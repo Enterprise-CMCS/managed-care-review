@@ -447,7 +447,7 @@ describe('Resubmitting plan packages', () => {
         screen.getByTestId('review-and-submit-modal-submit').click()
 
         expect(
-            await screen.findByText('Summary for submission is required')
+            await screen.findByText('You must provide a summary of changes')
         ).toBeInTheDocument()
     })
 
@@ -486,7 +486,7 @@ describe('Resubmitting plan packages', () => {
         userClickByTestId(screen, 'review-and-submit-modal-submit')
 
         expect(
-            await screen.findByText('Summary for submission is required')
+            await screen.findByText('You must provide a summary of changes')
         ).toBeInTheDocument()
 
         // check focus after error
