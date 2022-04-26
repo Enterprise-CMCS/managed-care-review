@@ -144,7 +144,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         initialValues: modalFormInitialValues,
         validationSchema: Yup.object().shape({
             unlockReason: Yup.string().defined(
-                'Reason for unlocking submission is required'
+                'You must provide a reason for unlocking this submission'
             ),
         }),
         onSubmit: (values) => onModalSubmit(values),
