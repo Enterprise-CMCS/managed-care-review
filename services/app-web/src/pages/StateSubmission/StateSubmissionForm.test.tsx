@@ -9,6 +9,7 @@ import {
     fetchHealthPlanPackageMock,
     mockDraftHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
+    mockUnlockedHealthPlanPackageWithDocuments,
     updateHealthPlanFormDataMockSuccess,
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
@@ -18,6 +19,7 @@ import {
     base64ToDomain,
     domainToBase64,
 } from '../../common-code/proto/healthPlanFormDataProto'
+import { testS3Client } from '../../testHelpers/s3Helpers'
 
 describe('StateSubmissionForm', () => {
     describe('loads draft submission', () => {
@@ -302,7 +304,7 @@ describe('StateSubmissionForm', () => {
             const mockDocs: Document[] = [
                 {
                     name: 'somedoc.pdf',
-                    s3URL: 's3://bucketName/key',
+                    s3URL: 's3://bucketName/key/somedoc.pdf',
                     documentCategories: ['CONTRACT_RELATED'],
                 },
             ]
@@ -440,6 +442,61 @@ describe('StateSubmissionForm', () => {
 
             const loading = await screen.findByText('System error')
             expect(loading).toBeInTheDocument()
+        })
+    })
+
+    describe('the delete button', () => {
+        // For this test, we want to mock the call to deleteFile to see when it gets called
+        const mockS3 = testS3Client()
+        const deleteCallKeys: string[] = []
+        mockS3.deleteFile = async (key) => {
+            deleteCallKeys.push(key)
+        }
+
+        it('does not delete files from past revisions', async () => {
+            const submission = mockUnlockedHealthPlanPackageWithDocuments()
+            renderWithProviders(
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    component={StateSubmissionForm}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchHealthPlanPackageMock({
+                                id: '15',
+                                statusCode: 200,
+                                submission,
+                            }),
+                        ],
+                    },
+                    routerProvider: { route: '/submissions/15/documents' },
+                    s3Provider: mockS3,
+                }
+            )
+
+            // PERFORM
+
+            // We should be able to find delete buttons for each of the three recent files.
+            // the aria label for each button is a lifesaver here.
+            const removeOneTwo = await screen.findByLabelText(
+                'Remove one two document'
+            )
+            const removeTwoOne = await screen.findByLabelText(
+                'Remove two one document'
+            )
+            const removeThreeOne = await screen.findByLabelText(
+                'Remove three one document'
+            )
+            userEvent.click(removeOneTwo)
+            userEvent.click(removeTwoOne)
+            userEvent.click(removeThreeOne)
+
+            // ASSERT
+            // When deleting a file that exists in a previous revision, we should not see it's key
+            // in the deleteCallKeys array.
+            expect(deleteCallKeys).toEqual(['three-one'])
         })
     })
 })

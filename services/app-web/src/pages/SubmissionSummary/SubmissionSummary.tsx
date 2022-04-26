@@ -17,7 +17,7 @@ import {
     packageName,
     HealthPlanFormDataType,
 } from '../../common-code/healthPlanFormDataType'
-import { makeDateTable } from './makeDocumentDateLookupTable'
+import { makeDateTable } from '../../documentHelpers/makeDocumentDateLookupTable'
 import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { Loading } from '../../components/Loading'
 import {
@@ -427,7 +427,6 @@ export const SubmissionSummary = (): React.ReactElement => {
                         formik.handleSubmit()
                     }}
                     modalRef={modalRef}
-                    onSubmitText="Unlock"
                 >
                     <form>
                         <FormGroup error={Boolean(formik.errors.unlockReason)}>

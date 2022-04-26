@@ -19,6 +19,7 @@ import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanF
 
 type DocumentProps = {
     draftSubmission: UnlockedHealthPlanFormDataType
+    previousDocuments: string[]
     updateDraft: (
         input: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackage | Error>
@@ -26,6 +27,7 @@ type DocumentProps = {
 
 export const Documents = ({
     draftSubmission,
+    previousDocuments,
     updateDraft,
 }: DocumentProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(false)
@@ -131,12 +133,20 @@ export const Documents = ({
     }) => {
         setFileItems(fileItems)
     }
-    const handleDeleteFile = async (key: string) => {
-        const result = await deleteFile(key)
-        if (isS3Error(result)) {
-            throw new Error(`Error in S3 key: ${key}`)
-        }
 
+    const handleDeleteFile = async (key: string) => {
+        const isSubmittedFile =
+            previousDocuments &&
+            Boolean(
+                previousDocuments.some((previousKey) => previousKey === key)
+            )
+
+        if (!isSubmittedFile) {
+            const result = await deleteFile(key)
+            if (isS3Error(result)) {
+                throw new Error(`Error in S3 key: ${key}`)
+            }
+        }
         return
     }
 

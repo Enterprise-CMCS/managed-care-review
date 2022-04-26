@@ -64,10 +64,12 @@ export interface RateDetailsFormValues {
 }
 export const RateDetails = ({
     draftSubmission,
+    previousDocuments,
     showValidations = false,
     updateDraft,
 }: {
     draftSubmission: UnlockedHealthPlanFormDataType
+    previousDocuments: string[]
     showValidations?: boolean
     updateDraft: (
         input: UnlockedHealthPlanFormDataType
@@ -136,12 +138,20 @@ export const RateDetails = ({
     }) => {
         setFileItems(fileItems)
     }
-    const handleDeleteFile = async (key: string) => {
-        const result = await deleteFile(key)
-        if (isS3Error(result)) {
-            throw new Error(`Error in S3 key: ${key}`)
-        }
 
+    const handleDeleteFile = async (key: string) => {
+        const isSubmittedFile =
+            previousDocuments &&
+            Boolean(
+                previousDocuments.some((previousKey) => previousKey === key)
+            )
+
+        if (!isSubmittedFile) {
+            const result = await deleteFile(key)
+            if (isS3Error(result)) {
+                throw new Error(`Error in S3 key: ${key}`)
+            }
+        }
         return
     }
 

@@ -102,9 +102,11 @@ type FormError =
 export const ContractDetails = ({
     draftSubmission,
     showValidations = false,
+    previousDocuments,
     updateDraft,
 }: {
     draftSubmission: UnlockedHealthPlanFormDataType
+    previousDocuments: string[]
     showValidations?: boolean
     updateDraft: (
         input: UnlockedHealthPlanFormDataType
@@ -179,12 +181,20 @@ export const ContractDetails = ({
     }) => {
         setFileItems(fileItems)
     }
-    const handleDeleteFile = async (key: string) => {
-        const result = await deleteFile(key)
-        if (isS3Error(result)) {
-            throw new Error(`Error in S3 key: ${key}`)
-        }
 
+    const handleDeleteFile = async (key: string) => {
+        const isSubmittedFile =
+            previousDocuments &&
+            Boolean(
+                previousDocuments.some((previousKey) => previousKey === key)
+            )
+
+        if (!isSubmittedFile) {
+            const result = await deleteFile(key)
+            if (isS3Error(result)) {
+                throw new Error(`Error in S3 key: ${key}`)
+            }
+        }
         return
     }
 
