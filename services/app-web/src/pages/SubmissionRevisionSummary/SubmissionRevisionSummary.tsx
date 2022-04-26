@@ -4,10 +4,9 @@ import { useLocation, useParams } from 'react-router-dom'
 import {
     packageName,
     HealthPlanFormDataType,
-    UpdateInfoType,
-} from '../../common-code/domain-models'
+} from '../../common-code/healthPlanFormDataType'
 import { makeDateTable } from '../../documentHelpers/makeDocumentDateLookupTable'
-import { base64ToDomain } from '../../common-code/proto/stateSubmission'
+import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { Loading } from '../../components/Loading'
 import {
     ContactsSummarySection,
@@ -17,24 +16,29 @@ import {
     SupportingDocumentsSummarySection,
 } from '../../components/SubmissionSummarySection'
 import { usePage } from '../../contexts/PageContext'
-import { useFetchHealthPlanPackageQuery } from '../../gen/gqlClient'
+import {
+    UpdateInformation,
+    useFetchHealthPlanPackageQuery,
+} from '../../gen/gqlClient'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404'
-import { dayjs } from '../../dateHelpers'
+import { dayjs } from '../../common-code/dateHelpers'
 import styles from './SubmissionRevisionSummary.module.scss'
 import { PreviousSubmissionBanner } from '../../components'
 import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
 
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
-    const { id, revisionVersion } =
-        useParams<{ id: string; revisionVersion: string }>()
+    const { id, revisionVersion } = useParams<{
+        id: string
+        revisionVersion: string
+    }>()
     const { pathname } = useLocation()
     const { updateHeading } = usePage()
     const [pageLevelAlert, setPageLevelAlert] = useState<string | undefined>(
         undefined
     )
-    const [submitInfo, setSubmitInfo] = useState<UpdateInfoType | undefined>(
+    const [submitInfo, setSubmitInfo] = useState<UpdateInformation | undefined>(
         undefined
     )
 

@@ -18,7 +18,7 @@ import { StateSubmissionForm } from './StateSubmissionForm'
 import {
     base64ToDomain,
     domainToBase64,
-} from '../../common-code/proto/stateSubmission'
+} from '../../common-code/proto/healthPlanFormDataProto'
 import { testS3Client } from '../../testHelpers/s3Helpers'
 
 describe('StateSubmissionForm', () => {
@@ -393,6 +393,7 @@ describe('StateSubmissionForm', () => {
             const loading = await screen.findByText('System error')
             expect(loading).toBeInTheDocument()
         })
+
         it('shows a generic error fetching submission fails at contract details', async () => {
             renderWithProviders(
                 <Route

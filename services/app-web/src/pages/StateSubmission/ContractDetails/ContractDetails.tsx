@@ -20,6 +20,7 @@ import {
     FieldRadio,
     FieldCheckbox,
     FieldTextInput,
+    FieldPreserveScrollPosition,
     ErrorSummary,
     PoliteErrorMessage,
 } from '../../../components'
@@ -45,7 +46,7 @@ import {
     ManagedCareEntity,
     UnlockedHealthPlanFormDataType,
     CapitationRatesAmendedReason,
-} from '../../../common-code/domain-models'
+} from '../../../common-code/healthPlanFormDataType'
 import {
     AmendableItemsRecord,
     RateChangeReasonRecord,
@@ -81,7 +82,6 @@ const ContractDatesErrorMessage = ({
             : validationErrorMessage}
     </PoliteErrorMessage>
 )
-
 export interface ContractDetailsFormValues {
     contractType: ContractType | undefined
     contractExecutionStatus: ContractExecutionStatus | undefined
@@ -465,11 +465,17 @@ export const ContractDetails = ({
                             <FormGroup
                                 error={showFieldErrors(errors.contractType)}
                             >
+                                <FieldPreserveScrollPosition
+                                    fieldName={
+                                        'contractType' as keyof ContractDetailsFormValues
+                                    }
+                                />
                                 <Fieldset
                                     role="radiogroup"
                                     aria-required
                                     className={styles.radioGroup}
                                     legend="Contract action type"
+                                    id="contractType"
                                 >
                                     {showFieldErrors(errors.contractType) && (
                                         <PoliteErrorMessage>

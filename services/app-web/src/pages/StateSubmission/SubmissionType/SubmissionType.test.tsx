@@ -1,12 +1,11 @@
 import userEvent from '@testing-library/user-event'
-import { createMemoryHistory } from 'history'
 import { screen, waitFor } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import { fetchCurrentUserMock } from '../../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SubmissionType, SubmissionTypeFormValues } from './'
 import { Formik } from 'formik'
-import { contractOnly } from '../../../common-code/domain-mocks'
+import { contractOnly } from '../../../common-code/healthPlanFormDataMocks'
 
 describe('SubmissionType', () => {
     const SubmissionTypeInitialValues: SubmissionTypeFormValues = {
@@ -40,14 +39,12 @@ describe('SubmissionType', () => {
     })
 
     it('displays new submission form when expected', async () => {
-        const history = createMemoryHistory()
         renderWithProviders(<SubmissionType />, {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
             routerProvider: {
                 route: '/submissions/new',
-                routerProps: { history: history },
             },
         })
 

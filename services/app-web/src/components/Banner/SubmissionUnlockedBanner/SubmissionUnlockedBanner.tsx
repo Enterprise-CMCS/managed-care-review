@@ -1,7 +1,7 @@
 import React from 'react'
 import styles from '../Banner.module.scss'
 import { Alert } from '@trussworks/react-uswds'
-import { dayjs } from '../../../dateHelpers'
+import { dayjs } from '../../../common-code/dateHelpers'
 import { ExpandableText } from '../../'
 
 export type UnlockedProps = {

@@ -24,7 +24,7 @@ import styles from './ReviewSubmit.module.scss'
 import { PoliteErrorMessage } from '../../../components'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-import { UnlockedHealthPlanFormDataType } from '../../../common-code/domain-models'
+import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 
 export const ReviewSubmit = ({
     draftSubmission,

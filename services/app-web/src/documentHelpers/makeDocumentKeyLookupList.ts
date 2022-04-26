@@ -1,4 +1,4 @@
-import { base64ToDomain } from '../common-code/proto/stateSubmission'
+import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto';
 import { HealthPlanPackage } from '../gen/gqlClient'
 import { parseKey } from '../common-code/s3URLEncoding'
 

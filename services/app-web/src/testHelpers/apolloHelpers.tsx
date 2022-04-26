@@ -5,13 +5,13 @@ import {
     basicLockedHealthPlanFormData,
     basicHealthPlanFormData,
     unlockedWithALittleBitOfEverything,
-} from '../common-code/domain-mocks'
+} from '../common-code/healthPlanFormDataMocks'
 import {
     LockedHealthPlanFormDataType,
     SubmissionDocument,
     UnlockedHealthPlanFormDataType,
-} from '../common-code/domain-models'
-import { domainToBase64 } from '../common-code/proto/stateSubmission'
+} from '../common-code/healthPlanFormDataType'
+import { domainToBase64 } from '../common-code/proto/healthPlanFormDataProto'
 import {
     FetchCurrentUserDocument,
     FetchHealthPlanPackageDocument,
@@ -802,7 +802,10 @@ const submitHealthPlanPackageMockError = ({
         },
         result: {
             errors: [
-                new GraphQLError('Incomplete submission cannot be submitted'),
+                new GraphQLError(
+                    'Incomplete submission cannot be submitted',
+                    {}
+                ),
             ],
         },
     }
@@ -842,7 +845,10 @@ const unlockHealthPlanPackageMockError = ({
         },
         result: {
             errors: [
-                new GraphQLError('Incomplete submission cannot be submitted'),
+                new GraphQLError(
+                    'Incomplete submission cannot be submitted',
+                    {}
+                ),
             ],
         },
     }

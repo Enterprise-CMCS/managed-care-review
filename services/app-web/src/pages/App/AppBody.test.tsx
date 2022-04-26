@@ -9,17 +9,27 @@ import {
     fetchCurrentUserMock,
     indexHealthPlanPackagesMockSuccess,
 } from '../../testHelpers/apolloHelpers'
-test('App renders without errors', () => {
-    renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
-    const mainElement = screen.getByRole('main')
-    expect(mainElement).toBeInTheDocument()
-})
 
 test.todo(
     'App displays ErrorBoundary fallback component when there is JS error on page'
 )
 
+window.scrollTo = jest.fn()
+
 describe('App Body and routes', () => {
+    afterEach(() => {
+        jest.resetAllMocks()
+    })
+    afterAll(() => {
+        jest.clearAllMocks()
+    })
+
+    it('App renders without errors', () => {
+        renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
+        const mainElement = screen.getByRole('main')
+        expect(mainElement).toBeInTheDocument()
+    })
+
     describe('/', () => {
         it('display dashboard when logged in', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
@@ -126,6 +136,16 @@ describe('App Body and routes', () => {
             expect(
                 screen.getByRole('form', { name: 'Signup Form' })
             ).toBeInTheDocument()
+        })
+    })
+
+    describe('page scrolling', () => {
+        it('scroll top on page load', async () => {
+            renderWithProviders(<AppBody authMode={'LOCAL'} />)
+            await waitFor(() => {
+                userClickSignIn(screen)
+            })
+            expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
         })
     })
 

@@ -15,7 +15,7 @@ import {
 import { PageActions } from '../PageActions'
 import classNames from 'classnames'
 import { ErrorSummary } from '../../../components/Form'
-import { UnlockedHealthPlanFormDataType } from '../../../common-code/domain-models'
+import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 
 type DocumentProps = {
     draftSubmission: UnlockedHealthPlanFormDataType

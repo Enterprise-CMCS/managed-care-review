@@ -4,7 +4,7 @@ import { FileRow } from '../FileRow/FileRow'
 import { FileListItem } from '../FileListItem/FileListItem'
 
 import styles from '../FileUpload.module.scss'
-import { DocumentCategoryType } from '../../../common-code/domain-models'
+import { DocumentCategoryType } from '../../../common-code/healthPlanFormDataType'
 
 export type FileStatus =
     | 'DUPLICATE_NAME_ERROR'
@@ -146,7 +146,7 @@ export const FileProcessor = ({
         statusValue = 'uploading'
     } else if (isScanning) {
         statusValue = 'scanning for viruses'
-    } else if (isComplete){
+    } else if (isComplete) {
         statusValue = 'upload complete'
     } else if (
         hasDuplicateNameError ||

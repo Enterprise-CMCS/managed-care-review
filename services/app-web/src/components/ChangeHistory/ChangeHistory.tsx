@@ -1,15 +1,14 @@
 import React from 'react'
-import { dayjs } from '../../dateHelpers/dayjs'
+import { dayjs } from '../../common-code/dateHelpers/dayjs'
 import { SectionHeader } from '../SectionHeader'
 import { Accordion, Link } from '@trussworks/react-uswds'
-import { HealthPlanPackage } from '../../gen/gqlClient'
-import { UpdateInfoType } from '../../common-code/domain-models'
+import { HealthPlanPackage, UpdateInformation } from '../../gen/gqlClient'
 import styles from './ChangeHistory.module.scss'
 type ChangeHistoryProps = {
     submission: HealthPlanPackage
 }
 
-type flatRevisions = UpdateInfoType & {
+type flatRevisions = UpdateInformation & {
     kind: 'submit' | 'unlock'
     revisionVersion: string | undefined
 }

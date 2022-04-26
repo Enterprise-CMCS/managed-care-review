@@ -9,7 +9,7 @@ import {
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionRevisionSummary } from './SubmissionRevisionSummary'
-import { dayjs } from '../../dateHelpers'
+import { dayjs } from '../../common-code/dateHelpers'
 
 describe('SubmissionRevisionSummary', () => {
     it('renders correctly without errors', async () => {
