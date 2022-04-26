@@ -177,4 +177,29 @@ describe('PageActions', () => {
             expect(continueAction).not.toHaveBeenCalled()
         })
     })
+
+    describe('when disableAll is true', () => {
+        it('does not call click handlers if button is clicked', () => {
+            const backAction = jest.fn()
+            const continueAction = jest.fn()
+            const saveAsDraftAction = jest.fn()
+            render(
+                <PageActions
+                    continueOnClick={continueAction}
+                    saveAsDraftOnClick={saveAsDraftAction}
+                    backOnClick={backAction}
+                    disableAll
+                />
+            )
+
+            userEvent.click(screen.getByRole('button', { name: 'Back' }))
+            expect(backAction).not.toHaveBeenCalled()
+            userEvent.click(screen.getByRole('button', { name: 'Continue' }))
+            expect(continueAction).not.toHaveBeenCalled()
+            userEvent.click(
+                screen.getByRole('button', { name: 'Save as draft' })
+            )
+            expect(saveAsDraftAction).not.toHaveBeenCalled()
+        })
+    })
 })
