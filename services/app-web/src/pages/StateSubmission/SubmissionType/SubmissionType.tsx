@@ -155,7 +155,13 @@ export const SubmissionType = ({
 
     const handleFormSubmit = async (
         values: SubmissionTypeFormValues,
-        formikHelpers: FormikHelpers<SubmissionTypeFormValues>
+        formikHelpers: Pick<
+            FormikHelpers<SubmissionTypeFormValues>,
+            'setSubmitting'
+        >,
+        options?: {
+            redirectPath?: string
+        }
     ) => {
         if (isNewSubmission) {
             try {
@@ -215,10 +221,13 @@ export const SubmissionType = ({
 
             try {
                 await updateDraft(draftSubmission)
-
-                history.push(
-                    `/submissions/${draftSubmission.id}/contract-details`
-                )
+                if (options?.redirectPath) {
+                    history.push(options.redirectPath)
+                } else {
+                    history.push(
+                        `/submissions/${draftSubmission.id}/contract-details`
+                    )
+                }
             } catch (serverError) {
                 setShowFormAlert(true)
                 formikHelpers.setSubmitting(false) // unblock submit button to allow resubmit
@@ -232,7 +241,14 @@ export const SubmissionType = ({
             onSubmit={handleFormSubmit}
             validationSchema={SubmissionTypeFormSchema}
         >
-            {({ values, errors, handleSubmit, isSubmitting }) => (
+            {({
+                values,
+                errors,
+                handleSubmit,
+                isSubmitting,
+                setSubmitting,
+                validateForm,
+            }) => (
                 <>
                     <UswdsForm
                         className={styles.formContainer}
@@ -392,13 +408,30 @@ export const SubmissionType = ({
                             />
                         </fieldset>
                         <PageActions
-                            pageVariant="FIRST"
+                            pageVariant={
+                                isNewSubmission ? 'FIRST' : 'EDIT-FIRST'
+                            }
                             backOnClick={() => history.push('/dashboard')}
                             continueOnClick={() => {
                                 setShouldValidate(true)
                                 setFocusErrorSummaryHeading(true)
                             }}
-                            saveAsDraftOnClick={() => setShouldValidate(true)}
+                            saveAsDraftOnClick={async () => {
+                                setShouldValidate(true)
+                                //Validate form before trying to save a draft
+                                const validationErrors = await validateForm(
+                                    values
+                                )
+                                if (
+                                    Object.keys(validationErrors).length === 0
+                                ) {
+                                    await handleFormSubmit(
+                                        values,
+                                        { setSubmitting },
+                                        { redirectPath: '/dashboard' }
+                                    )
+                                }
+                            }}
                             continueDisabled={isSubmitting}
                         />
                     </UswdsForm>
