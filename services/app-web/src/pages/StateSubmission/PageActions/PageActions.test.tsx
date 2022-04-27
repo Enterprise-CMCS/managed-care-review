@@ -216,7 +216,7 @@ describe('PageActions', () => {
             userEvent.click(screen.getByRole('button', { name: 'Continue' }))
             expect(continueAction).toHaveBeenCalled()
         })
-        it('calls saveAsDraftOnClick when Continue button is clicked on the first page when editing', () => {
+        it('calls saveAsDraftOnClick when Save as draft button is clicked on the first page when editing', () => {
             const saveAsDraftOnClick = jest.fn()
             render(
                 <PageActions
