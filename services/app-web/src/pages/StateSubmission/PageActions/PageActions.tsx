@@ -11,7 +11,7 @@ type PageActionProps = {
     saveAsDraftOnClick?: React.MouseEventHandler<HTMLButtonElement>
     continueOnClick?: React.MouseEventHandler<HTMLButtonElement> // the reason this isn't required is the continue button is a type="submit" so is can use the form onsubmit as its event handler.
     continueDisabled?: boolean
-    pageVariant?: 'FIRST' | 'LAST' // other options could be added here as union type
+    pageVariant?: 'FIRST' | 'LAST' | 'EDIT-FIRST' // other options could be added here as union type
 }
 
 export const PageActions = (props: PageActionProps): React.ReactElement => {
@@ -25,8 +25,11 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
 
     const isFirstPage = pageVariant === 'FIRST'
     const isLastPage = pageVariant === 'LAST'
+    const isFirstPageEditing = pageVariant === 'EDIT-FIRST'
     const leftElement =
-        isFirstPage || !saveAsDraftOnClick ? undefined : (
+        isFirstPage ||
+        !saveAsDraftOnClick ||
+        !isFirstPageEditing ? undefined : (
             <Button type="button" unstyled onClick={saveAsDraftOnClick}>
                 Save as draft
             </Button>
@@ -36,7 +39,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
         <PageActionsContainer left={leftElement}>
             <ButtonGroup type="default">
                 <Button type="button" outline onClick={backOnClick}>
-                    {!isFirstPage ? 'Back' : 'Cancel'}
+                    {!isFirstPage && !isFirstPageEditing ? 'Back' : 'Cancel'}
                 </Button>
 
                 <Button
