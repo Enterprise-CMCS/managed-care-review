@@ -72,10 +72,45 @@ describe('SubmissionType', () => {
         )
     })
 
-    it('displays a cancel link', async () => {
+    it('displays a save as draft link when editing a submission', async () => {
         renderWithProviders(<SubmissionType />, {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
+
+        await waitFor(() =>
+            expect(
+                screen.getByRole('button', {
+                    name: 'Save as draft',
+                })
+            ).toBeDefined()
+        )
+    })
+
+    it('displays a cancel link when editing a submission', async () => {
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
+
+        await waitFor(() =>
+            expect(
+                screen.getByRole('button', {
+                    name: 'Cancel',
+                })
+            ).toBeDefined()
+        )
+    })
+
+    it('displays a cancel link on new submission', async () => {
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+            routerProvider: {
+                route: '/submissions/new',
             },
         })
 
@@ -322,6 +357,34 @@ describe('SubmissionType', () => {
             userEvent.click(
                 screen.getByRole('button', {
                     name: 'Continue',
+                })
+            )
+            await waitFor(() => {
+                expect(
+                    screen.queryAllByText('You must choose a submission type')
+                ).toHaveLength(2)
+                expect(
+                    screen.queryAllByText(
+                        'You must provide a description of any major changes or updates'
+                    )
+                ).toHaveLength(2)
+                expect(
+                    screen.queryAllByText(
+                        'You must select at least one program'
+                    )
+                ).toHaveLength(2)
+            })
+        })
+        it('if form fields are invalid, shows validation error messages when save as draft button is clicked', async () => {
+            renderWithProviders(<SubmissionType />, {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            })
+
+            userEvent.click(
+                screen.getByRole('button', {
+                    name: 'Save as draft',
                 })
             )
             await waitFor(() => {
