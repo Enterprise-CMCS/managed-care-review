@@ -375,7 +375,7 @@ describe('SubmissionType', () => {
                 ).toHaveLength(2)
             })
         })
-        it('if form fields are invalid, shows validation error messages when save as draft button is clicked', async () => {
+        it('shows validation error messages when save as draft button is clicked and form fields are invalid', async () => {
             renderWithProviders(<SubmissionType />, {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
