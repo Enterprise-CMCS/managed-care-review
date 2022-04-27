@@ -24,6 +24,9 @@ export const Default = (): React.ReactElement => (
         <Button type="button" variant="primary" disabled>
             Disabled
         </Button>
+        <Button type="button" variant="primary" loading animationTimeout={0}>
+            Loading
+        </Button>
 
         <h1>Secondary</h1>
         <>
@@ -49,6 +52,14 @@ export const Default = (): React.ReactElement => (
             </Button>
             <Button type="button" variant="secondary" disabled>
                 Disabled
+            </Button>
+            <Button
+                type="button"
+                variant="secondary"
+                loading
+                animationTimeout={0}
+            >
+                Loading
             </Button>
         </>
 
@@ -76,6 +87,14 @@ export const Default = (): React.ReactElement => (
             </Button>
             <Button type="button" variant="outline" disabled>
                 Disabled
+            </Button>
+            <Button
+                type="button"
+                variant="outline"
+                loading
+                animationTimeout={0}
+            >
+                Loading
             </Button>
         </>
 
@@ -112,6 +131,15 @@ export const Default = (): React.ReactElement => (
                 disabled
             >
                 Disabled
+            </Button>
+            <Button
+                type="button"
+                variant="linkStyle"
+                className="margin-1"
+                loading
+                animationTimeout={0}
+            >
+                Loading
             </Button>
         </>
     </div>

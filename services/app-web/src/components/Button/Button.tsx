@@ -1,7 +1,10 @@
-import React, { ComponentProps } from 'react'
+import React, { useEffect, useState, ComponentProps } from 'react'
 import { Button as UswdsButton } from '@trussworks/react-uswds'
-import styles from './Button.module.scss'
 import classnames from 'classnames'
+
+import styles from './Button.module.scss'
+
+import { Spinner } from '../Spinner'
 
 /* 
 Main application-wide action button. 
@@ -11,7 +14,9 @@ Main application-wide action button.
 
 */
 type ButtonProps = {
-    variant: 'primary' | 'secondary' | 'outline' | 'linkStyle' | 'loading'
+    variant: 'primary' | 'secondary' | 'outline' | 'linkStyle'
+    loading?: boolean
+    animationTimeout?: number // used for loading animation
 } & ComponentProps<typeof UswdsButton>
 
 export const Button = ({
@@ -19,18 +24,34 @@ export const Button = ({
     children,
     className,
     variant,
+    loading = false,
+    animationTimeout = 750,
     ...inheritedProps
 }: ButtonProps): React.ReactElement => {
+    const [showLoading, setShowLoading] = useState(false)
     const isDisabled = disabled || inheritedProps['aria-disabled']
     const isLinkStyled = variant === 'linkStyle'
     const isOutline = variant === 'outline'
+    const isLoading = loading
+
+    useEffect(() => {
+        if (loading) {
+            const timeout = setTimeout(() => {
+                setShowLoading(true)
+            }, animationTimeout)
+            return function cleanup() {
+                clearTimeout(timeout)
+            }
+        }
+    }, [loading, animationTimeout])
 
     const classes = classnames(
         {
-            [styles.disabled]: isDisabled,
-            [styles.disabledButtonStyle]: isDisabled && !isLinkStyled,
-            [`usa-button--outline-disabled ${styles.disabledOutlineStyle}`]:
+            [styles.disabledCursor]: isDisabled || isLoading,
+            [styles.disabledButtonBase]: isDisabled && !isLinkStyled,
+            [`usa-button--outline-disabled ${styles.disabledButtonOutline}`]:
                 isDisabled && isOutline,
+            'usa-button--active': isLoading,
         },
         className
     )
@@ -43,15 +64,15 @@ export const Button = ({
     }
 
     // prefer aria attributes to HTML disabled attribute
-    const ariaLabel = inheritedProps['aria-label']
+    const ariaLabel =
+        inheritedProps['aria-label'] && isDisabled
+            ? `${inheritedProps['aria-label']} (disabled)`
+            : null
+
     const accessibilityProps = {
         ariaDisabled: isDisabled,
         disabled: false,
-        ariaLabel: isDisabled
-            ? ariaLabel
-                ? `${ariaLabel} (disabled)`
-                : '(disabled)'
-            : inheritedProps['aria-label'] || '',
+        ariaLabel: ariaLabel,
     }
 
     return (
@@ -61,7 +82,10 @@ export const Button = ({
             {...accessibilityProps}
             className={classes}
         >
-            {children}
+            {showLoading && <Spinner size="small" />}
+            <span className={showLoading ? styles.buttonTextWithIcon : ''}>
+                {showLoading ? 'Loading' : children}
+            </span>
         </UswdsButton>
     )
 }
