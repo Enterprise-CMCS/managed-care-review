@@ -27,9 +27,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
     const isLastPage = pageVariant === 'LAST'
     const isFirstPageEditing = pageVariant === 'EDIT-FIRST'
     const leftElement =
-        isFirstPage ||
-        !saveAsDraftOnClick ||
-        !isFirstPageEditing ? undefined : (
+        isFirstPage || !saveAsDraftOnClick ? undefined : (
             <Button type="button" unstyled onClick={saveAsDraftOnClick}>
                 Save as draft
             </Button>
