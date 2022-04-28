@@ -349,33 +349,5 @@ describe('SubmissionType', () => {
                 ).toHaveLength(2)
             })
         })
-        it('shows validation error messages when save as draft button is clicked and form fields are invalid', async () => {
-            renderWithProviders(<SubmissionType />, {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            })
-
-            userEvent.click(
-                screen.getByRole('button', {
-                    name: 'Save as draft',
-                })
-            )
-            await waitFor(() => {
-                expect(
-                    screen.queryAllByText('You must choose a submission type')
-                ).toHaveLength(2)
-                expect(
-                    screen.queryAllByText(
-                        'You must provide a description of any major changes or updates'
-                    )
-                ).toHaveLength(2)
-                expect(
-                    screen.queryAllByText(
-                        'You must select at least one program'
-                    )
-                ).toHaveLength(2)
-            })
-        })
     })
 })
