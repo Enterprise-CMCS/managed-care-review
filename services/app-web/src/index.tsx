@@ -7,12 +7,11 @@ import { loader } from 'graphql.macro'
 import './index.scss'
 
 import App from './pages/App/App'
-import type { AppProps } from './pages/App/App'
 import reportWebVitals from './reportWebVitals'
 import { localGQLFetch, fakeAmplifyFetch } from './api'
 import { assertIsAuthMode } from './common-code/config'
 import { S3ClientT, newAmplifyS3Client, newLocalS3Client } from './s3'
-import { withLDProvider } from 'launchdarkly-react-client-sdk'
+import { asyncWithLDProvider } from 'launchdarkly-react-client-sdk'
 
 const gqlSchema = loader('../../app-web/src/gen/schema.graphql')
 
@@ -110,20 +109,26 @@ if (ldClientId === undefined) {
     )
 }
 
-withLDProvider<AppProps>({
-    clientSideID: ldClientId,
-})(App)
+;(async () => {
+    const LDProvider = await asyncWithLDProvider({
+        clientSideID: ldClientId,
+    })
 
-ReactDOM.render(
-    <React.StrictMode>
-        <App
-            authMode={authMode}
-            apolloClient={apolloClient}
-            s3Client={s3Client}
-        />
-    </React.StrictMode>,
-    document.getElementById('root')
-)
+    ReactDOM.render(
+        <React.StrictMode>
+            <LDProvider>
+                <App
+                    authMode={authMode}
+                    apolloClient={apolloClient}
+                    s3Client={s3Client}
+                />
+            </LDProvider>
+        </React.StrictMode>,
+        document.getElementById('root')
+    )
+})().catch((e) => {
+    throw new Error('Could not initialize the application: ' + e)
+})
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
