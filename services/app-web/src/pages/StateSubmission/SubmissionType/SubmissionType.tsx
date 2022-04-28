@@ -159,9 +159,7 @@ export const SubmissionType = ({
             FormikHelpers<SubmissionTypeFormValues>,
             'setSubmitting'
         >,
-        options?: {
-            redirectPath?: string
-        }
+        redirectPath?: string
     ) => {
         if (isNewSubmission) {
             try {
@@ -221,8 +219,8 @@ export const SubmissionType = ({
 
             try {
                 await updateDraft(draftSubmission)
-                if (options?.redirectPath) {
-                    history.push(options.redirectPath)
+                if (redirectPath) {
+                    history.push(redirectPath)
                 } else {
                     history.push(
                         `/submissions/${draftSubmission.id}/contract-details`
@@ -247,7 +245,6 @@ export const SubmissionType = ({
                 handleSubmit,
                 isSubmitting,
                 setSubmitting,
-                validateForm,
             }) => (
                 <>
                     <UswdsForm
@@ -417,20 +414,11 @@ export const SubmissionType = ({
                                 setFocusErrorSummaryHeading(true)
                             }}
                             saveAsDraftOnClick={async () => {
-                                setShouldValidate(true)
-                                //Validate form before trying to save a draft
-                                const validationErrors = await validateForm(
-                                    values
+                                await handleFormSubmit(
+                                    values,
+                                    { setSubmitting },
+                                    '/dashboard'
                                 )
-                                if (
-                                    Object.keys(validationErrors).length === 0
-                                ) {
-                                    await handleFormSubmit(
-                                        values,
-                                        { setSubmitting },
-                                        { redirectPath: '/dashboard' }
-                                    )
-                                }
                             }}
                             continueDisabled={isSubmitting}
                         />
