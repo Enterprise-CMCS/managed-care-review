@@ -669,9 +669,8 @@ export const RateDetails = ({
                                         )
                                     }
                                 }}
-                                actionInProgress={Boolean(
-                                    isSubmitting || showFileUploadError
-                                )}
+                                disableContinue={showFileUploadError}
+                                actionInProgress={isSubmitting}
                             />
                         </UswdsForm>
                     </>

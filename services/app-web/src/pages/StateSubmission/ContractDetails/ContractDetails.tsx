@@ -1230,9 +1230,8 @@ export const ContractDetails = ({
                                     )
                                 }
                             }}
-                            actionInProgress={
-                                isSubmitting || showFileUploadError
-                            }
+                            disableContinue={showFileUploadError}
+                            actionInProgress={isSubmitting}
                         />
                     </UswdsForm>
                 </>

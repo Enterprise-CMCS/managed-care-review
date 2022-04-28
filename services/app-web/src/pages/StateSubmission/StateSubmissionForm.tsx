@@ -106,7 +106,8 @@ export type HealthPlanFormPageProps = {
     draftSubmission: UnlockedHealthPlanFormDataType
     showValidations?: boolean
     updateDraft: (
-        input: UnlockedHealthPlanFormDataType
+        input: UnlockedHealthPlanFormDataType,
+        updateDraftLoading?: boolean
     ) => Promise<HealthPlanPackage | Error>
 }
 export const StateSubmissionForm = (): React.ReactElement => {
@@ -143,8 +144,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
     })
 
     const submissionAndRevisions = fetchData?.fetchHealthPlanPackage?.pkg
-    const [updateFormData, { error: updateFormDataError }] =
-        useUpdateHealthPlanFormDataMutation()
+    const [
+        updateFormData,
+        { error: updateFormDataError, loading: updateDraftLoading },
+    ] = useUpdateHealthPlanFormDataMutation()
 
     // When the new API is done, we'll call the new API here
     const updateDraftHealthPlanPackage = async (
@@ -329,6 +332,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         <Documents
                             draftSubmission={formDataFromLatestRevision}
                             updateDraft={updateDraftHealthPlanPackage}
+                            updateDraftLoading={updateDraftLoading}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>

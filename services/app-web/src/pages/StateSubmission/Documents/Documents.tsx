@@ -20,6 +20,7 @@ import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 export const Documents = ({
     draftSubmission,
     updateDraft,
+    updateDraftLoading,
 }: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(false)
     const isContractOnly = draftSubmission.submissionType === 'CONTRACT_ONLY'
@@ -181,7 +182,6 @@ export const Documents = ({
                 if (!hasValidFiles || hasMissingCategories) {
                     setShouldValidate(true)
                     setFocusErrorSummaryHeading(true)
-                    setSubmitting(false) // reset formik submit
                     return
                 }
             }
@@ -311,9 +311,10 @@ export const Documents = ({
                             redirectPath: 'contacts',
                         })(e)
                     }}
-                    actionInProgress={
+                    disableContinue={
                         showFileUploadError && fileItems.length > 0
                     }
+                    actionInProgress={updateDraftLoading}
                     continueOnClick={async (e) => {
                         await handleFormSubmit({
                             shouldValidateDocuments: true,
