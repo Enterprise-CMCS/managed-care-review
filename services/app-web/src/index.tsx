@@ -11,6 +11,7 @@ import reportWebVitals from './reportWebVitals'
 import { localGQLFetch, fakeAmplifyFetch } from './api'
 import { assertIsAuthMode } from './common-code/config'
 import { S3ClientT, newAmplifyS3Client, newLocalS3Client } from './s3'
+import { asyncWithLDProvider } from 'launchdarkly-react-client-sdk'
 
 const gqlSchema = loader('../../app-web/src/gen/schema.graphql')
 
@@ -101,16 +102,33 @@ if (otelCollectorUrl === undefined) {
     )
 }
 
-ReactDOM.render(
-    <React.StrictMode>
-        <App
-            authMode={authMode}
-            apolloClient={apolloClient}
-            s3Client={s3Client}
-        />
-    </React.StrictMode>,
-    document.getElementById('root')
-)
+const ldClientId = process.env.REACT_APP_LD_CLIENT_ID
+if (ldClientId === undefined) {
+    throw new Error(
+        'To configure LaunchDarkly, you must set REACT_APP_LD_CLIENT_ID'
+    )
+}
+
+;(async () => {
+    const LDProvider = await asyncWithLDProvider({
+        clientSideID: ldClientId,
+    })
+
+    ReactDOM.render(
+        <React.StrictMode>
+            <LDProvider>
+                <App
+                    authMode={authMode}
+                    apolloClient={apolloClient}
+                    s3Client={s3Client}
+                />
+            </LDProvider>
+        </React.StrictMode>,
+        document.getElementById('root')
+    )
+})().catch((e) => {
+    throw new Error('Could not initialize the application: ' + e)
+})
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
