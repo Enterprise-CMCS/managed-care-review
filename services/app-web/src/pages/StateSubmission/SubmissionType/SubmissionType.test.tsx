@@ -31,11 +31,9 @@ describe('SubmissionType', () => {
             },
         })
 
-        await waitFor(() =>
-            expect(
-                screen.getByRole('form', { name: 'Submission Type Form' })
-            ).toBeInTheDocument()
-        )
+        expect(
+            await screen.getByRole('form', { name: 'Submission Type Form' })
+        ).toBeInTheDocument()
     })
 
     it('displays new submission form when expected', async () => {
@@ -48,11 +46,9 @@ describe('SubmissionType', () => {
             },
         })
 
-        await waitFor(() =>
-            expect(
-                screen.getByRole('form', { name: 'New Submission Form' })
-            ).toBeInTheDocument()
-        )
+        expect(
+            await screen.getByRole('form', { name: 'New Submission Form' })
+        ).toBeInTheDocument()
     })
 
     it('displays with draft submission when expected', async () => {
@@ -65,11 +61,9 @@ describe('SubmissionType', () => {
             }
         )
 
-        await waitFor(() =>
-            expect(
-                screen.getByRole('form', { name: 'Submission Type Form' })
-            ).toBeInTheDocument()
-        )
+        expect(
+            await screen.getByRole('form', { name: 'Submission Type Form' })
+        ).toBeInTheDocument()
     })
 
     it('displays a save as draft link when editing a submission', async () => {
@@ -79,13 +73,11 @@ describe('SubmissionType', () => {
             },
         })
 
-        await waitFor(() =>
-            expect(
-                screen.getByRole('button', {
-                    name: 'Save as draft',
-                })
-            ).toBeDefined()
-        )
+        expect(
+            await screen.getByRole('button', {
+                name: 'Save as draft',
+            })
+        ).toBeDefined()
     })
 
     it('displays a cancel link when editing a submission', async () => {
@@ -95,13 +87,11 @@ describe('SubmissionType', () => {
             },
         })
 
-        await waitFor(() =>
-            expect(
-                screen.getByRole('button', {
-                    name: 'Cancel',
-                })
-            ).toBeDefined()
-        )
+        expect(
+            await screen.getByRole('button', {
+                name: 'Cancel',
+            })
+        ).toBeDefined()
     })
 
     it('displays a cancel link on new submission', async () => {
@@ -114,13 +104,11 @@ describe('SubmissionType', () => {
             },
         })
 
-        await waitFor(() =>
-            expect(
-                screen.getByRole('button', {
-                    name: 'Cancel',
-                })
-            ).toBeDefined()
-        )
+        expect(
+            await screen.getByRole('button', {
+                name: 'Cancel',
+            })
+        ).toBeDefined()
     })
 
     it('displays a continue button', async () => {
@@ -130,13 +118,11 @@ describe('SubmissionType', () => {
             },
         })
 
-        await waitFor(() =>
-            expect(
-                screen.getByRole('button', {
-                    name: 'Continue',
-                })
-            ).toBeDefined()
-        )
+        expect(
+            await screen.getByRole('button', {
+                name: 'Continue',
+            })
+        ).toBeDefined()
     })
 
     it('displays programs select dropdown', async () => {
@@ -154,11 +140,9 @@ describe('SubmissionType', () => {
             }
         )
 
-        await waitFor(() =>
-            expect(
-                screen.getByRole('combobox', { name: 'programs (required)' })
-            ).toBeInTheDocument()
-        )
+        expect(
+            await screen.getByRole('combobox', { name: 'programs (required)' })
+        ).toBeInTheDocument()
     })
 
     it('displays program options based on current user state', async () => {
@@ -201,9 +185,7 @@ describe('SubmissionType', () => {
             selectEvent.openMenu(combobox)
         })
 
-        await waitFor(() => {
-            expect(screen.getByText('Program 3')).toBeInTheDocument()
-        })
+        expect(await screen.getByText('Program 3')).toBeInTheDocument()
 
         await waitFor(async () => {
             await selectEvent.select(combobox, 'Program 1')
@@ -211,14 +193,12 @@ describe('SubmissionType', () => {
         })
 
         // in react-select, only items that are selected have a "remove item" label
-        await waitFor(() => {
-            expect(
-                screen.getByLabelText('Remove Program 1')
-            ).toBeInTheDocument()
-            expect(
-                screen.getByLabelText('Remove Program 3')
-            ).toBeInTheDocument()
-        })
+        expect(
+            await screen.getByLabelText('Remove Program 1')
+        ).toBeInTheDocument()
+        expect(
+            await screen.getByLabelText('Remove Program 3')
+        ).toBeInTheDocument()
     })
 
     it('displays submission type radio buttons', async () => {
@@ -236,16 +216,14 @@ describe('SubmissionType', () => {
             }
         )
 
-        await waitFor(() => {
-            expect(
-                screen.getByRole('radio', { name: 'Contract action only' })
-            ).toBeInTheDocument()
-            expect(
-                screen.getByRole('radio', {
-                    name: 'Contract action and rate certification',
-                })
-            ).toBeInTheDocument()
-        })
+        expect(
+            await screen.getByRole('radio', { name: 'Contract action only' })
+        ).toBeInTheDocument()
+        expect(
+            await screen.getByRole('radio', {
+                name: 'Contract action and rate certification',
+            })
+        ).toBeInTheDocument()
     })
 
     it('displays submission description textarea', async () => {
@@ -262,11 +240,11 @@ describe('SubmissionType', () => {
                 },
             }
         )
-        await waitFor(() =>
-            expect(
-                screen.getByRole('textbox', { name: 'Submission description' })
-            ).toBeInTheDocument()
-        )
+        expect(
+            await screen.getByRole('textbox', {
+                name: 'Submission description',
+            })
+        ).toBeInTheDocument()
     })
 
     describe('validations', () => {
@@ -277,19 +255,17 @@ describe('SubmissionType', () => {
                 },
             })
 
-            await waitFor(() => {
-                expect(screen.getByRole('textbox')).not.toHaveClass(
-                    'usa-input--error'
+            expect(await screen.getByRole('textbox')).not.toHaveClass(
+                'usa-input--error'
+            )
+            expect(
+                await screen.queryByText('You must choose a submission type')
+            ).toBeNull()
+            expect(
+                await screen.queryByText(
+                    'You must provide a description of any major changes or updates'
                 )
-                expect(
-                    screen.queryByText('You must choose a submission type')
-                ).toBeNull()
-                expect(
-                    screen.queryByText(
-                        'You must provide a description of any major changes or updates'
-                    )
-                ).toBeNull()
-            })
+            ).toBeNull()
         })
 
         it('shows error messages when there are validation errors and showValidations is true', async () => {
@@ -306,9 +282,7 @@ describe('SubmissionType', () => {
                 name: 'Submission description',
             })
 
-            await waitFor(() => {
-                expect(textarea).toBeInTheDocument()
-            })
+            expect(await textarea).toBeInTheDocument()
 
             //trigger validation
             userEvent.type(textarea, 'something')
