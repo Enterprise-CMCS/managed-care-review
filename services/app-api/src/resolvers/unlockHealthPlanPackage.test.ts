@@ -36,7 +36,6 @@ describe('unlockHealthPlanPackage', () => {
         })
 
         // Unlock
-        await new Promise((resolve) => setTimeout(resolve, 2000))
         const unlockResult = await cmsServer.executeOperation({
             query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
@@ -106,7 +105,6 @@ describe('unlockHealthPlanPackage', () => {
         })
 
         // Unlock
-        await new Promise((resolve) => setTimeout(resolve, 2000))
         const unlockResult = await cmsServer.executeOperation({
             query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
@@ -238,7 +236,6 @@ describe('unlockHealthPlanPackage', () => {
         )
 
         // Unlock
-        await new Promise((resolve) => setTimeout(resolve, 2000))
         const unlockResult = await stateServer.executeOperation({
             query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
@@ -336,7 +333,6 @@ describe('unlockHealthPlanPackage', () => {
         // const stateSubmission = await createAndSubmitTestHealthPlanPackage(stateServer)
 
         // Unlock
-        await new Promise((resolve) => setTimeout(resolve, 2000))
         const unlockResult = await cmsServer.executeOperation({
             query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {
@@ -369,7 +365,6 @@ describe('unlockHealthPlanPackage', () => {
         })
 
         // Unlock
-        await new Promise((resolve) => setTimeout(resolve, 2000))
         const unlockResult = await cmsServer.executeOperation({
             query: UNLOCK_HEALTH_PLAN_PACKAGE,
             variables: {

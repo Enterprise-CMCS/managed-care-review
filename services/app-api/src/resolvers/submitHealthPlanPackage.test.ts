@@ -26,8 +26,11 @@ describe('submitHealthPlanPackage', () => {
         const draft = latestFormData(initialPkg)
         const draftID = draft.id
 
-        // submit
+        // We delay here to enable checking that updatedAt changes
+        jest.setTimeout(20000)
         await new Promise((resolve) => setTimeout(resolve, 2000))
+
+        // submit
         const submitResult = await server.executeOperation({
             query: SUBMIT_HEALTH_PLAN_PACKAGE,
             variables: {
@@ -206,7 +209,6 @@ describe('submitHealthPlanPackage', () => {
         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
         const draftID = draft.id
 
-        await new Promise((resolve) => setTimeout(resolve, 2000)) // TODO: why is this here in other tests??
         const submitResult = await server.executeOperation({
             query: SUBMIT_HEALTH_PLAN_PACKAGE,
             variables: {
@@ -230,7 +232,6 @@ describe('submitHealthPlanPackage', () => {
         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
         const draftID = draft.id
 
-        await new Promise((resolve) => setTimeout(resolve, 2000)) // TODO: why is this here in other tests??
         const submitResult = await server.executeOperation({
             query: SUBMIT_HEALTH_PLAN_PACKAGE,
             variables: {
@@ -276,7 +277,6 @@ describe('submitHealthPlanPackage', () => {
         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
         const draftID = draft.id
 
-        await new Promise((resolve) => setTimeout(resolve, 2000)) // TODO: why is this here in other tests??
         const submitResult = await server.executeOperation({
             query: SUBMIT_HEALTH_PLAN_PACKAGE,
             variables: {
@@ -318,7 +318,6 @@ describe('submitHealthPlanPackage', () => {
         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
         const draftID = draft.id
 
-        await new Promise((resolve) => setTimeout(resolve, 2000)) // TODO: why is this here in other tests??
         const submitResult = await server.executeOperation({
             query: SUBMIT_HEALTH_PLAN_PACKAGE,
             variables: {
