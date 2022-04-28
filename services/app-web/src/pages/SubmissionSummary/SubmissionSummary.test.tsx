@@ -383,6 +383,7 @@ describe('SubmissionSummary', () => {
             userEvent.type(textbox, 'Test unlock reason')
 
             const unlockButton = screen.getByTestId('unlockReason-modal-submit')
+            expect(unlockButton).toHaveTextContent('Unlock')
             userEvent.click(unlockButton)
 
             // the popup dialog should be hidden again
@@ -438,6 +439,7 @@ describe('SubmissionSummary', () => {
             })
 
             const unlockButton = screen.getByTestId('unlockReason-modal-submit')
+            expect(unlockButton).toHaveTextContent('Unlock')
             userEvent.click(unlockButton)
 
             expect(
