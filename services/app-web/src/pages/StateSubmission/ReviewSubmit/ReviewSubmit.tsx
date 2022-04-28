@@ -50,7 +50,8 @@ export const ReviewSubmit = ({
             loggedInUser.state.programs) ||
         []
 
-    const [submitDraftSubmission] = useSubmitHealthPlanPackageMutation()
+    const [submitDraftSubmission, { loading: submitMutationLoading }] =
+        useSubmitHealthPlanPackageMutation()
 
     const showError = (error: string) => {
         setUserVisibleError(error)
@@ -218,7 +219,7 @@ export const ReviewSubmit = ({
                 submitButtonProps={{ className: styles.submitButton }}
                 onSubmitText={unlocked ? 'Resubmit' : undefined}
                 onSubmit={submitHandler}
-                isSubmitting={formik.isSubmitting}
+                isSubmitting={formik.isSubmitting || submitMutationLoading}
             >
                 {unlocked ? (
                     <form>
