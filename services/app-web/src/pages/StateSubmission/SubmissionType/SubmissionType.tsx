@@ -409,7 +409,7 @@ export const SubmissionType = ({
                         </fieldset>
                         <PageActions
                             pageVariant={
-                                isNewSubmission ? 'FIRST' : 'EDIT-FIRST'
+                                isNewSubmission ? 'FIRST' : 'EDIT_FIRST'
                             }
                             backOnClick={() => history.push('/dashboard')}
                             continueOnClick={() => {

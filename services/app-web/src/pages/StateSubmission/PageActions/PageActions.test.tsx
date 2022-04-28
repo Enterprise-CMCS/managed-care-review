@@ -180,7 +180,7 @@ describe('PageActions', () => {
         it('displays Save as draft, Cancel and Continue buttons for the first page when editing', () => {
             render(
                 <PageActions
-                    pageVariant="EDIT-FIRST"
+                    pageVariant="EDIT_FIRST"
                     continueOnClick={jest.fn()}
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={jest.fn()}
@@ -206,7 +206,7 @@ describe('PageActions', () => {
             const continueAction = jest.fn()
             render(
                 <PageActions
-                    pageVariant="EDIT-FIRST"
+                    pageVariant="EDIT_FIRST"
                     continueOnClick={continueAction}
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={jest.fn()}
@@ -220,7 +220,7 @@ describe('PageActions', () => {
             const saveAsDraftOnClick = jest.fn()
             render(
                 <PageActions
-                    pageVariant="EDIT-FIRST"
+                    pageVariant="EDIT_FIRST"
                     continueOnClick={jest.fn()}
                     saveAsDraftOnClick={saveAsDraftOnClick}
                     backOnClick={jest.fn()}
@@ -236,7 +236,7 @@ describe('PageActions', () => {
             const backOnClick = jest.fn()
             render(
                 <PageActions
-                    pageVariant="EDIT-FIRST"
+                    pageVariant="EDIT_FIRST"
                     continueOnClick={jest.fn()}
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={backOnClick}
