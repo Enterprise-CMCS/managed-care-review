@@ -28,7 +28,7 @@ import {
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
 import { GenericApiErrorBanner } from '../../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
-import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
@@ -45,11 +45,6 @@ export interface SubmissionTypeFormValues {
     submissionType: string
 }
 type SubmissionTypeProps = {
-    showValidations?: boolean
-    draftSubmission?: UnlockedHealthPlanFormDataType
-    updateDraft?: (
-        input: UnlockedHealthPlanFormDataType
-    ) => Promise<HealthPlanPackage | Error>
     formAlert?: React.ReactElement
 }
 
@@ -63,10 +58,10 @@ interface ProgramOption {
 type FormError =
     FormikErrors<SubmissionTypeFormValues>[keyof FormikErrors<SubmissionTypeFormValues>]
 export const SubmissionType = ({
-    showValidations = false,
     draftSubmission,
+    showValidations = false,
     updateDraft,
-}: SubmissionTypeProps): React.ReactElement => {
+}: HealthPlanFormPageProps & SubmissionTypeProps): React.ReactElement => {
     const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const { loggedInUser } = useAuth()
@@ -399,7 +394,7 @@ export const SubmissionType = ({
                                 setFocusErrorSummaryHeading(true)
                             }}
                             saveAsDraftOnClick={() => setShouldValidate(true)}
-                            continueDisabled={isSubmitting}
+                            actionInProgress={isSubmitting}
                         />
                     </UswdsForm>
                 </>

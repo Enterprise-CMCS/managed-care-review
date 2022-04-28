@@ -76,7 +76,7 @@ describe('PageActions', () => {
                     continueOnClick={continueAction}
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={jest.fn()}
-                    continueDisabled
+                    actionInProgress
                 />
             )
 
@@ -169,7 +169,7 @@ describe('PageActions', () => {
                     continueOnClick={continueAction}
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={jest.fn()}
-                    continueDisabled
+                    actionInProgress
                 />
             )
 
@@ -178,8 +178,8 @@ describe('PageActions', () => {
         })
     })
 
-    describe('when disableAll is true', () => {
-        it('does not call click handlers if button is clicked', () => {
+    describe('when async request is in progress', () => {
+        it('does not call click handlers on buttons', () => {
             const backAction = jest.fn()
             const continueAction = jest.fn()
             const saveAsDraftAction = jest.fn()
@@ -188,7 +188,7 @@ describe('PageActions', () => {
                     continueOnClick={continueAction}
                     saveAsDraftOnClick={saveAsDraftAction}
                     backOnClick={backAction}
-                    disableAll
+                    actionInProgress
                 />
             )
 

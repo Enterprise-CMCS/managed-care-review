@@ -9,25 +9,23 @@ import classNames from 'classnames'
    We have a preference to use buttons even when a link behavior (redirect) is being used. This to ensure unity of the UI and experience across pages, since different pages have different logic. 
 */
 type PageActionProps = {
-    disableAll?: boolean // disable all buttons e.g. while an async request is taking place
     backOnClick: React.MouseEventHandler<HTMLButtonElement>
     saveAsDraftOnClick?: React.MouseEventHandler<HTMLButtonElement>
     continueOnClick?: React.MouseEventHandler<HTMLButtonElement> // the reason this isn't required is the continue button is a type="submit" so is can use the form onsubmit as its event handler.
-    continueDisabled?: boolean
+    actionInProgress?: boolean // disable all buttons e.g. while an async request is taking place
     pageVariant?: 'FIRST' | 'LAST' // other options could be added here as union type
 }
 
 export const PageActions = (props: PageActionProps): React.ReactElement => {
     const {
         backOnClick,
-        disableAll = false,
         saveAsDraftOnClick,
         continueOnClick,
-        continueDisabled = false,
+        actionInProgress = false,
         pageVariant,
     } = props
     const classes = classNames({
-        [`${styles.disabled}`]: disableAll,
+        [`${styles.disabled}`]: actionInProgress,
     })
     const isFirstPage = pageVariant === 'FIRST'
     const isLastPage = pageVariant === 'LAST'
@@ -36,7 +34,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
             <Button
                 type="button"
                 unstyled
-                onClick={disableAll ? undefined : saveAsDraftOnClick}
+                onClick={actionInProgress ? undefined : saveAsDraftOnClick}
                 className={classes}
             >
                 Save as draft
@@ -49,7 +47,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                 <Button
                     type="button"
                     outline
-                    onClick={disableAll ? undefined : backOnClick}
+                    onClick={actionInProgress ? undefined : backOnClick}
                     className={classes}
                 >
                     {!isFirstPage ? 'Back' : 'Cancel'}
@@ -57,8 +55,8 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
 
                 <Button
                     type="submit"
-                    disabled={continueDisabled}
-                    onClick={disableAll ? undefined : continueOnClick}
+                    disabled={actionInProgress}
+                    onClick={actionInProgress ? undefined : continueOnClick}
                     className={classes}
                 >
                     {!isLastPage ? 'Continue' : 'Submit'}

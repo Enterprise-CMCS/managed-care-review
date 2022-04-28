@@ -96,6 +96,19 @@ type FormDataError =
     | 'MALFORMATTED_DATA'
     | 'WRONG_SUBMISSION_STATUS'
 
+/* 
+    Prep work for refactor of form pages
+    We have several instances of shared states across pages.
+    This could eventually be pulled out into a HealthPlanFormPageContext or HOC
+*/
+
+export type HealthPlanFormPageProps = {
+    draftSubmission: UnlockedHealthPlanFormDataType
+    showValidations?: boolean
+    updateDraft: (
+        input: UnlockedHealthPlanFormDataType
+    ) => Promise<HealthPlanPackage | Error>
+}
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
@@ -119,7 +132,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     // Set up graphql calls
     const {
         data: fetchData,
-        loading,
+        loading: fetchLoading,
         error: fetchError,
     } = useFetchHealthPlanPackageQuery({
         variables: {
@@ -223,7 +236,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
         }
     }, [submissionAndRevisions])
 
-    if (loading) {
+    if (fetchLoading) {
         return (
             <GridContainer>
                 <Loading />

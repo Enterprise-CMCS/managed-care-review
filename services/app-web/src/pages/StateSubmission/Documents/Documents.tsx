@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
-import { Document, HealthPlanPackage } from '../../../gen/gqlClient'
+import { Document } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
 import {
@@ -15,19 +15,12 @@ import {
 import { PageActions } from '../PageActions'
 import classNames from 'classnames'
 import { ErrorSummary } from '../../../components/Form'
-import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
-
-type DocumentProps = {
-    draftSubmission: UnlockedHealthPlanFormDataType
-    updateDraft: (
-        input: UnlockedHealthPlanFormDataType
-    ) => Promise<HealthPlanPackage | Error>
-}
+import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 
 export const Documents = ({
     draftSubmission,
     updateDraft,
-}: DocumentProps): React.ReactElement => {
+}: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(false)
     const isContractOnly = draftSubmission.submissionType === 'CONTRACT_ONLY'
     const history = useHistory()
@@ -317,7 +310,7 @@ export const Documents = ({
                             redirectPath: 'contacts',
                         })(e)
                     }}
-                    continueDisabled={
+                    actionInProgress={
                         showFileUploadError && fileItems.length > 0
                     }
                     continueOnClick={async (e) => {

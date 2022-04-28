@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
 
-import { Document, RateType, HealthPlanPackage } from '../../../gen/gqlClient'
+import { Document, RateType } from '../../../gen/gqlClient'
 
 import {
     FileUpload,
@@ -32,10 +32,10 @@ import {
 } from '../../../formHelpers'
 import { isS3Error } from '../../../s3'
 import { RateDetailsFormSchema } from './RateDetailsSchema'
-// import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { useS3 } from '../../../contexts/S3Context'
 import { PageActions } from '../PageActions'
-import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
+
 type FormError =
     FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
 
@@ -66,13 +66,7 @@ export const RateDetails = ({
     draftSubmission,
     showValidations = false,
     updateDraft,
-}: {
-    draftSubmission: UnlockedHealthPlanFormDataType
-    showValidations?: boolean
-    updateDraft: (
-        input: UnlockedHealthPlanFormDataType
-    ) => Promise<HealthPlanPackage | Error>
-}): React.ReactElement => {
+}: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const history = useHistory()
 
@@ -674,7 +668,7 @@ export const RateDetails = ({
                                         )
                                     }
                                 }}
-                                continueDisabled={Boolean(
+                                actionInProgress={Boolean(
                                     isSubmitting || showFileUploadError
                                 )}
                             />

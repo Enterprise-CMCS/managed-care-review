@@ -21,7 +21,6 @@ import styles from '../StateSubmissionForm.module.scss'
 import {
     ActuarialFirmType,
     ActuaryCommunicationType,
-    HealthPlanPackage,
 } from '../../../gen/gqlClient'
 
 import { ErrorSummary, FieldRadio } from '../../../components/Form'
@@ -30,7 +29,7 @@ import { stripTypename } from '../updateSubmissionTransform'
 
 import { useFocus } from '../../../hooks/useFocus'
 import { PageActions } from '../PageActions'
-import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 export interface ContactsFormValues {
     stateContacts: stateContactValue[]
     actuaryContacts: actuaryContactValue[]
@@ -159,13 +158,7 @@ export const Contacts = ({
     draftSubmission,
     showValidations = false,
     updateDraft,
-}: {
-    draftSubmission: UnlockedHealthPlanFormDataType
-    showValidations?: boolean
-    updateDraft: (
-        input: UnlockedHealthPlanFormDataType
-    ) => Promise<HealthPlanPackage | Error>
-}): React.ReactElement => {
+}: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const [focusNewContact, setFocusNewContact] = React.useState(false)
     const [focusNewActuaryContact, setFocusNewActuaryContact] =
@@ -967,6 +960,7 @@ export const Contacts = ({
                                     setShouldValidate(true)
                                     setFocusErrorSummaryHeading(true)
                                 }}
+                                actionInProgress={isSubmitting}
                             />
                         </UswdsForm>
                     </>

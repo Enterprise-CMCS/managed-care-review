@@ -36,7 +36,6 @@ import {
     ContractExecutionStatus,
     FederalAuthority,
     CapitationRatesAmendmentReason,
-    HealthPlanPackage,
 } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
@@ -44,7 +43,6 @@ import { isS3Error } from '../../../s3'
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
 import {
     ManagedCareEntity,
-    UnlockedHealthPlanFormDataType,
     CapitationRatesAmendedReason,
 } from '../../../common-code/healthPlanFormDataType'
 import {
@@ -54,6 +52,7 @@ import {
     FederalAuthorityRecord,
 } from '../../../constants/healthPlanPackages'
 import { PageActions } from '../PageActions'
+import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -103,13 +102,7 @@ export const ContractDetails = ({
     draftSubmission,
     showValidations = false,
     updateDraft,
-}: {
-    draftSubmission: UnlockedHealthPlanFormDataType
-    showValidations?: boolean
-    updateDraft: (
-        input: UnlockedHealthPlanFormDataType
-    ) => Promise<HealthPlanPackage | Error>
-}): React.ReactElement => {
+}: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const history = useHistory()
 
@@ -1236,7 +1229,7 @@ export const ContractDetails = ({
                                     )
                                 }
                             }}
-                            continueDisabled={
+                            actionInProgress={
                                 isSubmitting || showFileUploadError
                             }
                         />
