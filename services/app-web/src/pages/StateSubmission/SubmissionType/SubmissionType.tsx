@@ -155,7 +155,11 @@ export const SubmissionType = ({
 
     const handleFormSubmit = async (
         values: SubmissionTypeFormValues,
-        formikHelpers: FormikHelpers<SubmissionTypeFormValues>
+        formikHelpers: Pick<
+            FormikHelpers<SubmissionTypeFormValues>,
+            'setSubmitting'
+        >,
+        redirectPath?: string
     ) => {
         if (isNewSubmission) {
             try {
@@ -215,10 +219,13 @@ export const SubmissionType = ({
 
             try {
                 await updateDraft(draftSubmission)
-
-                history.push(
-                    `/submissions/${draftSubmission.id}/contract-details`
-                )
+                if (redirectPath) {
+                    history.push(redirectPath)
+                } else {
+                    history.push(
+                        `/submissions/${draftSubmission.id}/contract-details`
+                    )
+                }
             } catch (serverError) {
                 setShowFormAlert(true)
                 formikHelpers.setSubmitting(false) // unblock submit button to allow resubmit
@@ -232,7 +239,13 @@ export const SubmissionType = ({
             onSubmit={handleFormSubmit}
             validationSchema={SubmissionTypeFormSchema}
         >
-            {({ values, errors, handleSubmit, isSubmitting }) => (
+            {({
+                values,
+                errors,
+                handleSubmit,
+                isSubmitting,
+                setSubmitting,
+            }) => (
                 <>
                     <UswdsForm
                         className={styles.formContainer}
@@ -392,13 +405,21 @@ export const SubmissionType = ({
                             />
                         </fieldset>
                         <PageActions
-                            pageVariant="FIRST"
+                            pageVariant={
+                                isNewSubmission ? 'FIRST' : 'EDIT_FIRST'
+                            }
                             backOnClick={() => history.push('/dashboard')}
                             continueOnClick={() => {
                                 setShouldValidate(true)
                                 setFocusErrorSummaryHeading(true)
                             }}
-                            saveAsDraftOnClick={() => setShouldValidate(true)}
+                            saveAsDraftOnClick={async () => {
+                                await handleFormSubmit(
+                                    values,
+                                    { setSubmitting },
+                                    '/dashboard'
+                                )
+                            }}
                             continueDisabled={isSubmitting}
                         />
                     </UswdsForm>
