@@ -2,37 +2,36 @@ import React, { useEffect, useState, ComponentProps } from 'react'
 import { Button as UswdsButton } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 
-import styles from './Button.module.scss'
+import styles from './ActionButton.module.scss'
 
 import { Spinner } from '../Spinner'
 
 /* 
 Main application-wide action button. 
   This is a react-uswds Button enhanced with accessible support for disabled, loading, and styled as link buttons.
-  Most props are passed through, so to understand this component well, reference react-uswds docs.
-
-
+  Most props are passed through, so to understand this component well, reference react-uswds and uswds docs.
 */
-type ButtonProps = {
-    variant: 'primary' | 'secondary' | 'outline' | 'linkStyle'
+type ActionButtonProps = {
+    variant?: 'default' | 'secondary' | 'outline' | 'linkStyle' | 'success'
     loading?: boolean
     animationTimeout?: number // used for loading animation
 } & ComponentProps<typeof UswdsButton>
 
-export const Button = ({
+export const ActionButton = ({
     disabled,
     children,
     className,
-    variant,
+    variant = 'default',
     loading = false,
     animationTimeout = 750,
     ...inheritedProps
-}: ButtonProps): React.ReactElement => {
+}: ActionButtonProps): React.ReactElement => {
     const [showLoading, setShowLoading] = useState(false)
     const isDisabled = disabled || inheritedProps['aria-disabled']
     const isLinkStyled = variant === 'linkStyle'
     const isOutline = variant === 'outline'
     const isLoading = loading
+    const isSuccess = variant === 'success'
 
     useEffect(() => {
         if (loading) {
@@ -48,29 +47,27 @@ export const Button = ({
     const classes = classnames(
         {
             [styles.disabledCursor]: isDisabled || isLoading,
-            [styles.disabledButtonBase]: isDisabled && !isLinkStyled,
-            [`usa-button--outline-disabled ${styles.disabledButtonOutline}`]:
-                isDisabled && isOutline,
-            'usa-button--active': isLoading,
+            'usa-button--outline-disabled': isDisabled && isOutline,
+            'usa-button--disabled': isDisabled,
+            'usa-button--active': isLoading && !isSuccess,
+            [styles.successButton]: isSuccess && !isDisabled,
         },
         className
     )
 
     const variantProps = {
-        primary: variant === 'primary',
         secondary: variant === 'secondary',
         outline: variant === 'outline',
         unstyled: isLinkStyled,
     }
 
-    // prefer aria attributes to HTML disabled attribute
     const ariaLabel =
         inheritedProps['aria-label'] && isDisabled
             ? `${inheritedProps['aria-label']} (disabled)`
             : null
 
     const accessibilityProps = {
-        ariaDisabled: isDisabled,
+        ariaDisabled: isDisabled, // prefer aria attributes to HTML disabled attribute
         disabled: false,
         ariaLabel: ariaLabel,
     }
