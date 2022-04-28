@@ -7,10 +7,12 @@ import { loader } from 'graphql.macro'
 import './index.scss'
 
 import App from './pages/App/App'
+import type { AppProps } from './pages/App/App'
 import reportWebVitals from './reportWebVitals'
 import { localGQLFetch, fakeAmplifyFetch } from './api'
 import { assertIsAuthMode } from './common-code/config'
 import { S3ClientT, newAmplifyS3Client, newLocalS3Client } from './s3'
+import { withLDProvider } from 'launchdarkly-react-client-sdk'
 
 const gqlSchema = loader('../../app-web/src/gen/schema.graphql')
 
@@ -107,6 +109,10 @@ if (ldClientId === undefined) {
         'To configure LaunchDarkly, you must set REACT_APP_LD_CLIENT_ID'
     )
 }
+
+withLDProvider<AppProps>({
+    clientSideID: ldClientId,
+})(App)
 
 ReactDOM.render(
     <React.StrictMode>

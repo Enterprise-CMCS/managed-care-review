@@ -18,8 +18,6 @@ import { S3Provider } from '../../contexts/S3Context'
 import { useScript } from '../../hooks/useScript'
 import type { S3ClientT } from '../../s3'
 
-import { withLDProvider } from 'launchdarkly-react-client-sdk'
-
 function ErrorFallback({
     error,
 }: {
@@ -30,7 +28,7 @@ function ErrorFallback({
     return <GenericErrorPage />
 }
 
-type AppProps = {
+export type AppProps = {
     authMode: AuthModeType
     apolloClient: ApolloClient<NormalizedCacheObject>
     s3Client: S3ClientT
@@ -73,6 +71,4 @@ function App({
     )
 }
 
-export default withLDProvider<AppProps>({
-    clientSideID: process.env.REACT_APP_LD_CLIENT_ID || '',
-})(App)
+export default App
