@@ -34,6 +34,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
             <Button
                 type="button"
                 unstyled
+                disabled={actionInProgress}
                 onClick={actionInProgress ? undefined : saveAsDraftOnClick}
                 className={classes}
             >
@@ -47,6 +48,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                 <Button
                     type="button"
                     outline
+                    disabled={actionInProgress}
                     onClick={actionInProgress ? undefined : backOnClick}
                     className={classes}
                 >
