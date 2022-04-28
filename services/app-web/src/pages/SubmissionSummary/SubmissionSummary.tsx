@@ -1,15 +1,10 @@
-import { GraphQLErrors } from '@apollo/client/errors'
 import {
     Alert,
     GridContainer,
     Link,
     ModalRef,
     ModalToggleButton,
-    FormGroup,
-    Textarea,
 } from '@trussworks/react-uswds'
-import * as Yup from 'yup'
-import { useFormik } from 'formik'
 import React, { useEffect, useState, useRef } from 'react'
 import { NavLink, useLocation, useParams } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
@@ -29,26 +24,21 @@ import {
 } from '../../components/SubmissionSummarySection'
 import {
     SubmissionUnlockedBanner,
-    Modal,
-    PoliteErrorMessage,
     SubmissionUpdatedBanner,
 } from '../../components'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import {
-    HealthPlanPackage,
-    UnlockHealthPlanPackageMutationFn,
     useFetchHealthPlanPackageQuery,
-    useUnlockHealthPlanPackageMutation,
     HealthPlanPackageStatus,
     UpdateInformation,
 } from '../../gen/gqlClient'
-import { isGraphQLErrors } from '../../gqlHelpers'
+
 import { Error404 } from '../Errors/Error404'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory/ChangeHistory'
-
+import { UnlockModal } from './UnlockModal'
 export type DocumentDateLookupTable = {
     [key: string]: string
 }
@@ -74,48 +64,13 @@ function UnlockModalButton({
     )
 }
 
-// This wrapper gets us some reasonable errors out of our unlock call. This would be a good candidate
-// for a more general and generic function so that we can get more sensible errors out of all of the
-// generated mutations.
-async function unlockMutationWrapper(
-    unlockHealthPlanPackage: UnlockHealthPlanPackageMutationFn,
-    id: string,
-    unlockedReason: string
-): Promise<HealthPlanPackage | GraphQLErrors | Error> {
-    try {
-        const result = await unlockHealthPlanPackage({
-            variables: {
-                input: {
-                    pkgID: id,
-                    unlockedReason,
-                },
-            },
-        })
-
-        if (result.errors) {
-            return result.errors
-        }
-
-        if (result.data?.unlockHealthPlanPackage.pkg) {
-            return result.data?.unlockHealthPlanPackage.pkg
-        } else {
-            return new Error('No errors, and no unlock result.')
-        }
-    } catch (error) {
-        // this can be an errors object
-        if ('graphQLErrors' in error) {
-            return error.graphQLErrors
-        }
-        return error
-    }
-}
-
 export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
     const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
+    const modalRef = useRef<ModalRef>(null)
     const [pageLevelAlert, setPageLevelAlert] = useState<string | undefined>(
         undefined
     )
@@ -128,27 +83,10 @@ export const SubmissionSummary = (): React.ReactElement => {
     const [submissionStatus, setSubmissionStatus] =
         useState<HealthPlanPackageStatus | null>(null)
 
-    // Unlock modal state
-    const [focusErrorsInModal, setFocusErrorsInModal] = useState(true)
-    const modalRef = useRef<ModalRef>(null)
-    const modalFormInitialValues = {
-        unlockReason: '',
-    }
-
     // document date lookup state
     const [documentDates, setDocumentDates] = useState<
         DocumentDateLookupTable | undefined
     >({})
-
-    const formik = useFormik({
-        initialValues: modalFormInitialValues,
-        validationSchema: Yup.object().shape({
-            unlockReason: Yup.string().defined(
-                'Reason for unlocking submission is required'
-            ),
-        }),
-        onSubmit: (values) => onModalSubmit(values),
-    })
 
     const { loading, error, data } = useFetchHealthPlanPackageQuery({
         variables: {
@@ -158,7 +96,6 @@ export const SubmissionSummary = (): React.ReactElement => {
         },
     })
 
-    const [unlockHealthPlanPackage] = useUnlockHealthPlanPackageMutation()
     const submissionAndRevisions = data?.fetchHealthPlanPackage.pkg
 
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
@@ -247,22 +184,6 @@ export const SubmissionSummary = (): React.ReactElement => {
         }
     }, [updateHeading, pathname, packageData, data])
 
-    // Focus unlockReason field in the unlock modal on submit click when errors exist
-    useEffect(() => {
-        if (focusErrorsInModal && formik.errors.unlockReason) {
-            const fieldElement: HTMLElement | null = document.querySelector(
-                `[name="unlockReason"]`
-            )
-
-            if (fieldElement) {
-                fieldElement.focus()
-                setFocusErrorsInModal(false)
-            } else {
-                console.log('Attempting to focus element that does not exist')
-            }
-        }
-    }, [focusErrorsInModal, formik.errors])
-
     if (loading || !submissionAndRevisions || !packageData) {
         return (
             <GridContainer>
@@ -274,44 +195,6 @@ export const SubmissionSummary = (): React.ReactElement => {
     if (data && !submissionAndRevisions) return <Error404 /> // api request resolves but are no revisions likely because invalid submission is queried. This should be "Not Found"
     if (error || !packageData || !submissionAndRevisions)
         return <GenericErrorPage /> // api failure or protobuf decode failure
-
-    const onModalSubmit = async (values: typeof modalFormInitialValues) => {
-        const { unlockReason } = values
-        await onUnlock(unlockReason)
-    }
-
-    const onUnlock = async (unlockReason: string) => {
-        const result = await unlockMutationWrapper(
-            unlockHealthPlanPackage,
-            submissionAndRevisions.id,
-            unlockReason
-        )
-
-        if (result instanceof Error) {
-            console.error(
-                'ERROR: got an Apollo Client Error attempting to unlock',
-                result
-            )
-            setPageLevelAlert('Error attempting to unlock. Please try again.')
-            modalRef.current?.toggleModal(undefined, false)
-        } else if (isGraphQLErrors(result)) {
-            console.error('ERROR: got a GraphQL error response', result)
-            if (result[0].extensions.code === 'BAD_USER_INPUT') {
-                setPageLevelAlert(
-                    'Submission is already unlocked. Please refresh and try again.'
-                )
-            } else {
-                setPageLevelAlert(
-                    'Error attempting to unlock. Please try again.'
-                )
-            }
-            modalRef.current?.toggleModal(undefined, false)
-        } else {
-            const unlockedSub: HealthPlanPackage = result
-            modalRef.current?.toggleModal(undefined, false)
-            console.log('Submission Unlocked', unlockedSub)
-        }
-    }
 
     const statePrograms = submissionAndRevisions.state.programs
 
@@ -418,41 +301,10 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <SupportingDocumentsSummarySection submission={packageData} />
 
                 <ChangeHistory submission={submissionAndRevisions} />
-
-                <Modal
-                    modalHeading="Reason for unlocking submission"
-                    id="unlockReason"
-                    onSubmit={() => {
-                        setFocusErrorsInModal(true)
-                        formik.handleSubmit()
-                    }}
+                <UnlockModal
                     modalRef={modalRef}
-                    onSubmitText="Unlock"
-                >
-                    <form>
-                        <FormGroup error={Boolean(formik.errors.unlockReason)}>
-                            {formik.errors.unlockReason && (
-                                <PoliteErrorMessage role="alert">
-                                    {formik.errors.unlockReason}
-                                </PoliteErrorMessage>
-                            )}
-                            <span id="unlockReason-hint" role="note">
-                                Provide reason for unlocking
-                            </span>
-                            <Textarea
-                                id="unlockReasonCharacterCount"
-                                name="unlockReason"
-                                data-testid="unlockReason"
-                                aria-labelledby="unlockReason-hint"
-                                className={styles.unlockReasonTextarea}
-                                aria-required
-                                error={!!formik.errors.unlockReason}
-                                onChange={formik.handleChange}
-                                defaultValue={formik.values.unlockReason}
-                            />
-                        </FormGroup>
-                    </form>
-                </Modal>
+                    healthPlanPackage={submissionAndRevisions}
+                />
             </GridContainer>
         </div>
     )

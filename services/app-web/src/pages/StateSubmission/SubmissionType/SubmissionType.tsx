@@ -46,6 +46,9 @@ export interface SubmissionTypeFormValues {
 }
 type SubmissionTypeProps = {
     formAlert?: React.ReactElement
+    draftSubmission?: HealthPlanFormPageProps['draftSubmission'] // overwrite HealthPlanFormProps because this can be undefined when we start a new submission
+    showValidations?: HealthPlanFormPageProps['showValidations']
+    updateDraft?: HealthPlanFormPageProps['updateDraft'] // overwrite HealthPlanFormProps because this can be undefined when we start a new submission
 }
 
 interface ProgramOption {
@@ -61,7 +64,7 @@ export const SubmissionType = ({
     draftSubmission,
     showValidations = false,
     updateDraft,
-}: HealthPlanFormPageProps & SubmissionTypeProps): React.ReactElement => {
+}: SubmissionTypeProps): React.ReactElement => {
     const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const { loggedInUser } = useAuth()

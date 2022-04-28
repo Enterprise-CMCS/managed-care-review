@@ -1,6 +1,5 @@
 import {
     Alert,
-    Button,
     FormGroup,
     GridContainer,
     ModalRef,
@@ -25,6 +24,7 @@ import { PoliteErrorMessage } from '../../../components'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import { ActionButton } from '../../../components/ActionButton'
 
 export const ReviewSubmit = ({
     draftSubmission,
@@ -181,22 +181,24 @@ export const ReviewSubmit = ({
 
             <PageActionsContainer
                 left={
-                    <Button
+                    <ActionButton
                         type="button"
+                        variant="linkStyle"
                         onClick={() => history.push('/dashboard')}
-                        unstyled
+                        disabled={formik.isSubmitting}
                     >
                         Save as draft
-                    </Button>
+                    </ActionButton>
                 }
             >
-                <Button
+                <ActionButton
                     type="button"
-                    outline
+                    variant="outline"
                     onClick={() => history.push('documents')}
+                    disabled={formik.isSubmitting}
                 >
                     Back
-                </Button>
+                </ActionButton>
                 <ModalToggleButton
                     modalRef={modalRef}
                     className={styles.submitButton}
@@ -216,6 +218,7 @@ export const ReviewSubmit = ({
                 submitButtonProps={{ className: styles.submitButton }}
                 onSubmitText={unlocked ? 'Resubmit' : undefined}
                 onSubmit={submitHandler}
+                isSubmitting={formik.isSubmitting}
             >
                 {unlocked ? (
                     <form>

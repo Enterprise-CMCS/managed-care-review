@@ -1,9 +1,11 @@
 import React from 'react'
-import { Button, ButtonGroup } from '@trussworks/react-uswds'
-import { PageActionsContainer } from './PageActionsContainer'
-import styles from './PageActions.module.scss'
 import classNames from 'classnames'
+import { ButtonGroup } from '@trussworks/react-uswds'
 
+import styles from './PageActions.module.scss'
+
+import { PageActionsContainer } from './PageActionsContainer'
+import { ActionButton } from '../../../components/ActionButton'
 /*  
    This is the main call to action element displayed at the bottom of form pages.
    We have a preference to use buttons even when a link behavior (redirect) is being used. This to ensure unity of the UI and experience across pages, since different pages have different logic. 
@@ -31,38 +33,39 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
     const isLastPage = pageVariant === 'LAST'
     const leftElement =
         isFirstPage || !saveAsDraftOnClick ? undefined : (
-            <Button
+            <ActionButton
                 type="button"
-                unstyled
+                variant="linkStyle"
                 disabled={actionInProgress}
                 onClick={actionInProgress ? undefined : saveAsDraftOnClick}
                 className={classes}
             >
                 Save as draft
-            </Button>
+            </ActionButton>
         )
 
     return (
         <PageActionsContainer left={leftElement}>
             <ButtonGroup type="default">
-                <Button
+                <ActionButton
                     type="button"
-                    outline
+                    variant="outline"
                     disabled={actionInProgress}
                     onClick={actionInProgress ? undefined : backOnClick}
                     className={classes}
                 >
                     {!isFirstPage ? 'Back' : 'Cancel'}
-                </Button>
+                </ActionButton>
 
-                <Button
+                <ActionButton
                     type="submit"
-                    disabled={actionInProgress}
+                    variant="success"
                     onClick={actionInProgress ? undefined : continueOnClick}
                     className={classes}
+                    loading={actionInProgress}
                 >
                     {!isLastPage ? 'Continue' : 'Submit'}
-                </Button>
+                </ActionButton>
             </ButtonGroup>
         </PageActionsContainer>
     )
