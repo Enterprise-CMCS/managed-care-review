@@ -218,8 +218,9 @@ export const RateDetails = ({
         // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
         if (options.shouldValidateDocuments) {
             if (!hasValidFiles) {
-                setShouldValidate(true)
-                setFocusErrorSummaryHeading(true)
+                setShouldValidate(true) // set inline field errors
+                setFocusErrorSummaryHeading(true) // set errors in form-wide error summary
+                setSubmitting(false) // reset formik submit
                 return
             }
         }

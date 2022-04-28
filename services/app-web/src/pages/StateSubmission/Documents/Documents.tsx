@@ -181,6 +181,7 @@ export const Documents = ({
                 if (!hasValidFiles || hasMissingCategories) {
                     setShouldValidate(true)
                     setFocusErrorSummaryHeading(true)
+                    setSubmitting(false) // reset formik submit
                     return
                 }
             }

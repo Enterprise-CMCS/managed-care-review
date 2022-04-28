@@ -260,6 +260,7 @@ export const ContractDetails = ({
             if (!hasValidFiles) {
                 setShouldValidate(true)
                 setFocusErrorSummaryHeading(true)
+                setSubmitting(false)
                 return
             }
         }
