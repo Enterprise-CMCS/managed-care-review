@@ -3,6 +3,9 @@ import { AuthModeType } from '../common-code/config'
 import { useFetchCurrentUserQuery, User as UserType } from '../gen/gqlClient'
 import { logoutLocalUser } from '../localAuth'
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import * as LDClient from 'launchdarkly-js-client-sdk'
+import sha256 from 'crypto-js/sha256'
 
 type LogoutFn = () => Promise<null>
 
@@ -89,6 +92,19 @@ function AuthProvider({
                 })
         })
     }
+
+    // add current authenticated user to launchdarkly client
+    const client = useLDClient()
+    const email = loggedInUser === undefined ? 'anonymous' : loggedInUser.email
+    const key = sha256(email).toString()
+    const user: LDClient.LDUser = {
+        key: key,
+        name: loggedInUser?.name,
+        email: loggedInUser?.email,
+    }
+    client?.identify(user).catch((e) => {
+        console.log(e)
+    })
 
     const realLogout: LogoutFn =
         authMode === 'LOCAL' ? logoutLocalUser : cognitoSignOut

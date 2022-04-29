@@ -112,6 +112,14 @@ if (ldClientId === undefined) {
 ;(async () => {
     const LDProvider = await asyncWithLDProvider({
         clientSideID: ldClientId,
+        options: {
+            requestHeaderTransform(headers: Map<string, string>) {
+                return {
+                    ...headers,
+                    'content-type': 'application/json',
+                }
+            },
+        },
     })
 
     ReactDOM.render(
