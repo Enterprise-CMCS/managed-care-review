@@ -37,10 +37,12 @@ registerInstrumentations({
         getWebAutoInstrumentations({
             // load custom configuration for xml-http-request instrumentation
             '@opentelemetry/instrumentation-xml-http-request': {
+                ignoreUrls: [/(.*).launchdarkly.com/g],
                 propagateTraceHeaderCorsUrls: [/.+/g],
             },
             // load custom configuration for fetch instrumentation
             '@opentelemetry/instrumentation-fetch': {
+                ignoreUrls: [/(.*).launchdarkly.com/g],
                 propagateTraceHeaderCorsUrls: [/.+/g],
             },
         }),

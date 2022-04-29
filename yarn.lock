@@ -10397,7 +10397,7 @@ base64-arraybuffer@0.1.4:
   resolved "https://registry.yarnpkg.com/base64-arraybuffer/-/base64-arraybuffer-0.1.4.tgz#9818c79e059b1355f97e0428a017c838e90ba812"
   integrity sha1-mBjHngWbE1X5fgQooBfIOOkLqBI=
 
-base64-js@^1.0.2, base64-js@^1.3.1:
+base64-js@^1.0.2, base64-js@^1.3.0, base64-js@^1.3.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.5.1.tgz#1b1b440160a5bf7ad40b650f095963481903930a"
   integrity sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==
@@ -14329,6 +14329,11 @@ fast-base64-decode@^1.0.0:
   resolved "https://registry.yarnpkg.com/fast-base64-decode/-/fast-base64-decode-1.0.0.tgz#b434a0dd7d92b12b43f26819300d2dafb83ee418"
   integrity sha512-qwaScUgUGBYeDNRnbc/KyllVU88Jk1pRHPStuF/lO7B0/RTRLj7U0lkdTAutlBblY08rwZDff6tNU9cjv6j//Q==
 
+fast-deep-equal@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-2.0.1.tgz#7b05218ddf9667bf7f370bf7fdb2cb15fdd0aa49"
+  integrity sha1-ewUhjd+WZ79/Nwv3/bLLFf3Qqkk=
+
 fast-deep-equal@^3.1.1, fast-deep-equal@^3.1.3:
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz#3a7d56b559d6cbc3eb512325244e619a65c6c525"
@@ -18092,6 +18097,23 @@ launchdarkly-eventsource@1.4.1:
   dependencies:
     original "^1.0.2"
 
+launchdarkly-js-client-sdk@2.20.2:
+  version "2.20.2"
+  resolved "https://registry.yarnpkg.com/launchdarkly-js-client-sdk/-/launchdarkly-js-client-sdk-2.20.2.tgz#4c5a72cc8e2d0b5dbb3d4dd31a30e36b243b9e8f"
+  integrity sha512-KAAb1nnpAiQF4dCohe0d1M7QSxhJfa9v6+5PJUPANAVZ3EwX/y6aL7mK8Mik2IrL5I654mseXxidfSbnHVMBXA==
+  dependencies:
+    escape-string-regexp "^1.0.5"
+    launchdarkly-js-sdk-common "3.5.1"
+
+launchdarkly-js-sdk-common@3.5.1:
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/launchdarkly-js-sdk-common/-/launchdarkly-js-sdk-common-3.5.1.tgz#25966a5b25311bba4db7c9f3807031166b97545d"
+  integrity sha512-MTIn5XkREKCb87A78QTQXNEPaDaC35PzW1mU8bTf1hdxgm78LiDtXjvtKvVk+oU5tqFrH7dZrLKMCGkt03VaKw==
+  dependencies:
+    base64-js "^1.3.0"
+    fast-deep-equal "^2.0.1"
+    uuid "^3.3.2"
+
 launchdarkly-node-server-sdk@5.14.6:
   version "5.14.6"
   resolved "https://registry.yarnpkg.com/launchdarkly-node-server-sdk/-/launchdarkly-node-server-sdk-5.14.6.tgz#430030096635e86ad95304bc4dfea81a874c5acd"
@@ -18108,6 +18130,16 @@ launchdarkly-node-server-sdk@5.14.6:
     uuid "^3.3.3"
     winston "^3.2.1"
     yaml "^1.0.1"
+
+launchdarkly-react-client-sdk@^2.25.2:
+  version "2.25.2"
+  resolved "https://registry.yarnpkg.com/launchdarkly-react-client-sdk/-/launchdarkly-react-client-sdk-2.25.2.tgz#68af68ce0faa85b6912f61591de0896a8422926c"
+  integrity sha512-cKzbP5e4SKEQzcjh2OndYPORs+xvP27sUJi11pQ4vHoy0LC9HiSTA6HF0JGlljPSp4HLYuzzr3Dhat3jinpnXA==
+  dependencies:
+    hoist-non-react-statics "^3.3.2"
+    launchdarkly-js-client-sdk "2.20.2"
+    lodash.camelcase "^4.3.0"
+    uuid "^3.3.2"
 
 lazy-ass@^1.6.0:
   version "1.6.0"
@@ -18415,6 +18447,11 @@ lodash._reinterpolate@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/lodash._reinterpolate/-/lodash._reinterpolate-3.0.0.tgz#0ccf2d89166af03b3663c796538b75ac6e114d9d"
   integrity sha1-DM8tiRZq8Ds2Y8eWU4t1rG4RTZ0=
+
+lodash.camelcase@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/lodash.camelcase/-/lodash.camelcase-4.3.0.tgz#b28aa6288a2b9fc651035c7711f65ab6190331a6"
+  integrity sha1-soqmKIorn8ZRA1x3EfZathkDMaY=
 
 lodash.debounce@^4.0.8:
   version "4.0.8"
