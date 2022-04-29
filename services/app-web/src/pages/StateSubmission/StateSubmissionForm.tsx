@@ -41,6 +41,8 @@ import {
 } from '../../common-code/healthPlanFormDataType'
 import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
 import { makeDocumentList } from '../../documentHelpers/makeDocumentKeyLookupList'
+import { makeDateTable } from '../../documentHelpers/makeDocumentDateLookupTable'
+import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
 
 const FormAlert = ({ message }: { message?: string }): React.ReactElement => {
     return message ? (
@@ -117,6 +119,11 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const [computedSubmissionName, setComputedSubmissionName] =
         useState<string>('')
     const [previousDocuments, setPreviousDocuments] = useState<string[]>([])
+
+    // document date lookup state
+    const [documentDates, setDocumentDates] = useState<
+        DocumentDateLookupTable | undefined
+    >({})
 
     // Set up graphql calls
     const {
@@ -203,6 +210,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
             //set previous submitted files
             const documentList = makeDocumentList(submissionAndRevisions)
+            //set document dates
+            const documentDates = makeDateTable(submissionAndRevisions)
+            setDocumentDates(documentDates)
             if (documentList instanceof Error) {
                 //Maybe a different error message here.
                 setFormDataError('MALFORMATTED_DATA')
@@ -337,6 +347,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                             draftSubmission={formDataFromLatestRevision}
                             unlocked={!!unlockedInfo}
                             submissionName={computedSubmissionName}
+                            documentDateLookupTable={documentDates}
                         />
                     </Route>
                 </Switch>
