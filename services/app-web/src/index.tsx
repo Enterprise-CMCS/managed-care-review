@@ -12,6 +12,7 @@ import { localGQLFetch, fakeAmplifyFetch } from './api'
 import { assertIsAuthMode } from './common-code/config'
 import { S3ClientT, newAmplifyS3Client, newLocalS3Client } from './s3'
 import { asyncWithLDProvider } from 'launchdarkly-react-client-sdk'
+import * as ld from 'launchdarkly-js-client-sdk'
 
 const gqlSchema = loader('../../app-web/src/gen/schema.graphql')
 
@@ -110,15 +111,13 @@ if (ldClientId === undefined) {
 }
 
 ;(async () => {
+    // init with an anon user. upon login they will be identified.
+    const anonymousUser: ld.LDUser = { anonymous: true }
     const LDProvider = await asyncWithLDProvider({
         clientSideID: ldClientId,
-        options: {
-            requestHeaderTransform(headers: Map<string, string>) {
-                return {
-                    ...headers,
-                    'content-type': 'application/json',
-                }
-            },
+        user: anonymousUser,
+        reactOptions: {
+            useCamelCaseFlagKeys: true,
         },
     })
 

@@ -3,8 +3,8 @@ import { AuthModeType } from '../common-code/config'
 import { useFetchCurrentUserQuery, User as UserType } from '../gen/gqlClient'
 import { logoutLocalUser } from '../localAuth'
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
+
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import * as LDClient from 'launchdarkly-js-client-sdk'
 import sha256 from 'crypto-js/sha256'
 
 type LogoutFn = () => Promise<null>
@@ -46,6 +46,26 @@ function AuthProvider({
 
     const isAuthenticated = loggedInUser !== undefined
 
+    // add current authenticated user to launchdarkly client
+    const client = useLDClient()
+    async function setLDUser(user: UserType) {
+        const email = user === undefined ? 'anonymous' : user.email
+        const key = sha256(email).toString()
+        const ldUser = {
+            key: key,
+            name: user.name,
+            email: user.email,
+        }
+
+        const previousUser = client?.getUser() || {}
+        client?.alias(ldUser, previousUser)
+        console.log('previous user:')
+        console.log(previousUser)
+        await client?.identify(ldUser)
+        console.log('after identify:')
+        console.log(client?.getUser())
+    }
+
     const computedLoginStatus: LoginStatusType = loading
         ? 'LOADING'
         : loggedInUser !== undefined
@@ -75,6 +95,9 @@ function AuthProvider({
         } else if (data?.fetchCurrentUser) {
             if (!isAuthenticated) {
                 setLoggedInUser(data.fetchCurrentUser)
+                setLDUser(data.fetchCurrentUser).catch((err) => {
+                    console.log(err)
+                })
                 setLoginStatus('LOGGED_IN')
             }
         }
@@ -92,19 +115,6 @@ function AuthProvider({
                 })
         })
     }
-
-    // add current authenticated user to launchdarkly client
-    const client = useLDClient()
-    const email = loggedInUser === undefined ? 'anonymous' : loggedInUser.email
-    const key = sha256(email).toString()
-    const user: LDClient.LDUser = {
-        key: key,
-        name: loggedInUser?.name,
-        email: loggedInUser?.email,
-    }
-    client?.identify(user).catch((e) => {
-        console.log(e)
-    })
 
     const realLogout: LogoutFn =
         authMode === 'LOCAL' ? logoutLocalUser : cognitoSignOut
