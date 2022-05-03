@@ -40,6 +40,7 @@ import {
     packageName,
 } from '../../common-code/healthPlanFormDataType'
 import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
+import { makeDocumentList } from '../../documentHelpers/makeDocumentKeyLookupList'
 
 const FormAlert = ({ message }: { message?: string }): React.ReactElement => {
     return message ? (
@@ -105,9 +106,10 @@ type FormDataError =
 export type HealthPlanFormPageProps = {
     draftSubmission: UnlockedHealthPlanFormDataType
     showValidations?: boolean
+    updateDraftLoading?: boolean
+    previousDocuments: string[]
     updateDraft: (
-        input: UnlockedHealthPlanFormDataType,
-        updateDraftLoading?: boolean
+        input: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackage | Error>
 }
 export const StateSubmissionForm = (): React.ReactElement => {
@@ -129,6 +131,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     )
     const [computedSubmissionName, setComputedSubmissionName] =
         useState<string>('')
+    const [previousDocuments, setPreviousDocuments] = useState<string[]>([])
 
     // Set up graphql calls
     const {
@@ -181,7 +184,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
         }
     }
 
-    // Set up side effects
+    // Setup side effects
     useEffect(() => {
         if (formDataFromLatestRevision) {
             const statePrograms =
@@ -214,6 +217,15 @@ export const StateSubmissionForm = (): React.ReactElement => {
             }
 
             setFormDataFromLatestRevision(planFormData)
+
+            //set previous submitted files
+            const documentList = makeDocumentList(submissionAndRevisions)
+            if (documentList instanceof Error) {
+                //Maybe a different error message here.
+                setFormDataError('MALFORMATTED_DATA')
+                return
+            }
+            setPreviousDocuments(documentList.previousDocuments)
 
             // set unlock info
             if (submissionAndRevisions.status === 'UNLOCKED') {
@@ -314,18 +326,21 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         <ContractDetails
                             draftSubmission={formDataFromLatestRevision}
                             updateDraft={updateDraftHealthPlanPackage}
+                            previousDocuments={previousDocuments}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}>
                         <RateDetails
                             draftSubmission={formDataFromLatestRevision}
                             updateDraft={updateDraftHealthPlanPackage}
+                            previousDocuments={previousDocuments}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_CONTACTS}>
                         <Contacts
                             draftSubmission={formDataFromLatestRevision}
                             updateDraft={updateDraftHealthPlanPackage}
+                            previousDocuments={previousDocuments}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_DOCUMENTS}>
@@ -333,6 +348,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                             draftSubmission={formDataFromLatestRevision}
                             updateDraft={updateDraftHealthPlanPackage}
                             updateDraftLoading={updateDraftLoading}
+                            previousDocuments={previousDocuments}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>

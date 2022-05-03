@@ -15,8 +15,8 @@ type PageActionProps = {
     saveAsDraftOnClick?: React.MouseEventHandler<HTMLButtonElement>
     continueOnClick?: React.MouseEventHandler<HTMLButtonElement> // the reason this isn't required is the continue button is a type="submit" so is can use the form onsubmit as its event handler.
     actionInProgress?: boolean // disable all buttons e.g. while an async request is taking place
-    disableContinue?: boolean // disable continue when strange errors have occured
-    pageVariant?: 'FIRST' | 'LAST' // other options could be added here as union type
+    disableContinue?: boolean // disable continue when errors outside formik have occured (e.g. relating to documents)
+    pageVariant?: 'FIRST' | 'LAST' | 'EDIT_FIRST'
 }
 
 export const PageActions = (props: PageActionProps): React.ReactElement => {
@@ -33,6 +33,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
     })
     const isFirstPage = pageVariant === 'FIRST'
     const isLastPage = pageVariant === 'LAST'
+    const isFirstPageEditing = pageVariant === 'EDIT_FIRST'
     const leftElement =
         isFirstPage || !saveAsDraftOnClick ? undefined : (
             <ActionButton
@@ -56,7 +57,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                     onClick={actionInProgress ? undefined : backOnClick}
                     className={classes}
                 >
-                    {!isFirstPage ? 'Back' : 'Cancel'}
+                    {!isFirstPage && !isFirstPageEditing ? 'Back' : 'Cancel'}
                 </ActionButton>
 
                 <ActionButton

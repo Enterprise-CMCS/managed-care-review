@@ -39,6 +39,7 @@ describe('ContractDetails', () => {
             <ContractDetails
                 draftSubmission={mockDraft()}
                 updateDraft={jest.fn()}
+                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -60,6 +61,7 @@ describe('ContractDetails', () => {
             <ContractDetails
                 draftSubmission={emptyDraft}
                 updateDraft={jest.fn()}
+                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -185,6 +187,7 @@ describe('ContractDetails', () => {
             <ContractDetails
                 draftSubmission={emptyDraft}
                 updateDraft={mockUpdateDraftFn}
+                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -244,6 +247,7 @@ describe('ContractDetails', () => {
             <ContractDetails
                 draftSubmission={emptyDraft}
                 updateDraft={mockUpdateDraftFn}
+                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -319,6 +323,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -348,6 +353,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -370,6 +376,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -403,6 +410,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -428,6 +436,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -458,6 +467,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -487,6 +497,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -522,6 +533,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -556,6 +568,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -603,6 +616,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -629,6 +643,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -657,6 +672,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -693,6 +709,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={hasDocsDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -719,6 +736,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -758,6 +776,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -783,6 +802,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={jest.fn()}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -811,6 +831,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {
@@ -837,6 +858,7 @@ describe('ContractDetails', () => {
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
                     updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
                 />,
                 {
                     apolloProvider: {

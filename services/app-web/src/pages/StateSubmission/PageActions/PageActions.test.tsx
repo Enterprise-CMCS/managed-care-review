@@ -176,6 +176,76 @@ describe('PageActions', () => {
             userEvent.click(screen.getByRole('button', { name: 'Submit' }))
             expect(continueAction).not.toHaveBeenCalled()
         })
+
+        it('displays Save as draft, Cancel and Continue buttons for the first page when editing', () => {
+            render(
+                <PageActions
+                    pageVariant="EDIT_FIRST"
+                    continueOnClick={jest.fn()}
+                    saveAsDraftOnClick={jest.fn()}
+                    backOnClick={jest.fn()}
+                />
+            )
+            const buttons = screen.getAllByRole('button')
+            expect(buttons).toHaveLength(3)
+            buttons.forEach((button: HTMLElement) =>
+                expect(button).not.toBeDisabled()
+            )
+
+            expect(
+                screen.getByRole('button', { name: 'Save as draft' })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('button', { name: 'Cancel' })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('button', { name: 'Continue' })
+            ).toBeInTheDocument()
+        })
+        it('calls continueOnClick when Continue button is clicked on the first page when editing', () => {
+            const continueAction = jest.fn()
+            render(
+                <PageActions
+                    pageVariant="EDIT_FIRST"
+                    continueOnClick={continueAction}
+                    saveAsDraftOnClick={jest.fn()}
+                    backOnClick={jest.fn()}
+                />
+            )
+
+            userEvent.click(screen.getByRole('button', { name: 'Continue' }))
+            expect(continueAction).toHaveBeenCalled()
+        })
+        it('calls saveAsDraftOnClick when Save as draft button is clicked on the first page when editing', () => {
+            const saveAsDraftOnClick = jest.fn()
+            render(
+                <PageActions
+                    pageVariant="EDIT_FIRST"
+                    continueOnClick={jest.fn()}
+                    saveAsDraftOnClick={saveAsDraftOnClick}
+                    backOnClick={jest.fn()}
+                />
+            )
+
+            userEvent.click(
+                screen.getByRole('button', { name: 'Save as draft' })
+            )
+            expect(saveAsDraftOnClick).toHaveBeenCalled()
+        })
+        it('calls backOnClick when Cancel button is clicked on the first page when editing', () => {
+            const backOnClick = jest.fn()
+            render(
+                <PageActions
+                    pageVariant="EDIT_FIRST"
+                    continueOnClick={jest.fn()}
+                    saveAsDraftOnClick={jest.fn()}
+                    backOnClick={backOnClick}
+                />
+            )
+
+            userEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+            expect(backOnClick).toHaveBeenCalled()
+        })
     })
 
     describe('when async request is in progress', () => {

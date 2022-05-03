@@ -444,7 +444,7 @@ describe('SubmissionSummary', () => {
 
             expect(
                 await screen.findByText(
-                    'Reason for unlocking submission is required'
+                    'You must provide a reason for unlocking this submission'
                 )
             ).toBeInTheDocument()
         })
@@ -494,7 +494,7 @@ describe('SubmissionSummary', () => {
 
             expect(
                 await screen.findByText(
-                    'Reason for unlocking submission is required'
+                    'You must provide a reason for unlocking this submission'
                 )
             ).toBeInTheDocument()
 

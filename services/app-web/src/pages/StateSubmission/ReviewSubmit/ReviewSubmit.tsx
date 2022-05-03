@@ -65,7 +65,7 @@ export const ReviewSubmit = ({
         initialValues: modalFormInitialValues,
         validationSchema: Yup.object().shape({
             submittedReason: Yup.string().defined(
-                'Summary for submission is required'
+                'You must provide a summary of changes'
             ),
         }),
         onSubmit: (values) => onModalSubmit(values),
