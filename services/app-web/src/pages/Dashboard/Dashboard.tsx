@@ -20,6 +20,9 @@ import styles from './Dashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 
+import { useFlags } from 'launchdarkly-react-client-sdk'
+import { MaintenanceMessage } from './MaintenanceMessage'
+
 // We only pull a subset of data out of the submission and revisions for display in Dashboard
 type SubmissionInDashboard = {
     id: string
@@ -67,6 +70,7 @@ const StatusTag = ({
 export const Dashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser, sessionIsExpiring } = useAuth()
     const location = useLocation()
+    const { testFrontendBanner } = useFlags()
 
     const { loading, data, error } = useIndexHealthPlanPackagesQuery()
 
@@ -149,6 +153,10 @@ export const Dashboard = (): React.ReactElement => {
                                     submissionName={justSubmittedSubmissionName}
                                 />
                             )}
+                            {testFrontendBanner && (
+                                <MaintenanceMessage message="This is a test message from launch darkly" />
+                            )}
+
                             <div className={styles.panelHeader}>
                                 <h2>Submissions</h2>
                                 <div>
