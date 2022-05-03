@@ -196,27 +196,23 @@ export const ContractDetailsSummarySection = ({
                             dict: FederalAuthorityRecord,
                         })}
                     />
+                    {submission.contractType === 'AMENDMENT' &&
+                        submission.contractAmendmentInfo && (
+                            <DataDetail
+                                id="itemsAmended"
+                                label="Items being amended"
+                                data={createCheckboxList({
+                                    list: submission.contractAmendmentInfo.itemsBeingAmended.filter(
+                                        (item) =>
+                                            item !== 'CAPITATION_RATES' &&
+                                            item !== 'OTHER'
+                                    ),
+                                    dict: AmendableItemsRecord,
+                                    otherReasons: itemsAmendedOtherList,
+                                })}
+                            />
+                        )}
                 </DoubleColumnGrid>
-                {submission.contractType === 'AMENDMENT' &&
-                    submission.contractAmendmentInfo && (
-                        <>
-                            <DoubleColumnGrid>
-                                <DataDetail
-                                    id="itemsAmended"
-                                    label="Items being amended"
-                                    data={createCheckboxList({
-                                        list: submission.contractAmendmentInfo.itemsBeingAmended.filter(
-                                            (item) =>
-                                                item !== 'CAPITATION_RATES' &&
-                                                item !== 'OTHER'
-                                        ),
-                                        dict: AmendableItemsRecord,
-                                        otherReasons: itemsAmendedOtherList,
-                                    })}
-                                />
-                            </DoubleColumnGrid>
-                        </>
-                    )}
             </dl>
             <UploadedDocumentsTable
                 documents={submission.contractDocuments}
