@@ -13,6 +13,8 @@ type AuthContextType = {
     loginStatus: LoginStatusType
     checkAuth: () => Promise<void> // this can probably be simpler, letting callers use the loading states etc instead.
     logout: undefined | (() => Promise<void>)
+    sessionIsExpiring: React.MutableRefObject<boolean>
+    updateSessionExpiry: (value: boolean) => void
 }
 
 const AuthContext = React.createContext<AuthContextType>({
@@ -20,6 +22,9 @@ const AuthContext = React.createContext<AuthContextType>({
     loginStatus: 'LOADING',
     checkAuth: () => Promise.reject(Error('Auth context error')),
     logout: undefined,
+    sessionIsExpiring: { current: false },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    updateSessionExpiry: () => {},
 })
 
 export type AuthProviderProps = {
@@ -36,7 +41,7 @@ function AuthProvider({
     >(undefined)
     const [loginStatus, setLoginStatus] =
         React.useState<LoginStatusType>('LOGGED_OUT')
-
+    const sessionIsExpiring = React.useRef<boolean>(false)
     const { loading, data, error, refetch } = useFetchCurrentUserQuery({
         notifyOnNetworkStatusChange: true,
     })
@@ -90,6 +95,15 @@ function AuthProvider({
         })
     }
 
+    const updateSessionExpiry = (value: boolean) => {
+        console.log(
+            'UPDATING SESSION EXPIRY: ',
+            value,
+            sessionIsExpiring.current
+        )
+        sessionIsExpiring.current = value
+    }
+
     const realLogout: LogoutFn =
         authMode === 'LOCAL' ? logoutLocalUser : cognitoSignOut
 
@@ -118,6 +132,8 @@ function AuthProvider({
                 loginStatus,
                 logout,
                 checkAuth,
+                sessionIsExpiring,
+                updateSessionExpiry,
             }}
             children={children}
         />

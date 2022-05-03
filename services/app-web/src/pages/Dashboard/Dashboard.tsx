@@ -65,7 +65,7 @@ const StatusTag = ({
 }
 
 export const Dashboard = (): React.ReactElement => {
-    const { loginStatus, loggedInUser } = useAuth()
+    const { loginStatus, loggedInUser, sessionIsExpiring } = useAuth()
     const location = useLocation()
 
     const { loading, data, error } = useIndexHealthPlanPackagesQuery()
@@ -136,6 +136,7 @@ export const Dashboard = (): React.ReactElement => {
 
     return (
         <>
+            {sessionIsExpiring ? <p>it's expiring!</p> : null}
             <div id="dashboard-page" className={styles.wrapper}>
                 <GridContainer
                     className={styles.container}

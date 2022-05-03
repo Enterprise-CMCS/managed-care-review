@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router'
 import { Route, Switch } from 'react-router-dom'
+import { extendSession } from '../../pages/Auth/cognitoAuth'
 import { assertNever, AuthModeType } from '../../common-code/config'
+import { dayjs } from '../../common-code/dateHelpers/dayjs'
 import {
     getRouteName,
     PageTitlesRecord,
@@ -26,6 +28,14 @@ import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
 
 const LOGIN_REDIRECT_STORAGE_KEY = 'LOGIN_REDIRECT'
 const LocalStorage = window.localStorage
+
+const refreshSession = async (): Promise<void> => {
+    try {
+        await extendSession()
+    } catch (e) {
+        console.log('Error refreshing session: ', e)
+    }
+}
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -115,12 +125,31 @@ export const AppRoutes = ({
 }: {
     authMode: AuthModeType
 }): React.ReactElement => {
-    const { loggedInUser } = useAuth()
+    const { loggedInUser, sessionIsExpiring, updateSessionExpiry } = useAuth()
     const { pathname } = useLocation()
     const history = useHistory()
     const route = getRouteName(pathname)
     const { updateHeading } = usePage()
     const [initialPath] = useState(pathname) // this gets written on mount, so we don't call the effect on every path change
+    // when we load, set the logout timer for 30 minutes in the future and refresh the session
+    const sessionExpiration = dayjs(Date.now()).add(2, 'minute')
+    localStorage.setItem('LOGOUT_TIMER', sessionExpiration.toISOString())
+    void refreshSession()
+    // check for session about to expire
+    setInterval(() => {
+        // is the current time within 2 minutes of the session expiration time?
+        const isSessionExpiring = dayjs(Date.now()).isAfter(
+            dayjs(sessionExpiration).subtract(1, 'minute')
+        )
+        if (
+            isSessionExpiring &&
+            isSessionExpiring !== sessionIsExpiring.current
+        ) {
+            updateSessionExpiry(isSessionExpiring)
+
+            console.log('Your session is about to expire. Please log in again.')
+        }
+    }, 1000 * 30)
 
     // This effect handles our initial redirect on login
     // This way, if you get a link to something and aren't logged in, you get
