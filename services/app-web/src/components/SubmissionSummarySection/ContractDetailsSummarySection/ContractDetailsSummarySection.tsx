@@ -214,32 +214,7 @@ export const ContractDetailsSummarySection = ({
                                         otherReasons: itemsAmendedOtherList,
                                     })}
                                 />
-                                <DataDetail
-                                    id="covidRelated"
-                                    label="Is this contract action related to the COVID-19 public health emergency"
-                                    data={
-                                        submission.contractAmendmentInfo
-                                            .relatedToCovid19
-                                            ? 'Yes'
-                                            : 'No'
-                                    }
-                                />
                             </DoubleColumnGrid>
-                            {submission.contractAmendmentInfo
-                                .relatedToCovid19 && (
-                                <DoubleColumnGrid>
-                                    <DataDetail
-                                        id="vaccineRelated"
-                                        label="Is this related to coverage and reimbursement for vaccine administration?"
-                                        data={
-                                            submission.contractAmendmentInfo
-                                                .relatedToVaccination
-                                                ? 'Yes'
-                                                : 'No'
-                                        }
-                                    />
-                                </DoubleColumnGrid>
-                            )}
                         </>
                     )}
             </dl>

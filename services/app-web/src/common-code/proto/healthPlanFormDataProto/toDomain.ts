@@ -226,8 +226,6 @@ function parseContractAmendment(
             cleanAmendment.capitationRatesAmendedInfo
         ),
         otherItemBeingAmended: cleanAmendment.otherAmendableItem,
-        relatedToCovid19: cleanAmendment.relatedToCovid_19,
-        relatedToVaccination: cleanAmendment.relatedToVaccination,
     }
 }
 
