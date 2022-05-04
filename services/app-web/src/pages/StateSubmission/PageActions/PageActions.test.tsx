@@ -16,7 +16,7 @@ describe('PageActions', () => {
             expect(buttons).toHaveLength(3)
 
             buttons.forEach((button: HTMLElement) =>
-                expect(button).not.toBeDisabled()
+                expect(button).not.toHaveAttribute('aria-disabled')
             )
             expect(
                 screen.getByRole('button', { name: 'Save as draft' })
@@ -76,7 +76,7 @@ describe('PageActions', () => {
                     continueOnClick={continueAction}
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={jest.fn()}
-                    actionInProgress
+                    disableContinue
                 />
             )
 
@@ -84,6 +84,7 @@ describe('PageActions', () => {
             expect(continueAction).not.toHaveBeenCalled()
         })
     })
+
     describe('page variant specific behavior', () => {
         it('displays Cancel and Continue buttons for the first page', () => {
             render(
@@ -97,7 +98,7 @@ describe('PageActions', () => {
             const buttons = screen.getAllByRole('button')
             expect(buttons).toHaveLength(2)
             buttons.forEach((button: HTMLElement) =>
-                expect(button).not.toBeDisabled()
+                expect(button).not.toHaveAttribute('aria-disabled')
             )
 
             expect(
@@ -119,7 +120,7 @@ describe('PageActions', () => {
             const buttons = screen.getAllByRole('button')
             expect(buttons).toHaveLength(3)
             buttons.forEach((button: HTMLElement) =>
-                expect(button).not.toBeDisabled()
+                expect(button).not.toHaveAttribute('aria-disabled')
             )
             expect(
                 screen.getByRole('button', { name: 'Save as draft' })
@@ -161,6 +162,7 @@ describe('PageActions', () => {
             userEvent.click(screen.getByRole('button', { name: 'Submit' }))
             expect(continueAction).toHaveBeenCalled()
         })
+
         it('disables submit action when expected on last page', () => {
             const continueAction = jest.fn()
             render(
@@ -169,7 +171,7 @@ describe('PageActions', () => {
                     continueOnClick={continueAction}
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={jest.fn()}
-                    actionInProgress
+                    disableContinue
                 />
             )
 
@@ -249,27 +251,28 @@ describe('PageActions', () => {
     })
 
     describe('when async request is in progress', () => {
-        it('does not call click handlers on buttons', () => {
-            const backAction = jest.fn()
+        it('disables all buttons', () => {
             const continueAction = jest.fn()
             const saveAsDraftAction = jest.fn()
+            const backAction = jest.fn()
+
             render(
                 <PageActions
                     continueOnClick={continueAction}
-                    saveAsDraftOnClick={saveAsDraftAction}
-                    backOnClick={backAction}
+                    saveAsDraftOnClick={jest.fn()}
+                    backOnClick={jest.fn()}
                     actionInProgress
                 />
             )
 
+            userEvent.click(screen.getByTestId('page-actions-right-primary'))
+            expect(continueAction).not.toHaveBeenCalled()
+
+            userEvent.click(screen.getByTestId('page-actions-right-primary'))
+            expect(saveAsDraftAction).not.toHaveBeenCalled()
+
             userEvent.click(screen.getByRole('button', { name: 'Back' }))
             expect(backAction).not.toHaveBeenCalled()
-            userEvent.click(screen.getByRole('button', { name: 'Continue' }))
-            expect(continueAction).not.toHaveBeenCalled()
-            userEvent.click(
-                screen.getByRole('button', { name: 'Save as draft' })
-            )
-            expect(saveAsDraftAction).not.toHaveBeenCalled()
         })
     })
 })

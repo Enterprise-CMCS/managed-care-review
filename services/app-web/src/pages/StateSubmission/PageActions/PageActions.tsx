@@ -1,8 +1,5 @@
 import React from 'react'
-import classNames from 'classnames'
 import { ButtonGroup } from '@trussworks/react-uswds'
-
-import styles from './PageActions.module.scss'
 
 import { PageActionsContainer } from './PageActionsContainer'
 import { ActionButton } from '../../../components/ActionButton'
@@ -28,9 +25,6 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
         actionInProgress = false,
         pageVariant,
     } = props
-    const classes = classNames({
-        [`${styles.disabled}`]: actionInProgress,
-    })
     const isFirstPage = pageVariant === 'FIRST'
     const isLastPage = pageVariant === 'LAST'
     const isFirstPageEditing = pageVariant === 'EDIT_FIRST'
@@ -41,7 +35,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                 variant="linkStyle"
                 disabled={actionInProgress}
                 onClick={actionInProgress ? undefined : saveAsDraftOnClick}
-                className={classes}
+                data-testid="page-actions-left-primary"
             >
                 Save as draft
             </ActionButton>
@@ -53,9 +47,9 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                 <ActionButton
                     type="button"
                     variant="outline"
+                    data-testid="page-actions-left-secondary"
                     disabled={actionInProgress}
                     onClick={actionInProgress ? undefined : backOnClick}
-                    className={classes}
                 >
                     {!isFirstPage && !isFirstPageEditing ? 'Back' : 'Cancel'}
                 </ActionButton>
@@ -63,9 +57,14 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                 <ActionButton
                     type="submit"
                     variant="success"
+                    data-testid="page-actions-right-primary"
                     disabled={disableContinue}
-                    onClick={actionInProgress ? undefined : continueOnClick}
-                    className={classes}
+                    onClick={
+                        actionInProgress || disableContinue
+                            ? undefined
+                            : continueOnClick
+                    }
+                    animationTimeout={1000}
                     loading={actionInProgress}
                 >
                     {!isLastPage ? 'Continue' : 'Submit'}
