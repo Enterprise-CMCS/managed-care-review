@@ -5,6 +5,7 @@ import { logoutLocalUser } from '../localAuth'
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
 
 import { useLDClient } from 'launchdarkly-react-client-sdk'
+import * as ld from 'launchdarkly-js-client-sdk'
 import sha256 from 'crypto-js/sha256'
 
 type LogoutFn = () => Promise<null>
@@ -51,19 +52,17 @@ function AuthProvider({
     async function setLDUser(user: UserType) {
         const email = user === undefined ? 'anonymous' : user.email
         const key = sha256(email).toString()
-        const ldUser = {
+        const ldUser: ld.LDUser = {
             key: key,
             name: user.name,
             email: user.email,
         }
 
         const previousUser = client?.getUser() || {}
+        await client?.identify(ldUser)
         client?.alias(ldUser, previousUser)
         console.log('previous user:')
         console.log(previousUser)
-        await client?.identify(ldUser, key, function () {
-            console.log("New user's flags available")
-        })
         console.log('after identify:')
         console.log(client?.getUser())
     }
@@ -96,10 +95,11 @@ function AuthProvider({
             }
         } else if (data?.fetchCurrentUser) {
             if (!isAuthenticated) {
-                setLoggedInUser(data.fetchCurrentUser)
-                setLDUser(data.fetchCurrentUser).catch((err) => {
+                const currentUser = data.fetchCurrentUser
+                setLDUser(currentUser).catch((err) => {
                     console.log(err)
                 })
+                setLoggedInUser(currentUser)
                 setLoginStatus('LOGGED_IN')
             }
         }
