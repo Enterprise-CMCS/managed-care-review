@@ -61,7 +61,9 @@ function AuthProvider({
         client?.alias(ldUser, previousUser)
         console.log('previous user:')
         console.log(previousUser)
-        await client?.identify(ldUser)
+        await client?.identify(ldUser, key, function () {
+            console.log("New user's flags available")
+        })
         console.log('after identify:')
         console.log(client?.getUser())
     }
