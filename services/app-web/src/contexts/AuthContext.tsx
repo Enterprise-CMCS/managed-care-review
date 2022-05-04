@@ -61,10 +61,6 @@ function AuthProvider({
         const previousUser = client?.getUser() || {}
         await client?.identify(ldUser)
         client?.alias(ldUser, previousUser)
-        console.log('previous user:')
-        console.log(previousUser)
-        console.log('after identify:')
-        console.log(client?.getUser())
     }
 
     const computedLoginStatus: LoginStatusType = loading
