@@ -1,5 +1,4 @@
 import { screen, waitFor } from '@testing-library/react'
-import { within } from '@testing-library/react'
 import { Route } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { Document } from '../../gen/gqlClient'
@@ -105,8 +104,6 @@ describe('StateSubmissionForm', () => {
                     capitationRatesAmendedInfo: {
                         reason: 'MIDYEAR',
                     },
-                    relatedToCovid19: true,
-                    relatedToVaccination: false,
                 },
             })
 
@@ -144,30 +141,6 @@ describe('StateSubmissionForm', () => {
                 expect(
                     screen.getByLabelText('Other item description')
                 ).toHaveValue('foobar')
-
-                // narrow our search for the "Yes" label inside the covid question
-                const covid19Question = screen.getByText(
-                    'Is this contract action related to the COVID-19 public health emergency?'
-                ).parentElement
-
-                if (covid19Question === null) {
-                    throw new Error('this element should always have a parent')
-                }
-
-                expect(
-                    within(covid19Question).getByLabelText('Yes')
-                ).toBeChecked()
-
-                // narrow our search for the "Yes" label inside the vax question
-                const vaxQuestion = screen.getByText(
-                    'Is this related to coverage and reimbursement for vaccine administration?'
-                ).parentElement
-
-                if (vaxQuestion === null) {
-                    throw new Error('this element should always have a parent')
-                }
-
-                expect(within(vaxQuestion).getByLabelText('No')).toBeChecked()
             })
         })
 

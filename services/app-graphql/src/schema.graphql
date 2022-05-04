@@ -225,16 +225,12 @@ type ContractAmendmentInfo {
     itemsBeingAmended: [String!]!
     otherItemBeingAmended: String
     capitationRatesAmendedInfo: CapitationRatesAmendedInfo
-    relatedToCovid19: Boolean
-    relatedToVaccination: Boolean
 }
 
 input ContractAmendmentInfoInput {
     itemsBeingAmended: [String!]!
     otherItemBeingAmended: String
     capitationRatesAmendedInfo: CapitationRatesAmendedInfoInput
-    relatedToCovid19: Boolean
-    relatedToVaccination: Boolean
 }
 
 enum CapitationRatesAmendmentReason {

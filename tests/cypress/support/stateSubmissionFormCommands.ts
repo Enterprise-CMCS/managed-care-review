@@ -80,7 +80,6 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     cy.findByLabelText('1932(a) State Plan Authority').safeClick()
     cy.findByLabelText('Benefits provided').safeClick()
     cy.findByLabelText('Financial incentives').safeClick()
-    cy.findByText('No').click()
     cy.findByTestId('file-input-input').attachFile(
         'documents/trussel-guide.pdf'
     )

@@ -41,8 +41,6 @@ const contractAmendmentInfoSchema = z.object({
             otherReason: z.string().optional(),
         })
         .optional(),
-    relatedToCovid19: z.boolean().optional(),
-    relatedToVaccination: z.boolean().optional(),
 })
 
 const rateAmendmentInfoSchema = z.object({

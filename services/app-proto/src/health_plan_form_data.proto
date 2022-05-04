@@ -82,8 +82,6 @@ message ContractInfo {
     repeated AmendedItem amendable_items = 1;
     optional string other_amendable_item = 2;
     optional CapitationRatesAmendedInfo capitation_rates_amended_info = 3;
-    optional bool related_to_covid_19 = 4;
-    optional bool related_to_vaccination = 5;
   }
 }
 
