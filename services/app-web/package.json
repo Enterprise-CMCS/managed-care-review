@@ -110,7 +110,7 @@
         "@storybook/react": "^6.5.0-alpha.61",
         "@testing-library/cypress": "^8.0.1",
         "@testing-library/jest-dom": "^5.11.4",
-        "@testing-library/react": "^12.1.2",
+        "@testing-library/react": "^13.2.0",
         "@testing-library/user-event": "^13.5.0",
         "@types/classnames": "^2.2.11",
         "@types/jest": "^27.0.1",
