@@ -33,6 +33,11 @@ export const ActionButton = ({
     const isLoading = loading
     const isSuccess = variant === 'success'
 
+    if (isDisabled && isLoading)
+        console.error(
+            'Incompatible props on ActionButton are being used. Button should not be both loading and disabled at the same time.'
+        )
+
     useEffect(() => {
         if (loading) {
             const timeout = setTimeout(() => {
@@ -61,15 +66,13 @@ export const ActionButton = ({
         unstyled: isLinkStyled,
     }
 
-    const ariaLabel =
-        inheritedProps['aria-label'] && isDisabled
-            ? `${inheritedProps['aria-label']} (disabled)`
-            : null
-
     const accessibilityProps = {
-        ariaDisabled: isDisabled, // prefer aria attributes to HTML disabled attribute
+        'aria-disabled': isDisabled, // prefer aria attributes to HTML disabled attribute
         disabled: false,
-        ariaLabel: ariaLabel,
+        'aria-label':
+            !inheritedProps['aria-label'] && isLoading
+                ? 'Loading'
+                : inheritedProps['aria-label'],
     }
 
     return (
