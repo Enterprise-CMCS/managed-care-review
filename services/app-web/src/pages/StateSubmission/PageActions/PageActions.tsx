@@ -57,7 +57,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
 
                 <ActionButton
                     type="submit"
-                    variant="success"
+                    variant="default"
                     data-testid="page-actions-right-primary"
                     disabled={disableContinue}
                     onClick={
