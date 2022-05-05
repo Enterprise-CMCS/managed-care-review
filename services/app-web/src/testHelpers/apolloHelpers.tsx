@@ -179,7 +179,6 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
                 reason: 'OTHER',
                 otherReason: 'Test reason',
             },
-            relatedToCovid19: true,
         },
         managedCareEntities: ['MCO'],
         federalAuthorities: ['STATE_PLAN'],

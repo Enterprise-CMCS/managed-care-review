@@ -25,13 +25,16 @@ import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { ActionButton } from '../../../components/ActionButton'
+import { DocumentDateLookupTable } from '../../SubmissionSummary/SubmissionSummary'
 
 export const ReviewSubmit = ({
     draftSubmission,
+    documentDateLookupTable,
     unlocked,
     submissionName,
 }: {
     draftSubmission: UnlockedHealthPlanFormDataType
+    documentDateLookupTable?: DocumentDateLookupTable
     unlocked: boolean
     submissionName: string
 }): React.ReactElement => {
@@ -160,6 +163,7 @@ export const ReviewSubmit = ({
                 submission={draftSubmission}
                 navigateTo="contract-details"
                 submissionName={submissionName}
+                documentDateLookupTable={documentDateLookupTable}
             />
 
             {isContractActionAndRateCertification && (
@@ -167,6 +171,7 @@ export const ReviewSubmit = ({
                     submission={draftSubmission}
                     navigateTo="rate-details"
                     submissionName={submissionName}
+                    documentDateLookupTable={documentDateLookupTable}
                 />
             )}
 

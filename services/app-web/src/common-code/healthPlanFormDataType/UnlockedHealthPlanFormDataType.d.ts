@@ -23,8 +23,6 @@ type ContractAmendmentInfo = {
         reason?: CapitationRatesAmendedReason
         otherReason?: string
     }
-    relatedToCovid19?: boolean
-    relatedToVaccination?: boolean
 }
 
 type RateAmendmentInfo = {

@@ -167,8 +167,6 @@ const toProtoBuffer = (
             contractAmendmentInfo: contractAmendmentInfo
                 ? {
                       ...contractAmendmentInfo,
-                      relatedToCovid_19:
-                          contractAmendmentInfo?.relatedToCovid19,
                       otherAmendableItem:
                           contractAmendmentInfo?.otherItemBeingAmended,
                       amendableItems: domainEnumArrayToProto(
