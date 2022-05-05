@@ -158,6 +158,7 @@ export const Contacts = ({
     draftSubmission,
     showValidations = false,
     updateDraft,
+    ...restProps
 }: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const [focusNewContact, setFocusNewContact] = React.useState(false)

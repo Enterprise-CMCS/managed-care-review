@@ -191,7 +191,7 @@ describe('PageActions', () => {
             const buttons = screen.getAllByRole('button')
             expect(buttons).toHaveLength(3)
             buttons.forEach((button: HTMLElement) =>
-                expect(button).not.toBeDisabled()
+                expect(button).not.toHaveAttribute('aria-disabled')
             )
 
             expect(

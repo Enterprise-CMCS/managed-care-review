@@ -21,7 +21,6 @@ export const Documents = ({
     draftSubmission,
     previousDocuments,
     updateDraft,
-    updateDraftLoading,
 }: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(false)
     const isContractOnly = draftSubmission.submissionType === 'CONTRACT_ONLY'
@@ -33,6 +32,8 @@ export const Documents = ({
     const hasValidFiles = fileItems.every(
         (item) => item.status === 'UPLOAD_COMPLETE'
     )
+    const [isSubmitting, setIsSubmitting] = useState(false) // mock same behavior as formik isSubmitting
+
     const hasMissingCategories =
         /* fileItems must have some document category.  a contract-only submission
        must have "CONTRACT_RELATED" as the document category. */
@@ -117,6 +118,7 @@ export const Documents = ({
     // If there is a submission error, ensure form is in validation state
     const onUpdateDraftSubmissionError = () => {
         if (!shouldValidate) setShouldValidate(true)
+        setIsSubmitting(false)
     }
 
     const onFileItemsUpdate = async ({
@@ -227,7 +229,7 @@ export const Documents = ({
             )
 
             draftSubmission.documents = documents
-
+            setIsSubmitting(true)
             try {
                 const updatedSubmission = await updateDraft(draftSubmission)
                 if (updatedSubmission instanceof Error) {
@@ -243,7 +245,7 @@ export const Documents = ({
                 onUpdateDraftSubmissionError()
             }
         }
-
+    console.log('DOCUMENTS', showFileUploadError && fileItems.length > 0)
     return (
         <>
             <UswdsForm
@@ -323,7 +325,7 @@ export const Documents = ({
                     disableContinue={
                         showFileUploadError && fileItems.length > 0
                     }
-                    actionInProgress={updateDraftLoading}
+                    actionInProgress={isSubmitting}
                     continueOnClick={async (e) => {
                         await handleFormSubmit({
                             shouldValidateDocuments: true,

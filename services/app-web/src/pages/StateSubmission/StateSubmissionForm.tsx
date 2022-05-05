@@ -98,15 +98,13 @@ type FormDataError =
     | 'WRONG_SUBMISSION_STATUS'
 
 /* 
-    Prep work for refactor of form pages
-    We have several instances of shared states across pages.
-    This could eventually be pulled out into a HealthPlanFormPageContext or HOC
+    Prep work for refactor of form pages.  This should be pulled out into a HealthPlanFormPageContext or HOC.
+    We have several instances of shared state across pages. 
 */
 
 export type HealthPlanFormPageProps = {
     draftSubmission: UnlockedHealthPlanFormDataType
     showValidations?: boolean
-    updateDraftLoading?: boolean
     previousDocuments: string[]
     updateDraft: (
         input: UnlockedHealthPlanFormDataType
@@ -147,10 +145,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
     })
 
     const submissionAndRevisions = fetchData?.fetchHealthPlanPackage?.pkg
-    const [
-        updateFormData,
-        { error: updateFormDataError, loading: updateDraftLoading },
-    ] = useUpdateHealthPlanFormDataMutation()
+    const [updateFormData, { error: updateFormDataError }] =
+        useUpdateHealthPlanFormDataMutation()
 
     // When the new API is done, we'll call the new API here
     const updateDraftHealthPlanPackage = async (
@@ -347,7 +343,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         <Documents
                             draftSubmission={formDataFromLatestRevision}
                             updateDraft={updateDraftHealthPlanPackage}
-                            updateDraftLoading={updateDraftLoading}
                             previousDocuments={previousDocuments}
                         />
                     </Route>

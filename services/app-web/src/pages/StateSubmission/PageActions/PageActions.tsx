@@ -41,6 +41,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
             </ActionButton>
         )
 
+    console.log('HERE', actionInProgress, disableContinue)
     return (
         <PageActionsContainer left={leftElement}>
             <ButtonGroup type="default">

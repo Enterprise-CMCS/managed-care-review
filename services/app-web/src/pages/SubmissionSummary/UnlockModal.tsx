@@ -70,7 +70,7 @@ export const UnlockModal = ({
         initialValues: modalFormInitialValues,
         validationSchema: Yup.object().shape({
             unlockReason: Yup.string().defined(
-                'Reason for unlocking submission is required'
+                'You must provide a reason for unlocking this submission'
             ),
         }),
         onSubmit: (values) => onModalSubmit(values),
@@ -87,7 +87,7 @@ export const UnlockModal = ({
                 fieldElement.focus()
                 setFocusErrorsInModal(false)
             } else {
-                console.log('Attempting to focus element that does not exist')
+                console.warn('Attempting to focus element that does not exist')
             }
         }
     }, [focusErrorsInModal, formik.errors])
@@ -122,9 +122,7 @@ export const UnlockModal = ({
             }
             modalRef.current?.toggleModal(undefined, false)
         } else {
-            const unlockedSub: HealthPlanPackage = result
             modalRef.current?.toggleModal(undefined, false)
-            console.log('Submission Unlocked', unlockedSub)
         }
     }
 
