@@ -14,7 +14,12 @@ import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
 
-import { Document, RateType, HealthPlanPackage } from '../../../gen/gqlClient'
+import {
+    Document,
+    RateType,
+    HealthPlanPackage,
+    RateCapitationType,
+} from '../../../gen/gqlClient'
 
 import {
     FileUpload,
@@ -56,6 +61,7 @@ const RateDatesErrorMessage = ({
 )
 export interface RateDetailsFormValues {
     rateType: RateType | undefined
+    rateCapitationType: RateCapitationType | undefined
     rateDateStart: string
     rateDateEnd: string
     rateDateCertified: string
@@ -192,6 +198,7 @@ export const RateDetails = ({
 
     const rateDetailsInitialValues: RateDetailsFormValues = {
         rateType: draftSubmission?.rateType ?? undefined,
+        rateCapitationType: draftSubmission?.rateCapitationType ?? undefined,
         rateDateStart:
             (draftSubmission && formatForForm(draftSubmission.rateDateStart)) ??
             '',
@@ -272,6 +279,7 @@ export const RateDetails = ({
 
         // const updatedDraft = updatesFromSubmission(draftSubmission)
         draftSubmission.rateType = values.rateType
+        draftSubmission.rateCapitationType = values.rateCapitationType
         draftSubmission.rateDateStart = formatFormDateForDomain(
             values.rateDateStart
         )
@@ -438,6 +446,68 @@ export const RateDetails = ({
                                             value={'AMENDMENT'}
                                             checked={
                                                 values.rateType === 'AMENDMENT'
+                                            }
+                                        />
+                                    </Fieldset>
+                                </FormGroup>
+
+                                <FormGroup
+                                    error={showFieldErrors(
+                                        errors.rateCapitationType
+                                    )}
+                                >
+                                    <Fieldset
+                                        className={styles.radioGroup}
+                                        legend={
+                                            <div
+                                                className={
+                                                    styles.capitationLegend
+                                                }
+                                            >
+                                                <p>
+                                                    Does the actuary certify
+                                                    capitation rates specific to
+                                                    each rate cell or a rate
+                                                    range?
+                                                </p>
+                                                <p
+                                                    className={
+                                                        styles.legendSubHeader
+                                                    }
+                                                >
+                                                    See 42 CFR §§ 438.4(b) and
+                                                    438.4(c)
+                                                </p>
+                                            </div>
+                                        }
+                                        role="radiogroup"
+                                        aria-required
+                                    >
+                                        {showFieldErrors(
+                                            errors.rateCapitationType
+                                        ) && (
+                                            <PoliteErrorMessage>
+                                                {errors.rateCapitationType}
+                                            </PoliteErrorMessage>
+                                        )}
+                                        <FieldRadio
+                                            id="rateCell"
+                                            name="rateCapitationType"
+                                            label="Certification of capitation rates specific to each rate cell"
+                                            value={'RATE_CELL'}
+                                            checked={
+                                                values.rateCapitationType ===
+                                                'RATE_CELL'
+                                            }
+                                        />
+                                        <FieldRadio
+                                            id="rateRange"
+                                            name="rateCapitationType"
+                                            label="Certification of rate ranges of capitation rates per rate cell"
+                                            value={'RATE_RANGE'}
+                                            checked={
+                                                values.rateCapitationType ===
+                                                'RATE_RANGE'
                                             }
                                         />
                                     </Fieldset>
