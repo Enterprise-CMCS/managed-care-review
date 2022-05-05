@@ -153,13 +153,15 @@ const flattenErrors = (
 
     return flattened
 }
-
 export const Contacts = ({
     draftSubmission,
     showValidations = false,
     updateDraft,
-    ...restProps
-}: HealthPlanFormPageProps): React.ReactElement => {
+}: {
+    draftSubmission: HealthPlanFormPageProps['draftSubmission']
+    showValidations?: HealthPlanFormPageProps['showValidations']
+    updateDraft: HealthPlanFormPageProps['updateDraft']
+}): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const [focusNewContact, setFocusNewContact] = React.useState(false)
     const [focusNewActuaryContact, setFocusNewActuaryContact] =

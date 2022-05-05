@@ -115,7 +115,7 @@ export const UnlockModal = ({
             console.error('ERROR: got a GraphQL error response', result)
             if (result[0].extensions.code === 'BAD_USER_INPUT') {
                 setModalAlert(
-                    'Submission is already unlocked. Please refresh and try again.'
+                    'Error attempting to unlock. Submission may be already unlocked. Please refresh and try again.'
                 )
             } else {
                 setModalAlert('Error attempting to unlock. Please try again.')
