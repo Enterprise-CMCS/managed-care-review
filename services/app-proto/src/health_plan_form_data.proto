@@ -156,6 +156,7 @@ message RateInfo {
   repeated ActuaryContact actuary_contacts = 6;
   optional ActuaryCommunicationType actuary_communication_preference = 7;
   repeated Document rate_documents = 8;
+  optional RateCapitationType rate_capitation_type = 9;
   
   optional RateAmendmentInfo rate_amendment_info = 50;
 
@@ -175,6 +176,12 @@ enum RateType {
   RATE_TYPE_UNSPECIFIED = 0;
   RATE_TYPE_NEW = 1;
   RATE_TYPE_AMENDMENT = 2;
+}
+
+enum RateCapitationType {
+  RATE_CAPITATION_TYPE_UNSPECIFIED = 0;
+  RATE_CAPITATION_TYPE_RATE_CELL = 1;
+  RATE_CAPITATION_TYPE_RATE_RANGE = 2;
 }
 
 enum ActuaryCommunicationType {
