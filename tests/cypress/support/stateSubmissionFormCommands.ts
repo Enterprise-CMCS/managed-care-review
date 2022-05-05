@@ -95,6 +95,7 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     // Must be a contract and rates submission
     cy.findByText('New rate certification').click()
     cy.wait(2000)
+    cy.findByText('Certification of capitation rates specific to each rate cell').click()
     cy.findByLabelText('Start date').type('02/29/2024')
     cy.findByLabelText('End date').type('02/28/2025')
     cy.findByLabelText('Date certified').type('03/01/2024')
@@ -112,6 +113,7 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
     // Must be a contract and rates submission
     cy.findByText('Amendment to prior rate certification').click()
     cy.wait(2000)
+    cy.findByText('Certification of capitation rates specific to each rate cell').click()
     cy.findAllByLabelText('Start date').eq(0).type('02/29/2024')
     cy.findAllByLabelText('End date').eq(0).type('02/28/2025')
     cy.findAllByLabelText('Start date').eq(1).type('03/01/2024')
