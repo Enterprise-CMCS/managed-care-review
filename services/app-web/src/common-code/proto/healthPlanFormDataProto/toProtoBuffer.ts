@@ -193,6 +193,10 @@ const toProtoBuffer = (
                     domainData.rateType,
                     mcreviewproto.RateType
                 ),
+                rateCapitationType: domainEnumToProto(
+                    domainData.rateCapitationType,
+                    mcreviewproto.RateCapitationType
+                ),
                 rateDateStart: domainDateToProtoDate(domainData.rateDateStart),
                 rateDateEnd: domainDateToProtoDate(domainData.rateDateEnd),
                 rateDateCertified: domainDateToProtoDate(
