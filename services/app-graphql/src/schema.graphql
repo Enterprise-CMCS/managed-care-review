@@ -269,6 +269,11 @@ enum RateType {
     AMENDMENT
 }
 
+enum RateCapitationType {
+    RATE_CELL
+    RATE_RANGE
+}
+
 enum FederalAuthority {
     STATE_PLAN
     WAIVER_1915B
@@ -330,6 +335,7 @@ type StateSubmission {
     managedCareEntities: [String!]!
     federalAuthorities: [FederalAuthority!]!
     rateType: RateType
+    rateCapitationType: RateCapitationType
     rateDocuments: [Document!]!
     rateDateStart: Date
     rateDateEnd: Date
@@ -356,6 +362,7 @@ input DraftSubmissionUpdates {
     federalAuthorities: [FederalAuthority!]!
     contractAmendmentInfo: ContractAmendmentInfoInput
     rateType: RateType
+    rateCapitationType: RateCapitationType
     rateDocuments: [DocumentInput!]!
     rateDateStart: Date
     rateDateEnd: Date

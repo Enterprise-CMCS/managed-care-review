@@ -6,6 +6,9 @@ Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 const RateDetailsFormSchema = Yup.object().shape({
     rateType: Yup.string().defined('You must choose a rate certification type'),
+    rateCapitationType: Yup.string().defined(
+        "You must select whether you're certifying rates or rate ranges"
+    ),
     rateDateStart: Yup.date().when('rateType', (contractType) => {
         if (contractType) {
             return (

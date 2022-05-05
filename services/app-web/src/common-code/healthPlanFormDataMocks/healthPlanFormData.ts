@@ -223,6 +223,7 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
         managedCareEntities: ['PIHP'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateType: 'AMENDMENT',
+        rateCapitationType: 'RATE_CELL',
         rateDateStart: new Date(Date.UTC(2021, 4, 22)),
         rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
         rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
@@ -318,6 +319,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
         managedCareEntities: ['PIHP'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateType: 'AMENDMENT',
+        rateCapitationType: 'RATE_RANGE',
         rateDateStart: new Date(Date.UTC(2021, 4, 22)),
         rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
         rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
@@ -395,6 +397,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
         managedCareEntities: ['PIHP', 'PCCM'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateType: 'AMENDMENT',
+        rateCapitationType: 'RATE_CELL',
         rateDocuments: [
             {
                 s3URL: 's3://bucketname/key/foo.png',

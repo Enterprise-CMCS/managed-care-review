@@ -117,6 +117,16 @@
     }
 }
 
+.capitationLegend {
+    p {
+        margin-top: 0;
+    }
+}
+
+.legendSubHeader {
+    font-weight: normal;
+}
+
 // react-select draws the chips in two parts, so we round the outer and square in the inner corners
 .multiSelect {
     padding-top: 12px;

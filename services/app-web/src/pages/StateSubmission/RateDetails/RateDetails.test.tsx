@@ -92,6 +92,16 @@ describe('RateDetails', () => {
                 name: 'Amendment to prior rate certification',
             })
         ).not.toBeChecked()
+        expect(
+            screen.getByRole('radio', {
+                name: 'Certification of capitation rates specific to each rate cell',
+            })
+        ).not.toBeChecked()
+        expect(
+            screen.getByRole('radio', {
+                name: 'Certification of rate ranges of capitation rates per rate cell',
+            })
+        ).not.toBeChecked()
         expect(screen.getByTestId('file-input')).toBeInTheDocument()
         expect(
             within(
@@ -125,6 +135,33 @@ describe('RateDetails', () => {
         await waitFor(() => {
             expect(
                 screen.getAllByText('You must choose a rate certification type')
+            ).toHaveLength(2)
+            expect(continueButton).toBeDisabled()
+        })
+    })
+
+    it('cannot continue without selecting rate capitation type', async () => {
+        const mockUpdateDraftFn = jest.fn()
+
+        renderWithProviders(
+            <RateDetails
+                draftSubmission={emptyRateDetailsDraft}
+                updateDraft={mockUpdateDraftFn}
+                previousDocuments={[]}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+        const continueButton = screen.getByRole('button', { name: 'Continue' })
+        await continueButton.click()
+        await waitFor(() => {
+            expect(
+                screen.getAllByText(
+                    "You must select whether you're certifying rates or rate ranges"
+                )
             ).toHaveLength(2)
             expect(continueButton).toBeDisabled()
         })
@@ -174,6 +211,16 @@ describe('RateDetails', () => {
 
         expect(screen.getByText('Rate certification type')).toBeInTheDocument()
         screen.getByLabelText('New rate certification').click()
+        expect(
+            screen.getByText(
+                'Does the actuary certify capitation rates specific to each rate cell or a rate range?'
+            )
+        ).toBeInTheDocument()
+        screen
+            .getByLabelText(
+                'Certification of capitation rates specific to each rate cell'
+            )
+            .click()
         const input = screen.getByLabelText('Upload rate certification')
         userEvent.upload(input, [TEST_DOC_FILE])
 
