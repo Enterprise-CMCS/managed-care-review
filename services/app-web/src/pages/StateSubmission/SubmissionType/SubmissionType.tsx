@@ -411,7 +411,13 @@ export const SubmissionType = ({
                                 setShouldValidate(true)
                                 setFocusErrorSummaryHeading(true)
                             }}
-                            saveAsDraftOnClick={() => setShouldValidate(true)}
+                            saveAsDraftOnClick={async () => {
+                                await handleFormSubmit(
+                                    values,
+                                    { setSubmitting },
+                                    '/dashboard'
+                                )
+                            }}
                             actionInProgress={isSubmitting}
                         />
                     </UswdsForm>
