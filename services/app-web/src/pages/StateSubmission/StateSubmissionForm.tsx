@@ -99,6 +99,19 @@ type FormDataError =
     | 'MALFORMATTED_DATA'
     | 'WRONG_SUBMISSION_STATUS'
 
+/* 
+    Prep work for refactor of form pages.  This should be pulled out into a HealthPlanFormPageContext or HOC.
+    We have several instances of shared state across pages. 
+*/
+
+export type HealthPlanFormPageProps = {
+    draftSubmission: UnlockedHealthPlanFormDataType
+    showValidations?: boolean
+    previousDocuments: string[]
+    updateDraft: (
+        input: UnlockedHealthPlanFormDataType
+    ) => Promise<HealthPlanPackage | Error>
+}
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
@@ -128,7 +141,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     // Set up graphql calls
     const {
         data: fetchData,
-        loading,
+        loading: fetchLoading,
         error: fetchError,
     } = useFetchHealthPlanPackageQuery({
         variables: {
@@ -244,14 +257,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
         }
     }, [submissionAndRevisions])
 
-    if (loading) {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
-    }
-
     if (updateFormDataError && !showPageErrorMessage) {
         // This triggers if Apollo sets the error from our useQuery invocation
         // we should already be setting this in our try {} block in the actual update handler, I think
@@ -286,14 +291,17 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return <GenericErrorPage />
     }
 
-    if (formDataError === 'NOT_FOUND' || !formDataFromLatestRevision) {
-        return <Error404 />
-    }
-
     if (formDataError === 'WRONG_SUBMISSION_STATUS') {
         return <ErrorInvalidSubmissionStatus />
     }
-
+    // order matters, this should be last to prevent 404 flicker
+    if (fetchLoading || !formDataFromLatestRevision) {
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
+    }
     return (
         <>
             <div className={styles.stepIndicator}>

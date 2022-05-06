@@ -235,7 +235,9 @@ Cypress.Commands.add(
             aliasMutation(req, 'createHealthPlanPackage')
             aliasMutation(req, 'updateHealthPlanFormData')
         })
-
+        cy.findByRole('button', {
+            name: buttonsWithLabels[buttonKey],
+        }).should('not.have.attr', 'aria-disabled')
         cy.findByRole('button', {
             name: buttonsWithLabels[buttonKey],
         }).safeClick()
