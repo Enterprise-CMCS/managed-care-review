@@ -21,7 +21,6 @@ describe('Contacts', () => {
             <Contacts
                 draftSubmission={mockDraft()}
                 updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -40,11 +39,7 @@ describe('Contacts', () => {
 
     it('displays correct form guidance for contract only submission', async () => {
         renderWithProviders(
-            <Contacts
-                draftSubmission={mockDraft()}
-                updateDraft={jest.fn()}
-                previousDocuments={[]}
-            />,
+            <Contacts draftSubmission={mockDraft()} updateDraft={jest.fn()} />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -62,7 +57,6 @@ describe('Contacts', () => {
             <Contacts
                 draftSubmission={mockContactAndRatesDraft()}
                 updateDraft={jest.fn()}
-                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -83,7 +77,6 @@ describe('Contacts', () => {
             <Contacts
                 draftSubmission={mockCompleteDraft()}
                 updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -116,7 +109,6 @@ describe('Contacts', () => {
             <Contacts
                 draftSubmission={emptyContactsDraft}
                 updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
             />,
             {
                 apolloProvider: {
@@ -147,11 +139,7 @@ describe('Contacts', () => {
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
-            <Contacts
-                draftSubmission={mock}
-                updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
-            />,
+            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -184,11 +172,7 @@ describe('Contacts', () => {
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
-            <Contacts
-                draftSubmission={mock}
-                updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
-            />,
+            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -227,11 +211,7 @@ describe('Contacts', () => {
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
-            <Contacts
-                draftSubmission={mock}
-                updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
-            />,
+            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -261,11 +241,7 @@ describe('Contacts', () => {
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
-            <Contacts
-                draftSubmission={mock}
-                updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
-            />,
+            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -295,11 +271,7 @@ describe('Contacts', () => {
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
-            <Contacts
-                draftSubmission={mock}
-                updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
-            />,
+            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -322,11 +294,7 @@ describe('Contacts', () => {
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
-            <Contacts
-                draftSubmission={mock}
-                updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
-            />,
+            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -350,11 +318,7 @@ describe('Contacts', () => {
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
-            <Contacts
-                draftSubmission={mock}
-                updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
-            />,
+            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],

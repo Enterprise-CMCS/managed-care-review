@@ -341,7 +341,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         <Contacts
                             draftSubmission={formDataFromLatestRevision}
                             updateDraft={updateDraftHealthPlanPackage}
-                            previousDocuments={previousDocuments}
                         />
                     </Route>
                     <Route path={RoutesRecord.SUBMISSIONS_DOCUMENTS}>
