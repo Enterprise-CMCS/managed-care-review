@@ -23,6 +23,7 @@ import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBa
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 import { MaintenanceMessage } from './MaintenanceMessage'
+import { featureFlags } from '../../common-code/featureFlags'
 
 // We only pull a subset of data out of the submission and revisions for display in Dashboard
 type SubmissionInDashboard = {
@@ -74,7 +75,9 @@ export const Dashboard = (): React.ReactElement => {
 
     // Get the LD feature flag
     const ldClient = useLDClient()
-    const testFrontendBanner = ldClient?.variation('test-frontend-banner')
+    const testFrontendBanner = ldClient?.variation(
+        featureFlags.REACT_TEST_FRONTEND_BANNER
+    )
 
     const { loading, data, error } = useIndexHealthPlanPackagesQuery()
 
