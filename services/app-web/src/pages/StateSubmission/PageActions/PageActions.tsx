@@ -41,7 +41,6 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
             </ActionButton>
         )
 
-    console.log('HERE', actionInProgress, disableContinue)
     return (
         <PageActionsContainer left={leftElement}>
             <ButtonGroup type="default">
@@ -66,7 +65,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                             : continueOnClick
                     }
                     animationTimeout={1000}
-                    loading={actionInProgress}
+                    loading={actionInProgress && !disableContinue}
                 >
                     {!isLastPage ? 'Continue' : 'Submit'}
                 </ActionButton>

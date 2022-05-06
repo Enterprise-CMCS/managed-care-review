@@ -163,7 +163,7 @@ describe('RateDetails', () => {
                     "You must select whether you're certifying rates or rate ranges"
                 )
             ).toHaveLength(2)
-            expect(continueButton).toBeDisabled()
+            expect(continueButton).toHaveAttribute('aria-disabled', 'true')
         })
     })
 
