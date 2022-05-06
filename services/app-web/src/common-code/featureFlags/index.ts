@@ -1,1 +1,1 @@
-export * from './flags'
+export { featureFlags } from './flags'
