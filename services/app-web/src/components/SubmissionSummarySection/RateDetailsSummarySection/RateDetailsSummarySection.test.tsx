@@ -65,6 +65,11 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', {
+                name: 'Does the actuary certify capitation rates specific to each rate cell or a rate range?',
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
                 name: 'Rating period of original rate certification',
             })
         ).toBeInTheDocument()
