@@ -6,7 +6,6 @@ import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
 
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import * as ld from 'launchdarkly-js-client-sdk'
-import sha256 from 'crypto-js/sha256'
 
 type LogoutFn = () => Promise<null>
 
@@ -50,12 +49,9 @@ function AuthProvider({
     // add current authenticated user to launchdarkly client
     const client = useLDClient()
     async function setLDUser(user: UserType) {
-        const email = user === undefined ? 'anonymous' : user.email
-        const key = sha256(email).toString()
         const ldUser: ld.LDUser = {
-            key: key,
+            key: user.email,
             name: user.name,
-            email: user.email,
         }
 
         const previousUser = client?.getUser() || {}
