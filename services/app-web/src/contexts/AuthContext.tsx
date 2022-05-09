@@ -4,6 +4,9 @@ import { useFetchCurrentUserQuery, User as UserType } from '../gen/gqlClient'
 import { logoutLocalUser } from '../localAuth'
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
 
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import * as ld from 'launchdarkly-js-client-sdk'
+
 type LogoutFn = () => Promise<null>
 
 export type LoginStatusType = 'LOADING' | 'LOGGED_OUT' | 'LOGGED_IN'
@@ -43,6 +46,20 @@ function AuthProvider({
 
     const isAuthenticated = loggedInUser !== undefined
 
+    // add current authenticated user to launchdarkly client
+    const client = useLDClient()
+    async function setLDUser(user: UserType) {
+        const ldUser: ld.LDUser = {
+            key: user.email,
+            email: user.email,
+            name: user.name,
+        }
+
+        const previousUser = client?.getUser() || {}
+        await client?.identify(ldUser)
+        client?.alias(ldUser, previousUser)
+    }
+
     const computedLoginStatus: LoginStatusType = loading
         ? 'LOADING'
         : loggedInUser !== undefined
@@ -71,7 +88,11 @@ function AuthProvider({
             }
         } else if (data?.fetchCurrentUser) {
             if (!isAuthenticated) {
-                setLoggedInUser(data.fetchCurrentUser)
+                const currentUser = data.fetchCurrentUser
+                setLDUser(currentUser).catch((err) => {
+                    console.log(err)
+                })
+                setLoggedInUser(currentUser)
                 setLoginStatus('LOGGED_IN')
             }
         }
