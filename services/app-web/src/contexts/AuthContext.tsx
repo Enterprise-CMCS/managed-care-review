@@ -51,6 +51,7 @@ function AuthProvider({
     async function setLDUser(user: UserType) {
         const ldUser: ld.LDUser = {
             key: user.email,
+            email: user.email,
             name: user.name,
         }
 
