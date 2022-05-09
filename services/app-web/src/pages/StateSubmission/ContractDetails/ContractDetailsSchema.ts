@@ -12,21 +12,22 @@ export const ContractDetailsFormSchema = Yup.object().shape({
     contractExecutionStatus: Yup.string().defined(
         'You must select a contract status'
     ),
-    contractDateStart: Yup.date()
-        .when("contractType", (contractType) => {
-            if (contractType) {
-                return Yup.date()
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore-next-line
-                .validateDateFormat('YYYY-MM-DD', true)
-                .defined('You must enter a start date')
-                .typeError('The start date must be in MM/DD/YYYY format');
-            }
-        }),
-    contractDateEnd: Yup.date()
-        .when("contractType", (contractType) => {
-            if (contractType) {
-                return Yup.date()
+    contractDateStart: Yup.date().when('contractType', (contractType) => {
+        if (contractType) {
+            return (
+                Yup.date()
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-ignore-next-line
+                    .validateDateFormat('YYYY-MM-DD', true)
+                    .defined('You must enter a start date')
+                    .typeError('The start date must be in MM/DD/YYYY format')
+            )
+        }
+    }),
+    contractDateEnd: Yup.date().when('contractType', (contractType) => {
+        if (contractType) {
+            return (
+                Yup.date()
                     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                     // @ts-ignore-next-line
                     .validateDateFormat('YYYY-MM-DD', true)
@@ -45,18 +46,17 @@ export const ContractDetailsFormSchema = Yup.object().shape({
                             }
                         }
                     )
-            }
-        }),
-    managedCareEntities: Yup.array()
-        .when("contractType", {
-            is: (contractType:string|undefined) => contractType,
-            then: Yup.array().min(1, 'You must select at least one entity')
-        }),
-    federalAuthorities: Yup.array()
-        .when("contractType", {
-            is: (contractType:string|undefined) => contractType,
-            then: Yup.array().min(1, 'You must select at least one authority')
-        }),
+            )
+        }
+    }),
+    managedCareEntities: Yup.array().when('contractType', {
+        is: (contractType: string | undefined) => contractType,
+        then: Yup.array().min(1, 'You must select at least one entity'),
+    }),
+    federalAuthorities: Yup.array().when('contractType', {
+        is: (contractType: string | undefined) => contractType,
+        then: Yup.array().min(1, 'You must select at least one authority'),
+    }),
     itemsAmended: Yup.array().when('contractType', {
         is: 'AMENDMENT',
         then: Yup.array().min(1, 'You must select at least one item'),
@@ -74,17 +74,5 @@ export const ContractDetailsFormSchema = Yup.object().shape({
     capitationRatesOther: Yup.string().when('capitationRates', {
         is: 'OTHER',
         then: Yup.string().defined('You must enter a description'),
-    }),
-    relatedToCovid19: Yup.string().when('contractType', {
-        is: 'AMENDMENT',
-        then: Yup.string().defined(
-            'You must indicate whether or not this contract action is related to COVID-19'
-        ),
-    }),
-    relatedToVaccination: Yup.string().when('relatedToCovid19', {
-        is: 'YES',
-        then: Yup.string().defined(
-            'You must indicate whether or not this is related to vaccine administration'
-        ),
     }),
 })

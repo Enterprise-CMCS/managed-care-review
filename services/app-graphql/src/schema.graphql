@@ -225,16 +225,12 @@ type ContractAmendmentInfo {
     itemsBeingAmended: [String!]!
     otherItemBeingAmended: String
     capitationRatesAmendedInfo: CapitationRatesAmendedInfo
-    relatedToCovid19: Boolean
-    relatedToVaccination: Boolean
 }
 
 input ContractAmendmentInfoInput {
     itemsBeingAmended: [String!]!
     otherItemBeingAmended: String
     capitationRatesAmendedInfo: CapitationRatesAmendedInfoInput
-    relatedToCovid19: Boolean
-    relatedToVaccination: Boolean
 }
 
 enum CapitationRatesAmendmentReason {
@@ -271,6 +267,11 @@ enum ContractExecutionStatus {
 enum RateType {
     NEW
     AMENDMENT
+}
+
+enum RateCapitationType {
+    RATE_CELL
+    RATE_RANGE
 }
 
 enum FederalAuthority {
@@ -334,6 +335,7 @@ type StateSubmission {
     managedCareEntities: [String!]!
     federalAuthorities: [FederalAuthority!]!
     rateType: RateType
+    rateCapitationType: RateCapitationType
     rateDocuments: [Document!]!
     rateDateStart: Date
     rateDateEnd: Date
@@ -360,6 +362,7 @@ input DraftSubmissionUpdates {
     federalAuthorities: [FederalAuthority!]!
     contractAmendmentInfo: ContractAmendmentInfoInput
     rateType: RateType
+    rateCapitationType: RateCapitationType
     rateDocuments: [DocumentInput!]!
     rateDateStart: Date
     rateDateEnd: Date

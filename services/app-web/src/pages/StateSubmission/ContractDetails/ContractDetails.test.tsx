@@ -76,11 +76,6 @@ describe('ContractDetails', () => {
         // should not be able to find hidden things
         // "Items being amended"
         expect(screen.queryByText('Items being amended')).toBeNull()
-        expect(
-            screen.queryByText(
-                'Is this contract action related to the COVID-19 public health emergency?'
-            )
-        ).toBeNull()
 
         // click amendment and upload docs
         const amendmentRadio = screen.getByLabelText(
@@ -93,11 +88,6 @@ describe('ContractDetails', () => {
 
         // check that now we can see hidden things
         expect(screen.queryByText('Items being amended')).toBeInTheDocument()
-        expect(
-            screen.queryByText(
-                'Is this contract action related to the COVID-19 public health emergency?'
-            )
-        ).toBeInTheDocument()
 
         // click "next"
         const continueButton = screen.getByRole('button', { name: 'Continue' })
@@ -162,13 +152,10 @@ describe('ContractDetails', () => {
                 screen.getAllByText('You must enter a description')
             ).toHaveLength(2)
         )
-        // click "NO" for the Covid question so we can submit
         const otherBox = screen.getByLabelText(
             'Other capitation rate description'
         )
         userEvent.type(otherBox, 'x') // WEIRD, for some reason it's not recording but the last character of the typing
-        await waitFor(() => screen.getByLabelText('No').click())
-
         // click continue
 
         userEvent.click(continueButton)
@@ -236,87 +223,6 @@ describe('ContractDetails', () => {
         expect(screen.queryByText('You must enter a description')).toBeNull()
     })
 
-    it('progressively discloses option for covid', async () => {
-        // mount an empty form
-
-        const emptyDraft = mockDraft()
-        emptyDraft.id = '12'
-        const mockUpdateDraftFn = jest.fn()
-
-        renderWithProviders(
-            <ContractDetails
-                draftSubmission={emptyDraft}
-                updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-                routerProvider: {
-                    route: '/submissions/12/contract-details',
-                },
-            }
-        )
-
-        // click amendment
-        const amendmentRadio = screen.getByLabelText(
-            'Amendment to base contract'
-        )
-        amendmentRadio.click()
-
-        // click "next"
-        const continueButton = screen.getByRole('button', { name: 'Continue' })
-        await act(async () => {
-            continueButton.click()
-        })
-
-        // select some things to narrow down which errors we are looking for
-        // these options have to be selected no matter which type of contract it is
-        await act(async () => {
-            screen.getByLabelText('Managed Care Organization (MCO)').click()
-            screen.getByLabelText('1115 Waiver Authority').click()
-            screen.getByLabelText('Financial incentives').click()
-        })
-
-        // check on the covid error
-        expect(
-            screen.queryAllByText(
-                'You must indicate whether or not this contract action is related to COVID-19'
-            )
-        ).toHaveLength(2)
-
-        // click other
-        await act(async () => {
-            screen.getByLabelText('Yes').click()
-        })
-
-        // check error for not selected
-        expect(
-            screen.getByText(
-                'Is this related to coverage and reimbursement for vaccine administration?'
-            )
-        ).toBeInTheDocument()
-        expect(
-            screen.queryAllByText(
-                'You must indicate whether or not this is related to vaccine administration'
-            )
-        ).toHaveLength(2)
-
-        // click annual rate
-        await act(async () => {
-            const vaccineNo = screen.getAllByLabelText('No')[1]
-            vaccineNo.click()
-        })
-
-        // error should be gone
-        expect(
-            screen.queryByText(
-                'You must indicate whether or not this is related to vaccine administration'
-            )
-        ).toBeNull()
-    })
-
     describe('Contract documents file upload', () => {
         it('renders without errors', async () => {
             renderWithProviders(
@@ -339,7 +245,7 @@ describe('ContractDetails', () => {
                 )
                 expect(
                     screen.getByRole('button', { name: 'Continue' })
-                ).not.toBeDisabled()
+                ).not.toHaveAttribute('aria-disabled')
                 expect(
                     within(
                         screen.getByTestId('file-input-preview-list')
@@ -427,7 +333,7 @@ describe('ContractDetails', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
-                expect(continueButton).not.toBeDisabled()
+                expect(continueButton).not.toHaveAttribute('aria-disabled')
             })
         })
 
@@ -458,7 +364,7 @@ describe('ContractDetails', () => {
                 expect(
                     screen.getByText('This is not a valid file type.')
                 ).toBeInTheDocument()
-                expect(continueButton).not.toBeDisabled()
+                expect(continueButton).not.toHaveAttribute('aria-disabled')
             })
         })
 
@@ -479,7 +385,7 @@ describe('ContractDetails', () => {
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
-            expect(continueButton).not.toBeDisabled()
+            expect(continueButton).not.toHaveAttribute('aria-disabled')
 
             continueButton.click()
 
@@ -488,7 +394,7 @@ describe('ContractDetails', () => {
                     screen.getAllByText('You must upload at least one document')
                 ).toHaveLength(2)
 
-                expect(continueButton).toBeDisabled()
+                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
             })
         })
 
@@ -514,7 +420,7 @@ describe('ContractDetails', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
             userEvent.upload(input, []) // clear input and ensure we add same file twice
             userEvent.upload(input, [TEST_DOC_FILE])
-            expect(continueButton).not.toBeDisabled()
+            expect(continueButton).not.toHaveAttribute('aria-disabled')
 
             continueButton.click()
             await waitFor(() => {
@@ -524,7 +430,7 @@ describe('ContractDetails', () => {
                     )
                 ).toHaveLength(2)
 
-                expect(continueButton).toBeDisabled()
+                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
             })
         })
 
@@ -552,7 +458,7 @@ describe('ContractDetails', () => {
                 await screen.findByText('This is not a valid file type.')
             ).toBeInTheDocument()
 
-            expect(continueButton).not.toBeDisabled()
+            expect(continueButton).not.toHaveAttribute('aria-disabled')
             continueButton.click()
 
             expect(
@@ -561,7 +467,7 @@ describe('ContractDetails', () => {
                 )
             ).toHaveLength(2)
 
-            expect(continueButton).toBeDisabled()
+            expect(continueButton).toHaveAttribute('aria-disabled', 'true')
         })
         it('disabled with alert when trying to continue while a file is still uploading', async () => {
             renderWithProviders(
@@ -599,7 +505,7 @@ describe('ContractDetails', () => {
 
             // click continue while file 2 still loading
             continueButton.click()
-            expect(continueButton).toBeDisabled()
+            expect(continueButton).toHaveAttribute('aria-disabled', 'true')
 
             expect(
                 screen.getAllByText(
@@ -633,7 +539,7 @@ describe('ContractDetails', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
-                expect(saveAsDraftButton).not.toBeDisabled()
+                expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
             })
         })
 
@@ -662,7 +568,7 @@ describe('ContractDetails', () => {
             dragAndDrop(targetEl, [TEST_PNG_FILE])
 
             await waitFor(() => {
-                expect(saveAsDraftButton).not.toBeDisabled()
+                expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
             })
         })
 
@@ -684,7 +590,7 @@ describe('ContractDetails', () => {
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
             })
-            expect(saveAsDraftButton).not.toBeDisabled()
+            expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
 
             userEvent.click(saveAsDraftButton)
             expect(mockUpdateDraftFn).toHaveBeenCalled()
@@ -721,7 +627,7 @@ describe('ContractDetails', () => {
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
             })
-            expect(saveAsDraftButton).not.toBeDisabled()
+            expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
 
             userEvent.click(saveAsDraftButton)
             expect(mockUpdateDraftFn).toHaveBeenCalled()
@@ -793,7 +699,7 @@ describe('ContractDetails', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
-                expect(backButton).not.toBeDisabled()
+                expect(backButton).not.toHaveAttribute('aria-disabled')
             })
         })
 
@@ -821,7 +727,7 @@ describe('ContractDetails', () => {
             dragAndDrop(targetEl, [TEST_PNG_FILE])
 
             await waitFor(() => {
-                expect(backButton).not.toBeDisabled()
+                expect(backButton).not.toHaveAttribute('aria-disabled')
             })
         })
 
@@ -843,7 +749,7 @@ describe('ContractDetails', () => {
             const backButton = screen.getByRole('button', {
                 name: 'Back',
             })
-            expect(backButton).not.toBeDisabled()
+            expect(backButton).not.toHaveAttribute('aria-disabled')
 
             userEvent.click(backButton)
             expect(
@@ -876,7 +782,7 @@ describe('ContractDetails', () => {
             userEvent.upload(input, [TEST_PDF_FILE])
             userEvent.upload(input, [TEST_DOC_FILE])
             await waitFor(() => {
-                expect(backButton).not.toBeDisabled()
+                expect(backButton).not.toHaveAttribute('aria-disabled')
                 expect(
                     screen.queryAllByText('Duplicate file, please remove')
                 ).toHaveLength(1)

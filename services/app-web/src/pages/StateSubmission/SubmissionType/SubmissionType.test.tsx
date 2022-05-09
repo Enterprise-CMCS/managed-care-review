@@ -13,9 +13,10 @@ describe('SubmissionType', () => {
         submissionDescription: '',
         submissionType: '',
     }
+    const updateDraftMock = jest.fn()
 
     it('displays correct form guidance', async () => {
-        renderWithProviders(<SubmissionType />, {
+        renderWithProviders(<SubmissionType updateDraft={updateDraftMock} />, {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
@@ -25,7 +26,7 @@ describe('SubmissionType', () => {
     })
 
     it('displays submission type form when expected', async () => {
-        renderWithProviders(<SubmissionType />, {
+        renderWithProviders(<SubmissionType updateDraft={updateDraftMock} />, {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
@@ -37,7 +38,7 @@ describe('SubmissionType', () => {
     })
 
     it('displays new submission form when expected', async () => {
-        renderWithProviders(<SubmissionType />, {
+        renderWithProviders(<SubmissionType updateDraft={updateDraftMock} />, {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
@@ -53,7 +54,10 @@ describe('SubmissionType', () => {
 
     it('displays with draft submission when expected', async () => {
         renderWithProviders(
-            <SubmissionType draftSubmission={contractOnly()} />,
+            <SubmissionType
+                updateDraft={updateDraftMock}
+                draftSubmission={contractOnly()}
+            />,
             {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -66,8 +70,8 @@ describe('SubmissionType', () => {
         ).toBeInTheDocument()
     })
 
-    it('displays a save as draft link when editing a submission', async () => {
-        renderWithProviders(<SubmissionType />, {
+    it('displays a cancel link', async () => {
+        renderWithProviders(<SubmissionType updateDraft={updateDraftMock} />, {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
@@ -112,7 +116,7 @@ describe('SubmissionType', () => {
     })
 
     it('displays a continue button', async () => {
-        renderWithProviders(<SubmissionType />, {
+        renderWithProviders(<SubmissionType updateDraft={updateDraftMock} />, {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
@@ -131,7 +135,7 @@ describe('SubmissionType', () => {
                 initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType />
+                <SubmissionType updateDraft={updateDraftMock} />
             </Formik>,
             {
                 apolloProvider: {
@@ -166,7 +170,7 @@ describe('SubmissionType', () => {
                 initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType />
+                <SubmissionType updateDraft={updateDraftMock} />
             </Formik>,
             {
                 apolloProvider: {
@@ -207,7 +211,7 @@ describe('SubmissionType', () => {
                 initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType />
+                <SubmissionType updateDraft={updateDraftMock} />
             </Formik>,
             {
                 apolloProvider: {
@@ -232,7 +236,7 @@ describe('SubmissionType', () => {
                 initialValues={SubmissionTypeInitialValues}
                 onSubmit={jest.fn()}
             >
-                <SubmissionType />
+                <SubmissionType updateDraft={updateDraftMock} />
             </Formik>,
             {
                 apolloProvider: {
@@ -249,11 +253,14 @@ describe('SubmissionType', () => {
 
     describe('validations', () => {
         it('does not show error validations on initial load', async () => {
-            renderWithProviders(<SubmissionType />, {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            })
+            renderWithProviders(
+                <SubmissionType updateDraft={updateDraftMock} />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
 
             expect(await screen.getByRole('textbox')).not.toHaveClass(
                 'usa-input--error'
@@ -270,7 +277,10 @@ describe('SubmissionType', () => {
 
         it('shows error messages when there are validation errors and showValidations is true', async () => {
             renderWithProviders(
-                <SubmissionType showValidations={true} />,
+                <SubmissionType
+                    updateDraft={updateDraftMock}
+                    showValidations={true}
+                />,
 
                 {
                     apolloProvider: {
@@ -297,11 +307,17 @@ describe('SubmissionType', () => {
         })
 
         it('do not show error messages when showValidations is false', async () => {
-            renderWithProviders(<SubmissionType showValidations={false} />, {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            })
+            renderWithProviders(
+                <SubmissionType
+                    updateDraft={updateDraftMock}
+                    showValidations={false}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
             await waitFor(() => {
                 const textarea = screen.getByRole('textbox', {
                     name: 'Submission description',
@@ -322,11 +338,14 @@ describe('SubmissionType', () => {
 
     describe('Continue / Save Draft button', () => {
         it('if form fields are invalid, shows validation error messages when continue button is clicked', async () => {
-            renderWithProviders(<SubmissionType />, {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            })
+            renderWithProviders(
+                <SubmissionType updateDraft={updateDraftMock} />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
 
             userEvent.click(
                 screen.getByRole('button', {

@@ -41,8 +41,6 @@ const contractAmendmentInfoSchema = z.object({
             otherReason: z.string().optional(),
         })
         .optional(),
-    relatedToCovid19: z.boolean().optional(),
-    relatedToVaccination: z.boolean().optional(),
 })
 
 const rateAmendmentInfoSchema = z.object({
@@ -97,6 +95,11 @@ const actuaryContactSchema = z.object({
 
 const rateTypeSchema = z.union([z.literal('NEW'), z.literal('AMENDMENT')])
 
+const rateCapitationTypeSchema = z.union([
+    z.literal('RATE_CELL'),
+    z.literal('RATE_RANGE'),
+])
+
 // Commenting out because this wasn't being used but was raising lint warning -hw
 // const managedCareEntitySchema = z.union([
 //     z.literal('MCO'),
@@ -144,6 +147,7 @@ export const unlockedHealthPlanFormDataSchema = z.object({
     federalAuthorities: z.array(federalAuthoritySchema),
     contractAmendmentInfo: contractAmendmentInfoSchema.optional(),
     rateType: rateTypeSchema.optional(),
+    rateCapitationType: rateCapitationTypeSchema.optional(),
     rateDocuments: z.array(submissionDocumentSchema).optional(),
     rateDateStart: z.date().optional(),
     rateDateEnd: z.date().optional(),

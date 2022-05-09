@@ -1,24 +1,26 @@
 import React from 'react'
 import {
-    Button,
     ButtonGroup,
     Modal as UswdsModal,
     ModalFooter,
     ModalHeading,
     ModalRef,
     ModalProps as UswdsModalProps,
-    ModalToggleButton
-} from '@trussworks/react-uswds';
+    ModalToggleButton,
+} from '@trussworks/react-uswds'
 import styles from './Modal.module.scss'
 
+import { ActionButton } from '../ActionButton'
+
 interface ModalComponentProps {
-    id: string,
-    modalHeading?: string,
-    onSubmit?: React.MouseEventHandler<HTMLButtonElement> | undefined,
-    onSubmitText?: string,
-    className?: string,
+    id: string
+    modalHeading?: string
+    onSubmit?: React.MouseEventHandler<HTMLButtonElement>
+    onSubmitText?: string
+    className?: string
     modalRef: React.RefObject<ModalRef>
     submitButtonProps?: JSX.IntrinsicElements['button']
+    isSubmitting?: boolean
 }
 
 export type ModalProps = ModalComponentProps & UswdsModalProps
@@ -32,8 +34,9 @@ export const Modal = ({
     modalRef,
     submitButtonProps,
     onSubmitText,
+    isSubmitting = false,
     ...divProps
-}: ModalProps): React.ReactElement  => {
+}: ModalProps): React.ReactElement => {
     return (
         <UswdsModal
             aria-labelledby={`${id}-heading`}
@@ -55,19 +58,21 @@ export const Modal = ({
                         id={`${id}-closer`}
                         closer
                         outline
+                        disabled={isSubmitting}
                     >
                         Cancel
                     </ModalToggleButton>
-                    <Button
-                        type="button"
-                        aria-label="Submit"
+                    <ActionButton
+                        type="submit"
                         data-testid={`${id}-modal-submit`}
+                        variant="success"
                         id={`${id}-submit`}
                         onClick={onSubmit}
+                        loading={isSubmitting}
                         {...submitButtonProps}
                     >
                         {onSubmitText || 'Submit'}
-                    </Button>
+                    </ActionButton>
                 </ButtonGroup>
             </ModalFooter>
         </UswdsModal>

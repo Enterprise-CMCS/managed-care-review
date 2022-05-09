@@ -104,6 +104,15 @@ export const RateDetailsSummarySection = ({
                         }
                     />
                     <DataDetail
+                        id="rateCapitationType"
+                        label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
+                        data={
+                            submission.rateAmendmentInfo
+                                ? 'Certification of rate ranges of capitation rates per rate cell'
+                                : 'Certification of capitation rates specific to each rate cell'
+                        }
+                    />
+                    <DataDetail
                         id="ratingPeriod"
                         label={
                             submission.rateAmendmentInfo

@@ -3,8 +3,11 @@ import {
     mockSubmittedHealthPlanPackageWithRevision,
     mockUnlockedHealthPlanPackage,
 } from '../testHelpers/apolloHelpers'
-import { basicHealthPlanFormData, unlockedWithContacts } from '../common-code/healthPlanFormDataMocks';
-import { domainToBase64 } from '../common-code/proto/healthPlanFormDataProto';
+import {
+    basicHealthPlanFormData,
+    unlockedWithContacts,
+} from '../common-code/healthPlanFormDataMocks'
+import { domainToBase64 } from '../common-code/proto/healthPlanFormDataProto'
 
 describe('makeDocumentList', () => {
     it('should make two lists with document s3 keys', () => {
