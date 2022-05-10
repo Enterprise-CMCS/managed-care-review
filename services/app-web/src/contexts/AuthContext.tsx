@@ -8,12 +8,15 @@ type LogoutFn = () => Promise<null>
 
 export type LoginStatusType = 'LOADING' | 'LOGGED_OUT' | 'LOGGED_IN'
 
+// const LocalStorage = window.localStorage
+
 type AuthContextType = {
     loggedInUser: UserType | undefined
     loginStatus: LoginStatusType
     checkAuth: () => Promise<void> // this can probably be simpler, letting callers use the loading states etc instead.
     logout: undefined | (() => Promise<void>)
-    sessionIsExpiring: React.MutableRefObject<boolean>
+    // sessionIsExpiring: React.MutableRefObject<boolean | undefined>
+    sessionIsExpiring: boolean
     updateSessionExpiry: (value: boolean) => void
 }
 
@@ -22,9 +25,9 @@ const AuthContext = React.createContext<AuthContextType>({
     loginStatus: 'LOADING',
     checkAuth: () => Promise.reject(Error('Auth context error')),
     logout: undefined,
-    sessionIsExpiring: { current: false },
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    updateSessionExpiry: () => {},
+    // sessionIsExpiring: { current: false },
+    sessionIsExpiring: false,
+    updateSessionExpiry: () => void 0,
 })
 
 export type AuthProviderProps = {
@@ -41,10 +44,28 @@ function AuthProvider({
     >(undefined)
     const [loginStatus, setLoginStatus] =
         React.useState<LoginStatusType>('LOGGED_OUT')
-    const sessionIsExpiring = React.useRef<boolean>(false)
+    // const sessionIsExpiring = React.useRef<boolean | undefined>(false)
+    // const initialExpiringBoolean =
+    //     LocalStorage.getItem('IS_EXPIRING')?.toLowerCase() === 'true'
+    const [sessionIsExpiring, setSessionIsExpiring] =
+        React.useState<boolean>(false)
     const { loading, data, error, refetch } = useFetchCurrentUserQuery({
         notifyOnNetworkStatusChange: true,
     })
+
+    // const useUpdateSessionExpiry = (): [React.RefCallback<boolean>] => {
+    //     const setRef: React.RefCallback<boolean> = React.useCallback(
+    //         (value) => {
+    //             console.log('setting session expiry to', value)
+    //             if (sessionIsExpiring.current !== value && value) {
+    //                 sessionIsExpiring.current = value
+    //             }
+    //         },
+    //         []
+    //     )
+
+    //     return [setRef]
+    // }
 
     const isAuthenticated = loggedInUser !== undefined
 
@@ -96,12 +117,13 @@ function AuthProvider({
     }
 
     const updateSessionExpiry = (value: boolean) => {
-        console.log(
-            'UPDATING SESSION EXPIRY: ',
-            value,
-            sessionIsExpiring.current
-        )
-        sessionIsExpiring.current = value
+        console.log('called update', value)
+        console.log('current', sessionIsExpiring)
+        if (sessionIsExpiring !== value) {
+            console.log('setting session expiry to', value)
+            setSessionIsExpiring(value)
+            // LocalStorage.setItem('IS_EXPIRING', value.toString())
+        }
     }
 
     const realLogout: LogoutFn =

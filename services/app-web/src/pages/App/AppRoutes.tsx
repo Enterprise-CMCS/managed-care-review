@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useHistory, useLocation } from 'react-router'
 import { Route, Switch } from 'react-router-dom'
 import { extendSession } from '../../pages/Auth/cognitoAuth'
@@ -18,6 +18,7 @@ import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
 import { CognitoLogin } from '../Auth/CognitoLogin'
 import { CMSDashboard } from '../Dashboard/CMSDashboard'
 import { Dashboard } from '../Dashboard/Dashboard'
+import { AuthenticatedRouteWrapper } from '../Wrapper/AuthenticatedRouteWrapper'
 import { Error404 } from '../Errors/Error404'
 import { Help } from '../Help/Help'
 import { Landing } from '../Landing/Landing'
@@ -54,50 +55,58 @@ function componentForAuthMode(
 
 const StateUserRoutes = (): React.ReactElement => {
     return (
-        <Switch>
-            <Route path={RoutesRecord.ROOT} exact component={Dashboard} />
-            <Route path={RoutesRecord.DASHBOARD} component={Dashboard} />
-            <Route
-                path={RoutesRecord.SUBMISSIONS_NEW}
-                component={NewStateSubmissionForm}
-            />
-            <Route
-                path={RoutesRecord.SUBMISSIONS_FORM}
-                component={SubmissionSummary}
-                exact
-            />
-            <Route
-                path={RoutesRecord.SUBMISSIONS_REVISION}
-                component={SubmissionRevisionSummary}
-                exact
-            />
-            <Route
-                path={RoutesRecord.SUBMISSIONS_FORM}
-                component={StateSubmissionForm}
-            />
-            <Route path={RoutesRecord.HELP} component={Help} />
-            <Route path="*" component={Error404} />
-        </Switch>
+        <AuthenticatedRouteWrapper>
+            <Switch>
+                <Route path={RoutesRecord.ROOT} exact component={Dashboard} />
+                <Route path={RoutesRecord.DASHBOARD} component={Dashboard} />
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_NEW}
+                    component={NewStateSubmissionForm}
+                />
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    component={SubmissionSummary}
+                    exact
+                />
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVISION}
+                    component={SubmissionRevisionSummary}
+                    exact
+                />
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    component={StateSubmissionForm}
+                />
+                <Route path={RoutesRecord.HELP} component={Help} />
+                <Route path="*" component={Error404} />
+            </Switch>
+        </AuthenticatedRouteWrapper>
     )
 }
 
 const CMSUserRoutes = (): React.ReactElement => {
     return (
-        <Switch>
-            <Route path={RoutesRecord.ROOT} exact component={CMSDashboard} />
-            <Route path={RoutesRecord.DASHBOARD} component={CMSDashboard} />
-            <Route
-                path={RoutesRecord.SUBMISSIONS_FORM}
-                component={SubmissionSummary}
-                exact
-            />
-            <Route
-                path={RoutesRecord.SUBMISSIONS_REVISION}
-                component={SubmissionRevisionSummary}
-                exact
-            />
-            <Route path="*" component={Error404} />
-        </Switch>
+        <AuthenticatedRouteWrapper>
+            <Switch>
+                <Route
+                    path={RoutesRecord.ROOT}
+                    exact
+                    component={CMSDashboard}
+                />
+                <Route path={RoutesRecord.DASHBOARD} component={CMSDashboard} />
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_FORM}
+                    component={SubmissionSummary}
+                    exact
+                />
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVISION}
+                    component={SubmissionRevisionSummary}
+                    exact
+                />
+                <Route path="*" component={Error404} />
+            </Switch>
+        </AuthenticatedRouteWrapper>
     )
 }
 
@@ -131,25 +140,64 @@ export const AppRoutes = ({
     const route = getRouteName(pathname)
     const { updateHeading } = usePage()
     const [initialPath] = useState(pathname) // this gets written on mount, so we don't call the effect on every path change
+    const runningTimers = useRef<NodeJS.Timer[]>([])
     // when we load, set the logout timer for 30 minutes in the future and refresh the session
-    const sessionExpiration = dayjs(Date.now()).add(2, 'minute')
-    localStorage.setItem('LOGOUT_TIMER', sessionExpiration.toISOString())
-    void refreshSession()
-    // check for session about to expire
-    setInterval(() => {
-        // is the current time within 2 minutes of the session expiration time?
-        const isSessionExpiring = dayjs(Date.now()).isAfter(
-            dayjs(sessionExpiration).subtract(1, 'minute')
-        )
-        if (
-            isSessionExpiring &&
-            isSessionExpiring !== sessionIsExpiring.current
-        ) {
-            updateSessionExpiry(isSessionExpiring)
-
-            console.log('Your session is about to expire. Please log in again.')
+    let sessionExpirationTime: dayjs.Dayjs | undefined = undefined
+    if (loggedInUser && !sessionIsExpiring) {
+        sessionExpirationTime = dayjs(Date.now()).add(2, 'minute')
+        try {
+            LocalStorage.setItem(
+                'LOGOUT_TIMER',
+                sessionExpirationTime.toISOString()
+            )
+        } catch (e) {
+            console.log('Error setting logout timer: ', e)
         }
-    }, 1000 * 30)
+        // void extendSession()
+        updateSessionExpiry(false)
+    }
+    console.log('RERENDERED?')
+    // check for session about to expire
+    if (!sessionIsExpiring) {
+        const timer = setInterval(() => {
+            console.log('interval running', timer)
+            // LocalStorage.setItem(
+            //     'TIMERS',
+            //     LocalStorage.getItem('TIMERS') +
+            //         ',' +
+            //         JSON.stringify(timer) +
+            //         ','
+            // )
+            runningTimers.current.push(timer)
+            // is the current time within 2 minutes of the session expiration time?
+            let isSessionExpiring = false
+            if (sessionExpirationTime) {
+                isSessionExpiring = dayjs(Date.now()).isAfter(
+                    dayjs(sessionExpirationTime).subtract(1, 'minute')
+                )
+            }
+            if (isSessionExpiring && !sessionIsExpiring) {
+                console.log('about to clear: ', runningTimers.current)
+                // LocalStorage.getItem('TIMERS')
+                //     ?.split(',')
+                //     .forEach((timer) => {
+                //         console.log('timer in loop: ', timer)
+                //         if (timer) {
+                //             clearInterval(Number(timer))
+                //         }
+                //     })
+                // LocalStorage.removeItem('TIMERS')
+                runningTimers.current.forEach((t) => clearInterval(t))
+                runningTimers.current = []
+                console.log('cleared: ', runningTimers.current)
+                // LocalStorage.setItem(
+                //     'IS_EXPIRING',
+                //     JSON.stringify(isSessionExpiring)
+                // )
+                updateSessionExpiry(isSessionExpiring)
+            }
+        }, 1000 * 30)
+    }
 
     // This effect handles our initial redirect on login
     // This way, if you get a link to something and aren't logged in, you get
