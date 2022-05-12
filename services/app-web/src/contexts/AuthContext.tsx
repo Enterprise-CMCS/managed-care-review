@@ -3,6 +3,7 @@ import { AuthModeType } from '../common-code/config'
 import { useFetchCurrentUserQuery, User as UserType } from '../gen/gqlClient'
 import { logoutLocalUser } from '../localAuth'
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
+import { useRef } from 'react'
 
 type LogoutFn = () => Promise<null>
 
@@ -18,6 +19,7 @@ type AuthContextType = {
     // sessionIsExpiring: React.MutableRefObject<boolean | undefined>
     sessionIsExpiring: boolean
     updateSessionExpiry: (value: boolean) => void
+    timeUntilLogout: number
 }
 
 const AuthContext = React.createContext<AuthContextType>({
@@ -28,6 +30,7 @@ const AuthContext = React.createContext<AuthContextType>({
     // sessionIsExpiring: { current: false },
     sessionIsExpiring: false,
     updateSessionExpiry: () => void 0,
+    timeUntilLogout: 120,
 })
 
 export type AuthProviderProps = {
@@ -49,9 +52,21 @@ function AuthProvider({
     //     LocalStorage.getItem('IS_EXPIRING')?.toLowerCase() === 'true'
     const [sessionIsExpiring, setSessionIsExpiring] =
         React.useState<boolean>(false)
+    const [timeUntilLogout, setTimeUntilLogout] = React.useState<number>(120)
+    const runningTimers = React.useRef<NodeJS.Timer[]>([])
     const { loading, data, error, refetch } = useFetchCurrentUserQuery({
         notifyOnNetworkStatusChange: true,
     })
+
+    // React.useEffect(() => {
+    //     if (sessionIsExpiring) {
+    //         const timer = setInterval(() => {
+    //             setTimeUntilLogout((timeUntilLogout) => timeUntilLogout - 1)
+    //         }, 1000)
+    //         runningTimers.current.push(timer)
+    //         // remember to clear this timer
+    //     }
+    // }, [sessionIsExpiring])
 
     // const useUpdateSessionExpiry = (): [React.RefCallback<boolean>] => {
     //     const setRef: React.RefCallback<boolean> = React.useCallback(
@@ -156,6 +171,7 @@ function AuthProvider({
                 checkAuth,
                 sessionIsExpiring,
                 updateSessionExpiry,
+                timeUntilLogout,
             }}
             children={children}
         />

@@ -10,7 +10,7 @@ export const AuthenticatedRouteWrapper = ({
 }: {
     children: React.ReactNode
 }): React.ReactElement => {
-    const { sessionIsExpiring } = useAuth()
+    const { logout, sessionIsExpiring, timeUntilLogout } = useAuth()
     const modalRef = createRef<ModalRef>()
     useEffect(() => {
         console.log('in the effect')
@@ -26,9 +26,16 @@ export const AuthenticatedRouteWrapper = ({
                     modalRef={modalRef}
                     id="extend-session-modal"
                     modalHeading="Session Expiring"
+                    onSubmitText="Continue Session"
+                    onCancelText="Logout"
+                    onCancel={logout}
                     submitButtonProps={{ className: styles.submitButton }}
+                    onSubmit={logout}
                 >
-                    <p>Your session is going to expire in this many minutes</p>
+                    <p>
+                        Your session is going to expire in {timeUntilLogout}{' '}
+                        seconds
+                    </p>
                     <p>
                         If you would like to extend your session, click the
                         Continue Session button
