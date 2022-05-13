@@ -19,6 +19,7 @@ const ROUTES = [
     'SUBMISSIONS_DOCUMENTS',
     'SUBMISSIONS_REVIEW_SUBMIT',
     'SUBMISSIONS_REVISION',
+    'SUBMISSIONS_SUMMARY',
 ] as const // iterable union type
 type RouteT = typeof ROUTES[number]
 
@@ -29,6 +30,7 @@ const STATE_SUBMISSION_FORM_ROUTES = [
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_DOCUMENTS',
     'SUBMISSIONS_REVIEW_SUBMIT',
+    'SUBMISSIONS_SUMMARY',
 ] as RouteT[]
 
 const RoutesRecord: Record<RouteT, string> = {
@@ -36,16 +38,17 @@ const RoutesRecord: Record<RouteT, string> = {
     AUTH: '/auth',
     DASHBOARD: '/dashboard',
     HELP: '/help',
-    SUBMISSIONS: '/submissions',
-    SUBMISSIONS_NEW: '/submissions/new',
-    SUBMISSIONS_FORM: '/submissions/:id',
-    SUBMISSIONS_TYPE: '/submissions/:id/type',
-    SUBMISSIONS_CONTRACT_DETAILS: '/submissions/:id/contract-details',
-    SUBMISSIONS_RATE_DETAILS: '/submissions/:id/rate-details',
-    SUBMISSIONS_CONTACTS: '/submissions/:id/contacts',
-    SUBMISSIONS_DOCUMENTS: '/submissions/:id/documents',
-    SUBMISSIONS_REVIEW_SUBMIT: '/submissions/:id/review-and-submit',
-    SUBMISSIONS_REVISION: '/submissions/:id/revisions/:revisionVersion',
+    SUBMISSIONS: 'submissions',
+    SUBMISSIONS_NEW: 'submissions/new',
+    SUBMISSIONS_FORM: 'submissions/:id/form/*',
+    SUBMISSIONS_TYPE: 'type',
+    SUBMISSIONS_CONTRACT_DETAILS: 'contract-details',
+    SUBMISSIONS_RATE_DETAILS: 'rate-details',
+    SUBMISSIONS_CONTACTS: 'contacts',
+    SUBMISSIONS_DOCUMENTS: 'documents',
+    SUBMISSIONS_REVIEW_SUBMIT: 'review-and-submit',
+    SUBMISSIONS_REVISION: 'submissions/:id/summary/revisions/:revisionVersion',
+    SUBMISSIONS_SUMMARY: 'submissions/:id/summary',
 }
 
 // Static page headings used in <header> h1 when logged in. Dynamic headings, when necessary, are set in page specific parent component.
@@ -71,17 +74,14 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_CONTACTS: 'Contacts',
     SUBMISSIONS_DOCUMENTS: 'Supporting documents',
     SUBMISSIONS_REVIEW_SUBMIT: 'Review and submit',
-    SUBMISSIONS_REVISION: 'Submission Revision',
+    SUBMISSIONS_REVISION: 'Submission revision',
+    SUBMISSIONS_SUMMARY: 'Submission summary',
     UNKNOWN_ROUTE: 'Not found',
 }
 
 const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {
     const match = ROUTES.find((route) =>
-        matchPath(pathname, {
-            path: RoutesRecord[route],
-            exact: true,
-            strict: true,
-        })
+        matchPath({ path: RoutesRecord[route], end: true }, pathname)
     )
     return match ? match : 'UNKNOWN_ROUTE'
 }

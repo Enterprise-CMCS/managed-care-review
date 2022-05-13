@@ -24,7 +24,7 @@ describe('SubmissionSummary', () => {
         renderWithProviders(
             <Route
                 path={RoutesRecord.SUBMISSIONS_FORM}
-                component={SubmissionSummary}
+                element={<SubmissionSummary />}
             />,
             {
                 apolloProvider: {
@@ -55,7 +55,7 @@ describe('SubmissionSummary', () => {
         renderWithProviders(
             <Route
                 path={RoutesRecord.SUBMISSIONS_FORM}
-                component={SubmissionSummary}
+                element={<SubmissionSummary />}
             />,
             {
                 apolloProvider: {
@@ -106,7 +106,7 @@ describe('SubmissionSummary', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={SubmissionSummary}
+                    element={<SubmissionSummary />}
                 />,
                 {
                     apolloProvider: {
@@ -143,7 +143,7 @@ describe('SubmissionSummary', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={SubmissionSummary}
+                    element={<SubmissionSummary />}
                 />,
                 {
                     apolloProvider: {
@@ -174,7 +174,7 @@ describe('SubmissionSummary', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={SubmissionSummary}
+                    element={<SubmissionSummary />}
                 />,
                 {
                     apolloProvider: {
@@ -232,7 +232,7 @@ describe('SubmissionSummary', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={SubmissionSummary}
+                    element={<SubmissionSummary />}
                 />,
                 {
                     apolloProvider: {
@@ -272,7 +272,7 @@ describe('SubmissionSummary', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={SubmissionSummary}
+                    element={<SubmissionSummary />}
                 />,
                 {
                     apolloProvider: {
@@ -307,7 +307,7 @@ describe('SubmissionSummary', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={SubmissionSummary}
+                    element={<SubmissionSummary />}
                 />,
                 {
                     apolloProvider: {
@@ -343,7 +343,7 @@ describe('SubmissionSummary', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={SubmissionSummary}
+                    element={<SubmissionSummary />}
                 />,
                 {
                     apolloProvider: {
@@ -401,7 +401,7 @@ describe('SubmissionSummary', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={SubmissionSummary}
+                    element={<SubmissionSummary />}
                 />,
                 {
                     apolloProvider: {
@@ -450,7 +450,7 @@ describe('SubmissionSummary', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={SubmissionSummary}
+                    element={<SubmissionSummary />}
                 />,
                 {
                     apolloProvider: {

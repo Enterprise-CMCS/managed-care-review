@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { useHistory, useLocation } from 'react-router'
-import { Route, Switch } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router'
+import { Route, Routes } from 'react-router-dom'
 import { assertNever, AuthModeType } from '../../common-code/config'
 import {
     getRouteName,
@@ -29,12 +29,12 @@ const LocalStorage = window.localStorage
 
 function componentForAuthMode(
     authMode: AuthModeType
-): (() => React.ReactElement) | undefined {
+): React.ReactElement | undefined {
     switch (authMode) {
         case 'LOCAL':
-            return LocalLogin
+            return <LocalLogin />
         case 'AWS_COGNITO':
-            return CognitoLogin
+            return <CognitoLogin />
         case 'IDM':
             return undefined
         default:
@@ -44,50 +44,46 @@ function componentForAuthMode(
 
 const StateUserRoutes = (): React.ReactElement => {
     return (
-        <Switch>
-            <Route path={RoutesRecord.ROOT} exact component={Dashboard} />
-            <Route path={RoutesRecord.DASHBOARD} component={Dashboard} />
+        <Routes>
+            <Route path={RoutesRecord.ROOT} element={<Dashboard />} />
+            <Route path={RoutesRecord.DASHBOARD} element={<Dashboard />} />
             <Route
                 path={RoutesRecord.SUBMISSIONS_NEW}
-                component={NewStateSubmissionForm}
+                element={<NewStateSubmissionForm />}
             />
             <Route
-                path={RoutesRecord.SUBMISSIONS_FORM}
-                component={SubmissionSummary}
-                exact
+                path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                element={<SubmissionSummary />}
             />
             <Route
                 path={RoutesRecord.SUBMISSIONS_REVISION}
-                component={SubmissionRevisionSummary}
-                exact
+                element={<SubmissionRevisionSummary />}
             />
             <Route
                 path={RoutesRecord.SUBMISSIONS_FORM}
-                component={StateSubmissionForm}
+                element={<StateSubmissionForm />}
             />
-            <Route path={RoutesRecord.HELP} component={Help} />
-            <Route path="*" component={Error404} />
-        </Switch>
+            <Route path={RoutesRecord.HELP} element={<Help />} />
+            <Route path="*" element={<Error404 />} />
+        </Routes>
     )
 }
 
 const CMSUserRoutes = (): React.ReactElement => {
     return (
-        <Switch>
-            <Route path={RoutesRecord.ROOT} exact component={CMSDashboard} />
-            <Route path={RoutesRecord.DASHBOARD} component={CMSDashboard} />
+        <Routes>
+            <Route path={RoutesRecord.ROOT} element={<CMSDashboard />} />
+            <Route path={RoutesRecord.DASHBOARD} element={<CMSDashboard />} />
             <Route
-                path={RoutesRecord.SUBMISSIONS_FORM}
-                component={SubmissionSummary}
-                exact
+                path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                element={<SubmissionSummary />}
             />
             <Route
                 path={RoutesRecord.SUBMISSIONS_REVISION}
-                component={SubmissionRevisionSummary}
-                exact
+                element={<SubmissionRevisionSummary />}
             />
-            <Route path="*" component={Error404} />
-        </Switch>
+            <Route path="*" element={<Error404 />} />
+        </Routes>
     )
 }
 
@@ -99,14 +95,14 @@ const UnauthenticatedRoutes = ({
     const authComponent = componentForAuthMode(authMode)
 
     return (
-        <Switch>
-            <Route path={RoutesRecord.ROOT} exact component={Landing} />
+        <Routes>
+            <Route path={RoutesRecord.ROOT} element={<Landing />} />
             {/* no /auth page for IDM auth, we just have the login redirect link */}
             {authComponent && (
-                <Route path={RoutesRecord.AUTH} component={authComponent} />
+                <Route path={RoutesRecord.AUTH} element={authComponent} />
             )}
-            <Route path="*" component={Landing} />
-        </Switch>
+            <Route path="*" element={<Landing />} />
+        </Routes>
     )
 }
 
@@ -117,7 +113,7 @@ export const AppRoutes = ({
 }): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
-    const history = useHistory()
+    const navigate = useNavigate()
     const route = getRouteName(pathname)
     const { updateHeading } = usePage()
     const [initialPath] = useState(pathname) // this gets written on mount, so we don't call the effect on every path change
@@ -149,7 +145,7 @@ export const AppRoutes = ({
                         window.location.href = idmRedirectURL()
                     } else {
                         console.log('redirecting to /auth')
-                        history.push('/auth')
+                        navigate('/auth')
                     }
                 } catch (err) {
                     console.log(
@@ -165,11 +161,11 @@ export const AppRoutes = ({
             console.log('Retrieved For Redirect: ', redirectPath)
 
             if (redirectPath) {
-                history.push(redirectPath)
+                navigate(redirectPath)
                 LocalStorage.removeItem(LOGIN_REDIRECT_STORAGE_KEY)
             }
         }
-    }, [initialPath, loggedInUser, history, authMode])
+    }, [initialPath, loggedInUser, navigate, authMode])
 
     /*
         Side effects that happen on page change

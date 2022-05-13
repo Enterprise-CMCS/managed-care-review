@@ -237,12 +237,12 @@ describe('ContractDetailsSummarySection', () => {
         renderWithProviders(
             <Route
                 path={RoutesRecord.SUBMISSIONS_REVISION}
-                component={() => (
+                element={
                     <ContractDetailsSummarySection
                         submission={draftContractAndRatesSubmission}
                         submissionName="MN-PMAP-0001"
                     />
-                )}
+                }
             />,
             {
                 routerProvider: {

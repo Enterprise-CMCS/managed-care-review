@@ -16,7 +16,7 @@ describe('SubmissionRevisionSummary', () => {
         renderWithProviders(
             <Route
                 path={RoutesRecord.SUBMISSIONS_REVISION}
-                component={SubmissionRevisionSummary}
+                element={<SubmissionRevisionSummary />}
             />,
             {
                 apolloProvider: {
@@ -54,7 +54,7 @@ describe('SubmissionRevisionSummary', () => {
         renderWithProviders(
             <Route
                 path={RoutesRecord.SUBMISSIONS_REVISION}
-                component={SubmissionRevisionSummary}
+                element={<SubmissionRevisionSummary />}
             />,
             {
                 apolloProvider: {

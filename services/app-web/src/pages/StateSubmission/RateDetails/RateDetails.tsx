@@ -9,7 +9,7 @@ import {
     Label,
 } from '@trussworks/react-uswds'
 import { Formik, FormikErrors } from 'formik'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
@@ -82,7 +82,8 @@ export const RateDetails = ({
     ) => Promise<HealthPlanPackage | Error>
 }): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const history = useHistory()
+    const navigate = useNavigate()
+    const parentPath = `/submissions/${draftSubmission.id}/form`
 
     // Rate documents state management
     const { deleteFile, getKey, getS3URL, scanFile, uploadFile } = useS3()
@@ -313,7 +314,7 @@ export const RateDetails = ({
                     updatedSubmission
                 )
             } else if (updatedSubmission) {
-                history.push(options.redirectPath)
+                navigate(options.redirectPath)
             }
         } catch (serverError) {
             setSubmitting(false)
@@ -327,7 +328,7 @@ export const RateDetails = ({
                 onSubmit={(values, { setSubmitting }) => {
                     return handleFormSubmit(values, setSubmitting, {
                         shouldValidateDocuments: true,
-                        redirectPath: 'contacts',
+                        redirectPath: `${parentPath}/contacts`,
                     })
                 }}
                 validationSchema={RateDetailsFormSchema}
@@ -718,15 +719,14 @@ export const RateDetails = ({
                                 backOnClick={async () => {
                                     // do not need to validate or submit if no documents are uploaded
                                     if (fileItems.length === 0) {
-                                        history.push('contract-details')
+                                        navigate('../contract-details')
                                     } else {
                                         await handleFormSubmit(
                                             values,
                                             setSubmitting,
                                             {
                                                 shouldValidateDocuments: false,
-                                                redirectPath:
-                                                    'contract-details',
+                                                redirectPath: `../contract-details`,
                                             }
                                         )
                                     }

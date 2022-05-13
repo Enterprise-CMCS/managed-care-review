@@ -37,7 +37,7 @@ type CreateHealthPlanPackagePayload {
 }
 
 input FetchHealthPlanPackageInput {
-    pkgID: ID!
+    pkgID: ID
 }
 
 type FetchHealthPlanPackagePayload {

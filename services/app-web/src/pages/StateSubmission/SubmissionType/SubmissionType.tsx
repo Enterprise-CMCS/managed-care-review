@@ -7,7 +7,11 @@ import {
 } from '@trussworks/react-uswds'
 import { Field, Formik, FormikErrors, FormikHelpers } from 'formik'
 import React, { useEffect } from 'react'
-import { Link as ReactRouterLink, useHistory } from 'react-router-dom'
+import {
+    Link as ReactRouterLink,
+    useNavigate,
+    useLocation,
+} from 'react-router-dom'
 import Select, { AriaOnFocus } from 'react-select'
 import * as Yup from 'yup'
 import {
@@ -79,8 +83,8 @@ export const SubmissionType = ({
         programs = loggedInUser.state.programs
     }
 
-    const history = useHistory()
-    const location = history.location
+    const navigate = useNavigate()
+    const location = useLocation()
     const isNewSubmission = location.pathname === '/submissions/new'
 
     const programOptions: Array<{ value: string; label: string }> =
@@ -190,8 +194,8 @@ export const SubmissionType = ({
                     result?.data?.createHealthPlanPackage.pkg
 
                 if (draftSubmission) {
-                    history.push(
-                        `/submissions/${draftSubmission.id}/contract-details`
+                    navigate(
+                        `/submissions/${draftSubmission.id}/form/contract-details`
                     )
                 }
             } catch (serverError) {
@@ -220,10 +224,10 @@ export const SubmissionType = ({
             try {
                 await updateDraft(draftSubmission)
                 if (redirectPath) {
-                    history.push(redirectPath)
+                    navigate(redirectPath)
                 } else {
-                    history.push(
-                        `/submissions/${draftSubmission.id}/contract-details`
+                    navigate(
+                        `/submissions/${draftSubmission.id}/form/contract-details`
                     )
                 }
             } catch (serverError) {
@@ -408,7 +412,7 @@ export const SubmissionType = ({
                             pageVariant={
                                 isNewSubmission ? 'FIRST' : 'EDIT_FIRST'
                             }
-                            backOnClick={() => history.push('/dashboard')}
+                            backOnClick={() => navigate('/dashboard')}
                             continueOnClick={() => {
                                 setShouldValidate(true)
                                 setFocusErrorSummaryHeading(true)

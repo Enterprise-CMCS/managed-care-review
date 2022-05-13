@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 
 import { Alert, GridContainer } from '@trussworks/react-uswds'
-import { Switch, Route, useParams, useLocation } from 'react-router-dom'
+import { Routes, Route, useParams, useLocation } from 'react-router-dom'
 import styles from './StateSubmissionForm.module.scss'
 
 import { Error404 } from '../Errors/Error404'
@@ -100,9 +100,9 @@ type FormDataError =
     | 'WRONG_SUBMISSION_STATUS'
 
 export const StateSubmissionForm = (): React.ReactElement => {
-    const { id } = useParams<{ id: string }>()
+    const { id, '*': path } = useParams<{ id: string; ['*']: string }>()
     const { pathname } = useLocation()
-    const currentRoute = getRouteName(pathname)
+    const currentRoute = getRouteName(`/${path}` || 'UNKNOWN_ROUTE')
     const { updateHeading } = usePage()
     const [formDataFromLatestRevision, setFormDataFromLatestRevision] =
         useState<UnlockedHealthPlanFormDataType | null>(null)
@@ -308,49 +308,67 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 />
             </div>
             <StateSubmissionContainer>
-                <Switch>
-                    <Route path={RoutesRecord.SUBMISSIONS_TYPE}>
-                        <SubmissionType
-                            draftSubmission={formDataFromLatestRevision}
-                            updateDraft={updateDraftHealthPlanPackage}
-                        />
-                    </Route>
-                    <Route path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}>
-                        <ContractDetails
-                            draftSubmission={formDataFromLatestRevision}
-                            updateDraft={updateDraftHealthPlanPackage}
-                            previousDocuments={previousDocuments}
-                        />
-                    </Route>
-                    <Route path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}>
-                        <RateDetails
-                            draftSubmission={formDataFromLatestRevision}
-                            updateDraft={updateDraftHealthPlanPackage}
-                            previousDocuments={previousDocuments}
-                        />
-                    </Route>
-                    <Route path={RoutesRecord.SUBMISSIONS_CONTACTS}>
-                        <Contacts
-                            draftSubmission={formDataFromLatestRevision}
-                            updateDraft={updateDraftHealthPlanPackage}
-                        />
-                    </Route>
-                    <Route path={RoutesRecord.SUBMISSIONS_DOCUMENTS}>
-                        <Documents
-                            draftSubmission={formDataFromLatestRevision}
-                            updateDraft={updateDraftHealthPlanPackage}
-                            previousDocuments={previousDocuments}
-                        />
-                    </Route>
-                    <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>
-                        <ReviewSubmit
-                            draftSubmission={formDataFromLatestRevision}
-                            unlocked={!!unlockedInfo}
-                            submissionName={computedSubmissionName}
-                            documentDateLookupTable={documentDates}
-                        />
-                    </Route>
-                </Switch>
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_TYPE}
+                        element={
+                            <SubmissionType
+                                draftSubmission={formDataFromLatestRevision}
+                                updateDraft={updateDraftHealthPlanPackage}
+                            />
+                        }
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={
+                            <ContractDetails
+                                draftSubmission={formDataFromLatestRevision}
+                                updateDraft={updateDraftHealthPlanPackage}
+                                previousDocuments={previousDocuments}
+                            />
+                        }
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={
+                            <RateDetails
+                                draftSubmission={formDataFromLatestRevision}
+                                updateDraft={updateDraftHealthPlanPackage}
+                                previousDocuments={previousDocuments}
+                            />
+                        }
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTACTS}
+                        element={
+                            <Contacts
+                                draftSubmission={formDataFromLatestRevision}
+                                updateDraft={updateDraftHealthPlanPackage}
+                            />
+                        }
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_DOCUMENTS}
+                        element={
+                            <Documents
+                                draftSubmission={formDataFromLatestRevision}
+                                updateDraft={updateDraftHealthPlanPackage}
+                                previousDocuments={previousDocuments}
+                            />
+                        }
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={
+                            <ReviewSubmit
+                                draftSubmission={formDataFromLatestRevision}
+                                unlocked={!!unlockedInfo}
+                                submissionName={computedSubmissionName}
+                                documentDateLookupTable={documentDates}
+                            />
+                        }
+                    />
+                </Routes>
             </StateSubmissionContainer>
         </>
     )

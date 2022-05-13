@@ -1,7 +1,6 @@
 import React from 'react'
 import userEvent from '@testing-library/user-event'
-import { Route } from 'react-router-dom'
-import { Location } from 'history'
+import { Route, Location } from 'react-router-dom'
 import { screen, waitFor, Screen, queries } from '@testing-library/react'
 import { CognitoUser, CognitoUserPool } from 'amazon-cognito-identity-js'
 
@@ -92,8 +91,8 @@ describe('Auth', () => {
                 <>
                     <Route
                         path="*"
-                        render={({ location }) => {
-                            testLocation = location as Location
+                        element={({ location }: { location: Location }) => {
+                            testLocation = location
                             return null
                         }}
                     />
@@ -123,8 +122,8 @@ describe('Auth', () => {
                 <>
                     <Route
                         path="*"
-                        render={({ location }) => {
-                            testLocation = location as Location
+                        element={({ location }: { location: Location }) => {
+                            testLocation = location
                             return null
                         }}
                     />
@@ -195,8 +194,8 @@ describe('Auth', () => {
                 <>
                     <Route
                         path="*"
-                        render={({ location }) => {
-                            testLocation = location as Location
+                        element={({ location }: { location: Location }) => {
+                            testLocation = location
                             return null
                         }}
                     />
@@ -233,8 +232,8 @@ describe('Auth', () => {
                 <>
                     <Route
                         path="*"
-                        render={({ location }) => {
-                            testLocation = location as Location
+                        element={({ location }: { location: Location }) => {
+                            testLocation = location
                             return null
                         }}
                     />

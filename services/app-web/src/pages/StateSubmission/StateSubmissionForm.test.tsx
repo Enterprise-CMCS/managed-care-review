@@ -26,7 +26,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={StateSubmissionForm}
+                    element={<StateSubmissionForm />}
                 />,
                 {
                     apolloProvider: {
@@ -58,7 +58,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={StateSubmissionForm}
+                    element={<StateSubmissionForm />}
                 />,
                 {
                     apolloProvider: {
@@ -110,7 +110,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={StateSubmissionForm}
+                    element={<StateSubmissionForm />}
                 />,
                 {
                     apolloProvider: {
@@ -148,7 +148,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={StateSubmissionForm}
+                    element={<StateSubmissionForm />}
                 />,
                 {
                     apolloProvider: {
@@ -182,7 +182,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={StateSubmissionForm}
+                    element={<StateSubmissionForm />}
                 />,
                 {
                     apolloProvider: {
@@ -231,7 +231,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={StateSubmissionForm}
+                    element={<StateSubmissionForm />}
                 />,
                 {
                     apolloProvider: {
@@ -299,7 +299,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={StateSubmissionForm}
+                    element={<StateSubmissionForm />}
                 />,
                 {
                     apolloProvider: {
@@ -347,7 +347,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={StateSubmissionForm}
+                    element={<StateSubmissionForm />}
                 />,
                 {
                     apolloProvider: {
@@ -371,7 +371,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={StateSubmissionForm}
+                    element={<StateSubmissionForm />}
                 />,
                 {
                     apolloProvider: {
@@ -397,7 +397,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={StateSubmissionForm}
+                    element={<StateSubmissionForm />}
                 />,
                 {
                     apolloProvider: {
@@ -431,7 +431,7 @@ describe('StateSubmissionForm', () => {
             renderWithProviders(
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={StateSubmissionForm}
+                    element={<StateSubmissionForm />}
                 />,
                 {
                     apolloProvider: {

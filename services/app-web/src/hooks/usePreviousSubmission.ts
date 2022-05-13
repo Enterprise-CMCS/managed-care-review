@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react'
-import { useRouteMatch } from 'react-router-dom'
+import { useLocation, matchPath } from 'react-router-dom'
 import { RoutesRecord } from '../constants/routes'
 
 export const usePreviousSubmission = (): boolean => {
     const [isPreviousSubmission, setIsPreviousSubmission] =
         useState<boolean>(false)
-    const { path } = useRouteMatch()
+    const { pathname } = useLocation()
     useEffect(() => {
-        if (path === RoutesRecord.SUBMISSIONS_REVISION) {
+        if (matchPath(RoutesRecord.SUBMISSIONS_REVISION, pathname)) {
             setIsPreviousSubmission(true)
         }
-    }, [path, setIsPreviousSubmission])
+    }, [pathname, setIsPreviousSubmission])
 
     return isPreviousSubmission
 }

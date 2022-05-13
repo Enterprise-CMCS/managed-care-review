@@ -14,7 +14,7 @@ import {
     FieldArray,
     ErrorMessage,
 } from 'formik'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import styles from '../StateSubmissionForm.module.scss'
 
@@ -179,7 +179,7 @@ export const Contacts = ({
     const [newActuaryContactButtonRef, setNewActuaryContactButtonFocus] =
         useFocus()
 
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
     const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
@@ -287,9 +287,11 @@ export const Contacts = ({
                 )
             } else if (updatedSubmission) {
                 if (redirectToDashboard.current) {
-                    history.push(`/dashboard`)
+                    navigate(`/dashboard`)
                 } else {
-                    history.push(`/submissions/${draftSubmission.id}/documents`)
+                    navigate(
+                        `/submissions/${draftSubmission.id}/form/documents`
+                    )
                 }
             }
         } catch (serverError) {
@@ -946,7 +948,7 @@ export const Contacts = ({
                             <PageActions
                                 saveAsDraftOnClick={() => {
                                     if (!dirty) {
-                                        history.push(`/dashboard`)
+                                        navigate(`/dashboard`)
                                     } else {
                                         setShouldValidate(true)
                                         setFocusErrorSummaryHeading(true)
@@ -955,11 +957,11 @@ export const Contacts = ({
                                     }
                                 }}
                                 backOnClick={() =>
-                                    history.push(
+                                    navigate(
                                         draftSubmission.submissionType ===
                                             'CONTRACT_ONLY'
-                                            ? 'contract-details'
-                                            : 'rate-details'
+                                            ? '../contract-details'
+                                            : '../rate-details'
                                     )
                                 }
                                 continueOnClick={() => {

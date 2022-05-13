@@ -1,6 +1,6 @@
 import { Alert, Grid, GridContainer } from '@trussworks/react-uswds'
 import React from 'react'
-import { NavLink, useHistory } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import onemacLogo from '../../assets/images/onemac-logo.svg'
 import { AuthModeType } from '../../common-code/config'
 import { getRouteName } from '../../constants/routes'
@@ -24,9 +24,9 @@ export const Header = ({
     setAlert,
 }: HeaderProps): React.ReactElement => {
     const { logout, loggedInUser, loginStatus } = useAuth()
-    const history = useHistory()
+    const location = useLocation()
     const { heading } = usePage()
-    const route = getRouteName(history.location.pathname)
+    const route = getRouteName(location.pathname)
 
     const handleLogout = (
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>

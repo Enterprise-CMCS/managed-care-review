@@ -8,7 +8,7 @@ import {
     Textarea,
 } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import {
     ContactsSummarySection,
     ContractDetailsSummarySection,
@@ -42,7 +42,8 @@ export const ReviewSubmit = ({
         string | undefined
     >(undefined)
     const [focusErrorsInModal, setFocusErrorsInModal] = useState(true)
-    const history = useHistory()
+    const navigate = useNavigate()
+    const parentPath = `/submissions/${draftSubmission.id}/form`
     const modalRef = useRef<ModalRef>(null)
     const { loggedInUser } = useAuth()
 
@@ -112,7 +113,7 @@ export const ReviewSubmit = ({
 
             if (data.data?.submitHealthPlanPackage) {
                 modalRef.current?.toggleModal(undefined, false)
-                history.push(`/dashboard?justSubmitted=${submissionName}`)
+                navigate(`/dashboard?justSubmitted=${submissionName}`)
             } else {
                 console.error('Got nothing back from submit')
                 showError('Error attempting to submit. Please try again.')
@@ -154,13 +155,13 @@ export const ReviewSubmit = ({
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
                 submissionName={submissionName}
-                navigateTo="type"
+                navigateTo={`${parentPath}/type`}
                 statePrograms={statePrograms}
             />
 
             <ContractDetailsSummarySection
                 submission={draftSubmission}
-                navigateTo="contract-details"
+                navigateTo={`${parentPath}/contract-details`}
                 submissionName={submissionName}
                 documentDateLookupTable={documentDateLookupTable}
             />
@@ -168,7 +169,7 @@ export const ReviewSubmit = ({
             {isContractActionAndRateCertification && (
                 <RateDetailsSummarySection
                     submission={draftSubmission}
-                    navigateTo="rate-details"
+                    navigateTo={`${parentPath}/rate-details`}
                     submissionName={submissionName}
                     documentDateLookupTable={documentDateLookupTable}
                 />
@@ -176,19 +177,19 @@ export const ReviewSubmit = ({
 
             <ContactsSummarySection
                 submission={draftSubmission}
-                navigateTo="contacts"
+                navigateTo={`${parentPath}/contacts`}
             />
 
             <SupportingDocumentsSummarySection
                 submission={draftSubmission}
-                navigateTo="documents"
+                navigateTo={`${parentPath}/documents`}
             />
 
             <PageActionsContainer
                 left={
                     <Button
                         type="button"
-                        onClick={() => history.push('/dashboard')}
+                        onClick={() => navigate('/dashboard')}
                         unstyled
                     >
                         Save as draft
@@ -198,7 +199,7 @@ export const ReviewSubmit = ({
                 <Button
                     type="button"
                     outline
-                    onClick={() => history.push('documents')}
+                    onClick={() => navigate(`${parentPath}/documents`)}
                 >
                     Back
                 </Button>

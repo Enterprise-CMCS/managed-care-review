@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Form as UswdsForm, Link } from '@trussworks/react-uswds'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
@@ -32,7 +32,8 @@ export const Documents = ({
 }: DocumentProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(false)
     const isContractOnly = draftSubmission.submissionType === 'CONTRACT_ONLY'
-    const history = useHistory()
+    const navigate = useNavigate()
+    const parentPath = `/submissions/${draftSubmission.id}/form`
 
     // Documents state management
     const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
@@ -244,7 +245,7 @@ export const Documents = ({
                     )
                     onUpdateDraftSubmissionError()
                 } else if (updatedSubmission) {
-                    history.push(redirectPath)
+                    navigate(redirectPath)
                 }
             } catch (error) {
                 onUpdateDraftSubmissionError()
@@ -324,7 +325,7 @@ export const Documents = ({
                     backOnClick={async (e) => {
                         await handleFormSubmit({
                             shouldValidateDocuments: false,
-                            redirectPath: 'contacts',
+                            redirectPath: `${parentPath}/contacts`,
                         })(e)
                     }}
                     continueDisabled={
@@ -333,7 +334,7 @@ export const Documents = ({
                     continueOnClick={async (e) => {
                         await handleFormSubmit({
                             shouldValidateDocuments: true,
-                            redirectPath: `review-and-submit`,
+                            redirectPath: `${parentPath}/review-and-submit`,
                         })(e)
                     }}
                 />

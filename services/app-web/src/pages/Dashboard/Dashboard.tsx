@@ -42,11 +42,11 @@ function submissionURL(
     status: SubmissionInDashboard['status']
 ): string {
     if (status === 'DRAFT') {
-        return `/submissions/${id}/type`
+        return `/submissions/${id}/form/type`
     } else if (status === 'UNLOCKED') {
-        return `/submissions/${id}/review-and-submit`
+        return `/submissions/${id}/form/review-and-submit`
     }
-    return `/submissions/${id}`
+    return `/submissions/${id}/summary`
 }
 
 const StatusTag = ({
