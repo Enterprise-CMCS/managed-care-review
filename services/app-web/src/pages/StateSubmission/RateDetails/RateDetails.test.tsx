@@ -49,7 +49,7 @@ describe('RateDetails', () => {
         ).toBeInTheDocument()
         expect(
             screen.getByRole('button', { name: 'Continue' })
-        ).not.toBeDisabled()
+        ).not.toHaveAttribute('aria-disabled')
     })
 
     it('displays correct form guidance', async () => {
@@ -136,7 +136,7 @@ describe('RateDetails', () => {
             expect(
                 screen.getAllByText('You must choose a rate certification type')
             ).toHaveLength(2)
-            expect(continueButton).toBeDisabled()
+            expect(continueButton).toHaveAttribute('aria-disabled', 'true')
         })
     })
 
@@ -163,7 +163,7 @@ describe('RateDetails', () => {
                     "You must select whether you're certifying rates or rate ranges"
                 )
             ).toHaveLength(2)
-            expect(continueButton).toBeDisabled()
+            expect(continueButton).toHaveAttribute('aria-disabled', 'true')
         })
     })
 
@@ -191,7 +191,7 @@ describe('RateDetails', () => {
             expect(
                 screen.getAllByText('You must upload at least one document')
             ).toHaveLength(2)
-            expect(continueButton).toBeDisabled()
+            expect(continueButton).toHaveAttribute('aria-disabled', 'true')
         })
     })
 
@@ -281,7 +281,7 @@ describe('RateDetails', () => {
                 )
                 expect(
                     screen.getByRole('button', { name: 'Continue' })
-                ).not.toBeDisabled()
+                ).not.toHaveAttribute('aria-disabled')
                 expect(
                     within(
                         screen.getByTestId('file-input-preview-list')
@@ -369,7 +369,7 @@ describe('RateDetails', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
-                expect(continueButton).not.toBeDisabled()
+                expect(continueButton).not.toHaveAttribute('aria-disabled')
             })
         })
 
@@ -400,7 +400,7 @@ describe('RateDetails', () => {
                 expect(
                     screen.getByText('This is not a valid file type.')
                 ).toBeInTheDocument()
-                expect(continueButton).not.toBeDisabled()
+                expect(continueButton).not.toHaveAttribute('aria-disabled')
             })
         })
 
@@ -421,7 +421,7 @@ describe('RateDetails', () => {
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
-            expect(continueButton).not.toBeDisabled()
+            expect(continueButton).not.toHaveAttribute('aria-disabled')
 
             continueButton.click()
 
@@ -430,7 +430,7 @@ describe('RateDetails', () => {
                     screen.getAllByText('You must upload at least one document')
                 ).toHaveLength(2)
 
-                expect(continueButton).toBeDisabled()
+                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
             })
         })
 
@@ -456,7 +456,7 @@ describe('RateDetails', () => {
             userEvent.upload(input, TEST_DOC_FILE)
             userEvent.upload(input, [])
             userEvent.upload(input, TEST_DOC_FILE)
-            expect(continueButton).not.toBeDisabled()
+            expect(continueButton).not.toHaveAttribute('aria-disabled')
 
             continueButton.click()
 
@@ -467,7 +467,7 @@ describe('RateDetails', () => {
                     )
                 ).toHaveLength(2)
 
-                expect(continueButton).toBeDisabled()
+                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
             })
         })
 
@@ -495,7 +495,7 @@ describe('RateDetails', () => {
                 await screen.findByText('This is not a valid file type.')
             ).toBeInTheDocument()
 
-            expect(continueButton).not.toBeDisabled()
+            expect(continueButton).not.toHaveAttribute('aria-disabled')
             continueButton.click()
 
             expect(
@@ -504,7 +504,7 @@ describe('RateDetails', () => {
                 )
             ).toHaveLength(2)
 
-            expect(continueButton).toBeDisabled()
+            expect(continueButton).toHaveAttribute('aria-disabled', 'true')
         })
         it('disabled with alert when trying to continue while a file is still uploading', async () => {
             renderWithProviders(
@@ -542,7 +542,7 @@ describe('RateDetails', () => {
 
             // click continue while file 2 still loading
             continueButton.click()
-            expect(continueButton).toBeDisabled()
+            expect(continueButton).toHaveAttribute('aria-disabled', 'true')
 
             expect(
                 screen.getAllByText(
@@ -576,7 +576,7 @@ describe('RateDetails', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
-                expect(saveAsDraftButton).not.toBeDisabled()
+                expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
             })
         })
 
@@ -605,7 +605,7 @@ describe('RateDetails', () => {
             dragAndDrop(targetEl, [TEST_PNG_FILE])
 
             await waitFor(() => {
-                expect(saveAsDraftButton).not.toBeDisabled()
+                expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
             })
         })
 
@@ -627,7 +627,7 @@ describe('RateDetails', () => {
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
             })
-            expect(saveAsDraftButton).not.toBeDisabled()
+            expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
 
             userEvent.click(saveAsDraftButton)
             expect(mockUpdateDraftFn).toHaveBeenCalled()
@@ -668,7 +668,7 @@ describe('RateDetails', () => {
             const saveAsDraftButton = screen.getByRole('button', {
                 name: 'Save as draft',
             })
-            expect(saveAsDraftButton).not.toBeDisabled()
+            expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
 
             userEvent.click(saveAsDraftButton)
             expect(mockUpdateDraftFn).toHaveBeenCalled()
@@ -740,7 +740,7 @@ describe('RateDetails', () => {
             userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
-                expect(backButton).not.toBeDisabled()
+                expect(backButton).not.toHaveAttribute('aria-disabled')
             })
         })
 
@@ -768,7 +768,7 @@ describe('RateDetails', () => {
             dragAndDrop(targetEl, [TEST_PNG_FILE])
 
             await waitFor(() => {
-                expect(backButton).not.toBeDisabled()
+                expect(backButton).not.toHaveAttribute('aria-disabled')
             })
         })
 
@@ -790,7 +790,7 @@ describe('RateDetails', () => {
             const backButton = screen.getByRole('button', {
                 name: 'Back',
             })
-            expect(backButton).not.toBeDisabled()
+            expect(backButton).not.toHaveAttribute('aria-disabled')
 
             userEvent.click(backButton)
             expect(
@@ -823,7 +823,7 @@ describe('RateDetails', () => {
             userEvent.upload(input, [TEST_PDF_FILE])
             userEvent.upload(input, [TEST_DOC_FILE])
             await waitFor(() => {
-                expect(backButton).not.toBeDisabled()
+                expect(backButton).not.toHaveAttribute('aria-disabled')
                 expect(
                     screen.queryAllByText('Duplicate file, please remove')
                 ).toHaveLength(1)

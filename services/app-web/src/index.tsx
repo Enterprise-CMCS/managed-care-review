@@ -112,6 +112,9 @@ if (ldClientId === undefined) {
 ;(async () => {
     const LDProvider = await asyncWithLDProvider({
         clientSideID: ldClientId,
+        options: {
+            bootstrap: 'localStorage',
+        },
     })
 
     ReactDOM.render(

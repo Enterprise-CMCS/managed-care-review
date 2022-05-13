@@ -85,6 +85,7 @@ $animation-speed-4: 0.8s * $speed-base !default;
     box-sizing: border-box;
     display: inline-block;
     position: relative;
+    vertical-align: middle; 
 
     &::before,
     &::after {

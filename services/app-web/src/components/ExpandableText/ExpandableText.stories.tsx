@@ -1,7 +1,8 @@
 import React from 'react'
-import { Story } from '@storybook/react'
 import { ExpandableText, ExpandableTextProps } from './ExpandableText'
 import { GridContainer } from '@trussworks/react-uswds'
+
+import type { Story } from '@storybook/react'
 
 export default {
     title: 'Components/ExpandableText',

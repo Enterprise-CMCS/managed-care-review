@@ -20,8 +20,10 @@ import styles from './Dashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 
-import { useFlags } from 'launchdarkly-react-client-sdk'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+
 import { MaintenanceMessage } from './MaintenanceMessage'
+import { featureFlags } from '../../common-code/featureFlags'
 
 // We only pull a subset of data out of the submission and revisions for display in Dashboard
 type SubmissionInDashboard = {
@@ -70,7 +72,12 @@ const StatusTag = ({
 export const Dashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
     const location = useLocation()
-    const { testFrontendBanner } = useFlags()
+
+    // Get the LD feature flag
+    const ldClient = useLDClient()
+    const testFrontendBanner = ldClient?.variation(
+        featureFlags.REACT_TEST_FRONTEND_BANNER
+    )
 
     const { loading, data, error } = useIndexHealthPlanPackagesQuery()
 

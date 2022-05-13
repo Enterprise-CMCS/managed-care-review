@@ -1,4 +1,4 @@
-import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto';
+import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto'
 import { HealthPlanPackage } from '../gen/gqlClient'
 import { DocumentDateLookupTable } from '../pages/SubmissionSummary/SubmissionSummary'
 export const makeDateTable = (

@@ -36,7 +36,6 @@ import {
     ContractExecutionStatus,
     FederalAuthority,
     CapitationRatesAmendmentReason,
-    HealthPlanPackage,
 } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
@@ -44,7 +43,6 @@ import { isS3Error } from '../../../s3'
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
 import {
     ManagedCareEntity,
-    UnlockedHealthPlanFormDataType,
     CapitationRatesAmendedReason,
 } from '../../../common-code/healthPlanFormDataType'
 import {
@@ -54,6 +52,7 @@ import {
     FederalAuthorityRecord,
 } from '../../../constants/healthPlanPackages'
 import { PageActions } from '../PageActions'
+import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -102,14 +101,7 @@ export const ContractDetails = ({
     showValidations = false,
     previousDocuments,
     updateDraft,
-}: {
-    draftSubmission: UnlockedHealthPlanFormDataType
-    previousDocuments: string[]
-    showValidations?: boolean
-    updateDraft: (
-        input: UnlockedHealthPlanFormDataType
-    ) => Promise<HealthPlanPackage | Error>
-}): React.ReactElement => {
+}: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const navigate = useNavigate()
     const parentPath = `/submissions/${draftSubmission.id}/form`
@@ -269,6 +261,7 @@ export const ContractDetails = ({
             if (!hasValidFiles) {
                 setShouldValidate(true)
                 setFocusErrorSummaryHeading(true)
+                setSubmitting(false)
                 return
             }
         }
@@ -1141,9 +1134,8 @@ export const ContractDetails = ({
                                     )
                                 }
                             }}
-                            continueDisabled={
-                                isSubmitting || showFileUploadError
-                            }
+                            disableContinue={showFileUploadError}
+                            actionInProgress={isSubmitting}
                         />
                     </UswdsForm>
                 </>
