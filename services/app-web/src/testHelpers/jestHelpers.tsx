@@ -68,8 +68,10 @@ const userClickByRole = (
     userEvent.click(element)
 }
 
-const userClickSignIn = (screen: Screen<typeof queries>): void => {
-    const signInButton = screen.getByRole('link', { name: /Sign In/i })
+const userClickSignIn = async (
+    screen: Screen<typeof queries>
+): Promise<void> => {
+    const signInButton = await screen.findByRole('link', { name: /Sign In/i })
     userEvent.click(signInButton)
 }
 

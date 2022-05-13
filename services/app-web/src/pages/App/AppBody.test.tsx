@@ -97,9 +97,7 @@ describe('App Body and routes', () => {
 
         it('when user clicks Sign In link, redirects to /auth', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
-            await waitFor(() => {
-                userClickSignIn(screen)
-            })
+            await userClickSignIn(screen)
 
             expect(
                 screen.getByRole('heading', { name: /Auth Page/i, level: 2 })
@@ -109,9 +107,7 @@ describe('App Body and routes', () => {
         it('display local login page when expected', async () => {
             renderWithProviders(<AppBody authMode={'LOCAL'} />)
 
-            await waitFor(() => {
-                userClickSignIn(screen)
-            })
+            await userClickSignIn(screen)
 
             expect(
                 screen.getByRole('heading', {
@@ -123,9 +119,7 @@ describe('App Body and routes', () => {
 
         it('display cognito signup page when expected', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
-            await waitFor(() => {
-                userClickSignIn(screen)
-            })
+            await userClickSignIn(screen)
 
             expect(
                 screen.getByRole('textbox', { name: 'First Name' })
@@ -142,9 +136,7 @@ describe('App Body and routes', () => {
     describe('page scrolling', () => {
         it('scroll top on page load', async () => {
             renderWithProviders(<AppBody authMode={'LOCAL'} />)
-            await waitFor(() => {
-                userClickSignIn(screen)
-            })
+            await userClickSignIn(screen)
             expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
         })
     })
