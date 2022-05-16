@@ -33,7 +33,7 @@ export function AppBody({
                 {loginStatus === 'LOADING' ? (
                     <Loading />
                 ) : (
-                    <AppRoutes authMode={authMode} />
+                    <AppRoutes authMode={authMode} setAlert={setAlert} />
                 )}
             </main>
 

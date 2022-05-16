@@ -26,17 +26,18 @@ import { NewStateSubmissionForm, StateSubmissionForm } from '../StateSubmission'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
 import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
+import React from 'react'
 
 const LOGIN_REDIRECT_STORAGE_KEY = 'LOGIN_REDIRECT'
 const LocalStorage = window.localStorage
 
-const refreshSession = async (): Promise<void> => {
-    try {
-        await extendSession()
-    } catch (e) {
-        console.log('Error refreshing session: ', e)
-    }
-}
+// const refreshSession = async (): Promise<void> => {
+//     try {
+//         await extendSession()
+//     } catch (e) {
+//         console.log('Error refreshing session: ', e)
+//     }
+// }
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -53,9 +54,13 @@ function componentForAuthMode(
     }
 }
 
-const StateUserRoutes = (): React.ReactElement => {
+const StateUserRoutes = ({
+    setAlert,
+}: {
+    setAlert?: React.Dispatch<React.ReactElement>
+}): React.ReactElement => {
     return (
-        <AuthenticatedRouteWrapper>
+        <AuthenticatedRouteWrapper setAlert={setAlert}>
             <Switch>
                 <Route path={RoutesRecord.ROOT} exact component={Dashboard} />
                 <Route path={RoutesRecord.DASHBOARD} component={Dashboard} />
@@ -84,9 +89,13 @@ const StateUserRoutes = (): React.ReactElement => {
     )
 }
 
-const CMSUserRoutes = (): React.ReactElement => {
+const CMSUserRoutes = ({
+    setAlert,
+}: {
+    setAlert?: React.Dispatch<React.ReactElement>
+}): React.ReactElement => {
     return (
-        <AuthenticatedRouteWrapper>
+        <AuthenticatedRouteWrapper setAlert={setAlert}>
             <Switch>
                 <Route
                     path={RoutesRecord.ROOT}
@@ -131,10 +140,12 @@ const UnauthenticatedRoutes = ({
 
 export const AppRoutes = ({
     authMode,
+    setAlert,
 }: {
     authMode: AuthModeType
+    setAlert?: React.Dispatch<React.ReactElement>
 }): React.ReactElement => {
-    const { loggedInUser, sessionIsExpiring, updateSessionExpiry } = useAuth()
+    const { loggedInUser, isSessionExpiring, updateSessionExpiry } = useAuth()
     const { pathname } = useLocation()
     const history = useHistory()
     const route = getRouteName(pathname)
@@ -143,7 +154,11 @@ export const AppRoutes = ({
     const runningTimers = useRef<NodeJS.Timer[]>([])
     // when we load, set the logout timer for 30 minutes in the future and refresh the session
     let sessionExpirationTime: dayjs.Dayjs | undefined = undefined
-    if (loggedInUser && !sessionIsExpiring) {
+    console.log('logged in user: ', loggedInUser)
+    if (!loggedInUser) {
+        LocalStorage.removeItem('LOGOUT_TIMER')
+    }
+    if (loggedInUser && !isSessionExpiring) {
         sessionExpirationTime = dayjs(Date.now()).add(2, 'minute')
         try {
             LocalStorage.setItem(
@@ -153,12 +168,16 @@ export const AppRoutes = ({
         } catch (e) {
             console.log('Error setting logout timer: ', e)
         }
-        // void extendSession()
+        try {
+            void extendSession()
+        } catch (e) {
+            console.log('Error refreshing session: ', e)
+        }
         updateSessionExpiry(false)
-    }
-    console.log('RERENDERED?')
-    // check for session about to expire
-    if (!sessionIsExpiring) {
+        // }
+        console.log('RERENDERED?')
+        // check for session about to expire
+        // if (!isSessionExpiring) {
         const timer = setInterval(() => {
             console.log('interval running', timer)
             // LocalStorage.setItem(
@@ -170,13 +189,16 @@ export const AppRoutes = ({
             // )
             runningTimers.current.push(timer)
             // is the current time within 2 minutes of the session expiration time?
-            let isSessionExpiring = false
+            let insideTwoMinuteWindow = false
             if (sessionExpirationTime) {
-                isSessionExpiring = dayjs(Date.now()).isAfter(
+                insideTwoMinuteWindow = dayjs(Date.now()).isAfter(
                     dayjs(sessionExpirationTime).subtract(1, 'minute')
                 )
             }
-            if (isSessionExpiring && !sessionIsExpiring) {
+            if (insideTwoMinuteWindow) {
+                /* if the session is about to expire, but we haven't set that piece of state yet
+                we set it here and clear the timers, because we don't need a countdown anymore once we've 
+                entered the expiry window */
                 console.log('about to clear: ', runningTimers.current)
                 // LocalStorage.getItem('TIMERS')
                 //     ?.split(',')
@@ -194,7 +216,7 @@ export const AppRoutes = ({
                 //     'IS_EXPIRING',
                 //     JSON.stringify(isSessionExpiring)
                 // )
-                updateSessionExpiry(isSessionExpiring)
+                updateSessionExpiry(true)
             }
         }, 1000 * 30)
     }
@@ -265,8 +287,8 @@ export const AppRoutes = ({
     if (!loggedInUser) {
         return <UnauthenticatedRoutes authMode={authMode} />
     } else if (loggedInUser.__typename === 'StateUser') {
-        return <StateUserRoutes />
+        return <StateUserRoutes setAlert={setAlert} />
     } else {
-        return <CMSUserRoutes />
+        return <CMSUserRoutes setAlert={setAlert} />
     }
 }

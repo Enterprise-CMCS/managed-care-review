@@ -1,14 +1,7 @@
-import {
-    GridContainer,
-    Link,
-    ModalRef,
-    Table,
-    Tag,
-} from '@trussworks/react-uswds'
-import { Modal } from '../../components/Modal/Modal'
+import { GridContainer, Link, Table, Tag } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 import dayjs from 'dayjs'
-import React, { createRef, useEffect } from 'react'
+import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import {
     packageName,
@@ -75,21 +68,7 @@ const StatusTag = ({
 }
 
 export const Dashboard = (): React.ReactElement => {
-    const { loginStatus, loggedInUser, sessionIsExpiring } = useAuth()
-    const modalRef = createRef<ModalRef>()
-    console.log('SESSIONISEXPIRING NO INTERVAL', sessionIsExpiring)
-    // let shouldChange = false
-    // setInterval(() => {
-    //     console.log('SESSIONISEXPIRING', sessionIsExpiring)
-    //     // shouldChange = sessionIsExpiring.current
-    //     // console.log('SHOULDCHANGE', shouldChange)
-    // }, 30000)
-    // useEffect(() => {
-    //     console.log('in the effect')
-    //     if (sessionIsExpiring) {
-    //         modalRef.current?.toggleModal(undefined, sessionIsExpiring)
-    //     }
-    // }, [sessionIsExpiring, modalRef])
+    const { loginStatus, loggedInUser, isSessionExpiring } = useAuth()
     const location = useLocation()
     const { testFrontendBanner } = useFlags()
 
@@ -161,7 +140,7 @@ export const Dashboard = (): React.ReactElement => {
 
     return (
         <>
-            {sessionIsExpiring === true ? <p>expiring</p> : null}
+            {isSessionExpiring === true ? <p>expiring</p> : null}
             <div id="dashboard-page" className={styles.wrapper}>
                 <GridContainer
                     className={styles.container}

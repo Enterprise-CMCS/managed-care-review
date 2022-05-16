@@ -7,7 +7,6 @@ import {
     ModalHeading,
     ModalRef,
     ModalProps as UswdsModalProps,
-    ModalToggleButton,
 } from '@trussworks/react-uswds'
 import styles from './Modal.module.scss'
 
