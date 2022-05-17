@@ -226,8 +226,6 @@ function parseContractAmendment(
             cleanAmendment.capitationRatesAmendedInfo
         ),
         otherItemBeingAmended: cleanAmendment.otherAmendableItem,
-        relatedToCovid19: cleanAmendment.relatedToCovid_19,
-        relatedToVaccination: cleanAmendment.relatedToVaccination,
     }
 }
 
@@ -377,6 +375,10 @@ const toDomain = (
         ),
         rateAmendmentInfo: parseProtoRateAmendment(rateInfo?.rateAmendmentInfo),
         rateType: enumToDomain(mcreviewproto.RateType, rateInfo?.rateType),
+        rateCapitationType: enumToDomain(
+            mcreviewproto.RateCapitationType,
+            rateInfo?.rateCapitationType
+        ),
         rateDocuments: parseProtoDocuments(rateInfo?.rateDocuments),
         rateDateStart: protoDateToDomain(rateInfo?.rateDateStart),
         rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),

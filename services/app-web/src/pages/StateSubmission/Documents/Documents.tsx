@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
-import { Document, HealthPlanPackage } from '../../../gen/gqlClient'
+import { Document } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
 import {
@@ -15,21 +15,13 @@ import {
 import { PageActions } from '../PageActions'
 import classNames from 'classnames'
 import { ErrorSummary } from '../../../components/Form'
-import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
-
-type DocumentProps = {
-    draftSubmission: UnlockedHealthPlanFormDataType
-    previousDocuments: string[]
-    updateDraft: (
-        input: UnlockedHealthPlanFormDataType
-    ) => Promise<HealthPlanPackage | Error>
-}
+import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 
 export const Documents = ({
     draftSubmission,
     previousDocuments,
     updateDraft,
-}: DocumentProps): React.ReactElement => {
+}: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = useState(false)
     const isContractOnly = draftSubmission.submissionType === 'CONTRACT_ONLY'
     const history = useHistory()
@@ -40,6 +32,8 @@ export const Documents = ({
     const hasValidFiles = fileItems.every(
         (item) => item.status === 'UPLOAD_COMPLETE'
     )
+    const [isSubmitting, setIsSubmitting] = useState(false) // mock same behavior as formik isSubmitting
+
     const hasMissingCategories =
         /* fileItems must have some document category.  a contract-only submission
        must have "CONTRACT_RELATED" as the document category. */
@@ -124,6 +118,7 @@ export const Documents = ({
     // If there is a submission error, ensure form is in validation state
     const onUpdateDraftSubmissionError = () => {
         if (!shouldValidate) setShouldValidate(true)
+        setIsSubmitting(false)
     }
 
     const onFileItemsUpdate = async ({
@@ -234,7 +229,7 @@ export const Documents = ({
             )
 
             draftSubmission.documents = documents
-
+            setIsSubmitting(true)
             try {
                 const updatedSubmission = await updateDraft(draftSubmission)
                 if (updatedSubmission instanceof Error) {
@@ -250,7 +245,7 @@ export const Documents = ({
                 onUpdateDraftSubmissionError()
             }
         }
-
+    console.log('DOCUMENTS', showFileUploadError && fileItems.length > 0)
     return (
         <>
             <UswdsForm
@@ -327,9 +322,10 @@ export const Documents = ({
                             redirectPath: 'contacts',
                         })(e)
                     }}
-                    continueDisabled={
+                    disableContinue={
                         showFileUploadError && fileItems.length > 0
                     }
+                    actionInProgress={isSubmitting}
                     continueOnClick={async (e) => {
                         await handleFormSubmit({
                             shouldValidateDocuments: true,

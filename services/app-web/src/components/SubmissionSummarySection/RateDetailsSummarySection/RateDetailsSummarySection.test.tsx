@@ -65,6 +65,11 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', {
+                name: 'Does the actuary certify capitation rates specific to each rate cell or a rate range?',
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
                 name: 'Rating period of original rate certification',
             })
         ).toBeInTheDocument()
@@ -270,5 +275,45 @@ describe('RateDetailsSummarySection', () => {
                 name: 'Download all rate documents',
             })
         ).toBeNull()
+    })
+    it('renders rate cell capitation type', () => {
+        renderWithProviders(
+            <RateDetailsSummarySection
+                submission={draftSubmission}
+                navigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+            />
+        )
+        expect(
+            screen.getByRole('definition', {
+                name: 'Does the actuary certify capitation rates specific to each rate cell or a rate range?',
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByText(
+                'Certification of capitation rates specific to each rate cell'
+            )
+        ).toBeInTheDocument()
+    })
+    it('renders rate range capitation type', () => {
+        const draftSubmission = mockContractAndRatesDraft()
+        draftSubmission.rateCapitationType = 'RATE_RANGE'
+        renderWithProviders(
+            <RateDetailsSummarySection
+                submission={draftSubmission}
+                navigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+            />
+        )
+        expect(
+            screen.getByRole('definition', {
+                name: 'Does the actuary certify capitation rates specific to each rate cell or a rate range?',
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByText(
+                'Certification of rate ranges of capitation rates per rate cell'
+            )
+        ).toBeInTheDocument()
     })
 })

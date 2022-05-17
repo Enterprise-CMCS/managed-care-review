@@ -151,7 +151,7 @@ export const AppRoutes = ({
         LocalStorage.removeItem('LOGOUT_TIMER')
     }
     if (loggedInUser && !isSessionExpiring) {
-        sessionExpirationTime = dayjs(Date.now()).add(30, 'minute')
+        sessionExpirationTime = dayjs(Date.now()).add(2, 'minute')
         try {
             LocalStorage.setItem(
                 'LOGOUT_TIMER',
@@ -172,7 +172,7 @@ export const AppRoutes = ({
             let insideTwoMinuteWindow = false
             if (sessionExpirationTime) {
                 insideTwoMinuteWindow = dayjs(Date.now()).isAfter(
-                    dayjs(sessionExpirationTime).subtract(2, 'minute')
+                    dayjs(sessionExpirationTime).subtract(1, 'minute')
                 )
             }
             if (insideTwoMinuteWindow) {

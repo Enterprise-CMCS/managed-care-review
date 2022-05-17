@@ -16,6 +16,7 @@ describe('Contacts', () => {
 
     it('renders without errors', async () => {
         const mockUpdateDraftFn = jest.fn()
+
         renderWithProviders(
             <Contacts
                 draftSubmission={mockDraft()}

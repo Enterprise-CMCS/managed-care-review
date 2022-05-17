@@ -16,19 +16,21 @@ import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 
 describe('submitHealthPlanPackage', () => {
     it('returns a StateSubmission if complete', async () => {
+        console.log('TIMEOUT DEBUG: Start Test')
         const server = await constructTestPostgresServer()
+        console.log('TIMEOUT DEBUG: Got Postgres Server')
 
         // setup
         const initialPkg = await createAndUpdateTestHealthPlanPackage(
             server,
             {}
         )
+        console.log('TIMEOUT DEBUG: Created HPP')
         const draft = latestFormData(initialPkg)
         const draftID = draft.id
 
-        // We delay here to enable checking that updatedAt changes
-        jest.setTimeout(20000)
         await new Promise((resolve) => setTimeout(resolve, 2000))
+        console.log('TIMEOUT DEBUG: Waited')
 
         // submit
         const submitResult = await server.executeOperation({
@@ -39,6 +41,7 @@ describe('submitHealthPlanPackage', () => {
                 },
             },
         })
+        console.log('TIMEOUT DEBUG: Submitted')
 
         expect(submitResult.errors).toBeUndefined()
         const createdID = submitResult?.data?.submitHealthPlanPackage.pkg.id
@@ -86,7 +89,9 @@ describe('submitHealthPlanPackage', () => {
         expect(
             resultUpdated.getTime() - createdUpdated.getTime()
         ).toBeGreaterThan(0)
-    })
+
+        console.log('TIMEOUT DEBUG: Ran all expects')
+    }, 20000)
 
     it('returns an error if there are no contract documents attached', async () => {
         const server = await constructTestPostgresServer()

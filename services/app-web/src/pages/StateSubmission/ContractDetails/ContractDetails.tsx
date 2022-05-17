@@ -36,7 +36,6 @@ import {
     ContractExecutionStatus,
     FederalAuthority,
     CapitationRatesAmendmentReason,
-    HealthPlanPackage,
 } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
@@ -44,7 +43,6 @@ import { isS3Error } from '../../../s3'
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
 import {
     ManagedCareEntity,
-    UnlockedHealthPlanFormDataType,
     CapitationRatesAmendedReason,
 } from '../../../common-code/healthPlanFormDataType'
 import {
@@ -54,6 +52,7 @@ import {
     FederalAuthorityRecord,
 } from '../../../constants/healthPlanPackages'
 import { PageActions } from '../PageActions'
+import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -92,8 +91,6 @@ export interface ContractDetailsFormValues {
     otherItemAmended: string
     capitationRates: CapitationRatesAmendmentReason | undefined
     capitationRatesOther: string
-    relatedToCovid19: string
-    relatedToVaccination: string
     federalAuthorities: FederalAuthority[]
 }
 type FormError =
@@ -104,14 +101,7 @@ export const ContractDetails = ({
     showValidations = false,
     previousDocuments,
     updateDraft,
-}: {
-    draftSubmission: UnlockedHealthPlanFormDataType
-    previousDocuments: string[]
-    showValidations?: boolean
-    updateDraft: (
-        input: UnlockedHealthPlanFormDataType
-    ) => Promise<HealthPlanPackage | Error>
-}): React.ReactElement => {
+}: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const history = useHistory()
 
@@ -244,12 +234,6 @@ export const ContractDetails = ({
         capitationRatesOther:
             draftSubmission.contractAmendmentInfo?.capitationRatesAmendedInfo
                 ?.otherReason ?? '',
-        relatedToCovid19: formatForForm(
-            draftSubmission.contractAmendmentInfo?.relatedToCovid19 ?? null
-        ),
-        relatedToVaccination: formatForForm(
-            draftSubmission.contractAmendmentInfo?.relatedToVaccination ?? null
-        ),
         federalAuthorities: draftSubmission?.federalAuthorities ?? [],
     }
 
@@ -277,6 +261,7 @@ export const ContractDetails = ({
             if (!hasValidFiles) {
                 setShouldValidate(true)
                 setFocusErrorSummaryHeading(true)
+                setSubmitting(false)
                 return
             }
         }
@@ -324,11 +309,6 @@ export const ContractDetails = ({
         draftSubmission.contractDocuments = contractDocuments
 
         if (values.contractType === 'AMENDMENT') {
-            const relatedToCovid = values.relatedToCovid19 === 'YES'
-            const relatedToVaccine = relatedToCovid
-                ? values.relatedToVaccination === 'YES'
-                : undefined
-
             // const amendedOther = formatForApi(values.otherItemAmended)
 
             let capitationInfo:
@@ -351,8 +331,6 @@ export const ContractDetails = ({
                 itemsBeingAmended: values.itemsAmended,
                 otherItemBeingAmended: values.otherItemAmended,
                 capitationRatesAmendedInfo: capitationInfo,
-                relatedToCovid19: relatedToCovid,
-                relatedToVaccination: relatedToVaccine,
             }
         } else {
             draftSubmission.contractAmendmentInfo = undefined
@@ -1112,96 +1090,6 @@ export const ContractDetails = ({
                                                     )}
                                                 </Fieldset>
                                             </FormGroup>
-                                            {values.contractType ===
-                                                'AMENDMENT' && (
-                                                <>
-                                                    <FormGroup
-                                                        error={showFieldErrors(
-                                                            errors.relatedToCovid19
-                                                        )}
-                                                    >
-                                                        <Fieldset
-                                                            role="radiogroup"
-                                                            aria-required
-                                                            legend="Is this contract action related to the COVID-19 public health emergency?"
-                                                        >
-                                                            {showFieldErrors(
-                                                                errors.relatedToCovid19
-                                                            ) && (
-                                                                <PoliteErrorMessage>
-                                                                    {
-                                                                        errors.relatedToCovid19
-                                                                    }
-                                                                </PoliteErrorMessage>
-                                                            )}
-                                                            <FieldRadio
-                                                                id="covidYes"
-                                                                name="relatedToCovid19"
-                                                                label="Yes"
-                                                                value="YES"
-                                                                checked={
-                                                                    values.relatedToCovid19 ===
-                                                                    'YES'
-                                                                }
-                                                            />
-                                                            <FieldRadio
-                                                                id="covidNo"
-                                                                name="relatedToCovid19"
-                                                                label="No"
-                                                                value="NO"
-                                                                checked={
-                                                                    values.relatedToCovid19 ===
-                                                                    'NO'
-                                                                }
-                                                            />
-                                                        </Fieldset>
-                                                    </FormGroup>
-                                                    {values.relatedToCovid19 ===
-                                                        'YES' && (
-                                                        <FormGroup
-                                                            error={showFieldErrors(
-                                                                errors.relatedToVaccination
-                                                            )}
-                                                        >
-                                                            <Fieldset
-                                                                role="radiogroup"
-                                                                aria-required
-                                                                legend="Is this related to coverage and reimbursement for vaccine administration?"
-                                                            >
-                                                                {showFieldErrors(
-                                                                    errors.relatedToVaccination
-                                                                ) && (
-                                                                    <PoliteErrorMessage>
-                                                                        {
-                                                                            errors.relatedToVaccination
-                                                                        }
-                                                                    </PoliteErrorMessage>
-                                                                )}
-                                                                <FieldRadio
-                                                                    id="vaccineYes"
-                                                                    name="relatedToVaccination"
-                                                                    label="Yes"
-                                                                    value="YES"
-                                                                    checked={
-                                                                        values.relatedToVaccination ===
-                                                                        'YES'
-                                                                    }
-                                                                />
-                                                                <FieldRadio
-                                                                    id="vaccineNo"
-                                                                    name="relatedToVaccination"
-                                                                    label="No"
-                                                                    value="NO"
-                                                                    checked={
-                                                                        values.relatedToVaccination ===
-                                                                        'NO'
-                                                                    }
-                                                                />
-                                                            </Fieldset>
-                                                        </FormGroup>
-                                                    )}
-                                                </>
-                                            )}
                                         </>
                                     )}
                                 </>
@@ -1246,9 +1134,8 @@ export const ContractDetails = ({
                                     )
                                 }
                             }}
-                            continueDisabled={
-                                isSubmitting || showFileUploadError
-                            }
+                            disableContinue={showFileUploadError}
+                            actionInProgress={isSubmitting}
                         />
                     </UswdsForm>
                 </>

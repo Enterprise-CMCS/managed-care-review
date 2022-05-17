@@ -41,6 +41,8 @@ import {
 } from '../../common-code/healthPlanFormDataType'
 import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
 import { makeDocumentList } from '../../documentHelpers/makeDocumentKeyLookupList'
+import { makeDateTable } from '../../documentHelpers/makeDocumentDateLookupTable'
+import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
 
 const FormAlert = ({ message }: { message?: string }): React.ReactElement => {
     return message ? (
@@ -97,6 +99,19 @@ type FormDataError =
     | 'MALFORMATTED_DATA'
     | 'WRONG_SUBMISSION_STATUS'
 
+/* 
+    Prep work for refactor of form pages.  This should be pulled out into a HealthPlanFormPageContext or HOC.
+    We have several instances of shared state across pages. 
+*/
+
+export type HealthPlanFormPageProps = {
+    draftSubmission: UnlockedHealthPlanFormDataType
+    showValidations?: boolean
+    previousDocuments: string[]
+    updateDraft: (
+        input: UnlockedHealthPlanFormDataType
+    ) => Promise<HealthPlanPackage | Error>
+}
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
@@ -118,10 +133,15 @@ export const StateSubmissionForm = (): React.ReactElement => {
         useState<string>('')
     const [previousDocuments, setPreviousDocuments] = useState<string[]>([])
 
+    // document date lookup state
+    const [documentDates, setDocumentDates] = useState<
+        DocumentDateLookupTable | undefined
+    >({})
+
     // Set up graphql calls
     const {
         data: fetchData,
-        loading,
+        loading: fetchLoading,
         error: fetchError,
     } = useFetchHealthPlanPackageQuery({
         variables: {
@@ -203,6 +223,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
             //set previous submitted files
             const documentList = makeDocumentList(submissionAndRevisions)
+            //set document dates
+            const documentDates = makeDateTable(submissionAndRevisions)
+            setDocumentDates(documentDates)
             if (documentList instanceof Error) {
                 //Maybe a different error message here.
                 setFormDataError('MALFORMATTED_DATA')
@@ -233,14 +256,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
             }
         }
     }, [submissionAndRevisions])
-
-    if (loading) {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
-    }
 
     if (updateFormDataError && !showPageErrorMessage) {
         // This triggers if Apollo sets the error from our useQuery invocation
@@ -276,14 +291,17 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return <GenericErrorPage />
     }
 
-    if (formDataError === 'NOT_FOUND' || !formDataFromLatestRevision) {
-        return <Error404 />
-    }
-
     if (formDataError === 'WRONG_SUBMISSION_STATUS') {
         return <ErrorInvalidSubmissionStatus />
     }
-
+    // order matters, this should be last to prevent 404 flicker
+    if (fetchLoading || !formDataFromLatestRevision) {
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
+    }
     return (
         <>
             <div className={styles.stepIndicator}>
@@ -337,6 +355,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                             draftSubmission={formDataFromLatestRevision}
                             unlocked={!!unlockedInfo}
                             submissionName={computedSubmissionName}
+                            documentDateLookupTable={documentDates}
                         />
                     </Route>
                 </Switch>

@@ -13,10 +13,7 @@ import {
     unlockHealthPlanPackageMockSuccess,
     mockSubmittedHealthPlanPackageWithRevision,
 } from '../../testHelpers/apolloHelpers'
-import {
-    renderWithProviders,
-    userClickByTestId,
-} from '../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
 
 describe('SubmissionSummary', () => {
@@ -213,6 +210,7 @@ describe('SubmissionSummary', () => {
             userEvent.type(textbox, 'Test unlock reason')
 
             const unlockButton = screen.getByTestId('unlockReason-modal-submit')
+            expect(unlockButton).toHaveTextContent('Unlock')
             userEvent.click(unlockButton)
 
             // the popup dialog should be hidden again
@@ -382,6 +380,7 @@ describe('SubmissionSummary', () => {
             userEvent.type(textbox, 'Test unlock reason')
 
             const unlockButton = screen.getByTestId('unlockReason-modal-submit')
+            expect(unlockButton).toHaveTextContent('Unlock')
             userEvent.click(unlockButton)
 
             // the popup dialog should be hidden again
@@ -395,108 +394,6 @@ describe('SubmissionSummary', () => {
                     'Error attempting to unlock. Please try again.'
                 )
             ).toBeInTheDocument()
-        })
-
-        it('displays form validation error when submitting without a unlock reason', async () => {
-            renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={SubmissionSummary}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                user: mockValidCMSUser(),
-                                statusCode: 200,
-                            }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                            }),
-                            unlockHealthPlanPackageMockSuccess({
-                                id: '15',
-                                reason: 'Test unlock reason',
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15',
-                    },
-                }
-            )
-
-            const unlockModalButton = await screen.findByRole('button', {
-                name: 'Unlock submission',
-            })
-            userEvent.click(unlockModalButton)
-
-            // the popup dialog should be visible now
-            await waitFor(() => {
-                const dialog = screen.getByRole('dialog')
-                expect(dialog).toHaveClass('is-visible')
-            })
-
-            const unlockButton = screen.getByTestId('unlockReason-modal-submit')
-            userEvent.click(unlockButton)
-
-            expect(
-                await screen.findByText(
-                    'You must provide a reason for unlocking this submission'
-                )
-            ).toBeInTheDocument()
-        })
-
-        it('draws focus to unlock reason input when form validation errors exist', async () => {
-            renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={SubmissionSummary}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                user: mockValidCMSUser(),
-                                statusCode: 200,
-                            }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                            }),
-                            unlockHealthPlanPackageMockSuccess({
-                                id: '15',
-                                reason: 'Test Reason',
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15',
-                    },
-                }
-            )
-
-            const unlockModalButton = await screen.findByRole('button', {
-                name: 'Unlock submission',
-            })
-            userEvent.click(unlockModalButton)
-
-            // the popup dialog should be visible now
-            await waitFor(() =>
-                screen.getByText('Provide reason for unlocking')
-            )
-
-            const textbox = await screen.findByTestId('unlockReason')
-
-            // submit without entering anything
-            userClickByTestId(screen, 'unlockReason-modal-submit')
-
-            expect(
-                await screen.findByText(
-                    'You must provide a reason for unlocking this submission'
-                )
-            ).toBeInTheDocument()
-
-            // check focus after error
-            expect(textbox).toHaveFocus()
         })
     })
 })

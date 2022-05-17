@@ -1,6 +1,5 @@
 import {
     Alert,
-    Button,
     FormGroup,
     GridContainer,
     ModalRef,
@@ -25,13 +24,17 @@ import { PoliteErrorMessage } from '../../../components'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import { ActionButton } from '../../../components/ActionButton'
+import { DocumentDateLookupTable } from '../../SubmissionSummary/SubmissionSummary'
 
 export const ReviewSubmit = ({
     draftSubmission,
+    documentDateLookupTable,
     unlocked,
     submissionName,
 }: {
     draftSubmission: UnlockedHealthPlanFormDataType
+    documentDateLookupTable?: DocumentDateLookupTable
     unlocked: boolean
     submissionName: string
 }): React.ReactElement => {
@@ -50,7 +53,8 @@ export const ReviewSubmit = ({
             loggedInUser.state.programs) ||
         []
 
-    const [submitDraftSubmission] = useSubmitHealthPlanPackageMutation()
+    const [submitDraftSubmission, { loading: submitMutationLoading }] =
+        useSubmitHealthPlanPackageMutation()
 
     const showError = (error: string) => {
         setUserVisibleError(error)
@@ -159,6 +163,7 @@ export const ReviewSubmit = ({
                 submission={draftSubmission}
                 navigateTo="contract-details"
                 submissionName={submissionName}
+                documentDateLookupTable={documentDateLookupTable}
             />
 
             {isContractActionAndRateCertification && (
@@ -166,6 +171,7 @@ export const ReviewSubmit = ({
                     submission={draftSubmission}
                     navigateTo="rate-details"
                     submissionName={submissionName}
+                    documentDateLookupTable={documentDateLookupTable}
                 />
             )}
 
@@ -181,22 +187,24 @@ export const ReviewSubmit = ({
 
             <PageActionsContainer
                 left={
-                    <Button
+                    <ActionButton
                         type="button"
+                        variant="linkStyle"
                         onClick={() => history.push('/dashboard')}
-                        unstyled
+                        disabled={formik.isSubmitting}
                     >
                         Save as draft
-                    </Button>
+                    </ActionButton>
                 }
             >
-                <Button
+                <ActionButton
                     type="button"
-                    outline
+                    variant="outline"
                     onClick={() => history.push('documents')}
+                    disabled={formik.isSubmitting}
                 >
                     Back
-                </Button>
+                </ActionButton>
                 <ModalToggleButton
                     modalRef={modalRef}
                     className={styles.submitButton}
@@ -217,6 +225,7 @@ export const ReviewSubmit = ({
                     submitButtonProps={{ className: styles.submitButton }}
                     onSubmitText={unlocked ? 'Resubmit' : undefined}
                     onSubmit={submitHandler}
+                    isSubmitting={formik.isSubmitting || submitMutationLoading}
                 >
                     {unlocked ? (
                         <form>

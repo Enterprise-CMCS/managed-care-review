@@ -167,8 +167,6 @@ const toProtoBuffer = (
             contractAmendmentInfo: contractAmendmentInfo
                 ? {
                       ...contractAmendmentInfo,
-                      relatedToCovid_19:
-                          contractAmendmentInfo?.relatedToCovid19,
                       otherAmendableItem:
                           contractAmendmentInfo?.otherItemBeingAmended,
                       amendableItems: domainEnumArrayToProto(
@@ -192,6 +190,10 @@ const toProtoBuffer = (
                 rateType: domainEnumToProto(
                     domainData.rateType,
                     mcreviewproto.RateType
+                ),
+                rateCapitationType: domainEnumToProto(
+                    domainData.rateCapitationType,
+                    mcreviewproto.RateCapitationType
                 ),
                 rateDateStart: domainDateToProtoDate(domainData.rateDateStart),
                 rateDateEnd: domainDateToProtoDate(domainData.rateDateEnd),

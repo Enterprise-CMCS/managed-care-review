@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
 
-import { Document, RateType, HealthPlanPackage } from '../../../gen/gqlClient'
+import { Document, RateType, RateCapitationType } from '../../../gen/gqlClient'
 
 import {
     FileUpload,
@@ -32,10 +32,10 @@ import {
 } from '../../../formHelpers'
 import { isS3Error } from '../../../s3'
 import { RateDetailsFormSchema } from './RateDetailsSchema'
-// import { updatesFromSubmission } from '../updateSubmissionTransform'
 import { useS3 } from '../../../contexts/S3Context'
 import { PageActions } from '../PageActions'
-import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
+
 type FormError =
     FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
 
@@ -56,6 +56,7 @@ const RateDatesErrorMessage = ({
 )
 export interface RateDetailsFormValues {
     rateType: RateType | undefined
+    rateCapitationType: RateCapitationType | undefined
     rateDateStart: string
     rateDateEnd: string
     rateDateCertified: string
@@ -67,14 +68,7 @@ export const RateDetails = ({
     previousDocuments,
     showValidations = false,
     updateDraft,
-}: {
-    draftSubmission: UnlockedHealthPlanFormDataType
-    previousDocuments: string[]
-    showValidations?: boolean
-    updateDraft: (
-        input: UnlockedHealthPlanFormDataType
-    ) => Promise<HealthPlanPackage | Error>
-}): React.ReactElement => {
+}: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const history = useHistory()
 
@@ -192,6 +186,7 @@ export const RateDetails = ({
 
     const rateDetailsInitialValues: RateDetailsFormValues = {
         rateType: draftSubmission?.rateType ?? undefined,
+        rateCapitationType: draftSubmission?.rateCapitationType ?? undefined,
         rateDateStart:
             (draftSubmission && formatForForm(draftSubmission.rateDateStart)) ??
             '',
@@ -234,8 +229,9 @@ export const RateDetails = ({
         // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
         if (options.shouldValidateDocuments) {
             if (!hasValidFiles) {
-                setShouldValidate(true)
-                setFocusErrorSummaryHeading(true)
+                setShouldValidate(true) // set inline field errors
+                setFocusErrorSummaryHeading(true) // set errors in form-wide error summary
+                setSubmitting(false) // reset formik submit
                 return
             }
         }
@@ -272,6 +268,7 @@ export const RateDetails = ({
 
         // const updatedDraft = updatesFromSubmission(draftSubmission)
         draftSubmission.rateType = values.rateType
+        draftSubmission.rateCapitationType = values.rateCapitationType
         draftSubmission.rateDateStart = formatFormDateForDomain(
             values.rateDateStart
         )
@@ -438,6 +435,68 @@ export const RateDetails = ({
                                             value={'AMENDMENT'}
                                             checked={
                                                 values.rateType === 'AMENDMENT'
+                                            }
+                                        />
+                                    </Fieldset>
+                                </FormGroup>
+
+                                <FormGroup
+                                    error={showFieldErrors(
+                                        errors.rateCapitationType
+                                    )}
+                                >
+                                    <Fieldset
+                                        className={styles.radioGroup}
+                                        legend={
+                                            <div
+                                                className={
+                                                    styles.capitationLegend
+                                                }
+                                            >
+                                                <p>
+                                                    Does the actuary certify
+                                                    capitation rates specific to
+                                                    each rate cell or a rate
+                                                    range?
+                                                </p>
+                                                <p
+                                                    className={
+                                                        styles.legendSubHeader
+                                                    }
+                                                >
+                                                    See 42 CFR §§ 438.4(b) and
+                                                    438.4(c)
+                                                </p>
+                                            </div>
+                                        }
+                                        role="radiogroup"
+                                        aria-required
+                                    >
+                                        {showFieldErrors(
+                                            errors.rateCapitationType
+                                        ) && (
+                                            <PoliteErrorMessage>
+                                                {errors.rateCapitationType}
+                                            </PoliteErrorMessage>
+                                        )}
+                                        <FieldRadio
+                                            id="rateCell"
+                                            name="rateCapitationType"
+                                            label="Certification of capitation rates specific to each rate cell"
+                                            value={'RATE_CELL'}
+                                            checked={
+                                                values.rateCapitationType ===
+                                                'RATE_CELL'
+                                            }
+                                        />
+                                        <FieldRadio
+                                            id="rateRange"
+                                            name="rateCapitationType"
+                                            label="Certification of rate ranges of capitation rates per rate cell"
+                                            value={'RATE_RANGE'}
+                                            checked={
+                                                values.rateCapitationType ===
+                                                'RATE_RANGE'
                                             }
                                         />
                                     </Fieldset>
@@ -684,9 +743,8 @@ export const RateDetails = ({
                                         )
                                     }
                                 }}
-                                continueDisabled={Boolean(
-                                    isSubmitting || showFileUploadError
-                                )}
+                                disableContinue={showFileUploadError}
+                                actionInProgress={isSubmitting}
                             />
                         </UswdsForm>
                     </>

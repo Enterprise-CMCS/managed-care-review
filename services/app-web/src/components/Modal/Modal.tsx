@@ -1,14 +1,16 @@
 import React from 'react'
 import {
-    Button,
     ButtonGroup,
     Modal as UswdsModal,
     ModalFooter,
     ModalHeading,
     ModalRef,
     ModalProps as UswdsModalProps,
+    Button,
 } from '@trussworks/react-uswds'
 import styles from './Modal.module.scss'
+
+import { ActionButton } from '../ActionButton'
 
 interface ModalComponentProps {
     id: string
@@ -20,6 +22,7 @@ interface ModalComponentProps {
     className?: string
     modalRef: React.RefObject<ModalRef>
     submitButtonProps?: JSX.IntrinsicElements['button']
+    isSubmitting?: boolean
 }
 
 export type ModalProps = ModalComponentProps & UswdsModalProps
@@ -35,6 +38,7 @@ export const Modal = ({
     submitButtonProps,
     onSubmitText,
     onCancelText,
+    isSubmitting = false,
     ...divProps
 }: ModalProps): React.ReactElement => {
     const cancelHandler = (e: React.MouseEvent): void => {
@@ -66,19 +70,21 @@ export const Modal = ({
                         id={`${id}-cancel`}
                         onClick={cancelHandler}
                         outline
+                        disabled={isSubmitting}
                     >
                         {onCancelText || 'Cancel'}
                     </Button>
-                    <Button
-                        type="button"
-                        aria-label={`${onSubmitText || 'Submit'}`}
+                    <ActionButton
+                        type="submit"
                         data-testid={`${id}-modal-submit`}
+                        variant="success"
                         id={`${id}-submit`}
                         onClick={onSubmit}
+                        loading={isSubmitting}
                         {...submitButtonProps}
                     >
                         {onSubmitText || 'Submit'}
-                    </Button>
+                    </ActionButton>
                 </ButtonGroup>
             </ModalFooter>
         </UswdsModal>

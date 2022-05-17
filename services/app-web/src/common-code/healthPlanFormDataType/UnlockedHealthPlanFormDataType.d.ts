@@ -23,8 +23,6 @@ type ContractAmendmentInfo = {
         reason?: CapitationRatesAmendedReason
         otherReason?: string
     }
-    relatedToCovid19?: boolean
-    relatedToVaccination?: boolean
 }
 
 type RateAmendmentInfo = {
@@ -71,6 +69,8 @@ type ActuaryContact = {
 
 type RateType = 'NEW' | 'AMENDMENT'
 
+type RateCapitationType = 'RATE_CELL' | 'RATE_RANGE'
+
 type ManagedCareEntity = 'MCO' | 'PIHP' | 'PAHP' | 'PCCM'
 
 type AmendableItems =
@@ -89,7 +89,7 @@ type AmendableItems =
     | 'RISK_SHARING_MECHANISM'
 
 // MAIN
-export type UnlockedHealthPlanFormDataType = {
+type UnlockedHealthPlanFormDataType = {
     id: string
     createdAt: Date
     updatedAt: Date
@@ -112,6 +112,7 @@ export type UnlockedHealthPlanFormDataType = {
     federalAuthorities: FederalAuthority[]
     contractAmendmentInfo?: ContractAmendmentInfo
     rateType?: RateType
+    rateCapitationType?: RateCapitationType
     rateDocuments: SubmissionDocument[]
     rateDateStart?: Date
     rateDateEnd?: Date
@@ -121,6 +122,7 @@ export type UnlockedHealthPlanFormDataType = {
 
 type RateDataType = {
     rateType?: 'AMENDMENT' | 'NEW' | null
+    rateCapitationType?: RateCapitationType
     rateDateStart?: Date
     rateDateEnd?: Date
     rateDateCertified?: Date
@@ -148,4 +150,5 @@ export type {
     ContractAmendmentInfo,
     ContractExecutionStatus,
     RateDataType,
+    RateCapitationType,
 }
