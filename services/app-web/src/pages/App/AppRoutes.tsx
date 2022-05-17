@@ -31,14 +31,6 @@ import React from 'react'
 const LOGIN_REDIRECT_STORAGE_KEY = 'LOGIN_REDIRECT'
 const LocalStorage = window.localStorage
 
-// const refreshSession = async (): Promise<void> => {
-//     try {
-//         await extendSession()
-//     } catch (e) {
-//         console.log('Error refreshing session: ', e)
-//     }
-// }
-
 function componentForAuthMode(
     authMode: AuthModeType
 ): (() => React.ReactElement) | undefined {
@@ -159,7 +151,7 @@ export const AppRoutes = ({
         LocalStorage.removeItem('LOGOUT_TIMER')
     }
     if (loggedInUser && !isSessionExpiring) {
-        sessionExpirationTime = dayjs(Date.now()).add(2, 'minute')
+        sessionExpirationTime = dayjs(Date.now()).add(30, 'minute')
         try {
             LocalStorage.setItem(
                 'LOGOUT_TIMER',
@@ -174,25 +166,13 @@ export const AppRoutes = ({
             console.log('Error refreshing session: ', e)
         }
         updateSessionExpiry(false)
-        // }
-        console.log('RERENDERED?')
-        // check for session about to expire
-        // if (!isSessionExpiring) {
         const timer = setInterval(() => {
-            console.log('interval running', timer)
-            // LocalStorage.setItem(
-            //     'TIMERS',
-            //     LocalStorage.getItem('TIMERS') +
-            //         ',' +
-            //         JSON.stringify(timer) +
-            //         ','
-            // )
             runningTimers.current.push(timer)
             // is the current time within 2 minutes of the session expiration time?
             let insideTwoMinuteWindow = false
             if (sessionExpirationTime) {
                 insideTwoMinuteWindow = dayjs(Date.now()).isAfter(
-                    dayjs(sessionExpirationTime).subtract(1, 'minute')
+                    dayjs(sessionExpirationTime).subtract(2, 'minute')
                 )
             }
             if (insideTwoMinuteWindow) {
@@ -200,22 +180,9 @@ export const AppRoutes = ({
                 we set it here and clear the timers, because we don't need a countdown anymore once we've 
                 entered the expiry window */
                 console.log('about to clear: ', runningTimers.current)
-                // LocalStorage.getItem('TIMERS')
-                //     ?.split(',')
-                //     .forEach((timer) => {
-                //         console.log('timer in loop: ', timer)
-                //         if (timer) {
-                //             clearInterval(Number(timer))
-                //         }
-                //     })
-                // LocalStorage.removeItem('TIMERS')
                 runningTimers.current.forEach((t) => clearInterval(t))
                 runningTimers.current = []
                 console.log('cleared: ', runningTimers.current)
-                // LocalStorage.setItem(
-                //     'IS_EXPIRING',
-                //     JSON.stringify(isSessionExpiring)
-                // )
                 updateSessionExpiry(true)
             }
         }, 1000 * 30)

@@ -41,7 +41,7 @@ export const ReviewSubmit = ({
     const [focusErrorsInModal, setFocusErrorsInModal] = useState(true)
     const history = useHistory()
     const modalRef = useRef<ModalRef>(null)
-    const { loggedInUser } = useAuth()
+    const { loggedInUser, isSessionExpiring } = useAuth()
 
     // pull the programs off the user
     const statePrograms =
@@ -207,55 +207,57 @@ export const ReviewSubmit = ({
                 </ModalToggleButton>
             </PageActionsContainer>
 
-            <Modal
-                modalRef={modalRef}
-                id="review-and-submit"
-                modalHeading={
-                    unlocked ? 'Summarize changes' : 'Ready to submit?'
-                }
-                submitButtonProps={{ className: styles.submitButton }}
-                onSubmitText={unlocked ? 'Resubmit' : undefined}
-                onSubmit={submitHandler}
-            >
-                {unlocked ? (
-                    <form>
+            {!isSessionExpiring && (
+                <Modal
+                    modalRef={modalRef}
+                    id="review-and-submit"
+                    modalHeading={
+                        unlocked ? 'Summarize changes' : 'Ready to submit?'
+                    }
+                    submitButtonProps={{ className: styles.submitButton }}
+                    onSubmitText={unlocked ? 'Resubmit' : undefined}
+                    onSubmit={submitHandler}
+                >
+                    {unlocked ? (
+                        <form>
+                            <p>
+                                Once you submit, this package will be sent to
+                                CMS for review and you will no longer be able to
+                                make changes.
+                            </p>
+                            <FormGroup
+                                error={Boolean(formik.errors.submittedReason)}
+                            >
+                                {formik.errors.submittedReason && (
+                                    <PoliteErrorMessage role="alert">
+                                        {formik.errors.submittedReason}
+                                    </PoliteErrorMessage>
+                                )}
+                                <span id="submittedReason-hint" role="note">
+                                    Provide summary of all changes made to this
+                                    submission
+                                </span>
+                                <Textarea
+                                    id="submittedReasonCharacterCount"
+                                    name="submittedReason"
+                                    data-testid="submittedReason"
+                                    aria-labelledby="submittedReason-hint"
+                                    className={styles.submittedReasonTextarea}
+                                    aria-required
+                                    error={!!formik.errors.submittedReason}
+                                    onChange={formik.handleChange}
+                                    defaultValue={formik.values.submittedReason}
+                                />
+                            </FormGroup>
+                        </form>
+                    ) : (
                         <p>
-                            Once you submit, this package will be sent to CMS
-                            for review and you will no longer be able to make
-                            changes.
+                            Submitting this package will send it to CMS to begin
+                            their review.
                         </p>
-                        <FormGroup
-                            error={Boolean(formik.errors.submittedReason)}
-                        >
-                            {formik.errors.submittedReason && (
-                                <PoliteErrorMessage role="alert">
-                                    {formik.errors.submittedReason}
-                                </PoliteErrorMessage>
-                            )}
-                            <span id="submittedReason-hint" role="note">
-                                Provide summary of all changes made to this
-                                submission
-                            </span>
-                            <Textarea
-                                id="submittedReasonCharacterCount"
-                                name="submittedReason"
-                                data-testid="submittedReason"
-                                aria-labelledby="submittedReason-hint"
-                                className={styles.submittedReasonTextarea}
-                                aria-required
-                                error={!!formik.errors.submittedReason}
-                                onChange={formik.handleChange}
-                                defaultValue={formik.values.submittedReason}
-                            />
-                        </FormGroup>
-                    </form>
-                ) : (
-                    <p>
-                        Submitting this package will send it to CMS to begin
-                        their review.
-                    </p>
-                )}
-            </Modal>
+                    )}
+                </Modal>
+            )}
         </GridContainer>
     )
 }

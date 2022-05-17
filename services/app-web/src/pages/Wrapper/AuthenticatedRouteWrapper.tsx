@@ -60,10 +60,7 @@ export const AuthenticatedRouteWrapper = ({
     }
 
     useEffect(() => {
-        console.log('in the effect')
-        // if (isSessionExpiring) {
         modalRef.current?.toggleModal(undefined, isSessionExpiring)
-        // }
     }, [isSessionExpiring, modalRef])
 
     useEffect(() => {
@@ -84,6 +81,8 @@ export const AuthenticatedRouteWrapper = ({
                     onCancel={logoutSession}
                     submitButtonProps={{ className: styles.submitButton }}
                     onSubmit={resetSessionTimeout}
+                    className={styles.expireModal}
+                    forceAction={true}
                 >
                     <p>
                         Your session is going to expire in {timeUntilLogout}{' '}

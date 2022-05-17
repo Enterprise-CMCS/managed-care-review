@@ -59,15 +59,6 @@ export const Modal = ({
             <div id={`${id}-modal-description`}>{children}</div>
             <ModalFooter>
                 <ButtonGroup className="float-right">
-                    {/* <ModalToggleButton
-                        data-testid={`${id}-modal-cancel`}
-                        modalRef={modalRef}
-                        id={`${id}-closer`}
-                        closer
-                        outline
-                    >
-                        {onCancelText || 'Cancel'}
-                    </ModalToggleButton> */}
                     <Button
                         type="button"
                         aria-label={`${onCancelText || 'Cancel'}`}

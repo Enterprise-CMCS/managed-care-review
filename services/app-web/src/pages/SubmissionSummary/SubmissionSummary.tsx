@@ -114,7 +114,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
-    const { loggedInUser } = useAuth()
+    const { loggedInUser, isSessionExpiring } = useAuth()
     const { updateHeading } = usePage()
     const [pageLevelAlert, setPageLevelAlert] = useState<string | undefined>(
         undefined
@@ -419,39 +419,43 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 <ChangeHistory submission={submissionAndRevisions} />
 
-                <Modal
-                    modalHeading="Reason for unlocking submission"
-                    id="unlockReason"
-                    onSubmit={() => {
-                        setFocusErrorsInModal(true)
-                        formik.handleSubmit()
-                    }}
-                    modalRef={modalRef}
-                >
-                    <form>
-                        <FormGroup error={Boolean(formik.errors.unlockReason)}>
-                            {formik.errors.unlockReason && (
-                                <PoliteErrorMessage role="alert">
-                                    {formik.errors.unlockReason}
-                                </PoliteErrorMessage>
-                            )}
-                            <span id="unlockReason-hint" role="note">
-                                Provide reason for unlocking
-                            </span>
-                            <Textarea
-                                id="unlockReasonCharacterCount"
-                                name="unlockReason"
-                                data-testid="unlockReason"
-                                aria-labelledby="unlockReason-hint"
-                                className={styles.unlockReasonTextarea}
-                                aria-required
-                                error={!!formik.errors.unlockReason}
-                                onChange={formik.handleChange}
-                                defaultValue={formik.values.unlockReason}
-                            />
-                        </FormGroup>
-                    </form>
-                </Modal>
+                {!isSessionExpiring && (
+                    <Modal
+                        modalHeading="Reason for unlocking submission"
+                        id="unlockReason"
+                        onSubmit={() => {
+                            setFocusErrorsInModal(true)
+                            formik.handleSubmit()
+                        }}
+                        modalRef={modalRef}
+                    >
+                        <form>
+                            <FormGroup
+                                error={Boolean(formik.errors.unlockReason)}
+                            >
+                                {formik.errors.unlockReason && (
+                                    <PoliteErrorMessage role="alert">
+                                        {formik.errors.unlockReason}
+                                    </PoliteErrorMessage>
+                                )}
+                                <span id="unlockReason-hint" role="note">
+                                    Provide reason for unlocking
+                                </span>
+                                <Textarea
+                                    id="unlockReasonCharacterCount"
+                                    name="unlockReason"
+                                    data-testid="unlockReason"
+                                    aria-labelledby="unlockReason-hint"
+                                    className={styles.unlockReasonTextarea}
+                                    aria-required
+                                    error={!!formik.errors.unlockReason}
+                                    onChange={formik.handleChange}
+                                    defaultValue={formik.values.unlockReason}
+                                />
+                            </FormGroup>
+                        </form>
+                    </Modal>
+                )}
             </GridContainer>
         </div>
     )
