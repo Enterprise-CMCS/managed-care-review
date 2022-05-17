@@ -1,5 +1,5 @@
 import { MockedProvider, MockedProviderProps } from '@apollo/client/testing'
-import { MemoryRouter } from 'react-router-dom'
+import { Location, MemoryRouter, useLocation } from 'react-router-dom'
 import {
     fireEvent,
     render,
@@ -48,6 +48,18 @@ const renderWithProviders = (
             </MemoryRouter>
         </MockedProvider>
     )
+}
+
+const WithLocation = ({
+    children,
+    setLocation,
+}: {
+    children: JSX.Element | JSX.Element[]
+    setLocation: (location: Location) => Location
+}): JSX.Element => {
+    const location = useLocation()
+    setLocation(location)
+    return <>{children}</>
 }
 
 /* User Events */
@@ -143,4 +155,5 @@ export {
     TEST_TEXT_FILE,
     TEST_VIDEO_FILE,
     TEST_XLS_FILE,
+    WithLocation,
 }
