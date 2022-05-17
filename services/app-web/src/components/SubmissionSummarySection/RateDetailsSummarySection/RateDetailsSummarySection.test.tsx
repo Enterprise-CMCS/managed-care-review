@@ -5,7 +5,7 @@ import {
 } from '../../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
-import { Route } from 'react-router'
+import { Route, Routes } from 'react-router'
 import { RoutesRecord } from '../../../constants/routes'
 import { formatRateNameDate } from '../../../common-code/dateHelpers'
 
@@ -255,18 +255,20 @@ describe('RateDetailsSummarySection', () => {
 
     it('does not render download all button when on previous submission', () => {
         renderWithProviders(
-            <Route
-                path={RoutesRecord.SUBMISSIONS_REVISION}
-                element={
-                    <RateDetailsSummarySection
-                        submission={stateSubmission}
-                        submissionName="MN-PMAP-0001"
-                    />
-                }
-            />,
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVISION}
+                    element={
+                        <RateDetailsSummarySection
+                            submission={stateSubmission}
+                            submissionName="MN-PMAP-0001"
+                        />
+                    }
+                />
+            </Routes>,
             {
                 routerProvider: {
-                    route: '/submissions/15/revisions/2',
+                    route: '/submissions/15/summary/revisions/2',
                 },
             }
         )

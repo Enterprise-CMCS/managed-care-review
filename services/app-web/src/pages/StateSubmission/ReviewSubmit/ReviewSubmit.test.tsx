@@ -5,10 +5,11 @@ import {
     submitHealthPlanPackageMockError,
     submitHealthPlanPackageMockSuccess,
 } from '../../../testHelpers/apolloHelpers'
-import { Routes, Route, Location, useLocation } from 'react-router-dom'
+import { Routes, Route, Location } from 'react-router-dom'
 import {
     renderWithProviders,
     userClickByTestId,
+    WithLocation,
 } from '../../../testHelpers/jestHelpers'
 import { ReviewSubmit } from './ReviewSubmit'
 import userEvent from '@testing-library/user-event'
@@ -202,24 +203,24 @@ describe('ReviewSubmit', () => {
         })
     })
 
-    const ShowPath = () => {
-        const { pathname, search, hash } = useLocation()
-        return <pre>{JSON.stringify({ pathname, search, hash })}</pre>
-    }
-
     it('redirects if submission succeeds', async () => {
         let testLocation: Location
+
         renderWithProviders(
-            <>
+            <WithLocation setLocation={(location) => (testLocation = location)}>
                 <Routes>
-                    <Route path="*" element={<ShowPath />} />
+                    <Route
+                        path="/draftSubmission/:id/form/review-and-submit"
+                        element={
+                            <ReviewSubmit
+                                draftSubmission={mockCompleteDraft()}
+                                unlocked={false}
+                                submissionName="MN-MSHO-0001"
+                            />
+                        }
+                    />
                 </Routes>
-                <ReviewSubmit
-                    draftSubmission={mockCompleteDraft()}
-                    unlocked={false}
-                    submissionName="MN-MSHO-0001"
-                />
-            </>,
+            </WithLocation>,
             {
                 apolloProvider: {
                     mocks: [
@@ -230,7 +231,7 @@ describe('ReviewSubmit', () => {
                     ],
                 },
                 routerProvider: {
-                    route: `draftSubmission/${
+                    route: `/draftSubmission/${
                         mockCompleteDraft().id
                     }/form/review-and-submit`,
                 },

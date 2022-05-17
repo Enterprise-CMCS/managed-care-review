@@ -1,6 +1,6 @@
 import React from 'react'
 import userEvent from '@testing-library/user-event'
-import { Route, Location } from 'react-router-dom'
+import { Route, Location, Routes } from 'react-router-dom'
 import { screen, waitFor, Screen, queries } from '@testing-library/react'
 import { CognitoUser, CognitoUserPool } from 'amazon-cognito-identity-js'
 
@@ -10,6 +10,7 @@ import { Login } from './Login'
 import {
     renderWithProviders,
     userClickByRole,
+    WithLocation,
 } from '../../testHelpers/jestHelpers'
 
 const failedAuthMock = {
@@ -98,9 +99,17 @@ describe('Cognito Login', () => {
             })
         )
 
-        renderWithProviders(<Login />, {
-            apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
-        })
+        renderWithProviders(
+            <Routes>
+                <Route path="/auth" element={<Login />} />
+            </Routes>,
+            {
+                apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
+                routerProvider: {
+                    route: '/auth',
+                },
+            }
+        )
         const loginButton = screen.getByRole('button', { name: 'Login' })
         const loginEmail = screen.getByTestId('loginEmail')
         const loginPassword = screen.getByTestId('loginPassword')
@@ -127,18 +136,16 @@ describe('Cognito Login', () => {
         let testLocation: Location
 
         renderWithProviders(
-            <>
-                <Route
-                    path="*"
-                    element={({ location }: { location: Location }) => {
-                        testLocation = location
-                        return null
-                    }}
-                />
-                <Login />
-            </>,
+            <WithLocation setLocation={(location) => (testLocation = location)}>
+                <Routes>
+                    <Route path="/auth" element={<Login />} />
+                </Routes>
+            </WithLocation>,
             {
                 apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
+                routerProvider: {
+                    route: '/auth',
+                },
             }
         )
 
@@ -156,16 +163,11 @@ describe('Cognito Login', () => {
         let testLocation: Location
 
         renderWithProviders(
-            <>
-                <Route
-                    path="*"
-                    element={({ location }: { location: Location }) => {
-                        testLocation = location
-                        return null
-                    }}
-                />
-                <Login />
-            </>,
+            <WithLocation setLocation={(location) => (testLocation = location)}>
+                <Routes>
+                    <Route path="/auth" element={<Login />} />
+                </Routes>
+            </WithLocation>,
             {
                 apolloProvider: { mocks: [failedAuthMock, failedAuthMock] },
                 routerProvider: {

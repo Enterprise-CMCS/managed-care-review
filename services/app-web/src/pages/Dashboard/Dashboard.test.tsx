@@ -96,16 +96,19 @@ describe('Dashboard', () => {
         const link1 = within(rows[1]).getByRole('link')
         expect(link1).toHaveAttribute(
             'href',
-            '/submissions/test-abc-draft/type'
+            '/submissions/test-abc-draft/form/type'
         )
 
         const link2 = within(rows[2]).getByRole('link')
         expect(link2).toHaveAttribute(
             'href',
-            '/submissions/test-abc-unlocked/review-and-submit'
+            '/submissions/test-abc-unlocked/form/review-and-submit'
         )
 
         const link3 = within(rows[3]).getByRole('link')
-        expect(link3).toHaveAttribute('href', '/submissions/test-abc-submitted')
+        expect(link3).toHaveAttribute(
+            'href',
+            '/submissions/test-abc-submitted/summary'
+        )
     })
 })

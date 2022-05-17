@@ -1,5 +1,5 @@
 import { screen, waitFor } from '@testing-library/react'
-import { Route } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { Document } from '../../gen/gqlClient'
 import { RoutesRecord } from '../../constants/routes'
@@ -24,10 +24,12 @@ describe('StateSubmissionForm', () => {
     describe('loads draft submission', () => {
         it('loads step indicator', async () => {
             renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    element={<StateSubmissionForm />}
-                />,
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        element={<StateSubmissionForm />}
+                    />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -39,7 +41,7 @@ describe('StateSubmissionForm', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/contract-details',
+                        route: '/submissions/15/form/contract-details',
                     },
                 }
             )
@@ -56,10 +58,12 @@ describe('StateSubmissionForm', () => {
                 programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
             })
             renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    element={<StateSubmissionForm />}
-                />,
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        element={<StateSubmissionForm />}
+                    />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -71,7 +75,7 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/type' },
+                    routerProvider: { route: '/submissions/15/form/type' },
                 }
             )
 
@@ -108,10 +112,12 @@ describe('StateSubmissionForm', () => {
             })
 
             renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    element={<StateSubmissionForm />}
-                />,
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        element={<StateSubmissionForm />}
+                    />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -124,7 +130,7 @@ describe('StateSubmissionForm', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/12/contract-details',
+                        route: '/submissions/12/form/contract-details',
                     },
                 }
             )
@@ -146,10 +152,12 @@ describe('StateSubmissionForm', () => {
 
         it('loads documents fields for /submissions/:id/documents', async () => {
             renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    element={<StateSubmissionForm />}
-                />,
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        element={<StateSubmissionForm />}
+                    />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -161,7 +169,7 @@ describe('StateSubmissionForm', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/12/documents',
+                        route: '/submissions/12/form/documents',
                     },
                 }
             )
@@ -180,10 +188,12 @@ describe('StateSubmissionForm', () => {
     describe('loads unlocked submission', () => {
         it('displays unlock banner with correct data for an unlocked submission', async () => {
             renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    element={<StateSubmissionForm />}
-                />,
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        element={<StateSubmissionForm />}
+                    />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -196,7 +206,7 @@ describe('StateSubmissionForm', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/documents',
+                        route: '/submissions/15/form/documents',
                     },
                 }
             )
@@ -229,10 +239,12 @@ describe('StateSubmissionForm', () => {
             const updatedFormData = domainToBase64(formData)
 
             renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    element={<StateSubmissionForm />}
-                />,
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        element={<StateSubmissionForm />}
+                    />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -253,7 +265,7 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/type' },
+                    routerProvider: { route: '/submissions/15/form/type' },
                 }
             )
 
@@ -297,10 +309,12 @@ describe('StateSubmissionForm', () => {
             const updatedFormData = domainToBase64(formData)
 
             renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    element={<StateSubmissionForm />}
-                />,
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        element={<StateSubmissionForm />}
+                    />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -321,7 +335,7 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/type' },
+                    routerProvider: { route: '/submissions/15/form/type' },
                 }
             )
             await waitFor(() =>
@@ -345,10 +359,12 @@ describe('StateSubmissionForm', () => {
     describe('errors', () => {
         it('shows a generic error fetching submission fails at submission type', async () => {
             renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    element={<StateSubmissionForm />}
-                />,
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        element={<StateSubmissionForm />}
+                    />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -359,7 +375,7 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/type' },
+                    routerProvider: { route: '/submissions/15/form/type' },
                 }
             )
 
@@ -369,10 +385,12 @@ describe('StateSubmissionForm', () => {
 
         it('shows a generic error fetching submission fails at contract details', async () => {
             renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    element={<StateSubmissionForm />}
-                />,
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        element={<StateSubmissionForm />}
+                    />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -384,7 +402,7 @@ describe('StateSubmissionForm', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/contract-details',
+                        route: '/submissions/15/form/contract-details',
                     },
                 }
             )
@@ -395,10 +413,12 @@ describe('StateSubmissionForm', () => {
 
         it('shows a generic error fetching submission fails at documents', async () => {
             renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    element={<StateSubmissionForm />}
-                />,
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        element={<StateSubmissionForm />}
+                    />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -409,7 +429,7 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/documents' },
+                    routerProvider: { route: '/submissions/15/form/documents' },
                 }
             )
 
@@ -429,10 +449,12 @@ describe('StateSubmissionForm', () => {
         it('does not delete files from past revisions', async () => {
             const submission = mockUnlockedHealthPlanPackageWithDocuments()
             renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    element={<StateSubmissionForm />}
-                />,
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        element={<StateSubmissionForm />}
+                    />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -444,7 +466,7 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/documents' },
+                    routerProvider: { route: '/submissions/15/form/documents' },
                     s3Provider: mockS3,
                 }
             )

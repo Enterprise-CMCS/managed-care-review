@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Route } from 'react-router'
+import { Route, Routes } from 'react-router'
 import { basicLockedHealthPlanFormData } from '../../common-code/healthPlanFormDataMocks'
 import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
 import { RoutesRecord } from '../../constants/routes'
@@ -19,10 +19,12 @@ import { SubmissionSummary } from './SubmissionSummary'
 describe('SubmissionSummary', () => {
     it('renders without errors', async () => {
         renderWithProviders(
-            <Route
-                path={RoutesRecord.SUBMISSIONS_FORM}
-                element={<SubmissionSummary />}
-            />,
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                    element={<SubmissionSummary />}
+                />
+            </Routes>,
             {
                 apolloProvider: {
                     mocks: [
@@ -36,7 +38,7 @@ describe('SubmissionSummary', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15',
+                    route: '/submissions/15/summary',
                 },
             }
         )
@@ -50,10 +52,12 @@ describe('SubmissionSummary', () => {
         const submissionsWithRevisions =
             mockSubmittedHealthPlanPackageWithRevision()
         renderWithProviders(
-            <Route
-                path={RoutesRecord.SUBMISSIONS_FORM}
-                element={<SubmissionSummary />}
-            />,
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                    element={<SubmissionSummary />}
+                />
+            </Routes>,
             {
                 apolloProvider: {
                     mocks: [
@@ -68,7 +72,7 @@ describe('SubmissionSummary', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15',
+                    route: '/submissions/15/summary',
                 },
             }
         )
@@ -101,10 +105,12 @@ describe('SubmissionSummary', () => {
             pkg.revisions[1].node.formDataProto = domainToBase64(oldPackageData)
 
             renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    element={<SubmissionSummary />}
-                />,
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -119,7 +125,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15',
+                        route: '/submissions/15/summary',
                     },
                 }
             )
@@ -138,10 +144,12 @@ describe('SubmissionSummary', () => {
     describe('CMS user unlock submission', () => {
         it('renders the unlock button', async () => {
             renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    element={<SubmissionSummary />}
-                />,
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -155,7 +163,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15',
+                        route: '/submissions/15/summary',
                     },
                 }
             )
@@ -169,10 +177,12 @@ describe('SubmissionSummary', () => {
 
         it('displays no error on unlock success', async () => {
             renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    element={<SubmissionSummary />}
-                />,
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -190,7 +200,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15',
+                        route: '/submissions/15/summary',
                     },
                 }
             )
@@ -228,10 +238,12 @@ describe('SubmissionSummary', () => {
 
         it('extracts the correct dates from the submission and displays them in tables', async () => {
             renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    element={<SubmissionSummary />}
-                />,
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -247,7 +259,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15',
+                        route: '/submissions/15/summary',
                     },
                 }
             )
@@ -268,10 +280,12 @@ describe('SubmissionSummary', () => {
 
         it('disables the unlock button for an unlocked submission', async () => {
             renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    element={<SubmissionSummary />}
-                />,
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -287,7 +301,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15',
+                        route: '/submissions/15/summary',
                     },
                 }
             )
@@ -303,10 +317,12 @@ describe('SubmissionSummary', () => {
 
         it('displays unlock banner with correct data for an unlocked submission', async () => {
             renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    element={<SubmissionSummary />}
-                />,
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -322,7 +338,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15',
+                        route: '/submissions/15/summary',
                     },
                 }
             )
@@ -339,10 +355,12 @@ describe('SubmissionSummary', () => {
 
         it('displays page alert banner error if unlock api request fails', async () => {
             renderWithProviders(
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    element={<SubmissionSummary />}
-                />,
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -360,7 +378,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15',
+                        route: '/submissions/15/summary',
                     },
                 }
             )
