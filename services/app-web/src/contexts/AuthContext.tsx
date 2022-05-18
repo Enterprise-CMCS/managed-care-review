@@ -7,6 +7,7 @@ import { useRef } from 'react'
 
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import * as ld from 'launchdarkly-js-client-sdk'
+import { featureFlags } from '../common-code/featureFlags'
 
 type LogoutFn = () => Promise<null>
 
@@ -48,7 +49,11 @@ function AuthProvider({
         React.useState<LoginStatusType>('LOGGED_OUT')
     const [isSessionExpiring, setisSessionExpiring] =
         React.useState<boolean>(false)
-    const [timeUntilLogout, setTimeUntilLogout] = React.useState<number>(120)
+    const ldClient = useLDClient()
+    const countdownDuration =
+        ldClient?.variation(featureFlags.MODAL_COUNTDOWN_DURATION, 2) * 60
+    const [timeUntilLogout, setTimeUntilLogout] =
+        React.useState<number>(countdownDuration)
     const runningTimers = useRef<NodeJS.Timer[]>([])
     const { loading, data, error, refetch } = useFetchCurrentUserQuery({
         notifyOnNetworkStatusChange: true,
@@ -56,7 +61,7 @@ function AuthProvider({
 
     React.useEffect(() => {
         if (isSessionExpiring) {
-            setTimeUntilLogout(120)
+            setTimeUntilLogout(countdownDuration)
             const timer = setInterval(() => {
                 setTimeUntilLogout((timeUntilLogout) => timeUntilLogout - 1)
             }, 1000)
@@ -65,7 +70,7 @@ function AuthProvider({
             runningTimers.current.forEach((timer) => clearInterval(timer))
             runningTimers.current = []
         }
-    }, [isSessionExpiring])
+    }, [isSessionExpiring, countdownDuration])
 
     const isAuthenticated = loggedInUser !== undefined
 
