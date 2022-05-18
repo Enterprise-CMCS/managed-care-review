@@ -71,7 +71,7 @@ export const ChangeHistory = ({
                     <br />
                     {r.revisionVersion && (
                         <Link
-                            href={`/submissions/${submission.id}/summary/revisions/${r.revisionVersion}`}
+                            href={`/submissions/${submission.id}/revisions/${r.revisionVersion}`}
                             data-testid={`revision-link-${r.revisionVersion}`}
                         >
                             View past submission version
@@ -98,7 +98,7 @@ export const ChangeHistory = ({
                     </div>
                     {isSubsequentSubmission && r.revisionVersion && (
                         <Link
-                            href={`/submissions/${submission.id}/summary/revisions/${r.revisionVersion}`}
+                            href={`/submissions/${submission.id}/revisions/${r.revisionVersion}`}
                             data-testid={`revision-link-${r.revisionVersion}`}
                         >
                             View past submission version
