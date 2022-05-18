@@ -285,9 +285,7 @@ export const Contacts = ({
                 if (redirectToDashboard.current) {
                     navigate(`/dashboard`)
                 } else {
-                    navigate(
-                        `/submissions/${draftSubmission.id}/form/documents`
-                    )
+                    navigate(`../documents`)
                 }
             }
         } catch (serverError) {

@@ -104,7 +104,6 @@ export const ContractDetails = ({
 }: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const navigate = useNavigate()
-    const parentPath = `/submissions/${draftSubmission.id}/form`
     // Contract documents state management
     const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
@@ -360,8 +359,8 @@ export const ContractDetails = ({
                     shouldValidateDocuments: true,
                     redirectPath:
                         draftSubmission.submissionType === 'CONTRACT_ONLY'
-                            ? `${parentPath}/contacts`
-                            : `${parentPath}/rate-details`,
+                            ? `../contacts`
+                            : `../rate-details`,
                 })
             }}
             validationSchema={ContractDetailsFormSchema}

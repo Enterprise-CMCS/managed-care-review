@@ -71,7 +71,6 @@ export const RateDetails = ({
 }: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const navigate = useNavigate()
-    const parentPath = `/submissions/${draftSubmission.id}/form`
 
     // Rate documents state management
     const { deleteFile, getKey, getS3URL, scanFile, uploadFile } = useS3()
@@ -317,7 +316,7 @@ export const RateDetails = ({
                 onSubmit={(values, { setSubmitting }) => {
                     return handleFormSubmit(values, setSubmitting, {
                         shouldValidateDocuments: true,
-                        redirectPath: `${parentPath}/contacts`,
+                        redirectPath: `../contacts`,
                     })
                 }}
                 validationSchema={RateDetailsFormSchema}

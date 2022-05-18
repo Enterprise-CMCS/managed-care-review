@@ -224,9 +224,7 @@ export const SubmissionType = ({
                 if (redirectPath) {
                     navigate(redirectPath)
                 } else {
-                    navigate(
-                        `/submissions/${draftSubmission.id}/form/contract-details`
-                    )
+                    navigate(`../contract-details`)
                 }
             } catch (serverError) {
                 setShowFormAlert(true)

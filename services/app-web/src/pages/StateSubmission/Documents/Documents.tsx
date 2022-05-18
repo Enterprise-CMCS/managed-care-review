@@ -25,7 +25,6 @@ export const Documents = ({
     const [shouldValidate, setShouldValidate] = useState(false)
     const isContractOnly = draftSubmission.submissionType === 'CONTRACT_ONLY'
     const navigate = useNavigate()
-    const parentPath = `/submissions/${draftSubmission.id}/form`
 
     // Documents state management
     const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
@@ -320,7 +319,7 @@ export const Documents = ({
                     backOnClick={async (e) => {
                         await handleFormSubmit({
                             shouldValidateDocuments: false,
-                            redirectPath: `${parentPath}/contacts`,
+                            redirectPath: `../contacts`,
                         })(e)
                     }}
                     disableContinue={
@@ -330,7 +329,7 @@ export const Documents = ({
                     continueOnClick={async (e) => {
                         await handleFormSubmit({
                             shouldValidateDocuments: true,
-                            redirectPath: `${parentPath}/review-and-submit`,
+                            redirectPath: `../review-and-submit`,
                         })(e)
                     }}
                 />

@@ -43,7 +43,6 @@ export const ReviewSubmit = ({
     >(undefined)
     const [focusErrorsInModal, setFocusErrorsInModal] = useState(true)
     const navigate = useNavigate()
-    const parentPath = `/submissions/${draftSubmission.id}/form`
     const modalRef = useRef<ModalRef>(null)
     const { loggedInUser } = useAuth()
 
@@ -156,13 +155,13 @@ export const ReviewSubmit = ({
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
                 submissionName={submissionName}
-                navigateTo={`${parentPath}/type`}
+                navigateTo="../type"
                 statePrograms={statePrograms}
             />
 
             <ContractDetailsSummarySection
                 submission={draftSubmission}
-                navigateTo={`${parentPath}/contract-details`}
+                navigateTo={'../contract-details'}
                 submissionName={submissionName}
                 documentDateLookupTable={documentDateLookupTable}
             />
@@ -170,7 +169,7 @@ export const ReviewSubmit = ({
             {isContractActionAndRateCertification && (
                 <RateDetailsSummarySection
                     submission={draftSubmission}
-                    navigateTo={`${parentPath}/rate-details`}
+                    navigateTo={'../rate-details'}
                     submissionName={submissionName}
                     documentDateLookupTable={documentDateLookupTable}
                 />
@@ -178,12 +177,12 @@ export const ReviewSubmit = ({
 
             <ContactsSummarySection
                 submission={draftSubmission}
-                navigateTo={`${parentPath}/contacts`}
+                navigateTo={'../contacts'}
             />
 
             <SupportingDocumentsSummarySection
                 submission={draftSubmission}
-                navigateTo={`${parentPath}/documents`}
+                navigateTo={'../documents'}
             />
 
             <PageActionsContainer
@@ -201,7 +200,7 @@ export const ReviewSubmit = ({
                 <ActionButton
                     type="button"
                     variant="outline"
-                    onClick={() => navigate(`${parentPath}/documents`)}
+                    onClick={() => navigate('../documents')}
                     disabled={formik.isSubmitting}
                 >
                     Back
