@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useHistory, useLocation } from 'react-router'
 import { Route, Switch } from 'react-router-dom'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { extendSession } from '../../pages/Auth/cognitoAuth'
 import { assertNever, AuthModeType } from '../../common-code/config'
 import { dayjs } from '../../common-code/dateHelpers/dayjs'
@@ -27,6 +28,7 @@ import { SubmissionSummary } from '../SubmissionSummary'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
 import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
 import React from 'react'
+import { featureFlags } from '../../common-code/featureFlags'
 
 const LOGIN_REDIRECT_STORAGE_KEY = 'LOGIN_REDIRECT'
 const LocalStorage = window.localStorage
@@ -139,6 +141,19 @@ export const AppRoutes = ({
 }): React.ReactElement => {
     const { loggedInUser, isSessionExpiring, updateSessionExpiry } = useAuth()
     const { pathname } = useLocation()
+    const ldClient = useLDClient()
+    const showExpirationModal = ldClient?.variation(
+        featureFlags.SESSION_EXPIRING_MODAL,
+        true
+    )
+    const minutesUntilExpiration = ldClient?.variation(
+        featureFlags.MINUTES_UNTIL_SESSION_EXPIRES,
+        30
+    )
+    const countdownDuration = ldClient?.variation(
+        featureFlags.MODAL_COUNTDOWN_DURATION,
+        2
+    )
     const history = useHistory()
     const route = getRouteName(pathname)
     const { updateHeading } = usePage()
@@ -150,8 +165,11 @@ export const AppRoutes = ({
     if (!loggedInUser) {
         LocalStorage.removeItem('LOGOUT_TIMER')
     }
-    if (loggedInUser && !isSessionExpiring) {
-        sessionExpirationTime = dayjs(Date.now()).add(2, 'minute')
+    if (loggedInUser && !isSessionExpiring && showExpirationModal) {
+        sessionExpirationTime = dayjs(Date.now()).add(
+            minutesUntilExpiration,
+            'minute'
+        )
         try {
             LocalStorage.setItem(
                 'LOGOUT_TIMER',
@@ -172,7 +190,10 @@ export const AppRoutes = ({
             let insideTwoMinuteWindow = false
             if (sessionExpirationTime) {
                 insideTwoMinuteWindow = dayjs(Date.now()).isAfter(
-                    dayjs(sessionExpirationTime).subtract(1, 'minute')
+                    dayjs(sessionExpirationTime).subtract(
+                        countdownDuration,
+                        'minute'
+                    )
                 )
             }
             if (insideTwoMinuteWindow) {

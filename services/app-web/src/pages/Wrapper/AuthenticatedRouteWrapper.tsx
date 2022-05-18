@@ -85,8 +85,10 @@ export const AuthenticatedRouteWrapper = ({
                     forceAction={true}
                 >
                     <p>
-                        Your session is going to expire in {timeUntilLogout}{' '}
-                        seconds
+                        Your session is going to expire in{' '}
+                        {dayjs
+                            .duration(timeUntilLogout, 'seconds')
+                            .format('mm:ss')}{' '}
                     </p>
                     <p>
                         If you would like to extend your session, click the

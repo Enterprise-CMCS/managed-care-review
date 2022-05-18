@@ -56,6 +56,7 @@ function AuthProvider({
 
     React.useEffect(() => {
         if (isSessionExpiring) {
+            setTimeUntilLogout(120)
             const timer = setInterval(() => {
                 setTimeUntilLogout((timeUntilLogout) => timeUntilLogout - 1)
             }, 1000)

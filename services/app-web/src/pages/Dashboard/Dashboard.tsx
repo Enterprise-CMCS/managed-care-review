@@ -70,7 +70,7 @@ const StatusTag = ({
 }
 
 export const Dashboard = (): React.ReactElement => {
-    const { loginStatus, loggedInUser, isSessionExpiring } = useAuth()
+    const { loginStatus, loggedInUser } = useAuth()
     const location = useLocation()
 
     // Get the LD feature flag
@@ -147,7 +147,6 @@ export const Dashboard = (): React.ReactElement => {
 
     return (
         <>
-            {isSessionExpiring === true ? <p>expiring</p> : null}
             <div id="dashboard-page" className={styles.wrapper}>
                 <GridContainer
                     className={styles.container}
