@@ -47,8 +47,8 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_CONTACTS: 'contacts',
     SUBMISSIONS_DOCUMENTS: 'documents',
     SUBMISSIONS_REVIEW_SUBMIT: 'review-and-submit',
-    SUBMISSIONS_REVISION: 'submissions/:id/summary/revisions/:revisionVersion',
     SUBMISSIONS_SUMMARY: 'submissions/:id/summary',
+    SUBMISSIONS_REVISION: 'submissions/:id/revisions/:revisionVersion',
 }
 
 // Static page headings used in <header> h1 when logged in. Dynamic headings, when necessary, are set in page specific parent component.
