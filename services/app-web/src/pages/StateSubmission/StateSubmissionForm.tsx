@@ -114,8 +114,14 @@ export type HealthPlanFormPageProps = {
 }
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id, '*': path } = useParams<{ id: string; ['*']: string }>()
+    // IF not id throw new error
+    if (!id) {
+        throw new Error(
+            'PROGRAMMING ERROR: id param not set in state submission form.'
+        )
+    }
     const { pathname } = useLocation()
-    const currentRoute = getRouteName(`/${path}` || 'UNKNOWN_ROUTE')
+    const currentRoute = getRouteName(`/${path}`)
     const { updateHeading } = usePage()
     const [formDataFromLatestRevision, setFormDataFromLatestRevision] =
         useState<UnlockedHealthPlanFormDataType | null>(null)

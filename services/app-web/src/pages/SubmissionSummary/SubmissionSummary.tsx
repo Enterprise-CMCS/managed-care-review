@@ -67,6 +67,11 @@ function UnlockModalButton({
 export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
     const { id } = useParams<{ id: string }>()
+    if (!id) {
+        throw new Error(
+            'PROGRAMMING ERROR: id param not set in state submission form.'
+        )
+    }
     const { pathname } = useLocation()
     const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()

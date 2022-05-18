@@ -33,6 +33,11 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         id: string
         revisionVersion: string
     }>()
+    if (!id) {
+        throw new Error(
+            'PROGRAMMING ERROR: id param not set in state submission form.'
+        )
+    }
     const { pathname } = useLocation()
     const { updateHeading } = usePage()
     const [pageLevelAlert, setPageLevelAlert] = useState<string | undefined>(
