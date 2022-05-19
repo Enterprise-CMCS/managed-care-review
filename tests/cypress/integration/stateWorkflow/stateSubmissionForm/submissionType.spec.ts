@@ -8,7 +8,7 @@ describe('submission type', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.visit(`/submissions/${draftSubmissionId}/type`)
+            cy.visit(`/submissions/${draftSubmissionId}/form/type`)
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
             cy.findByRole('heading', { level: 2, name: /Submission type/, timeout: 10000 })
             cy.wait(500) // WEIRD flake here where we click the cancel button but the page doesn't navigate back
@@ -19,14 +19,14 @@ describe('submission type', () => {
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to type page
-            cy.visit(`/submissions/${draftSubmissionId}/type`)
+            cy.visit(`/submissions/${draftSubmissionId}/form/type`)
 
             // Navigate to dashboard page by clicking save as draft
             cy.navigateForm('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to back to submission type page
-            cy.visit(`/submissions/${draftSubmissionId}/type`)
+            cy.visit(`/submissions/${draftSubmissionId}/form/type`)
 
             // Navigate to contract details page by clicking continue for contract only submission
             cy.navigateForm('CONTINUE')
@@ -43,7 +43,7 @@ describe('submission type', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.visit(`/submissions/${draftSubmissionId}/type`)
+            cy.visit(`/submissions/${draftSubmissionId}/form/type`)
 
             cy.findByText('Contract action and rate certification').click()
 
@@ -52,7 +52,7 @@ describe('submission type', () => {
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
 
             // Navigate to type page
-            cy.visit(`/submissions/${draftSubmissionId}/type`)
+            cy.visit(`/submissions/${draftSubmissionId}/form/type`)
 
             cy.findByLabelText('Contract action and rate certification').should(
                 'be.checked'
@@ -69,7 +69,7 @@ describe('submission type', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.visit(`/submissions/${draftSubmissionId}/type`)
+            cy.visit(`/submissions/${draftSubmissionId}/form/type`)
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
             cy.findByRole('heading', { level: 2, name: /Submission type/, timeout: 10000 })
             cy.wait(500) // WEIRD flake here where we click the cancel button but the page doesn't navigate back
@@ -80,7 +80,7 @@ describe('submission type', () => {
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to type page
-            cy.visit(`/submissions/${draftSubmissionId}/type`)
+            cy.visit(`/submissions/${draftSubmissionId}/form/type`)
 
             //Edit some stuff here
             cy.findByRole('combobox', { name: 'programs (required)' }).click({
@@ -98,7 +98,7 @@ describe('submission type', () => {
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate back to submission type page
-            cy.visit(`/submissions/${draftSubmissionId}/type`)
+            cy.visit(`/submissions/${draftSubmissionId}/form/type`)
 
             //Check to make sure edited stuff was saved
             cy.get('[aria-label="Remove PMAP"]').should('exist')

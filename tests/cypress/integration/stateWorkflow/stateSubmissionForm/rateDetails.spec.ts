@@ -8,21 +8,21 @@ describe('rate details', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.visit(`/submissions/${draftSubmissionId}/rate-details`)
+            cy.visit(`/submissions/${draftSubmissionId}/form/rate-details`)
 
             // Navigate to contract details page by clicking back
            cy.navigateForm('BACK')
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
 
             // Navigate to rate details page
-            cy.visit(`/submissions/${draftSubmissionId}/rate-details`)
+            cy.visit(`/submissions/${draftSubmissionId}/form/rate-details`)
 
             // Navigate to dashboard page by clicking save as draft
             cy.navigateForm('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to rate details page
-            cy.visit(`/submissions/${draftSubmissionId}/rate-details`)
+            cy.visit(`/submissions/${draftSubmissionId}/form/rate-details`)
 
             cy.fillOutNewRateCertification()
 
@@ -41,7 +41,7 @@ describe('rate details', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.visit(`/submissions/${draftSubmissionId}/rate-details`)
+            cy.visit(`/submissions/${draftSubmissionId}/form/rate-details`)
 
             cy.fillOutAmendmentToPriorRateCertification()
 
@@ -69,7 +69,7 @@ describe('rate details', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.visit(`/submissions/${draftSubmissionId}/rate-details`)
+            cy.visit(`/submissions/${draftSubmissionId}/form/rate-details`)
 
             cy.fillOutAmendmentToPriorRateCertification()
 

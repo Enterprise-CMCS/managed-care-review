@@ -18,7 +18,7 @@ describe('dashboard', () => {
         // Store submission url for reference later
         cy.location().then( (fullUrl) => {
             const reviewURL = fullUrl.toString()
-            const submissionURL = reviewURL.replace('/review-and-submit', '')
+            const submissionURL = reviewURL.replace('form/review-and-submit', 'summary')
             fullUrl.pathname = path.dirname(fullUrl)
 
             // Submit, sent to dashboard
@@ -32,7 +32,7 @@ describe('dashboard', () => {
             cy.findByText(
                 'Medicaid and CHIP Managed Care Reporting and Review System'
             )
-            cy.logInAsCMSUser({ initialURL: submissionURL })
+            cy.logInAsCMSUser({ initialURL: submissionURL})
 
             // click on the unlock button, type in reason and confirm
             cy.wait(2000)
