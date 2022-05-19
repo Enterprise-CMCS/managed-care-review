@@ -40,6 +40,12 @@ export const RateDetailsSummarySection = ({
 
     const rateName = generateRateName(submission, submissionName)
 
+    const rateCapitationType = submission.rateCapitationType
+        ? submission.rateCapitationType === 'RATE_CELL'
+            ? 'Certification of capitation rates specific to each rate cell'
+            : 'Certification of rate ranges of capitation rates per rate cell'
+        : ''
+
     useEffect(() => {
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
@@ -106,11 +112,7 @@ export const RateDetailsSummarySection = ({
                     <DataDetail
                         id="rateCapitationType"
                         label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
-                        data={
-                            submission.rateAmendmentInfo
-                                ? 'Certification of rate ranges of capitation rates per rate cell'
-                                : 'Certification of capitation rates specific to each rate cell'
-                        }
+                        data={rateCapitationType}
                     />
                     <DataDetail
                         id="ratingPeriod"
