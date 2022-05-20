@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useHistory, useLocation } from 'react-router'
 import { Route, Switch } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
@@ -27,7 +27,6 @@ import { NewStateSubmissionForm, StateSubmissionForm } from '../StateSubmission'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
 import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
-import React from 'react'
 import { featureFlags } from '../../common-code/featureFlags'
 
 const LOGIN_REDIRECT_STORAGE_KEY = 'LOGIN_REDIRECT'
@@ -163,12 +162,12 @@ export const AppRoutes = ({
     const { updateHeading } = usePage()
     const [initialPath] = useState(pathname) // this gets written on mount, so we don't call the effect on every path change
     const runningTimers = useRef<NodeJS.Timer[]>([])
-    // when we load, set the logout timer for 30 minutes in the future and refresh the session
     let sessionExpirationTime: dayjs.Dayjs | undefined = undefined
     if (!loggedInUser) {
         LocalStorage.removeItem('LOGOUT_TIMER')
     }
     if (loggedInUser && !isSessionExpiring && showExpirationModal) {
+        // whenever we load a page, reset the logout timer for 'minutesUntilExpiration` and refresh the session
         sessionExpirationTime = dayjs(Date.now()).add(
             minutesUntilExpiration,
             'minute'
@@ -185,22 +184,21 @@ export const AppRoutes = ({
             void extendSession()
         }
         updateSessionExpiry(false)
+        // Every thirty seconds, check if the current time is within `countdownDuration` of the session expiration time
         const timer = setInterval(() => {
             runningTimers.current.push(timer)
-            // is the current time within 2 minutes of the session expiration time?
-            let insideTwoMinuteWindow = false
+            let insideCountdownDurationPeriod = false
             if (sessionExpirationTime) {
-                insideTwoMinuteWindow = dayjs(Date.now()).isAfter(
+                insideCountdownDurationPeriod = dayjs(Date.now()).isAfter(
                     dayjs(sessionExpirationTime).subtract(
                         countdownDuration,
                         'minute'
                     )
                 )
             }
-            if (insideTwoMinuteWindow) {
-                /* if the session is about to expire, but we haven't set that piece of state yet
-                we set it here and clear the timers, because we don't need a countdown anymore once we've 
-                entered the expiry window */
+            if (insideCountdownDurationPeriod) {
+                /* Once we're inside the countdown period, we can stop the interval that checks
+                whether we're inside the countdown period */
                 runningTimers.current.forEach((t) => clearInterval(t))
                 runningTimers.current = []
                 updateSessionExpiry(true)

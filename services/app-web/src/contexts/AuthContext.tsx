@@ -63,6 +63,7 @@ function AuthProvider({
         if (isSessionExpiring) {
             setTimeUntilLogout(countdownDuration)
             const timer = setInterval(() => {
+                // decrement the countdown timer by one second per second
                 setTimeUntilLogout((timeUntilLogout) => timeUntilLogout - 1)
             }, 1000)
             runningTimers.current.push(timer)
@@ -141,7 +142,7 @@ function AuthProvider({
 
     const updateSessionExpiry = (value: boolean) => {
         if (isSessionExpiring !== value) {
-            setisSessionExpiring(!!loggedInUser && value)
+            setisSessionExpiring(loggedInUser !== undefined && value)
         }
     }
 

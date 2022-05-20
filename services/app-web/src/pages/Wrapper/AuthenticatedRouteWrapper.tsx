@@ -7,6 +7,8 @@ import { AuthModeType } from '../../common-code/config'
 import { extendSession } from '../Auth/cognitoAuth'
 import styles from '../StateSubmission/ReviewSubmit/ReviewSubmit.module.scss'
 import { dayjs } from '../../common-code/dateHelpers/dayjs'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../common-code/featureFlags'
 
 export const AuthenticatedRouteWrapper = ({
     children,
@@ -19,6 +21,11 @@ export const AuthenticatedRouteWrapper = ({
 }): React.ReactElement => {
     const { logout, isSessionExpiring, timeUntilLogout, updateSessionExpiry } =
         useAuth()
+    const ldClient = useLDClient()
+    const minutesUntilExpiration = ldClient?.variation(
+        featureFlags.MINUTES_UNTIL_SESSION_EXPIRES,
+        30
+    )
     const modalRef = createRef<ModalRef>()
     const LocalStorage = window.localStorage
     const logoutSession = useCallback(() => {
@@ -42,7 +49,10 @@ export const AuthenticatedRouteWrapper = ({
 
     const resetSessionTimeout = () => {
         updateSessionExpiry(false)
-        const sessionExpirationTime = dayjs(Date.now()).add(2, 'minute')
+        const sessionExpirationTime = dayjs(Date.now()).add(
+            minutesUntilExpiration,
+            'minute'
+        )
         try {
             LocalStorage.setItem(
                 'LOGOUT_TIMER',

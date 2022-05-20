@@ -215,7 +215,7 @@ export const ReviewSubmit = ({
                 </ModalToggleButton>
             </PageActionsContainer>
 
-            {!isSessionExpiring && (
+            {!isSessionExpiring && ( // if the session is expiring, close this modal so the countdown modal can appear
                 <Modal
                     modalRef={modalRef}
                     id="review-and-submit"

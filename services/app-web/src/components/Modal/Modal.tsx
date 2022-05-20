@@ -15,7 +15,7 @@ import { ActionButton } from '../ActionButton'
 interface ModalComponentProps {
     id: string
     modalHeading?: string
-    onSubmit?: React.MouseEventHandler<HTMLButtonElement> | undefined
+    onSubmit?: React.MouseEventHandler<HTMLButtonElement>
     onCancel?: () => void
     onSubmitText?: string
     onCancelText?: string
