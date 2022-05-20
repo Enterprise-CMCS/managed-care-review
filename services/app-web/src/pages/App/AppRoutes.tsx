@@ -49,12 +49,14 @@ function componentForAuthMode(
 }
 
 const StateUserRoutes = ({
+    authMode,
     setAlert,
 }: {
+    authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
 }): React.ReactElement => {
     return (
-        <AuthenticatedRouteWrapper setAlert={setAlert}>
+        <AuthenticatedRouteWrapper setAlert={setAlert} authMode={authMode}>
             <Switch>
                 <Route path={RoutesRecord.ROOT} exact component={Dashboard} />
                 <Route path={RoutesRecord.DASHBOARD} component={Dashboard} />
@@ -84,12 +86,14 @@ const StateUserRoutes = ({
 }
 
 const CMSUserRoutes = ({
+    authMode,
     setAlert,
 }: {
+    authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
 }): React.ReactElement => {
     return (
-        <AuthenticatedRouteWrapper setAlert={setAlert}>
+        <AuthenticatedRouteWrapper authMode={authMode} setAlert={setAlert}>
             <Switch>
                 <Route
                     path={RoutesRecord.ROOT}
@@ -177,10 +181,8 @@ export const AppRoutes = ({
         } catch (e) {
             console.log('Error setting logout timer: ', e)
         }
-        try {
+        if (authMode !== 'LOCAL') {
             void extendSession()
-        } catch (e) {
-            console.log('Error refreshing session: ', e)
         }
         updateSessionExpiry(false)
         const timer = setInterval(() => {
@@ -272,8 +274,8 @@ export const AppRoutes = ({
     if (!loggedInUser) {
         return <UnauthenticatedRoutes authMode={authMode} />
     } else if (loggedInUser.__typename === 'StateUser') {
-        return <StateUserRoutes setAlert={setAlert} />
+        return <StateUserRoutes authMode={authMode} setAlert={setAlert} />
     } else {
-        return <CMSUserRoutes setAlert={setAlert} />
+        return <CMSUserRoutes authMode={authMode} setAlert={setAlert} />
     }
 }

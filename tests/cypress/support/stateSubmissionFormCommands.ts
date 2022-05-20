@@ -94,7 +94,9 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     // Must be a contract and rates submission
     cy.findByText('New rate certification').click()
     cy.wait(2000)
-    cy.findByText('Certification of capitation rates specific to each rate cell').click()
+    cy.findByText(
+        'Certification of capitation rates specific to each rate cell'
+    ).click()
     cy.findByLabelText('Start date').type('02/29/2024')
     cy.findByLabelText('End date').type('02/28/2025')
     cy.findByLabelText('Date certified').type('03/01/2024')
@@ -112,7 +114,9 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
     // Must be a contract and rates submission
     cy.findByText('Amendment to prior rate certification').click()
     cy.wait(2000)
-    cy.findByText('Certification of capitation rates specific to each rate cell').click()
+    cy.findByText(
+        'Certification of capitation rates specific to each rate cell'
+    ).click()
     cy.findAllByLabelText('Start date').eq(0).type('02/29/2024')
     cy.findAllByLabelText('End date').eq(0).type('02/28/2025')
     cy.findAllByLabelText('Start date').eq(1).type('03/01/2024')
@@ -158,24 +162,29 @@ Cypress.Commands.add('fillOutSupportingDocuments', () => {
         'documents/trussel-guide.pdf'
     )
 
-    cy.findByTestId('file-input-input').attachFile(
-        'documents/testing.csv'
-    )
-   
+    cy.findByTestId('file-input-input').attachFile('documents/testing.csv')
+
     cy.verifyDocumentsHaveNoErrors()
 
     cy.findAllByRole('checkbox', {
-            name: 'contract-supporting',
-        }).eq(1).click({ force: true })
+        name: 'contract-supporting',
+    })
+        .eq(1)
+        .click({ force: true })
 
     cy.findAllByRole('checkbox', {
         name: 'rate-supporting',
-    }).eq(0).click({ force: true })
+    })
+        .eq(0)
+        .click({ force: true })
 
     // twice because there could be validation errors with checkbox
     cy.verifyDocumentsHaveNoErrors()
 
-    cy.findAllByTestId('upload-finished-indicator', {timeout: 120000}).should('have.have.length', 2)
+    cy.findAllByTestId('upload-finished-indicator', { timeout: 120000 }).should(
+        'have.have.length',
+        2
+    )
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
@@ -197,27 +206,37 @@ Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
     cy.findByText('Remove files with errors').should('not.exist')
 })
 
-Cypress.Commands.add('submitStateSubmissionForm', (success = true, resubmission = false) => {
-      cy.intercept('POST', '*/graphql', (req) => {
-          aliasMutation(req, 'submitHealthPlanPackage')
-      })
-    cy.findByRole('heading', { level: 2, name: /Review and submit/ })
-    cy.findByRole('button', {
-        name: 'Submit'
-    }).safeClick()
-
-    cy.findAllByTestId('modalWindow')
-        .should('exist')
-        .within(($modal) => {
-            if (resubmission) {
-                cy.get('#submittedReasonCharacterCount').type('Resubmission summary')
-            }
-            cy.findByTestId('review-and-submit-modal-submit').click()
+Cypress.Commands.add(
+    'submitStateSubmissionForm',
+    (success = true, resubmission = false) => {
+        cy.intercept('POST', '*/graphql', (req) => {
+            aliasMutation(req, 'submitHealthPlanPackage')
         })
-    cy.wait('@submitHealthPlanPackageMutation', { timeout: 50000 })
-})
+        cy.findByRole('heading', { level: 2, name: /Review and submit/ })
+        cy.findByRole('button', {
+            name: 'Submit',
+        }).safeClick()
 
-type FormButtonKey =  'CONTINUE_FROM_START_NEW' | 'CONTINUE' | 'SAVE_DRAFT' | 'BACK'
+        cy.findAllByTestId('modalWindow')
+            .eq(1)
+            .should('exist')
+            .within(($modal) => {
+                if (resubmission) {
+                    cy.get('#submittedReasonCharacterCount').type(
+                        'Resubmission summary'
+                    )
+                }
+                cy.findByTestId('review-and-submit-modal-submit').click()
+            })
+        cy.wait('@submitHealthPlanPackageMutation', { timeout: 50000 })
+    }
+)
+
+type FormButtonKey =
+    | 'CONTINUE_FROM_START_NEW'
+    | 'CONTINUE'
+    | 'SAVE_DRAFT'
+    | 'BACK'
 type FormButtons = { [key in FormButtonKey]: string }
 const buttonsWithLabels: FormButtons = {
     CONTINUE: 'Continue',
@@ -244,24 +263,20 @@ Cypress.Commands.add(
 
         if (buttonKey === 'SAVE_DRAFT') {
             cy.findByTestId('dashboard-page').should('exist')
-
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
-                 if (waitForLoad){
-                    cy.wait('@createHealthPlanPackageMutation', { timeout: 50000 })
-                    cy.wait('@fetchHealthPlanPackageQuery')
-                 }
-            cy.findByTestId('state-submission-form-page').should(
-                'exist'
-            ) 
-        } else if (buttonKey === 'CONTINUE'){
-            if (waitForLoad){
+            if (waitForLoad) {
+                cy.wait('@createHealthPlanPackageMutation', { timeout: 50000 })
+                cy.wait('@fetchHealthPlanPackageQuery')
+            }
+            cy.findByTestId('state-submission-form-page').should('exist')
+        } else if (buttonKey === 'CONTINUE') {
+            if (waitForLoad) {
                 cy.wait('@updateHealthPlanFormDataMutation')
             }
             cy.findByTestId('state-submission-form-page').should('exist')
         } else {
             // don't wait for api on BACK
-              cy.findByTestId('state-submission-form-page').should('exist')
+            cy.findByTestId('state-submission-form-page').should('exist')
         }
-
     }
 )

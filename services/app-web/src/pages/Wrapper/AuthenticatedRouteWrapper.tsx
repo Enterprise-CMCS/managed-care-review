@@ -3,24 +3,19 @@ import { Modal } from '../../components/Modal/Modal'
 import { ModalRef, Alert } from '@trussworks/react-uswds'
 import { createRef, useCallback, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { AuthModeType } from '../../common-code/config'
 import { extendSession } from '../Auth/cognitoAuth'
 import styles from '../StateSubmission/ReviewSubmit/ReviewSubmit.module.scss'
 import { dayjs } from '../../common-code/dateHelpers/dayjs'
 
-const refreshSession = async (): Promise<void> => {
-    try {
-        await extendSession()
-    } catch (e) {
-        console.log('Error refreshing session: ', e)
-    }
-}
-
 export const AuthenticatedRouteWrapper = ({
     children,
     setAlert,
+    authMode,
 }: {
     children: React.ReactNode
     setAlert?: React.Dispatch<React.ReactElement>
+    authMode: AuthModeType
 }): React.ReactElement => {
     const { logout, isSessionExpiring, timeUntilLogout, updateSessionExpiry } =
         useAuth()
@@ -56,7 +51,9 @@ export const AuthenticatedRouteWrapper = ({
         } catch (e) {
             console.log('Error setting logout timer: ', e)
         }
-        void refreshSession()
+        if (authMode !== 'LOCAL') {
+            void extendSession()
+        }
     }
 
     useEffect(() => {
