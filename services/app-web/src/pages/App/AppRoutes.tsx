@@ -161,7 +161,6 @@ export const AppRoutes = ({
     const runningTimers = useRef<NodeJS.Timer[]>([])
     // when we load, set the logout timer for 30 minutes in the future and refresh the session
     let sessionExpirationTime: dayjs.Dayjs | undefined = undefined
-    console.log('logged in user: ', loggedInUser)
     if (!loggedInUser) {
         LocalStorage.removeItem('LOGOUT_TIMER')
     }
@@ -200,10 +199,8 @@ export const AppRoutes = ({
                 /* if the session is about to expire, but we haven't set that piece of state yet
                 we set it here and clear the timers, because we don't need a countdown anymore once we've 
                 entered the expiry window */
-                console.log('about to clear: ', runningTimers.current)
                 runningTimers.current.forEach((t) => clearInterval(t))
                 runningTimers.current = []
-                console.log('cleared: ', runningTimers.current)
                 updateSessionExpiry(true)
             }
         }, 1000 * 30)

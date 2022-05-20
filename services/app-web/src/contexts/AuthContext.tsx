@@ -140,10 +140,7 @@ function AuthProvider({
     }
 
     const updateSessionExpiry = (value: boolean) => {
-        console.log('called update', value)
-        console.log('current', isSessionExpiring)
         if (isSessionExpiring !== value) {
-            console.log('setting session expiry to', value)
             setisSessionExpiring(!!loggedInUser && value)
         }
     }
