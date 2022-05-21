@@ -81,7 +81,7 @@ export const AuthenticatedRouteWrapper = ({
         }
     }, [timeUntilLogout, logoutSession])
     return (
-        <div className={styles.wrapper}>
+        <>
             {' '}
             {
                 <Modal
@@ -93,7 +93,6 @@ export const AuthenticatedRouteWrapper = ({
                     onCancel={logoutSession}
                     submitButtonProps={{ className: styles.submitButton }}
                     onSubmit={resetSessionTimeout}
-                    className={styles.expireModal}
                     forceAction={true}
                 >
                     <p
@@ -120,6 +119,6 @@ export const AuthenticatedRouteWrapper = ({
                 </Modal>
             }
             {children}
-        </div>
+        </>
     )
 }
