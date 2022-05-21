@@ -99,7 +99,7 @@ export const AuthenticatedRouteWrapper = ({
                     <p
                         aria-live={
                             announcementTimes.includes(timeUntilLogout)
-                                ? 'polite'
+                                ? 'assertive'
                                 : 'off'
                         }
                         aria-atomic={true}
