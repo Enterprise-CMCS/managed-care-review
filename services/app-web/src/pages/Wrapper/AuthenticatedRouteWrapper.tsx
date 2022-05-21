@@ -21,6 +21,11 @@ export const AuthenticatedRouteWrapper = ({
 }): React.ReactElement => {
     const { logout, isSessionExpiring, timeUntilLogout, updateSessionExpiry } =
         useAuth()
+    const [announcementSeed] = React.useState<number>(timeUntilLogout)
+    const announcementTimes: number[] = []
+    for (let i = announcementSeed; i > 0; i -= 10) {
+        announcementTimes.push(i)
+    }
     const ldClient = useLDClient()
     const minutesUntilExpiration = ldClient?.variation(
         featureFlags.MINUTES_UNTIL_SESSION_EXPIRES,
@@ -91,7 +96,14 @@ export const AuthenticatedRouteWrapper = ({
                     className={styles.expireModal}
                     forceAction={true}
                 >
-                    <p>
+                    <p
+                        aria-live={
+                            announcementTimes.includes(timeUntilLogout)
+                                ? 'polite'
+                                : 'off'
+                        }
+                        aria-atomic={true}
+                    >
                         Your session is going to expire in{' '}
                         {dayjs
                             .duration(timeUntilLogout, 'seconds')
