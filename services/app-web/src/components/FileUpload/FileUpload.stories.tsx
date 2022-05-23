@@ -1,5 +1,5 @@
-import { FileUpload, S3FileData } from './FileUpload'
-import {fakeRequest} from '../../testHelpers/jestHelpers'
+import { FileUpload, S3FileData } from './index'
+import { fakeRequest } from '../../testHelpers/jestHelpers'
 
 export default {
     title: 'Components/Forms/FileUpload',
@@ -15,7 +15,8 @@ export const DemoListUploadSuccess = (): React.ReactElement => {
             label="FileInput"
             renderMode="list"
             uploadFile={(file: File) =>
-                fakeRequest<S3FileData>(true, resolveData)}
+                fakeRequest<S3FileData>(true, resolveData)
+            }
             scanFile={async (key: string) => {
                 await fakeRequest<S3FileData>(true, resolveData)
                 return
@@ -149,5 +150,3 @@ export const DemoTableScanFailure = (): React.ReactElement => {
         />
     )
 }
-
-
