@@ -1,4 +1,5 @@
-import { FileUpload, S3FileData } from './index'
+import { FileUpload } from '../index'
+import { S3FileData } from './index'
 import { fakeRequest } from '../../testHelpers/jestHelpers'
 
 export default {
