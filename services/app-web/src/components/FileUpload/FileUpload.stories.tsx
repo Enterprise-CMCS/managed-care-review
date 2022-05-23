@@ -1,5 +1,5 @@
-import { FileUpload } from '../index'
-import { S3FileData } from './index'
+//Changed import from component/index.ts to fix Cannot access before initialization error on multiple stories when upgrading to storybook 6.5.4 as a part of react-router v6 upgrade
+import { FileUpload, S3FileData } from '../index'
 import { fakeRequest } from '../../testHelpers/jestHelpers'
 
 export default {
