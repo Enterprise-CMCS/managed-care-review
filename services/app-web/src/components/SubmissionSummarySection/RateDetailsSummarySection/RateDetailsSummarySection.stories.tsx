@@ -1,7 +1,9 @@
 import { Story } from '@storybook/react'
 import ProvidersDecorator from '../../../../.storybook/providersDecorator'
-import { RateDetailsSummarySection } from '../index'
-import { RateDetailsSummarySectionProps } from './RateDetailsSummarySection'
+import {
+    RateDetailsSummarySectionProps,
+    RateDetailsSummarySection,
+} from './RateDetailsSummarySection'
 import { mockContractAndRatesDraft } from '../../../testHelpers/apolloHelpers'
 
 export default {
