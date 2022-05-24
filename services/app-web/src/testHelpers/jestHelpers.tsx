@@ -25,6 +25,7 @@ const renderWithProviders = (
         apolloProvider?: MockedProviderProps
         authProvider?: Partial<AuthProviderProps>
         s3Provider?: S3ClientT
+        location?: (location: Location) => Location
     }
 ) => {
     const {
@@ -32,6 +33,7 @@ const renderWithProviders = (
         apolloProvider = {},
         authProvider = {},
         s3Provider = undefined,
+        location = undefined,
     } = options || {}
 
     const { route } = routerProvider
@@ -42,6 +44,7 @@ const renderWithProviders = (
             <MemoryRouter initialEntries={[route || '']}>
                 <AuthProvider authMode={'AWS_COGNITO'} {...authProvider}>
                     <S3Provider client={s3Client}>
+                        {location && <WithLocation setLocation={location} />}
                         <PageProvider>{ui}</PageProvider>
                     </S3Provider>
                 </AuthProvider>
@@ -51,15 +54,13 @@ const renderWithProviders = (
 }
 
 const WithLocation = ({
-    children,
     setLocation,
 }: {
-    children: JSX.Element | JSX.Element[]
     setLocation: (location: Location) => Location
-}): JSX.Element => {
+}): null => {
     const location = useLocation()
     setLocation(location)
-    return <>{children}</>
+    return null
 }
 
 /* User Events */
@@ -155,5 +156,4 @@ export {
     TEST_TEXT_FILE,
     TEST_VIDEO_FILE,
     TEST_XLS_FILE,
-    WithLocation,
 }

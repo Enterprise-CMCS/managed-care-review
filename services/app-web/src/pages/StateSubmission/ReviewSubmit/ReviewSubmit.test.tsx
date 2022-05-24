@@ -9,7 +9,6 @@ import { Routes, Route, Location } from 'react-router-dom'
 import {
     renderWithProviders,
     userClickByTestId,
-    WithLocation,
 } from '../../../testHelpers/jestHelpers'
 import { ReviewSubmit } from './ReviewSubmit'
 import userEvent from '@testing-library/user-event'
@@ -207,20 +206,18 @@ describe('ReviewSubmit', () => {
         let testLocation: Location
 
         renderWithProviders(
-            <WithLocation setLocation={(location) => (testLocation = location)}>
-                <Routes>
-                    <Route
-                        path="/draftSubmission/:id/form/review-and-submit"
-                        element={
-                            <ReviewSubmit
-                                draftSubmission={mockCompleteDraft()}
-                                unlocked={false}
-                                submissionName="MN-MSHO-0001"
-                            />
-                        }
-                    />
-                </Routes>
-            </WithLocation>,
+            <Routes>
+                <Route
+                    path="/draftSubmission/:id/form/review-and-submit"
+                    element={
+                        <ReviewSubmit
+                            draftSubmission={mockCompleteDraft()}
+                            unlocked={false}
+                            submissionName="MN-MSHO-0001"
+                        />
+                    }
+                />
+            </Routes>,
             {
                 apolloProvider: {
                     mocks: [
@@ -235,6 +232,7 @@ describe('ReviewSubmit', () => {
                         mockCompleteDraft().id
                     }/form/review-and-submit`,
                 },
+                location: (location) => (testLocation = location),
             }
         )
         userClickByTestId(screen, 'form-submit')

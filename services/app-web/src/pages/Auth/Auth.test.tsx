@@ -9,7 +9,6 @@ import {
     renderWithProviders,
     userClickByTestId,
     userClickByRole,
-    WithLocation,
 } from '../../testHelpers/jestHelpers'
 import { CognitoLogin } from './CognitoLogin'
 import { LocalLogin } from '../../localAuth'
@@ -89,13 +88,9 @@ describe('Auth', () => {
             let testLocation: Location
 
             renderWithProviders(
-                <WithLocation
-                    setLocation={(location) => (testLocation = location)}
-                >
-                    <Routes>
-                        <Route path="/auth" element={<CognitoLogin />} />
-                    </Routes>
-                </WithLocation>,
+                <Routes>
+                    <Route path="/auth" element={<CognitoLogin />} />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -106,6 +101,7 @@ describe('Auth', () => {
                     routerProvider: {
                         route: '/auth',
                     },
+                    location: (location) => (testLocation = location),
                 }
             )
 
@@ -120,13 +116,9 @@ describe('Auth', () => {
             let testLocation: Location
 
             renderWithProviders(
-                <WithLocation
-                    setLocation={(location) => (testLocation = location)}
-                >
-                    <Routes>
-                        <Route path="/auth" element={<CognitoLogin />} />
-                    </Routes>
-                </WithLocation>,
+                <Routes>
+                    <Route path="/auth" element={<CognitoLogin />} />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -138,6 +130,7 @@ describe('Auth', () => {
                     routerProvider: {
                         route: '/auth',
                     },
+                    location: (location) => (testLocation = location),
                 }
             )
 
@@ -190,13 +183,9 @@ describe('Auth', () => {
             let testLocation: Location
 
             renderWithProviders(
-                <WithLocation
-                    setLocation={(location) => (testLocation = location)}
-                >
-                    <Routes>
-                        <Route path="/auth" element={<LocalLogin />} />
-                    </Routes>
-                </WithLocation>,
+                <Routes>
+                    <Route path="/auth" element={<LocalLogin />} />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -208,6 +197,7 @@ describe('Auth', () => {
                     routerProvider: {
                         route: '/auth',
                     },
+                    location: (location) => (testLocation = location),
                 }
             )
 
@@ -228,13 +218,9 @@ describe('Auth', () => {
             let testLocation: Location
 
             renderWithProviders(
-                <WithLocation
-                    setLocation={(location) => (testLocation = location)}
-                >
-                    <Routes>
-                        <Route path="/auth" element={<LocalLogin />} />
-                    </Routes>
-                </WithLocation>,
+                <Routes>
+                    <Route path="/auth" element={<LocalLogin />} />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -245,6 +231,7 @@ describe('Auth', () => {
                     routerProvider: {
                         route: '/auth',
                     },
+                    location: (location) => (testLocation = location),
                 }
             )
 

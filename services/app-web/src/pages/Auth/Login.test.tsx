@@ -10,7 +10,6 @@ import { Login } from './Login'
 import {
     renderWithProviders,
     userClickByRole,
-    WithLocation,
 } from '../../testHelpers/jestHelpers'
 
 const failedAuthMock = {
@@ -136,16 +135,15 @@ describe('Cognito Login', () => {
         let testLocation: Location
 
         renderWithProviders(
-            <WithLocation setLocation={(location) => (testLocation = location)}>
-                <Routes>
-                    <Route path="/auth" element={<Login />} />
-                </Routes>
-            </WithLocation>,
+            <Routes>
+                <Route path="/auth" element={<Login />} />
+            </Routes>,
             {
                 apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
                 routerProvider: {
                     route: '/auth',
                 },
+                location: (location) => (testLocation = location),
             }
         )
 
@@ -163,16 +161,15 @@ describe('Cognito Login', () => {
         let testLocation: Location
 
         renderWithProviders(
-            <WithLocation setLocation={(location) => (testLocation = location)}>
-                <Routes>
-                    <Route path="/auth" element={<Login />} />
-                </Routes>
-            </WithLocation>,
+            <Routes>
+                <Route path="/auth" element={<Login />} />
+            </Routes>,
             {
                 apolloProvider: { mocks: [failedAuthMock, failedAuthMock] },
                 routerProvider: {
                     route: '/auth',
                 },
+                location: (location) => (testLocation = location),
             }
         )
 
