@@ -48,7 +48,7 @@ function submissionURL(
     } else if (status === 'UNLOCKED') {
         return `/submissions/${id}/form/review-and-submit`
     }
-    return `/submissions/${id}/summary`
+    return `/submissions/${id}`
 }
 
 const StatusTag = ({

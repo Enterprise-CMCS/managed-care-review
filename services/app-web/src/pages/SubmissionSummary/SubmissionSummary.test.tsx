@@ -38,7 +38,7 @@ describe('SubmissionSummary', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/summary',
+                    route: '/submissions/15',
                 },
             }
         )
@@ -72,7 +72,7 @@ describe('SubmissionSummary', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/summary',
+                    route: '/submissions/15',
                 },
             }
         )
@@ -125,7 +125,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/summary',
+                        route: '/submissions/15',
                     },
                 }
             )
@@ -163,7 +163,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/summary',
+                        route: '/submissions/15',
                     },
                 }
             )
@@ -200,7 +200,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/summary',
+                        route: '/submissions/15',
                     },
                 }
             )
@@ -259,7 +259,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/summary',
+                        route: '/submissions/15',
                     },
                 }
             )
@@ -301,7 +301,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/summary',
+                        route: '/submissions/15',
                     },
                 }
             )
@@ -338,7 +338,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/summary',
+                        route: '/submissions/15',
                     },
                 }
             )
@@ -378,7 +378,7 @@ describe('SubmissionSummary', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/summary',
+                        route: '/submissions/15',
                     },
                 }
             )

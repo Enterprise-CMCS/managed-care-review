@@ -155,7 +155,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                     </Alert>
                 )}
 
-                <PreviousSubmissionBanner link={`/submissions/${id}/summary`} />
+                <PreviousSubmissionBanner link={`/submissions/${id}`} />
 
                 <SubmissionTypeSummarySection
                     submission={packageData}

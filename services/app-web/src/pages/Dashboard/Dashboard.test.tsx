@@ -106,9 +106,6 @@ describe('Dashboard', () => {
         )
 
         const link3 = within(rows[3]).getByRole('link')
-        expect(link3).toHaveAttribute(
-            'href',
-            '/submissions/test-abc-submitted/summary'
-        )
+        expect(link3).toHaveAttribute('href', '/submissions/test-abc-submitted')
     })
 })

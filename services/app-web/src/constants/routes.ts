@@ -47,7 +47,7 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_CONTACTS: 'contacts',
     SUBMISSIONS_DOCUMENTS: 'documents',
     SUBMISSIONS_REVIEW_SUBMIT: 'review-and-submit',
-    SUBMISSIONS_SUMMARY: 'submissions/:id/summary',
+    SUBMISSIONS_SUMMARY: 'submissions/:id',
     SUBMISSIONS_REVISION: 'submissions/:id/revisions/:revisionVersion',
 }
 
