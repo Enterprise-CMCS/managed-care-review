@@ -193,7 +193,7 @@ describe('RateDetailsSummarySection', () => {
         renderWithProviders(
             <RateDetailsSummarySection
                 submission={testSubmission}
-                navigateTo={'/rate-details'}
+                navigateTo="/rate-details'"
                 submissionName="MN-PMAP-0001"
             />
         )
