@@ -40,7 +40,7 @@ const RoutesRecord: Record<RouteT, string> = {
     HELP: '/help',
     SUBMISSIONS: 'submissions',
     SUBMISSIONS_NEW: 'submissions/new',
-    SUBMISSIONS_FORM: 'submissions/:id/form/*',
+    SUBMISSIONS_FORM: 'submissions/:id/edit/*',
     SUBMISSIONS_TYPE: 'type',
     SUBMISSIONS_CONTRACT_DETAILS: 'contract-details',
     SUBMISSIONS_RATE_DETAILS: 'rate-details',

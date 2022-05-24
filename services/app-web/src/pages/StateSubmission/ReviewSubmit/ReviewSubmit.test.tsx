@@ -208,7 +208,7 @@ describe('ReviewSubmit', () => {
         renderWithProviders(
             <Routes>
                 <Route
-                    path="/draftSubmission/:id/form/review-and-submit"
+                    path="/draftSubmission/:id/edit/review-and-submit"
                     element={
                         <ReviewSubmit
                             draftSubmission={mockCompleteDraft()}
@@ -230,7 +230,7 @@ describe('ReviewSubmit', () => {
                 routerProvider: {
                     route: `/draftSubmission/${
                         mockCompleteDraft().id
-                    }/form/review-and-submit`,
+                    }/edit/review-and-submit`,
                 },
                 location: (location) => (testLocation = location),
             }
@@ -349,7 +349,7 @@ describe('Resubmitting plan packages', () => {
                 routerProvider: {
                     route: `draftSubmission/${
                         mockCompleteDraft().id
-                    }/form/review-and-submit`,
+                    }/edit/review-and-submit`,
                 },
             }
         )

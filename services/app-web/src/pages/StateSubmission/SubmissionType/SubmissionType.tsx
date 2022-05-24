@@ -193,7 +193,7 @@ export const SubmissionType = ({
 
                 if (draftSubmission) {
                     navigate(
-                        `/submissions/${draftSubmission.id}/form/contract-details`
+                        `/submissions/${draftSubmission.id}/edit/contract-details`
                     )
                 }
             } catch (serverError) {

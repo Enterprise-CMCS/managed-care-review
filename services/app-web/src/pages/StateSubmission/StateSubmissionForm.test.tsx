@@ -41,7 +41,7 @@ describe('StateSubmissionForm', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/form/contract-details',
+                        route: '/submissions/15/edit/contract-details',
                     },
                 }
             )
@@ -75,7 +75,7 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/form/type' },
+                    routerProvider: { route: '/submissions/15/edit/type' },
                 }
             )
 
@@ -130,7 +130,7 @@ describe('StateSubmissionForm', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/12/form/contract-details',
+                        route: '/submissions/12/edit/contract-details',
                     },
                 }
             )
@@ -169,7 +169,7 @@ describe('StateSubmissionForm', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/12/form/documents',
+                        route: '/submissions/12/edit/documents',
                     },
                 }
             )
@@ -206,7 +206,7 @@ describe('StateSubmissionForm', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/form/documents',
+                        route: '/submissions/15/edit/documents',
                     },
                 }
             )
@@ -265,7 +265,7 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/form/type' },
+                    routerProvider: { route: '/submissions/15/edit/type' },
                 }
             )
 
@@ -335,7 +335,7 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/form/type' },
+                    routerProvider: { route: '/submissions/15/edit/type' },
                 }
             )
             await waitFor(() =>
@@ -375,7 +375,7 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/form/type' },
+                    routerProvider: { route: '/submissions/15/edit/type' },
                 }
             )
 
@@ -402,7 +402,7 @@ describe('StateSubmissionForm', () => {
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15/form/contract-details',
+                        route: '/submissions/15/edit/contract-details',
                     },
                 }
             )
@@ -429,7 +429,7 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/form/documents' },
+                    routerProvider: { route: '/submissions/15/edit/documents' },
                 }
             )
 
@@ -466,7 +466,7 @@ describe('StateSubmissionForm', () => {
                             }),
                         ],
                     },
-                    routerProvider: { route: '/submissions/15/form/documents' },
+                    routerProvider: { route: '/submissions/15/edit/documents' },
                     s3Provider: mockS3,
                 }
             )
