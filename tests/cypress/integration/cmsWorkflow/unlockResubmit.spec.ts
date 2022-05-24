@@ -18,7 +18,7 @@ describe('dashboard', () => {
         // Store submission url for reference later
         cy.location().then( (fullUrl) => {
             const reviewURL = fullUrl.toString()
-            const submissionURL = reviewURL.replace('form/review-and-submit', 'summary')
+            const submissionURL = reviewURL.replace('form/review-and-submit', '')
             fullUrl.pathname = path.dirname(fullUrl)
 
             // Submit, sent to dashboard
