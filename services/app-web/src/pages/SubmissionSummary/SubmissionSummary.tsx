@@ -68,7 +68,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
     const { id } = useParams<{ id: string }>()
     const { pathname } = useLocation()
-    const { loggedInUser, isSessionExpiring } = useAuth()
+    const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
     const modalRef = useRef<ModalRef>(null)
     const [pageLevelAlert, setPageLevelAlert] = useState<string | undefined>(
@@ -301,12 +301,13 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <SupportingDocumentsSummarySection submission={packageData} />
 
                 <ChangeHistory submission={submissionAndRevisions} />
-                {!isSessionExpiring && ( // if the session is expiring, close this modal so the countdown modal can appear
+                {
+                    // if the session is expiring, close this modal so the countdown modal can appear
                     <UnlockModal
                         modalRef={modalRef}
                         healthPlanPackage={submissionAndRevisions}
                     />
-                )}
+                }
             </GridContainer>
         </div>
     )

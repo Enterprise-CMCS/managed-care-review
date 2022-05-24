@@ -44,7 +44,7 @@ export const ReviewSubmit = ({
     const [focusErrorsInModal, setFocusErrorsInModal] = useState(true)
     const history = useHistory()
     const modalRef = useRef<ModalRef>(null)
-    const { loggedInUser, isSessionExpiring } = useAuth()
+    const { loggedInUser } = useAuth()
 
     // pull the programs off the user
     const statePrograms =
@@ -215,7 +215,8 @@ export const ReviewSubmit = ({
                 </ModalToggleButton>
             </PageActionsContainer>
 
-            {!isSessionExpiring && ( // if the session is expiring, close this modal so the countdown modal can appear
+            {
+                // if the session is expiring, close this modal so the countdown modal can appear
                 <Modal
                     modalRef={modalRef}
                     id="review-and-submit"
@@ -266,7 +267,7 @@ export const ReviewSubmit = ({
                         </p>
                     )}
                 </Modal>
-            )}
+            }
         </GridContainer>
     )
 }

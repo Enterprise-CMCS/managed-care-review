@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
     ButtonGroup,
     Modal as UswdsModal,
@@ -11,6 +11,7 @@ import {
 import styles from './Modal.module.scss'
 
 import { ActionButton } from '../ActionButton'
+import { useAuth } from '../../contexts/AuthContext'
 
 interface ModalComponentProps {
     id: string
@@ -41,6 +42,16 @@ export const Modal = ({
     isSubmitting = false,
     ...divProps
 }: ModalProps): React.ReactElement => {
+    const { isSessionExpiring } = useAuth()
+
+    /* unless it's the session expiring modal, close it if the session is expiring, so the user can interact
+    with the session expiring modal */
+    useEffect(() => {
+        if (id !== 'extend-session-modal' && isSessionExpiring) {
+            modalRef.current?.toggleModal(undefined, false)
+        }
+    }, [isSessionExpiring, modalRef, id])
+
     const cancelHandler = (e: React.MouseEvent): void => {
         if (onCancel) {
             onCancel()
