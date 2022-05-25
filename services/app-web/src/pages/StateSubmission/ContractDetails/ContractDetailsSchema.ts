@@ -75,4 +75,14 @@ export const ContractDetailsFormSchema = Yup.object().shape({
         is: 'OTHER',
         then: Yup.string().defined('You must enter a description'),
     }),
+
+    modifiedBenefitsProvided: Yup.string().when('contractType', {
+        is: 'AMENDMENT',
+        then: Yup.string().defined('You must select yes or no'),
+    }),
+
+    modifiedGeoAreaServed: Yup.string().when('contractType', {
+        is: 'AMENDMENT',
+        then: Yup.string().defined('You must select yes or no'),
+    }),
 })

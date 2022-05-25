@@ -92,6 +92,8 @@ export interface ContractDetailsFormValues {
     capitationRates: CapitationRatesAmendmentReason | undefined
     capitationRatesOther: string
     federalAuthorities: FederalAuthority[]
+    modifiedBenefitsProvided: string | undefined
+    modifiedGeoAreaServed: string | undefined
 }
 type FormError =
     FormikErrors<ContractDetailsFormValues>[keyof FormikErrors<ContractDetailsFormValues>]
@@ -235,6 +237,22 @@ export const ContractDetails = ({
             draftSubmission.contractAmendmentInfo?.capitationRatesAmendedInfo
                 ?.otherReason ?? '',
         federalAuthorities: draftSubmission?.federalAuthorities ?? [],
+
+        modifiedBenefitsProvided:
+            draftSubmission?.contractAmendmentInfo?.modifiedBenefitsProvided ===
+            undefined
+                ? undefined
+                : draftSubmission?.contractAmendmentInfo
+                      ?.modifiedBenefitsProvided
+                ? 'YES'
+                : 'NO',
+        modifiedGeoAreaServed:
+            draftSubmission?.contractAmendmentInfo?.modifiedGeoAreaServed ===
+            undefined
+                ? undefined
+                : draftSubmission?.contractAmendmentInfo?.modifiedGeoAreaServed
+                ? 'YES'
+                : 'NO',
     }
 
     const showFieldErrors = (error?: FormError) =>
@@ -331,6 +349,13 @@ export const ContractDetails = ({
                 itemsBeingAmended: values.itemsAmended,
                 otherItemBeingAmended: values.otherItemAmended,
                 capitationRatesAmendedInfo: capitationInfo,
+
+                modifiedBenefitsProvided: values.modifiedBenefitsProvided
+                    ? values.modifiedBenefitsProvided === 'YES'
+                    : undefined,
+                modifiedGeoAreaServed: values.modifiedGeoAreaServed
+                    ? values.modifiedGeoAreaServed === 'YES'
+                    : undefined,
             }
         } else {
             draftSubmission.contractAmendmentInfo = undefined
@@ -831,6 +856,91 @@ export const ContractDetails = ({
                                                             }
                                                         </PoliteErrorMessage>
                                                     )}
+                                                    <>
+                                                        <Fieldset
+                                                            role="radiogroup"
+                                                            aria-required
+                                                            className={
+                                                                styles.radioGroup
+                                                            }
+                                                            legend="Benefits provided by the managed care plans"
+                                                            id="modifiedBenefitsProvided"
+                                                        >
+                                                            {showFieldErrors(
+                                                                errors.modifiedBenefitsProvided
+                                                            ) && (
+                                                                <PoliteErrorMessage>
+                                                                    {
+                                                                        errors.modifiedBenefitsProvided
+                                                                    }
+                                                                </PoliteErrorMessage>
+                                                            )}
+                                                            <FieldRadio
+                                                                id="modifiedBenefitsProvidedYes"
+                                                                name="modifiedBenefitsProvided"
+                                                                label="Yes"
+                                                                aria-required
+                                                                value={'YES'}
+                                                                checked={
+                                                                    values.modifiedBenefitsProvided ===
+                                                                    'YES'
+                                                                }
+                                                            />
+                                                            <FieldRadio
+                                                                id="modifiedBenefitsProvidedNo"
+                                                                name="modifiedBenefitsProvided"
+                                                                label="No"
+                                                                aria-required
+                                                                value={'NO'}
+                                                                checked={
+                                                                    values.modifiedBenefitsProvided ===
+                                                                    'NO'
+                                                                }
+                                                            />
+                                                        </Fieldset>
+
+                                                        <Fieldset
+                                                            role="radiogroup"
+                                                            aria-required
+                                                            className={
+                                                                styles.radioGroup
+                                                            }
+                                                            legend="Geographic areas served by the managed care plans"
+                                                            id="modifiedGeoAreaServed"
+                                                        >
+                                                            {showFieldErrors(
+                                                                errors.modifiedGeoAreaServed
+                                                            ) && (
+                                                                <PoliteErrorMessage>
+                                                                    {
+                                                                        errors.modifiedGeoAreaServed
+                                                                    }
+                                                                </PoliteErrorMessage>
+                                                            )}
+                                                            <FieldRadio
+                                                                id="modifiedGeoAreaServedYes"
+                                                                name="modifiedGeoAreaServed"
+                                                                label="Yes"
+                                                                aria-required
+                                                                value={'YES'}
+                                                                checked={
+                                                                    values.modifiedGeoAreaServed ===
+                                                                    'YES'
+                                                                }
+                                                            />
+                                                            <FieldRadio
+                                                                id="modifiedGeoAreaServedNo"
+                                                                name="modifiedGeoAreaServed"
+                                                                label="No"
+                                                                aria-required
+                                                                value={'NO'}
+                                                                checked={
+                                                                    values.modifiedGeoAreaServed ===
+                                                                    'NO'
+                                                                }
+                                                            />
+                                                        </Fieldset>
+                                                    </>
                                                     <FieldCheckbox
                                                         id="benefitsProvided"
                                                         name="itemsAmended"

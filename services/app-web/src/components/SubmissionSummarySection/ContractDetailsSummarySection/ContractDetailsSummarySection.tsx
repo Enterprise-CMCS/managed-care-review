@@ -122,7 +122,7 @@ export const ContractDetailsSummarySection = ({
     const itemsAmendedOtherList = []
 
     if (
-        submission?.contractAmendmentInfo?.itemsBeingAmended.includes(
+        submission?.contractAmendmentInfo?.itemsBeingAmended?.includes(
             'CAPITATION_RATES'
         ) &&
         capitationRateChangeReason() !== null
@@ -202,7 +202,7 @@ export const ContractDetailsSummarySection = ({
                                 id="itemsAmended"
                                 label="Items being amended"
                                 data={createCheckboxList({
-                                    list: submission.contractAmendmentInfo.itemsBeingAmended.filter(
+                                    list: submission.contractAmendmentInfo.itemsBeingAmended?.filter(
                                         (item) =>
                                             item !== 'CAPITATION_RATES' &&
                                             item !== 'OTHER'

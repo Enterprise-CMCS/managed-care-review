@@ -41,6 +41,9 @@ const contractAmendmentInfoSchema = z.object({
             otherReason: z.string().optional(),
         })
         .optional(),
+
+    modifiedBenefitsProvided: z.boolean().optional(),
+    modifiedGeoAreaServed: z.boolean().optional(),
 })
 
 const rateAmendmentInfoSchema = z.object({

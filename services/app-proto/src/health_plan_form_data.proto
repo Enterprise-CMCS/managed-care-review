@@ -82,6 +82,10 @@ message ContractInfo {
     repeated AmendedItem amendable_items = 1;
     optional string other_amendable_item = 2;
     optional CapitationRatesAmendedInfo capitation_rates_amended_info = 3;
+
+    optional bool modified_benefits_provided = 4;
+    optional bool modified_geo_area_served = 5;
+
   }
 }
 

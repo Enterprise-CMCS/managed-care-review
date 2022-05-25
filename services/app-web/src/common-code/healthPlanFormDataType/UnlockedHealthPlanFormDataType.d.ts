@@ -23,6 +23,9 @@ type ContractAmendmentInfo = {
         reason?: CapitationRatesAmendedReason
         otherReason?: string
     }
+
+    modifiedBenefitsProvided?: bool
+    modifiedGeoAreaServed?: bool
 }
 
 type RateAmendmentInfo = {

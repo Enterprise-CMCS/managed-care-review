@@ -223,6 +223,66 @@ describe('ContractDetails', () => {
         expect(screen.queryByText('You must enter a description')).toBeNull()
     })
 
+    it('allows setting a yes/no modified provision', async () => {
+        const emptyDraft = mockDraft()
+        const mockUpdateDraftFn = jest.fn()
+        renderWithProviders(
+            <ContractDetails
+                draftSubmission={emptyDraft}
+                updateDraft={mockUpdateDraftFn}
+                previousDocuments={[]}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        // click amendment
+        const amendmentRadio = screen.getByLabelText(
+            'Amendment to base contract'
+        )
+        amendmentRadio.click()
+        expect(scrollIntoViewMock).toHaveBeenCalled()
+
+        // click "next"
+        const continueButton = screen.getByRole('button', { name: 'Continue' })
+        userEvent.click(continueButton)
+
+        // check for yes/no errors
+        await waitFor(() => {
+            expect(
+                screen.getAllByText('You must select yes or no')
+            ).toHaveLength(4)
+        })
+
+        const benefitsGroup = screen.getByText(
+            'Benefits provided by the managed care plans'
+        ).parentElement
+        const geoGroup = screen.getByText(
+            'Geographic areas served by the managed care plans'
+        ).parentElement
+
+        if (benefitsGroup === null || geoGroup === null) {
+            throw new Error('Benefits and Geo must have parents.')
+        }
+
+        // choose yes and no
+        const benefitsYes = within(benefitsGroup).getByLabelText('Yes') //
+        const geoNo = within(geoGroup).getByLabelText('No')
+
+        userEvent.click(benefitsYes)
+        userEvent.click(geoNo)
+
+        // error should be gone
+        await waitFor(() => {
+            expect(
+                screen.queryAllByText('You must select yes or no')
+            ).toHaveLength(0)
+        })
+    })
+
     describe('Contract documents file upload', () => {
         it('renders without errors', async () => {
             renderWithProviders(

@@ -74,6 +74,47 @@ function contractOnly(): UnlockedHealthPlanFormDataType {
     }
 }
 
+function contractAmendedOnly(): UnlockedHealthPlanFormDataType {
+    return {
+        createdAt: new Date(Date.UTC(2021, 4, 10)),
+        updatedAt: new Date(),
+        status: 'DRAFT',
+        stateNumber: 5,
+        id: 'test-abc-123',
+        stateCode: 'MN',
+        programIDs: ['snbc'],
+        submissionType: 'CONTRACT_ONLY',
+        submissionDescription: 'A real submission',
+        documents: [],
+        contractDocuments: [],
+        rateDocuments: [],
+        contractType: 'BASE',
+        contractExecutionStatus: 'EXECUTED',
+        contractDateStart: new Date(Date.UTC(2021, 4, 22)),
+        contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
+        managedCareEntities: [],
+        federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+        stateContacts: [],
+        actuaryContacts: [],
+        contractAmendmentInfo: {
+            itemsBeingAmended: [
+                'ENROLLEE_ACCESS',
+                'GEO_AREA_SERVED',
+                'CAPITATION_RATES',
+                'OTHER',
+            ],
+            otherItemBeingAmended: 'OTHERAMEND',
+            capitationRatesAmendedInfo: {
+                reason: 'OTHER',
+                otherReason: 'somethingelse',
+            },
+
+            modifiedBenefitsProvided: true,
+            // modifiedGeoAreaServed: false,
+        },
+    }
+}
+
 function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
     return {
         createdAt: new Date(Date.UTC(2021, 4, 10)),
@@ -497,6 +538,7 @@ export {
     newHealthPlanFormData,
     basicHealthPlanFormData,
     contractOnly,
+    contractAmendedOnly,
     unlockedWithContacts,
     unlockedWithDocuments,
     unlockedWithFullRates,

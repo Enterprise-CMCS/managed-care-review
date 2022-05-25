@@ -208,7 +208,7 @@ function parseCapitationRates(
 
 function parseContractAmendment(
     amendment: mcreviewproto.IContractInfo['contractAmendmentInfo']
-): RecursivePartial<UnlockedHealthPlanFormDataType['contractAmendmentInfo']> {
+): UnlockedHealthPlanFormDataType['contractAmendmentInfo'] {
     if (!amendment) {
         return undefined
     }
@@ -226,6 +226,9 @@ function parseContractAmendment(
             cleanAmendment.capitationRatesAmendedInfo
         ),
         otherItemBeingAmended: cleanAmendment.otherAmendableItem,
+
+        modifiedBenefitsProvided: cleanAmendment.modifiedBenefitsProvided,
+        modifiedGeoAreaServed: cleanAmendment.modifiedGeoAreaServed,
     }
 }
 
