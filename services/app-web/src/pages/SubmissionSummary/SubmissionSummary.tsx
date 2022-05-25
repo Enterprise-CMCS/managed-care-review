@@ -6,7 +6,7 @@ import {
     ModalToggleButton,
 } from '@trussworks/react-uswds'
 import React, { useEffect, useState, useRef } from 'react'
-import { NavLink, useLocation, useParams } from 'react-router-dom'
+import { useNavigate, NavLink, useLocation, useParams } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
 import {
     packageName,
@@ -73,6 +73,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         )
     }
     const { pathname } = useLocation()
+    const navigate = useNavigate()
     const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
     const modalRef = useRef<ModalRef>(null)
@@ -102,7 +103,6 @@ export const SubmissionSummary = (): React.ReactElement => {
     })
 
     const submissionAndRevisions = data?.fetchHealthPlanPackage.pkg
-
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
 
     // Pull out the correct revision form api request, display errors for bad dad
@@ -124,9 +124,8 @@ export const SubmissionSummary = (): React.ReactElement => {
                     'ERROR: submission in summary has no submitted revision',
                     submissionAndRevisions.revisions
                 )
-                setPageLevelAlert(
-                    'Error fetching the submission. Please try again.'
-                )
+                // if state user goes to submission/:id for a draft submission, put them on the form
+                navigate(`/submissions/${id}/form/type`)
                 return
             }
 
@@ -178,7 +177,13 @@ export const SubmissionSummary = (): React.ReactElement => {
 
             setPackageData(submissionResult)
         }
-    }, [submissionAndRevisions, setPackageData, setPageLevelAlert])
+    }, [
+        submissionAndRevisions,
+        setPackageData,
+        setPageLevelAlert,
+        navigate,
+        id,
+    ])
 
     // Update header with submission name
     useEffect(() => {

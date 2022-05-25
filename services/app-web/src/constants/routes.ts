@@ -3,6 +3,9 @@ import { matchPath } from 'react-router'
 /*
     Every application route is named here.
     These types ensure we use valid routes throughout the application.
+    
+    As of react-router v6, ROUTES is a list where order matters. 
+    To allow us continue to properly match route names (with matchPath), routes with wildcard parameters (e.g. /submissions/:id/form/*) should be declared at the end of the ROUTES list.
 */
 const ROUTES = [
     'ROOT',
@@ -11,7 +14,6 @@ const ROUTES = [
     'HELP',
     'SUBMISSIONS',
     'SUBMISSIONS_NEW',
-    'SUBMISSIONS_FORM',
     'SUBMISSIONS_TYPE',
     'SUBMISSIONS_CONTRACT_DETAILS',
     'SUBMISSIONS_RATE_DETAILS',
@@ -20,37 +22,36 @@ const ROUTES = [
     'SUBMISSIONS_REVIEW_SUBMIT',
     'SUBMISSIONS_REVISION',
     'SUBMISSIONS_SUMMARY',
+    'SUBMISSIONS_FORM', // eep this at the end
 ] as const // iterable union type
 type RouteT = typeof ROUTES[number]
-
-const STATE_SUBMISSION_FORM_ROUTES = [
-    'SUBMISSIONS_TYPE',
-    'SUBMISSIONS_CONTRACT_DETAILS',
-    'SUBMISSIONS_RATE_DETAILS',
-    'SUBMISSIONS_CONTACTS',
-    'SUBMISSIONS_DOCUMENTS',
-    'SUBMISSIONS_REVIEW_SUBMIT',
-    'SUBMISSIONS_SUMMARY',
-] as RouteT[]
 
 const RoutesRecord: Record<RouteT, string> = {
     ROOT: '/',
     AUTH: '/auth',
     DASHBOARD: '/dashboard',
     HELP: '/help',
-    SUBMISSIONS: 'submissions',
-    SUBMISSIONS_NEW: 'submissions/new',
-    SUBMISSIONS_FORM: 'submissions/:id/form/*',
-    SUBMISSIONS_TYPE: 'type',
-    SUBMISSIONS_CONTRACT_DETAILS: 'contract-details',
-    SUBMISSIONS_RATE_DETAILS: 'rate-details',
-    SUBMISSIONS_CONTACTS: 'contacts',
-    SUBMISSIONS_DOCUMENTS: 'documents',
-    SUBMISSIONS_REVIEW_SUBMIT: 'review-and-submit',
-    SUBMISSIONS_SUMMARY: 'submissions/:id',
-    SUBMISSIONS_REVISION: 'submissions/:id/revisions/:revisionVersion',
+    SUBMISSIONS: '/submissions',
+    SUBMISSIONS_NEW: '/submissions/new',
+    SUBMISSIONS_FORM: '/submissions/:id/form/*',
+    SUBMISSIONS_TYPE: '/submissions/:id/form/type',
+    SUBMISSIONS_CONTRACT_DETAILS: '/submissions/:id/form/contract-details',
+    SUBMISSIONS_RATE_DETAILS: '/submissions/:id/form/rate-details',
+    SUBMISSIONS_CONTACTS: '/submissions/:id/form/contacts',
+    SUBMISSIONS_DOCUMENTS: '/submissions/:id/form/documents',
+    SUBMISSIONS_REVIEW_SUBMIT: '/submissions/:id/form/review-and-submit',
+    SUBMISSIONS_SUMMARY: '/submissions/:id',
+    SUBMISSIONS_REVISION: '/submissions/:id/revisions/:revisionVersion',
 }
 
+const STATE_SUBMISSION_FORM_ROUTES: RouteT[] = [
+    'SUBMISSIONS_TYPE',
+    'SUBMISSIONS_CONTRACT_DETAILS',
+    'SUBMISSIONS_RATE_DETAILS',
+    'SUBMISSIONS_CONTACTS',
+    'SUBMISSIONS_DOCUMENTS',
+    'SUBMISSIONS_REVIEW_SUBMIT',
+]
 // Static page headings used in <header> h1 when logged in. Dynamic headings, when necessary, are set in page specific parent component.
 const PageHeadingsRecord: Record<string, string> = {
     ROOT: 'Dashboard',
@@ -79,11 +80,56 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     UNKNOWN_ROUTE: 'Not found',
 }
 
+// Calculate the route  from a pathname - e.g. SUBMISSIONS_TYPE from 'submissions/123/form/type'
 const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {
-    const match = ROUTES.find((route) =>
-        matchPath({ path: RoutesRecord[route], end: true }, pathname)
-    )
-    return match ? match : 'UNKNOWN_ROUTE'
+    const matchingRouteNames = ROUTES.filter((route: RouteT) => {
+        return matchPath({ path: RoutesRecord[route], end: true }, pathname)
+    })
+
+    if (matchingRouteNames.length === 0) {
+        return 'UNKNOWN_ROUTE'
+    } else if (matchingRouteNames.length === 1) {
+        return matchingRouteNames[0]
+    } else {
+        // This for cases when there is more than one full path match
+        // e.g. /submissions/:id/form/type and /submissions/:id/form/*  both match the pathname string /submissions/123123412/form/type
+        // We resolve by preferring the first instance of a match and ordering ROUTES array by specificity. This workaround was needed because as of v6 the matchPath 'exact' param is no longer present.
+        const exactMatch = matchingRouteNames.find(
+            (route: RouteT) =>
+                RoutesRecord[route] ===
+                matchPath({ path: RoutesRecord[route], end: true }, pathname)
+                    ?.pattern.path
+        )
+        if (!exactMatch) {
+            console.error(
+                `Coding error: Please check your routes, there were multiple matching potential route names but cannot find a match for ${pathname} from ${matchingRouteNames.toString()}`
+            )
+        }
+        return exactMatch || 'UNKNOWN_ROUTE'
+    }
+}
+
+const isWildcardPath = (pathname: string) =>
+    pathname.charAt(pathname.length + 1) === '*'
+
+/* Calculate the relative path string for a nested route  - e.g. '/type' 
+    base route refers to the route pointing to the section of the path you want to ignore - e.g. SUBMISSIONS_FORM
+    target route refers to the nested route you are trying to get the relative path for - e.g. SUBMISSIONS_TYPE
+*/
+const getRelativePath = ({
+    baseRoute,
+    targetRoute,
+}: {
+    baseRoute: RouteT
+    targetRoute: RouteT
+}): string => {
+    let baseRouteString = RoutesRecord[baseRoute]
+
+    // remove wildcard if present
+    if (isWildcardPath(baseRouteString)) {
+        baseRouteString = baseRouteString.slice(0, -1)
+    }
+    return RoutesRecord[targetRoute].replace('submissions/:id/form', '')
 }
 
 export {
@@ -93,6 +139,7 @@ export {
     ROUTES,
     STATE_SUBMISSION_FORM_ROUTES,
     getRouteName,
+    getRelativePath,
 }
 
 export type { RouteT }

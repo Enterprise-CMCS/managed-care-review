@@ -6,15 +6,15 @@ import styles from './StateSubmissionForm.module.scss'
 
 import { Error404 } from '../Errors/Error404'
 import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionStatus'
+
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Loading } from '../../components/Loading'
 import { DynamicStepIndicator } from '../../components/DynamicStepIndicator'
 import { usePage } from '../../contexts/PageContext'
 import {
-    RoutesRecord,
-    getRouteName,
     STATE_SUBMISSION_FORM_ROUTES,
     RouteT,
+    getRelativePath,
 } from '../../constants/routes'
 import { getCurrentRevisionFromHealthPlanPackage } from '../../gqlHelpers'
 import { StateSubmissionContainer } from './StateSubmissionContainer'
@@ -34,6 +34,7 @@ import {
 } from '../../gen/gqlClient'
 import { SubmissionUnlockedBanner } from '../../components/Banner'
 import { useAuth } from '../../contexts/AuthContext'
+import { useCurrentRoute } from '../../hooks/useCurrentRoute'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import {
     UnlockedHealthPlanFormDataType,
@@ -113,16 +114,19 @@ export type HealthPlanFormPageProps = {
     ) => Promise<HealthPlanPackage | Error>
 }
 export const StateSubmissionForm = (): React.ReactElement => {
-    const { id, '*': path } = useParams<{ id: string; ['*']: string }>()
+    const { id } = useParams<{ id: string }>()
     // IF not id throw new error
     if (!id) {
         throw new Error(
             'PROGRAMMING ERROR: id param not set in state submission form.'
         )
     }
-    const { pathname } = useLocation()
-    const currentRoute = getRouteName(`/${path}`)
+    const location = useLocation()
+    console.log(location)
+    const { pathname } = location
+    const { currentRoute } = useCurrentRoute()
     const { updateHeading } = usePage()
+
     const [formDataFromLatestRevision, setFormDataFromLatestRevision] =
         useState<UnlockedHealthPlanFormDataType | null>(null)
     const [formDataError, setFormDataError] = useState<FormDataError | null>(
@@ -308,6 +312,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
             </GridContainer>
         )
     }
+
     return (
         <>
             <div className={styles.stepIndicator}>
@@ -324,7 +329,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
             <StateSubmissionContainer>
                 <Routes>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_TYPE}
+                        path={getRelativePath({
+                            baseRoute: 'SUBMISSIONS_FORM',
+                            targetRoute: 'SUBMISSIONS_TYPE',
+                        })}
                         element={
                             <SubmissionType
                                 draftSubmission={formDataFromLatestRevision}
@@ -333,7 +341,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         }
                     />
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        path={getRelativePath({
+                            baseRoute: 'SUBMISSIONS_FORM',
+                            targetRoute: 'SUBMISSIONS_CONTRACT_DETAILS',
+                        })}
                         element={
                             <ContractDetails
                                 draftSubmission={formDataFromLatestRevision}
@@ -343,7 +354,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         }
                     />
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        path={getRelativePath({
+                            baseRoute: 'SUBMISSIONS_FORM',
+                            targetRoute: 'SUBMISSIONS_RATE_DETAILS',
+                        })}
                         element={
                             <RateDetails
                                 draftSubmission={formDataFromLatestRevision}
@@ -353,7 +367,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         }
                     />
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTACTS}
+                        path={getRelativePath({
+                            baseRoute: 'SUBMISSIONS_FORM',
+                            targetRoute: 'SUBMISSIONS_CONTACTS',
+                        })}
                         element={
                             <Contacts
                                 draftSubmission={formDataFromLatestRevision}
@@ -362,7 +379,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         }
                     />
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_DOCUMENTS}
+                        path={getRelativePath({
+                            baseRoute: 'SUBMISSIONS_FORM',
+                            targetRoute: 'SUBMISSIONS_DOCUMENTS',
+                        })}
                         element={
                             <Documents
                                 draftSubmission={formDataFromLatestRevision}
@@ -372,7 +392,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         }
                     />
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        path={getRelativePath({
+                            baseRoute: 'SUBMISSIONS_FORM',
+                            targetRoute: 'SUBMISSIONS_REVIEW_SUBMIT',
+                        })}
                         element={
                             <ReviewSubmit
                                 draftSubmission={formDataFromLatestRevision}
@@ -382,6 +405,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                             />
                         }
                     />
+                    <Route path="*" element={<Error404 />} />
                 </Routes>
             </StateSubmissionContainer>
         </>

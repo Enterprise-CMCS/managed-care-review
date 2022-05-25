@@ -47,6 +47,8 @@ const StateUserRoutes = (): React.ReactElement => {
         <Routes>
             <Route path={RoutesRecord.ROOT} element={<Dashboard />} />
             <Route path={RoutesRecord.DASHBOARD} element={<Dashboard />} />
+            <Route path={RoutesRecord.HELP} element={<Help />} />
+            <Route path={RoutesRecord.SUBMISSIONS} element={<Dashboard />} />
             <Route
                 path={RoutesRecord.SUBMISSIONS_NEW}
                 element={<NewStateSubmissionForm />}
@@ -63,7 +65,6 @@ const StateUserRoutes = (): React.ReactElement => {
                 path={RoutesRecord.SUBMISSIONS_FORM}
                 element={<StateSubmissionForm />}
             />
-            <Route path={RoutesRecord.HELP} element={<Help />} />
             <Route path="*" element={<Error404 />} />
         </Routes>
     )
