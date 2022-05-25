@@ -161,7 +161,7 @@ export const UnlockModal = ({
                         className={styles.unlockReasonTextarea}
                         aria-required
                         error={!!formik.errors.unlockReason}
-                        //onChange={formik.handleChange}
+                        onChange={formik.handleChange}
                         defaultValue={formik.values.unlockReason}
                     />
                 </FormGroup>
