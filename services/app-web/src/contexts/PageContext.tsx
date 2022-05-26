@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { PageHeadingsRecord, getRouteName } from '../constants/routes'
+import { PageHeadingsRecord } from '../constants/routes'
+import { useCurrentRoute } from '../hooks/useCurrentRoute'
 
 /*
     Use sparingly. 
@@ -7,7 +8,7 @@ import { PageHeadingsRecord, getRouteName } from '../constants/routes'
 */
 type PageContextType = {
     heading?: string
-    updateHeading: (pathname: string, headingText?: string) => void
+    updateHeading: ({ customHeading }: { customHeading?: string }) => void
 }
 
 const PageContext = React.createContext(null as unknown as PageContextType)
@@ -17,23 +18,25 @@ export type PageProviderProps = {
 }
 const PageProvider: React.FC = ({ children }) => {
     const [heading, setHeading] = React.useState<string | undefined>(undefined)
-
+    const { currentRoute: routeName } = useCurrentRoute()
     /* 
         Set headings in priority order
-        1. If there a custom heading, use that
-        2. Otherwise, use default headings based on the PageHeadingsRecord
-        3. Do not show any page-specific headings when user is logged out (handled in Header component)
-        4. Do not show any headings when logged in user is on a Not Found page (handled in Header component)
+        1. If there a custom heading, use that (relevant for heading related to the api loaded resource, such as the submission name)
+        2. Otherwise, use default static headings for the current location when defined.
     */
-    const updateHeading = (pathname: string, customHeading?: string) => {
-        const routeName = getRouteName(pathname)
-        const defaultHeading = Object.prototype.hasOwnProperty.call(
-            PageHeadingsRecord,
-            routeName
-        )
+    const updateHeading = ({ customHeading }: { customHeading?: string }) => {
+        const defaultHeading = PageHeadingsRecord[routeName]
             ? PageHeadingsRecord[routeName]
             : undefined
 
+        console.log(
+            'routeName',
+            routeName,
+            'defaultHeading',
+            defaultHeading,
+            'custom',
+            customHeading
+        )
         if (!defaultHeading && !customHeading) return
 
         setHeading((_prev) => {

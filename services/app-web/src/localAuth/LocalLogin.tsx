@@ -11,7 +11,7 @@ import {
     GridContainer,
 } from '@trussworks/react-uswds'
 import { useNavigate } from 'react-router-dom'
-
+import { RoutesRecord } from '../constants/routes'
 import { loginLocalUser } from '.'
 
 import aangAvatar from '../assets/images/aang.png'
@@ -57,7 +57,7 @@ export function LocalLogin(): React.ReactElement {
 
         try {
             await checkAuth()
-            navigate('/')
+            navigate(RoutesRecord.ROOT)
         } catch (error) {
             setShowFormAlert(true)
             console.log('Log: Server Error')

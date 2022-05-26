@@ -2,12 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router'
 import { Route, Routes } from 'react-router-dom'
 import { assertNever, AuthModeType } from '../../common-code/config'
-import {
-    getRouteName,
-    PageTitlesRecord,
-    RoutesRecord,
-    RouteT,
-} from '../../constants/routes'
+import { PageTitlesRecord, RoutesRecord, RouteT } from '../../constants/routes'
+import { getRouteName } from '../../routeHelpers'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import { useTitle } from '../../hooks/useTitle'
@@ -179,7 +175,7 @@ export const AppRoutes = ({
     useTitle(title)
     useScrollToPageTop()
     useEffect(() => {
-        updateHeading(pathname)
+        updateHeading({})
     }, [pathname, updateHeading])
 
     if (!loggedInUser) {

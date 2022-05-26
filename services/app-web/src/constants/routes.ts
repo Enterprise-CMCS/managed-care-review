@@ -1,5 +1,3 @@
-import { matchPath } from 'react-router'
-
 /*
     Every application route is named here.
     These types ensure we use valid routes throughout the application.
@@ -52,7 +50,11 @@ const STATE_SUBMISSION_FORM_ROUTES: RouteT[] = [
     'SUBMISSIONS_DOCUMENTS',
     'SUBMISSIONS_REVIEW_SUBMIT',
 ]
-// Static page headings used in <header> h1 when logged in. Dynamic headings, when necessary, are set in page specific parent component.
+
+/*
+    Static page headings used in <header> h1 when logged in. Dynamic headings, when necessary, are set in page specific parent component.
+    Every route does not need a page heading in the record. It is a design choice what goes here. For example, we do not any headings when logged in user is on a Not Found page
+*/
 const PageHeadingsRecord: Record<string, string> = {
     ROOT: 'Dashboard',
     DASHBOARD: 'Dashboard',
@@ -60,7 +62,7 @@ const PageHeadingsRecord: Record<string, string> = {
 }
 
 // Static page titles used in <title>.
-// Every route must have a fallback page title. Dynamic page title logic are set in AppRoutes.tsx
+// Every route must have a page title in the record for accessibility reasons. Dynamic page titles, when necessary, are set in AppRoutes
 const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     ROOT: 'Home',
     AUTH: 'Login',
@@ -80,42 +82,12 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     UNKNOWN_ROUTE: 'Not found',
 }
 
-// Calculate the route  from a pathname - e.g. SUBMISSIONS_TYPE from 'submissions/123/edit/type'
-const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {
-    const matchingRouteNames = ROUTES.filter((route: RouteT) => {
-        return matchPath({ path: RoutesRecord[route], end: true }, pathname)
-    })
-
-    if (matchingRouteNames.length === 0) {
-        return 'UNKNOWN_ROUTE'
-    } else if (matchingRouteNames.length === 1) {
-        return matchingRouteNames[0]
-    } else {
-        // This for cases when there is more than one full path match
-        // e.g. /submissions/:id/edit/type and /submissions/:id/edit/*  both match the pathname string /submissions/123123412/edit/type
-        // We resolve by preferring the first instance of a match and ordering ROUTES array by specificity. This workaround was needed because as of v6 the matchPath 'exact' param is no longer present.
-        const exactMatch = matchingRouteNames.find(
-            (route: RouteT) =>
-                RoutesRecord[route] ===
-                matchPath({ path: RoutesRecord[route], end: true }, pathname)
-                    ?.pattern.path
-        )
-        if (!exactMatch) {
-            console.error(
-                `Coding error: Please check your routes, there were multiple matching potential route names but cannot find a match for ${pathname} from ${matchingRouteNames.toString()}`
-            )
-        }
-        return exactMatch || 'UNKNOWN_ROUTE'
-    }
-}
-
 export {
     PageHeadingsRecord,
     PageTitlesRecord,
     RoutesRecord,
     ROUTES,
     STATE_SUBMISSION_FORM_ROUTES,
-    getRouteName,
 }
 
 export type { RouteT }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 
 import { Alert, GridContainer } from '@trussworks/react-uswds'
-import { Routes, Route, useParams, useLocation } from 'react-router-dom'
+import { Routes, Route, useParams } from 'react-router-dom'
 import styles from './StateSubmissionForm.module.scss'
 
 import { Error404 } from '../Errors/Error404'
@@ -128,8 +128,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
             'PROGRAMMING ERROR: id param not set in state submission form.'
         )
     }
-    const location = useLocation()
-    const { pathname } = location
     const { currentRoute } = useCurrentRoute()
     const { updateHeading } = usePage()
 
@@ -213,9 +211,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 []
             const name = packageName(formDataFromLatestRevision, statePrograms)
             setComputedSubmissionName(name)
-            updateHeading(pathname, name)
+            updateHeading({ customHeading: name })
         }
-    }, [updateHeading, pathname, formDataFromLatestRevision, loggedInUser])
+    }, [updateHeading, formDataFromLatestRevision, loggedInUser])
 
     useEffect(() => {
         if (submissionAndRevisions) {

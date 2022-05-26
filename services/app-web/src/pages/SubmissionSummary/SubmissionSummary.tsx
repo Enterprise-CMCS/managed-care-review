@@ -6,7 +6,7 @@ import {
     ModalToggleButton,
 } from '@trussworks/react-uswds'
 import React, { useEffect, useState, useRef } from 'react'
-import { useNavigate, NavLink, useLocation, useParams } from 'react-router-dom'
+import { useNavigate, NavLink, useParams } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
 import {
     packageName,
@@ -72,7 +72,6 @@ export const SubmissionSummary = (): React.ReactElement => {
             'PROGRAMMING ERROR: id param not set in state submission form.'
         )
     }
-    const { pathname } = useLocation()
     const navigate = useNavigate()
     const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
@@ -190,9 +189,9 @@ export const SubmissionSummary = (): React.ReactElement => {
         const subWithRevisions = data?.fetchHealthPlanPackage.pkg
         if (packageData && subWithRevisions) {
             const programs = subWithRevisions.state.programs
-            updateHeading(pathname, packageName(packageData, programs))
+            updateHeading({ customHeading: packageName(packageData, programs) })
         }
-    }, [updateHeading, pathname, packageData, data])
+    }, [updateHeading, packageData, data])
 
     if (loading || !submissionAndRevisions || !packageData) {
         return (
