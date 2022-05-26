@@ -1,5 +1,5 @@
 import React from 'react'
-import { Alert, GridContainer, Grid } from '@trussworks/react-uswds'
+import {GridContainer, Grid } from '@trussworks/react-uswds'
 import styles from './Landing.module.scss'
 
 export const Landing = (): React.ReactElement => {
