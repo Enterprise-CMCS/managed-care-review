@@ -44,9 +44,9 @@ function submissionURL(
     status: SubmissionInDashboard['status']
 ): string {
     if (status === 'DRAFT') {
-        return `/submissions/${id}/form/type`
+        return `/submissions/${id}/edit/type`
     } else if (status === 'UNLOCKED') {
-        return `/submissions/${id}/form/review-and-submit`
+        return `/submissions/${id}/edit/review-and-submit`
     }
     return `/submissions/${id}`
 }

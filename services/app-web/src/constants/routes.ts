@@ -5,7 +5,7 @@ import { matchPath } from 'react-router'
     These types ensure we use valid routes throughout the application.
     
     As of react-router v6, ROUTES is a list where order matters. 
-    To allow us continue to properly match route names (with matchPath), routes with wildcard parameters (e.g. /submissions/:id/form/*) should be declared at the end of the ROUTES list.
+    To allow us continue to properly match route names (with matchPath), routes names referring to wildcard route paths (e.g. /submissions/:id/edit/*) should be declared at the end of the ROUTES list.
 */
 const ROUTES = [
     'ROOT',
@@ -33,13 +33,13 @@ const RoutesRecord: Record<RouteT, string> = {
     HELP: '/help',
     SUBMISSIONS: '/submissions',
     SUBMISSIONS_NEW: '/submissions/new',
-    SUBMISSIONS_FORM: '/submissions/:id/form/*',
-    SUBMISSIONS_TYPE: '/submissions/:id/form/type',
-    SUBMISSIONS_CONTRACT_DETAILS: '/submissions/:id/form/contract-details',
-    SUBMISSIONS_RATE_DETAILS: '/submissions/:id/form/rate-details',
-    SUBMISSIONS_CONTACTS: '/submissions/:id/form/contacts',
-    SUBMISSIONS_DOCUMENTS: '/submissions/:id/form/documents',
-    SUBMISSIONS_REVIEW_SUBMIT: '/submissions/:id/form/review-and-submit',
+    SUBMISSIONS_FORM: '/submissions/:id/edit/*',
+    SUBMISSIONS_TYPE: '/submissions/:id/edit/type',
+    SUBMISSIONS_CONTRACT_DETAILS: '/submissions/:id/edit/contract-details',
+    SUBMISSIONS_RATE_DETAILS: '/submissions/:id/edit/rate-details',
+    SUBMISSIONS_CONTACTS: '/submissions/:id/edit/contacts',
+    SUBMISSIONS_DOCUMENTS: '/submissions/:id/edit/documents',
+    SUBMISSIONS_REVIEW_SUBMIT: '/submissions/:id/edit/review-and-submit',
     SUBMISSIONS_SUMMARY: '/submissions/:id',
     SUBMISSIONS_REVISION: '/submissions/:id/revisions/:revisionVersion',
 }
@@ -80,7 +80,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     UNKNOWN_ROUTE: 'Not found',
 }
 
-// Calculate the route  from a pathname - e.g. SUBMISSIONS_TYPE from 'submissions/123/form/type'
+// Calculate the route  from a pathname - e.g. SUBMISSIONS_TYPE from 'submissions/123/edit/type'
 const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {
     const matchingRouteNames = ROUTES.filter((route: RouteT) => {
         return matchPath({ path: RoutesRecord[route], end: true }, pathname)
@@ -92,7 +92,7 @@ const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {
         return matchingRouteNames[0]
     } else {
         // This for cases when there is more than one full path match
-        // e.g. /submissions/:id/form/type and /submissions/:id/form/*  both match the pathname string /submissions/123123412/form/type
+        // e.g. /submissions/:id/edit/type and /submissions/:id/edit/*  both match the pathname string /submissions/123123412/edit/type
         // We resolve by preferring the first instance of a match and ordering ROUTES array by specificity. This workaround was needed because as of v6 the matchPath 'exact' param is no longer present.
         const exactMatch = matchingRouteNames.find(
             (route: RouteT) =>
@@ -129,7 +129,7 @@ const getRelativePath = ({
     if (isWildcardPath(baseRouteString)) {
         baseRouteString = baseRouteString.slice(0, -1)
     }
-    return RoutesRecord[targetRoute].replace('submissions/:id/form', '')
+    return RoutesRecord[targetRoute].replace('submissions/:id/edit/', '')
 }
 
 export {

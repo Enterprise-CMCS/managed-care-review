@@ -125,7 +125,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     submissionAndRevisions.revisions
                 )
                 // if state user goes to submission/:id for a draft submission, put them on the form
-                navigate(`/submissions/${id}/form/type`)
+                navigate(`/submissions/${id}/edit/type`)
                 return
             }
 
