@@ -29,6 +29,7 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
 
 Cypress.Commands.add('fillOutContractActionOnly', () => {
     // Must be on '/submissions/new'
+    cy.wait(2000)
     cy.findByRole('combobox', { name: 'programs (required)' }).click({
         force: true,
     })
@@ -41,6 +42,7 @@ Cypress.Commands.add('fillOutContractActionOnly', () => {
 
 Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
     // Must be on '/submissions/new'
+    cy.wait(2000)
     cy.findByRole('combobox', { name: 'programs (required)' }).click({
         force: true,
     })
