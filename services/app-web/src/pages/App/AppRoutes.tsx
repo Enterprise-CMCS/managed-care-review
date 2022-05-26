@@ -147,7 +147,6 @@ export const AppRoutes = ({
         updateSessionExpirationState,
         updateSessionExpirationTime,
         checkIfSessionsIsAboutToExpire,
-        logoutTime,
     } = useAuth()
     const { pathname } = useLocation()
     const ldClient = useLDClient()
@@ -164,7 +163,6 @@ export const AppRoutes = ({
         sessionIsExpiring === false &&
         showExpirationModal
     ) {
-        console.log('logout time: ', logoutTime)
         // whenever we load a page, reset the logout timer and refresh the session
         updateSessionExpirationTime()
 

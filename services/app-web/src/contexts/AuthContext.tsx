@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { MutableRefObject, useEffect, useRef, useState } from 'react'
 import { AuthModeType } from '../common-code/config'
 import { useFetchCurrentUserQuery, User as UserType } from '../gen/gqlClient'
 import { logoutLocalUser } from '../localAuth'
@@ -19,7 +19,7 @@ type AuthContextType = {
     loginStatus: LoginStatusType
     logout: undefined | (() => Promise<void>)
     logoutCountdownDuration: number
-    logoutTime: dayjs.Dayjs | undefined
+    logoutTime: MutableRefObject<dayjs.Dayjs | undefined>
     sessionIsExpiring: boolean
     setLogoutCountdownDuration: (value: number) => void
     updateSessionExpirationState: (value: boolean) => void
@@ -33,7 +33,7 @@ const AuthContext = React.createContext<AuthContextType>({
     loginStatus: 'LOADING',
     logout: undefined,
     logoutCountdownDuration: 120,
-    logoutTime: undefined,
+    logoutTime: { current: undefined },
     sessionIsExpiring: false,
     setLogoutCountdownDuration: () => void 0,
     updateSessionExpirationState: () => void 0,
@@ -60,21 +60,18 @@ function AuthProvider({
         featureFlags.MINUTES_UNTIL_SESSION_EXPIRES,
         30
     )
-    const [logoutTime, setLogoutTime] = useState<dayjs.Dayjs>(
+    const logoutTime = useRef<dayjs.Dayjs>(
         dayjs(Date.now()).add(minutesUntilExpiration, 'minute')
     )
-    const countdownDuration: number =
+    const countdownDurationSeconds: number =
         ldClient?.variation(featureFlags.MODAL_COUNTDOWN_DURATION, 2) * 60
     const [logoutCountdownDuration, setLogoutCountdownDuration] =
-        useState<number>(countdownDuration)
+        useState<number>(countdownDurationSeconds)
     const modalCountdownTimers = useRef<NodeJS.Timer[]>([])
     const sessionExpirationTimers = useRef<NodeJS.Timer[]>([])
     const { loading, data, error, refetch } = useFetchCurrentUserQuery({
         notifyOnNetworkStatusChange: true,
     })
-    // if (!logoutTime) {
-    //     setLogoutTime(dayjs(Date.now()).add(minutesUntilExpiration, 'minute'))
-    // }
 
     useEffect(() => {
         if (sessionIsExpiring) {
@@ -94,7 +91,7 @@ function AuthProvider({
             modalCountdownTimers.current = []
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [sessionIsExpiring, countdownDuration]) // full dep array causes a loop, because we're resetting the dep in the useEffect
+    }, [sessionIsExpiring, countdownDurationSeconds]) // full dep array causes a loop, because we're resetting the dep in the useEffect
 
     const isAuthenticated = loggedInUser !== undefined
 
@@ -170,12 +167,10 @@ function AuthProvider({
     }
 
     const updateSessionExpirationTime = () => {
-        // without this if condition, we'll get an infinite loop of re-rendering after updates
-        if (dayjs(Date.now()).isAfter(logoutTime, 'minute')) {
-            setLogoutTime(
-                dayjs(Date.now()).add(minutesUntilExpiration, 'minute')
-            )
-        }
+        logoutTime.current = dayjs(Date.now()).add(
+            minutesUntilExpiration,
+            'minute'
+        )
     }
 
     const checkIfSessionsIsAboutToExpire = () => {
@@ -183,9 +178,12 @@ function AuthProvider({
             const timer = setInterval(() => {
                 sessionExpirationTimers.current.push(timer)
                 let insideCountdownDurationPeriod = false
-                if (logoutTime) {
+                if (logoutTime.current) {
                     insideCountdownDurationPeriod = dayjs(Date.now()).isAfter(
-                        dayjs(logoutTime).subtract(countdownDuration, 'minute')
+                        dayjs(logoutTime.current).subtract(
+                            countdownDurationSeconds,
+                            'second'
+                        )
                     )
                 }
                 if (insideCountdownDurationPeriod) {

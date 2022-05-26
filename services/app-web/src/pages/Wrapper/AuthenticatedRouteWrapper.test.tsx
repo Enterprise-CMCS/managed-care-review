@@ -49,7 +49,7 @@ describe('AuthenticatedRouteWrapper', () => {
             sessionIsExpiring: true,
             updateSessionExpirationState: () => void 0,
             logoutCountdownDuration: 120,
-            logoutTime: undefined,
+            logoutTime: { current: undefined },
             updateSessionExpirationTime: () => void 0,
             checkIfSessionsIsAboutToExpire: () => void 0,
             setLogoutCountdownDuration: () => void 0,
