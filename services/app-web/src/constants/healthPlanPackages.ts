@@ -3,7 +3,6 @@ import {
     ContractType,
     FederalAuthority,
     ManagedCareEntity,
-    AmendableItems,
     ActuarialFirmType,
     ActuaryCommunicationType,
     ContractExecutionStatus,
@@ -41,22 +40,6 @@ const ManagedCareEntityRecord: Record<ManagedCareEntity, string> = {
     PCCM: 'Primary Care Case Management Entity (PCCM Entity)',
 }
 
-const AmendableItemsRecord: Record<AmendableItems, string> = {
-    BENEFITS_PROVIDED: 'Benefits provided',
-    CAPITATION_RATES: 'Capitation rates',
-    ENCOUNTER_DATA: 'Encounter data',
-    ENROLLE_ACCESS: 'Enrollee access',
-    ENROLLMENT_PROCESS: 'Enrollment/disenrollment process',
-    FINANCIAL_INCENTIVES: 'Financial incentives',
-    GEO_AREA_SERVED: 'Geographic area served',
-    GRIEVANCES_AND_APPEALS_SYSTEM: 'Grievances and appeals system',
-    LENGTH_OF_CONTRACT_PERIOD: 'Length of contract period',
-    NON_RISK_PAYMENT: 'Non-risk payment',
-    PROGRAM_INTEGRITY: 'Program integrity',
-    QUALITY_STANDARDS: 'Quality standards',
-    RISK_SHARING_MECHANISM: 'Risk sharing mechanisms',
-}
-
 const ActuaryFirmsRecord: Record<ActuarialFirmType, string> = {
     MERCER: 'Mercer',
     MILLIMAN: 'Milliman',
@@ -76,12 +59,6 @@ state will relay all written communication to their actuary
 and set up time for any potential verbal discussions.`,
 }
 
-const RateChangeReasonRecord: Record<'ANNUAL' | 'MIDYEAR' | 'OTHER', string> = {
-    ANNUAL: 'Annual rate update',
-    MIDYEAR: 'Mid-year update',
-    OTHER: 'Other (please describe)',
-}
-
 const SubmissionStatusRecord: Record<HealthPlanPackageStatus, string> = {
     DRAFT: 'Draft',
     SUBMITTED: 'Submitted',
@@ -90,8 +67,6 @@ const SubmissionStatusRecord: Record<HealthPlanPackageStatus, string> = {
 }
 
 export {
-    RateChangeReasonRecord,
-    AmendableItemsRecord,
     ContractTypeRecord,
     SubmissionTypeRecord,
     FederalAuthorityRecord,

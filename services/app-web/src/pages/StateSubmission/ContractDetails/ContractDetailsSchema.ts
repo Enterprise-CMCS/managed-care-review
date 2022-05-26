@@ -64,6 +64,5 @@ export const ContractDetailsFormSchema = Yup.object().shape({
     }),
 
     modifiedBenefitsProvided: yesNoError,
-
     modifiedGeoAreaServed: yesNoError,
 })

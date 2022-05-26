@@ -95,15 +95,7 @@ describe('StateSubmissionForm', () => {
             const mockAmendment = mockDraftHealthPlanPackage({
                 contractType: 'AMENDMENT',
                 contractAmendmentInfo: {
-                    itemsBeingAmended: [
-                        'CAPITATION_RATES',
-                        'GEO_AREA_SERVED',
-                        'OTHER',
-                    ],
-                    otherItemBeingAmended: 'foobar',
-                    capitationRatesAmendedInfo: {
-                        reason: 'MIDYEAR',
-                    },
+                    modifiedBenefitsProvided: true,
                 },
             })
 

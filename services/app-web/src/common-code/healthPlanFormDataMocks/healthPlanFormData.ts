@@ -88,7 +88,7 @@ function contractAmendedOnly(): UnlockedHealthPlanFormDataType {
         documents: [],
         contractDocuments: [],
         rateDocuments: [],
-        contractType: 'BASE',
+        contractType: 'AMENDMENT',
         contractExecutionStatus: 'EXECUTED',
         contractDateStart: new Date(Date.UTC(2021, 4, 22)),
         contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
@@ -97,20 +97,7 @@ function contractAmendedOnly(): UnlockedHealthPlanFormDataType {
         stateContacts: [],
         actuaryContacts: [],
         contractAmendmentInfo: {
-            itemsBeingAmended: [
-                'ENROLLEE_ACCESS',
-                'GEO_AREA_SERVED',
-                'CAPITATION_RATES',
-                'OTHER',
-            ],
-            otherItemBeingAmended: 'OTHERAMEND',
-            capitationRatesAmendedInfo: {
-                reason: 'OTHER',
-                otherReason: 'somethingelse',
-            },
-
             modifiedBenefitsProvided: true,
-            // modifiedGeoAreaServed: false,
         },
     }
 }
@@ -345,17 +332,8 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
             },
         ],
         contractAmendmentInfo: {
-            itemsBeingAmended: [
-                'ENROLLEE_ACCESS',
-                'GEO_AREA_SERVED',
-                'CAPITATION_RATES',
-                'OTHER',
-            ],
-            otherItemBeingAmended: 'OTHERAMEND',
-            capitationRatesAmendedInfo: {
-                reason: 'OTHER',
-                otherReason: 'somethingelse',
-            },
+            modifiedBenefitsProvided: false,
+            modifiedGeoAreaServed: true,
         },
         managedCareEntities: ['PIHP'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
@@ -423,17 +401,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
         contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
         contractDocuments: [],
         contractAmendmentInfo: {
-            itemsBeingAmended: [
-                'ENROLLEE_ACCESS',
-                'GEO_AREA_SERVED',
-                'CAPITATION_RATES',
-                'OTHER',
-            ],
-            otherItemBeingAmended: 'OTHERAMEND',
-            capitationRatesAmendedInfo: {
-                reason: 'OTHER',
-                otherReason: 'somethingelse',
-            },
+            modifiedGeoAreaServed: true,
         },
         managedCareEntities: ['PIHP', 'PCCM'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],

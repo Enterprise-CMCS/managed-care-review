@@ -5,7 +5,6 @@ import {
     LockedHealthPlanFormDataType,
     DocumentCategoryType,
     ActuarialFirmType,
-    ContractAmendmentInfo,
     FederalAuthority,
     isLockedHealthPlanFormData,
 } from '../../healthPlanFormDataType'
@@ -186,26 +185,6 @@ function parseProtoDocuments(
     }))
 }
 
-// Just pulling this type out of the hierarchy
-type CapitationRateI =
-    mcreviewproto.ContractInfo.IContractAmendmentInfo['capitationRatesAmendedInfo']
-
-function parseCapitationRates(
-    capRates: CapitationRateI | null | undefined
-): ContractAmendmentInfo['capitationRatesAmendedInfo'] | undefined {
-    if (!capRates) {
-        return undefined
-    }
-
-    return {
-        reason: enumToDomain(
-            mcreviewproto.CapitationRateAmendmentReason,
-            capRates.reason
-        ),
-        otherReason: capRates.otherReason ?? undefined,
-    }
-}
-
 function parseContractAmendment(
     amendment: mcreviewproto.IContractInfo['contractAmendmentInfo']
 ): UnlockedHealthPlanFormDataType['contractAmendmentInfo'] {
@@ -216,17 +195,6 @@ function parseContractAmendment(
     const cleanAmendment = replaceNullsWithUndefineds(amendment)
 
     return {
-        // items being amended are an enum in proto but not in domain
-        itemsBeingAmended: protoEnumArrayToDomain(
-            mcreviewproto.AmendedItem,
-            amendment.amendableItems
-        ),
-
-        capitationRatesAmendedInfo: parseCapitationRates(
-            cleanAmendment.capitationRatesAmendedInfo
-        ),
-        otherItemBeingAmended: cleanAmendment.otherAmendableItem,
-
         modifiedBenefitsProvided: cleanAmendment.modifiedBenefitsProvided,
         modifiedGeoAreaServed: cleanAmendment.modifiedGeoAreaServed,
     }

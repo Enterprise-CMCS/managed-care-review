@@ -8,7 +8,7 @@ import {
     DateRangePicker,
 } from '@trussworks/react-uswds'
 import { v4 as uuidv4 } from 'uuid'
-import { Link as ReactRouterLink, useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import { Formik, FormikErrors } from 'formik'
 
 import styles from '../StateSubmissionForm.module.scss'
@@ -19,7 +19,6 @@ import {
     FileItemT,
     FieldRadio,
     FieldCheckbox,
-    FieldTextInput,
     FieldPreserveScrollPosition,
     ErrorSummary,
     PoliteErrorMessage,
@@ -35,19 +34,13 @@ import {
     ContractType,
     ContractExecutionStatus,
     FederalAuthority,
-    CapitationRatesAmendmentReason,
 } from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
 
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
+import { ManagedCareEntity } from '../../../common-code/healthPlanFormDataType'
 import {
-    ManagedCareEntity,
-    CapitationRatesAmendedReason,
-} from '../../../common-code/healthPlanFormDataType'
-import {
-    AmendableItemsRecord,
-    RateChangeReasonRecord,
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
 } from '../../../constants/healthPlanPackages'
@@ -87,10 +80,6 @@ export interface ContractDetailsFormValues {
     contractDateStart: string
     contractDateEnd: string
     managedCareEntities: ManagedCareEntity[]
-    itemsAmended: string[]
-    otherItemAmended: string
-    capitationRates: CapitationRatesAmendmentReason | undefined
-    capitationRatesOther: string
     federalAuthorities: FederalAuthority[]
     modifiedBenefitsProvided: string | undefined
     modifiedGeoAreaServed: string | undefined
@@ -226,16 +215,6 @@ export const ContractDetails = ({
             '',
         managedCareEntities:
             (draftSubmission?.managedCareEntities as ManagedCareEntity[]) ?? [],
-        itemsAmended:
-            draftSubmission.contractAmendmentInfo?.itemsBeingAmended ?? [],
-        otherItemAmended:
-            draftSubmission.contractAmendmentInfo?.otherItemBeingAmended ?? '',
-        capitationRates:
-            draftSubmission.contractAmendmentInfo?.capitationRatesAmendedInfo
-                ?.reason ?? undefined,
-        capitationRatesOther:
-            draftSubmission.contractAmendmentInfo?.capitationRatesAmendedInfo
-                ?.otherReason ?? '',
         federalAuthorities: draftSubmission?.federalAuthorities ?? [],
 
         modifiedBenefitsProvided:
@@ -327,29 +306,7 @@ export const ContractDetails = ({
         draftSubmission.contractDocuments = contractDocuments
 
         if (values.contractType === 'AMENDMENT') {
-            // const amendedOther = formatForApi(values.otherItemAmended)
-
-            let capitationInfo:
-                | {
-                      reason: CapitationRatesAmendedReason | undefined
-                      otherReason: string
-                  }
-                | undefined = undefined
-
-            // let capitationInfo: CapitationRatesAmendedInfo | undefined =
-            //     undefined
-            if (values.itemsAmended.includes('CAPITATION_RATES')) {
-                capitationInfo = {
-                    reason: values.capitationRates,
-                    otherReason: values.capitationRatesOther,
-                }
-            }
-
             draftSubmission.contractAmendmentInfo = {
-                itemsBeingAmended: values.itemsAmended,
-                otherItemBeingAmended: values.otherItemAmended,
-                capitationRatesAmendedInfo: capitationInfo,
-
                 modifiedBenefitsProvided: values.modifiedBenefitsProvided
                     ? values.modifiedBenefitsProvided === 'YES'
                     : undefined,
@@ -818,389 +775,87 @@ export const ContractDetails = ({
                                         </Fieldset>
                                     </FormGroup>
                                     {isContractAmendmentSelected(values) && (
-                                        <>
-                                            <FormGroup
-                                                error={showFieldErrors(
-                                                    errors.itemsAmended
-                                                )}
+                                        <FormGroup>
+                                            <Fieldset
+                                                role="radiogroup"
+                                                aria-required
+                                                className={styles.radioGroup}
+                                                legend="Benefits provided by the managed care plans"
+                                                id="modifiedBenefitsProvided"
                                             >
-                                                <Fieldset
+                                                {showFieldErrors(
+                                                    errors.modifiedBenefitsProvided
+                                                ) && (
+                                                    <PoliteErrorMessage>
+                                                        {
+                                                            errors.modifiedBenefitsProvided
+                                                        }
+                                                    </PoliteErrorMessage>
+                                                )}
+                                                <FieldRadio
+                                                    id="modifiedBenefitsProvidedYes"
+                                                    name="modifiedBenefitsProvided"
+                                                    label="Yes"
                                                     aria-required
-                                                    legend="Items being amended"
-                                                >
-                                                    <Link
-                                                        variant="external"
-                                                        asCustom={
-                                                            ReactRouterLink
-                                                        }
-                                                        to={{
-                                                            pathname: '/help',
-                                                            hash: '#items-being-amended-definitions',
-                                                        }}
-                                                        target="_blank"
-                                                    >
-                                                        Items being amended
-                                                        definitions
-                                                    </Link>
-                                                    <div className="usa-hint">
-                                                        <span>
-                                                            Check all that apply
-                                                        </span>
-                                                    </div>
-                                                    {showFieldErrors(
-                                                        errors.itemsAmended
-                                                    ) && (
-                                                        <PoliteErrorMessage>
-                                                            {
-                                                                errors.itemsAmended
-                                                            }
-                                                        </PoliteErrorMessage>
-                                                    )}
-                                                    <>
-                                                        <Fieldset
-                                                            role="radiogroup"
-                                                            aria-required
-                                                            className={
-                                                                styles.radioGroup
-                                                            }
-                                                            legend="Benefits provided by the managed care plans"
-                                                            id="modifiedBenefitsProvided"
-                                                        >
-                                                            {showFieldErrors(
-                                                                errors.modifiedBenefitsProvided
-                                                            ) && (
-                                                                <PoliteErrorMessage>
-                                                                    {
-                                                                        errors.modifiedBenefitsProvided
-                                                                    }
-                                                                </PoliteErrorMessage>
-                                                            )}
-                                                            <FieldRadio
-                                                                id="modifiedBenefitsProvidedYes"
-                                                                name="modifiedBenefitsProvided"
-                                                                label="Yes"
-                                                                aria-required
-                                                                value={'YES'}
-                                                                checked={
-                                                                    values.modifiedBenefitsProvided ===
-                                                                    'YES'
-                                                                }
-                                                            />
-                                                            <FieldRadio
-                                                                id="modifiedBenefitsProvidedNo"
-                                                                name="modifiedBenefitsProvided"
-                                                                label="No"
-                                                                aria-required
-                                                                value={'NO'}
-                                                                checked={
-                                                                    values.modifiedBenefitsProvided ===
-                                                                    'NO'
-                                                                }
-                                                            />
-                                                        </Fieldset>
+                                                    value={'YES'}
+                                                    checked={
+                                                        values.modifiedBenefitsProvided ===
+                                                        'YES'
+                                                    }
+                                                />
+                                                <FieldRadio
+                                                    id="modifiedBenefitsProvidedNo"
+                                                    name="modifiedBenefitsProvided"
+                                                    label="No"
+                                                    aria-required
+                                                    value={'NO'}
+                                                    checked={
+                                                        values.modifiedBenefitsProvided ===
+                                                        'NO'
+                                                    }
+                                                />
+                                            </Fieldset>
 
-                                                        <Fieldset
-                                                            role="radiogroup"
-                                                            aria-required
-                                                            className={
-                                                                styles.radioGroup
-                                                            }
-                                                            legend="Geographic areas served by the managed care plans"
-                                                            id="modifiedGeoAreaServed"
-                                                        >
-                                                            {showFieldErrors(
-                                                                errors.modifiedGeoAreaServed
-                                                            ) && (
-                                                                <PoliteErrorMessage>
-                                                                    {
-                                                                        errors.modifiedGeoAreaServed
-                                                                    }
-                                                                </PoliteErrorMessage>
-                                                            )}
-                                                            <FieldRadio
-                                                                id="modifiedGeoAreaServedYes"
-                                                                name="modifiedGeoAreaServed"
-                                                                label="Yes"
-                                                                aria-required
-                                                                value={'YES'}
-                                                                checked={
-                                                                    values.modifiedGeoAreaServed ===
-                                                                    'YES'
-                                                                }
-                                                            />
-                                                            <FieldRadio
-                                                                id="modifiedGeoAreaServedNo"
-                                                                name="modifiedGeoAreaServed"
-                                                                label="No"
-                                                                aria-required
-                                                                value={'NO'}
-                                                                checked={
-                                                                    values.modifiedGeoAreaServed ===
-                                                                    'NO'
-                                                                }
-                                                            />
-                                                        </Fieldset>
-                                                    </>
-                                                    <FieldCheckbox
-                                                        id="benefitsProvided"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.BENEFITS_PROVIDED
+                                            <Fieldset
+                                                role="radiogroup"
+                                                aria-required
+                                                className={styles.radioGroup}
+                                                legend="Geographic areas served by the managed care plans"
+                                                id="modifiedGeoAreaServed"
+                                            >
+                                                {showFieldErrors(
+                                                    errors.modifiedGeoAreaServed
+                                                ) && (
+                                                    <PoliteErrorMessage>
+                                                        {
+                                                            errors.modifiedGeoAreaServed
                                                         }
-                                                        value="BENEFITS_PROVIDED"
-                                                        checked={values.itemsAmended.includes(
-                                                            'BENEFITS_PROVIDED'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="capitationRates"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.CAPITATION_RATES
-                                                        }
-                                                        value="CAPITATION_RATES"
-                                                        checked={values.itemsAmended.includes(
-                                                            'CAPITATION_RATES'
-                                                        )}
-                                                    />
-                                                    {values.itemsAmended.includes(
-                                                        'CAPITATION_RATES'
-                                                    ) && (
-                                                        <div>
-                                                            <FormGroup
-                                                                className={
-                                                                    showFieldErrors(
-                                                                        errors.capitationRates
-                                                                    )
-                                                                        ? styles.nestedOptionsError
-                                                                        : styles.nestedOptions
-                                                                }
-                                                            >
-                                                                <Fieldset
-                                                                    role="radiogroup"
-                                                                    aria-required
-                                                                    legend="Select reason for capitation rate change"
-                                                                >
-                                                                    {showFieldErrors(
-                                                                        errors.capitationRates
-                                                                    ) && (
-                                                                        <PoliteErrorMessage>
-                                                                            {
-                                                                                errors.capitationRates
-                                                                            }
-                                                                        </PoliteErrorMessage>
-                                                                    )}
-                                                                    <FieldRadio
-                                                                        id="annualRateUpdate"
-                                                                        name="capitationRates"
-                                                                        label={
-                                                                            RateChangeReasonRecord.ANNUAL
-                                                                        }
-                                                                        value={
-                                                                            'ANNUAL'
-                                                                        }
-                                                                        checked={
-                                                                            values.capitationRates ===
-                                                                            'ANNUAL'
-                                                                        }
-                                                                    />
-                                                                    <FieldRadio
-                                                                        id="midYearUpdate"
-                                                                        name="capitationRates"
-                                                                        label={
-                                                                            RateChangeReasonRecord.MIDYEAR
-                                                                        }
-                                                                        value={
-                                                                            'MIDYEAR'
-                                                                        }
-                                                                        checked={
-                                                                            values.capitationRates ===
-                                                                            'MIDYEAR'
-                                                                        }
-                                                                    />
-                                                                    <FieldRadio
-                                                                        id="capitation-other"
-                                                                        name="capitationRates"
-                                                                        label={
-                                                                            RateChangeReasonRecord.OTHER
-                                                                        }
-                                                                        value={
-                                                                            'OTHER'
-                                                                        }
-                                                                        checked={
-                                                                            values.capitationRates ===
-                                                                            'OTHER'
-                                                                        }
-                                                                    />
-                                                                    {values.capitationRates ===
-                                                                        'OTHER' && (
-                                                                        <FieldTextInput
-                                                                            id="other-rates"
-                                                                            label="Other capitation rate description"
-                                                                            showError={showFieldErrors(
-                                                                                errors.capitationRatesOther
-                                                                            )}
-                                                                            name="capitationRatesOther"
-                                                                            type="text"
-                                                                        />
-                                                                    )}
-                                                                </Fieldset>
-                                                            </FormGroup>
-                                                        </div>
-                                                    )}
-                                                    <FieldCheckbox
-                                                        id="encounterData"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.ENCOUNTER_DATA
-                                                        }
-                                                        value="ENCOUNTER_DATA"
-                                                        checked={values.itemsAmended.includes(
-                                                            'ENCOUNTER_DATA'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="enrolleeAccess"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.ENROLLE_ACCESS
-                                                        }
-                                                        value="ENROLLE_ACCESS"
-                                                        checked={values.itemsAmended.includes(
-                                                            'ENROLLE_ACCESS'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="enrollmentDisenrollementProcess"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.ENROLLMENT_PROCESS
-                                                        }
-                                                        value="ENROLLMENT_PROCESS"
-                                                        checked={values.itemsAmended.includes(
-                                                            'ENROLLMENT_PROCESS'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="financialIncentives"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.FINANCIAL_INCENTIVES
-                                                        }
-                                                        value="FINANCIAL_INCENTIVES"
-                                                        checked={values.itemsAmended.includes(
-                                                            'FINANCIAL_INCENTIVES'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="geographicAreaServed"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.GEO_AREA_SERVED
-                                                        }
-                                                        value="GEO_AREA_SERVED"
-                                                        checked={values.itemsAmended.includes(
-                                                            'GEO_AREA_SERVED'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="grievancesAndAppealsSystem"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.GRIEVANCES_AND_APPEALS_SYSTEM
-                                                        }
-                                                        value="GRIEVANCES_AND_APPEALS_SYSTEM"
-                                                        checked={values.itemsAmended.includes(
-                                                            'GRIEVANCES_AND_APPEALS_SYSTEM'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="lengthOfContractPeriod"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.LENGTH_OF_CONTRACT_PERIOD
-                                                        }
-                                                        value="LENGTH_OF_CONTRACT_PERIOD"
-                                                        checked={values.itemsAmended.includes(
-                                                            'LENGTH_OF_CONTRACT_PERIOD'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="nonriskPayment"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.NON_RISK_PAYMENT
-                                                        }
-                                                        value="NON_RISK_PAYMENT"
-                                                        checked={values.itemsAmended.includes(
-                                                            'NON_RISK_PAYMENT'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="programIntegrity"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.PROGRAM_INTEGRITY
-                                                        }
-                                                        value="PROGRAM_INTEGRITY"
-                                                        checked={values.itemsAmended.includes(
-                                                            'PROGRAM_INTEGRITY'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="qualityStandards"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.QUALITY_STANDARDS
-                                                        }
-                                                        value="QUALITY_STANDARDS"
-                                                        checked={values.itemsAmended.includes(
-                                                            'QUALITY_STANDARDS'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="riskSharingMechanisms"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.RISK_SHARING_MECHANISM
-                                                        }
-                                                        value="RISK_SHARING_MECHANISM"
-                                                        checked={values.itemsAmended.includes(
-                                                            'RISK_SHARING_MECHANISM'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="items-other"
-                                                        name="itemsAmended"
-                                                        label="Other (please describe)"
-                                                        value="OTHER"
-                                                        checked={values.itemsAmended.includes(
-                                                            'OTHER'
-                                                        )}
-                                                    />
-                                                    {values.itemsAmended.includes(
-                                                        'OTHER'
-                                                    ) && (
-                                                        <div
-                                                            className={
-                                                                styles.nestedOptions
-                                                            }
-                                                        >
-                                                            <FieldTextInput
-                                                                id="other-items-amended"
-                                                                name="otherItemAmended"
-                                                                label="Other item description"
-                                                                aria-required
-                                                                showError={showFieldErrors(
-                                                                    errors.otherItemAmended
-                                                                )}
-                                                                type="text"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </Fieldset>
-                                            </FormGroup>
-                                        </>
+                                                    </PoliteErrorMessage>
+                                                )}
+                                                <FieldRadio
+                                                    id="modifiedGeoAreaServedYes"
+                                                    name="modifiedGeoAreaServed"
+                                                    label="Yes"
+                                                    aria-required
+                                                    value={'YES'}
+                                                    checked={
+                                                        values.modifiedGeoAreaServed ===
+                                                        'YES'
+                                                    }
+                                                />
+                                                <FieldRadio
+                                                    id="modifiedGeoAreaServedNo"
+                                                    name="modifiedGeoAreaServed"
+                                                    label="No"
+                                                    aria-required
+                                                    value={'NO'}
+                                                    checked={
+                                                        values.modifiedGeoAreaServed ===
+                                                        'NO'
+                                                    }
+                                                />
+                                            </Fieldset>
+                                        </FormGroup>
                                     )}
                                 </>
                             )}

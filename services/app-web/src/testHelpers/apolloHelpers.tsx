@@ -172,16 +172,7 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
         contractDateStart: new Date(),
         contractDateEnd: new Date(),
         contractAmendmentInfo: {
-            itemsBeingAmended: [
-                'BENEFITS_PROVIDED',
-                'LENGTH_OF_CONTRACT_PERIOD',
-                'CAPITATION_RATES',
-            ],
-            otherItemBeingAmended: 'Test amendment',
-            capitationRatesAmendedInfo: {
-                reason: 'OTHER',
-                otherReason: 'Test reason',
-            },
+            modifiedGeoAreaServed: false,
         },
         managedCareEntities: ['MCO'],
         federalAuthorities: ['STATE_PLAN'],
@@ -308,7 +299,6 @@ export function mockStateSubmissionContractAmendment(): LockedHealthPlanFormData
         contractDateStart: new Date(),
         contractDateEnd: new Date(),
         contractAmendmentInfo: {
-            itemsBeingAmended: [],
             modifiedBenefitsProvided: true,
             modifiedGeoAreaServed: false,
         },
