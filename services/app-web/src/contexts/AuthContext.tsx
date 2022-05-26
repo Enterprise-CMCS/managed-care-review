@@ -13,13 +13,14 @@ type LogoutFn = () => Promise<null>
 export type LoginStatusType = 'LOADING' | 'LOGGED_OUT' | 'LOGGED_IN'
 
 type AuthContextType = {
+    /* See docs/AuthContext.md for an explanation of some of these variables */
     checkAuth: () => Promise<void> // this can probably be simpler, letting callers use the loading states etc instead.
     checkIfSessionsIsAboutToExpire: () => void
     loggedInUser: UserType | undefined
     loginStatus: LoginStatusType
     logout: undefined | (() => Promise<void>)
     logoutCountdownDuration: number
-    logoutTime: MutableRefObject<dayjs.Dayjs | undefined>
+    sessionExpirationTime: MutableRefObject<dayjs.Dayjs | undefined>
     sessionIsExpiring: boolean
     setLogoutCountdownDuration: (value: number) => void
     updateSessionExpirationState: (value: boolean) => void
@@ -33,7 +34,7 @@ const AuthContext = React.createContext<AuthContextType>({
     loginStatus: 'LOADING',
     logout: undefined,
     logoutCountdownDuration: 120,
-    logoutTime: { current: undefined },
+    sessionExpirationTime: { current: undefined },
     sessionIsExpiring: false,
     setLogoutCountdownDuration: () => void 0,
     updateSessionExpirationState: () => void 0,
@@ -60,7 +61,7 @@ function AuthProvider({
         featureFlags.MINUTES_UNTIL_SESSION_EXPIRES,
         30
     )
-    const logoutTime = useRef<dayjs.Dayjs>(
+    const sessionExpirationTime = useRef<dayjs.Dayjs>(
         dayjs(Date.now()).add(minutesUntilExpiration, 'minute')
     )
     const countdownDurationSeconds: number =
@@ -167,7 +168,7 @@ function AuthProvider({
     }
 
     const updateSessionExpirationTime = () => {
-        logoutTime.current = dayjs(Date.now()).add(
+        sessionExpirationTime.current = dayjs(Date.now()).add(
             minutesUntilExpiration,
             'minute'
         )
@@ -178,9 +179,9 @@ function AuthProvider({
             const timer = setInterval(() => {
                 sessionExpirationTimers.current.push(timer)
                 let insideCountdownDurationPeriod = false
-                if (logoutTime.current) {
+                if (sessionExpirationTime.current) {
                     insideCountdownDurationPeriod = dayjs(Date.now()).isAfter(
-                        dayjs(logoutTime.current).subtract(
+                        dayjs(sessionExpirationTime.current).subtract(
                             countdownDurationSeconds,
                             'second'
                         )
@@ -229,7 +230,7 @@ function AuthProvider({
                 loginStatus,
                 logout,
                 logoutCountdownDuration,
-                logoutTime,
+                sessionExpirationTime,
                 sessionIsExpiring,
                 setLogoutCountdownDuration,
                 updateSessionExpirationState,
