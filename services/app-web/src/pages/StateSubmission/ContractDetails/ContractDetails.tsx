@@ -1121,7 +1121,6 @@ export const ContractDetails = ({
                             backOnClick={async () => {
                                 // do not need to validate or resubmit if no documents are uploaded
                                 if (fileItems.length === 0) {
-                                    // TODO: HANA can we use route const instead
                                     navigate('../type')
                                 } else {
                                     await handleFormSubmit(
