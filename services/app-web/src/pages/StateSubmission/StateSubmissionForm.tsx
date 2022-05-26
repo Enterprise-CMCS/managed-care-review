@@ -14,8 +14,9 @@ import { usePage } from '../../contexts/PageContext'
 import {
     STATE_SUBMISSION_FORM_ROUTES,
     RouteT,
-    getRelativePath,
+    RoutesRecord,
 } from '../../constants/routes'
+import { getRelativePath } from '../../routeHelpers'
 import { getCurrentRevisionFromHealthPlanPackage } from '../../gqlHelpers'
 import { StateSubmissionContainer } from './StateSubmissionContainer'
 import { ContractDetails } from './ContractDetails'
@@ -44,6 +45,12 @@ import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
 import { makeDocumentList } from '../../documentHelpers/makeDocumentKeyLookupList'
 import { makeDateTable } from '../../documentHelpers/makeDocumentDateLookupTable'
 import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
+
+const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
+    getRelativePath({
+        basePath: RoutesRecord.SUBMISSIONS_FORM,
+        targetPath: RoutesRecord[formRouteType],
+    })
 
 const FormAlert = ({ message }: { message?: string }): React.ReactElement => {
     return message ? (
@@ -122,7 +129,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
         )
     }
     const location = useLocation()
-    console.log(location)
     const { pathname } = location
     const { currentRoute } = useCurrentRoute()
     const { updateHeading } = usePage()
@@ -329,10 +335,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
             <StateSubmissionContainer>
                 <Routes>
                     <Route
-                        path={getRelativePath({
-                            baseRoute: 'SUBMISSIONS_FORM',
-                            targetRoute: 'SUBMISSIONS_TYPE',
-                        })}
+                        path={getRelativePathFromNestedRoute(
+                            'SUBMISSIONS_TYPE'
+                        )}
                         element={
                             <SubmissionType
                                 draftSubmission={formDataFromLatestRevision}
@@ -341,10 +346,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         }
                     />
                     <Route
-                        path={getRelativePath({
-                            baseRoute: 'SUBMISSIONS_FORM',
-                            targetRoute: 'SUBMISSIONS_CONTRACT_DETAILS',
-                        })}
+                        path={getRelativePathFromNestedRoute(
+                            'SUBMISSIONS_CONTRACT_DETAILS'
+                        )}
                         element={
                             <ContractDetails
                                 draftSubmission={formDataFromLatestRevision}
@@ -354,10 +358,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         }
                     />
                     <Route
-                        path={getRelativePath({
-                            baseRoute: 'SUBMISSIONS_FORM',
-                            targetRoute: 'SUBMISSIONS_RATE_DETAILS',
-                        })}
+                        path={getRelativePathFromNestedRoute(
+                            'SUBMISSIONS_RATE_DETAILS'
+                        )}
                         element={
                             <RateDetails
                                 draftSubmission={formDataFromLatestRevision}
@@ -367,10 +370,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         }
                     />
                     <Route
-                        path={getRelativePath({
-                            baseRoute: 'SUBMISSIONS_FORM',
-                            targetRoute: 'SUBMISSIONS_CONTACTS',
-                        })}
+                        path={getRelativePathFromNestedRoute(
+                            'SUBMISSIONS_CONTACTS'
+                        )}
                         element={
                             <Contacts
                                 draftSubmission={formDataFromLatestRevision}
@@ -379,10 +381,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         }
                     />
                     <Route
-                        path={getRelativePath({
-                            baseRoute: 'SUBMISSIONS_FORM',
-                            targetRoute: 'SUBMISSIONS_DOCUMENTS',
-                        })}
+                        path={getRelativePathFromNestedRoute(
+                            'SUBMISSIONS_DOCUMENTS'
+                        )}
                         element={
                             <Documents
                                 draftSubmission={formDataFromLatestRevision}
@@ -392,10 +393,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         }
                     />
                     <Route
-                        path={getRelativePath({
-                            baseRoute: 'SUBMISSIONS_FORM',
-                            targetRoute: 'SUBMISSIONS_REVIEW_SUBMIT',
-                        })}
+                        path={getRelativePathFromNestedRoute(
+                            'SUBMISSIONS_REVIEW_SUBMIT'
+                        )}
                         element={
                             <ReviewSubmit
                                 draftSubmission={formDataFromLatestRevision}

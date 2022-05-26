@@ -22,7 +22,7 @@ const ROUTES = [
     'SUBMISSIONS_REVIEW_SUBMIT',
     'SUBMISSIONS_REVISION',
     'SUBMISSIONS_SUMMARY',
-    'SUBMISSIONS_FORM', // eep this at the end
+    'SUBMISSIONS_FORM', // keep this at the end
 ] as const // iterable union type
 type RouteT = typeof ROUTES[number]
 
@@ -109,29 +109,6 @@ const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {
     }
 }
 
-const isWildcardPath = (pathname: string) =>
-    pathname.charAt(pathname.length + 1) === '*'
-
-/* Calculate the relative path string for a nested route  - e.g. '/type' 
-    base route refers to the route pointing to the section of the path you want to ignore - e.g. SUBMISSIONS_FORM
-    target route refers to the nested route you are trying to get the relative path for - e.g. SUBMISSIONS_TYPE
-*/
-const getRelativePath = ({
-    baseRoute,
-    targetRoute,
-}: {
-    baseRoute: RouteT
-    targetRoute: RouteT
-}): string => {
-    let baseRouteString = RoutesRecord[baseRoute]
-
-    // remove wildcard if present
-    if (isWildcardPath(baseRouteString)) {
-        baseRouteString = baseRouteString.slice(0, -1)
-    }
-    return RoutesRecord[targetRoute].replace('submissions/:id/edit/', '')
-}
-
 export {
     PageHeadingsRecord,
     PageTitlesRecord,
@@ -139,7 +116,6 @@ export {
     ROUTES,
     STATE_SUBMISSION_FORM_ROUTES,
     getRouteName,
-    getRelativePath,
 }
 
 export type { RouteT }

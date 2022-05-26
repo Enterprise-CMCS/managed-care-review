@@ -245,7 +245,7 @@ export const Documents = ({
                 onUpdateDraftSubmissionError()
             }
         }
-    console.log('DOCUMENTS', showFileUploadError && fileItems.length > 0)
+
     return (
         <>
             <UswdsForm
