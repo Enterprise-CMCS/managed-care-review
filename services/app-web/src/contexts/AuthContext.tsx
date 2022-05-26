@@ -1,36 +1,43 @@
-import * as React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { AuthModeType } from '../common-code/config'
 import { useFetchCurrentUserQuery, User as UserType } from '../gen/gqlClient'
 import { logoutLocalUser } from '../localAuth'
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
-import { useRef } from 'react'
-
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import * as ld from 'launchdarkly-js-client-sdk'
 import { featureFlags } from '../common-code/featureFlags'
+import { dayjs } from '../common-code/dateHelpers/dayjs'
 
 type LogoutFn = () => Promise<null>
 
 export type LoginStatusType = 'LOADING' | 'LOGGED_OUT' | 'LOGGED_IN'
 
 type AuthContextType = {
+    checkAuth: () => Promise<void> // this can probably be simpler, letting callers use the loading states etc instead.
+    checkIfSessionsIsAboutToExpire: () => void
     loggedInUser: UserType | undefined
     loginStatus: LoginStatusType
-    checkAuth: () => Promise<void> // this can probably be simpler, letting callers use the loading states etc instead.
     logout: undefined | (() => Promise<void>)
-    isSessionExpiring: boolean
-    updateSessionExpiry: (value: boolean) => void
-    timeUntilLogout: number
+    logoutCountdownDuration: number
+    logoutTime: dayjs.Dayjs | undefined
+    sessionIsExpiring: boolean
+    setLogoutCountdownDuration: (value: number) => void
+    updateSessionExpirationState: (value: boolean) => void
+    updateSessionExpirationTime: () => void
 }
 
 const AuthContext = React.createContext<AuthContextType>({
+    checkAuth: () => Promise.reject(Error('Auth context error')),
+    checkIfSessionsIsAboutToExpire: () => void 0,
     loggedInUser: undefined,
     loginStatus: 'LOADING',
-    checkAuth: () => Promise.reject(Error('Auth context error')),
     logout: undefined,
-    isSessionExpiring: false,
-    updateSessionExpiry: () => void 0,
-    timeUntilLogout: 120,
+    logoutCountdownDuration: 120,
+    logoutTime: undefined,
+    sessionIsExpiring: false,
+    setLogoutCountdownDuration: () => void 0,
+    updateSessionExpirationState: () => void 0,
+    updateSessionExpirationTime: () => void 0,
 })
 
 export type AuthProviderProps = {
@@ -42,36 +49,52 @@ function AuthProvider({
     authMode,
     children,
 }: AuthProviderProps): React.ReactElement {
-    const [loggedInUser, setLoggedInUser] = React.useState<
-        UserType | undefined
-    >(undefined)
+    const [loggedInUser, setLoggedInUser] = useState<UserType | undefined>(
+        undefined
+    )
     const [loginStatus, setLoginStatus] =
-        React.useState<LoginStatusType>('LOGGED_OUT')
-    const [isSessionExpiring, setisSessionExpiring] =
-        React.useState<boolean>(false)
+        useState<LoginStatusType>('LOGGED_OUT')
+    const [sessionIsExpiring, setSessionIsExpiring] = useState<boolean>(false)
     const ldClient = useLDClient()
-    const countdownDuration =
+    const minutesUntilExpiration: number = ldClient?.variation(
+        featureFlags.MINUTES_UNTIL_SESSION_EXPIRES,
+        30
+    )
+    const [logoutTime, setLogoutTime] = useState<dayjs.Dayjs>(
+        dayjs(Date.now()).add(minutesUntilExpiration, 'minute')
+    )
+    const countdownDuration: number =
         ldClient?.variation(featureFlags.MODAL_COUNTDOWN_DURATION, 2) * 60
-    const [timeUntilLogout, setTimeUntilLogout] =
-        React.useState<number>(countdownDuration)
-    const runningTimers = useRef<NodeJS.Timer[]>([])
+    const [logoutCountdownDuration, setLogoutCountdownDuration] =
+        useState<number>(countdownDuration)
+    const modalCountdownTimers = useRef<NodeJS.Timer[]>([])
+    const sessionExpirationTimers = useRef<NodeJS.Timer[]>([])
     const { loading, data, error, refetch } = useFetchCurrentUserQuery({
         notifyOnNetworkStatusChange: true,
     })
+    // if (!logoutTime) {
+    //     setLogoutTime(dayjs(Date.now()).add(minutesUntilExpiration, 'minute'))
+    // }
 
-    React.useEffect(() => {
-        if (isSessionExpiring) {
-            setTimeUntilLogout(countdownDuration)
+    useEffect(() => {
+        if (sessionIsExpiring) {
             const timer = setInterval(() => {
                 // decrement the countdown timer by one second per second
-                setTimeUntilLogout((timeUntilLogout) => timeUntilLogout - 1)
+                modalCountdownTimers.current.push(timer)
+                if (logoutCountdownDuration > 0) {
+                    setLogoutCountdownDuration(
+                        (logoutCountdownDuration) => logoutCountdownDuration - 1
+                    )
+                }
             }, 1000)
-            runningTimers.current.push(timer)
         } else {
-            runningTimers.current.forEach((timer) => clearInterval(timer))
-            runningTimers.current = []
+            modalCountdownTimers.current.forEach((timer) =>
+                clearInterval(timer)
+            )
+            modalCountdownTimers.current = []
         }
-    }, [isSessionExpiring, countdownDuration])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [sessionIsExpiring, countdownDuration]) // full dep array causes a loop, because we're resetting the dep in the useEffect
 
     const isAuthenticated = loggedInUser !== undefined
 
@@ -140,9 +163,41 @@ function AuthProvider({
         })
     }
 
-    const updateSessionExpiry = (value: boolean) => {
-        if (isSessionExpiring !== value) {
-            setisSessionExpiring(loggedInUser !== undefined && value)
+    const updateSessionExpirationState = (value: boolean) => {
+        if (sessionIsExpiring !== value) {
+            setSessionIsExpiring(loggedInUser !== undefined && value)
+        }
+    }
+
+    const updateSessionExpirationTime = () => {
+        // without this if condition, we'll get an infinite loop of re-rendering after updates
+        if (dayjs(Date.now()).isAfter(logoutTime, 'minute')) {
+            setLogoutTime(
+                dayjs(Date.now()).add(minutesUntilExpiration, 'minute')
+            )
+        }
+    }
+
+    const checkIfSessionsIsAboutToExpire = () => {
+        if (!sessionIsExpiring) {
+            const timer = setInterval(() => {
+                sessionExpirationTimers.current.push(timer)
+                let insideCountdownDurationPeriod = false
+                if (logoutTime) {
+                    insideCountdownDurationPeriod = dayjs(Date.now()).isAfter(
+                        dayjs(logoutTime).subtract(countdownDuration, 'minute')
+                    )
+                }
+                if (insideCountdownDurationPeriod) {
+                    /* Once we're inside the countdown period, we can stop the interval that checks
+                whether we're inside the countdown period */
+                    sessionExpirationTimers.current.forEach((t) =>
+                        clearInterval(t)
+                    )
+                    sessionExpirationTimers.current = []
+                    updateSessionExpirationState(true)
+                }
+            }, 1000 * 30)
         }
     }
 
@@ -170,13 +225,17 @@ function AuthProvider({
     return (
         <AuthContext.Provider
             value={{
+                checkAuth,
+                checkIfSessionsIsAboutToExpire,
                 loggedInUser,
                 loginStatus,
                 logout,
-                checkAuth,
-                isSessionExpiring,
-                updateSessionExpiry,
-                timeUntilLogout,
+                logoutCountdownDuration,
+                logoutTime,
+                sessionIsExpiring,
+                setLogoutCountdownDuration,
+                updateSessionExpirationState,
+                updateSessionExpirationTime,
             }}
             children={children}
         />

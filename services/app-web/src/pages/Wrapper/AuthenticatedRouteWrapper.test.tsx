@@ -26,7 +26,7 @@ describe('AuthenticatedRouteWrapper', () => {
         await waitFor(() => expect(dialog).toHaveClass('is-hidden'))
     })
 
-    it('shows the modal when isSessionExpiring is true', async () => {
+    it('shows the modal when sessionIsExpiring is true', async () => {
         jest.spyOn(AuthContext, 'useAuth').mockReturnValue({
             loggedInUser: {
                 __typename: 'StateUser' as const,
@@ -46,9 +46,13 @@ describe('AuthenticatedRouteWrapper', () => {
             loginStatus: 'LOGGED_IN',
             checkAuth: () => Promise.reject(Error('Auth context error')),
             logout: () => Promise.resolve(),
-            isSessionExpiring: true,
-            updateSessionExpiry: () => void 0,
-            timeUntilLogout: 120,
+            sessionIsExpiring: true,
+            updateSessionExpirationState: () => void 0,
+            logoutCountdownDuration: 120,
+            logoutTime: undefined,
+            updateSessionExpirationTime: () => void 0,
+            checkIfSessionsIsAboutToExpire: () => void 0,
+            setLogoutCountdownDuration: () => void 0,
         })
         renderWithProviders(
             <AuthenticatedRouteWrapper

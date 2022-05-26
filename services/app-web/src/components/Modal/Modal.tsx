@@ -42,15 +42,15 @@ export const Modal = ({
     isSubmitting = false,
     ...divProps
 }: ModalProps): React.ReactElement => {
-    const { isSessionExpiring } = useAuth()
+    const { sessionIsExpiring } = useAuth()
 
     /* unless it's the session expiring modal, close it if the session is expiring, so the user can interact
     with the session expiring modal */
     useEffect(() => {
-        if (id !== 'extend-session-modal' && isSessionExpiring) {
+        if (id !== 'extend-session-modal' && sessionIsExpiring) {
             modalRef.current?.toggleModal(undefined, false)
         }
-    }, [isSessionExpiring, modalRef, id])
+    }, [sessionIsExpiring, modalRef, id])
 
     const cancelHandler = (e: React.MouseEvent): void => {
         if (onCancel) {

@@ -1,10 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useHistory, useLocation } from 'react-router'
 import { Route, Switch } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { extendSession } from '../../pages/Auth/cognitoAuth'
 import { assertNever, AuthModeType } from '../../common-code/config'
-import { dayjs } from '../../common-code/dateHelpers/dayjs'
 import {
     getRouteName,
     PageTitlesRecord,
@@ -142,68 +141,39 @@ export const AppRoutes = ({
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
 }): React.ReactElement => {
-    const { loggedInUser, isSessionExpiring, updateSessionExpiry } = useAuth()
+    const {
+        loggedInUser,
+        sessionIsExpiring,
+        updateSessionExpirationState,
+        updateSessionExpirationTime,
+        checkIfSessionsIsAboutToExpire,
+        logoutTime,
+    } = useAuth()
     const { pathname } = useLocation()
     const ldClient = useLDClient()
-    const showExpirationModal = ldClient?.variation(
+    const showExpirationModal: boolean = ldClient?.variation(
         featureFlags.SESSION_EXPIRING_MODAL,
         true
-    )
-    const minutesUntilExpiration = ldClient?.variation(
-        featureFlags.MINUTES_UNTIL_SESSION_EXPIRES,
-        30
-    )
-    const countdownDuration = ldClient?.variation(
-        featureFlags.MODAL_COUNTDOWN_DURATION,
-        2
     )
     const history = useHistory()
     const route = getRouteName(pathname)
     const { updateHeading } = usePage()
     const [initialPath] = useState(pathname) // this gets written on mount, so we don't call the effect on every path change
-    const runningTimers = useRef<NodeJS.Timer[]>([])
-    let sessionExpirationTime: dayjs.Dayjs | undefined = undefined
-    if (!loggedInUser) {
-        LocalStorage.removeItem('LOGOUT_TIMER')
-    }
-    if (loggedInUser && !isSessionExpiring && showExpirationModal) {
-        // whenever we load a page, reset the logout timer for 'minutesUntilExpiration` and refresh the session
-        sessionExpirationTime = dayjs(Date.now()).add(
-            minutesUntilExpiration,
-            'minute'
-        )
-        try {
-            LocalStorage.setItem(
-                'LOGOUT_TIMER',
-                sessionExpirationTime.toISOString()
-            )
-        } catch (e) {
-            console.log('Error setting logout timer: ', e)
-        }
+    if (
+        loggedInUser !== undefined &&
+        sessionIsExpiring === false &&
+        showExpirationModal
+    ) {
+        console.log('logout time: ', logoutTime)
+        // whenever we load a page, reset the logout timer and refresh the session
+        updateSessionExpirationTime()
+
         if (authMode !== 'LOCAL') {
             void extendSession()
         }
-        updateSessionExpiry(false)
+        updateSessionExpirationState(false)
         // Every thirty seconds, check if the current time is within `countdownDuration` of the session expiration time
-        const timer = setInterval(() => {
-            runningTimers.current.push(timer)
-            let insideCountdownDurationPeriod = false
-            if (sessionExpirationTime) {
-                insideCountdownDurationPeriod = dayjs(Date.now()).isAfter(
-                    dayjs(sessionExpirationTime).subtract(
-                        countdownDuration,
-                        'minute'
-                    )
-                )
-            }
-            if (insideCountdownDurationPeriod) {
-                /* Once we're inside the countdown period, we can stop the interval that checks
-                whether we're inside the countdown period */
-                runningTimers.current.forEach((t) => clearInterval(t))
-                runningTimers.current = []
-                updateSessionExpiry(true)
-            }
-        }, 1000 * 30)
+        checkIfSessionsIsAboutToExpire()
     }
 
     // This effect handles our initial redirect on login
