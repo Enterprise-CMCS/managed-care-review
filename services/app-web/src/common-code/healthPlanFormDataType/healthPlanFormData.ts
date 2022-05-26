@@ -22,7 +22,10 @@ const hasValidContract = (sub: LockedHealthPlanFormDataType): boolean =>
     sub.contractDateStart !== undefined &&
     sub.contractDateEnd !== undefined &&
     sub.managedCareEntities.length !== 0 &&
-    sub.federalAuthorities.length !== 0
+    sub.federalAuthorities.length !== 0 &&
+    (sub.contractType === 'BASE' || // If it's an amendment, then all the yes/nos must be set.
+        (sub.contractAmendmentInfo?.modifiedBenefitsProvided !== undefined &&
+            sub.contractAmendmentInfo?.modifiedGeoAreaServed !== undefined))
 
 const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
     const validBaseRate =

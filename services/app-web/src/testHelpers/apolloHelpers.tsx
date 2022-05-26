@@ -277,6 +277,68 @@ export function mockStateSubmission(): LockedHealthPlanFormDataType {
     }
 }
 
+export function mockStateSubmissionContractAmendment(): LockedHealthPlanFormDataType {
+    return {
+        status: 'SUBMITTED',
+        stateNumber: 5,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        id: 'test-abc-125',
+        stateCode: 'MN',
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+        submissionType: 'CONTRACT_AND_RATES',
+        submissionDescription: 'A submitted submission',
+        submittedAt: new Date(),
+        documents: [
+            {
+                s3URL: 's3://bucketname/key/supporting-documents',
+                name: 'supporting documents',
+                documentCategories: ['RATES_RELATED' as const],
+            },
+        ],
+        contractType: 'AMENDMENT',
+        contractExecutionStatus: 'EXECUTED',
+        contractDocuments: [
+            {
+                s3URL: 's3://bucketname/key/contract',
+                name: 'contract',
+                documentCategories: ['CONTRACT' as const],
+            },
+        ],
+        contractDateStart: new Date(),
+        contractDateEnd: new Date(),
+        contractAmendmentInfo: {
+            itemsBeingAmended: [],
+            modifiedBenefitsProvided: true,
+            modifiedGeoAreaServed: false,
+        },
+        managedCareEntities: ['ENROLLMENT_PROCESS'],
+        federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+        rateType: 'NEW',
+        rateCapitationType: 'RATE_CELL',
+        rateDocuments: [
+            {
+                s3URL: 's3://bucketname/key/rate',
+                name: 'rate',
+                documentCategories: ['RATES' as const],
+            },
+        ],
+        rateDateStart: new Date(),
+        rateDateEnd: new Date(),
+        rateDateCertified: new Date(),
+        rateAmendmentInfo: null,
+        stateContacts: [
+            {
+                name: 'Test Person',
+                titleRole: 'A Role',
+                email: 'test@test.com',
+            },
+        ],
+        actuaryContacts: [],
+        actuaryCommunicationPreference: undefined,
+    }
+}
+
 export function mockMNState(): State {
     return {
         name: 'Minnesota',
