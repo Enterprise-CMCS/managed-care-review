@@ -1,8 +1,8 @@
-import React , {createRef} from 'react'
-import {ModalRef, ModalToggleButton} from '@trussworks/react-uswds'
+import React, { createRef } from 'react'
+import { ModalRef, ModalToggleButton } from '@trussworks/react-uswds'
 import { screen, render, waitFor, fireEvent } from '@testing-library/react'
-import { Modal } from './Modal';
-import { userClickByTestId } from '../../testHelpers/jestHelpers';
+import { Modal } from './Modal'
+import { userClickByTestId } from '../../testHelpers/jestHelpers'
 
 describe('Modal', () => {
     it('Renders element by default with modal hidden', () => {
@@ -19,7 +19,7 @@ describe('Modal', () => {
     })
 
     it('Renders open modal with appropriate subcomponents', async () => {
-       const modalRef = createRef<ModalRef>()
+        const modalRef = createRef<ModalRef>()
         const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
 
         render(
@@ -48,6 +48,31 @@ describe('Modal', () => {
         ).toBeInTheDocument()
     })
 
+    it('Renders open modal with passed in cancel button text', async () => {
+        const modalRef = createRef<ModalRef>()
+        const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
+
+        render(
+            <div>
+                <Modal
+                    id="hiddenModal"
+                    modalHeading="Test Modal Title"
+                    modalRef={modalRef}
+                    onCancelText="Cancel Button Test"
+                >
+                    <textarea id="textarea" data-testid="textarea" />
+                </Modal>
+            </div>
+        )
+
+        await waitFor(() => handleOpen())
+
+        expect(screen.getByRole('dialog')).toHaveClass('is-visible')
+        expect(
+            screen.getByRole('button', { name: 'Cancel Button Test' })
+        ).toBeInTheDocument()
+    })
+
     it('Calls onSubmit prop when Submit button is clicked', async () => {
         const modalRef = createRef<ModalRef>()
         const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
@@ -67,6 +92,27 @@ describe('Modal', () => {
         await waitFor(() => handleOpen())
         userClickByTestId(screen, 'test-modal-submit')
         expect(onSubmit).toHaveBeenCalled()
+    })
+
+    it('Calls onCancel prop when Cancel button is clicked', async () => {
+        const modalRef = createRef<ModalRef>()
+        const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
+        const onCancel = jest.fn()
+        render(
+            <div>
+                <Modal
+                    id="test"
+                    modalHeading="Test Modal Title"
+                    modalRef={modalRef}
+                    onCancel={onCancel}
+                >
+                    <textarea id="textarea" data-testid="textarea" />
+                </Modal>
+            </div>
+        )
+        await waitFor(() => handleOpen())
+        userClickByTestId(screen, 'test-modal-cancel')
+        expect(onCancel).toHaveBeenCalled()
     })
 
     it('renders onSubmitText prop string on Submit button when one is passed', async () => {
@@ -115,7 +161,8 @@ describe('Modal', () => {
     describe('opening and closing the modal', () => {
         it('Opens modal via ref.current.toggleModal', async () => {
             const modalRef = createRef<ModalRef>()
-            const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
             render(
                 <div>
                     <Modal
@@ -135,149 +182,145 @@ describe('Modal', () => {
             expect(screen.getByTestId('textarea')).toBeInTheDocument()
         })
 
-    it('Opens modal via opener button click', async () => {
-        const modalRef = createRef<ModalRef>()
-        render(
-            <div>
-                <Modal
-                    id="hiddenModal"
-                    modalHeading="Test Modal Title"
-                    modalRef={modalRef}
-                >
-                    <textarea data-testid="modal-children" />
-                </Modal>
-                <ModalToggleButton
-                    modalRef={modalRef}
-                    data-testid="opener-button"
-                    opener
-                >
-                    Open modal
-                </ModalToggleButton>
-            </div>
-        )
-        userClickByTestId(screen, 'opener-button')
-
-        await waitFor(() => {
-            expect(modalRef.current?.modalIsOpen).toBe(true)
-            expect(screen.getByRole('dialog')).toHaveClass('is-visible')
-        })
-    })
-
-    it('Closes modal via Cancel button click', async () => {
-        const modalRef = createRef<ModalRef>()
-        render(
-            <div>
-                <Modal
-                    id="test"
-                    modalHeading="Test Modal Title"
-                    modalRef={modalRef}
-                >
-                    <textarea data-testid="modal-children" />
-                </Modal>
-                <ModalToggleButton
-                    modalRef={modalRef}
-                    data-testid="opener-button"
-                    opener
-                >
-                    Open modal
-                </ModalToggleButton>
-            </div>
-        )
-
-        userClickByTestId(screen, 'opener-button')
-
-        await waitFor(() => {
-            expect(modalRef.current?.modalIsOpen).toBe(true)
-        })
-
-        userClickByTestId(screen, 'test-modal-cancel')
-        await waitFor(() => {
-            expect(modalRef.current?.modalIsOpen).toBe(false)
-            expect(screen.getByRole('dialog')).not.toHaveClass(
-                'is-visible'
+        it('Opens modal via opener button click', async () => {
+            const modalRef = createRef<ModalRef>()
+            render(
+                <div>
+                    <Modal
+                        id="hiddenModal"
+                        modalHeading="Test Modal Title"
+                        modalRef={modalRef}
+                    >
+                        <textarea data-testid="modal-children" />
+                    </Modal>
+                    <ModalToggleButton
+                        modalRef={modalRef}
+                        data-testid="opener-button"
+                        opener
+                    >
+                        Open modal
+                    </ModalToggleButton>
+                </div>
             )
-        })
-    })
+            userClickByTestId(screen, 'opener-button')
 
-    it('Closes modal via ESC key', async () => {
-        const modalRef = createRef<ModalRef>()
-        render(
-            <div>
-                <Modal
-                    id="test"
-                    modalHeading="Test Modal Title"
-                    modalRef={modalRef}
-                >
-                    <textarea data-testid="modal-children" />
-                </Modal>
-                <ModalToggleButton
-                    modalRef={modalRef}
-                    data-testid="opener-button"
-                    opener
-                >
-                    Open modal
-                </ModalToggleButton>
-            </div>
-        )
-        userClickByTestId(screen, 'opener-button')
-
-        await waitFor(() => {
-            expect(modalRef.current?.modalIsOpen).toBe(true)
+            await waitFor(() => {
+                expect(modalRef.current?.modalIsOpen).toBe(true)
+                expect(screen.getByRole('dialog')).toHaveClass('is-visible')
+            })
         })
 
-       await fireEvent.keyDown(screen.getByText(/Test Modal Title/i), {
-           key: 'Escape',
-           code: 'Escape',
-           keyCode: 27,
-           charCode: 27,
-       })
-
-        await waitFor( () => {
-            expect(modalRef.current?.modalIsOpen).toBe(false)
-            expect(screen.getByRole('dialog')).not.toHaveClass(
-                'is-visible'
+        it('Closes modal via Cancel button click', async () => {
+            const modalRef = createRef<ModalRef>()
+            render(
+                <div>
+                    <Modal
+                        id="test"
+                        modalHeading="Test Modal Title"
+                        modalRef={modalRef}
+                    >
+                        <textarea data-testid="modal-children" />
+                    </Modal>
+                    <ModalToggleButton
+                        modalRef={modalRef}
+                        data-testid="opener-button"
+                        opener
+                    >
+                        Open modal
+                    </ModalToggleButton>
+                </div>
             )
-        })
-    })
 
+            userClickByTestId(screen, 'opener-button')
 
-    it('Closes modal via ref.current.toggleModal', async () => {
-        const modalRef = createRef<ModalRef>()
-        const handleClose = () => modalRef.current?.toggleModal(undefined, false)
-        render(
-            <div>
-                <Modal
-                    id="hiddenModal"
-                    modalHeading="Test Modal Title"
-                    modalRef={modalRef}
-                >
-                    <textarea data-testid="modal-children" />
-                </Modal>
-                <ModalToggleButton
-                    modalRef={modalRef}
-                    data-testid="opener-button"
-                    opener
-                >
-                    Open modal
-                </ModalToggleButton>
-            </div>
-        )
-        
-        userClickByTestId(screen, 'opener-button')
-        await waitFor(() => {
-            expect(modalRef.current?.modalIsOpen).toBe(true)
-            expect(screen.getByRole('dialog')).toHaveClass('is-visible')
-            expect(screen.queryByTestId('modal-children')).toBeInTheDocument()
+            await waitFor(() => {
+                expect(modalRef.current?.modalIsOpen).toBe(true)
+            })
+
+            userClickByTestId(screen, 'test-modal-cancel')
+            await waitFor(() => {
+                expect(modalRef.current?.modalIsOpen).toBe(false)
+                expect(screen.getByRole('dialog')).not.toHaveClass('is-visible')
+            })
         })
 
-        await waitFor( () => handleClose())
+        it('Closes modal via ESC key', async () => {
+            const modalRef = createRef<ModalRef>()
+            render(
+                <div>
+                    <Modal
+                        id="test"
+                        modalHeading="Test Modal Title"
+                        modalRef={modalRef}
+                    >
+                        <textarea data-testid="modal-children" />
+                    </Modal>
+                    <ModalToggleButton
+                        modalRef={modalRef}
+                        data-testid="opener-button"
+                        opener
+                    >
+                        Open modal
+                    </ModalToggleButton>
+                </div>
+            )
+            userClickByTestId(screen, 'opener-button')
 
-        await waitFor(() => {
-           expect(modalRef.current?.modalIsOpen).toBe(false)
-           expect(screen.getByRole('dialog')).not.toHaveClass('is-visible')
+            await waitFor(() => {
+                expect(modalRef.current?.modalIsOpen).toBe(true)
+            })
+
+            await fireEvent.keyDown(screen.getByText(/Test Modal Title/i), {
+                key: 'Escape',
+                code: 'Escape',
+                keyCode: 27,
+                charCode: 27,
+            })
+
+            await waitFor(() => {
+                expect(modalRef.current?.modalIsOpen).toBe(false)
+                expect(screen.getByRole('dialog')).not.toHaveClass('is-visible')
+            })
+        })
+
+        it('Closes modal via ref.current.toggleModal', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleClose = () =>
+                modalRef.current?.toggleModal(undefined, false)
+            render(
+                <div>
+                    <Modal
+                        id="hiddenModal"
+                        modalHeading="Test Modal Title"
+                        modalRef={modalRef}
+                    >
+                        <textarea data-testid="modal-children" />
+                    </Modal>
+                    <ModalToggleButton
+                        modalRef={modalRef}
+                        data-testid="opener-button"
+                        opener
+                    >
+                        Open modal
+                    </ModalToggleButton>
+                </div>
+            )
+
+            userClickByTestId(screen, 'opener-button')
+            await waitFor(() => {
+                expect(modalRef.current?.modalIsOpen).toBe(true)
+                expect(screen.getByRole('dialog')).toHaveClass('is-visible')
+                expect(
+                    screen.queryByTestId('modal-children')
+                ).toBeInTheDocument()
+            })
+
+            await waitFor(() => handleClose())
+
+            await waitFor(() => {
+                expect(modalRef.current?.modalIsOpen).toBe(false)
+                expect(screen.getByRole('dialog')).not.toHaveClass('is-visible')
+            })
         })
     })
-
-    })
-
 })

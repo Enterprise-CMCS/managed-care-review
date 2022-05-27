@@ -1,5 +1,5 @@
 import React from 'react'
-import { Alert, GridContainer, Grid } from '@trussworks/react-uswds'
+import { GridContainer, Grid } from '@trussworks/react-uswds'
 import styles from './Landing.module.scss'
 
 export const Landing = (): React.ReactElement => {
@@ -7,13 +7,6 @@ export const Landing = (): React.ReactElement => {
         <>
             <section className={styles.detailsSection}>
                 <GridContainer className={styles.detailsSectionContent}>
-                    <Alert type="info" heading="Test submissions only">
-                        This system is still in development and is only
-                        accepting test submissions from a small number of
-                        pre-selected states. Test submissions must be complete
-                        at the time of submission and fully executed by all
-                        parties.
-                    </Alert>
                     <Grid row gap className="margin-top-2">
                         <Grid tablet={{ col: 6 }}>
                             <div className={styles.detailsSteps}>
@@ -79,7 +72,8 @@ export const Landing = (): React.ReactElement => {
                                     managed care programs
                                 </li>
                                 <li>
-                                    Contracts may be fully executed or unexecuted by some or all parties
+                                    Contracts may be fully executed or
+                                    unexecuted by some or all parties
                                 </li>
                             </ul>
                         </Grid>

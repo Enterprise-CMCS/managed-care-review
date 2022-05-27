@@ -11,12 +11,14 @@ describe('dashboard', () => {
         cy.navigateForm('CONTINUE')
         cy.fillOutStateContact()
         cy.navigateForm('CONTINUE')
-        cy.findByRole('heading', {name: /Supporting documents/}).should('exist')
+        cy.findByRole('heading', { name: /Supporting documents/ }).should(
+            'exist'
+        )
         cy.navigateForm('CONTINUE')
-        cy.findByRole('heading', {name: /Review and submit/}).should('exist')
+        cy.findByRole('heading', { name: /Review and submit/ }).should('exist')
 
         // Store submission url for reference later
-        cy.location().then( (fullUrl) => {
+        cy.location().then((fullUrl) => {
             const reviewURL = fullUrl.toString()
             const submissionURL = reviewURL.replace('edit/review-and-submit', '')
             fullUrl.pathname = path.dirname(fullUrl)
@@ -37,24 +39,27 @@ describe('dashboard', () => {
             // click on the unlock button, type in reason and confirm
             cy.wait(2000)
             cy.findByRole('button', { name: 'Unlock submission' }).click()
-            cy.findByTestId('modalWindow')
-                .should('be.visible')
-            cy.get("#unlockReasonCharacterCount").type('Unlock submission reason.')
+            cy.findAllByTestId('modalWindow').eq(1).should('be.visible')
+            cy.get('#unlockReasonCharacterCount').type(
+                'Unlock submission reason.'
+            )
             cy.findByRole('button', { name: 'Unlock' }).click()
 
             cy.wait(2000)
 
-            cy.findByRole('button', { name: 'Unlock submission' })
-                .should('be.disabled')
-            cy.findByTestId('modalWindow')
-                .should('be.hidden')
+            cy.findByRole('button', { name: 'Unlock submission' }).should(
+                'be.disabled'
+            )
+            cy.findAllByTestId('modalWindow').eq(1).should('be.hidden')
 
             //Unlock banner for CMS user to be present with correct data.
             cy.findByTestId('unlockedBanner')
                 .should('exist')
                 .and('contain.text', 'zuko@example.com')
                 .and('contain.text', 'Unlock submission reason.')
-                .contains(/Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i)
+                .contains(
+                    /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+                )
                 .should('exist')
 
             cy.wait(2000)
@@ -93,10 +98,13 @@ describe('dashboard', () => {
                 cy.wait('@fetchHealthPlanPackageQuery')
 
                 //Unlock banner for state user to be present with correct data.
-                 cy.findByRole('heading', {level: 2, name: /Review and submit/})
-                 cy.findByRole('heading', {
-                     name: `Minnesota ${submissionName}`,
-                 }).should('exist')
+                cy.findByRole('heading', {
+                    level: 2,
+                    name: /Review and submit/,
+                })
+                cy.findByRole('heading', {
+                    name: `Minnesota ${submissionName}`,
+                }).should('exist')
                 cy.findByTestId('unlockedBanner')
                     .should('exist')
                     .and('contain.text', 'zuko@example.com')
@@ -123,9 +131,7 @@ describe('dashboard', () => {
                     .and('not.include', 'review-and-submit')
 
                 //Navigate to resubmitted submission and check for submission updated banner
-                cy.get('table')
-                    .findByText(submissionName)
-                    .click()
+                cy.get('table').findByText(submissionName).click()
                 cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
                 cy.findByTestId('updatedSubmissionBanner').should('exist')
 
@@ -151,31 +157,30 @@ describe('dashboard', () => {
                 cy.findByTestId('updatedSubmissionBanner').should('exist')
 
                 //Open all change history accordion items
-                cy.findByTestId('accordion')
-                    .should('exist')
+                cy.findByTestId('accordion').should('exist')
 
-                cy.get('[data-testid^="accordionButton_"]')
-                    .each( button => {
-                        button.trigger('click')
-                    })
+                cy.get('[data-testid^="accordionButton_"]').each((button) => {
+                    button.trigger('click')
+                })
                 //Check for view previous submission link in the initial accordion item to exist
                 cy.navigateToSubmissionByUserInteraction('revision-link-1')
                 //Making sure we are on SubmissionRevisionSummary page and contains version text
                 cy.findByTestId('revision-version')
                     .should('exist')
                     .contains(
-                    /(0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET version/i
-                )
+                        /(0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET version/i
+                    )
                 //Previous submission banner should exist and able to click link to go back to current submission
-                cy.findByTestId('previous-submission-banner')
-                    .should('exist')
+                cy.findByTestId('previous-submission-banner').should('exist')
                 //Navigate back to current submission using link inside banner.
-                cy.navigateToSubmissionByUserInteraction('currentSubmissionLink')
+                cy.navigateToSubmissionByUserInteraction(
+                    'currentSubmissionLink'
+                )
                 //MAke sure banner and revision version text are gone.
-                cy.findByTestId('previous-submission-banner')
-                    .should('not.exist')
-                cy.findByTestId('revision-version')
-                    .should('not.exist')
+                cy.findByTestId('previous-submission-banner').should(
+                    'not.exist'
+                )
+                cy.findByTestId('revision-version').should('not.exist')
             })
         })
     })
