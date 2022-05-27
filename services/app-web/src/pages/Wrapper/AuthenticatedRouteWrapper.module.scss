@@ -1,0 +1,11 @@
+.wrapper {
+    height: '100%';
+    width: '100%';
+}
+
+.submitButton {
+    background: $theme-color-success;
+    &:hover {
+        background-color: #2a7a3b !important;
+    }
+}

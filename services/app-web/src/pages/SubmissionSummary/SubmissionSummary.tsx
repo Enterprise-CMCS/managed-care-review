@@ -301,10 +301,13 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <SupportingDocumentsSummarySection submission={packageData} />
 
                 <ChangeHistory submission={submissionAndRevisions} />
-                <UnlockModal
-                    modalRef={modalRef}
-                    healthPlanPackage={submissionAndRevisions}
-                />
+                {
+                    // if the session is expiring, close this modal so the countdown modal can appear
+                    <UnlockModal
+                        modalRef={modalRef}
+                        healthPlanPackage={submissionAndRevisions}
+                    />
+                }
             </GridContainer>
         </div>
     )
