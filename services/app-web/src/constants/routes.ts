@@ -1,9 +1,6 @@
 /*
     Every application route is named here.
     These types ensure we use valid routes throughout the application.
-    
-    As of react-router v6, ROUTES is a list where order matters. 
-    To allow us continue to properly match route names (with matchPath), routes names referring to wildcard route paths (e.g. /submissions/:id/edit/*) should be declared at the end of the ROUTES list.
 */
 const ROUTES = [
     'ROOT',
@@ -13,6 +10,7 @@ const ROUTES = [
     'SUBMISSIONS',
     'SUBMISSIONS_NEW',
     'SUBMISSIONS_TYPE',
+    'SUBMISSIONS_FORM',
     'SUBMISSIONS_CONTRACT_DETAILS',
     'SUBMISSIONS_RATE_DETAILS',
     'SUBMISSIONS_CONTACTS',
@@ -20,7 +18,6 @@ const ROUTES = [
     'SUBMISSIONS_REVIEW_SUBMIT',
     'SUBMISSIONS_REVISION',
     'SUBMISSIONS_SUMMARY',
-    'SUBMISSIONS_FORM', // keep this at the end
 ] as const // iterable union type
 type RouteT = typeof ROUTES[number]
 

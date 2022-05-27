@@ -1,37 +1,54 @@
-import { matchPath } from 'react-router'
+import { matchPath, PathMatch } from 'react-router'
 import { RouteT, RoutesRecord, ROUTES } from '../constants/routes'
+import { isWildcardPath } from './isWildcardPath'
 /* 
-    Calculate the route from a pathname 
+    Calculate the route from a pathname. Relies on react-router matchPath. 
     
     @param pathname - full pathname, likely from react-router location object
     @returns route type name assigned to that route - e.g. SUBMISSIONS_TYPE for 'submissions/123/edit/type'
-
-   Uses react-router matchPath. The api changed in v6. Now when wildcard routes are used, there may be more than one full path match.
-        e.g. /submissions/:id/edit/type and /submissions/:id/edit/*  will both match for SUBMISSION_TYPE
-        To resolve the more than one match case, prefer the first instance of a match since the ROUTES array is ordered by specificity. 
 */
+type RouteMap = { route: RouteT; pathMatch: PathMatch<string> | null }
+type RouteMapList = RouteMap[]
+
 const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {
-    const matchingRouteNames = ROUTES.filter((route: RouteT) => {
-        return matchPath({ path: RoutesRecord[route], end: true }, pathname)
+    const matchingRoutes: RouteMapList = []
+
+    ROUTES.forEach((route) => {
+        const pathMatch = matchPath(
+            { path: RoutesRecord[route], end: true },
+            pathname
+        )
+
+        if (pathMatch) {
+            matchingRoutes.push({
+                route,
+                pathMatch: matchPath(
+                    { path: RoutesRecord[route], end: true },
+                    pathname
+                ),
+            })
+        }
     })
 
-    if (matchingRouteNames.length === 0) {
+    if (matchingRoutes.length === 0) {
         return 'UNKNOWN_ROUTE'
-    } else if (matchingRouteNames.length === 1) {
-        return matchingRouteNames[0]
+    } else if (matchingRoutes.length === 1) {
+        return matchingRoutes[0].route
     } else {
-        const exactMatch = matchingRouteNames.find(
-            (route: RouteT) =>
-                RoutesRecord[route] ===
-                matchPath({ path: RoutesRecord[route], end: true }, pathname)
-                    ?.pattern.path
+        // more than one potential match, discard wildcard routes
+        const exactMatch = matchingRoutes.find(
+            (routeMap) =>
+                !isWildcardPath(RoutesRecord[routeMap.route]) &&
+                RoutesRecord[routeMap.route] ===
+                    routeMap.pathMatch?.pattern.path
         )
-        if (!exactMatch) {
+
+        if (!exactMatch?.route) {
             console.error(
-                `Coding error: Please check your routes, there were multiple matching potential route names but cannot find a match for ${pathname} from ${matchingRouteNames.toString()}`
+                `Coding error: Please check your routes, there were multiple matching potential route names for ${pathname}}.`
             )
         }
-        return exactMatch || 'UNKNOWN_ROUTE'
+        return exactMatch?.route || 'UNKNOWN_ROUTE'
     }
 }
 
