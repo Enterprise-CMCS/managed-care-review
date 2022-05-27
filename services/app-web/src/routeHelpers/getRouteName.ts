@@ -2,10 +2,10 @@ import { matchPath, PathMatch } from 'react-router'
 import { RouteT, RoutesRecord, ROUTES } from '../constants/routes'
 import { isWildcardPath } from './isWildcardPath'
 /* 
-    Calculate the route from a pathname. Relies on react-router matchPath. 
+    Calculate the route name for a path (often from the current location). Relies on react-router matchPath. 
     
-    @param pathname - full pathname, likely from react-router location object
-    @returns route type name assigned to that route - e.g. SUBMISSIONS_TYPE for 'submissions/123/edit/type'
+    @param pathname - full pathname - e.g. /submissions/123/edit/type
+    @returns route type name - e.g. SUBMISSIONS_TYPE 
 */
 type RouteMap = { route: RouteT; pathMatch: PathMatch<string> | null }
 type RouteMapList = RouteMap[]
@@ -22,10 +22,7 @@ const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {
         if (pathMatch) {
             matchingRoutes.push({
                 route,
-                pathMatch: matchPath(
-                    { path: RoutesRecord[route], end: true },
-                    pathname
-                ),
+                pathMatch,
             })
         }
     })
