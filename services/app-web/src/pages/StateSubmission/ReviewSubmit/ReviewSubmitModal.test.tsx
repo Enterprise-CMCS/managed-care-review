@@ -11,7 +11,6 @@ import { ReviewSubmitModal } from './ReviewSubmitModal'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import userEvent from '@testing-library/user-event'
 import { Location } from 'history'
-import { Route } from 'react-router-dom'
 
 describe('ReviewSubmitModal', () => {
     const mockSetIsSubmitting = jest.fn()
@@ -80,7 +79,7 @@ describe('ReviewSubmitModal', () => {
         })
     })
 
-    describe('Initial submission modal', () => {
+    describe('Health plan package submission modal', () => {
         it('displays correct modal when submitting initial submission', async () => {
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
@@ -117,23 +116,14 @@ describe('ReviewSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             const mockSetShowError = jest.fn()
             renderWithProviders(
-                <>
-                    <Route
-                        path="*"
-                        render={({ location }) => {
-                            testLocation = location as Location
-                            return null
-                        }}
-                    ></Route>
-                    <ReviewSubmitModal
-                        draftSubmission={mockCompleteDraft()}
-                        submissionName="Test-Submission"
-                        unlocked={false}
-                        modalRef={modalRef}
-                        showError={mockSetShowError}
-                        isSubmitting={mockSetIsSubmitting}
-                    />
-                </>,
+                <ReviewSubmitModal
+                    draftSubmission={mockCompleteDraft()}
+                    submissionName="Test-Submission"
+                    unlocked={false}
+                    modalRef={modalRef}
+                    showError={mockSetShowError}
+                    isSubmitting={mockSetIsSubmitting}
+                />,
                 {
                     apolloProvider: {
                         mocks: [
@@ -148,6 +138,7 @@ describe('ReviewSubmitModal', () => {
                             mockCompleteDraft().id
                         }/review-and-submit`,
                     },
+                    location: (location) => (testLocation = location),
                 }
             )
 
@@ -271,23 +262,14 @@ describe('ReviewSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             const mockSetShowError = jest.fn()
             renderWithProviders(
-                <>
-                    <Route
-                        path="*"
-                        render={({ location }) => {
-                            testLocation = location as Location
-                            return null
-                        }}
-                    ></Route>
-                    <ReviewSubmitModal
-                        draftSubmission={mockCompleteDraft()}
-                        submissionName="Test-Submission"
-                        unlocked
-                        modalRef={modalRef}
-                        showError={mockSetShowError}
-                        isSubmitting={mockSetIsSubmitting}
-                    />
-                </>,
+                <ReviewSubmitModal
+                    draftSubmission={mockCompleteDraft()}
+                    submissionName="Test-Submission"
+                    unlocked
+                    modalRef={modalRef}
+                    showError={mockSetShowError}
+                    isSubmitting={mockSetIsSubmitting}
+                />,
                 {
                     apolloProvider: {
                         mocks: [
@@ -303,6 +285,7 @@ describe('ReviewSubmitModal', () => {
                             mockCompleteDraft().id
                         }/review-and-submit`,
                     },
+                    location: (location) => (testLocation = location),
                 }
             )
             await waitFor(() => handleOpen())
