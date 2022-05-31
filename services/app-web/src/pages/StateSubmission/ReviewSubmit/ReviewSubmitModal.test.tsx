@@ -22,7 +22,7 @@ describe('ReviewSubmitModal', () => {
             <ReviewSubmitModal
                 draftSubmission={mockCompleteDraft()}
                 submissionName="Test-Submission"
-                unlocked={true}
+                unlocked={false}
                 modalRef={modalRef}
                 showError={jest.fn()}
                 isSubmitting={mockSetIsSubmitting}
