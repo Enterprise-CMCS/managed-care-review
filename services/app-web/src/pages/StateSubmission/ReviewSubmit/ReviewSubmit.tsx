@@ -125,14 +125,17 @@ export const ReviewSubmit = ({
                 </ModalToggleButton>
             </PageActionsContainer>
 
-            <ReviewSubmitModal
-                draftSubmission={draftSubmission}
-                submissionName={submissionName}
-                unlocked={unlocked}
-                modalRef={modalRef}
-                showError={showError}
-                isSubmitting={setIsSubmitting}
-            />
+            {
+                // if the session is expiring, close this modal so the countdown modal can appear
+                <ReviewSubmitModal
+                    draftSubmission={draftSubmission}
+                    submissionName={submissionName}
+                    unlocked={unlocked}
+                    modalRef={modalRef}
+                    showError={showError}
+                    isSubmitting={setIsSubmitting}
+                />
+            }
         </GridContainer>
     )
 }

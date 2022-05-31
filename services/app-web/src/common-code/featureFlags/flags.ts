@@ -3,13 +3,25 @@
  * around flag names when we're enabling/disabling features in our code.
  */
 export const featureFlags = {
-    /**
-     * Toggles the /health api endpoint
-     */
+    /*
+     Toggles the /health api endpoint
+    */
     API_ENABLE_HEALTH_ENDPOINT: 'enable-health-endpoint',
 
-    /**
-     * Displays a banner in the frontend dashboard. Added for testing React integration with LD.
-     */
+    /*
+     Displays a banner in the frontend dashboard. Added for testing React integration with LD.
+    */
     REACT_TEST_FRONTEND_BANNER: 'test-frontend-banner',
+    /* 
+     Enables the modal that alerts the user to an expiring session
+    */
+    SESSION_EXPIRING_MODAL: 'session-expiring-modal',
+    /*
+     The number of minutes before the session expires
+    */
+    MINUTES_UNTIL_SESSION_EXPIRES: 'session-expiration-minutes',
+    /*
+     The number of minutes before session expiration that the warning modal appears
+    */
+    MODAL_COUNTDOWN_DURATION: 'modal-countdown-duration',
 }
