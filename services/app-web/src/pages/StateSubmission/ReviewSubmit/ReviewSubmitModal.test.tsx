@@ -152,7 +152,7 @@ describe('ReviewSubmitModal', () => {
         expect(textbox).toHaveFocus()
     })
 
-    it('returns an error if submission fails on unlocked plan package', async () => {
+    it('returns an error if submission fails on resubmitting', async () => {
         const modalRef = createRef<ModalRef>()
         const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
         let errorText: string
