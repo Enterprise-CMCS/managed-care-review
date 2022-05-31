@@ -30,6 +30,49 @@ describe('App Body and routes', () => {
         expect(mainElement).toBeInTheDocument()
     })
 
+    describe('Environment specific banner', () => {
+        const OLD_ENV = process.env
+
+        beforeEach(() => {
+            jest.resetModules() // Most important - it clears the cache
+            process.env = { ...OLD_ENV } // Make a copy
+        })
+
+        afterAll(() => {
+            process.env = OLD_ENV // Restore old environment
+        })
+
+        it('shows test environment banner in val', () => {
+            process.env.REACT_APP_STAGE_NAME = 'val'
+            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        indexHealthPlanPackagesMockSuccess(),
+                    ],
+                },
+            })
+
+            expect(
+                screen.getByText('THIS IS A TEST ENVIRONMENT')
+            ).toBeInTheDocument()
+        })
+
+        it('does not show test environment banner in prod', () => {
+            process.env.REACT_APP_STAGE_NAME = 'prod'
+            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        indexHealthPlanPackagesMockSuccess(),
+                    ],
+                },
+            })
+
+            expect(screen.queryByText('THIS IS A TEST ENVIRONMENT')).toBeNull()
+        })
+    })
+
     describe('/', () => {
         it('display dashboard when logged in', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
