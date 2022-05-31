@@ -5,7 +5,7 @@ import { Modal, PoliteErrorMessage } from '../../../components'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useSubmitHealthPlanPackageMutation } from '../../../gen/gqlClient'
 
 export const ReviewSubmitModal = ({
@@ -24,7 +24,7 @@ export const ReviewSubmitModal = ({
     isSubmitting: React.Dispatch<React.SetStateAction<boolean>>
 }): React.ReactElement => {
     const [focusErrorsInModal, setFocusErrorsInModal] = useState(true)
-    const history = useHistory()
+    const navigate = useNavigate()
 
     const [submitDraftSubmission, { loading: submitMutationLoading }] =
         useSubmitHealthPlanPackageMutation()
@@ -83,7 +83,7 @@ export const ReviewSubmitModal = ({
 
             if (data.data?.submitHealthPlanPackage) {
                 modalRef.current?.toggleModal(undefined, false)
-                history.push(`/dashboard?justSubmitted=${submissionName}`)
+                navigate(`/dashboard?justSubmitted=${submissionName}`)
             } else {
                 console.error('Got nothing back from submit')
                 showError('Error attempting to submit. Please try again.')
