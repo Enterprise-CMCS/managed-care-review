@@ -14,6 +14,8 @@ import { Location } from 'history'
 import { Route } from 'react-router-dom'
 
 describe('ReviewSubmitModal', () => {
+    const mockSetIsSubmitting = jest.fn()
+
     it('renders without errors', async () => {
         const modalRef = createRef<ModalRef>()
         const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
@@ -24,7 +26,7 @@ describe('ReviewSubmitModal', () => {
                 unlocked={true}
                 modalRef={modalRef}
                 showError={jest.fn()}
-                isSubmitting={jest.fn()}
+                isSubmitting={mockSetIsSubmitting}
             />
         )
         await waitFor(() => handleOpen())
@@ -36,7 +38,6 @@ describe('ReviewSubmitModal', () => {
         const modalRef = createRef<ModalRef>()
         let errorText: string
         const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
-        const mockSetIsSubmitting = jest.fn()
         const mockSetShowError = jest.fn((error: string) => (errorText = error))
         renderWithProviders(
             <ReviewSubmitModal
@@ -91,7 +92,7 @@ describe('ReviewSubmitModal', () => {
                     unlocked={false}
                     modalRef={modalRef}
                     showError={jest.fn()}
-                    isSubmitting={jest.fn()}
+                    isSubmitting={mockSetIsSubmitting}
                 />
             )
             await waitFor(() => handleOpen())
@@ -114,7 +115,6 @@ describe('ReviewSubmitModal', () => {
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
-            const mockSetIsSubmitting = jest.fn()
             const mockSetShowError = jest.fn()
             renderWithProviders(
                 <>
@@ -178,7 +178,7 @@ describe('ReviewSubmitModal', () => {
                     unlocked={true}
                     modalRef={modalRef}
                     showError={jest.fn()}
-                    isSubmitting={jest.fn()}
+                    isSubmitting={mockSetIsSubmitting}
                 />
             )
             await waitFor(() => handleOpen())
@@ -216,7 +216,7 @@ describe('ReviewSubmitModal', () => {
                     unlocked
                     modalRef={modalRef}
                     showError={jest.fn()}
-                    isSubmitting={jest.fn()}
+                    isSubmitting={mockSetIsSubmitting}
                 />
             )
             await waitFor(() => handleOpen())
@@ -243,7 +243,7 @@ describe('ReviewSubmitModal', () => {
                     unlocked
                     modalRef={modalRef}
                     showError={jest.fn()}
-                    isSubmitting={jest.fn()}
+                    isSubmitting={mockSetIsSubmitting}
                 />
             )
 
@@ -269,7 +269,6 @@ describe('ReviewSubmitModal', () => {
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
-            const mockSetIsSubmitting = jest.fn()
             const mockSetShowError = jest.fn()
             renderWithProviders(
                 <>
@@ -321,9 +320,6 @@ describe('ReviewSubmitModal', () => {
                 expect(screen.getByRole('dialog')).toHaveClass('is-hidden')
                 expect(mockSetIsSubmitting).toHaveBeenCalledTimes(1)
                 expect(mockSetShowError).toHaveBeenCalledTimes(0)
-            })
-
-            await waitFor(() => {
                 expect(testLocation.pathname).toBe(`/dashboard`)
                 expect(testLocation.search).toBe(
                     '?justSubmitted=Test-Submission'
