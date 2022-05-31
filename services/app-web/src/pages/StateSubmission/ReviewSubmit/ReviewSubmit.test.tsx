@@ -7,10 +7,7 @@ import {
 } from '../../../testHelpers/apolloHelpers'
 import { Route } from 'react-router-dom'
 import { Location } from 'history'
-import {
-    renderWithProviders,
-    userClickByTestId,
-} from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { ReviewSubmit } from './ReviewSubmit'
 import userEvent from '@testing-library/user-event'
 
@@ -416,80 +413,5 @@ describe('Resubmitting plan packages', () => {
                 'Error attempting to submit. Please try again.'
             )
         ).toBeInTheDocument()
-    })
-
-    it('displays form validation error when submitting without an submission summary', async () => {
-        renderWithProviders(
-            <ReviewSubmit
-                draftSubmission={mockCompleteDraft()}
-                unlocked={true}
-                submissionName="MN-MSHO-0001"
-            />,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        submitHealthPlanPackageMockSuccess({
-                            id: mockCompleteDraft().id,
-                            submittedReason: 'Test submission summary',
-                        }),
-                    ],
-                },
-            }
-        )
-        screen.getByTestId('form-submit').click()
-
-        await waitFor(() => {
-            expect(screen.getByRole('dialog')).toHaveClass('is-visible')
-            expect(screen.getByText('Summarize changes')).toBeInTheDocument()
-        })
-
-        screen.getByTestId('review-and-submit-modal-submit').click()
-
-        expect(
-            await screen.findByText('You must provide a summary of changes')
-        ).toBeInTheDocument()
-    })
-
-    it('draws focus to submitted summary textarea when form validation errors exist', async () => {
-        renderWithProviders(
-            <ReviewSubmit
-                draftSubmission={mockCompleteDraft()}
-                unlocked={true}
-                submissionName="MN-MSHO-0001"
-            />,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        submitHealthPlanPackageMockSuccess({
-                            id: mockCompleteDraft().id,
-                        }),
-                    ],
-                },
-            }
-        )
-        userClickByTestId(screen, 'form-submit')
-
-        // the popup dialog should be visible now
-        await waitFor(() =>
-            screen.getByText(
-                'Provide summary of all changes made to this submission'
-            )
-        )
-
-        // Using findBy because it seems like the timeout in findBy gives it enough time to find the textarea?
-        const textbox = await screen.findByTestId('submittedReason')
-        expect(textbox).toBeInTheDocument()
-
-        // submit without entering anything
-        userClickByTestId(screen, 'review-and-submit-modal-submit')
-
-        expect(
-            await screen.findByText('You must provide a summary of changes')
-        ).toBeInTheDocument()
-
-        // check focus after error
-        expect(textbox).toHaveFocus()
     })
 })
