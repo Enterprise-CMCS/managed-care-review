@@ -5,8 +5,6 @@ import {
 } from '../../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
-import { Route } from 'react-router'
-import { RoutesRecord } from '../../../constants/routes'
 import { formatRateNameDate } from '../../../common-code/dateHelpers'
 
 describe('RateDetailsSummarySection', () => {
@@ -193,7 +191,7 @@ describe('RateDetailsSummarySection', () => {
         renderWithProviders(
             <RateDetailsSummarySection
                 submission={testSubmission}
-                navigateTo={'/rate-details'}
+                navigateTo="/rate-details'"
                 submissionName="MN-PMAP-0001"
             />
         )
@@ -255,20 +253,10 @@ describe('RateDetailsSummarySection', () => {
 
     it('does not render download all button when on previous submission', () => {
         renderWithProviders(
-            <Route
-                path={RoutesRecord.SUBMISSIONS_REVISION}
-                component={() => (
-                    <RateDetailsSummarySection
-                        submission={stateSubmission}
-                        submissionName="MN-PMAP-0001"
-                    />
-                )}
-            />,
-            {
-                routerProvider: {
-                    route: '/submissions/15/revisions/2',
-                },
-            }
+            <RateDetailsSummarySection
+                submission={stateSubmission}
+                submissionName="MN-PMAP-0001"
+            />
         )
         expect(
             screen.queryByRole('button', {

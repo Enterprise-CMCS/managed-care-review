@@ -10,8 +10,8 @@ import {
     CardFooter,
     GridContainer,
 } from '@trussworks/react-uswds'
-import { useHistory } from 'react-router-dom'
-
+import { useNavigate } from 'react-router-dom'
+import { RoutesRecord } from '../constants/routes'
 import { loginLocalUser } from '.'
 
 import aangAvatar from '../assets/images/aang.png'
@@ -49,7 +49,7 @@ const userAvatars: { [key: string]: string } = {
 
 export function LocalLogin(): React.ReactElement {
     const [showFormAlert, setShowFormAlert] = React.useState(false)
-    const history = useHistory()
+    const navigate = useNavigate()
     const { checkAuth, loginStatus } = useAuth()
 
     async function login(user: LocalUserType) {
@@ -57,7 +57,7 @@ export function LocalLogin(): React.ReactElement {
 
         try {
             await checkAuth()
-            history.push('/')
+            navigate(RoutesRecord.ROOT)
         } catch (error) {
             setShowFormAlert(true)
             console.log('Log: Server Error')

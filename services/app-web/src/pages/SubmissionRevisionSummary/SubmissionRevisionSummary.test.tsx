@@ -1,5 +1,5 @@
 import { screen, waitFor, within } from '@testing-library/react'
-import { Route } from 'react-router'
+import { Route, Routes } from 'react-router'
 import { RoutesRecord } from '../../constants/routes'
 import {
     fetchCurrentUserMock,
@@ -14,10 +14,12 @@ import { dayjs } from '../../common-code/dateHelpers'
 describe('SubmissionRevisionSummary', () => {
     it('renders correctly without errors', async () => {
         renderWithProviders(
-            <Route
-                path={RoutesRecord.SUBMISSIONS_REVISION}
-                component={SubmissionRevisionSummary}
-            />,
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVISION}
+                    element={<SubmissionRevisionSummary />}
+                />
+            </Routes>,
             {
                 apolloProvider: {
                     mocks: [
@@ -52,10 +54,12 @@ describe('SubmissionRevisionSummary', () => {
     })
     it('extracts the correct dates from the submission and displays them in tables', async () => {
         renderWithProviders(
-            <Route
-                path={RoutesRecord.SUBMISSIONS_REVISION}
-                component={SubmissionRevisionSummary}
-            />,
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVISION}
+                    element={<SubmissionRevisionSummary />}
+                />
+            </Routes>,
             {
                 apolloProvider: {
                     mocks: [

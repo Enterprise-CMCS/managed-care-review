@@ -29,6 +29,7 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
 
 Cypress.Commands.add('fillOutContractActionOnly', () => {
     // Must be on '/submissions/new'
+    cy.wait(2000)
     cy.findByRole('combobox', { name: 'programs (required)' }).click({
         force: true,
     })
@@ -41,6 +42,7 @@ Cypress.Commands.add('fillOutContractActionOnly', () => {
 
 Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
     // Must be on '/submissions/new'
+    cy.wait(2000)
     cy.findByRole('combobox', { name: 'programs (required)' }).click({
         force: true,
     })
@@ -52,7 +54,7 @@ Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
 })
 
 Cypress.Commands.add('fillOutBaseContractDetails', () => {
-    // Must be on '/submissions/:id/contract-details'
+    // Must be on '/submissions/:id/edit/contract-details'
     cy.findByText('Base contract').click()
     cy.findByText('Fully executed').click()
     cy.wait(2000)
@@ -70,7 +72,7 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
 })
 
 Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
-    // Must be on '/submissions/:id/contract-details'
+    // Must be on '/submissions/:id/edit/contract-details'
     cy.findByText('Amendment to base contract').click()
     cy.findByText('Unexecuted by some or all parties').click()
     cy.wait(2000)
@@ -90,13 +92,12 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
 })
 
 Cypress.Commands.add('fillOutNewRateCertification', () => {
-    // Must be on '/submissions/:id/rate-details'
+    // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
-    cy.findByText('New rate certification').click()
     cy.wait(2000)
-    cy.findByText(
-        'Certification of capitation rates specific to each rate cell'
-    ).click()
+    cy.findByText('New rate certification').click()
+    cy.findByText('Certification of capitation rates specific to each rate cell').click()
+    cy.wait(2000)
     cy.findByLabelText('Start date').type('02/29/2024')
     cy.findByLabelText('End date').type('02/28/2025')
     cy.findByLabelText('Date certified').type('03/01/2024')
@@ -110,13 +111,12 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
 })
 
 Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
-    // Must be on '/submissions/:id/rate-details'
+    // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
-    cy.findByText('Amendment to prior rate certification').click()
     cy.wait(2000)
-    cy.findByText(
-        'Certification of capitation rates specific to each rate cell'
-    ).click()
+    cy.findByText('Amendment to prior rate certification').click()
+    cy.findByText('Certification of capitation rates specific to each rate cell').click()
+    cy.wait(2000)
     cy.findAllByLabelText('Start date').eq(0).type('02/29/2024')
     cy.findAllByLabelText('End date').eq(0).type('02/28/2025')
     cy.findAllByLabelText('Start date').eq(1).type('03/01/2024')
@@ -140,7 +140,7 @@ Cypress.Commands.add('fillOutStateContact', () => {
 })
 
 Cypress.Commands.add('fillOutActuaryContact', () => {
-    // Must be on '/submissions/:id/contacts'
+    // Must be on '/submissions/:id/edit/contacts'
     // Must be a contract and rates submission
     cy.findAllByLabelText('Name').eq(1).type('Actuary Contact Person')
     cy.findAllByLabelText('Title/Role').eq(1).type('Actuary Contact Title')
@@ -157,7 +157,7 @@ Cypress.Commands.add('fillOutActuaryContact', () => {
 })
 
 Cypress.Commands.add('fillOutSupportingDocuments', () => {
-    // Must be on '/submissions/:id/documents'
+    // Must be on '/submissions/:id/edit/documents'
     cy.findByTestId('file-input-input').attachFile(
         'documents/trussel-guide.pdf'
     )

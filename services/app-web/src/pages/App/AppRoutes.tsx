@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { useHistory, useLocation } from 'react-router'
-import { Route, Switch } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router'
+import { Route, Routes } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { extendSession } from '../../pages/Auth/cognitoAuth'
 import { assertNever, AuthModeType } from '../../common-code/config'
-import {
-    getRouteName,
-    PageTitlesRecord,
-    RoutesRecord,
-    RouteT,
-} from '../../constants/routes'
+import { PageTitlesRecord, RoutesRecord, RouteT } from '../../constants/routes'
+import { getRouteName } from '../../routeHelpers'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import { useTitle } from '../../hooks/useTitle'
@@ -33,12 +29,12 @@ const LocalStorage = window.localStorage
 
 function componentForAuthMode(
     authMode: AuthModeType
-): (() => React.ReactElement) | undefined {
+): React.ReactElement | undefined {
     switch (authMode) {
         case 'LOCAL':
-            return LocalLogin
+            return <LocalLogin />
         case 'AWS_COGNITO':
-            return CognitoLogin
+            return <CognitoLogin />
         case 'IDM':
             return undefined
         default:
@@ -55,30 +51,32 @@ const StateUserRoutes = ({
 }): React.ReactElement => {
     return (
         <AuthenticatedRouteWrapper setAlert={setAlert} authMode={authMode}>
-            <Switch>
-                <Route path={RoutesRecord.ROOT} exact component={Dashboard} />
-                <Route path={RoutesRecord.DASHBOARD} component={Dashboard} />
+            <Routes>
+                <Route path={RoutesRecord.ROOT} element={<Dashboard />} />
+                <Route path={RoutesRecord.DASHBOARD} element={<Dashboard />} />
+                <Route path={RoutesRecord.HELP} element={<Help />} />
                 <Route
-                    path={RoutesRecord.SUBMISSIONS_NEW}
-                    component={NewStateSubmissionForm}
+                    path={RoutesRecord.SUBMISSIONS}
+                    element={<Dashboard />}
                 />
                 <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={SubmissionSummary}
-                    exact
+                    path={RoutesRecord.SUBMISSIONS_NEW}
+                    element={<NewStateSubmissionForm />}
+                />
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                    element={<SubmissionSummary />}
                 />
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
-                    component={SubmissionRevisionSummary}
-                    exact
+                    element={<SubmissionRevisionSummary />}
                 />
                 <Route
                     path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={StateSubmissionForm}
+                    element={<StateSubmissionForm />}
                 />
-                <Route path={RoutesRecord.HELP} component={Help} />
-                <Route path="*" component={Error404} />
-            </Switch>
+                <Route path="*" element={<Error404 />} />
+            </Routes>
         </AuthenticatedRouteWrapper>
     )
 }
@@ -92,25 +90,22 @@ const CMSUserRoutes = ({
 }): React.ReactElement => {
     return (
         <AuthenticatedRouteWrapper authMode={authMode} setAlert={setAlert}>
-            <Switch>
+            <Routes>
+                <Route path={RoutesRecord.ROOT} element={<CMSDashboard />} />
                 <Route
-                    path={RoutesRecord.ROOT}
-                    exact
-                    component={CMSDashboard}
+                    path={RoutesRecord.DASHBOARD}
+                    element={<CMSDashboard />}
                 />
-                <Route path={RoutesRecord.DASHBOARD} component={CMSDashboard} />
                 <Route
-                    path={RoutesRecord.SUBMISSIONS_FORM}
-                    component={SubmissionSummary}
-                    exact
+                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                    element={<SubmissionSummary />}
                 />
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
-                    component={SubmissionRevisionSummary}
-                    exact
+                    element={<SubmissionRevisionSummary />}
                 />
-                <Route path="*" component={Error404} />
-            </Switch>
+                <Route path="*" element={<Error404 />} />
+            </Routes>
         </AuthenticatedRouteWrapper>
     )
 }
@@ -123,14 +118,14 @@ const UnauthenticatedRoutes = ({
     const authComponent = componentForAuthMode(authMode)
 
     return (
-        <Switch>
-            <Route path={RoutesRecord.ROOT} exact component={Landing} />
+        <Routes>
+            <Route path={RoutesRecord.ROOT} element={<Landing />} />
             {/* no /auth page for IDM auth, we just have the login redirect link */}
             {authComponent && (
-                <Route path={RoutesRecord.AUTH} component={authComponent} />
+                <Route path={RoutesRecord.AUTH} element={authComponent} />
             )}
-            <Route path="*" component={Landing} />
-        </Switch>
+            <Route path="*" element={<Landing />} />
+        </Routes>
     )
 }
 
@@ -149,12 +144,12 @@ export const AppRoutes = ({
         checkIfSessionsIsAboutToExpire,
     } = useAuth()
     const { pathname } = useLocation()
+    const navigate = useNavigate()
     const ldClient = useLDClient()
     const showExpirationModal: boolean = ldClient?.variation(
         featureFlags.SESSION_EXPIRING_MODAL,
         true
     )
-    const history = useHistory()
     const route = getRouteName(pathname)
     const { updateHeading } = usePage()
     const [initialPath] = useState(pathname) // this gets written on mount, so we don't call the effect on every path change
@@ -187,7 +182,6 @@ export const AppRoutes = ({
         ]
         if (!loggedInUser) {
             const currentRoute = getRouteName(initialPath)
-            console.log('ROUTE NAME', currentRoute, dontRedirectToAuthRoutes)
             if (!dontRedirectToAuthRoutes.includes(currentRoute)) {
                 try {
                     console.log('Storing For Redirect: ', initialPath)
@@ -201,7 +195,7 @@ export const AppRoutes = ({
                         window.location.href = idmRedirectURL()
                     } else {
                         console.log('redirecting to /auth')
-                        history.push('/auth')
+                        navigate('/auth')
                     }
                 } catch (err) {
                     console.log(
@@ -217,11 +211,11 @@ export const AppRoutes = ({
             console.log('Retrieved For Redirect: ', redirectPath)
 
             if (redirectPath) {
-                history.push(redirectPath)
+                navigate(redirectPath)
                 LocalStorage.removeItem(LOGIN_REDIRECT_STORAGE_KEY)
             }
         }
-    }, [initialPath, loggedInUser, history, authMode])
+    }, [initialPath, loggedInUser, navigate, authMode])
 
     /*
         Side effects that happen on page change
@@ -234,7 +228,7 @@ export const AppRoutes = ({
     useTitle(title)
     useScrollToPageTop()
     useEffect(() => {
-        updateHeading(pathname)
+        updateHeading({})
     }, [pathname, updateHeading])
 
     if (!loggedInUser) {

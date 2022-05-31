@@ -5,6 +5,8 @@ import { Story } from '@storybook/react'
 
 import { AuthProvider, AuthProviderProps } from '../src/contexts/AuthContext'
 import { PageProvider } from '../src/contexts/PageContext'
+import { S3Provider } from '../src/contexts/S3Context'
+import { testS3Client } from '../src/testHelpers/s3Helpers'
 
 const ProvidersDecorator = (
     Story: Story,
@@ -19,9 +21,11 @@ const ProvidersDecorator = (
     <MockedProvider {...apolloProvider}>
         <BrowserRouter>
             <AuthProvider authMode="LOCAL" {...authProvider}>
-                <PageProvider>
-                    <Story />
-                </PageProvider>
+                <S3Provider client={testS3Client()}>
+                    <PageProvider>
+                        <Story />
+                    </PageProvider>
+                </S3Provider>
             </AuthProvider>
         </BrowserRouter>
     </MockedProvider>

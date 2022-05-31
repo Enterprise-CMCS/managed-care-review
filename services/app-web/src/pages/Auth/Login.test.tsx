@@ -1,7 +1,6 @@
 import React from 'react'
 import userEvent from '@testing-library/user-event'
-import { Route } from 'react-router-dom'
-import { Location } from 'history'
+import { Route, Location, Routes } from 'react-router-dom'
 import { screen, waitFor, Screen, queries } from '@testing-library/react'
 import { CognitoUser, CognitoUserPool } from 'amazon-cognito-identity-js'
 
@@ -99,9 +98,17 @@ describe('Cognito Login', () => {
             })
         )
 
-        renderWithProviders(<Login />, {
-            apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
-        })
+        renderWithProviders(
+            <Routes>
+                <Route path="/auth" element={<Login />} />
+            </Routes>,
+            {
+                apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
+                routerProvider: {
+                    route: '/auth',
+                },
+            }
+        )
         const loginButton = screen.getByRole('button', { name: 'Login' })
         const loginEmail = screen.getByTestId('loginEmail')
         const loginPassword = screen.getByTestId('loginPassword')
@@ -128,18 +135,15 @@ describe('Cognito Login', () => {
         let testLocation: Location
 
         renderWithProviders(
-            <>
-                <Route
-                    path="*"
-                    render={({ location }) => {
-                        testLocation = location as Location
-                        return null
-                    }}
-                />
-                <Login />
-            </>,
+            <Routes>
+                <Route path="/auth" element={<Login />} />
+            </Routes>,
             {
                 apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
+                routerProvider: {
+                    route: '/auth',
+                },
+                location: (location) => (testLocation = location),
             }
         )
 
@@ -157,21 +161,15 @@ describe('Cognito Login', () => {
         let testLocation: Location
 
         renderWithProviders(
-            <>
-                <Route
-                    path="*"
-                    render={({ location }) => {
-                        testLocation = location as Location
-                        return null
-                    }}
-                />
-                <Login />
-            </>,
+            <Routes>
+                <Route path="/auth" element={<Login />} />
+            </Routes>,
             {
                 apolloProvider: { mocks: [failedAuthMock, failedAuthMock] },
                 routerProvider: {
                     route: '/auth',
                 },
+                location: (location) => (testLocation = location),
             }
         )
 
