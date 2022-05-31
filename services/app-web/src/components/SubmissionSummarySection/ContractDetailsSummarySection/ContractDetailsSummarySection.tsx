@@ -72,7 +72,6 @@ export const ContractDetailsSummarySection = ({
     const isEditing = !isSubmitted && navigateTo !== undefined
 
     useEffect(() => {
-        console.log('Zip-a-Dee-Doo-Dah')
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
             const keysFromDocs = submission.contractDocuments
