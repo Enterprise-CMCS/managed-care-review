@@ -1,5 +1,5 @@
 import { MockedProvider, MockedProviderProps } from '@apollo/client/testing'
-import { MemoryRouter } from 'react-router-dom'
+import { Location, MemoryRouter, useLocation } from 'react-router-dom'
 import {
     fireEvent,
     render,
@@ -25,6 +25,7 @@ const renderWithProviders = (
         apolloProvider?: MockedProviderProps
         authProvider?: Partial<AuthProviderProps>
         s3Provider?: S3ClientT
+        location?: (location: Location) => Location
     }
 ) => {
     const {
@@ -32,6 +33,7 @@ const renderWithProviders = (
         apolloProvider = {},
         authProvider = {},
         s3Provider = undefined,
+        location = undefined,
     } = options || {}
 
     const { route } = routerProvider
@@ -42,12 +44,23 @@ const renderWithProviders = (
             <MemoryRouter initialEntries={[route || '']}>
                 <AuthProvider authMode={'AWS_COGNITO'} {...authProvider}>
                     <S3Provider client={s3Client}>
+                        {location && <WithLocation setLocation={location} />}
                         <PageProvider>{ui}</PageProvider>
                     </S3Provider>
                 </AuthProvider>
             </MemoryRouter>
         </MockedProvider>
     )
+}
+
+const WithLocation = ({
+    setLocation,
+}: {
+    setLocation: (location: Location) => Location
+}): null => {
+    const location = useLocation()
+    setLocation(location)
+    return null
 }
 
 /* User Events */
@@ -68,8 +81,10 @@ const userClickByRole = (
     userEvent.click(element)
 }
 
-const userClickSignIn = (screen: Screen<typeof queries>): void => {
-    const signInButton = screen.getByRole('link', { name: /Sign In/i })
+const userClickSignIn = async (
+    screen: Screen<typeof queries>
+): Promise<void> => {
+    const signInButton = await screen.findByRole('link', { name: /Sign In/i })
     userEvent.click(signInButton)
 }
 

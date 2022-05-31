@@ -5,8 +5,7 @@ import {
     submitHealthPlanPackageMockError,
     submitHealthPlanPackageMockSuccess,
 } from '../../../testHelpers/apolloHelpers'
-import { Route } from 'react-router-dom'
-import { Location } from 'history'
+import { Routes, Route, Location } from 'react-router-dom'
 import {
     renderWithProviders,
     userClickByTestId,
@@ -205,21 +204,20 @@ describe('ReviewSubmit', () => {
 
     it('redirects if submission succeeds', async () => {
         let testLocation: Location
+
         renderWithProviders(
-            <>
+            <Routes>
                 <Route
-                    path="*"
-                    render={({ location }) => {
-                        testLocation = location as Location
-                        return null
-                    }}
-                ></Route>
-                <ReviewSubmit
-                    draftSubmission={mockCompleteDraft()}
-                    unlocked={false}
-                    submissionName="MN-MSHO-0001"
+                    path="/draftSubmission/:id/edit/review-and-submit"
+                    element={
+                        <ReviewSubmit
+                            draftSubmission={mockCompleteDraft()}
+                            unlocked={false}
+                            submissionName="MN-MSHO-0001"
+                        />
+                    }
                 />
-            </>,
+            </Routes>,
             {
                 apolloProvider: {
                     mocks: [
@@ -230,23 +228,20 @@ describe('ReviewSubmit', () => {
                     ],
                 },
                 routerProvider: {
-                    route: `draftSubmission/${
+                    route: `/draftSubmission/${
                         mockCompleteDraft().id
-                    }/review-and-submit`,
+                    }/edit/review-and-submit`,
                 },
+                location: (location) => (testLocation = location),
             }
         )
+        userClickByTestId(screen, 'form-submit')
 
-        const submit = screen.getByTestId('review-and-submit-modal-submit')
-        submit.click()
-
-        await waitFor(() => {
-            const confirmSubmit = screen.getByTestId(
-                'review-and-submit-modal-submit'
-            )
-            expect(confirmSubmit).toBeInTheDocument()
-            confirmSubmit.click()
-        })
+        const confirmSubmit = screen.getByTestId(
+            'review-and-submit-modal-submit'
+        )
+        expect(confirmSubmit).toBeInTheDocument()
+        confirmSubmit.click()
 
         await waitFor(() => {
             expect(testLocation.pathname).toBe(`/dashboard`)
@@ -354,7 +349,7 @@ describe('Resubmitting plan packages', () => {
                 routerProvider: {
                     route: `draftSubmission/${
                         mockCompleteDraft().id
-                    }/review-and-submit`,
+                    }/edit/review-and-submit`,
                 },
             }
         )

@@ -58,7 +58,7 @@ export const UploadedDocumentsTable = ({
                     variant="unstyled"
                     asCustom={NavLink}
                     className="usa-button usa-button--outline"
-                    to="documents"
+                    to="../documents"
                 >
                     Edit <span className="srOnly">{caption}</span>
                 </Link>

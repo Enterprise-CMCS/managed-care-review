@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from 'react'
 
 import { Alert, GridContainer } from '@trussworks/react-uswds'
-import { Switch, Route, useParams, useLocation } from 'react-router-dom'
+import { Routes, Route, useParams } from 'react-router-dom'
 import styles from './StateSubmissionForm.module.scss'
 
 import { Error404 } from '../Errors/Error404'
 import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionStatus'
+
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Loading } from '../../components/Loading'
 import { DynamicStepIndicator } from '../../components/DynamicStepIndicator'
 import { usePage } from '../../contexts/PageContext'
 import {
-    RoutesRecord,
-    getRouteName,
     STATE_SUBMISSION_FORM_ROUTES,
     RouteT,
+    RoutesRecord,
 } from '../../constants/routes'
+import { getRelativePath } from '../../routeHelpers'
 import { getCurrentRevisionFromHealthPlanPackage } from '../../gqlHelpers'
 import { StateSubmissionContainer } from './StateSubmissionContainer'
 import { ContractDetails } from './ContractDetails'
@@ -34,6 +35,7 @@ import {
 } from '../../gen/gqlClient'
 import { SubmissionUnlockedBanner } from '../../components/Banner'
 import { useAuth } from '../../contexts/AuthContext'
+import { useCurrentRoute } from '../../hooks/useCurrentRoute'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import {
     UnlockedHealthPlanFormDataType,
@@ -43,6 +45,12 @@ import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
 import { makeDocumentList } from '../../documentHelpers/makeDocumentKeyLookupList'
 import { makeDateTable } from '../../documentHelpers/makeDocumentDateLookupTable'
 import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
+
+const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
+    getRelativePath({
+        basePath: RoutesRecord.SUBMISSIONS_FORM,
+        targetPath: RoutesRecord[formRouteType],
+    })
 
 const FormAlert = ({ message }: { message?: string }): React.ReactElement => {
     return message ? (
@@ -114,9 +122,15 @@ export type HealthPlanFormPageProps = {
 }
 export const StateSubmissionForm = (): React.ReactElement => {
     const { id } = useParams<{ id: string }>()
-    const { pathname } = useLocation()
-    const currentRoute = getRouteName(pathname)
+    // IF not id throw new error
+    if (!id) {
+        throw new Error(
+            'PROGRAMMING ERROR: id param not set in state submission form.'
+        )
+    }
+    const { currentRoute } = useCurrentRoute()
     const { updateHeading } = usePage()
+
     const [formDataFromLatestRevision, setFormDataFromLatestRevision] =
         useState<UnlockedHealthPlanFormDataType | null>(null)
     const [formDataError, setFormDataError] = useState<FormDataError | null>(
@@ -197,9 +211,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 []
             const name = packageName(formDataFromLatestRevision, statePrograms)
             setComputedSubmissionName(name)
-            updateHeading(pathname, name)
+            updateHeading({ customHeading: name })
         }
-    }, [updateHeading, pathname, formDataFromLatestRevision, loggedInUser])
+    }, [updateHeading, formDataFromLatestRevision, loggedInUser])
 
     useEffect(() => {
         if (submissionAndRevisions) {
@@ -302,6 +316,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
             </GridContainer>
         )
     }
+
     return (
         <>
             <div className={styles.stepIndicator}>
@@ -316,49 +331,80 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 />
             </div>
             <StateSubmissionContainer>
-                <Switch>
-                    <Route path={RoutesRecord.SUBMISSIONS_TYPE}>
-                        <SubmissionType
-                            draftSubmission={formDataFromLatestRevision}
-                            updateDraft={updateDraftHealthPlanPackage}
-                        />
-                    </Route>
-                    <Route path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}>
-                        <ContractDetails
-                            draftSubmission={formDataFromLatestRevision}
-                            updateDraft={updateDraftHealthPlanPackage}
-                            previousDocuments={previousDocuments}
-                        />
-                    </Route>
-                    <Route path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}>
-                        <RateDetails
-                            draftSubmission={formDataFromLatestRevision}
-                            updateDraft={updateDraftHealthPlanPackage}
-                            previousDocuments={previousDocuments}
-                        />
-                    </Route>
-                    <Route path={RoutesRecord.SUBMISSIONS_CONTACTS}>
-                        <Contacts
-                            draftSubmission={formDataFromLatestRevision}
-                            updateDraft={updateDraftHealthPlanPackage}
-                        />
-                    </Route>
-                    <Route path={RoutesRecord.SUBMISSIONS_DOCUMENTS}>
-                        <Documents
-                            draftSubmission={formDataFromLatestRevision}
-                            updateDraft={updateDraftHealthPlanPackage}
-                            previousDocuments={previousDocuments}
-                        />
-                    </Route>
-                    <Route path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}>
-                        <ReviewSubmit
-                            draftSubmission={formDataFromLatestRevision}
-                            unlocked={!!unlockedInfo}
-                            submissionName={computedSubmissionName}
-                            documentDateLookupTable={documentDates}
-                        />
-                    </Route>
-                </Switch>
+                <Routes>
+                    <Route
+                        path={getRelativePathFromNestedRoute(
+                            'SUBMISSIONS_TYPE'
+                        )}
+                        element={
+                            <SubmissionType
+                                draftSubmission={formDataFromLatestRevision}
+                                updateDraft={updateDraftHealthPlanPackage}
+                            />
+                        }
+                    />
+                    <Route
+                        path={getRelativePathFromNestedRoute(
+                            'SUBMISSIONS_CONTRACT_DETAILS'
+                        )}
+                        element={
+                            <ContractDetails
+                                draftSubmission={formDataFromLatestRevision}
+                                updateDraft={updateDraftHealthPlanPackage}
+                                previousDocuments={previousDocuments}
+                            />
+                        }
+                    />
+                    <Route
+                        path={getRelativePathFromNestedRoute(
+                            'SUBMISSIONS_RATE_DETAILS'
+                        )}
+                        element={
+                            <RateDetails
+                                draftSubmission={formDataFromLatestRevision}
+                                updateDraft={updateDraftHealthPlanPackage}
+                                previousDocuments={previousDocuments}
+                            />
+                        }
+                    />
+                    <Route
+                        path={getRelativePathFromNestedRoute(
+                            'SUBMISSIONS_CONTACTS'
+                        )}
+                        element={
+                            <Contacts
+                                draftSubmission={formDataFromLatestRevision}
+                                updateDraft={updateDraftHealthPlanPackage}
+                            />
+                        }
+                    />
+                    <Route
+                        path={getRelativePathFromNestedRoute(
+                            'SUBMISSIONS_DOCUMENTS'
+                        )}
+                        element={
+                            <Documents
+                                draftSubmission={formDataFromLatestRevision}
+                                updateDraft={updateDraftHealthPlanPackage}
+                                previousDocuments={previousDocuments}
+                            />
+                        }
+                    />
+                    <Route
+                        path={getRelativePathFromNestedRoute(
+                            'SUBMISSIONS_REVIEW_SUBMIT'
+                        )}
+                        element={
+                            <ReviewSubmit
+                                draftSubmission={formDataFromLatestRevision}
+                                unlocked={!!unlockedInfo}
+                                submissionName={computedSubmissionName}
+                                documentDateLookupTable={documentDates}
+                            />
+                        }
+                    />
+                    <Route path="*" element={<Error404 />} />
+                </Routes>
             </StateSubmissionContainer>
         </>
     )

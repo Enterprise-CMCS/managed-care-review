@@ -2,7 +2,7 @@ import React from 'react'
 import styles from '../Banner.module.scss'
 import { Alert } from '@trussworks/react-uswds'
 import { dayjs } from '../../../common-code/dateHelpers'
-import { ExpandableText } from '../../'
+import { ExpandableText } from '../../ExpandableText'
 
 export type UnlockedProps = {
     userType: 'STATE_USER' | 'CMS_USER'

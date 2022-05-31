@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Alert, GridContainer } from '@trussworks/react-uswds'
-import { useLocation, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import {
     packageName,
     HealthPlanFormDataType,
@@ -33,7 +33,11 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         id: string
         revisionVersion: string
     }>()
-    const { pathname } = useLocation()
+    if (!id) {
+        throw new Error(
+            'PROGRAMMING ERROR: id param not set in state submission form.'
+        )
+    }
     const { updateHeading } = usePage()
     const [pageLevelAlert, setPageLevelAlert] = useState<string | undefined>(
         undefined
@@ -117,9 +121,9 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         const subWithRevisions = data?.fetchHealthPlanPackage.pkg
         if (packageData && subWithRevisions) {
             const programs = subWithRevisions.state.programs
-            updateHeading(pathname, packageName(packageData, programs))
+            updateHeading({ customHeading: packageName(packageData, programs) })
         }
-    }, [updateHeading, pathname, packageData, data])
+    }, [updateHeading, packageData, data])
 
     if (loading || !submissionAndRevisions || !packageData) {
         return (

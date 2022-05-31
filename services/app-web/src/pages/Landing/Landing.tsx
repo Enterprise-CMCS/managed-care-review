@@ -1,5 +1,5 @@
 import React from 'react'
-import {GridContainer, Grid } from '@trussworks/react-uswds'
+import { GridContainer, Grid } from '@trussworks/react-uswds'
 import styles from './Landing.module.scss'
 
 export const Landing = (): React.ReactElement => {
@@ -72,7 +72,8 @@ export const Landing = (): React.ReactElement => {
                                     managed care programs
                                 </li>
                                 <li>
-                                    Contracts may be fully executed or unexecuted by some or all parties
+                                    Contracts may be fully executed or
+                                    unexecuted by some or all parties
                                 </li>
                             </ul>
                         </Grid>
