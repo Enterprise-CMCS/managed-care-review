@@ -45,8 +45,8 @@ export const ReviewSubmitModal = ({
 
     const submitHandler = async () => {
         setFocusErrorsInModal(true)
+        isSubmitting(true)
         if (unlocked) {
-            isSubmitting(formik.isSubmitting)
             formik.handleSubmit()
         } else {
             await onSubmit(undefined)
@@ -70,7 +70,6 @@ export const ReviewSubmitModal = ({
         }
 
         try {
-            isSubmitting(formik.isSubmitting)
             const data = await submitDraftSubmission({
                 variables: {
                     input: input,
@@ -78,7 +77,6 @@ export const ReviewSubmitModal = ({
             })
 
             if (data.errors) {
-                isSubmitting(formik.isSubmitting)
                 showError('Error attempting to submit. Please try again.')
                 modalRef.current?.toggleModal(undefined, false)
             }
@@ -87,15 +85,15 @@ export const ReviewSubmitModal = ({
                 modalRef.current?.toggleModal(undefined, false)
                 history.push(`/dashboard?justSubmitted=${submissionName}`)
             } else {
-                isSubmitting(formik.isSubmitting)
                 console.error('Got nothing back from submit')
                 showError('Error attempting to submit. Please try again.')
                 modalRef.current?.toggleModal(undefined, false)
+                isSubmitting(false)
             }
         } catch (error) {
-            isSubmitting(formik.isSubmitting)
             showError('Error attempting to submit. Please try again.')
             modalRef.current?.toggleModal(undefined, false)
+            isSubmitting(false)
         }
     }
 
