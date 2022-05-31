@@ -121,7 +121,7 @@ describe('ReviewSubmitModal', () => {
         ).toBeInTheDocument()
     })
 
-    it('draws focus to unlock reason input when form validation errors exist', async () => {
+    it('draws focus to submitted summary textarea when form validation errors exist', async () => {
         const modalRef = createRef<ModalRef>()
         const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
         renderWithProviders(
