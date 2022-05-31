@@ -34,7 +34,7 @@ describe('App Body and routes', () => {
         const OLD_ENV = process.env
 
         beforeEach(() => {
-            jest.resetModules() // Most important - it clears the cache
+            jest.resetModules() // Most important - clears the cache
             process.env = { ...OLD_ENV } // Make a copy
         })
 
