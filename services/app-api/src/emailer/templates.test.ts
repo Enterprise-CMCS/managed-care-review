@@ -242,7 +242,7 @@ describe('Email templates', () => {
             )
         })
         it('includes ratesReviewSharedEmails on contract and rate submission', () => {
-            const sub = mockContractOnlyFormData()
+            const sub = mockContractAndRatesFormData()
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
