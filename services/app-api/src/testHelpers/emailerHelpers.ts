@@ -57,9 +57,14 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
             return this.sendEmail(emailData)
         },
         sendUnlockPackageCMSEmail: function async(
+            submission: UnlockedHealthPlanFormDataType,
             updatedEmailData: UpdatedEmailData
         ): Promise<void | Error> {
-            const emailData = unlockPackageCMSEmail(updatedEmailData, config)
+            const emailData = unlockPackageCMSEmail(
+                submission,
+                updatedEmailData,
+                config
+            )
             return this.sendEmail(emailData)
         },
         sendUnlockPackageStateEmail: function async(
@@ -155,6 +160,63 @@ const mockContractAndRatesFormData = (
         rateDateEnd: new Date(),
         rateDateCertified: new Date(),
         rateAmendmentInfo: null,
+        stateContacts: [
+            {
+                name: 'Test Person',
+                titleRole: 'A Role',
+                email: 'test+state+contact@example.com',
+            },
+        ],
+        actuaryContacts: [],
+        ...submissionPartial,
+    }
+}
+
+const mockUnlockedContractAndRatesFormData = (
+    submissionPartial?: Partial<UnlockedHealthPlanFormDataType>
+): UnlockedHealthPlanFormDataType => {
+    return {
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: 'DRAFT',
+        stateNumber: 3,
+        id: 'test-abc-125',
+        stateCode: 'MN',
+        programIDs: ['snbc'],
+        submissionType: 'CONTRACT_AND_RATES',
+        submissionDescription: 'A submitted submission',
+        documents: [
+            {
+                s3URL: 'bar',
+                name: 'foo',
+                documentCategories: ['RATES_RELATED' as const],
+            },
+        ],
+        contractType: 'BASE',
+        contractExecutionStatus: 'EXECUTED',
+        contractDocuments: [
+            {
+                s3URL: 'bar',
+                name: 'foo',
+                documentCategories: ['CONTRACT' as const],
+            },
+        ],
+        contractDateStart: new Date(),
+        contractDateEnd: new Date(),
+        managedCareEntities: ['ENROLLMENT_PROCESS'],
+        federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+        rateType: 'NEW',
+        rateDocuments: [
+            {
+                s3URL: 'bar',
+                name: 'foo',
+                documentCategories: ['RATES' as const],
+            },
+        ],
+        rateDateStart: new Date(),
+        rateDateEnd: new Date(),
+        rateDateCertified: new Date(),
+        rateAmendmentInfo: undefined,
         stateContacts: [
             {
                 name: 'Test Person',
@@ -277,6 +339,7 @@ export {
     mockContractAmendmentFormData,
     mockContractOnlyFormData,
     mockContractAndRatesFormData,
+    mockUnlockedContractAndRatesFormData,
     mockUser,
     testEmailer,
 }
