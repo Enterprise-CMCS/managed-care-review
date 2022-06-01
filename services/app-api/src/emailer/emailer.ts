@@ -47,6 +47,7 @@ type Emailer = {
         user: UserType
     ) => Promise<void | Error>
     sendUnlockPackageCMSEmail: (
+        submission: UnlockedHealthPlanFormDataType,
         updatedEmailData: UpdatedEmailData
     ) => Promise<void | Error>
     sendUnlockPackageStateEmail: (
@@ -105,8 +106,15 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             )
             return await this.sendEmail(emailData)
         },
-        sendUnlockPackageCMSEmail: async function (updatedEmailData) {
-            const emailData = unlockPackageCMSEmail(updatedEmailData, config)
+        sendUnlockPackageCMSEmail: async function (
+            submission,
+            updatedEmailData
+        ) {
+            const emailData = unlockPackageCMSEmail(
+                submission,
+                updatedEmailData,
+                config
+            )
             return await this.sendEmail(emailData)
         },
         sendUnlockPackageStateEmail: async function (
@@ -179,9 +187,14 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             localEmailerLogger(emailData)
         },
         sendUnlockPackageCMSEmail: async (
+            submission: UnlockedHealthPlanFormDataType,
             updatedEmailData: UpdatedEmailData
         ) => {
-            const emailData = unlockPackageCMSEmail(updatedEmailData, config)
+            const emailData = unlockPackageCMSEmail(
+                submission,
+                updatedEmailData,
+                config
+            )
             localEmailerLogger(emailData)
         },
         sendUnlockPackageStateEmail: async (
