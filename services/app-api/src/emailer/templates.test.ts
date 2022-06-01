@@ -4,6 +4,7 @@ import {
     mockContractOnlyFormData,
     mockContractAndRatesFormData,
     mockUser,
+    mockUnlockedContractAndRatesFormData,
 } from '../testHelpers/emailerHelpers'
 import { LockedHealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import {
@@ -485,7 +486,12 @@ describe('Email templates', () => {
             updatedAt: new Date('01/01/2022'),
             updatedReason: 'Adding rate development guide.',
         }
-        const template = unlockPackageCMSEmail(unlockData, testEmailConfig)
+        const submission = mockUnlockedContractAndRatesFormData()
+        const template = unlockPackageCMSEmail(
+            submission,
+            unlockData,
+            testEmailConfig
+        )
         it('subject line is correct and clearly states submission is unlocked', () => {
             expect(template).toEqual(
                 expect.objectContaining({
