@@ -34,7 +34,6 @@ describe('Email templates', () => {
                 )
             })
         })
-
         it('subject line is correct', () => {
             const sub = mockContractOnlyFormData()
             const name = 'FL-MMA-001'
@@ -48,7 +47,6 @@ describe('Email templates', () => {
                 })
             )
         })
-
         it('includes warning about unofficial submission', () => {
             const sub = mockContractOnlyFormData()
             const template = newPackageCMSEmail(
@@ -64,7 +62,6 @@ describe('Email templates', () => {
                 })
             )
         })
-
         it('includes expected data summary for a contract only submission', () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractOnlyFormData(),
@@ -187,7 +184,6 @@ describe('Email templates', () => {
                 })
             )
         })
-
         it('includes expected data summary for a rate amendment submission CMS email', () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAndRatesFormData(),
@@ -244,6 +240,25 @@ describe('Email templates', () => {
                     ),
                 })
             )
+        })
+        it('includes ratesReviewSharedEmails on contract and rate submission', () => {
+            const sub = mockContractOnlyFormData()
+            const template = newPackageCMSEmail(
+                sub,
+                'some-title',
+                testEmailConfig
+            )
+            const reviewerEmails = [
+                ...testEmailConfig.cmsReviewSharedEmails,
+                ...testEmailConfig.ratesReviewSharedEmails,
+            ]
+            reviewerEmails.forEach((emailAddress) => {
+                expect(template).toEqual(
+                    expect.objectContaining({
+                        toAddresses: expect.arrayContaining([emailAddress]),
+                    })
+                )
+            })
         })
     })
     describe('State email', () => {
@@ -512,6 +527,19 @@ describe('Email templates', () => {
                 })
             )
         })
+        it('includes ratesReviewSharedEmails on contract and rate submission unlock', () => {
+            const reviewerEmails = [
+                ...testEmailConfig.cmsReviewSharedEmails,
+                ...testEmailConfig.ratesReviewSharedEmails,
+            ]
+            reviewerEmails.forEach((emailAddress) => {
+                expect(template).toEqual(
+                    expect.objectContaining({
+                        toAddresses: expect.arrayContaining([emailAddress]),
+                    })
+                )
+            })
+        })
     })
     describe('State unlock email', () => {
         const unlockData = {
@@ -644,7 +672,7 @@ describe('Email templates', () => {
             updatedAt: new Date('02/01/2022'),
             updatedReason: 'Added rate certification.',
         }
-        const submission = mockContractOnlyFormData()
+        const submission = mockContractAndRatesFormData()
         const template = resubmittedCMSEmail(
             submission,
             resubmitData,
@@ -704,6 +732,19 @@ describe('Email templates', () => {
                     ),
                 })
             )
+        })
+        it('includes ratesReviewSharedEmails on contract and rate resubmission email', () => {
+            const reviewerEmails = [
+                ...testEmailConfig.cmsReviewSharedEmails,
+                ...testEmailConfig.ratesReviewSharedEmails,
+            ]
+            reviewerEmails.forEach((emailAddress) => {
+                expect(template).toEqual(
+                    expect.objectContaining({
+                        toAddresses: expect.arrayContaining([emailAddress]),
+                    })
+                )
+            })
         })
     })
 })
