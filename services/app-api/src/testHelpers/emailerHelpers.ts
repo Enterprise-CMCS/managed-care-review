@@ -21,6 +21,7 @@ const testEmailConfig: EmailConfiguration = {
     baseUrl: 'http://localhost',
     emailSource: 'emailSource@example.com',
     cmsReviewSharedEmails: ['cmsreview1@example.com', 'cmsreview2@example.com'],
+    ratesReviewSharedEmails: ['ratesreview@example.com'],
 }
 
 const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
