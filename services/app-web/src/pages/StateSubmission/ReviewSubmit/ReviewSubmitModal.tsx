@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useReducer } from 'react'
 import styles from './ReviewSubmit.module.scss'
 import { FormGroup, ModalRef, Textarea } from '@trussworks/react-uswds'
 import { Modal, PoliteErrorMessage } from '../../../components'
@@ -43,9 +43,21 @@ export const ReviewSubmitModal = ({
         onSubmit: (values) => onModalSubmit(values),
     })
 
+    const toggleIsSubmitting = (
+        previousState: boolean,
+        currentState: boolean
+    ) => {
+        if (currentState !== previousState) {
+            isSubmitting(currentState)
+            return currentState
+        }
+        return previousState
+    }
+
+    const [submittingState, dispatch] = useReducer(toggleIsSubmitting, false)
+
     const submitHandler = async () => {
         setFocusErrorsInModal(true)
-        isSubmitting(true)
         if (unlocked) {
             formik.handleSubmit()
         } else {
@@ -88,12 +100,10 @@ export const ReviewSubmitModal = ({
                 console.error('Got nothing back from submit')
                 showError('Error attempting to submit. Please try again.')
                 modalRef.current?.toggleModal(undefined, false)
-                isSubmitting(false)
             }
         } catch (error) {
             showError('Error attempting to submit. Please try again.')
             modalRef.current?.toggleModal(undefined, false)
-            isSubmitting(false)
         }
     }
 
@@ -113,6 +123,10 @@ export const ReviewSubmitModal = ({
         }
     }, [focusErrorsInModal, formik.errors])
 
+    useEffect(() => {
+        dispatch(formik.isSubmitting || submitMutationLoading)
+    }, [formik.isSubmitting, submitMutationLoading])
+
     return (
         <Modal
             modalRef={modalRef}
@@ -121,7 +135,7 @@ export const ReviewSubmitModal = ({
             submitButtonProps={{ className: styles.submitButton }}
             onSubmitText={unlocked ? 'Resubmit' : undefined}
             onSubmit={submitHandler}
-            isSubmitting={formik.isSubmitting || submitMutationLoading}
+            isSubmitting={submittingState}
         >
             {unlocked ? (
                 <form>
