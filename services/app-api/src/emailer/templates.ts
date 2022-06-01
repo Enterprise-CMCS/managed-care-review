@@ -38,9 +38,12 @@ const stripHTMLFromTemplate = (template: string) => {
 
 const generateReviewerEmails = (
     config: EmailConfiguration,
-    submissionType: SubmissionType
+    submission: LockedHealthPlanFormDataType | UnlockedHealthPlanFormDataType
 ): string[] => {
-    if (submissionType === 'CONTRACT_AND_RATES') {
+    if (
+        submission.submissionType === 'CONTRACT_AND_RATES' &&
+        submission.stateCode !== 'PR'
+    ) {
         return [
             ...config.cmsReviewSharedEmails,
             ...config.ratesReviewSharedEmails,
@@ -129,10 +132,7 @@ const newPackageCMSEmail = (
 ): EmailData => {
     // config
     const isTestEnvironment = config.stage !== 'prod'
-    const reviewerEmails = generateReviewerEmails(
-        config,
-        submission.submissionType
-    )
+    const reviewerEmails = generateReviewerEmails(config, submission)
     const bodyHTML = `
             ${testEmailAlert}
             <br /><br />
@@ -214,10 +214,7 @@ const unlockPackageCMSEmail = (
     config: EmailConfiguration
 ): EmailData => {
     const isTestEnvironment = config.stage !== 'prod'
-    const reviewerEmails = generateReviewerEmails(
-        config,
-        submission.submissionType
-    )
+    const reviewerEmails = generateReviewerEmails(config, submission)
     const bodyHTML = `
         ${testEmailAlert}
         <br /><br />
@@ -313,10 +310,7 @@ const resubmittedCMSEmail = (
     resubmittedData: UpdatedEmailData,
     config: EmailConfiguration
 ): EmailData => {
-    const reviewerEmails = generateReviewerEmails(
-        config,
-        submission.submissionType
-    )
+    const reviewerEmails = generateReviewerEmails(config, submission)
     const submissionURL = new URL(
         `submissions/${submission.id}`,
         config.baseUrl
