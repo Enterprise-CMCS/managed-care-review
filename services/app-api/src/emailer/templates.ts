@@ -209,11 +209,15 @@ type UpdatedEmailData = {
 }
 
 const unlockPackageCMSEmail = (
+    submission: UnlockedHealthPlanFormDataType,
     unlockData: UpdatedEmailData,
     config: EmailConfiguration
 ): EmailData => {
     const isTestEnvironment = config.stage !== 'prod'
-    const reviewerEmails = config.cmsReviewSharedEmails
+    const reviewerEmails = generateReviewerEmails(
+        config,
+        submission.submissionType
+    )
     const bodyHTML = `
         ${testEmailAlert}
         <br /><br />
