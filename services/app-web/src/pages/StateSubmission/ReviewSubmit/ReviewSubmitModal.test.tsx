@@ -25,7 +25,7 @@ describe('ReviewSubmitModal', () => {
                 unlocked={false}
                 modalRef={modalRef}
                 showError={jest.fn()}
-                isSubmitting={mockSetIsSubmitting}
+                setIsSubmitting={mockSetIsSubmitting}
             />
         )
         await waitFor(() => handleOpen())
@@ -45,7 +45,7 @@ describe('ReviewSubmitModal', () => {
                 unlocked
                 modalRef={modalRef}
                 showError={mockSetShowError}
-                isSubmitting={mockSetIsSubmitting}
+                setIsSubmitting={mockSetIsSubmitting}
             />,
             {
                 apolloProvider: {
@@ -91,7 +91,7 @@ describe('ReviewSubmitModal', () => {
                     unlocked={false}
                     modalRef={modalRef}
                     showError={jest.fn()}
-                    isSubmitting={mockSetIsSubmitting}
+                    setIsSubmitting={mockSetIsSubmitting}
                 />
             )
             await waitFor(() => handleOpen())
@@ -122,7 +122,7 @@ describe('ReviewSubmitModal', () => {
                     unlocked={false}
                     modalRef={modalRef}
                     showError={mockSetShowError}
-                    isSubmitting={mockSetIsSubmitting}
+                    setIsSubmitting={mockSetIsSubmitting}
                 />,
                 {
                     apolloProvider: {
@@ -169,7 +169,7 @@ describe('ReviewSubmitModal', () => {
                     unlocked={true}
                     modalRef={modalRef}
                     showError={jest.fn()}
-                    isSubmitting={mockSetIsSubmitting}
+                    setIsSubmitting={mockSetIsSubmitting}
                 />
             )
             await waitFor(() => handleOpen())
@@ -195,7 +195,6 @@ describe('ReviewSubmitModal', () => {
                 screen.getByTestId('review-and-submit-modal-submit')
             ).toHaveTextContent('Resubmit')
         })
-
         it('displays form validation error when submitting without an submission summary', async () => {
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
@@ -207,7 +206,7 @@ describe('ReviewSubmitModal', () => {
                     unlocked
                     modalRef={modalRef}
                     showError={jest.fn()}
-                    isSubmitting={mockSetIsSubmitting}
+                    setIsSubmitting={mockSetIsSubmitting}
                 />
             )
             await waitFor(() => handleOpen())
@@ -222,7 +221,6 @@ describe('ReviewSubmitModal', () => {
                 await screen.findByText('You must provide a summary of changes')
             ).toBeInTheDocument()
         })
-
         it('draws focus to submitted summary textarea when form validation errors exist', async () => {
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
@@ -234,7 +232,7 @@ describe('ReviewSubmitModal', () => {
                     unlocked
                     modalRef={modalRef}
                     showError={jest.fn()}
-                    isSubmitting={mockSetIsSubmitting}
+                    setIsSubmitting={mockSetIsSubmitting}
                 />
             )
 
@@ -254,13 +252,13 @@ describe('ReviewSubmitModal', () => {
             // check focus after error
             expect(textbox).toHaveFocus()
         })
-
         it('redirects if submission succeeds on unlocked plan package', async () => {
             let testLocation: Location
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
             const mockSetShowError = jest.fn()
+
             renderWithProviders(
                 <ReviewSubmitModal
                     draftSubmission={mockCompleteDraft()}
@@ -268,7 +266,7 @@ describe('ReviewSubmitModal', () => {
                     unlocked
                     modalRef={modalRef}
                     showError={mockSetShowError}
-                    isSubmitting={mockSetIsSubmitting}
+                    setIsSubmitting={mockSetIsSubmitting}
                 />,
                 {
                     apolloProvider: {
@@ -301,7 +299,7 @@ describe('ReviewSubmitModal', () => {
 
             await waitFor(() => {
                 expect(screen.getByRole('dialog')).toHaveClass('is-hidden')
-                expect(mockSetIsSubmitting).toHaveBeenCalledTimes(1)
+                expect(mockSetIsSubmitting).toHaveBeenCalledTimes(2)
                 expect(mockSetShowError).toHaveBeenCalledTimes(0)
                 expect(testLocation.pathname).toBe(`/dashboard`)
                 expect(testLocation.search).toBe(
