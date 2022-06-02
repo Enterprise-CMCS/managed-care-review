@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useReducer } from 'react'
+import React, { useEffect, useState } from 'react'
 import styles from './ReviewSubmit.module.scss'
 import { FormGroup, ModalRef, Textarea } from '@trussworks/react-uswds'
 import { Modal, PoliteErrorMessage } from '../../../components'
@@ -7,6 +7,7 @@ import * as Yup from 'yup'
 import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { useNavigate } from 'react-router-dom'
 import { useSubmitHealthPlanPackageMutation } from '../../../gen/gqlClient'
+import { usePrevious } from '../../../hooks/usePrevious'
 
 export const ReviewSubmitModal = ({
     draftSubmission,
@@ -14,14 +15,14 @@ export const ReviewSubmitModal = ({
     unlocked,
     modalRef,
     showError,
-    isSubmitting,
+    setIsSubmitting,
 }: {
     draftSubmission: UnlockedHealthPlanFormDataType
     submissionName: string
     unlocked: boolean
     modalRef: React.RefObject<ModalRef>
     showError: (error: string) => void
-    isSubmitting: React.Dispatch<React.SetStateAction<boolean>>
+    setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>
 }): React.ReactElement => {
     const [focusErrorsInModal, setFocusErrorsInModal] = useState(true)
     const navigate = useNavigate()
@@ -43,18 +44,9 @@ export const ReviewSubmitModal = ({
         onSubmit: (values) => onModalSubmit(values),
     })
 
-    const toggleIsSubmitting = (
-        previousState: boolean,
-        currentState: boolean
-    ) => {
-        if (currentState !== previousState) {
-            isSubmitting(currentState)
-            return currentState
-        }
-        return previousState
-    }
-
-    const [submittingState, dispatch] = useReducer(toggleIsSubmitting, false)
+    const prevSubmitting = usePrevious(
+        formik.isSubmitting || submitMutationLoading
+    )
 
     const submitHandler = async () => {
         setFocusErrorsInModal(true)
@@ -124,8 +116,16 @@ export const ReviewSubmitModal = ({
     }, [focusErrorsInModal, formik.errors])
 
     useEffect(() => {
-        dispatch(formik.isSubmitting || submitMutationLoading)
-    }, [formik.isSubmitting, submitMutationLoading])
+        const isSubmitting = formik.isSubmitting || submitMutationLoading
+        if (prevSubmitting !== isSubmitting && prevSubmitting !== undefined) {
+            setIsSubmitting(isSubmitting)
+        }
+    }, [
+        formik.isSubmitting,
+        submitMutationLoading,
+        setIsSubmitting,
+        prevSubmitting,
+    ])
 
     return (
         <Modal
@@ -135,7 +135,7 @@ export const ReviewSubmitModal = ({
             submitButtonProps={{ className: styles.submitButton }}
             onSubmitText={unlocked ? 'Resubmit' : undefined}
             onSubmit={submitHandler}
-            isSubmitting={submittingState}
+            isSubmitting={formik.isSubmitting || submitMutationLoading}
         >
             {unlocked ? (
                 <form>
