@@ -1,5 +1,4 @@
 import {
-    Alert,
     GridContainer,
     ModalRef,
     ModalToggleButton,
@@ -32,9 +31,6 @@ export const ReviewSubmit = ({
     unlocked: boolean
     submissionName: string
 }): React.ReactElement => {
-    const [userVisibleError, setUserVisibleError] = useState<
-        string | undefined
-    >(undefined)
     const navigate = useNavigate()
     const modalRef = useRef<ModalRef>(null)
     const { loggedInUser } = useAuth()
@@ -47,100 +43,84 @@ export const ReviewSubmit = ({
             loggedInUser.state.programs) ||
         []
 
-    const showError = (error: string) => {
-        setUserVisibleError(error)
-    }
-
     const isContractActionAndRateCertification =
         draftSubmission.submissionType === 'CONTRACT_AND_RATES'
 
     return (
-        <>
-            {userVisibleError && (
-                <Alert
-                    type="error"
-                    heading="Submission Error"
-                    className={unlocked ? styles.errorAlert : ''}
-                >
-                    {userVisibleError}
-                </Alert>
-            )}
-            <GridContainer className={styles.reviewSectionWrapper}>
-                <SubmissionTypeSummarySection
-                    submission={draftSubmission}
-                    submissionName={submissionName}
-                    navigateTo="../type"
-                    statePrograms={statePrograms}
-                />
+        <GridContainer className={styles.reviewSectionWrapper}>
+            <SubmissionTypeSummarySection
+                submission={draftSubmission}
+                submissionName={submissionName}
+                navigateTo="../type"
+                statePrograms={statePrograms}
+            />
 
-                <ContractDetailsSummarySection
+            <ContractDetailsSummarySection
+                submission={draftSubmission}
+                navigateTo="../contract-details"
+                submissionName={submissionName}
+                documentDateLookupTable={documentDateLookupTable}
+            />
+
+            {isContractActionAndRateCertification && (
+                <RateDetailsSummarySection
                     submission={draftSubmission}
-                    navigateTo="../contract-details"
+                    navigateTo="../rate-details"
                     submissionName={submissionName}
                     documentDateLookupTable={documentDateLookupTable}
                 />
+            )}
 
-                {isContractActionAndRateCertification && (
-                    <RateDetailsSummarySection
-                        submission={draftSubmission}
-                        navigateTo="../rate-details"
-                        submissionName={submissionName}
-                        documentDateLookupTable={documentDateLookupTable}
-                    />
-                )}
+            <ContactsSummarySection
+                submission={draftSubmission}
+                navigateTo="../contacts"
+            />
 
-                <ContactsSummarySection
-                    submission={draftSubmission}
-                    navigateTo="../contacts"
-                />
+            <SupportingDocumentsSummarySection
+                submission={draftSubmission}
+                navigateTo="../documents"
+            />
 
-                <SupportingDocumentsSummarySection
-                    submission={draftSubmission}
-                    navigateTo="../documents"
-                />
-
-                <PageActionsContainer
-                    left={
-                        <ActionButton
-                            type="button"
-                            variant="linkStyle"
-                            onClick={() => navigate('/dashboard')}
-                            disabled={isSubmitting}
-                        >
-                            Save as draft
-                        </ActionButton>
-                    }
-                >
+            <PageActionsContainer
+                left={
                     <ActionButton
                         type="button"
-                        variant="outline"
-                        onClick={() => navigate('../documents')}
+                        variant="linkStyle"
+                        onClick={() => navigate('/dashboard')}
                         disabled={isSubmitting}
                     >
-                        Back
+                        Save as draft
                     </ActionButton>
-                    <ModalToggleButton
-                        modalRef={modalRef}
-                        className={styles.submitButton}
-                        data-testid="form-submit"
-                        opener
-                    >
-                        Submit
-                    </ModalToggleButton>
-                </PageActionsContainer>
-
-                {
-                    // if the session is expiring, close this modal so the countdown modal can appear
-                    <ReviewSubmitModal
-                        draftSubmission={draftSubmission}
-                        submissionName={submissionName}
-                        unlocked={unlocked}
-                        modalRef={modalRef}
-                        showError={showError}
-                        setIsSubmitting={setIsSubmitting}
-                    />
                 }
-            </GridContainer>
-        </>
+            >
+                <ActionButton
+                    type="button"
+                    variant="outline"
+                    onClick={() => navigate('../documents')}
+                    disabled={isSubmitting}
+                >
+                    Back
+                </ActionButton>
+                <ModalToggleButton
+                    modalRef={modalRef}
+                    className={styles.submitButton}
+                    data-testid="form-submit"
+                    opener
+                >
+                    Submit
+                </ModalToggleButton>
+            </PageActionsContainer>
+
+            {
+                // if the session is expiring, close this modal so the countdown modal can appear
+                <ReviewSubmitModal
+                    draftSubmission={draftSubmission}
+                    submissionName={submissionName}
+                    unlocked={unlocked}
+                    modalRef={modalRef}
+                    setIsSubmitting={setIsSubmitting}
+                />
+            }
+        </GridContainer>
     )
 }
