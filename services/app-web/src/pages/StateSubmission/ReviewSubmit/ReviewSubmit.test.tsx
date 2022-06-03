@@ -304,10 +304,6 @@ describe('Resubmitting plan packages', () => {
 
         screen.getByTestId('review-and-submit-modal-submit').click()
 
-        await waitFor(() => {
-            expect(screen.getByRole('dialog')).toHaveClass('is-hidden')
-        })
-
         expect(
             await screen.findByText(
                 'Error attempting to submit. Please try again.'

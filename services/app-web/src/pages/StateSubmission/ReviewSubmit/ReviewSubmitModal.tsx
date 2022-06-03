@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import styles from './ReviewSubmit.module.scss'
-import { FormGroup, ModalRef, Textarea } from '@trussworks/react-uswds'
+import { Alert, FormGroup, ModalRef, Textarea } from '@trussworks/react-uswds'
 import { Modal, PoliteErrorMessage } from '../../../components'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
@@ -14,17 +14,16 @@ export const ReviewSubmitModal = ({
     submissionName,
     unlocked,
     modalRef,
-    showError,
     setIsSubmitting,
 }: {
     draftSubmission: UnlockedHealthPlanFormDataType
     submissionName: string
     unlocked: boolean
     modalRef: React.RefObject<ModalRef>
-    showError: (error: string) => void
     setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>
 }): React.ReactElement => {
     const [focusErrorsInModal, setFocusErrorsInModal] = useState(true)
+    const [modalAlert, setModalAlert] = useState<string | null>(null) // when api errors error
     const navigate = useNavigate()
 
     const [submitDraftSubmission, { loading: submitMutationLoading }] =
@@ -81,21 +80,17 @@ export const ReviewSubmitModal = ({
             })
 
             if (data.errors) {
-                showError('Error attempting to submit. Please try again.')
-                modalRef.current?.toggleModal(undefined, false)
+                setModalAlert('Error attempting to submit. Please try again.')
             }
 
             if (data.data?.submitHealthPlanPackage) {
                 modalRef.current?.toggleModal(undefined, false)
                 navigate(`/dashboard?justSubmitted=${submissionName}`)
             } else {
-                console.error('Got nothing back from submit')
-                showError('Error attempting to submit. Please try again.')
-                modalRef.current?.toggleModal(undefined, false)
+                setModalAlert('Error attempting to submit. Please try again.')
             }
         } catch (error) {
-            showError('Error attempting to submit. Please try again.')
-            modalRef.current?.toggleModal(undefined, false)
+            setModalAlert('Error attempting to submit. Please try again.')
         }
     }
 
@@ -137,6 +132,11 @@ export const ReviewSubmitModal = ({
             onSubmit={submitHandler}
             isSubmitting={formik.isSubmitting || submitMutationLoading}
         >
+            {modalAlert && (
+                <Alert type="error" heading="Unlock Error">
+                    {modalAlert}
+                </Alert>
+            )}
             {unlocked ? (
                 <form>
                     <p>

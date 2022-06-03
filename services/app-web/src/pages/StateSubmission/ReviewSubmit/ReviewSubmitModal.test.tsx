@@ -24,7 +24,6 @@ describe('ReviewSubmitModal', () => {
                 submissionName="Test-Submission"
                 unlocked={false}
                 modalRef={modalRef}
-                showError={jest.fn()}
                 setIsSubmitting={mockSetIsSubmitting}
             />
         )
@@ -33,18 +32,15 @@ describe('ReviewSubmitModal', () => {
         await waitFor(() => expect(dialog).toHaveClass('is-visible'))
     })
 
-    it('returns an error if submission fails on resubmitting', async () => {
+    it('displays an error if submission fails on resubmitting', async () => {
         const modalRef = createRef<ModalRef>()
-        let errorText: string
         const handleOpen = () => modalRef.current?.toggleModal(undefined, true)
-        const mockSetShowError = jest.fn((error: string) => (errorText = error))
         renderWithProviders(
             <ReviewSubmitModal
                 draftSubmission={mockCompleteDraft()}
                 submissionName="Test-Submission"
                 unlocked
                 modalRef={modalRef}
-                showError={mockSetShowError}
                 setIsSubmitting={mockSetIsSubmitting}
             />,
             {
@@ -69,14 +65,12 @@ describe('ReviewSubmitModal', () => {
 
         screen.getByTestId('review-and-submit-modal-submit').click()
 
-        await waitFor(() => {
-            expect(screen.getByRole('dialog')).toHaveClass('is-hidden')
-            expect(errorText).toBe(
+        expect(
+            await screen.findByText(
                 'Error attempting to submit. Please try again.'
             )
-            expect(mockSetIsSubmitting).toHaveBeenCalledTimes(2)
-            expect(mockSetShowError).toHaveBeenCalledTimes(1)
-        })
+        ).toBeInTheDocument()
+        expect(mockSetIsSubmitting).toHaveBeenCalledTimes(2)
     })
 
     describe('Health plan package submission modal', () => {
@@ -90,7 +84,6 @@ describe('ReviewSubmitModal', () => {
                     submissionName="Test-Submission"
                     unlocked={false}
                     modalRef={modalRef}
-                    showError={jest.fn()}
                     setIsSubmitting={mockSetIsSubmitting}
                 />
             )
@@ -114,14 +107,12 @@ describe('ReviewSubmitModal', () => {
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
-            const mockSetShowError = jest.fn()
             renderWithProviders(
                 <ReviewSubmitModal
                     draftSubmission={mockCompleteDraft()}
                     submissionName="Test-Submission"
                     unlocked={false}
                     modalRef={modalRef}
-                    showError={mockSetShowError}
                     setIsSubmitting={mockSetIsSubmitting}
                 />,
                 {
@@ -168,7 +159,6 @@ describe('ReviewSubmitModal', () => {
                     submissionName="Test-Submission"
                     unlocked={true}
                     modalRef={modalRef}
-                    showError={jest.fn()}
                     setIsSubmitting={mockSetIsSubmitting}
                 />
             )
@@ -205,7 +195,6 @@ describe('ReviewSubmitModal', () => {
                     submissionName="Test-Submission"
                     unlocked
                     modalRef={modalRef}
-                    showError={jest.fn()}
                     setIsSubmitting={mockSetIsSubmitting}
                 />
             )
@@ -231,7 +220,6 @@ describe('ReviewSubmitModal', () => {
                     submissionName="Test-Submission"
                     unlocked
                     modalRef={modalRef}
-                    showError={jest.fn()}
                     setIsSubmitting={mockSetIsSubmitting}
                 />
             )
@@ -257,7 +245,6 @@ describe('ReviewSubmitModal', () => {
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
-            const mockSetShowError = jest.fn()
 
             renderWithProviders(
                 <ReviewSubmitModal
@@ -265,7 +252,6 @@ describe('ReviewSubmitModal', () => {
                     submissionName="Test-Submission"
                     unlocked
                     modalRef={modalRef}
-                    showError={mockSetShowError}
                     setIsSubmitting={mockSetIsSubmitting}
                 />,
                 {
@@ -300,7 +286,6 @@ describe('ReviewSubmitModal', () => {
             await waitFor(() => {
                 expect(screen.getByRole('dialog')).toHaveClass('is-hidden')
                 expect(mockSetIsSubmitting).toHaveBeenCalledTimes(2)
-                expect(mockSetShowError).toHaveBeenCalledTimes(0)
                 expect(testLocation.pathname).toBe(`/dashboard`)
                 expect(testLocation.search).toBe(
                     '?justSubmitted=Test-Submission'
