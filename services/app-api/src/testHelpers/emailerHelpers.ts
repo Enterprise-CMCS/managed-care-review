@@ -229,6 +229,52 @@ const mockUnlockedContractAndRatesFormData = (
     }
 }
 
+const mockUnlockedContractOnlyFormData = (
+    submissionPartial?: Partial<UnlockedHealthPlanFormDataType>
+): UnlockedHealthPlanFormDataType => {
+    return {
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        status: 'DRAFT',
+        stateNumber: 3,
+        id: 'test-abc-125',
+        stateCode: 'MN',
+        programIDs: ['snbc'],
+        submissionType: 'CONTRACT_ONLY',
+        submissionDescription: 'A submitted submission',
+        documents: [
+            {
+                s3URL: 'bar',
+                name: 'foo',
+                documentCategories: ['CONTRACT_RELATED' as const],
+            },
+        ],
+        contractType: 'BASE',
+        contractExecutionStatus: 'EXECUTED',
+        contractDocuments: [
+            {
+                s3URL: 'bar',
+                name: 'foo',
+                documentCategories: ['CONTRACT' as const],
+            },
+        ],
+        contractDateStart: new Date(),
+        contractDateEnd: new Date(),
+        managedCareEntities: ['ENROLLMENT_PROCESS'],
+        federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+        rateDocuments: [],
+        stateContacts: [
+            {
+                name: 'Test Person',
+                titleRole: 'A Role',
+                email: 'test+state+contact@example.com',
+            },
+        ],
+        actuaryContacts: [],
+        ...submissionPartial,
+    }
+}
+
 const mockContractOnlyFormData = (
     submissionPartial?: Partial<LockedHealthPlanFormDataType>
 ): LockedHealthPlanFormDataType => {
@@ -340,6 +386,7 @@ export {
     mockContractOnlyFormData,
     mockContractAndRatesFormData,
     mockUnlockedContractAndRatesFormData,
+    mockUnlockedContractOnlyFormData,
     mockUser,
     testEmailer,
 }
