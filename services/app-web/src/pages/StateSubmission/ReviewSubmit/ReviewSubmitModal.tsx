@@ -133,7 +133,7 @@ export const ReviewSubmitModal = ({
             isSubmitting={formik.isSubmitting || submitMutationLoading}
         >
             {modalAlert && (
-                <Alert type="error" heading="Unlock Error">
+                <Alert type="error" heading="Submission Error">
                     {modalAlert}
                 </Alert>
             )}
