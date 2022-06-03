@@ -10,6 +10,7 @@ import { Logo } from '../Logo'
 import styles from './Header.module.scss'
 import { PageHeadingRow } from './PageHeadingRow/PageHeadingRow'
 import { UserLoginInfo } from './UserLoginInfo/UserLoginInfo'
+import { Link } from 'react-router-dom'
 
 export type HeaderProps = {
     authMode: AuthModeType

@@ -19,6 +19,13 @@ const LoggedInUserInfo = (
 ): React.ReactElement => {
     return (
         <div className={styles.userInfo}>
+            <a
+                href={'mailto: mc-review@cms.hhs.gov'}
+                className="usa-link"
+            >
+                Submit feedback
+            </a>
+            <span className={styles.divider}>|</span>
             <span>{user.email}</span>
             <span className={styles.divider}>|</span>
 
