@@ -22,6 +22,7 @@ const LoggedInUserInfo = (
             <a
                 href={'mailto: mc-review@cms.hhs.gov'}
                 className="usa-link"
+                target="_blank"
             >
                 Submit feedback
             </a>
