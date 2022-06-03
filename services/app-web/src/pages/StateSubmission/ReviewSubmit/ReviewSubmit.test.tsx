@@ -3,14 +3,8 @@ import {
     fetchCurrentUserMock,
     mockCompleteDraft,
     submitHealthPlanPackageMockError,
-    submitHealthPlanPackageMockSuccess,
 } from '../../../testHelpers/apolloHelpers'
-import { Route } from 'react-router-dom'
-import { Location } from 'history'
-import {
-    renderWithProviders,
-    userClickByTestId,
-} from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { ReviewSubmit } from './ReviewSubmit'
 import userEvent from '@testing-library/user-event'
 
@@ -203,57 +197,6 @@ describe('ReviewSubmit', () => {
         })
     })
 
-    it('redirects if submission succeeds', async () => {
-        let testLocation: Location
-        renderWithProviders(
-            <>
-                <Route
-                    path="*"
-                    render={({ location }) => {
-                        testLocation = location as Location
-                        return null
-                    }}
-                ></Route>
-                <ReviewSubmit
-                    draftSubmission={mockCompleteDraft()}
-                    unlocked={false}
-                    submissionName="MN-MSHO-0001"
-                />
-            </>,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        submitHealthPlanPackageMockSuccess({
-                            id: mockCompleteDraft().id,
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: `draftSubmission/${
-                        mockCompleteDraft().id
-                    }/review-and-submit`,
-                },
-            }
-        )
-
-        const submit = screen.getByTestId('review-and-submit-modal-submit')
-        submit.click()
-
-        await waitFor(() => {
-            const confirmSubmit = screen.getByTestId(
-                'review-and-submit-modal-submit'
-            )
-            expect(confirmSubmit).toBeInTheDocument()
-            confirmSubmit.click()
-        })
-
-        await waitFor(() => {
-            expect(testLocation.pathname).toBe(`/dashboard`)
-            expect(testLocation.search).toBe(`?justSubmitted=MN-MSHO-0001`)
-        })
-    })
-
     it('displays an error if submission fails', async () => {
         renderWithProviders(
             <ReviewSubmit
@@ -334,52 +277,6 @@ describe('Resubmitting plan packages', () => {
         })
     })
 
-    it('redirects if submission succeeds on unlocked plan package', async () => {
-        renderWithProviders(
-            <ReviewSubmit
-                draftSubmission={mockCompleteDraft()}
-                unlocked={true}
-                submissionName="MN-MSHO-0001"
-            />,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        submitHealthPlanPackageMockSuccess({
-                            id: mockCompleteDraft().id,
-                            submittedReason: 'Test submission summary',
-                        }),
-                    ],
-                },
-                routerProvider: {
-                    route: `draftSubmission/${
-                        mockCompleteDraft().id
-                    }/review-and-submit`,
-                },
-            }
-        )
-        screen.getByTestId('form-submit').click()
-
-        userEvent.type(
-            screen.getByTestId('submittedReason'),
-            'Test submission summary'
-        )
-
-        screen.getByTestId('review-and-submit-modal-submit').click()
-
-        // the popup dialog should be hidden again
-        await waitFor(() => {
-            expect(screen.getByRole('dialog')).toHaveClass('is-hidden')
-        })
-
-        /* history.location is throwing errors
-        await waitFor(() => {
-            expect(history.location.pathname).toBe(`/dashboard`)
-            expect(history.location.search).toBe('?justSubmitted=MN-MSHO-0001')
-        })
-        */
-    })
-
     it('displays an error if submission fails on unlocked plan package', async () => {
         renderWithProviders(
             <ReviewSubmit
@@ -407,89 +304,10 @@ describe('Resubmitting plan packages', () => {
 
         screen.getByTestId('review-and-submit-modal-submit').click()
 
-        await waitFor(() => {
-            expect(screen.getByRole('dialog')).toHaveClass('is-hidden')
-        })
-
         expect(
             await screen.findByText(
                 'Error attempting to submit. Please try again.'
             )
         ).toBeInTheDocument()
-    })
-
-    it('displays form validation error when submitting without an submission summary', async () => {
-        renderWithProviders(
-            <ReviewSubmit
-                draftSubmission={mockCompleteDraft()}
-                unlocked={true}
-                submissionName="MN-MSHO-0001"
-            />,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        submitHealthPlanPackageMockSuccess({
-                            id: mockCompleteDraft().id,
-                            submittedReason: 'Test submission summary',
-                        }),
-                    ],
-                },
-            }
-        )
-        screen.getByTestId('form-submit').click()
-
-        await waitFor(() => {
-            expect(screen.getByRole('dialog')).toHaveClass('is-visible')
-            expect(screen.getByText('Summarize changes')).toBeInTheDocument()
-        })
-
-        screen.getByTestId('review-and-submit-modal-submit').click()
-
-        expect(
-            await screen.findByText('You must provide a summary of changes')
-        ).toBeInTheDocument()
-    })
-
-    it('draws focus to submitted summary textarea when form validation errors exist', async () => {
-        renderWithProviders(
-            <ReviewSubmit
-                draftSubmission={mockCompleteDraft()}
-                unlocked={true}
-                submissionName="MN-MSHO-0001"
-            />,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        submitHealthPlanPackageMockSuccess({
-                            id: mockCompleteDraft().id,
-                        }),
-                    ],
-                },
-            }
-        )
-        userClickByTestId(screen, 'form-submit')
-
-        // the popup dialog should be visible now
-        await waitFor(() =>
-            screen.getByText(
-                'Provide summary of all changes made to this submission'
-            )
-        )
-
-        // Using findBy because it seems like the timeout in findBy gives it enough time to find the textarea?
-        const textbox = await screen.findByTestId('submittedReason')
-        expect(textbox).toBeInTheDocument()
-
-        // submit without entering anything
-        userClickByTestId(screen, 'review-and-submit-modal-submit')
-
-        expect(
-            await screen.findByText('You must provide a summary of changes')
-        ).toBeInTheDocument()
-
-        // check focus after error
-        expect(textbox).toHaveFocus()
     })
 })

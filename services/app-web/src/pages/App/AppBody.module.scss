@@ -14,3 +14,11 @@
     flex-direction: column;
     background-color: color('base-lightest');
 }
+
+.testEnvironmentBanner {
+    background-color: $cms-color-gold-darker;
+    font-weight: bold;
+    text-align: center;
+    font-size: 1rem;
+    padding: .5rem;
+}

@@ -5,8 +5,6 @@ import {
     mockContractAndRatesDraft,
     mockStateSubmission,
 } from '../../../testHelpers/apolloHelpers'
-import { Route } from 'react-router'
-import { RoutesRecord } from '../../../constants/routes'
 
 describe('ContractDetailsSummarySection', () => {
     const draftContractAndRatesSubmission = mockContractAndRatesDraft()
@@ -235,20 +233,10 @@ describe('ContractDetailsSummarySection', () => {
 
     it('does not render download all button when on previous submission', () => {
         renderWithProviders(
-            <Route
-                path={RoutesRecord.SUBMISSIONS_REVISION}
-                component={() => (
-                    <ContractDetailsSummarySection
-                        submission={draftContractAndRatesSubmission}
-                        submissionName="MN-PMAP-0001"
-                    />
-                )}
-            />,
-            {
-                routerProvider: {
-                    route: '/submissions/15/revisions/2',
-                },
-            }
+            <ContractDetailsSummarySection
+                submission={draftContractAndRatesSubmission}
+                submissionName="MN-PMAP-0001"
+            />
         )
         expect(
             screen.queryByRole('button', {

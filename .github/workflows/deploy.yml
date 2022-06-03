@@ -230,6 +230,7 @@ jobs:
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
+      ses_rates_email_addresses: ${{ secrets.SES_RATES_EMAIL_ADDRESSES }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       react_app_auth_mode: AWS_COGNITO

@@ -1,5 +1,6 @@
-import { FileUpload, S3FileData } from './FileUpload'
-import {fakeRequest} from '../../testHelpers/jestHelpers'
+//Changed import from component/index.ts to fix Cannot access before initialization error on multiple stories when upgrading to storybook 6.5.4 as a part of react-router v6 upgrade
+import { FileUpload, S3FileData } from '../index'
+import { fakeRequest } from '../../testHelpers/jestHelpers'
 
 export default {
     title: 'Components/Forms/FileUpload',
@@ -15,7 +16,8 @@ export const DemoListUploadSuccess = (): React.ReactElement => {
             label="FileInput"
             renderMode="list"
             uploadFile={(file: File) =>
-                fakeRequest<S3FileData>(true, resolveData)}
+                fakeRequest<S3FileData>(true, resolveData)
+            }
             scanFile={async (key: string) => {
                 await fakeRequest<S3FileData>(true, resolveData)
                 return
@@ -149,5 +151,3 @@ export const DemoTableScanFailure = (): React.ReactElement => {
         />
     )
 }
-
-

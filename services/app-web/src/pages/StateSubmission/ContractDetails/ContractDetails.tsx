@@ -8,7 +8,7 @@ import {
     DateRangePicker,
 } from '@trussworks/react-uswds'
 import { v4 as uuidv4 } from 'uuid'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Formik, FormikErrors } from 'formik'
 
 import styles from '../StateSubmissionForm.module.scss'
@@ -95,8 +95,7 @@ export const ContractDetails = ({
     updateDraft,
 }: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const history = useHistory()
-
+    const navigate = useNavigate()
     // Contract documents state management
     const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
@@ -328,7 +327,7 @@ export const ContractDetails = ({
                     updatedSubmission
                 )
             } else if (updatedSubmission) {
-                history.push(options.redirectPath)
+                navigate(options.redirectPath)
             }
         } catch (serverError) {
             setSubmitting(false)
@@ -343,8 +342,8 @@ export const ContractDetails = ({
                     shouldValidateDocuments: true,
                     redirectPath:
                         draftSubmission.submissionType === 'CONTRACT_ONLY'
-                            ? 'contacts'
-                            : 'rate-details',
+                            ? `../contacts`
+                            : `../rate-details`,
                 })
             }}
             validationSchema={ContractDetailsFormSchema}
@@ -831,14 +830,14 @@ export const ContractDetails = ({
                             backOnClick={async () => {
                                 // do not need to validate or resubmit if no documents are uploaded
                                 if (fileItems.length === 0) {
-                                    history.push('type')
+                                    navigate('../type')
                                 } else {
                                     await handleFormSubmit(
                                         values,
                                         setSubmitting,
                                         {
                                             shouldValidateDocuments: false,
-                                            redirectPath: 'type',
+                                            redirectPath: '../type',
                                         }
                                     )
                                 }

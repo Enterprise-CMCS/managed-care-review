@@ -1,7 +1,6 @@
 import React from 'react'
 import userEvent from '@testing-library/user-event'
-import { Route } from 'react-router-dom'
-import { Location } from 'history'
+import { Route, Location, Routes } from 'react-router-dom'
 import { screen, waitFor, Screen, queries } from '@testing-library/react'
 import { CognitoUser, CognitoUserPool } from 'amazon-cognito-identity-js'
 
@@ -89,16 +88,9 @@ describe('Auth', () => {
             let testLocation: Location
 
             renderWithProviders(
-                <>
-                    <Route
-                        path="*"
-                        render={({ location }) => {
-                            testLocation = location as Location
-                            return null
-                        }}
-                    />
-                    (<CognitoLogin />
-                </>,
+                <Routes>
+                    <Route path="/auth" element={<CognitoLogin />} />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -106,6 +98,10 @@ describe('Auth', () => {
                             fetchCurrentUserMock({ statusCode: 403 }),
                         ],
                     },
+                    routerProvider: {
+                        route: '/auth',
+                    },
+                    location: (location) => (testLocation = location),
                 }
             )
 
@@ -120,16 +116,9 @@ describe('Auth', () => {
             let testLocation: Location
 
             renderWithProviders(
-                <>
-                    <Route
-                        path="*"
-                        render={({ location }) => {
-                            testLocation = location as Location
-                            return null
-                        }}
-                    />
-                    <CognitoLogin />
-                </>,
+                <Routes>
+                    <Route path="/auth" element={<CognitoLogin />} />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -141,6 +130,7 @@ describe('Auth', () => {
                     routerProvider: {
                         route: '/auth',
                     },
+                    location: (location) => (testLocation = location),
                 }
             )
 
@@ -191,17 +181,11 @@ describe('Auth', () => {
 
         it('when login is successful, redirect to dashboard', async () => {
             let testLocation: Location
+
             renderWithProviders(
-                <>
-                    <Route
-                        path="*"
-                        render={({ location }) => {
-                            testLocation = location as Location
-                            return null
-                        }}
-                    />
-                    <LocalLogin />
-                </>,
+                <Routes>
+                    <Route path="/auth" element={<LocalLogin />} />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -210,6 +194,10 @@ describe('Auth', () => {
                             fetchCurrentUserMock({ statusCode: 200 }),
                         ],
                     },
+                    routerProvider: {
+                        route: '/auth',
+                    },
+                    location: (location) => (testLocation = location),
                 }
             )
 
@@ -230,16 +218,9 @@ describe('Auth', () => {
             let testLocation: Location
 
             renderWithProviders(
-                <>
-                    <Route
-                        path="*"
-                        render={({ location }) => {
-                            testLocation = location as Location
-                            return null
-                        }}
-                    />
-                    <LocalLogin />/
-                </>,
+                <Routes>
+                    <Route path="/auth" element={<LocalLogin />} />
+                </Routes>,
                 {
                     apolloProvider: {
                         mocks: [
@@ -250,6 +231,7 @@ describe('Auth', () => {
                     routerProvider: {
                         route: '/auth',
                     },
+                    location: (location) => (testLocation = location),
                 }
             )
 

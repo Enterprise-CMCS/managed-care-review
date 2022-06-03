@@ -30,6 +30,49 @@ describe('App Body and routes', () => {
         expect(mainElement).toBeInTheDocument()
     })
 
+    describe('Environment specific banner', () => {
+        const OLD_ENV = process.env
+
+        beforeEach(() => {
+            jest.resetModules() // Most important - clears the cache
+            process.env = { ...OLD_ENV } // Make a copy
+        })
+
+        afterAll(() => {
+            process.env = OLD_ENV // Restore old environment
+        })
+
+        it('shows test environment banner in val', () => {
+            process.env.REACT_APP_STAGE_NAME = 'val'
+            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        indexHealthPlanPackagesMockSuccess(),
+                    ],
+                },
+            })
+
+            expect(
+                screen.getByText('THIS IS A TEST ENVIRONMENT')
+            ).toBeInTheDocument()
+        })
+
+        it('does not show test environment banner in prod', () => {
+            process.env.REACT_APP_STAGE_NAME = 'prod'
+            renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        indexHealthPlanPackagesMockSuccess(),
+                    ],
+                },
+            })
+
+            expect(screen.queryByText('THIS IS A TEST ENVIRONMENT')).toBeNull()
+        })
+    })
+
     describe('/', () => {
         it('display dashboard when logged in', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
@@ -97,9 +140,7 @@ describe('App Body and routes', () => {
 
         it('when user clicks Sign In link, redirects to /auth', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
-            await waitFor(() => {
-                userClickSignIn(screen)
-            })
+            await userClickSignIn(screen)
 
             expect(
                 screen.getByRole('heading', { name: /Auth Page/i, level: 2 })
@@ -109,9 +150,7 @@ describe('App Body and routes', () => {
         it('display local login page when expected', async () => {
             renderWithProviders(<AppBody authMode={'LOCAL'} />)
 
-            await waitFor(() => {
-                userClickSignIn(screen)
-            })
+            await userClickSignIn(screen)
 
             expect(
                 screen.getByRole('heading', {
@@ -123,9 +162,7 @@ describe('App Body and routes', () => {
 
         it('display cognito signup page when expected', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
-            await waitFor(() => {
-                userClickSignIn(screen)
-            })
+            await userClickSignIn(screen)
 
             expect(
                 screen.getByRole('textbox', { name: 'First Name' })
@@ -142,9 +179,7 @@ describe('App Body and routes', () => {
     describe('page scrolling', () => {
         it('scroll top on page load', async () => {
             renderWithProviders(<AppBody authMode={'LOCAL'} />)
-            await waitFor(() => {
-                userClickSignIn(screen)
-            })
+            await userClickSignIn(screen)
             expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
         })
     })

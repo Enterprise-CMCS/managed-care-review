@@ -14,6 +14,7 @@ export const PreviousSubmissionBanner = ({
             type="warning"
             heading="Previous Submission"
             data-testid="previousSubmissionBanner"
+            validation={true}
         >
             <p
                 className="usa-alert__text"

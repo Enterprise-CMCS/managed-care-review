@@ -6,7 +6,7 @@ import {
     ModalToggleButton,
 } from '@trussworks/react-uswds'
 import React, { useEffect, useState, useRef } from 'react'
-import { NavLink, useLocation, useParams } from 'react-router-dom'
+import { useNavigate, NavLink, useParams } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
 import {
     packageName,
@@ -67,7 +67,12 @@ function UnlockModalButton({
 export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
     const { id } = useParams<{ id: string }>()
-    const { pathname } = useLocation()
+    if (!id) {
+        throw new Error(
+            'PROGRAMMING ERROR: id param not set in state submission form.'
+        )
+    }
+    const navigate = useNavigate()
     const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
     const modalRef = useRef<ModalRef>(null)
@@ -97,7 +102,6 @@ export const SubmissionSummary = (): React.ReactElement => {
     })
 
     const submissionAndRevisions = data?.fetchHealthPlanPackage.pkg
-
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
 
     // Pull out the correct revision form api request, display errors for bad dad
@@ -119,9 +123,8 @@ export const SubmissionSummary = (): React.ReactElement => {
                     'ERROR: submission in summary has no submitted revision',
                     submissionAndRevisions.revisions
                 )
-                setPageLevelAlert(
-                    'Error fetching the submission. Please try again.'
-                )
+                // if state user goes to submission/:id for a draft submission, put them on the form
+                navigate(`/submissions/${id}/edit/type`)
                 return
             }
 
@@ -173,16 +176,22 @@ export const SubmissionSummary = (): React.ReactElement => {
 
             setPackageData(submissionResult)
         }
-    }, [submissionAndRevisions, setPackageData, setPageLevelAlert])
+    }, [
+        submissionAndRevisions,
+        setPackageData,
+        setPageLevelAlert,
+        navigate,
+        id,
+    ])
 
     // Update header with submission name
     useEffect(() => {
         const subWithRevisions = data?.fetchHealthPlanPackage.pkg
         if (packageData && subWithRevisions) {
             const programs = subWithRevisions.state.programs
-            updateHeading(pathname, packageName(packageData, programs))
+            updateHeading({ customHeading: packageName(packageData, programs) })
         }
-    }, [updateHeading, pathname, packageData, data])
+    }, [updateHeading, packageData, data])
 
     if (loading || !submissionAndRevisions || !packageData) {
         return (
@@ -301,10 +310,13 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <SupportingDocumentsSummarySection submission={packageData} />
 
                 <ChangeHistory submission={submissionAndRevisions} />
-                <UnlockModal
-                    modalRef={modalRef}
-                    healthPlanPackage={submissionAndRevisions}
-                />
+                {
+                    // if the session is expiring, close this modal so the countdown modal can appear
+                    <UnlockModal
+                        modalRef={modalRef}
+                        healthPlanPackage={submissionAndRevisions}
+                    />
+                }
             </GridContainer>
         </div>
     )

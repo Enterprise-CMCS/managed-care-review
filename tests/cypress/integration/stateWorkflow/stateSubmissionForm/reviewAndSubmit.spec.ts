@@ -8,14 +8,14 @@ describe('review and submit', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.visit(`/submissions/${draftSubmissionId}/review-and-submit`)
+            cy.visit(`/submissions/${draftSubmissionId}/edit/review-and-submit`)
 
             // Navigate to documents page by clicking back
             cy.navigateForm('BACK')
             cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
 
             // Navigate to review and submit page
-            cy.visit(`/submissions/${draftSubmissionId}/review-and-submit`)
+            cy.visit(`/submissions/${draftSubmissionId}/edit/review-and-submit`)
 
             cy.findByText('Submitted').should('not.exist')
             cy.findByText('Download all contract documents').should('not.exist')
@@ -35,10 +35,9 @@ describe('review and submit', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.visit(`/submissions/${draftSubmissionId}/review-and-submit`)
+            cy.visit(`/submissions/${draftSubmissionId}/edit/review-and-submit`)
 
             cy.submitStateSubmissionForm(false)
-            cy.findAllByTestId('modalWindow').should('be.hidden')
             cy.findByRole('heading', { level: 4, name: /Submission Error/ })
         })
     })

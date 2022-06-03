@@ -15,9 +15,11 @@ export function AppBody({
 }: {
     authMode: AuthModeType
 }): React.ReactElement {
-    const [alert, setAlert] = React.useState<React.ReactElement | undefined>(
-        undefined
-    )
+    const [globalAlert, setGlobalAlert] = React.useState<
+        React.ReactElement | undefined
+    >(undefined)
+    const environmentName = process.env.REACT_APP_STAGE_NAME || ''
+    const isLowerEnvironment = environmentName !== 'prod'
     const { loginStatus } = useAuth()
 
     return (
@@ -26,14 +28,19 @@ export function AppBody({
                 Skip to main content
             </a>
             <GovBanner aria-label="Official government website" />
+            {isLowerEnvironment && (
+                <div className={styles.testEnvironmentBanner}>
+                    THIS IS A TEST ENVIRONMENT
+                </div>
+            )}
 
-            <Header authMode={authMode} setAlert={setAlert} />
+            <Header authMode={authMode} setAlert={setGlobalAlert} />
             <main id="main-content" className={styles.mainContent} role="main">
-                {alert && alert}
+                {globalAlert && globalAlert}
                 {loginStatus === 'LOADING' ? (
                     <Loading />
                 ) : (
-                    <AppRoutes authMode={authMode} />
+                    <AppRoutes authMode={authMode} setAlert={setGlobalAlert} />
                 )}
             </main>
 

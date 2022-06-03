@@ -7,7 +7,7 @@ import {
     Label,
     TextInput,
 } from '@trussworks/react-uswds'
-import { useHistory } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import { signIn } from '../Auth/cognitoAuth'
 import { useAuth } from '../../contexts/AuthContext'
@@ -23,9 +23,9 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
         loginPassword: '',
     })
 
-    const history = useHistory()
+    const navigate = useNavigate()
     const { loginStatus, checkAuth } = useAuth()
-    if (loginStatus === 'LOGGED_IN') history.push('/')
+    if (loginStatus === 'LOGGED_IN') navigate('/')
 
     const onFieldChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = event.target
@@ -65,7 +65,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
                     setShowFormAlert(true)
                 }
 
-                history.push('/')
+                navigate('/')
             }
         } catch (err) {
             console.log('Unexpected error signing in:', err)

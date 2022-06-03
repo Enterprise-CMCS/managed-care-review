@@ -29,6 +29,7 @@ custom:
   emailSource: ${env:SES_SOURCE_EMAIL_ADDRESS}
   emailerMode: ${env:EMAILER_MODE}
   emailReviewTeamAddresses: ${env:SES_REVIEW_TEAM_EMAIL_ADDRESSES}
+  ratesEmailAddresses: ${env:SES_RATES_EMAIL_ADDRESSES}
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${self:custom.stage}.PostgresAuroraArn }
   iamPath: ${env:IAM_PATH, "/"}
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
@@ -120,6 +121,7 @@ provider:
     EMAILER_MODE: ${self:custom.emailerMode}
     SES_SOURCE_EMAIL_ADDRESS: ${self:custom.emailSource}
     SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${self:custom.emailReviewTeamAddresses}
+    SES_RATES_EMAIL_ADDRESSES: ${self:custom.ratesEmailAddresses}
     APPLICATION_ENDPOINT: ${self:custom.applicationEndpoint}
     AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
     OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml

@@ -1,5 +1,3 @@
-import { matchPath } from 'react-router'
-
 /*
     Every application route is named here.
     These types ensure we use valid routes throughout the application.
@@ -11,25 +9,17 @@ const ROUTES = [
     'HELP',
     'SUBMISSIONS',
     'SUBMISSIONS_NEW',
-    'SUBMISSIONS_FORM',
     'SUBMISSIONS_TYPE',
+    'SUBMISSIONS_FORM',
     'SUBMISSIONS_CONTRACT_DETAILS',
     'SUBMISSIONS_RATE_DETAILS',
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_DOCUMENTS',
     'SUBMISSIONS_REVIEW_SUBMIT',
     'SUBMISSIONS_REVISION',
+    'SUBMISSIONS_SUMMARY',
 ] as const // iterable union type
 type RouteT = typeof ROUTES[number]
-
-const STATE_SUBMISSION_FORM_ROUTES = [
-    'SUBMISSIONS_TYPE',
-    'SUBMISSIONS_CONTRACT_DETAILS',
-    'SUBMISSIONS_RATE_DETAILS',
-    'SUBMISSIONS_CONTACTS',
-    'SUBMISSIONS_DOCUMENTS',
-    'SUBMISSIONS_REVIEW_SUBMIT',
-] as RouteT[]
 
 const RoutesRecord: Record<RouteT, string> = {
     ROOT: '/',
@@ -38,17 +28,30 @@ const RoutesRecord: Record<RouteT, string> = {
     HELP: '/help',
     SUBMISSIONS: '/submissions',
     SUBMISSIONS_NEW: '/submissions/new',
-    SUBMISSIONS_FORM: '/submissions/:id',
-    SUBMISSIONS_TYPE: '/submissions/:id/type',
-    SUBMISSIONS_CONTRACT_DETAILS: '/submissions/:id/contract-details',
-    SUBMISSIONS_RATE_DETAILS: '/submissions/:id/rate-details',
-    SUBMISSIONS_CONTACTS: '/submissions/:id/contacts',
-    SUBMISSIONS_DOCUMENTS: '/submissions/:id/documents',
-    SUBMISSIONS_REVIEW_SUBMIT: '/submissions/:id/review-and-submit',
+    SUBMISSIONS_FORM: '/submissions/:id/edit/*',
+    SUBMISSIONS_TYPE: '/submissions/:id/edit/type',
+    SUBMISSIONS_CONTRACT_DETAILS: '/submissions/:id/edit/contract-details',
+    SUBMISSIONS_RATE_DETAILS: '/submissions/:id/edit/rate-details',
+    SUBMISSIONS_CONTACTS: '/submissions/:id/edit/contacts',
+    SUBMISSIONS_DOCUMENTS: '/submissions/:id/edit/documents',
+    SUBMISSIONS_REVIEW_SUBMIT: '/submissions/:id/edit/review-and-submit',
+    SUBMISSIONS_SUMMARY: '/submissions/:id',
     SUBMISSIONS_REVISION: '/submissions/:id/revisions/:revisionVersion',
 }
 
-// Static page headings used in <header> h1 when logged in. Dynamic headings, when necessary, are set in page specific parent component.
+const STATE_SUBMISSION_FORM_ROUTES: RouteT[] = [
+    'SUBMISSIONS_TYPE',
+    'SUBMISSIONS_CONTRACT_DETAILS',
+    'SUBMISSIONS_RATE_DETAILS',
+    'SUBMISSIONS_CONTACTS',
+    'SUBMISSIONS_DOCUMENTS',
+    'SUBMISSIONS_REVIEW_SUBMIT',
+]
+
+/*
+    Static page headings used in <header> h1 when logged in. Dynamic headings, when necessary, are set in page specific parent component.
+    Every route does not need a page heading in the record. It is a design choice what goes here. For example, we do not any headings when logged in user is on a Not Found page
+*/
 const PageHeadingsRecord: Record<string, string> = {
     ROOT: 'Dashboard',
     DASHBOARD: 'Dashboard',
@@ -56,7 +59,7 @@ const PageHeadingsRecord: Record<string, string> = {
 }
 
 // Static page titles used in <title>.
-// Every route must have a fallback page title. Dynamic page title logic are set in AppRoutes.tsx
+// Every route must have a page title in the record for accessibility reasons. Dynamic page titles, when necessary, are set in AppRoutes
 const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     ROOT: 'Home',
     AUTH: 'Login',
@@ -71,19 +74,9 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_CONTACTS: 'Contacts',
     SUBMISSIONS_DOCUMENTS: 'Supporting documents',
     SUBMISSIONS_REVIEW_SUBMIT: 'Review and submit',
-    SUBMISSIONS_REVISION: 'Submission Revision',
+    SUBMISSIONS_REVISION: 'Submission revision',
+    SUBMISSIONS_SUMMARY: 'Submission summary',
     UNKNOWN_ROUTE: 'Not found',
-}
-
-const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {
-    const match = ROUTES.find((route) =>
-        matchPath(pathname, {
-            path: RoutesRecord[route],
-            exact: true,
-            strict: true,
-        })
-    )
-    return match ? match : 'UNKNOWN_ROUTE'
 }
 
 export {
@@ -92,7 +85,6 @@ export {
     RoutesRecord,
     ROUTES,
     STATE_SUBMISSION_FORM_ROUTES,
-    getRouteName,
 }
 
 export type { RouteT }

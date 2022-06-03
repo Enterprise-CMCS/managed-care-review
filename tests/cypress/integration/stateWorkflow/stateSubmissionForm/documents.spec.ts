@@ -7,10 +7,10 @@ describe('documents', () => {
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
             const draftSubmissionID = pathname.split('/')[2]
-            cy.visit(`/submissions/${draftSubmissionID}/documents`)
+            cy.visit(`/submissions/${draftSubmissionID}/edit/documents`)
 
             // Add two of the same document
-            cy.visit(`/submissions/${draftSubmissionID}/documents`)
+            cy.visit(`/submissions/${draftSubmissionID}/edit/documents`)
             cy.findByTestId('file-input-input').attachFile([
                 'documents/trussel-guide.pdf',
             ])
@@ -27,7 +27,7 @@ describe('documents', () => {
             cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.findByText(/1 complete, 1 error, 0 pending/).should('exist')
             cy.findByText('Duplicate file, please remove').should('exist')
-            cy.visit(`/submissions/${draftSubmissionID}/documents`)
+            cy.visit(`/submissions/${draftSubmissionID}/edit/documents`)
 
             // Add two more valid documents, then navigate back
             cy.findByRole('heading', { name: /Supporting documents/ })
@@ -61,7 +61,7 @@ describe('documents', () => {
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
             // reload page, see two documents, duplicate was discarded on Back
-            cy.visit(`/submissions/${draftSubmissionID}/documents`)
+            cy.visit(`/submissions/${draftSubmissionID}/edit/documents`)
             cy.findAllByRole('row').should('have.length', 3)
             cy.findAllByRole('checkbox', {
                 name: 'rate-supporting',
@@ -86,7 +86,7 @@ describe('documents', () => {
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
             const draftSubmissionId = pathname.split('/')[2]
-            cy.visit(`/submissions/${draftSubmissionId}/documents`)
+            cy.visit(`/submissions/${draftSubmissionId}/edit/documents`)
 
             // Drop invalid files and invalid type message appears
             cy.findByTestId('file-input-droptarget')

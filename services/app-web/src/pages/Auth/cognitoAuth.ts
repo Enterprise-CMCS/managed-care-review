@@ -165,3 +165,13 @@ export async function signOut(): Promise<null> {
         throw e
     }
 }
+
+export async function extendSession(): Promise<null> {
+    try {
+        await AmplifyAuth.currentSession()
+        return null
+    } catch (e) {
+        console.log('error extending session: ', e)
+        throw e
+    }
+}
