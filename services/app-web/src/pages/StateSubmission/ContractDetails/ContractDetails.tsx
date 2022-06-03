@@ -22,6 +22,7 @@ import {
     FieldPreserveScrollPosition,
     ErrorSummary,
     PoliteErrorMessage,
+    FieldYesNo,
 } from '../../../components'
 import {
     formatForForm,
@@ -777,82 +778,25 @@ export const ContractDetails = ({
                                     {isContractAmendmentSelected(values) && (
                                         <FormGroup>
                                             <Fieldset
-                                                role="radiogroup"
                                                 aria-required
-                                                className={styles.radioGroup}
-                                                legend="Benefits provided by the managed care plans"
-                                                id="modifiedBenefitsProvided"
+                                                legend="Does this contract action include new or modified provisions related to any of the following"
                                             >
-                                                {showFieldErrors(
-                                                    errors.modifiedBenefitsProvided
-                                                ) && (
-                                                    <PoliteErrorMessage>
-                                                        {
-                                                            errors.modifiedBenefitsProvided
-                                                        }
-                                                    </PoliteErrorMessage>
-                                                )}
-                                                <FieldRadio
-                                                    id="modifiedBenefitsProvidedYes"
+                                                <FieldYesNo
+                                                    id="modifiedBenefitsProvided"
                                                     name="modifiedBenefitsProvided"
-                                                    label="Yes"
-                                                    aria-required
-                                                    value={'YES'}
-                                                    checked={
-                                                        values.modifiedBenefitsProvided ===
-                                                        'YES'
-                                                    }
+                                                    label="Benefits provided by the managed care plans"
+                                                    showError={showFieldErrors(
+                                                        errors.modifiedBenefitsProvided
+                                                    )}
                                                 />
-                                                <FieldRadio
-                                                    id="modifiedBenefitsProvidedNo"
-                                                    name="modifiedBenefitsProvided"
-                                                    label="No"
-                                                    aria-required
-                                                    value={'NO'}
-                                                    checked={
-                                                        values.modifiedBenefitsProvided ===
-                                                        'NO'
-                                                    }
-                                                />
-                                            </Fieldset>
 
-                                            <Fieldset
-                                                role="radiogroup"
-                                                aria-required
-                                                className={styles.radioGroup}
-                                                legend="Geographic areas served by the managed care plans"
-                                                id="modifiedGeoAreaServed"
-                                            >
-                                                {showFieldErrors(
-                                                    errors.modifiedGeoAreaServed
-                                                ) && (
-                                                    <PoliteErrorMessage>
-                                                        {
-                                                            errors.modifiedGeoAreaServed
-                                                        }
-                                                    </PoliteErrorMessage>
-                                                )}
-                                                <FieldRadio
-                                                    id="modifiedGeoAreaServedYes"
+                                                <FieldYesNo
+                                                    id="modifiedGeoAreaServed"
                                                     name="modifiedGeoAreaServed"
-                                                    label="Yes"
-                                                    aria-required
-                                                    value={'YES'}
-                                                    checked={
-                                                        values.modifiedGeoAreaServed ===
-                                                        'YES'
-                                                    }
-                                                />
-                                                <FieldRadio
-                                                    id="modifiedGeoAreaServedNo"
-                                                    name="modifiedGeoAreaServed"
-                                                    label="No"
-                                                    aria-required
-                                                    value={'NO'}
-                                                    checked={
-                                                        values.modifiedGeoAreaServed ===
-                                                        'NO'
-                                                    }
+                                                    label="Geographic areas served by the managed care plans"
+                                                    showError={showFieldErrors(
+                                                        errors.modifiedGeoAreaServed
+                                                    )}
                                                 />
                                             </Fieldset>
                                         </FormGroup>
