@@ -38,7 +38,7 @@ export const FieldYesNo = ({
         <Fieldset
             role="radiogroup"
             aria-required={isRequired}
-            id={name}
+            id={id}
             className={styles.yesnofield}
         >
             <span className={styles.label}>{label}</span>
@@ -47,7 +47,7 @@ export const FieldYesNo = ({
             )}
             <span className={styles.optionsContainer}>
                 <FieldRadio
-                    id={name + 'Yes'}
+                    id={id + 'Yes'}
                     className={styles.yes}
                     name={name}
                     label="Yes"
@@ -55,7 +55,7 @@ export const FieldYesNo = ({
                     value="YES"
                 />
                 <FieldRadio
-                    id={name + 'No'}
+                    id={id + 'No'}
                     className={styles.no}
                     name={name}
                     label="No"
