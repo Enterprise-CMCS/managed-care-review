@@ -167,12 +167,12 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (cmsReviewSharedEmails === undefined)
         throw new Error(
-            'Configuration Error: SES_RATES_EMAIL_ADDRESSES is required'
+            'Configuration Error: SES_REVIEW_TEAM_EMAIL_ADDRESSES is required'
         )
 
     if (ratesReviewSharedEmails === undefined)
         throw new Error(
-            'Configuration Error: SES_REVIEW_TEAM_EMAIL_ADDRESSES is required'
+            'Configuration Error: SES_RATES_EMAIL_ADDRESSES is required'
         )
 
     if (applicationEndpoint === undefined || applicationEndpoint === '')
