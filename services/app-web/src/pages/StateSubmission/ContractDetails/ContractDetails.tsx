@@ -47,6 +47,7 @@ import {
 } from '../../../constants/healthPlanPackages'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
+import { formatYesNoForProto } from '../../../formHelpers/formatters'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -217,21 +218,12 @@ export const ContractDetails = ({
             (draftSubmission?.managedCareEntities as ManagedCareEntity[]) ?? [],
         federalAuthorities: draftSubmission?.federalAuthorities ?? [],
 
-        modifiedBenefitsProvided:
-            draftSubmission?.contractAmendmentInfo?.modifiedBenefitsProvided ===
-            undefined
-                ? undefined
-                : draftSubmission?.contractAmendmentInfo
-                      ?.modifiedBenefitsProvided
-                ? 'YES'
-                : 'NO',
-        modifiedGeoAreaServed:
-            draftSubmission?.contractAmendmentInfo?.modifiedGeoAreaServed ===
-            undefined
-                ? undefined
-                : draftSubmission?.contractAmendmentInfo?.modifiedGeoAreaServed
-                ? 'YES'
-                : 'NO',
+        modifiedBenefitsProvided: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedBenefitsProvided
+        ),
+        modifiedGeoAreaServed: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedGeoAreaServed
+        ),
     }
 
     const showFieldErrors = (error?: FormError) =>
@@ -307,12 +299,12 @@ export const ContractDetails = ({
 
         if (values.contractType === 'AMENDMENT') {
             draftSubmission.contractAmendmentInfo = {
-                modifiedBenefitsProvided: values.modifiedBenefitsProvided
-                    ? values.modifiedBenefitsProvided === 'YES'
-                    : undefined,
-                modifiedGeoAreaServed: values.modifiedGeoAreaServed
-                    ? values.modifiedGeoAreaServed === 'YES'
-                    : undefined,
+                modifiedBenefitsProvided: formatYesNoForProto(
+                    values.modifiedBenefitsProvided
+                ),
+                modifiedGeoAreaServed: formatYesNoForProto(
+                    values.modifiedGeoAreaServed
+                ),
             }
         } else {
             draftSubmission.contractAmendmentInfo = undefined

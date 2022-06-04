@@ -33,15 +33,6 @@ const submissionDocumentSchema = z.object({
 })
 
 const contractAmendmentInfoSchema = z.object({
-    itemsBeingAmended: z.array(z.string()),
-    otherItemBeingAmended: z.string().optional(),
-    capitationRatesAmendedInfo: z
-        .object({
-            reason: capitationRatesAmendedReasonSchema.optional(),
-            otherReason: z.string().optional(),
-        })
-        .optional(),
-
     modifiedBenefitsProvided: z.boolean().optional(),
     modifiedGeoAreaServed: z.boolean().optional(),
 })

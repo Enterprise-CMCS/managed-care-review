@@ -19,6 +19,7 @@ import {
     domainToBase64,
 } from '../../common-code/proto/healthPlanFormDataProto'
 import { testS3Client } from '../../testHelpers/s3Helpers'
+import { getYesNoFieldValue } from '../../testHelpers/fieldHelpers'
 
 describe('StateSubmissionForm', () => {
     describe('loads draft submission', () => {
@@ -100,6 +101,7 @@ describe('StateSubmissionForm', () => {
                 contractType: 'AMENDMENT',
                 contractAmendmentInfo: {
                     modifiedBenefitsProvided: true,
+                    modifiedGeoAreaServed: false,
                 },
             })
 
@@ -128,17 +130,16 @@ describe('StateSubmissionForm', () => {
             )
 
             await waitFor(() => {
-                expect(screen.getByLabelText('Capitation rates')).toBeChecked()
-
-                expect(screen.getByLabelText('Mid-year update')).toBeChecked()
-
                 expect(
-                    screen.getByLabelText('Geographic area served')
-                ).toBeChecked()
-
+                    getYesNoFieldValue(
+                        'Benefits provided by the managed care plans'
+                    )
+                ).toBe(true)
                 expect(
-                    screen.getByLabelText('Other item description')
-                ).toHaveValue('foobar')
+                    getYesNoFieldValue(
+                        'Geographic areas served by the managed care plans'
+                    )
+                ).toBe(false)
             })
         })
 
