@@ -360,7 +360,7 @@ jobs:
     steps:
       # this action sets env.WORKFLOW_CONCLUSION so we can call a
       # failure notification if any part of the workflow fails
-      - uses: technote-space/workflow-conclusion-action@v2
+      - uses: technote-space/workflow-conclusion-action@v3
 
       - name: Alert Slack On Failure
         uses: rtCamp/action-slack-notify@v2
