@@ -8,6 +8,7 @@ import {
     ContractTypeRecord,
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
+    ModifiedProvisionsRecord,
 } from '../../../constants/healthPlanPackages'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
@@ -15,7 +16,10 @@ import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
-import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import {
+    ContractAmendmentInfo,
+    HealthPlanFormDataType,
+} from '../../../common-code/healthPlanFormDataType'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -49,6 +53,32 @@ const createCheckboxList = ({
             ))}
         </ul>
     )
+}
+
+// This function takes a ContractAmendmentInfo and returns two lists of keys sorted by whether they are set true/false
+export function sortAmendedItems(
+    amendmentInfo: ContractAmendmentInfo | undefined
+): [string[], string[]] {
+    const modifiedProvisions = []
+    const unmodifiedProvisions = []
+
+    if (amendmentInfo) {
+        // We type cast this to be the list of keys in the ContractAmendmentInfo
+        const provisions = Object.keys(amendmentInfo) as Array<
+            keyof ContractAmendmentInfo
+        >
+
+        for (const provisionKey of provisions) {
+            const value = amendmentInfo[provisionKey]
+            if (value === true) {
+                modifiedProvisions.push(provisionKey)
+            } else {
+                unmodifiedProvisions.push(provisionKey)
+            }
+        }
+    }
+
+    return [modifiedProvisions, unmodifiedProvisions]
 }
 
 export const ContractDetailsSummarySection = ({
@@ -102,6 +132,10 @@ export const ContractDetailsSummarySection = ({
         contractSupportingDocuments,
         submissionName,
     ])
+
+    const [modifiedProvisions, unmodifiedProvisions] = sortAmendedItems(
+        submission.contractAmendmentInfo
+    )
 
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>
@@ -164,11 +198,29 @@ export const ContractDetailsSummarySection = ({
                             dict: FederalAuthorityRecord,
                         })}
                     />
-                    {submission.contractType === 'AMENDMENT' &&
-                        submission.contractAmendmentInfo && (
-                            <p>add Yes Nos here.</p>
-                        )}
                 </DoubleColumnGrid>
+                {submission.contractType === 'AMENDMENT' &&
+                    submission.contractAmendmentInfo && (
+                        <DoubleColumnGrid>
+                            <DataDetail
+                                id="modifiedProvisions"
+                                label="This contract action includes new or modified provisions related to the following"
+                                data={createCheckboxList({
+                                    list: modifiedProvisions,
+                                    dict: ModifiedProvisionsRecord,
+                                })}
+                            />
+
+                            <DataDetail
+                                id="unmodifiedProvisions"
+                                label="This contract action does NOT include new or modified provisions related to the following"
+                                data={createCheckboxList({
+                                    list: unmodifiedProvisions,
+                                    dict: ModifiedProvisionsRecord,
+                                })}
+                            />
+                        </DoubleColumnGrid>
+                    )}
             </dl>
             <UploadedDocumentsTable
                 documents={submission.contractDocuments}

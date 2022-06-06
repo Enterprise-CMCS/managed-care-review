@@ -65,4 +65,18 @@ export const ContractDetailsFormSchema = Yup.object().shape({
 
     modifiedBenefitsProvided: yesNoError,
     modifiedGeoAreaServed: yesNoError,
+    modifiedMedicaidBeneficiaries: yesNoError,
+    modifiedRiskSharingStrategy: yesNoError,
+    modifiedIncentiveArrangements: yesNoError,
+    modifiedWitholdAgreements: yesNoError,
+    modifiedStateDirectedPayments: yesNoError,
+    modifiedPassThroughPayments: yesNoError,
+    modifiedPaymentsForMentalDiseaseInstitutions: yesNoError,
+    modifiedMedicalLossRatioStandards: yesNoError,
+    modifiedOtherFinancialPaymentIncentive: yesNoError,
+    modifiedEnrollmentProcess: yesNoError,
+    modifiedGrevienceAndAppeal: yesNoError,
+    modifiedNetworkAdequacyStandards: yesNoError,
+    modifiedLengthOfContract: yesNoError,
+    modifiedNonRiskPaymentArrangements: yesNoError,
 })

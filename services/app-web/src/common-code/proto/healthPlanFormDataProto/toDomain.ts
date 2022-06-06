@@ -197,6 +197,28 @@ function parseContractAmendment(
     return {
         modifiedBenefitsProvided: cleanAmendment.modifiedBenefitsProvided,
         modifiedGeoAreaServed: cleanAmendment.modifiedGeoAreaServed,
+        modifiedMedicaidBeneficiaries:
+            cleanAmendment.modifiedMedicaidBeneficiaries,
+        modifiedRiskSharingStrategy: cleanAmendment.modifiedRiskSharingStrategy,
+        modifiedIncentiveArrangements:
+            cleanAmendment.modifiedIncentiveArrangements,
+        modifiedWitholdAgreements: cleanAmendment.modifiedWitholdAgreements,
+        modifiedStateDirectedPayments:
+            cleanAmendment.modifiedStateDirectedPayments,
+        modifiedPassThroughPayments: cleanAmendment.modifiedPassThroughPayments,
+        modifiedPaymentsForMentalDiseaseInstitutions:
+            cleanAmendment.modifiedPaymentsForMentalDiseaseInstitutions,
+        modifiedMedicalLossRatioStandards:
+            cleanAmendment.modifiedMedicalLossRatioStandards,
+        modifiedOtherFinancialPaymentIncentive:
+            cleanAmendment.modifiedOtherFinancialPaymentIncentive,
+        modifiedEnrollmentProcess: cleanAmendment.modifiedEnrollmentProcess,
+        modifiedGrevienceAndAppeal: cleanAmendment.modifiedGrevienceAndAppeal,
+        modifiedNetworkAdequacyStandards:
+            cleanAmendment.modifiedNetworkAdequacyStandards,
+        modifiedLengthOfContract: cleanAmendment.modifiedLengthOfContract,
+        modifiedNonRiskPaymentArrangements:
+            cleanAmendment.modifiedNonRiskPaymentArrangements,
     }
 }
 

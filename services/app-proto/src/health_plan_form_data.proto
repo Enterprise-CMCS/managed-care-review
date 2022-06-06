@@ -85,6 +85,21 @@ message ContractInfo {
 
     optional bool modified_benefits_provided = 4;
     optional bool modified_geo_area_served = 5;
+    optional bool modified_medicaid_beneficiaries = 6;
+    optional bool modified_risk_sharing_strategy = 7;
+    optional bool modified_incentive_arrangements = 8;
+    optional bool modified_withold_agreements = 9;
+    optional bool modified_state_directed_payments = 10;
+    optional bool modified_pass_through_payments = 11;
+    optional bool modified_payments_for_mental_disease_institutions = 12;
+    optional bool modified_medical_loss_ratio_standards = 13;
+    optional bool modified_other_financial_payment_incentive = 14;
+    optional bool modified_enrollment_process = 15;
+    optional bool modified_grevience_and_appeal = 16;
+    optional bool modified_network_adequacy_standards = 17;
+    optional bool modified_length_of_contract = 18;
+    optional bool modified_non_risk_payment_arrangements = 19;
+
 
   }
 }

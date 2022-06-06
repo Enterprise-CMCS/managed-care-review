@@ -40,10 +40,14 @@ import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
 
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
-import { ManagedCareEntity } from '../../../common-code/healthPlanFormDataType'
+import {
+    ContractAmendmentInfo,
+    ManagedCareEntity,
+} from '../../../common-code/healthPlanFormDataType'
 import {
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
+    ModifiedProvisionsRecord,
 } from '../../../constants/healthPlanPackages'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
@@ -85,6 +89,20 @@ export interface ContractDetailsFormValues {
     federalAuthorities: FederalAuthority[]
     modifiedBenefitsProvided: string | undefined
     modifiedGeoAreaServed: string | undefined
+    modifiedMedicaidBeneficiaries: string | undefined
+    modifiedRiskSharingStrategy: string | undefined
+    modifiedIncentiveArrangements: string | undefined
+    modifiedWitholdAgreements: string | undefined
+    modifiedStateDirectedPayments: string | undefined
+    modifiedPassThroughPayments: string | undefined
+    modifiedPaymentsForMentalDiseaseInstitutions: string | undefined
+    modifiedMedicalLossRatioStandards: string | undefined
+    modifiedOtherFinancialPaymentIncentive: string | undefined
+    modifiedEnrollmentProcess: string | undefined
+    modifiedGrevienceAndAppeal: string | undefined
+    modifiedNetworkAdequacyStandards: string | undefined
+    modifiedLengthOfContract: string | undefined
+    modifiedNonRiskPaymentArrangements: string | undefined
 }
 type FormError =
     FormikErrors<ContractDetailsFormValues>[keyof FormikErrors<ContractDetailsFormValues>]
@@ -224,6 +242,56 @@ export const ContractDetails = ({
         modifiedGeoAreaServed: formatForForm(
             draftSubmission?.contractAmendmentInfo?.modifiedGeoAreaServed
         ),
+        modifiedMedicaidBeneficiaries: formatForForm(
+            draftSubmission?.contractAmendmentInfo
+                ?.modifiedMedicaidBeneficiaries
+        ),
+        modifiedRiskSharingStrategy: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedRiskSharingStrategy
+        ),
+        modifiedIncentiveArrangements: formatForForm(
+            draftSubmission?.contractAmendmentInfo
+                ?.modifiedIncentiveArrangements
+        ),
+        modifiedWitholdAgreements: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedWitholdAgreements
+        ),
+        modifiedStateDirectedPayments: formatForForm(
+            draftSubmission?.contractAmendmentInfo
+                ?.modifiedStateDirectedPayments
+        ),
+        modifiedPassThroughPayments: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedPassThroughPayments
+        ),
+        modifiedPaymentsForMentalDiseaseInstitutions: formatForForm(
+            draftSubmission?.contractAmendmentInfo
+                ?.modifiedPaymentsForMentalDiseaseInstitutions
+        ),
+        modifiedMedicalLossRatioStandards: formatForForm(
+            draftSubmission?.contractAmendmentInfo
+                ?.modifiedMedicalLossRatioStandards
+        ),
+        modifiedOtherFinancialPaymentIncentive: formatForForm(
+            draftSubmission?.contractAmendmentInfo
+                ?.modifiedOtherFinancialPaymentIncentive
+        ),
+        modifiedEnrollmentProcess: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedEnrollmentProcess
+        ),
+        modifiedGrevienceAndAppeal: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedGrevienceAndAppeal
+        ),
+        modifiedNetworkAdequacyStandards: formatForForm(
+            draftSubmission?.contractAmendmentInfo
+                ?.modifiedNetworkAdequacyStandards
+        ),
+        modifiedLengthOfContract: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedLengthOfContract
+        ),
+        modifiedNonRiskPaymentArrangements: formatForForm(
+            draftSubmission?.contractAmendmentInfo
+                ?.modifiedNonRiskPaymentArrangements
+        ),
     }
 
     const showFieldErrors = (error?: FormError) =>
@@ -305,6 +373,49 @@ export const ContractDetails = ({
                 modifiedGeoAreaServed: formatYesNoForProto(
                     values.modifiedGeoAreaServed
                 ),
+                modifiedMedicaidBeneficiaries: formatYesNoForProto(
+                    values.modifiedMedicaidBeneficiaries
+                ),
+                modifiedRiskSharingStrategy: formatYesNoForProto(
+                    values.modifiedRiskSharingStrategy
+                ),
+                modifiedIncentiveArrangements: formatYesNoForProto(
+                    values.modifiedIncentiveArrangements
+                ),
+                modifiedWitholdAgreements: formatYesNoForProto(
+                    values.modifiedWitholdAgreements
+                ),
+                modifiedStateDirectedPayments: formatYesNoForProto(
+                    values.modifiedStateDirectedPayments
+                ),
+                modifiedPassThroughPayments: formatYesNoForProto(
+                    values.modifiedPassThroughPayments
+                ),
+                modifiedPaymentsForMentalDiseaseInstitutions:
+                    formatYesNoForProto(
+                        values.modifiedPaymentsForMentalDiseaseInstitutions
+                    ),
+                modifiedMedicalLossRatioStandards: formatYesNoForProto(
+                    values.modifiedMedicalLossRatioStandards
+                ),
+                modifiedOtherFinancialPaymentIncentive: formatYesNoForProto(
+                    values.modifiedOtherFinancialPaymentIncentive
+                ),
+                modifiedEnrollmentProcess: formatYesNoForProto(
+                    values.modifiedEnrollmentProcess
+                ),
+                modifiedGrevienceAndAppeal: formatYesNoForProto(
+                    values.modifiedGrevienceAndAppeal
+                ),
+                modifiedNetworkAdequacyStandards: formatYesNoForProto(
+                    values.modifiedNetworkAdequacyStandards
+                ),
+                modifiedLengthOfContract: formatYesNoForProto(
+                    values.modifiedLengthOfContract
+                ),
+                modifiedNonRiskPaymentArrangements: formatYesNoForProto(
+                    values.modifiedNonRiskPaymentArrangements
+                ),
             }
         } else {
             draftSubmission.contractAmendmentInfo = undefined
@@ -325,6 +436,27 @@ export const ContractDetails = ({
             setSubmitting(false)
         }
     }
+
+    // I put these names here so that I could get the types right for the
+    // .map() below.
+    const yesNoNames: (keyof ContractAmendmentInfo)[] = [
+        'modifiedBenefitsProvided',
+        'modifiedGeoAreaServed',
+        'modifiedMedicaidBeneficiaries',
+        'modifiedRiskSharingStrategy',
+        'modifiedIncentiveArrangements',
+        'modifiedWitholdAgreements',
+        'modifiedStateDirectedPayments',
+        'modifiedPassThroughPayments',
+        'modifiedPaymentsForMentalDiseaseInstitutions',
+        'modifiedMedicalLossRatioStandards',
+        'modifiedOtherFinancialPaymentIncentive',
+        'modifiedEnrollmentProcess',
+        'modifiedGrevienceAndAppeal',
+        'modifiedNetworkAdequacyStandards',
+        'modifiedLengthOfContract',
+        'modifiedNonRiskPaymentArrangements',
+    ]
 
     return (
         <Formik
@@ -772,23 +904,26 @@ export const ContractDetails = ({
                                                 aria-required
                                                 legend="Does this contract action include new or modified provisions related to any of the following"
                                             >
-                                                <FieldYesNo
-                                                    id="modifiedBenefitsProvided"
-                                                    name="modifiedBenefitsProvided"
-                                                    label="Benefits provided by the managed care plans"
-                                                    showError={showFieldErrors(
-                                                        errors.modifiedBenefitsProvided
-                                                    )}
-                                                />
-
-                                                <FieldYesNo
-                                                    id="modifiedGeoAreaServed"
-                                                    name="modifiedGeoAreaServed"
-                                                    label="Geographic areas served by the managed care plans"
-                                                    showError={showFieldErrors(
-                                                        errors.modifiedGeoAreaServed
-                                                    )}
-                                                />
+                                                {yesNoNames.map(
+                                                    (modifiedProvisionName) => (
+                                                        <FieldYesNo
+                                                            id={
+                                                                modifiedProvisionName
+                                                            }
+                                                            name={
+                                                                modifiedProvisionName
+                                                            }
+                                                            label={
+                                                                ModifiedProvisionsRecord[
+                                                                    modifiedProvisionName
+                                                                ]
+                                                            }
+                                                            showError={showFieldErrors(
+                                                                errors.modifiedBenefitsProvided
+                                                            )}
+                                                        />
+                                                    )
+                                                )}
                                             </Fieldset>
                                         </FormGroup>
                                     )}

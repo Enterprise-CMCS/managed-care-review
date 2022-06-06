@@ -17,9 +17,21 @@ type SubmissionDocument = {
 type ContractAmendmentInfo = {
     modifiedBenefitsProvided: bool
     modifiedGeoAreaServed: bool
+    modifiedMedicaidBeneficiaries: bool
+    modifiedRiskSharingStrategy: bool
+    modifiedIncentiveArrangements: bool
+    modifiedWitholdAgreements: bool
+    modifiedStateDirectedPayments: bool
+    modifiedPassThroughPayments: bool
+    modifiedPaymentsForMentalDiseaseInstitutions: bool
+    modifiedMedicalLossRatioStandards: bool
+    modifiedOtherFinancialPaymentIncentive: bool
+    modifiedEnrollmentProcess: bool
+    modifiedGrevienceAndAppeal: bool
+    modifiedNetworkAdequacyStandards: bool
+    modifiedLengthOfContract: bool
+    modifiedNonRiskPaymentArrangements: bool
 }
-
-type UnlockedContractAmendmentInfo = Partial<ContractAmendmentInfo>
 
 type RateAmendmentInfo = {
     effectiveDateStart?: Date
@@ -91,7 +103,7 @@ type UnlockedHealthPlanFormDataType = {
     contractDateEnd?: Date
     managedCareEntities: string[]
     federalAuthorities: FederalAuthority[]
-    contractAmendmentInfo?: UnlockedContractAmendmentInfo
+    contractAmendmentInfo?: ContractAmendmentInfo
     rateType?: RateType
     rateCapitationType?: RateCapitationType
     rateDocuments: SubmissionDocument[]

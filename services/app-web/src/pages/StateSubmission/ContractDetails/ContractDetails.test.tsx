@@ -81,7 +81,7 @@ describe('ContractDetails', () => {
         await waitFor(() => {
             expect(
                 screen.getAllByText('You must select yes or no')
-            ).toHaveLength(4)
+            ).toHaveLength(32)
         })
 
         const benefitsGroup = screen.getByText(
@@ -90,23 +90,32 @@ describe('ContractDetails', () => {
         const geoGroup = screen.getByText(
             'Geographic areas served by the managed care plans'
         ).parentElement
+        const lengthGroup = screen.getByText(
+            'Length of the contract period'
+        ).parentElement
 
-        if (benefitsGroup === null || geoGroup === null) {
-            throw new Error('Benefits and Geo must have parents.')
+        if (
+            benefitsGroup === null ||
+            geoGroup === null ||
+            lengthGroup === null
+        ) {
+            throw new Error('Benefits and Geo and Length must have parents.')
         }
 
         // choose yes and no
         const benefitsYes = within(benefitsGroup).getByLabelText('Yes') //
         const geoNo = within(geoGroup).getByLabelText('No')
+        const lengthYes = within(lengthGroup).getByLabelText('Yes')
 
         userEvent.click(benefitsYes)
         userEvent.click(geoNo)
+        userEvent.click(lengthYes)
 
-        // error should be gone
+        // error should be reduced by 3
         await waitFor(() => {
             expect(
                 screen.queryAllByText('You must select yes or no')
-            ).toHaveLength(0)
+            ).toHaveLength(13)
         })
     })
 

@@ -102,6 +102,20 @@ describe('StateSubmissionForm', () => {
                 contractAmendmentInfo: {
                     modifiedBenefitsProvided: true,
                     modifiedGeoAreaServed: false,
+                    modifiedMedicaidBeneficiaries: false,
+                    modifiedRiskSharingStrategy: false,
+                    modifiedIncentiveArrangements: false,
+                    modifiedWitholdAgreements: false,
+                    modifiedStateDirectedPayments: true,
+                    modifiedPassThroughPayments: false,
+                    modifiedPaymentsForMentalDiseaseInstitutions: false,
+                    modifiedMedicalLossRatioStandards: false,
+                    modifiedOtherFinancialPaymentIncentive: false,
+                    modifiedEnrollmentProcess: false,
+                    modifiedGrevienceAndAppeal: false,
+                    modifiedNetworkAdequacyStandards: false,
+                    modifiedLengthOfContract: false,
+                    modifiedNonRiskPaymentArrangements: false,
                 },
             })
 
