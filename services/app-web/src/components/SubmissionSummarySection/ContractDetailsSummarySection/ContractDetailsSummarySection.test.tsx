@@ -115,7 +115,12 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', {
-                name: 'Items being amended',
+                name: 'This contract action includes new or modified provisions related to the following',
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: 'This contract action does NOT include new or modified provisions related to the following',
             })
         ).toBeInTheDocument()
     })
@@ -129,7 +134,9 @@ describe('ContractDetailsSummarySection', () => {
         )
         expect(screen.getByText('Contract effective dates')).toBeInTheDocument()
         expect(
-            screen.queryByText('Items being amended')
+            screen.queryByText(
+                'This contract action does NOT include new or modified provisions related to the following'
+            )
         ).not.toBeInTheDocument()
     })
 
@@ -143,7 +150,11 @@ describe('ContractDetailsSummarySection', () => {
         expect(
             screen.getByText('Contract amendment effective dates')
         ).toBeInTheDocument()
-        expect(screen.queryByText('Items being amended')).toBeInTheDocument()
+        expect(
+            screen.queryByText(
+                'This contract action does NOT include new or modified provisions related to the following'
+            )
+        ).toBeInTheDocument()
     })
 
     it('render supporting contract docs when they exist', async () => {
@@ -326,7 +337,7 @@ describe('ContractDetailsSummarySection', () => {
             'modifiedWitholdAgreements',
             'modifiedStateDirectedPayments',
             'modifiedOtherFinancialPaymentIncentive',
-            'modifiedLenthOfContract',
+            'modifiedLengthOfContract',
         ])
     })
 })
