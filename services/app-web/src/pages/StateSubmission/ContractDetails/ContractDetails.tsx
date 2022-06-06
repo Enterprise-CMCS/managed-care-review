@@ -572,7 +572,6 @@ export const ContractDetails = ({
                                         label="Base contract"
                                         aria-required
                                         value={'BASE'}
-                                        checked={values.contractType === 'BASE'}
                                     />
                                     <FieldRadio
                                         id="amendmentContract"
@@ -580,9 +579,6 @@ export const ContractDetails = ({
                                         label="Amendment to base contract"
                                         aria-required
                                         value={'AMENDMENT'}
-                                        checked={
-                                            values.contractType === 'AMENDMENT'
-                                        }
                                     />
                                 </Fieldset>
                             </FormGroup>
@@ -610,10 +606,6 @@ export const ContractDetails = ({
                                         label="Fully executed"
                                         aria-required
                                         value={'EXECUTED'}
-                                        checked={
-                                            values.contractExecutionStatus ===
-                                            'EXECUTED'
-                                        }
                                     />
                                     <FieldRadio
                                         id="unexecutedContract"
@@ -621,10 +613,6 @@ export const ContractDetails = ({
                                         label="Unexecuted by some or all parties"
                                         aria-required
                                         value={'UNEXECUTED'}
-                                        checked={
-                                            values.contractExecutionStatus ===
-                                            'UNEXECUTED'
-                                        }
                                     />
                                 </Fieldset>
                             </FormGroup>
@@ -759,9 +747,6 @@ export const ContractDetails = ({
                                                     ManagedCareEntityRecord.MCO
                                                 }
                                                 value="MCO"
-                                                checked={values.managedCareEntities.includes(
-                                                    'MCO'
-                                                )}
                                             />
                                             <FieldCheckbox
                                                 id="prepaidInpatientHealthPlan"
@@ -770,9 +755,6 @@ export const ContractDetails = ({
                                                     ManagedCareEntityRecord.PIHP
                                                 }
                                                 value="PIHP"
-                                                checked={values.managedCareEntities.includes(
-                                                    'PIHP'
-                                                )}
                                             />
                                             <FieldCheckbox
                                                 id="prepaidAmbulatoryHealthPlans"
@@ -781,9 +763,6 @@ export const ContractDetails = ({
                                                     ManagedCareEntityRecord.PAHP
                                                 }
                                                 value="PAHP"
-                                                checked={values.managedCareEntities.includes(
-                                                    'PAHP'
-                                                )}
                                             />
                                             <FieldCheckbox
                                                 id="primaryCareCaseManagementEntity"
@@ -792,9 +771,6 @@ export const ContractDetails = ({
                                                     ManagedCareEntityRecord.PCCM
                                                 }
                                                 value="PCCM"
-                                                checked={values.managedCareEntities.includes(
-                                                    'PCCM'
-                                                )}
                                             />
                                         </Fieldset>
                                     </FormGroup>
@@ -837,9 +813,6 @@ export const ContractDetails = ({
                                                     FederalAuthorityRecord.STATE_PLAN
                                                 }
                                                 value={'STATE_PLAN'}
-                                                checked={values.federalAuthorities.includes(
-                                                    'STATE_PLAN'
-                                                )}
                                             />
                                             <FieldCheckbox
                                                 id="1915bWaiverAuthority"
@@ -848,9 +821,6 @@ export const ContractDetails = ({
                                                     FederalAuthorityRecord.WAIVER_1915B
                                                 }
                                                 value={'WAIVER_1915B'}
-                                                checked={values.federalAuthorities.includes(
-                                                    'WAIVER_1915B'
-                                                )}
                                             />
                                             <FieldCheckbox
                                                 id="1115WaiverAuthority"
@@ -859,9 +829,6 @@ export const ContractDetails = ({
                                                     FederalAuthorityRecord.WAIVER_1115
                                                 }
                                                 value={'WAIVER_1115'}
-                                                checked={values.federalAuthorities.includes(
-                                                    'WAIVER_1115'
-                                                )}
                                             />
                                             <FieldCheckbox
                                                 id="1915aVoluntaryAuthority"
@@ -870,9 +837,6 @@ export const ContractDetails = ({
                                                     FederalAuthorityRecord.VOLUNTARY
                                                 }
                                                 value={'VOLUNTARY'}
-                                                checked={values.federalAuthorities.includes(
-                                                    'VOLUNTARY'
-                                                )}
                                             />
                                             <FieldCheckbox
                                                 id="1937BenchmarkAuthority"
@@ -881,9 +845,6 @@ export const ContractDetails = ({
                                                     FederalAuthorityRecord.BENCHMARK
                                                 }
                                                 value={'BENCHMARK'}
-                                                checked={values.federalAuthorities.includes(
-                                                    'BENCHMARK'
-                                                )}
                                             />
                                             <FieldCheckbox
                                                 id="titleXXISeparateChipStatePlanAuthority"
@@ -892,9 +853,6 @@ export const ContractDetails = ({
                                                     FederalAuthorityRecord.TITLE_XXI
                                                 }
                                                 value={'TITLE_XXI'}
-                                                checked={values.federalAuthorities.includes(
-                                                    'TITLE_XXI'
-                                                )}
                                             />
                                         </Fieldset>
                                     </FormGroup>
