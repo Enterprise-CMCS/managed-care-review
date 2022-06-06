@@ -25,7 +25,34 @@ const hasValidContract = (sub: LockedHealthPlanFormDataType): boolean =>
     sub.federalAuthorities.length !== 0 &&
     (sub.contractType === 'BASE' || // If it's an amendment, then all the yes/nos must be set.
         (sub.contractAmendmentInfo?.modifiedBenefitsProvided !== undefined &&
-            sub.contractAmendmentInfo?.modifiedGeoAreaServed !== undefined))
+            sub.contractAmendmentInfo?.modifiedGeoAreaServed !== undefined &&
+            sub.contractAmendmentInfo?.modifiedMedicaidBeneficiaries !==
+                undefined &&
+            sub.contractAmendmentInfo?.modifiedRiskSharingStrategy !==
+                undefined &&
+            sub.contractAmendmentInfo?.modifiedIncentiveArrangements !==
+                undefined &&
+            sub.contractAmendmentInfo?.modifiedWitholdAgreements !==
+                undefined &&
+            sub.contractAmendmentInfo?.modifiedStateDirectedPayments !==
+                undefined &&
+            sub.contractAmendmentInfo?.modifiedPassThroughPayments !==
+                undefined &&
+            sub.contractAmendmentInfo
+                ?.modifiedPaymentsForMentalDiseaseInstitutions !== undefined &&
+            sub.contractAmendmentInfo?.modifiedMedicalLossRatioStandards !==
+                undefined &&
+            sub.contractAmendmentInfo
+                ?.modifiedOtherFinancialPaymentIncentive !== undefined &&
+            sub.contractAmendmentInfo?.modifiedEnrollmentProcess !==
+                undefined &&
+            sub.contractAmendmentInfo?.modifiedGrevienceAndAppeal !==
+                undefined &&
+            sub.contractAmendmentInfo?.modifiedNetworkAdequacyStandards !==
+                undefined &&
+            sub.contractAmendmentInfo?.modifiedLengthOfContract !== undefined &&
+            sub.contractAmendmentInfo?.modifiedNonRiskPaymentArrangements !==
+                undefined))
 
 const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
     const validBaseRate =
