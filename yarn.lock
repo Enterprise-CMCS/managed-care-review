@@ -23552,7 +23552,8 @@ serverless-plugin-scripts@^1.0.2:
 
 serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   version "1.0.0"
-  resolved "https://codeload.github.com/CMSgov/serverless-s3-bucket-helper/tar.gz/f0f6d6a1ffe54e292f0afc93777764bce16a4037"
+  uid f654af78fae84fbecafd956bd6e857dc7e79bbcc
+  resolved "https://codeload.github.com/CMSgov/serverless-s3-bucket-helper/tar.gz/f654af78fae84fbecafd956bd6e857dc7e79bbcc"
 
 serverless-s3-local@^0.6.7:
   version "0.6.22"
