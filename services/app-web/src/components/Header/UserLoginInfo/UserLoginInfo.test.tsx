@@ -46,6 +46,22 @@ describe('UserLoginInfo', () => {
         expect(screen.getByText('bob@dmas.mn.gov')).toBeInTheDocument()
     })
 
+    it('renders submit feedback link', () => {
+        const jestFn =jest.fn()
+
+        renderWithProviders(
+            <UserLoginInfo
+                user={loggedInUser}
+                loginStatus={'LOGGED_IN'}
+                authMode={'LOCAL'}
+                logout={jestFn}
+            />
+        )
+        const feedbackLink = screen.getByRole('link', {name: /Submit feedback/i, 
+        })
+        expect(feedbackLink).toHaveAttribute('href', 'mailto: mc-review@cms.hhs.gov')
+    })
+
     it('displays nothing while loading', () => {
         const jestFn = jest.fn()
 
