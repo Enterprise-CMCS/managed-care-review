@@ -146,6 +146,9 @@ jobs:
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
+      ses_mcog_email_address: ${{ secrets.SES_MCOG_EMAIL_ADDRESS }}
+      ses_rate_email_address: ${{ secrets.SES_RATE_EMAIL_ADDRESS }}
+      ses_direct_review_team_email_address: ${{ secrets.SES_DIRECT_REVIEW_TEAM_EMAIL_ADDRESS }}
       react_app_auth_mode: IDM
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
@@ -226,6 +229,9 @@ jobs:
       react_app_auth_mode: IDM
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
+      ses_mcog_email_address: ${{ secrets.SES_MCOG_EMAIL_ADDRESS }}
+      ses_rate_email_address: ${{ secrets.SES_RATE_EMAIL_ADDRESS }}
+      ses_direct_review_team_email_address: ${{ secrets.SES_DIRECT_REVIEW_TEAM_EMAIL_ADDRESS }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
       ld_sdk_key: ${{ secrets.VAL_LD_SDK_KEY }}
@@ -286,6 +292,10 @@ jobs:
       full_iam_permissions_boundary_policy: ${{ secrets.PROD_FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
+      ses_review_team_email_addresses: ${{ secrets.PROD_SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
+      ses_mcog_email_address: ${{ secrets.SES_MCOG_EMAIL_ADDRESS }}
+      ses_rate_email_address: ${{ secrets.SES_RATE_EMAIL_ADDRESS }}
+      ses_direct_review_team_email_address: ${{ secrets.SES_DIRECT_REVIEW_TEAM_EMAIL_ADDRESS }}
       iam_path: ${{ secrets.IAM_PATH }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
@@ -305,6 +315,9 @@ jobs:
       react_app_auth_mode: IDM
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.PROD_SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
+      ses_mcog_email_address: ${{ secrets.SES_MCOG_EMAIL_ADDRESS }}
+      ses_rate_email_address: ${{ secrets.SES_RATE_EMAIL_ADDRESS }}
+      ses_direct_review_team_email_address: ${{ secrets.SES_DIRECT_REVIEW_TEAM_EMAIL_ADDRESS }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
       ld_sdk_key: ${{ secrets.PROD_LD_SDK_KEY }}

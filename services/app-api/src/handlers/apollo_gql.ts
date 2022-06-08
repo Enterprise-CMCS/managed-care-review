@@ -139,6 +139,10 @@ async function initializeGQLHandler(): Promise<Handler> {
     const emailSource = process.env.SES_SOURCE_EMAIL_ADDRESS
     const emailerMode = process.env.EMAILER_MODE
     const cmsReviewSharedEmails = process.env.SES_REVIEW_TEAM_EMAIL_ADDRESSES
+    const cmsMcogEmailAddress = process.env.SES_MCOG_EMAIL_ADDRESS
+    const cmsRateEmailAddress = process.env.SES_RATE_EMAIL_ADDRESS
+    const cmsDirectReviewTeamEmailAddress =
+        process.env.SES_DIRECT_REVIEW_TEAM_EMAIL_ADDRESS
     const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
 
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
@@ -168,6 +172,24 @@ async function initializeGQLHandler(): Promise<Handler> {
         throw new Error(
             'Configuration Error: SES_REVIEW_TEAM_EMAIL_ADDRESSES is required'
         )
+
+    if (cmsMcogEmailAddress === undefined) {
+        throw new Error(
+            'Configuration Error: SES_MCOG_EMAIL_ADDRESS is required'
+        )
+    }
+
+    if (cmsRateEmailAddress === undefined) {
+        throw new Error(
+            'Configuration Error: SES_RATE_EMAIL_ADDRESS is required'
+        )
+    }
+
+    if (cmsDirectReviewTeamEmailAddress === undefined) {
+        throw new Error(
+            'Configuration Error: SES_DIRECT_REVIEW_TEAM_EMAIL_ADDRESS is required'
+        )
+    }
 
     if (applicationEndpoint === undefined || applicationEndpoint === '')
         throw new Error('Configuration Error: APPLICATION_ENDPOINT is required')
@@ -201,12 +223,18 @@ async function initializeGQLHandler(): Promise<Handler> {
                   stage: 'local',
                   baseUrl: applicationEndpoint,
                   cmsReviewSharedEmails: cmsReviewSharedEmails.split(','),
+                  cmsMcogEmailAddress,
+                  cmsRateEmailAddress,
+                  cmsDirectReviewTeamEmailAddress,
               })
             : newSESEmailer({
                   emailSource: emailSource,
                   stage: stageName,
                   baseUrl: applicationEndpoint,
                   cmsReviewSharedEmails: cmsReviewSharedEmails.split(','),
+                  cmsMcogEmailAddress,
+                  cmsRateEmailAddress,
+                  cmsDirectReviewTeamEmailAddress,
               })
 
     // Resolvers are defined and tested in the resolvers package

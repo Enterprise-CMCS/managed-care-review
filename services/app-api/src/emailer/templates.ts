@@ -162,6 +162,24 @@ const newPackageStateEmail = (
                     <strong>Decision:</strong> Once all questions have been addressed, CMS will contact you with their final recommendation.
 
                 </li>
+                <li>
+                If you need assistance or to make changes to your submission: 
+                    <li>
+                        For assistance with programmatic, contractual, or operational issues, please reach out to ${
+                            config.cmsMcogEmailAddress
+                        } and/or your CMS primary contact.
+                    </li>
+                    <li>
+                        For assistance on policy and actuarial issues, please reach out to ${
+                            config.cmsRateEmailAddress
+                        }.
+                    </li>
+                    <li>
+                        For issues related to MC-Review or all other inquiries, please reach out to ${
+                            config.cmsDirectReviewTeamEmailAddress
+                        }.
+                    </li>
+                </li>
             </ol>
         `
     return {
@@ -193,6 +211,7 @@ const unlockPackageCMSEmail = (
         <b>Unlocked by:</b> ${unlockData.updatedBy}<br />
         <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}<br />
         <b>Reason for unlock:</b> ${unlockData.updatedReason}<br /><br />
+        
         You will receive another notification when the state resubmits.
     `
     return {

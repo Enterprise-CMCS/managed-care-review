@@ -21,7 +21,12 @@ const testEmailConfig: EmailConfiguration = {
     baseUrl: 'http://localhost',
     emailSource: 'emailSource@example.com',
     cmsReviewSharedEmails: ['cmsreview1@example.com', 'cmsreview2@example.com'],
+    cmsMcogEmailAddress: 'mcog@example.com',
+    cmsRateEmailAddress: 'rates@example.com',
+    cmsDirectReviewTeamEmailAddress: 'mc-review@example.com',
 }
+
+const submissionName = 'MN-PMAP-0001'
 
 const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
     const config = customConfig || testEmailConfig
@@ -68,7 +73,8 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
             const emailData = unlockPackageStateEmail(
                 submission,
                 updatedEmailData,
-                config
+                config,
+                submissionName
             )
             return this.sendEmail(emailData)
         },
