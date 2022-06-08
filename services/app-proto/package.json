@@ -23,6 +23,6 @@
         "protobufjs": "^6.11.2"
     },
     "devDependencies": {
-        "lint-staged": "^12.1.2"
+        "lint-staged": "^13.0.0"
     }
 }
