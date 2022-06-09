@@ -6097,12 +6097,12 @@
     read-package-json-fast "^2.0.1"
 
 "@octokit/action@^3.18.0":
-  version "3.18.0"
-  resolved "https://registry.yarnpkg.com/@octokit/action/-/action-3.18.0.tgz#2e9083b360ddab25b16843be7640402a305396ff"
-  integrity sha512-vyEESFzgLtMxDZOnD9L88xWqHNG1ZR9wh67nlnOj9fGwL1UEOAvMxYtP03OUlharq1ONtwYj9vMPDQI1xelkoQ==
+  version "3.18.1"
+  resolved "https://registry.yarnpkg.com/@octokit/action/-/action-3.18.1.tgz#dcf92887d18e98599ec9f02e9937b80745271143"
+  integrity sha512-jl88CBdtk7SE1Jwpxtf5k24XkUCcrUhQfsKNxMWFg4hdzge8o+aEYytrx1X7DwXwOYpuezNXVa03hK/zizt4Dg==
   dependencies:
     "@octokit/auth-action" "^1.2.0"
-    "@octokit/core" "^3.0.0"
+    "@octokit/core" "^3.6.0"
     "@octokit/plugin-paginate-rest" "^2.16.8"
     "@octokit/plugin-rest-endpoint-methods" "^5.12.0"
     "@octokit/types" "^6.16.1"
@@ -6195,7 +6195,7 @@
     "@octokit/request-error" "^2.1.0"
     "@octokit/types" "^6.0.3"
 
-"@octokit/core@^3.0.0", "@octokit/core@^3.3.2", "@octokit/core@^3.4.0", "@octokit/core@^3.5.1":
+"@octokit/core@^3.3.2", "@octokit/core@^3.4.0", "@octokit/core@^3.5.1", "@octokit/core@^3.6.0":
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/@octokit/core/-/core-3.6.0.tgz#3376cb9f3008d9b3d110370d90e0a1fcd5fe6085"
   integrity sha512-7RKRKuA4xTjMhY+eG3jthb3hlZCsOwg3rztWh75Xc+ShDWOfDDATWbeZpAHBNRpm4Tv9WgBMOy1zEJYXG6NJ7Q==
