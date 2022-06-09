@@ -2,13 +2,13 @@ import { screen, waitFor, within } from '@testing-library/react'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import {
     ContractDetailsSummarySection,
-    sortAmendedItems,
+    sortModifiedProvisions,
 } from './ContractDetailsSummarySection'
 import {
     mockContractAndRatesDraft,
     mockStateSubmission,
 } from '../../../testHelpers/apolloHelpers'
-import { ContractAmendmentInfo } from '../../../common-code/healthPlanFormDataType'
+import { ModifiedProvisions } from '../../../common-code/healthPlanFormDataType'
 
 describe('ContractDetailsSummarySection', () => {
     it('can render draft submission without errors (review and submit behavior)', () => {
@@ -298,7 +298,7 @@ describe('ContractDetailsSummarySection', () => {
     })
 
     it('sorts amended provisions correctly', () => {
-        const amendedItems: ContractAmendmentInfo = {
+        const amendedItems: ModifiedProvisions = {
             modifiedBenefitsProvided: true,
             modifiedGeoAreaServed: false,
             modifiedMedicaidBeneficiaries: true,
@@ -317,7 +317,7 @@ describe('ContractDetailsSummarySection', () => {
             modifiedNonRiskPaymentArrangements: true,
         }
 
-        const [mod, unmod] = sortAmendedItems(amendedItems)
+        const [mod, unmod] = sortModifiedProvisions(amendedItems)
 
         expect(mod).toEqual([
             'modifiedBenefitsProvided',

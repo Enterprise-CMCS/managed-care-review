@@ -17,8 +17,8 @@ import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
-    ContractAmendmentInfo,
     HealthPlanFormDataType,
+    ModifiedProvisions,
 } from '../../../common-code/healthPlanFormDataType'
 
 export type ContractDetailsSummarySectionProps = {
@@ -56,8 +56,8 @@ const createCheckboxList = ({
 }
 
 // This function takes a ContractAmendmentInfo and returns two lists of keys sorted by whether they are set true/false
-export function sortAmendedItems(
-    amendmentInfo: ContractAmendmentInfo | undefined
+export function sortModifiedProvisions(
+    amendmentInfo: ModifiedProvisions | undefined
 ): [string[], string[]] {
     const modifiedProvisions = []
     const unmodifiedProvisions = []
@@ -65,7 +65,7 @@ export function sortAmendedItems(
     if (amendmentInfo) {
         // We type cast this to be the list of keys in the ContractAmendmentInfo
         const provisions = Object.keys(amendmentInfo) as Array<
-            keyof ContractAmendmentInfo
+            keyof ModifiedProvisions
         >
 
         for (const provisionKey of provisions) {
@@ -133,8 +133,8 @@ export const ContractDetailsSummarySection = ({
         submissionName,
     ])
 
-    const [modifiedProvisions, unmodifiedProvisions] = sortAmendedItems(
-        submission.contractAmendmentInfo
+    const [modifiedProvisions, unmodifiedProvisions] = sortModifiedProvisions(
+        submission.contractAmendmentInfo?.modifiedProvisions
     )
 
     return (

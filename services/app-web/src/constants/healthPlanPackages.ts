@@ -6,7 +6,7 @@ import {
     ActuarialFirmType,
     ActuaryCommunicationType,
     ContractExecutionStatus,
-    ContractAmendmentInfo,
+    ModifiedProvisions,
 } from '../common-code/healthPlanFormDataType'
 import { HealthPlanPackageStatus } from '../gen/gqlClient'
 
@@ -41,7 +41,7 @@ const ManagedCareEntityRecord: Record<ManagedCareEntity, string> = {
     PCCM: 'Primary Care Case Management Entity (PCCM Entity)',
 }
 
-const ModifiedProvisionsRecord: Record<keyof ContractAmendmentInfo, string> = {
+const ModifiedProvisionsRecord: Record<keyof ModifiedProvisions, string> = {
     modifiedBenefitsProvided: 'Benefits provided by the managed care plans',
     modifiedGeoAreaServed: 'Geographic areas served by the managed care plans',
     modifiedMedicaidBeneficiaries:

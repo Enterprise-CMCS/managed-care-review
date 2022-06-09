@@ -33,22 +33,28 @@ const submissionDocumentSchema = z.object({
 })
 
 const contractAmendmentInfoSchema = z.object({
-    modifiedBenefitsProvided: z.boolean().optional(),
-    modifiedGeoAreaServed: z.boolean().optional(),
-    modifiedMedicaidBeneficiaries: z.boolean().optional(),
-    modifiedRiskSharingStrategy: z.boolean().optional(),
-    modifiedIncentiveArrangements: z.boolean().optional(),
-    modifiedWitholdAgreements: z.boolean().optional(),
-    modifiedStateDirectedPayments: z.boolean().optional(),
-    modifiedPassThroughPayments: z.boolean().optional(),
-    modifiedPaymentsForMentalDiseaseInstitutions: z.boolean().optional(),
-    modifiedMedicalLossRatioStandards: z.boolean().optional(),
-    modifiedOtherFinancialPaymentIncentive: z.boolean().optional(),
-    modifiedEnrollmentProcess: z.boolean().optional(),
-    modifiedGrevienceAndAppeal: z.boolean().optional(),
-    modifiedNetworkAdequacyStandards: z.boolean().optional(),
-    modifiedLengthOfContract: z.boolean().optional(),
-    modifiedNonRiskPaymentArrangements: z.boolean().optional(),
+    modifiedProvisions: z
+        .object({
+            modifiedBenefitsProvided: z.boolean().optional(),
+            modifiedGeoAreaServed: z.boolean().optional(),
+            modifiedMedicaidBeneficiaries: z.boolean().optional(),
+            modifiedRiskSharingStrategy: z.boolean().optional(),
+            modifiedIncentiveArrangements: z.boolean().optional(),
+            modifiedWitholdAgreements: z.boolean().optional(),
+            modifiedStateDirectedPayments: z.boolean().optional(),
+            modifiedPassThroughPayments: z.boolean().optional(),
+            modifiedPaymentsForMentalDiseaseInstitutions: z
+                .boolean()
+                .optional(),
+            modifiedMedicalLossRatioStandards: z.boolean().optional(),
+            modifiedOtherFinancialPaymentIncentive: z.boolean().optional(),
+            modifiedEnrollmentProcess: z.boolean().optional(),
+            modifiedGrevienceAndAppeal: z.boolean().optional(),
+            modifiedNetworkAdequacyStandards: z.boolean().optional(),
+            modifiedLengthOfContract: z.boolean().optional(),
+            modifiedNonRiskPaymentArrangements: z.boolean().optional(),
+        })
+        .required(),
 })
 
 const rateAmendmentInfoSchema = z.object({

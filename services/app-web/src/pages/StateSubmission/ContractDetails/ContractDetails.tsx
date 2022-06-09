@@ -41,8 +41,8 @@ import { isS3Error } from '../../../s3'
 
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
 import {
-    ContractAmendmentInfo,
     ManagedCareEntity,
+    modifiedProvisionKeys,
 } from '../../../common-code/healthPlanFormDataType'
 import {
     ManagedCareEntityRecord,
@@ -237,60 +237,68 @@ export const ContractDetails = ({
         federalAuthorities: draftSubmission?.federalAuthorities ?? [],
 
         modifiedBenefitsProvided: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedBenefitsProvided
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedBenefitsProvided
         ),
         modifiedGeoAreaServed: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedGeoAreaServed
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedGeoAreaServed
         ),
         modifiedMedicaidBeneficiaries: formatForForm(
-            draftSubmission?.contractAmendmentInfo
-                ?.modifiedMedicaidBeneficiaries
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedMedicaidBeneficiaries
         ),
         modifiedRiskSharingStrategy: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedRiskSharingStrategy
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedRiskSharingStrategy
         ),
         modifiedIncentiveArrangements: formatForForm(
-            draftSubmission?.contractAmendmentInfo
-                ?.modifiedIncentiveArrangements
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedIncentiveArrangements
         ),
         modifiedWitholdAgreements: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedWitholdAgreements
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedWitholdAgreements
         ),
         modifiedStateDirectedPayments: formatForForm(
-            draftSubmission?.contractAmendmentInfo
-                ?.modifiedStateDirectedPayments
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedStateDirectedPayments
         ),
         modifiedPassThroughPayments: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedPassThroughPayments
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedPassThroughPayments
         ),
         modifiedPaymentsForMentalDiseaseInstitutions: formatForForm(
-            draftSubmission?.contractAmendmentInfo
-                ?.modifiedPaymentsForMentalDiseaseInstitutions
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedPaymentsForMentalDiseaseInstitutions
         ),
         modifiedMedicalLossRatioStandards: formatForForm(
-            draftSubmission?.contractAmendmentInfo
-                ?.modifiedMedicalLossRatioStandards
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedMedicalLossRatioStandards
         ),
         modifiedOtherFinancialPaymentIncentive: formatForForm(
-            draftSubmission?.contractAmendmentInfo
-                ?.modifiedOtherFinancialPaymentIncentive
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedOtherFinancialPaymentIncentive
         ),
         modifiedEnrollmentProcess: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedEnrollmentProcess
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedEnrollmentProcess
         ),
         modifiedGrevienceAndAppeal: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedGrevienceAndAppeal
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedGrevienceAndAppeal
         ),
         modifiedNetworkAdequacyStandards: formatForForm(
-            draftSubmission?.contractAmendmentInfo
-                ?.modifiedNetworkAdequacyStandards
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedNetworkAdequacyStandards
         ),
         modifiedLengthOfContract: formatForForm(
-            draftSubmission?.contractAmendmentInfo?.modifiedLengthOfContract
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedLengthOfContract
         ),
         modifiedNonRiskPaymentArrangements: formatForForm(
-            draftSubmission?.contractAmendmentInfo
-                ?.modifiedNonRiskPaymentArrangements
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedNonRiskPaymentArrangements
         ),
     }
 
@@ -367,55 +375,57 @@ export const ContractDetails = ({
 
         if (values.contractType === 'AMENDMENT') {
             draftSubmission.contractAmendmentInfo = {
-                modifiedBenefitsProvided: formatYesNoForProto(
-                    values.modifiedBenefitsProvided
-                ),
-                modifiedGeoAreaServed: formatYesNoForProto(
-                    values.modifiedGeoAreaServed
-                ),
-                modifiedMedicaidBeneficiaries: formatYesNoForProto(
-                    values.modifiedMedicaidBeneficiaries
-                ),
-                modifiedRiskSharingStrategy: formatYesNoForProto(
-                    values.modifiedRiskSharingStrategy
-                ),
-                modifiedIncentiveArrangements: formatYesNoForProto(
-                    values.modifiedIncentiveArrangements
-                ),
-                modifiedWitholdAgreements: formatYesNoForProto(
-                    values.modifiedWitholdAgreements
-                ),
-                modifiedStateDirectedPayments: formatYesNoForProto(
-                    values.modifiedStateDirectedPayments
-                ),
-                modifiedPassThroughPayments: formatYesNoForProto(
-                    values.modifiedPassThroughPayments
-                ),
-                modifiedPaymentsForMentalDiseaseInstitutions:
-                    formatYesNoForProto(
-                        values.modifiedPaymentsForMentalDiseaseInstitutions
+                modifiedProvisions: {
+                    modifiedBenefitsProvided: formatYesNoForProto(
+                        values.modifiedBenefitsProvided
                     ),
-                modifiedMedicalLossRatioStandards: formatYesNoForProto(
-                    values.modifiedMedicalLossRatioStandards
-                ),
-                modifiedOtherFinancialPaymentIncentive: formatYesNoForProto(
-                    values.modifiedOtherFinancialPaymentIncentive
-                ),
-                modifiedEnrollmentProcess: formatYesNoForProto(
-                    values.modifiedEnrollmentProcess
-                ),
-                modifiedGrevienceAndAppeal: formatYesNoForProto(
-                    values.modifiedGrevienceAndAppeal
-                ),
-                modifiedNetworkAdequacyStandards: formatYesNoForProto(
-                    values.modifiedNetworkAdequacyStandards
-                ),
-                modifiedLengthOfContract: formatYesNoForProto(
-                    values.modifiedLengthOfContract
-                ),
-                modifiedNonRiskPaymentArrangements: formatYesNoForProto(
-                    values.modifiedNonRiskPaymentArrangements
-                ),
+                    modifiedGeoAreaServed: formatYesNoForProto(
+                        values.modifiedGeoAreaServed
+                    ),
+                    modifiedMedicaidBeneficiaries: formatYesNoForProto(
+                        values.modifiedMedicaidBeneficiaries
+                    ),
+                    modifiedRiskSharingStrategy: formatYesNoForProto(
+                        values.modifiedRiskSharingStrategy
+                    ),
+                    modifiedIncentiveArrangements: formatYesNoForProto(
+                        values.modifiedIncentiveArrangements
+                    ),
+                    modifiedWitholdAgreements: formatYesNoForProto(
+                        values.modifiedWitholdAgreements
+                    ),
+                    modifiedStateDirectedPayments: formatYesNoForProto(
+                        values.modifiedStateDirectedPayments
+                    ),
+                    modifiedPassThroughPayments: formatYesNoForProto(
+                        values.modifiedPassThroughPayments
+                    ),
+                    modifiedPaymentsForMentalDiseaseInstitutions:
+                        formatYesNoForProto(
+                            values.modifiedPaymentsForMentalDiseaseInstitutions
+                        ),
+                    modifiedMedicalLossRatioStandards: formatYesNoForProto(
+                        values.modifiedMedicalLossRatioStandards
+                    ),
+                    modifiedOtherFinancialPaymentIncentive: formatYesNoForProto(
+                        values.modifiedOtherFinancialPaymentIncentive
+                    ),
+                    modifiedEnrollmentProcess: formatYesNoForProto(
+                        values.modifiedEnrollmentProcess
+                    ),
+                    modifiedGrevienceAndAppeal: formatYesNoForProto(
+                        values.modifiedGrevienceAndAppeal
+                    ),
+                    modifiedNetworkAdequacyStandards: formatYesNoForProto(
+                        values.modifiedNetworkAdequacyStandards
+                    ),
+                    modifiedLengthOfContract: formatYesNoForProto(
+                        values.modifiedLengthOfContract
+                    ),
+                    modifiedNonRiskPaymentArrangements: formatYesNoForProto(
+                        values.modifiedNonRiskPaymentArrangements
+                    ),
+                },
             }
         } else {
             draftSubmission.contractAmendmentInfo = undefined
@@ -436,27 +446,6 @@ export const ContractDetails = ({
             setSubmitting(false)
         }
     }
-
-    // I put these names here so that I could get the types right for the
-    // .map() below.
-    const yesNoNames: (keyof ContractAmendmentInfo)[] = [
-        'modifiedBenefitsProvided',
-        'modifiedGeoAreaServed',
-        'modifiedMedicaidBeneficiaries',
-        'modifiedRiskSharingStrategy',
-        'modifiedIncentiveArrangements',
-        'modifiedWitholdAgreements',
-        'modifiedStateDirectedPayments',
-        'modifiedPassThroughPayments',
-        'modifiedPaymentsForMentalDiseaseInstitutions',
-        'modifiedMedicalLossRatioStandards',
-        'modifiedOtherFinancialPaymentIncentive',
-        'modifiedEnrollmentProcess',
-        'modifiedGrevienceAndAppeal',
-        'modifiedNetworkAdequacyStandards',
-        'modifiedLengthOfContract',
-        'modifiedNonRiskPaymentArrangements',
-    ]
 
     return (
         <Formik
@@ -862,7 +851,7 @@ export const ContractDetails = ({
                                                 aria-required
                                                 legend="Does this contract action include new or modified provisions related to any of the following"
                                             >
-                                                {yesNoNames.map(
+                                                {modifiedProvisionKeys.map(
                                                     (modifiedProvisionName) => (
                                                         <FieldYesNo
                                                             id={

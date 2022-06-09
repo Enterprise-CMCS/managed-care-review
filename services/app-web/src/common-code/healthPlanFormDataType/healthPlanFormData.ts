@@ -1,4 +1,5 @@
 import { UnlockedHealthPlanFormDataType } from './UnlockedHealthPlanFormDataType'
+import { ModifiedProvisions } from './ModifiedProvisions'
 import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import { HealthPlanFormDataType } from './HealthPlanFormDataType'
 import { RateDataType } from '.'
@@ -16,6 +17,27 @@ const isRateAmendment = (
     sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
 ): boolean => sub.rateType === 'AMENDMENT'
 
+const hasValidModifiedProvisions = (
+    provisions: ModifiedProvisions | undefined
+): boolean =>
+    provisions !== undefined &&
+    provisions.modifiedBenefitsProvided !== undefined &&
+    provisions.modifiedGeoAreaServed !== undefined &&
+    provisions.modifiedMedicaidBeneficiaries !== undefined &&
+    provisions.modifiedRiskSharingStrategy !== undefined &&
+    provisions.modifiedIncentiveArrangements !== undefined &&
+    provisions.modifiedWitholdAgreements !== undefined &&
+    provisions.modifiedStateDirectedPayments !== undefined &&
+    provisions.modifiedPassThroughPayments !== undefined &&
+    provisions.modifiedPaymentsForMentalDiseaseInstitutions !== undefined &&
+    provisions.modifiedMedicalLossRatioStandards !== undefined &&
+    provisions.modifiedOtherFinancialPaymentIncentive !== undefined &&
+    provisions.modifiedEnrollmentProcess !== undefined &&
+    provisions.modifiedGrevienceAndAppeal !== undefined &&
+    provisions.modifiedNetworkAdequacyStandards !== undefined &&
+    provisions.modifiedLengthOfContract !== undefined &&
+    provisions.modifiedNonRiskPaymentArrangements !== undefined
+
 const hasValidContract = (sub: LockedHealthPlanFormDataType): boolean =>
     sub.contractType !== undefined &&
     sub.contractExecutionStatus !== undefined &&
@@ -24,35 +46,9 @@ const hasValidContract = (sub: LockedHealthPlanFormDataType): boolean =>
     sub.managedCareEntities.length !== 0 &&
     sub.federalAuthorities.length !== 0 &&
     (sub.contractType === 'BASE' || // If it's an amendment, then all the yes/nos must be set.
-        (sub.contractAmendmentInfo?.modifiedBenefitsProvided !== undefined &&
-            sub.contractAmendmentInfo?.modifiedGeoAreaServed !== undefined &&
-            sub.contractAmendmentInfo?.modifiedMedicaidBeneficiaries !==
-                undefined &&
-            sub.contractAmendmentInfo?.modifiedRiskSharingStrategy !==
-                undefined &&
-            sub.contractAmendmentInfo?.modifiedIncentiveArrangements !==
-                undefined &&
-            sub.contractAmendmentInfo?.modifiedWitholdAgreements !==
-                undefined &&
-            sub.contractAmendmentInfo?.modifiedStateDirectedPayments !==
-                undefined &&
-            sub.contractAmendmentInfo?.modifiedPassThroughPayments !==
-                undefined &&
-            sub.contractAmendmentInfo
-                ?.modifiedPaymentsForMentalDiseaseInstitutions !== undefined &&
-            sub.contractAmendmentInfo?.modifiedMedicalLossRatioStandards !==
-                undefined &&
-            sub.contractAmendmentInfo
-                ?.modifiedOtherFinancialPaymentIncentive !== undefined &&
-            sub.contractAmendmentInfo?.modifiedEnrollmentProcess !==
-                undefined &&
-            sub.contractAmendmentInfo?.modifiedGrevienceAndAppeal !==
-                undefined &&
-            sub.contractAmendmentInfo?.modifiedNetworkAdequacyStandards !==
-                undefined &&
-            sub.contractAmendmentInfo?.modifiedLengthOfContract !== undefined &&
-            sub.contractAmendmentInfo?.modifiedNonRiskPaymentArrangements !==
-                undefined))
+        hasValidModifiedProvisions(
+            sub.contractAmendmentInfo?.modifiedProvisions
+        ))
 
 const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
     const validBaseRate =

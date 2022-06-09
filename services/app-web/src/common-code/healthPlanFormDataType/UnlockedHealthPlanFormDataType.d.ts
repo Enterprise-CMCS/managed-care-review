@@ -15,22 +15,7 @@ type SubmissionDocument = {
 }
 
 type ContractAmendmentInfo = {
-    modifiedBenefitsProvided: bool
-    modifiedGeoAreaServed: bool
-    modifiedMedicaidBeneficiaries: bool
-    modifiedRiskSharingStrategy: bool
-    modifiedIncentiveArrangements: bool
-    modifiedWitholdAgreements: bool
-    modifiedStateDirectedPayments: bool
-    modifiedPassThroughPayments: bool
-    modifiedPaymentsForMentalDiseaseInstitutions: bool
-    modifiedMedicalLossRatioStandards: bool
-    modifiedOtherFinancialPaymentIncentive: bool
-    modifiedEnrollmentProcess: bool
-    modifiedGrevienceAndAppeal: bool
-    modifiedNetworkAdequacyStandards: bool
-    modifiedLengthOfContract: bool
-    modifiedNonRiskPaymentArrangements: bool
+    modifiedProvisions: ModifiedProvisions
 }
 
 type RateAmendmentInfo = {

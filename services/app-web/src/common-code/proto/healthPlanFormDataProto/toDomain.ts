@@ -188,37 +188,47 @@ function parseProtoDocuments(
 function parseContractAmendment(
     amendment: mcreviewproto.IContractInfo['contractAmendmentInfo']
 ): UnlockedHealthPlanFormDataType['contractAmendmentInfo'] {
-    if (!amendment) {
+    // for now, amendment info and modified provisions are one and the same so we can skip dealing with them being missing separately
+    if (!amendment || !amendment.modifiedProvisions) {
         return undefined
     }
 
-    const cleanAmendment = replaceNullsWithUndefineds(amendment)
+    const cleanProvisions = replaceNullsWithUndefineds(
+        amendment.modifiedProvisions
+    )
 
     return {
-        modifiedBenefitsProvided: cleanAmendment.modifiedBenefitsProvided,
-        modifiedGeoAreaServed: cleanAmendment.modifiedGeoAreaServed,
-        modifiedMedicaidBeneficiaries:
-            cleanAmendment.modifiedMedicaidBeneficiaries,
-        modifiedRiskSharingStrategy: cleanAmendment.modifiedRiskSharingStrategy,
-        modifiedIncentiveArrangements:
-            cleanAmendment.modifiedIncentiveArrangements,
-        modifiedWitholdAgreements: cleanAmendment.modifiedWitholdAgreements,
-        modifiedStateDirectedPayments:
-            cleanAmendment.modifiedStateDirectedPayments,
-        modifiedPassThroughPayments: cleanAmendment.modifiedPassThroughPayments,
-        modifiedPaymentsForMentalDiseaseInstitutions:
-            cleanAmendment.modifiedPaymentsForMentalDiseaseInstitutions,
-        modifiedMedicalLossRatioStandards:
-            cleanAmendment.modifiedMedicalLossRatioStandards,
-        modifiedOtherFinancialPaymentIncentive:
-            cleanAmendment.modifiedOtherFinancialPaymentIncentive,
-        modifiedEnrollmentProcess: cleanAmendment.modifiedEnrollmentProcess,
-        modifiedGrevienceAndAppeal: cleanAmendment.modifiedGrevienceAndAppeal,
-        modifiedNetworkAdequacyStandards:
-            cleanAmendment.modifiedNetworkAdequacyStandards,
-        modifiedLengthOfContract: cleanAmendment.modifiedLengthOfContract,
-        modifiedNonRiskPaymentArrangements:
-            cleanAmendment.modifiedNonRiskPaymentArrangements,
+        modifiedProvisions: {
+            modifiedBenefitsProvided: cleanProvisions.modifiedBenefitsProvided,
+            modifiedGeoAreaServed: cleanProvisions.modifiedGeoAreaServed,
+            modifiedMedicaidBeneficiaries:
+                cleanProvisions.modifiedMedicaidBeneficiaries,
+            modifiedRiskSharingStrategy:
+                cleanProvisions.modifiedRiskSharingStrategy,
+            modifiedIncentiveArrangements:
+                cleanProvisions.modifiedIncentiveArrangements,
+            modifiedWitholdAgreements:
+                cleanProvisions.modifiedWitholdAgreements,
+            modifiedStateDirectedPayments:
+                cleanProvisions.modifiedStateDirectedPayments,
+            modifiedPassThroughPayments:
+                cleanProvisions.modifiedPassThroughPayments,
+            modifiedPaymentsForMentalDiseaseInstitutions:
+                cleanProvisions.modifiedPaymentsForMentalDiseaseInstitutions,
+            modifiedMedicalLossRatioStandards:
+                cleanProvisions.modifiedMedicalLossRatioStandards,
+            modifiedOtherFinancialPaymentIncentive:
+                cleanProvisions.modifiedOtherFinancialPaymentIncentive,
+            modifiedEnrollmentProcess:
+                cleanProvisions.modifiedEnrollmentProcess,
+            modifiedGrevienceAndAppeal:
+                cleanProvisions.modifiedGrevienceAndAppeal,
+            modifiedNetworkAdequacyStandards:
+                cleanProvisions.modifiedNetworkAdequacyStandards,
+            modifiedLengthOfContract: cleanProvisions.modifiedLengthOfContract,
+            modifiedNonRiskPaymentArrangements:
+                cleanProvisions.modifiedNonRiskPaymentArrangements,
+        },
     }
 }
 

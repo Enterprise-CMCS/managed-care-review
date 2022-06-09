@@ -20,6 +20,10 @@ export type {
     RateDataType,
 } from './UnlockedHealthPlanFormDataType'
 
+export type { ModifiedProvisions } from './ModifiedProvisions'
+
+export { modifiedProvisionKeys } from './ModifiedProvisions'
+
 export type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 export {
     hasValidContract,

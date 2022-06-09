@@ -82,53 +82,53 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     cy.findByLabelText('1932(a) State Plan Authority').safeClick()
 
     // fill out the yes/nos
-    cy.findByText('Benefits provided by the managed care plans').parent().within((el) => {
+    cy.findByText('Benefits provided by the managed care plans').parent().within(() => {
         cy.findByText('Yes').click()
     })
 
-    cy.findByText('Geographic areas served by the managed care plans').parent().within((el) => {
+    cy.findByText('Geographic areas served by the managed care plans').parent().within(() => {
         cy.findByText('Yes').click()
     })
-    cy.findByText('Medicaid beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)').parent().within((el) => {
+    cy.findByText('Medicaid beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)').parent().within(() => {
         cy.findByText('Yes').click()
     })
-    cy.findByText('Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)').parent().within((el) => {
+    cy.findByText('Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)').parent().within(() => {
         cy.findByText('Yes').click()
     })
-    cy.findByText('Incentive arrangements in accordance with 42 CFR § 438.6(b)(2)').parent().within((el) => {
+    cy.findByText('Incentive arrangements in accordance with 42 CFR § 438.6(b)(2)').parent().within(() => {
         cy.findByText('Yes').click()
     })
-    cy.findByText('Withhold arrangements in accordance with 42 CFR § 438.6(b)(3)').parent().within((el) => {
+    cy.findByText('Withhold arrangements in accordance with 42 CFR § 438.6(b)(3)').parent().within(() => {
         cy.findByText('No').click()
     })
-    cy.findByText('State directed payments in accordance with 42 CFR § 438.6(c)').parent().within((el) => {
+    cy.findByText('State directed payments in accordance with 42 CFR § 438.6(c)').parent().within(() => {
         cy.findByText('No').click()
     })
-    cy.findByText('Pass-through payments in accordance with 42 CFR § 438.6(d)').parent().within((el) => {
+    cy.findByText('Pass-through payments in accordance with 42 CFR § 438.6(d)').parent().within(() => {
         cy.findByText('No').click()
     })
-    cy.findByText('Payments to MCOs and PIHPs for enrollees that are a patient in an institution for mental disease in accordance with 42 CFR § 438.6(e)').parent().within((el) => {
+    cy.findByText('Payments to MCOs and PIHPs for enrollees that are a patient in an institution for mental disease in accordance with 42 CFR § 438.6(e)').parent().within(() => {
         cy.findByText('Yes').click()
     })
-    cy.findByText('Medical loss ratio standards in accordance with 42 CFR § 438.8').parent().within((el) => {
+    cy.findByText('Medical loss ratio standards in accordance with 42 CFR § 438.8').parent().within(() => {
         cy.findByText('Yes').click()
     })
-    cy.findByText('Other financial, payment, incentive or related contractual provisions').parent().within((el) => {
+    cy.findByText('Other financial, payment, incentive or related contractual provisions').parent().within(() => {
         cy.findByText('Yes').click()
     })
-    cy.findByText('Enrollment/disenrollment process').parent().within((el) => {
+    cy.findByText('Enrollment/disenrollment process').parent().within(() => {
         cy.findByText('Yes').click()
     })
-    cy.findByText('Grievance and appeal system').parent().within((el) => {
+    cy.findByText('Grievance and appeal system').parent().within(() => {
         cy.findByText('No').click()
     })
-    cy.findByText('Network adequacy standards').parent().within((el) => {
+    cy.findByText('Network adequacy standards').parent().within(() => {
         cy.findByText('Yes').click()
     })
-    cy.findByText('Length of the contract period').parent().within((el) => {
+    cy.findByText('Length of the contract period').parent().within(() => {
         cy.findByText('No').click()
     })
-    cy.findByText('Non-risk payment arrangements').parent().within((el) => {
+    cy.findByText('Non-risk payment arrangements').parent().within(() => {
         cy.findByText('Yes').click()
     })
 
@@ -259,7 +259,7 @@ Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
 
 Cypress.Commands.add(
     'submitStateSubmissionForm',
-    (success = true, resubmission = false) => {
+    (_success = true, resubmission = false) => {
         cy.intercept('POST', '*/graphql', (req) => {
             aliasMutation(req, 'submitHealthPlanPackage')
         })
@@ -271,7 +271,7 @@ Cypress.Commands.add(
         cy.findAllByTestId('modalWindow')
             .eq(1)
             .should('exist')
-            .within(($modal) => {
+            .within(() => {
                 if (resubmission) {
                     cy.get('#submittedReasonCharacterCount').type(
                         'Resubmission summary'
