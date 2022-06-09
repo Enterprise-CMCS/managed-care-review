@@ -48,7 +48,6 @@ Default.args = {
             name: 'modifiedBenefitsProvided',
             id: 'modifiedBenefitsProvided',
             label: 'Benefits provided have been modified',
-            showError: false,
         },
     ],
     initialValues: {

@@ -115,7 +115,7 @@ describe('ContractDetails', () => {
         await waitFor(() => {
             expect(
                 screen.queryAllByText('You must select yes or no')
-            ).toHaveLength(13)
+            ).toHaveLength(26)
         })
     })
 

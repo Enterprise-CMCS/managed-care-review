@@ -877,7 +877,9 @@ export const ContractDetails = ({
                                                                 ]
                                                             }
                                                             showError={showFieldErrors(
-                                                                errors.modifiedBenefitsProvided
+                                                                errors[
+                                                                    modifiedProvisionName
+                                                                ]
                                                             )}
                                                         />
                                                     )

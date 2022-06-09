@@ -19,14 +19,14 @@ import styles from './FieldYesNo.module.scss'
 export type FieldYesNoProps = {
     name: string
     label: string
-    showError: boolean
+    showError?: boolean
     id: string
 } & JSX.IntrinsicElements['input']
 
 export const FieldYesNo = ({
     name,
     label,
-    showError,
+    showError = false,
     id,
     ...inputProps
 }: FieldYesNoProps): React.ReactElement => {
@@ -39,16 +39,15 @@ export const FieldYesNo = ({
             role="radiogroup"
             aria-required={isRequired}
             id={id}
+            legend={label}
             className={styles.yesnofield}
         >
-            <span className={styles.label}>{label}</span>
             {showError && meta.error && (
                 <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>
             )}
             <span className={styles.optionsContainer}>
                 <FieldRadio
                     id={id + 'Yes'}
-                    className={styles.yes}
                     name={name}
                     label="Yes"
                     aria-required={isRequired}
