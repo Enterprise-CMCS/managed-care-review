@@ -146,6 +146,7 @@ jobs:
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
+      ses_rates_email_addresses: ${{ secrets.SES_RATES_EMAIL_ADDRESSES }}
       react_app_auth_mode: IDM
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
@@ -226,6 +227,7 @@ jobs:
       react_app_auth_mode: IDM
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
+      ses_rates_email_addresses: ${{ secrets.SES_RATES_EMAIL_ADDRESSES }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
       ld_sdk_key: ${{ secrets.VAL_LD_SDK_KEY }}
@@ -305,6 +307,7 @@ jobs:
       react_app_auth_mode: IDM
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.PROD_SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
+      ses_rates_email_addresses: ${{ secrets.PROD_SES_RATES_EMAIL_ADDRESSES }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
       ld_sdk_key: ${{ secrets.PROD_LD_SDK_KEY }}
@@ -357,7 +360,7 @@ jobs:
     steps:
       # this action sets env.WORKFLOW_CONCLUSION so we can call a
       # failure notification if any part of the workflow fails
-      - uses: technote-space/workflow-conclusion-action@v2
+      - uses: technote-space/workflow-conclusion-action@v3
 
       - name: Alert Slack On Failure
         uses: rtCamp/action-slack-notify@v2
