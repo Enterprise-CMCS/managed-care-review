@@ -31,7 +31,7 @@ on:
       ses_mcog_email_address: 
         required: true
       ses_rate_email_address: 
-      ses_direct_review_team_email_addresses:
+      ses_review_team_email_addresses:
         required: true
         required: true
       okta_metadata_url:
