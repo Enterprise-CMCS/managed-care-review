@@ -1,18 +1,19 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
-import { ContractDetailsSummarySection } from './ContractDetailsSummarySection'
+import {
+    ContractDetailsSummarySection,
+    sortModifiedProvisions,
+} from './ContractDetailsSummarySection'
 import {
     mockContractAndRatesDraft,
     mockStateSubmission,
 } from '../../../testHelpers/apolloHelpers'
+import { ModifiedProvisions } from '../../../common-code/healthPlanFormDataType'
 
 describe('ContractDetailsSummarySection', () => {
-    const draftContractAndRatesSubmission = mockContractAndRatesDraft()
-    const stateBaseContractOnlySubmission = mockStateSubmission()
-
     it('can render draft submission without errors (review and submit behavior)', () => {
         const testSubmission = {
-            ...draftContractAndRatesSubmission,
+            ...mockContractAndRatesDraft(),
             documents: [
                 {
                     s3URL: 's3://bucketname/key/test1',
@@ -63,7 +64,7 @@ describe('ContractDetailsSummarySection', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
                 submission={{
-                    ...stateBaseContractOnlySubmission,
+                    ...mockStateSubmission(),
                     status: 'SUBMITTED',
                 }}
                 submissionName="MN-PMAP-0001"
@@ -87,7 +88,7 @@ describe('ContractDetailsSummarySection', () => {
     it('can render all contract details fields', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
-                submission={draftContractAndRatesSubmission}
+                submission={mockContractAndRatesDraft()}
                 navigateTo="contract-details"
                 submissionName="MN-PMAP-0001"
             />
@@ -114,7 +115,12 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', {
-                name: 'Items being amended',
+                name: 'This contract action includes new or modified provisions related to the following',
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: 'This contract action does NOT include new or modified provisions related to the following',
             })
         ).toBeInTheDocument()
     })
@@ -122,32 +128,38 @@ describe('ContractDetailsSummarySection', () => {
     it('displays correct text content for contract a base contract', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
-                submission={stateBaseContractOnlySubmission}
+                submission={mockStateSubmission()}
                 submissionName="MN-PMAP-0001"
             />
         )
         expect(screen.getByText('Contract effective dates')).toBeInTheDocument()
         expect(
-            screen.queryByText('Items being amended')
+            screen.queryByText(
+                'This contract action does NOT include new or modified provisions related to the following'
+            )
         ).not.toBeInTheDocument()
     })
 
     it('displays correct text content for a contract amendment', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
-                submission={draftContractAndRatesSubmission}
+                submission={mockContractAndRatesDraft()}
                 submissionName="MN-PMAP-0001"
             />
         )
         expect(
             screen.getByText('Contract amendment effective dates')
         ).toBeInTheDocument()
-        expect(screen.queryByText('Items being amended')).toBeInTheDocument()
+        expect(
+            screen.queryByText(
+                'This contract action does NOT include new or modified provisions related to the following'
+            )
+        ).toBeInTheDocument()
     })
 
     it('render supporting contract docs when they exist', async () => {
         const testSubmission = {
-            ...draftContractAndRatesSubmission,
+            ...mockContractAndRatesDraft(),
             contractDocuments: [
                 {
                     s3URL: 's3://foo/bar/contract',
@@ -219,7 +231,7 @@ describe('ContractDetailsSummarySection', () => {
     it('does not render supporting contract documents table when no documents exist', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
-                submission={draftContractAndRatesSubmission}
+                submission={mockContractAndRatesDraft()}
                 submissionName="MN-PMAP-0001"
             />
         )
@@ -234,7 +246,7 @@ describe('ContractDetailsSummarySection', () => {
     it('does not render download all button when on previous submission', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
-                submission={draftContractAndRatesSubmission}
+                submission={mockContractAndRatesDraft()}
                 submissionName="MN-PMAP-0001"
             />
         )
@@ -243,5 +255,89 @@ describe('ContractDetailsSummarySection', () => {
                 name: 'Download all contract documents',
             })
         ).toBeNull()
+    })
+
+    it('renders amended provisions', () => {
+        renderWithProviders(
+            <ContractDetailsSummarySection
+                submission={mockContractAndRatesDraft()}
+                submissionName="MN-PMAP-0001"
+            />
+        )
+        expect(
+            screen.getByText('Benefits provided by the managed care plans')
+        ).toBeInTheDocument()
+
+        const modifiedProvisions = screen.getByLabelText(
+            'This contract action includes new or modified provisions related to the following'
+        )
+        expect(
+            within(modifiedProvisions).getByText(
+                'Benefits provided by the managed care plans'
+            )
+        ).toBeInTheDocument()
+        expect(
+            within(modifiedProvisions).getByText(
+                'Pass-through payments in accordance with 42 CFR § 438.6(d)'
+            )
+        ).toBeInTheDocument()
+
+        const unmodifiedProvisions = screen.getByLabelText(
+            'This contract action does NOT include new or modified provisions related to the following'
+        )
+        expect(
+            within(unmodifiedProvisions).getByText(
+                'Geographic areas served by the managed care plans'
+            )
+        ).toBeInTheDocument()
+        expect(
+            within(unmodifiedProvisions).getByText(
+                'Other financial, payment, incentive or related contractual provisions'
+            )
+        ).toBeInTheDocument()
+    })
+
+    it('sorts amended provisions correctly', () => {
+        const amendedItems: ModifiedProvisions = {
+            modifiedBenefitsProvided: true,
+            modifiedGeoAreaServed: false,
+            modifiedMedicaidBeneficiaries: true,
+            modifiedRiskSharingStrategy: true,
+            modifiedIncentiveArrangements: false,
+            modifiedWitholdAgreements: false,
+            modifiedStateDirectedPayments: false,
+            modifiedPassThroughPayments: true,
+            modifiedPaymentsForMentalDiseaseInstitutions: true,
+            modifiedMedicalLossRatioStandards: true,
+            modifiedOtherFinancialPaymentIncentive: false,
+            modifiedEnrollmentProcess: true,
+            modifiedGrevienceAndAppeal: true,
+            modifiedNetworkAdequacyStandards: true,
+            modifiedLengthOfContract: false,
+            modifiedNonRiskPaymentArrangements: true,
+        }
+
+        const [mod, unmod] = sortModifiedProvisions(amendedItems)
+
+        expect(mod).toEqual([
+            'modifiedBenefitsProvided',
+            'modifiedMedicaidBeneficiaries',
+            'modifiedRiskSharingStrategy',
+            'modifiedPassThroughPayments',
+            'modifiedPaymentsForMentalDiseaseInstitutions',
+            'modifiedMedicalLossRatioStandards',
+            'modifiedEnrollmentProcess',
+            'modifiedGrevienceAndAppeal',
+            'modifiedNetworkAdequacyStandards',
+            'modifiedNonRiskPaymentArrangements',
+        ])
+        expect(unmod).toEqual([
+            'modifiedGeoAreaServed',
+            'modifiedIncentiveArrangements',
+            'modifiedWitholdAgreements',
+            'modifiedStateDirectedPayments',
+            'modifiedOtherFinancialPaymentIncentive',
+            'modifiedLengthOfContract',
+        ])
     })
 })
