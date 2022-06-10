@@ -142,7 +142,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     const cmsMcogEmailAddress = process.env.SES_MCOG_EMAIL_ADDRESS
     const cmsRateEmailAddress = process.env.SES_RATE_EMAIL_ADDRESS
     const cmsDirectReviewTeamEmailAddress =
-        process.env.SES_DIRECT_REVIEW_TEAM_EMAIL_ADDRESS
+        process.env.SES_REVIEW_TEAM_EMAIL_ADDRESS
     const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
 
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
@@ -187,7 +187,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (cmsDirectReviewTeamEmailAddress === undefined) {
         throw new Error(
-            'Configuration Error: SES_DIRECT_REVIEW_TEAM_EMAIL_ADDRESS is required'
+            'Configuration Error: SES_REVIEW_TEAM_EMAIL_ADDRESS is required'
         )
     }
 

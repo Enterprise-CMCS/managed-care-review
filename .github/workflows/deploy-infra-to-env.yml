@@ -173,7 +173,7 @@ jobs:
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
           SES_MCOG_EMAIL_ADDRESS: ${{ secrets.ses_mcog_email_address }}
           SES_RATE_EMAIL_ADDRESS: ${{ secrets.ses_rate_email_address }}
-          SES_DIRECT_REVIEW_TEAM_EMAIL_ADDRESS: ${{ secrets.ses_direct_review_team_email_address }}
+          SES_REVIEW_TEAM_EMAIL_ADDRESS: ${{ secrets.ses_review_team_email_address }}
           OKTA_METADATA_URL: ${{ secrets.okta_metadata_url }}
 
         run: |

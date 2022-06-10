@@ -148,7 +148,7 @@ jobs:
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       ses_mcog_email_address: ${{ secrets.SES_MCOG_EMAIL_ADDRESS }}
       ses_rate_email_address: ${{ secrets.SES_RATE_EMAIL_ADDRESS }}
-      ses_direct_review_team_email_address: ${{ secrets.SES_DIRECT_REVIEW_TEAM_EMAIL_ADDRESS }}
+      ses_review_team_email_address: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
       react_app_auth_mode: IDM
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
@@ -231,7 +231,7 @@ jobs:
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       ses_mcog_email_address: ${{ secrets.SES_MCOG_EMAIL_ADDRESS }}
       ses_rate_email_address: ${{ secrets.SES_RATE_EMAIL_ADDRESS }}
-      ses_direct_review_team_email_address: ${{ secrets.SES_DIRECT_REVIEW_TEAM_EMAIL_ADDRESS }}
+      ses_review_team_email_address: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
       ld_sdk_key: ${{ secrets.VAL_LD_SDK_KEY }}
@@ -295,7 +295,7 @@ jobs:
       ses_review_team_email_addresses: ${{ secrets.PROD_SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       ses_mcog_email_address: ${{ secrets.SES_MCOG_EMAIL_ADDRESS }}
       ses_rate_email_address: ${{ secrets.SES_RATE_EMAIL_ADDRESS }}
-      ses_direct_review_team_email_address: ${{ secrets.SES_DIRECT_REVIEW_TEAM_EMAIL_ADDRESS }}
+      ses_review_team_email_address: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
       iam_path: ${{ secrets.IAM_PATH }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
@@ -317,7 +317,7 @@ jobs:
       ses_review_team_email_addresses: ${{ secrets.PROD_SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       ses_mcog_email_address: ${{ secrets.SES_MCOG_EMAIL_ADDRESS }}
       ses_rate_email_address: ${{ secrets.SES_RATE_EMAIL_ADDRESS }}
-      ses_direct_review_team_email_address: ${{ secrets.SES_DIRECT_REVIEW_TEAM_EMAIL_ADDRESS }}
+      ses_review_team_email_address: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESS }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
       ld_sdk_key: ${{ secrets.PROD_LD_SDK_KEY }}
