@@ -202,7 +202,8 @@ type UpdatedEmailData = {
 
 const unlockPackageCMSEmail = (
     unlockData: UpdatedEmailData,
-    config: EmailConfiguration
+    config: EmailConfiguration,
+    rateName: string
 ): EmailData => {
     const isTestEnvironment = config.stage !== 'prod'
     const reviewerEmails = config.cmsReviewSharedEmails
@@ -211,7 +212,7 @@ const unlockPackageCMSEmail = (
         <b>Unlocked by:</b> ${unlockData.updatedBy}<br />
         <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}<br />
         <b>Reason for unlock:</b> ${unlockData.updatedReason}<br /><br />
-        
+        <b>Rate name</b>: ${rateName}
         You will receive another notification when the state resubmits.
     `
     return {

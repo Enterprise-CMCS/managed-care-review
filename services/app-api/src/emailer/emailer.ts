@@ -10,6 +10,7 @@ import {
     UpdatedEmailData,
 } from './'
 import {
+    generateRateName,
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
@@ -49,7 +50,9 @@ type Emailer = {
         user: UserType
     ) => Promise<void | Error>
     sendUnlockPackageCMSEmail: (
-        updatedEmailData: UpdatedEmailData
+        submission: UnlockedHealthPlanFormDataType,
+        updatedEmailData: UpdatedEmailData,
+        submissionName: string
     ) => Promise<void | Error>
     sendUnlockPackageStateEmail: (
         submission: UnlockedHealthPlanFormDataType,
@@ -108,8 +111,17 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             )
             return await this.sendEmail(emailData)
         },
-        sendUnlockPackageCMSEmail: async function (updatedEmailData) {
-            const emailData = unlockPackageCMSEmail(updatedEmailData, config)
+        sendUnlockPackageCMSEmail: async function (
+            submission,
+            updatedEmailData,
+            submissionName
+        ) {
+            const rateName = generateRateName(submission, submissionName)
+            const emailData = unlockPackageCMSEmail(
+                updatedEmailData,
+                config,
+                rateName
+            )
             return await this.sendEmail(emailData)
         },
         sendUnlockPackageStateEmail: async function (
@@ -184,9 +196,16 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             localEmailerLogger(emailData)
         },
         sendUnlockPackageCMSEmail: async (
-            updatedEmailData: UpdatedEmailData
+            submission: UnlockedHealthPlanFormDataType,
+            updatedEmailData: UpdatedEmailData,
+            submissionName: string
         ) => {
-            const emailData = unlockPackageCMSEmail(updatedEmailData, config)
+            const rateName = generateRateName(submission, submissionName)
+            const emailData = unlockPackageCMSEmail(
+                updatedEmailData,
+                config,
+                rateName
+            )
             localEmailerLogger(emailData)
         },
         sendUnlockPackageStateEmail: async (
