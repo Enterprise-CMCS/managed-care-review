@@ -14,6 +14,7 @@ export type {
     FederalAuthority,
     ManagedCareEntity,
     RateType,
+    RateCapitationType,
     StateContact,
     SubmissionDocument,
     SubmissionType,

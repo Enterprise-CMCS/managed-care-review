@@ -3,12 +3,12 @@ import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { useS3 } from '../../../contexts/S3Context'
-import { Document } from '../../../gen/gqlClient'
+import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
 import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import styles from './UploadedDocumentsTable.module.scss'
 
 export type UploadedDocumentsTableProps = {
-    documents: Document[]
+    documents: SubmissionDocument[]
     caption: string | null
     documentCategory: string
     documentDateLookupTable?: DocumentDateLookupTable
@@ -17,9 +17,9 @@ export type UploadedDocumentsTableProps = {
     isCMSUser?: boolean
 }
 
-type DocumentWithLink = { url: string | null } & Document
+type DocumentWithLink = { url: string | null } & SubmissionDocument
 
-const isBothContractAndRateSupporting = (doc: Document) =>
+const isBothContractAndRateSupporting = (doc: SubmissionDocument) =>
     doc.documentCategories.includes('CONTRACT_RELATED') &&
     doc.documentCategories.includes('RATES_RELATED')
 
