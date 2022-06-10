@@ -22,9 +22,10 @@ export const FieldRadio = ({
     name,
     label,
     id,
+    value,
     ...inputProps
 }: FieldRadioProps): React.ReactElement => {
-    const [field] = useField({ name })
+    const [field] = useField({ name, value, type: 'radio' })
     const isRequired =
         inputProps['aria-required'] !== false && inputProps.required !== false // consumer must explicitly say this field is not required, otherwise we assume aria-required
     return (

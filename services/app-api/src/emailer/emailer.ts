@@ -24,6 +24,7 @@ type EmailConfiguration = {
     cmsMcogEmailAddress: string // email address for the managed care organization group
     cmsRateEmailAddress: string
     cmsDirectReviewTeamEmailAddress: string
+    ratesReviewSharedEmails: string[]
 }
 type EmailData = {
     bodyText: string
@@ -118,6 +119,7 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
         ) {
             const rateName = generateRateName(submission, submissionName)
             const emailData = unlockPackageCMSEmail(
+                submission,
                 updatedEmailData,
                 config,
                 rateName
@@ -202,6 +204,7 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
         ) => {
             const rateName = generateRateName(submission, submissionName)
             const emailData = unlockPackageCMSEmail(
+                submission,
                 updatedEmailData,
                 config,
                 rateName

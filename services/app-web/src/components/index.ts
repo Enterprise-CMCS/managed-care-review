@@ -16,6 +16,7 @@ export {
     FieldTextarea,
     FieldTextInput,
     FieldPreserveScrollPosition,
+    FieldYesNo,
 } from './Form'
 
 export { Footer } from './Footer'

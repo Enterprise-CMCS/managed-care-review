@@ -4,6 +4,8 @@ import {
     mockContractOnlyFormData,
     mockContractAndRatesFormData,
     mockUser,
+    mockUnlockedContractAndRatesFormData,
+    mockUnlockedContractOnlyFormData,
 } from '../testHelpers/emailerHelpers'
 import { LockedHealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import {
@@ -34,7 +36,6 @@ describe('Email templates', () => {
                 )
             })
         })
-
         it('subject line is correct', () => {
             const sub = mockContractOnlyFormData()
             const name = 'FL-MMA-001'
@@ -48,7 +49,6 @@ describe('Email templates', () => {
                 })
             )
         })
-
         it('includes expected data summary for a contract only submission', () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractOnlyFormData(),
@@ -171,7 +171,6 @@ describe('Email templates', () => {
                 })
             )
         })
-
         it('includes expected data summary for a rate amendment submission CMS email', () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAndRatesFormData(),
@@ -228,6 +227,43 @@ describe('Email templates', () => {
                     ),
                 })
             )
+        })
+        it('includes ratesReviewSharedEmails on contract and rate submission', () => {
+            const sub = mockContractAndRatesFormData()
+            const template = newPackageCMSEmail(
+                sub,
+                'some-title',
+                testEmailConfig
+            )
+            const reviewerEmails = [
+                ...testEmailConfig.cmsReviewSharedEmails,
+                ...testEmailConfig.ratesReviewSharedEmails,
+            ]
+            reviewerEmails.forEach((emailAddress) => {
+                expect(template).toEqual(
+                    expect.objectContaining({
+                        toAddresses: expect.arrayContaining([emailAddress]),
+                    })
+                )
+            })
+        })
+        it('does not include ratesReviewSharedEmails on contract only submission', () => {
+            const sub = mockContractOnlyFormData()
+            const template = newPackageCMSEmail(
+                sub,
+                'some-title',
+                testEmailConfig
+            )
+            const ratesReviewerEmails = [
+                ...testEmailConfig.ratesReviewSharedEmails,
+            ]
+            ratesReviewerEmails.forEach((emailAddress) => {
+                expect(template).toEqual(
+                    expect.objectContaining({
+                        toAddresses: expect.not.arrayContaining([emailAddress]),
+                    })
+                )
+            })
         })
     })
     describe('State email', () => {
@@ -471,7 +507,14 @@ describe('Email templates', () => {
             updatedAt: new Date('01/01/2022'),
             updatedReason: 'Adding rate development guide.',
         }
-        const template = unlockPackageCMSEmail(unlockData, testEmailConfig)
+        const submission = mockUnlockedContractAndRatesFormData()
+        const rateName = 'test-rate-name'
+        const template = unlockPackageCMSEmail(
+            submission,
+            unlockData,
+            testEmailConfig,
+            rateName
+        )
         it('subject line is correct and clearly states submission is unlocked', () => {
             expect(template).toEqual(
                 expect.objectContaining({
@@ -510,6 +553,41 @@ describe('Email templates', () => {
                     bodyText: expect.stringMatching(/Rate name:/),
                 })
             )
+            it('includes ratesReviewSharedEmails on contract and rate submission unlock', () => {
+                const reviewerEmails = [
+                    ...testEmailConfig.cmsReviewSharedEmails,
+                    ...testEmailConfig.ratesReviewSharedEmails,
+                ]
+                reviewerEmails.forEach((emailAddress) => {
+                    expect(template).toEqual(
+                        expect.objectContaining({
+                            toAddresses: expect.arrayContaining([emailAddress]),
+                        })
+                    )
+                })
+            })
+            it('does not include ratesReviewSharedEmails on contract only submission unlock', () => {
+                const sub = mockUnlockedContractOnlyFormData()
+                const rateName = 'test-rate-name'
+                const contractOnlyTemplate = unlockPackageCMSEmail(
+                    sub,
+                    unlockData,
+                    testEmailConfig,
+                    rateName
+                )
+                const ratesReviewerEmails = [
+                    ...testEmailConfig.ratesReviewSharedEmails,
+                ]
+                ratesReviewerEmails.forEach((emailAddress) => {
+                    expect(contractOnlyTemplate).toEqual(
+                        expect.objectContaining({
+                            toAddresses: expect.not.arrayContaining([
+                                emailAddress,
+                            ]),
+                        })
+                    )
+                })
+            })
         })
     })
     describe('State unlock email', () => {
@@ -650,7 +728,7 @@ describe('Email templates', () => {
             updatedAt: new Date('02/01/2022'),
             updatedReason: 'Added rate certification.',
         }
-        const submission = mockContractOnlyFormData()
+        const submission = mockContractAndRatesFormData()
         const template = resubmittedCMSEmail(
             submission,
             resubmitData,
@@ -708,6 +786,39 @@ describe('Email templates', () => {
                     bodyText: expect.stringMatching(/Rate name:/),
                 })
             )
+            it('includes ratesReviewSharedEmails on contract and rate resubmission email', () => {
+                const reviewerEmails = [
+                    ...testEmailConfig.cmsReviewSharedEmails,
+                    ...testEmailConfig.ratesReviewSharedEmails,
+                ]
+                reviewerEmails.forEach((emailAddress) => {
+                    expect(template).toEqual(
+                        expect.objectContaining({
+                            toAddresses: expect.arrayContaining([emailAddress]),
+                        })
+                    )
+                })
+            })
+            it('does not include ratesReviewSharedEmails on contract only resubmission email', () => {
+                const sub = mockContractOnlyFormData()
+                const contractOnlyTemplate = resubmittedCMSEmail(
+                    sub,
+                    resubmitData,
+                    testEmailConfig
+                )
+                const rateReviewerEmails = [
+                    ...testEmailConfig.ratesReviewSharedEmails,
+                ]
+                rateReviewerEmails.forEach((emailAddress) => {
+                    expect(contractOnlyTemplate).toEqual(
+                        expect.objectContaining({
+                            toAddresses: expect.not.arrayContaining([
+                                emailAddress,
+                            ]),
+                        })
+                    )
+                })
+            })
         })
     })
 })

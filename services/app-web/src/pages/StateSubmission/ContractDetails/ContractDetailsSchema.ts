@@ -4,6 +4,11 @@ import { validateDateFormat } from '../../../formHelpers'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
+const yesNoError = Yup.string().when('contractType', {
+    is: 'AMENDMENT',
+    then: Yup.string().defined('You must select yes or no'),
+})
+
 // Formik setup
 export const ContractDetailsFormSchema = Yup.object().shape({
     contractType: Yup.string().defined(
@@ -57,22 +62,21 @@ export const ContractDetailsFormSchema = Yup.object().shape({
         is: (contractType: string | undefined) => contractType,
         then: Yup.array().min(1, 'You must select at least one authority'),
     }),
-    itemsAmended: Yup.array().when('contractType', {
-        is: 'AMENDMENT',
-        then: Yup.array().min(1, 'You must select at least one item'),
-    }),
-    otherItemAmended: Yup.string().when('itemsAmended', {
-        is: (items: string[]) => items.includes('OTHER'),
-        then: Yup.string().defined('You must enter a description'),
-    }),
-    capitationRates: Yup.string().when('itemsAmended', {
-        is: (items: string[]) => items.includes('CAPITATION_RATES'),
-        then: Yup.string()
-            .nullable()
-            .defined('You must select a reason for capitation rate change'),
-    }),
-    capitationRatesOther: Yup.string().when('capitationRates', {
-        is: 'OTHER',
-        then: Yup.string().defined('You must enter a description'),
-    }),
+
+    modifiedBenefitsProvided: yesNoError,
+    modifiedGeoAreaServed: yesNoError,
+    modifiedMedicaidBeneficiaries: yesNoError,
+    modifiedRiskSharingStrategy: yesNoError,
+    modifiedIncentiveArrangements: yesNoError,
+    modifiedWitholdAgreements: yesNoError,
+    modifiedStateDirectedPayments: yesNoError,
+    modifiedPassThroughPayments: yesNoError,
+    modifiedPaymentsForMentalDiseaseInstitutions: yesNoError,
+    modifiedMedicalLossRatioStandards: yesNoError,
+    modifiedOtherFinancialPaymentIncentive: yesNoError,
+    modifiedEnrollmentProcess: yesNoError,
+    modifiedGrevienceAndAppeal: yesNoError,
+    modifiedNetworkAdequacyStandards: yesNoError,
+    modifiedLengthOfContract: yesNoError,
+    modifiedNonRiskPaymentArrangements: yesNoError,
 })

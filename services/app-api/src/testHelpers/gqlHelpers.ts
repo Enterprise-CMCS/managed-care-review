@@ -71,6 +71,7 @@ const constructTestEmailer = (): Emailer => {
         cmsMcogEmailAddress: 'mcog@example.com',
         cmsRateEmailAddress: 'rates@example.com',
         cmsDirectReviewTeamEmailAddress: 'mc-review@example.com',
+        ratesReviewSharedEmails: ['testRate@example.com'],
     }
     return newLocalEmailer(config)
 }

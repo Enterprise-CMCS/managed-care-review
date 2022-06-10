@@ -143,6 +143,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     const cmsRateEmailAddress = process.env.SES_RATE_EMAIL_ADDRESS
     const cmsDirectReviewTeamEmailAddress =
         process.env.SES_REVIEW_TEAM_EMAIL_ADDRESS
+    const ratesReviewSharedEmails = process.env.SES_RATES_EMAIL_ADDRESSES
     const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
 
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
@@ -190,6 +191,10 @@ async function initializeGQLHandler(): Promise<Handler> {
             'Configuration Error: SES_REVIEW_TEAM_EMAIL_ADDRESS is required'
         )
     }
+    if (ratesReviewSharedEmails === undefined)
+        throw new Error(
+            'Configuration Error: SES_RATES_EMAIL_ADDRESSES is required'
+        )
 
     if (applicationEndpoint === undefined || applicationEndpoint === '')
         throw new Error('Configuration Error: APPLICATION_ENDPOINT is required')
@@ -226,6 +231,7 @@ async function initializeGQLHandler(): Promise<Handler> {
                   cmsMcogEmailAddress,
                   cmsRateEmailAddress,
                   cmsDirectReviewTeamEmailAddress,
+                  ratesReviewSharedEmails: ratesReviewSharedEmails.split(','),
               })
             : newSESEmailer({
                   emailSource: emailSource,
@@ -235,6 +241,7 @@ async function initializeGQLHandler(): Promise<Handler> {
                   cmsMcogEmailAddress,
                   cmsRateEmailAddress,
                   cmsDirectReviewTeamEmailAddress,
+                  ratesReviewSharedEmails: ratesReviewSharedEmails.split(','),
               })
 
     // Resolvers are defined and tested in the resolvers package
