@@ -29,10 +29,10 @@ custom:
   emailSource: ${env:SES_SOURCE_EMAIL_ADDRESS}
   emailerMode: ${env:EMAILER_MODE}
   emailReviewTeamAddresses: ${env:SES_REVIEW_TEAM_EMAIL_ADDRESSES}
-  emailMcogAddress: ${env:SES_REVIEW_HELP_EMAIL_ADDRESS}
-  emailRateAddress: ${env:SES_RATE_HELP_EMAIL_ADDRESS}
-  emailDirectReviewTeamAddress: ${env:SES_DEV_TEAM_HELP_EMAIL_ADDRESS}
-  ratesEmailAddresses: ${env:SES_RATES_EMAIL_ADDRESSES}
+  emailRatesTeamAddresses: ${env:SES_RATES_EMAIL_ADDRESSES}
+  emailReviewHelpAddress: ${env:SES_REVIEW_HELP_EMAIL_ADDRESS}
+  emailRateHelpAddress: ${env:SES_RATE_HELP_EMAIL_ADDRESS}
+  emailDevTeamHelpAddress: ${env:SES_DEV_TEAM_HELP_EMAIL_ADDRESS}
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${self:custom.stage}.PostgresAuroraArn }
   iamPath: ${env:IAM_PATH, "/"}
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
@@ -124,10 +124,10 @@ provider:
     EMAILER_MODE: ${self:custom.emailerMode}
     SES_SOURCE_EMAIL_ADDRESS: ${self:custom.emailSource}
     SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${self:custom.emailReviewTeamAddresses}
-    SES_REVIEW_HELP_EMAIL_ADDRESS: ${self:custom.emailMcogAddress}
-    SES_RATE_HELP_EMAIL_ADDRESS: ${self:custom.emailRateAddress}
-    SES_DEV_TEAM_HELP_EMAIL_ADDRESS: ${self:custom.emailDirectReviewTeamAddress}
-    SES_RATES_EMAIL_ADDRESSES: ${self:custom.ratesEmailAddresses}
+    SES_REVIEW_HELP_EMAIL_ADDRESS: ${self:custom.emailReviewHelpAddress}
+    SES_RATE_HELP_EMAIL_ADDRESS: ${self:custom.emailRateHelpAddress}
+    SES_DEV_TEAM_HELP_EMAIL_ADDRESS: ${self:custom.emailDevTeamHelpAddress}
+    SES_RATES_EMAIL_ADDRESSES: ${self:custom.emailRatesTeamAddresses}
     APPLICATION_ENDPOINT: ${self:custom.applicationEndpoint}
     AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
     OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
