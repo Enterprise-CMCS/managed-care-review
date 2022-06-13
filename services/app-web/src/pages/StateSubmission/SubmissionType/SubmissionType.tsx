@@ -343,10 +343,6 @@ export const SubmissionType = ({
                                         </PoliteErrorMessage>
                                     )}
                                     <FieldRadio
-                                        checked={
-                                            values.submissionType ===
-                                            'CONTRACT_ONLY'
-                                        }
                                         id="contractOnly"
                                         name="submissionType"
                                         label={
@@ -357,10 +353,6 @@ export const SubmissionType = ({
                                         value={'CONTRACT_ONLY'}
                                     />
                                     <FieldRadio
-                                        checked={
-                                            values.submissionType ===
-                                            'CONTRACT_AND_RATES'
-                                        }
                                         id="contractRate"
                                         name="submissionType"
                                         label={

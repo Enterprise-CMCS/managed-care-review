@@ -1,5 +1,4 @@
 import { screen, waitFor, within } from '@testing-library/react'
-import { act } from 'react-dom/test-utils'
 import userEvent from '@testing-library/user-event'
 
 import {
@@ -51,123 +50,7 @@ describe('ContractDetails', () => {
         expect(screen.getByText(/All fields are required/)).toBeInTheDocument()
     })
 
-    it('progressively discloses options for capitation rates', async () => {
-        // mount an empty form
-
-        const emptyDraft = mockDraft()
-        emptyDraft.id = '12'
-
-        renderWithProviders(
-            <ContractDetails
-                draftSubmission={emptyDraft}
-                updateDraft={jest.fn()}
-                previousDocuments={[]}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-                routerProvider: {
-                    route: '/submissions/12/contract-details',
-                },
-            }
-        )
-
-        // should not be able to find hidden things
-        // "Items being amended"
-        expect(screen.queryByText('Items being amended')).toBeNull()
-
-        // click amendment and upload docs
-        const amendmentRadio = screen.getByLabelText(
-            'Amendment to base contract'
-        )
-        amendmentRadio.click()
-
-        const input = screen.getByLabelText('Upload contract')
-        userEvent.upload(input, [TEST_DOC_FILE])
-
-        // check that now we can see hidden things
-        expect(screen.queryByText('Items being amended')).toBeInTheDocument()
-
-        // click "next"
-        const continueButton = screen.getByRole('button', { name: 'Continue' })
-        await act(async () => {
-            continueButton.click()
-        })
-
-        // select some things to narrow down which errors we are looking for
-        // these options have to be selected no matter which type of contract it is
-        await act(async () => {
-            screen.getByLabelText('Managed Care Organization (MCO)').click()
-            screen.getByLabelText('1115 Waiver Authority').click()
-        })
-
-        // check that there are the errors we expect
-        expect(
-            screen.queryAllByText('You must select at least one item')
-        ).toHaveLength(2)
-
-        // click capRates
-        await act(async () => {
-            screen.getByLabelText('Capitation rates').click()
-        })
-        expect(
-            screen.queryByText('You must select at least one item')
-        ).toBeNull()
-
-        // check error for not selected
-        expect(
-            screen.getAllByText(
-                'You must select a reason for capitation rate change'
-            )
-        ).toHaveLength(2)
-
-        // click annual rate
-        await act(async () => {
-            screen.getByLabelText('Mid-year update').click()
-        })
-
-        // error should be gone
-        expect(
-            screen.queryByText(
-                'You must select a reason for capitation rate change'
-            )
-        ).toBeNull()
-
-        // click other,
-        const capitationChoices = screen.getByText(
-            'Select reason for capitation rate change'
-        ).parentElement
-        if (capitationChoices === null) {
-            throw new Error('cap choices should always have a parent')
-        }
-
-        within(capitationChoices)
-            .getByLabelText('Other (please describe)')
-            .click()
-
-        // other is displayed, error is back
-        await waitFor(() =>
-            expect(
-                screen.getAllByText('You must enter a description')
-            ).toHaveLength(2)
-        )
-        const otherBox = screen.getByLabelText(
-            'Other capitation rate description'
-        )
-        userEvent.type(otherBox, 'x') // WEIRD, for some reason it's not recording but the last character of the typing
-        // click continue
-
-        userEvent.click(continueButton)
-
-        await waitFor(() => {
-            expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
-        })
-    })
-
-    it('progressively discloses option for amended items', async () => {
-        // mount an empty form
-
+    it('allows setting a yes/no modified provision', async () => {
         const emptyDraft = mockDraft()
         const mockUpdateDraftFn = jest.fn()
         renderWithProviders(
@@ -192,35 +75,48 @@ describe('ContractDetails', () => {
 
         // click "next"
         const continueButton = screen.getByRole('button', { name: 'Continue' })
-        await act(async () => {
-            continueButton.click()
+        userEvent.click(continueButton)
+
+        // check for yes/no errors
+        await waitFor(() => {
+            expect(
+                screen.getAllByText('You must select yes or no')
+            ).toHaveLength(32)
         })
 
-        // select some things to narrow down which errors we are looking for
-        // these options have to be selected no matter which type of contract it is
-        await act(async () => {
-            screen.getByLabelText('Managed Care Organization (MCO)').click()
-            screen.getByLabelText('1115 Waiver Authority').click()
+        const benefitsGroup = screen.getByText(
+            'Benefits provided by the managed care plans'
+        ).parentElement
+        const geoGroup = screen.getByText(
+            'Geographic areas served by the managed care plans'
+        ).parentElement
+        const lengthGroup = screen.getByText(
+            'Length of the contract period'
+        ).parentElement
+
+        if (
+            benefitsGroup === null ||
+            geoGroup === null ||
+            lengthGroup === null
+        ) {
+            throw new Error('Benefits and Geo and Length must have parents.')
+        }
+
+        // choose yes and no
+        const benefitsYes = within(benefitsGroup).getByLabelText('Yes') //
+        const geoNo = within(geoGroup).getByLabelText('No')
+        const lengthYes = within(lengthGroup).getByLabelText('Yes')
+
+        userEvent.click(benefitsYes)
+        userEvent.click(geoNo)
+        userEvent.click(lengthYes)
+
+        // error should be reduced by 3
+        await waitFor(() => {
+            expect(
+                screen.queryAllByText('You must select yes or no')
+            ).toHaveLength(26)
         })
-
-        // click other
-        await act(async () => {
-            screen.getByLabelText('Other (please describe)').click()
-        })
-
-        // check error for not selected
-        expect(
-            screen.getAllByText('You must enter a description')
-        ).toHaveLength(2)
-
-        // click annual rate
-        await act(async () => {
-            const other = screen.getByLabelText('Other item description')
-            userEvent.type(other, 'foo bar')
-        })
-
-        // error should be gone
-        expect(screen.queryByText('You must enter a description')).toBeNull()
     })
 
     describe('Contract documents file upload', () => {

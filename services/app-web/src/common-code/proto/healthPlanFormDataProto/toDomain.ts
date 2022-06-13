@@ -5,7 +5,6 @@ import {
     LockedHealthPlanFormDataType,
     DocumentCategoryType,
     ActuarialFirmType,
-    ContractAmendmentInfo,
     FederalAuthority,
     isLockedHealthPlanFormData,
 } from '../../healthPlanFormDataType'
@@ -186,46 +185,50 @@ function parseProtoDocuments(
     }))
 }
 
-// Just pulling this type out of the hierarchy
-type CapitationRateI =
-    mcreviewproto.ContractInfo.IContractAmendmentInfo['capitationRatesAmendedInfo']
-
-function parseCapitationRates(
-    capRates: CapitationRateI | null | undefined
-): ContractAmendmentInfo['capitationRatesAmendedInfo'] | undefined {
-    if (!capRates) {
-        return undefined
-    }
-
-    return {
-        reason: enumToDomain(
-            mcreviewproto.CapitationRateAmendmentReason,
-            capRates.reason
-        ),
-        otherReason: capRates.otherReason ?? undefined,
-    }
-}
-
 function parseContractAmendment(
     amendment: mcreviewproto.IContractInfo['contractAmendmentInfo']
-): RecursivePartial<UnlockedHealthPlanFormDataType['contractAmendmentInfo']> {
-    if (!amendment) {
+): UnlockedHealthPlanFormDataType['contractAmendmentInfo'] {
+    // for now, amendment info and modified provisions are one and the same so we can skip dealing with them being missing separately
+    if (!amendment || !amendment.modifiedProvisions) {
         return undefined
     }
 
-    const cleanAmendment = replaceNullsWithUndefineds(amendment)
+    const cleanProvisions = replaceNullsWithUndefineds(
+        amendment.modifiedProvisions
+    )
 
     return {
-        // items being amended are an enum in proto but not in domain
-        itemsBeingAmended: protoEnumArrayToDomain(
-            mcreviewproto.AmendedItem,
-            amendment.amendableItems
-        ),
-
-        capitationRatesAmendedInfo: parseCapitationRates(
-            cleanAmendment.capitationRatesAmendedInfo
-        ),
-        otherItemBeingAmended: cleanAmendment.otherAmendableItem,
+        modifiedProvisions: {
+            modifiedBenefitsProvided: cleanProvisions.modifiedBenefitsProvided,
+            modifiedGeoAreaServed: cleanProvisions.modifiedGeoAreaServed,
+            modifiedMedicaidBeneficiaries:
+                cleanProvisions.modifiedMedicaidBeneficiaries,
+            modifiedRiskSharingStrategy:
+                cleanProvisions.modifiedRiskSharingStrategy,
+            modifiedIncentiveArrangements:
+                cleanProvisions.modifiedIncentiveArrangements,
+            modifiedWitholdAgreements:
+                cleanProvisions.modifiedWitholdAgreements,
+            modifiedStateDirectedPayments:
+                cleanProvisions.modifiedStateDirectedPayments,
+            modifiedPassThroughPayments:
+                cleanProvisions.modifiedPassThroughPayments,
+            modifiedPaymentsForMentalDiseaseInstitutions:
+                cleanProvisions.modifiedPaymentsForMentalDiseaseInstitutions,
+            modifiedMedicalLossRatioStandards:
+                cleanProvisions.modifiedMedicalLossRatioStandards,
+            modifiedOtherFinancialPaymentIncentive:
+                cleanProvisions.modifiedOtherFinancialPaymentIncentive,
+            modifiedEnrollmentProcess:
+                cleanProvisions.modifiedEnrollmentProcess,
+            modifiedGrevienceAndAppeal:
+                cleanProvisions.modifiedGrevienceAndAppeal,
+            modifiedNetworkAdequacyStandards:
+                cleanProvisions.modifiedNetworkAdequacyStandards,
+            modifiedLengthOfContract: cleanProvisions.modifiedLengthOfContract,
+            modifiedNonRiskPaymentArrangements:
+                cleanProvisions.modifiedNonRiskPaymentArrangements,
+        },
     }
 }
 
