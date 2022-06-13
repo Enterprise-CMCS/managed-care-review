@@ -87,6 +87,7 @@ const generateNewSubmissionBody = (
               }`
             : 'Rating Period Dates Not Found'
     }`
+
     const rateName =
         submission.submissionType === 'CONTRACT_AND_RATES'
             ? `<b>Rate name</b>: ${generateRateName(
@@ -128,7 +129,7 @@ const newPackageCMSEmail = (
 ): EmailData => {
     // config
     const isTestEnvironment = config.stage !== 'prod'
-    const reviewerEmails = config.cmsReviewSharedEmails
+    const reviewerEmails = generateReviewerEmails(config, submission)
     const bodyHTML = `Managed Care submission: <b>${submissionName}</b> was received from <b>${
         submission.stateCode
     }</b>.
@@ -223,13 +224,18 @@ const unlockPackageCMSEmail = (
     rateName: string
 ): EmailData => {
     const isTestEnvironment = config.stage !== 'prod'
-    const reviewerEmails = config.cmsReviewSharedEmails
+    const reviewerEmails = generateReviewerEmails(config, submission)
+    const rateNameText =
+        submission.submissionType === 'CONTRACT_AND_RATES'
+            ? `<b>Rate name</b>: ${rateName}<br />`
+            : ''
+
     const bodyHTML = `Submission ${unlockData.packageName} was unlocked<br />
         <br />
         <b>Unlocked by:</b> ${unlockData.updatedBy}<br />
         <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}<br />
         <b>Reason for unlock:</b> ${unlockData.updatedReason}<br /><br />
-        <b>Rate name</b>: ${rateName}
+        ${rateNameText}
         You will receive another notification when the state resubmits.
     `
     return {
@@ -256,6 +262,15 @@ const unlockPackageStateEmail = (
     const receiverEmails: string[] = submission.stateContacts.map(
         (contact) => contact.email
     )
+
+    const rateNameText =
+        submission.submissionType === 'CONTRACT_AND_RATES'
+            ? `<b>Rate name</b>: ${generateRateName(
+                  submission,
+                  submissionName
+              )}<br />`
+            : ''
+
     const bodyHTML = `Submission ${
         unlockData.packageName
     } was unlocked by CMS<br />
@@ -263,7 +278,7 @@ const unlockPackageStateEmail = (
         <b>Unlocked by:</b> ${unlockData.updatedBy}<br />
         <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}<br />
         <b>Reason for unlock:</b> ${unlockData.updatedReason}<br /><br />
-        <b>Rate name</b>: ${generateRateName(submission, submissionName)}<br />
+        ${rateNameText}
         <b>You must revise the submission before CMS can continue reviewing it.<br />
         <a href="${submissionURL}">Open the submission in MC-Review to make edits.</a>
     `
@@ -288,6 +303,15 @@ const resubmittedStateEmail = (
     const receiverEmails: string[] = [currentUserEmail].concat(
         submission.stateContacts.map((contact) => contact.email)
     )
+
+    const rateNameText =
+        submission.submissionType === 'CONTRACT_AND_RATES'
+            ? `<b>Rate name</b>: ${generateRateName(
+                  submission,
+                  resubmittedData.packageName
+              )}<br />`
+            : ''
+
     const bodyHTML = `Submission ${
         resubmittedData.packageName
     } was successfully resubmitted<br />
@@ -297,6 +321,7 @@ const resubmittedStateEmail = (
             resubmittedData.updatedAt
         )}<br />
         <b>Changes made:</b> ${resubmittedData.updatedReason}<br />
+        ${rateNameText}
         <br />
         <p>If you need to make any further changes, please contact CMS.</p>
     `
@@ -321,6 +346,13 @@ const resubmittedCMSEmail = (
         `submissions/${submission.id}`,
         config.baseUrl
     ).href
+    const rateNameText =
+        submission.submissionType === 'CONTRACT_AND_RATES'
+            ? `<b>Rate name</b>: ${generateRateName(
+                  submission,
+                  resubmittedData.packageName
+              )}<br />`
+            : ''
 
     const bodyHTML = `The state completed their edits on submission ${
         resubmittedData.packageName
@@ -331,6 +363,7 @@ const resubmittedCMSEmail = (
             resubmittedData.updatedAt
         )}<br />
         <b>Changes made:</b> ${resubmittedData.updatedReason}<br />
+        ${rateNameText}
         <br />
         <a href="${submissionURL}">View submission</a>
     `
