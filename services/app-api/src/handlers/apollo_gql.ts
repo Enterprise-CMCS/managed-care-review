@@ -139,10 +139,10 @@ async function initializeGQLHandler(): Promise<Handler> {
     const emailSource = process.env.SES_SOURCE_EMAIL_ADDRESS
     const emailerMode = process.env.EMAILER_MODE
     const cmsReviewSharedEmails = process.env.SES_REVIEW_TEAM_EMAIL_ADDRESSES
-    const cmsMcogEmailAddress = process.env.SES_MCOG_EMAIL_ADDRESS
-    const cmsRateEmailAddress = process.env.SES_RATE_EMAIL_ADDRESS
-    const cmsDirectReviewTeamEmailAddress =
-        process.env.SES_REVIEW_TEAM_EMAIL_ADDRESS
+    const cmsReviewHelpEmailAddress = process.env.SES_REVIEW_HELP_EMAIL_ADDRESS
+    const cmsRateHelpEmailAddress = process.env.SES_RATE_HELP_EMAIL_ADDRESS
+    const cmsDevTeamHelpEmailAddress =
+        process.env.SES_DEV_TEAM_HELP_EMAIL_ADDRESS
     const ratesReviewSharedEmails = process.env.SES_RATES_EMAIL_ADDRESSES
     const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
 
@@ -174,21 +174,21 @@ async function initializeGQLHandler(): Promise<Handler> {
             'Configuration Error: SES_REVIEW_TEAM_EMAIL_ADDRESSES is required'
         )
 
-    if (cmsMcogEmailAddress === undefined) {
+    if (cmsReviewHelpEmailAddress === undefined) {
         throw new Error(
-            'Configuration Error: SES_MCOG_EMAIL_ADDRESS is required'
+            'Configuration Error: SES_REVIEW_HELP_EMAIL_ADDRESS is required'
         )
     }
 
-    if (cmsRateEmailAddress === undefined) {
+    if (cmsRateHelpEmailAddress === undefined) {
         throw new Error(
-            'Configuration Error: SES_RATE_EMAIL_ADDRESS is required'
+            'Configuration Error: SES_RATE_HELP_EMAIL_ADDRESS is required'
         )
     }
 
-    if (cmsDirectReviewTeamEmailAddress === undefined) {
+    if (cmsDevTeamHelpEmailAddress === undefined) {
         throw new Error(
-            'Configuration Error: SES_REVIEW_TEAM_EMAIL_ADDRESS is required'
+            'Configuration Error: SES_DEV_TEAM_HELP_EMAIL_ADDRESS is required'
         )
     }
     if (ratesReviewSharedEmails === undefined)
@@ -228,9 +228,9 @@ async function initializeGQLHandler(): Promise<Handler> {
                   stage: 'local',
                   baseUrl: applicationEndpoint,
                   cmsReviewSharedEmails: cmsReviewSharedEmails.split(','),
-                  cmsMcogEmailAddress,
-                  cmsRateEmailAddress,
-                  cmsDirectReviewTeamEmailAddress,
+                  cmsReviewHelpEmailAddress,
+                  cmsRateHelpEmailAddress,
+                  cmsDevTeamHelpEmailAddress,
                   ratesReviewSharedEmails: ratesReviewSharedEmails.split(','),
               })
             : newSESEmailer({
@@ -238,9 +238,9 @@ async function initializeGQLHandler(): Promise<Handler> {
                   stage: stageName,
                   baseUrl: applicationEndpoint,
                   cmsReviewSharedEmails: cmsReviewSharedEmails.split(','),
-                  cmsMcogEmailAddress,
-                  cmsRateEmailAddress,
-                  cmsDirectReviewTeamEmailAddress,
+                  cmsReviewHelpEmailAddress,
+                  cmsRateHelpEmailAddress,
+                  cmsDevTeamHelpEmailAddress,
                   ratesReviewSharedEmails: ratesReviewSharedEmails.split(','),
               })
 

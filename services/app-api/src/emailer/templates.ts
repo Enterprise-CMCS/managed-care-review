@@ -183,17 +183,17 @@ const newPackageStateEmail = (
                 If you need assistance or to make changes to your submission: 
                     <li>
                         For assistance with programmatic, contractual, or operational issues, please reach out to ${
-                            config.cmsMcogEmailAddress
+                            config.cmsReviewHelpEmailAddress
                         } and/or your CMS primary contact.
                     </li>
                     <li>
                         For assistance on policy and actuarial issues, please reach out to ${
-                            config.cmsRateEmailAddress
+                            config.cmsRateHelpEmailAddress
                         }.
                     </li>
                     <li>
                         For issues related to MC-Review or all other inquiries, please reach out to ${
-                            config.cmsDirectReviewTeamEmailAddress
+                            config.cmsDevTeamHelpEmailAddress
                         }.
                     </li>
                 </li>

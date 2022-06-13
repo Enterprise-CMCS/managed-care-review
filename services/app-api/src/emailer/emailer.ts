@@ -21,10 +21,10 @@ type EmailConfiguration = {
     baseUrl: string
     emailSource: string // an email address for the generic application-wide sender
     cmsReviewSharedEmails: string[] // list of shared emails that all new managed care packages must be sent to
-    cmsMcogEmailAddress: string // email address for the managed care organization group
-    cmsRateEmailAddress: string
-    cmsDirectReviewTeamEmailAddress: string
-    ratesReviewSharedEmails: string[]
+    ratesReviewSharedEmails: string[] // list of shared emails that managed care packages with rates must be sent to
+    cmsReviewHelpEmailAddress: string // email address for the managed care organization group
+    cmsRateHelpEmailAddress: string // email address for rates help
+    cmsDevTeamHelpEmailAddress: string // email address for all other help
 }
 type EmailData = {
     bodyText: string

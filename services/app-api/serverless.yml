@@ -29,9 +29,9 @@ custom:
   emailSource: ${env:SES_SOURCE_EMAIL_ADDRESS}
   emailerMode: ${env:EMAILER_MODE}
   emailReviewTeamAddresses: ${env:SES_REVIEW_TEAM_EMAIL_ADDRESSES}
-  emailMcogAddress: ${env:SES_MCOG_EMAIL_ADDRESS}
-  emailRateAddress: ${env:SES_RATE_EMAIL_ADDRESS}
-  emailDirectReviewTeamAddress: ${env:SES_REVIEW_TEAM_EMAIL_ADDRESS}
+  emailMcogAddress: ${env:SES_REVIEW_HELP_EMAIL_ADDRESS}
+  emailRateAddress: ${env:SES_RATE_HELP_EMAIL_ADDRESS}
+  emailDirectReviewTeamAddress: ${env:SES_DEV_TEAM_HELP_EMAIL_ADDRESS}
   ratesEmailAddresses: ${env:SES_RATES_EMAIL_ADDRESSES}
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${self:custom.stage}.PostgresAuroraArn }
   iamPath: ${env:IAM_PATH, "/"}
@@ -124,9 +124,9 @@ provider:
     EMAILER_MODE: ${self:custom.emailerMode}
     SES_SOURCE_EMAIL_ADDRESS: ${self:custom.emailSource}
     SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${self:custom.emailReviewTeamAddresses}
-    SES_MCOG_EMAIL_ADDRESS: ${self:custom.emailMcogAddress}
-    SES_RATE_EMAIL_ADDRESS: ${self:custom.emailRateAddress}
-    SES_REVIEW_TEAM_EMAIL_ADDRESS: ${self:custom.emailDirectReviewTeamAddress}
+    SES_REVIEW_HELP_EMAIL_ADDRESS: ${self:custom.emailMcogAddress}
+    SES_RATE_HELP_EMAIL_ADDRESS: ${self:custom.emailRateAddress}
+    SES_DEV_TEAM_HELP_EMAIL_ADDRESS: ${self:custom.emailDirectReviewTeamAddress}
     SES_RATES_EMAIL_ADDRESSES: ${self:custom.ratesEmailAddresses}
     APPLICATION_ENDPOINT: ${self:custom.applicationEndpoint}
     AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler

@@ -21,9 +21,9 @@ const testEmailConfig: EmailConfiguration = {
     baseUrl: 'http://localhost',
     emailSource: 'emailSource@example.com',
     cmsReviewSharedEmails: ['cmsreview1@example.com', 'cmsreview2@example.com'],
-    cmsMcogEmailAddress: 'mcog@example.com',
-    cmsRateEmailAddress: 'rates@example.com',
-    cmsDirectReviewTeamEmailAddress: 'mc-review@example.com',
+    cmsReviewHelpEmailAddress: 'mcog@example.com',
+    cmsRateHelpEmailAddress: 'rates@example.com',
+    cmsDevTeamHelpEmailAddress: 'mc-review@example.com',
     ratesReviewSharedEmails: ['ratesreview@example.com'],
 }
 
