@@ -35,4 +35,11 @@
     > span {
         margin: units(1);
     }
+    a {
+        color: $cms-color-white;
+
+        &:hover {
+            color: $cms-color-white;
+        }
+    }
 }
