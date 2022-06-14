@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react'
 import { Route, Routes } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
-import { Document } from '../../gen/gqlClient'
+import { SubmissionDocument } from '../../common-code/healthPlanFormDataType'
 import { RoutesRecord } from '../../constants/routes'
 import {
     fetchCurrentUserMock,
@@ -295,7 +295,7 @@ describe('StateSubmissionForm', () => {
         })
 
         it('works even if other sections of the form have been filled out', async () => {
-            const mockDocs: Document[] = [
+            const mockDocs: SubmissionDocument[] = [
                 {
                     name: 'somedoc.pdf',
                     s3URL: 's3://bucketName/key/somedoc.pdf',

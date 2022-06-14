@@ -21,11 +21,9 @@ import styles from '../StateSubmissionForm.module.scss'
 import {
     ActuarialFirmType,
     ActuaryCommunicationType,
-} from '../../../gen/gqlClient'
+} from '../../../common-code/healthPlanFormDataType'
 
 import { ErrorSummary, FieldRadio } from '../../../components/Form'
-
-import { stripTypename } from '../updateSubmissionTransform'
 
 import { useFocus } from '../../../hooks/useFocus'
 import { PageActions } from '../PageActions'
@@ -214,8 +212,8 @@ export const Contacts = ({
     const showFieldErrors = (error?: FormError): boolean | undefined =>
         shouldValidate && Boolean(error)
 
-    const stateContacts = stripTypename(draftSubmission.stateContacts)
-    const actuaryContacts = stripTypename(draftSubmission.actuaryContacts)
+    const stateContacts = draftSubmission.stateContacts
+    const actuaryContacts = draftSubmission.actuaryContacts
 
     const emptyStateContact = {
         name: '',
@@ -535,7 +533,7 @@ export const Contacts = ({
                                                     0 &&
                                                     values.actuaryContacts.map(
                                                         (
-                                                            actuaryContact,
+                                                            _actuaryContact,
                                                             index
                                                         ) => (
                                                             <div

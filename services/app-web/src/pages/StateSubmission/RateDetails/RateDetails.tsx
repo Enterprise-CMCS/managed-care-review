@@ -14,7 +14,11 @@ import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
 
-import { Document, RateType, RateCapitationType } from '../../../gen/gqlClient'
+import {
+    SubmissionDocument,
+    RateType,
+    RateCapitationType,
+} from '../../../common-code/healthPlanFormDataType'
 
 import {
     FileUpload,
@@ -263,7 +267,7 @@ export const RateDetails = ({
                 }
                 return formDataDocuments
             },
-            [] as Document[]
+            [] as SubmissionDocument[]
         )
 
         // const updatedDraft = updatesFromSubmission(draftSubmission)
