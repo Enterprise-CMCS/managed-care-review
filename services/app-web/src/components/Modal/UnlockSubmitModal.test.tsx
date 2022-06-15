@@ -4,11 +4,9 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import {
-    fetchCurrentUserMock,
     mockCompleteDraft,
     mockSubmittedHealthPlanPackage,
     mockSubmittedHealthPlanPackageWithRevisions,
-    mockValidCMSUser,
     submitHealthPlanPackageMockError,
     submitHealthPlanPackageMockSuccess,
     unlockHealthPlanPackageMockError,
@@ -83,14 +81,16 @@ describe('UnlockSubmitModal', () => {
             const dialog = screen.getByRole('dialog')
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
-            screen.getByTestId('submit-modal-submit').click()
+            userEvent.click(screen.getByTestId('submit-modal-submit'))
 
-            await waitFor(() => {
+            await waitFor(() =>
                 expect(testLocation.pathname).toBe(`/dashboard`)
+            )
+            await waitFor(() =>
                 expect(testLocation.search).toBe(
                     `?justSubmitted=Test-Submission`
                 )
-            })
+            )
         })
         it('displays modal alert banner error if submit api request fails', async () => {
             const modalRef = createRef<ModalRef>()
@@ -118,7 +118,7 @@ describe('UnlockSubmitModal', () => {
             const dialog = screen.getByRole('dialog')
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
-            screen.getByTestId('submit-modal-submit').click()
+            userEvent.click(screen.getByTestId('submit-modal-submit'))
 
             expect(
                 await screen.findByText(
@@ -215,10 +215,6 @@ describe('UnlockSubmitModal', () => {
                 {
                     apolloProvider: {
                         mocks: [
-                            fetchCurrentUserMock({
-                                user: mockValidCMSUser(),
-                                statusCode: 200,
-                            }),
                             unlockHealthPlanPackageMockSuccess({
                                 id: mockUnlockedHealthPlanPackage().id,
                                 reason: 'Test unlock summary',
@@ -236,10 +232,16 @@ describe('UnlockSubmitModal', () => {
                 'Test unlock summary'
             )
 
-            screen.getByTestId('unlock-modal-submit').click()
+            userEvent.click(screen.getByTestId('unlock-modal-submit'))
+
+            // the popup dialog should be hidden again
+            await waitFor(() => {
+                const dialog = screen.queryByRole('dialog')
+                expect(dialog).toHaveClass('is-hidden')
+            })
 
             expect(
-                await screen.findByText(
+                screen.queryByText(
                     'Error attempting to unlock. Submission may be already unlocked. Please refresh and try again.'
                 )
             ).not.toBeInTheDocument()
@@ -275,13 +277,14 @@ describe('UnlockSubmitModal', () => {
                 'Test unlock summary'
             )
 
-            screen.getByTestId('unlock-modal-submit').click()
+            userEvent.click(screen.getByTestId('unlock-modal-submit'))
 
-            expect(
-                await screen.findByText(
+            await waitFor(() => {
+                const error = screen.queryByText(
                     'Error attempting to unlock. Submission may be already unlocked. Please refresh and try again.'
                 )
-            ).toBeInTheDocument()
+                expect(error).toBeInTheDocument()
+            })
         })
     })
 
@@ -338,7 +341,8 @@ describe('UnlockSubmitModal', () => {
 
             expect(screen.getByRole('dialog')).toHaveClass('is-visible')
             expect(screen.getByText('Summarize changes')).toBeInTheDocument()
-            screen.getByTestId('resubmit-modal-submit').click()
+
+            userEvent.click(screen.getByTestId('resubmit-modal-submit'))
 
             expect(
                 await screen.findByText('You must provide a summary of changes')
@@ -365,7 +369,7 @@ describe('UnlockSubmitModal', () => {
             const textbox = await screen.getByTestId('modalInput')
 
             // submit without entering anything
-            screen.getByTestId('resubmit-modal-submit').click()
+            userEvent.click(screen.getByTestId('resubmit-modal-submit'))
 
             expect(
                 await screen.findByText('You must provide a summary of changes')
@@ -414,16 +418,22 @@ describe('UnlockSubmitModal', () => {
                 'Test submission summary'
             )
 
-            screen.getByTestId('resubmit-modal-submit').click()
+            userEvent.click(screen.getByTestId('resubmit-modal-submit'))
 
-            await waitFor(() => {
+            await waitFor(() =>
                 expect(screen.getByRole('dialog')).toHaveClass('is-hidden')
+            )
+            await waitFor(() =>
                 expect(mockSetIsSubmitting).toHaveBeenCalledTimes(2)
+            )
+            await waitFor(() =>
                 expect(testLocation.pathname).toBe(`/dashboard`)
+            )
+            await waitFor(() =>
                 expect(testLocation.search).toBe(
                     '?justSubmitted=Test-Submission'
                 )
-            })
+            )
         })
     })
 })
