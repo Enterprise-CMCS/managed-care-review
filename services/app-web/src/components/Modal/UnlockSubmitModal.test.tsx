@@ -1,0 +1,429 @@
+import { createRef } from 'react'
+import { ModalRef } from '@trussworks/react-uswds'
+import { screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+
+import {
+    fetchCurrentUserMock,
+    mockCompleteDraft,
+    mockSubmittedHealthPlanPackage,
+    mockSubmittedHealthPlanPackageWithRevisions,
+    mockValidCMSUser,
+    submitHealthPlanPackageMockError,
+    submitHealthPlanPackageMockSuccess,
+    unlockHealthPlanPackageMockError,
+    unlockHealthPlanPackageMockSuccess,
+    mockUnlockedHealthPlanPackage,
+} from '../../testHelpers/apolloHelpers'
+import { UnlockSubmitModal } from './UnlockSubmitModal'
+import { renderWithProviders } from '../../testHelpers/jestHelpers'
+import { Location } from 'history'
+
+describe('UnlockSubmitModal', () => {
+    const mockSetIsSubmitting = jest.fn()
+
+    describe('initial submission modal', () => {
+        it('displays correct modal when submitting initial submission', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    healthPlanPackage={mockCompleteDraft()}
+                    submissionName="Test-Submission"
+                    modalType="SUBMIT"
+                    modalRef={modalRef}
+                    setIsSubmitting={mockSetIsSubmitting}
+                />
+            )
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            const confirmSubmit = screen.getByTestId('submit-modal-submit')
+            expect(confirmSubmit).toBeInTheDocument()
+            expect(screen.getByText('Ready to submit?')).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'Submitting this package will send it to CMS to begin their review.'
+                )
+            ).toBeInTheDocument()
+        })
+        it('redirects if submission succeeds', async () => {
+            let testLocation: Location
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    healthPlanPackage={mockCompleteDraft()}
+                    submissionName="Test-Submission"
+                    modalType="SUBMIT"
+                    modalRef={modalRef}
+                    setIsSubmitting={mockSetIsSubmitting}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            submitHealthPlanPackageMockSuccess({
+                                id: mockCompleteDraft().id,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `draftSubmission/${
+                            mockCompleteDraft().id
+                        }/review-and-submit`,
+                    },
+                    location: (location) => (testLocation = location),
+                }
+            )
+
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            screen.getByTestId('submit-modal-submit').click()
+
+            await waitFor(() => {
+                expect(testLocation.pathname).toBe(`/dashboard`)
+                expect(testLocation.search).toBe(
+                    `?justSubmitted=Test-Submission`
+                )
+            })
+        })
+        it('displays modal alert banner error if submit api request fails', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    healthPlanPackage={mockCompleteDraft()}
+                    submissionName="Test-Submission"
+                    modalType="SUBMIT"
+                    modalRef={modalRef}
+                    setIsSubmitting={mockSetIsSubmitting}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            submitHealthPlanPackageMockError({
+                                id: mockCompleteDraft().id,
+                            }),
+                        ],
+                    },
+                }
+            )
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            screen.getByTestId('submit-modal-submit').click()
+
+            expect(
+                await screen.findByText(
+                    'Error attempting to submit. Please try again.'
+                )
+            ).toBeInTheDocument()
+            expect(mockSetIsSubmitting).toHaveBeenCalledTimes(2)
+        })
+    })
+
+    describe('unlock submission modal', () => {
+        it('renders without errors', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    modalRef={modalRef}
+                    modalType="UNLOCK"
+                    healthPlanPackage={mockSubmittedHealthPlanPackageWithRevisions()}
+                />
+            )
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+        })
+
+        it('displays form validation error when submitting without a unlock reason', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    modalRef={modalRef}
+                    modalType="UNLOCK"
+                    healthPlanPackage={mockSubmittedHealthPlanPackageWithRevisions()}
+                />
+            )
+            await waitFor(() => handleOpen())
+            await screen.findByTestId('modalInput')
+
+            const modalSubmit = screen.getByTestId('unlock-modal-submit')
+            expect(modalSubmit).toHaveTextContent('Unlock')
+            userEvent.click(modalSubmit)
+            const dialog = screen.getByRole('dialog')
+            expect(dialog).toHaveClass('is-visible')
+            expect(
+                await screen.findByText(
+                    'You must provide a reason for unlocking this submission'
+                )
+            ).toBeInTheDocument()
+        })
+
+        it('draws focus to unlock reason input when form validation errors exist', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    modalRef={modalRef}
+                    modalType="UNLOCK"
+                    healthPlanPackage={mockSubmittedHealthPlanPackageWithRevisions()}
+                />
+            )
+
+            await waitFor(() => handleOpen())
+            screen.getByText('Provide reason for unlocking')
+
+            const textbox = await screen.findByTestId('modalInput')
+
+            // submit without entering anything
+            userEvent.click(screen.getByTestId('unlock-modal-submit'))
+
+            expect(
+                await screen.findByText(
+                    'You must provide a reason for unlocking this submission'
+                )
+            ).toBeInTheDocument()
+
+            // check focus after error
+            expect(textbox).toHaveFocus()
+        })
+
+        it('displays no modal alert banner error if unlock api request succeeds', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    modalRef={modalRef}
+                    modalType="UNLOCK"
+                    healthPlanPackage={mockSubmittedHealthPlanPackage()}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            unlockHealthPlanPackageMockSuccess({
+                                id: mockUnlockedHealthPlanPackage().id,
+                                reason: 'Test unlock summary',
+                            }),
+                        ],
+                    },
+                }
+            )
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            userEvent.type(
+                screen.getByTestId('modalInput'),
+                'Test unlock summary'
+            )
+
+            screen.getByTestId('unlock-modal-submit').click()
+
+            expect(
+                await screen.findByText(
+                    'Error attempting to unlock. Submission may be already unlocked. Please refresh and try again.'
+                )
+            ).not.toBeInTheDocument()
+        })
+
+        it('displays modal alert banner error if unlock api request fails', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    modalRef={modalRef}
+                    modalType="UNLOCK"
+                    healthPlanPackage={mockSubmittedHealthPlanPackage()}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            unlockHealthPlanPackageMockError({
+                                id: mockUnlockedHealthPlanPackage().id,
+                                reason: 'Test unlock summary',
+                            }),
+                        ],
+                    },
+                }
+            )
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            userEvent.type(
+                screen.getByTestId('modalInput'),
+                'Test unlock summary'
+            )
+
+            screen.getByTestId('unlock-modal-submit').click()
+
+            expect(
+                await screen.findByText(
+                    'Error attempting to unlock. Submission may be already unlocked. Please refresh and try again.'
+                )
+            ).toBeInTheDocument()
+        })
+    })
+
+    describe('resubmit unlocked submission modal', () => {
+        it('displays correct modal when submitting unlocked submission', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    healthPlanPackage={mockCompleteDraft()}
+                    submissionName="Test-Submission"
+                    modalType="RESUBMIT"
+                    modalRef={modalRef}
+                    setIsSubmitting={mockSetIsSubmitting}
+                />
+            )
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            expect(screen.getByText('Summarize changes')).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'Once you submit, this package will be sent to CMS for review and you will no longer be able to make changes.'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'Provide summary of all changes made to this submission'
+                )
+            ).toBeInTheDocument()
+            expect(screen.getByTestId('modalInput')).toBeInTheDocument()
+            expect(
+                screen.getByTestId('resubmit-modal-submit')
+            ).toHaveTextContent('Resubmit')
+        })
+        it('displays form validation error when submitting without an submission summary', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    healthPlanPackage={mockCompleteDraft()}
+                    submissionName="Test-Submission"
+                    modalType="RESUBMIT"
+                    modalRef={modalRef}
+                    setIsSubmitting={mockSetIsSubmitting}
+                />
+            )
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            expect(screen.getByRole('dialog')).toHaveClass('is-visible')
+            expect(screen.getByText('Summarize changes')).toBeInTheDocument()
+            screen.getByTestId('resubmit-modal-submit').click()
+
+            expect(
+                await screen.findByText('You must provide a summary of changes')
+            ).toBeInTheDocument()
+        })
+        it('draws focus to submitted summary textarea when form validation errors exist', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    healthPlanPackage={mockCompleteDraft()}
+                    submissionName="Test-Submission"
+                    modalType="RESUBMIT"
+                    modalRef={modalRef}
+                    setIsSubmitting={mockSetIsSubmitting}
+                />
+            )
+
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            const textbox = await screen.getByTestId('modalInput')
+
+            // submit without entering anything
+            screen.getByTestId('resubmit-modal-submit').click()
+
+            expect(
+                await screen.findByText('You must provide a summary of changes')
+            ).toBeInTheDocument()
+
+            // check focus after error
+            expect(textbox).toHaveFocus()
+        })
+        it('redirects if submission succeeds on unlocked plan package', async () => {
+            let testLocation: Location
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+
+            renderWithProviders(
+                <UnlockSubmitModal
+                    healthPlanPackage={mockCompleteDraft()}
+                    submissionName="Test-Submission"
+                    modalType="RESUBMIT"
+                    modalRef={modalRef}
+                    setIsSubmitting={mockSetIsSubmitting}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            submitHealthPlanPackageMockSuccess({
+                                id: mockCompleteDraft().id,
+                                submittedReason: 'Test submission summary',
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `draftSubmission/${
+                            mockCompleteDraft().id
+                        }/review-and-submit`,
+                    },
+                    location: (location) => (testLocation = location),
+                }
+            )
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            userEvent.type(
+                screen.getByTestId('modalInput'),
+                'Test submission summary'
+            )
+
+            screen.getByTestId('resubmit-modal-submit').click()
+
+            await waitFor(() => {
+                expect(screen.getByRole('dialog')).toHaveClass('is-hidden')
+                expect(mockSetIsSubmitting).toHaveBeenCalledTimes(2)
+                expect(testLocation.pathname).toBe(`/dashboard`)
+                expect(testLocation.search).toBe(
+                    '?justSubmitted=Test-Submission'
+                )
+            })
+        })
+    })
+})
