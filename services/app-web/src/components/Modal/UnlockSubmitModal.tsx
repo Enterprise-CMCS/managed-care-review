@@ -25,7 +25,7 @@ type ModalValueType = {
     modalInputValidationText?: string
 }
 
-const modalValueDictionary: { [key: string]: ModalValueType } = {
+const modalValueDictionary: { [Property in ModalType]: ModalValueType } = {
     RESUBMIT: {
         modalHeading: 'Summarize changes',
         onSubmitText: 'Resubmit',
