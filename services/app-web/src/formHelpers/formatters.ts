@@ -34,7 +34,7 @@ const formatForForm = (
     if (attribute === null || attribute === undefined) {
         return ''
     } else if (attribute instanceof Date) {
-        return dayjs(attribute).format('YYYY-MM-DD')
+        return dayjs(attribute).utc().format('YYYY-MM-DD')
     } else if (typeof attribute === 'boolean') {
         return attribute ? 'YES' : 'NO'
     } else {
