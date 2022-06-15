@@ -1,5 +1,4 @@
 import { screen, waitFor, within } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
 import { basicLockedHealthPlanFormData } from '../../common-code/healthPlanFormDataMocks'
 import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
@@ -9,8 +8,6 @@ import {
     fetchStateHealthPlanPackageMockSuccess,
     mockUnlockedHealthPlanPackage,
     mockValidCMSUser,
-    unlockHealthPlanPackageMockError,
-    unlockHealthPlanPackageMockSuccess,
     mockSubmittedHealthPlanPackageWithRevision,
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
@@ -175,67 +172,6 @@ describe('SubmissionSummary', () => {
             ).toBeInTheDocument()
         })
 
-        it('displays no error on unlock success', async () => {
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<SubmissionSummary />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                user: mockValidCMSUser(),
-                                statusCode: 200,
-                            }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                            }),
-                            unlockHealthPlanPackageMockSuccess({
-                                id: '15',
-                                reason: 'Test unlock reason',
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15',
-                    },
-                }
-            )
-
-            const unlockModalButton = await screen.findByRole('button', {
-                name: 'Unlock submission',
-            })
-            userEvent.click(unlockModalButton)
-
-            // the popup dialog should be visible now
-            await waitFor(() => {
-                const dialog = screen.getByRole('dialog')
-                expect(dialog).toHaveClass('is-visible')
-            })
-
-            const textbox = screen.getByTestId('unlockReason')
-            userEvent.type(textbox, 'Test unlock reason')
-
-            const unlockButton = screen.getByTestId('unlockReason-modal-submit')
-            expect(unlockButton).toHaveTextContent('Unlock')
-            userEvent.click(unlockButton)
-
-            // the popup dialog should be hidden again
-            await waitFor(() => {
-                const dialog = screen.getByRole('dialog')
-                expect(dialog).toHaveClass('is-hidden')
-            })
-
-            expect(
-                screen.queryByText(
-                    'Error attempting to unlock. Please try again.'
-                )
-            ).toBeNull()
-        })
-
         it('extracts the correct dates from the submission and displays them in tables', async () => {
             renderWithProviders(
                 <Routes>
@@ -351,67 +287,6 @@ describe('SubmissionSummary', () => {
             )
             banner.toHaveTextContent('Unlocked by: bob@dmas.mn.govUnlocked')
             banner.toHaveTextContent('Reason for unlock: Test unlock reason')
-        })
-
-        it('displays page alert banner error if unlock api request fails', async () => {
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                        element={<SubmissionSummary />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                user: mockValidCMSUser(),
-                                statusCode: 200,
-                            }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                            }),
-                            unlockHealthPlanPackageMockError({
-                                id: '15',
-                                reason: 'Test unlock reason',
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/15',
-                    },
-                }
-            )
-
-            const unlockModalButton = await screen.findByRole('button', {
-                name: 'Unlock submission',
-            })
-            userEvent.click(unlockModalButton)
-
-            // the popup dialog should be visible now
-            await waitFor(() => {
-                const dialog = screen.getByRole('dialog')
-                expect(dialog).toHaveClass('is-visible')
-            })
-
-            const textbox = screen.getByTestId('unlockReason')
-            userEvent.type(textbox, 'Test unlock reason')
-
-            const unlockButton = screen.getByTestId('unlockReason-modal-submit')
-            expect(unlockButton).toHaveTextContent('Unlock')
-            userEvent.click(unlockButton)
-
-            // the popup dialog should be hidden again
-            await waitFor(() => {
-                const dialog = screen.getByRole('dialog')
-                expect(dialog).toHaveClass('is-hidden')
-            })
-
-            expect(
-                await screen.findByText(
-                    'Error attempting to unlock. Please try again.'
-                )
-            ).toBeInTheDocument()
         })
     })
 })
