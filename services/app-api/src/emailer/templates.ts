@@ -200,25 +200,26 @@ const newPackageStateEmail = (
                     <strong>Decision:</strong> Once all questions have been addressed, CMS will contact you with their final recommendation.
 
                 </li>
-                <li>
-                If you need assistance or to make changes to your submission: 
-                    <li>
-                        For assistance with programmatic, contractual, or operational issues, please reach out to ${
-                            config.cmsReviewHelpEmailAddress
-                        } and/or your CMS primary contact.
-                    </li>
-                    <li>
-                        For assistance on policy and actuarial issues, please reach out to ${
-                            config.cmsRateHelpEmailAddress
-                        }.
-                    </li>
-                    <li>
-                        For issues related to MC-Review or all other inquiries, please reach out to ${
-                            config.cmsDevTeamHelpEmailAddress
-                        }.
-                    </li>
-                </li>
             </ol>
+            <br />
+            <div>If you need assistance or to make changes to your submission:</div>
+            <ul>
+                <li>
+                    For assistance with programmatic, contractual, or operational issues, please reach out to ${
+                        config.cmsReviewHelpEmailAddress
+                    } and/or your CMS primary contact.
+                </li>
+                <li>
+                    For assistance on policy and actuarial issues, please reach out to ${
+                        config.cmsRateHelpEmailAddress
+                    }.
+                </li>
+                <li>
+                    For issues related to MC-Review or all other inquiries, please reach out to ${
+                        config.cmsDevTeamHelpEmailAddress
+                    }.
+                </li>
+            </ul>
         `
     return {
         toAddresses: receiverEmails,
