@@ -43,6 +43,8 @@ To adjust warning levels, ignore certain types of warnings, or create actions (s
 
 We are running pa11y on every page of our form inside of our Cypress tests using the cypress-audit library. This allows us to sign in and fill out the form using Cypress, and only rely on pa11y to scan those pages. This is also one place in our app where we have implemented a ratchet in CI. The issues present when we started testing with pa11y have been ignored, allowing CI to ensure that we aren't adding new errors in the future. Tickets have been filed to address those existing issues.
 
+### Jaeger
+Jaeger is used to emulate Open Telemetry behavior for local dev. Read more in the [Jaeger docs](https://www.jaegertracing.io/docs/1.35/getting-started/) or visit port [16686](http://localhost:16686)) on local dev.
 ### Todo:
 
 -   GraphQL
