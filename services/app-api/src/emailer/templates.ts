@@ -14,6 +14,12 @@ const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_AND_RATES: 'Contract action and rate certification',
 }
 
+//This should reference UUIDS in the statePrograms.json in src/data/
+const CHIP_PROGRAMS_UUID = {
+    MS: '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
+    AS: 'e112301b-72c7-4c8f-856a-2cf8c6a1465b',
+}
+
 // Clean out HTML tags from an HTML based template
 // this way we still have a text alternative for email client rendering html in plaintext
 // plaintext is also referenced for unit testing
@@ -32,18 +38,33 @@ const stripHTMLFromTemplate = (template: string) => {
     return formatted.replace(/(<([^>]+)>)/gi, '')
 }
 
+//Checks if at least one program is CHIP
+const includesChipPrograms = (programIDs: string[]): boolean => {
+    const chipProgramIds = Object.values(CHIP_PROGRAMS_UUID)
+    return programIDs.some((id: string) => chipProgramIds.includes(id))
+}
+
 const generateReviewerEmails = (
     config: EmailConfiguration,
     submission: LockedHealthPlanFormDataType | UnlockedHealthPlanFormDataType
 ): string[] => {
+    //chipReviewerEmails does not include OACT and DMCP emails
+    const chipReviewerEmails = config.cmsReviewSharedEmails.filter(
+        (email) => email !== config.cmsRateHelpEmailAddress
+    )
+    const contractAndRateReviewerEmails = [
+        ...config.cmsReviewSharedEmails,
+        ...config.ratesReviewSharedEmails,
+    ]
+
     if (
         submission.submissionType === 'CONTRACT_AND_RATES' &&
-        submission.stateCode !== 'PR'
+        submission.stateCode !== 'PR' &&
+        !includesChipPrograms(submission.programIDs)
     ) {
-        return [
-            ...config.cmsReviewSharedEmails,
-            ...config.ratesReviewSharedEmails,
-        ]
+        return contractAndRateReviewerEmails
+    } else if (includesChipPrograms(submission.programIDs)) {
+        return chipReviewerEmails
     }
     return config.cmsReviewSharedEmails
 }
@@ -179,25 +200,26 @@ const newPackageStateEmail = (
                     <strong>Decision:</strong> Once all questions have been addressed, CMS will contact you with their final recommendation.
 
                 </li>
-                <li>
-                If you need assistance or to make changes to your submission: 
-                    <li>
-                        For assistance with programmatic, contractual, or operational issues, please reach out to ${
-                            config.cmsReviewHelpEmailAddress
-                        } and/or your CMS primary contact.
-                    </li>
-                    <li>
-                        For assistance on policy and actuarial issues, please reach out to ${
-                            config.cmsRateHelpEmailAddress
-                        }.
-                    </li>
-                    <li>
-                        For issues related to MC-Review or all other inquiries, please reach out to ${
-                            config.cmsDevTeamHelpEmailAddress
-                        }.
-                    </li>
-                </li>
             </ol>
+            <br />
+            <div>If you need assistance or to make changes to your submission:</div>
+            <ul>
+                <li>
+                    For assistance with programmatic, contractual, or operational issues, please reach out to ${
+                        config.cmsReviewHelpEmailAddress
+                    } and/or your CMS primary contact.
+                </li>
+                <li>
+                    For assistance on policy and actuarial issues, please reach out to ${
+                        config.cmsRateHelpEmailAddress
+                    }.
+                </li>
+                <li>
+                    For issues related to MC-Review or all other inquiries, please reach out to ${
+                        config.cmsDevTeamHelpEmailAddress
+                    }.
+                </li>
+            </ul>
         `
     return {
         toAddresses: receiverEmails,
@@ -386,4 +408,5 @@ export {
     resubmittedStateEmail,
     resubmittedCMSEmail,
     UpdatedEmailData,
+    CHIP_PROGRAMS_UUID,
 }
