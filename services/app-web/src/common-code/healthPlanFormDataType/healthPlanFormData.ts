@@ -174,7 +174,7 @@ function packageName(
                 .toUpperCase()
         )
         .join('-')
-    return `MCR-${submission.stateCode.toUpperCase()}-${formattedProgramNames}-${padNumber}`
+    return `MCR-${submission.stateCode.toUpperCase()}-${padNumber}-${formattedProgramNames}`
 }
 
 const generateRateName = (
