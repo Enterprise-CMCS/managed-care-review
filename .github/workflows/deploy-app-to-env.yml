@@ -39,6 +39,12 @@ on:
         required: true
       ses_rates_email_addresses:
         required: true
+      ses_review_help_email_address:
+        required: true
+      ses_rate_help_email_address:
+        required: true
+      ses_dev_team_help_email_address:
+        required: true
 
 jobs:
   app-web:
@@ -118,6 +124,9 @@ jobs:
           SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.ses_review_team_email_addresses }}
           SES_RATES_EMAIL_ADDRESSES: ${{ secrets.ses_rates_email_addresses }}
           SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
+          SES_REVIEW_HELP_EMAIL_ADDRESS: ${{ secrets.ses_review_help_email_address }}
+          SES_RATE_HELP_EMAIL_ADDRESS: ${{ secrets.ses_rate_help_email_address }}
+          SES_DEV_TEAM_HELP_EMAIL_ADDRESS: ${{ secrets.ses_dev_team_help_email_address }}
           NR_LICENSE_KEY: ${{ secrets.nr_license_key}}
           REACT_APP_OTEL_COLLECTOR_URL: ${{ secrets.react_app_otel_collector_url }}
           LD_SDK_KEY: ${{ secrets.ld_sdk_key }}

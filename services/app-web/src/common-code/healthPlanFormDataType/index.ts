@@ -6,21 +6,24 @@ export type {
     ActuarialFirmType,
     ActuaryCommunicationType,
     ActuaryContact,
-    CapitationRatesAmendedReason,
     ContractAmendmentInfo,
     ContractExecutionStatus,
     ContractType,
     DocumentCategoryType,
-    AmendableItems,
     UnlockedHealthPlanFormDataType,
     FederalAuthority,
     ManagedCareEntity,
     RateType,
+    RateCapitationType,
     StateContact,
     SubmissionDocument,
     SubmissionType,
     RateDataType,
 } from './UnlockedHealthPlanFormDataType'
+
+export type { ModifiedProvisions } from './ModifiedProvisions'
+
+export { modifiedProvisionKeys } from './ModifiedProvisions'
 
 export type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 export {

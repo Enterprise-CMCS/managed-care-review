@@ -3,6 +3,7 @@ import {
     mockStateSubmission,
     mockContractAndRatesDraft,
     mockMNState,
+    mockStateSubmissionContractAmendment,
 } from '../../testHelpers/apolloHelpers'
 import {
     generateRateName,
@@ -25,6 +26,7 @@ import { basicHealthPlanFormData } from '../healthPlanFormDataMocks'
 describe('submission type assertions', () => {
     test.each([
         [mockStateSubmission(), true],
+        [mockStateSubmissionContractAmendment(), true],
         [{ ...mockStateSubmission(), contractType: undefined }, false],
         [
             { ...mockStateSubmission(), contractExecutionStatus: undefined },
@@ -34,6 +36,13 @@ describe('submission type assertions', () => {
         [{ ...mockStateSubmission(), contractDateEnd: undefined }, false],
         [{ ...mockStateSubmission(), managedCareEntities: [] }, false],
         [{ ...mockStateSubmission(), federalAuthorities: [] }, false],
+        [
+            {
+                ...mockStateSubmissionContractAmendment(),
+                contractAmendmentInfo: { modifiedGeoAreaServed: true },
+            },
+            false,
+        ],
     ])(
         'hasValidContract evaluates as expected',
         (submission, expectedResponse) => {
@@ -330,7 +339,7 @@ describe('submission type assertions', () => {
         [mockDraft(), false],
         [mockContractAndRatesDraft(), false],
     ])(
-        'isStateSubmission evaluates as expected',
+        'isLockedHealthPlanFormData evaluates as expected',
         (submission, expectedResponse) => {
             // type coercion to allow us to test
             expect(isLockedHealthPlanFormData(submission)).toEqual(

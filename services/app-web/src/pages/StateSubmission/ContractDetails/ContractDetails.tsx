@@ -8,7 +8,7 @@ import {
     DateRangePicker,
 } from '@trussworks/react-uswds'
 import { v4 as uuidv4 } from 'uuid'
-import { Link as ReactRouterLink, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Formik, FormikErrors } from 'formik'
 
 import styles from '../StateSubmissionForm.module.scss'
@@ -19,10 +19,10 @@ import {
     FileItemT,
     FieldRadio,
     FieldCheckbox,
-    FieldTextInput,
     FieldPreserveScrollPosition,
     ErrorSummary,
     PoliteErrorMessage,
+    FieldYesNo,
 } from '../../../components'
 import {
     formatForForm,
@@ -30,29 +30,26 @@ import {
     formatUserInputDate,
     isDateRangeEmpty,
 } from '../../../formHelpers'
-import {
-    Document,
-    ContractType,
-    ContractExecutionStatus,
-    FederalAuthority,
-    CapitationRatesAmendmentReason,
-} from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
 
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
 import {
     ManagedCareEntity,
-    CapitationRatesAmendedReason,
+    modifiedProvisionKeys,
+    SubmissionDocument,
+    ContractType,
+    ContractExecutionStatus,
+    FederalAuthority,
 } from '../../../common-code/healthPlanFormDataType'
 import {
-    AmendableItemsRecord,
-    RateChangeReasonRecord,
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
+    ModifiedProvisionsRecord,
 } from '../../../constants/healthPlanPackages'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
+import { formatYesNoForProto } from '../../../formHelpers/formatters'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -87,11 +84,23 @@ export interface ContractDetailsFormValues {
     contractDateStart: string
     contractDateEnd: string
     managedCareEntities: ManagedCareEntity[]
-    itemsAmended: string[]
-    otherItemAmended: string
-    capitationRates: CapitationRatesAmendmentReason | undefined
-    capitationRatesOther: string
     federalAuthorities: FederalAuthority[]
+    modifiedBenefitsProvided: string | undefined
+    modifiedGeoAreaServed: string | undefined
+    modifiedMedicaidBeneficiaries: string | undefined
+    modifiedRiskSharingStrategy: string | undefined
+    modifiedIncentiveArrangements: string | undefined
+    modifiedWitholdAgreements: string | undefined
+    modifiedStateDirectedPayments: string | undefined
+    modifiedPassThroughPayments: string | undefined
+    modifiedPaymentsForMentalDiseaseInstitutions: string | undefined
+    modifiedMedicalLossRatioStandards: string | undefined
+    modifiedOtherFinancialPaymentIncentive: string | undefined
+    modifiedEnrollmentProcess: string | undefined
+    modifiedGrevienceAndAppeal: string | undefined
+    modifiedNetworkAdequacyStandards: string | undefined
+    modifiedLengthOfContract: string | undefined
+    modifiedNonRiskPaymentArrangements: string | undefined
 }
 type FormError =
     FormikErrors<ContractDetailsFormValues>[keyof FormikErrors<ContractDetailsFormValues>]
@@ -223,17 +232,72 @@ export const ContractDetails = ({
             '',
         managedCareEntities:
             (draftSubmission?.managedCareEntities as ManagedCareEntity[]) ?? [],
-        itemsAmended:
-            draftSubmission.contractAmendmentInfo?.itemsBeingAmended ?? [],
-        otherItemAmended:
-            draftSubmission.contractAmendmentInfo?.otherItemBeingAmended ?? '',
-        capitationRates:
-            draftSubmission.contractAmendmentInfo?.capitationRatesAmendedInfo
-                ?.reason ?? undefined,
-        capitationRatesOther:
-            draftSubmission.contractAmendmentInfo?.capitationRatesAmendedInfo
-                ?.otherReason ?? '',
         federalAuthorities: draftSubmission?.federalAuthorities ?? [],
+
+        modifiedBenefitsProvided: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedBenefitsProvided
+        ),
+        modifiedGeoAreaServed: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedGeoAreaServed
+        ),
+        modifiedMedicaidBeneficiaries: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedMedicaidBeneficiaries
+        ),
+        modifiedRiskSharingStrategy: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedRiskSharingStrategy
+        ),
+        modifiedIncentiveArrangements: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedIncentiveArrangements
+        ),
+        modifiedWitholdAgreements: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedWitholdAgreements
+        ),
+        modifiedStateDirectedPayments: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedStateDirectedPayments
+        ),
+        modifiedPassThroughPayments: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedPassThroughPayments
+        ),
+        modifiedPaymentsForMentalDiseaseInstitutions: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedPaymentsForMentalDiseaseInstitutions
+        ),
+        modifiedMedicalLossRatioStandards: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedMedicalLossRatioStandards
+        ),
+        modifiedOtherFinancialPaymentIncentive: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedOtherFinancialPaymentIncentive
+        ),
+        modifiedEnrollmentProcess: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedEnrollmentProcess
+        ),
+        modifiedGrevienceAndAppeal: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedGrevienceAndAppeal
+        ),
+        modifiedNetworkAdequacyStandards: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedNetworkAdequacyStandards
+        ),
+        modifiedLengthOfContract: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedLengthOfContract
+        ),
+        modifiedNonRiskPaymentArrangements: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .modifiedNonRiskPaymentArrangements
+        ),
     }
 
     const showFieldErrors = (error?: FormError) =>
@@ -292,7 +356,7 @@ export const ContractDetails = ({
                 }
                 return formDataDocuments
             },
-            [] as Document[]
+            [] as SubmissionDocument[]
         )
 
         draftSubmission.contractType = values.contractType
@@ -308,28 +372,58 @@ export const ContractDetails = ({
         draftSubmission.contractDocuments = contractDocuments
 
         if (values.contractType === 'AMENDMENT') {
-            // const amendedOther = formatForApi(values.otherItemAmended)
-
-            let capitationInfo:
-                | {
-                      reason: CapitationRatesAmendedReason | undefined
-                      otherReason: string
-                  }
-                | undefined = undefined
-
-            // let capitationInfo: CapitationRatesAmendedInfo | undefined =
-            //     undefined
-            if (values.itemsAmended.includes('CAPITATION_RATES')) {
-                capitationInfo = {
-                    reason: values.capitationRates,
-                    otherReason: values.capitationRatesOther,
-                }
-            }
-
             draftSubmission.contractAmendmentInfo = {
-                itemsBeingAmended: values.itemsAmended,
-                otherItemBeingAmended: values.otherItemAmended,
-                capitationRatesAmendedInfo: capitationInfo,
+                modifiedProvisions: {
+                    modifiedBenefitsProvided: formatYesNoForProto(
+                        values.modifiedBenefitsProvided
+                    ),
+                    modifiedGeoAreaServed: formatYesNoForProto(
+                        values.modifiedGeoAreaServed
+                    ),
+                    modifiedMedicaidBeneficiaries: formatYesNoForProto(
+                        values.modifiedMedicaidBeneficiaries
+                    ),
+                    modifiedRiskSharingStrategy: formatYesNoForProto(
+                        values.modifiedRiskSharingStrategy
+                    ),
+                    modifiedIncentiveArrangements: formatYesNoForProto(
+                        values.modifiedIncentiveArrangements
+                    ),
+                    modifiedWitholdAgreements: formatYesNoForProto(
+                        values.modifiedWitholdAgreements
+                    ),
+                    modifiedStateDirectedPayments: formatYesNoForProto(
+                        values.modifiedStateDirectedPayments
+                    ),
+                    modifiedPassThroughPayments: formatYesNoForProto(
+                        values.modifiedPassThroughPayments
+                    ),
+                    modifiedPaymentsForMentalDiseaseInstitutions:
+                        formatYesNoForProto(
+                            values.modifiedPaymentsForMentalDiseaseInstitutions
+                        ),
+                    modifiedMedicalLossRatioStandards: formatYesNoForProto(
+                        values.modifiedMedicalLossRatioStandards
+                    ),
+                    modifiedOtherFinancialPaymentIncentive: formatYesNoForProto(
+                        values.modifiedOtherFinancialPaymentIncentive
+                    ),
+                    modifiedEnrollmentProcess: formatYesNoForProto(
+                        values.modifiedEnrollmentProcess
+                    ),
+                    modifiedGrevienceAndAppeal: formatYesNoForProto(
+                        values.modifiedGrevienceAndAppeal
+                    ),
+                    modifiedNetworkAdequacyStandards: formatYesNoForProto(
+                        values.modifiedNetworkAdequacyStandards
+                    ),
+                    modifiedLengthOfContract: formatYesNoForProto(
+                        values.modifiedLengthOfContract
+                    ),
+                    modifiedNonRiskPaymentArrangements: formatYesNoForProto(
+                        values.modifiedNonRiskPaymentArrangements
+                    ),
+                },
             }
         } else {
             draftSubmission.contractAmendmentInfo = undefined
@@ -465,7 +559,6 @@ export const ContractDetails = ({
                                         label="Base contract"
                                         aria-required
                                         value={'BASE'}
-                                        checked={values.contractType === 'BASE'}
                                     />
                                     <FieldRadio
                                         id="amendmentContract"
@@ -473,9 +566,6 @@ export const ContractDetails = ({
                                         label="Amendment to base contract"
                                         aria-required
                                         value={'AMENDMENT'}
-                                        checked={
-                                            values.contractType === 'AMENDMENT'
-                                        }
                                     />
                                 </Fieldset>
                             </FormGroup>
@@ -503,10 +593,6 @@ export const ContractDetails = ({
                                         label="Fully executed"
                                         aria-required
                                         value={'EXECUTED'}
-                                        checked={
-                                            values.contractExecutionStatus ===
-                                            'EXECUTED'
-                                        }
                                     />
                                     <FieldRadio
                                         id="unexecutedContract"
@@ -514,10 +600,6 @@ export const ContractDetails = ({
                                         label="Unexecuted by some or all parties"
                                         aria-required
                                         value={'UNEXECUTED'}
-                                        checked={
-                                            values.contractExecutionStatus ===
-                                            'UNEXECUTED'
-                                        }
                                     />
                                 </Fieldset>
                             </FormGroup>
@@ -652,9 +734,6 @@ export const ContractDetails = ({
                                                     ManagedCareEntityRecord.MCO
                                                 }
                                                 value="MCO"
-                                                checked={values.managedCareEntities.includes(
-                                                    'MCO'
-                                                )}
                                             />
                                             <FieldCheckbox
                                                 id="prepaidInpatientHealthPlan"
@@ -663,9 +742,6 @@ export const ContractDetails = ({
                                                     ManagedCareEntityRecord.PIHP
                                                 }
                                                 value="PIHP"
-                                                checked={values.managedCareEntities.includes(
-                                                    'PIHP'
-                                                )}
                                             />
                                             <FieldCheckbox
                                                 id="prepaidAmbulatoryHealthPlans"
@@ -674,9 +750,6 @@ export const ContractDetails = ({
                                                     ManagedCareEntityRecord.PAHP
                                                 }
                                                 value="PAHP"
-                                                checked={values.managedCareEntities.includes(
-                                                    'PAHP'
-                                                )}
                                             />
                                             <FieldCheckbox
                                                 id="primaryCareCaseManagementEntity"
@@ -685,9 +758,6 @@ export const ContractDetails = ({
                                                     ManagedCareEntityRecord.PCCM
                                                 }
                                                 value="PCCM"
-                                                checked={values.managedCareEntities.includes(
-                                                    'PCCM'
-                                                )}
                                             />
                                         </Fieldset>
                                     </FormGroup>
@@ -730,9 +800,6 @@ export const ContractDetails = ({
                                                     FederalAuthorityRecord.STATE_PLAN
                                                 }
                                                 value={'STATE_PLAN'}
-                                                checked={values.federalAuthorities.includes(
-                                                    'STATE_PLAN'
-                                                )}
                                             />
                                             <FieldCheckbox
                                                 id="1915bWaiverAuthority"
@@ -741,9 +808,6 @@ export const ContractDetails = ({
                                                     FederalAuthorityRecord.WAIVER_1915B
                                                 }
                                                 value={'WAIVER_1915B'}
-                                                checked={values.federalAuthorities.includes(
-                                                    'WAIVER_1915B'
-                                                )}
                                             />
                                             <FieldCheckbox
                                                 id="1115WaiverAuthority"
@@ -752,9 +816,6 @@ export const ContractDetails = ({
                                                     FederalAuthorityRecord.WAIVER_1115
                                                 }
                                                 value={'WAIVER_1115'}
-                                                checked={values.federalAuthorities.includes(
-                                                    'WAIVER_1115'
-                                                )}
                                             />
                                             <FieldCheckbox
                                                 id="1915aVoluntaryAuthority"
@@ -763,9 +824,6 @@ export const ContractDetails = ({
                                                     FederalAuthorityRecord.VOLUNTARY
                                                 }
                                                 value={'VOLUNTARY'}
-                                                checked={values.federalAuthorities.includes(
-                                                    'VOLUNTARY'
-                                                )}
                                             />
                                             <FieldCheckbox
                                                 id="1937BenchmarkAuthority"
@@ -774,9 +832,6 @@ export const ContractDetails = ({
                                                     FederalAuthorityRecord.BENCHMARK
                                                 }
                                                 value={'BENCHMARK'}
-                                                checked={values.federalAuthorities.includes(
-                                                    'BENCHMARK'
-                                                )}
                                             />
                                             <FieldCheckbox
                                                 id="titleXXISeparateChipStatePlanAuthority"
@@ -785,311 +840,39 @@ export const ContractDetails = ({
                                                     FederalAuthorityRecord.TITLE_XXI
                                                 }
                                                 value={'TITLE_XXI'}
-                                                checked={values.federalAuthorities.includes(
-                                                    'TITLE_XXI'
-                                                )}
                                             />
                                         </Fieldset>
                                     </FormGroup>
                                     {isContractAmendmentSelected(values) && (
-                                        <>
-                                            <FormGroup
-                                                error={showFieldErrors(
-                                                    errors.itemsAmended
-                                                )}
+                                        <FormGroup>
+                                            <Fieldset
+                                                aria-required
+                                                legend="Does this contract action include new or modified provisions related to any of the following"
                                             >
-                                                <Fieldset
-                                                    aria-required
-                                                    legend="Items being amended"
-                                                >
-                                                    <Link
-                                                        variant="external"
-                                                        asCustom={
-                                                            ReactRouterLink
-                                                        }
-                                                        to={{
-                                                            pathname: '/help',
-                                                            hash: '#items-being-amended-definitions',
-                                                        }}
-                                                        target="_blank"
-                                                    >
-                                                        Items being amended
-                                                        definitions
-                                                    </Link>
-                                                    <div className="usa-hint">
-                                                        <span>
-                                                            Check all that apply
-                                                        </span>
-                                                    </div>
-                                                    {showFieldErrors(
-                                                        errors.itemsAmended
-                                                    ) && (
-                                                        <PoliteErrorMessage>
-                                                            {
-                                                                errors.itemsAmended
+                                                {modifiedProvisionKeys.map(
+                                                    (modifiedProvisionName) => (
+                                                        <FieldYesNo
+                                                            id={
+                                                                modifiedProvisionName
                                                             }
-                                                        </PoliteErrorMessage>
-                                                    )}
-                                                    <FieldCheckbox
-                                                        id="benefitsProvided"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.BENEFITS_PROVIDED
-                                                        }
-                                                        value="BENEFITS_PROVIDED"
-                                                        checked={values.itemsAmended.includes(
-                                                            'BENEFITS_PROVIDED'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="capitationRates"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.CAPITATION_RATES
-                                                        }
-                                                        value="CAPITATION_RATES"
-                                                        checked={values.itemsAmended.includes(
-                                                            'CAPITATION_RATES'
-                                                        )}
-                                                    />
-                                                    {values.itemsAmended.includes(
-                                                        'CAPITATION_RATES'
-                                                    ) && (
-                                                        <div>
-                                                            <FormGroup
-                                                                className={
-                                                                    showFieldErrors(
-                                                                        errors.capitationRates
-                                                                    )
-                                                                        ? styles.nestedOptionsError
-                                                                        : styles.nestedOptions
-                                                                }
-                                                            >
-                                                                <Fieldset
-                                                                    role="radiogroup"
-                                                                    aria-required
-                                                                    legend="Select reason for capitation rate change"
-                                                                >
-                                                                    {showFieldErrors(
-                                                                        errors.capitationRates
-                                                                    ) && (
-                                                                        <PoliteErrorMessage>
-                                                                            {
-                                                                                errors.capitationRates
-                                                                            }
-                                                                        </PoliteErrorMessage>
-                                                                    )}
-                                                                    <FieldRadio
-                                                                        id="annualRateUpdate"
-                                                                        name="capitationRates"
-                                                                        label={
-                                                                            RateChangeReasonRecord.ANNUAL
-                                                                        }
-                                                                        value={
-                                                                            'ANNUAL'
-                                                                        }
-                                                                        checked={
-                                                                            values.capitationRates ===
-                                                                            'ANNUAL'
-                                                                        }
-                                                                    />
-                                                                    <FieldRadio
-                                                                        id="midYearUpdate"
-                                                                        name="capitationRates"
-                                                                        label={
-                                                                            RateChangeReasonRecord.MIDYEAR
-                                                                        }
-                                                                        value={
-                                                                            'MIDYEAR'
-                                                                        }
-                                                                        checked={
-                                                                            values.capitationRates ===
-                                                                            'MIDYEAR'
-                                                                        }
-                                                                    />
-                                                                    <FieldRadio
-                                                                        id="capitation-other"
-                                                                        name="capitationRates"
-                                                                        label={
-                                                                            RateChangeReasonRecord.OTHER
-                                                                        }
-                                                                        value={
-                                                                            'OTHER'
-                                                                        }
-                                                                        checked={
-                                                                            values.capitationRates ===
-                                                                            'OTHER'
-                                                                        }
-                                                                    />
-                                                                    {values.capitationRates ===
-                                                                        'OTHER' && (
-                                                                        <FieldTextInput
-                                                                            id="other-rates"
-                                                                            label="Other capitation rate description"
-                                                                            showError={showFieldErrors(
-                                                                                errors.capitationRatesOther
-                                                                            )}
-                                                                            name="capitationRatesOther"
-                                                                            type="text"
-                                                                        />
-                                                                    )}
-                                                                </Fieldset>
-                                                            </FormGroup>
-                                                        </div>
-                                                    )}
-                                                    <FieldCheckbox
-                                                        id="encounterData"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.ENCOUNTER_DATA
-                                                        }
-                                                        value="ENCOUNTER_DATA"
-                                                        checked={values.itemsAmended.includes(
-                                                            'ENCOUNTER_DATA'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="enrolleeAccess"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.ENROLLE_ACCESS
-                                                        }
-                                                        value="ENROLLE_ACCESS"
-                                                        checked={values.itemsAmended.includes(
-                                                            'ENROLLE_ACCESS'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="enrollmentDisenrollementProcess"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.ENROLLMENT_PROCESS
-                                                        }
-                                                        value="ENROLLMENT_PROCESS"
-                                                        checked={values.itemsAmended.includes(
-                                                            'ENROLLMENT_PROCESS'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="financialIncentives"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.FINANCIAL_INCENTIVES
-                                                        }
-                                                        value="FINANCIAL_INCENTIVES"
-                                                        checked={values.itemsAmended.includes(
-                                                            'FINANCIAL_INCENTIVES'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="geographicAreaServed"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.GEO_AREA_SERVED
-                                                        }
-                                                        value="GEO_AREA_SERVED"
-                                                        checked={values.itemsAmended.includes(
-                                                            'GEO_AREA_SERVED'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="grievancesAndAppealsSystem"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.GRIEVANCES_AND_APPEALS_SYSTEM
-                                                        }
-                                                        value="GRIEVANCES_AND_APPEALS_SYSTEM"
-                                                        checked={values.itemsAmended.includes(
-                                                            'GRIEVANCES_AND_APPEALS_SYSTEM'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="lengthOfContractPeriod"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.LENGTH_OF_CONTRACT_PERIOD
-                                                        }
-                                                        value="LENGTH_OF_CONTRACT_PERIOD"
-                                                        checked={values.itemsAmended.includes(
-                                                            'LENGTH_OF_CONTRACT_PERIOD'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="nonriskPayment"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.NON_RISK_PAYMENT
-                                                        }
-                                                        value="NON_RISK_PAYMENT"
-                                                        checked={values.itemsAmended.includes(
-                                                            'NON_RISK_PAYMENT'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="programIntegrity"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.PROGRAM_INTEGRITY
-                                                        }
-                                                        value="PROGRAM_INTEGRITY"
-                                                        checked={values.itemsAmended.includes(
-                                                            'PROGRAM_INTEGRITY'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="qualityStandards"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.QUALITY_STANDARDS
-                                                        }
-                                                        value="QUALITY_STANDARDS"
-                                                        checked={values.itemsAmended.includes(
-                                                            'QUALITY_STANDARDS'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="riskSharingMechanisms"
-                                                        name="itemsAmended"
-                                                        label={
-                                                            AmendableItemsRecord.RISK_SHARING_MECHANISM
-                                                        }
-                                                        value="RISK_SHARING_MECHANISM"
-                                                        checked={values.itemsAmended.includes(
-                                                            'RISK_SHARING_MECHANISM'
-                                                        )}
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="items-other"
-                                                        name="itemsAmended"
-                                                        label="Other (please describe)"
-                                                        value="OTHER"
-                                                        checked={values.itemsAmended.includes(
-                                                            'OTHER'
-                                                        )}
-                                                    />
-                                                    {values.itemsAmended.includes(
-                                                        'OTHER'
-                                                    ) && (
-                                                        <div
-                                                            className={
-                                                                styles.nestedOptions
+                                                            name={
+                                                                modifiedProvisionName
                                                             }
-                                                        >
-                                                            <FieldTextInput
-                                                                id="other-items-amended"
-                                                                name="otherItemAmended"
-                                                                label="Other item description"
-                                                                aria-required
-                                                                showError={showFieldErrors(
-                                                                    errors.otherItemAmended
-                                                                )}
-                                                                type="text"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </Fieldset>
-                                            </FormGroup>
-                                        </>
+                                                            label={
+                                                                ModifiedProvisionsRecord[
+                                                                    modifiedProvisionName
+                                                                ]
+                                                            }
+                                                            showError={showFieldErrors(
+                                                                errors[
+                                                                    modifiedProvisionName
+                                                                ]
+                                                            )}
+                                                        />
+                                                    )
+                                                )}
+                                            </Fieldset>
+                                        </FormGroup>
                                     )}
                                 </>
                             )}

@@ -3,10 +3,10 @@ import {
     ContractType,
     FederalAuthority,
     ManagedCareEntity,
-    AmendableItems,
     ActuarialFirmType,
     ActuaryCommunicationType,
     ContractExecutionStatus,
+    ModifiedProvisions,
 } from '../common-code/healthPlanFormDataType'
 import { HealthPlanPackageStatus } from '../gen/gqlClient'
 
@@ -41,20 +41,32 @@ const ManagedCareEntityRecord: Record<ManagedCareEntity, string> = {
     PCCM: 'Primary Care Case Management Entity (PCCM Entity)',
 }
 
-const AmendableItemsRecord: Record<AmendableItems, string> = {
-    BENEFITS_PROVIDED: 'Benefits provided',
-    CAPITATION_RATES: 'Capitation rates',
-    ENCOUNTER_DATA: 'Encounter data',
-    ENROLLE_ACCESS: 'Enrollee access',
-    ENROLLMENT_PROCESS: 'Enrollment/disenrollment process',
-    FINANCIAL_INCENTIVES: 'Financial incentives',
-    GEO_AREA_SERVED: 'Geographic area served',
-    GRIEVANCES_AND_APPEALS_SYSTEM: 'Grievances and appeals system',
-    LENGTH_OF_CONTRACT_PERIOD: 'Length of contract period',
-    NON_RISK_PAYMENT: 'Non-risk payment',
-    PROGRAM_INTEGRITY: 'Program integrity',
-    QUALITY_STANDARDS: 'Quality standards',
-    RISK_SHARING_MECHANISM: 'Risk sharing mechanisms',
+const ModifiedProvisionsRecord: Record<keyof ModifiedProvisions, string> = {
+    modifiedBenefitsProvided: 'Benefits provided by the managed care plans',
+    modifiedGeoAreaServed: 'Geographic areas served by the managed care plans',
+    modifiedMedicaidBeneficiaries:
+        'Medicaid beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)',
+    modifiedRiskSharingStrategy:
+        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)',
+    modifiedIncentiveArrangements:
+        'Incentive arrangements in accordance with 42 CFR § 438.6(b)(2)',
+    modifiedWitholdAgreements:
+        'Withhold arrangements in accordance with 42 CFR § 438.6(b)(3)',
+    modifiedStateDirectedPayments:
+        'State directed payments in accordance with 42 CFR § 438.6(c)',
+    modifiedPassThroughPayments:
+        'Pass-through payments in accordance with 42 CFR § 438.6(d)',
+    modifiedPaymentsForMentalDiseaseInstitutions:
+        'Payments to MCOs and PIHPs for enrollees that are a patient in an institution for mental disease in accordance with 42 CFR § 438.6(e)',
+    modifiedMedicalLossRatioStandards:
+        'Medical loss ratio standards in accordance with 42 CFR § 438.8',
+    modifiedOtherFinancialPaymentIncentive:
+        'Other financial, payment, incentive or related contractual provisions',
+    modifiedEnrollmentProcess: 'Enrollment/disenrollment process',
+    modifiedGrevienceAndAppeal: 'Grievance and appeal system',
+    modifiedNetworkAdequacyStandards: 'Network adequacy standards',
+    modifiedLengthOfContract: 'Length of the contract period',
+    modifiedNonRiskPaymentArrangements: 'Non-risk payment arrangements',
 }
 
 const ActuaryFirmsRecord: Record<ActuarialFirmType, string> = {
@@ -76,12 +88,6 @@ state will relay all written communication to their actuary
 and set up time for any potential verbal discussions.`,
 }
 
-const RateChangeReasonRecord: Record<'ANNUAL' | 'MIDYEAR' | 'OTHER', string> = {
-    ANNUAL: 'Annual rate update',
-    MIDYEAR: 'Mid-year update',
-    OTHER: 'Other (please describe)',
-}
-
 const SubmissionStatusRecord: Record<HealthPlanPackageStatus, string> = {
     DRAFT: 'Draft',
     SUBMITTED: 'Submitted',
@@ -90,12 +96,11 @@ const SubmissionStatusRecord: Record<HealthPlanPackageStatus, string> = {
 }
 
 export {
-    RateChangeReasonRecord,
-    AmendableItemsRecord,
     ContractTypeRecord,
     SubmissionTypeRecord,
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
+    ModifiedProvisionsRecord,
     ActuaryFirmsRecord,
     ActuaryCommunicationRecord,
     ContractExecutionStatusRecord,

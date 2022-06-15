@@ -98,7 +98,7 @@ export function updateHealthPlanFormDataResolver(
             )
         }
 
-        // Check the package is in an updateable state
+        // Check the package is in an update-able state
         const planPackageStatus = packageStatus(planPackage)
         if (planPackageStatus instanceof Error) {
             const errMessage = `No revisions found on package: ${input.pkgID}`

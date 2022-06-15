@@ -4,6 +4,7 @@ import {
     basicLockedHealthPlanFormData,
     basicHealthPlanFormData,
     contractOnly,
+    contractAmendedOnly,
     unlockedWithALittleBitOfEverything,
     unlockedWithContacts,
     unlockedWithDocuments,
@@ -36,6 +37,7 @@ describe('Validate encoding to protobuf and decoding back to domain model', () =
         unlockedWithFullContracts(),
         unlockedWithALittleBitOfEverything(),
         basicLockedHealthPlanFormData(),
+        contractAmendedOnly(),
     ])(
         'given valid domain model %j expect protobufs to be symmetric)',
         (

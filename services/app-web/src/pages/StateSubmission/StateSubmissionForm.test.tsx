@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react'
 import { Route, Routes } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
-import { Document } from '../../gen/gqlClient'
+import { SubmissionDocument } from '../../common-code/healthPlanFormDataType'
 import { RoutesRecord } from '../../constants/routes'
 import {
     fetchCurrentUserMock,
@@ -19,6 +19,7 @@ import {
     domainToBase64,
 } from '../../common-code/proto/healthPlanFormDataProto'
 import { testS3Client } from '../../testHelpers/s3Helpers'
+import { getYesNoFieldValue } from '../../testHelpers/fieldHelpers'
 
 describe('StateSubmissionForm', () => {
     describe('loads draft submission', () => {
@@ -99,14 +100,23 @@ describe('StateSubmissionForm', () => {
             const mockAmendment = mockDraftHealthPlanPackage({
                 contractType: 'AMENDMENT',
                 contractAmendmentInfo: {
-                    itemsBeingAmended: [
-                        'CAPITATION_RATES',
-                        'GEO_AREA_SERVED',
-                        'OTHER',
-                    ],
-                    otherItemBeingAmended: 'foobar',
-                    capitationRatesAmendedInfo: {
-                        reason: 'MIDYEAR',
+                    modifiedProvisions: {
+                        modifiedBenefitsProvided: true,
+                        modifiedGeoAreaServed: false,
+                        modifiedMedicaidBeneficiaries: false,
+                        modifiedRiskSharingStrategy: false,
+                        modifiedIncentiveArrangements: false,
+                        modifiedWitholdAgreements: false,
+                        modifiedStateDirectedPayments: true,
+                        modifiedPassThroughPayments: false,
+                        modifiedPaymentsForMentalDiseaseInstitutions: false,
+                        modifiedMedicalLossRatioStandards: false,
+                        modifiedOtherFinancialPaymentIncentive: false,
+                        modifiedEnrollmentProcess: false,
+                        modifiedGrevienceAndAppeal: false,
+                        modifiedNetworkAdequacyStandards: false,
+                        modifiedLengthOfContract: false,
+                        modifiedNonRiskPaymentArrangements: false,
                     },
                 },
             })
@@ -136,17 +146,16 @@ describe('StateSubmissionForm', () => {
             )
 
             await waitFor(() => {
-                expect(screen.getByLabelText('Capitation rates')).toBeChecked()
-
-                expect(screen.getByLabelText('Mid-year update')).toBeChecked()
-
                 expect(
-                    screen.getByLabelText('Geographic area served')
-                ).toBeChecked()
-
+                    getYesNoFieldValue(
+                        'Benefits provided by the managed care plans'
+                    )
+                ).toBe(true)
                 expect(
-                    screen.getByLabelText('Other item description')
-                ).toHaveValue('foobar')
+                    getYesNoFieldValue(
+                        'Geographic areas served by the managed care plans'
+                    )
+                ).toBe(false)
             })
         })
 
@@ -286,7 +295,7 @@ describe('StateSubmissionForm', () => {
         })
 
         it('works even if other sections of the form have been filled out', async () => {
-            const mockDocs: Document[] = [
+            const mockDocs: SubmissionDocument[] = [
                 {
                     name: 'somedoc.pdf',
                     s3URL: 's3://bucketName/key/somedoc.pdf',

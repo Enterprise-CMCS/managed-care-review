@@ -14,7 +14,11 @@ import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
 
-import { Document, RateType, RateCapitationType } from '../../../gen/gqlClient'
+import {
+    SubmissionDocument,
+    RateType,
+    RateCapitationType,
+} from '../../../common-code/healthPlanFormDataType'
 
 import {
     FileUpload,
@@ -263,7 +267,7 @@ export const RateDetails = ({
                 }
                 return formDataDocuments
             },
-            [] as Document[]
+            [] as SubmissionDocument[]
         )
 
         // const updatedDraft = updatesFromSubmission(draftSubmission)
@@ -426,16 +430,12 @@ export const RateDetails = ({
                                             name="rateType"
                                             label="New rate certification"
                                             value={'NEW'}
-                                            checked={values.rateType === 'NEW'}
                                         />
                                         <FieldRadio
                                             id="amendmentRate"
                                             name="rateType"
                                             label="Amendment to prior rate certification"
                                             value={'AMENDMENT'}
-                                            checked={
-                                                values.rateType === 'AMENDMENT'
-                                            }
                                         />
                                     </Fieldset>
                                 </FormGroup>
@@ -484,20 +484,12 @@ export const RateDetails = ({
                                             name="rateCapitationType"
                                             label="Certification of capitation rates specific to each rate cell"
                                             value={'RATE_CELL'}
-                                            checked={
-                                                values.rateCapitationType ===
-                                                'RATE_CELL'
-                                            }
                                         />
                                         <FieldRadio
                                             id="rateRange"
                                             name="rateCapitationType"
                                             label="Certification of rate ranges of capitation rates per rate cell"
                                             value={'RATE_RANGE'}
-                                            checked={
-                                                values.rateCapitationType ===
-                                                'RATE_RANGE'
-                                            }
                                         />
                                     </Fieldset>
                                 </FormGroup>

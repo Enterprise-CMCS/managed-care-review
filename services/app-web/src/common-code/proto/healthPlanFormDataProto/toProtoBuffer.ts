@@ -164,25 +164,7 @@ const toProtoBuffer = (
                     doc.documentCategories
                 ),
             })),
-            contractAmendmentInfo: contractAmendmentInfo
-                ? {
-                      ...contractAmendmentInfo,
-                      otherAmendableItem:
-                          contractAmendmentInfo?.otherItemBeingAmended,
-                      amendableItems: domainEnumArrayToProto(
-                          mcreviewproto.AmendedItem,
-                          contractAmendmentInfo?.itemsBeingAmended
-                      ),
-                      capitationRatesAmendedInfo: {
-                          ...contractAmendmentInfo?.capitationRatesAmendedInfo,
-                          reason: domainEnumToProto(
-                              contractAmendmentInfo?.capitationRatesAmendedInfo
-                                  ?.reason,
-                              mcreviewproto.CapitationRateAmendmentReason
-                          ),
-                      },
-                  }
-                : undefined,
+            contractAmendmentInfo: contractAmendmentInfo,
         },
         // 9.21 currently only ever one rate on a domain model, eventually this will be a map
         rateInfos: [

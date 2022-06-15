@@ -78,10 +78,32 @@ message ContractInfo {
       optional CapitationRateAmendmentReason reason = 1;
       optional string other_reason = 2;
     }
+
+    message ModifiedProvisions {
+      optional bool modified_benefits_provided = 1;
+      optional bool modified_geo_area_served = 2;
+      optional bool modified_medicaid_beneficiaries = 3;
+      optional bool modified_risk_sharing_strategy = 4;
+      optional bool modified_incentive_arrangements = 5;
+      optional bool modified_withold_agreements = 6;
+      optional bool modified_state_directed_payments = 7;
+      optional bool modified_pass_through_payments = 8;
+      optional bool modified_payments_for_mental_disease_institutions = 9;
+      optional bool modified_medical_loss_ratio_standards = 10;
+      optional bool modified_other_financial_payment_incentive = 11;
+      optional bool modified_enrollment_process = 12;
+      optional bool modified_grevience_and_appeal = 13;
+      optional bool modified_network_adequacy_standards = 14;
+      optional bool modified_length_of_contract = 15;
+      optional bool modified_non_risk_payment_arrangements = 16;
+    }
     
     repeated AmendedItem amendable_items = 1;
     optional string other_amendable_item = 2;
     optional CapitationRatesAmendedInfo capitation_rates_amended_info = 3;
+
+    optional ModifiedProvisions modified_provisions = 4;
+
   }
 }
 

@@ -71,14 +71,14 @@ jobs:
         run: |
           echo "${{steps.changed-services-action.outputs.changed-services}}"
 
-      - uses: chrnorm/deployment-action@releases/v1
+      - uses: chrnorm/deployment-action@releases/v2
         name: Create GitHub deployment
         id: ghdeployment
         with:
           token: '${{ github.token }}'
           environment: review-apps
           description: stack ${{ steps.branch-name.outputs.stage-name-for-branch}}
-          initial_status: in_progress
+          initial-status: in_progress
 
   web-unit-tests:
     name: test - web unit tests
@@ -231,6 +231,9 @@ jobs:
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       ses_rates_email_addresses: ${{ secrets.SES_RATES_EMAIL_ADDRESSES }}
+      ses_review_help_email_address: ${{ secrets.SES_REVIEW_HELP_EMAIL_ADDRESS }}
+      ses_rate_help_email_address: ${{ secrets.SES_RATE_HELP_EMAIL_ADDRESS }}
+      ses_dev_team_help_email_address: ${{ secrets.SES_DEV_TEAM_HELP_EMAIL_ADDRESS }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       react_app_auth_mode: AWS_COGNITO
@@ -300,12 +303,12 @@ jobs:
 
       - name: Update deployment status (success)
         if: needs.deploy-app.result == 'success'
-        uses: chrnorm/deployment-status@releases/v1
+        uses: chrnorm/deployment-status@releases/v2
         with:
           token: '${{ github.token }}'
-          environment_url: ${{ needs.finishing-prep.outputs.application-endpoint }}
+          environment-url: ${{ needs.finishing-prep.outputs.application-endpoint }}
           state: 'success'
-          deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
+          deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
   cypress:
     name: cypress-run
