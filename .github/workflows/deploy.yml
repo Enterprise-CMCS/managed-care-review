@@ -219,7 +219,7 @@ jobs:
       always() &&
       (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped')
 
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@ma_mr-2179-email-copy
     with:
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
       app_version: ${{ needs.begin-deployment.outputs.app-version }}
@@ -231,6 +231,9 @@ jobs:
       ses_source_email_address: ${{ secrets.SES_SOURCE_EMAIL_ADDRESS }}
       ses_review_team_email_addresses: ${{ secrets.SES_REVIEW_TEAM_EMAIL_ADDRESSES }}
       ses_rates_email_addresses: ${{ secrets.SES_RATES_EMAIL_ADDRESSES }}
+      ses_review_help_email_address: ${{ secrets.SES_REVIEW_HELP_EMAIL_ADDRESS }}
+      ses_rate_help_email_address: ${{ secrets.SES_RATE_HELP_EMAIL_ADDRESS }}
+      ses_dev_team_help_email_address: ${{ secrets.SES_DEV_TEAM_HELP_EMAIL_ADDRESS }}
       iam_path: ${{ secrets.IAM_PATH }}
       full_iam_permissions_boundary_policy: ${{ secrets.FULL_IAM_PERMISSIONS_BOUNDARY_POLICY }}
       react_app_auth_mode: AWS_COGNITO

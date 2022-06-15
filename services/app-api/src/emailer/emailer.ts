@@ -10,6 +10,7 @@ import {
     UpdatedEmailData,
 } from './'
 import {
+    generateRateName,
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
@@ -20,7 +21,10 @@ type EmailConfiguration = {
     baseUrl: string
     emailSource: string // an email address for the generic application-wide sender
     cmsReviewSharedEmails: string[] // list of shared emails that all new managed care packages must be sent to
-    ratesReviewSharedEmails: string[]
+    ratesReviewSharedEmails: string[] // list of shared emails that managed care packages with rates must be sent to
+    cmsReviewHelpEmailAddress: string // email address for the managed care organization group
+    cmsRateHelpEmailAddress: string // email address for rates help
+    cmsDevTeamHelpEmailAddress: string // email address for all other help
 }
 type EmailData = {
     bodyText: string
@@ -48,11 +52,13 @@ type Emailer = {
     ) => Promise<void | Error>
     sendUnlockPackageCMSEmail: (
         submission: UnlockedHealthPlanFormDataType,
-        updatedEmailData: UpdatedEmailData
+        updatedEmailData: UpdatedEmailData,
+        submissionName: string
     ) => Promise<void | Error>
     sendUnlockPackageStateEmail: (
         submission: UnlockedHealthPlanFormDataType,
-        updatedEmailData: UpdatedEmailData
+        updatedEmailData: UpdatedEmailData,
+        submissionName: string
     ) => Promise<void | Error>
     sendResubmittedStateEmail: (
         submission: LockedHealthPlanFormDataType,
@@ -108,23 +114,28 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
         },
         sendUnlockPackageCMSEmail: async function (
             submission,
-            updatedEmailData
+            updatedEmailData,
+            submissionName
         ) {
+            const rateName = generateRateName(submission, submissionName)
             const emailData = unlockPackageCMSEmail(
                 submission,
                 updatedEmailData,
-                config
+                config,
+                rateName
             )
             return await this.sendEmail(emailData)
         },
         sendUnlockPackageStateEmail: async function (
             submission,
-            updatedEmailData
+            updatedEmailData,
+            submissionName
         ) {
             const emailData = unlockPackageStateEmail(
                 submission,
                 updatedEmailData,
-                config
+                config,
+                submissionName
             )
             return await this.sendEmail(emailData)
         },
@@ -188,23 +199,28 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
         },
         sendUnlockPackageCMSEmail: async (
             submission: UnlockedHealthPlanFormDataType,
-            updatedEmailData: UpdatedEmailData
+            updatedEmailData: UpdatedEmailData,
+            submissionName: string
         ) => {
+            const rateName = generateRateName(submission, submissionName)
             const emailData = unlockPackageCMSEmail(
                 submission,
                 updatedEmailData,
-                config
+                config,
+                rateName
             )
             localEmailerLogger(emailData)
         },
         sendUnlockPackageStateEmail: async (
             submission: UnlockedHealthPlanFormDataType,
-            updatedEmailData: UpdatedEmailData
+            updatedEmailData: UpdatedEmailData,
+            submissionName: string
         ) => {
             const emailData = unlockPackageStateEmail(
                 submission,
                 updatedEmailData,
-                config
+                config,
+                submissionName
             )
             localEmailerLogger(emailData)
         },
