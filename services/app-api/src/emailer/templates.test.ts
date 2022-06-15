@@ -44,22 +44,7 @@ describe('Email templates', () => {
             expect(template).toEqual(
                 expect.objectContaining({
                     subject: expect.stringContaining(
-                        `TEST New Managed Care Submission: ${name}`
-                    ),
-                })
-            )
-        })
-        it('includes warning about unofficial submission', () => {
-            const sub = mockContractOnlyFormData()
-            const template = newPackageCMSEmail(
-                sub,
-                'some-title',
-                testEmailConfig
-            )
-            expect(template).toEqual(
-                expect.objectContaining({
-                    bodyText: expect.stringMatching(
-                        /This is NOT an official submission/
+                        `New Managed Care Submission: ${name}`
                     ),
                 })
             )
@@ -280,6 +265,19 @@ describe('Email templates', () => {
                 )
             })
         })
+        it('does not include rate name on contract only submission', () => {
+            const sub = mockContractOnlyFormData()
+            const template = newPackageCMSEmail(
+                sub,
+                'some-title',
+                testEmailConfig
+            )
+            expect(template).toEqual(
+                expect.not.objectContaining({
+                    bodyText: expect.stringMatching(/Rate name:/),
+                })
+            )
+        })
     })
     describe('State email', () => {
         it('to addresses list includes current user', () => {
@@ -343,9 +341,7 @@ describe('Email templates', () => {
 
             expect(template).toEqual(
                 expect.objectContaining({
-                    subject: expect.stringContaining(
-                        `TEST ${name} was sent to CMS`
-                    ),
+                    subject: expect.stringContaining(`${name} was sent to CMS`),
                     bodyText: expect.stringContaining(
                         `${name} was successfully submitted.`
                     ),
@@ -353,19 +349,38 @@ describe('Email templates', () => {
             )
         })
 
-        it('includes warning about unofficial submission', () => {
+        it('includes mcog, rate, and team email addresses', () => {
             const sub = mockContractOnlyFormData()
+            const name = 'FL-MMA-001'
             const user = mockUser()
             const template = newPackageStateEmail(
                 sub,
-                'some-title',
+                name,
                 user,
                 testEmailConfig
             )
+
             expect(template).toEqual(
                 expect.objectContaining({
-                    bodyText: expect.stringMatching(
-                        /This is NOT an official submission/
+                    subject: expect.stringContaining(`${name} was sent to CMS`),
+                    bodyText: expect.stringContaining(
+                        `please reach out to mcog@example.com`
+                    ),
+                })
+            )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    subject: expect.stringContaining(`${name} was sent to CMS`),
+                    bodyText: expect.stringContaining(
+                        `please reach out to rates@example.com`
+                    ),
+                })
+            )
+            expect(template).toEqual(
+                expect.objectContaining({
+                    subject: expect.stringContaining(`${name} was sent to CMS`),
+                    bodyText: expect.stringContaining(
+                        `please reach out to mc-review@example.com`
                     ),
                 })
             )
@@ -506,25 +521,18 @@ describe('Email templates', () => {
             updatedReason: 'Adding rate development guide.',
         }
         const submission = mockUnlockedContractAndRatesFormData()
+        const rateName = 'test-rate-name'
         const template = unlockPackageCMSEmail(
             submission,
             unlockData,
-            testEmailConfig
+            testEmailConfig,
+            rateName
         )
         it('subject line is correct and clearly states submission is unlocked', () => {
             expect(template).toEqual(
                 expect.objectContaining({
                     subject: expect.stringContaining(
                         `${unlockData.packageName} was unlocked`
-                    ),
-                })
-            )
-        })
-        it('includes warning about unofficial submission', () => {
-            expect(template).toEqual(
-                expect.objectContaining({
-                    bodyText: expect.stringMatching(
-                        /This is NOT an official submission/
                     ),
                 })
             )
@@ -552,6 +560,13 @@ describe('Email templates', () => {
                 })
             )
         })
+        it('includes rate name', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(/Rate name:/),
+                })
+            )
+        })
         it('includes ratesReviewSharedEmails on contract and rate submission unlock', () => {
             const reviewerEmails = [
                 ...testEmailConfig.cmsReviewSharedEmails,
@@ -567,10 +582,12 @@ describe('Email templates', () => {
         })
         it('does not include ratesReviewSharedEmails on contract only submission unlock', () => {
             const sub = mockUnlockedContractOnlyFormData()
+            const rateName = 'test-rate-name'
             const contractOnlyTemplate = unlockPackageCMSEmail(
                 sub,
                 unlockData,
-                testEmailConfig
+                testEmailConfig,
+                rateName
             )
             const ratesReviewerEmails = [
                 ...testEmailConfig.ratesReviewSharedEmails,
@@ -583,6 +600,21 @@ describe('Email templates', () => {
                 )
             })
         })
+        it('does not include rate name on contract only submission unlock', () => {
+            const sub = mockUnlockedContractOnlyFormData()
+            const rateName = 'test-rate-name'
+            const contractOnlyTemplate = unlockPackageCMSEmail(
+                sub,
+                unlockData,
+                testEmailConfig,
+                rateName
+            )
+            expect(contractOnlyTemplate).toEqual(
+                expect.not.objectContaining({
+                    bodyText: expect.stringMatching(/Rate name:/),
+                })
+            )
+        })
     })
     describe('State unlock email', () => {
         const unlockData = {
@@ -591,26 +623,19 @@ describe('Email templates', () => {
             updatedAt: new Date('02/01/2022'),
             updatedReason: 'Adding rate certification.',
         }
+        const submissionName = 'MN-PMAP-0001'
         const sub = unlockedWithFullContracts()
         const template = unlockPackageStateEmail(
             sub,
             unlockData,
-            testEmailConfig
+            testEmailConfig,
+            submissionName
         )
         it('subject line is correct and clearly states submission is unlocked', () => {
             expect(template).toEqual(
                 expect.objectContaining({
                     subject: expect.stringContaining(
                         `${unlockData.packageName} was unlocked by CMS`
-                    ),
-                })
-            )
-        })
-        it('includes warning about unofficial submission', () => {
-            expect(template).toEqual(
-                expect.objectContaining({
-                    bodyText: expect.stringMatching(
-                        /This is NOT an official submission/
                     ),
                 })
             )
@@ -638,6 +663,22 @@ describe('Email templates', () => {
                 })
             )
         })
+        it('includes rate name', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(/Rate name:/),
+                })
+            )
+        })
+        it('includes instructions about revising the submission', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(
+                        /You must revise the submission before CMS can continue reviewing it/
+                    ),
+                })
+            )
+        })
     })
     describe('State resubmission email', () => {
         const resubmitData = {
@@ -647,7 +688,7 @@ describe('Email templates', () => {
             updatedReason: 'Added rate certification.',
         }
         const user = mockUser()
-        const submission = mockContractOnlyFormData()
+        const submission = mockContractAndRatesFormData()
         const template = resubmittedStateEmail(
             submission,
             user,
@@ -662,15 +703,6 @@ describe('Email templates', () => {
                     ),
                     bodyText: expect.stringMatching(
                         `${resubmitData.packageName} was successfully resubmitted`
-                    ),
-                })
-            )
-        })
-        it('includes warning about unofficial submission', () => {
-            expect(template).toEqual(
-                expect.objectContaining({
-                    bodyText: expect.stringMatching(
-                        /This is NOT an official submission/
                     ),
                 })
             )
@@ -707,6 +739,13 @@ describe('Email templates', () => {
                 ),
             })
         })
+        it('includes rate name', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(/Rate name:/),
+                })
+            )
+        })
     })
     describe('CMS resubmission email', () => {
         const resubmitData = {
@@ -729,15 +768,6 @@ describe('Email templates', () => {
                     ),
                     bodyText: expect.stringMatching(
                         `The state completed their edits on submission ${resubmitData.packageName}`
-                    ),
-                })
-            )
-        })
-        it('includes warning about unofficial submission', () => {
-            expect(template).toEqual(
-                expect.objectContaining({
-                    bodyText: expect.stringMatching(
-                        /This is NOT an official submission/
                     ),
                 })
             )
@@ -776,6 +806,13 @@ describe('Email templates', () => {
                 })
             )
         })
+        it('includes rate name', () => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    bodyText: expect.stringMatching(/Rate name:/),
+                })
+            )
+        })
         it('includes ratesReviewSharedEmails on contract and rate resubmission email', () => {
             const reviewerEmails = [
                 ...testEmailConfig.cmsReviewSharedEmails,
@@ -789,13 +826,22 @@ describe('Email templates', () => {
                 )
             })
         })
-        it('does not include ratesReviewSharedEmails on contract only resubmission email', () => {
-            const sub = mockContractOnlyFormData()
-            const contractOnlyTemplate = resubmittedCMSEmail(
-                sub,
-                resubmitData,
-                testEmailConfig
-            )
+    })
+    describe('CMS resubmission email without rates', () => {
+        const resubmitData = {
+            packageName: 'MCR-VA-CCCPLUS-0003',
+            updatedBy: 'bob@example.com',
+            updatedAt: new Date('02/01/2022'),
+            updatedReason: 'Added more contract details.',
+        }
+        const submission = mockContractOnlyFormData()
+        const contractOnlyTemplate = resubmittedCMSEmail(
+            submission,
+            resubmitData,
+            testEmailConfig
+        )
+
+        it('does not include ratesReviewSharedEmails', () => {
             const rateReviewerEmails = [
                 ...testEmailConfig.ratesReviewSharedEmails,
             ]
@@ -806,6 +852,14 @@ describe('Email templates', () => {
                     })
                 )
             })
+        })
+
+        it('does not include the rate name', () => {
+            expect(contractOnlyTemplate).toEqual(
+                expect.not.objectContaining({
+                    bodyText: expect.stringMatching(/Rate name:/),
+                })
+            )
         })
     })
 })
