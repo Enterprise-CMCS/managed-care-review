@@ -265,6 +265,46 @@ describe('Email templates', () => {
                 )
             })
         })
+        it('CHIP contract only submission does not include ratesReviewSharedEmails and cmsRateHelpEmailAddress', () => {
+            const sub = mockContractOnlyFormData()
+            sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
+            const template = newPackageCMSEmail(
+                sub,
+                'some-title',
+                testEmailConfig
+            )
+            const excludedEmails = [
+                ...testEmailConfig.ratesReviewSharedEmails,
+                testEmailConfig.cmsRateHelpEmailAddress,
+            ]
+            excludedEmails.forEach((emailAddress) => {
+                expect(template).toEqual(
+                    expect.objectContaining({
+                        toAddresses: expect.not.arrayContaining([emailAddress]),
+                    })
+                )
+            })
+        })
+        it('CHIP contract and rate submission does not include ratesReviewSharedEmails and cmsRateHelpEmailAddress', () => {
+            const sub = mockContractAndRatesFormData()
+            sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
+            const template = newPackageCMSEmail(
+                sub,
+                'some-title',
+                testEmailConfig
+            )
+            const excludedEmails = [
+                ...testEmailConfig.ratesReviewSharedEmails,
+                testEmailConfig.cmsRateHelpEmailAddress,
+            ]
+            excludedEmails.forEach((emailAddress) => {
+                expect(template).toEqual(
+                    expect.objectContaining({
+                        toAddresses: expect.not.arrayContaining([emailAddress]),
+                    })
+                )
+            })
+        })
         it('does not include rate name on contract only submission', () => {
             const sub = mockContractOnlyFormData()
             const template = newPackageCMSEmail(
@@ -600,6 +640,48 @@ describe('Email templates', () => {
                 )
             })
         })
+        it('CHIP contract only unlock email does not include ratesReviewSharedEmails and cmsRateHelpEmailAddress', () => {
+            const sub = mockUnlockedContractOnlyFormData()
+            sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
+            const template = unlockPackageCMSEmail(
+                sub,
+                unlockData,
+                testEmailConfig,
+                rateName
+            )
+            const excludedEmails = [
+                ...testEmailConfig.ratesReviewSharedEmails,
+                testEmailConfig.cmsRateHelpEmailAddress,
+            ]
+            excludedEmails.forEach((emailAddress) => {
+                expect(template).toEqual(
+                    expect.objectContaining({
+                        toAddresses: expect.not.arrayContaining([emailAddress]),
+                    })
+                )
+            })
+        })
+        it('CHIP contract and rate unlock email does not include ratesReviewSharedEmails and cmsRateHelpEmailAddress', () => {
+            const sub = mockUnlockedContractAndRatesFormData()
+            sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
+            const template = unlockPackageCMSEmail(
+                sub,
+                unlockData,
+                testEmailConfig,
+                rateName
+            )
+            const excludedEmails = [
+                ...testEmailConfig.ratesReviewSharedEmails,
+                testEmailConfig.cmsRateHelpEmailAddress,
+            ]
+            excludedEmails.forEach((emailAddress) => {
+                expect(template).toEqual(
+                    expect.objectContaining({
+                        toAddresses: expect.not.arrayContaining([emailAddress]),
+                    })
+                )
+            })
+        })
         it('does not include rate name on contract only submission unlock', () => {
             const sub = mockUnlockedContractOnlyFormData()
             const rateName = 'test-rate-name'
@@ -826,6 +908,26 @@ describe('Email templates', () => {
                 )
             })
         })
+        it('CHIP contract and rate resubmission does not include ratesReviewSharedEmails and cmsRateHelpEmailAddress', () => {
+            const sub = mockContractAndRatesFormData()
+            sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
+            const template = resubmittedCMSEmail(
+                sub,
+                resubmitData,
+                testEmailConfig
+            )
+            const excludedEmails = [
+                ...testEmailConfig.ratesReviewSharedEmails,
+                testEmailConfig.cmsRateHelpEmailAddress,
+            ]
+            excludedEmails.forEach((emailAddress) => {
+                expect(template).toEqual(
+                    expect.objectContaining({
+                        toAddresses: expect.not.arrayContaining([emailAddress]),
+                    })
+                )
+            })
+        })
     })
     describe('CMS resubmission email without rates', () => {
         const resubmitData = {
@@ -860,6 +962,27 @@ describe('Email templates', () => {
                     bodyText: expect.stringMatching(/Rate name:/),
                 })
             )
+        })
+
+        it('CHIP contract only resubmission does not include ratesReviewSharedEmails and cmsRateHelpEmailAddress', () => {
+            const sub = mockContractOnlyFormData()
+            sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
+            const template = resubmittedCMSEmail(
+                sub,
+                resubmitData,
+                testEmailConfig
+            )
+            const excludedEmails = [
+                ...testEmailConfig.ratesReviewSharedEmails,
+                testEmailConfig.cmsRateHelpEmailAddress,
+            ]
+            excludedEmails.forEach((emailAddress) => {
+                expect(template).toEqual(
+                    expect.objectContaining({
+                        toAddresses: expect.not.arrayContaining([emailAddress]),
+                    })
+                )
+            })
         })
     })
 })
