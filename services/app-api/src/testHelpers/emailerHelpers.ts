@@ -20,7 +20,11 @@ const testEmailConfig: EmailConfiguration = {
     stage: 'LOCAL',
     baseUrl: 'http://localhost',
     emailSource: 'emailSource@example.com',
-    cmsReviewSharedEmails: ['cmsreview1@example.com', 'cmsreview2@example.com'],
+    cmsReviewSharedEmails: [
+        'cmsreview1@example.com',
+        'cmsreview2@example.com',
+        'rates@example.com',
+    ],
     cmsReviewHelpEmailAddress: 'mcog@example.com',
     cmsRateHelpEmailAddress: 'rates@example.com',
     cmsDevTeamHelpEmailAddress: 'mc-review@example.com',
