@@ -115,6 +115,26 @@ Read by `app-api`
 
 Sets the "to" addresses for generic emails sent to the shared CMS inbox (there may be multiple). Value is comma separated string.
 
+### `SES_RATES_EMAIL_ADDRESSES`
+
+Read by `app-api`
+
+Sets additional "to" addresses for emails about packages that contain rates, sent to rate reviewers (there may be multiple). Value is comma separated string.
+
+### `SES_RATES_EMAIL_ADDRESSES`
+
+Read by `app-api`
+
+Sets additional "to" addresses for emails about packages that contain rates, sent to rate reviewers (there may be multiple). Value is comma separated string.
+
+
+### `SES_REVIEW_HELP_EMAIL_ADDRESS`, `SES_RATE_HELP_EMAIL_ADDRESS`, `SES_DEV_TEAM_HELP_EMAIL_ADDRESS`
+
+Read by `app-api`
+
+Single email addresses, used in email bodies to indicate where a state user could go for help with any issues about the submission.
+
+
 ### `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`
 
 Read by CI for deploys, add_cypress_test_users.ts, `./dev local web --hybrid`

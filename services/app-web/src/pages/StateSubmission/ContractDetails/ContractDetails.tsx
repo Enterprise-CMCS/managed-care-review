@@ -30,12 +30,6 @@ import {
     formatUserInputDate,
     isDateRangeEmpty,
 } from '../../../formHelpers'
-import {
-    Document,
-    ContractType,
-    ContractExecutionStatus,
-    FederalAuthority,
-} from '../../../gen/gqlClient'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
 
@@ -43,6 +37,10 @@ import { ContractDetailsFormSchema } from './ContractDetailsSchema'
 import {
     ManagedCareEntity,
     modifiedProvisionKeys,
+    SubmissionDocument,
+    ContractType,
+    ContractExecutionStatus,
+    FederalAuthority,
 } from '../../../common-code/healthPlanFormDataType'
 import {
     ManagedCareEntityRecord,
@@ -358,7 +356,7 @@ export const ContractDetails = ({
                 }
                 return formDataDocuments
             },
-            [] as Document[]
+            [] as SubmissionDocument[]
         )
 
         draftSubmission.contractType = values.contractType
