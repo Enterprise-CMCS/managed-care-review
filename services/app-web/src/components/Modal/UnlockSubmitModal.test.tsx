@@ -130,7 +130,7 @@ describe('UnlockSubmitModal', () => {
     })
 
     describe('unlock submission modal', () => {
-        it('renders without errors', async () => {
+        it('displays correct modal when unlocking submission', async () => {
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
@@ -144,6 +144,17 @@ describe('UnlockSubmitModal', () => {
             await waitFor(() => handleOpen())
             const dialog = screen.getByRole('dialog')
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            expect(
+                screen.getByText('Reason for unlocking submission')
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText('Provide reason for unlocking')
+            ).toBeInTheDocument()
+            expect(screen.getByTestId('modalInput')).toBeInTheDocument()
+            expect(screen.getByTestId('unlock-modal-submit')).toHaveTextContent(
+                'Unlock'
+            )
         })
 
         it('displays form validation error when submitting without a unlock reason', async () => {
