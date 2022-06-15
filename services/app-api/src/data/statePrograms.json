@@ -49,6 +49,11 @@
           "id": "b4775eeb-365f-48e9-bf2e-8c2d0e8dbc70",
           "fullName": "TPPlus",
           "name": "tpplus"
+        },
+        {
+          "id": "e112301b-72c7-4c8f-856a-2cf8c6a1465b",
+          "fullName": "Samoa CHIP",
+          "name": "SCHIP"
         }
       ],
       "code": "AS"
