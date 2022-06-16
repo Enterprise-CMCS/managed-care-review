@@ -38,11 +38,13 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
         uploadFile: async (file: File): Promise<string | S3Error> => {
             const uuid = uuidv4()
             const ext = file.name.split('.').pop()
+            //encode file names and decoding done in bulk_downloads.ts
+            const fileName = encodeURIComponent(file.name)
 
             try {
                 const stored = await Storage.put(`${uuid}.${ext}`, file, {
                     contentType: file.type,
-                    contentDisposition: `attachment; filename=${file.name}`,
+                    contentDisposition: `attachment; filename=${fileName}`,
                 })
 
                 assertIsS3PutResponse(stored)
