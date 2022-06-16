@@ -39,6 +39,9 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
             const uuid = uuidv4()
             const ext = file.name.split('.').pop()
 
+            console.log('File extension')
+            console.log(ext)
+
             try {
                 const stored = await Storage.put(`${uuid}.${ext}`, file, {
                     contentType: file.type,
