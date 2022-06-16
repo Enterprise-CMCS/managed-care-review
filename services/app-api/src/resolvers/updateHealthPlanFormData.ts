@@ -18,11 +18,31 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
 
+import { featureFlags } from '../../../app-web/src/common-code/featureFlags'
+
 export function updateHealthPlanFormDataResolver(
     store: Store
 ): MutationResolvers['updateHealthPlanFormData'] {
     return async (_parent, { input }, context) => {
-        const { user, span } = context
+        const { user, span, ld } = context
+
+        // if this is enabled, updateHealthPlanFormDataResolver throws
+        await ld?.waitForInitialization()
+        const gqlErrors = await ld?.variation(
+            featureFlags.API_GRAPHQL_ERRORS,
+            {
+                key: context.user.email,
+            },
+            false
+        )
+
+        if (gqlErrors) {
+            const errMessage = `API_GRAPHQL_ERRORS flag is enabled for user ${context.user.email}`
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            logError('fetchCurrentUser', errMessage)
+            throw new Error(errMessage)
+        }
+
         setResolverDetailsOnActiveSpan('updateHealthPlanFormData', user, span)
 
         // This resolver is only callable by state users
