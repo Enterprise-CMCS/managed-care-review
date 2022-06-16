@@ -1,9 +1,7 @@
 import React from 'react'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
-import { BaseOpenTelemetryComponent } from '@opentelemetry/plugin-react-load'
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
-import { diag, DiagConsoleLogger } from '@opentelemetry/api'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http/build/esnext'
 import { Resource } from '@opentelemetry/resources'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
@@ -20,10 +18,11 @@ const provider = new WebTracerProvider({
     }),
 })
 
-const exporter = new OTLPTraceExporter({
+const collectorOptions = {
     url: process.env.REACT_APP_OTEL_COLLECTOR_URL,
     headers: {},
-})
+}
+const exporter = new OTLPTraceExporter(collectorOptions)
 
 provider.addSpanProcessor(new BatchSpanProcessor(exporter))
 
@@ -48,9 +47,6 @@ registerInstrumentations({
         }),
     ],
 })
-
-BaseOpenTelemetryComponent.setTracer(serviceName)
-diag.setLogger(new DiagConsoleLogger())
 
 export type TraceProviderProps = {
     children?: React.ReactNode
