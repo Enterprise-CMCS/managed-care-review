@@ -134,7 +134,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
         zip.pipe(streamPassThrough)
         s3DownloadStreams.forEach((streamDetails: S3DownloadStreamDetails) =>
             zip.append(streamDetails.stream, {
-                name: streamDetails.filename,
+                name: decodeURIComponent(streamDetails.filename),
             })
         )
 
