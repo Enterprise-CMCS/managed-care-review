@@ -33,7 +33,7 @@ import {
     HealthPlanPackageStatus,
     UpdateInformation,
 } from '../../gen/gqlClient'
-
+import { recordJSException } from '../../otelHelpers'
 import { Error404 } from '../Errors/Error404'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
@@ -119,9 +119,8 @@ export const SubmissionSummary = (): React.ReactElement => {
             )
 
             if (!currentRevision) {
-                console.error(
-                    'ERROR: submission in summary has no submitted revision',
-                    submissionAndRevisions.revisions
+                recordJSException(
+                    `SubmissionSummary: submission in summary has no submitted revision. submission ID: ${submissionAndRevisions.id}`
                 )
                 // if state user goes to submission/:id for a draft submission, put them on the form
                 navigate(`/submissions/${id}/edit/type`)
@@ -132,9 +131,8 @@ export const SubmissionSummary = (): React.ReactElement => {
                 currentRevision.node.formDataProto
             )
             if (submissionResult instanceof Error) {
-                console.error(
-                    'ERROR: got a proto decoding error',
-                    submissionResult
+                recordJSException(
+                    `SubmissionSummary: proto decoding error. submission ID: ${submissionAndRevisions.id}`
                 )
                 setPageLevelAlert(
                     'Error fetching the submission. Please try again.'
@@ -164,9 +162,8 @@ export const SubmissionSummary = (): React.ReactElement => {
                         submissionStatus === 'UNLOCKED'
                             ? 'unlock information'
                             : 'resubmission information'
-                    console.error(
-                        `ERROR: Encountered error when fetching ${info}`,
-                        submissionAndRevisions.revisions
+                    recordJSException(
+                        `SubmissionSummary: error fetching update info. submission ID: ${submissionAndRevisions.id}`
                     )
                     setPageLevelAlert(
                         `Error fetching ${info}. Please try again.`

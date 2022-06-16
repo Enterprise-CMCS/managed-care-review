@@ -2,14 +2,11 @@ import React from 'react'
 
 import { NavLink } from 'react-router-dom'
 import styles from './Errors.module.scss'
-import { recordGenericTrace } from '../../otelHelpers/tracingHelper'
 
 import { PageHeading } from '../../components/PageHeading'
 import { GridContainer } from '@trussworks/react-uswds'
 
 export const Error404 = (): React.ReactElement => {
-    
-    async () => await recordGenericTrace('404 page')
     return (
         <section className={styles.errorsContainer}>
             <GridContainer>
