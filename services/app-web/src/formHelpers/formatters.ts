@@ -14,6 +14,18 @@ const formatForApi = (attribute: string): string | null => {
     return attribute
 }
 
+const formatYesNoForProto = (
+    attribute: string | undefined
+): boolean | undefined => {
+    if (attribute === 'YES') {
+        return true
+    }
+    if (attribute === 'NO') {
+        return false
+    }
+    return undefined
+}
+
 // Convert api data for use in form.  Form fields must be a string.
 // Empty values as an empty string, dates in date picker as YYYY-MM-DD, boolean as "Yes" "No" values
 const formatForForm = (
@@ -22,7 +34,7 @@ const formatForForm = (
     if (attribute === null || attribute === undefined) {
         return ''
     } else if (attribute instanceof Date) {
-        return dayjs(attribute).format('YYYY-MM-DD')
+        return dayjs(attribute).utc().format('YYYY-MM-DD')
     } else if (typeof attribute === 'boolean') {
         return attribute ? 'YES' : 'NO'
     } else {
@@ -41,5 +53,6 @@ export {
     formatForApi,
     formatForForm,
     formatUserInputDate,
+    formatYesNoForProto,
     formatFormDateForDomain,
 }

@@ -1,20 +1,24 @@
 import React, { useEffect, useState } from 'react'
 import styles from '../SubmissionSummarySection.module.scss'
-import { Document } from '../../../gen/gqlClient'
 import { SectionHeader } from '../../SectionHeader'
 import { DownloadButton } from '../../DownloadButton'
 import { Link } from '@trussworks/react-uswds'
 import { useS3 } from '../../../contexts/S3Context'
-import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import {
+    HealthPlanFormDataType,
+    SubmissionDocument,
+} from '../../../common-code/healthPlanFormDataType'
 
-type DocumentWithLink = { url: string | null } & Document
+type DocumentWithLink = { url: string | null } & SubmissionDocument
 
 export type SupportingDocumentsSummarySectionProps = {
     submission: HealthPlanFormDataType
     navigateTo?: string
     submissionName?: string
 }
-const getUncategorizedDocuments = (documents: Document[]): Document[] =>
+const getUncategorizedDocuments = (
+    documents: SubmissionDocument[]
+): SubmissionDocument[] =>
     documents.filter(
         (doc) => !doc.documentCategories || doc.documentCategories.length === 0
     )

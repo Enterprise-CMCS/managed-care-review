@@ -261,7 +261,7 @@ describe('submitHealthPlanPackage', () => {
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 subject: expect.stringContaining(
-                    `TEST New Managed Care Submission: ${name}`
+                    `New Managed Care Submission: ${name}`
                 ),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining(
@@ -306,9 +306,7 @@ describe('submitHealthPlanPackage', () => {
 
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
-                subject: expect.stringContaining(
-                    `TEST ${name} was sent to CMS`
-                ),
+                subject: expect.stringContaining(`${name} was sent to CMS`),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining([currentUser.email]),
             })
@@ -347,9 +345,7 @@ describe('submitHealthPlanPackage', () => {
 
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
-                subject: expect.stringContaining(
-                    `TEST ${name} was sent to CMS`
-                ),
+                subject: expect.stringContaining(`${name} was sent to CMS`),
                 toAddresses: expect.arrayContaining([
                     sub.stateContacts[0].email,
                 ]),
@@ -408,9 +404,7 @@ describe('submitHealthPlanPackage', () => {
         // email subject line is correct for CMS email and contains correct email body text
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
-                subject: expect.stringContaining(
-                    `TEST ${name} was resubmitted`
-                ),
+                subject: expect.stringContaining(`${name} was resubmitted`),
                 sourceEmail: config.emailSource,
                 bodyText: expect.stringContaining(
                     `The state completed their edits on submission ${name}`
@@ -471,9 +465,7 @@ describe('submitHealthPlanPackage', () => {
         // email subject line is correct for CMS email and contains correct email body text
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
-                subject: expect.stringContaining(
-                    `TEST ${name} was resubmitted`
-                ),
+                subject: expect.stringContaining(`${name} was resubmitted`),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining([
                     currentUser.email,

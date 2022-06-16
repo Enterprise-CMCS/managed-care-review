@@ -1,10 +1,7 @@
 import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto'
-import {
-    HealthPlanRevision,
-    HealthPlanPackage,
-    Submission as GQLSubmissionUnionType,
-} from '../gen/gqlClient'
+
+import { HealthPlanRevision, HealthPlanPackage } from '../gen/gqlClient'
 import { recordJSException } from '../otelHelpers/tracingHelper'
 
 const getCurrentRevisionFromHealthPlanPackage = (
@@ -57,4 +54,3 @@ const getCurrentRevisionFromHealthPlanPackage = (
 }
 
 export { getCurrentRevisionFromHealthPlanPackage }
-export type { GQLSubmissionUnionType }

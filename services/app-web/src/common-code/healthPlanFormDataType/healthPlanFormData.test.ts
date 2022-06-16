@@ -3,6 +3,7 @@ import {
     mockStateSubmission,
     mockContractAndRatesDraft,
     mockMNState,
+    mockStateSubmissionContractAmendment,
 } from '../../testHelpers/apolloHelpers'
 import {
     generateRateName,
@@ -25,6 +26,7 @@ import { basicHealthPlanFormData } from '../healthPlanFormDataMocks'
 describe('submission type assertions', () => {
     test.each([
         [mockStateSubmission(), true],
+        [mockStateSubmissionContractAmendment(), true],
         [{ ...mockStateSubmission(), contractType: undefined }, false],
         [
             { ...mockStateSubmission(), contractExecutionStatus: undefined },
@@ -34,6 +36,13 @@ describe('submission type assertions', () => {
         [{ ...mockStateSubmission(), contractDateEnd: undefined }, false],
         [{ ...mockStateSubmission(), managedCareEntities: [] }, false],
         [{ ...mockStateSubmission(), federalAuthorities: [] }, false],
+        [
+            {
+                ...mockStateSubmissionContractAmendment(),
+                contractAmendmentInfo: { modifiedGeoAreaServed: true },
+            },
+            false,
+        ],
     ])(
         'hasValidContract evaluates as expected',
         (submission, expectedResponse) => {
@@ -330,7 +339,7 @@ describe('submission type assertions', () => {
         [mockDraft(), false],
         [mockContractAndRatesDraft(), false],
     ])(
-        'isStateSubmission evaluates as expected',
+        'isLockedHealthPlanFormData evaluates as expected',
         (submission, expectedResponse) => {
             // type coercion to allow us to test
             expect(isLockedHealthPlanFormData(submission)).toEqual(
@@ -340,25 +349,25 @@ describe('submission type assertions', () => {
     )
 
     test.each([
-        [['foo-bar', 'baz-bin'], 'MCR-MN-UNKNOWNPROGRAM-UNKNOWNPROGRAM-0005'],
-        [['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'], 'MCR-MN-SNBC-0005'],
+        [['foo-bar', 'baz-bin'], 'MCR-MN-0005-UNKNOWNPROGRAM-UNKNOWNPROGRAM'],
+        [['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'], 'MCR-MN-0005-SNBC'],
         [
             [
                 'd95394e5-44d1-45df-8151-1cc1ee66f100',
                 'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
             ],
-            'MCR-MN-MSC+-PMAP-0005',
+            'MCR-MN-0005-MSC+-PMAP',
         ],
         [
             [
                 'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
                 'd95394e5-44d1-45df-8151-1cc1ee66f100',
             ],
-            'MCR-MN-MSC+-PMAP-0005',
+            'MCR-MN-0005-MSC+-PMAP',
         ],
         [
             ['3fd36500-bf2c-47bc-80e8-e7aa417184c5', 'baz-bin'],
-            'MCR-MN-MSHO-UNKNOWNPROGRAM-0005',
+            'MCR-MN-0005-MSHO-UNKNOWNPROGRAM',
         ],
         [
             [
@@ -366,7 +375,7 @@ describe('submission type assertions', () => {
                 'd95394e5-44d1-45df-8151-1cc1ee66f100',
                 'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
             ],
-            'MCR-MN-MSC+-PMAP-SNBC-0005',
+            'MCR-MN-0005-MSC+-PMAP-SNBC',
         ],
     ])('submission name is correct', (programIDs, expectedName) => {
         const programs = mockMNState().programs

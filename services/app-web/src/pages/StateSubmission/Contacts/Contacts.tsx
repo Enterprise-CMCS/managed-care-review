@@ -21,11 +21,9 @@ import styles from '../StateSubmissionForm.module.scss'
 import {
     ActuarialFirmType,
     ActuaryCommunicationType,
-} from '../../../gen/gqlClient'
+} from '../../../common-code/healthPlanFormDataType'
 
 import { ErrorSummary, FieldRadio } from '../../../components/Form'
-
-import { stripTypename } from '../updateSubmissionTransform'
 
 import { useFocus } from '../../../hooks/useFocus'
 import { PageActions } from '../PageActions'
@@ -214,8 +212,8 @@ export const Contacts = ({
     const showFieldErrors = (error?: FormError): boolean | undefined =>
         shouldValidate && Boolean(error)
 
-    const stateContacts = stripTypename(draftSubmission.stateContacts)
-    const actuaryContacts = stripTypename(draftSubmission.actuaryContacts)
+    const stateContacts = draftSubmission.stateContacts
+    const actuaryContacts = draftSubmission.actuaryContacts
 
     const emptyStateContact = {
         name: '',
@@ -535,7 +533,7 @@ export const Contacts = ({
                                                     0 &&
                                                     values.actuaryContacts.map(
                                                         (
-                                                            actuaryContact,
+                                                            _actuaryContact,
                                                             index
                                                         ) => (
                                                             <div
@@ -700,14 +698,6 @@ export const Contacts = ({
                                                                             value={
                                                                                 'MERCER'
                                                                             }
-                                                                            checked={
-                                                                                values
-                                                                                    .actuaryContacts[
-                                                                                    index
-                                                                                ]
-                                                                                    .actuarialFirm ===
-                                                                                'MERCER'
-                                                                            }
                                                                             aria-required
                                                                         />
                                                                         <FieldRadio
@@ -717,14 +707,6 @@ export const Contacts = ({
                                                                             value={
                                                                                 'MILLIMAN'
                                                                             }
-                                                                            checked={
-                                                                                values
-                                                                                    .actuaryContacts[
-                                                                                    index
-                                                                                ]
-                                                                                    .actuarialFirm ===
-                                                                                'MILLIMAN'
-                                                                            }
                                                                             aria-required
                                                                         />
                                                                         <FieldRadio
@@ -732,14 +714,6 @@ export const Contacts = ({
                                                                             name={`actuaryContacts.${index}.actuarialFirm`}
                                                                             label="Optumas"
                                                                             value={
-                                                                                'OPTUMAS'
-                                                                            }
-                                                                            checked={
-                                                                                values
-                                                                                    .actuaryContacts[
-                                                                                    index
-                                                                                ]
-                                                                                    .actuarialFirm ===
                                                                                 'OPTUMAS'
                                                                             }
                                                                             aria-required
@@ -760,14 +734,6 @@ export const Contacts = ({
                                                                             value={
                                                                                 'DELOITTE'
                                                                             }
-                                                                            checked={
-                                                                                values
-                                                                                    .actuaryContacts[
-                                                                                    index
-                                                                                ]
-                                                                                    .actuarialFirm ===
-                                                                                'DELOITTE'
-                                                                            }
                                                                             aria-required
                                                                         />
                                                                         <FieldRadio
@@ -777,14 +743,6 @@ export const Contacts = ({
                                                                             value={
                                                                                 'STATE_IN_HOUSE'
                                                                             }
-                                                                            checked={
-                                                                                values
-                                                                                    .actuaryContacts[
-                                                                                    index
-                                                                                ]
-                                                                                    .actuarialFirm ===
-                                                                                'STATE_IN_HOUSE'
-                                                                            }
                                                                             aria-required
                                                                         />
                                                                         <FieldRadio
@@ -792,14 +750,6 @@ export const Contacts = ({
                                                                             name={`actuaryContacts.${index}.actuarialFirm`}
                                                                             label="Other"
                                                                             value={
-                                                                                'OTHER'
-                                                                            }
-                                                                            checked={
-                                                                                values
-                                                                                    .actuaryContacts[
-                                                                                    index
-                                                                                ]
-                                                                                    .actuarialFirm ===
                                                                                 'OTHER'
                                                                             }
                                                                             aria-required
@@ -917,10 +867,6 @@ export const Contacts = ({
                                                 name="actuaryCommunicationPreference"
                                                 label={`OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`}
                                                 value={'OACT_TO_ACTUARY'}
-                                                checked={
-                                                    values.actuaryCommunicationPreference ===
-                                                    'OACT_TO_ACTUARY'
-                                                }
                                                 aria-required
                                             />
                                             <FieldRadio
@@ -928,10 +874,6 @@ export const Contacts = ({
                                                 name="actuaryCommunicationPreference"
                                                 label={`OACT can communicate directly with the state, and the state will relay all written communication to their actuary and set up time for any potential verbal discussions.`}
                                                 value={'OACT_TO_STATE'}
-                                                checked={
-                                                    values.actuaryCommunicationPreference ===
-                                                    'OACT_TO_STATE'
-                                                }
                                                 aria-required
                                             />
                                         </Fieldset>

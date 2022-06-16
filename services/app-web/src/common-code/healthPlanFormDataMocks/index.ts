@@ -2,6 +2,7 @@ export {
     newHealthPlanFormData,
     basicHealthPlanFormData,
     contractOnly,
+    contractAmendedOnly,
     unlockedWithContacts,
     unlockedWithDocuments,
     unlockedWithFullRates,

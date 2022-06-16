@@ -203,9 +203,13 @@ describe('indexHealthPlanPackages', () => {
             query: INDEX_HEALTH_PLAN_PACKAGES,
         })
 
-        expect(result.errors).toBeUndefined() // Is this really what we want? I thought this would be 403 unauthorized
+        expect(result.errors).toBeUndefined()
 
         const indexHealthPlanPackages = result.data?.indexHealthPlanPackages
-        expect(indexHealthPlanPackages).toEqual({ edges: [], totalCount: 0 })
+        const otherStatePackages = indexHealthPlanPackages.edges.filter(
+            (pkg: HealthPlanPackageEdge) => pkg.node.stateCode !== 'VA'
+        )
+
+        expect(otherStatePackages).toEqual([])
     })
 })

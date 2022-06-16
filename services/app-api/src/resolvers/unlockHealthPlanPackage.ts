@@ -142,10 +142,18 @@ export function unlockHealthPlanPackageResolver(
             packageName: name,
         }
         const unlockPackageCMSEmailResult =
-            await emailer.sendUnlockPackageCMSEmail(draft, updatedEmailData)
+            await emailer.sendUnlockPackageCMSEmail(
+                draft,
+                updatedEmailData,
+                name
+            )
 
         const unlockPackageStateEmailResult =
-            await emailer.sendUnlockPackageStateEmail(draft, updatedEmailData)
+            await emailer.sendUnlockPackageStateEmail(
+                draft,
+                updatedEmailData,
+                name
+            )
 
         if (unlockPackageCMSEmailResult instanceof Error) {
             logError(

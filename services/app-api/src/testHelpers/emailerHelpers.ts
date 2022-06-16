@@ -20,9 +20,18 @@ const testEmailConfig: EmailConfiguration = {
     stage: 'LOCAL',
     baseUrl: 'http://localhost',
     emailSource: 'emailSource@example.com',
-    cmsReviewSharedEmails: ['cmsreview1@example.com', 'cmsreview2@example.com'],
+    cmsReviewSharedEmails: [
+        'cmsreview1@example.com',
+        'cmsreview2@example.com',
+        'rates@example.com',
+    ],
+    cmsReviewHelpEmailAddress: 'mcog@example.com',
+    cmsRateHelpEmailAddress: 'rates@example.com',
+    cmsDevTeamHelpEmailAddress: 'mc-review@example.com',
     ratesReviewSharedEmails: ['ratesreview@example.com'],
 }
+
+const submissionName = 'MN-PMAP-0001'
 
 const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
     const config = customConfig || testEmailConfig
@@ -58,12 +67,14 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
         },
         sendUnlockPackageCMSEmail: function async(
             submission: UnlockedHealthPlanFormDataType,
-            updatedEmailData: UpdatedEmailData
+            updatedEmailData: UpdatedEmailData,
+            submissionName: string
         ): Promise<void | Error> {
             const emailData = unlockPackageCMSEmail(
                 submission,
                 updatedEmailData,
-                config
+                config,
+                submissionName
             )
             return this.sendEmail(emailData)
         },
@@ -74,7 +85,8 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
             const emailData = unlockPackageStateEmail(
                 submission,
                 updatedEmailData,
-                config
+                config,
+                submissionName
             )
             return this.sendEmail(emailData)
         },
