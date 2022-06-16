@@ -1,5 +1,4 @@
 import opentelemetry, { Span } from '@opentelemetry/api'
-import { User as UserType } from '../gen/gqlClient'
 
 const serviceNameOTEL = 'app-web-' + process.env.REACT_APP_STAGE_NAME
 
@@ -48,14 +47,4 @@ function recordJSException(error: string | Error): void {
     span.end()
 }
 
-function addUserToActiveSpan(user: UserType) {
-    const activeSpan = opentelemetry.trace.getSpan(
-        opentelemetry.context.active()
-    )
-    if (!activeSpan) return
-
-    activeSpan.setAttribute('user_id', user.email)
-    activeSpan.setAttribute('user_role', user.role)
-}
-
-export { getTracer, recordSpan, recordJSException, addUserToActiveSpan }
+export { getTracer, recordSpan, recordJSException }
