@@ -228,7 +228,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientEngineLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-2-0:1
 
   hello:
     handler: src/handlers/hello.main
@@ -248,7 +248,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientMigrationLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-2-0:1
 
   zip_keys:
     handler: src/handlers/bulk_download.main
