@@ -42,7 +42,7 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
             try {
                 const stored = await Storage.put(`${uuid}.${ext}`, file, {
                     contentType: file.type,
-                    contentDisposition: `attachment; filename="${file.name}"`,
+                    contentDisposition: `attachment; filename=${file.name}"`,
                 })
 
                 assertIsS3PutResponse(stored)
@@ -111,6 +111,8 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
         },
         getKey: (s3URL: string) => {
             const key = parseKey(s3URL)
+            console.log('S3 File Key')
+            console.log(key)
             return key instanceof Error ? null : key
         },
         getURL: async (key: string): Promise<string> => {
@@ -128,6 +130,8 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
             filename: string
         ): Promise<string | Error> => {
             const prependedKeys = keys.map((key) => `allusers/${key}`)
+            console.log('Prepended Keys')
+            console.log(prependedKeys)
             const prependedFilename = `allusers/${filename}`
 
             const zipRequestParams = {
