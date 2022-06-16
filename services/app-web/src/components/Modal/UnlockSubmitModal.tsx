@@ -22,7 +22,7 @@ type ModalValueType = {
     onSubmitText?: string
     modalDescription?: string
     inputHint?: string
-    modalInputValidationText?: string
+    unlockSubmitModalInputValidation?: string
 }
 
 const modalValueDictionary: { [Property in ModalType]: ModalValueType } = {
@@ -32,13 +32,14 @@ const modalValueDictionary: { [Property in ModalType]: ModalValueType } = {
         modalDescription:
             'Once you submit, this package will be sent to CMS for review and you will no longer be able to make changes.',
         inputHint: 'Provide summary of all changes made to this submission',
-        modalInputValidationText: 'You must provide a summary of changes',
+        unlockSubmitModalInputValidation:
+            'You must provide a summary of changes',
     },
     UNLOCK: {
         modalHeading: 'Reason for unlocking submission',
         onSubmitText: 'Unlock',
         inputHint: 'Provide reason for unlocking',
-        modalInputValidationText:
+        unlockSubmitModalInputValidation:
             'You must provide a reason for unlocking this submission',
     },
     SUBMIT: {
@@ -68,7 +69,7 @@ export const UnlockSubmitModal = ({
     const modalValues: ModalValueType = modalValueDictionary[modalType]
 
     const modalFormInitialValues = {
-        modalInput: '',
+        unlockSubmitModalInput: '',
     }
 
     const [submitHealthPlanPackage, { loading: submitMutationLoading }] =
@@ -79,11 +80,11 @@ export const UnlockSubmitModal = ({
     const formik = useFormik({
         initialValues: modalFormInitialValues,
         validationSchema: Yup.object().shape({
-            modalInput: Yup.string().defined(
-                modalValues.modalInputValidationText
+            unlockSubmitModalInput: Yup.string().defined(
+                modalValues.unlockSubmitModalInputValidation
             ),
         }),
-        onSubmit: (values) => onSubmit(values.modalInput),
+        onSubmit: (values) => onSubmit(values.unlockSubmitModalInput),
     })
 
     const mutationLoading =
@@ -101,19 +102,19 @@ export const UnlockSubmitModal = ({
         }
     }
 
-    const onSubmit = async (modalInput?: string): Promise<void> => {
+    const onSubmit = async (unlockSubmitModalInput?: string): Promise<void> => {
         let result
-        if (modalType === 'UNLOCK' && modalInput) {
+        if (modalType === 'UNLOCK' && unlockSubmitModalInput) {
             result = await unlockMutationWrapper(
                 unlockHealthPlanPackage,
                 healthPlanPackage.id,
-                modalInput
+                unlockSubmitModalInput
             )
         } else {
             result = await submitMutationWrapper(
                 submitHealthPlanPackage,
                 healthPlanPackage.id,
-                modalInput
+                unlockSubmitModalInput
             )
         }
 
@@ -129,9 +130,10 @@ export const UnlockSubmitModal = ({
 
     // Focus submittedReason field in submission modal on Resubmit click when errors exist
     useEffect(() => {
-        if (focusErrorsInModal && formik.errors.modalInput) {
-            const fieldElement: HTMLElement | null =
-                document.querySelector(`[name="modalInput"]`)
+        if (focusErrorsInModal && formik.errors.unlockSubmitModalInput) {
+            const fieldElement: HTMLElement | null = document.querySelector(
+                `[name="unlockSubmitModalInput"]`
+            )
             if (fieldElement) {
                 fieldElement.focus()
                 setFocusErrorsInModal(false)
@@ -166,10 +168,12 @@ export const UnlockSubmitModal = ({
                     {modalValues.modalDescription && (
                         <p>{modalValues.modalDescription}</p>
                     )}
-                    <FormGroup error={Boolean(formik.errors.modalInput)}>
-                        {formik.errors.modalInput && (
+                    <FormGroup
+                        error={Boolean(formik.errors.unlockSubmitModalInput)}
+                    >
+                        {formik.errors.unlockSubmitModalInput && (
                             <PoliteErrorMessage role="alert">
-                                {formik.errors.modalInput}
+                                {formik.errors.unlockSubmitModalInput}
                             </PoliteErrorMessage>
                         )}
                         {modalValues.inputHint && (
@@ -178,15 +182,15 @@ export const UnlockSubmitModal = ({
                             </span>
                         )}
                         <Textarea
-                            id="modalInputCharacterCount"
-                            name="modalInput"
-                            data-testid="modalInput"
-                            aria-labelledby="modal-input-hint"
+                            id="unlockSubmitModalInput"
+                            name="unlockSubmitModalInput"
+                            data-testid="unlockSubmitModalInput"
+                            aria-labelledby="unlock-submit-modal-input-hint"
                             className={styles.modalInputTextarea}
                             aria-required
-                            error={!!formik.errors.modalInput}
+                            error={!!formik.errors.unlockSubmitModalInput}
                             onChange={formik.handleChange}
-                            defaultValue={formik.values.modalInput}
+                            defaultValue={formik.values.unlockSubmitModalInput}
                         />
                     </FormGroup>
                 </form>

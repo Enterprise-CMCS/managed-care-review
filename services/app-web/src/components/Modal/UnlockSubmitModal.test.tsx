@@ -151,7 +151,9 @@ describe('UnlockSubmitModal', () => {
             expect(
                 screen.getByText('Provide reason for unlocking')
             ).toBeInTheDocument()
-            expect(screen.getByTestId('modalInput')).toBeInTheDocument()
+            expect(
+                screen.getByTestId('unlockSubmitModalInput')
+            ).toBeInTheDocument()
             expect(screen.getByTestId('unlock-modal-submit')).toHaveTextContent(
                 'Unlock'
             )
@@ -169,7 +171,7 @@ describe('UnlockSubmitModal', () => {
                 />
             )
             await waitFor(() => handleOpen())
-            await screen.findByTestId('modalInput')
+            await screen.findByTestId('unlockSubmitModalInput')
 
             const modalSubmit = screen.getByTestId('unlock-modal-submit')
             expect(modalSubmit).toHaveTextContent('Unlock')
@@ -198,7 +200,7 @@ describe('UnlockSubmitModal', () => {
             await waitFor(() => handleOpen())
             screen.getByText('Provide reason for unlocking')
 
-            const textbox = await screen.findByTestId('modalInput')
+            const textbox = await screen.findByTestId('unlockSubmitModalInput')
 
             // submit without entering anything
             userEvent.click(screen.getByTestId('unlock-modal-submit'))
@@ -239,7 +241,7 @@ describe('UnlockSubmitModal', () => {
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
             userEvent.type(
-                screen.getByTestId('modalInput'),
+                screen.getByTestId('unlockSubmitModalInput'),
                 'Test unlock summary'
             )
 
@@ -284,7 +286,7 @@ describe('UnlockSubmitModal', () => {
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
             userEvent.type(
-                screen.getByTestId('modalInput'),
+                screen.getByTestId('unlockSubmitModalInput'),
                 'Test unlock summary'
             )
 
@@ -328,7 +330,9 @@ describe('UnlockSubmitModal', () => {
                     'Provide summary of all changes made to this submission'
                 )
             ).toBeInTheDocument()
-            expect(screen.getByTestId('modalInput')).toBeInTheDocument()
+            expect(
+                screen.getByTestId('unlockSubmitModalInput')
+            ).toBeInTheDocument()
             expect(
                 screen.getByTestId('resubmit-modal-submit')
             ).toHaveTextContent('Resubmit')
@@ -377,7 +381,7 @@ describe('UnlockSubmitModal', () => {
             const dialog = screen.getByRole('dialog')
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
-            const textbox = await screen.getByTestId('modalInput')
+            const textbox = await screen.getByTestId('unlockSubmitModalInput')
 
             // submit without entering anything
             userEvent.click(screen.getByTestId('resubmit-modal-submit'))
@@ -425,7 +429,7 @@ describe('UnlockSubmitModal', () => {
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
             userEvent.type(
-                screen.getByTestId('modalInput'),
+                screen.getByTestId('unlockSubmitModalInput'),
                 'Test submission summary'
             )
 
