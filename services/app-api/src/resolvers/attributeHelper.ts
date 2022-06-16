@@ -1,5 +1,6 @@
 import { Context } from '../handlers/apollo_gql'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
+import { SpanStatusCode } from '@opentelemetry/api'
 
 /* gather information about what's going on in the request, including user info and the resolver that's being called. */
 export function setResolverDetailsOnActiveSpan(
@@ -8,6 +9,7 @@ export function setResolverDetailsOnActiveSpan(
     span: Context['span']
 ): void {
     if (!span) return
+    span.addEvent(name)
     span.setAttributes({
         [SemanticAttributes.CODE_FUNCTION]: name,
         [SemanticAttributes.ENDUSER_ID]: user.email,
@@ -20,9 +22,10 @@ export function setErrorAttributesOnActiveSpan(
     span: Context['span']
 ): void {
     if (!span) return
-    span.setAttributes({
-        [SemanticAttributes.EXCEPTION_MESSAGE]: message,
-        'resolver.success': false,
+    span.recordException(new Error(message))
+    span.setStatus({
+        message: message,
+        code: SpanStatusCode.ERROR,
     })
 }
 

@@ -18,6 +18,8 @@ import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
 import { createTracer } from '../otel/otel_handler'
+import LaunchDarkly from 'launchdarkly-node-server-sdk'
+import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 
 const requestSpanKey = 'REQUEST_SPAN'
 let tracer: Tracer
@@ -26,11 +28,15 @@ let tracer: Tracer
 export interface Context {
     user: UserType
     span?: Span
+    ld?: LaunchDarkly.LDClient
 }
 
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
 // and turns that into our GQL resolver context object
-function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
+function contextForRequestForFetcher(
+    userFetcher: userFromAuthProvider,
+    ldClient: LaunchDarkly.LDClient
+): ({
     event,
 }: {
     event: APIGatewayProxyEvent
@@ -53,6 +59,7 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                     return {
                         user: userResult.value,
                         span: requestSpan,
+                        ld: ldClient,
                     }
                 } else {
                     throw new Error(
@@ -103,7 +110,10 @@ function tracingMiddleware(wrapped: Handler): Handler {
             'handleRequest',
             {
                 kind: 1,
-                attributes: { middlewareInit: true },
+                attributes: {
+                    [SemanticAttributes.AWS_LAMBDA_INVOKED_ARN]:
+                        context.invokedFunctionArn,
+                },
             },
             ctx
         )
@@ -145,6 +155,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         process.env.SES_DEV_TEAM_HELP_EMAIL_ADDRESS
     const ratesReviewSharedEmails = process.env.SES_RATES_EMAIL_ADDRESSES
     const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
+    const ldClientKey = process.env.LD_SDK_KEY
 
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
     console.info('Running With Config: ', {
@@ -211,6 +222,10 @@ async function initializeGQLHandler(): Promise<Handler> {
             'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL is required to run app-api'
         )
     }
+
+    if (ldClientKey === undefined) {
+        throw new Error('Configuration Error: LD_SDK_KEY is required ')
+    }
     // END
 
     const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
@@ -252,8 +267,10 @@ async function initializeGQLHandler(): Promise<Handler> {
             ? userFromLocalAuthProvider
             : userFromCognitoAuthProvider
 
+    const ldClient = LaunchDarkly.init(ldClientKey)
+
     // Our user-context function is parametrized with a local or
-    const contextForRequest = contextForRequestForFetcher(userFetcher)
+    const contextForRequest = contextForRequestForFetcher(userFetcher, ldClient)
 
     const server = new ApolloServer({
         typeDefs,
