@@ -26,6 +26,7 @@ import { dayjs } from '../../common-code/dateHelpers'
 import styles from './SubmissionRevisionSummary.module.scss'
 import { PreviousSubmissionBanner } from '../../components'
 import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
+import { recordJSException } from '../../otelHelpers/tracingHelper'
 
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
@@ -79,9 +80,8 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 .find((_revision, index) => index === revisionIndex)
 
             if (!revision) {
-                console.error(
-                    'ERROR: submission in summary has no submitted revision',
-                    submissionAndRevisions.revisions
+                recordJSException(
+                    `SubmissionRevisionSummary:  submission in summary has no submitted revision. submission ID: ${submissionAndRevisions.id}`
                 )
                 setPageLevelAlert(
                     'Error fetching the submission. Please try again.'
@@ -95,17 +95,15 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 submissionResult instanceof Error ||
                 !revision.node.submitInfo
             ) {
-                console.error(
-                    'ERROR: got a proto decoding error',
-                    submissionResult
+                recordJSException(
+                    `SubmissionRevisionSummary: error decoding proto. submission ID: ${submissionAndRevisions.id}`
                 )
                 setPageLevelAlert(
                     'Error fetching the submission. Please try again.'
                 )
                 return
             }
-            console.log('submissionResult', submissionResult)
-            console.log('revision.node.submitInfo', revision.node.submitInfo)
+
             setSubmitInfo(revision.node.submitInfo)
             setPackageData(submissionResult)
         }
