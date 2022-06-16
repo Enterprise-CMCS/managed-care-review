@@ -40,7 +40,7 @@ describe('dashboard', () => {
             cy.wait(2000)
             cy.findByRole('button', { name: 'Unlock submission' }).click()
             cy.findAllByTestId('modalWindow').eq(1).should('be.visible')
-            cy.get('#unlockReasonCharacterCount').type(
+            cy.get('#unlockSubmitModalInput').type(
                 'Unlock submission reason.'
             )
             cy.findByRole('button', { name: 'Unlock' }).click()
