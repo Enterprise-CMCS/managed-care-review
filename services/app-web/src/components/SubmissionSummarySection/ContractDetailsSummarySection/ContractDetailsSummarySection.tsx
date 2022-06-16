@@ -112,8 +112,6 @@ export const ContractDetailsSummarySection = ({
                 .filter((key) => key !== '')
 
             // call the lambda to zip the files and get the url
-            console.log('Keys from S3')
-            console.log(keysFromDocs)
             const zippedURL = await getBulkDlURL(
                 keysFromDocs,
                 submissionName + '-contract-details.zip'
