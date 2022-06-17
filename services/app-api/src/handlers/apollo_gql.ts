@@ -1,4 +1,10 @@
-import { propagation, ROOT_CONTEXT, Span, Tracer } from '@opentelemetry/api'
+import {
+    propagation,
+    ROOT_CONTEXT,
+    Span,
+    SpanKind,
+    Tracer,
+} from '@opentelemetry/api'
 import { ApolloServer } from 'apollo-server-lambda'
 import {
     APIGatewayProxyEvent,
@@ -18,7 +24,6 @@ import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
 import { createTracer } from '../otel/otel_handler'
-import LaunchDarkly from 'launchdarkly-node-server-sdk'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 
 const requestSpanKey = 'REQUEST_SPAN'
@@ -28,15 +33,11 @@ let tracer: Tracer
 export interface Context {
     user: UserType
     span?: Span
-    ld?: LaunchDarkly.LDClient
 }
 
 // This function pulls auth info out of the cognitoAuthenticationProvider in the lambda event
 // and turns that into our GQL resolver context object
-function contextForRequestForFetcher(
-    userFetcher: userFromAuthProvider,
-    ldClient: LaunchDarkly.LDClient
-): ({
+function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
     event,
 }: {
     event: APIGatewayProxyEvent
@@ -59,7 +60,6 @@ function contextForRequestForFetcher(
                     return {
                         user: userResult.value,
                         span: requestSpan,
-                        ld: ldClient,
                     }
                 } else {
                     throw new Error(
@@ -109,7 +109,7 @@ function tracingMiddleware(wrapped: Handler): Handler {
         const span = tracer.startSpan(
             'handleRequest',
             {
-                kind: 1,
+                kind: SpanKind.SERVER,
                 attributes: {
                     [SemanticAttributes.AWS_LAMBDA_INVOKED_ARN]:
                         context.invokedFunctionArn,
@@ -267,10 +267,8 @@ async function initializeGQLHandler(): Promise<Handler> {
             ? userFromLocalAuthProvider
             : userFromCognitoAuthProvider
 
-    const ldClient = LaunchDarkly.init(ldClientKey)
-
     // Our user-context function is parametrized with a local or
-    const contextForRequest = contextForRequestForFetcher(userFetcher, ldClient)
+    const contextForRequest = contextForRequestForFetcher(userFetcher)
 
     const server = new ApolloServer({
         typeDefs,
