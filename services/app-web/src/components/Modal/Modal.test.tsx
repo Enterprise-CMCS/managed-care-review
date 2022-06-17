@@ -322,5 +322,33 @@ describe('Modal', () => {
                 expect(screen.getByRole('dialog')).not.toHaveClass('is-visible')
             })
         })
+
+        it('renders modalAlert prop string and header text on Alert component when one is passed', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            const onSubmit = jest.fn()
+            render(
+                <div>
+                    <Modal
+                        id="test"
+                        modalHeading="Test Modal Title"
+                        modalRef={modalRef}
+                        onSubmit={onSubmit}
+                        onSubmitText={'Resubmit'}
+                        modalAlert="This should be a modal alert"
+                    >
+                        <textarea id="textarea" data-testid="textarea" />
+                    </Modal>
+                </div>
+            )
+            await waitFor(() => handleOpen())
+            expect(
+                await screen.findByText('This should be a modal alert')
+            ).toBeInTheDocument()
+            expect(
+                await screen.findByText('Resubmit Error')
+            ).toBeInTheDocument()
+        })
     })
 })
