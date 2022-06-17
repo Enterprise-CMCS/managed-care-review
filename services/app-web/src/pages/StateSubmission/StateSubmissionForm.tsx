@@ -231,7 +231,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
             if (planFormData.status !== 'DRAFT') {
                 recordJSException(
-                    `StateSubmissionForm: WRONG_SUBMISSION_STATUS. submission ID:
+                    `StateSubmissionForm: WRONG_SUBMISSION_STATUS. ID:
                 ${submissionAndRevisions.id}`
                 )
                 setFormDataError('WRONG_SUBMISSION_STATUS')
@@ -247,8 +247,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
             setDocumentDates(documentDates)
             if (documentList instanceof Error) {
                 recordJSException(
-                    `StateSubmissionForm: MALFORMATTED_DATA. document list malformatted. submission ID:
-                    ${submissionAndRevisions.id}`
+                    `StateSubmissionForm: MALFORMATTED_DATA. document list malformatted. ID:
+                    ${submissionAndRevisions.id} Error message: ${documentList.message}`
                 )
                 setFormDataError('MALFORMATTED_DATA')
                 return
@@ -267,7 +267,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
                     })
                 } else {
                     recordJSException(
-                        `StateSubmissionForm: submission in summary has no revision with unlocked information. submission ID:
+                        `StateSubmissionForm: submission in summary has no revision with unlocked information. ID:
                         ${submissionAndRevisions.id}`
                     )
                     setShowPageErrorMessage(
@@ -283,7 +283,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
         // we should already be setting this in our try {} block in the actual update handler, I think
         // so this might be worth looking into.
         recordJSException(
-            `StateSubmissionForm: Apollo error reported. ${updateFormDataError}`
+            `StateSubmissionForm: Apollo error reported. Error message: ${updateFormDataError.message}`
         )
         setShowPageErrorMessage(true)
     }

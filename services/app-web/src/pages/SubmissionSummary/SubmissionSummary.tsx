@@ -120,7 +120,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
             if (!currentRevision) {
                 recordJSException(
-                    `SubmissionSummary: submission in summary has no submitted revision. submission ID: ${submissionAndRevisions.id}`
+                    `SubmissionSummary: submission in summary has no submitted revision. ID: ${submissionAndRevisions.id}`
                 )
                 // if state user goes to submission/:id for a draft submission, put them on the form
                 navigate(`/submissions/${id}/edit/type`)
@@ -132,7 +132,7 @@ export const SubmissionSummary = (): React.ReactElement => {
             )
             if (submissionResult instanceof Error) {
                 recordJSException(
-                    `SubmissionSummary: proto decoding error. submission ID: ${submissionAndRevisions.id}`
+                    `SubmissionSummary: proto decoding error. ID: ${submissionAndRevisions.id} Error message: ${submissionResult.message}`
                 )
                 setPageLevelAlert(
                     'Error fetching the submission. Please try again.'
@@ -163,7 +163,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                             ? 'unlock information'
                             : 'resubmission information'
                     recordJSException(
-                        `SubmissionSummary: error fetching update info. submission ID: ${submissionAndRevisions.id}`
+                        `SubmissionSummary: error fetching update info. ID: ${submissionAndRevisions.id}`
                     )
                     setPageLevelAlert(
                         `Error fetching ${info}. Please try again.`

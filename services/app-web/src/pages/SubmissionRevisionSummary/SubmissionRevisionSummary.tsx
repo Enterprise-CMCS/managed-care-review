@@ -81,7 +81,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
 
             if (!revision) {
                 recordJSException(
-                    `SubmissionRevisionSummary:  submission in summary has no submitted revision. submission ID: ${submissionAndRevisions.id}`
+                    `SubmissionRevisionSummary:  submission in summary has no submitted revision. ID: ${submissionAndRevisions.id}`
                 )
                 setPageLevelAlert(
                     'Error fetching the submission. Please try again.'
@@ -96,7 +96,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 !revision.node.submitInfo
             ) {
                 recordJSException(
-                    `SubmissionRevisionSummary: error decoding proto. submission ID: ${submissionAndRevisions.id}`
+                    `SubmissionRevisionSummary: error decoding proto. ID: ${submissionAndRevisions.id}`
                 )
                 setPageLevelAlert(
                     'Error fetching the submission. Please try again.'

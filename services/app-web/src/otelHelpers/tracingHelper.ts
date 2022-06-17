@@ -44,6 +44,7 @@ function recordJSException(error: string | Error): void {
     const tracer = getTracer()
     const span = tracer.startSpan('JSException')
     span.recordException(error)
+    console.error(error)
     span.end()
 }
 

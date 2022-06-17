@@ -83,7 +83,7 @@ export const Dashboard = (): React.ReactElement => {
 
     if (error) {
         recordJSException(
-            `indexHealthPlanPackagesQuery: Error indexing submission. ${error.message}`
+            `indexHealthPlanPackagesQuery: Error indexing submissions. Error message:${error.message}`
         )
         return (
             <div id="dashboard-page" className={styles.wrapper}>
@@ -118,7 +118,7 @@ export const Dashboard = (): React.ReactElement => {
             )
             if (currentSubmissionData instanceof Error) {
                 recordJSException(
-                    `indexHealthPlanPackagesQuery: Error decoding proto. submission ID ${sub.id}`
+                    `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${sub.id} Error message: ${currentSubmissionData.message}`
                 )
 
                 return null

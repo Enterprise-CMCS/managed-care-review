@@ -17,7 +17,7 @@ export const makeDateTable = (
 
             if (revisionData instanceof Error) {
                 recordJSException(
-                    'makeDocumentLookupTable: failed to read submission data; unable to display document dates'
+                    `makeDocumentLookupTable: failed to read submission data; unable to display document dates. ID: ${submissions.id} Error message: ${revisionData.message}`
                 )
                 return
             }

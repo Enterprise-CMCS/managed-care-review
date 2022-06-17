@@ -14,7 +14,7 @@ const getCurrentRevisionFromHealthPlanPackage = (
             submissionAndRevisions.revisions.length < 1
         ) {
             recordJSException(
-                `getCurrentRevisionFromHealthPlanPackage: submission has no submitted revision. submission ID: 
+                `getCurrentRevisionFromHealthPlanPackage: submission has no submitted revision. ID: 
                 ${submissionAndRevisions.id}`
             )
             return new Error(
@@ -38,7 +38,7 @@ const getCurrentRevisionFromHealthPlanPackage = (
         )
         if (healthPlanPackageFormDataResult instanceof Error) {
             recordJSException(
-                `getCurrentRevisionFromHealthPlanPackage: proto decoding error. submission ID: 
+                `getCurrentRevisionFromHealthPlanPackage: proto decoding error. ID: 
                 ${submissionAndRevisions.id}. Error message: ${Error}`
             )
             return new Error('Error decoding the submission. Please try again.')

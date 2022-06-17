@@ -14,10 +14,14 @@ function ErrorBoundaryRoot({
     useEffect(() => {
         const logError = async () => {
             await recordSpan('React: ErrorBoundary')
-            recordJSException(`Crash in ErrorBoundaryRoot:  ${error}`)
+            recordJSException(
+                `Crash in ErrorBoundaryRoot. Error message: ${error}`
+            )
         }
         logError().catch((err) => {
-            recordJSException(`ErrorBoundaryRoot: failed to log error:${err} `)
+            recordJSException(
+                `ErrorBoundaryRoot: failed to log error. Error message: ${err} `
+            )
         })
     }, [error])
 

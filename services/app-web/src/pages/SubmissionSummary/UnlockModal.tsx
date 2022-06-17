@@ -13,6 +13,7 @@ import {
 } from '../../gen/gqlClient'
 import { Modal, PoliteErrorMessage } from '../../components'
 import { isGraphQLErrors } from '../../gqlHelpers'
+import { recordJSException } from '../../otelHelpers'
 
 type UnlockModalProps = {
     modalRef: React.RefObject<ModalRef> // needs to be established in the parent component
@@ -105,14 +106,15 @@ export const UnlockModal = ({
         )
 
         if (result instanceof Error) {
-            console.error(
-                'ERROR: got an Apollo Client Error attempting to unlock',
-                result
+            recordJSException(
+                `UnlockModal: Apollo Client error attempting to unlock. ID: ${healthPlanPackage.id} Error message: ${result.message}`
             )
             setModalAlert('Error attempting to unlock. Please try again.')
             modalRef.current?.toggleModal(undefined, false)
         } else if (isGraphQLErrors(result)) {
-            console.error('ERROR: got a GraphQL error response', result)
+            recordJSException(
+                `UnlockModal: GraphQL error attempting to unlock. ID: ${healthPlanPackage.id} Error message: ${result}`
+            )
             if (result[0].extensions.code === 'BAD_USER_INPUT') {
                 setModalAlert(
                     'Error attempting to unlock. Submission may be already unlocked. Please refresh and try again.'
