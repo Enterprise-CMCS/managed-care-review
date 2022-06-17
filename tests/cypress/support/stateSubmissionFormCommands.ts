@@ -273,11 +273,13 @@ Cypress.Commands.add(
             .should('exist')
             .within(() => {
                 if (resubmission) {
-                    cy.get('#submittedReasonCharacterCount').type(
+                    cy.get('#unlockSubmitModalInput').type(
                         'Resubmission summary'
                     )
+                    cy.findByTestId('resubmit-modal-submit').click()
+                } else {
+                    cy.findByTestId('submit-modal-submit').click()
                 }
-                cy.findByTestId('review-and-submit-modal-submit').click()
             })
         cy.wait('@submitHealthPlanPackageMutation', { timeout: 50000 })
     }

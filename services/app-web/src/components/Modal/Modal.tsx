@@ -7,6 +7,7 @@ import {
     ModalRef,
     ModalProps as UswdsModalProps,
     Button,
+    Alert,
 } from '@trussworks/react-uswds'
 import styles from './Modal.module.scss'
 
@@ -24,6 +25,7 @@ interface ModalComponentProps {
     modalRef: React.RefObject<ModalRef>
     submitButtonProps?: JSX.IntrinsicElements['button']
     isSubmitting?: boolean
+    modalAlert?: string
 }
 
 export type ModalProps = ModalComponentProps & UswdsModalProps
@@ -40,6 +42,7 @@ export const Modal = ({
     onSubmitText,
     onCancelText,
     isSubmitting = false,
+    modalAlert,
     ...divProps
 }: ModalProps): React.ReactElement => {
     const { sessionIsExpiring } = useAuth()
@@ -70,6 +73,11 @@ export const Modal = ({
         >
             {modalHeading && (
                 <ModalHeading id={`${id}-heading`}>{modalHeading}</ModalHeading>
+            )}
+            {modalAlert && (
+                <Alert type="error" heading={`${onSubmitText} Error`}>
+                    {modalAlert}
+                </Alert>
             )}
             <div id={`${id}-modal-description`}>{children}</div>
             <ModalFooter>
