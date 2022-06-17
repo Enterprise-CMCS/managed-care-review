@@ -11,9 +11,9 @@ import { submitMutationWrapper, unlockMutationWrapper } from '../../gqlHelpers'
 import { useFormik } from 'formik'
 import { usePrevious } from '../../hooks/usePrevious'
 import { Modal } from './Modal'
-import styles from './UnlockSubmitModal.module.scss'
 import { PoliteErrorMessage } from '../PoliteErrorMessage'
 import * as Yup from 'yup'
+import styles from './UnlockSubmitModal.module.scss'
 
 type ModalType = 'SUBMIT' | 'RESUBMIT' | 'UNLOCK'
 
@@ -90,12 +90,13 @@ export const UnlockSubmitModal = ({
     const mutationLoading =
         modalType === 'UNLOCK' ? unlockMutationLoading : submitMutationLoading
     const isSubmitting = mutationLoading || formik.isSubmitting
+    const includesFormInput = modalType === 'UNLOCK' || modalType === 'RESUBMIT'
 
     const prevSubmitting = usePrevious(isSubmitting)
 
     const submitHandler = async () => {
         setFocusErrorsInModal(true)
-        if (modalType === 'UNLOCK' || modalType === 'RESUBMIT') {
+        if (includesFormInput) {
             formik.handleSubmit()
         } else {
             await onSubmit()
@@ -163,7 +164,7 @@ export const UnlockSubmitModal = ({
             isSubmitting={isSubmitting}
             modalAlert={modalAlert}
         >
-            {modalType === 'RESUBMIT' || modalType === 'UNLOCK' ? (
+            {includesFormInput ? (
                 <form>
                     {modalValues.modalDescription && (
                         <p>{modalValues.modalDescription}</p>
