@@ -23,9 +23,7 @@ import { SubmissionSummary } from '../SubmissionSummary'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
 import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
 import { featureFlags } from '../../common-code/featureFlags'
-
-const LOGIN_REDIRECT_STORAGE_KEY = 'LOGIN_REDIRECT'
-const LocalStorage = window.localStorage
+import { useLocalStorage } from '../../hooks/useLocalStorage'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -146,6 +144,10 @@ export const AppRoutes = ({
     const { pathname } = useLocation()
     const navigate = useNavigate()
     const ldClient = useLDClient()
+    const [redirectPath, setRedirectPath] = useLocalStorage(
+        'LOGIN_REDIRECT',
+        null
+    )
     const showExpirationModal: boolean = ldClient?.variation(
         featureFlags.SESSION_EXPIRING_MODAL,
         true
@@ -175,6 +177,7 @@ export const AppRoutes = ({
     useEffect(() => {
         // When AppRoutes mounts and we are logged out, stash the url we navigated to in local storage
         // and redirect them to auth if they aren't heading for the dashboard.
+
         const dontRedirectToAuthRoutes: (RouteT | 'UNKNOWN_ROUTE')[] = [
             'ROOT' as const,
             'AUTH' as const,
@@ -184,12 +187,9 @@ export const AppRoutes = ({
             const currentRoute = getRouteName(initialPath)
             if (!dontRedirectToAuthRoutes.includes(currentRoute)) {
                 try {
-                    console.log('Storing For Redirect: ', initialPath)
-                    LocalStorage.setItem(
-                        LOGIN_REDIRECT_STORAGE_KEY,
-                        initialPath
-                    )
-
+                    if (redirectPath !== initialPath) {
+                        setRedirectPath(initialPath)
+                    }
                     if (authMode === 'IDM') {
                         console.log('redirecting to', idmRedirectURL())
                         window.location.href = idmRedirectURL()
@@ -198,24 +198,28 @@ export const AppRoutes = ({
                         navigate('/auth')
                     }
                 } catch (err) {
-                    console.log(
-                        'Error: Local Storage is Full Attempting to Save Redirect URL'
+                    console.error(
+                        `Error attempting to save login redirect URL. Error message: ${err}`
                     )
                 }
             }
             // Then, when we login, read that key, if it exists, go forth.
         } else {
-            const redirectPath = LocalStorage.getItem(
-                LOGIN_REDIRECT_STORAGE_KEY
-            )
             console.log('Retrieved For Redirect: ', redirectPath)
 
             if (redirectPath) {
                 navigate(redirectPath)
-                LocalStorage.removeItem(LOGIN_REDIRECT_STORAGE_KEY)
+                setRedirectPath(null)
             }
         }
-    }, [initialPath, loggedInUser, navigate, authMode])
+    }, [
+        initialPath,
+        loggedInUser,
+        navigate,
+        authMode,
+        redirectPath,
+        setRedirectPath,
+    ])
 
     /*
         Side effects that happen on page change
