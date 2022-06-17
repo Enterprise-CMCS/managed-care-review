@@ -6,7 +6,7 @@ type LocalStorage = {
 }
 
 type UseLocalStorage = [LocalStorage['value'], (value: string | null) => void]
-// Get, set, and remove keys from local storage with error handling. Returns a tuple similar to setState with one additional function [ value, setValue, clearValue]
+// Get and set keys in local storage. If key is set to a value of null, clear and remove from local storage, return default fallback value
 function useLocalStorage(
     key: LocalStorage['key'],
     defaultValue: LocalStorage['value']
