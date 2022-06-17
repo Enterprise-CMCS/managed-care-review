@@ -4,7 +4,6 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http'
 import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
@@ -32,13 +31,7 @@ export function createTracer(serviceName: string): Tracer {
     })
 
     registerInstrumentations({
-        instrumentations: [
-            new GraphQLInstrumentation({
-                depth: 2,
-                mergeItems: true,
-            }),
-            new HttpInstrumentation(),
-        ],
+        instrumentations: [new HttpInstrumentation()],
     })
 
     return trace.getTracer(serviceName)
