@@ -299,7 +299,6 @@ async function initializeGQLHandler(): Promise<Handler> {
 const handlerPromise = initializeGQLHandler()
 
 const gqlHandler: Handler = async (event, context, completion) => {
-    console.log(tracer)
     // Once initialized, future awaits will return immediately
     const initializedHandler = await handlerPromise
 

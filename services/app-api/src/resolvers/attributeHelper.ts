@@ -9,11 +9,10 @@ export function setResolverDetailsOnActiveSpan(
     span: Context['span']
 ): void {
     if (!span) return
-    span.addEvent(name)
     span.setAttributes({
-        [SemanticAttributes.CODE_FUNCTION]: name,
         [SemanticAttributes.ENDUSER_ID]: user.email,
         [SemanticAttributes.ENDUSER_ROLE]: user.role,
+        'graphql.operation.name': name,
     })
 }
 
@@ -32,6 +31,6 @@ export function setErrorAttributesOnActiveSpan(
 export function setSuccessAttributesOnActiveSpan(span: Context['span']): void {
     if (!span) return
     span.setAttributes({
-        'resolver.success': true,
+        'graphql.operation.success': true,
     })
 }

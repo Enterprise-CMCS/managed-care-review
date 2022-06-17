@@ -38,8 +38,13 @@ export function updateHealthPlanFormDataResolver(
 
         if (gqlErrors) {
             const errMessage = `API_GRAPHQL_ERRORS flag is enabled for user ${context.user.email}`
+            setResolverDetailsOnActiveSpan(
+                'updateHealthPlanFormData',
+                user,
+                span
+            )
             setErrorAttributesOnActiveSpan(errMessage, span)
-            logError('fetchCurrentUser', errMessage)
+            logError('updateHealthPlanFormData', errMessage)
             throw new Error(errMessage)
         }
 
