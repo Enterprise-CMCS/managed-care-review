@@ -155,7 +155,6 @@ async function initializeGQLHandler(): Promise<Handler> {
         process.env.SES_DEV_TEAM_HELP_EMAIL_ADDRESS
     const ratesReviewSharedEmails = process.env.SES_RATES_EMAIL_ADDRESSES
     const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
-    const ldClientKey = process.env.LD_SDK_KEY
 
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
     console.info('Running With Config: ', {
@@ -221,10 +220,6 @@ async function initializeGQLHandler(): Promise<Handler> {
         throw new Error(
             'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL is required to run app-api'
         )
-    }
-
-    if (ldClientKey === undefined) {
-        throw new Error('Configuration Error: LD_SDK_KEY is required ')
     }
     // END
 
