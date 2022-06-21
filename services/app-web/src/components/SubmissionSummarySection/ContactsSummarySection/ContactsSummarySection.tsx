@@ -1,4 +1,4 @@
-import { Grid, GridContainer } from '@trussworks/react-uswds'
+import { Grid, GridContainer, Link } from '@trussworks/react-uswds'
 import styles from '../SubmissionSummarySection.module.scss'
 import { SectionHeader } from '../../SectionHeader'
 import {
@@ -6,10 +6,27 @@ import {
     ActuaryCommunicationRecord,
 } from '../../../constants/healthPlanPackages'
 import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import { ActuaryContact } from '../../../common-code/healthPlanFormDataType'
 
 export type ContactsSummarySectionProps = {
     submission: HealthPlanFormDataType
     navigateTo?: string
+}
+
+const getActuaryFirm = (actuaryContact: ActuaryContact): string => {
+    if (
+        actuaryContact.actuarialFirmOther &&
+        actuaryContact.actuarialFirm === 'OTHER'
+    ) {
+        return actuaryContact.actuarialFirmOther
+    } else if (
+        actuaryContact.actuarialFirm &&
+        ActuaryFirmsRecord[actuaryContact.actuarialFirm]
+    ) {
+        return ActuaryFirmsRecord[actuaryContact.actuarialFirm]
+    } else {
+        return ''
+    }
 }
 
 export const ContactsSummarySection = ({
@@ -37,9 +54,14 @@ export const ContactsSummarySection = ({
                                     <br />
                                     {stateContact.titleRole}
                                     <br />
-                                    <a href={`mailto:${stateContact.email}`}>
+                                    <Link
+                                        href={`mailto:${stateContact.email}`}
+                                        target="_blank"
+                                        variant="external"
+                                        rel="noreferrer"
+                                    >
                                         {stateContact.email}
-                                    </a>
+                                    </Link>
                                     <br />
                                 </address>
                             </Grid>
@@ -73,30 +95,16 @@ export const ContactsSummarySection = ({
                                                 <br />
                                                 {actuaryContact.titleRole}
                                                 <br />
-                                                <a
+                                                <Link
                                                     href={`mailto:${actuaryContact.email}`}
+                                                    target="_blank"
+                                                    variant="external"
+                                                    rel="noreferrer"
                                                 >
                                                     {actuaryContact.email}
-                                                </a>
+                                                </Link>
                                                 <br />
-                                                {actuaryContact.actuarialFirm ===
-                                                'OTHER' ? (
-                                                    <>
-                                                        {
-                                                            actuaryContact.actuarialFirmOther
-                                                        }
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        {/*TODO: make this more clear, a const or something */}
-                                                        {actuaryContact.actuarialFirm
-                                                            ? ActuaryFirmsRecord[
-                                                                  actuaryContact
-                                                                      .actuarialFirm
-                                                              ]
-                                                            : ''}
-                                                    </>
-                                                )}
+                                                {getActuaryFirm(actuaryContact)}
                                             </address>
                                         </Grid>
                                     )
