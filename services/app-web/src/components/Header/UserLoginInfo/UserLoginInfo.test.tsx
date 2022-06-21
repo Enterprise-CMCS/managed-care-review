@@ -62,7 +62,7 @@ describe('UserLoginInfo', () => {
         })
         expect(feedbackLink).toHaveAttribute(
             'href',
-            'mailto: mc-review@cms.hhs.gov'
+            'mailto: mc-review@cms.hhs.gov, mc-review-team@truss.works'
         )
     })
 

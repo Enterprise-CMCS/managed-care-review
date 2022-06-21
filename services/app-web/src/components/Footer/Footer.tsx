@@ -38,7 +38,7 @@ export const Footer = (): React.ReactElement => {
                         <span>
                             Email&nbsp;
                             <a
-                                href="mailto: mc-review@cms.hhs.gov"
+                                href="mailto: mc-review@cms.hhs.gov, mc-review-team@truss.works"
                                 className="usa-link"
                                 target="_blank"
                                 rel="noreferrer"
