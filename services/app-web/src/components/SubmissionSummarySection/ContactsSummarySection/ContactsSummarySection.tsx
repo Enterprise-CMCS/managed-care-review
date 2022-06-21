@@ -6,10 +6,27 @@ import {
     ActuaryCommunicationRecord,
 } from '../../../constants/healthPlanPackages'
 import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import { ActuaryContact } from '../../../common-code/healthPlanFormDataType'
 
 export type ContactsSummarySectionProps = {
     submission: HealthPlanFormDataType
     navigateTo?: string
+}
+
+const getActuaryFirm = (actuaryContact: ActuaryContact): string => {
+    if (
+        actuaryContact.actuarialFirmOther &&
+        actuaryContact.actuarialFirm === 'OTHER'
+    ) {
+        return actuaryContact.actuarialFirmOther
+    } else if (
+        actuaryContact.actuarialFirm &&
+        ActuaryFirmsRecord[actuaryContact.actuarialFirm]
+    ) {
+        return ActuaryFirmsRecord[actuaryContact.actuarialFirm]
+    } else {
+        return ''
+    }
 }
 
 export const ContactsSummarySection = ({
@@ -87,24 +104,7 @@ export const ContactsSummarySection = ({
                                                     {actuaryContact.email}
                                                 </Link>
                                                 <br />
-                                                {actuaryContact.actuarialFirm ===
-                                                'OTHER' ? (
-                                                    <>
-                                                        {
-                                                            actuaryContact.actuarialFirmOther
-                                                        }
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        {/*TODO: make this more clear, a const or something */}
-                                                        {actuaryContact.actuarialFirm
-                                                            ? ActuaryFirmsRecord[
-                                                                  actuaryContact
-                                                                      .actuarialFirm
-                                                              ]
-                                                            : ''}
-                                                    </>
-                                                )}
+                                                {getActuaryFirm(actuaryContact)}
                                             </address>
                                         </Grid>
                                     )
