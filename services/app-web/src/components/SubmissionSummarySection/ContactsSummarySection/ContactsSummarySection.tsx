@@ -1,4 +1,4 @@
-import { Grid, GridContainer } from '@trussworks/react-uswds'
+import { Grid, GridContainer, Link } from '@trussworks/react-uswds'
 import styles from '../SubmissionSummarySection.module.scss'
 import { SectionHeader } from '../../SectionHeader'
 import {
@@ -37,9 +37,13 @@ export const ContactsSummarySection = ({
                                     <br />
                                     {stateContact.titleRole}
                                     <br />
-                                    <a href={`mailto:${stateContact.email}`}>
+                                    <Link
+                                        href={`mailto:${stateContact.email}`}
+                                        target="_blank"
+                                        variant="external"
+                                    >
                                         {stateContact.email}
-                                    </a>
+                                    </Link>
                                     <br />
                                 </address>
                             </Grid>
@@ -73,11 +77,13 @@ export const ContactsSummarySection = ({
                                                 <br />
                                                 {actuaryContact.titleRole}
                                                 <br />
-                                                <a
+                                                <Link
                                                     href={`mailto:${actuaryContact.email}`}
+                                                    target="_blank"
+                                                    variant="external"
                                                 >
                                                     {actuaryContact.email}
-                                                </a>
+                                                </Link>
                                                 <br />
                                                 {actuaryContact.actuarialFirm ===
                                                 'OTHER' ? (
