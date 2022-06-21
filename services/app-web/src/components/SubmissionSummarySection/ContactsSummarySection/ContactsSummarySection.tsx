@@ -41,6 +41,7 @@ export const ContactsSummarySection = ({
                                         href={`mailto:${stateContact.email}`}
                                         target="_blank"
                                         variant="external"
+                                        rel="noreferrer"
                                     >
                                         {stateContact.email}
                                     </Link>
@@ -81,6 +82,7 @@ export const ContactsSummarySection = ({
                                                     href={`mailto:${actuaryContact.email}`}
                                                     target="_blank"
                                                     variant="external"
+                                                    rel="noreferrer"
                                                 >
                                                     {actuaryContact.email}
                                                 </Link>
