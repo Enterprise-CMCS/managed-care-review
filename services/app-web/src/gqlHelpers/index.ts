@@ -1,5 +1,9 @@
 import { GraphQLErrors } from '@apollo/client/errors'
 import { getCurrentRevisionFromHealthPlanPackage } from './healthPlanPackages'
+import {
+    unlockMutationWrapper,
+    submitMutationWrapper,
+} from './mutationWrappers'
 
 const isGraphQLErrors = (input: unknown): input is GraphQLErrors => {
     if (Array.isArray(input)) {
@@ -10,4 +14,9 @@ const isGraphQLErrors = (input: unknown): input is GraphQLErrors => {
     return false
 }
 
-export { getCurrentRevisionFromHealthPlanPackage, isGraphQLErrors }
+export {
+    getCurrentRevisionFromHealthPlanPackage,
+    isGraphQLErrors,
+    unlockMutationWrapper,
+    submitMutationWrapper,
+}

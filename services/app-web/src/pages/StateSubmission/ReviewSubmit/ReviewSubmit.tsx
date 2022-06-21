@@ -18,7 +18,7 @@ import styles from './ReviewSubmit.module.scss'
 import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { ActionButton } from '../../../components/ActionButton'
 import { DocumentDateLookupTable } from '../../SubmissionSummary/SubmissionSummary'
-import { ReviewSubmitModal } from './ReviewSubmitModal'
+import { UnlockSubmitModal } from '../../../components/Modal/UnlockSubmitModal'
 
 export const ReviewSubmit = ({
     draftSubmission,
@@ -113,10 +113,10 @@ export const ReviewSubmit = ({
 
             {
                 // if the session is expiring, close this modal so the countdown modal can appear
-                <ReviewSubmitModal
-                    draftSubmission={draftSubmission}
+                <UnlockSubmitModal
+                    healthPlanPackage={draftSubmission}
                     submissionName={submissionName}
-                    unlocked={unlocked}
+                    modalType={unlocked ? 'RESUBMIT' : 'SUBMIT'}
                     modalRef={modalRef}
                     setIsSubmitting={setIsSubmitting}
                 />

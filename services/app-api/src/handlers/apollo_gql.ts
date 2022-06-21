@@ -1,4 +1,10 @@
-import { propagation, ROOT_CONTEXT, Span, Tracer } from '@opentelemetry/api'
+import {
+    propagation,
+    ROOT_CONTEXT,
+    Span,
+    SpanKind,
+    Tracer,
+} from '@opentelemetry/api'
 import { ApolloServer } from 'apollo-server-lambda'
 import {
     APIGatewayProxyEvent,
@@ -18,6 +24,7 @@ import { NewPostgresStore } from '../postgres/postgresStore'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
 import { createTracer } from '../otel/otel_handler'
+import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 
 const requestSpanKey = 'REQUEST_SPAN'
 let tracer: Tracer
@@ -102,8 +109,11 @@ function tracingMiddleware(wrapped: Handler): Handler {
         const span = tracer.startSpan(
             'handleRequest',
             {
-                kind: 1,
-                attributes: { middlewareInit: true },
+                kind: SpanKind.SERVER,
+                attributes: {
+                    [SemanticAttributes.AWS_LAMBDA_INVOKED_ARN]:
+                        context.invokedFunctionArn,
+                },
             },
             ctx
         )
@@ -282,7 +292,6 @@ async function initializeGQLHandler(): Promise<Handler> {
 const handlerPromise = initializeGQLHandler()
 
 const gqlHandler: Handler = async (event, context, completion) => {
-    console.log(tracer)
     // Once initialized, future awaits will return immediately
     const initializedHandler = await handlerPromise
 

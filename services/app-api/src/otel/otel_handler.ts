@@ -34,5 +34,5 @@ export function createTracer(serviceName: string): Tracer {
         instrumentations: [new HttpInstrumentation()],
     })
 
-    return trace.getTracer(serviceName)
+    return trace.getTracer('app-api')
 }

@@ -38,7 +38,7 @@ import { Error404 } from '../Errors/Error404'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory/ChangeHistory'
-import { UnlockModal } from './UnlockModal'
+import { UnlockSubmitModal } from '../../components/Modal/UnlockSubmitModal'
 export type DocumentDateLookupTable = {
     [key: string]: string
 }
@@ -309,8 +309,9 @@ export const SubmissionSummary = (): React.ReactElement => {
                 <ChangeHistory submission={submissionAndRevisions} />
                 {
                     // if the session is expiring, close this modal so the countdown modal can appear
-                    <UnlockModal
+                    <UnlockSubmitModal
                         modalRef={modalRef}
+                        modalType="UNLOCK"
                         healthPlanPackage={submissionAndRevisions}
                     />
                 }
