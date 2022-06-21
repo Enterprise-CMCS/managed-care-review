@@ -38,7 +38,9 @@
     a {
         color: $cms-color-white;
 
-        &:hover {
+        &:hover,
+        &:active,
+        &:visited {
             color: $cms-color-white;
         }
     }
