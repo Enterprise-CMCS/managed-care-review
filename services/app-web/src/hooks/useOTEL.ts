@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Span } from '@opentelemetry/api'
-
+import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import { useAuth } from '../contexts/AuthContext'
 import { useCurrentRoute } from './useCurrentRoute'
 import { getTracer } from '../otelHelpers'
@@ -12,18 +12,24 @@ export const useOTEL = (title?: string): void => {
 
     useEffect(() => {
         const tracer = getTracer()
-
+        const httpURL = window.location.href
         const span: Span = tracer.startSpan('React: Page View')
-        span.setAttribute('current_route', currentRoute.toString())
+
+        span.setAttributes({
+            [SemanticAttributes.HTTP_URL]: httpURL,
+            current_route_name: currentRoute.toString(), // e.g. SUBMISSION_TYPE
+        })
 
         if (loggedInUser) {
-            span.setAttribute('user_id', loggedInUser.email)
-            span.setAttribute('user_role', loggedInUser.role)
-        }
+            span.setAttributes({
+                [SemanticAttributes.ENDUSER_ID]: loggedInUser.email,
+                [SemanticAttributes.ENDUSER_ROLE]: loggedInUser.role,
+            })
 
-        // cleanup
-        return () => {
-            span.end()
+            // cleanup
+            return () => {
+                span.end()
+            }
         }
     }, [loggedInUser, currentRoute])
 }
