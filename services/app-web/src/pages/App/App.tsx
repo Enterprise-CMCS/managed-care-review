@@ -50,9 +50,7 @@ function App({
                         <S3Provider client={s3Client}>
                             <AuthProvider authMode={authMode}>
                                 <PageProvider>
-                                    <>
-                                        <AppBody authMode={authMode} />
-                                    </>
+                                    <AppBody authMode={authMode} />
                                 </PageProvider>
                             </AuthProvider>
                         </S3Provider>
