@@ -1,6 +1,6 @@
 service: app-api
 
-frameworkVersion: '2'
+frameworkVersion: '^3.19.0'
 
 package:
   individually: true
@@ -66,7 +66,7 @@ custom:
 provider:
   name: aws
   lambdaHashingVersion: 20201221
-  runtime: nodejs14.x
+  runtime: nodejs16.x
   region: us-east-1
   stage: dev
   logs:

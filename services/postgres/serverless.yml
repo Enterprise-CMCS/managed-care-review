@@ -1,7 +1,7 @@
 service: postgres
 variablesResolutionMode: 20210326
 
-frameworkVersion: '2'
+frameworkVersion: '^3.19.0'
 
 plugins:
   - serverless-stack-termination-protection

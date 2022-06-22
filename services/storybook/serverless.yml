@@ -1,6 +1,6 @@
 service: storybook
 
-frameworkVersion: '2'
+frameworkVersion: '^3.19.0'
 
 plugins:
   - serverless-stack-termination-protection
@@ -18,7 +18,7 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs16.x
   region: us-east-1
 
 resources:
