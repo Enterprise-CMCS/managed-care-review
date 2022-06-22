@@ -25,6 +25,7 @@ import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
 import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
 import { featureFlags } from '../../common-code/featureFlags'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
+import { recordJSException } from '../../otelHelpers'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -199,7 +200,7 @@ export const AppRoutes = ({
                         navigate('/auth')
                     }
                 } catch (err) {
-                    console.error(
+                    recordJSException(
                         `Error attempting to save login redirect URL. Error message: ${err}`
                     )
                 }
