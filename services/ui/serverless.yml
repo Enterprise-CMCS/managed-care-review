@@ -1,6 +1,6 @@
 service: ui
 
-frameworkVersion: '2'
+frameworkVersion: '^3.19.0'
 
 provider:
   name: aws
