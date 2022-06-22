@@ -21,7 +21,7 @@ import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-
+import { recordJSException } from '../../otelHelpers/tracingHelper'
 import { MaintenanceMessage } from './MaintenanceMessage'
 import { featureFlags } from '../../common-code/featureFlags'
 
@@ -82,7 +82,9 @@ export const Dashboard = (): React.ReactElement => {
     const { loading, data, error } = useIndexHealthPlanPackagesQuery()
 
     if (error) {
-        console.error('Error indexing submissions: ', error)
+        recordJSException(
+            `indexHealthPlanPackagesQuery: Error indexing submissions. Error message:${error.message}`
+        )
         return (
             <div id="dashboard-page" className={styles.wrapper}>
                 <GridContainer className={styles.container}>
@@ -115,10 +117,10 @@ export const Dashboard = (): React.ReactElement => {
                 currentRevision.node.formDataProto
             )
             if (currentSubmissionData instanceof Error) {
-                console.error(
-                    'ERROR: got a proto decoding error',
-                    currentSubmissionData
+                recordJSException(
+                    `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${sub.id} Error message: ${currentSubmissionData.message}`
                 )
+
                 return null
             }
 

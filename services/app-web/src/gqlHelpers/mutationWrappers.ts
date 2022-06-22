@@ -5,6 +5,8 @@ import {
 } from '../gen/gqlClient'
 import { GraphQLErrors } from '@apollo/client/errors'
 
+import { recordJSException } from '../otelHelpers'
+
 export const unlockMutationWrapper = async (
     unlockHealthPlanPackage: UnlockHealthPlanPackageMutationFn,
     id: string,
@@ -21,7 +23,9 @@ export const unlockMutationWrapper = async (
         })
 
         if (result.errors) {
-            console.error('ERROR: got a GraphQL error response', result.errors)
+            recordJSException(
+                `GraphQL error attempting to unlock. ID: ${id} Error message: ${result.errors}`
+            )
             return new Error('Error attempting to unlock. Please try again.')
         }
 
@@ -33,17 +37,16 @@ export const unlockMutationWrapper = async (
     } catch (error) {
         // this can be an errors object
         if ('graphQLErrors' in error) {
-            console.error(
-                'ERROR: got a GraphQL error response',
-                error.graphQLErrors
+            recordJSException(
+                `GraphQL error attempting to unlock. ID: ${id} Error message: ${error.graphQLErrors}`
             )
+
             return new Error(
                 'Error attempting to unlock. Submission may be already unlocked. Please refresh and try again.'
             )
         }
-        console.error(
-            'ERROR: got an Apollo Client Error attempting to unlock',
-            error
+        recordJSException(
+            `Apollo Client error attempting to unlock. ID: ${id} Error message: ${error.message}`
         )
         return new Error('Error attempting to unlock. Please try again.')
     }
@@ -69,7 +72,9 @@ export const submitMutationWrapper = async (
         })
 
         if (result.errors) {
-            console.error('ERROR: got a GraphQL error response', result.errors)
+            recordJSException(
+                `Error attempting to submit. ID: ${id} Error message: ${result.errors}`
+            )
             return new Error('Error attempting to submit. Please try again.')
         }
 
@@ -81,15 +86,15 @@ export const submitMutationWrapper = async (
     } catch (error) {
         // this can be an errors object
         if ('graphQLErrors' in error) {
-            console.error(
-                'ERROR: got a GraphQL error response',
-                error.graphQLErrors
+            recordJSException(
+                `GraphQL error attempting to submit. ID: ${id} Error message: ${error.graphQLErrors}`
             )
+
             return new Error('Error attempting to submit. Please try again.')
         }
-        console.error(
-            'ERROR: got an Apollo Client Error attempting to unlock',
-            error
+
+        recordJSException(
+            `Apollo Client error attempting to submit. ID: ${id} Error message: ${error.message}`
         )
         return new Error('Error attempting to submit. Please try again.')
     }

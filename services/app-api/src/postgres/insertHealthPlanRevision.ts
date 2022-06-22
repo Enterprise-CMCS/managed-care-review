@@ -16,8 +16,9 @@ export async function insertHealthPlanRevision(
     client: PrismaClient,
     args: InsertHealthPlanRevisionArgsType
 ): Promise<HealthPlanPackageType | StoreError> {
-    const protobuf = toProtoBuffer(args.draft)
+    args.draft.updatedAt = new Date()
 
+    const protobuf = toProtoBuffer(args.draft)
     const buffer = Buffer.from(protobuf)
 
     const { unlockInfo, pkgID } = args

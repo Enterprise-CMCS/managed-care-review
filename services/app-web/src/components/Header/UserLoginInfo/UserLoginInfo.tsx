@@ -20,7 +20,7 @@ const LoggedInUserInfo = (
     return (
         <div className={styles.userInfo}>
             <a
-                href={'mailto: mc-review@cms.hhs.gov'}
+                href="mailto: mc-review@cms.hhs.gov, mc-review-team@truss.works"
                 className="usa-link"
                 target="_blank"
                 rel="noreferrer"

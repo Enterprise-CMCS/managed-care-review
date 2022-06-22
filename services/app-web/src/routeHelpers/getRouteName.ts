@@ -42,7 +42,7 @@ const getRouteName = (pathname: string): RouteT | 'UNKNOWN_ROUTE' => {
 
         if (!exactMatch?.route) {
             console.error(
-                `Coding error: Please check your routes, there were multiple matching potential route names for ${pathname}}.`
+                `CODING ERROR: Please check your routes, there were multiple matching potential route names for ${pathname}}.`
             )
         }
         return exactMatch?.route || 'UNKNOWN_ROUTE'

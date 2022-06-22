@@ -47,7 +47,7 @@ describe('UserLoginInfo', () => {
     })
 
     it('renders submit feedback link', () => {
-        const jestFn =jest.fn()
+        const jestFn = jest.fn()
 
         renderWithProviders(
             <UserLoginInfo
@@ -57,9 +57,13 @@ describe('UserLoginInfo', () => {
                 logout={jestFn}
             />
         )
-        const feedbackLink = screen.getByRole('link', {name: /Submit feedback/i, 
+        const feedbackLink = screen.getByRole('link', {
+            name: /Submit feedback/i,
         })
-        expect(feedbackLink).toHaveAttribute('href', 'mailto: mc-review@cms.hhs.gov')
+        expect(feedbackLink).toHaveAttribute(
+            'href',
+            'mailto: mc-review@cms.hhs.gov, mc-review-team@truss.works'
+        )
     })
 
     it('displays nothing while loading', () => {

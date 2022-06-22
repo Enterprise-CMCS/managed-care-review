@@ -8,7 +8,7 @@ import {
 export function fetchCurrentUserResolver(): QueryResolvers['fetchCurrentUser'] {
     return async (_parent, _args, context) => {
         const { user, span } = context
-        setResolverDetailsOnActiveSpan('createHealthPlanPackage', user, span)
+        setResolverDetailsOnActiveSpan('fetchCurrentUser', user, span)
         setSuccessAttributesOnActiveSpan(span)
         logSuccess('fetchCurrentUser')
         return context.user

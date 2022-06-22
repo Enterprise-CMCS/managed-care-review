@@ -1,6 +1,7 @@
 import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto'
 import { HealthPlanPackage } from '../gen/gqlClient'
 import { DocumentDateLookupTable } from '../pages/SubmissionSummary/SubmissionSummary'
+import { recordJSException } from '../otelHelpers/tracingHelper'
 export const makeDateTable = (
     submissions: HealthPlanPackage
 ): DocumentDateLookupTable | undefined => {
@@ -15,8 +16,8 @@ export const makeDateTable = (
             const revisionData = base64ToDomain(revision.node.formDataProto)
 
             if (revisionData instanceof Error) {
-                console.error(
-                    'failed to read submission data; unable to display document dates'
+                recordJSException(
+                    `makeDocumentLookupTable: failed to read submission data; unable to display document dates. ID: ${submissions.id} Error message: ${revisionData.message}`
                 )
                 return
             }
