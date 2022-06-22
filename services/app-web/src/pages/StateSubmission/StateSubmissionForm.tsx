@@ -45,6 +45,7 @@ import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
 import { makeDocumentList } from '../../documentHelpers/makeDocumentKeyLookupList'
 import { makeDateTable } from '../../documentHelpers/makeDocumentDateLookupTable'
 import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
+import { recordJSException } from '../../otelHelpers/tracingHelper'
 
 const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
     getRelativePath({
@@ -229,6 +230,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
             const [revision, planFormData] = currentRevisionPackageOrError
 
             if (planFormData.status !== 'DRAFT') {
+                recordJSException(
+                    `StateSubmissionForm: WRONG_SUBMISSION_STATUS. ID:
+                ${submissionAndRevisions.id}`
+                )
                 setFormDataError('WRONG_SUBMISSION_STATUS')
                 return
             }
@@ -241,7 +246,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
             const documentDates = makeDateTable(submissionAndRevisions)
             setDocumentDates(documentDates)
             if (documentList instanceof Error) {
-                //Maybe a different error message here.
+                recordJSException(
+                    `StateSubmissionForm: MALFORMATTED_DATA. document list malformatted. ID:
+                    ${submissionAndRevisions.id} Error message: ${documentList.message}`
+                )
                 setFormDataError('MALFORMATTED_DATA')
                 return
             }
@@ -258,10 +266,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         updatedReason: unlockInfo.updatedReason,
                     })
                 } else {
-                    //Maybe could use a better error message.
-                    console.error(
-                        'ERROR: submission in summary has no revision with unlocked information',
-                        submissionAndRevisions.revisions
+                    recordJSException(
+                        `StateSubmissionForm: submission in summary has no revision with unlocked information. ID:
+                        ${submissionAndRevisions.id}`
                     )
                     setShowPageErrorMessage(
                         'This may be an unlocked submission that is currently being edited. Please reload the page and try again.'
@@ -275,7 +282,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
         // This triggers if Apollo sets the error from our useQuery invocation
         // we should already be setting this in our try {} block in the actual update handler, I think
         // so this might be worth looking into.
-        console.log('Apollo Error reported: ', updateFormDataError)
+        recordJSException(
+            `StateSubmissionForm: Apollo error reported. Error message: ${updateFormDataError.message}`
+        )
         setShowPageErrorMessage(true)
     }
 

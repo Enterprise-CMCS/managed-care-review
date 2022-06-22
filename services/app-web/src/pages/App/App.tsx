@@ -9,23 +9,15 @@ import {
 
 import { AppBody } from './AppBody'
 import { AuthProvider } from '../../contexts/AuthContext'
+import {ErrorBoundaryRoot} from '../Errors/ErrorBoundaryRoot'
 import { PageProvider } from '../../contexts/PageContext'
 import { logEvent } from '../../log_event'
 import TraceProvider from '../../contexts/TraceContext'
-import { GenericErrorPage } from '../Errors/GenericErrorPage'
+
 import { AuthModeType } from '../../common-code/config'
 import { S3Provider } from '../../contexts/S3Context'
 import type { S3ClientT } from '../../s3'
 
-function ErrorFallback({
-    error,
-}: {
-    error: Error
-    resetErrorBoundary?: () => void
-}): React.ReactElement {
-    console.error(error)
-    return <GenericErrorPage />
-}
 
 export type AppProps = {
     authMode: AuthModeType
@@ -43,7 +35,7 @@ function App({
     }, [])
 
     return (
-        <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <ErrorBoundary FallbackComponent={ErrorBoundaryRoot}>
             <BrowserRouter>
                 <TraceProvider>
                     <ApolloProvider client={apolloClient}>

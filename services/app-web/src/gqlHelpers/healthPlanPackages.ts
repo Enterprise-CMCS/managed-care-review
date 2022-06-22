@@ -1,6 +1,8 @@
 import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto'
+
 import { HealthPlanRevision, HealthPlanPackage } from '../gen/gqlClient'
+import { recordJSException } from '../otelHelpers/tracingHelper'
 
 const getCurrentRevisionFromHealthPlanPackage = (
     submissionAndRevisions: HealthPlanPackage
@@ -11,9 +13,9 @@ const getCurrentRevisionFromHealthPlanPackage = (
             !submissionAndRevisions.revisions ||
             submissionAndRevisions.revisions.length < 1
         ) {
-            console.error(
-                'ERROR: submission in summary has no submitted revision',
-                submissionAndRevisions.revisions
+            recordJSException(
+                `getCurrentRevisionFromHealthPlanPackage: submission has no submitted revision. ID: 
+                ${submissionAndRevisions.id}`
             )
             return new Error(
                 'Error fetching the latest revision. Please try again.'
@@ -35,16 +37,18 @@ const getCurrentRevisionFromHealthPlanPackage = (
             newestRev.formDataProto
         )
         if (healthPlanPackageFormDataResult instanceof Error) {
-            console.error(
-                'ERROR: got a proto decoding error',
-                healthPlanPackageFormDataResult
+            recordJSException(
+                `getCurrentRevisionFromHealthPlanPackage: proto decoding error. ID: 
+                ${submissionAndRevisions.id}. Error message: ${Error}`
             )
             return new Error('Error decoding the submission. Please try again.')
         } else {
             return [newestRev, healthPlanPackageFormDataResult]
         }
     } else {
-        console.error('ERROR: no submission exists')
+        recordJSException(
+            `getCurrentRevisionFromHealthPlanPackage: no submission exists.`
+        )
         return new Error('Error fetching the submission. Please try again.')
     }
 }
