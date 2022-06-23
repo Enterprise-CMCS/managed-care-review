@@ -66,8 +66,6 @@ provider:
   runtime: nodejs16.x
   region: us-east-1
   stage: dev
-  logs:
-    restApi: true
   apiGateway:
     restApiId: ${self:custom.appApiGatewayId}
     restApiRootResourceId: ${self:custom.appApiGatewayRootResourceId}
