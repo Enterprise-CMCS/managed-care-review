@@ -445,6 +445,69 @@ describe('StateSubmissionForm', () => {
             const loading = await screen.findByText('System error')
             expect(loading).toBeInTheDocument()
         })
+
+        //Shows a generic error updating submission
+        //TODO: Finish this test
+        it('shows a generic error updating submission', async () => {
+            const mockSubmission = mockDraftHealthPlanPackage({
+                submissionDescription:
+                    'A real submission but updated something',
+            })
+            const formData = base64ToDomain(
+                mockSubmission.revisions[0].node.formDataProto
+            )
+            if (formData instanceof Error) throw Error
+
+            formData.submissionDescription =
+                'A real submission but updated something'
+
+            const updatedFormData = domainToBase64(formData)
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        element={<StateSubmissionForm />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchHealthPlanPackageMock({
+                                submission: mockSubmission,
+                                id: '15',
+                                statusCode: 200,
+                            }),
+                            updateHealthPlanFormDataMockSuccess({
+                                id: '15',
+                                pkg: mockSubmission,
+                                updatedFormData,
+                            }),
+                        ],
+                    },
+                    routerProvider: { route: '/submissions/15/edit/type' },
+                }
+            )
+
+            await waitFor(() =>
+                expect(
+                    screen.getByRole('form', { name: 'Submission Type Form' })
+                ).toBeInTheDocument()
+            )
+            const textarea = await screen.findByRole('textbox', {
+                name: 'Submission description',
+            })
+            userEvent.type(textarea, ' but updated something')
+
+            const continueButton = await screen.findByRole('button', {
+                name: 'Continue',
+            })
+            continueButton.click()
+        })
+        //Shows generic 404 error page
+        //Shows MALFORMATTED_DATA error
+        //Shows WRONG_SUBMISSION_STATUS
     })
 
     describe('the delete button', () => {
