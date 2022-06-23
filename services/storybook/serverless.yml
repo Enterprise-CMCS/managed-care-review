@@ -87,7 +87,7 @@ resources:
         Rules:
           - Action:
               Allow: {}
-            Name: ${self:custom.stage}-allow-usa-plus-territories
+            Name: ${sls:stage}-allow-usa-plus-territories
             Priority: 0
             Statement:
               GeoMatchStatement:
@@ -106,7 +106,7 @@ resources:
         VisibilityConfig:
           CloudWatchMetricsEnabled: true
           SampledRequestsEnabled: true
-          MetricName: ${self:custom.stage}-webacl
+          MetricName: ${sls:stage}-webacl
     CloudFrontOriginAccessIdentity:
       Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
       Properties:

@@ -10,9 +10,9 @@ plugins:
 custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
-  document_uploads_bucket_arn: ${cf:uploads-${self:custom.stage}.DocumentUploadsBucketArn}
-  api_gateway_rest_api_name: ${cf:infra-api-${self:custom.stage}.ApiGatewayRestApiId}
-  application_endpoint_url: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl}
+  document_uploads_bucket_arn: ${cf:uploads-${sls:stage}.DocumentUploadsBucketArn}
+  api_gateway_rest_api_name: ${cf:infra-api-${sls:stage}.ApiGatewayRestApiId}
+  application_endpoint_url: ${cf:ui-${sls:stage}.CloudFrontEndpointUrl}
   okta_metadata_url: ${env:OKTA_METADATA_URL}
   iamPath: ${env:IAM_PATH, "/"}
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
@@ -49,7 +49,7 @@ resources:
     CognitoUserPool:
       Type: AWS::Cognito::UserPool
       Properties:
-        UserPoolName: ${self:custom.stage}-user-pool
+        UserPoolName: ${sls:stage}-user-pool
         UsernameAttributes:
           - email
         AutoVerifiedAttributes:
@@ -85,7 +85,7 @@ resources:
     CognitoUserPoolClient:
       Type: AWS::Cognito::UserPoolClient
       Properties:
-        ClientName: ${self:custom.stage}-user-pool-client
+        ClientName: ${sls:stage}-user-pool-client
         AllowedOAuthFlows:
           - implicit
         AllowedOAuthFlowsUserPoolClient: true
@@ -115,7 +115,7 @@ resources:
         Domain:
           Fn::Join:
             - ''
-            - - ${self:custom.stage}-login-
+            - - ${sls:stage}-login-
               - Ref: CognitoUserPoolClient
         UserPoolId: !Ref CognitoUserPool
 
@@ -140,7 +140,7 @@ resources:
     CognitoIdentityPool:
       Type: AWS::Cognito::IdentityPool
       Properties:
-        IdentityPoolName: ${self:custom.stage}IdentityPool
+        IdentityPoolName: ${sls:stage}IdentityPool
         AllowUnauthenticatedIdentities: false
         CognitoIdentityProviders:
           - ClientId: !Ref CognitoUserPoolClient

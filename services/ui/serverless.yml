@@ -12,7 +12,6 @@ plugins:
   - serverless-s3-bucket-helper
 
 custom:
-  stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
   serverlessTerminationProtection:
     stages:
@@ -84,7 +83,7 @@ resources:
         Rules:
           - Action:
               Allow: {}
-            Name: ${self:custom.stage}-allow-usa-plus-territories
+            Name: ${sls:stage}-allow-usa-plus-territories
             Priority: 0
             Statement:
               GeoMatchStatement:
@@ -103,7 +102,7 @@ resources:
         VisibilityConfig:
           CloudWatchMetricsEnabled: true
           SampledRequestsEnabled: true
-          MetricName: ${self:custom.stage}-webacl
+          MetricName: ${sls:stage}-webacl
     CloudFrontOriginAccessIdentity:
       Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
       Properties:
@@ -181,7 +180,7 @@ resources:
         FunctionConfig:
           Comment: This function adds headers to implement HSTS
           Runtime: cloudfront-js-1.0
-        Name: hsts-${self:custom.stage}
+        Name: hsts-${sls:stage}
   Outputs:
     S3BucketName:
       Value: !Ref S3Bucket
