@@ -11,7 +11,6 @@ package:
 
 plugins:
   - serverless-webpack
-  - serverless-plugin-monorepo
   - serverless-offline
   - serverless-online
   - serverless-stack-termination-protection
