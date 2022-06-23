@@ -78,7 +78,7 @@ layers:
 functions:
   avScan:
     handler: src/antivirus.lambdaHandleEvent
-    name: ${self:service.name}-${sls:stage}-avScan
+    name: ${self:service}-${sls:stage}-avScan
     timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
     memorySize: 3008
     layers:
@@ -110,7 +110,7 @@ resources:
     DocumentUploadsBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: !Sub ${self:service.name}-${sls:stage}-uploads-${AWS::AccountId}
+        BucketName: !Sub ${self:service}-${sls:stage}-uploads-${AWS::AccountId}
         BucketEncryption:
           ServerSideEncryptionConfiguration:
             - ServerSideEncryptionByDefault:
@@ -183,12 +183,12 @@ resources:
         Action: lambda:InvokeFunction
         Principal: s3.amazonaws.com
         SourceAccount: !Sub ${AWS::AccountId}
-        SourceArn: !Sub arn:aws:s3:::${self:service.name}-${sls:stage}-uploads-${AWS::AccountId}
+        SourceArn: !Sub arn:aws:s3:::${self:service}-${sls:stage}-uploads-${AWS::AccountId}
 
     ClamDefsBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: !Sub ${self:service.name}-${sls:stage}-avscan-${AWS::AccountId}
+        BucketName: !Sub ${self:service}-${sls:stage}-avscan-${AWS::AccountId}
         BucketEncryption:
           ServerSideEncryptionConfiguration:
             - ServerSideEncryptionByDefault:
