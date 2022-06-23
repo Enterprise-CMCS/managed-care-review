@@ -39,6 +39,12 @@ type EmailData = {
     bodyHTML?: string
 }
 
+// Next steps for adding state specific logic
+// ensure SES_REVIEW_TEAM list stays intact. this is only for folks that get all emails
+// ensure the parameter store /configuration/STATE/stateanalyst is only assigned to the state specific contacts
+// we will pass in state emails from the resolvers
+// make sure we get alerts to NR from getParameter errors
+
 type Emailer = {
     sendEmail: (emailData: EmailData) => Promise<void | Error>
     sendCMSNewPackage: (
