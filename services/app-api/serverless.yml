@@ -19,11 +19,10 @@ plugins:
   - serverless-iam-helper
 
 custom:
-  stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
-  applicationEndpoint: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl, env:APPLICATION_ENDPOINT}
-  appApiGatewayId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${self:custom.stage}.ApiGatewayRestApiId}
-  appApiGatewayRootResourceId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${self:custom.stage}.AppApiGatewayRootResourceId}
+  applicationEndpoint: ${cf:ui-${sls:stage}.CloudFrontEndpointUrl, env:APPLICATION_ENDPOINT}
+  appApiGatewayId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.ApiGatewayRestApiId}
+  appApiGatewayRootResourceId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.AppApiGatewayRootResourceId}
   emailSource: ${env:SES_SOURCE_EMAIL_ADDRESS}
   emailerMode: ${env:EMAILER_MODE}
   emailReviewTeamAddresses: ${env:SES_REVIEW_TEAM_EMAIL_ADDRESSES}
@@ -31,11 +30,11 @@ custom:
   emailReviewHelpAddress: ${env:SES_REVIEW_HELP_EMAIL_ADDRESS}
   emailRateHelpAddress: ${env:SES_RATE_HELP_EMAIL_ADDRESS}
   emailDevTeamHelpAddress: ${env:SES_DEV_TEAM_HELP_EMAIL_ADDRESS}
-  auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${self:custom.stage}.PostgresAuroraArn }
+  auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${sls:stage}.PostgresAuroraArn }
   iamPath: ${env:IAM_PATH, "/"}
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
-  document_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${self:custom.stage}.DocumentUploadsBucketArn}
-  secretsManagerSecret: aurora_postgres_${self:custom.stage} #pragma: allowlist secret
+  document_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.DocumentUploadsBucketArn}
+  secretsManagerSecret: aurora_postgres_${sls:stage} #pragma: allowlist secret
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   reactAppOtelCollectorUrl: ${env:REACT_APP_OTEL_COLLECTOR_URL}
   dbURL: ${env:DATABASE_URL}
@@ -54,12 +53,12 @@ custom:
       - val
       - prod
       - main
-  vpcId: ${ssm:/configuration/${self:custom.stage}/vpc/id, ssm:/configuration/default/vpc/id}
-  sgId: ${ssm:/configuration/${self:custom.stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
+  vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
+  sgId: ${ssm:/configuration/${sls:stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
   privateSubnets:
-    - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/a/id, ssm:/configuration/default/vpc/subnets/private/a/id}
-    - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
-    - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
+    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/a/id, ssm:/configuration/default/vpc/subnets/private/a/id}
+    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
+    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
 
 provider:
   name: aws
@@ -110,7 +109,7 @@ provider:
             - ${self:custom.document_uploads_bucket_arn}/allusers/*
 
   environment:
-    stage: ${self:custom.stage}
+    stage: ${sls:stage}
     DATABASE_URL: ${self:custom.dbURL}
     REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
     REACT_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
