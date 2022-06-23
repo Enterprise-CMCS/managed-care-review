@@ -1,16 +1,18 @@
-import AWS from 'aws-sdk'
+import { SSM } from 'aws-sdk'
 
-const getParameter = async (name: string): Promise<string | Error> => {
-    const SSM = new AWS.SSM({ region: 'us-east-1' })
+type GetParameterResult = SSM.GetParameterResult
+
+const getParameterStore = async (name: string): Promise<string | Error> => {
+    const ssm = new SSM({ region: 'us-east-1' })
 
     const params = {
         Name: name,
     }
 
     try {
-        const response: AWS.SSM.GetParameterResult = await SSM.getParameter(
-            params
-        ).promise()
+        const response: GetParameterResult = await ssm
+            .getParameter(params)
+            .promise()
         const value = response?.Parameter?.Value
 
         if (value === undefined) {
@@ -28,4 +30,4 @@ const getParameter = async (name: string): Promise<string | Error> => {
     }
 }
 
-export { getParameter }
+export { getParameterStore }
