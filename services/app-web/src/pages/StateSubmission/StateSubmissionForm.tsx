@@ -278,6 +278,15 @@ export const StateSubmissionForm = (): React.ReactElement => {
         }
     }, [submissionAndRevisions])
 
+    // order matters, this should be last to prevent 404 flicker
+    if (fetchLoading || !formDataFromLatestRevision) {
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
+    }
+
     if (updateFormDataError && !showPageErrorMessage) {
         // This triggers if Apollo sets the error from our useQuery invocation
         // we should already be setting this in our try {} block in the actual update handler, I think
@@ -316,14 +325,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     if (formDataError === 'WRONG_SUBMISSION_STATUS') {
         return <ErrorInvalidSubmissionStatus />
-    }
-    // order matters, this should be last to prevent 404 flicker
-    if (fetchLoading || !formDataFromLatestRevision) {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
     }
 
     return (
