@@ -39,11 +39,11 @@ type EmailData = {
     bodyHTML?: string
 }
 
-// Next steps for adding state specific logic
-// ensure SES_REVIEW_TEAM list stays intact. this is only for folks that get all emails
-// ensure the parameter store /configuration/STATE/stateanalyst is only assigned to the state specific contacts
-// we will pass in state emails from the resolvers
-// make sure we get alerts to NR from getParameter errors
+// TODO: Next steps for state specific logic
+// ensure SES_REVIEW_TEAM list in GH is correct. This will now be only for folks that get all emails, no analysts.
+// ensure the parameter store keys by state are only assigned to the state specific contacts. No general emails here.
+// emailer functions should accept param for state analysts, passed in by the api resolver
+// make sure we get alerts in New Relic from getParameter errors
 
 type Emailer = {
     sendEmail: (emailData: EmailData) => Promise<void | Error>
