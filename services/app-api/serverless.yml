@@ -22,7 +22,6 @@ plugins:
 custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${opt:region, self:provider.region}
-  appVersion: ${env:APP_VERSION}
   applicationEndpoint: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl, env:APPLICATION_ENDPOINT}
   appApiGatewayId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${self:custom.stage}.ApiGatewayRestApiId}
   appApiGatewayRootResourceId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${self:custom.stage}.AppApiGatewayRootResourceId}
@@ -113,7 +112,6 @@ provider:
 
   environment:
     stage: ${self:custom.stage}
-    appVersion: ${self:custom.appVersion}
     DATABASE_URL: ${self:custom.dbURL}
     REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
     REACT_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
