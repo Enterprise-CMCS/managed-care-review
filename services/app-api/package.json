@@ -25,7 +25,7 @@
         "@opentelemetry/exporter-trace-otlp-http": "^0.28.0",
         "@opentelemetry/id-generator-aws-xray": "^1.1.0",
         "@opentelemetry/instrumentation": "^0.28.0",
-        "@opentelemetry/instrumentation-http": "^0.28.0",
+        "@opentelemetry/instrumentation-http": "^0.29.2",
         "@opentelemetry/propagator-aws-xray": "^1.1.0",
         "@opentelemetry/resources": "^1.2.0",
         "@opentelemetry/sdk-trace-base": "^1.2.0",
