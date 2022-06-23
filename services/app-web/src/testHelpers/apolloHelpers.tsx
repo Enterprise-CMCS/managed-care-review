@@ -840,6 +840,7 @@ type updateHealthPlanFormDataMockSuccessProps = {
     pkg?: HealthPlanPackage
     updatedFormData: string
     id: string
+    statusCode?: 200 | 403 | 500
 }
 
 const updateHealthPlanFormDataMockSuccess = ({
@@ -855,6 +856,40 @@ const updateHealthPlanFormDataMockSuccess = ({
             },
         },
         result: { data: { updateHealthPlanFormData: { pkg } } },
+    }
+}
+
+//TODO: Finish up this mock.
+const updateHealthPlanFormDataMockError = ({
+    pkg = mockUnlockedHealthPlanPackage(),
+    updatedFormData,
+    id,
+    statusCode,
+}: updateHealthPlanFormDataMockSuccessProps): MockedResponse<UpdateHealthPlanFormDataMutation> => {
+    switch (statusCode) {
+        case 200:
+            return {
+                request: {
+                    query: UpdateHealthPlanFormDataDocument,
+                    variables: {
+                        input: {
+                            pkgID: id,
+                            healthPlanFormData: updatedFormData,
+                        },
+                    },
+                },
+                result: { data: { updateHealthPlanFormData: { pkg } } },
+            }
+        case 403:
+            return {
+                request: { query: UpdateHealthPlanFormDataDocument },
+                error: new Error('You are not logged in'),
+            }
+        default:
+            return {
+                request: { query: UpdateHealthPlanFormDataDocument },
+                error: new Error('A network error occurred'),
+            }
     }
 }
 
@@ -975,6 +1010,7 @@ export {
     fetchHealthPlanPackageMock,
     fetchStateHealthPlanPackageMockSuccess,
     updateHealthPlanFormDataMockSuccess,
+    updateHealthPlanFormDataMockError,
     submitHealthPlanPackageMockSuccess,
     submitHealthPlanPackageMockError,
     indexHealthPlanPackagesMockSuccess,
