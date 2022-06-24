@@ -26,7 +26,8 @@ describe('Email templates', () => {
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
-                testEmailConfig
+                testEmailConfig,
+                []
             )
             testEmailConfig.cmsReviewSharedEmails.forEach((emailAddress) => {
                 expect(template).toEqual(
@@ -39,7 +40,7 @@ describe('Email templates', () => {
         it('subject line is correct', () => {
             const sub = mockContractOnlyFormData()
             const name = 'FL-MMA-001'
-            const template = newPackageCMSEmail(sub, name, testEmailConfig)
+            const template = newPackageCMSEmail(sub, name, testEmailConfig, [])
 
             expect(template).toEqual(
                 expect.objectContaining({
@@ -58,7 +59,8 @@ describe('Email templates', () => {
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
-                testEmailConfig
+                testEmailConfig,
+                []
             )
             expect(template).toEqual(
                 expect.objectContaining({
@@ -92,7 +94,8 @@ describe('Email templates', () => {
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
-                testEmailConfig
+                testEmailConfig,
+                []
             )
             const rateName = `some-title-RATE-20210101-20220101-CERTIFICATION-${formatRateNameDate(
                 new Date()
@@ -137,7 +140,8 @@ describe('Email templates', () => {
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
-                testEmailConfig
+                testEmailConfig,
+                []
             )
             const rateName = `some-title-RATE-20210101-20220101-CERTIFICATION-${formatRateNameDate(
                 new Date()
@@ -187,7 +191,8 @@ describe('Email templates', () => {
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
-                testEmailConfig
+                testEmailConfig,
+                []
             )
             const rateName = `some-title-RATE-20210605-20211231-AMENDMENT-${formatRateNameDate(
                 new Date()
@@ -218,7 +223,8 @@ describe('Email templates', () => {
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
-                testEmailConfig
+                testEmailConfig,
+                []
             )
             expect(template).toEqual(
                 expect.objectContaining({
@@ -233,7 +239,8 @@ describe('Email templates', () => {
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
-                testEmailConfig
+                testEmailConfig,
+                []
             )
             const reviewerEmails = [
                 ...testEmailConfig.cmsReviewSharedEmails,
@@ -252,7 +259,8 @@ describe('Email templates', () => {
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
-                testEmailConfig
+                testEmailConfig,
+                []
             )
             const ratesReviewerEmails = [
                 ...testEmailConfig.ratesReviewSharedEmails,
@@ -271,7 +279,8 @@ describe('Email templates', () => {
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
-                testEmailConfig
+                testEmailConfig,
+                []
             )
             const excludedEmails = [
                 ...testEmailConfig.ratesReviewSharedEmails,
@@ -291,7 +300,8 @@ describe('Email templates', () => {
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
-                testEmailConfig
+                testEmailConfig,
+                []
             )
             const excludedEmails = [
                 ...testEmailConfig.ratesReviewSharedEmails,
@@ -310,7 +320,8 @@ describe('Email templates', () => {
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
-                testEmailConfig
+                testEmailConfig,
+                []
             )
             expect(template).toEqual(
                 expect.not.objectContaining({
@@ -566,7 +577,8 @@ describe('Email templates', () => {
             submission,
             unlockData,
             testEmailConfig,
-            rateName
+            rateName,
+            []
         )
         it('subject line is correct and clearly states submission is unlocked', () => {
             expect(template).toEqual(
@@ -627,7 +639,8 @@ describe('Email templates', () => {
                 sub,
                 unlockData,
                 testEmailConfig,
-                rateName
+                rateName,
+                []
             )
             const ratesReviewerEmails = [
                 ...testEmailConfig.ratesReviewSharedEmails,
@@ -647,7 +660,8 @@ describe('Email templates', () => {
                 sub,
                 unlockData,
                 testEmailConfig,
-                rateName
+                rateName,
+                []
             )
             const excludedEmails = [
                 ...testEmailConfig.ratesReviewSharedEmails,
@@ -668,7 +682,8 @@ describe('Email templates', () => {
                 sub,
                 unlockData,
                 testEmailConfig,
-                rateName
+                rateName,
+                []
             )
             const excludedEmails = [
                 ...testEmailConfig.ratesReviewSharedEmails,
@@ -689,7 +704,8 @@ describe('Email templates', () => {
                 sub,
                 unlockData,
                 testEmailConfig,
-                rateName
+                rateName,
+                []
             )
             expect(contractOnlyTemplate).toEqual(
                 expect.not.objectContaining({
@@ -840,7 +856,8 @@ describe('Email templates', () => {
         const template = resubmittedCMSEmail(
             submission,
             resubmitData,
-            testEmailConfig
+            testEmailConfig,
+            []
         )
         it('contains correct subject and clearly states submission edits are completed', () => {
             expect(template).toEqual(
@@ -914,7 +931,8 @@ describe('Email templates', () => {
             const template = resubmittedCMSEmail(
                 sub,
                 resubmitData,
-                testEmailConfig
+                testEmailConfig,
+                []
             )
             const excludedEmails = [
                 ...testEmailConfig.ratesReviewSharedEmails,
@@ -940,7 +958,8 @@ describe('Email templates', () => {
         const contractOnlyTemplate = resubmittedCMSEmail(
             submission,
             resubmitData,
-            testEmailConfig
+            testEmailConfig,
+            []
         )
 
         it('does not include ratesReviewSharedEmails', () => {
@@ -970,7 +989,8 @@ describe('Email templates', () => {
             const template = resubmittedCMSEmail(
                 sub,
                 resubmitData,
-                testEmailConfig
+                testEmailConfig,
+                []
             )
             const excludedEmails = [
                 ...testEmailConfig.ratesReviewSharedEmails,
