@@ -113,7 +113,7 @@ provider:
         - Effect: 'Allow'
           Action:
             - ssm:GetParameter
-          Resources: '*'
+          Resource: '*'
 
   environment:
     stage: ${self:custom.stage}
