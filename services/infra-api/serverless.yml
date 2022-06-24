@@ -12,7 +12,7 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   iamPath: ${env:IAM_PATH, "/"}
-  nrLicenseKey: ${env:NR_LICENSE_KEY}
+  nrLicenseKey: ${env:NR_LICENSE_KEY, ""}
   nrMetricStreamName: 'NewRelic-Metric-Stream'
   nrFirehoseStreamName: 'NewRelic-Delivery-Stream'
   nrExternalId: '3407984'
