@@ -1,4 +1,7 @@
 import { SSM } from 'aws-sdk'
+import { logError } from '../logger'
+import { setErrorAttributesOnActiveSpan } from '../resolvers/attributeHelper'
+import { Context } from '../handlers/apollo_gql'
 
 type GetParameterResult = SSM.GetParameterResult
 
@@ -26,8 +29,25 @@ const getParameterStore = async (name: string): Promise<string | Error> => {
         console.error(
             `Failed to fetch parameter ${name}. Error: ${err.message}`
         )
-        return err
+        return new Error(err)
     }
 }
 
-export { getParameterStore }
+const getStateAnalystEmailsStore = async (
+    stateCode: string,
+    span: Context['span'],
+    operation: string
+): Promise<string[]> => {
+    const analystsParameterStore = await getParameterStore(
+        `/configuration/${stateCode}/stateanalysts/email`
+    )
+    if (analystsParameterStore instanceof Error) {
+        logError(operation, analystsParameterStore.message)
+        setErrorAttributesOnActiveSpan(analystsParameterStore.message, span)
+        return []
+    } else {
+        return analystsParameterStore.split(',')
+    }
+}
+
+export { getParameterStore, getStateAnalystEmailsStore }
