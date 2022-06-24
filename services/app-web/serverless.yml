@@ -16,7 +16,7 @@ plugins:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  region: ${opt:region, self:provider.region}
+  region: ${aws:region}
   api_url: ${cf:infra-api-${sls:stage}.ApiGatewayRestApiUrl}
   application_endpoint_url: ${cf:ui-${sls:stage}.CloudFrontEndpointUrl}
   cognito_region: ${cf:ui-auth-${sls:stage}.Region}

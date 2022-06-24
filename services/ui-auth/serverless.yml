@@ -9,7 +9,7 @@ plugins:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  region: ${opt:region, self:provider.region}
+  region: ${aws:region}
   document_uploads_bucket_arn: ${cf:uploads-${sls:stage}.DocumentUploadsBucketArn}
   api_gateway_rest_api_name: ${cf:infra-api-${sls:stage}.ApiGatewayRestApiId}
   application_endpoint_url: ${cf:ui-${sls:stage}.CloudFrontEndpointUrl}
@@ -58,7 +58,7 @@ resources:
           Fn::If:
             - CreateEmailConfiguration
             - EmailSendingAccount: DEVELOPER
-              SourceArn: !Sub arn:aws:ses:us-east-1:${AWS::AccountId}:identity/${self:custom.sesSourceEmailAddress}
+              SourceArn: !Sub arn:aws:ses:us-east-1:${aws:accountId}:identity/${self:custom.sesSourceEmailAddress}
             - !Ref AWS::NoValue
         Schema:
           - Name: given_name
@@ -183,7 +183,7 @@ resources:
                 - Effect: 'Allow'
                   Action:
                     - 'execute-api:Invoke'
-                  Resource: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${self:custom.api_gateway_rest_api_name}/*
+                  Resource: !Sub arn:aws:execute-api:${AWS::Region}:${aws:accountId}:${self:custom.api_gateway_rest_api_name}/*
 
                 - Effect: 'Allow'
                   Action:

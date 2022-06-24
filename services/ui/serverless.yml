@@ -12,7 +12,7 @@ plugins:
   - serverless-s3-bucket-helper
 
 custom:
-  region: ${opt:region, self:provider.region}
+  region: ${aws:region}
   serverlessTerminationProtection:
     stages:
       - dev

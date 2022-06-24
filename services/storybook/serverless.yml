@@ -8,7 +8,7 @@ plugins:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  region: ${opt:region, self:provider.region}
+  region: ${aws:region}
   serverlessTerminationProtection:
     stages:
       - dev
