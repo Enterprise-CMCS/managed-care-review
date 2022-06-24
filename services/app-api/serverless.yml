@@ -112,7 +112,7 @@ provider:
             - ${self:custom.document_uploads_bucket_arn}/allusers/*
         - Effect: 'Allow'
           Action:
-            - 'ssm:GetParameter'
+            - ssm:GetParameter
           Resources: '*'
 
   environment:
