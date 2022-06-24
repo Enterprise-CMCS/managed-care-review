@@ -1,5 +1,5 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
 import { Amplify } from 'aws-amplify'
 import { loader } from 'graphql.macro'
@@ -117,7 +117,11 @@ if (ldClientId === undefined) {
         },
     })
 
-    ReactDOM.render(
+    const container = document.getElementById('root')
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const root = createRoot(container!)
+
+    root.render(
         <React.StrictMode>
             <LDProvider>
                 <App
@@ -126,8 +130,7 @@ if (ldClientId === undefined) {
                     s3Client={s3Client}
                 />
             </LDProvider>
-        </React.StrictMode>,
-        document.getElementById('root')
+        </React.StrictMode>
     )
 })().catch((e) => {
     throw new Error('Could not initialize the application: ' + e)

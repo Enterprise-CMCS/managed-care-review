@@ -117,7 +117,6 @@ export type {
     RateType,
     StateContact,
     ActuaryContact,
-    ActuaryContactType,
     ActuarialFirmType,
     ActuaryCommunicationType,
     ContractType,
