@@ -16,7 +16,7 @@ import {
     HealthPlanPackageType,
     packageStatus,
 } from '../domain-models'
-import { Emailer } from '../emailer'
+import { Emailer, UpdatedEmailData, StateAnalystsEmails } from '../emailer'
 import { MutationResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
@@ -26,6 +26,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import { getStateAnalystEmailsStore } from '../parameterStore'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
@@ -256,21 +257,27 @@ export function submitHealthPlanPackageResolver(
 
         // Send emails!
         const name = packageName(lockedFormData, programs)
-
         const status = packageStatus(updatedPackage)
+        const stateAnalystsEmails: StateAnalystsEmails =
+            await getStateAnalystEmailsStore(
+                updatedPackage.stateCode,
+                span,
+                'submitHealthPlanPackage'
+            )
+
         let cmsPackageEmailResult
         let statePackageEmailResult
 
-        // Check for submitted or resubmitted status and send emails accordingly
         if (status === 'RESUBMITTED') {
             logSuccess('It was resubmitted')
-            const updatedEmailData = {
+            const updatedEmailData: UpdatedEmailData = {
                 ...submitInfo,
                 packageName: name,
             }
             cmsPackageEmailResult = await emailer.sendResubmittedCMSEmail(
                 lockedFormData,
-                updatedEmailData
+                updatedEmailData,
+                stateAnalystsEmails
             )
             statePackageEmailResult = await emailer.sendResubmittedStateEmail(
                 lockedFormData,
@@ -280,7 +287,8 @@ export function submitHealthPlanPackageResolver(
         } else if (status === 'SUBMITTED') {
             cmsPackageEmailResult = await emailer.sendCMSNewPackage(
                 lockedFormData,
-                name
+                name,
+                stateAnalystsEmails
             )
             statePackageEmailResult = await emailer.sendStateNewPackage(
                 lockedFormData,

@@ -225,7 +225,7 @@ describe('submitHealthPlanPackage', () => {
 
         expect(submitResult.errors).toBeUndefined()
         expect(mockEmailer.sendEmail).toHaveBeenCalledTimes(2)
-    })
+    }, 20000)
 
     it('send CMS email to CMS if submission is valid', async () => {
         const config = testEmailConfig
@@ -269,7 +269,7 @@ describe('submitHealthPlanPackage', () => {
                 ),
             })
         )
-    })
+    }, 20000)
 
     it('send state email to logged in user if submission is valid', async () => {
         const config = testEmailConfig
@@ -311,7 +311,7 @@ describe('submitHealthPlanPackage', () => {
                 toAddresses: expect.arrayContaining([currentUser.email]),
             })
         )
-    })
+    }, 20000)
 
     it('send state email to all state contacts if submission is valid', async () => {
         const mockEmailer = testEmailer()
@@ -351,7 +351,7 @@ describe('submitHealthPlanPackage', () => {
                 ]),
             })
         )
-    })
+    }, 20000)
 
     it('send CMS email to CMS on valid resubmission', async () => {
         const config = testEmailConfig
@@ -414,7 +414,7 @@ describe('submitHealthPlanPackage', () => {
                 ),
             })
         )
-    })
+    }, 20000)
 
     it('send state email to state contacts and current user on valid resubmission', async () => {
         const config = testEmailConfig
@@ -473,7 +473,7 @@ describe('submitHealthPlanPackage', () => {
                 ]),
             })
         )
-    })
+    }, 20000)
 
     it('does not send any emails if submission fails', async () => {
         const mockEmailer = testEmailer()
@@ -499,5 +499,5 @@ describe('submitHealthPlanPackage', () => {
 
         expect(submitResult.errors).toBeDefined()
         expect(mockEmailer.sendEmail).not.toHaveBeenCalled()
-    })
+    }, 20000)
 })
