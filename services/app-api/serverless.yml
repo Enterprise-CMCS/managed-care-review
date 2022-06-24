@@ -110,6 +110,10 @@ provider:
           Resource:
             # this is the "public" folder for all regular uploads from Amplify
             - ${self:custom.document_uploads_bucket_arn}/allusers/*
+        - Effect: 'Allow'
+          Action:
+            - 'ssm:GetParameter'
+          Resources: '*'
 
   environment:
     stage: ${self:custom.stage}
