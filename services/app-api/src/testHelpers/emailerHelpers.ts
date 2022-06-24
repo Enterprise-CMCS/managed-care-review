@@ -42,20 +42,22 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
             }
         ),
         sendCMSNewPackage: function async(
-            submission: LockedHealthPlanFormDataType,
-            submissionName: string
+            submission,
+            submissionName,
+            stateAnalystsEmails
         ): Promise<void | Error> {
             const emailData = newPackageCMSEmail(
                 submission,
                 submissionName,
-                config
+                config,
+                stateAnalystsEmails
             )
             return this.sendEmail(emailData)
         },
         sendStateNewPackage: function async(
-            submission: LockedHealthPlanFormDataType,
-            submissionName: string,
-            user: UserType
+            submission,
+            submissionName,
+            user
         ): Promise<void | Error> {
             const emailData = newPackageStateEmail(
                 submission,
@@ -66,21 +68,23 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
             return this.sendEmail(emailData)
         },
         sendUnlockPackageCMSEmail: function async(
-            submission: UnlockedHealthPlanFormDataType,
-            updatedEmailData: UpdatedEmailData,
-            submissionName: string
+            submission,
+            updatedEmailData,
+            submissionName,
+            stateAnalystsEmails
         ): Promise<void | Error> {
             const emailData = unlockPackageCMSEmail(
                 submission,
                 updatedEmailData,
                 config,
-                submissionName
+                submissionName,
+                stateAnalystsEmails
             )
             return this.sendEmail(emailData)
         },
         sendUnlockPackageStateEmail: function async(
-            submission: UnlockedHealthPlanFormDataType,
-            updatedEmailData: UpdatedEmailData
+            submission,
+            updatedEmailData
         ): Promise<void | Error> {
             const emailData = unlockPackageStateEmail(
                 submission,
@@ -104,13 +108,15 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
             return this.sendEmail(emailData)
         },
         sendResubmittedCMSEmail: function async(
-            submission: LockedHealthPlanFormDataType,
-            updatedEmailData: UpdatedEmailData
+            submission,
+            updatedEmailData,
+            stateAnalystsEmails
         ): Promise<void | Error> {
             const emailData = resubmittedCMSEmail(
                 submission,
                 updatedEmailData,
-                config
+                config,
+                stateAnalystsEmails
             )
             return this.sendEmail(emailData)
         },
