@@ -148,7 +148,9 @@ async function initializeGQLHandler(): Promise<Handler> {
     const applicationEndpoint = process.env.APPLICATION_ENDPOINT
     const emailSource = process.env.SES_SOURCE_EMAIL_ADDRESS
     const emailerMode = process.env.EMAILER_MODE
-    const cmsReviewSharedEmails = process.env.SES_REVIEW_TEAM_EMAIL_ADDRESSES
+    // const cmsReviewSharedEmails = process.env.SES_REVIEW_TEAM_EMAIL_ADDRESSES
+    const cmsReviewSharedEmails =
+        '"MacRae Linton" <macrael@truss.works>,"Notnil Earcam" <macrael@truss.works>'
     const cmsReviewHelpEmailAddress = process.env.SES_REVIEW_HELP_EMAIL_ADDRESS
     const cmsRateHelpEmailAddress = process.env.SES_RATE_HELP_EMAIL_ADDRESS
     const cmsDevTeamHelpEmailAddress =
