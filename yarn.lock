@@ -23205,6 +23205,11 @@ serverless-idempotency-helper@CMSgov/serverless-idempotency-helper:
     extract-zip "^2.0.1"
     lodash "^4.17.21"
 
+serverless-offline-ssm@^6.2.0:
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/serverless-offline-ssm/-/serverless-offline-ssm-6.2.0.tgz#f2db290a72631629579ce5f940ed76f254f96653"
+  integrity sha512-Af7JeLbU4OHAx7ZgAs2OLP2DGKyp/g45rX7SWQ8KiBzn47jme+MqN+GOV6qd5oZ8V9khd3p62+RueHR3ezEZZQ==
+
 serverless-offline@^8.0.0:
   version "8.5.0"
   resolved "https://registry.yarnpkg.com/serverless-offline/-/serverless-offline-8.5.0.tgz#cd1c74f6dc3b8c41e4be2d6ea0fc48a5f7ee6700"
@@ -23270,12 +23275,6 @@ serverless-offline@^8.8.0:
     update-notifier "^5.1.0"
     velocityjs "^2.0.6"
     ws "^7.5.7"
-
-serverless-online@CMSgov/serverless-online:
-  version "1.0.0"
-  resolved "https://codeload.github.com/CMSgov/serverless-online/tar.gz/1f7d068721f10f13f3c1f1b8e2d4bd21be42e77d"
-  dependencies:
-    chokidar "^3.5.2"
 
 serverless-plugin-scripts@^1.0.2:
   version "1.0.2"
