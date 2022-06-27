@@ -10,6 +10,8 @@
         "test:once": "jest --runInBand --ci",
         "lint": "tsc --noEmit && eslint . --max-warnings=0",
         "clean": "rm -rf node_modules && yarn cache clean",
+        "generate-partials": "handlebars src/emailer/templates/partials/*.handlebars -f src/emailer/templates/partials.js -c handlebars/runtime",
+        "generate-templates": "handlebars src/emailer/templates/*.handlebars -f src/emailer/templates/precompiled.js -c handlebars/runtime",
         "generate-code": "yarn prisma generate"
     },
     "lint-staged": {
@@ -31,11 +33,13 @@
         "@opentelemetry/sdk-trace-base": "^1.2.0",
         "@opentelemetry/sdk-trace-node": "^1.2.0",
         "@opentelemetry/semantic-conventions": "^1.2.0",
+        "@types/handlebars": "^4.1.0",
         "apollo-server-lambda": "^3.5.0",
         "archiver": "^5.3.0",
         "axios": "^0.26.1",
         "graphql": "^16.2.0",
         "graphql-scalars": "^1.11.1",
+        "handlebars": "^4.7.7",
         "launchdarkly-node-server-sdk": "5.14.6",
         "neverthrow": "^4.2.2",
         "protobufjs": "^6.11.2",
