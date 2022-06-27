@@ -7,9 +7,11 @@ export async function runS3Locally(runner: LabeledProcessRunner) {
         ['yarn', 'install'],
         'services/uploads'
     )
+
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     runner.runCommandAndOutput(
         's3',
-        ['serverless', '--stage', 'local', 's3', 'start'],
+        ['serverless', 's3', 'start', '--stage', 'local'],
         'services/uploads'
     )
 }

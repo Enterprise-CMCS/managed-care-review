@@ -1,6 +1,6 @@
 service: app-api
 
-frameworkVersion: '2'
+frameworkVersion: '^3.19.0'
 
 package:
   individually: true
@@ -10,22 +10,19 @@ package:
     - '!node_modules/@prisma'
 
 plugins:
-  - serverless-webpack
-  - serverless-plugin-monorepo
+  - serverless-offline-ssm
   - serverless-offline
-  - serverless-online
+  - serverless-webpack
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   - serverless-idempotency-helper
   - serverless-iam-helper
 
 custom:
-  stage: ${opt:stage, self:provider.stage}
-  region: ${opt:region, self:provider.region}
-  appVersion: ${env:APP_VERSION}
-  applicationEndpoint: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl, env:APPLICATION_ENDPOINT}
-  appApiGatewayId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${self:custom.stage}.ApiGatewayRestApiId}
-  appApiGatewayRootResourceId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${self:custom.stage}.AppApiGatewayRootResourceId}
+  region: ${aws:region}
+  applicationEndpoint: ${env:APPLICATION_ENDPOINT, cf:ui-${sls:stage}.CloudFrontEndpointUrl}
+  appApiGatewayId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.ApiGatewayRestApiId}
+  appApiGatewayRootResourceId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.AppApiGatewayRootResourceId}
   emailSource: ${env:SES_SOURCE_EMAIL_ADDRESS}
   emailerMode: ${env:EMAILER_MODE}
   emailReviewTeamAddresses: ${env:SES_REVIEW_TEAM_EMAIL_ADDRESSES}
@@ -33,11 +30,11 @@ custom:
   emailReviewHelpAddress: ${env:SES_REVIEW_HELP_EMAIL_ADDRESS}
   emailRateHelpAddress: ${env:SES_RATE_HELP_EMAIL_ADDRESS}
   emailDevTeamHelpAddress: ${env:SES_DEV_TEAM_HELP_EMAIL_ADDRESS}
-  auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${self:custom.stage}.PostgresAuroraArn }
+  auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${sls:stage}.PostgresAuroraArn }
   iamPath: ${env:IAM_PATH, "/"}
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
-  document_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${self:custom.stage}.DocumentUploadsBucketArn}
-  secretsManagerSecret: aurora_postgres_${self:custom.stage} #pragma: allowlist secret
+  document_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.DocumentUploadsBucketArn}
+  secretsManagerSecret: aurora_postgres_${sls:stage} #pragma: allowlist secret
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   reactAppOtelCollectorUrl: ${env:REACT_APP_OTEL_COLLECTOR_URL}
   dbURL: ${env:DATABASE_URL}
@@ -56,21 +53,28 @@ custom:
       - val
       - prod
       - main
-  vpcId: ${ssm:/configuration/${self:custom.stage}/vpc/id, ssm:/configuration/default/vpc/id}
-  sgId: ${ssm:/configuration/${self:custom.stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
+  serverless-offline-ssm:
+    stages:
+      - local
+      - offline
+    ssm:
+      '/configuration/default/vpc/id': 'offline'
+      '/configuration/default/vpc/sg/id': 'offline'
+      '/configuration/default/vpc/subnets/private/a/id': 'offline'
+      '/configuration/default/vpc/subnets/private/b/id': 'offline'
+      '/configuration/default/vpc/subnets/private/c/id': 'offline'
+  vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
+  sgId: ${ssm:/configuration/${sls:stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
   privateSubnets:
-    - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/a/id, ssm:/configuration/default/vpc/subnets/private/a/id}
-    - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
-    - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
+    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/a/id, ssm:/configuration/default/vpc/subnets/private/a/id}
+    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
+    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
 
 provider:
   name: aws
-  lambdaHashingVersion: 20201221
-  runtime: nodejs14.x
+  runtime: nodejs16.x
   region: us-east-1
   stage: dev
-  logs:
-    restApi: true
   apiGateway:
     restApiId: ${self:custom.appApiGatewayId}
     restApiRootResourceId: ${self:custom.appApiGatewayRootResourceId}
@@ -116,8 +120,7 @@ provider:
           Resource: '*'
 
   environment:
-    stage: ${self:custom.stage}
-    appVersion: ${self:custom.appVersion}
+    stage: ${sls:stage}
     DATABASE_URL: ${self:custom.dbURL}
     REACT_APP_AUTH_MODE: ${self:custom.reactAppAuthMode}
     REACT_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
@@ -129,7 +132,7 @@ provider:
     SES_RATE_HELP_EMAIL_ADDRESS: ${self:custom.emailRateHelpAddress}
     SES_DEV_TEAM_HELP_EMAIL_ADDRESS: ${self:custom.emailDevTeamHelpAddress}
     SES_RATES_EMAIL_ADDRESSES: ${self:custom.emailRatesTeamAddresses}
-    APPLICATION_ENDPOINT: ${self:custom.applicationEndpoint}
+    APPLICATION_ENDPOINT: ${self:custom.applicationEndpoint, 'http://localhost:3000'}
     AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
     OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
     LD_SDK_KEY: ${self:custom.ldSDKKey}
