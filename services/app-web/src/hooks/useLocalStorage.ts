@@ -2,19 +2,16 @@ import { useState, useEffect } from 'react'
 import { LocalStorageKeyType } from '../constants/localStorage'
 type LocalStorage = {
     key: LocalStorageKeyType
-    value?: string | string[] | boolean | object
+    value: string | string[] | boolean | object | null
 }
 
-type UseLocalStorage = [
-    LocalStorage['value'],
-    (value: string | undefined) => void
-]
-// Get and set keys in local storage. If key is set to a value of undefined, clear and remove from local storage, return default fallback value
+type UseLocalStorage = [LocalStorage['value'], (value: string | null) => void]
+// Get and set keys in local storage. If key is set to a value of null, clear and remove from local storage, return default fallback value
 function useLocalStorage(
     key: LocalStorage['key'],
     defaultValue: LocalStorage['value']
 ): UseLocalStorage {
-    const [storedValue, setStoredValue] = useState<string | undefined>(() => {
+    const [storedValue, setStoredValue] = useState<string | null>(() => {
         if (typeof window === 'undefined') {
             console.error('Unable to find local storage. window is undefined')
             return defaultValue
@@ -35,7 +32,7 @@ function useLocalStorage(
     })
 
     useEffect(() => {
-        if (storedValue === undefined) {
+        if (storedValue === null) {
             try {
                 window.localStorage.removeItem(key)
             } catch (error) {

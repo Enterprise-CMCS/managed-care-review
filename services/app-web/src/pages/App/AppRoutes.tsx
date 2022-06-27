@@ -148,7 +148,7 @@ export const AppRoutes = ({
     const ldClient = useLDClient()
     const [redirectPath, setRedirectPath] = useLocalStorage(
         'LOGIN_REDIRECT',
-        undefined
+        null
     )
     const showExpirationModal: boolean = ldClient?.variation(
         featureFlags.SESSION_EXPIRING_MODAL,
@@ -211,7 +211,7 @@ export const AppRoutes = ({
 
             if (typeof redirectPath === 'string') {
                 navigate(redirectPath)
-                setRedirectPath(undefined)
+                setRedirectPath(null)
             }
         }
     }, [
