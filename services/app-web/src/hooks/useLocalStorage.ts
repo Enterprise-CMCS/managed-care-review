@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { LocalStorageKeyType } from '../constants/localStorage'
+import { recordJSException } from '../otelHelpers'
 type LocalStorage = {
     key: LocalStorageKeyType
     value: string | string[] | boolean | object | null
@@ -13,7 +14,9 @@ function useLocalStorage(
 ): UseLocalStorage {
     const [storedValue, setStoredValue] = useState<string | null>(() => {
         if (typeof window === 'undefined') {
-            console.error('Unable to find local storage. window is undefined')
+            recordJSException(
+                'Unable to find local storage. window is undefined'
+            )
             return defaultValue
         }
 
@@ -23,7 +26,7 @@ function useLocalStorage(
                 window.localStorage.getItem(key) || JSON.stringify(defaultValue)
             )
         } catch (error) {
-            console.error(
+            recordJSException(
                 `Unable to set local storage. Error message: ${error}`
             )
             value = defaultValue
@@ -36,7 +39,7 @@ function useLocalStorage(
             try {
                 window.localStorage.removeItem(key)
             } catch (error) {
-                console.error(
+                recordJSException(
                     `Unable to remove ${key} local storage. Error message: ${error.message}`
                 )
             }
@@ -44,7 +47,7 @@ function useLocalStorage(
             try {
                 window.localStorage.setItem(key, JSON.stringify(storedValue))
             } catch (error) {
-                console.error(
+                recordJSException(
                     `Unable to set ${key} in local storage. Error message: ${error.message}`
                 )
             }
