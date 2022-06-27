@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { FileProcessor, FileItemT } from './FileProcessor'
@@ -149,15 +149,15 @@ describe('FileProcessor component', () => {
             />
         )
 
-        void userEvent.click(screen.getByRole('button', { name: /Retry/ }))
-        await waitFor(() => {
-            expect(buttonActionProps.retryItem).toHaveBeenCalled()
-        })
+        void (await userEvent.click(
+            screen.getByRole('button', { name: /Retry/ })
+        ))
+        expect(buttonActionProps.retryItem).toHaveBeenCalled()
 
-        void userEvent.click(screen.getByRole('button', { name: /Remove/ }))
-        await waitFor(() => {
-            expect(buttonActionProps.deleteItem).toHaveBeenCalled()
-        })
+        void (await userEvent.click(
+            screen.getByRole('button', { name: /Remove/ })
+        ))
+        expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 
     it('button actions work as expected in the table', async () => {
@@ -170,15 +170,11 @@ describe('FileProcessor component', () => {
             />
         )
 
-        void userEvent.click(screen.getByText('Retry'))
-        await waitFor(() => {
-            expect(buttonActionProps.retryItem).toHaveBeenCalled()
-        })
+        void (await userEvent.click(screen.getByText('Retry')))
+        expect(buttonActionProps.retryItem).toHaveBeenCalled()
 
-        void userEvent.click(screen.getByText('Remove'))
-        await waitFor(() => {
-            expect(buttonActionProps.deleteItem).toHaveBeenCalled()
-        })
+        void (await userEvent.click(screen.getByText('Remove')))
+        expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 
     it('displays loading image, loading text, and remove button when status is LOADING in the list', () => {
@@ -278,30 +274,22 @@ describe('FileProcessor component', () => {
         const ratesCheckbox = screen.getByRole('checkbox', {
             name: 'rate-supporting',
         })
-        void userEvent.click(contractCheckbox)
-        await waitFor(() => {
-            expect(
-                categoryCheckboxProps.handleCheckboxClick
-            ).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    target: expect.objectContaining({
-                        name: 'contract-supporting',
-                    }),
-                })
-            )
-        })
-        void userEvent.click(ratesCheckbox)
-        await waitFor(() => {
-            expect(
-                categoryCheckboxProps.handleCheckboxClick
-            ).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    target: expect.objectContaining({
-                        name: 'rate-supporting',
-                    }),
-                })
-            )
-        })
+        void (await userEvent.click(contractCheckbox))
+        expect(categoryCheckboxProps.handleCheckboxClick).toHaveBeenCalledWith(
+            expect.objectContaining({
+                target: expect.objectContaining({
+                    name: 'contract-supporting',
+                }),
+            })
+        )
+        void (await userEvent.click(ratesCheckbox))
+        expect(categoryCheckboxProps.handleCheckboxClick).toHaveBeenCalledWith(
+            expect.objectContaining({
+                target: expect.objectContaining({
+                    name: 'rate-supporting',
+                }),
+            })
+        )
     })
 
     it('does not have clickable document category checkboxes for a contract-only submission', () => {
@@ -357,15 +345,15 @@ describe('FileProcessor component', () => {
             screen.getByRole('button', { name: /Retry/ })
         ).toBeInTheDocument()
 
-        void userEvent.click(screen.getByRole('button', { name: /Retry/ }))
-        await waitFor(() => {
-            expect(buttonActionProps.retryItem).toHaveBeenCalled()
-        })
+        void (await userEvent.click(
+            screen.getByRole('button', { name: /Retry/ })
+        ))
+        expect(buttonActionProps.retryItem).toHaveBeenCalled()
 
-        void userEvent.click(screen.getByRole('button', { name: /Remove/ }))
-        await waitFor(() => {
-            expect(buttonActionProps.deleteItem).toHaveBeenCalled()
-        })
+        void (await userEvent.click(
+            screen.getByRole('button', { name: /Remove/ })
+        ))
+        expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 
     it('displays upload failed message, without checkboxes, and both retry and remove buttons when status is UPLOAD_ERROR in a table', async () => {
@@ -388,15 +376,11 @@ describe('FileProcessor component', () => {
         expect(screen.getByText('Remove')).toBeInTheDocument()
         expect(screen.getByText('Retry')).toBeInTheDocument()
 
-        void userEvent.click(screen.getByText('Retry'))
-        await waitFor(() => {
-            expect(buttonActionProps.retryItem).toHaveBeenCalled()
-        })
+        void (await userEvent.click(screen.getByText('Retry')))
+        expect(buttonActionProps.retryItem).toHaveBeenCalled()
 
-        void userEvent.click(screen.getByText('Remove'))
-        await waitFor(() => {
-            expect(buttonActionProps.deleteItem).toHaveBeenCalled()
-        })
+        void (await userEvent.click(screen.getByText('Remove')))
+        expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 
     it('displays security scan failed message and both retry and remove buttons when status is SCANNING_ERROR in a list', () => {
@@ -444,15 +428,11 @@ describe('FileProcessor component', () => {
         expect(screen.getByText('Remove')).toBeInTheDocument()
         expect(screen.getByText('Retry')).toBeInTheDocument()
 
-        void userEvent.click(screen.getByText('Retry'))
-        await waitFor(() => {
-            expect(buttonActionProps.retryItem).toHaveBeenCalled()
-        })
+        void (await userEvent.click(screen.getByText('Retry')))
+        expect(buttonActionProps.retryItem).toHaveBeenCalled()
 
-        void userEvent.click(screen.getByText('Remove'))
-        await waitFor(() => {
-            expect(buttonActionProps.deleteItem).toHaveBeenCalled()
-        })
+        void (await userEvent.click(screen.getByText('Remove')))
+        expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 
     it('displays duplicate name error message and remove button when status is DUPLICATE_NAME_ERROR in a list', () => {

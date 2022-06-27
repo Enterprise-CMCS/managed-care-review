@@ -81,7 +81,9 @@ describe('UnlockSubmitModal', () => {
             const dialog = screen.getByRole('dialog')
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
-            void userEvent.click(screen.getByTestId('submit-modal-submit'))
+            void (await userEvent.click(
+                screen.getByTestId('submit-modal-submit')
+            ))
 
             await waitFor(() =>
                 expect(testLocation.pathname).toBe(`/dashboard`)
@@ -118,7 +120,9 @@ describe('UnlockSubmitModal', () => {
             const dialog = screen.getByRole('dialog')
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
-            void userEvent.click(screen.getByTestId('submit-modal-submit'))
+            void (await userEvent.click(
+                screen.getByTestId('submit-modal-submit')
+            ))
 
             expect(
                 await screen.findByText(
@@ -175,7 +179,7 @@ describe('UnlockSubmitModal', () => {
 
             const modalSubmit = screen.getByTestId('unlock-modal-submit')
             expect(modalSubmit).toHaveTextContent('Unlock')
-            void userEvent.click(modalSubmit)
+            void (await userEvent.click(modalSubmit))
             const dialog = await screen.getByRole('dialog')
             await waitFor(() => {
                 expect(dialog).toHaveClass('is-visible')
@@ -205,7 +209,9 @@ describe('UnlockSubmitModal', () => {
             const textbox = await screen.findByTestId('unlockSubmitModalInput')
 
             // submit without entering anything
-            void userEvent.click(screen.getByTestId('unlock-modal-submit'))
+            void (await userEvent.click(
+                screen.getByTestId('unlock-modal-submit')
+            ))
 
             expect(
                 await screen.findByText(
@@ -217,7 +223,7 @@ describe('UnlockSubmitModal', () => {
             expect(textbox).toHaveFocus()
         })
 
-        it('displays no modal alert banner error if unlock api request succeeds', async () => {
+        it.only('displays no modal alert banner error if unlock api request succeeds', async () => {
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
@@ -244,12 +250,14 @@ describe('UnlockSubmitModal', () => {
                 expect(dialog).toHaveClass('is-visible')
             })
 
-            void userEvent.type(
+            void (await userEvent.type(
                 screen.getByTestId('unlockSubmitModalInput'),
                 'Test unlock summary'
-            )
+            ))
 
-            void userEvent.click(screen.getByTestId('unlock-modal-submit'))
+            void (await userEvent.click(
+                screen.getByTestId('unlock-modal-submit')
+            ))
 
             // the popup dialog should be hidden again
             await waitFor(() => {
@@ -289,12 +297,14 @@ describe('UnlockSubmitModal', () => {
             const dialog = screen.getByRole('dialog')
             await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
-            void userEvent.type(
+            void (await userEvent.type(
                 screen.getByTestId('unlockSubmitModalInput'),
                 'Test unlock summary'
-            )
+            ))
 
-            void userEvent.click(screen.getByTestId('unlock-modal-submit'))
+            void (await userEvent.click(
+                screen.getByTestId('unlock-modal-submit')
+            ))
 
             await waitFor(() => {
                 const error = screen.queryByText(
@@ -361,7 +371,9 @@ describe('UnlockSubmitModal', () => {
             expect(screen.getByRole('dialog')).toHaveClass('is-visible')
             expect(screen.getByText('Summarize changes')).toBeInTheDocument()
 
-            void userEvent.click(screen.getByTestId('resubmit-modal-submit'))
+            void (await userEvent.click(
+                screen.getByTestId('resubmit-modal-submit')
+            ))
 
             expect(
                 await screen.findByText('You must provide a summary of changes')
@@ -388,7 +400,9 @@ describe('UnlockSubmitModal', () => {
             const textbox = await screen.getByTestId('unlockSubmitModalInput')
 
             // submit without entering anything
-            void userEvent.click(screen.getByTestId('resubmit-modal-submit'))
+            void (await userEvent.click(
+                screen.getByTestId('resubmit-modal-submit')
+            ))
 
             expect(
                 await screen.findByText('You must provide a summary of changes')
@@ -397,7 +411,7 @@ describe('UnlockSubmitModal', () => {
             // check focus after error
             expect(textbox).toHaveFocus()
         })
-        it.only('redirects if submission succeeds on unlocked plan package', async () => {
+        it.skip('redirects if submission succeeds on unlocked plan package', async () => {
             let testLocation: Location
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
@@ -432,12 +446,14 @@ describe('UnlockSubmitModal', () => {
             // const dialog = await waitFor(() => screen.getByRole('dialog'))
             // await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
-            void userEvent.type(
+            void (await userEvent.type(
                 screen.getByTestId('unlockSubmitModalInput'),
                 'Test submission summary'
-            )
+            ))
 
-            void userEvent.click(screen.getByTestId('resubmit-modal-submit'))
+            void (await userEvent.click(
+                screen.getByTestId('resubmit-modal-submit')
+            ))
             const refreshedDialog = await waitFor(() =>
                 screen.getByRole('dialog')
             )

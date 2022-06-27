@@ -115,11 +115,12 @@ describe('ActionButton', () => {
             expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
 
             jest.advanceTimersByTime(1)
-            expect(
-                screen.getByRole('button', { name: 'Loading' })
-            ).toBeInTheDocument()
-            expect(screen.getByRole('progressbar')).toBeInTheDocument()
-
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('button', { name: 'Loading' })
+                ).toBeInTheDocument()
+                expect(screen.getByRole('progressbar')).toBeInTheDocument()
+            })
             jest.useRealTimers()
         })
     })

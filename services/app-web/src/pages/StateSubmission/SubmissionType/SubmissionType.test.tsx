@@ -2,7 +2,7 @@ import userEvent from '@testing-library/user-event'
 import { screen, waitFor } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import { fetchCurrentUserMock } from '../../../testHelpers/apolloHelpers'
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import { debugLog, renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SubmissionType, SubmissionTypeFormValues } from './'
 import { Formik } from 'formik'
 import { contractOnly } from '../../../common-code/healthPlanFormDataMocks'
@@ -185,24 +185,19 @@ describe('SubmissionType', () => {
         )
         const combobox = await screen.findByRole('combobox')
 
-        await waitFor(async () => {
-            selectEvent.openMenu(combobox)
+        void (await selectEvent.openMenu(combobox))
+
+        await waitFor(() => {
+            expect(screen.getByText('Program 3')).toBeInTheDocument()
         })
 
-        // expect(await screen.getByText('Program 3')).toBeInTheDocument()
-
-        await (async () => {
-            await selectEvent.select(combobox, 'Program 1')
-            await selectEvent.select(combobox, 'Program 3')
-        })
+        void (await selectEvent.select(combobox, 'Program 1'))
+        void (await selectEvent.openMenu(combobox))
+        void (await selectEvent.select(combobox, 'Program 3'))
 
         // in react-select, only items that are selected have a "remove item" label
-        expect(
-            await screen.getByLabelText('Remove Program 1')
-        ).toBeInTheDocument()
-        expect(
-            await screen.getByLabelText('Remove Program 3')
-        ).toBeInTheDocument()
+        expect(screen.getByLabelText('Remove Program 1')).toBeInTheDocument()
+        expect(screen.getByLabelText('Remove Program 3')).toBeInTheDocument()
     })
 
     it('displays submission type radio buttons', async () => {
@@ -295,8 +290,8 @@ describe('SubmissionType', () => {
             expect(await textarea).toBeInTheDocument()
 
             //trigger validation
-            userEvent.type(textarea, 'something')
-            userEvent.clear(textarea)
+            void (await userEvent.type(textarea, 'something'))
+            void (await userEvent.clear(textarea))
 
             await waitFor(() => {
                 expect(textarea).toHaveClass('usa-input--error')
@@ -318,16 +313,16 @@ describe('SubmissionType', () => {
                     },
                 }
             )
+            const textarea = screen.getByRole('textbox', {
+                name: 'Submission description',
+            })
+            expect(textarea).toBeInTheDocument()
+
+            //trigger validation
+            void (await userEvent.type(textarea, 'something'))
+            void (await userEvent.clear(textarea))
+
             await waitFor(() => {
-                const textarea = screen.getByRole('textbox', {
-                    name: 'Submission description',
-                })
-                expect(textarea).toBeInTheDocument()
-
-                //trigger validation
-                userEvent.type(textarea, 'something')
-                userEvent.clear(textarea)
-
                 expect(textarea).not.toHaveClass('usa-input--error')
                 expect(
                     screen.queryByText('You must choose a submission type')
@@ -347,11 +342,11 @@ describe('SubmissionType', () => {
                 }
             )
 
-            userEvent.click(
+            void (await userEvent.click(
                 screen.getByRole('button', {
                     name: 'Continue',
                 })
-            )
+            ))
             await waitFor(() => {
                 expect(
                     screen.queryAllByText('You must choose a submission type')

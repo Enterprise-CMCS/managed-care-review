@@ -34,7 +34,7 @@ describe('Modal', () => {
             </div>
         )
 
-        await waitFor(() => handleOpen())
+        handleOpen()
         await waitFor(() => {
             expect(screen.getByRole('dialog')).toHaveClass('is-visible')
             expect(
@@ -66,7 +66,7 @@ describe('Modal', () => {
             </div>
         )
 
-        await waitFor(() => handleOpen())
+        handleOpen()
         await waitFor(() => {
             expect(screen.getByRole('dialog')).toHaveClass('is-visible')
             expect(
@@ -91,11 +91,9 @@ describe('Modal', () => {
                 </Modal>
             </div>
         )
-        await waitFor(() => handleOpen())
-        userClickByTestId(screen, 'test-modal-submit')
-        await waitFor(() => {
-            expect(onSubmit).toHaveBeenCalled()
-        })
+        handleOpen()
+        await userClickByTestId(screen, 'test-modal-submit')
+        expect(onSubmit).toHaveBeenCalled()
     })
 
     it('Calls onCancel prop when Cancel button is clicked', async () => {
@@ -114,11 +112,9 @@ describe('Modal', () => {
                 </Modal>
             </div>
         )
-        await waitFor(() => handleOpen())
-        userClickByTestId(screen, 'test-modal-cancel')
-        await waitFor(() => {
-            expect(onCancel).toHaveBeenCalled()
-        })
+        handleOpen()
+        await userClickByTestId(screen, 'test-modal-cancel')
+        expect(onCancel).toHaveBeenCalled()
     })
 
     it('renders onSubmitText prop string on Submit button when one is passed', async () => {
@@ -138,7 +134,7 @@ describe('Modal', () => {
                 </Modal>
             </div>
         )
-        await waitFor(() => handleOpen())
+        handleOpen()
         const onSubmitButton = await screen.findByTestId('test-modal-submit')
         expect(onSubmitButton).toHaveTextContent('Resubmit')
     })
@@ -159,7 +155,7 @@ describe('Modal', () => {
                 </Modal>
             </div>
         )
-        await waitFor(() => handleOpen())
+        handleOpen()
         const onSubmitButton = await screen.findByTestId('test-modal-submit')
         expect(onSubmitButton).toHaveTextContent('Submit')
     })
@@ -180,7 +176,7 @@ describe('Modal', () => {
                     </Modal>
                 </div>
             )
-            await waitFor(() => handleOpen())
+            handleOpen()
             await waitFor(() => {
                 expect(modalRef.current?.modalIsOpen).toBe(true)
                 expect(screen.getByRole('dialog')).toHaveClass('is-visible')
@@ -209,12 +205,10 @@ describe('Modal', () => {
                     </ModalToggleButton>
                 </div>
             )
-            userClickByTestId(screen, 'opener-button')
+            await userClickByTestId(screen, 'opener-button')
 
-            await waitFor(() => {
-                expect(modalRef.current?.modalIsOpen).toBe(true)
-                expect(screen.getByRole('dialog')).toHaveClass('is-visible')
-            })
+            expect(modalRef.current?.modalIsOpen).toBe(true)
+            expect(screen.getByRole('dialog')).toHaveClass('is-visible')
         })
 
         it('Closes modal via Cancel button click', async () => {
@@ -238,17 +232,13 @@ describe('Modal', () => {
                 </div>
             )
 
-            userClickByTestId(screen, 'opener-button')
+            await userClickByTestId(screen, 'opener-button')
 
-            await waitFor(() => {
-                expect(modalRef.current?.modalIsOpen).toBe(true)
-            })
+            expect(modalRef.current?.modalIsOpen).toBe(true)
 
-            userClickByTestId(screen, 'test-modal-cancel')
-            await waitFor(() => {
-                expect(modalRef.current?.modalIsOpen).toBe(false)
-                expect(screen.getByRole('dialog')).not.toHaveClass('is-visible')
-            })
+            await userClickByTestId(screen, 'test-modal-cancel')
+            expect(modalRef.current?.modalIsOpen).toBe(false)
+            expect(screen.getByRole('dialog')).not.toHaveClass('is-visible')
         })
 
         it('Closes modal via ESC key', async () => {
@@ -271,11 +261,9 @@ describe('Modal', () => {
                     </ModalToggleButton>
                 </div>
             )
-            userClickByTestId(screen, 'opener-button')
+            await userClickByTestId(screen, 'opener-button')
 
-            await waitFor(() => {
-                expect(modalRef.current?.modalIsOpen).toBe(true)
-            })
+            expect(modalRef.current?.modalIsOpen).toBe(true)
 
             await fireEvent.keyDown(screen.getByText(/Test Modal Title/i), {
                 key: 'Escape',
@@ -284,10 +272,8 @@ describe('Modal', () => {
                 charCode: 27,
             })
 
-            await waitFor(() => {
-                expect(modalRef.current?.modalIsOpen).toBe(false)
-                expect(screen.getByRole('dialog')).not.toHaveClass('is-visible')
-            })
+            expect(modalRef.current?.modalIsOpen).toBe(false)
+            expect(screen.getByRole('dialog')).not.toHaveClass('is-visible')
         })
 
         it('Closes modal via ref.current.toggleModal', async () => {
@@ -313,14 +299,10 @@ describe('Modal', () => {
                 </div>
             )
 
-            userClickByTestId(screen, 'opener-button')
-            await waitFor(() => {
-                expect(modalRef.current?.modalIsOpen).toBe(true)
-                expect(screen.getByRole('dialog')).toHaveClass('is-visible')
-                expect(
-                    screen.queryByTestId('modal-children')
-                ).toBeInTheDocument()
-            })
+            await userClickByTestId(screen, 'opener-button')
+            expect(modalRef.current?.modalIsOpen).toBe(true)
+            expect(screen.getByRole('dialog')).toHaveClass('is-visible')
+            expect(screen.queryByTestId('modal-children')).toBeInTheDocument()
 
             await waitFor(() => handleClose())
 
@@ -349,7 +331,7 @@ describe('Modal', () => {
                     </Modal>
                 </div>
             )
-            await waitFor(() => handleOpen())
+            handleOpen()
             expect(
                 await screen.findByText('This should be a modal alert')
             ).toBeInTheDocument()

@@ -128,7 +128,7 @@ describe('FileItemList component', () => {
         expect(tree).toMatchSnapshot()
     })
 
-    it('button actions in a list work as expected', () => {
+    it('button actions in a list work as expected', async () => {
         const fileItems = [uploadError]
         render(
             <FileItemsList
@@ -139,14 +139,18 @@ describe('FileItemList component', () => {
             />
         )
 
-        userEvent.click(screen.getByRole('button', { name: /Retry/ }))
+        void (await userEvent.click(
+            screen.getByRole('button', { name: /Retry/ })
+        ))
         expect(buttonActionProps.retryItem).toHaveBeenCalled()
 
-        userEvent.click(screen.getByRole('button', { name: /Remove/ }))
+        void (await userEvent.click(
+            screen.getByRole('button', { name: /Remove/ })
+        ))
         expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 
-    it('button actions in a table work as expected', () => {
+    it('button actions in a table work as expected', async () => {
         const fileItems = [uploadError]
         render(
             <FileItemsList
@@ -157,10 +161,10 @@ describe('FileItemList component', () => {
             />
         )
 
-        userEvent.click(screen.getByText('Retry'))
+        void (await userEvent.click(screen.getByText('Retry')))
         expect(buttonActionProps.retryItem).toHaveBeenCalled()
 
-        userEvent.click(screen.getByText('Remove'))
+        void (await userEvent.click(screen.getByText('Remove')))
         expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 

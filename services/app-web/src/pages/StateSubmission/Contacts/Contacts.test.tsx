@@ -151,7 +151,7 @@ describe('Contacts', () => {
         })
         const firstContactName = screen.getByLabelText('Name')
 
-        userEvent.type(firstContactName, 'First person')
+        void (await userEvent.type(firstContactName, 'First person'))
         expect(firstContactName).toHaveFocus()
 
         addStateContactButton.click()
@@ -185,7 +185,10 @@ describe('Contacts', () => {
         })
         const firstActuaryContactName = screen.getAllByLabelText('Name')[1]
 
-        userEvent.type(firstActuaryContactName, 'First actuary person')
+        void (await userEvent.type(
+            firstActuaryContactName,
+            'First actuary person'
+        ))
         expect(firstActuaryContactName).toHaveFocus()
 
         addActuaryContactButton.click()
@@ -221,19 +224,18 @@ describe('Contacts', () => {
         const addStateContactButton = screen.getByRole('button', {
             name: 'Add another state contact',
         })
-        addStateContactButton.click()
+        expect(addStateContactButton).toBeInTheDocument()
+        void (await userEvent.click(addStateContactButton))
 
-        await waitFor(() => {
-            expect(
-                screen.getByRole('button', { name: 'Remove contact' })
-            ).toBeInTheDocument()
+        expect(
+            screen.getByRole('button', { name: 'Remove contact' })
+        ).toBeInTheDocument()
 
-            userEvent.click(
-                screen.getByRole('button', { name: 'Remove contact' })
-            )
+        void (await userEvent.click(
+            screen.getByRole('button', { name: 'Remove contact' })
+        ))
 
-            expect(addStateContactButton).toHaveFocus()
-        })
+        expect(addStateContactButton).toHaveFocus()
     })
 
     it('after actuary contact "Remove contact" button click, should focus on add new actuary contact button', async () => {
@@ -251,19 +253,17 @@ describe('Contacts', () => {
         const addActuaryContactButton = screen.getByRole('button', {
             name: 'Add another actuary contact',
         })
-        addActuaryContactButton.click()
+        void (await userEvent.click(addActuaryContactButton))
 
-        await waitFor(() => {
-            expect(
-                screen.getByRole('button', { name: 'Remove contact' })
-            ).toBeInTheDocument()
+        expect(
+            screen.getByRole('button', { name: 'Remove contact' })
+        ).toBeInTheDocument()
 
-            userEvent.click(
-                screen.getByRole('button', { name: 'Remove contact' })
-            )
+        void (await userEvent.click(
+            screen.getByRole('button', { name: 'Remove contact' })
+        ))
 
-            expect(addActuaryContactButton).toHaveFocus()
-        })
+        expect(addActuaryContactButton).toHaveFocus()
     })
 
     it('when there are multiple state contacts, they should numbered', async () => {
@@ -327,94 +327,94 @@ describe('Contacts', () => {
         )
 
         // add state contact
-        userEvent.type(
+        void (await userEvent.type(
             screen.getAllByLabelText('Name')[0],
             'State Contact Person'
-        )
-        userEvent.type(
+        ))
+        void (await userEvent.type(
             screen.getAllByLabelText('Title/Role')[0],
             'State Contact Title'
-        )
-        userEvent.type(
+        ))
+        void (await userEvent.type(
             screen.getAllByLabelText('Email')[0],
             'statecontact@test.com'
-        )
+        ))
         expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
 
         // add actuary contact
-        userEvent.type(
+        void (await userEvent.type(
             screen.getAllByLabelText('Name')[1],
             'Actuary Contact Person'
-        )
-        userEvent.type(
+        ))
+        void (await userEvent.type(
             screen.getAllByLabelText('Title/Role')[1],
             'Actuary Contact Title'
-        )
-        userEvent.type(
+        ))
+        void (await userEvent.type(
             screen.getAllByLabelText('Email')[1],
             'actuarycontact@test.com'
-        )
+        ))
 
-        userEvent.click(screen.getAllByLabelText('Mercer')[0])
+        void (await userEvent.click(screen.getAllByLabelText('Mercer')[0]))
 
-        userEvent.click(
+        void (await userEvent.click(
             screen.getByText(
                 `OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`
             )
-        )
+        ))
 
         expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
 
         // Add additional state contact
-        userEvent.click(
+        void (await userEvent.click(
             screen.getByRole('button', {
                 name: /Add another state contact/,
             })
-        )
+        ))
 
-        userEvent.type(
+        void (await userEvent.type(
             screen.getAllByLabelText('Name')[1],
             'State Contact Person 2'
-        )
-        userEvent.type(
+        ))
+        void (await userEvent.type(
             screen.getAllByLabelText('Title/Role')[1],
             'State Contact Title 2'
-        )
-        userEvent.type(
+        ))
+        void (await userEvent.type(
             screen.getAllByLabelText('Email')[1],
             'statecontact2@test.com'
-        )
+        ))
         expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
 
         // Add additional actuary contact
-        userEvent.click(
+        void (await userEvent.click(
             screen.getByRole('button', {
                 name: /Add another actuary contact/,
             })
-        )
+        ))
 
-        userEvent.type(
+        void (await userEvent.type(
             screen.getAllByLabelText('Name')[1],
             'Actuary Contact Person 2'
-        )
-        userEvent.type(
+        ))
+        void (await userEvent.type(
             screen.getAllByLabelText('Title/Role')[1],
             'Actuary Contact Title 2'
-        )
-        userEvent.type(
+        ))
+        void (await userEvent.type(
             screen.getAllByLabelText('Email')[1],
             'actuarycontact2@test.com'
-        )
+        ))
         // Select additional actuarial firm
-        userEvent.click(screen.getAllByLabelText('Mercer')[1])
+        void (await userEvent.click(screen.getAllByLabelText('Mercer')[1]))
 
         // Remove additional state contact
         expect(
             screen.getAllByRole('button', { name: /Remove contact/ })
         ).toHaveLength(2) // there are two remove contact buttons on screen, one for state one for actuary
-        userEvent.click(
+        void (await userEvent.click(
             screen.getAllByRole('button', { name: /Remove contact/ })[0]
-        )
+        ))
 
         expect(screen.queryByText('State contact 2')).toBeNull()
 
@@ -423,9 +423,9 @@ describe('Contacts', () => {
             screen.getAllByRole('button', { name: /Remove contact/ })
         ).toHaveLength(1) // there is only 1 button on screen, for actuary
 
-        userEvent.click(
+        void (await userEvent.click(
             screen.getAllByRole('button', { name: /Remove contact/ })[0]
-        )
+        ))
 
         expect(screen.queryByText('Additional actuary contact 1')).toBeNull()
     })

@@ -148,8 +148,8 @@ describe('FieldYesNo component', () => {
         }
 
         // Click Yes for benefits and No for geo
-        userEvent.click(within(benefits).getByLabelText('Yes'))
-        userEvent.click(within(geo).getByLabelText('No'))
+        void (await userEvent.click(within(benefits).getByLabelText('Yes')))
+        void (await userEvent.click(within(geo).getByLabelText('No')))
 
         // The correct Yes or No or neither should be checked
         await waitFor(() => {
@@ -163,7 +163,9 @@ describe('FieldYesNo component', () => {
             expect(within(something).getByLabelText('No')).toBeChecked()
         })
 
-        userEvent.click(screen.getByRole('button', { name: 'Submit' }))
+        void (await userEvent.click(
+            screen.getByRole('button', { name: 'Submit' })
+        ))
 
         await waitFor(() => {
             expect(submittedValues).toEqual({

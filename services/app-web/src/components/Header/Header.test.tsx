@@ -53,7 +53,7 @@ describe('Header', () => {
                 const signInButton = screen.getByRole('link', {
                     name: /Sign In/i,
                 })
-                userEvent.click(signInButton)
+                void userEvent.click(signInButton)
                 expect(signInButton).toHaveAttribute('href', '/auth')
             })
         })
@@ -136,7 +136,7 @@ describe('Header', () => {
                     name: /Sign out/i,
                 })
                 expect(signOutButton).toBeInTheDocument()
-                userEvent.click(signOutButton)
+                void userEvent.click(signOutButton)
             })
 
             await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))
@@ -166,7 +166,7 @@ describe('Header', () => {
                 })
 
                 expect(signOutButton).toBeInTheDocument()
-                userEvent.click(signOutButton)
+                void userEvent.click(signOutButton)
             })
 
             await waitFor(() => expect(spy).toHaveBeenCalledTimes(1))

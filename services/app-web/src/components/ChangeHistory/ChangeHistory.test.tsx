@@ -139,15 +139,15 @@ describe('Change History', () => {
         ).toBeInTheDocument()
     })
 
-    it('should expand and collapse the accordion on click', () => {
+    it('should expand and collapse the accordion on click', async () => {
         render(<ChangeHistory submission={submissionData} />)
         expect(
             screen.getByText('Placeholder resubmission reason')
         ).not.toBeVisible()
         const accordionRows = screen.getAllByRole('button')
-        userEvent.click(accordionRows[0])
+        void (await userEvent.click(accordionRows[0]))
         expect(screen.getByText('Should be latest resubmission')).toBeVisible()
-        userEvent.click(accordionRows[0])
+        void (await userEvent.click(accordionRows[0]))
         expect(
             screen.getByText('Should be latest resubmission')
         ).not.toBeVisible()

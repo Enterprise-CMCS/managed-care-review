@@ -56,7 +56,7 @@ describe('ExpandableText', () => {
         expect(screen.getByText('Show More')).toBeInTheDocument()
     })
 
-    it('can expand and contract clamped text to show more or less text', () => {
+    it('can expand and contract clamped text to show more or less text', async () => {
         setMockRefElement(clamped2Lines)
         render(
             <ExpandableText>
@@ -66,7 +66,7 @@ describe('ExpandableText', () => {
         expect(screen.getByText('Show More')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toHaveClass('textContracted')
-        userEvent.click(screen.getByText('Show More'))
+        void (await userEvent.click(screen.getByText('Show More')))
         expect(screen.getByText('Show Less')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toHaveClass('textExpanded')
     })
@@ -98,7 +98,7 @@ describe('ExpandableText', () => {
         expect(screen.getByText('Show More')).toBeInTheDocument()
     })
 
-    it('can expand and contract clamped text inside react element to show more or less text', () => {
+    it('can expand and contract clamped text inside react element to show more or less text', async () => {
         setMockRefElement(clamped2Lines)
         render(
             <ExpandableText>
@@ -111,7 +111,7 @@ describe('ExpandableText', () => {
         expect(screen.getByText('Show More')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toHaveClass('textContracted')
-        userEvent.click(screen.getByText('Show More'))
+        void (await userEvent.click(screen.getByText('Show More')))
         expect(screen.getByText('Show Less')).toBeInTheDocument()
         expect(screen.getByTestId('clampElement')).toHaveClass('textExpanded')
     })
