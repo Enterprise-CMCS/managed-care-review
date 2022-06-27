@@ -1,5 +1,6 @@
 import {
     testEmailConfig,
+    testStateAnalystsEmails,
     mockContractAmendmentFormData,
     mockContractOnlyFormData,
     mockContractAndRatesFormData,
@@ -18,11 +19,6 @@ import {
 } from './'
 import { formatRateNameDate } from '../../../app-web/src/common-code/dateHelpers'
 import { unlockedWithFullContracts } from '../../../app-web/src/common-code/healthPlanFormDataMocks'
-
-const stateAnalystEmails = [
-    '"MN State Analyst 1" <MNStateAnalyst1@example.com>',
-    '"MN State Analyst 2" <MNStateAnalyst2@example.com>',
-]
 
 describe('Email templates', () => {
     describe('CMS email', () => {
@@ -241,6 +237,7 @@ describe('Email templates', () => {
         })
         it('includes state specific analyst on contract only submission', () => {
             const sub = mockContractAndRatesFormData()
+            const stateAnalystEmails = testStateAnalystsEmails()
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
@@ -261,6 +258,7 @@ describe('Email templates', () => {
         })
         it('includes state specific analyst on contract and rate submission', () => {
             const sub = mockContractAndRatesFormData()
+            const stateAnalystEmails = testStateAnalystsEmails()
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
@@ -282,6 +280,7 @@ describe('Email templates', () => {
         })
         it('does not include state specific analyst on contract and rate submission', () => {
             const sub = mockContractAndRatesFormData()
+            const stateAnalystEmails = testStateAnalystsEmails()
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
@@ -339,6 +338,7 @@ describe('Email templates', () => {
         it('CHIP contract only submission does include state specific analysts emails', () => {
             const sub = mockContractOnlyFormData()
             sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
+            const stateAnalystEmails = testStateAnalystsEmails()
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
@@ -356,6 +356,7 @@ describe('Email templates', () => {
         it('CHIP contract and rate submission does include state specific analysts emails', () => {
             const sub = mockContractAndRatesFormData()
             sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
+            const stateAnalystEmails = testStateAnalystsEmails()
             const template = newPackageCMSEmail(
                 sub,
                 'some-title',
@@ -670,6 +671,7 @@ describe('Email templates', () => {
         }
         const submission = mockUnlockedContractAndRatesFormData()
         const rateName = 'test-rate-name'
+        const stateAnalystEmails = testStateAnalystsEmails()
         const template = unlockPackageCMSEmail(
             submission,
             unlockData,
@@ -1045,6 +1047,7 @@ describe('Email templates', () => {
             updatedReason: 'Added rate certification.',
         }
         const submission = mockContractAndRatesFormData()
+        const stateAnalystEmails = testStateAnalystsEmails()
         const template = resubmittedCMSEmail(
             submission,
             resubmitData,
@@ -1178,6 +1181,7 @@ describe('Email templates', () => {
             updatedReason: 'Added more contract details.',
         }
         const submission = mockContractOnlyFormData()
+        const stateAnalystEmails = testStateAnalystsEmails()
         const contractOnlyTemplate = resubmittedCMSEmail(
             submission,
             resubmitData,

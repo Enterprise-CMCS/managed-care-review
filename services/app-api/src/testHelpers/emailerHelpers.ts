@@ -31,6 +31,11 @@ const testEmailConfig: EmailConfiguration = {
     ratesReviewSharedEmails: ['ratesreview@example.com'],
 }
 
+const testStateAnalystsEmails = () => [
+    '"MN State Analyst 1" <MNStateAnalyst1@example.com>',
+    '"MN State Analyst 2" <MNStateAnalyst2@example.com>',
+]
+
 const submissionName = 'MN-PMAP-0001'
 
 const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
@@ -400,6 +405,7 @@ const mockContractAmendmentFormData = (
 
 export {
     testEmailConfig,
+    testStateAnalystsEmails,
     mockContractAmendmentFormData,
     mockContractOnlyFormData,
     mockContractAndRatesFormData,
