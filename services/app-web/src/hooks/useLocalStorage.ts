@@ -6,33 +6,39 @@ type LocalStorage = {
     value: string | string[] | boolean | object | null
 }
 
-type UseLocalStorage = [LocalStorage['value'], (value: string | null) => void]
+type UseLocalStorage = [
+    LocalStorage['value'],
+    (value: LocalStorage['value']) => void
+]
 // Get and set keys in local storage. If key is set to a value of null, clear and remove from local storage, return default fallback value
 function useLocalStorage(
     key: LocalStorage['key'],
     defaultValue: LocalStorage['value']
 ): UseLocalStorage {
-    const [storedValue, setStoredValue] = useState<string | null>(() => {
-        if (typeof window === 'undefined') {
-            recordJSException(
-                'Unable to find local storage. window is undefined'
-            )
-            return defaultValue
-        }
+    const [storedValue, setStoredValue] = useState<LocalStorage['value']>(
+        () => {
+            if (typeof window === 'undefined') {
+                recordJSException(
+                    'Unable to find local storage. window is undefined'
+                )
+                return defaultValue
+            }
 
-        let value
-        try {
-            value = JSON.parse(
-                window.localStorage.getItem(key) || JSON.stringify(defaultValue)
-            )
-        } catch (error) {
-            recordJSException(
-                `Unable to set local storage. Error message: ${error}`
-            )
-            value = defaultValue
+            let value
+            try {
+                value = JSON.parse(
+                    window.localStorage.getItem(key) ||
+                        JSON.stringify(defaultValue)
+                )
+            } catch (error) {
+                recordJSException(
+                    `Unable to set local storage. Error message: ${error}`
+                )
+                value = defaultValue
+            }
+            return value
         }
-        return value
-    })
+    )
 
     useEffect(() => {
         if (storedValue === null) {
