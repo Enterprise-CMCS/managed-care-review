@@ -3,7 +3,7 @@ import { logError } from '../logger'
 import { setErrorAttributesOnActiveSpan } from '../resolvers/attributeHelper'
 import { getParameterStore } from './parameterStore'
 
-export const getStateAnalystEmailsStore = async (
+export const getStateAnalystEmails = async (
     stateCode: string,
     span?: Context['span'],
     operation?: string
@@ -13,7 +13,7 @@ export const getStateAnalystEmailsStore = async (
     )
     if (analystsParameterStore instanceof Error) {
         logError(
-            operation || 'getStateAnalystEmailsStore',
+            operation || 'getStateAnalystEmails',
             analystsParameterStore.message
         )
         setErrorAttributesOnActiveSpan(analystsParameterStore.message, span)

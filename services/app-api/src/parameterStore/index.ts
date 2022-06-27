@@ -1,2 +1,2 @@
 export { getParameterStore } from './parameterStore'
-export { getStateAnalystEmailsStore } from './getStateAnalystEmailsStore'
+export { getStateAnalystEmails } from './getStateAnalystEmails'

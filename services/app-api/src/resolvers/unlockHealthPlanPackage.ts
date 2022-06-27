@@ -20,7 +20,7 @@ import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
-import { getStateAnalystEmailsStore } from '../parameterStore'
+import { getStateAnalystEmails } from '../parameterStore'
 
 // unlock is a state machine transforming a LockedFormDatya and turning it into UnlockedFormData
 // Since Unlocked is a strict subset of Locked, this can't error today.
@@ -138,7 +138,7 @@ export function unlockHealthPlanPackageResolver(
         // Send emails!
         const name = packageName(draft, programs)
         const stateAnalystsEmails: StateAnalystsEmails =
-            await getStateAnalystEmailsStore(
+            await getStateAnalystEmails(
                 draft.stateCode,
                 span,
                 'unlockHealthPlanPackage'

@@ -26,7 +26,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import { getStateAnalystEmailsStore } from '../parameterStore'
+import { getStateAnalystEmails } from '../parameterStore'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
@@ -259,7 +259,7 @@ export function submitHealthPlanPackageResolver(
         const name = packageName(lockedFormData, programs)
         const status = packageStatus(updatedPackage)
         const stateAnalystsEmails: StateAnalystsEmails =
-            await getStateAnalystEmailsStore(
+            await getStateAnalystEmails(
                 updatedPackage.stateCode,
                 span,
                 'submitHealthPlanPackage'
