@@ -6,7 +6,7 @@ import {
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { UserType } from '../domain-models'
 import { formatCalendarDate } from '../../../app-web/src/common-code/dateHelpers'
-import { EmailConfiguration, EmailData } from './'
+import { EmailConfiguration, EmailData, StateAnalystsEmails } from './'
 import { generateRateName } from '../../../app-web/src/common-code/healthPlanFormDataType'
 
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
@@ -46,14 +46,21 @@ const includesChipPrograms = (programIDs: string[]): boolean => {
 
 const generateReviewerEmails = (
     config: EmailConfiguration,
-    submission: LockedHealthPlanFormDataType | UnlockedHealthPlanFormDataType
+    submission: LockedHealthPlanFormDataType | UnlockedHealthPlanFormDataType,
+    stateAnalystsEmails: StateAnalystsEmails
 ): string[] => {
+    //Combine CMS emails along with State specific analyst emails.
+    const cmsReviewSharedEmails = [
+        ...config.cmsReviewSharedEmails,
+        ...stateAnalystsEmails,
+    ]
+
     //chipReviewerEmails does not include OACT and DMCP emails
-    const chipReviewerEmails = config.cmsReviewSharedEmails.filter(
+    const chipReviewerEmails = cmsReviewSharedEmails.filter(
         (email) => email !== config.cmsRateHelpEmailAddress
     )
     const contractAndRateReviewerEmails = [
-        ...config.cmsReviewSharedEmails,
+        ...cmsReviewSharedEmails,
         ...config.ratesReviewSharedEmails,
     ]
 
@@ -66,7 +73,8 @@ const generateReviewerEmails = (
     } else if (includesChipPrograms(submission.programIDs)) {
         return chipReviewerEmails
     }
-    return config.cmsReviewSharedEmails
+
+    return cmsReviewSharedEmails
 }
 
 const generateNewSubmissionBody = (
@@ -146,11 +154,16 @@ const generateNewSubmissionBody = (
 const newPackageCMSEmail = (
     submission: LockedHealthPlanFormDataType,
     submissionName: string,
-    config: EmailConfiguration
+    config: EmailConfiguration,
+    stateAnalystsEmails: StateAnalystsEmails
 ): EmailData => {
     // config
     const isTestEnvironment = config.stage !== 'prod'
-    const reviewerEmails = generateReviewerEmails(config, submission)
+    const reviewerEmails = generateReviewerEmails(
+        config,
+        submission,
+        stateAnalystsEmails
+    )
     const bodyHTML = `Managed Care submission: <b>${submissionName}</b> was received from <b>${
         submission.stateCode
     }</b>.
@@ -237,16 +250,22 @@ type UpdatedEmailData = {
     updatedBy: string
     updatedAt: Date
     updatedReason: string
+    stateAnalystsEmail?: string[]
 }
 
 const unlockPackageCMSEmail = (
     submission: UnlockedHealthPlanFormDataType,
     unlockData: UpdatedEmailData,
     config: EmailConfiguration,
-    rateName: string
+    rateName: string,
+    stateAnalystsEmails: StateAnalystsEmails
 ): EmailData => {
     const isTestEnvironment = config.stage !== 'prod'
-    const reviewerEmails = generateReviewerEmails(config, submission)
+    const reviewerEmails = generateReviewerEmails(
+        config,
+        submission,
+        stateAnalystsEmails
+    )
     const rateNameText =
         submission.submissionType === 'CONTRACT_AND_RATES'
             ? `<b>Rate name</b>: ${rateName}<br />`
@@ -361,9 +380,14 @@ const resubmittedStateEmail = (
 const resubmittedCMSEmail = (
     submission: LockedHealthPlanFormDataType,
     resubmittedData: UpdatedEmailData,
-    config: EmailConfiguration
+    config: EmailConfiguration,
+    stateAnalystsEmails: StateAnalystsEmails
 ): EmailData => {
-    const reviewerEmails = generateReviewerEmails(config, submission)
+    const reviewerEmails = generateReviewerEmails(
+        config,
+        submission,
+        stateAnalystsEmails
+    )
     const submissionURL = new URL(
         `submissions/${submission.id}`,
         config.baseUrl
@@ -407,6 +431,7 @@ export {
     unlockPackageStateEmail,
     resubmittedStateEmail,
     resubmittedCMSEmail,
-    UpdatedEmailData,
     CHIP_PROGRAMS_UUID,
 }
+
+export type { UpdatedEmailData }
