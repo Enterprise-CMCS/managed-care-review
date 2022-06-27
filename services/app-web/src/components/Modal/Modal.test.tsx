@@ -35,17 +35,18 @@ describe('Modal', () => {
         )
 
         await waitFor(() => handleOpen())
-
-        expect(screen.getByRole('dialog')).toHaveClass('is-visible')
-        expect(
-            screen.getByRole('heading', { name: 'Test Modal Title' })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('button', { name: 'Cancel' })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('button', { name: 'Submit' })
-        ).toBeInTheDocument()
+        await waitFor(() => {
+            expect(screen.getByRole('dialog')).toHaveClass('is-visible')
+            expect(
+                screen.getByRole('heading', { name: 'Test Modal Title' })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('button', { name: 'Cancel' })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('button', { name: 'Submit' })
+            ).toBeInTheDocument()
+        })
     })
 
     it('Renders open modal with passed in cancel button text', async () => {
@@ -66,11 +67,12 @@ describe('Modal', () => {
         )
 
         await waitFor(() => handleOpen())
-
-        expect(screen.getByRole('dialog')).toHaveClass('is-visible')
-        expect(
-            screen.getByRole('button', { name: 'Cancel Button Test' })
-        ).toBeInTheDocument()
+        await waitFor(() => {
+            expect(screen.getByRole('dialog')).toHaveClass('is-visible')
+            expect(
+                screen.getByRole('button', { name: 'Cancel Button Test' })
+            ).toBeInTheDocument()
+        })
     })
 
     it('Calls onSubmit prop when Submit button is clicked', async () => {
@@ -91,7 +93,9 @@ describe('Modal', () => {
         )
         await waitFor(() => handleOpen())
         userClickByTestId(screen, 'test-modal-submit')
-        expect(onSubmit).toHaveBeenCalled()
+        await waitFor(() => {
+            expect(onSubmit).toHaveBeenCalled()
+        })
     })
 
     it('Calls onCancel prop when Cancel button is clicked', async () => {
@@ -112,7 +116,9 @@ describe('Modal', () => {
         )
         await waitFor(() => handleOpen())
         userClickByTestId(screen, 'test-modal-cancel')
-        expect(onCancel).toHaveBeenCalled()
+        await waitFor(() => {
+            expect(onCancel).toHaveBeenCalled()
+        })
     })
 
     it('renders onSubmitText prop string on Submit button when one is passed', async () => {
@@ -175,11 +181,12 @@ describe('Modal', () => {
                 </div>
             )
             await waitFor(() => handleOpen())
-
-            expect(modalRef.current?.modalIsOpen).toBe(true)
-            expect(screen.getByRole('dialog')).toHaveClass('is-visible')
-            expect(screen.getByText('Test Modal Title')).toBeInTheDocument()
-            expect(screen.getByTestId('textarea')).toBeInTheDocument()
+            await waitFor(() => {
+                expect(modalRef.current?.modalIsOpen).toBe(true)
+                expect(screen.getByRole('dialog')).toHaveClass('is-visible')
+                expect(screen.getByText('Test Modal Title')).toBeInTheDocument()
+                expect(screen.getByTestId('textarea')).toBeInTheDocument()
+            })
         })
 
         it('Opens modal via opener button click', async () => {

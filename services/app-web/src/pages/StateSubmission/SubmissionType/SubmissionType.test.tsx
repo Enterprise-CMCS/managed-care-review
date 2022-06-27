@@ -189,9 +189,9 @@ describe('SubmissionType', () => {
             selectEvent.openMenu(combobox)
         })
 
-        expect(await screen.getByText('Program 3')).toBeInTheDocument()
+        // expect(await screen.getByText('Program 3')).toBeInTheDocument()
 
-        await waitFor(async () => {
+        await (async () => {
             await selectEvent.select(combobox, 'Program 1')
             await selectEvent.select(combobox, 'Program 3')
         })

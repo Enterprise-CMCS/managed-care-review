@@ -6,6 +6,7 @@ import {
     Screen,
     queries,
     ByRoleMatcher,
+    prettyDOM,
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
@@ -61,6 +62,14 @@ const WithLocation = ({
     const location = useLocation()
     setLocation(location)
     return null
+}
+
+const debugLog = (label: string, element: HTMLElement): void => {
+    console.log(
+        `${label}:
+    `,
+        prettyDOM(element)
+    )
 }
 
 /* User Events */
@@ -147,6 +156,7 @@ export {
     fakeRequest,
     dragAndDrop,
     renderWithProviders,
+    debugLog,
     userClickByRole,
     userClickByTestId,
     userClickSignIn,
