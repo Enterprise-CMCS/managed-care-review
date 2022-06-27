@@ -1,13 +1,10 @@
 import { SSM } from 'aws-sdk'
-import { logError } from '../logger'
-import { setErrorAttributesOnActiveSpan } from '../resolvers/attributeHelper'
-import { Context } from '../handlers/apollo_gql'
 
 type GetParameterResult = SSM.GetParameterResult
 
-const getParameterStore = async (name: string): Promise<string | Error> => {
-    const ssm = new SSM({ region: 'us-east-1' })
+const ssm = new SSM({ region: 'us-east-1' })
 
+const getParameterStore = async (name: string): Promise<string | Error> => {
     const params = {
         Name: name,
     }
@@ -33,21 +30,4 @@ const getParameterStore = async (name: string): Promise<string | Error> => {
     }
 }
 
-const getStateAnalystEmailsStore = async (
-    stateCode: string,
-    span: Context['span'],
-    operation: string
-): Promise<string[]> => {
-    const analystsParameterStore = await getParameterStore(
-        `/configuration/${stateCode}/stateanalysts/email`
-    )
-    if (analystsParameterStore instanceof Error) {
-        logError(operation, analystsParameterStore.message)
-        setErrorAttributesOnActiveSpan(analystsParameterStore.message, span)
-        return []
-    } else {
-        return analystsParameterStore.split(',')
-    }
-}
-
-export { getParameterStore, getStateAnalystEmailsStore }
+export { getParameterStore }
