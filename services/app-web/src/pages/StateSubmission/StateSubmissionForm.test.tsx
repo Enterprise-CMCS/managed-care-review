@@ -9,6 +9,7 @@ import {
     mockDraftHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
     mockUnlockedHealthPlanPackageWithDocuments,
+    updateHealthPlanFormDataMockError,
     updateHealthPlanFormDataMockSuccess,
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
@@ -446,9 +447,7 @@ describe('StateSubmissionForm', () => {
             expect(loading).toBeInTheDocument()
         })
 
-        //Shows a generic error updating submission
-        //TODO: Finish this test
-        it('shows a generic error updating submission', async () => {
+        it('shows a generic error when updating submission fails', async () => {
             const mockSubmission = mockDraftHealthPlanPackage({
                 submissionDescription:
                     'A real submission but updated something',
@@ -479,10 +478,10 @@ describe('StateSubmissionForm', () => {
                                 id: '15',
                                 statusCode: 200,
                             }),
-                            updateHealthPlanFormDataMockSuccess({
+                            updateHealthPlanFormDataMockError({
                                 id: '15',
-                                pkg: mockSubmission,
                                 updatedFormData,
+                                statusCode: 403,
                             }),
                         ],
                     },
@@ -503,11 +502,13 @@ describe('StateSubmissionForm', () => {
             const continueButton = await screen.findByRole('button', {
                 name: 'Continue',
             })
+            expect(continueButton).toBeInTheDocument()
             continueButton.click()
+
+            await waitFor(() => {
+                expect(screen.getByText('System error')).toBeInTheDocument()
+            })
         })
-        //Shows generic 404 error page
-        //Shows MALFORMATTED_DATA error
-        //Shows WRONG_SUBMISSION_STATUS
     })
 
     describe('the delete button', () => {
