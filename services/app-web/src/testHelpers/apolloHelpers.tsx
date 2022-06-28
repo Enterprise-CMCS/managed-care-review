@@ -859,9 +859,7 @@ const updateHealthPlanFormDataMockSuccess = ({
     }
 }
 
-//TODO: Finish up this mock.
 const updateHealthPlanFormDataMockError = ({
-    pkg = mockUnlockedHealthPlanPackage(),
     updatedFormData,
     id,
     statusCode,
@@ -878,7 +876,7 @@ const updateHealthPlanFormDataMockError = ({
                         },
                     },
                 },
-                result: { data: { updateHealthPlanFormData: { pkg } } },
+                result: { data: undefined },
             }
         case 403:
             return {
