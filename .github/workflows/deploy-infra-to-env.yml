@@ -53,7 +53,7 @@ jobs:
           IAM_PATH: ${{ secrets.iam_path }}
           FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
         run: |
-          pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name }} --enforce-hash-update
+          pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   ui:
     if: ${{ contains(inputs.changed_services, 'ui') }}
