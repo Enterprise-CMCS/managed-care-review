@@ -90,7 +90,7 @@ describe('Cognito Login', () => {
         await waitFor(() => expect(loginButton).not.toBeDisabled())
     })
 
-    it.skip('when login is clicked, button is disabled while loading', async () => {
+    it.only('when login is clicked, button is disabled while loading', async () => {
         const loginSpy = jest.spyOn(CognitoAuthApi, 'signIn').mockResolvedValue(
             new CognitoUser({
                 Username: 'foo@example.com',
@@ -118,10 +118,9 @@ describe('Cognito Login', () => {
 
         await waitFor(() => expect(loginButton).not.toBeDisabled())
 
-        await userClickByRole(screen, 'button', { name: 'Login' })
-
-        await waitFor(() => expect(loginSpy).toHaveBeenCalledTimes(1))
+        void (await userClickByRole(screen, 'button', { name: 'Login' }))
         await waitFor(() => expect(loginButton).toBeDisabled())
+        await waitFor(() => expect(loginSpy).toHaveBeenCalledTimes(1))
     })
 
     it('when login is successful, redirect to /', async () => {

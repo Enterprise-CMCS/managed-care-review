@@ -64,11 +64,11 @@ const WithLocation = ({
     return null
 }
 
-const debugLog = (label: string, element: HTMLElement): void => {
+const prettyDebug = (label?: string, element?: HTMLElement): void => {
     console.log(
-        `${label}:
+        `${label ?? 'body'}:
     `,
-        prettyDOM(element)
+        prettyDOM(element ?? document.body)
     )
 }
 
@@ -156,7 +156,7 @@ export {
     fakeRequest,
     dragAndDrop,
     renderWithProviders,
-    debugLog,
+    prettyDebug,
     userClickByRole,
     userClickByTestId,
     userClickSignIn,

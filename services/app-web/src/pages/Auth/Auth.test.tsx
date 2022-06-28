@@ -135,10 +135,10 @@ describe('Auth', () => {
             )
 
             await userLogin(screen)
-            // await waitFor(() => {
-            expect(loginSpy).toHaveBeenCalledTimes(1)
-            expect(location.pathname).toBe('/auth')
-            // })
+            await waitFor(() => {
+                expect(loginSpy).toHaveBeenCalledTimes(1)
+                expect(testLocation.pathname).toBe('/auth')
+            })
         })
     })
 
@@ -207,7 +207,7 @@ describe('Auth', () => {
                 expect(tophButton).toBeEnabled()
             })
 
-            userClickByTestId(screen, 'TophButton')
+            await userClickByTestId(screen, 'TophButton')
 
             await waitFor(() => {
                 expect(testLocation.pathname).toBe('/')
@@ -235,7 +235,7 @@ describe('Auth', () => {
                 }
             )
 
-            userClickByTestId(screen, 'TophButton')
+            await userClickByTestId(screen, 'TophButton')
             await waitFor(() => {
                 expect(testLocation.pathname).toBe('/auth')
             })

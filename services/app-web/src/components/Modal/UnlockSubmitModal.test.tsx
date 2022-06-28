@@ -14,7 +14,7 @@ import {
     mockUnlockedHealthPlanPackage,
 } from '../../testHelpers/apolloHelpers'
 import { UnlockSubmitModal } from './UnlockSubmitModal'
-import { debugLog, renderWithProviders } from '../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { Location } from 'history'
 
 describe('UnlockSubmitModal', () => {
@@ -223,7 +223,7 @@ describe('UnlockSubmitModal', () => {
             expect(textbox).toHaveFocus()
         })
 
-        it.only('displays no modal alert banner error if unlock api request succeeds', async () => {
+        it('displays no modal alert banner error if unlock api request succeeds', async () => {
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
                 modalRef.current?.toggleModal(undefined, true)
@@ -411,7 +411,7 @@ describe('UnlockSubmitModal', () => {
             // check focus after error
             expect(textbox).toHaveFocus()
         })
-        it.skip('redirects if submission succeeds on unlocked plan package', async () => {
+        it('redirects if submission succeeds on unlocked plan package', async () => {
             let testLocation: Location
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
@@ -443,8 +443,8 @@ describe('UnlockSubmitModal', () => {
                 }
             )
             await waitFor(() => handleOpen())
-            // const dialog = await waitFor(() => screen.getByRole('dialog'))
-            // await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
 
             void (await userEvent.type(
                 screen.getByTestId('unlockSubmitModalInput'),
@@ -454,12 +454,9 @@ describe('UnlockSubmitModal', () => {
             void (await userEvent.click(
                 screen.getByTestId('resubmit-modal-submit')
             ))
-            const refreshedDialog = await waitFor(() =>
-                screen.getByRole('dialog')
-            )
-            debugLog('refreshedDialog: ', refreshedDialog)
+
             await waitFor(() =>
-                expect(refreshedDialog).toHaveClass('is-hidden')
+                expect(screen.getByRole('dialog')).toHaveClass('is-hidden')
             )
             await waitFor(() =>
                 expect(mockSetIsSubmitting).toHaveBeenCalledTimes(2)
