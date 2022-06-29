@@ -145,9 +145,9 @@ describe('Change History', () => {
             screen.getByText('Placeholder resubmission reason')
         ).not.toBeVisible()
         const accordionRows = screen.getAllByRole('button')
-        void (await userEvent.click(accordionRows[0]))
+        await userEvent.click(accordionRows[0])
         expect(screen.getByText('Should be latest resubmission')).toBeVisible()
-        void (await userEvent.click(accordionRows[0]))
+        await userEvent.click(accordionRows[0])
         expect(
             screen.getByText('Should be latest resubmission')
         ).not.toBeVisible()

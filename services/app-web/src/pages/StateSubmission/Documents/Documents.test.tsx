@@ -66,7 +66,7 @@ describe('Documents', () => {
             'Upload any additional supporting documents'
         )
         expect(input).toBeInTheDocument()
-        void (await userEvent.upload(input, [TEST_DOC_FILE]))
+        await userEvent.upload(input, [TEST_DOC_FILE])
 
         expect(await screen.findByText(TEST_DOC_FILE.name)).toBeInTheDocument()
     })
@@ -198,9 +198,9 @@ describe('Documents', () => {
             const input = screen.getByLabelText(
                 'Upload any additional supporting documents'
             )
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
-            void (await userEvent.upload(input, [TEST_PDF_FILE]))
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_PDF_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
                 expect(screen.queryAllByText(TEST_PDF_FILE.name)).toHaveLength(
@@ -235,7 +235,7 @@ describe('Documents', () => {
                 'Upload any additional supporting documents'
             )
 
-            void (await userEvent.upload(input, [TEST_XLS_FILE]))
+            await userEvent.upload(input, [TEST_XLS_FILE])
 
             await waitFor(() => {
                 expect(
@@ -244,8 +244,8 @@ describe('Documents', () => {
                 expect(screen.queryAllByRole('row')).toHaveLength(2)
             })
             // note: userEvent.upload does not re-trigger input event when selected files are the same as before, this is why we upload nothing in between
-            void (await userEvent.upload(input, []))
-            void (await userEvent.upload(input, [TEST_XLS_FILE]))
+            await userEvent.upload(input, [])
+            await userEvent.upload(input, [TEST_XLS_FILE])
 
             await waitFor(() => {
                 expect(
@@ -254,8 +254,8 @@ describe('Documents', () => {
                 expect(screen.queryAllByRole('row')).toHaveLength(3)
             })
 
-            void (await userEvent.upload(input, []))
-            void (await userEvent.upload(input, [TEST_XLS_FILE]))
+            await userEvent.upload(input, [])
+            await userEvent.upload(input, [TEST_XLS_FILE])
 
             await waitFor(() => {
                 expect(
@@ -284,9 +284,9 @@ describe('Documents', () => {
             const input = screen.getByLabelText(
                 'Upload any additional supporting documents'
             )
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
-            void (await userEvent.upload(input, [TEST_PDF_FILE]))
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_PDF_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
                 expect(screen.queryAllByText(TEST_PDF_FILE.name)).toHaveLength(
@@ -301,7 +301,7 @@ describe('Documents', () => {
             })
 
             // Remove duplicate document and remove error
-            void (await userEvent.click(screen.queryAllByText(/Remove/)[0]))
+            await userEvent.click(screen.queryAllByText(/Remove/)[0])
             expect(
                 await screen.queryAllByText(TEST_DOC_FILE.name)
             ).toHaveLength(1)
@@ -331,8 +331,8 @@ describe('Documents', () => {
             const input = screen.getByLabelText(
                 'Upload any additional supporting documents'
             )
-            void (await userEvent.upload(input, [TEST_PDF_FILE]))
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_PDF_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
                 expect(
@@ -397,9 +397,9 @@ describe('Documents', () => {
                 'Upload any additional supporting documents'
             )
 
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
-            void (await userEvent.upload(input, [TEST_PDF_FILE]))
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_PDF_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
                 // error summary messages don't appear on load
@@ -453,7 +453,7 @@ describe('Documents', () => {
                 'Upload any additional supporting documents'
             )
 
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
                 expect(continueButton).not.toHaveAttribute('aria-disabled')
@@ -486,7 +486,7 @@ describe('Documents', () => {
             )
             const targetEl = screen.getByTestId('file-input-droptarget')
 
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
             dragAndDrop(targetEl, [TEST_PNG_FILE])
 
             await waitFor(() => {
@@ -521,16 +521,16 @@ describe('Documents', () => {
                 name: 'Save as draft',
             })
 
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
-            void (await userEvent.upload(input, [TEST_PDF_FILE]))
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_PDF_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
                 expect(
                     screen.queryAllByText('Duplicate file, please remove')
                 ).toHaveLength(1)
             })
-            void (await userEvent.click(saveAsDraftButton))
+            await userEvent.click(saveAsDraftButton)
             await waitFor(() => {
                 expect(mockUpdateDraftFn).not.toHaveBeenCalled()
                 const errorMessage = screen.getByText(
@@ -568,7 +568,7 @@ describe('Documents', () => {
             })
             expect(continueButton).not.toHaveAttribute('aria-disabled')
 
-            void (await userEvent.click(continueButton))
+            await userEvent.click(continueButton)
             expect(
                 screen.queryByText('You must upload at least one document')
             ).toBeNull()
@@ -602,7 +602,7 @@ describe('Documents', () => {
             )
             const targetEl = screen.getByTestId('file-input-droptarget')
 
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
             dragAndDrop(targetEl, [TEST_PNG_FILE])
 
             await waitFor(() => {
@@ -611,7 +611,7 @@ describe('Documents', () => {
                 ).toBeInTheDocument()
             })
 
-            void (await userEvent.click(continueButton))
+            await userEvent.click(continueButton)
             expect(
                 screen.queryByText(
                     'You must remove all documents with error messages before continuing'
@@ -691,7 +691,7 @@ describe('Documents', () => {
                 'Upload any additional supporting documents'
             )
 
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
                 expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
@@ -724,7 +724,7 @@ describe('Documents', () => {
             )
             const targetEl = screen.getByTestId('file-input-droptarget')
 
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
             dragAndDrop(targetEl, [TEST_PNG_FILE])
 
             await waitFor(() => {
@@ -755,7 +755,7 @@ describe('Documents', () => {
             })
             expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
 
-            void (await userEvent.click(saveAsDraftButton))
+            await userEvent.click(saveAsDraftButton)
             expect(mockUpdateDraftFn).toHaveBeenCalled()
             expect(
                 screen.queryByText('You must upload at least one document')
@@ -785,16 +785,16 @@ describe('Documents', () => {
                 name: 'Save as draft',
             })
 
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
-            void (await userEvent.upload(input, [TEST_PDF_FILE]))
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_PDF_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
                 expect(
                     screen.queryAllByText('Duplicate file, please remove')
                 ).toHaveLength(1)
             })
-            void (await userEvent.click(saveAsDraftButton))
+            await userEvent.click(saveAsDraftButton)
             await waitFor(() => {
                 const errorMessage = screen.getByText(
                     'You must remove duplicate files'
@@ -835,7 +835,7 @@ describe('Documents', () => {
                 'Upload any additional supporting documents'
             )
 
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
                 expect(backButton).not.toHaveAttribute('aria-disabled')
@@ -868,7 +868,7 @@ describe('Documents', () => {
             )
             const targetEl = screen.getByTestId('file-input-droptarget')
 
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
             dragAndDrop(targetEl, [TEST_PNG_FILE])
 
             await waitFor(() => {
@@ -899,7 +899,7 @@ describe('Documents', () => {
             })
             expect(backButton).not.toHaveAttribute('aria-disabled')
 
-            void (await userEvent.click(backButton))
+            await userEvent.click(backButton)
             expect(
                 screen.queryByText('You must upload at least one document')
             ).toBeNull()
@@ -930,16 +930,16 @@ describe('Documents', () => {
                 name: 'Back',
             })
 
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
-            void (await userEvent.upload(input, [TEST_PDF_FILE]))
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_PDF_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
             await waitFor(() => {
                 expect(backButton).not.toHaveAttribute('aria-disabled')
                 expect(
                     screen.queryAllByText('Duplicate file, please remove')
                 ).toHaveLength(1)
             })
-            void (await userEvent.click(backButton))
+            await userEvent.click(backButton)
             expect(screen.queryByText('Remove files with errors')).toBeNull()
             expect(mockUpdateDraftFn).toHaveBeenCalled()
         })
@@ -967,7 +967,7 @@ describe('Documents', () => {
             expect(screen.queryAllByText('Rate-supporting')).toHaveLength(0)
 
             const input = screen.getByTestId('file-input-input')
-            void (await userEvent.upload(input, [TEST_PDF_FILE]))
+            await userEvent.upload(input, [TEST_PDF_FILE])
 
             await waitFor(() => {
                 expect(screen.getByText(/1 complete/)).toBeInTheDocument()
@@ -1048,7 +1048,7 @@ describe('Documents', () => {
                 'Upload any additional supporting documents'
             )
 
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
 
             // no errors before validation but checkboxes present
             await waitFor(() => {
@@ -1100,9 +1100,9 @@ describe('Documents', () => {
                 'Upload any additional supporting documents'
             )
 
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
-            void (await userEvent.upload(input, [TEST_PDF_FILE]))
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_PDF_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
 
             const rows = screen.getAllByRole('row')
             await waitFor(() => expect(rows).toHaveLength(4))

@@ -161,10 +161,10 @@ describe('FileItemList component', () => {
             />
         )
 
-        void (await userEvent.click(screen.getByText('Retry')))
+        await userEvent.click(screen.getByText('Retry'))
         expect(buttonActionProps.retryItem).toHaveBeenCalled()
 
-        void (await userEvent.click(screen.getByText('Remove')))
+        await userEvent.click(screen.getByText('Remove'))
         expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 

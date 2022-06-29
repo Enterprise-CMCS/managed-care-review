@@ -151,7 +151,7 @@ describe('Contacts', () => {
         })
         const firstContactName = screen.getByLabelText('Name')
 
-        void (await userEvent.type(firstContactName, 'First person'))
+        await userEvent.type(firstContactName, 'First person')
         expect(firstContactName).toHaveFocus()
 
         addStateContactButton.click()
@@ -225,7 +225,7 @@ describe('Contacts', () => {
             name: 'Add another state contact',
         })
         expect(addStateContactButton).toBeInTheDocument()
-        void (await userEvent.click(addStateContactButton))
+        await userEvent.click(addStateContactButton)
 
         expect(
             screen.getByRole('button', { name: 'Remove contact' })
@@ -253,7 +253,7 @@ describe('Contacts', () => {
         const addActuaryContactButton = screen.getByRole('button', {
             name: 'Add another actuary contact',
         })
-        void (await userEvent.click(addActuaryContactButton))
+        await userEvent.click(addActuaryContactButton)
 
         expect(
             screen.getByRole('button', { name: 'Remove contact' })
@@ -355,7 +355,7 @@ describe('Contacts', () => {
         await userEvent.paste('actuarycontact@test.com')
         // ))
 
-        void (await userEvent.click(screen.getAllByLabelText('Mercer')[0]))
+        await userEvent.click(screen.getAllByLabelText('Mercer')[0])
 
         void (await userEvent.click(
             screen.getByText(
@@ -406,7 +406,7 @@ describe('Contacts', () => {
         await userEvent.paste('actuarycontact2@test.com')
         // ))
         // Select additional actuarial firm
-        void (await userEvent.click(screen.getAllByLabelText('Mercer')[1]))
+        await userEvent.click(screen.getAllByLabelText('Mercer')[1])
 
         // Remove additional state contact
         expect(

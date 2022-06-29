@@ -44,8 +44,8 @@ describe('Cognito Login', () => {
         const loginEmail = screen.getByTestId('loginEmail')
         const loginPassword = screen.getByTestId('loginPassword')
 
-        void (await userEvent.type(loginEmail, 'countdracula@muppets.com'))
-        void (await userEvent.type(loginPassword, 'passwordABC'))
+        await userEvent.type(loginEmail, 'countdracula@muppets.com')
+        await userEvent.type(loginPassword, 'passwordABC')
         await waitFor(() =>
             expect(
                 screen.getByRole('button', { name: 'Login' })
@@ -83,10 +83,10 @@ describe('Cognito Login', () => {
 
         expect(loginButton).toBeDisabled()
 
-        void (await userEvent.type(loginEmail, 'countdracula@muppets.com'))
+        await userEvent.type(loginEmail, 'countdracula@muppets.com')
         expect(loginButton).toBeDisabled()
 
-        void (await userEvent.type(loginPassword, 'passwordABC'))
+        await userEvent.type(loginPassword, 'passwordABC')
         await waitFor(() => expect(loginButton).not.toBeDisabled())
     })
 

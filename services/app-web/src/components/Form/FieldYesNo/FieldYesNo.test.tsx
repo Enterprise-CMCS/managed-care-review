@@ -148,8 +148,8 @@ describe('FieldYesNo component', () => {
         }
 
         // Click Yes for benefits and No for geo
-        void (await userEvent.click(within(benefits).getByLabelText('Yes')))
-        void (await userEvent.click(within(geo).getByLabelText('No')))
+        await userEvent.click(within(benefits).getByLabelText('Yes'))
+        await userEvent.click(within(geo).getByLabelText('No'))
 
         // The correct Yes or No or neither should be checked
         await waitFor(() => {

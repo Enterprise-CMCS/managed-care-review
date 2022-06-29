@@ -76,7 +76,7 @@ describe('FileUpload component', () => {
 
         // add another file
         const inputEl = screen.getByTestId('file-input-input')
-        void (await userEvent.upload(inputEl, TEST_PDF_FILE))
+        await userEvent.upload(inputEl, TEST_PDF_FILE)
         expect(screen.getAllByRole('listitem')).toHaveLength(2)
         expect(
             screen.getByText('Trussel Guide to Truss - trussels-guide.pdf')
@@ -87,7 +87,7 @@ describe('FileUpload component', () => {
     it('renders a loading state while file is loading', async () => {
         render(<FileUpload {...testProps} />)
         const inputEl = screen.getByTestId('file-input-input')
-        void (await userEvent.upload(inputEl, TEST_PDF_FILE))
+        await userEvent.upload(inputEl, TEST_PDF_FILE)
         await screen.findByText(/Uploading/)
 
         const imageEl = screen.getByTestId('file-input-preview-image')
@@ -98,7 +98,7 @@ describe('FileUpload component', () => {
     it('moves to scanning state when file is finished loading', async () => {
         render(<FileUpload {...testProps} />)
         const inputEl = screen.getByTestId('file-input-input')
-        void (await userEvent.upload(inputEl, TEST_PDF_FILE))
+        await userEvent.upload(inputEl, TEST_PDF_FILE)
         await screen.findByText(/Uploading/)
         await screen.findByText(/Scanning/)
 
@@ -111,7 +111,7 @@ describe('FileUpload component', () => {
     it('removes loading and scanning styles when file is complete', async () => {
         render(<FileUpload {...testProps} />)
         const inputEl = screen.getByTestId('file-input-input')
-        void (await userEvent.upload(inputEl, TEST_PDF_FILE))
+        await userEvent.upload(inputEl, TEST_PDF_FILE)
 
         await screen.findByText(/Uploading/)
         await screen.findByText(/Scanning/)
@@ -179,9 +179,9 @@ describe('FileUpload component', () => {
         await render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
 
         const input = screen.getByTestId('file-input-input')
-        void (await userEvent.upload(input, [TEST_DOC_FILE]))
-        void (await userEvent.upload(input, [TEST_PDF_FILE]))
-        void (await userEvent.upload(input, [TEST_DOC_FILE]))
+        await userEvent.upload(input, [TEST_DOC_FILE])
+        await userEvent.upload(input, [TEST_PDF_FILE])
+        await userEvent.upload(input, [TEST_DOC_FILE])
 
         await waitFor(() => {
             expect(screen.queryAllByText(TEST_PDF_FILE.name)).toHaveLength(1)
@@ -210,7 +210,7 @@ describe('FileUpload component', () => {
         render(<FileUpload {...props} />)
 
         const input = screen.getByTestId('file-input-input')
-        void (await userEvent.upload(input, [TEST_PDF_FILE]))
+        await userEvent.upload(input, [TEST_PDF_FILE])
         await waitFor(() => {
             expect(props.uploadFile).toHaveBeenCalled()
             expect(props.scanFile).toHaveBeenCalled()
@@ -237,7 +237,7 @@ describe('FileUpload component', () => {
         render(<FileUpload {...props} />)
 
         const input = screen.getByTestId('file-input-input')
-        void (await userEvent.upload(input, [TEST_PDF_FILE]))
+        await userEvent.upload(input, [TEST_PDF_FILE])
         await waitFor(() => {
             expect(props.uploadFile).toHaveBeenCalled()
             expect(props.scanFile).toHaveBeenCalled()
@@ -264,7 +264,7 @@ describe('FileUpload component', () => {
         render(<FileUpload {...props} />)
 
         const input = screen.getByTestId('file-input-input')
-        void (await userEvent.upload(input, [TEST_PDF_FILE]))
+        await userEvent.upload(input, [TEST_PDF_FILE])
         await waitFor(() => {
             expect(props.uploadFile).toHaveBeenCalled()
             expect(props.onFileItemsUpdate).toHaveBeenCalled()
@@ -279,8 +279,8 @@ describe('FileUpload component', () => {
             await render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
 
             const input = screen.getByTestId('file-input-input')
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
-            void (await userEvent.upload(input, [TEST_PDF_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_PDF_FILE])
             await waitFor(() =>
                 expect(screen.getByText(/2 files added/)).toBeInTheDocument()
             )
@@ -296,7 +296,7 @@ describe('FileUpload component', () => {
             )
 
             const input = screen.getByTestId('file-input-input')
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
             await waitFor(() => {
                 expect(screen.getByText(/1 file added/)).toBeInTheDocument()
                 expect(screen.getByText(/1 error/)).toBeInTheDocument()
@@ -307,8 +307,8 @@ describe('FileUpload component', () => {
             await render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
 
             const input = screen.getByTestId('file-input-input')
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
 
             expect(screen.getByText(/2 files added/)).toBeInTheDocument()
             expect(screen.getByText(/1 error/)).toBeInTheDocument()
@@ -318,7 +318,7 @@ describe('FileUpload component', () => {
             await render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
 
             const input = screen.getByTestId('file-input-input')
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
             await waitFor(() => {
                 expect(screen.getByText(/1 file added/)).toBeInTheDocument()
                 expect(screen.queryByText(/Uploading/)).toBeNull()
@@ -339,7 +339,7 @@ describe('FileUpload component', () => {
             await render(<FileUpload {...testProps} accept=".pdf,.txt,.doc" />)
 
             const input = screen.getByTestId('file-input-input')
-            void (await userEvent.upload(input, [TEST_DOC_FILE]))
+            await userEvent.upload(input, [TEST_DOC_FILE])
             await waitFor(() => {
                 expect(screen.getByText(/1 file added/)).toBeInTheDocument()
                 expect(screen.getByText(/1 pending/)).toBeInTheDocument()

@@ -27,8 +27,8 @@ describe('Auth', () => {
             const loginEmail = screen.getByTestId('loginEmail')
             const loginPassword = screen.getByTestId('loginPassword')
 
-            void (await userEvent.type(loginEmail, 'countdracula@muppets.com'))
-            void (await userEvent.type(loginPassword, 'passwordABC'))
+            await userEvent.type(loginEmail, 'countdracula@muppets.com')
+            await userEvent.type(loginPassword, 'passwordABC')
             await waitFor(() =>
                 expect(
                     screen.getByRole('button', { name: 'Login' })

@@ -185,15 +185,15 @@ describe('SubmissionType', () => {
         )
         const combobox = await screen.findByRole('combobox')
 
-        void (await selectEvent.openMenu(combobox))
+        await selectEvent.openMenu(combobox)
 
         await waitFor(() => {
             expect(screen.getByText('Program 3')).toBeInTheDocument()
         })
 
-        void (await selectEvent.select(combobox, 'Program 1'))
-        void (await selectEvent.openMenu(combobox))
-        void (await selectEvent.select(combobox, 'Program 3'))
+        await selectEvent.select(combobox, 'Program 1')
+        await selectEvent.openMenu(combobox)
+        await selectEvent.select(combobox, 'Program 3')
 
         // in react-select, only items that are selected have a "remove item" label
         expect(screen.getByLabelText('Remove Program 1')).toBeInTheDocument()
@@ -290,8 +290,8 @@ describe('SubmissionType', () => {
             expect(await textarea).toBeInTheDocument()
 
             //trigger validation
-            void (await userEvent.type(textarea, 'something'))
-            void (await userEvent.clear(textarea))
+            await userEvent.type(textarea, 'something')
+            await userEvent.clear(textarea)
 
             await waitFor(() => {
                 expect(textarea).toHaveClass('usa-input--error')
@@ -319,8 +319,8 @@ describe('SubmissionType', () => {
             expect(textarea).toBeInTheDocument()
 
             //trigger validation
-            void (await userEvent.type(textarea, 'something'))
-            void (await userEvent.clear(textarea))
+            await userEvent.type(textarea, 'something')
+            await userEvent.clear(textarea)
 
             await waitFor(() => {
                 expect(textarea).not.toHaveClass('usa-input--error')

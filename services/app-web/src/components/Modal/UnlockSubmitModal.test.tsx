@@ -181,7 +181,7 @@ describe('UnlockSubmitModal', () => {
 
             const modalSubmit = screen.getByTestId('unlock-modal-submit')
             expect(modalSubmit).toHaveTextContent('Unlock')
-            void (await userEvent.click(modalSubmit))
+            await userEvent.click(modalSubmit)
             const dialog = await screen.getByRole('dialog')
             await waitFor(() => {
                 expect(dialog).toHaveClass('is-visible')

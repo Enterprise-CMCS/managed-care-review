@@ -170,10 +170,10 @@ describe('FileProcessor component', () => {
             />
         )
 
-        void (await userEvent.click(screen.getByText('Retry')))
+        await userEvent.click(screen.getByText('Retry'))
         expect(buttonActionProps.retryItem).toHaveBeenCalled()
 
-        void (await userEvent.click(screen.getByText('Remove')))
+        await userEvent.click(screen.getByText('Remove'))
         expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 
@@ -274,7 +274,7 @@ describe('FileProcessor component', () => {
         const ratesCheckbox = screen.getByRole('checkbox', {
             name: 'rate-supporting',
         })
-        void (await userEvent.click(contractCheckbox))
+        await userEvent.click(contractCheckbox)
         expect(categoryCheckboxProps.handleCheckboxClick).toHaveBeenCalledWith(
             expect.objectContaining({
                 target: expect.objectContaining({
@@ -282,7 +282,7 @@ describe('FileProcessor component', () => {
                 }),
             })
         )
-        void (await userEvent.click(ratesCheckbox))
+        await userEvent.click(ratesCheckbox)
         expect(categoryCheckboxProps.handleCheckboxClick).toHaveBeenCalledWith(
             expect.objectContaining({
                 target: expect.objectContaining({
@@ -376,10 +376,10 @@ describe('FileProcessor component', () => {
         expect(screen.getByText('Remove')).toBeInTheDocument()
         expect(screen.getByText('Retry')).toBeInTheDocument()
 
-        void (await userEvent.click(screen.getByText('Retry')))
+        await userEvent.click(screen.getByText('Retry'))
         expect(buttonActionProps.retryItem).toHaveBeenCalled()
 
-        void (await userEvent.click(screen.getByText('Remove')))
+        await userEvent.click(screen.getByText('Remove'))
         expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 
@@ -428,10 +428,10 @@ describe('FileProcessor component', () => {
         expect(screen.getByText('Remove')).toBeInTheDocument()
         expect(screen.getByText('Retry')).toBeInTheDocument()
 
-        void (await userEvent.click(screen.getByText('Retry')))
+        await userEvent.click(screen.getByText('Retry'))
         expect(buttonActionProps.retryItem).toHaveBeenCalled()
 
-        void (await userEvent.click(screen.getByText('Remove')))
+        await userEvent.click(screen.getByText('Remove'))
         expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 
