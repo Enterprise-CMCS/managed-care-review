@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { screen, waitFor, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import {
@@ -235,7 +235,7 @@ describe('RateDetails', () => {
         // click "continue"
         const continueButton = screen.getByRole('button', { name: 'Continue' })
 
-        continueButton.click()
+        fireEvent.click(continueButton)
 
         // check for expected errors
         await waitFor(() => {
@@ -512,7 +512,7 @@ describe('RateDetails', () => {
 
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')
         })
-        it.skip('disabled with alert when trying to continue while a file is still uploading', async () => {
+        it('disabled with alert when trying to continue while a file is still uploading', async () => {
             renderWithProviders(
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
@@ -547,10 +547,8 @@ describe('RateDetails', () => {
             expect(imageElFile2).toHaveClass('is-loading')
 
             // click continue while file 2 still loading
-            void (await userEvent.click(continueButton))
-            await waitFor(() =>
-                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
-            )
+            fireEvent.click(continueButton)
+            expect(continueButton).toHaveAttribute('aria-disabled', 'true')
 
             expect(
                 screen.getAllByText(

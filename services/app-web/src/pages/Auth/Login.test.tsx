@@ -90,39 +90,6 @@ describe('Cognito Login', () => {
         await waitFor(() => expect(loginButton).not.toBeDisabled())
     })
 
-    it.only('when login is clicked, button is disabled while loading', async () => {
-        const loginSpy = jest.spyOn(CognitoAuthApi, 'signIn').mockResolvedValue(
-            new CognitoUser({
-                Username: 'foo@example.com',
-                Pool: { getClientId: () => '7' } as CognitoUserPool,
-            })
-        )
-
-        renderWithProviders(
-            <Routes>
-                <Route path="/auth" element={<Login />} />
-            </Routes>,
-            {
-                apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
-                routerProvider: {
-                    route: '/auth',
-                },
-            }
-        )
-        const loginButton = screen.getByRole('button', { name: 'Login' })
-        const loginEmail = screen.getByTestId('loginEmail')
-        const loginPassword = screen.getByTestId('loginPassword')
-
-        void (await userEvent.type(loginEmail, 'countdracula@muppets.com'))
-        void (await userEvent.type(loginPassword, 'passwordABC'))
-
-        await waitFor(() => expect(loginButton).not.toBeDisabled())
-
-        void (await userClickByRole(screen, 'button', { name: 'Login' }))
-        await waitFor(() => expect(loginButton).toBeDisabled())
-        await waitFor(() => expect(loginSpy).toHaveBeenCalledTimes(1))
-    })
-
     it('when login is successful, redirect to /', async () => {
         const loginSpy = jest.spyOn(CognitoAuthApi, 'signIn').mockResolvedValue(
             new CognitoUser({

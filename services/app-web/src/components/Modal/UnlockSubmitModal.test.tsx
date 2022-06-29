@@ -129,7 +129,9 @@ describe('UnlockSubmitModal', () => {
                     'Error attempting to submit. Please try again.'
                 )
             ).toBeInTheDocument()
-            expect(mockSetIsSubmitting).toHaveBeenCalledTimes(2)
+            await waitFor(() =>
+                expect(mockSetIsSubmitting).toHaveBeenCalledTimes(2)
+            )
         })
     })
 
@@ -220,7 +222,9 @@ describe('UnlockSubmitModal', () => {
             ).toBeInTheDocument()
 
             // check focus after error
-            expect(textbox).toHaveFocus()
+            await waitFor(() => {
+                expect(textbox).toHaveFocus()
+            })
         })
 
         it('displays no modal alert banner error if unlock api request succeeds', async () => {
@@ -409,7 +413,9 @@ describe('UnlockSubmitModal', () => {
             ).toBeInTheDocument()
 
             // check focus after error
-            expect(textbox).toHaveFocus()
+            await waitFor(() => {
+                expect(textbox).toHaveFocus()
+            })
         })
         it('redirects if submission succeeds on unlocked plan package', async () => {
             let testLocation: Location

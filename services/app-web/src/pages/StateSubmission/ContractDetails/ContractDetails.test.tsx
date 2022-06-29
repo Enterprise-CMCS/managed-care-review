@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { screen, waitFor, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import {
@@ -365,7 +365,7 @@ describe('ContractDetails', () => {
 
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')
         })
-        it.skip('disabled with alert when trying to continue while a file is still uploading', async () => {
+        it('disabled with alert when trying to continue while a file is still uploading', async () => {
             renderWithProviders(
                 <ContractDetails
                     draftSubmission={emptyContractDetailsDraft}
@@ -398,9 +398,7 @@ describe('ContractDetails', () => {
                 'file-input-preview-image'
             )[1]
             expect(imageElFile2).toHaveClass('is-loading')
-
-            // click continue while file 2 still loading
-            continueButton.click()
+            fireEvent.click(continueButton)
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')
 
             expect(

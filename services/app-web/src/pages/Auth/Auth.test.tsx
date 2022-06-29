@@ -111,8 +111,11 @@ describe('Auth', () => {
             await waitFor(() => expect(testLocation.pathname).toBe('/'))
         })
 
-        it.skip('when login fails, stay on page and display error alert', async () => {
-            const loginSpy = jest.spyOn(CognitoAuthApi, 'signIn')
+        it('when login fails, stay on page and display error alert', async () => {
+            const loginSpy = jest
+                .spyOn(CognitoAuthApi, 'signIn')
+                .mockRejectedValue(new Error('Login failed'))
+
             let testLocation: Location
 
             renderWithProviders(
@@ -121,11 +124,7 @@ describe('Auth', () => {
                 </Routes>,
                 {
                     apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 403 }),
-                            fetchCurrentUserMock({ statusCode: 403 }),
-                            fetchCurrentUserMock({ statusCode: 403 }),
-                        ],
+                        mocks: [fetchCurrentUserMock({ statusCode: 403 })],
                     },
                     routerProvider: {
                         route: '/auth',
@@ -133,8 +132,8 @@ describe('Auth', () => {
                     location: (location) => (testLocation = location),
                 }
             )
+            await waitFor(() => userLogin(screen))
 
-            await userLogin(screen)
             await waitFor(() => {
                 expect(loginSpy).toHaveBeenCalledTimes(1)
                 expect(testLocation.pathname).toBe('/auth')

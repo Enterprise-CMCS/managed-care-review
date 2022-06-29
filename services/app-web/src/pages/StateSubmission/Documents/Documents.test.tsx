@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import {
@@ -620,7 +620,7 @@ describe('Documents', () => {
             expect(mockUpdateDraftFn).toHaveBeenCalled()
         })
 
-        it.skip('disabled with alert when trying to continue while a file is still uploading', async () => {
+        it('disabled with alert when trying to continue while a file is still uploading', async () => {
             renderWithProviders(
                 <Documents
                     draftSubmission={{
@@ -654,7 +654,7 @@ describe('Documents', () => {
             expect(imageElFile2).toHaveClass('is-loading')
 
             // click continue while file 2 still loading
-            continueButton.click()
+            fireEvent.click(continueButton)
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')
 
             expect(

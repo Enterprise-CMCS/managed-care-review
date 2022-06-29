@@ -68,7 +68,7 @@ const prettyDebug = (label?: string, element?: HTMLElement): void => {
     console.log(
         `${label ?? 'body'}:
     `,
-        prettyDOM(element ?? document.body)
+        prettyDOM(element ?? document.body, 50000)
     )
 }
 

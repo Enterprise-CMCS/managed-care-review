@@ -327,33 +327,33 @@ describe('Contacts', () => {
         )
 
         // add state contact
-        void (await userEvent.type(
-            screen.getAllByLabelText('Name')[0],
-            'State Contact Person'
-        ))
-        void (await userEvent.type(
-            screen.getAllByLabelText('Title/Role')[0],
-            'State Contact Title'
-        ))
-        void (await userEvent.type(
-            screen.getAllByLabelText('Email')[0],
-            'statecontact@test.com'
-        ))
+        // void (await userEvent.paste(
+        screen.getAllByLabelText('Name')[0].focus()
+        await userEvent.paste('State Contact Person')
+        // ))
+        // void (await userEvent.type(
+        screen.getAllByLabelText('Title/Role')[0].focus()
+        await userEvent.paste('State Contact Title')
+        // ))
+        // void (await userEvent.type(
+        screen.getAllByLabelText('Email')[0].focus()
+        await userEvent.paste('statecontact@test.com')
+        // ))
         expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
 
         // add actuary contact
-        void (await userEvent.type(
-            screen.getAllByLabelText('Name')[1],
-            'Actuary Contact Person'
-        ))
-        void (await userEvent.type(
-            screen.getAllByLabelText('Title/Role')[1],
-            'Actuary Contact Title'
-        ))
-        void (await userEvent.type(
-            screen.getAllByLabelText('Email')[1],
-            'actuarycontact@test.com'
-        ))
+        // void (await userEvent.type(
+        screen.getAllByLabelText('Name')[1].focus()
+        await userEvent.paste('Actuary Contact Person')
+        // ))
+        // void (await userEvent.type(
+        screen.getAllByLabelText('Title/Role')[1].focus()
+        await userEvent.paste('Actuary Contact Title')
+        // ))
+        // void (await userEvent.type(
+        screen.getAllByLabelText('Email')[1].focus()
+        await userEvent.paste('actuarycontact@test.com')
+        // ))
 
         void (await userEvent.click(screen.getAllByLabelText('Mercer')[0]))
 
@@ -372,18 +372,18 @@ describe('Contacts', () => {
             })
         ))
 
-        void (await userEvent.type(
-            screen.getAllByLabelText('Name')[1],
-            'State Contact Person 2'
-        ))
-        void (await userEvent.type(
-            screen.getAllByLabelText('Title/Role')[1],
-            'State Contact Title 2'
-        ))
-        void (await userEvent.type(
-            screen.getAllByLabelText('Email')[1],
-            'statecontact2@test.com'
-        ))
+        // void (await userEvent.type(
+        screen.getAllByLabelText('Name')[1].focus()
+        await userEvent.paste('State Contact Person 2')
+        // ))
+        // void (await userEvent.type(
+        screen.getAllByLabelText('Title/Role')[1].focus()
+        await userEvent.paste('State Contact Title 2')
+        // ))
+        // void (await userEvent.type(
+        screen.getAllByLabelText('Email')[1].focus()
+        await userEvent.paste('statecontact2@test.com')
+        // ))
         expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
 
         // Add additional actuary contact
@@ -393,18 +393,18 @@ describe('Contacts', () => {
             })
         ))
 
-        void (await userEvent.type(
-            screen.getAllByLabelText('Name')[1],
-            'Actuary Contact Person 2'
-        ))
-        void (await userEvent.type(
-            screen.getAllByLabelText('Title/Role')[1],
-            'Actuary Contact Title 2'
-        ))
-        void (await userEvent.type(
-            screen.getAllByLabelText('Email')[1],
-            'actuarycontact2@test.com'
-        ))
+        // void (await userEvent.type(
+        screen.getAllByLabelText('Name')[1].focus()
+        await userEvent.paste('Actuary Contact Person 2')
+        // ))
+        // void (await userEvent.type(await userEvent.paste(
+        screen.getAllByLabelText('Title/Role')[1].focus()
+        await userEvent.paste('Actuary Contact Title 2')
+        // ))
+        // void (await userEvent.type(
+        screen.getAllByLabelText('Email')[1].focus()
+        await userEvent.paste('actuarycontact2@test.com')
+        // ))
         // Select additional actuarial firm
         void (await userEvent.click(screen.getAllByLabelText('Mercer')[1]))
 
