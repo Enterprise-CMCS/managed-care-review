@@ -313,6 +313,7 @@ describe('Contacts', () => {
         })
     })
 
+    /* This test is likely to time out if we use userEvent.type().  Converted to .paste() */
     it('when there are multiple state and actuary contacts, remove button works as expected', async () => {
         const mock = mockContactAndRatesDraft()
         const mockUpdateDraftFn = jest.fn()
@@ -326,34 +327,26 @@ describe('Contacts', () => {
             }
         )
 
-        // add state contact
-        // void (await userEvent.paste(
         screen.getAllByLabelText('Name')[0].focus()
         await userEvent.paste('State Contact Person')
-        // ))
-        // void (await userEvent.type(
+
         screen.getAllByLabelText('Title/Role')[0].focus()
         await userEvent.paste('State Contact Title')
-        // ))
-        // void (await userEvent.type(
+
         screen.getAllByLabelText('Email')[0].focus()
         await userEvent.paste('statecontact@test.com')
-        // ))
+
         expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
 
         // add actuary contact
-        // void (await userEvent.type(
         screen.getAllByLabelText('Name')[1].focus()
         await userEvent.paste('Actuary Contact Person')
-        // ))
-        // void (await userEvent.type(
+
         screen.getAllByLabelText('Title/Role')[1].focus()
         await userEvent.paste('Actuary Contact Title')
-        // ))
-        // void (await userEvent.type(
+
         screen.getAllByLabelText('Email')[1].focus()
         await userEvent.paste('actuarycontact@test.com')
-        // ))
 
         await userEvent.click(screen.getAllByLabelText('Mercer')[0])
 
@@ -372,18 +365,15 @@ describe('Contacts', () => {
             })
         ))
 
-        // void (await userEvent.type(
         screen.getAllByLabelText('Name')[1].focus()
         await userEvent.paste('State Contact Person 2')
-        // ))
-        // void (await userEvent.type(
+
         screen.getAllByLabelText('Title/Role')[1].focus()
         await userEvent.paste('State Contact Title 2')
-        // ))
-        // void (await userEvent.type(
+
         screen.getAllByLabelText('Email')[1].focus()
         await userEvent.paste('statecontact2@test.com')
-        // ))
+
         expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
 
         // Add additional actuary contact
@@ -393,19 +383,15 @@ describe('Contacts', () => {
             })
         ))
 
-        // void (await userEvent.type(
         screen.getAllByLabelText('Name')[1].focus()
         await userEvent.paste('Actuary Contact Person 2')
-        // ))
-        // void (await userEvent.type(await userEvent.paste(
+
         screen.getAllByLabelText('Title/Role')[1].focus()
         await userEvent.paste('Actuary Contact Title 2')
-        // ))
-        // void (await userEvent.type(
+
         screen.getAllByLabelText('Email')[1].focus()
         await userEvent.paste('actuarycontact2@test.com')
-        // ))
-        // Select additional actuarial firm
+
         await userEvent.click(screen.getAllByLabelText('Mercer')[1])
 
         // Remove additional state contact
