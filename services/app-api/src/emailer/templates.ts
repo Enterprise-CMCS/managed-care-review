@@ -83,83 +83,43 @@ const generateReviewerEmails = (
     return cmsReviewSharedEmails
 }
 
-const generateNewSubmissionBody = (
-    submission: LockedHealthPlanFormDataType,
-    submissionName: string,
-    config: EmailConfiguration
-): string => {
-    // template
-    const contractEffectiveDatesText = `${
-        submission.contractType === 'AMENDMENT'
-            ? '<b>Contract amendment effective dates</b>'
-            : '<b>Contract effective dates</b>'
-    }: ${
-        formatCalendarDate(submission.contractDateStart) +
-        ' to ' +
-        formatCalendarDate(submission.contractDateEnd)
-    }`
-    const ratingPeriodText = `${
-        submission.rateType === 'NEW'
-            ? '<b>Rating period</b>'
-            : '<b>Rate amendment effective dates</b>'
-    }`
-    const ratingPeriodDates = `${
-        submission.rateType === 'AMENDMENT' && submission.rateAmendmentInfo
-            ? `${
-                  formatCalendarDate(
-                      submission.rateAmendmentInfo.effectiveDateStart
-                  ) +
-                  ' to ' +
-                  formatCalendarDate(
-                      submission.rateAmendmentInfo.effectiveDateEnd
-                  )
-              }`
-            : submission.rateDateStart && submission.rateDateEnd
-            ? `${
-                  formatCalendarDate(submission.rateDateStart) +
-                  ' to ' +
-                  formatCalendarDate(submission.rateDateEnd)
-              }`
-            : 'Rating Period Dates Not Found'
-    }`
-
-    const rateName =
-        submission.submissionType === 'CONTRACT_AND_RATES'
-            ? `<b>Rate name</b>: ${generateRateName(
-                  submission,
-                  submissionName
-              )}<br />`
-            : ''
-    const rateRelatedDatesText =
-        submission.submissionType === 'CONTRACT_AND_RATES'
-            ? `${ratingPeriodText}: ${ratingPeriodDates}`
-            : '' // displays nothing if submission is CONTRACT_ONLY
-    const submissionURL = new URL(
-        `submissions/${submission.id}`,
-        config.baseUrl
-    ).href
-
-    return `
-        <b>Submission type</b>: ${
-            SubmissionTypeRecord[submission.submissionType]
-        }
-        <br />
-        ${contractEffectiveDatesText}
-        <br />
-        ${rateName}
-        ${rateRelatedDatesText}${
-        rateRelatedDatesText.length > 0 ? '<br />' : ''
-    }
-        <b>Submission description</b>: ${submission.submissionDescription}
-        <br />
-        <br />
-        <a href="${submissionURL}">View submission</a>
-    `
-}
-
+// const generateNewSubmissionData = (
+//     pkg: LockedHealthPlanFormDataType,
+//     packageName: string,
+//     config: EmailConfiguration
+// ):  => {
+//     return{
+//        contractDates: {
+//             label:
+//                 pkg.contractType === 'AMENDMENT'
+//                     ? 'Contract amendment effective dates'
+//                     : 'Contract effective dates',
+//             start: formatCalendarDate(pkg.contractDateStart),
+//             end: formatCalendarDate(pkg.contractDateEnd),
+//         },
+//         rateInfo: {
+//             name: generateRateName(pkg, packageName),
+//             dates: {
+//                 label:
+//                     pkg.rateType === 'NEW'
+//                         ? 'Rating period'
+//                         : 'Rate amendment effective dates',
+//                 start: hasRateAmendmentInfo
+//                     ? formatCalendarDate(
+//                           pkg.rateAmendmentInfo.effectiveDateStart
+//                       )
+//                     : formatCalendarDate(pkg.rateDateStart),
+//                 end: hasRateAmendmentInfo
+//                     ? formatCalendarDate(pkg.rateAmendmentInfo.effectiveDateEnd)
+//                     : formatCalendarDate(pkg.rateDateEnd),
+//             },
+//         },
+//         submissionUrl: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
+// }
+// }
 const newPackageCMSEmail = (
-    submission: LockedHealthPlanFormDataType,
-    submissionName: string,
+    pkg: LockedHealthPlanFormDataType,
+    packageName: string,
     config: EmailConfiguration,
     stateAnalystsEmails: StateAnalystsEmails
 ): EmailData => {
@@ -167,47 +127,17 @@ const newPackageCMSEmail = (
     const isTestEnvironment = config.stage !== 'prod'
     const reviewerEmails = generateReviewerEmails(
         config,
-        submission,
+        pkg,
         stateAnalystsEmails
-    )
-    const bodyHTML = `Managed Care submission: <b>${submissionName}</b> was received from <b>${
-        submission.stateCode
-    }</b>.
-            <br />
-            <br />
-            ${generateNewSubmissionBody(submission, submissionName, config)}
-        `
-    return {
-        toAddresses: reviewerEmails,
-        sourceEmail: config.emailSource,
-        subject: `${
-            isTestEnvironment ? `[${config.stage}] ` : ''
-        }New Managed Care Submission: ${submissionName}`,
-        bodyText: stripHTMLFromTemplate(bodyHTML),
-        bodyHTML: bodyHTML,
-    }
-}
-
-const newPackageStateEmail = (
-    pkg: LockedHealthPlanFormDataType,
-    packageName: string,
-    user: UserType,
-    config: EmailConfiguration
-): EmailData => {
-    const currentUserEmail = user.email
-    const receiverEmails: string[] = [currentUserEmail].concat(
-        pkg.stateContacts.map((contact) => contact.email)
     )
 
     const hasRateAmendmentInfo =
         pkg.rateType === 'AMENDMENT' && pkg.rateAmendmentInfo
-    // const hasRates = pkg.submissionType === 'CONTRACT_AND_RATES'
+
     const data = {
-        cmsReviewHelpEmailAddress: config.cmsReviewHelpEmailAddress,
-        cmsRateHelpEmailAddress: config.cmsRateHelpEmailAddress,
-        cmsDevTeamHelpEmailAddress: config.cmsDevTeamHelpEmailAddress,
         packageName: packageName,
-        submissionType: pkg.submissionType,
+        submissionType: SubmissionTypeRecord[pkg.submissionType],
+        stateCode: pkg.stateCode,
         submissionDescription: pkg.submissionDescription,
         contractDates: {
             label:
@@ -236,7 +166,69 @@ const newPackageStateEmail = (
         },
         submissionUrl: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
     }
-    Handlebars.partials['packageSummary'](data)
+
+    const bodyHTMLHandlebars = Handlebars.templates['newPackageCMSEmail'](data)
+
+    return {
+        toAddresses: reviewerEmails,
+        sourceEmail: config.emailSource,
+        subject: `${
+            isTestEnvironment ? `[${config.stage}] ` : ''
+        }New Managed Care Submission: ${packageName}`,
+        bodyText: stripHTMLFromTemplate(bodyHTMLHandlebars),
+        bodyHTML: bodyHTMLHandlebars,
+    }
+}
+
+const newPackageStateEmail = (
+    pkg: LockedHealthPlanFormDataType,
+    packageName: string,
+    user: UserType,
+    config: EmailConfiguration
+): EmailData => {
+    const currentUserEmail = user.email
+    const receiverEmails: string[] = [currentUserEmail].concat(
+        pkg.stateContacts.map((contact) => contact.email)
+    )
+
+    const hasRateAmendmentInfo =
+        pkg.rateType === 'AMENDMENT' && pkg.rateAmendmentInfo
+
+    const data = {
+        cmsReviewHelpEmailAddress: config.cmsReviewHelpEmailAddress,
+        cmsRateHelpEmailAddress: config.cmsRateHelpEmailAddress,
+        cmsDevTeamHelpEmailAddress: config.cmsDevTeamHelpEmailAddress,
+        packageName: packageName,
+        submissionType: SubmissionTypeRecord[pkg.submissionType],
+        submissionDescription: pkg.submissionDescription,
+        contractDates: {
+            label:
+                pkg.contractType === 'AMENDMENT'
+                    ? 'Contract amendment effective dates'
+                    : 'Contract effective dates',
+            start: formatCalendarDate(pkg.contractDateStart),
+            end: formatCalendarDate(pkg.contractDateEnd),
+        },
+        rateInfo: {
+            name: generateRateName(pkg, packageName),
+            dates: {
+                label:
+                    pkg.rateType === 'NEW'
+                        ? 'Rating period'
+                        : 'Rate amendment effective dates',
+                start: hasRateAmendmentInfo
+                    ? formatCalendarDate(
+                          pkg.rateAmendmentInfo.effectiveDateStart
+                      )
+                    : formatCalendarDate(pkg.rateDateStart),
+                end: hasRateAmendmentInfo
+                    ? formatCalendarDate(pkg.rateAmendmentInfo.effectiveDateEnd)
+                    : formatCalendarDate(pkg.rateDateEnd),
+            },
+        },
+        submissionUrl: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
+    }
+
     const bodyHTMLHandlebars =
         Handlebars.templates['newPackageStateEmail'](data)
 

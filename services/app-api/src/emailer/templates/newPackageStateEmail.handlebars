@@ -1,7 +1,23 @@
 {{packageName}} was successfully submitted.
 <br /><br />
+<b>Submission type</b>: {{submissionType }}
+<br />
+<b>{{contractDates.label}}</b>: {{contractDates.start}} to {{contractDates.end}} 
+<br />
+{{#rateInfo}}
+<b>Rate name</b>: {{rateInfo.name}}
+<br />
+<b>{{rateInfo.dates.label}}</b>: {{rateInfo.dates.start}} to  {{rateInfo.dates.end}}
+<br />
+{{/rateInfo}}
+<b>Submission description</b>: {{submission.submissionDescription}}
+<br />
+<br />
+<a href={{submissionURL}}>View submission</a>
+<br /><br />
 If you need to make any changes, please contact CMS.
 <br /><br />
+
 <div>What comes next:</div>
 <ol>
     <li>
