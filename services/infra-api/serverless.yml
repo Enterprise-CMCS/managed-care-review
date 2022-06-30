@@ -109,7 +109,7 @@ resources:
       Type: AWS::S3::Bucket
       Condition: CreateNRInfraMonitoring
       Properties:
-        BucketName: !Sub newrelic-firehose-${sls:stage}-${aws:accountId}
+        BucketName: !Sub newrelic-firehose-${sls:stage}-${AWS::AccountId}
         PublicAccessBlockConfiguration:
           BlockPublicAcls: true
           BlockPublicPolicy: true
@@ -160,7 +160,7 @@ resources:
                 - 'sts:AssumeRole'
               Condition:
                 StringEquals:
-                  'sts:ExternalId': !Sub ${aws:accountId}
+                  'sts:ExternalId': !Sub ${AWS::AccountId}
         Policies:
           - PolicyName: MetricStreams-FirehosePutRecords
             PolicyDocument:

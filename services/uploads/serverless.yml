@@ -5,6 +5,7 @@ frameworkVersion: '^3.19.0'
 plugins:
   - serverless-plugin-scripts
   - serverless-s3-local
+  - serverless-offline
   - serverless-stack-termination-protection
   - serverless-idempotency-helper
   - serverless-iam-helper
@@ -31,14 +32,14 @@ provider:
             - s3:DeleteObject
             - s3:ListBucket
           Resource:
-            - !Sub arn:aws:s3:::${self:service}-${sls:stage}-uploads-${aws:accountId}/*
-            - !Sub arn:aws:s3:::${self:service}-${sls:stage}-avscan-${aws:accountId}/*
+            - !Sub arn:aws:s3:::${self:service}-${sls:stage}-uploads-${AWS::AccountId}/*
+            - !Sub arn:aws:s3:::${self:service}-${sls:stage}-avscan-${AWS::AccountId}/*
         - Effect: 'Allow'
           Action:
             - s3:ListBucket
           Resource:
-            - !Sub arn:aws:s3:::${self:service}-${sls:stage}-uploads-${aws:accountId}
-            - !Sub arn:aws:s3:::${self:service}-${sls:stage}-avscan-${aws:accountId}
+            - !Sub arn:aws:s3:::${self:service}-${sls:stage}-uploads-${AWS::AccountId}
+            - !Sub arn:aws:s3:::${self:service}-${sls:stage}-avscan-${AWS::AccountId}
 
 custom:
   region: ${aws:region}
@@ -110,7 +111,7 @@ resources:
     DocumentUploadsBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: !Sub ${self:service}-${sls:stage}-uploads-${aws:accountId}
+        BucketName: !Sub ${self:service}-${sls:stage}-uploads-${AWS::AccountId}
         BucketEncryption:
           ServerSideEncryptionConfiguration:
             - ServerSideEncryptionByDefault:
@@ -182,13 +183,13 @@ resources:
         FunctionName: !GetAtt AvScanLambdaFunction.Arn
         Action: lambda:InvokeFunction
         Principal: s3.amazonaws.com
-        SourceAccount: !Sub ${aws:accountId}
-        SourceArn: !Sub arn:aws:s3:::${self:service}-${sls:stage}-uploads-${aws:accountId}
+        SourceAccount: !Sub ${AWS::AccountId}
+        SourceArn: !Sub arn:aws:s3:::${self:service}-${sls:stage}-uploads-${AWS::AccountId}
 
     ClamDefsBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: !Sub ${self:service}-${sls:stage}-avscan-${aws:accountId}
+        BucketName: !Sub ${self:service}-${sls:stage}-avscan-${AWS::AccountId}
         BucketEncryption:
           ServerSideEncryptionConfiguration:
             - ServerSideEncryptionByDefault:
