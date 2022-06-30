@@ -1,45 +1,51 @@
 import { useState, useEffect } from 'react'
 import { LocalStorageKeyType } from '../constants/localStorage'
+import { recordJSException } from '../otelHelpers'
 type LocalStorage = {
     key: LocalStorageKeyType
-    value?: string | string[] | boolean | object
+    value: string | string[] | boolean | object | null
 }
 
 type UseLocalStorage = [
     LocalStorage['value'],
-    (value: string | undefined) => void
+    (value: LocalStorage['value']) => void
 ]
-// Get and set keys in local storage. If key is set to a value of undefined, clear and remove from local storage, return default fallback value
+// Get and set keys in local storage. If key is set to a value of null, clear and remove from local storage, return default fallback value
 function useLocalStorage(
     key: LocalStorage['key'],
     defaultValue: LocalStorage['value']
 ): UseLocalStorage {
-    const [storedValue, setStoredValue] = useState<string | undefined>(() => {
-        if (typeof window === 'undefined') {
-            console.error('Unable to find local storage. window is undefined')
-            return defaultValue
-        }
+    const [storedValue, setStoredValue] = useState<LocalStorage['value']>(
+        () => {
+            if (typeof window === 'undefined') {
+                recordJSException(
+                    'Unable to find local storage. window is undefined'
+                )
+                return defaultValue
+            }
 
-        let value
-        try {
-            value = JSON.parse(
-                window.localStorage.getItem(key) || JSON.stringify(defaultValue)
-            )
-        } catch (error) {
-            console.error(
-                `Unable to set local storage. Error message: ${error}`
-            )
-            value = defaultValue
+            let value
+            try {
+                value = JSON.parse(
+                    window.localStorage.getItem(key) ||
+                        JSON.stringify(defaultValue)
+                )
+            } catch (error) {
+                recordJSException(
+                    `Unable to set local storage. Error message: ${error}`
+                )
+                value = defaultValue
+            }
+            return value
         }
-        return value
-    })
+    )
 
     useEffect(() => {
-        if (storedValue === undefined) {
+        if (storedValue === null) {
             try {
                 window.localStorage.removeItem(key)
             } catch (error) {
-                console.error(
+                recordJSException(
                     `Unable to remove ${key} local storage. Error message: ${error.message}`
                 )
             }
@@ -47,7 +53,7 @@ function useLocalStorage(
             try {
                 window.localStorage.setItem(key, JSON.stringify(storedValue))
             } catch (error) {
-                console.error(
+                recordJSException(
                     `Unable to set ${key} in local storage. Error message: ${error.message}`
                 )
             }

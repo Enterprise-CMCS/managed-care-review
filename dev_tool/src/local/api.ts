@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import LabeledProcessRunner from '../runner.js'
 import { compileGraphQLTypesWatchOnce } from './graphql.js'
 import { installPrismaDeps } from './postgres.js'
@@ -24,15 +25,15 @@ export async function runAPILocally(runner: LabeledProcessRunner) {
         [
             'npx',
             'serverless',
+            'offline',
+            'start',
             '--stage',
             'local',
             '--region',
             'us-east-1',
-            'offline',
             '--httpPort',
             '3030',
             '--useChildProcesses',
-            'start',
         ],
         'services/app-api'
     )

@@ -1,6 +1,6 @@
 service: uploads
 
-frameworkVersion: '2'
+frameworkVersion: '^3.19.0'
 
 plugins:
   - serverless-plugin-scripts
@@ -13,7 +13,7 @@ plugins:
 # The `provider` block defines where your service will be deployed
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs16.x
   region: us-east-1
   iam:
     role:
@@ -31,18 +31,17 @@ provider:
             - s3:DeleteObject
             - s3:ListBucket
           Resource:
-            - !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-uploads-${AWS::AccountId}/*
-            - !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-avscan-${AWS::AccountId}/*
+            - !Sub arn:aws:s3:::${self:service}-${sls:stage}-uploads-${aws:accountId}/*
+            - !Sub arn:aws:s3:::${self:service}-${sls:stage}-avscan-${aws:accountId}/*
         - Effect: 'Allow'
           Action:
             - s3:ListBucket
           Resource:
-            - !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-uploads-${AWS::AccountId}
-            - !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-avscan-${AWS::AccountId}
+            - !Sub arn:aws:s3:::${self:service}-${sls:stage}-uploads-${aws:accountId}
+            - !Sub arn:aws:s3:::${self:service}-${sls:stage}-avscan-${aws:accountId}
 
 custom:
-  stage: ${opt:stage, self:provider.stage}
-  region: ${opt:region, self:provider.region}
+  region: ${aws:region}
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   iamPath: ${env:IAM_PATH, "/"}
   scripts:
@@ -53,7 +52,7 @@ custom:
         curl -L --output lambda_layer.zip https://github.com/CMSgov/lambda-clamav-layer/releases/download/0.7/lambda_layer.zip
       deploy:finalize: |
         rm lambda_layer.zip
-        serverless invoke --stage ${self:custom.stage} --function avDownloadDefinitions -t Event
+        serverless invoke --stage ${sls:stage} --function avDownloadDefinitions -t Event
   s3:
     # when vhostBuckets are enabled all non-localhost hostnames are re-written as buckets
     # setting this false allows the workaround for docker to work.
@@ -79,7 +78,7 @@ layers:
 functions:
   avScan:
     handler: src/antivirus.lambdaHandleEvent
-    name: ${self:service.name}-${self:custom.stage}-avScan
+    name: ${self:service}-${sls:stage}-avScan
     timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
     memorySize: 3008
     layers:
@@ -111,7 +110,7 @@ resources:
     DocumentUploadsBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: !Sub ${self:service.name}-${self:custom.stage}-uploads-${AWS::AccountId}
+        BucketName: !Sub ${self:service}-${sls:stage}-uploads-${aws:accountId}
         BucketEncryption:
           ServerSideEncryptionConfiguration:
             - ServerSideEncryptionByDefault:
@@ -183,13 +182,13 @@ resources:
         FunctionName: !GetAtt AvScanLambdaFunction.Arn
         Action: lambda:InvokeFunction
         Principal: s3.amazonaws.com
-        SourceAccount: !Sub ${AWS::AccountId}
-        SourceArn: !Sub arn:aws:s3:::${self:service.name}-${self:custom.stage}-uploads-${AWS::AccountId}
+        SourceAccount: !Sub ${aws:accountId}
+        SourceArn: !Sub arn:aws:s3:::${self:service}-${sls:stage}-uploads-${aws:accountId}
 
     ClamDefsBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: !Sub ${self:service.name}-${self:custom.stage}-avscan-${AWS::AccountId}
+        BucketName: !Sub ${self:service}-${sls:stage}-avscan-${aws:accountId}
         BucketEncryption:
           ServerSideEncryptionConfiguration:
             - ServerSideEncryptionByDefault:

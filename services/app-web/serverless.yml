@@ -1,10 +1,10 @@
 service: app-web
 
-frameworkVersion: '2'
+frameworkVersion: '^3.19.0'
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs16.x
   region: us-east-1
 
 plugins:
@@ -16,20 +16,20 @@ plugins:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  region: ${opt:region, self:provider.region}
-  api_url: ${cf:infra-api-${self:custom.stage}.ApiGatewayRestApiUrl}
-  application_endpoint_url: ${cf:ui-${self:custom.stage}.CloudFrontEndpointUrl}
-  cognito_region: ${cf:ui-auth-${self:custom.stage}.Region}
-  cognito_identity_pool_id: ${cf:ui-auth-${self:custom.stage}.IdentityPoolId}
-  cognito_user_pool_id: ${cf:ui-auth-${self:custom.stage}.UserPoolId}
-  cognito_client_id: ${cf:ui-auth-${self:custom.stage}.UserPoolClientId}
-  cognito_user_pool_client_domain: ${cf:ui-auth-${self:custom.stage}.UserPoolClientDomain}
-  s3_documents_bucket_region: ${cf:uploads-${self:custom.stage}.Region}
-  s3_documents_bucket_name: ${cf:uploads-${self:custom.stage}.DocumentUploadsBucketName}
-  ui_s3_bucket_name: ${cf:ui-${self:custom.stage}.S3BucketName}
-  ui_cloudfront_distribution_id: ${cf:ui-${self:custom.stage}.CloudFrontDistributionId}
-  storybook_s3_bucket_name: ${cf:storybook-${self:custom.stage}.S3BucketName}
-  storybook_cloudfront_distribution_id: ${cf:storybook-${self:custom.stage}.CloudFrontDistributionId}
+  region: ${aws:region}
+  api_url: ${cf:infra-api-${sls:stage}.ApiGatewayRestApiUrl}
+  application_endpoint_url: ${cf:ui-${sls:stage}.CloudFrontEndpointUrl}
+  cognito_region: ${cf:ui-auth-${sls:stage}.Region}
+  cognito_identity_pool_id: ${cf:ui-auth-${sls:stage}.IdentityPoolId}
+  cognito_user_pool_id: ${cf:ui-auth-${sls:stage}.UserPoolId}
+  cognito_client_id: ${cf:ui-auth-${sls:stage}.UserPoolClientId}
+  cognito_user_pool_client_domain: ${cf:ui-auth-${sls:stage}.UserPoolClientDomain}
+  s3_documents_bucket_region: ${cf:uploads-${sls:stage}.Region}
+  s3_documents_bucket_name: ${cf:uploads-${sls:stage}.DocumentUploadsBucketName}
+  ui_s3_bucket_name: ${cf:ui-${sls:stage}.S3BucketName}
+  ui_cloudfront_distribution_id: ${cf:ui-${sls:stage}.CloudFrontDistributionId}
+  storybook_s3_bucket_name: ${cf:storybook-${sls:stage}.S3BucketName}
+  storybook_cloudfront_distribution_id: ${cf:storybook-${sls:stage}.CloudFrontDistributionId}
   react_app_auth_mode: ${env:REACT_APP_AUTH_MODE}
   nr_license_key: ${env:NR_LICENSE_KEY}
   react_app_ld_client_id: ${env:REACT_APP_LD_CLIENT_ID}
@@ -71,7 +71,7 @@ custom:
         export REACT_APP_COGNITO_USER_POOL_CLIENT_DOMAIN=${self:custom.cognito_user_pool_client_domain}
         export REACT_APP_S3_REGION=${self:custom.s3_documents_bucket_region}
         export REACT_APP_S3_DOCUMENTS_BUCKET=${self:custom.s3_documents_bucket_name}
-        export REACT_APP_STAGE_NAME=${self:custom.stage}
+        export REACT_APP_STAGE_NAME=${sls:stage}
         export REACT_APP_OTEL_COLLECTOR_URL=${self:custom.api_url}/otel
         export REACT_APP_LD_CLIENT_ID=${self:custom.react_app_ld_client_id}
 

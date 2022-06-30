@@ -1,7 +1,7 @@
 service: infra-api
 variablesResolutionMode: 20210326
 
-frameworkVersion: '2'
+frameworkVersion: '^3.19.0'
 
 plugins:
   - serverless-stack-termination-protection
@@ -12,7 +12,7 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   iamPath: ${env:IAM_PATH, "/"}
-  nrLicenseKey: ${env:NR_LICENSE_KEY}
+  nrLicenseKey: ${env:NR_LICENSE_KEY, ""}
   nrMetricStreamName: 'NewRelic-Metric-Stream'
   nrFirehoseStreamName: 'NewRelic-Delivery-Stream'
   nrExternalId: '3407984'
@@ -25,7 +25,7 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs16.x
   region: us-east-1
   iam:
     role:
@@ -42,22 +42,22 @@ resources:
     CreateNRInfraMonitoring:
       Fn::Or:
         - Fn::Equals:
-            - ${self:custom.stage}
+            - ${sls:stage}
             - 'dev'
         - Fn::Equals:
-            - ${self:custom.stage}
+            - ${sls:stage}
             - 'val'
         - Fn::Equals:
-            - ${self:custom.stage}
+            - ${sls:stage}
             - 'prod'
         - Fn::Equals:
-            - ${self:custom.stage}
+            - ${sls:stage}
             - 'main'
   Resources:
     AppApiGateway:
       Type: AWS::ApiGateway::RestApi
       Properties:
-        Name: ${self:service}-${self:custom.stage}-app-api-gateway
+        Name: ${self:service}-${sls:stage}-app-api-gateway
 
     GatewayResponseDefault4XX:
       Type: 'AWS::ApiGateway::GatewayResponse'
@@ -109,7 +109,7 @@ resources:
       Type: AWS::S3::Bucket
       Condition: CreateNRInfraMonitoring
       Properties:
-        BucketName: !Sub newrelic-firehose-${self:custom.stage}-${AWS::AccountId}
+        BucketName: !Sub newrelic-firehose-${sls:stage}-${aws:accountId}
         PublicAccessBlockConfiguration:
           BlockPublicAcls: true
           BlockPublicPolicy: true
@@ -160,7 +160,7 @@ resources:
                 - 'sts:AssumeRole'
               Condition:
                 StringEquals:
-                  'sts:ExternalId': !Sub ${AWS::AccountId}
+                  'sts:ExternalId': !Sub ${aws:accountId}
         Policies:
           - PolicyName: MetricStreams-FirehosePutRecords
             PolicyDocument:
@@ -222,7 +222,7 @@ resources:
     #     Rules:
     #       - Action:
     #           Allow: {}
-    #         Name: ${self:custom.stage}-allow-usa-plus-territories
+    #         Name: ${sls:stage}-allow-usa-plus-territories
     #         Priority: 0
     #         Statement:
     #           GeoMatchStatement:
@@ -241,7 +241,7 @@ resources:
     #     VisibilityConfig:
     #       CloudWatchMetricsEnabled: true
     #       SampledRequestsEnabled: true
-    #       MetricName: ${self:custom.stage}-webacl
+    #       MetricName: ${sls:stage}-webacl
 
     # ApiGwWebAclAssociation:
     #   Type: AWS::WAFv2::WebACLAssociation
@@ -250,7 +250,7 @@ resources:
     #     - AppApiGatewayAcl
     #   Properties:
     #     ResourceArn: !Sub
-    #       - arn:aws:apigateway:${self:provider.region}::/restapis/${GatewayRef}/stages/${self:custom.stage}
+    #       - arn:aws:apigateway:${self:provider.region}::/restapis/${GatewayRef}/stages/${sls:stage}
     #       - { GatewayRef: !Ref AppApiGateway }
     #     WebACLArn: !GetAtt AppApiGatewayAcl.Arn
 
@@ -259,7 +259,7 @@ resources:
       Value:
         Ref: AppApiGateway
     ApiGatewayRestApiUrl:
-      Value: !Sub https://${AppApiGateway}.execute-api.${self:provider.region}.amazonaws.com/${self:custom.stage}
+      Value: !Sub https://${AppApiGateway}.execute-api.${self:provider.region}.amazonaws.com/${sls:stage}
     AppApiGatewayRootResourceId:
       Value:
         Fn::GetAtt:

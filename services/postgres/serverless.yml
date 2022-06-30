@@ -1,7 +1,6 @@
 service: postgres
-variablesResolutionMode: 20210326
 
-frameworkVersion: '2'
+frameworkVersion: '^3.19.0'
 
 plugins:
   - serverless-stack-termination-protection
@@ -42,14 +41,14 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
   iamPath: ${env:IAM_PATH, "/"}
-  databaseName: !Sub aurora_${self:service}_${self:custom.stage}_${AWS::AccountId}
-  vpcId: ${ssm:/configuration/${self:custom.stage}/vpc/id, ssm:/configuration/default/vpc/id}
-  sgId: ${ssm:/configuration/${self:custom.stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
+  databaseName: !Sub aurora_${self:service}_${sls:stage}_${aws:accountId}
+  vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
+  sgId: ${ssm:/configuration/${sls:stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
   privateSubnets:
-    - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/a/id, ssm:/configuration/default/vpc/subnets/private/a/id}
-    - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
-    - ${ssm:/configuration/${self:custom.stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
-  rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${self:custom.stage}-rotator'
+    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/a/id, ssm:/configuration/default/vpc/subnets/private/a/id}
+    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
+    - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
+  rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${aws:accountId}:function:${self:service}-${sls:stage}-rotator'
   serverlessTerminationProtection:
     stages:
       - dev
@@ -94,7 +93,7 @@ resources:
     PostgresSecret:
       Type: AWS::SecretsManager::Secret
       Properties:
-        Name: 'aurora_${self:service}_${self:custom.stage}'
+        Name: 'aurora_${self:service}_${sls:stage}'
         Description: 'Dynamically generated password for aurora serverless postgres'
         GenerateSecretString:
           SecretStringTemplate: '{"username": "mcreviewadmin"}'
@@ -125,7 +124,7 @@ resources:
       Type: AWS::SecretsManager::SecretTargetAttachment
       Properties:
         SecretId: !Ref PostgresSecret
-        TargetId: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAurora}'
+        TargetId: !Sub 'arn:aws:rds:${AWS::Region}:${aws:accountId}:cluster:${PostgresAurora}'
         TargetType: AWS::RDS::DBCluster
 
     PostgresSecretsRotationSchedule:
@@ -150,4 +149,4 @@ resources:
 
   Outputs:
     PostgresAuroraArn:
-      Value: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAurora}'
+      Value: !Sub 'arn:aws:rds:${AWS::Region}:${aws:accountId}:cluster:${PostgresAurora}'

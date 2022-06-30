@@ -84,7 +84,7 @@ describe('unlockHealthPlanPackage', () => {
         expect(
             unlockedSub.revisions[0].node.unlockInfo?.updatedAt.toISOString()
         ).toContain('Z')
-    })
+    }, 20000)
 
     it('returns a package that can be updated without errors', async () => {
         const stateServer = await constructTestPostgresServer()
@@ -162,7 +162,7 @@ describe('unlockHealthPlanPackage', () => {
         expect(refetchedFormData.submissionDescription).toBe(
             'UPDATED_AFTER_UNLOCK'
         )
-    })
+    }, 20000)
 
     it('can be unlocked repeatedly', async () => {
         const stateServer = await constructTestPostgresServer()
@@ -225,7 +225,7 @@ describe('unlockHealthPlanPackage', () => {
         expect(
             draft.revisions[0].node.unlockInfo?.updatedAt.toISOString()
         ).toContain('Z')
-    })
+    }, 20000)
 
     it('returns errors if a state user tries to unlock', async () => {
         const stateServer = await constructTestPostgresServer()

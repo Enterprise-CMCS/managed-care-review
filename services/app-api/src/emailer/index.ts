@@ -7,7 +7,12 @@ export {
     unlockPackageStateEmail,
     resubmittedStateEmail,
     resubmittedCMSEmail,
-    UpdatedEmailData,
 } from './templates'
 
-export type { EmailConfiguration, EmailData, Emailer } from './emailer'
+export type { UpdatedEmailData } from './templates'
+export type {
+    EmailConfiguration,
+    EmailData,
+    Emailer,
+    StateAnalystsEmails,
+} from './emailer'
