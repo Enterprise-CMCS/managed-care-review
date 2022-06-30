@@ -1,2 +1,3 @@
-export { getParameterStore } from './parameterStore'
-export { getStateAnalystEmails } from './getStateAnalystEmails'
+export { newAWSParameterStore, newLocalParameterStore } from './parameterStore'
+
+export type { ParameterStore } from './parameterStore'

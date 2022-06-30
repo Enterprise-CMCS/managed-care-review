@@ -1,33 +1,35 @@
-import { SSM } from 'aws-sdk'
+import { getParameterStore } from './awsParameterStore'
+import { getStateAnalystEmails } from './getStateAnalystEmails'
+import { Context } from '../handlers/apollo_gql'
 
-type GetParameterResult = SSM.GetParameterResult
+export type ParameterStore = {
+    getStateAnalystEmails: (
+        stateCode: string,
+        span?: Context['span'],
+        operation?: string
+    ) => Promise<string[]>
+}
 
-const ssm = new SSM({ region: 'us-east-1' })
-
-const getParameterStore = async (name: string): Promise<string | Error> => {
-    const params = {
-        Name: name,
-    }
-
-    try {
-        const response: GetParameterResult = await ssm
-            .getParameter(params)
-            .promise()
-        const value = response?.Parameter?.Value
-
-        if (value === undefined) {
-            const errorMessage = `Failed to return parameter ${name}. Value was undefined.`
-            console.error(errorMessage)
-            return new Error(errorMessage)
-        }
-
-        return value
-    } catch (err) {
-        console.error(
-            `Failed to fetch parameter ${name}. Error: ${err.message}`
-        )
-        return new Error(err)
+function newLocalParameterStore(): ParameterStore {
+    return {
+        getStateAnalystEmails: async (
+            stateCode: string,
+            span?: Context['span'],
+            operation?: string
+        ): Promise<string[]> => {
+            const analystsParameterStore = `"${stateCode} State Analyst 1" <${stateCode}StateAnalyst1@example.com>, "${stateCode} State Analyst 2" <${stateCode}StateAnalyst2@example.com>`
+            //Split string into array using ',' separator and trim each array item.
+            return analystsParameterStore
+                .split(',')
+                .map((email) => email.trim())
+        },
     }
 }
 
-export { getParameterStore }
+function newAWSParameterStore(): ParameterStore {
+    return {
+        getStateAnalystEmails: getStateAnalystEmails,
+    }
+}
+
+export { getParameterStore, newAWSParameterStore, newLocalParameterStore }

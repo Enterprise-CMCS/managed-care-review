@@ -21,6 +21,7 @@ import { configureResolvers } from '../resolvers'
 import { latestFormData } from './healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from './storeHelpers'
 import { domainToBase64 } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import { newLocalParameterStore, ParameterStore } from '../parameterStore'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -46,14 +47,20 @@ const constructTestPostgresServer = async (opts?: {
     context?: Context
     emailer?: Emailer
     store?: Store
+    parameterStore?: ParameterStore
 }): Promise<ApolloServer> => {
     // set defaults
     const context = opts?.context || defaultContext()
     const emailer = opts?.emailer || constructTestEmailer()
+    const parameterStore = opts?.parameterStore || newLocalParameterStore()
 
     const prismaClient = await sharedTestPrismaClient()
     const postgresStore = opts?.store || NewPostgresStore(prismaClient)
-    const postgresResolvers = configureResolvers(postgresStore, emailer)
+    const postgresResolvers = configureResolvers(
+        postgresStore,
+        emailer,
+        parameterStore
+    )
 
     return new ApolloServer({
         typeDefs,
