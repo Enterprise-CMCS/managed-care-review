@@ -25,6 +25,7 @@ import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
 import { createTracer } from '../otel/otel_handler'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
+import { newAWSParameterStore, newLocalParameterStore } from '../parameterStore'
 
 const requestSpanKey = 'REQUEST_SPAN'
 let tracer: Tracer
@@ -254,8 +255,13 @@ async function initializeGQLHandler(): Promise<Handler> {
                   ratesReviewSharedEmails: ratesReviewSharedEmails.split(','),
               })
 
+    const parameterStore =
+        emailerMode === 'LOCAL'
+            ? newLocalParameterStore()
+            : newAWSParameterStore()
+
     // Resolvers are defined and tested in the resolvers package
-    const resolvers = configureResolvers(store, emailer)
+    const resolvers = configureResolvers(store, emailer, parameterStore)
 
     const userFetcher =
         authMode === 'LOCAL'
