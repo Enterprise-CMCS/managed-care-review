@@ -26,7 +26,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import { getStateAnalystEmails } from '../parameterStore'
+import { ParameterStore } from '../parameterStore'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
@@ -115,7 +115,8 @@ function submit(
 // submitHealthPlanPackageResolver is a state machine transition for HealthPlanPackage
 export function submitHealthPlanPackageResolver(
     store: Store,
-    emailer: Emailer
+    emailer: Emailer,
+    parameterStore: ParameterStore
 ): MutationResolvers['submitHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
@@ -259,7 +260,7 @@ export function submitHealthPlanPackageResolver(
         const name = packageName(lockedFormData, programs)
         const status = packageStatus(updatedPackage)
         const stateAnalystsEmails: StateAnalystsEmails =
-            await getStateAnalystEmails(
+            await parameterStore.getStateAnalystEmails(
                 updatedPackage.stateCode,
                 span,
                 'submitHealthPlanPackage'
