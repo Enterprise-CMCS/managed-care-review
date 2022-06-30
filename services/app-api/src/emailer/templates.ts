@@ -1,4 +1,6 @@
 import { URL } from 'url'
+import Handlebars from 'handlebars/runtime'
+
 import {
     LockedHealthPlanFormDataType,
     SubmissionType,
@@ -8,6 +10,10 @@ import { UserType } from '../domain-models'
 import { formatCalendarDate } from '../../../app-web/src/common-code/dateHelpers'
 import { EmailConfiguration, EmailData, StateAnalystsEmails } from './'
 import { generateRateName } from '../../../app-web/src/common-code/healthPlanFormDataType'
+
+// load email templates
+import './templates/partials.js'
+import './templates/precompiled.js'
 
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_ONLY: 'Contract action only',
@@ -183,65 +189,65 @@ const newPackageCMSEmail = (
 }
 
 const newPackageStateEmail = (
-    submission: LockedHealthPlanFormDataType,
-    submissionName: string,
+    pkg: LockedHealthPlanFormDataType,
+    packageName: string,
     user: UserType,
     config: EmailConfiguration
 ): EmailData => {
     const currentUserEmail = user.email
     const receiverEmails: string[] = [currentUserEmail].concat(
-        submission.stateContacts.map((contact) => contact.email)
+        pkg.stateContacts.map((contact) => contact.email)
     )
-    const bodyHTML = `${submissionName} was successfully submitted.
-            <br /><br />
-            ${generateNewSubmissionBody(submission, submissionName, config)}
-            <br /><br />
-            If you need to make any changes, please contact CMS.
-            <br /><br />
-            <div>What comes next:</div>
-            <ol>
-                <li>
-                    <strong>Check for completeness:</strong> CMS will review all documentation submitted to ensure all required materials were received.
-                </li>
-                <li>
-                    <strong>CMS review:</strong> Your submission will be reviewed by CMS for adherence to federal regulations.
-                </li>
-                <li>
-                    <strong>Questions:</strong> You may receive questions via email from CMS as they conduct their review.
-                </li>
-                <li>
-                    <strong>Decision:</strong> Once all questions have been addressed, CMS will contact you with their final recommendation.
 
-                </li>
-            </ol>
-            <br />
-            <div>If you need assistance or to make changes to your submission:</div>
-            <ul>
-                <li>
-                    For assistance with programmatic, contractual, or operational issues, please reach out to ${
-                        config.cmsReviewHelpEmailAddress
-                    } and/or your CMS primary contact.
-                </li>
-                <li>
-                    For assistance on policy and actuarial issues, please reach out to ${
-                        config.cmsRateHelpEmailAddress
-                    }.
-                </li>
-                <li>
-                    For issues related to MC-Review or all other inquiries, please reach out to ${
-                        config.cmsDevTeamHelpEmailAddress
-                    }.
-                </li>
-            </ul>
-        `
+    const hasRateAmendmentInfo =
+        pkg.rateType === 'AMENDMENT' && pkg.rateAmendmentInfo
+    // const hasRates = pkg.submissionType === 'CONTRACT_AND_RATES'
+    const data = {
+        cmsReviewHelpEmailAddress: config.cmsReviewHelpEmailAddress,
+        cmsRateHelpEmailAddress: config.cmsRateHelpEmailAddress,
+        cmsDevTeamHelpEmailAddress: config.cmsDevTeamHelpEmailAddress,
+        packageName: packageName,
+        submissionType: pkg.submissionType,
+        submissionDescription: pkg.submissionDescription,
+        contractDates: {
+            label:
+                pkg.contractType === 'AMENDMENT'
+                    ? 'Contract amendment effective dates'
+                    : 'Contract effective dates',
+            start: formatCalendarDate(pkg.contractDateStart),
+            end: formatCalendarDate(pkg.contractDateEnd),
+        },
+        rateInfo: {
+            name: generateRateName(pkg, packageName),
+            dates: {
+                label:
+                    pkg.rateType === 'NEW'
+                        ? 'Rating period'
+                        : 'Rate amendment effective dates',
+                start: hasRateAmendmentInfo
+                    ? formatCalendarDate(
+                          pkg.rateAmendmentInfo.effectiveDateStart
+                      )
+                    : formatCalendarDate(pkg.rateDateStart),
+                end: hasRateAmendmentInfo
+                    ? formatCalendarDate(pkg.rateAmendmentInfo.effectiveDateEnd)
+                    : formatCalendarDate(pkg.rateDateEnd),
+            },
+        },
+        submissionUrl: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
+    }
+    Handlebars.partials['packageSummary'](data)
+    const bodyHTMLHandlebars =
+        Handlebars.templates['newPackageStateEmail'](data)
+
     return {
         toAddresses: receiverEmails,
         sourceEmail: config.emailSource,
         subject: `${
             config.stage !== 'prod' ? `[${config.stage}] ` : ''
-        }${submissionName} was sent to CMS`,
-        bodyText: stripHTMLFromTemplate(bodyHTML),
-        bodyHTML: bodyHTML,
+        }${packageName} was sent to CMS`,
+        bodyText: stripHTMLFromTemplate(bodyHTMLHandlebars),
+        bodyHTML: bodyHTMLHandlebars,
     }
 }
 

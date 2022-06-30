@@ -1,2 +1,2 @@
-emailer/templates/partials.js
-emailer/templates/precompiled.js
+src/emailer/templates/partials.js
+src/emailer/templates/precompiled.js
