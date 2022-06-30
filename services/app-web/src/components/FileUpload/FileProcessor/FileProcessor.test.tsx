@@ -149,14 +149,10 @@ describe('FileProcessor component', () => {
             />
         )
 
-        void (await userEvent.click(
-            screen.getByRole('button', { name: /Retry/ })
-        ))
+        await userEvent.click(screen.getByRole('button', { name: /Retry/ }))
         expect(buttonActionProps.retryItem).toHaveBeenCalled()
 
-        void (await userEvent.click(
-            screen.getByRole('button', { name: /Remove/ })
-        ))
+        await userEvent.click(screen.getByRole('button', { name: /Remove/ }))
         expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 
@@ -345,14 +341,10 @@ describe('FileProcessor component', () => {
             screen.getByRole('button', { name: /Retry/ })
         ).toBeInTheDocument()
 
-        void (await userEvent.click(
-            screen.getByRole('button', { name: /Retry/ })
-        ))
+        await userEvent.click(screen.getByRole('button', { name: /Retry/ }))
         expect(buttonActionProps.retryItem).toHaveBeenCalled()
 
-        void (await userEvent.click(
-            screen.getByRole('button', { name: /Remove/ })
-        ))
+        await userEvent.click(screen.getByRole('button', { name: /Remove/ }))
         expect(buttonActionProps.deleteItem).toHaveBeenCalled()
     })
 

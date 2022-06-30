@@ -193,11 +193,11 @@ describe('ContractDetails', () => {
                 'accept',
                 'application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             )
-            void (await userEvent.upload(input, [
+            await userEvent.upload(input, [
                 TEST_DOC_FILE,
                 TEST_PDF_FILE,
                 TEST_XLS_FILE,
-            ]))
+            ])
             await waitFor(() => {
                 expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
                 expect(screen.getByText(TEST_PDF_FILE.name)).toBeInTheDocument()

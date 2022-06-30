@@ -163,9 +163,7 @@ describe('FieldYesNo component', () => {
             expect(within(something).getByLabelText('No')).toBeChecked()
         })
 
-        void (await userEvent.click(
-            screen.getByRole('button', { name: 'Submit' })
-        ))
+        await userEvent.click(screen.getByRole('button', { name: 'Submit' }))
 
         await waitFor(() => {
             expect(submittedValues).toEqual({

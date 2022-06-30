@@ -133,9 +133,9 @@ describe('FileUpload component', () => {
 
         const inputEl = screen.getByTestId('file-input-input')
 
-        void (await userEvent.upload(inputEl, [TEST_TEXT_FILE, TEST_PDF_FILE], {
+        await userEvent.upload(inputEl, [TEST_TEXT_FILE, TEST_PDF_FILE], {
             applyAccept: true,
-        }))
+        })
 
         await waitFor(() => {
             expect(screen.getAllByRole('listitem')).toHaveLength(2)
@@ -151,9 +151,9 @@ describe('FileUpload component', () => {
         const inputEl = screen.getByTestId('file-input-input')
         expect(inputEl).toHaveAttribute('accept', '.pdf,.txt')
 
-        void (await userEvent.upload(inputEl, TEST_PDF_FILE, {
+        await userEvent.upload(inputEl, TEST_PDF_FILE, {
             applyAccept: true,
-        }))
+        })
 
         expect(screen.queryByTestId('file-input-error')).not.toBeInTheDocument()
         expect(screen.getByTestId('file-input-droptarget')).not.toHaveClass(
@@ -168,9 +168,9 @@ describe('FileUpload component', () => {
         const inputEl = screen.getByTestId('file-input-input')
         expect(inputEl).toHaveAttribute('accept', '.pdf,.txt')
 
-        void (await userEvent.upload(inputEl, TEST_VIDEO_FILE, {
+        await userEvent.upload(inputEl, TEST_VIDEO_FILE, {
             applyAccept: true,
-        }))
+        })
 
         expect(screen.queryByRole('listitem')).toBeNull()
     })

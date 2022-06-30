@@ -342,11 +342,11 @@ describe('SubmissionType', () => {
                 }
             )
 
-            void (await userEvent.click(
+            await userEvent.click(
                 screen.getByRole('button', {
                     name: 'Continue',
                 })
-            ))
+            )
             await waitFor(() => {
                 expect(
                     screen.queryAllByText('You must choose a submission type')

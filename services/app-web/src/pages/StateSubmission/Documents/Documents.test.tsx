@@ -94,11 +94,11 @@ describe('Documents', () => {
             'accept',
             'application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
         )
-        void (await userEvent.upload(input, [
+        await userEvent.upload(input, [
             TEST_DOC_FILE,
             TEST_PDF_FILE,
             TEST_XLS_FILE,
-        ]))
+        ])
         await waitFor(() => {
             expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
             expect(screen.getByText(TEST_PDF_FILE.name)).toBeInTheDocument()
@@ -345,11 +345,11 @@ describe('Documents', () => {
             // check a category for the second row
             const rows = screen.getAllByRole('row')
             expect(rows).toHaveLength(3)
-            void (await userEvent.click(
+            await userEvent.click(
                 within(rows[1]).getByRole('checkbox', {
                     name: 'contract-supporting',
                 })
-            ))
+            )
 
             await waitFor(() => {
                 expect(
@@ -360,9 +360,9 @@ describe('Documents', () => {
             })
 
             // click continue and enter validation state
-            void (await userEvent.click(
+            await userEvent.click(
                 screen.getByRole('button', { name: 'Continue' })
-            ))
+            )
 
             await waitFor(() => {
                 expect(
@@ -412,9 +412,9 @@ describe('Documents', () => {
             })
 
             // click continue and enter validation state
-            void (await userEvent.click(
+            await userEvent.click(
                 screen.getByRole('button', { name: 'Continue' })
-            ))
+            )
 
             await waitFor(() => {
                 expect(
@@ -1062,9 +1062,9 @@ describe('Documents', () => {
                 expect(screen.queryAllByText('Rate-supporting')).toHaveLength(1)
             })
 
-            void (await userEvent.click(
+            await userEvent.click(
                 screen.getByRole('button', { name: 'Continue' })
-            ))
+            )
 
             // errors after validation and checkboxes still present
             await waitFor(() => {
@@ -1108,11 +1108,11 @@ describe('Documents', () => {
             await waitFor(() => expect(rows).toHaveLength(4))
 
             // check a category for the second row
-            void (await userEvent.click(
+            await userEvent.click(
                 within(rows[2]).getByRole('checkbox', {
                     name: 'contract-supporting',
                 })
-            ))
+            )
 
             // confirm checkboxes are present or hidden when expected
             const missingDocumentCategoriesRow = rows[1]
@@ -1129,9 +1129,9 @@ describe('Documents', () => {
             expect(within(duplicateNameRow).queryByRole('checkbox')).toBeNull()
 
             // click continue and enter validation state
-            void (await userEvent.click(
+            await userEvent.click(
                 screen.getByRole('button', { name: 'Continue' })
-            ))
+            )
             await waitFor(() => {
                 expect(
                     screen.queryAllByText('You must select a document category')

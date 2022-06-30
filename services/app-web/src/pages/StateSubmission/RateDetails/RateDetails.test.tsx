@@ -251,15 +251,9 @@ describe('RateDetails', () => {
         })
 
         // fill out form and clear errors
-        void (await userEvent.type(
-            screen.getByText('Start date'),
-            '01/01/2022'
-        ))
+        await userEvent.type(screen.getByText('Start date'), '01/01/2022')
         await userEvent.type(screen.getByText('End date'), '12/31/2022')
-        void (await userEvent.type(
-            screen.getByText('Date certified'),
-            '12/01/2021'
-        ))
+        await userEvent.type(screen.getByText('Date certified'), '12/01/2021')
         await waitFor(() =>
             expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
         )
@@ -339,11 +333,11 @@ describe('RateDetails', () => {
                 'accept',
                 'application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             )
-            void (await userEvent.upload(input, [
+            await userEvent.upload(input, [
                 TEST_DOC_FILE,
                 TEST_PDF_FILE,
                 TEST_XLS_FILE,
-            ]))
+            ])
             await waitFor(() => {
                 expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
                 expect(screen.getByText(TEST_PDF_FILE.name)).toBeInTheDocument()

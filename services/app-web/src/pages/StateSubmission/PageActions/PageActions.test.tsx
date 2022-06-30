@@ -38,9 +38,7 @@ describe('PageActions', () => {
                 />
             )
 
-            void (await userEvent.click(
-                screen.getByRole('button', { name: 'Back' })
-            ))
+            await userEvent.click(screen.getByRole('button', { name: 'Back' }))
             expect(backAction).toHaveBeenCalled()
         })
         it('calls saveAsDraftClick when Save as draft button is clicked on generic page', async () => {
@@ -53,9 +51,9 @@ describe('PageActions', () => {
                 />
             )
 
-            void (await userEvent.click(
+            await userEvent.click(
                 screen.getByRole('button', { name: 'Save as draft' })
-            ))
+            )
             expect(saveAction).toHaveBeenCalled()
         })
         it('calls continueClick when Continue button is clicked on generic page', async () => {
@@ -68,9 +66,9 @@ describe('PageActions', () => {
                 />
             )
 
-            void (await userEvent.click(
+            await userEvent.click(
                 screen.getByRole('button', { name: 'Continue' })
-            ))
+            )
             expect(continueAction).toHaveBeenCalled()
         })
         it('disables continue action when expected', async () => {
@@ -84,9 +82,9 @@ describe('PageActions', () => {
                 />
             )
 
-            void (await userEvent.click(
+            await userEvent.click(
                 screen.getByRole('button', { name: 'Continue' })
-            ))
+            )
             expect(continueAction).not.toHaveBeenCalled()
         })
     })
@@ -150,9 +148,9 @@ describe('PageActions', () => {
                 />
             )
 
-            void (await userEvent.click(
+            await userEvent.click(
                 screen.getByRole('button', { name: 'Cancel' })
-            ))
+            )
             expect(backAction).toHaveBeenCalled()
         })
 
@@ -167,9 +165,9 @@ describe('PageActions', () => {
                 />
             )
 
-            void (await userEvent.click(
+            await userEvent.click(
                 screen.getByRole('button', { name: 'Submit' })
-            ))
+            )
             expect(continueAction).toHaveBeenCalled()
         })
 
@@ -185,9 +183,9 @@ describe('PageActions', () => {
                 />
             )
 
-            void (await userEvent.click(
+            await userEvent.click(
                 screen.getByRole('button', { name: 'Submit' })
-            ))
+            )
             expect(continueAction).not.toHaveBeenCalled()
         })
 
@@ -227,9 +225,9 @@ describe('PageActions', () => {
                 />
             )
 
-            void (await userEvent.click(
+            await userEvent.click(
                 screen.getByRole('button', { name: 'Continue' })
-            ))
+            )
             expect(continueAction).toHaveBeenCalled()
         })
         it('calls saveAsDraftOnClick when Save as draft button is clicked on the first page when editing', async () => {
@@ -243,9 +241,9 @@ describe('PageActions', () => {
                 />
             )
 
-            void (await userEvent.click(
+            await userEvent.click(
                 screen.getByRole('button', { name: 'Save as draft' })
-            ))
+            )
             expect(saveAsDraftOnClick).toHaveBeenCalled()
         })
         it('calls backOnClick when Cancel button is clicked on the first page when editing', async () => {
@@ -259,9 +257,9 @@ describe('PageActions', () => {
                 />
             )
 
-            void (await userEvent.click(
+            await userEvent.click(
                 screen.getByRole('button', { name: 'Cancel' })
-            ))
+            )
             expect(backOnClick).toHaveBeenCalled()
         })
     })
@@ -281,19 +279,17 @@ describe('PageActions', () => {
                 />
             )
 
-            void (await userEvent.click(
+            await userEvent.click(
                 screen.getByTestId('page-actions-right-primary')
-            ))
+            )
             expect(continueAction).not.toHaveBeenCalled()
 
-            void (await userEvent.click(
+            await userEvent.click(
                 screen.getByTestId('page-actions-right-primary')
-            ))
+            )
             expect(saveAsDraftAction).not.toHaveBeenCalled()
 
-            void (await userEvent.click(
-                screen.getByRole('button', { name: 'Back' })
-            ))
+            await userEvent.click(screen.getByRole('button', { name: 'Back' }))
             expect(backAction).not.toHaveBeenCalled()
         })
     })
