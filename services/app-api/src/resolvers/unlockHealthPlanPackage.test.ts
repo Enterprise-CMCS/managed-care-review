@@ -472,9 +472,11 @@ describe('unlockHealthPlanPackage', () => {
 
         const programs = [defaultFloridaProgram()]
         const name = packageName(sub, programs)
+        const stateAnalystsEmails = getTestStateAnalystsEmails(sub)
+
         const cmsEmails = [
             ...config.cmsReviewSharedEmails,
-            ...getTestStateAnalystsEmails(sub),
+            ...stateAnalystsEmails,
             ...config.ratesReviewSharedEmails,
         ]
 
@@ -536,6 +538,12 @@ describe('unlockHealthPlanPackage', () => {
         const mockParameterStore = mockParameterStoreError()
         const consoleErrorSpy = jest.spyOn(console, 'error')
         const stateServer = await constructTestPostgresServer()
+        const error = {
+            error: 'No store found',
+            message: 'getStateAnalystsEmails failed',
+            operation: 'getStateAnalystsEmails',
+            status: 'ERROR',
+        }
 
         const stateSubmission = await createAndSubmitTestHealthPlanPackage(
             stateServer
@@ -561,13 +569,6 @@ describe('unlockHealthPlanPackage', () => {
                 },
             },
         })
-
-        const error = {
-            error: 'No store found',
-            message: 'getStateAnalystsEmails failed',
-            operation: 'getStateAnalystsEmails',
-            status: 'ERROR',
-        }
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(error)
     })

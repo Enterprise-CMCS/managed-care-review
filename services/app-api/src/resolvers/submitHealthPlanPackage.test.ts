@@ -260,9 +260,11 @@ describe('submitHealthPlanPackage', () => {
 
         const programs = [defaultFloridaProgram()]
         const name = packageName(sub, programs)
+        const stateAnalystsEmails = getTestStateAnalystsEmails(sub)
+
         const cmsEmails = [
             ...config.cmsReviewSharedEmails,
-            ...getTestStateAnalystsEmails(sub),
+            ...stateAnalystsEmails,
         ]
 
         // email subject line is correct for CMS email
@@ -310,6 +312,13 @@ describe('submitHealthPlanPackage', () => {
     it('does log error when request for state specific analysts emails failed', async () => {
         const mockParameterStore = mockParameterStoreError()
         const consoleErrorSpy = jest.spyOn(console, 'error')
+        const error = {
+            error: 'No store found',
+            message: 'getStateAnalystsEmails failed',
+            operation: 'getStateAnalystsEmails',
+            status: 'ERROR',
+        }
+
         const server = await constructTestPostgresServer({
             parameterStore: mockParameterStore,
         })
@@ -324,13 +333,6 @@ describe('submitHealthPlanPackage', () => {
                 },
             },
         })
-
-        const error = {
-            error: 'No store found',
-            message: 'getStateAnalystsEmails failed',
-            operation: 'getStateAnalystsEmails',
-            status: 'ERROR',
-        }
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(error)
     })
