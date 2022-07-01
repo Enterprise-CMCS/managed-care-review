@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { screen, waitFor, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import {
@@ -222,7 +222,7 @@ describe('RateDetails', () => {
             )
             .click()
         const input = screen.getByLabelText('Upload rate certification')
-        userEvent.upload(input, [TEST_DOC_FILE])
+        await userEvent.upload(input, [TEST_DOC_FILE])
 
         // check that now we can see hidden things
         await waitFor(() => {
@@ -235,7 +235,7 @@ describe('RateDetails', () => {
         // click "continue"
         const continueButton = screen.getByRole('button', { name: 'Continue' })
 
-        continueButton.click()
+        fireEvent.click(continueButton)
 
         // check for expected errors
         await waitFor(() => {
@@ -251,9 +251,9 @@ describe('RateDetails', () => {
         })
 
         // fill out form and clear errors
-        userEvent.type(screen.getByText('Start date'), '01/01/2022')
-        userEvent.type(screen.getByText('End date'), '12/31/2022')
-        userEvent.type(screen.getByText('Date certified'), '12/01/2021')
+        await userEvent.type(screen.getByText('Start date'), '01/01/2022')
+        await userEvent.type(screen.getByText('End date'), '12/31/2022')
+        await userEvent.type(screen.getByText('Date certified'), '12/01/2021')
         await waitFor(() =>
             expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
         )
@@ -306,7 +306,7 @@ describe('RateDetails', () => {
 
             const input = screen.getByLabelText('Upload rate certification')
             expect(input).toBeInTheDocument()
-            userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
 
             expect(
                 await screen.findByText(TEST_DOC_FILE.name)
@@ -333,7 +333,7 @@ describe('RateDetails', () => {
                 'accept',
                 'application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             )
-            userEvent.upload(input, [
+            await userEvent.upload(input, [
                 TEST_DOC_FILE,
                 TEST_PDF_FILE,
                 TEST_XLS_FILE,
@@ -366,7 +366,7 @@ describe('RateDetails', () => {
             })
             const input = screen.getByLabelText('Upload rate certification')
 
-            userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
                 expect(continueButton).not.toHaveAttribute('aria-disabled')
@@ -393,7 +393,7 @@ describe('RateDetails', () => {
             const input = screen.getByLabelText('Upload rate certification')
             const targetEl = screen.getByTestId('file-input-droptarget')
 
-            userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
             dragAndDrop(targetEl, [TEST_PNG_FILE])
 
             await waitFor(() => {
@@ -453,9 +453,9 @@ describe('RateDetails', () => {
                 name: 'Continue',
             })
 
-            userEvent.upload(input, TEST_DOC_FILE)
-            userEvent.upload(input, [])
-            userEvent.upload(input, TEST_DOC_FILE)
+            await userEvent.upload(input, TEST_DOC_FILE)
+            await userEvent.upload(input, [])
+            await userEvent.upload(input, TEST_DOC_FILE)
             expect(continueButton).not.toHaveAttribute('aria-disabled')
 
             continueButton.click()
@@ -541,7 +541,7 @@ describe('RateDetails', () => {
             expect(imageElFile2).toHaveClass('is-loading')
 
             // click continue while file 2 still loading
-            continueButton.click()
+            fireEvent.click(continueButton)
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')
 
             expect(
@@ -573,7 +573,7 @@ describe('RateDetails', () => {
             })
             const input = screen.getByLabelText('Upload rate certification')
 
-            userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
                 expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
@@ -601,7 +601,7 @@ describe('RateDetails', () => {
             const input = screen.getByLabelText('Upload rate certification')
             const targetEl = screen.getByTestId('file-input-droptarget')
 
-            userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
             dragAndDrop(targetEl, [TEST_PNG_FILE])
 
             await waitFor(() => {
@@ -629,7 +629,7 @@ describe('RateDetails', () => {
             })
             expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
 
-            userEvent.click(saveAsDraftButton)
+            await userEvent.click(saveAsDraftButton)
             expect(mockUpdateDraftFn).toHaveBeenCalled()
             expect(
                 screen.queryByText('You must upload at least one document')
@@ -670,7 +670,7 @@ describe('RateDetails', () => {
             })
             expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
 
-            userEvent.click(saveAsDraftButton)
+            await userEvent.click(saveAsDraftButton)
             expect(mockUpdateDraftFn).toHaveBeenCalled()
             expect(
                 screen.queryByText('You must upload at least one document')
@@ -696,16 +696,16 @@ describe('RateDetails', () => {
                 name: 'Save as draft',
             })
 
-            userEvent.upload(input, [TEST_DOC_FILE])
-            userEvent.upload(input, [TEST_PDF_FILE])
-            userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_PDF_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
                 expect(
                     screen.queryAllByText('Duplicate file, please remove')
                 ).toHaveLength(1)
             })
-            userEvent.click(saveAsDraftButton)
+            await userEvent.click(saveAsDraftButton)
             await waitFor(() => {
                 expect(mockUpdateDraftFn).not.toHaveBeenCalled()
                 expect(
@@ -737,7 +737,7 @@ describe('RateDetails', () => {
             })
             const input = screen.getByLabelText('Upload rate certification')
 
-            userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
 
             await waitFor(() => {
                 expect(backButton).not.toHaveAttribute('aria-disabled')
@@ -764,7 +764,7 @@ describe('RateDetails', () => {
             const input = screen.getByLabelText('Upload rate certification')
             const targetEl = screen.getByTestId('file-input-droptarget')
 
-            userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
             dragAndDrop(targetEl, [TEST_PNG_FILE])
 
             await waitFor(() => {
@@ -792,7 +792,7 @@ describe('RateDetails', () => {
             })
             expect(backButton).not.toHaveAttribute('aria-disabled')
 
-            userEvent.click(backButton)
+            await userEvent.click(backButton)
             expect(
                 screen.queryByText('You must upload at least one document')
             ).toBeNull()
@@ -819,16 +819,16 @@ describe('RateDetails', () => {
                 name: 'Back',
             })
 
-            userEvent.upload(input, [TEST_DOC_FILE])
-            userEvent.upload(input, [TEST_PDF_FILE])
-            userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_PDF_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
             await waitFor(() => {
                 expect(backButton).not.toHaveAttribute('aria-disabled')
                 expect(
                     screen.queryAllByText('Duplicate file, please remove')
                 ).toHaveLength(1)
             })
-            userEvent.click(backButton)
+            await userEvent.click(backButton)
             expect(screen.queryByText('Remove files with errors')).toBeNull()
             expect(mockUpdateDraftFn).toHaveBeenCalledWith(
                 expect.objectContaining({

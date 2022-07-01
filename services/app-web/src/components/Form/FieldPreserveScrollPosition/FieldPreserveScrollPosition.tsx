@@ -18,7 +18,7 @@ export function FieldPreserveScrollPosition<T>({
     const { values } = useFormikContext<T>()
     const fieldValue = values[fieldName]
     useLayoutEffect(() => {
-        document.querySelector(`#${fieldName}`)?.scrollIntoView()
+        document.querySelector(`#${String(fieldName)}`)?.scrollIntoView()
     }, [fieldValue, fieldName])
     return null
 }
