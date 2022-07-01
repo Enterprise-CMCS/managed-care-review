@@ -1,5 +1,6 @@
 import { URL } from 'url'
-import Handlebars from 'handlebars/runtime'
+import * as Eta from 'eta'
+import * as path from 'path'
 
 import {
     LockedHealthPlanFormDataType,
@@ -14,6 +15,11 @@ import { generateRateName } from '../../../app-web/src/common-code/healthPlanFor
 // load email templates
 import './templates/partials.js'
 import './templates/precompiled.js'
+
+Eta.configure({
+    cache: true, // Make Eta cache templates
+    views: path.join(__dirname, 'templates'),
+})
 
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_ONLY: 'Contract action only',
@@ -117,12 +123,24 @@ const generateReviewerEmails = (
 //         submissionUrl: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
 // }
 // }
-const newPackageCMSEmail = (
+const renderTemplate = async <T>(templateRelativePath: string, data: T) => {
+    try {
+        const templateHTML = await Eta.renderFile('./template', {
+            data,
+        })
+        // TODO come back and check what the return void case is
+        return templateHTML
+    } catch (err) {
+        console.error(err)
+        throw new Error(err)
+    }
+}
+const newPackageCMSEmail = async (
     pkg: LockedHealthPlanFormDataType,
     packageName: string,
     config: EmailConfiguration,
     stateAnalystsEmails: StateAnalystsEmails
-): EmailData => {
+): Promise<EmailData> => {
     // config
     const isTestEnvironment = config.stage !== 'prod'
     const reviewerEmails = generateReviewerEmails(
@@ -139,42 +157,40 @@ const newPackageCMSEmail = (
         submissionType: SubmissionTypeRecord[pkg.submissionType],
         stateCode: pkg.stateCode,
         submissionDescription: pkg.submissionDescription,
-        contractDates: {
-            label:
-                pkg.contractType === 'AMENDMENT'
-                    ? 'Contract amendment effective dates'
-                    : 'Contract effective dates',
-            start: formatCalendarDate(pkg.contractDateStart),
-            end: formatCalendarDate(pkg.contractDateEnd),
-        },
-        rateInfo: {
-            name: generateRateName(pkg, packageName),
-            dateLabel:
+        contractDatesLabel:
+            pkg.contractType === 'AMENDMENT'
+                ? 'Contract amendment effective dates'
+                : 'Contract effective dates',
+        contractDatesStart: formatCalendarDate(pkg.contractDateStart),
+        contractDatesEnd: formatCalendarDate(pkg.contractDateEnd),
+        rateName: generateRateName(pkg, packageName),
+        rateDatesLabel:
             pkg.rateType === 'NEW'
                 ? 'Rating period'
                 : 'Rate amendment effective dates',
-            dateStart: hasRateAmendmentInfo
-                    ? formatCalendarDate(
-                          pkg.rateAmendmentInfo.effectiveDateStart
-                      )
-                    : formatCalendarDate(pkg.rateDateStart),
-            dateEnd: hasRateAmendmentInfo
-                    ? formatCalendarDate(pkg.rateAmendmentInfo.effectiveDateEnd)
-                    : formatCalendarDate(pkg.rateDateEnd),
-        },
+        rateDatesStart: hasRateAmendmentInfo
+            ? formatCalendarDate(pkg.rateAmendmentInfo.effectiveDateStart)
+            : formatCalendarDate(pkg.rateDateStart),
+        rateDatesEnd: hasRateAmendmentInfo
+            ? formatCalendarDate(pkg.rateAmendmentInfo.effectiveDateEnd)
+            : formatCalendarDate(pkg.rateDateEnd),
         submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
     }
 
-    const bodyHTMLHandlebars = Handlebars.templates['newPackageCMSEmail'](data)
-
+    const bodyHTMLEta = await renderTemplate<typeof data>(
+        './templates/newPackageCMSEmail',
+        data
+    )
+    console.log(bodyHTMLEta)
+    // TODO handle void an don't coerce string
     return {
         toAddresses: reviewerEmails,
         sourceEmail: config.emailSource,
         subject: `${
             isTestEnvironment ? `[${config.stage}] ` : ''
         }New Managed Care Submission: ${packageName}`,
-        bodyText: stripHTMLFromTemplate(bodyHTMLHandlebars),
-        bodyHTML: bodyHTMLHandlebars,
+        bodyText: stripHTMLFromTemplate(bodyHTMLEta as string),
+        bodyHTML: bodyHTMLEta as string,
     }
 }
 
@@ -199,32 +215,24 @@ const newPackageStateEmail = (
         packageName: packageName,
         submissionType: SubmissionTypeRecord[pkg.submissionType],
         submissionDescription: pkg.submissionDescription,
-        contractDates: {
-            label:
-                pkg.contractType === 'AMENDMENT'
-                    ? 'Contract amendment effective dates'
-                    : 'Contract effective dates',
-            start: formatCalendarDate(pkg.contractDateStart),
-            end: formatCalendarDate(pkg.contractDateEnd),
-        },
-        rateInfo: {
-            name: generateRateName(pkg, packageName),
-            dates: {
-                label:
-                    pkg.rateType === 'NEW'
-                        ? 'Rating period'
-                        : 'Rate amendment effective dates',
-                start: hasRateAmendmentInfo
-                    ? formatCalendarDate(
-                          pkg.rateAmendmentInfo.effectiveDateStart
-                      )
-                    : formatCalendarDate(pkg.rateDateStart),
-                end: hasRateAmendmentInfo
-                    ? formatCalendarDate(pkg.rateAmendmentInfo.effectiveDateEnd)
-                    : formatCalendarDate(pkg.rateDateEnd),
-            },
-        },
-        submissionUrl: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
+        contractDatesLabel:
+            pkg.contractType === 'AMENDMENT'
+                ? 'Contract amendment effective dates'
+                : 'Contract effective dates',
+        contractDatesStart: formatCalendarDate(pkg.contractDateStart),
+        contractDatesEnd: formatCalendarDate(pkg.contractDateEnd),
+        rateName: generateRateName(pkg, packageName),
+        rateDatesLabel:
+            pkg.rateType === 'NEW'
+                ? 'Rating period'
+                : 'Rate amendment effective dates',
+        rateDatesStart: hasRateAmendmentInfo
+            ? formatCalendarDate(pkg.rateAmendmentInfo.effectiveDateStart)
+            : formatCalendarDate(pkg.rateDateStart),
+        rateDatesEnd: hasRateAmendmentInfo
+            ? formatCalendarDate(pkg.rateAmendmentInfo.effectiveDateEnd)
+            : formatCalendarDate(pkg.rateDateEnd),
+        submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
     }
 
     const bodyHTMLHandlebars =
