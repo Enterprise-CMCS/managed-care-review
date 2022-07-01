@@ -15,6 +15,13 @@ import {
 } from '../testHelpers/gqlHelpers'
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 import { mockStoreThatErrors } from '../testHelpers/storeHelpers'
+import { testEmailConfig, testEmailer } from '../testHelpers/emailerHelpers'
+import { base64ToDomain } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
+import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
+import {
+    getTestStateAnalystsEmails,
+    mockParameterStoreError,
+} from '../testHelpers/parameterStoreHelpers'
 
 describe('unlockHealthPlanPackage', () => {
     it('returns a HealthPlanPackage with all revisions', async () => {
@@ -420,5 +427,148 @@ describe('unlockHealthPlanPackage', () => {
         expect(err.message).toContain(
             'Field "unlockedReason" of required type "String!" was not provided.'
         )
+    })
+
+    it('send email to CMS when unlocking submission succeeds', async () => {
+        const config = testEmailConfig
+        const mockEmailer = testEmailer(config)
+        //mock invoke email submit lambda
+        const stateServer = await constructTestPostgresServer()
+
+        // First, create a new submitted submission
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: {
+                    name: 'Zuko',
+                    role: 'CMS_USER',
+                    email: 'zuko@example.com',
+                },
+            },
+            emailer: mockEmailer,
+        })
+
+        // Unlock
+        const unlockResult = await cmsServer.executeOperation({
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
+            variables: {
+                input: {
+                    pkgID: stateSubmission.id,
+                    unlockedReason: 'Super duper good reason.',
+                },
+            },
+        })
+
+        const currentRevision =
+            unlockResult?.data?.unlockHealthPlanPackage?.pkg.revisions[0].node
+
+        const sub = base64ToDomain(currentRevision.formDataProto)
+        if (sub instanceof Error) {
+            throw sub
+        }
+
+        const programs = [defaultFloridaProgram()]
+        const name = packageName(sub, programs)
+        const cmsEmails = [
+            ...config.cmsReviewSharedEmails,
+            ...getTestStateAnalystsEmails(sub),
+            ...config.ratesReviewSharedEmails,
+        ]
+
+        // email subject line is correct for CMS email
+        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                subject: expect.stringContaining(`${name} was unlocked`),
+                sourceEmail: config.emailSource,
+                toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
+            })
+        )
+    })
+
+    it('does send unlock email when request for state analysts emails fails', async () => {
+        const config = testEmailConfig
+        const mockEmailer = testEmailer(config)
+        //mock invoke email submit lambda
+        const mockParameterStore = mockParameterStoreError()
+        const stateServer = await constructTestPostgresServer()
+
+        // First, create a new submitted submission
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: {
+                    name: 'Zuko',
+                    role: 'CMS_USER',
+                    email: 'zuko@example.com',
+                },
+            },
+            emailer: mockEmailer,
+            parameterStore: mockParameterStore,
+        })
+
+        // Unlock
+        await cmsServer.executeOperation({
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
+            variables: {
+                input: {
+                    pkgID: stateSubmission.id,
+                    unlockedReason: 'Super duper good reason.',
+                },
+            },
+        })
+
+        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                toAddresses: expect.arrayContaining(
+                    Array.from(config.cmsReviewSharedEmails)
+                ),
+            })
+        )
+    })
+
+    it('does log error when request for state specific analysts emails failed', async () => {
+        const mockParameterStore = mockParameterStoreError()
+        const consoleErrorSpy = jest.spyOn(console, 'error')
+        const stateServer = await constructTestPostgresServer()
+
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: {
+                    name: 'Zuko',
+                    role: 'CMS_USER',
+                    email: 'zuko@example.com',
+                },
+            },
+            parameterStore: mockParameterStore,
+        })
+
+        await cmsServer.executeOperation({
+            query: UNLOCK_HEALTH_PLAN_PACKAGE,
+            variables: {
+                input: {
+                    pkgID: stateSubmission.id,
+                    unlockedReason: 'Super duper good reason.',
+                },
+            },
+        })
+
+        const error = {
+            error: 'No store found',
+            message: 'getStateAnalystsEmails failed',
+            operation: 'getStateAnalystsEmails',
+            status: 'ERROR',
+        }
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(error)
     })
 })
