@@ -1,4 +1,4 @@
-import { getStateAnalystEmails } from './getStateAnalystEmails'
+import { getStateAnalystsEmails } from './getStateAnalystsEmails'
 import * as ParameterStore from './parameterStore'
 
 describe('getStateAnalystEmails', () => {
@@ -7,7 +7,7 @@ describe('getStateAnalystEmails', () => {
         spy.mockResolvedValue(
             '"FL Anlyst 1" <testFLStateAnalyst1@email.com>, "FL Anlyst 2" <testFLStateAnalyst2@email.com>'
         )
-        const result = await getStateAnalystEmails('FL')
+        const result = await getStateAnalystsEmails('FL')
         expect(result).toStrictEqual([
             '"FL Anlyst 1" <testFLStateAnalyst1@email.com>',
             '"FL Anlyst 2" <testFLStateAnalyst2@email.com>',
@@ -15,8 +15,8 @@ describe('getStateAnalystEmails', () => {
     })
     it('returns empty array on error fetching store value', async () => {
         const spy = jest.spyOn(ParameterStore, 'getParameterStore')
-        spy.mockResolvedValue(new Error('Not store found'))
-        const result = await getStateAnalystEmails('FL')
-        expect(result).toStrictEqual([])
+        spy.mockResolvedValue(new Error('No store found'))
+        const result = await getStateAnalystsEmails('FL')
+        expect(result).toBeInstanceOf(Error)
     })
 })
