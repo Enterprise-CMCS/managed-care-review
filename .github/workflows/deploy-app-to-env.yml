@@ -25,8 +25,6 @@ on:
         required: true
       react_app_ld_client_id:
         required: true
-      full_iam_permissions_boundary_policy:
-        required: true
       nr_license_key:
         required: true
       react_app_auth_mode:
@@ -119,7 +117,6 @@ jobs:
           DATABASE_URL: AWS_SM
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
           IAM_PATH: ${{ secrets.iam_path }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
           EMAILER_MODE: SES
           SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.ses_review_team_email_addresses }}
           SES_RATES_EMAIL_ADDRESSES: ${{ secrets.ses_rates_email_addresses }}
