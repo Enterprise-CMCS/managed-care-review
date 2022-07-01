@@ -15,7 +15,6 @@ custom:
   application_endpoint_url: ${cf:ui-${sls:stage}.CloudFrontEndpointUrl}
   okta_metadata_url: ${env:OKTA_METADATA_URL}
   iamPath: ${env:IAM_PATH, "/"}
-  iamPermissionsBoundaryPolicy: ${ssm:/configuration/${sls:stage, "default"}/iam/full_iam_permissions_boundary_policy, ""}
   sesSourceEmailAddress: ${env:SES_SOURCE_EMAIL_ADDRESS, ""}
   serverlessTerminationProtection:
     stages:
@@ -31,7 +30,7 @@ provider:
   iam:
     role:
       path: ${self:custom.iamPath}
-      permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
+      permissionsBoundary: ${ssm:/configuration/${sls:stage}/iam/full_iam_permissions_boundary_policy, ssm:/configuration/default/iam/full_iam_permissions_boundary_policy}
       statements:
         - Effect: 'Allow'
           Action:

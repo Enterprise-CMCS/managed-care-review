@@ -32,7 +32,6 @@ custom:
   emailDevTeamHelpAddress: ${env:SES_DEV_TEAM_HELP_EMAIL_ADDRESS}
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${sls:stage}.PostgresAuroraArn }
   iamPath: ${env:IAM_PATH, "/"}
-  iamPermissionsBoundaryPolicy: ${ssm:/configuration/${sls:stage, "default"}/iam/full_iam_permissions_boundary_policy, ""}
   document_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.DocumentUploadsBucketArn}
   secretsManagerSecret: aurora_postgres_${sls:stage} #pragma: allowlist secret
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
@@ -83,7 +82,7 @@ provider:
   iam:
     role:
       path: ${self:custom.iamPath}
-      permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
+      permissionsBoundary: ${ssm:/configuration/${sls:stage}/iam/full_iam_permissions_boundary_policy, ssm:/configuration/default/iam/full_iam_permissions_boundary_policy}
       statements:
         - Effect: 'Allow' # cognito user lookup
           Action:

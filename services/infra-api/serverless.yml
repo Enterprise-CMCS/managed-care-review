@@ -10,7 +10,6 @@ plugins:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  iamPermissionsBoundaryPolicy: ${ssm:/configuration/${sls:stage, "default"}/iam/full_iam_permissions_boundary_policy, ""}
   iamPath: ${env:IAM_PATH, "/"}
   nrLicenseKey: ${env:NR_LICENSE_KEY, ""}
   nrMetricStreamName: 'NewRelic-Metric-Stream'
@@ -30,7 +29,7 @@ provider:
   iam:
     role:
       path: ${self:custom.iamPath}
-      permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
+      permissionsBoundary: ${ssm:/configuration/${sls:stage}/iam/full_iam_permissions_boundary_policy, ssm:/configuration/default/iam/full_iam_permissions_boundary_policy}
       statements:
         - Effect: 'Allow'
           Action:
