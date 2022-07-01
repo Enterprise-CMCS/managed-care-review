@@ -1,34 +1,22 @@
 import { getParameterStore } from './awsParameterStore'
-import { getStateAnalystEmails } from './getStateAnalystEmails'
-import { Context } from '../handlers/apollo_gql'
+import {
+    getStateAnalystsEmails,
+    getStateAnalystsEmailsLocal,
+} from './getStateAnalystsEmails'
 
 export type ParameterStore = {
-    getStateAnalystEmails: (
-        stateCode: string,
-        span?: Context['span'],
-        operation?: string
-    ) => Promise<string[]>
+    getStateAnalystsEmails: (stateCode: string) => Promise<string[] | Error>
 }
 
 function newLocalParameterStore(): ParameterStore {
     return {
-        getStateAnalystEmails: async (
-            stateCode: string,
-            span?: Context['span'],
-            operation?: string
-        ): Promise<string[]> => {
-            const analystsParameterStore = `"${stateCode} State Analyst 1" <${stateCode}StateAnalyst1@example.com>, "${stateCode} State Analyst 2" <${stateCode}StateAnalyst2@example.com>`
-            //Split string into array using ',' separator and trim each array item.
-            return analystsParameterStore
-                .split(',')
-                .map((email) => email.trim())
-        },
+        getStateAnalystsEmails: getStateAnalystsEmailsLocal,
     }
 }
 
 function newAWSParameterStore(): ParameterStore {
     return {
-        getStateAnalystEmails: getStateAnalystEmails,
+        getStateAnalystsEmails: getStateAnalystsEmails,
     }
 }
 
