@@ -31,9 +31,9 @@ const testEmailConfig: EmailConfiguration = {
     ratesReviewSharedEmails: ['ratesreview@example.com'],
 }
 
-const testStateAnalystsEmails = () => [
-    '"MN State Analyst 1" <MNStateAnalyst1@example.com>',
-    '"MN State Analyst 2" <MNStateAnalyst2@example.com>',
+const testStateAnalystsEmails: string[] = [
+    '"State Analyst 1" <StateAnalyst1@example.com>',
+    '"State Analyst 2" <StateAnalyst2@example.com>',
 ]
 
 const submissionName = 'MN-PMAP-0001'
