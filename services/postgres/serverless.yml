@@ -39,7 +39,7 @@ provider:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  iamPermissionsBoundaryPolicy: ${ssm:/configuration/${sls:stage, "default"}/iam/full_iam_permissions_boundary_policy, ""}
   iamPath: ${env:IAM_PATH, "/"}
   databaseName: !Sub aurora_${self:service}_${sls:stage}_${AWS::AccountId}
   vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
