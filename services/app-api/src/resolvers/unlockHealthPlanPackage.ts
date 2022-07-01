@@ -11,7 +11,7 @@ import {
     HealthPlanPackageType,
     packageStatus,
 } from '../domain-models'
-import { Emailer, StateAnalystsEmails } from '../emailer'
+import { Emailer } from '../emailer'
 import { MutationResolvers } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
@@ -138,12 +138,23 @@ export function unlockHealthPlanPackageResolver(
 
         // Send emails!
         const name = packageName(draft, programs)
-        const stateAnalystsEmails: StateAnalystsEmails =
-            await parameterStore.getStateAnalystEmails(
-                draft.stateCode,
-                span,
-                'unlockHealthPlanPackage'
-            )
+
+        // Get state analysts emails from parameter store
+        let stateAnalystsEmails = await parameterStore.getStateAnalystsEmails(
+            draft.stateCode
+        )
+        //If error, log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
+        //TODO: This was moved here, the operation is named `getStateAnalystsEmails` instead of the resolver name,
+        // because when it does error, the log is not descriptive of what actually failed instead it just says the whole
+        // resolver failed, which is incorrect because the resolver will still complete if this request fails.
+        // Could we name this operation something like `unlockHealthPlanPackage at getStateAnalystsEmails`? This would
+        // be descriptive of where the error occurred.
+        if (stateAnalystsEmails instanceof Error) {
+            logError('getStateAnalystsEmails', stateAnalystsEmails.message)
+            //TODO: Should I include something to identify the submission? HealthPlanPackage id?
+            setErrorAttributesOnActiveSpan(stateAnalystsEmails.message, span)
+            stateAnalystsEmails = []
+        }
 
         const updatedEmailData = {
             ...unlockInfo,

@@ -16,7 +16,7 @@ import {
     HealthPlanPackageType,
     packageStatus,
 } from '../domain-models'
-import { Emailer, UpdatedEmailData, StateAnalystsEmails } from '../emailer'
+import { Emailer, UpdatedEmailData } from '../emailer'
 import { MutationResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
@@ -259,12 +259,17 @@ export function submitHealthPlanPackageResolver(
         // Send emails!
         const name = packageName(lockedFormData, programs)
         const status = packageStatus(updatedPackage)
-        const stateAnalystsEmails: StateAnalystsEmails =
-            await parameterStore.getStateAnalystEmails(
-                updatedPackage.stateCode,
-                span,
-                'submitHealthPlanPackage'
-            )
+
+        // Get state analysts emails from parameter store
+        let stateAnalystsEmails = await parameterStore.getStateAnalystsEmails(
+            updatedPackage.stateCode
+        )
+        //If error log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
+        if (stateAnalystsEmails instanceof Error) {
+            logError('getStateAnalystsEmails', stateAnalystsEmails.message)
+            setErrorAttributesOnActiveSpan(stateAnalystsEmails.message, span)
+            stateAnalystsEmails = []
+        }
 
         let cmsPackageEmailResult
         let statePackageEmailResult
