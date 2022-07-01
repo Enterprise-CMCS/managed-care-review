@@ -176,7 +176,7 @@ describe('Email templates', () => {
                 })
             )
         })
-        it('includes expected data summary for a rate amendment submission CMS email', () => {
+        it.only('includes expected data summary for a rate amendment submission CMS email', () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAndRatesFormData(),
                 rateType: 'AMENDMENT',

@@ -149,22 +149,20 @@ const newPackageCMSEmail = (
         },
         rateInfo: {
             name: generateRateName(pkg, packageName),
-            dates: {
-                label:
-                    pkg.rateType === 'NEW'
-                        ? 'Rating period'
-                        : 'Rate amendment effective dates',
-                start: hasRateAmendmentInfo
+            dateLabel:
+            pkg.rateType === 'NEW'
+                ? 'Rating period'
+                : 'Rate amendment effective dates',
+            dateStart: hasRateAmendmentInfo
                     ? formatCalendarDate(
                           pkg.rateAmendmentInfo.effectiveDateStart
                       )
                     : formatCalendarDate(pkg.rateDateStart),
-                end: hasRateAmendmentInfo
+            dateEnd: hasRateAmendmentInfo
                     ? formatCalendarDate(pkg.rateAmendmentInfo.effectiveDateEnd)
                     : formatCalendarDate(pkg.rateDateEnd),
-            },
         },
-        submissionUrl: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
+        submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
     }
 
     const bodyHTMLHandlebars = Handlebars.templates['newPackageCMSEmail'](data)
