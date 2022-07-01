@@ -44,14 +44,14 @@ describe('Cognito Login', () => {
         const loginEmail = screen.getByTestId('loginEmail')
         const loginPassword = screen.getByTestId('loginPassword')
 
-        userEvent.type(loginEmail, 'countdracula@muppets.com')
-        userEvent.type(loginPassword, 'passwordABC')
+        await userEvent.type(loginEmail, 'countdracula@muppets.com')
+        await userEvent.type(loginPassword, 'passwordABC')
         await waitFor(() =>
             expect(
                 screen.getByRole('button', { name: 'Login' })
             ).not.toBeDisabled()
         )
-        userClickByRole(screen, 'button', { name: 'Login' })
+        await userClickByRole(screen, 'button', { name: 'Login' })
     }
 
     it('displays login form', () => {
@@ -83,45 +83,11 @@ describe('Cognito Login', () => {
 
         expect(loginButton).toBeDisabled()
 
-        userEvent.type(loginEmail, 'countdracula@muppets.com')
+        await userEvent.type(loginEmail, 'countdracula@muppets.com')
         expect(loginButton).toBeDisabled()
 
-        userEvent.type(loginPassword, 'passwordABC')
+        await userEvent.type(loginPassword, 'passwordABC')
         await waitFor(() => expect(loginButton).not.toBeDisabled())
-    })
-
-    it('when login is clicked, button is disabled while loading', async () => {
-        const loginSpy = jest.spyOn(CognitoAuthApi, 'signIn').mockResolvedValue(
-            new CognitoUser({
-                Username: 'foo@example.com',
-                Pool: { getClientId: () => '7' } as CognitoUserPool,
-            })
-        )
-
-        renderWithProviders(
-            <Routes>
-                <Route path="/auth" element={<Login />} />
-            </Routes>,
-            {
-                apolloProvider: { mocks: [failedAuthMock, successfulAuthMock] },
-                routerProvider: {
-                    route: '/auth',
-                },
-            }
-        )
-        const loginButton = screen.getByRole('button', { name: 'Login' })
-        const loginEmail = screen.getByTestId('loginEmail')
-        const loginPassword = screen.getByTestId('loginPassword')
-
-        userEvent.type(loginEmail, 'countdracula@muppets.com')
-        userEvent.type(loginPassword, 'passwordABC')
-
-        await waitFor(() => expect(loginButton).not.toBeDisabled())
-
-        userClickByRole(screen, 'button', { name: 'Login' })
-
-        await waitFor(() => expect(loginButton).toBeDisabled())
-        await waitFor(() => expect(loginSpy).toHaveBeenCalledTimes(1))
     })
 
     it('when login is successful, redirect to /', async () => {
