@@ -10,8 +10,6 @@
         "test:once": "jest --runInBand --ci",
         "lint": "tsc --noEmit && eslint . --max-warnings=0",
         "clean": "rm -rf node_modules && yarn cache clean",
-        "generate-partials": "handlebars src/emailer/templates/partials/*.handlebars -f src/emailer/templates/partials.js -c handlebars/runtime",
-        "generate-templates": "handlebars src/emailer/templates/*.handlebars -f src/emailer/templates/precompiled.js -c handlebars/runtime",
         "generate-code": "yarn prisma generate"
     },
     "lint-staged": {
