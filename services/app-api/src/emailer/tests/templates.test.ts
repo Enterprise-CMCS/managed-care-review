@@ -7,8 +7,8 @@ import {
     mockUser,
     mockUnlockedContractAndRatesFormData,
     mockUnlockedContractOnlyFormData,
-} from '../testHelpers/emailerHelpers'
-import { LockedHealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
+} from '../../testHelpers/emailerHelpers'
+import { LockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     newPackageCMSEmail,
     newPackageStateEmail,
@@ -16,9 +16,9 @@ import {
     unlockPackageStateEmail,
     resubmittedCMSEmail,
     resubmittedStateEmail,
-} from './'
-import { formatRateNameDate } from '../../../app-web/src/common-code/dateHelpers'
-import { unlockedWithFullContracts } from '../../../app-web/src/common-code/healthPlanFormDataMocks'
+} from '..'
+import { formatRateNameDate } from '../../../../app-web/src/common-code/dateHelpers'
+import { unlockedWithFullContracts } from '../../../../app-web/src/common-code/healthPlanFormDataMocks'
 
 describe('Email templates', () => {
     describe('CMS email', () => {
@@ -1287,6 +1287,114 @@ describe('Email templates', () => {
                     })
                 )
             })
+        })
+    })
+
+    describe('snapshot tests', () => {
+        it('renders CMS new submission email as expected', async () => {
+            const sub: LockedHealthPlanFormDataType = {
+                ...mockContractAndRatesFormData(),
+            }
+            const template = await newPackageCMSEmail(
+                sub,
+                'CMS-new-submission-snapshot',
+                testEmailConfig,
+                []
+            )
+            expect(template.bodyHTML).toMatchSnapshot()
+        })
+        it('renders state new submission email as expected', async () => {
+            const sub: LockedHealthPlanFormDataType = {
+                ...mockContractAndRatesFormData(),
+                rateType: 'AMENDMENT',
+                contractDateStart: new Date('01/01/2021'),
+                contractDateEnd: new Date('01/01/2025'),
+                rateDateStart: new Date('01/01/2021'),
+                rateDateEnd: new Date('01/01/2022'),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date('06/05/2021'),
+                    effectiveDateEnd: new Date('12/31/2021'),
+                },
+            }
+            const user = mockUser()
+            const template = await newPackageStateEmail(
+                sub,
+                'MN-new-submission-snapshot',
+                user,
+                testEmailConfig
+            )
+            expect(template.bodyHTML).toMatchSnapshot()
+        })
+
+        it('renders CMS unlock email as expected', async () => {
+            const submission = mockUnlockedContractAndRatesFormData()
+            const rateName = 'test-rate-name'
+            const stateAnalystEmails = testStateAnalystsEmails()
+            const unlockData = {
+                packageName: 'MCR-VA-CCCPLUS-0001',
+                updatedBy: 'leslie@example.com',
+                updatedAt: new Date('01/01/2022'),
+                updatedReason: 'Adding rate development guide.',
+            }
+            const template = unlockPackageCMSEmail(
+                submission,
+                unlockData,
+                testEmailConfig,
+                rateName,
+                stateAnalystEmails
+            )
+            expect(template.bodyHTML).toMatchSnapshot()
+        })
+        it('renders state unlock email as expected', async () => {
+            const unlockData = {
+                packageName: 'MCR-VA-CCCPLUS-0002',
+                updatedBy: 'josh@example.com',
+                updatedAt: new Date('02/01/2022'),
+                updatedReason: 'Adding rate certification.',
+            }
+            const submissionName = 'MN-PMAP-0001'
+            const sub = unlockedWithFullContracts()
+            const template = unlockPackageStateEmail(
+                sub,
+                unlockData,
+                testEmailConfig,
+                submissionName
+            )
+            expect(template.bodyHTML).toMatchSnapshot()
+        })
+        it('renders CMS resubmit email as expected', async () => {
+            const resubmitData = {
+                packageName: 'MCR-VA-CCCPLUS-0002',
+                updatedBy: 'bob@example.com',
+                updatedAt: new Date('02/01/2022'),
+                updatedReason: 'Added rate certification.',
+            }
+            const submission = mockContractAndRatesFormData()
+            const stateAnalystEmails = testStateAnalystsEmails()
+            const template = resubmittedCMSEmail(
+                submission,
+                resubmitData,
+                testEmailConfig,
+                stateAnalystEmails
+            )
+            expect(template.bodyHTML).toMatchSnapshot()
+        })
+        it('renders state resubmit email as expected', async () => {
+            const resubmitData = {
+                packageName: 'MCR-VA-CCCPLUS-0002',
+                updatedBy: 'bob@example.com',
+                updatedAt: new Date('02/01/2022'),
+                updatedReason: 'Added rate certification.',
+            }
+            const user = mockUser()
+            const submission = mockContractAndRatesFormData()
+            const template = resubmittedStateEmail(
+                submission,
+                user,
+                resubmitData,
+                testEmailConfig
+            )
+            expect(template.bodyHTML).toMatchSnapshot()
         })
     })
 })
