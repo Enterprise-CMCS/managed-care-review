@@ -287,7 +287,7 @@ describe('StateSubmissionForm', () => {
             const textarea = await screen.findByRole('textbox', {
                 name: 'Submission description',
             })
-            userEvent.type(textarea, ' but updated something')
+            await userEvent.type(textarea, ' but updated something')
 
             const continueButton = await screen.findByRole('button', {
                 name: 'Continue',
@@ -357,7 +357,7 @@ describe('StateSubmissionForm', () => {
             const textarea = await screen.findByRole('textbox', {
                 name: 'Submission description',
             })
-            userEvent.type(textarea, ' but updated something')
+            await userEvent.type(textarea, ' but updated something')
 
             const continueButton = await screen.findByRole('button', {
                 name: 'Continue',
@@ -557,9 +557,9 @@ describe('StateSubmissionForm', () => {
             const removeThreeOne = await screen.findByLabelText(
                 'Remove three one document'
             )
-            userEvent.click(removeOneTwo)
-            userEvent.click(removeTwoOne)
-            userEvent.click(removeThreeOne)
+            await userEvent.click(removeOneTwo)
+            await userEvent.click(removeTwoOne)
+            await userEvent.click(removeThreeOne)
 
             // ASSERT
             // When deleting a file that exists in a previous revision, we should not see it's key

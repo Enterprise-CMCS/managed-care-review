@@ -3,9 +3,7 @@ describe('dashboard', () => {
         cy.logInAsStateUser()
         cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
-        cy.findByRole('link', { name: 'Start new submission' }).click({
-            force: true,
-        })
+        cy.findByRole('link', { name: 'Start new submission' }).click()
         cy.findByRole('heading', { level: 1, name: /New submission/ })
     })
 

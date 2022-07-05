@@ -15,7 +15,11 @@ export default {
     },
 }
 
-const TabPanelWrapper: React.FC = ({ children }) => {
+const TabPanelWrapper: React.FC<
+    React.PropsWithChildren<
+        React.PropsWithChildren<React.PropsWithChildren<unknown>>
+    >
+> = ({ children }) => {
     return <div style={{ margin: '10px', height: '500px' }}>{children}</div>
 }
 export const Default = (): React.ReactElement => {

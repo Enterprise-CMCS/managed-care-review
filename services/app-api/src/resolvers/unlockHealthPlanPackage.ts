@@ -11,7 +11,7 @@ import {
     HealthPlanPackageType,
     packageStatus,
 } from '../domain-models'
-import { Emailer } from '../emailer'
+import { Emailer, StateAnalystsEmails } from '../emailer'
 import { MutationResolvers } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
@@ -20,6 +20,7 @@ import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
+import { getStateAnalystEmails } from '../parameterStore'
 
 // unlock is a state machine transforming a LockedFormDatya and turning it into UnlockedFormData
 // Since Unlocked is a strict subset of Locked, this can't error today.
@@ -136,6 +137,12 @@ export function unlockHealthPlanPackageResolver(
 
         // Send emails!
         const name = packageName(draft, programs)
+        const stateAnalystsEmails: StateAnalystsEmails =
+            await getStateAnalystEmails(
+                draft.stateCode,
+                span,
+                'unlockHealthPlanPackage'
+            )
 
         const updatedEmailData = {
             ...unlockInfo,
@@ -145,7 +152,8 @@ export function unlockHealthPlanPackageResolver(
             await emailer.sendUnlockPackageCMSEmail(
                 draft,
                 updatedEmailData,
-                name
+                name,
+                stateAnalystsEmails
             )
 
         const unlockPackageStateEmailResult =

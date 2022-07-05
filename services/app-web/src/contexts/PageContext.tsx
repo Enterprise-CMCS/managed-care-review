@@ -16,7 +16,11 @@ const PageContext = React.createContext(null as unknown as PageContextType)
 export type PageProviderProps = {
     children: React.ReactNode
 }
-const PageProvider: React.FC = ({ children }) => {
+const PageProvider: React.FC<
+    React.PropsWithChildren<
+        React.PropsWithChildren<React.PropsWithChildren<unknown>>
+    >
+> = ({ children }) => {
     const [heading, setHeading] = React.useState<string | undefined>(undefined)
     const { currentRoute: routeName } = useCurrentRoute()
     /* 

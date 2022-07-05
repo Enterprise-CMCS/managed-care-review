@@ -10,7 +10,7 @@
     "devDependencies": {
         "prettier": "^2.2.1",
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
-        "serverless-stack-termination-protection": "^1.0.4",
+        "serverless-stack-termination-protection": "^2.0.2",
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper"
     }
 }

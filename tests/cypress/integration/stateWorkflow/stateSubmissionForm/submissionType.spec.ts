@@ -10,7 +10,11 @@ describe('submission type', () => {
             const draftSubmissionId = pathnameArray[2]
             cy.visit(`/submissions/${draftSubmissionId}/edit/type`)
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
-            cy.findByRole('heading', { level: 2, name: /Submission type/, timeout: 10000 })
+            cy.findByRole('heading', {
+                level: 2,
+                name: /Submission type/,
+                timeout: 10000,
+            })
             cy.wait(500) // WEIRD flake here where we click the cancel button but the page doesn't navigate back
 
             // Navigate to dashboard page by clicking cancel
@@ -71,7 +75,11 @@ describe('submission type', () => {
             const draftSubmissionId = pathnameArray[2]
             cy.visit(`/submissions/${draftSubmissionId}/edit/type`)
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
-            cy.findByRole('heading', { level: 2, name: /Submission type/, timeout: 10000 })
+            cy.findByRole('heading', {
+                level: 2,
+                name: /Submission type/,
+                timeout: 10000,
+            })
             cy.wait(500) // WEIRD flake here where we click the cancel button but the page doesn't navigate back
 
             // Navigate to dashboard page by clicking cancel
@@ -86,8 +94,10 @@ describe('submission type', () => {
             cy.findByRole('combobox', { name: 'programs (required)' }).click({
                 force: true,
             })
-            cy.findByText('SNBC').click()
-            cy.findByText('Contract action and rate certification').click()
+            cy.findByText('SNBC').click({ force: true })
+            cy.findByText('Contract action and rate certification').click({
+                force: true,
+            })
             cy.findByRole('textbox', { name: 'Submission description' }).clear()
             cy.findByRole('textbox', { name: 'Submission description' }).type(
                 'description of contract only submission, now with a new edited flavor'
@@ -103,7 +113,10 @@ describe('submission type', () => {
             //Check to make sure edited stuff was saved
             cy.get('[aria-label="Remove PMAP"]').should('exist')
             cy.get('[aria-label="Remove SNBC"]').should('exist')
-            cy.findByRole('textbox', { name: 'Submission description' }).should('have.value', 'description of contract only submission, now with a new edited flavor')
+            cy.findByRole('textbox', { name: 'Submission description' }).should(
+                'have.value',
+                'description of contract only submission, now with a new edited flavor'
+            )
             cy.findByLabelText('Contract action and rate certification').should(
                 'be.checked'
             )

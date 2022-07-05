@@ -103,6 +103,13 @@ function AuthProvider({
             key: user.email,
             email: user.email,
             name: user.name,
+            custom: {
+                role: user.role,
+            },
+        }
+
+        if (user.__typename === 'StateUser' && user.state.code) {
+            Object.assign(ldUser.custom, { state: user.state.code })
         }
 
         const previousUser = client?.getUser() || {}

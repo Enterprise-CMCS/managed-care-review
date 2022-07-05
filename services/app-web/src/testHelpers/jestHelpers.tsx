@@ -6,6 +6,7 @@ import {
     Screen,
     queries,
     ByRoleMatcher,
+    prettyDOM,
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
@@ -63,29 +64,37 @@ const WithLocation = ({
     return null
 }
 
+const prettyDebug = (label?: string, element?: HTMLElement): void => {
+    console.log(
+        `${label ?? 'body'}:
+    `,
+        prettyDOM(element ?? document.body, 50000)
+    )
+}
+
 /* User Events */
 
-const userClickByTestId = (
+const userClickByTestId = async (
     screen: Screen<typeof queries>,
     testId: string
-): void => {
+): Promise<void> => {
     const element = screen.getByTestId(testId)
-    userEvent.click(element)
+    await userEvent.click(element)
 }
-const userClickByRole = (
+const userClickByRole = async (
     screen: Screen<typeof queries>,
     role: ByRoleMatcher,
     options?: queries.ByRoleOptions | undefined
-): void => {
+): Promise<void> => {
     const element = screen.getByRole(role, options)
-    userEvent.click(element)
+    await userEvent.click(element)
 }
 
 const userClickSignIn = async (
     screen: Screen<typeof queries>
 ): Promise<void> => {
     const signInButton = await screen.findByRole('link', { name: /Sign In/i })
-    userEvent.click(signInButton)
+    await userEvent.click(signInButton)
 }
 
 function dragAndDrop(inputDropTarget: HTMLElement, files: File[]): void {
@@ -147,6 +156,7 @@ export {
     fakeRequest,
     dragAndDrop,
     renderWithProviders,
+    prettyDebug,
     userClickByRole,
     userClickByTestId,
     userClickSignIn,
