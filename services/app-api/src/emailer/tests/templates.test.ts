@@ -7,8 +7,8 @@ import {
     mockUser,
     mockUnlockedContractAndRatesFormData,
     mockUnlockedContractOnlyFormData,
-} from '../testHelpers/emailerHelpers'
-import { LockedHealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
+} from '../../testHelpers/emailerHelpers'
+import { LockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     newPackageCMSEmail,
     newPackageStateEmail,
@@ -16,12 +16,12 @@ import {
     unlockPackageStateEmail,
     resubmittedCMSEmail,
     resubmittedStateEmail,
-} from './'
-import { formatRateNameDate } from '../../../app-web/src/common-code/dateHelpers'
-import { unlockedWithFullContracts } from '../../../app-web/src/common-code/healthPlanFormDataMocks'
+} from '..'
+import { formatRateNameDate } from '../../../../app-web/src/common-code/dateHelpers'
+import { unlockedWithFullContracts } from '../../../../app-web/src/common-code/healthPlanFormDataMocks'
 
 describe('Email templates', () => {
-    describe('CMS email', () => {
+    describe('CMS new submission email', () => {
         it('to addresses list includes review email addresses from email config', () => {
             const sub = mockContractOnlyFormData()
             const template = newPackageCMSEmail(
@@ -428,7 +428,7 @@ describe('Email templates', () => {
             )
         })
     })
-    describe('State email', () => {
+    describe('State new submission email', () => {
         it('to addresses list includes current user', () => {
             const sub = mockContractOnlyFormData()
             const user = mockUser()
@@ -1282,6 +1282,42 @@ describe('Email templates', () => {
                     })
                 )
             })
+        })
+    })
+    describe('snapshot tests', () => {
+        it('renders CMS new submission email as expected', async () => {
+            const sub: LockedHealthPlanFormDataType = {
+                ...mockContractAndRatesFormData(),
+            }
+            const template = await newPackageCMSEmail(
+                sub,
+                'CMS-new-submission-snapshot',
+                testEmailConfig,
+                []
+            )
+            expect(template.bodyHTML).toMatchSnapshot()
+        })
+        it('renders state new submission email as expected', async () => {
+            const sub: LockedHealthPlanFormDataType = {
+                ...mockContractAndRatesFormData(),
+                rateType: 'AMENDMENT',
+                contractDateStart: new Date('01/01/2021'),
+                contractDateEnd: new Date('01/01/2025'),
+                rateDateStart: new Date('01/01/2021'),
+                rateDateEnd: new Date('01/01/2022'),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date('06/05/2021'),
+                    effectiveDateEnd: new Date('12/31/2021'),
+                },
+            }
+            const user = mockUser()
+            const template = await newPackageStateEmail(
+                sub,
+                'MN-new-submission-snapshot',
+                user,
+                testEmailConfig
+            )
+            expect(template.bodyHTML).toMatchSnapshot()
         })
     })
 })

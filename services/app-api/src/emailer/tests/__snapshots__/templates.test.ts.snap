@@ -1,0 +1,70 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Email templates snapshot tests renders CMS new submission email as expected 1`] = `
+"Managed Care submission: <b>CMS-new-submission-snapshot</b> was received from <b>MN</b>.
+            <br />
+            <br />
+            
+        <b>Submission type</b>: Contract action and rate certification
+        <br />
+        <b>Contract effective dates</b>: 07/05/2022 to 07/05/2022
+        <br />
+        <b>Rate name</b>: CMS-new-submission-snapshot-RATE-20220705-20220705-CERTIFICATION-20220705<br />
+        <b>Rating period</b>: 07/05/2022 to 07/05/2022<br />
+        <b>Submission description</b>: A submitted submission
+        <br />
+        <br />
+        <a href=\\"http://localhost/submissions/test-abc-125\\">View submission</a>
+    
+        "
+`;
+
+exports[`Email templates snapshot tests renders state new submission email as expected 1`] = `
+"MN-new-submission-snapshot was successfully submitted.
+            <br /><br />
+            
+        <b>Submission type</b>: Contract action and rate certification
+        <br />
+        <b>Contract effective dates</b>: 01/01/2021 to 01/01/2025
+        <br />
+        <b>Rate name</b>: MN-new-submission-snapshot-RATE-20210605-20211231-AMENDMENT-20220705<br />
+        <b>Rate amendment effective dates</b>: 06/05/2021 to 12/31/2021<br />
+        <b>Submission description</b>: A submitted submission
+        <br />
+        <br />
+        <a href=\\"http://localhost/submissions/test-abc-125\\">View submission</a>
+    
+            <br /><br />
+            If you need to make any changes, please contact CMS.
+            <br /><br />
+            <div>What comes next:</div>
+            <ol>
+                <li>
+                    <strong>Check for completeness:</strong> CMS will review all documentation submitted to ensure all required materials were received.
+                </li>
+                <li>
+                    <strong>CMS review:</strong> Your submission will be reviewed by CMS for adherence to federal regulations.
+                </li>
+                <li>
+                    <strong>Questions:</strong> You may receive questions via email from CMS as they conduct their review.
+                </li>
+                <li>
+                    <strong>Decision:</strong> Once all questions have been addressed, CMS will contact you with their final recommendation.
+
+                </li>
+            </ol>
+            <br />
+            <div>If you need assistance or to make changes to your submission:</div>
+            <ul>
+                <li>
+                    For assistance with programmatic, contractual, or operational issues, please reach out to mcog@example.com and/or your CMS primary contact.
+                </li>
+                <li>
+                    For assistance on policy and actuarial issues, please reach out to rates@example.com.
+                </li>
+                <li>
+                    For issues related to MC-Review or all other inquiries, please reach out to mc-review@example.com.
+                </li>
+            </ul>
+        "
+`;
