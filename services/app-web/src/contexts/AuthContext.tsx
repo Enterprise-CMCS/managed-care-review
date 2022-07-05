@@ -108,7 +108,11 @@ function AuthProvider({
             },
         }
 
-        if (user.__typename === 'StateUser' && user.state.code) {
+        if (
+            user.__typename === 'StateUser' &&
+            user.state.code &&
+            ldUser.custom
+        ) {
             Object.assign(ldUser.custom, { state: user.state.code })
         }
 
@@ -251,3 +255,6 @@ function AuthProvider({
 const useAuth = (): AuthContextType => React.useContext(AuthContext)
 
 export { AuthProvider, useAuth }
+
+//CAVALIERS ROLL
+//RAINBOW ROLL
