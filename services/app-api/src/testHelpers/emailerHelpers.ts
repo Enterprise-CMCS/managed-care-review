@@ -7,8 +7,8 @@ import {
     UpdatedEmailData,
     unlockPackageCMSEmail,
     unlockPackageStateEmail,
-    resubmittedStateEmail,
-    resubmittedCMSEmail,
+    resubmitPackageStateEmail,
+    resubmitPackageCMSEmail,
 } from '../emailer'
 import {
     LockedHealthPlanFormDataType,
@@ -109,7 +109,7 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
             updatedEmailData: UpdatedEmailData,
             user: UserType
         ): Promise<void | Error> {
-            const emailData = resubmittedStateEmail(
+            const emailData = resubmitPackageStateEmail(
                 submission,
                 user,
                 updatedEmailData,
@@ -122,7 +122,7 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
             updatedEmailData,
             stateAnalystsEmails
         ): Promise<void | Error> {
-            const emailData = resubmittedCMSEmail(
+            const emailData = resubmitPackageCMSEmail(
                 submission,
                 updatedEmailData,
                 config,

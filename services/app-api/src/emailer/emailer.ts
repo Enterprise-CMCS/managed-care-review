@@ -5,8 +5,8 @@ import {
     newPackageStateEmail,
     unlockPackageCMSEmail,
     unlockPackageStateEmail,
-    resubmittedStateEmail,
-    resubmittedCMSEmail,
+    resubmitPackageStateEmail,
+    resubmitPackageCMSEmail,
     UpdatedEmailData,
 } from './'
 import {
@@ -150,7 +150,7 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             updatedEmailData,
             user: UserType
         ) {
-            const emailData = resubmittedStateEmail(
+            const emailData = resubmitPackageStateEmail(
                 submission,
                 user,
                 updatedEmailData,
@@ -163,7 +163,7 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             updatedEmailData,
             stateAnalystsEmails
         ) {
-            const emailData = resubmittedCMSEmail(
+            const emailData = resubmitPackageCMSEmail(
                 submission,
                 updatedEmailData,
                 config,
@@ -244,7 +244,7 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             updatedEmailData,
             user
         ) => {
-            const emailData = resubmittedStateEmail(
+            const emailData = resubmitPackageStateEmail(
                 submission,
                 user,
                 updatedEmailData,
@@ -257,7 +257,7 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             updatedEmailData,
             stateAnalystsEmails
         ) => {
-            const emailData = resubmittedCMSEmail(
+            const emailData = resubmitPackageCMSEmail(
                 submission,
                 updatedEmailData,
                 config,
