@@ -23,13 +23,6 @@ custom:
   applicationEndpoint: ${env:APPLICATION_ENDPOINT, cf:ui-${sls:stage}.CloudFrontEndpointUrl}
   appApiGatewayId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.ApiGatewayRestApiId}
   appApiGatewayRootResourceId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.AppApiGatewayRootResourceId}
-  emailSource: ${env:SES_SOURCE_EMAIL_ADDRESS}
-  emailerMode: ${env:EMAILER_MODE}
-  emailReviewTeamAddresses: ${env:SES_REVIEW_TEAM_EMAIL_ADDRESSES}
-  emailRatesTeamAddresses: ${env:SES_RATES_EMAIL_ADDRESSES}
-  emailReviewHelpAddress: ${env:SES_REVIEW_HELP_EMAIL_ADDRESS}
-  emailRateHelpAddress: ${env:SES_RATE_HELP_EMAIL_ADDRESS}
-  emailDevTeamHelpAddress: ${env:SES_DEV_TEAM_HELP_EMAIL_ADDRESS}
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${sls:stage}.PostgresAuroraArn }
   iamPath: ${env:IAM_PATH, "/"}
   document_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.DocumentUploadsBucketArn}
@@ -125,12 +118,12 @@ provider:
     REACT_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
     EMAILER_MODE: ${self:custom.emailerMode}
-    SES_SOURCE_EMAIL_ADDRESS: ${self:custom.emailSource}
-    SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${self:custom.emailReviewTeamAddresses}
-    SES_REVIEW_HELP_EMAIL_ADDRESS: ${self:custom.emailReviewHelpAddress}
-    SES_RATE_HELP_EMAIL_ADDRESS: ${self:custom.emailRateHelpAddress}
-    SES_DEV_TEAM_HELP_EMAIL_ADDRESS: ${self:custom.emailDevTeamHelpAddress}
-    SES_RATES_EMAIL_ADDRESSES: ${self:custom.emailRatesTeamAddresses}
+    SES_SOURCE_EMAIL_ADDRESS: ${ssm:/configuration/email/sourceAddress}
+    SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${ssm:/configuration/email/reviewTeamAddresses}
+    SES_REVIEW_HELP_EMAIL_ADDRESS: ${ssm:/configuration/email/reviewHelpAddress}
+    SES_RATE_HELP_EMAIL_ADDRESS: ${ssm:/configuration/email/rateHelpAddress}
+    SES_DEV_TEAM_HELP_EMAIL_ADDRESS: ${ssm:/configuration/email/devTeamHelpAddress}
+    SES_RATES_EMAIL_ADDRESSES: ${ssm:/configuration/email/ratesAddresses}
     APPLICATION_ENDPOINT: ${self:custom.applicationEndpoint, 'http://localhost:3000'}
     AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
     OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
