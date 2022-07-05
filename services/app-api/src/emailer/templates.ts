@@ -12,10 +12,6 @@ import { formatCalendarDate } from '../../../app-web/src/common-code/dateHelpers
 import { EmailConfiguration, EmailData, StateAnalystsEmails } from './'
 import { generateRateName } from '../../../app-web/src/common-code/healthPlanFormDataType'
 
-// load email templates
-import './templates/partials.js'
-import './templates/precompiled.js'
-
 Eta.configure({
     cache: true, // Make Eta cache templates
     views: path.join(__dirname, 'templates'),
@@ -45,7 +41,6 @@ const stripHTMLFromTemplate = (template: string) => {
     // remove P and A tags but preserve what's inside of them
     formatted = formatted.replace(/<p.*>/gi, '\n')
     formatted = formatted.replace(/<a.*href="(.*?)".*>(.*?)<\/a>/gi, ' $2 ($1)')
-
     // everything else
     return formatted.replace(/(<([^>]+)>)/gi, '')
 }
@@ -89,49 +84,12 @@ const generateReviewerEmails = (
     return cmsReviewSharedEmails
 }
 
-// const generateNewSubmissionData = (
-//     pkg: LockedHealthPlanFormDataType,
-//     packageName: string,
-//     config: EmailConfiguration
-// ):  => {
-//     return{
-//        contractDates: {
-//             label:
-//                 pkg.contractType === 'AMENDMENT'
-//                     ? 'Contract amendment effective dates'
-//                     : 'Contract effective dates',
-//             start: formatCalendarDate(pkg.contractDateStart),
-//             end: formatCalendarDate(pkg.contractDateEnd),
-//         },
-//         rateInfo: {
-//             name: generateRateName(pkg, packageName),
-//             dates: {
-//                 label:
-//                     pkg.rateType === 'NEW'
-//                         ? 'Rating period'
-//                         : 'Rate amendment effective dates',
-//                 start: hasRateAmendmentInfo
-//                     ? formatCalendarDate(
-//                           pkg.rateAmendmentInfo.effectiveDateStart
-//                       )
-//                     : formatCalendarDate(pkg.rateDateStart),
-//                 end: hasRateAmendmentInfo
-//                     ? formatCalendarDate(pkg.rateAmendmentInfo.effectiveDateEnd)
-//                     : formatCalendarDate(pkg.rateDateEnd),
-//             },
-//         },
-//         submissionUrl: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
-// }
-// }
 const renderTemplate = async <T>(templateRelativePath: string, data: T) => {
     try {
-        const templateHTML = await Eta.renderFile('./template', {
-            data,
-        })
-        // TODO come back and check what the return void case is
+        const templateHTML = await Eta.renderFile(templateRelativePath, data)
+        // TODO come back and check what the return void case is for template HTML
         return templateHTML
     } catch (err) {
-        console.error(err)
         throw new Error(err)
     }
 }
@@ -153,6 +111,7 @@ const newPackageCMSEmail = async (
         pkg.rateType === 'AMENDMENT' && pkg.rateAmendmentInfo
 
     const data = {
+        shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
         packageName: packageName,
         submissionType: SubmissionTypeRecord[pkg.submissionType],
         stateCode: pkg.stateCode,
@@ -164,7 +123,7 @@ const newPackageCMSEmail = async (
         contractDatesStart: formatCalendarDate(pkg.contractDateStart),
         contractDatesEnd: formatCalendarDate(pkg.contractDateEnd),
         rateName: generateRateName(pkg, packageName),
-        rateDatesLabel:
+        rateDateLabel:
             pkg.rateType === 'NEW'
                 ? 'Rating period'
                 : 'Rate amendment effective dates',
@@ -177,29 +136,33 @@ const newPackageCMSEmail = async (
         submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
     }
 
-    const bodyHTMLEta = await renderTemplate<typeof data>(
-        './templates/newPackageCMSEmail',
-        data
-    )
-    console.log(bodyHTMLEta)
-    // TODO handle void an don't coerce string
-    return {
-        toAddresses: reviewerEmails,
-        sourceEmail: config.emailSource,
-        subject: `${
-            isTestEnvironment ? `[${config.stage}] ` : ''
-        }New Managed Care Submission: ${packageName}`,
-        bodyText: stripHTMLFromTemplate(bodyHTMLEta as string),
-        bodyHTML: bodyHTMLEta as string,
+    try {
+        const bodyHTMLEta = await renderTemplate<typeof data>(
+            './newPackageCMSEmail',
+            data
+        )
+
+        return {
+            toAddresses: reviewerEmails,
+            sourceEmail: config.emailSource,
+            subject: `${
+                isTestEnvironment ? `[${config.stage}] ` : ''
+            }New Managed Care Submission: ${packageName}`,
+            bodyText: stripHTMLFromTemplate(bodyHTMLEta as string),
+            bodyHTML: bodyHTMLEta as string, // TODO: dont do this
+        }
+    } catch (err) {
+        console.error(err)
+        throw new Error('Could not render template newPackageCMSEmail')
     }
 }
 
-const newPackageStateEmail = (
+const newPackageStateEmail = async (
     pkg: LockedHealthPlanFormDataType,
     packageName: string,
     user: UserType,
     config: EmailConfiguration
-): EmailData => {
+): Promise<EmailData> => {
     const currentUserEmail = user.email
     const receiverEmails: string[] = [currentUserEmail].concat(
         pkg.stateContacts.map((contact) => contact.email)
@@ -209,6 +172,7 @@ const newPackageStateEmail = (
         pkg.rateType === 'AMENDMENT' && pkg.rateAmendmentInfo
 
     const data = {
+        shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
         cmsReviewHelpEmailAddress: config.cmsReviewHelpEmailAddress,
         cmsRateHelpEmailAddress: config.cmsRateHelpEmailAddress,
         cmsDevTeamHelpEmailAddress: config.cmsDevTeamHelpEmailAddress,
@@ -222,7 +186,7 @@ const newPackageStateEmail = (
         contractDatesStart: formatCalendarDate(pkg.contractDateStart),
         contractDatesEnd: formatCalendarDate(pkg.contractDateEnd),
         rateName: generateRateName(pkg, packageName),
-        rateDatesLabel:
+        rateDateLabel:
             pkg.rateType === 'NEW'
                 ? 'Rating period'
                 : 'Rate amendment effective dates',
@@ -235,17 +199,24 @@ const newPackageStateEmail = (
         submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
     }
 
-    const bodyHTMLHandlebars =
-        Handlebars.templates['newPackageStateEmail'](data)
+    try {
+        const bodyHTMLEta = await renderTemplate<typeof data>(
+            './newPackageStateEmail',
+            data
+        )
 
-    return {
-        toAddresses: receiverEmails,
-        sourceEmail: config.emailSource,
-        subject: `${
-            config.stage !== 'prod' ? `[${config.stage}] ` : ''
-        }${packageName} was sent to CMS`,
-        bodyText: stripHTMLFromTemplate(bodyHTMLHandlebars),
-        bodyHTML: bodyHTMLHandlebars,
+        return {
+            toAddresses: receiverEmails,
+            sourceEmail: config.emailSource,
+            subject: `${
+                config.stage !== 'prod' ? `[${config.stage}] ` : ''
+            }${packageName} was sent to CMS`,
+            bodyText: stripHTMLFromTemplate(bodyHTMLEta as string),
+            bodyHTML: bodyHTMLEta as string,
+        }
+    } catch (err) {
+        console.error(err)
+        throw new Error('Could not render template newPackageStateEmail')
     }
 }
 

@@ -99,7 +99,7 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             submissionName,
             stateAnalystsEmails
         ) {
-            const emailData = newPackageCMSEmail(
+            const emailData = await newPackageCMSEmail(
                 submission,
                 submissionName,
                 config,
@@ -108,7 +108,7 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             return await this.sendEmail(emailData)
         },
         sendStateNewPackage: async function (submission, submissionName, user) {
-            const emailData = newPackageStateEmail(
+            const emailData = await newPackageStateEmail(
                 submission,
                 submissionName,
                 user,
@@ -192,7 +192,7 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             submissionName,
             stateAnalystsEmails
         ) => {
-            const emailData = newPackageCMSEmail(
+            const emailData = await newPackageCMSEmail(
                 submission,
                 'some-title',
                 config,
@@ -201,12 +201,13 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             localEmailerLogger(emailData)
         },
         sendStateNewPackage: async (submission, submissionName, user) => {
-            const emailData = newPackageStateEmail(
+            const emailData = await newPackageStateEmail(
                 submission,
                 submissionName,
                 user,
                 config
             )
+            console.log(emailData)
             localEmailerLogger(emailData)
         },
         sendUnlockPackageCMSEmail: async (

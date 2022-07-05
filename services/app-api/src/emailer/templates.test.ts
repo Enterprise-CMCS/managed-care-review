@@ -22,9 +22,9 @@ import { unlockedWithFullContracts } from '../../../app-web/src/common-code/heal
 
 describe('Email templates', () => {
     describe('CMS email', () => {
-        it('to addresses list includes review email addresses from email config', () => {
+        it('to addresses list includes review email addresses from email config', async () => {
             const sub = mockContractOnlyFormData()
-            const template = newPackageCMSEmail(
+            const template = await newPackageCMSEmail(
                 sub,
                 'some-title',
                 testEmailConfig,
@@ -38,10 +38,15 @@ describe('Email templates', () => {
                 )
             })
         })
-        it('subject line is correct', () => {
+        it('subject line is correct', async () => {
             const sub = mockContractOnlyFormData()
             const name = 'FL-MMA-001'
-            const template = newPackageCMSEmail(sub, name, testEmailConfig, [])
+            const template = await newPackageCMSEmail(
+                sub,
+                name,
+                testEmailConfig,
+                []
+            )
 
             expect(template).toEqual(
                 expect.objectContaining({
@@ -51,13 +56,13 @@ describe('Email templates', () => {
                 })
             )
         })
-        it('includes expected data summary for a contract only submission', () => {
+        it('includes expected data summary for a contract only submission', async () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractOnlyFormData(),
                 contractDateStart: new Date('01/01/2021'),
                 contractDateEnd: new Date('01/01/2025'),
             }
-            const template = newPackageCMSEmail(
+            const template = await newPackageCMSEmail(
                 sub,
                 'some-title',
                 testEmailConfig,
@@ -84,7 +89,7 @@ describe('Email templates', () => {
                 })
             )
         })
-        it('includes expected data summary for a contract and rates submission CMS email', () => {
+        it('includes expected data summary for a contract and rates submission CMS email', async () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAndRatesFormData(),
                 contractDateStart: new Date('01/01/2021'),
@@ -92,7 +97,7 @@ describe('Email templates', () => {
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
             }
-            const template = newPackageCMSEmail(
+            const template = await newPackageCMSEmail(
                 sub,
                 'some-title',
                 testEmailConfig,
@@ -130,7 +135,7 @@ describe('Email templates', () => {
                 })
             )
         })
-        it('includes expected data summary for a contract amendment submission', () => {
+        it('includes expected data summary for a contract amendment submission', async () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAmendmentFormData(),
                 contractDateStart: new Date('01/01/2021'),
@@ -138,7 +143,7 @@ describe('Email templates', () => {
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
             }
-            const template = newPackageCMSEmail(
+            const template = await newPackageCMSEmail(
                 sub,
                 'some-title',
                 testEmailConfig,
@@ -176,7 +181,7 @@ describe('Email templates', () => {
                 })
             )
         })
-        it.only('includes expected data summary for a rate amendment submission CMS email', () => {
+        it('includes expected data summary for a rate amendment submission CMS email', async () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAndRatesFormData(),
                 rateType: 'AMENDMENT',
@@ -189,7 +194,7 @@ describe('Email templates', () => {
                     effectiveDateEnd: new Date('12/31/2021'),
                 },
             }
-            const template = newPackageCMSEmail(
+            const template = await newPackageCMSEmail(
                 sub,
                 'some-title',
                 testEmailConfig,
@@ -219,9 +224,9 @@ describe('Email templates', () => {
                 })
             )
         })
-        it('includes link to submission', () => {
+        it('includes link to submission', async () => {
             const sub = mockContractAmendmentFormData()
-            const template = newPackageCMSEmail(
+            const template = await newPackageCMSEmail(
                 sub,
                 'some-title',
                 testEmailConfig,
@@ -235,10 +240,10 @@ describe('Email templates', () => {
                 })
             )
         })
-        it('includes state specific analyst on contract only submission', () => {
+        it('includes state specific analyst on contract only submission', async () => {
             const sub = mockContractAndRatesFormData()
             const stateAnalystEmails = testStateAnalystsEmails()
-            const template = newPackageCMSEmail(
+            const template = await newPackageCMSEmail(
                 sub,
                 'some-title',
                 testEmailConfig,
@@ -256,10 +261,10 @@ describe('Email templates', () => {
                 )
             })
         })
-        it('includes state specific analyst on contract and rate submission', () => {
+        it('includes state specific analyst on contract and rate submission', async () => {
             const sub = mockContractAndRatesFormData()
             const stateAnalystEmails = testStateAnalystsEmails()
-            const template = newPackageCMSEmail(
+            const template = await newPackageCMSEmail(
                 sub,
                 'some-title',
                 testEmailConfig,
@@ -278,10 +283,10 @@ describe('Email templates', () => {
                 )
             })
         })
-        it('does not include state specific analyst on contract and rate submission', () => {
+        it('does not include state specific analyst on contract and rate submission', async () => {
             const sub = mockContractAndRatesFormData()
             const stateAnalystEmails = testStateAnalystsEmails()
-            const template = newPackageCMSEmail(
+            const template = await newPackageCMSEmail(
                 sub,
                 'some-title',
                 testEmailConfig,
@@ -296,9 +301,9 @@ describe('Email templates', () => {
                 )
             })
         })
-        it('includes ratesReviewSharedEmails on contract and rate submission', () => {
+        it('includes ratesReviewSharedEmails on contract and rate submission', async () => {
             const sub = mockContractAndRatesFormData()
-            const template = newPackageCMSEmail(
+            const template = await newPackageCMSEmail(
                 sub,
                 'some-title',
                 testEmailConfig,
@@ -316,9 +321,9 @@ describe('Email templates', () => {
                 )
             })
         })
-        it('does not include ratesReviewSharedEmails on contract only submission', () => {
+        it('does not include ratesReviewSharedEmails on contract only submission', async () => {
             const sub = mockContractOnlyFormData()
-            const template = newPackageCMSEmail(
+            const template = await newPackageCMSEmail(
                 sub,
                 'some-title',
                 testEmailConfig,
@@ -335,11 +340,11 @@ describe('Email templates', () => {
                 )
             })
         })
-        it('CHIP contract only submission does include state specific analysts emails', () => {
+        it('CHIP contract only submission does include state specific analysts emails', async () => {
             const sub = mockContractOnlyFormData()
             sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
             const stateAnalystEmails = testStateAnalystsEmails()
-            const template = newPackageCMSEmail(
+            const template = await newPackageCMSEmail(
                 sub,
                 'some-title',
                 testEmailConfig,
@@ -353,11 +358,11 @@ describe('Email templates', () => {
                 )
             })
         })
-        it('CHIP contract and rate submission does include state specific analysts emails', () => {
+        it('CHIP contract and rate submission does include state specific analysts emails', async () => {
             const sub = mockContractAndRatesFormData()
             sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
             const stateAnalystEmails = testStateAnalystsEmails()
-            const template = newPackageCMSEmail(
+            const template = await newPackageCMSEmail(
                 sub,
                 'some-title',
                 testEmailConfig,
@@ -371,10 +376,10 @@ describe('Email templates', () => {
                 )
             })
         })
-        it('CHIP contract only submission does not include ratesReviewSharedEmails and cmsRateHelpEmailAddress', () => {
+        it('CHIP contract only submission does not include ratesReviewSharedEmails and cmsRateHelpEmailAddress', async () => {
             const sub = mockContractOnlyFormData()
             sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
-            const template = newPackageCMSEmail(
+            const template = await newPackageCMSEmail(
                 sub,
                 'some-title',
                 testEmailConfig,
@@ -392,10 +397,10 @@ describe('Email templates', () => {
                 )
             })
         })
-        it('CHIP contract and rate submission does not include ratesReviewSharedEmails and cmsRateHelpEmailAddress', () => {
+        it('CHIP contract and rate submission does not include ratesReviewSharedEmails and cmsRateHelpEmailAddress', async () => {
             const sub = mockContractAndRatesFormData()
             sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
-            const template = newPackageCMSEmail(
+            const template = await newPackageCMSEmail(
                 sub,
                 'some-title',
                 testEmailConfig,
@@ -413,9 +418,9 @@ describe('Email templates', () => {
                 )
             })
         })
-        it('does not include rate name on contract only submission', () => {
+        it('does not include rate name on contract only submission', async () => {
             const sub = mockContractOnlyFormData()
-            const template = newPackageCMSEmail(
+            const template = await newPackageCMSEmail(
                 sub,
                 'some-title',
                 testEmailConfig,
@@ -429,10 +434,10 @@ describe('Email templates', () => {
         })
     })
     describe('State email', () => {
-        it('to addresses list includes current user', () => {
+        it('to addresses list includes current user', async () => {
             const sub = mockContractOnlyFormData()
             const user = mockUser()
-            const template = newPackageStateEmail(
+            const template = await newPackageStateEmail(
                 sub,
                 'some-title',
                 user,
@@ -445,7 +450,7 @@ describe('Email templates', () => {
             )
         })
 
-        it('to addresses list includes all state contacts on submission', () => {
+        it('to addresses list includes all state contacts on submission', async () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractOnlyFormData(),
                 stateContacts: [
@@ -462,7 +467,7 @@ describe('Email templates', () => {
                 ],
             }
             const user = mockUser()
-            const template = newPackageStateEmail(
+            const template = await newPackageStateEmail(
                 sub,
                 'some-title',
                 user,
@@ -477,11 +482,11 @@ describe('Email templates', () => {
             })
         })
 
-        it('subject line is correct and clearly states submission is complete', () => {
+        it('subject line is correct and clearly states submission is complete', async () => {
             const sub = mockContractOnlyFormData()
             const name = 'FL-MMA-001'
             const user = mockUser()
-            const template = newPackageStateEmail(
+            const template = await newPackageStateEmail(
                 sub,
                 name,
                 user,
@@ -498,11 +503,11 @@ describe('Email templates', () => {
             )
         })
 
-        it('includes mcog, rate, and team email addresses', () => {
+        it('includes mcog, rate, and team email addresses', async () => {
             const sub = mockContractOnlyFormData()
             const name = 'FL-MMA-001'
             const user = mockUser()
-            const template = newPackageStateEmail(
+            const template = await newPackageStateEmail(
                 sub,
                 name,
                 user,
@@ -535,10 +540,10 @@ describe('Email templates', () => {
             )
         })
 
-        it('includes link to submission', () => {
+        it('includes link to submission', async () => {
             const sub = mockContractAmendmentFormData()
             const user = mockUser()
-            const template = newPackageStateEmail(
+            const template = await newPackageStateEmail(
                 sub,
                 'some-title',
                 user,
@@ -553,10 +558,10 @@ describe('Email templates', () => {
             )
         })
 
-        it('includes information about what is next', () => {
+        it('includes information about what is next', async () => {
             const sub = mockContractAmendmentFormData()
             const user = mockUser()
-            const template = newPackageStateEmail(
+            const template = await newPackageStateEmail(
                 sub,
                 'some-title',
                 user,
@@ -569,7 +574,7 @@ describe('Email templates', () => {
             )
         })
 
-        it('includes expected data summary for a contract and rates submission State email', () => {
+        it('includes expected data summary for a contract and rates submission State email', async () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAndRatesFormData(),
                 contractDateStart: new Date('01/01/2021'),
@@ -578,7 +583,7 @@ describe('Email templates', () => {
                 rateDateEnd: new Date('01/01/2022'),
             }
             const user = mockUser()
-            const template = newPackageStateEmail(
+            const template = await newPackageStateEmail(
                 sub,
                 'some-title',
                 user,
@@ -617,7 +622,7 @@ describe('Email templates', () => {
             )
         })
 
-        it('includes expected data summary for a rate amendment submission State email', () => {
+        it('includes expected data summary for a rate amendment submission State email', async () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAndRatesFormData(),
                 rateType: 'AMENDMENT',
@@ -631,7 +636,7 @@ describe('Email templates', () => {
                 },
             }
             const user = mockUser()
-            const template = newPackageStateEmail(
+            const template = await newPackageStateEmail(
                 sub,
                 'some-title',
                 user,

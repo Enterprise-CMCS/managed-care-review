@@ -38,7 +38,7 @@ const testStateAnalystsEmails = () => [
 
 const submissionName = 'MN-PMAP-0001'
 
-const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
+function testEmailer(customConfig?: EmailConfiguration): Emailer {
     const config = customConfig || testEmailConfig
     return {
         sendEmail: jest.fn(
@@ -46,25 +46,30 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
                 console.log('Email content' + JSON.stringify(emailData))
             }
         ),
-        sendCMSNewPackage: function async(
+        sendCMSNewPackage: async function (
             submission,
             submissionName,
             stateAnalystsEmails
         ): Promise<void | Error> {
-            const emailData = newPackageCMSEmail(
-                submission,
-                submissionName,
-                config,
-                stateAnalystsEmails
-            )
-            return this.sendEmail(emailData)
+            try {
+                const emailData = await newPackageCMSEmail(
+                    submission,
+                    submissionName,
+                    config,
+                    stateAnalystsEmails
+                )
+                return this.sendEmail(emailData)
+            } catch (err) {
+                console.error(err)
+                return new Error(err)
+            }
         },
-        sendStateNewPackage: function async(
+        sendStateNewPackage: async function (
             submission,
             submissionName,
             user
         ): Promise<void | Error> {
-            const emailData = newPackageStateEmail(
+            const emailData = await newPackageStateEmail(
                 submission,
                 submissionName,
                 user,
