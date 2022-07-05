@@ -47,6 +47,7 @@ export function unlockHealthPlanPackageResolver(
         const { user, span } = context
         const { unlockedReason, pkgID } = input
         setResolverDetailsOnActiveSpan('unlockHealthPlanPackage', user, span)
+        span?.setAttribute('mcreview.package_id', pkgID)
 
         // This resolver is only callable by CMS users
         if (!isCMSUser(user)) {
@@ -144,14 +145,8 @@ export function unlockHealthPlanPackageResolver(
             draft.stateCode
         )
         //If error, log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
-        //TODO: This was moved here, the operation is named `getStateAnalystsEmails` instead of the resolver name,
-        // because when it does error, the log is not descriptive of what actually failed instead it just says the whole
-        // resolver failed, which is incorrect because the resolver will still complete if this request fails.
-        // Could we name this operation something like `unlockHealthPlanPackage at getStateAnalystsEmails`? This would
-        // be descriptive of where the error occurred.
         if (stateAnalystsEmails instanceof Error) {
             logError('getStateAnalystsEmails', stateAnalystsEmails.message)
-            //TODO: Should I include something to identify the submission? HealthPlanPackage id?
             setErrorAttributesOnActiveSpan(stateAnalystsEmails.message, span)
             stateAnalystsEmails = []
         }

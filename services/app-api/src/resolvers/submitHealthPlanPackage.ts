@@ -120,8 +120,9 @@ export function submitHealthPlanPackageResolver(
 ): MutationResolvers['submitHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
-        const { submittedReason } = input
+        const { submittedReason, pkgID } = input
         setResolverDetailsOnActiveSpan('submitHealthPlanPackage', user, span)
+        span?.setAttribute('mcreview.package_id', pkgID)
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
