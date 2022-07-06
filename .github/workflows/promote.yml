@@ -153,7 +153,6 @@ jobs:
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       ld_sdk_key: ${{ secrets.DEV_LD_SDK_KEY }}
-      react_app_ld_client_id: ${{ secrets.DEV_REACT_APP_LD_CLIENT_ID }}
 
   dev-cypress:
     name: dev - cypress
@@ -234,7 +233,6 @@ jobs:
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
       ld_sdk_key: ${{ secrets.VAL_LD_SDK_KEY }}
-      react_app_ld_client_id: ${{ secrets.VAL_REACT_APP_LD_CLIENT_ID }}
 
   cypress-val:
     name: val - cypress
@@ -315,7 +313,6 @@ jobs:
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
       ld_sdk_key: ${{ secrets.PROD_LD_SDK_KEY }}
-      react_app_ld_client_id: ${{ secrets.PROD_REACT_APP_LD_CLIENT_ID }}
 
   cypress-prod:
     name: prod - cypress
