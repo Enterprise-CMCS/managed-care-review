@@ -31,6 +31,9 @@ export function fetchHealthPlanPackageResolver(
         }
 
         if (result === undefined) {
+            const errMessage = `Issue finding a package with id ${input.pkgID}. Message: Result was undefined `
+            logError('fetchHealthPlanPackage', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
             return {
                 pkg: undefined,
             }
