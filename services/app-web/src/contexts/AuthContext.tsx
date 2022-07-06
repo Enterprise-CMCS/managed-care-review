@@ -255,6 +255,3 @@ function AuthProvider({
 const useAuth = (): AuthContextType => React.useContext(AuthContext)
 
 export { AuthProvider, useAuth }
-
-//CAVALIERS ROLL
-//RAINBOW ROLL
