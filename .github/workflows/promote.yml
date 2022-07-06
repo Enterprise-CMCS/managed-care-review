@@ -128,7 +128,6 @@ jobs:
       cloudfront_certificate_arn: ${{ secrets.DEV_CLOUDFRONT_CERTIFICATE_ARN }}
       cloudfront_domain_name: ${{ secrets.DEV_CLOUDFRONT_DOMAIN_NAME }}
       cloudfront_storybook_domain_name: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
-      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   promote-app-dev:
     needs: [promote-infra-dev, build-prisma-client-lambda-layer, unit-tests]
@@ -144,7 +143,6 @@ jobs:
       iam_path: ${{ secrets.IAM_PATH }}
       react_app_auth_mode: IDM
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
-      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       ld_sdk_key: ${{ secrets.DEV_LD_SDK_KEY }}
 
   dev-cypress:
@@ -201,7 +199,6 @@ jobs:
       okta_metadata_url: ${{ secrets.VAL_OKTA_METADATA_URL }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       iam_path: ${{ secrets.IAM_PATH }}
-      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   promote-app-val:
     needs: [dev-cypress, promote-infra-val, unit-tests]
@@ -216,7 +213,6 @@ jobs:
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       iam_path: ${{ secrets.IAM_PATH }}
       react_app_auth_mode: IDM
-      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
       ld_sdk_key: ${{ secrets.VAL_LD_SDK_KEY }}
 
@@ -274,7 +270,6 @@ jobs:
       okta_metadata_url: ${{ secrets.PROD_OKTA_METADATA_URL }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       iam_path: ${{ secrets.IAM_PATH }}
-      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   promote-app-prod:
     needs: [cypress-val, promote-infra-prod, unit-tests]
@@ -289,7 +284,6 @@ jobs:
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       iam_path: ${{ secrets.IAM_PATH }}
       react_app_auth_mode: IDM
-      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
       ld_sdk_key: ${{ secrets.PROD_LD_SDK_KEY }}
 

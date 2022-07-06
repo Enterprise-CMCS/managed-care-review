@@ -202,7 +202,6 @@ jobs:
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
       iam_path: ${{ secrets.IAM_PATH }}
-      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   deploy-app:
     needs:
@@ -229,7 +228,6 @@ jobs:
       iam_path: ${{ secrets.IAM_PATH }}
       react_app_auth_mode: AWS_COGNITO
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
-      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
       ld_sdk_key: ${{ secrets.DEV_LD_SDK_KEY }}
 
   finishing-prep:
