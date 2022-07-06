@@ -2,7 +2,7 @@ import { screen, waitFor } from '@testing-library/react'
 
 import {
     fetchCurrentUserMock,
-    createHealthPlanPackageMock,
+    createHealthPlanPackageMockAuthFailure,
 } from '../../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { NewStateSubmissionForm } from './NewStateSubmissionForm'
@@ -30,7 +30,7 @@ describe('NewStateSubmissionForm', () => {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
                     fetchCurrentUserMock({ statusCode: 200 }),
-                    createHealthPlanPackageMock({ statusCode: 403 }),
+                    createHealthPlanPackageMockAuthFailure(),
                 ],
             },
             routerProvider: { route: '/submissions/new' },
