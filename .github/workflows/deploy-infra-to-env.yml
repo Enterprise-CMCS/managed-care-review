@@ -156,7 +156,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
           IAM_PATH: ${{ secrets.iam_path }}
-          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
           OKTA_METADATA_URL: ${{ secrets.okta_metadata_url }}
 
         run: |
