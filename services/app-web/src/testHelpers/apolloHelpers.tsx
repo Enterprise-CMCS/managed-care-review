@@ -683,7 +683,7 @@ fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
 type fetchHealthPlanPackageMockProps = {
     submission?: HealthPlanPackage
     id: string
-    statusCode: 200 | 403 | 500
+    statusCode: 200 | 403 | 404 | 500
 }
 
 const fetchHealthPlanPackageMock = ({
@@ -705,6 +705,20 @@ const fetchHealthPlanPackageMock = ({
                     data: {
                         fetchHealthPlanPackage: {
                             pkg: mergedDraftSubmission,
+                        },
+                    },
+                },
+            }
+        case 404:
+            return {
+                request: {
+                    query: FetchHealthPlanPackageDocument,
+                    variables: { input: { pkgID: id } },
+                },
+                result: {
+                    data: {
+                        fetchHealthPlanPackage: {
+                            pkg: undefined,
                         },
                     },
                 },
