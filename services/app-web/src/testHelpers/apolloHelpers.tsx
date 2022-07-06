@@ -27,6 +27,8 @@ import {
     IndexHealthPlanPackagesQuery,
     FetchHealthPlanPackageQuery,
     UpdateHealthPlanFormDataMutation,
+    CreateHealthPlanPackageDocument,
+    CreateHealthPlanPackageMutation,
 } from '../gen/gqlClient'
 
 /* For use with Apollo MockedProvider in jest tests */
@@ -850,7 +852,7 @@ const mockSubmittedHealthPlanPackageWithRevision = (): HealthPlanPackage => {
     }
 }
 
-type updateHealthPlanFormDataMockSuccessProps = {
+type updateHealthPlanFormDataMockProps = {
     pkg?: HealthPlanPackage
     updatedFormData: string
     id: string
@@ -862,7 +864,7 @@ const updateHealthPlanFormDataMock = ({
     updatedFormData,
     id,
     statusCode,
-}: updateHealthPlanFormDataMockSuccessProps): MockedResponse<UpdateHealthPlanFormDataMutation> => {
+}: updateHealthPlanFormDataMockProps): MockedResponse<UpdateHealthPlanFormDataMutation> => {
     switch (statusCode) {
         case 200:
             return {
@@ -894,6 +896,44 @@ const updateHealthPlanFormDataMock = ({
                     },
                 },
                 result: { data: undefined },
+            }
+        default:
+            return {
+                request: { query: UpdateHealthPlanFormDataDocument },
+                error: new Error('A network error occurred'),
+            }
+    }
+}
+
+type createHealthPlanPackageMockProps = {
+    pkg?: HealthPlanPackage
+    statusCode?: 200 | 403 | 500
+}
+
+const createHealthPlanPackageMock = ({
+    statusCode,
+}: createHealthPlanPackageMockProps): MockedResponse<CreateHealthPlanPackageMutation> => {
+    const submissionData: Partial<UnlockedHealthPlanFormDataType> = {
+        programIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
+        submissionType: 'CONTRACT_ONLY',
+        submissionDescription: 'A submitted submission',
+    }
+    const pkg = mockDraftHealthPlanPackage()
+    switch (statusCode) {
+        case 200:
+            return {
+                request: {
+                    query: CreateHealthPlanPackageDocument,
+                    variables: {
+                        input: submissionData,
+                    },
+                },
+                result: { data: { createHealthPlanPackage: { pkg } } },
+            }
+        case 403:
+            return {
+                request: { query: UpdateHealthPlanFormDataDocument },
+                error: new Error('You are not logged in'),
             }
         default:
             return {
@@ -1026,4 +1066,5 @@ export {
     unlockHealthPlanPackageMockSuccess,
     unlockHealthPlanPackageMockError,
     mockSubmittedHealthPlanPackageWithRevision,
+    createHealthPlanPackageMock,
 }
