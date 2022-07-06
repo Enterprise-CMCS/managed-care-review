@@ -685,58 +685,62 @@ fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
 type fetchHealthPlanPackageMockProps = {
     submission?: HealthPlanPackage
     id: string
-    statusCode: 200 | 403 | 404 | 500
 }
 
-const fetchHealthPlanPackageMock = ({
+const fetchHealthPlanPackageMockSuccess = ({
     submission = mockDraftHealthPlanPackage(),
     id,
-    statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: fetchHealthPlanPackageMockProps): MockedResponse<FetchHealthPlanPackageQuery> => {
     // override the ID of the returned draft to match the queried id.
     const mergedDraftSubmission = Object.assign({}, submission, { id })
-
-    switch (statusCode) {
-        case 200:
-            return {
-                request: {
-                    query: FetchHealthPlanPackageDocument,
-                    variables: { input: { pkgID: id } },
+    return {
+        request: {
+            query: FetchHealthPlanPackageDocument,
+            variables: { input: { pkgID: id } },
+        },
+        result: {
+            data: {
+                fetchHealthPlanPackage: {
+                    pkg: mergedDraftSubmission,
                 },
-                result: {
-                    data: {
-                        fetchHealthPlanPackage: {
-                            pkg: mergedDraftSubmission,
-                        },
-                    },
-                },
-            }
-        case 404:
-            return {
-                request: {
-                    query: FetchHealthPlanPackageDocument,
-                    variables: { input: { pkgID: id } },
-                },
-                result: {
-                    data: {
-                        fetchHealthPlanPackage: {
-                            pkg: undefined,
-                        },
-                    },
-                },
-            }
-        case 403:
-            return {
-                request: { query: FetchHealthPlanPackageDocument },
-                error: new Error('You are not logged in'),
-            }
-        default:
-            return {
-                request: { query: FetchHealthPlanPackageDocument },
-                error: new Error('A network error occurred'),
-            }
+            },
+        },
     }
 }
+
+const fetchHealthPlanPackageMockNotFound = ({
+    id,
+}: fetchHealthPlanPackageMockProps): MockedResponse<FetchHealthPlanPackageQuery> => {
+    return {
+        request: {
+            query: FetchHealthPlanPackageDocument,
+            variables: { input: { pkgID: id } },
+        },
+        result: {
+            data: {
+                fetchHealthPlanPackage: {
+                    pkg: undefined,
+                },
+            },
+        },
+    }
+}
+
+const fetchHealthPlanPackageMockAuthFailure =
+    (): MockedResponse<FetchHealthPlanPackageQuery> => {
+        return {
+            request: { query: FetchHealthPlanPackageDocument },
+            error: new Error('You are not logged in'),
+        }
+    }
+
+const fetchHealthPlanPackageMockNetworkFailure =
+    (): MockedResponse<FetchHealthPlanPackageQuery> => {
+        return {
+            request: { query: FetchHealthPlanPackageDocument },
+            error: new Error('A network error occurred'),
+        }
+    }
 
 // type fetchStateSubmissionMockProps = {
 //     stateSubmission?: StateSubmission | Partial<StateSubmission>
@@ -852,96 +856,78 @@ const mockSubmittedHealthPlanPackageWithRevision = (): HealthPlanPackage => {
     }
 }
 
-type updateHealthPlanFormDataMockProps = {
+type updateHealthPlanFormDataMockSuccessProps = {
     pkg?: HealthPlanPackage
     updatedFormData: string
     id: string
-    statusCode?: 200 | 403 | 404 | 500
 }
 
-const updateHealthPlanFormDataMock = ({
+const updateHealthPlanFormDataMockSuccess = ({
     pkg = mockUnlockedHealthPlanPackage(),
     updatedFormData,
     id,
-    statusCode,
-}: updateHealthPlanFormDataMockProps): MockedResponse<UpdateHealthPlanFormDataMutation> => {
-    switch (statusCode) {
-        case 200:
-            return {
-                request: {
-                    query: UpdateHealthPlanFormDataDocument,
-                    variables: {
-                        input: {
-                            pkgID: id,
-                            healthPlanFormData: updatedFormData,
-                        },
-                    },
-                },
-                result: { data: { updateHealthPlanFormData: { pkg } } },
-            }
-        case 403:
-            return {
-                request: { query: UpdateHealthPlanFormDataDocument },
-                error: new Error('You are not logged in'),
-            }
-        case 404:
-            return {
-                request: {
-                    query: UpdateHealthPlanFormDataDocument,
-                    variables: {
-                        input: {
-                            pkgID: id,
-                            healthPlanFormData: updatedFormData,
-                        },
-                    },
-                },
-                result: { data: undefined },
-            }
-        default:
-            return {
-                request: { query: UpdateHealthPlanFormDataDocument },
-                error: new Error('A network error occurred'),
-            }
+}: updateHealthPlanFormDataMockSuccessProps): MockedResponse<UpdateHealthPlanFormDataMutation> => {
+    return {
+        request: {
+            query: UpdateHealthPlanFormDataDocument,
+            variables: {
+                input: { pkgID: id, healthPlanFormData: updatedFormData },
+            },
+        },
+        result: { data: { updateHealthPlanFormData: { pkg } } },
     }
 }
 
-type createHealthPlanPackageMockProps = {
-    pkg?: HealthPlanPackage
-    statusCode?: 200 | 403 | 500
-}
+const updateHealthPlanFormDataMockAuthFailure =
+    (): MockedResponse<UpdateHealthPlanFormDataMutation> => {
+        return {
+            request: { query: UpdateHealthPlanFormDataDocument },
+            error: new Error('You are not logged in'),
+        }
+    }
 
-const createHealthPlanPackageMock = ({
-    statusCode,
-}: createHealthPlanPackageMockProps): MockedResponse<CreateHealthPlanPackageMutation> => {
-    const submissionData: Partial<UnlockedHealthPlanFormDataType> = {
-        programIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
-        submissionType: 'CONTRACT_ONLY',
-        submissionDescription: 'A submitted submission',
+const updateHealthPlanFormDataMockNetworkFailure =
+    (): MockedResponse<UpdateHealthPlanFormDataMutation> => {
+        return {
+            request: { query: UpdateHealthPlanFormDataDocument },
+            error: new Error('A network error occurred'),
+        }
     }
-    const pkg = mockDraftHealthPlanPackage()
-    switch (statusCode) {
-        case 200:
-            return {
-                request: {
-                    query: CreateHealthPlanPackageDocument,
-                    variables: {
-                        input: submissionData,
-                    },
+
+const createHealthPlanPackageMockSuccess =
+    (): MockedResponse<CreateHealthPlanPackageMutation> => {
+        const submissionData: Partial<UnlockedHealthPlanFormDataType> = {
+            programIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
+            submissionType: 'CONTRACT_ONLY',
+            submissionDescription: 'A submitted submission',
+        }
+        const pkg = mockDraftHealthPlanPackage()
+        return {
+            request: {
+                query: CreateHealthPlanPackageDocument,
+                variables: {
+                    input: submissionData,
                 },
-                result: { data: { createHealthPlanPackage: { pkg } } },
-            }
-        case 403:
-            return {
-                request: { query: UpdateHealthPlanFormDataDocument },
-                error: new Error('You are not logged in'),
-            }
-        default:
-            return {
-                request: { query: UpdateHealthPlanFormDataDocument },
-                error: new Error('A network error occurred'),
-            }
+            },
+            result: { data: { createHealthPlanPackage: { pkg } } },
+        }
     }
-}
+
+const createHealthPlanPackageMockAuthFailure =
+    (): MockedResponse<CreateHealthPlanPackageMutation> => {
+        return {
+            request: { query: UpdateHealthPlanFormDataDocument },
+            error: new Error('You are not logged in'),
+        }
+    }
+
+const createHealthPlanPackageMockNetworkFailure =
+    (): MockedResponse<CreateHealthPlanPackageMutation> => {
+        return {
+            request: { query: UpdateHealthPlanFormDataDocument },
+            error: new Error('A network error occurred'),
+        }
+    }
 
 type submitHealthPlanPackageMockSuccessProps = {
     stateSubmission?: HealthPlanPackage
@@ -1057,14 +1043,21 @@ const indexHealthPlanPackagesMockSuccess = (
 export {
     fetchCurrentUserMock,
     mockValidCMSUser,
-    fetchHealthPlanPackageMock,
+    fetchHealthPlanPackageMockSuccess,
+    fetchHealthPlanPackageMockNotFound,
+    fetchHealthPlanPackageMockNetworkFailure,
+    fetchHealthPlanPackageMockAuthFailure,
     fetchStateHealthPlanPackageMockSuccess,
-    updateHealthPlanFormDataMock,
+    updateHealthPlanFormDataMockAuthFailure,
+    updateHealthPlanFormDataMockNetworkFailure,
+    updateHealthPlanFormDataMockSuccess,
     submitHealthPlanPackageMockSuccess,
     submitHealthPlanPackageMockError,
     indexHealthPlanPackagesMockSuccess,
     unlockHealthPlanPackageMockSuccess,
     unlockHealthPlanPackageMockError,
     mockSubmittedHealthPlanPackageWithRevision,
-    createHealthPlanPackageMock,
+    createHealthPlanPackageMockSuccess,
+    createHealthPlanPackageMockAuthFailure,
+    createHealthPlanPackageMockNetworkFailure,
 }
