@@ -203,7 +203,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
             recordJSException(
                 `StateSubmissionForm: Apollo error reported. Error message: ${serverError.message}`
             )
-            throw new Error(serverError)
+            return new Error(serverError)
         }
     }
 
@@ -300,7 +300,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return specificContent ?? <GenericErrorPage />
     }
 
-    if (formDataError === 'NOT_FOUND') {
+    if (!fetchLoading && !submissionAndRevisions) {
         return <Error404 />
     }
 
