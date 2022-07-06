@@ -375,7 +375,10 @@ Cypress.Commands.add(
             }
             cy.findByTestId('state-submission-form-page').should('exist')
         } else {
-            // don't wait for api on BACK
+            // wait out some page transitions
+            cy.findByRole('button', {
+                name: buttonsWithLabels[buttonKey],
+            }).should('be.visible')
             cy.findByTestId('state-submission-form-page').should('exist')
         }
     }
