@@ -108,7 +108,11 @@ function AuthProvider({
             },
         }
 
-        if (user.__typename === 'StateUser' && user.state.code) {
+        if (
+            user.__typename === 'StateUser' &&
+            user.state.code &&
+            ldUser.custom
+        ) {
             Object.assign(ldUser.custom, { state: user.state.code })
         }
 
