@@ -854,26 +854,11 @@ type updateHealthPlanFormDataMockSuccessProps = {
     pkg?: HealthPlanPackage
     updatedFormData: string
     id: string
-    statusCode?: 200 | 403 | 500
+    statusCode?: 200 | 403 | 404 | 500
 }
 
-const updateHealthPlanFormDataMockSuccess = ({
+const updateHealthPlanFormDataMock = ({
     pkg = mockUnlockedHealthPlanPackage(),
-    updatedFormData,
-    id,
-}: updateHealthPlanFormDataMockSuccessProps): MockedResponse<UpdateHealthPlanFormDataMutation> => {
-    return {
-        request: {
-            query: UpdateHealthPlanFormDataDocument,
-            variables: {
-                input: { pkgID: id, healthPlanFormData: updatedFormData },
-            },
-        },
-        result: { data: { updateHealthPlanFormData: { pkg } } },
-    }
-}
-
-const updateHealthPlanFormDataMockError = ({
     updatedFormData,
     id,
     statusCode,
@@ -890,12 +875,25 @@ const updateHealthPlanFormDataMockError = ({
                         },
                     },
                 },
-                result: { data: undefined },
+                result: { data: { updateHealthPlanFormData: { pkg } } },
             }
         case 403:
             return {
                 request: { query: UpdateHealthPlanFormDataDocument },
                 error: new Error('You are not logged in'),
+            }
+        case 404:
+            return {
+                request: {
+                    query: UpdateHealthPlanFormDataDocument,
+                    variables: {
+                        input: {
+                            pkgID: id,
+                            healthPlanFormData: updatedFormData,
+                        },
+                    },
+                },
+                result: { data: undefined },
             }
         default:
             return {
@@ -1021,8 +1019,7 @@ export {
     mockValidCMSUser,
     fetchHealthPlanPackageMock,
     fetchStateHealthPlanPackageMockSuccess,
-    updateHealthPlanFormDataMockSuccess,
-    updateHealthPlanFormDataMockError,
+    updateHealthPlanFormDataMock,
     submitHealthPlanPackageMockSuccess,
     submitHealthPlanPackageMockError,
     indexHealthPlanPackagesMockSuccess,
