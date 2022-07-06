@@ -222,13 +222,11 @@ export const SubmissionType = ({
             try {
                 const updatedDraft = await updateDraft(draftSubmission)
                 if (updatedDraft instanceof Error) {
-                    setShowFormAlert(true)
                     formikHelpers.setSubmitting(false)
                 } else {
                     navigate(redirectPath || `../contract-details`)
                 }
             } catch (serverError) {
-                setShowFormAlert(true)
                 formikHelpers.setSubmitting(false) // unblock submit button to allow resubmit
             }
         }
