@@ -497,7 +497,7 @@ describe('StateSubmissionForm', () => {
             const textarea = await screen.findByRole('textbox', {
                 name: 'Submission description',
             })
-            userEvent.type(textarea, ' but updated something')
+            await userEvent.type(textarea, ' but updated something')
 
             const continueButton = await screen.findByRole('button', {
                 name: 'Continue',
@@ -508,6 +508,32 @@ describe('StateSubmissionForm', () => {
             await waitFor(() => {
                 expect(screen.getByText('System error')).toBeInTheDocument()
             })
+        })
+
+        it('shows a generic 404 page when package is undefined', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        element={<StateSubmissionForm />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchHealthPlanPackageMock({
+                                id: '404',
+                                statusCode: 404,
+                            }),
+                        ],
+                    },
+                    routerProvider: { route: '/submissions/404/edit/type' },
+                }
+            )
+
+            const notFound = await screen.findByText('404 / Page not found')
+            expect(notFound).toBeInTheDocument()
         })
     })
 
