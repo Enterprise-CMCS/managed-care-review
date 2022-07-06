@@ -24,8 +24,6 @@ on:
         required: false
       cloudfront_storybook_domain_name:
         required: false
-      ses_source_email_address:
-        required: true
       okta_metadata_url:
         required: true
       nr_license_key:
