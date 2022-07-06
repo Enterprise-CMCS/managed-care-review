@@ -1,7 +1,7 @@
 describe('contacts', () => {
     it('can navigate to and from contacts page with contract only submission', () => {
         cy.logInAsStateUser()
-       cy.startNewContractOnlySubmission()
+        cy.startNewContractOnlySubmission()
 
         // Navigate to contacts page
         cy.location().then((fullUrl) => {
