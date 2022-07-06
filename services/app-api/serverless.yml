@@ -31,7 +31,7 @@ custom:
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   reactAppOtelCollectorUrl: ${env:REACT_APP_OTEL_COLLECTOR_URL}
   dbURL: ${env:DATABASE_URL}
-  ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/${sls:stage}/ld_sdk_key}
+  ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key}
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
