@@ -11,7 +11,7 @@ plugins:
 custom:
   stage: ${opt:stage, self:provider.stage}
   iamPath: ${env:IAM_PATH, "/"}
-  nrLicenseKey: ${ssm:/configuration/${sls:stage}/nr_license_key}
+  nrLicenseKey: ${ssm:/configuration/nr_license_key}
   nrMetricStreamName: 'NewRelic-Metric-Stream'
   nrFirehoseStreamName: 'NewRelic-Delivery-Stream'
   nrExternalId: '3407984'
