@@ -54,10 +54,17 @@ export const newPackageStateEmail = async (
     }
 
     try {
-        const bodyHTMLEta = await renderTemplate<typeof data>(
+        const templateOrVoid = await renderTemplate<typeof data>(
             './newPackageStateEmail',
             data
         )
+
+        if (typeof templateOrVoid !== 'string') {
+            throw new Error(
+                'Could not render template newPackageCMSEmail, no template returned'
+            )
+        }
+        const bodyHTML = templateOrVoid as string
 
         return {
             toAddresses: receiverEmails,
@@ -65,8 +72,8 @@ export const newPackageStateEmail = async (
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
             }${packageName} was sent to CMS`,
-            bodyText: stripHTMLFromTemplate(bodyHTMLEta as string),
-            bodyHTML: bodyHTMLEta as string,
+            bodyText: stripHTMLFromTemplate(bodyHTML),
+            bodyHTML: bodyHTML,
         }
     } catch (err) {
         console.error(err)

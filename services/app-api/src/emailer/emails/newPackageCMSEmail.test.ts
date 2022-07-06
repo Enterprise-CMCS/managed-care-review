@@ -432,6 +432,10 @@ test('does not include rate name on contract only submission', async () => {
 test('renders overall email as expected', async () => {
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractAndRatesFormData(),
+        contractDateStart: new Date('2021-01-01'),
+        contractDateEnd: new Date('2021-12-31'),
+        rateDateStart: new Date('2021-01-01'),
+        rateDateEnd: new Date('2021-12-31'),
     }
     const template = await newPackageCMSEmail(
         sub,

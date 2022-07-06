@@ -256,6 +256,10 @@ test('renders overall email as expected', async () => {
         packageName: 'MCR-VA-CCCPLUS-0003',
         updatedBy: 'bob@example.com',
         updatedAt: new Date('02/01/2022'),
+        contractDateStart: new Date('2021-01-01'),
+        contractDateEnd: new Date('2021-12-31'),
+        rateDateStart: new Date('2021-01-01'),
+        rateDateEnd: new Date('2021-12-31'),
         updatedReason: 'Added more contract details.',
     }
     const submission = mockContractOnlyFormData()

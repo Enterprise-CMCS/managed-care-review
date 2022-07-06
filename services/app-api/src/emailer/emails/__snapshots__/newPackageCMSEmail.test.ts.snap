@@ -4,9 +4,9 @@ exports[`renders overall email as expected 1`] = `
 "Managed Care submission: <b>CMS-new-submission-snapshot</b> was received from <b>MN</b>.
 <br /><br />
 <b>Submission type</b>: Contract action and rate certification<br />
-<b>Contract effective dates</b>: 07/05/2022 to 07/05/2022<br />
-<b>Rate name</b>: CMS-new-submission-snapshot-RATE-20220705-20220705-CERTIFICATION-20220705<br />
-<b>Rating period<b>: 07/05/2022 to 07/05/2022<br />
+<b>Contract effective dates</b>: 01/01/2021 to 12/31/2021<br />
+<b>Rate name</b>: CMS-new-submission-snapshot-RATE-20210101-20211231-CERTIFICATION-20220706<br />
+<b>Rating period<b>: 01/01/2021 to 12/31/2021<br />
 <b>Submission description</b>: A submitted submission<br />
 <br />
 <a href=\\"http://localhost/submissions/test-abc-125\\">View submission</a>

@@ -8,6 +8,10 @@ import { resubmitPackageStateEmail } from './index'
 const resubmitData = {
     packageName: 'MCR-VA-CCCPLUS-0002',
     updatedBy: 'bob@example.com',
+    contractDateStart: new Date('2021-01-01'),
+    contractDateEnd: new Date('2021-12-31'),
+    rateDateStart: new Date('2021-01-01'),
+    rateDateEnd: new Date('2021-12-31'),
     updatedAt: new Date('02/01/2022'),
     updatedReason: 'Added rate certification.',
 }
