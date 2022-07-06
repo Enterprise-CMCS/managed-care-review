@@ -9,8 +9,7 @@ import {
     mockDraftHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
     mockUnlockedHealthPlanPackageWithDocuments,
-    updateHealthPlanFormDataMockError,
-    updateHealthPlanFormDataMockSuccess,
+    updateHealthPlanFormDataMock,
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
@@ -264,10 +263,11 @@ describe('StateSubmissionForm', () => {
                                 id: '15',
                                 statusCode: 200,
                             }),
-                            updateHealthPlanFormDataMockSuccess({
+                            updateHealthPlanFormDataMock({
                                 id: '15',
                                 pkg: mockSubmission,
                                 updatedFormData,
+                                statusCode: 200,
                             }),
                             fetchHealthPlanPackageMock({
                                 id: '15',
@@ -334,10 +334,11 @@ describe('StateSubmissionForm', () => {
                                 submission: mockSubmission,
                                 statusCode: 200,
                             }),
-                            updateHealthPlanFormDataMockSuccess({
+                            updateHealthPlanFormDataMock({
                                 id: '15',
                                 pkg: mockSubmission,
                                 updatedFormData,
+                                statusCode: 200,
                             }),
                             fetchHealthPlanPackageMock({
                                 id: '15',
@@ -478,10 +479,10 @@ describe('StateSubmissionForm', () => {
                                 id: '15',
                                 statusCode: 200,
                             }),
-                            updateHealthPlanFormDataMockError({
+                            updateHealthPlanFormDataMock({
                                 id: '15',
                                 updatedFormData,
-                                statusCode: 403,
+                                statusCode: 404,
                             }),
                         ],
                     },
