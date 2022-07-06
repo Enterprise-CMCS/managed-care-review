@@ -1,4 +1,3 @@
-import { getParameterStore } from './awsParameterStore'
 import {
     getStateAnalystsEmails,
     getStateAnalystsEmailsLocal,
@@ -20,4 +19,4 @@ function newAWSParameterStore(): ParameterStore {
     }
 }
 
-export { getParameterStore, newAWSParameterStore, newLocalParameterStore }
+export { newAWSParameterStore, newLocalParameterStore }
