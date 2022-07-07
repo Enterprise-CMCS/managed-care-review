@@ -140,7 +140,6 @@ jobs:
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       react_app_auth_mode: IDM
-      react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
 
   dev-cypress:
     name: dev - cypress
