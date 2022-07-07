@@ -124,7 +124,6 @@ jobs:
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
-      iam_path: ${{ secrets.IAM_PATH }}
       cloudfront_certificate_arn: ${{ secrets.DEV_CLOUDFRONT_CERTIFICATE_ARN }}
       cloudfront_domain_name: ${{ secrets.DEV_CLOUDFRONT_DOMAIN_NAME }}
       cloudfront_storybook_domain_name: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
@@ -140,7 +139,6 @@ jobs:
       aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      iam_path: ${{ secrets.IAM_PATH }}
       react_app_auth_mode: IDM
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
 
@@ -197,7 +195,6 @@ jobs:
       cloudfront_storybook_domain_name: ${{ secrets.VAL_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
       okta_metadata_url: ${{ secrets.VAL_OKTA_METADATA_URL }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      iam_path: ${{ secrets.IAM_PATH }}
 
   promote-app-val:
     needs: [dev-cypress, promote-infra-val, unit-tests]
@@ -210,7 +207,6 @@ jobs:
       aws_access_key_id: ${{ secrets.VAL_AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.VAL_AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      iam_path: ${{ secrets.IAM_PATH }}
       react_app_auth_mode: IDM
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
 
@@ -267,7 +263,6 @@ jobs:
       cloudfront_storybook_domain_name: ${{ secrets.PROD_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
       okta_metadata_url: ${{ secrets.PROD_OKTA_METADATA_URL }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      iam_path: ${{ secrets.IAM_PATH }}
 
   promote-app-prod:
     needs: [cypress-val, promote-infra-prod, unit-tests]
@@ -280,7 +275,6 @@ jobs:
       aws_access_key_id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      iam_path: ${{ secrets.IAM_PATH }}
       react_app_auth_mode: IDM
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
 

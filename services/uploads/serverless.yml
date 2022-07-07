@@ -43,7 +43,7 @@ provider:
 
 custom:
   region: ${aws:region}
-  iamPath: ${env:IAM_PATH, "/"}
+  iamPath: ${ssm:/configuration/iam/path, "/"}
   scripts:
     hooks:
       # This script is run locally when running 'serverless deploy'

@@ -25,7 +25,7 @@ custom:
   appApiGatewayRootResourceId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.AppApiGatewayRootResourceId}
   emailerMode: ${env:EMAILER_MODE}
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${sls:stage}.PostgresAuroraArn }
-  iamPath: ${env:IAM_PATH, "/"}
+  iamPath: ${ssm:/configuration/iam/path, "/"}
   document_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.DocumentUploadsBucketArn}
   secretsManagerSecret: aurora_postgres_${sls:stage} #pragma: allowlist secret
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}

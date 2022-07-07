@@ -39,7 +39,7 @@ provider:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  iamPath: ${env:IAM_PATH, "/"}
+  iamPath: ${ssm:/configuration/iam/path, "/"}
   databaseName: !Sub aurora_${self:service}_${sls:stage}_${AWS::AccountId}
   vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
   sgId: ${ssm:/configuration/${sls:stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}

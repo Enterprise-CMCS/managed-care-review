@@ -19,8 +19,6 @@ on:
         required: true
       aws_default_region:
         required: true
-      iam_path:
-        required: true
       react_app_auth_mode:
         required: true
       react_app_otel_collector_url:
@@ -47,7 +45,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          IAM_PATH: ${{ secrets.iam_path }}
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
 
         run: |
@@ -96,7 +93,6 @@ jobs:
           APP_VERSION: ${{ inputs.app_version }}
           DATABASE_URL: AWS_SM
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
-          IAM_PATH: ${{ secrets.iam_path }}
           EMAILER_MODE: SES
           REACT_APP_OTEL_COLLECTOR_URL: ${{ secrets.react_app_otel_collector_url }}
 
