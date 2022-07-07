@@ -121,9 +121,7 @@ describe('UnlockSubmitModal', () => {
             await userEvent.click(screen.getByTestId('submit-modal-submit'))
 
             expect(
-                await screen.findByText(
-                    'Error attempting to submit. Please try again.'
-                )
+                await screen.findByText('Error attempting to submit.')
             ).toBeInTheDocument()
             await waitFor(() =>
                 expect(mockSetIsSubmitting).toHaveBeenCalledTimes(2)
