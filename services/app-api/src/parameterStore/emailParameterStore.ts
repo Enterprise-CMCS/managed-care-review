@@ -3,20 +3,20 @@ import {
     getStateAnalystsEmailsLocal,
 } from './getStateAnalystsEmails'
 
-export type ParameterStore = {
+export type EmailParameterStore = {
     getStateAnalystsEmails: (stateCode: string) => Promise<string[] | Error>
 }
 
-function newLocalParameterStore(): ParameterStore {
+function newLocalEmailParameterStore(): EmailParameterStore {
     return {
         getStateAnalystsEmails: getStateAnalystsEmailsLocal,
     }
 }
 
-function newAWSParameterStore(): ParameterStore {
+function newAWSEmailParameterStore(): EmailParameterStore {
     return {
         getStateAnalystsEmails: getStateAnalystsEmails,
     }
 }
 
-export { newAWSParameterStore, newLocalParameterStore }
+export { newAWSEmailParameterStore, newLocalEmailParameterStore }

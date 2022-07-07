@@ -4,7 +4,7 @@ export type ParameterStore = {
     getStateAnalystsEmails: (stateCode: string) => Promise<string[] | Error>
 }
 
-function mockParameterStoreError(error?: string): ParameterStore {
+function mockEmailParameterStoreError(error?: string): ParameterStore {
     const message = error || 'No store found'
     return {
         getStateAnalystsEmails: async (stateCode: string): Promise<Error> => {
@@ -20,4 +20,4 @@ const getTestStateAnalystsEmails = (
     `"${submission.stateCode} State Analyst 2" <${submission.stateCode}StateAnalyst2@example.com>`,
 ]
 
-export { mockParameterStoreError, getTestStateAnalystsEmails }
+export { mockEmailParameterStoreError, getTestStateAnalystsEmails }

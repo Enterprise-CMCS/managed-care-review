@@ -1,3 +1,6 @@
-export { newAWSParameterStore, newLocalParameterStore } from './parameterStore'
+export {
+    newAWSEmailParameterStore,
+    newLocalEmailParameterStore,
+} from './emailParameterStore'
 
-export type { ParameterStore } from './parameterStore'
+export type { EmailParameterStore } from './emailParameterStore'

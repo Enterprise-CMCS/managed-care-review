@@ -20,7 +20,7 @@ import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
-import { ParameterStore } from '../parameterStore'
+import { EmailParameterStore } from '../parameterStore'
 
 // unlock is a state machine transforming a LockedFormDatya and turning it into UnlockedFormData
 // Since Unlocked is a strict subset of Locked, this can't error today.
@@ -41,7 +41,7 @@ function unlock(
 export function unlockHealthPlanPackageResolver(
     store: Store,
     emailer: Emailer,
-    parameterStore: ParameterStore
+    emailParameterStore: EmailParameterStore
 ): MutationResolvers['unlockHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
@@ -141,9 +141,8 @@ export function unlockHealthPlanPackageResolver(
         const name = packageName(draft, programs)
 
         // Get state analysts emails from parameter store
-        let stateAnalystsEmails = await parameterStore.getStateAnalystsEmails(
-            draft.stateCode
-        )
+        let stateAnalystsEmails =
+            await emailParameterStore.getStateAnalystsEmails(draft.stateCode)
         //If error, log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
         if (stateAnalystsEmails instanceof Error) {
             logError('getStateAnalystsEmails', stateAnalystsEmails.message)

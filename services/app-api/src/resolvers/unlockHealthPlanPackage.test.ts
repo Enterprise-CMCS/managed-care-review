@@ -20,7 +20,7 @@ import { base64ToDomain } from 'app-web/src/common-code/proto/healthPlanFormData
 import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
 import {
     getTestStateAnalystsEmails,
-    mockParameterStoreError,
+    mockEmailParameterStoreError,
 } from '../testHelpers/parameterStoreHelpers'
 
 describe('unlockHealthPlanPackage', () => {
@@ -494,7 +494,7 @@ describe('unlockHealthPlanPackage', () => {
         const config = testEmailConfig
         const mockEmailer = testEmailer(config)
         //mock invoke email submit lambda
-        const mockParameterStore = mockParameterStoreError()
+        const mockEmailParameterStore = mockEmailParameterStoreError()
         const stateServer = await constructTestPostgresServer()
 
         // First, create a new submitted submission
@@ -511,7 +511,7 @@ describe('unlockHealthPlanPackage', () => {
                 },
             },
             emailer: mockEmailer,
-            parameterStore: mockParameterStore,
+            emailParameterStore: mockEmailParameterStore,
         })
 
         // Unlock
@@ -535,7 +535,7 @@ describe('unlockHealthPlanPackage', () => {
     })
 
     it('does log error when request for state specific analysts emails failed', async () => {
-        const mockParameterStore = mockParameterStoreError()
+        const mockEmailParameterStore = mockEmailParameterStoreError()
         const consoleErrorSpy = jest.spyOn(console, 'error')
         const stateServer = await constructTestPostgresServer()
         const error = {
@@ -557,7 +557,7 @@ describe('unlockHealthPlanPackage', () => {
                     email: 'zuko@example.com',
                 },
             },
-            parameterStore: mockParameterStore,
+            emailParameterStore: mockEmailParameterStore,
         })
 
         await cmsServer.executeOperation({

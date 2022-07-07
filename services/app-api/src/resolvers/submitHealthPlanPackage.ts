@@ -26,7 +26,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import { ParameterStore } from '../parameterStore'
+import { EmailParameterStore } from '../parameterStore'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
@@ -116,7 +116,7 @@ function submit(
 export function submitHealthPlanPackageResolver(
     store: Store,
     emailer: Emailer,
-    parameterStore: ParameterStore
+    emailParameterStore: EmailParameterStore
 ): MutationResolvers['submitHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
@@ -262,9 +262,10 @@ export function submitHealthPlanPackageResolver(
         const status = packageStatus(updatedPackage)
 
         // Get state analysts emails from parameter store
-        let stateAnalystsEmails = await parameterStore.getStateAnalystsEmails(
-            updatedPackage.stateCode
-        )
+        let stateAnalystsEmails =
+            await emailParameterStore.getStateAnalystsEmails(
+                updatedPackage.stateCode
+            )
         //If error log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
         if (stateAnalystsEmails instanceof Error) {
             logError('getStateAnalystsEmails', stateAnalystsEmails.message)

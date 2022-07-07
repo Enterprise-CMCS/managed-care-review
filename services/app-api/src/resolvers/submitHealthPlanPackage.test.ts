@@ -15,7 +15,7 @@ import { packageName } from '../../../app-web/src/common-code/healthPlanFormData
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 import {
     getTestStateAnalystsEmails,
-    mockParameterStoreError,
+    mockEmailParameterStoreError,
 } from '../testHelpers/parameterStoreHelpers'
 
 describe('submitHealthPlanPackage', () => {
@@ -283,10 +283,10 @@ describe('submitHealthPlanPackage', () => {
         const config = testEmailConfig
         const mockEmailer = testEmailer(config)
         //mock invoke email submit lambda
-        const mockParameterStore = mockParameterStoreError()
+        const mockEmailParameterStore = mockEmailParameterStoreError()
         const server = await constructTestPostgresServer({
             emailer: mockEmailer,
-            parameterStore: mockParameterStore,
+            emailParameterStore: mockEmailParameterStore,
         })
         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
         const draftID = draft.id
@@ -310,7 +310,7 @@ describe('submitHealthPlanPackage', () => {
     })
 
     it('does log error when request for state specific analysts emails failed', async () => {
-        const mockParameterStore = mockParameterStoreError()
+        const mockEmailParameterStore = mockEmailParameterStoreError()
         const consoleErrorSpy = jest.spyOn(console, 'error')
         const error = {
             error: 'No store found',
@@ -320,7 +320,7 @@ describe('submitHealthPlanPackage', () => {
         }
 
         const server = await constructTestPostgresServer({
-            parameterStore: mockParameterStore,
+            emailParameterStore: mockEmailParameterStore,
         })
         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
         const draftID = draft.id
