@@ -131,6 +131,13 @@ test('includes link to submission', async () => {
             ),
         })
     )
+    expect(template).toEqual(
+        expect.objectContaining({
+            bodyHTML: expect.stringContaining(
+                `href="http://localhost/submissions/${sub.id}"`
+            ),
+        })
+    )
 })
 
 test('includes information about what is next', async () => {
