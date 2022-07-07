@@ -436,6 +436,7 @@ test('renders overall email as expected', async () => {
         contractDateEnd: new Date('2021-12-31'),
         rateDateStart: new Date('2021-01-01'),
         rateDateEnd: new Date('2021-12-31'),
+        rateDateCertified: new Date('2020-12-01'),
     }
     const template = await newPackageCMSEmail(
         sub,

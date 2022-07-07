@@ -250,6 +250,7 @@ test('renders overall email as expected', async () => {
         contractDateEnd: new Date('01/01/2025'),
         rateDateStart: new Date('01/01/2021'),
         rateDateEnd: new Date('01/01/2022'),
+        rateDateCertified: new Date('2020-12-01'),
         rateAmendmentInfo: {
             effectiveDateStart: new Date('06/05/2021'),
             effectiveDateEnd: new Date('12/31/2021'),

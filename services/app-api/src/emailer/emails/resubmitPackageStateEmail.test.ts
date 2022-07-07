@@ -13,6 +13,7 @@ const resubmitData = {
     rateDateStart: new Date('2021-01-01'),
     rateDateEnd: new Date('2021-12-31'),
     updatedAt: new Date('02/01/2022'),
+    rateDateCertified: new Date('2020-12-01'),
     updatedReason: 'Added rate certification.',
 }
 const user = mockUser()
