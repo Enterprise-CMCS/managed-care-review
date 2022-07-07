@@ -9,6 +9,7 @@ plugins:
 custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${aws:region}
+  cloudfrontCertificateArn: ${ssm:/configuration/cloudfront/certificate_arn, ""}
   serverlessTerminationProtection:
     stages:
       - dev
@@ -38,7 +39,7 @@ resources:
         - Fn::Not:
             - Fn::Equals:
                 - ''
-                - ${ssm:/configuration/cloudfront/certificate_arn, ""}
+                - ${self:custom.cloudfrontCertificateArn}
         - Fn::Not:
             - Fn::Equals:
                 - ''
@@ -152,7 +153,7 @@ resources:
           ViewerCertificate:
             Fn::If:
               - CreateCustomCloudFrontDomain
-              - AcmCertificateArn: ${ssm:/configuration/cloudfront/certificate_arn, ""}
+              - AcmCertificateArn: ${self:custom.cloudfrontCertificateArn}
                 MinimumProtocolVersion: TLSv1
                 SslSupportMethod: sni-only
               - CloudFrontDefaultCertificate: true

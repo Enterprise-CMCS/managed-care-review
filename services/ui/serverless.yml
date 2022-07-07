@@ -13,6 +13,8 @@ plugins:
 
 custom:
   region: ${aws:region}
+  cloudfrontDomainName: ${ssm:/configuration/cloudfront/domain_name, ""}
+  cloudfrontCertificateArn: ${ssm:/configuration/cloudfront/certificate_arn, ""}
   serverlessTerminationProtection:
     stages:
       - dev
@@ -37,11 +39,11 @@ resources:
         - Fn::Not:
             - Fn::Equals:
                 - ''
-                - ${ssm:/configuration/cloudfront/certificate_arn, ""}
+                - ${self:custom.cloudfrontCertificateArn}
         - Fn::Not:
             - Fn::Equals:
                 - ''
-                - ${ssm:/configuration/cloudfront/domain_name, ""}
+                - ${self:custom.cloudfrontDomainName}
   Resources:
     S3Bucket:
       Type: AWS::S3::Bucket
@@ -117,7 +119,7 @@ resources:
           Aliases:
             Fn::If:
               - CreateCustomCloudFrontDomain
-              - - ${ssm:/configuration/cloudfront/domain_name, ""}
+              - - ${self:custom.cloudfrontDomainName}
               - !Ref AWS::NoValue
           Origins:
             - DomainName: !GetAtt S3Bucket.DomainName
@@ -144,7 +146,7 @@ resources:
           ViewerCertificate:
             Fn::If:
               - CreateCustomCloudFrontDomain
-              - AcmCertificateArn: ${ssm:/configuration/cloudfront/certificate_arn, ""}
+              - AcmCertificateArn: ${self:custom.cloudfrontCertificateArn}
                 MinimumProtocolVersion: TLSv1
                 SslSupportMethod: sni-only
               - CloudFrontDefaultCertificate: true
@@ -190,5 +192,5 @@ resources:
       Value:
         Fn::If:
           - CreateCustomCloudFrontDomain
-          - https://${ssm:/configuration/cloudfront/domain_name, ""}/
+          - https://${self:custom.cloudfrontDomainName/
           - !Sub https://${CloudFrontDistribution.DomainName}
