@@ -23,14 +23,27 @@ Eta.configure({
     views: path.join(__dirname, 'etaTemplates'),
 })
 
-const renderTemplate = async <T>(templateRelativePath: string, data: T) => {
-    // path should be relative to the etaTemplates folder
+const renderTemplate = async <T>(
+    templateName: string,
+    data: T,
+    inUnitTest?: boolean
+) => {
+    if (!/^[a-zA-Z0-9]+$/.test(templateName)) {
+        console.error(
+            'CODING ERROR: templateName parameter should not include any punctuation, can only be alphanumeric characters'
+        )
+        return new Error(`${templateName} is not a valid template file name`)
+    }
+    const templatePath =
+        inUnitTest == true
+            ? `./${templateName}`
+            : `../emailer/etaTemplates/${templateName}`
     try {
-        const templateOrVoid = await Eta.renderFile(templateRelativePath, data)
+        const templateOrVoid = await Eta.renderFile(templatePath, data)
 
         if (typeof templateOrVoid !== 'string') {
             return new Error(
-                `Could not render file ${templateRelativePath}, no template string returned`
+                `Could not render file ${templatePath}, no template string returned`
             )
         }
         const templateHTML = templateOrVoid as string // we know we have a string we can coerce type here to simply types upstream

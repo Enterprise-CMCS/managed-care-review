@@ -17,6 +17,7 @@ export const newPackageStateEmail = async (
     user: UserType,
     config: EmailConfiguration
 ): Promise<EmailData | Error> => {
+    const isUnitTest = config.baseUrl === 'http://localhost'
     const currentUserEmail = user.email
     const receiverEmails: string[] = [currentUserEmail].concat(
         pkg.stateContacts.map((contact) => contact.email)
@@ -55,9 +56,11 @@ export const newPackageStateEmail = async (
     }
 
     const result = await renderTemplate<typeof data>(
-        './newPackageStateEmail',
-        data
+        'newPackageStateEmail',
+        data,
+        isUnitTest
     )
+
     if (result instanceof Error) {
         return result
     } else {

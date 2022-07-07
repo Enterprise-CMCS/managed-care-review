@@ -18,6 +18,7 @@ export const newPackageCMSEmail = async (
     stateAnalystsEmails: StateAnalystsEmails
 ): Promise<EmailData | Error> => {
     // config
+    const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
     const reviewerEmails = generateReviewerEmails(
         config,
@@ -55,8 +56,9 @@ export const newPackageCMSEmail = async (
     }
 
     const result = await renderTemplate<typeof data>(
-        './newPackageCMSEmail',
-        data
+        'newPackageCMSEmail',
+        data,
+        isUnitTest
     )
     if (result instanceof Error) {
         return result
