@@ -251,9 +251,16 @@ describe('RateDetails', () => {
         })
 
         // fill out form and clear errors
-        await userEvent.type(screen.getByText('Start date'), '01/01/2022')
-        await userEvent.type(screen.getByText('End date'), '12/31/2022')
-        await userEvent.type(screen.getByText('Date certified'), '12/01/2021')
+        const startDate = await screen.findByText('Start date')
+        await userEvent.type(startDate, '01/01/2022')
+
+        const endDate = await screen.findByText('End date')
+        await userEvent.type(endDate, '12/31/2022')
+
+        const dateCertified = await screen.findByText('Date certified')
+        await userEvent.type(dateCertified, '12/01/2021')
+
+        //wait for all errors to clear
         await waitFor(() =>
             expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
         )

@@ -167,8 +167,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     })
 
     const submissionAndRevisions = fetchData?.fetchHealthPlanPackage?.pkg
-    const [updateFormData, { error: updateFormDataError }] =
-        useUpdateHealthPlanFormDataMutation()
+    const [updateFormData] = useUpdateHealthPlanFormDataMutation()
 
     // When the new API is done, we'll call the new API here
     const updateDraftHealthPlanPackage = async (
@@ -192,13 +191,19 @@ export const StateSubmissionForm = (): React.ReactElement => {
             if (!updatedSubmission) {
                 setShowPageErrorMessage(true)
                 console.log('Failed to update form data', updateResult)
+                recordJSException(
+                    `StateSubmissionForm: Apollo error reported. Error message: Failed to update form data ${updateResult}`
+                )
                 return new Error('Failed to update form data')
             }
 
             return updatedSubmission
         } catch (serverError) {
             setShowPageErrorMessage(true)
-            return serverError
+            recordJSException(
+                `StateSubmissionForm: Apollo error reported. Error message: ${serverError.message}`
+            )
+            return new Error(serverError)
         }
     }
 
@@ -278,16 +283,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
         }
     }, [submissionAndRevisions])
 
-    if (updateFormDataError && !showPageErrorMessage) {
-        // This triggers if Apollo sets the error from our useQuery invocation
-        // we should already be setting this in our try {} block in the actual update handler, I think
-        // so this might be worth looking into.
-        recordJSException(
-            `StateSubmissionForm: Apollo error reported. Error message: ${updateFormDataError.message}`
-        )
-        setShowPageErrorMessage(true)
-    }
-
     if (fetchError) {
         // This is a sign that we are handling the same error handling logic frontend and backend around invalid status
         let specificContent: React.ReactElement | undefined = undefined
@@ -301,12 +296,11 @@ export const StateSubmissionForm = (): React.ReactElement => {
                 }
             }
         })
+
         return specificContent ?? <GenericErrorPage />
     }
-    if (
-        (fetchData && formDataError === 'NOT_FOUND') ||
-        (fetchData && !formDataFromLatestRevision)
-    ) {
+
+    if (!fetchLoading && !submissionAndRevisions) {
         return <Error404 />
     }
 
@@ -317,6 +311,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     if (formDataError === 'WRONG_SUBMISSION_STATUS') {
         return <ErrorInvalidSubmissionStatus />
     }
+
     // order matters, this should be last to prevent 404 flicker
     if (fetchLoading || !formDataFromLatestRevision) {
         return (

@@ -5,11 +5,15 @@ import { SubmissionDocument } from '../../common-code/healthPlanFormDataType'
 import { RoutesRecord } from '../../constants/routes'
 import {
     fetchCurrentUserMock,
-    fetchHealthPlanPackageMock,
+    fetchHealthPlanPackageMockSuccess,
+    fetchHealthPlanPackageMockNotFound,
+    fetchHealthPlanPackageMockNetworkFailure,
+    fetchHealthPlanPackageMockAuthFailure,
     mockDraftHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
     mockUnlockedHealthPlanPackageWithDocuments,
     updateHealthPlanFormDataMockSuccess,
+    updateHealthPlanFormDataMockAuthFailure,
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
@@ -35,9 +39,8 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMock({
+                            fetchHealthPlanPackageMockSuccess({
                                 id: '15',
-                                statusCode: 200,
                             }),
                         ],
                     },
@@ -69,9 +72,8 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMock({
+                            fetchHealthPlanPackageMockSuccess({
                                 id: '15',
-                                statusCode: 200,
                                 submission: mockSubmission,
                             }),
                         ],
@@ -132,9 +134,8 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMock({
+                            fetchHealthPlanPackageMockSuccess({
                                 id: '12',
-                                statusCode: 200,
                                 submission: mockAmendment,
                             }),
                         ],
@@ -171,9 +172,8 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMock({
+                            fetchHealthPlanPackageMockSuccess({
                                 id: '12',
-                                statusCode: 200,
                             }),
                         ],
                     },
@@ -207,9 +207,8 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMock({
+                            fetchHealthPlanPackageMockSuccess({
                                 id: '15',
-                                statusCode: 200,
                                 submission: mockUnlockedHealthPlanPackage(),
                             }),
                         ],
@@ -258,19 +257,17 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMock({
+                            fetchHealthPlanPackageMockSuccess({
                                 submission: mockSubmission,
                                 id: '15',
-                                statusCode: 200,
                             }),
                             updateHealthPlanFormDataMockSuccess({
                                 id: '15',
                                 pkg: mockSubmission,
                                 updatedFormData,
                             }),
-                            fetchHealthPlanPackageMock({
+                            fetchHealthPlanPackageMockSuccess({
                                 id: '15',
-                                statusCode: 200,
                             }),
                         ],
                     },
@@ -328,19 +325,17 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMock({
+                            fetchHealthPlanPackageMockSuccess({
                                 id: '15',
                                 submission: mockSubmission,
-                                statusCode: 200,
                             }),
                             updateHealthPlanFormDataMockSuccess({
                                 id: '15',
                                 pkg: mockSubmission,
                                 updatedFormData,
                             }),
-                            fetchHealthPlanPackageMock({
+                            fetchHealthPlanPackageMockSuccess({
                                 id: '15',
-                                statusCode: 200,
                             }),
                         ],
                     },
@@ -378,10 +373,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMock({
-                                id: '15',
-                                statusCode: 403,
-                            }),
+                            fetchHealthPlanPackageMockAuthFailure(),
                         ],
                     },
                     routerProvider: { route: '/submissions/15/edit/type' },
@@ -404,10 +396,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMock({
-                                id: '15',
-                                statusCode: 403,
-                            }),
+                            fetchHealthPlanPackageMockNetworkFailure(),
                         ],
                     },
                     routerProvider: {
@@ -432,10 +421,7 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMock({
-                                id: '15',
-                                statusCode: 403,
-                            }),
+                            fetchHealthPlanPackageMockAuthFailure(),
                         ],
                     },
                     routerProvider: { route: '/submissions/15/edit/documents' },
@@ -444,6 +430,80 @@ describe('StateSubmissionForm', () => {
 
             const loading = await screen.findByText('System error')
             expect(loading).toBeInTheDocument()
+        })
+
+        it('shows a generic error when updating submission fails', async () => {
+            const mockSubmission = mockDraftHealthPlanPackage({
+                submissionDescription:
+                    'A real submission but updated something',
+            })
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        element={<StateSubmissionForm />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchHealthPlanPackageMockSuccess({
+                                submission: mockSubmission,
+                                id: '15',
+                            }),
+                            updateHealthPlanFormDataMockAuthFailure(),
+                        ],
+                    },
+                    routerProvider: { route: '/submissions/15/edit/type' },
+                }
+            )
+
+            await waitFor(() =>
+                expect(
+                    screen.getByRole('form', { name: 'Submission Type Form' })
+                ).toBeInTheDocument()
+            )
+            const textarea = await screen.findByRole('textbox', {
+                name: 'Submission description',
+            })
+            await userEvent.type(textarea, ' but updated something')
+
+            const continueButton = await screen.findByRole('button', {
+                name: 'Continue',
+            })
+            expect(continueButton).toBeInTheDocument()
+            continueButton.click()
+
+            await waitFor(() => {
+                expect(screen.getByText('System error')).toBeInTheDocument()
+            })
+        })
+
+        it('shows a generic 404 page when package is undefined', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        element={<StateSubmissionForm />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchHealthPlanPackageMockNotFound({
+                                id: '404',
+                            }),
+                        ],
+                    },
+                    routerProvider: { route: '/submissions/404/edit/type' },
+                }
+            )
+
+            const notFound = await screen.findByText('404 / Page not found')
+            expect(notFound).toBeInTheDocument()
         })
     })
 
@@ -468,9 +528,8 @@ describe('StateSubmissionForm', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMock({
+                            fetchHealthPlanPackageMockSuccess({
                                 id: '15',
-                                statusCode: 200,
                                 submission,
                             }),
                         ],
