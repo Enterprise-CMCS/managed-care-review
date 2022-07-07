@@ -14,6 +14,7 @@ export const GenericApiErrorBanner = ({
             role="alert"
             type="error"
             heading="System error"
+            validation
             data-testid="genericApiErrorBanner"
         >
             <div className={styles.bannerBodyText}>

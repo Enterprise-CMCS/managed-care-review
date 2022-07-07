@@ -34,10 +34,12 @@ const renderTemplate = async <T>(
         )
         return new Error(`${templateName} is not a valid template file name`)
     }
-    const templatePath =
-        inUnitTest == true
-            ? `./${templateName}`
-            : `../emailer/etaTemplates/${templateName}`
+
+    // TODO: Issue with finding path in lambda/webpack
+    const templatePath = `./${templateName}`
+    // inUnitTest == true
+    //     ? `./${templateName}`
+    //     : `../emailer/etaTemplates/${templateName}`
     try {
         const templateOrVoid = await Eta.renderFile(templatePath, data)
 
