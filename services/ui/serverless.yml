@@ -192,5 +192,5 @@ resources:
       Value:
         Fn::If:
           - CreateCustomCloudFrontDomain
-          - https://${self:custom.cloudfrontDomainName/
+          - https://${self:custom.cloudfrontDomainName}/
           - !Sub https://${CloudFrontDistribution.DomainName}
