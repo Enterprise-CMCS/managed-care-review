@@ -21,8 +21,6 @@ on:
         required: true
       iam_path:
         required: true
-      ld_sdk_key:
-        required: true
       react_app_auth_mode:
         required: true
       react_app_otel_collector_url:
@@ -101,7 +99,6 @@ jobs:
           IAM_PATH: ${{ secrets.iam_path }}
           EMAILER_MODE: SES
           REACT_APP_OTEL_COLLECTOR_URL: ${{ secrets.react_app_otel_collector_url }}
-          LD_SDK_KEY: ${{ secrets.ld_sdk_key }}
 
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}

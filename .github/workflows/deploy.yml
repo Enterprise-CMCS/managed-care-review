@@ -228,7 +228,6 @@ jobs:
       iam_path: ${{ secrets.IAM_PATH }}
       react_app_auth_mode: AWS_COGNITO
       react_app_otel_collector_url: ${{ secrets.REACT_APP_OTEL_COLLECTOR_URL }}
-      ld_sdk_key: ${{ secrets.DEV_LD_SDK_KEY }}
 
   finishing-prep:
     name: Finishing Prep
