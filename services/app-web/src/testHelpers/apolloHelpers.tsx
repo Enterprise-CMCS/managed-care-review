@@ -27,6 +27,8 @@ import {
     IndexHealthPlanPackagesQuery,
     FetchHealthPlanPackageQuery,
     UpdateHealthPlanFormDataMutation,
+    CreateHealthPlanPackageDocument,
+    CreateHealthPlanPackageMutation,
 } from '../gen/gqlClient'
 
 /* For use with Apollo MockedProvider in jest tests */
@@ -683,44 +685,62 @@ fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
 type fetchHealthPlanPackageMockProps = {
     submission?: HealthPlanPackage
     id: string
-    statusCode: 200 | 403 | 500
 }
 
-const fetchHealthPlanPackageMock = ({
+const fetchHealthPlanPackageMockSuccess = ({
     submission = mockDraftHealthPlanPackage(),
     id,
-    statusCode, // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: fetchHealthPlanPackageMockProps): MockedResponse<FetchHealthPlanPackageQuery> => {
     // override the ID of the returned draft to match the queried id.
     const mergedDraftSubmission = Object.assign({}, submission, { id })
-
-    switch (statusCode) {
-        case 200:
-            return {
-                request: {
-                    query: FetchHealthPlanPackageDocument,
-                    variables: { input: { pkgID: id } },
+    return {
+        request: {
+            query: FetchHealthPlanPackageDocument,
+            variables: { input: { pkgID: id } },
+        },
+        result: {
+            data: {
+                fetchHealthPlanPackage: {
+                    pkg: mergedDraftSubmission,
                 },
-                result: {
-                    data: {
-                        fetchHealthPlanPackage: {
-                            pkg: mergedDraftSubmission,
-                        },
-                    },
-                },
-            }
-        case 403:
-            return {
-                request: { query: FetchHealthPlanPackageDocument },
-                error: new Error('You are not logged in'),
-            }
-        default:
-            return {
-                request: { query: FetchHealthPlanPackageDocument },
-                error: new Error('A network error occurred'),
-            }
+            },
+        },
     }
 }
+
+const fetchHealthPlanPackageMockNotFound = ({
+    id,
+}: fetchHealthPlanPackageMockProps): MockedResponse<FetchHealthPlanPackageQuery> => {
+    return {
+        request: {
+            query: FetchHealthPlanPackageDocument,
+            variables: { input: { pkgID: id } },
+        },
+        result: {
+            data: {
+                fetchHealthPlanPackage: {
+                    pkg: undefined,
+                },
+            },
+        },
+    }
+}
+
+const fetchHealthPlanPackageMockAuthFailure =
+    (): MockedResponse<FetchHealthPlanPackageQuery> => {
+        return {
+            request: { query: FetchHealthPlanPackageDocument },
+            error: new Error('You are not logged in'),
+        }
+    }
+
+const fetchHealthPlanPackageMockNetworkFailure =
+    (): MockedResponse<FetchHealthPlanPackageQuery> => {
+        return {
+            request: { query: FetchHealthPlanPackageDocument },
+            error: new Error('A network error occurred'),
+        }
+    }
 
 // type fetchStateSubmissionMockProps = {
 //     stateSubmission?: StateSubmission | Partial<StateSubmission>
@@ -858,6 +878,57 @@ const updateHealthPlanFormDataMockSuccess = ({
     }
 }
 
+const updateHealthPlanFormDataMockAuthFailure =
+    (): MockedResponse<UpdateHealthPlanFormDataMutation> => {
+        return {
+            request: { query: UpdateHealthPlanFormDataDocument },
+            error: new Error('You are not logged in'),
+        }
+    }
+
+const updateHealthPlanFormDataMockNetworkFailure =
+    (): MockedResponse<UpdateHealthPlanFormDataMutation> => {
+        return {
+            request: { query: UpdateHealthPlanFormDataDocument },
+            error: new Error('A network error occurred'),
+        }
+    }
+
+const createHealthPlanPackageMockSuccess =
+    (): MockedResponse<CreateHealthPlanPackageMutation> => {
+        const submissionData: Partial<UnlockedHealthPlanFormDataType> = {
+            programIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
+            submissionType: 'CONTRACT_ONLY',
+            submissionDescription: 'A submitted submission',
+        }
+        const pkg = mockDraftHealthPlanPackage()
+        return {
+            request: {
+                query: CreateHealthPlanPackageDocument,
+                variables: {
+                    input: submissionData,
+                },
+            },
+            result: { data: { createHealthPlanPackage: { pkg } } },
+        }
+    }
+
+const createHealthPlanPackageMockAuthFailure =
+    (): MockedResponse<CreateHealthPlanPackageMutation> => {
+        return {
+            request: { query: UpdateHealthPlanFormDataDocument },
+            error: new Error('You are not logged in'),
+        }
+    }
+
+const createHealthPlanPackageMockNetworkFailure =
+    (): MockedResponse<CreateHealthPlanPackageMutation> => {
+        return {
+            request: { query: UpdateHealthPlanFormDataDocument },
+            error: new Error('A network error occurred'),
+        }
+    }
+
 type submitHealthPlanPackageMockSuccessProps = {
     stateSubmission?: HealthPlanPackage
     id: string
@@ -972,8 +1043,13 @@ const indexHealthPlanPackagesMockSuccess = (
 export {
     fetchCurrentUserMock,
     mockValidCMSUser,
-    fetchHealthPlanPackageMock,
+    fetchHealthPlanPackageMockSuccess,
+    fetchHealthPlanPackageMockNotFound,
+    fetchHealthPlanPackageMockNetworkFailure,
+    fetchHealthPlanPackageMockAuthFailure,
     fetchStateHealthPlanPackageMockSuccess,
+    updateHealthPlanFormDataMockAuthFailure,
+    updateHealthPlanFormDataMockNetworkFailure,
     updateHealthPlanFormDataMockSuccess,
     submitHealthPlanPackageMockSuccess,
     submitHealthPlanPackageMockError,
@@ -981,4 +1057,7 @@ export {
     unlockHealthPlanPackageMockSuccess,
     unlockHealthPlanPackageMockError,
     mockSubmittedHealthPlanPackageWithRevision,
+    createHealthPlanPackageMockSuccess,
+    createHealthPlanPackageMockAuthFailure,
+    createHealthPlanPackageMockNetworkFailure,
 }

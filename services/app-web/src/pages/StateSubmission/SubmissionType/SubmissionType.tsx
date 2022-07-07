@@ -220,14 +220,13 @@ export const SubmissionType = ({
             draftSubmission.submissionDescription = values.submissionDescription
 
             try {
-                await updateDraft(draftSubmission)
-                if (redirectPath) {
-                    navigate(redirectPath)
+                const updatedDraft = await updateDraft(draftSubmission)
+                if (updatedDraft instanceof Error) {
+                    formikHelpers.setSubmitting(false)
                 } else {
-                    navigate(`../contract-details`)
+                    navigate(redirectPath || `../contract-details`)
                 }
             } catch (serverError) {
-                setShowFormAlert(true)
                 formikHelpers.setSubmitting(false) // unblock submit button to allow resubmit
             }
         }
