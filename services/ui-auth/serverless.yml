@@ -14,7 +14,6 @@ custom:
   api_gateway_rest_api_name: ${cf:infra-api-${sls:stage}.ApiGatewayRestApiId}
   application_endpoint_url: ${cf:ui-${sls:stage}.CloudFrontEndpointUrl}
   okta_metadata_url: ${env:OKTA_METADATA_URL}
-  iamPath: ${ssm:/configuration/iam/path, "/"}
   sesSourceEmailAddress: ${env:SES_SOURCE_EMAIL_ADDRESS, ""}
   serverlessTerminationProtection:
     stages:
@@ -29,7 +28,7 @@ provider:
   region: us-east-1
   iam:
     role:
-      path: ${self:custom.iamPath}
+      path: ${ssm:/configuration/iam/path, "/"}
       permissionsBoundary: ${ssm:/configuration/${sls:stage}/iam/full_iam_permissions_boundary_policy, ssm:/configuration/default/iam/full_iam_permissions_boundary_policy}
       statements:
         - Effect: 'Allow'

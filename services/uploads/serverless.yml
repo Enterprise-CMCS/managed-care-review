@@ -18,7 +18,7 @@ provider:
   region: us-east-1
   iam:
     role:
-      path: ${self:custom.iamPath}
+      path: ${ssm:/configuration/iam/path, "/"}
       permissionsBoundary: ${ssm:/configuration/${sls:stage}/iam/full_iam_permissions_boundary_policy, ssm:/configuration/default/iam/full_iam_permissions_boundary_policy}
       statements:
         - Effect: 'Allow'
@@ -43,7 +43,6 @@ provider:
 
 custom:
   region: ${aws:region}
-  iamPath: ${ssm:/configuration/iam/path, "/"}
   scripts:
     hooks:
       # This script is run locally when running 'serverless deploy'

@@ -13,7 +13,7 @@ provider:
   region: us-east-1
   iam:
     role:
-      path: ${self:custom.iamPath}
+      path: ${ssm:/configuration/iam/path, "/"}
       permissionsBoundary: ${ssm:/configuration/${sls:stage}/iam/full_iam_permissions_boundary_policy, ssm:/configuration/default/iam/full_iam_permissions_boundary_policy}
       statements:
         - Effect: 'Allow'
@@ -39,7 +39,6 @@ provider:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  iamPath: ${ssm:/configuration/iam/path, "/"}
   databaseName: !Sub aurora_${self:service}_${sls:stage}_${AWS::AccountId}
   vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
   sgId: ${ssm:/configuration/${sls:stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
