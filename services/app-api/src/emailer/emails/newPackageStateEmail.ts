@@ -54,17 +54,10 @@ export const newPackageStateEmail = async (
     }
 
     try {
-        const templateOrVoid = await renderTemplate<typeof data>(
+        const bodyHTML = await renderTemplate<typeof data>(
             './newPackageStateEmail',
             data
         )
-
-        if (typeof templateOrVoid !== 'string') {
-            throw new Error(
-                'Could not render template newPackageCMSEmail, no template returned'
-            )
-        }
-        const bodyHTML = templateOrVoid as string
 
         return {
             toAddresses: receiverEmails,
@@ -76,7 +69,6 @@ export const newPackageStateEmail = async (
             bodyHTML: bodyHTML,
         }
     } catch (err) {
-        console.error(err)
-        throw new Error('Could not render template newPackageStateEmail')
+        throw new Error(err)
     }
 }

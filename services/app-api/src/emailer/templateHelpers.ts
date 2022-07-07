@@ -26,7 +26,14 @@ Eta.configure({
 const renderTemplate = async <T>(templateRelativePath: string, data: T) => {
     // path should be relative to the etaTemplates folder
     try {
-        const templateHTML = await Eta.renderFile(templateRelativePath, data)
+        const templateOrVoid = await Eta.renderFile(templateRelativePath, data)
+
+        if (typeof templateOrVoid !== 'string') {
+            throw new Error(
+                `Could not render file ${templateRelativePath}, no template string returned`
+            )
+        }
+        const templateHTML = templateOrVoid as string // we know we have a string we can coerce type here to simply types upstream
         return templateHTML
     } catch (err) {
         throw new Error(err)
