@@ -37,11 +37,11 @@ resources:
         - Fn::Not:
             - Fn::Equals:
                 - ''
-                - ${env:CLOUDFRONT_CERTIFICATE_ARN, ""}
+                - ${ssm:/configuration/cloudfront/certificate_arn, ""}
         - Fn::Not:
             - Fn::Equals:
                 - ''
-                - ${env:CLOUDFRONT_DOMAIN_NAME, ""}
+                - ${ssm:/configuration/cloudfront/domain_name, ""}
   Resources:
     S3Bucket:
       Type: AWS::S3::Bucket
@@ -117,7 +117,7 @@ resources:
           Aliases:
             Fn::If:
               - CreateCustomCloudFrontDomain
-              - - ${env:CLOUDFRONT_DOMAIN_NAME, ""}
+              - - ${ssm:/configuration/cloudfront/domain_name, ""}
               - !Ref AWS::NoValue
           Origins:
             - DomainName: !GetAtt S3Bucket.DomainName
@@ -144,7 +144,7 @@ resources:
           ViewerCertificate:
             Fn::If:
               - CreateCustomCloudFrontDomain
-              - AcmCertificateArn: ${env:CLOUDFRONT_CERTIFICATE_ARN, ""}
+              - AcmCertificateArn: ${ssm:/configuration/cloudfront/certificate_arn, ""}
                 MinimumProtocolVersion: TLSv1
                 SslSupportMethod: sni-only
               - CloudFrontDefaultCertificate: true
@@ -190,5 +190,5 @@ resources:
       Value:
         Fn::If:
           - CreateCustomCloudFrontDomain
-          - https://${env:CLOUDFRONT_DOMAIN_NAME, ""}/
+          - https://${ssm:/configuration/cloudfront/domain_name, ""}/
           - !Sub https://${CloudFrontDistribution.DomainName}

@@ -38,7 +38,7 @@ resources:
         - Fn::Not:
             - Fn::Equals:
                 - ''
-                - ${env:CLOUDFRONT_CERTIFICATE_ARN, ""}
+                - ${ssm:/configuration/cloudfront/certificate_arn, ""}
         - Fn::Not:
             - Fn::Equals:
                 - ''
@@ -152,7 +152,7 @@ resources:
           ViewerCertificate:
             Fn::If:
               - CreateCustomCloudFrontDomain
-              - AcmCertificateArn: ${env:CLOUDFRONT_CERTIFICATE_ARN, ""}
+              - AcmCertificateArn: ${ssm:/configuration/cloudfront/certificate_arn, ""}
                 MinimumProtocolVersion: TLSv1
                 SslSupportMethod: sni-only
               - CloudFrontDefaultCertificate: true

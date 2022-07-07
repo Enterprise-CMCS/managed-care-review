@@ -16,10 +16,6 @@ on:
         required: true
       aws_default_region:
         required: true
-      cloudfront_certificate_arn:
-        required: false
-      cloudfront_domain_name:
-        required: false
       cloudfront_storybook_domain_name:
         required: false
       okta_metadata_url:
@@ -62,8 +58,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.cloudfront_certificate_arn }}
-          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.cloudfront_domain_name }}
         run: |
           pushd services/ui && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -83,8 +77,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.cloudfront_certificate_arn }}
-          CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.cloudfront_storybook_domain_name }}
         run: |
           pushd services/storybook && npx serverless deploy --stage ${{ inputs.stage_name }}
 
