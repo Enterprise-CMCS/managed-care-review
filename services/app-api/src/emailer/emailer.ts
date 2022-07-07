@@ -99,22 +99,32 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             submissionName,
             stateAnalystsEmails
         ) {
-            const emailData = await newPackageCMSEmail(
+            const result = await newPackageCMSEmail(
                 submission,
                 submissionName,
                 config,
                 stateAnalystsEmails
             )
-            return await this.sendEmail(emailData)
+            if (result instanceof Error) {
+                return result
+            } else {
+                const emailData = result
+                return await this.sendEmail(emailData)
+            }
         },
         sendStateNewPackage: async function (submission, submissionName, user) {
-            const emailData = await newPackageStateEmail(
+            const result = await newPackageStateEmail(
                 submission,
                 submissionName,
                 user,
                 config
             )
-            return await this.sendEmail(emailData)
+            if (result instanceof Error) {
+                return result
+            } else {
+                const emailData = result
+                return await this.sendEmail(emailData)
+            }
         },
         sendUnlockPackageCMSEmail: async function (
             submission,
@@ -192,23 +202,34 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             submissionName,
             stateAnalystsEmails
         ) => {
-            const emailData = await newPackageCMSEmail(
+            const result = await newPackageCMSEmail(
                 submission,
                 'some-title',
                 config,
                 stateAnalystsEmails
             )
-            localEmailerLogger(emailData)
+            if (result instanceof Error) {
+                console.error(result)
+                return result
+            } else {
+                const emailData = result
+                localEmailerLogger(emailData)
+            }
         },
         sendStateNewPackage: async (submission, submissionName, user) => {
-            const emailData = await newPackageStateEmail(
+            const result = await newPackageStateEmail(
                 submission,
                 submissionName,
                 user,
                 config
             )
-            console.log(emailData)
-            localEmailerLogger(emailData)
+            if (result instanceof Error) {
+                console.error(result)
+                return result
+            } else {
+                const emailData = result
+                localEmailerLogger(emailData)
+            }
         },
         sendUnlockPackageCMSEmail: async (
             submission,

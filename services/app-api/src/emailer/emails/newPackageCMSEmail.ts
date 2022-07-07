@@ -16,7 +16,7 @@ export const newPackageCMSEmail = async (
     packageName: string,
     config: EmailConfiguration,
     stateAnalystsEmails: StateAnalystsEmails
-): Promise<EmailData> => {
+): Promise<EmailData | Error> => {
     // config
     const isTestEnvironment = config.stage !== 'prod'
     const reviewerEmails = generateReviewerEmails(
@@ -54,22 +54,21 @@ export const newPackageCMSEmail = async (
         submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
     }
 
-    try {
-        const bodyHTML = await renderTemplate<typeof data>(
-            './newPackageCMSEmail',
-            data
-        )
-
+    const result = await renderTemplate<typeof data>(
+        './newPackageCMSEmail',
+        data
+    )
+    if (result instanceof Error) {
+        return result
+    } else {
         return {
             toAddresses: reviewerEmails,
             sourceEmail: config.emailSource,
             subject: `${
                 isTestEnvironment ? `[${config.stage}] ` : ''
             }New Managed Care Submission: ${packageName}`,
-            bodyText: stripHTMLFromTemplate(bodyHTML),
-            bodyHTML: bodyHTML,
+            bodyText: stripHTMLFromTemplate(result),
+            bodyHTML: result,
         }
-    } catch (err) {
-        throw new Error(err)
     }
 }

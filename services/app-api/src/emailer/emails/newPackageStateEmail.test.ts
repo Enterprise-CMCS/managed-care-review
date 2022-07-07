@@ -264,11 +264,16 @@ test('renders overall email as expected', async () => {
         },
     }
     const user = mockUser()
-    const template = await newPackageStateEmail(
+    const result = await newPackageStateEmail(
         sub,
         'MN-new-submission-snapshot',
         user,
         testEmailConfig
     )
-    expect(template.bodyHTML).toMatchSnapshot()
+    if (result instanceof Error) {
+        console.error(result)
+        return
+    }
+
+    expect(result.bodyHTML).toMatchSnapshot()
 })

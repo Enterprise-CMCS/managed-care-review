@@ -29,14 +29,14 @@ const renderTemplate = async <T>(templateRelativePath: string, data: T) => {
         const templateOrVoid = await Eta.renderFile(templateRelativePath, data)
 
         if (typeof templateOrVoid !== 'string') {
-            throw new Error(
+            return new Error(
                 `Could not render file ${templateRelativePath}, no template string returned`
             )
         }
         const templateHTML = templateOrVoid as string // we know we have a string we can coerce type here to simply types upstream
         return templateHTML
     } catch (err) {
-        throw new Error(err)
+        return new Error(err)
     }
 }
 

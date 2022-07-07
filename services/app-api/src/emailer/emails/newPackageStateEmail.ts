@@ -16,7 +16,7 @@ export const newPackageStateEmail = async (
     packageName: string,
     user: UserType,
     config: EmailConfiguration
-): Promise<EmailData> => {
+): Promise<EmailData | Error> => {
     const currentUserEmail = user.email
     const receiverEmails: string[] = [currentUserEmail].concat(
         pkg.stateContacts.map((contact) => contact.email)
@@ -33,6 +33,7 @@ export const newPackageStateEmail = async (
         packageName: packageName,
         submissionType: SubmissionTypeRecord[pkg.submissionType],
         submissionDescription: pkg.submissionDescription,
+        contractType: pkg.contractType,
         contractDatesLabel:
             pkg.contractType === 'AMENDMENT'
                 ? 'Contract amendment effective dates'
@@ -53,22 +54,21 @@ export const newPackageStateEmail = async (
         submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
     }
 
-    try {
-        const bodyHTML = await renderTemplate<typeof data>(
-            './newPackageStateEmail',
-            data
-        )
-
+    const result = await renderTemplate<typeof data>(
+        './newPackageStateEmail',
+        data
+    )
+    if (result instanceof Error) {
+        return result
+    } else {
         return {
             toAddresses: receiverEmails,
             sourceEmail: config.emailSource,
             subject: `${
                 config.stage !== 'prod' ? `[${config.stage}] ` : ''
             }${packageName} was sent to CMS`,
-            bodyText: stripHTMLFromTemplate(bodyHTML),
-            bodyHTML: bodyHTML,
+            bodyText: stripHTMLFromTemplate(result),
+            bodyHTML: result,
         }
-    } catch (err) {
-        throw new Error(err)
     }
 }

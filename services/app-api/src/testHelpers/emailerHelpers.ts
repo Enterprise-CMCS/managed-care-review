@@ -51,17 +51,17 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
             submissionName,
             stateAnalystsEmails
         ): Promise<void | Error> {
-            try {
-                const emailData = await newPackageCMSEmail(
-                    submission,
-                    submissionName,
-                    config,
-                    stateAnalystsEmails
-                )
-                return this.sendEmail(emailData)
-            } catch (err) {
-                console.error(err)
-                return new Error(err)
+            const result = await newPackageCMSEmail(
+                submission,
+                submissionName,
+                config,
+                stateAnalystsEmails
+            )
+            if (result instanceof Error) {
+                return result
+            } else {
+                const emailData = result
+                return await this.sendEmail(emailData)
             }
         },
         sendStateNewPackage: async function (
@@ -69,13 +69,18 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
             submissionName,
             user
         ): Promise<void | Error> {
-            const emailData = await newPackageStateEmail(
+            const result = await newPackageStateEmail(
                 submission,
                 submissionName,
                 user,
                 config
             )
-            return this.sendEmail(emailData)
+            if (result instanceof Error) {
+                return result
+            } else {
+                const emailData = result
+                return await this.sendEmail(emailData)
+            }
         },
         sendUnlockPackageCMSEmail: function async(
             submission,
