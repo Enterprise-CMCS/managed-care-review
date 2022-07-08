@@ -78,10 +78,6 @@ module.exports = {
                 },
                 {
                     from: path.resolve(__dirname, './src/emailer/etaTemplates'),
-                    to: path.resolve(
-                        __dirname,
-                        './.webpack/service/etaTemplates/'
-                    ),
                 },
                 {
                     from: path.resolve(__dirname, 'collector.yml'),

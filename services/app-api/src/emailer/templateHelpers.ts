@@ -22,7 +22,7 @@ Eta.configure({
     cache: true, // Make Eta cache templates
     views: [
         path.join(__dirname, 'etaTemplates'),
-        path.join(__dirname, '../../etaTemplates'),
+        path.join(__dirname, '../../'),
     ],
 })
 
