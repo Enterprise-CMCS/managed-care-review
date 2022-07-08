@@ -20,7 +20,10 @@ type UpdatedEmailData = {
 // ETA setup
 Eta.configure({
     cache: true, // Make Eta cache templates
-    views: path.join(__dirname, 'etaTemplates'),
+    views: [
+        path.join(__dirname, 'etaTemplates'),
+        path.join(__dirname, '../../etaTemplates'),
+    ],
 })
 
 const renderTemplate = async <T>(
