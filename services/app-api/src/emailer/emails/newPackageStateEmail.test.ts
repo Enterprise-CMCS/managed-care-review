@@ -253,10 +253,10 @@ test('renders overall email as expected', async () => {
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractAndRatesFormData(),
         rateType: 'AMENDMENT',
-        contractDateStart: new Date('01/01/2021'),
-        contractDateEnd: new Date('01/01/2025'),
-        rateDateStart: new Date('01/01/2021'),
-        rateDateEnd: new Date('01/01/2022'),
+        contractDateStart: new Date('2021-01-01'),
+        contractDateEnd: new Date('2021-12-31'),
+        rateDateStart: new Date('2021-02-02'),
+        rateDateEnd: new Date('2021-11-31'),
         rateDateCertified: new Date('2020-12-01'),
         rateAmendmentInfo: {
             effectiveDateStart: new Date('06/05/2021'),

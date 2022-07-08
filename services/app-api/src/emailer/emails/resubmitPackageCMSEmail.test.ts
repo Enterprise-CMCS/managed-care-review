@@ -264,14 +264,16 @@ test('renders overall email as expected', async () => {
         packageName: 'MCR-VA-CCCPLUS-0003',
         updatedBy: 'bob@example.com',
         updatedAt: new Date('02/01/2022'),
-        contractDateStart: new Date('2021-01-01'),
-        contractDateEnd: new Date('2021-12-31'),
-        rateDateStart: new Date('2021-01-01'),
-        rateDateEnd: new Date('2021-12-31'),
-        rateDateCertified: new Date('2020-12-01'),
         updatedReason: 'Added more contract details.',
     }
-    const submission = mockContractOnlyFormData()
+    const submission = {
+        ...mockContractOnlyFormData(),
+        contractDateStart: new Date('2021-01-01'),
+        contractDateEnd: new Date('2021-12-31'),
+        rateDateStart: new Date('2021-02-02'),
+        rateDateEnd: new Date('2021-11-31'),
+        rateDateCertified: new Date('2020-12-01'),
+    }
     const stateAnalystEmails = testStateAnalystsEmails()
     const template = resubmitPackageCMSEmail(
         submission,
