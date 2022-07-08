@@ -5,7 +5,7 @@
 <% if (it.shouldIncludeRates) { %>
 <b>Rate name</b>: <%= it.rateName %>
 <br />
-<b><%= it.rateDateLabel %><b>: <%= it.rateDatesStart %> to <%= it.rateDatesEnd %>
+<b><%= it.rateDateLabel %></b>: <%= it.rateDatesStart %> to <%= it.rateDatesEnd %>
 <br />
 <% } %>
 <b>Submission description</b>: <%= it.submissionDescription %>
