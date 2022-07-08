@@ -3,6 +3,7 @@ import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
     isLockedHealthPlanFormData,
+    CalendarDate,
 } from '../../healthPlanFormDataType'
 
 /*
@@ -19,6 +20,25 @@ const domainDateToProtoDate = (
         day: domainDate.getUTCDate(),
         month: domainDate.getUTCMonth(),
         year: domainDate.getUTCFullYear(),
+    }
+}
+
+const calendarDomainDateToProtoDate = (
+    domainDate: CalendarDate | undefined
+): mcreviewproto.IHealthPlanFormData['createdAt'] => {
+    if (!domainDate) {
+        return undefined
+    }
+
+    const parsedCalendarDate = domainDate.split('/')
+    const month = parseInt(parsedCalendarDate[0])
+    const day = parseInt(parsedCalendarDate[1])
+    const year = parseInt(parsedCalendarDate[2])
+
+    return {
+        day: day,
+        month: month,
+        year: year,
     }
 }
 
@@ -177,7 +197,9 @@ const toProtoBuffer = (
                     domainData.rateCapitationType,
                     mcreviewproto.RateCapitationType
                 ),
-                rateDateStart: domainDateToProtoDate(domainData.rateDateStart),
+                rateDateStart: calendarDomainDateToProtoDate(
+                    domainData.rateDateStart
+                ),
                 rateDateEnd: domainDateToProtoDate(domainData.rateDateEnd),
                 rateDateCertified: domainDateToProtoDate(
                     domainData.rateDateCertified

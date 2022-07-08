@@ -66,6 +66,45 @@ type RateCapitationType = 'RATE_CELL' | 'RATE_RANGE'
 
 type ManagedCareEntity = 'MCO' | 'PIHP' | 'PAHP' | 'PCCM'
 
+type Day =
+    | 1
+    | 2
+    | 3
+    | 4
+    | 5
+    | 6
+    | 7
+    | 8
+    | 9
+    | 10
+    | 11
+    | 12
+    | 13
+    | 14
+    | 15
+    | 16
+    | 17
+    | 18
+    | 19
+    | 20
+    | 21
+    | 22
+    | 23
+    | 24
+    | 25
+    | 26
+    | 27
+    | 28
+    | 29
+    | 30
+    | 31
+
+type Month = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
+
+type Year = number
+
+type CalendarDate = `${Month}/${Day}/${Year}` | undefined
+
 // MAIN
 type UnlockedHealthPlanFormDataType = {
     id: string
@@ -92,7 +131,7 @@ type UnlockedHealthPlanFormDataType = {
     rateType?: RateType
     rateCapitationType?: RateCapitationType
     rateDocuments: SubmissionDocument[]
-    rateDateStart?: Date
+    rateDateStart?: CalendarDate
     rateDateEnd?: Date
     rateDateCertified?: Date
     rateAmendmentInfo?: RateAmendmentInfo
@@ -101,7 +140,7 @@ type UnlockedHealthPlanFormDataType = {
 type RateDataType = {
     rateType?: 'AMENDMENT' | 'NEW' | null
     rateCapitationType?: RateCapitationType
-    rateDateStart?: Date
+    rateDateStart?: CalendarDate
     rateDateEnd?: Date
     rateDateCertified?: Date
     rateAmendmentInfo?: {
@@ -127,4 +166,5 @@ export type {
     ContractExecutionStatus,
     RateDataType,
     RateCapitationType,
+    CalendarDate,
 }

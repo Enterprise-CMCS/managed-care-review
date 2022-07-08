@@ -1,4 +1,5 @@
 import { dayjs } from '../../../app-web/src/common-code/dateHelpers'
+import { CalendarDate } from '../common-code/healthPlanFormDataType'
 
 const formatUserInputDate = (initialValue?: string): string | undefined => {
     const dayjsValue = dayjs(initialValue)
@@ -42,11 +43,17 @@ const formatForForm = (
     }
 }
 
-const formatFormDateForDomain = (attribute: string): Date | undefined => {
+const formatFormDateForDomain = (
+    attribute: string
+): CalendarDate | undefined => {
     if (attribute === '') {
         return undefined
     }
-    return dayjs.utc(attribute).toDate()
+    const parsedDate = attribute.split('-')
+    const month = parseInt(parsedDate[0])
+    const day = parseInt(parsedDate[1])
+    const year = parseInt(parsedDate[2])
+    return `${month}/${day}/${year}` as CalendarDate
 }
 
 export {
