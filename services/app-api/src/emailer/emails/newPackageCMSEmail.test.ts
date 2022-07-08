@@ -434,8 +434,8 @@ test('renders overall email as expected', async () => {
         ...mockContractAndRatesFormData(),
         contractDateStart: new Date('2021-01-01'),
         contractDateEnd: new Date('2021-12-31'),
-        rateDateStart: new Date('2021-01-01'),
-        rateDateEnd: new Date('2021-12-31'),
+        rateDateStart: new Date('2021-02-02'),
+        rateDateEnd: new Date('2021-11-31'),
         rateDateCertified: new Date('2020-12-01'),
     }
     const result = await newPackageCMSEmail(

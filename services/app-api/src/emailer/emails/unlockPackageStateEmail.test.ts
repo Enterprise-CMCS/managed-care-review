@@ -9,7 +9,18 @@ const unlockData = {
     updatedReason: 'Adding rate certification.',
 }
 const submissionName = 'MN-PMAP-0001'
-const sub = unlockedWithFullContracts()
+const sub = {
+    ...unlockedWithFullContracts(),
+    contractDateStart: new Date('2021-01-01'),
+    contractDateEnd: new Date('2021-12-31'),
+    rateDateStart: new Date('2021-02-02'),
+    rateDateEnd: new Date('2021-11-31'),
+    rateDateCertified: new Date('2020-12-01'),
+    rateAmendmentInfo: {
+        effectiveDateStart: new Date('06/05/2021'),
+        effectiveDateEnd: new Date('12/31/2021'),
+    },
+}
 const template = unlockPackageStateEmail(
     sub,
     unlockData,

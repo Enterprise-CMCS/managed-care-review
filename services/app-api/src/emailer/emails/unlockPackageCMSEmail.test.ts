@@ -12,7 +12,14 @@ const unlockData = {
     updatedAt: new Date('01/01/2022'),
     updatedReason: 'Adding rate development guide.',
 }
-const submission = mockUnlockedContractAndRatesFormData()
+const submission = {
+    ...mockUnlockedContractAndRatesFormData(),
+    contractDateStart: new Date('2021-01-01'),
+    contractDateEnd: new Date('2021-12-31'),
+    rateDateStart: new Date('2021-02-02'),
+    rateDateEnd: new Date('2021-11-31'),
+    rateDateCertified: new Date('2020-12-01'),
+}
 const rateName = 'test-rate-name'
 const stateAnalystEmails = testStateAnalystsEmails()
 const template = unlockPackageCMSEmail(
