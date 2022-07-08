@@ -16,8 +16,9 @@ export const newPackageCMSEmail = async (
     packageName: string,
     config: EmailConfiguration,
     stateAnalystsEmails: StateAnalystsEmails
-): Promise<EmailData> => {
+): Promise<EmailData | Error> => {
     // config
+    const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
     const reviewerEmails = generateReviewerEmails(
         config,
@@ -54,30 +55,22 @@ export const newPackageCMSEmail = async (
         submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
     }
 
-    try {
-        const templateOrVoid = await renderTemplate<typeof data>(
-            './newPackageCMSEmail',
-            data
-        )
-
-        if (typeof templateOrVoid !== 'string') {
-            throw new Error(
-                'Could not render template newPackageCMSEmail, no template returned'
-            )
-        }
-        const bodyHTML = templateOrVoid as string
-
+    const result = await renderTemplate<typeof data>(
+        'newPackageCMSEmail',
+        data,
+        isUnitTest
+    )
+    if (result instanceof Error) {
+        return result
+    } else {
         return {
             toAddresses: reviewerEmails,
             sourceEmail: config.emailSource,
             subject: `${
                 isTestEnvironment ? `[${config.stage}] ` : ''
             }New Managed Care Submission: ${packageName}`,
-            bodyText: stripHTMLFromTemplate(bodyHTML),
-            bodyHTML: bodyHTML,
+            bodyText: stripHTMLFromTemplate(result),
+            bodyHTML: result,
         }
-    } catch (err) {
-        console.error(err)
-        throw new Error('Could not render template newPackageCMSEmail')
     }
 }

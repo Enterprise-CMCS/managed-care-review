@@ -23,13 +23,35 @@ Eta.configure({
     views: path.join(__dirname, 'etaTemplates'),
 })
 
-const renderTemplate = async <T>(templateRelativePath: string, data: T) => {
-    // path should be relative to the etaTemplates folder
+const renderTemplate = async <T>(
+    templateName: string,
+    data: T,
+    inUnitTest?: boolean
+) => {
+    if (!/^[a-zA-Z0-9]+$/.test(templateName)) {
+        console.error(
+            'CODING ERROR: templateName parameter should not include any punctuation, can only be alphanumeric characters'
+        )
+        return new Error(`${templateName} is not a valid template file name`)
+    }
+
+    // TODO: Issue with finding path in lambda/webpack
+    const templatePath = `./${templateName}`
+    // inUnitTest == true
+    //     ? `./${templateName}`
+    //     : `../emailer/etaTemplates/${templateName}`
     try {
-        const templateHTML = await Eta.renderFile(templateRelativePath, data)
+        const templateOrVoid = await Eta.renderFile(templatePath, data)
+
+        if (typeof templateOrVoid !== 'string') {
+            return new Error(
+                `Could not render file ${templatePath}, no template string returned`
+            )
+        }
+        const templateHTML = templateOrVoid as string // we know we have a string we can coerce type here to simply types upstream
         return templateHTML
     } catch (err) {
-        throw new Error(err)
+        return new Error(err)
     }
 }
 

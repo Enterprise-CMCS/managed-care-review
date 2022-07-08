@@ -7,8 +7,8 @@ import {
     ModalRef,
     ModalProps as UswdsModalProps,
     Button,
-    Alert,
 } from '@trussworks/react-uswds'
+import { GenericApiErrorBanner } from '../Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import styles from './Modal.module.scss'
 
 import { ActionButton } from '../ActionButton'
@@ -74,11 +74,7 @@ export const Modal = ({
             {modalHeading && (
                 <ModalHeading id={`${id}-heading`}>{modalHeading}</ModalHeading>
             )}
-            {modalAlert && (
-                <Alert type="error" heading={`${onSubmitText} Error`}>
-                    {modalAlert}
-                </Alert>
-            )}
+            {modalAlert && <GenericApiErrorBanner message={modalAlert} />}
             <div id={`${id}-modal-description`}>{children}</div>
             <ModalFooter>
                 <ButtonGroup className="float-right">

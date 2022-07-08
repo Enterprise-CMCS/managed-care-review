@@ -438,11 +438,16 @@ test('renders overall email as expected', async () => {
         rateDateEnd: new Date('2021-12-31'),
         rateDateCertified: new Date('2020-12-01'),
     }
-    const template = await newPackageCMSEmail(
+    const result = await newPackageCMSEmail(
         sub,
         'CMS-new-submission-snapshot',
         testEmailConfig,
         []
     )
-    expect(template.bodyHTML).toMatchSnapshot()
+    if (result instanceof Error) {
+        console.error(result)
+        return
+    }
+
+    expect(result.bodyHTML).toMatchSnapshot()
 })

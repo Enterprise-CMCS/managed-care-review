@@ -66,6 +66,14 @@ describe('with rates', () => {
                 ),
             })
         )
+
+        expect(template).toEqual(
+            expect.objectContaining({
+                bodyHTML: expect.stringContaining(
+                    `href="http://localhost/submissions/${submission.id}"`
+                ),
+            })
+        )
     })
     it('includes rate name', () => {
         expect(template).toEqual(

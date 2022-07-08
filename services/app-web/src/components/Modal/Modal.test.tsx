@@ -335,9 +335,7 @@ describe('Modal', () => {
             expect(
                 await screen.findByText('This should be a modal alert')
             ).toBeInTheDocument()
-            expect(
-                await screen.findByText('Resubmit Error')
-            ).toBeInTheDocument()
+            expect(await screen.findByText('System error')).toBeInTheDocument()
         })
     })
 })
