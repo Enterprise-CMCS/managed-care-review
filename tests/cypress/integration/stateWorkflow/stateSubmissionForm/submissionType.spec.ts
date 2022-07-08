@@ -91,13 +91,9 @@ describe('submission type', () => {
             cy.visit(`/submissions/${draftSubmissionId}/edit/type`)
 
             //Edit some stuff here
-            cy.findByRole('combobox', { name: 'programs (required)' }).click({
-                force: true,
-            })
-            cy.findByText('SNBC').click({ force: true })
-            cy.findByText('Contract action and rate certification').click({
-                force: true,
-            })
+            cy.findByRole('combobox', { name: 'programs (required)' }).click()
+            cy.findByText('SNBC').click()
+            cy.findByText('Contract action and rate certification').click()
             cy.findByRole('textbox', { name: 'Submission description' }).clear()
             cy.findByRole('textbox', { name: 'Submission description' }).type(
                 'description of contract only submission, now with a new edited flavor'
