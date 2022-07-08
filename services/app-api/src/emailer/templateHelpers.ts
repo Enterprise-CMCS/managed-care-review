@@ -8,21 +8,12 @@ import {
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { EmailConfiguration, StateAnalystsEmails } from '.'
 
-// Types
-type UpdatedEmailData = {
-    packageName: string
-    updatedBy: string
-    updatedAt: Date
-    updatedReason: string
-    stateAnalystsEmail?: string[]
-}
-
-// ETA setup
+// ETA SETUP
 Eta.configure({
     cache: true, // Make Eta cache templates
     views: [
         path.join(__dirname, 'etaTemplates'),
-        path.join(__dirname, '../../'),
+        path.join(__dirname, '../../'), // this is intentional - we need to have this path here to be able to find the files from the graphql lambda when in serverless deployed app
     ],
 })
 
@@ -37,12 +28,8 @@ const renderTemplate = async <T>(
         )
         return new Error(`${templateName} is not a valid template file name`)
     }
-
-    // TODO: Issue with finding path in lambda/webpack
     const templatePath = `./${templateName}`
-    // inUnitTest == true
-    //     ? `./${templateName}`
-    //     : `../emailer/etaTemplates/${templateName}`
+
     try {
         const templateOrVoid = await Eta.renderFile(templatePath, data)
 
@@ -58,14 +45,29 @@ const renderTemplate = async <T>(
     }
 }
 
-// Shared email logic
+// SHARED EMAIL LOGIC
+// Types
+type UpdatedEmailData = {
+    packageName: string
+    updatedBy: string
+    updatedAt: Date
+    updatedReason: string
+    stateAnalystsEmail?: string[]
+}
 
+// Constants
 // This should reference UUIDS in the statePrograms.json in src/data/
 const CHIP_PROGRAMS_UUID = {
     MS: '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
     AS: 'e112301b-72c7-4c8f-856a-2cf8c6a1465b',
 }
 
+const SubmissionTypeRecord: Record<SubmissionType, string> = {
+    CONTRACT_ONLY: 'Contract action only',
+    CONTRACT_AND_RATES: 'Contract action and rate certification',
+}
+
+// Util Functions
 // Checks if at least one program is CHIP
 const includesChipPrograms = (programIDs: string[]): boolean => {
     const chipProgramIds = Object.values(CHIP_PROGRAMS_UUID)
@@ -104,14 +106,6 @@ const generateReviewerEmails = (
     }
 
     return cmsReviewSharedEmails
-}
-
-// Formatters
-
-// TODO: this is duplicating the lang that is in app-web - another case for shared i18n setup so emails in app-api and UI in app-web can you same constan ts
-const SubmissionTypeRecord: Record<SubmissionType, string> = {
-    CONTRACT_ONLY: 'Contract action only',
-    CONTRACT_AND_RATES: 'Contract action and rate certification',
 }
 
 // Clean out HTML tags from an HTML based template
