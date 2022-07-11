@@ -231,16 +231,16 @@ test('includes link to submission', async () => {
 
 test('includes state specific analyst on contract only submission', async () => {
     const sub = mockContractAndRatesFormData()
-    const stateAnalystEmails = testStateAnalystsEmails()
+    const testStateAnalystEmails = testStateAnalystsEmails
     const template = await newPackageCMSEmail(
         sub,
         'some-title',
         testEmailConfig,
-        stateAnalystEmails
+        testStateAnalystEmails
     )
     const reviewerEmails = [
         ...testEmailConfig.cmsReviewSharedEmails,
-        ...stateAnalystEmails,
+        ...testStateAnalystEmails,
     ]
     reviewerEmails.forEach((emailAddress) => {
         expect(template).toEqual(
@@ -253,17 +253,17 @@ test('includes state specific analyst on contract only submission', async () => 
 
 test('includes state specific analyst on contract and rate submission', async () => {
     const sub = mockContractAndRatesFormData()
-    const stateAnalystEmails = testStateAnalystsEmails()
+    const testStateAnalystEmails = testStateAnalystsEmails
     const template = await newPackageCMSEmail(
         sub,
         'some-title',
         testEmailConfig,
-        stateAnalystEmails
+        testStateAnalystEmails
     )
     const reviewerEmails = [
         ...testEmailConfig.cmsReviewSharedEmails,
         ...testEmailConfig.ratesReviewSharedEmails,
-        ...stateAnalystEmails,
+        ...testStateAnalystEmails,
     ]
     reviewerEmails.forEach((emailAddress) => {
         expect(template).toEqual(
@@ -276,7 +276,7 @@ test('includes state specific analyst on contract and rate submission', async ()
 
 test('does not include state specific analyst on contract and rate submission', async () => {
     const sub = mockContractAndRatesFormData()
-    const stateAnalystEmails = testStateAnalystsEmails()
+    const testStateAnalystEmails = testStateAnalystsEmails
     const template = await newPackageCMSEmail(
         sub,
         'some-title',
@@ -284,7 +284,7 @@ test('does not include state specific analyst on contract and rate submission', 
         []
     )
 
-    stateAnalystEmails.forEach((emailAddress) => {
+    testStateAnalystEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.not.arrayContaining([emailAddress]),
@@ -335,14 +335,14 @@ test('does not include ratesReviewSharedEmails on contract only submission', asy
 test('CHIP contract only submission does include state specific analysts emails', async () => {
     const sub = mockContractOnlyFormData()
     sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
-    const stateAnalystEmails = testStateAnalystsEmails()
+    const testStateAnalystEmails = testStateAnalystsEmails
     const template = await newPackageCMSEmail(
         sub,
         'some-title',
         testEmailConfig,
-        stateAnalystEmails
+        testStateAnalystEmails
     )
-    stateAnalystEmails.forEach((emailAddress) => {
+    testStateAnalystEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),
@@ -354,14 +354,14 @@ test('CHIP contract only submission does include state specific analysts emails'
 test('CHIP contract and rate submission does include state specific analysts emails', async () => {
     const sub = mockContractAndRatesFormData()
     sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
-    const stateAnalystEmails = testStateAnalystsEmails()
+    const testStateAnalystEmails = testStateAnalystsEmails
     const template = await newPackageCMSEmail(
         sub,
         'some-title',
         testEmailConfig,
-        stateAnalystEmails
+        testStateAnalystEmails
     )
-    stateAnalystEmails.forEach((emailAddress) => {
+    testStateAnalystEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),

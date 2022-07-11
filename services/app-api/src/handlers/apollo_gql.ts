@@ -25,6 +25,10 @@ import { configureResolvers } from '../resolvers'
 import { configurePostgres } from './configuration'
 import { createTracer } from '../otel/otel_handler'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
+import {
+    newAWSEmailParameterStore,
+    newLocalEmailParameterStore,
+} from '../parameterStore'
 
 const requestSpanKey = 'REQUEST_SPAN'
 let tracer: Tracer
@@ -155,6 +159,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         process.env.SES_DEV_TEAM_HELP_EMAIL_ADDRESS
     const ratesReviewSharedEmails = process.env.SES_RATES_EMAIL_ADDRESSES
     const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
+    const parameterStoreMode = process.env.PARAMETER_STORE_MODE
 
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
     console.info('Running With Config: ', {
@@ -165,6 +170,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         emailSource,
         emailerMode,
         otelCollectorUrl,
+        parameterStoreMode,
     })
 
     // START Assert configuration is valid
@@ -221,6 +227,13 @@ async function initializeGQLHandler(): Promise<Handler> {
             'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL is required to run app-api'
         )
     }
+
+    if (parameterStoreMode !== 'LOCAL' && parameterStoreMode !== 'AWS') {
+        throw new Error(
+            'Configuration Error: PARAMETER_STORE_MODE is not valid. Current value: ' +
+                parameterStoreMode
+        )
+    }
     // END
 
     const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
@@ -254,8 +267,13 @@ async function initializeGQLHandler(): Promise<Handler> {
                   ratesReviewSharedEmails: ratesReviewSharedEmails.split(','),
               })
 
+    const emailParameterStore =
+        parameterStoreMode === 'LOCAL'
+            ? newLocalEmailParameterStore()
+            : newAWSEmailParameterStore()
+
     // Resolvers are defined and tested in the resolvers package
-    const resolvers = configureResolvers(store, emailer)
+    const resolvers = configureResolvers(store, emailer, emailParameterStore)
 
     const userFetcher =
         authMode === 'LOCAL'

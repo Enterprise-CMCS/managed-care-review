@@ -14,12 +14,12 @@ describe('with rates', () => {
         updatedReason: 'Added rate certification.',
     }
     const submission = mockContractAndRatesFormData()
-    const stateAnalystEmails = testStateAnalystsEmails()
+    const testStateAnalystEmails = testStateAnalystsEmails
     const template = resubmitPackageCMSEmail(
         submission,
         resubmitData,
         testEmailConfig,
-        stateAnalystEmails
+        testStateAnalystEmails
     )
     it('contains correct subject and clearly states submission edits are completed', () => {
         expect(template).toEqual(
@@ -94,7 +94,7 @@ describe('with rates', () => {
                 })
             )
         })
-        stateAnalystEmails.forEach((emailAddress) => {
+        testStateAnalystEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
@@ -109,9 +109,9 @@ describe('with rates', () => {
             sub,
             resubmitData,
             testEmailConfig,
-            stateAnalystEmails
+            testStateAnalystEmails
         )
-        stateAnalystEmails.forEach((emailAddress) => {
+        testStateAnalystEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
@@ -139,7 +139,7 @@ describe('with rates', () => {
                 })
             )
         })
-        stateAnalystEmails.forEach((emailAddress) => {
+        testStateAnalystEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.not.arrayContaining([emailAddress]),
@@ -157,12 +157,12 @@ describe('contract only', () => {
         updatedReason: 'Added more contract details.',
     }
     const submission = mockContractOnlyFormData()
-    const stateAnalystEmails = testStateAnalystsEmails()
+    const testStateAnalystEmails = testStateAnalystsEmails
     const contractOnlyTemplate = resubmitPackageCMSEmail(
         submission,
         resubmitData,
         testEmailConfig,
-        stateAnalystEmails
+        testStateAnalystEmails
     )
 
     it('does not include ratesReviewSharedEmails', () => {
@@ -177,7 +177,7 @@ describe('contract only', () => {
     })
 
     it('does include state specific analysts emails', () => {
-        stateAnalystEmails.forEach((emailAddress) => {
+        testStateAnalystEmails.forEach((emailAddress) => {
             expect(contractOnlyTemplate).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
@@ -194,7 +194,7 @@ describe('contract only', () => {
             testEmailConfig,
             []
         )
-        stateAnalystEmails.forEach((emailAddress) => {
+        testStateAnalystEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.not.arrayContaining([emailAddress]),
@@ -218,9 +218,9 @@ describe('contract only', () => {
             sub,
             resubmitData,
             testEmailConfig,
-            stateAnalystEmails
+            testStateAnalystEmails
         )
-        stateAnalystEmails.forEach((emailAddress) => {
+        testStateAnalystEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
@@ -249,7 +249,7 @@ describe('contract only', () => {
                 })
             )
         })
-        stateAnalystEmails.forEach((emailAddress) => {
+        testStateAnalystEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.not.arrayContaining([emailAddress]),
@@ -274,12 +274,12 @@ test('renders overall email as expected', async () => {
         rateDateEnd: new Date('2021-11-31'),
         rateDateCertified: new Date('2020-12-01'),
     }
-    const stateAnalystEmails = testStateAnalystsEmails()
+    const testStateAnalystEmails = testStateAnalystsEmails
     const template = resubmitPackageCMSEmail(
         submission,
         resubmitData,
         testEmailConfig,
-        stateAnalystEmails
+        testStateAnalystEmails
     )
     expect(template.bodyHTML).toMatchSnapshot()
 })

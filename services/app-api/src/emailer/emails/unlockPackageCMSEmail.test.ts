@@ -21,13 +21,13 @@ const submission = {
     rateDateCertified: new Date('2020-12-01'),
 }
 const rateName = 'test-rate-name'
-const stateAnalystEmails = testStateAnalystsEmails()
+const testStateAnalystEmails = testStateAnalystsEmails
 const template = unlockPackageCMSEmail(
     submission,
     unlockData,
     testEmailConfig,
     rateName,
-    stateAnalystEmails
+    testStateAnalystEmails
 )
 
 test('subject line is correct and clearly states submission is unlocked', () => {
@@ -70,7 +70,7 @@ test('includes rate name', () => {
     )
 })
 test('includes state specific analysts emails on contract and rate submission unlock', () => {
-    stateAnalystEmails.forEach((emailAddress) => {
+    testStateAnalystEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),
@@ -99,9 +99,9 @@ test('does include state specific analysts emails on contract only submission un
         unlockData,
         testEmailConfig,
         rateName,
-        stateAnalystEmails
+        testStateAnalystEmails
     )
-    stateAnalystEmails.forEach((emailAddress) => {
+    testStateAnalystEmails.forEach((emailAddress) => {
         expect(contractOnlyTemplate).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),
@@ -138,7 +138,7 @@ test('does not include state specific analysts emails on contract only submissio
         rateName,
         []
     )
-    stateAnalystEmails.forEach((emailAddress) => {
+    testStateAnalystEmails.forEach((emailAddress) => {
         expect(contractOnlyTemplate).toEqual(
             expect.objectContaining({
                 toAddresses: expect.not.arrayContaining([emailAddress]),
@@ -154,9 +154,9 @@ test('CHIP contract only unlock email does include state specific analysts email
         unlockData,
         testEmailConfig,
         rateName,
-        stateAnalystEmails
+        testStateAnalystEmails
     )
-    stateAnalystEmails.forEach((emailAddress) => {
+    testStateAnalystEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),
@@ -185,7 +185,7 @@ test('CHIP contract only unlock email does not include ratesReviewSharedEmails, 
             })
         )
     })
-    stateAnalystEmails.forEach((emailAddress) => {
+    testStateAnalystEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.not.arrayContaining([emailAddress]),
@@ -201,9 +201,9 @@ test('CHIP contract and rate unlock email does include state specific analysts e
         unlockData,
         testEmailConfig,
         rateName,
-        stateAnalystEmails
+        testStateAnalystEmails
     )
-    stateAnalystEmails.forEach((emailAddress) => {
+    testStateAnalystEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),
@@ -232,7 +232,7 @@ test('CHIP contract and rate unlock email does not include ratesReviewSharedEmai
             })
         )
     })
-    stateAnalystEmails.forEach((emailAddress) => {
+    testStateAnalystEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.not.arrayContaining([emailAddress]),
