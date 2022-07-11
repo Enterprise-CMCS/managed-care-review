@@ -8,15 +8,8 @@ import {
     unlockTestHealthPlanPackage,
     resubmitTestHealthPlanPackage,
 } from '../testHelpers/gqlHelpers'
-import * as GetStateAnalystEmails from '../parameterStore/getStateAnalystEmails'
-import { testStateAnalystsEmails } from '../testHelpers/emailerHelpers'
 
 describe('fetchHealthPlanPackage', () => {
-    jest.spyOn(
-        GetStateAnalystEmails,
-        'getStateAnalystEmails'
-    ).mockResolvedValue(testStateAnalystsEmails())
-
     it('returns package with one revision', async () => {
         const server = await constructTestPostgresServer()
 
