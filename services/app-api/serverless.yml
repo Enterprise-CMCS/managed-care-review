@@ -127,7 +127,6 @@ provider:
     APPLICATION_ENDPOINT: ${self:custom.applicationEndpoint, 'http://localhost:3000'}
     AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
     OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
-    OKTA_METADATA_URL: ${env:OKTA_METADATA_URL}
     LD_SDK_KEY: ${self:custom.ldSDKKey}
 
 layers:

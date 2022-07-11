@@ -200,7 +200,6 @@ jobs:
       aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
 
   deploy-app:
     needs:
@@ -225,7 +224,6 @@ jobs:
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       react_app_auth_mode: AWS_COGNITO
-      okta_metadata_url: ${{ secrets.OKTA_METADATA_URL }}
 
   finishing-prep:
     name: Finishing Prep
