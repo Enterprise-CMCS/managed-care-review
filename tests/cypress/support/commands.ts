@@ -38,6 +38,6 @@ Cypress.Commands.add('restoreLocalStorage', () => {
 
 Cypress.Commands.add('safeClick', { prevSubject: 'element' }, ($element) => {
     const click = ($el) => $el.click()
-    return cy.wrap($element).should('exist').should('be.visible').pipe(click)
+    return cy.wrap($element).should('exist').should('be.visible').wait(500).pipe(click)
 })
 

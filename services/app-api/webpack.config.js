@@ -77,6 +77,9 @@ module.exports = {
                     ),
                 },
                 {
+                    from: path.resolve(__dirname, './src/emailer/etaTemplates'),
+                },
+                {
                     from: path.resolve(__dirname, 'collector.yml'),
                     transform(content) {
                         return content

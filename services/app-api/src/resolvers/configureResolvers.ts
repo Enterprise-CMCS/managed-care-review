@@ -11,8 +11,13 @@ import { submitHealthPlanPackageResolver } from './submitHealthPlanPackage'
 import { unlockHealthPlanPackageResolver } from './unlockHealthPlanPackage'
 import { updateHealthPlanFormDataResolver } from './updateHealthPlanFormData'
 import { stateUserResolver } from './userResolver'
+import { EmailParameterStore } from '../parameterStore'
 
-export function configureResolvers(store: Store, emailer: Emailer): Resolvers {
+export function configureResolvers(
+    store: Store,
+    emailer: Emailer,
+    emailParameterStore: EmailParameterStore
+): Resolvers {
     const resolvers: Resolvers = {
         Date: GraphQLDate,
         DateTime: GraphQLDateTime,
@@ -26,11 +31,13 @@ export function configureResolvers(store: Store, emailer: Emailer): Resolvers {
             updateHealthPlanFormData: updateHealthPlanFormDataResolver(store),
             submitHealthPlanPackage: submitHealthPlanPackageResolver(
                 store,
-                emailer
+                emailer,
+                emailParameterStore
             ),
             unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
                 store,
-                emailer
+                emailer,
+                emailParameterStore
             ),
         },
         User: {

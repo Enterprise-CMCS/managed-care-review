@@ -13,6 +13,10 @@ import { testEmailConfig, testEmailer } from '../testHelpers/emailerHelpers'
 import { base64ToDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { packageName } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
+import {
+    getTestStateAnalystsEmails,
+    mockEmailParameterStoreError,
+} from '../testHelpers/parameterStoreHelpers'
 
 describe('submitHealthPlanPackage', () => {
     it('returns a StateSubmission if complete', async () => {
@@ -256,6 +260,12 @@ describe('submitHealthPlanPackage', () => {
 
         const programs = [defaultFloridaProgram()]
         const name = packageName(sub, programs)
+        const stateAnalystsEmails = getTestStateAnalystsEmails(sub)
+
+        const cmsEmails = [
+            ...config.cmsReviewSharedEmails,
+            ...stateAnalystsEmails,
+        ]
 
         // email subject line is correct for CMS email
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
@@ -264,11 +274,67 @@ describe('submitHealthPlanPackage', () => {
                     `New Managed Care Submission: ${name}`
                 ),
                 sourceEmail: config.emailSource,
+                toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
+            })
+        )
+    })
+
+    it('does send email when request for state analysts emails fails', async () => {
+        const config = testEmailConfig
+        const mockEmailer = testEmailer(config)
+        //mock invoke email submit lambda
+        const mockEmailParameterStore = mockEmailParameterStoreError()
+        const server = await constructTestPostgresServer({
+            emailer: mockEmailer,
+            emailParameterStore: mockEmailParameterStore,
+        })
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {})
+        const draftID = draft.id
+
+        await server.executeOperation({
+            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            variables: {
+                input: {
+                    pkgID: draftID,
+                },
+            },
+        })
+
+        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
                 toAddresses: expect.arrayContaining(
                     Array.from(config.cmsReviewSharedEmails)
                 ),
             })
         )
+    })
+
+    it('does log error when request for state specific analysts emails failed', async () => {
+        const mockEmailParameterStore = mockEmailParameterStoreError()
+        const consoleErrorSpy = jest.spyOn(console, 'error')
+        const error = {
+            error: 'No store found',
+            message: 'getStateAnalystsEmails failed',
+            operation: 'getStateAnalystsEmails',
+            status: 'ERROR',
+        }
+
+        const server = await constructTestPostgresServer({
+            emailParameterStore: mockEmailParameterStore,
+        })
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {})
+        const draftID = draft.id
+
+        await server.executeOperation({
+            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            variables: {
+                input: {
+                    pkgID: draftID,
+                },
+            },
+        })
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith(error)
     })
 
     it('send state email to logged in user if submission is valid', async () => {

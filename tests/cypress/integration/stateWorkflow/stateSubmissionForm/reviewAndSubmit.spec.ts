@@ -38,7 +38,7 @@ describe('review and submit', () => {
             cy.visit(`/submissions/${draftSubmissionId}/edit/review-and-submit`)
 
             cy.submitStateSubmissionForm(false)
-            cy.findByRole('heading', { level: 4, name: /Submit Error/ })
+            cy.findByRole('heading', { level: 4, name: /Submit error/ })
         })
     })
 })

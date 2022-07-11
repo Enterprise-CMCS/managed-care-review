@@ -5,11 +5,10 @@ export {
     newPackageStateEmail,
     unlockPackageCMSEmail,
     unlockPackageStateEmail,
-    resubmittedStateEmail,
-    resubmittedCMSEmail,
-} from './templates'
-
-export type { UpdatedEmailData } from './templates'
+    resubmitPackageStateEmail,
+    resubmitPackageCMSEmail,
+} from './emails'
+export type { UpdatedEmailData } from './templateHelpers'
 export type {
     EmailConfiguration,
     EmailData,

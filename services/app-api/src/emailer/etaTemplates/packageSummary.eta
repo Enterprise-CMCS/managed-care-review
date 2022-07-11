@@ -1,0 +1,14 @@
+<b>Submission type</b>: <%= it.submissionType %>
+<br />
+<b><%= it.contractDatesLabel %></b>: <%= it.contractDatesStart %> to <%= it.contractDatesEnd %>
+<br />
+<% if (it.shouldIncludeRates) { %>
+<b>Rate name</b>: <%= it.rateName %>
+<br />
+<b><%= it.rateDateLabel %></b>: <%= it.rateDatesStart %> to <%= it.rateDatesEnd %>
+<br />
+<% } %>
+<b>Submission description</b>: <%= it.submissionDescription %>
+<br />
+<br />
+<a href="<%= it.submissionURL%>">View submission</a>

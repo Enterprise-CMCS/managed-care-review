@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 
-import { Alert, GridContainer } from '@trussworks/react-uswds'
+import { GridContainer } from '@trussworks/react-uswds'
 import { Routes, Route, useParams } from 'react-router-dom'
 import styles from './StateSubmissionForm.module.scss'
 
@@ -53,14 +53,6 @@ const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
         targetPath: RoutesRecord[formRouteType],
     })
 
-const FormAlert = ({ message }: { message?: string }): React.ReactElement => {
-    return message ? (
-        <Alert type="error">{message}</Alert>
-    ) : (
-        <GenericApiErrorBanner />
-    )
-}
-
 const PageBannerAlerts = ({
     showPageErrorMessage,
     loggedInUser,
@@ -76,7 +68,9 @@ const PageBannerAlerts = ({
             : undefined
     return (
         <>
-            {showPageErrorMessage && <FormAlert message={message} />}
+            {showPageErrorMessage && (
+                <GenericApiErrorBanner message={message} />
+            )}
             {unlockedInfo && (
                 <SubmissionUnlockedBanner
                     userType={
