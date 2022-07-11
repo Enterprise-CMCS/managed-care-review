@@ -5,8 +5,8 @@ import {
     newPackageStateEmail,
     unlockPackageCMSEmail,
     unlockPackageStateEmail,
-    resubmittedStateEmail,
-    resubmittedCMSEmail,
+    resubmitPackageStateEmail,
+    resubmitPackageCMSEmail,
     UpdatedEmailData,
 } from './'
 import {
@@ -99,22 +99,32 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             submissionName,
             stateAnalystsEmails
         ) {
-            const emailData = newPackageCMSEmail(
+            const result = await newPackageCMSEmail(
                 submission,
                 submissionName,
                 config,
                 stateAnalystsEmails
             )
-            return await this.sendEmail(emailData)
+            if (result instanceof Error) {
+                return result
+            } else {
+                const emailData = result
+                return await this.sendEmail(emailData)
+            }
         },
         sendStateNewPackage: async function (submission, submissionName, user) {
-            const emailData = newPackageStateEmail(
+            const result = await newPackageStateEmail(
                 submission,
                 submissionName,
                 user,
                 config
             )
-            return await this.sendEmail(emailData)
+            if (result instanceof Error) {
+                return result
+            } else {
+                const emailData = result
+                return await this.sendEmail(emailData)
+            }
         },
         sendUnlockPackageCMSEmail: async function (
             submission,
@@ -150,7 +160,7 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             updatedEmailData,
             user: UserType
         ) {
-            const emailData = resubmittedStateEmail(
+            const emailData = resubmitPackageStateEmail(
                 submission,
                 user,
                 updatedEmailData,
@@ -163,7 +173,7 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             updatedEmailData,
             stateAnalystsEmails
         ) {
-            const emailData = resubmittedCMSEmail(
+            const emailData = resubmitPackageCMSEmail(
                 submission,
                 updatedEmailData,
                 config,
@@ -192,22 +202,34 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             submissionName,
             stateAnalystsEmails
         ) => {
-            const emailData = newPackageCMSEmail(
+            const result = await newPackageCMSEmail(
                 submission,
                 'some-title',
                 config,
                 stateAnalystsEmails
             )
-            localEmailerLogger(emailData)
+            if (result instanceof Error) {
+                console.error(result)
+                return result
+            } else {
+                const emailData = result
+                localEmailerLogger(emailData)
+            }
         },
         sendStateNewPackage: async (submission, submissionName, user) => {
-            const emailData = newPackageStateEmail(
+            const result = await newPackageStateEmail(
                 submission,
                 submissionName,
                 user,
                 config
             )
-            localEmailerLogger(emailData)
+            if (result instanceof Error) {
+                console.error(result)
+                return result
+            } else {
+                const emailData = result
+                localEmailerLogger(emailData)
+            }
         },
         sendUnlockPackageCMSEmail: async (
             submission,
@@ -243,7 +265,7 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             updatedEmailData,
             user
         ) => {
-            const emailData = resubmittedStateEmail(
+            const emailData = resubmitPackageStateEmail(
                 submission,
                 user,
                 updatedEmailData,
@@ -256,7 +278,7 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             updatedEmailData,
             stateAnalystsEmails
         ) => {
-            const emailData = resubmittedCMSEmail(
+            const emailData = resubmitPackageCMSEmail(
                 submission,
                 updatedEmailData,
                 config,

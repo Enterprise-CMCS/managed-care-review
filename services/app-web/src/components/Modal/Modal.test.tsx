@@ -325,7 +325,7 @@ describe('Modal', () => {
                         modalRef={modalRef}
                         onSubmit={onSubmit}
                         onSubmitText={'Resubmit'}
-                        modalAlert="This should be a modal alert"
+                        modalAlert={{ message: 'This should be a modal alert' }}
                     >
                         <textarea id="textarea" data-testid="textarea" />
                     </Modal>
@@ -335,9 +335,7 @@ describe('Modal', () => {
             expect(
                 await screen.findByText('This should be a modal alert')
             ).toBeInTheDocument()
-            expect(
-                await screen.findByText('Resubmit Error')
-            ).toBeInTheDocument()
+            expect(await screen.findByText('System error')).toBeInTheDocument()
         })
     })
 })

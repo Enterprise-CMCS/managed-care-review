@@ -7,8 +7,8 @@ import {
     UpdatedEmailData,
     unlockPackageCMSEmail,
     unlockPackageStateEmail,
-    resubmittedStateEmail,
-    resubmittedCMSEmail,
+    resubmitPackageStateEmail,
+    resubmitPackageCMSEmail,
 } from '../emailer'
 import {
     LockedHealthPlanFormDataType,
@@ -38,7 +38,7 @@ const testStateAnalystsEmails: string[] = [
 
 const submissionName = 'MN-PMAP-0001'
 
-const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
+function testEmailer(customConfig?: EmailConfiguration): Emailer {
     const config = customConfig || testEmailConfig
     return {
         sendEmail: jest.fn(
@@ -46,31 +46,41 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
                 console.log('Email content' + JSON.stringify(emailData))
             }
         ),
-        sendCMSNewPackage: function async(
+        sendCMSNewPackage: async function (
             submission,
             submissionName,
             stateAnalystsEmails
         ): Promise<void | Error> {
-            const emailData = newPackageCMSEmail(
+            const result = await newPackageCMSEmail(
                 submission,
                 submissionName,
                 config,
                 stateAnalystsEmails
             )
-            return this.sendEmail(emailData)
+            if (result instanceof Error) {
+                return result
+            } else {
+                const emailData = result
+                return await this.sendEmail(emailData)
+            }
         },
-        sendStateNewPackage: function async(
+        sendStateNewPackage: async function (
             submission,
             submissionName,
             user
         ): Promise<void | Error> {
-            const emailData = newPackageStateEmail(
+            const result = await newPackageStateEmail(
                 submission,
                 submissionName,
                 user,
                 config
             )
-            return this.sendEmail(emailData)
+            if (result instanceof Error) {
+                return result
+            } else {
+                const emailData = result
+                return await this.sendEmail(emailData)
+            }
         },
         sendUnlockPackageCMSEmail: function async(
             submission,
@@ -104,7 +114,7 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
             updatedEmailData: UpdatedEmailData,
             user: UserType
         ): Promise<void | Error> {
-            const emailData = resubmittedStateEmail(
+            const emailData = resubmitPackageStateEmail(
                 submission,
                 user,
                 updatedEmailData,
@@ -117,7 +127,7 @@ const testEmailer = (customConfig?: EmailConfiguration): Emailer => {
             updatedEmailData,
             stateAnalystsEmails
         ): Promise<void | Error> {
-            const emailData = resubmittedCMSEmail(
+            const emailData = resubmitPackageCMSEmail(
                 submission,
                 updatedEmailData,
                 config,

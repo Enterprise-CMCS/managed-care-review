@@ -14,6 +14,7 @@ import { Modal } from './Modal'
 import { PoliteErrorMessage } from '../PoliteErrorMessage'
 import * as Yup from 'yup'
 import styles from './UnlockSubmitModal.module.scss'
+import { GenericApiErrorProps } from '../Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 
 type ModalType = 'SUBMIT' | 'RESUBMIT' | 'UNLOCK'
 
@@ -23,6 +24,7 @@ type ModalValueType = {
     modalDescription?: string
     inputHint?: string
     unlockSubmitModalInputValidation?: string
+    errorHeading: string
 }
 
 const modalValueDictionary: { [Property in ModalType]: ModalValueType } = {
@@ -34,6 +36,7 @@ const modalValueDictionary: { [Property in ModalType]: ModalValueType } = {
         inputHint: 'Provide summary of all changes made to this submission',
         unlockSubmitModalInputValidation:
             'You must provide a summary of changes',
+        errorHeading: 'Resubmit error',
     },
     UNLOCK: {
         modalHeading: 'Reason for unlocking submission',
@@ -41,12 +44,14 @@ const modalValueDictionary: { [Property in ModalType]: ModalValueType } = {
         inputHint: 'Provide reason for unlocking',
         unlockSubmitModalInputValidation:
             'You must provide a reason for unlocking this submission',
+        errorHeading: 'Unlock error',
     },
     SUBMIT: {
         modalHeading: 'Ready to submit?',
         onSubmitText: 'Submit',
         modalDescription:
             'Submitting this package will send it to CMS to begin their review.',
+        errorHeading: 'Submit error',
     },
 }
 
@@ -64,7 +69,9 @@ export const UnlockSubmitModal = ({
     setIsSubmitting?: React.Dispatch<React.SetStateAction<boolean>>
 }): React.ReactElement => {
     const [focusErrorsInModal, setFocusErrorsInModal] = useState(true)
-    const [modalAlert, setModalAlert] = useState<string | undefined>(undefined) // when api errors error
+    const [modalAlert, setModalAlert] = useState<
+        GenericApiErrorProps | undefined
+    >(undefined) // when api errors error
     const navigate = useNavigate()
     const modalValues: ModalValueType = modalValueDictionary[modalType]
 
@@ -120,7 +127,10 @@ export const UnlockSubmitModal = ({
         }
 
         if (result instanceof Error) {
-            setModalAlert(result.message)
+            setModalAlert({
+                heading: modalValues.errorHeading,
+                message: result.message,
+            })
         } else {
             modalRef.current?.toggleModal(undefined, false)
             if (modalType !== 'UNLOCK' && submissionName) {
