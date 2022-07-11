@@ -13,8 +13,8 @@ plugins:
 
 custom:
   region: ${aws:region}
-  cloudfrontDomainName: ${ssm:/configuration/${sls.stage}/cloudfront/domain_name, ""}
-  cloudfrontCertificateArn: ${ssm:/configuration/${sls.stage}/cloudfront/certificate_arn, ""}
+  cloudfrontDomainName: ${ssm:/configuration/${sls:stage}/cloudfront/domain_name, ""}
+  cloudfrontCertificateArn: ${ssm:/configuration/${sls:stage}/cloudfront/certificate_arn, ""}
   serverlessTerminationProtection:
     stages:
       - dev
