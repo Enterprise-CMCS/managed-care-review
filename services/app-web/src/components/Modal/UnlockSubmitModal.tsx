@@ -127,7 +127,6 @@ export const UnlockSubmitModal = ({
         }
 
         if (result instanceof Error) {
-            console.log('MODAL TEST ALLLLL', modalValues.errorHeading)
             setModalAlert({
                 heading: modalValues.errorHeading,
                 message: result.message,
