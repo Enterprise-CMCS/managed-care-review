@@ -21,6 +21,8 @@ on:
         required: true
       react_app_auth_mode:
         required: true
+      okta_metadata_url:
+        required: false
 
 jobs:
   app-web:
@@ -92,6 +94,7 @@ jobs:
           DATABASE_URL: AWS_SM
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
           EMAILER_MODE: SES
+          OKTA_METADATA_URL: ${{ secrets.okta_metadata_url }}
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 
