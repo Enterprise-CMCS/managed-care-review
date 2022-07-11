@@ -69,7 +69,7 @@ const StatusTag = ({
     return <Tag className={tagStyles}>{statusText}</Tag>
 }
 
-export const Dashboard = (): React.ReactElement => {
+export const StateDashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
     const location = useLocation()
 

@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 
-import { Dashboard } from './Dashboard'
+import { StateDashboard } from './StateDashboard'
 import {
     fetchCurrentUserMock,
     indexHealthPlanPackagesMockSuccess,
@@ -10,9 +10,9 @@ import {
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
-describe('Dashboard', () => {
+describe('StateDashboard', () => {
     it('display submission heading', async () => {
-        renderWithProviders(<Dashboard />, {
+        renderWithProviders(<StateDashboard />, {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
@@ -32,7 +32,7 @@ describe('Dashboard', () => {
     })
 
     it('displays new submission link', async () => {
-        renderWithProviders(<Dashboard />, {
+        renderWithProviders(<StateDashboard />, {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
@@ -81,7 +81,7 @@ describe('Dashboard', () => {
 
         const submissions = [draft, submitted, unlocked]
 
-        renderWithProviders(<Dashboard />, {
+        renderWithProviders(<StateDashboard />, {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
