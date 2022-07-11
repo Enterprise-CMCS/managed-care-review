@@ -118,7 +118,7 @@ provider:
     REACT_APP_OTEL_COLLECTOR_URL: ${self:custom.reactAppOtelCollectorUrl}
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
     EMAILER_MODE: ${self:custom.emailerMode}
-    SES_SOURCE_EMAIL_ADDRESS: ${ssm:/configuration/email/sourceAddress}
+    SES_SOURCE_EMAIL_ADDRESS: ${ssm:/configuration/email/sourceAddress, env:SES_SOURCE_EMAIL_ADDRESS}
     SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${ssm:/configuration/email/reviewTeamAddresses}
     SES_REVIEW_HELP_EMAIL_ADDRESS: ${ssm:/configuration/email/reviewHelpAddress}
     SES_RATE_HELP_EMAIL_ADDRESS: ${ssm:/configuration/email/rateHelpAddress}
