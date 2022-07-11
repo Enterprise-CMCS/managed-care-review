@@ -2,18 +2,20 @@ import React from 'react'
 import styles from '../Banner.module.scss'
 import { Alert, Link } from '@trussworks/react-uswds'
 
-export type UnlockedProps = {
+export type GenericApiErrorProps = {
     message?: string
+    heading?: string
 }
 
 export const GenericApiErrorBanner = ({
     message,
-}: UnlockedProps): React.ReactElement => {
+    heading,
+}: GenericApiErrorProps): React.ReactElement => {
     return (
         <Alert
             role="alert"
             type="error"
-            heading="System error"
+            heading={heading || 'System error'}
             validation
             data-testid="genericApiErrorBanner"
         >

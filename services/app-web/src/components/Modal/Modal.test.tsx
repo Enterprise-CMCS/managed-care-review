@@ -325,7 +325,7 @@ describe('Modal', () => {
                         modalRef={modalRef}
                         onSubmit={onSubmit}
                         onSubmitText={'Resubmit'}
-                        modalAlert="This should be a modal alert"
+                        modalAlert={{ message: 'This should be a modal alert' }}
                     >
                         <textarea id="textarea" data-testid="textarea" />
                     </Modal>

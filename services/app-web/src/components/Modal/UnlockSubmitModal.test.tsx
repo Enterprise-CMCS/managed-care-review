@@ -123,6 +123,10 @@ describe('UnlockSubmitModal', () => {
             expect(
                 await screen.findByText('Error attempting to submit.')
             ).toBeInTheDocument()
+            const errorHeading = screen.queryByRole('heading', {
+                name: 'Submit error',
+            })
+            expect(errorHeading).toBeInTheDocument()
             await waitFor(() =>
                 expect(mockSetIsSubmitting).toHaveBeenCalledTimes(2)
             )
@@ -299,10 +303,14 @@ describe('UnlockSubmitModal', () => {
             await userEvent.click(screen.getByTestId('unlock-modal-submit'))
 
             await waitFor(() => {
-                const error = screen.queryByText(
+                const errorHeading = screen.queryByRole('heading', {
+                    name: 'Unlock error',
+                })
+                const errorMessage = screen.queryByText(
                     'Error attempting to unlock. Submission may be already unlocked. Please refresh and try again.'
                 )
-                expect(error).toBeInTheDocument()
+                expect(errorHeading).toBeInTheDocument()
+                expect(errorMessage).toBeInTheDocument()
             })
         })
     })
@@ -401,6 +409,47 @@ describe('UnlockSubmitModal', () => {
                 expect(textbox).toHaveFocus()
             })
         })
+
+        it('displays modal alert banner error if resubmit api request fails', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    modalRef={modalRef}
+                    modalType="RESUBMIT"
+                    healthPlanPackage={mockCompleteDraft()}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            submitHealthPlanPackageMockError({
+                                id: mockCompleteDraft().id,
+                            }),
+                        ],
+                    },
+                }
+            )
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            await userEvent.type(
+                screen.getByTestId('unlockSubmitModalInput'),
+                'Test unlock resubmit'
+            )
+
+            await userEvent.click(screen.getByTestId('resubmit-modal-submit'))
+
+            await waitFor(() => {
+                const errorHeading = screen.queryByRole('heading', {
+                    name: 'Resubmit error',
+                })
+
+                expect(errorHeading).toBeInTheDocument()
+            })
+        })
+
         it('redirects if submission succeeds on unlocked plan package', async () => {
             let testLocation: Location
             const modalRef = createRef<ModalRef>()
