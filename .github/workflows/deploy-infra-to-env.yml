@@ -16,8 +16,6 @@ on:
         required: true
       aws_default_region:
         required: true
-      cloudfront_storybook_domain_name:
-        required: false
 
 jobs:
   postgres:
