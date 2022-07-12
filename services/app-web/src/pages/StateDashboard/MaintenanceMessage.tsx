@@ -1,7 +1,7 @@
 import React from 'react'
 import { Alert } from '@trussworks/react-uswds'
 
-import styles from './Dashboard.module.scss'
+import styles from './StateDashboard.module.scss'
 
 export function MaintenanceMessage({
     message,

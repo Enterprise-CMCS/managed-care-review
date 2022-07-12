@@ -237,3 +237,5 @@ export {
     packageName,
     generateRateName,
 }
+
+export type { ProgramArgType }
