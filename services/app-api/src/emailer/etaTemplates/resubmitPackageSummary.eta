@@ -1,0 +1,6 @@
+<b>Submitted by:</b> <%= it.resubmittedBy %><br />
+<b>Updated on:</b> <%= it.resubmittedOn %><br />
+<b>Changes made:</b> <%= it.resubmissionReason %><br />
+<% if (it.shouldIncludeRates) { %>
+<b>Rate name</b>: <%= it.rateName %><br />
+<% } %>
