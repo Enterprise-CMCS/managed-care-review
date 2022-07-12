@@ -22,15 +22,20 @@ const submission = {
 }
 const rateName = 'test-rate-name'
 const testStateAnalystEmails = testStateAnalystsEmails
-const template = unlockPackageCMSEmail(
-    submission,
-    unlockData,
-    testEmailConfig,
-    rateName,
-    testStateAnalystEmails
-)
 
-test('subject line is correct and clearly states submission is unlocked', () => {
+test('subject line is correct and clearly states submission is unlocked', async () => {
+    const template = await unlockPackageCMSEmail(
+        submission,
+        unlockData,
+        testEmailConfig,
+        rateName,
+        testStateAnalystEmails
+    )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
     expect(template).toEqual(
         expect.objectContaining({
             subject: expect.stringContaining(
@@ -39,21 +44,32 @@ test('subject line is correct and clearly states submission is unlocked', () => 
         })
     )
 })
-test('unlocked by includes correct email address', () => {
+test('email body contains correct information', async () => {
+    const template = await unlockPackageCMSEmail(
+        submission,
+        unlockData,
+        testEmailConfig,
+        rateName,
+        testStateAnalystEmails
+    )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringMatching(/Unlocked by: leslie/),
         })
     )
-})
-test('unlocked on includes correct date', () => {
+
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringMatching(/Unlocked on: 01/),
         })
     )
-})
-test('includes correct reason', () => {
+
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringMatching(
@@ -61,15 +77,26 @@ test('includes correct reason', () => {
             ),
         })
     )
-})
-test('includes rate name', () => {
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringMatching(/Rate name:/),
         })
     )
 })
-test('includes state specific analysts emails on contract and rate submission unlock', () => {
+test('includes state specific analysts emails on contract and rate submission unlock', async () => {
+    const template = await unlockPackageCMSEmail(
+        submission,
+        unlockData,
+        testEmailConfig,
+        rateName,
+        testStateAnalystEmails
+    )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
     testStateAnalystEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
@@ -78,11 +105,25 @@ test('includes state specific analysts emails on contract and rate submission un
         )
     })
 })
-test('includes ratesReviewSharedEmails on contract and rate submission unlock', () => {
+test('includes ratesReviewSharedEmails on contract and rate submission unlock', async () => {
+    const template = await unlockPackageCMSEmail(
+        submission,
+        unlockData,
+        testEmailConfig,
+        rateName,
+        testStateAnalystEmails
+    )
+
     const reviewerEmails = [
         ...testEmailConfig.cmsReviewSharedEmails,
         ...testEmailConfig.ratesReviewSharedEmails,
     ]
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
     reviewerEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
@@ -91,71 +132,95 @@ test('includes ratesReviewSharedEmails on contract and rate submission unlock', 
         )
     })
 })
-test('does include state specific analysts emails on contract only submission unlock', () => {
+test('does include state specific analysts emails on contract only submission unlock', async () => {
     const sub = mockUnlockedContractOnlyFormData()
     const rateName = 'test-rate-name'
-    const contractOnlyTemplate = unlockPackageCMSEmail(
+    const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
         testEmailConfig,
         rateName,
         testStateAnalystEmails
     )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
     testStateAnalystEmails.forEach((emailAddress) => {
-        expect(contractOnlyTemplate).toEqual(
+        expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),
             })
         )
     })
 })
-test('does not include ratesReviewSharedEmails on contract only submission unlock', () => {
+test('does not include ratesReviewSharedEmails on contract only submission unlock', async () => {
     const sub = mockUnlockedContractOnlyFormData()
     const rateName = 'test-rate-name'
-    const contractOnlyTemplate = unlockPackageCMSEmail(
+    const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
         testEmailConfig,
         rateName,
         []
     )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
     const ratesReviewerEmails = [...testEmailConfig.ratesReviewSharedEmails]
     ratesReviewerEmails.forEach((emailAddress) => {
-        expect(contractOnlyTemplate).toEqual(
+        expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.not.arrayContaining([emailAddress]),
             })
         )
     })
 })
-test('does not include state specific analysts emails on contract only submission unlock', () => {
+test('does not include state specific analysts emails on contract only submission unlock', async () => {
     const sub = mockUnlockedContractOnlyFormData()
     const rateName = 'test-rate-name'
-    const contractOnlyTemplate = unlockPackageCMSEmail(
+    const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
         testEmailConfig,
         rateName,
         []
     )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
     testStateAnalystEmails.forEach((emailAddress) => {
-        expect(contractOnlyTemplate).toEqual(
+        expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.not.arrayContaining([emailAddress]),
             })
         )
     })
 })
-test('CHIP contract only unlock email does include state specific analysts emails', () => {
+test('CHIP contract only unlock email does include state specific analysts emails', async () => {
     const sub = mockUnlockedContractOnlyFormData()
     sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
-    const template = unlockPackageCMSEmail(
+    const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
         testEmailConfig,
         rateName,
         testStateAnalystEmails
     )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
     testStateAnalystEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
@@ -164,10 +229,10 @@ test('CHIP contract only unlock email does include state specific analysts email
         )
     })
 })
-test('CHIP contract only unlock email does not include ratesReviewSharedEmails, cmsRateHelpEmailAddress or state specific analysts emails', () => {
+test('CHIP contract only unlock email does not include ratesReviewSharedEmails, cmsRateHelpEmailAddress or state specific analysts emails', async () => {
     const sub = mockUnlockedContractOnlyFormData()
     sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
-    const template = unlockPackageCMSEmail(
+    const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
         testEmailConfig,
@@ -178,6 +243,12 @@ test('CHIP contract only unlock email does not include ratesReviewSharedEmails, 
         ...testEmailConfig.ratesReviewSharedEmails,
         testEmailConfig.cmsRateHelpEmailAddress,
     ]
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
     excludedEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
@@ -193,16 +264,22 @@ test('CHIP contract only unlock email does not include ratesReviewSharedEmails, 
         )
     })
 })
-test('CHIP contract and rate unlock email does include state specific analysts emails', () => {
+test('CHIP contract and rate unlock email does include state specific analysts emails', async () => {
     const sub = mockUnlockedContractAndRatesFormData()
     sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
-    const template = unlockPackageCMSEmail(
+    const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
         testEmailConfig,
         rateName,
         testStateAnalystEmails
     )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
     testStateAnalystEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
@@ -211,10 +288,10 @@ test('CHIP contract and rate unlock email does include state specific analysts e
         )
     })
 })
-test('CHIP contract and rate unlock email does not include ratesReviewSharedEmails, cmsRateHelpEmailAddress or state specific analysts emails', () => {
+test('CHIP contract and rate unlock email does not include ratesReviewSharedEmails, cmsRateHelpEmailAddress or state specific analysts emails', async () => {
     const sub = mockUnlockedContractAndRatesFormData()
     sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
-    const template = unlockPackageCMSEmail(
+    const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
         testEmailConfig,
@@ -225,6 +302,12 @@ test('CHIP contract and rate unlock email does not include ratesReviewSharedEmai
         ...testEmailConfig.ratesReviewSharedEmails,
         testEmailConfig.cmsRateHelpEmailAddress,
     ]
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
     excludedEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
@@ -240,17 +323,23 @@ test('CHIP contract and rate unlock email does not include ratesReviewSharedEmai
         )
     })
 })
-test('does not include rate name on contract only submission unlock', () => {
+test('does not include rate name on contract only submission unlock', async () => {
     const sub = mockUnlockedContractOnlyFormData()
     const rateName = 'test-rate-name'
-    const contractOnlyTemplate = unlockPackageCMSEmail(
+    const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
         testEmailConfig,
         rateName,
         []
     )
-    expect(contractOnlyTemplate).toEqual(
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
+    expect(template).toEqual(
         expect.not.objectContaining({
             bodyText: expect.stringMatching(/Rate name:/),
         })
@@ -260,12 +349,18 @@ test('does not include rate name on contract only submission unlock', () => {
 test('renders overall email as expected', async () => {
     const sub = mockUnlockedContractOnlyFormData()
     const rateName = 'test-rate-name'
-    const template = unlockPackageCMSEmail(
+    const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
         testEmailConfig,
         rateName,
         []
     )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
     expect(template.bodyHTML).toMatchSnapshot()
 })

@@ -99,30 +99,28 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             submissionName,
             stateAnalystsEmails
         ) {
-            const result = await newPackageCMSEmail(
+            const emailData = await newPackageCMSEmail(
                 submission,
                 submissionName,
                 config,
                 stateAnalystsEmails
             )
-            if (result instanceof Error) {
-                return result
+            if (emailData instanceof Error) {
+                return emailData
             } else {
-                const emailData = result
                 return await this.sendEmail(emailData)
             }
         },
         sendStateNewPackage: async function (submission, submissionName, user) {
-            const result = await newPackageStateEmail(
+            const emailData = await newPackageStateEmail(
                 submission,
                 submissionName,
                 user,
                 config
             )
-            if (result instanceof Error) {
-                return result
+            if (emailData instanceof Error) {
+                return emailData
             } else {
-                const emailData = result
                 return await this.sendEmail(emailData)
             }
         },
@@ -133,53 +131,69 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             stateAnalystsEmails
         ) {
             const rateName = generateRateName(submission, submissionName)
-            const emailData = unlockPackageCMSEmail(
+            const emailData = await unlockPackageCMSEmail(
                 submission,
                 updatedEmailData,
                 config,
                 rateName,
                 stateAnalystsEmails
             )
-            return await this.sendEmail(emailData)
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
         },
         sendUnlockPackageStateEmail: async function (
             submission,
             updatedEmailData,
             submissionName
         ) {
-            const emailData = unlockPackageStateEmail(
+            const emailData = await unlockPackageStateEmail(
                 submission,
                 updatedEmailData,
                 config,
                 submissionName
             )
-            return await this.sendEmail(emailData)
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
         },
         sendResubmittedStateEmail: async function (
             submission,
             updatedEmailData,
             user: UserType
         ) {
-            const emailData = resubmitPackageStateEmail(
+            const emailData = await resubmitPackageStateEmail(
                 submission,
                 user,
                 updatedEmailData,
                 config
             )
-            return await this.sendEmail(emailData)
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
         },
         sendResubmittedCMSEmail: async function (
             submission,
             updatedEmailData,
             stateAnalystsEmails
         ) {
-            const emailData = resubmitPackageCMSEmail(
+            const emailData = await resubmitPackageCMSEmail(
                 submission,
                 updatedEmailData,
                 config,
                 stateAnalystsEmails
             )
-            return await this.sendEmail(emailData)
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
         },
     }
 }
@@ -212,8 +226,7 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
                 console.error(result)
                 return result
             } else {
-                const emailData = result
-                localEmailerLogger(emailData)
+                localEmailerLogger(result)
             }
         },
         sendStateNewPackage: async (submission, submissionName, user) => {
@@ -227,8 +240,7 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
                 console.error(result)
                 return result
             } else {
-                const emailData = result
-                localEmailerLogger(emailData)
+                localEmailerLogger(result)
             }
         },
         sendUnlockPackageCMSEmail: async (
@@ -238,53 +250,69 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
             stateAnalystsEmails
         ) => {
             const rateName = generateRateName(submission, submissionName)
-            const emailData = unlockPackageCMSEmail(
+            const emailData = await unlockPackageCMSEmail(
                 submission,
                 updatedEmailData,
                 config,
                 rateName,
                 stateAnalystsEmails
             )
-            localEmailerLogger(emailData)
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                localEmailerLogger(emailData)
+            }
         },
         sendUnlockPackageStateEmail: async (
             submission,
             updatedEmailData,
             submissionName
         ) => {
-            const emailData = unlockPackageStateEmail(
+            const emailData = await unlockPackageStateEmail(
                 submission,
                 updatedEmailData,
                 config,
                 submissionName
             )
-            localEmailerLogger(emailData)
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                localEmailerLogger(emailData)
+            }
         },
         sendResubmittedStateEmail: async (
             submission,
             updatedEmailData,
             user
         ) => {
-            const emailData = resubmitPackageStateEmail(
+            const emailData = await resubmitPackageStateEmail(
                 submission,
                 user,
                 updatedEmailData,
                 config
             )
-            localEmailerLogger(emailData)
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                localEmailerLogger(emailData)
+            }
         },
         sendResubmittedCMSEmail: async (
             submission,
             updatedEmailData,
             stateAnalystsEmails
         ) => {
-            const emailData = resubmitPackageCMSEmail(
+            const emailData = await resubmitPackageCMSEmail(
                 submission,
                 updatedEmailData,
                 config,
                 stateAnalystsEmails
             )
-            localEmailerLogger(emailData)
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                localEmailerLogger(emailData)
+            }
         },
     }
 }

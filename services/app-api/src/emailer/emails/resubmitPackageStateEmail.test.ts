@@ -21,13 +21,19 @@ const submission = {
     rateDateEnd: new Date('2021-11-31'),
     rateDateCertified: new Date('2020-12-01'),
 }
-const template = resubmitPackageStateEmail(
-    submission,
-    user,
-    resubmitData,
-    testEmailConfig
-)
-test('contains correct subject and clearly states successful resubmission', () => {
+test('contains correct subject and clearly states successful resubmission', async () => {
+    const template = await resubmitPackageStateEmail(
+        submission,
+        user,
+        resubmitData,
+        testEmailConfig
+    )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
     expect(template).toEqual(
         expect.objectContaining({
             subject: expect.stringContaining(
@@ -39,21 +45,30 @@ test('contains correct subject and clearly states successful resubmission', () =
         })
     )
 })
-test('Submitted by contains correct email address', () => {
+
+test('contains correct information in body of email', async () => {
+    const template = await resubmitPackageStateEmail(
+        submission,
+        user,
+        resubmitData,
+        testEmailConfig
+    )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringMatching(/Submitted by: bob@example.com/),
         })
     )
-})
-test('Updated on contains correct date', () => {
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringMatching(/Updated on: 02\/01\/2022/),
         })
     )
-})
-test('Changes made contains correct changes made', () => {
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringMatching(
@@ -61,15 +76,11 @@ test('Changes made contains correct changes made', () => {
             ),
         })
     )
-})
-test('includes instructions for further changes', () => {
     expect.objectContaining({
         bodyText: expect.stringMatching(
             /If you need to make any further changes, please contact CMS./
         ),
     })
-})
-test('includes rate name', () => {
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringMatching(/Rate name:/),
@@ -78,5 +89,17 @@ test('includes rate name', () => {
 })
 
 test('renders overall email as expected', async () => {
+    const template = await resubmitPackageStateEmail(
+        submission,
+        user,
+        resubmitData,
+        testEmailConfig
+    )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
     expect(template.bodyHTML).toMatchSnapshot()
 })
