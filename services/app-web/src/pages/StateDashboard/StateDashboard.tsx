@@ -16,7 +16,7 @@ import {
     SubmissionType as GQLSubmissionType,
     useIndexHealthPlanPackagesQuery,
 } from '../../gen/gqlClient'
-import styles from './Dashboard.module.scss'
+import styles from './StateDashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 
