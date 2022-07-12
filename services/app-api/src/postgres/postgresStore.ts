@@ -9,7 +9,7 @@ import {
     UpdateInfoType,
 } from '../domain-models'
 import { findPrograms } from '../postgres'
-import { findAllHealthPlanPackages } from './findAllHealthPlanPackages'
+import { findAllHealthPlanPackagesByState } from './findAllHealthPlanPackagesByState'
 import { findHealthPlanPackage } from './findHealthPlanPackage'
 import {
     insertHealthPlanPackage,
@@ -29,9 +29,11 @@ type Store = {
         draftUUID: string
     ) => Promise<HealthPlanPackageType | undefined | StoreError>
 
-    findAllHealthPlanPackages: (
+    findAllHealthPlanPackagesByState: (
         stateCode: string
     ) => Promise<HealthPlanPackageType[] | StoreError>
+
+    // findManySubmittedHealthPlanPackages: () => Promise<HealthPlanPackageType[] | StoreError>
 
     insertHealthPlanPackage: (
         args: InsertHealthPlanPackageArgsType
@@ -56,8 +58,9 @@ function NewPostgresStore(client: PrismaClient): Store {
         insertHealthPlanPackage: (args) =>
             insertHealthPlanPackage(client, args),
         findHealthPlanPackage: (id) => findHealthPlanPackage(client, id),
-        findAllHealthPlanPackages: (stateCode) =>
-            findAllHealthPlanPackages(client, stateCode),
+        findAllHealthPlanPackagesByState: (stateCode) =>
+            findAllHealthPlanPackagesByState(client, stateCode),
+        // findManyHealthPlanPackagesByStatus: (statuses) => findHealthPlanPackage(client, id),
         updateHealthPlanRevision: (pkgID, revisionID, formData, submitInfo) =>
             updateHealthPlanRevision(
                 client,
