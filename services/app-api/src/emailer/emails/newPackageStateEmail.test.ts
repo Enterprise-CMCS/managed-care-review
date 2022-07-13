@@ -57,7 +57,7 @@ test('to addresses list includes all state contacts on submission', async () => 
     })
 })
 
-test('to addresses list not include duplicate state contacts on submission', async () => {
+test('to addresses list does not include duplicate state contacts on submission', async () => {
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractOnlyFormData(),
         stateContacts: [
