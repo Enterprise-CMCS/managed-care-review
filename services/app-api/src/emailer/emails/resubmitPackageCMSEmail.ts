@@ -6,7 +6,7 @@ import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelp
 import {
     stripHTMLFromTemplate,
     UpdatedEmailData,
-    generateReviewerEmails,
+    generateCMSReviewerEmails,
     renderTemplate,
 } from '../templateHelpers'
 
@@ -21,7 +21,7 @@ export const resubmitPackageCMSEmail = async (
 ): Promise<EmailData | Error> => {
     const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
-    const reviewerEmails = generateReviewerEmails(
+    const reviewerEmails = generateCMSReviewerEmails(
         config,
         pkg,
         stateAnalystsEmails
