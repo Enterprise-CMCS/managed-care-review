@@ -1,4 +1,4 @@
-import { GridContainer, Link, Table, Tag } from '@trussworks/react-uswds'
+import { GridContainer, Table, Tag } from '@trussworks/react-uswds'
 import classnames from 'classnames'
 import dayjs from 'dayjs'
 import React from 'react'
@@ -35,15 +35,7 @@ type SubmissionInDashboard = {
 const isSubmitted = (status: HealthPlanPackageStatus) =>
     status === 'SUBMITTED' || status === 'RESUBMITTED'
 
-function submissionURL(
-    id: SubmissionInDashboard['id'],
-    status: SubmissionInDashboard['status']
-): string {
-    if (status === 'DRAFT') {
-        return `/submissions/${id}/edit/type`
-    } else if (status === 'UNLOCKED') {
-        return `/submissions/${id}/edit/review-and-submit`
-    }
+function submissionURL(id: SubmissionInDashboard['id']): string {
     return `/submissions/${id}`
 }
 
@@ -97,12 +89,17 @@ export const CMSDashboard = (): React.ReactElement => {
             const currentSubmissionData = base64ToDomain(
                 currentRevision.node.formDataProto
             )
+
             if (currentSubmissionData instanceof Error) {
                 recordJSException(
                     `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${sub.id} Error message: ${currentSubmissionData.message}`
                 )
 
                 return null
+            }
+            if (sub.status === 'DRAFT') {
+                // should display draft submissions to a CMS user - this is also filtered out on the api side
+                return
             }
 
             submissionRows.push({
@@ -131,110 +128,87 @@ export const CMSDashboard = (): React.ReactElement => {
                     className={styles.container}
                     data-testid="dashboard-page"
                 >
-                    {programs.length ? (
-                        <section className={styles.panel}>
-                            <div className={styles.panelHeader}>
-                                <h2>Submissions</h2>
-                                <div>
-                                    <Link
-                                        asCustom={NavLink}
-                                        className="usa-button"
-                                        variant="unstyled"
-                                        to={{
-                                            pathname: '/submissions/new',
-                                        }}
-                                    >
-                                        Start new submission
-                                    </Link>
-                                </div>
+                    <section className={styles.panel}>
+                        <div className={styles.panelHeader}>
+                            <h2>Submissions</h2>
+                        </div>
+                        {hasSubmissions ? (
+                            <Table fullWidth>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Programs</th>
+                                        <th>Submitted</th>
+                                        <th>Last updated</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {submissionRows.map(
+                                        (dashboardSubmission) => {
+                                            return (
+                                                <tr
+                                                    key={dashboardSubmission.id}
+                                                >
+                                                    <td data-testid="submission-id">
+                                                        <NavLink
+                                                            to={submissionURL(
+                                                                dashboardSubmission.id
+                                                            )}
+                                                        >
+                                                            {
+                                                                dashboardSubmission.name
+                                                            }
+                                                        </NavLink>
+                                                    </td>
+                                                    <td>
+                                                        {dashboardSubmission.programIDs.map(
+                                                            (id) => {
+                                                                return (
+                                                                    <Tag
+                                                                        data-testid="program-tag"
+                                                                        key={id}
+                                                                        className={`radius-pill ${styles.programTag}`}
+                                                                    >
+                                                                        {id}
+                                                                    </Tag>
+                                                                )
+                                                            }
+                                                        )}
+                                                    </td>
+                                                    <td data-testid="submission-date">
+                                                        {dashboardSubmission.submittedAt
+                                                            ? dayjs(
+                                                                  dashboardSubmission.submittedAt
+                                                              ).format(
+                                                                  'MM/DD/YYYY'
+                                                              )
+                                                            : ''}
+                                                    </td>
+                                                    <td>
+                                                        {dayjs(
+                                                            dashboardSubmission.updatedAt
+                                                        ).format('MM/DD/YYYY')}
+                                                    </td>
+                                                    <td data-testid="submission-status">
+                                                        <StatusTag
+                                                            status={
+                                                                dashboardSubmission.status
+                                                            }
+                                                        />
+                                                    </td>
+                                                </tr>
+                                            )
+                                        }
+                                    )}
+                                </tbody>
+                            </Table>
+                        ) : (
+                            <div className={styles.panelEmpty}>
+                                <h3>You have no submissions yet</h3>
                             </div>
-                            {hasSubmissions ? (
-                                <Table fullWidth>
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Programs</th>
-                                            <th>Submitted</th>
-                                            <th>Last updated</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {submissionRows.map(
-                                            (dashboardSubmission) => {
-                                                return (
-                                                    <tr
-                                                        key={
-                                                            dashboardSubmission.id
-                                                        }
-                                                    >
-                                                        <td data-testid="submission-id">
-                                                            <NavLink
-                                                                to={submissionURL(
-                                                                    dashboardSubmission.id,
-                                                                    dashboardSubmission.status
-                                                                )}
-                                                            >
-                                                                {
-                                                                    dashboardSubmission.name
-                                                                }
-                                                            </NavLink>
-                                                        </td>
-                                                        <td>
-                                                            {dashboardSubmission.programIDs.map(
-                                                                (id) => {
-                                                                    return (
-                                                                        <Tag
-                                                                            data-testid="program-tag"
-                                                                            key={
-                                                                                id
-                                                                            }
-                                                                            className={`radius-pill ${styles.programTag}`}
-                                                                        >
-                                                                            {id}
-                                                                        </Tag>
-                                                                    )
-                                                                }
-                                                            )}
-                                                        </td>
-                                                        <td data-testid="submission-date">
-                                                            {dashboardSubmission.submittedAt
-                                                                ? dayjs(
-                                                                      dashboardSubmission.submittedAt
-                                                                  ).format(
-                                                                      'MM/DD/YYYY'
-                                                                  )
-                                                                : ''}
-                                                        </td>
-                                                        <td>
-                                                            {dayjs(
-                                                                dashboardSubmission.updatedAt
-                                                            ).format(
-                                                                'MM/DD/YYYY'
-                                                            )}
-                                                        </td>
-                                                        <td data-testid="submission-status">
-                                                            <StatusTag
-                                                                status={
-                                                                    dashboardSubmission.status
-                                                                }
-                                                            />
-                                                        </td>
-                                                    </tr>
-                                                )
-                                            }
-                                        )}
-                                    </tbody>
-                                </Table>
-                            ) : (
-                                <div className={styles.panelEmpty}>
-                                    <h3>You have no submissions yet</h3>
-                                </div>
-                            )}
-                        </section>
-                    ) : (
-                        <p>No programs exist</p>
-                    )}
+                        )}
+                    </section>
                 </GridContainer>
             </div>
         </>
