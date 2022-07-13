@@ -9,6 +9,7 @@ import {
     stripHTMLFromTemplate,
     SubmissionTypeRecord,
     renderTemplate,
+    generateStateReceiverEmails,
 } from '../templateHelpers'
 
 export const newPackageStateEmail = async (
@@ -18,10 +19,7 @@ export const newPackageStateEmail = async (
     config: EmailConfiguration
 ): Promise<EmailData | Error> => {
     const isUnitTest = config.baseUrl === 'http://localhost'
-    const currentUserEmail = user.email
-    const receiverEmails: string[] = [currentUserEmail].concat(
-        pkg.stateContacts.map((contact) => contact.email)
-    )
+    const receiverEmails = generateStateReceiverEmails(pkg, user)
 
     const hasRateAmendmentInfo =
         pkg.rateType === 'AMENDMENT' && pkg.rateAmendmentInfo

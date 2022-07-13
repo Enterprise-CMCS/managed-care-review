@@ -8,6 +8,7 @@ import {
     renderTemplate,
     stripHTMLFromTemplate,
     UpdatedEmailData,
+    generateStateReceiverEmails,
 } from '../templateHelpers'
 
 import type { EmailData, EmailConfiguration } from '../'
@@ -18,12 +19,9 @@ export const resubmitPackageStateEmail = async (
     resubmittedData: UpdatedEmailData,
     config: EmailConfiguration
 ): Promise<EmailData | Error> => {
-    const currentUserEmail = user.email
     const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
-    const receiverEmails: string[] = [currentUserEmail].concat(
-        pkg.stateContacts.map((contact) => contact.email)
-    )
+    const receiverEmails = generateStateReceiverEmails(pkg, user)
 
     const data = {
         packageName: resubmittedData.packageName,

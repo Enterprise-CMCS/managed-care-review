@@ -7,6 +7,7 @@ import {
     renderTemplate,
     stripHTMLFromTemplate,
     UpdatedEmailData,
+    generateStateReceiverEmails,
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration } from '../'
 
@@ -17,9 +18,7 @@ export const unlockPackageStateEmail = async (
 ): Promise<EmailData | Error> => {
     const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
-    const receiverEmails: string[] = pkg.stateContacts.map(
-        (contact) => contact.email
-    )
+    const receiverEmails = generateStateReceiverEmails(pkg)
 
     const data = {
         packageName: unlockData.packageName,
