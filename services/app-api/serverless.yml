@@ -24,6 +24,7 @@ custom:
   appApiGatewayId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.ApiGatewayRestApiId}
   appApiGatewayRootResourceId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.AppApiGatewayRootResourceId}
   emailerMode: ${env:EMAILER_MODE}
+  parameterStoreMode: ${env:PARAMETER_STORE_MODE, ssm:/configuration/parameterStoreMode}
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${sls:stage}.PostgresAuroraArn }
   document_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.DocumentUploadsBucketArn}
   secretsManagerSecret: aurora_postgres_${sls:stage} #pragma: allowlist secret

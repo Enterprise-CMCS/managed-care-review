@@ -10,6 +10,7 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${aws:region}
   cloudfrontCertificateArn: ${ssm:/configuration/cloudfront/certificate_arn, ""}
+  cloudfrontStorybookDomainName: ${env:CLOUDFRONT_STORYBOOK_DOMAIN_NAME, ssm:/configuration/cloudfront/storybook_domain_name}
   serverlessTerminationProtection:
     stages:
       - dev
@@ -33,7 +34,7 @@ resources:
         - Fn::Not:
             - Fn::Equals:
                 - ''
-                - ${env:CLOUDFRONT_STORYBOOK_DOMAIN_NAME, ""}
+                - ${self:custom.cloudfrontStorybookDomainName}
   Resources:
     S3Bucket:
       Type: AWS::S3::Bucket
@@ -112,7 +113,7 @@ resources:
           Aliases:
             Fn::If:
               - CreateCustomCloudFrontDomain
-              - - ${env:CLOUDFRONT_STORYBOOK_DOMAIN_NAME, ""}
+              - - ${self:custom.cloudfrontStorybookDomainName}
               - Ref: AWS::NoValue
           Origins:
             - DomainName:
