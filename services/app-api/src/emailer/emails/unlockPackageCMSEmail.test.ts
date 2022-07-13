@@ -20,7 +20,6 @@ const submission = {
     rateDateEnd: new Date('2021-11-31'),
     rateDateCertified: new Date('2020-12-01'),
 }
-const rateName = 'test-rate-name'
 const testStateAnalystEmails = testStateAnalystsEmails
 
 test('subject line is correct and clearly states submission is unlocked', async () => {
@@ -28,7 +27,6 @@ test('subject line is correct and clearly states submission is unlocked', async 
         submission,
         unlockData,
         testEmailConfig,
-        rateName,
         testStateAnalystEmails
     )
 
@@ -49,7 +47,6 @@ test('email body contains correct information', async () => {
         submission,
         unlockData,
         testEmailConfig,
-        rateName,
         testStateAnalystEmails
     )
 
@@ -88,7 +85,6 @@ test('includes state specific analysts emails on contract and rate submission un
         submission,
         unlockData,
         testEmailConfig,
-        rateName,
         testStateAnalystEmails
     )
 
@@ -110,7 +106,6 @@ test('includes ratesReviewSharedEmails on contract and rate submission unlock', 
         submission,
         unlockData,
         testEmailConfig,
-        rateName,
         testStateAnalystEmails
     )
 
@@ -134,12 +129,10 @@ test('includes ratesReviewSharedEmails on contract and rate submission unlock', 
 })
 test('does include state specific analysts emails on contract only submission unlock', async () => {
     const sub = mockUnlockedContractOnlyFormData()
-    const rateName = 'test-rate-name'
     const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
         testEmailConfig,
-        rateName,
         testStateAnalystEmails
     )
 
@@ -158,12 +151,10 @@ test('does include state specific analysts emails on contract only submission un
 })
 test('does not include ratesReviewSharedEmails on contract only submission unlock', async () => {
     const sub = mockUnlockedContractOnlyFormData()
-    const rateName = 'test-rate-name'
     const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
         testEmailConfig,
-        rateName,
         []
     )
 
@@ -183,12 +174,10 @@ test('does not include ratesReviewSharedEmails on contract only submission unloc
 })
 test('does not include state specific analysts emails on contract only submission unlock', async () => {
     const sub = mockUnlockedContractOnlyFormData()
-    const rateName = 'test-rate-name'
     const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
         testEmailConfig,
-        rateName,
         []
     )
 
@@ -212,7 +201,6 @@ test('CHIP contract only unlock email does include state specific analysts email
         sub,
         unlockData,
         testEmailConfig,
-        rateName,
         testStateAnalystEmails
     )
 
@@ -236,7 +224,6 @@ test('CHIP contract only unlock email does not include ratesReviewSharedEmails, 
         sub,
         unlockData,
         testEmailConfig,
-        rateName,
         []
     )
     const excludedEmails = [
@@ -271,7 +258,6 @@ test('CHIP contract and rate unlock email does include state specific analysts e
         sub,
         unlockData,
         testEmailConfig,
-        rateName,
         testStateAnalystEmails
     )
 
@@ -295,7 +281,6 @@ test('CHIP contract and rate unlock email does not include ratesReviewSharedEmai
         sub,
         unlockData,
         testEmailConfig,
-        rateName,
         []
     )
     const excludedEmails = [
@@ -325,12 +310,10 @@ test('CHIP contract and rate unlock email does not include ratesReviewSharedEmai
 })
 test('does not include rate name on contract only submission unlock', async () => {
     const sub = mockUnlockedContractOnlyFormData()
-    const rateName = 'test-rate-name'
     const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
         testEmailConfig,
-        rateName,
         []
     )
 
@@ -348,12 +331,10 @@ test('does not include rate name on contract only submission unlock', async () =
 
 test('renders overall email as expected', async () => {
     const sub = mockUnlockedContractOnlyFormData()
-    const rateName = 'test-rate-name'
     const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
         testEmailConfig,
-        rateName,
         []
     )
 

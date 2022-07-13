@@ -13,8 +13,7 @@ import type { EmailData, EmailConfiguration } from '../'
 export const unlockPackageStateEmail = async (
     pkg: UnlockedHealthPlanFormDataType,
     unlockData: UpdatedEmailData,
-    config: EmailConfiguration,
-    submissionName: string
+    config: EmailConfiguration
 ): Promise<EmailData | Error> => {
     const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
@@ -28,7 +27,7 @@ export const unlockPackageStateEmail = async (
         unlockedOn: formatCalendarDate(unlockData.updatedAt),
         unlockedReason: unlockData.updatedReason,
         shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
-        rateName: generateRateName(pkg, submissionName),
+        rateName: generateRateName(pkg, unlockData.packageName),
         submissionURL: new URL(
             `submissions/${pkg.id}/review-and-submit`,
             config.baseUrl

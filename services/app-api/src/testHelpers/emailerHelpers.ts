@@ -36,8 +36,6 @@ const testStateAnalystsEmails: string[] = [
     '"State Analyst 2" <StateAnalyst2@example.com>',
 ]
 
-const submissionName = 'MN-PMAP-0001'
-
 function testEmailer(customConfig?: EmailConfiguration): Emailer {
     const config = customConfig || testEmailConfig
     return {
@@ -83,14 +81,12 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         sendUnlockPackageCMSEmail: async function (
             submission,
             updatedEmailData,
-            submissionName,
             stateAnalystsEmails
         ): Promise<void | Error> {
             const emailData = await unlockPackageCMSEmail(
                 submission,
                 updatedEmailData,
                 config,
-                submissionName,
                 stateAnalystsEmails
             )
 
@@ -107,8 +103,7 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
             const emailData = await unlockPackageStateEmail(
                 submission,
                 updatedEmailData,
-                config,
-                submissionName
+                config
             )
             if (emailData instanceof Error) {
                 return emailData

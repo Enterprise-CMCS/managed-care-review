@@ -10,7 +10,6 @@ import {
     UpdatedEmailData,
 } from './'
 import {
-    generateRateName,
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
@@ -57,13 +56,11 @@ type Emailer = {
     sendUnlockPackageCMSEmail: (
         submission: UnlockedHealthPlanFormDataType,
         updatedEmailData: UpdatedEmailData,
-        submissionName: string,
         stateAnalystsEmails: StateAnalystsEmails
     ) => Promise<void | Error>
     sendUnlockPackageStateEmail: (
         submission: UnlockedHealthPlanFormDataType,
-        updatedEmailData: UpdatedEmailData,
-        submissionName: string
+        updatedEmailData: UpdatedEmailData
     ) => Promise<void | Error>
     sendResubmittedStateEmail: (
         submission: LockedHealthPlanFormDataType,
@@ -127,15 +124,12 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
         sendUnlockPackageCMSEmail: async function (
             submission,
             updatedEmailData,
-            submissionName,
             stateAnalystsEmails
         ) {
-            const rateName = generateRateName(submission, submissionName)
             const emailData = await unlockPackageCMSEmail(
                 submission,
                 updatedEmailData,
                 config,
-                rateName,
                 stateAnalystsEmails
             )
             if (emailData instanceof Error) {
@@ -146,14 +140,12 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
         },
         sendUnlockPackageStateEmail: async function (
             submission,
-            updatedEmailData,
-            submissionName
+            updatedEmailData
         ) {
             const emailData = await unlockPackageStateEmail(
                 submission,
                 updatedEmailData,
-                config,
-                submissionName
+                config
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -246,15 +238,12 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
         sendUnlockPackageCMSEmail: async (
             submission,
             updatedEmailData,
-            submissionName,
             stateAnalystsEmails
         ) => {
-            const rateName = generateRateName(submission, submissionName)
             const emailData = await unlockPackageCMSEmail(
                 submission,
                 updatedEmailData,
                 config,
-                rateName,
                 stateAnalystsEmails
             )
             if (emailData instanceof Error) {
@@ -263,16 +252,11 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
                 localEmailerLogger(emailData)
             }
         },
-        sendUnlockPackageStateEmail: async (
-            submission,
-            updatedEmailData,
-            submissionName
-        ) => {
+        sendUnlockPackageStateEmail: async (submission, updatedEmailData) => {
             const emailData = await unlockPackageStateEmail(
                 submission,
                 updatedEmailData,
-                config,
-                submissionName
+                config
             )
             if (emailData instanceof Error) {
                 return emailData

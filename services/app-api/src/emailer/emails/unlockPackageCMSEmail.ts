@@ -1,4 +1,7 @@
-import { UnlockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import {
+    generateRateName,
+    UnlockedHealthPlanFormDataType,
+} from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import {
     stripHTMLFromTemplate,
@@ -12,7 +15,6 @@ export const unlockPackageCMSEmail = async (
     pkg: UnlockedHealthPlanFormDataType,
     unlockData: UpdatedEmailData,
     config: EmailConfiguration,
-    rateName: string,
     stateAnalystsEmails: StateAnalystsEmails
 ): Promise<EmailData | Error> => {
     const isUnitTest = config.baseUrl === 'http://localhost'
@@ -29,7 +31,7 @@ export const unlockPackageCMSEmail = async (
         unlockedOn: formatCalendarDate(unlockData.updatedAt),
         unlockedReason: unlockData.updatedReason,
         shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
-        rateName,
+        rateName: generateRateName(pkg, unlockData.packageName),
     }
 
     const result = await renderTemplate<typeof data>(

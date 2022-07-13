@@ -8,7 +8,6 @@ const unlockData = {
     updatedAt: new Date('02/01/2022'),
     updatedReason: 'Adding rate certification.',
 }
-const submissionName = 'MN-PMAP-0001'
 const sub = {
     ...unlockedWithFullContracts(),
     contractDateStart: new Date('2021-01-01'),
@@ -26,8 +25,7 @@ test('subject line is correct and clearly states submission is unlocked', async 
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig,
-        submissionName
+        testEmailConfig
     )
 
     if (template instanceof Error) {
@@ -48,8 +46,7 @@ test('body content is correct', async () => {
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig,
-        submissionName
+        testEmailConfig
     )
 
     if (template instanceof Error) {
@@ -92,8 +89,7 @@ test('renders overall email as expected', async () => {
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig,
-        submissionName
+        testEmailConfig
     )
 
     if (template instanceof Error) {
