@@ -57,6 +57,41 @@ test('to addresses list includes all state contacts on submission', async () => 
     })
 })
 
+test('to addresses list not include duplicate state contacts on submission', async () => {
+    const sub: LockedHealthPlanFormDataType = {
+        ...mockContractOnlyFormData(),
+        stateContacts: [
+            {
+                name: 'test1',
+                titleRole: 'Foo1',
+                email: 'test1@example.com',
+            },
+            {
+                name: 'test1',
+                titleRole: 'Foo1',
+                email: 'test1@example.com',
+            },
+        ],
+    }
+    const user = mockUser()
+    const template = await newPackageStateEmail(
+        sub,
+        'some-title',
+        user,
+        testEmailConfig
+    )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
+    expect(template.toAddresses).toEqual([
+        'test+state+user@example.com',
+        'test1@example.com',
+    ])
+})
+
 test('subject line is correct and clearly states submission is complete', async () => {
     const sub = mockContractOnlyFormData()
     const name = 'FL-MMA-001'
