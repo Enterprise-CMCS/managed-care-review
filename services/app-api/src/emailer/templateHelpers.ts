@@ -74,6 +74,10 @@ const includesChipPrograms = (programIDs: string[]): boolean => {
     return programIDs.some((id: string) => chipProgramIds.includes(id))
 }
 
+// Prune duplicate emails
+const pruneDuplicateEmails = (emails: string[]): string[] =>
+    emails.filter((email, index) => emails.indexOf(email) === index)
+
 // Determine who should be notified as a reviewer for a given health plan package and state
 const generateReviewerEmails = (
     config: EmailConfiguration,
@@ -100,12 +104,12 @@ const generateReviewerEmails = (
         submission.stateCode !== 'PR' &&
         !includesChipPrograms(submission.programIDs)
     ) {
-        return contractAndRateReviewerEmails
+        return pruneDuplicateEmails(contractAndRateReviewerEmails)
     } else if (includesChipPrograms(submission.programIDs)) {
-        return chipReviewerEmails
+        return pruneDuplicateEmails(chipReviewerEmails)
     }
 
-    return cmsReviewSharedEmails
+    return pruneDuplicateEmails(cmsReviewSharedEmails)
 }
 
 // Clean out HTML tags from an HTML based template
