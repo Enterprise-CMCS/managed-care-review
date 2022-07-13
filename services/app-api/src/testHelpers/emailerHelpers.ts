@@ -31,9 +31,29 @@ const testEmailConfig: EmailConfiguration = {
     ratesReviewSharedEmails: ['ratesreview@example.com'],
 }
 
+const testDuplicateEmailConfig: EmailConfiguration = {
+    stage: 'LOCAL',
+    baseUrl: 'http://localhost',
+    emailSource: 'emailSource@example.com',
+    cmsReviewSharedEmails: [
+        'duplicate@example.com',
+        'duplicate@example.com',
+        'duplicate@example.com',
+    ],
+    cmsReviewHelpEmailAddress: 'duplicate@example.com',
+    cmsRateHelpEmailAddress: 'duplicate@example.com',
+    cmsDevTeamHelpEmailAddress: 'duplicate@example.com',
+    ratesReviewSharedEmails: ['duplicate@example.com'],
+}
+
 const testStateAnalystsEmails: string[] = [
     '"State Analyst 1" <StateAnalyst1@example.com>',
     '"State Analyst 2" <StateAnalyst2@example.com>',
+]
+
+const testDuplicateStateAnalystsEmails: string[] = [
+    'duplicate@example.com',
+    'duplicate@example.com',
 ]
 
 function testEmailer(customConfig?: EmailConfiguration): Emailer {
@@ -426,6 +446,8 @@ const mockContractAmendmentFormData = (
 export {
     testEmailConfig,
     testStateAnalystsEmails,
+    testDuplicateEmailConfig,
+    testDuplicateStateAnalystsEmails,
     mockContractAmendmentFormData,
     mockContractOnlyFormData,
     mockContractAndRatesFormData,
