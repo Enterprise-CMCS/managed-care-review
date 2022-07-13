@@ -1,41 +1,37 @@
-// datasource requires a url. we override this with connection
-// details from secrets manager in the application
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "rhel-openssl-1.0.x"]
 }
 
-// HealthPlanPackageTable
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
 model HealthPlanPackageTable {
   id        String                    @id
-  state     State                     @relation(fields: [stateCode], references: [stateCode])
   stateCode String
+  state     State                     @relation(fields: [stateCode], references: [stateCode])
   revisions HealthPlanRevisionTable[]
 }
 
-// HealthPlanRevisionTable
 model HealthPlanRevisionTable {
-  id                  String          @id
-  createdAt           DateTime
-  pkg          HealthPlanPackageTable @relation(fields: [pkgID], references: [id])
-  pkgID        String
-  formDataProto Bytes
-  unlockedBy          String?
-  unlockedReason      String?
-  unlockedAt          DateTime?
-  submittedAt         DateTime?
-  submittedBy         String?
-  submittedReason     String?
+  id              String                 @id
+  createdAt       DateTime
+  pkgID           String
+  formDataProto   Bytes
+  submittedAt     DateTime?
+  unlockedAt      DateTime?
+  unlockedBy      String?
+  unlockedReason  String?
+  submittedBy     String?
+  submittedReason String?
+  pkg             HealthPlanPackageTable @relation(fields: [pkgID], references: [id])
 }
 
 model State {
-  stateCode                   String            @id
+  stateCode                   String                   @id
   name                        String
-  latestStateSubmissionNumber Int               @default(0)
-  statePackages            HealthPlanPackageTable[]
+  latestStateSubmissionNumber Int                      @default(0)
+  statePackages               HealthPlanPackageTable[]
 }
