@@ -23,10 +23,6 @@ jobs:
         with:
           fetch-depth: 20
 
-      - name: get non-sensitive values
-        shell: bash
-        run: echo ${{ secrets.CLOUDFRONT_STORYBOOK_DOMAIN_NAME }} | sed 's/./& /g'
-
       - name: Check for secrets
         uses: ./.github/actions/check_secrets
         with:
