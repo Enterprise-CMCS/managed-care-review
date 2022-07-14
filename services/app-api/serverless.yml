@@ -56,7 +56,7 @@ custom:
       '/configuration/default/vpc/subnets/private/a/id': 'offline'
       '/configuration/default/vpc/subnets/private/b/id': 'offline'
       '/configuration/default/vpc/subnets/private/c/id': 'offline'
-      '/configuration/iam/full_permissions_boundary_policy': 'offline'
+      '/configuration/iam/full_permissions_boundary_policy': 'arn:aws:iam::local:policy/local/developer-boundary-policy'
       '/configuration/email/sourceAddress': ${env:SES_SOURCE_EMAIL_ADDRESS}
       '/configuration/email/reviewTeamAddresses': ${env:SES_REVIEW_TEAM_EMAIL_ADDRESSES}
       '/configuration/email/ratesAddresses': ${env:SES_RATES_EMAIL_ADDRESSES}
