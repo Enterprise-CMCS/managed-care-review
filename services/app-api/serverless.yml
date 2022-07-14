@@ -57,12 +57,12 @@ custom:
       '/configuration/default/vpc/subnets/private/b/id': 'offline'
       '/configuration/default/vpc/subnets/private/c/id': 'offline'
       '/configuration/iam/full_permissions_boundary_policy': 'arn:aws:iam::local:policy/local/developer-boundary-policy'
-      '/configuration/email/sourceAddress': ${env:SES_SOURCE_EMAIL_ADDRESS}
-      '/configuration/email/reviewTeamAddresses': ${env:SES_REVIEW_TEAM_EMAIL_ADDRESSES}
-      '/configuration/email/ratesAddresses': ${env:SES_RATES_EMAIL_ADDRESSES}
-      '/configuration/email/reviewHelpAddress': ${env:SES_REVIEW_HELP_EMAIL_ADDRESS}
-      '/configuration/email/rateHelpAddress': ${env:SES_RATE_HELP_EMAIL_ADDRESS}
-      '/configuration/email/devTeamHelpAddress': ${env:SES_DEV_TEAM_HELP_EMAIL_ADDRESS}
+      '/configuration/email/sourceAddress': ${env:SES_SOURCE_EMAIL_ADDRESS, 'offline'}
+      '/configuration/email/reviewTeamAddresses': ${env:SES_REVIEW_TEAM_EMAIL_ADDRESSES, 'offline'}
+      '/configuration/email/ratesAddresses': ${env:SES_RATES_EMAIL_ADDRESSES, 'offline'}
+      '/configuration/email/reviewHelpAddress': ${env:SES_REVIEW_HELP_EMAIL_ADDRESS, 'offline'}
+      '/configuration/email/rateHelpAddress': ${env:SES_RATE_HELP_EMAIL_ADDRESS, 'offline'}
+      '/configuration/email/devTeamHelpAddress': ${env:SES_DEV_TEAM_HELP_EMAIL_ADDRESS, 'offline'}
   vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
   sgId: ${ssm:/configuration/${sls:stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
   privateSubnets:
