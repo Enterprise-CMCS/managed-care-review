@@ -1,6 +1,8 @@
 import {
     testEmailConfig,
     testStateAnalystsEmails,
+    testDuplicateEmailConfig,
+    testDuplicateStateAnalystsEmails,
     mockContractAmendmentFormData,
     mockContractOnlyFormData,
     mockContractAndRatesFormData,
@@ -24,6 +26,23 @@ test('to addresses list includes review email addresses from email config', asyn
             })
         )
     })
+})
+
+test('to addresses list does not include duplicate review email addresses', async () => {
+    const sub = mockContractAndRatesFormData()
+    const template = await newPackageCMSEmail(
+        sub,
+        'some-title',
+        testDuplicateEmailConfig,
+        testDuplicateStateAnalystsEmails
+    )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
+    expect(template.toAddresses).toEqual(['duplicate@example.com'])
 })
 
 test('subject line is correct', async () => {

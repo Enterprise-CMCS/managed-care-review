@@ -2,12 +2,13 @@
 
 exports[`renders overall email as expected 1`] = `
 "Submission MCR-VA-CCCPLUS-0002 was unlocked by CMS<br />
-        <br />
-        <b>Unlocked by:</b> josh@example.com<br />
-        <b>Unlocked on:</b> 02/01/2022<br />
-        <b>Reason for unlock:</b> Adding rate certification.<br /><br />
-        <b>Rate name</b>: MN-PMAP-0001-RATE-20210605-20211231-AMENDMENT-20201201<br />
-        <b>You must revise the submission before CMS can continue reviewing it.<br />
-        <a href=\\"http://localhost/submissions/test-abc-123/review-and-submit\\">Open the submission in MC-Review to make edits.</a>
-    "
+<br />
+<b>Unlocked by:</b> josh@example.com<br />
+<b>Unlocked on:</b> 02/01/2022<br />
+<b>Reason for unlock:</b> Adding rate certification.<br />
+<b>Rate name</b>: MCR-VA-CCCPLUS-0002-RATE-20210605-20211231-AMENDMENT-20201201<br />
+<br />
+<b>You must revise the submission before CMS can continue reviewing it.<br />
+<a href=\\"http://localhost/submissions/test-abc-123/review-and-submit\\">Open the submission in MC-Review to make edits.</a>
+"
 `;

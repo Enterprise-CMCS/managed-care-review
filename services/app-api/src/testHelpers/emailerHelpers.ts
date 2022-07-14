@@ -31,12 +31,30 @@ const testEmailConfig: EmailConfiguration = {
     ratesReviewSharedEmails: ['ratesreview@example.com'],
 }
 
+const testDuplicateEmailConfig: EmailConfiguration = {
+    stage: 'LOCAL',
+    baseUrl: 'http://localhost',
+    emailSource: 'emailSource@example.com',
+    cmsReviewSharedEmails: [
+        'duplicate@example.com',
+        'duplicate@example.com',
+        'duplicate@example.com',
+    ],
+    cmsReviewHelpEmailAddress: 'duplicate@example.com',
+    cmsRateHelpEmailAddress: 'duplicate@example.com',
+    cmsDevTeamHelpEmailAddress: 'duplicate@example.com',
+    ratesReviewSharedEmails: ['duplicate@example.com'],
+}
+
 const testStateAnalystsEmails: string[] = [
     '"State Analyst 1" <StateAnalyst1@example.com>',
     '"State Analyst 2" <StateAnalyst2@example.com>',
 ]
 
-const submissionName = 'MN-PMAP-0001'
+const testDuplicateStateAnalystsEmails: string[] = [
+    'duplicate@example.com',
+    'duplicate@example.com',
+]
 
 function testEmailer(customConfig?: EmailConfiguration): Emailer {
     const config = customConfig || testEmailConfig
@@ -51,16 +69,15 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
             submissionName,
             stateAnalystsEmails
         ): Promise<void | Error> {
-            const result = await newPackageCMSEmail(
+            const emailData = await newPackageCMSEmail(
                 submission,
                 submissionName,
                 config,
                 stateAnalystsEmails
             )
-            if (result instanceof Error) {
-                return result
+            if (emailData instanceof Error) {
+                return emailData
             } else {
-                const emailData = result
                 return await this.sendEmail(emailData)
             }
         },
@@ -69,71 +86,84 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
             submissionName,
             user
         ): Promise<void | Error> {
-            const result = await newPackageStateEmail(
+            const emailData = await newPackageStateEmail(
                 submission,
                 submissionName,
                 user,
                 config
             )
-            if (result instanceof Error) {
-                return result
+            if (emailData instanceof Error) {
+                return emailData
             } else {
-                const emailData = result
                 return await this.sendEmail(emailData)
             }
         },
-        sendUnlockPackageCMSEmail: function async(
+        sendUnlockPackageCMSEmail: async function (
             submission,
             updatedEmailData,
-            submissionName,
             stateAnalystsEmails
         ): Promise<void | Error> {
-            const emailData = unlockPackageCMSEmail(
+            const emailData = await unlockPackageCMSEmail(
                 submission,
                 updatedEmailData,
                 config,
-                submissionName,
                 stateAnalystsEmails
             )
-            return this.sendEmail(emailData)
+
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return this.sendEmail(emailData)
+            }
         },
-        sendUnlockPackageStateEmail: function async(
+        sendUnlockPackageStateEmail: async function (
             submission,
             updatedEmailData
         ): Promise<void | Error> {
-            const emailData = unlockPackageStateEmail(
+            const emailData = await unlockPackageStateEmail(
                 submission,
                 updatedEmailData,
-                config,
-                submissionName
+                config
             )
-            return this.sendEmail(emailData)
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return this.sendEmail(emailData)
+            }
         },
-        sendResubmittedStateEmail: function async(
+        sendResubmittedStateEmail: async function (
             submission: LockedHealthPlanFormDataType,
             updatedEmailData: UpdatedEmailData,
             user: UserType
         ): Promise<void | Error> {
-            const emailData = resubmitPackageStateEmail(
+            const emailData = await resubmitPackageStateEmail(
                 submission,
                 user,
                 updatedEmailData,
                 config
             )
-            return this.sendEmail(emailData)
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return this.sendEmail(emailData)
+            }
         },
-        sendResubmittedCMSEmail: function async(
+        sendResubmittedCMSEmail: async function (
             submission,
             updatedEmailData,
             stateAnalystsEmails
         ): Promise<void | Error> {
-            const emailData = resubmitPackageCMSEmail(
+            const emailData = await resubmitPackageCMSEmail(
                 submission,
                 updatedEmailData,
                 config,
                 stateAnalystsEmails
             )
-            return this.sendEmail(emailData)
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return this.sendEmail(emailData)
+            }
         },
     }
 }
@@ -416,6 +446,8 @@ const mockContractAmendmentFormData = (
 export {
     testEmailConfig,
     testStateAnalystsEmails,
+    testDuplicateEmailConfig,
+    testDuplicateStateAnalystsEmails,
     mockContractAmendmentFormData,
     mockContractOnlyFormData,
     mockContractAndRatesFormData,

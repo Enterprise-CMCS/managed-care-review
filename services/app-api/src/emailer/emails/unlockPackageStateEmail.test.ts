@@ -8,7 +8,6 @@ const unlockData = {
     updatedAt: new Date('02/01/2022'),
     updatedReason: 'Adding rate certification.',
 }
-const submissionName = 'MN-PMAP-0001'
 const sub = {
     ...unlockedWithFullContracts(),
     contractDateStart: new Date('2021-01-01'),
@@ -21,14 +20,19 @@ const sub = {
         effectiveDateEnd: new Date('12/31/2021'),
     },
 }
-const template = unlockPackageStateEmail(
-    sub,
-    unlockData,
-    testEmailConfig,
-    submissionName
-)
 
-test('subject line is correct and clearly states submission is unlocked', () => {
+test('subject line is correct and clearly states submission is unlocked', async () => {
+    const template = await unlockPackageStateEmail(
+        sub,
+        unlockData,
+        testEmailConfig
+    )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
     expect(template).toEqual(
         expect.objectContaining({
             subject: expect.stringContaining(
@@ -37,21 +41,29 @@ test('subject line is correct and clearly states submission is unlocked', () => 
         })
     )
 })
-test('unlocked by includes correct email address', () => {
+
+test('body content is correct', async () => {
+    const template = await unlockPackageStateEmail(
+        sub,
+        unlockData,
+        testEmailConfig
+    )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringMatching(/Unlocked by: josh/),
         })
     )
-})
-test('unlocked on includes correct date', () => {
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringMatching(/Unlocked on: 02/),
         })
     )
-})
-test('includes correct reason', () => {
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringMatching(
@@ -59,15 +71,11 @@ test('includes correct reason', () => {
             ),
         })
     )
-})
-test('includes rate name', () => {
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringMatching(/Rate name:/),
         })
     )
-})
-test('includes instructions about revising the submission', () => {
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringMatching(
@@ -78,5 +86,16 @@ test('includes instructions about revising the submission', () => {
 })
 
 test('renders overall email as expected', async () => {
+    const template = await unlockPackageStateEmail(
+        sub,
+        unlockData,
+        testEmailConfig
+    )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
     expect(template.bodyHTML).toMatchSnapshot()
 })

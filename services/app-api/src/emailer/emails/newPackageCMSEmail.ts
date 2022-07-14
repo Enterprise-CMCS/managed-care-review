@@ -7,7 +7,7 @@ import { generateRateName } from '../../../../app-web/src/common-code/healthPlan
 import {
     stripHTMLFromTemplate,
     SubmissionTypeRecord,
-    generateReviewerEmails,
+    generateCMSReviewerEmails,
     renderTemplate,
 } from '../templateHelpers'
 
@@ -20,7 +20,7 @@ export const newPackageCMSEmail = async (
     // config
     const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
-    const reviewerEmails = generateReviewerEmails(
+    const reviewerEmails = generateCMSReviewerEmails(
         config,
         pkg,
         stateAnalystsEmails

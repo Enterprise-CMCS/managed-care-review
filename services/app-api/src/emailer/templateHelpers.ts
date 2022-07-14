@@ -7,6 +7,7 @@ import {
     SubmissionType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { EmailConfiguration, StateAnalystsEmails } from '.'
+import { UserType } from '../domain-models'
 
 // ETA SETUP
 Eta.configure({
@@ -74,8 +75,12 @@ const includesChipPrograms = (programIDs: string[]): boolean => {
     return programIDs.some((id: string) => chipProgramIds.includes(id))
 }
 
+// Prune duplicate emails
+const pruneDuplicateEmails = (emails: string[]): string[] =>
+    emails.filter((email, index) => emails.indexOf(email) === index)
+
 // Determine who should be notified as a reviewer for a given health plan package and state
-const generateReviewerEmails = (
+const generateCMSReviewerEmails = (
     config: EmailConfiguration,
     submission: LockedHealthPlanFormDataType | UnlockedHealthPlanFormDataType,
     stateAnalystsEmails: StateAnalystsEmails
@@ -100,12 +105,29 @@ const generateReviewerEmails = (
         submission.stateCode !== 'PR' &&
         !includesChipPrograms(submission.programIDs)
     ) {
-        return contractAndRateReviewerEmails
+        return pruneDuplicateEmails(contractAndRateReviewerEmails)
     } else if (includesChipPrograms(submission.programIDs)) {
-        return chipReviewerEmails
+        return pruneDuplicateEmails(chipReviewerEmails)
     }
 
-    return cmsReviewSharedEmails
+    return pruneDuplicateEmails(cmsReviewSharedEmails)
+}
+
+const generateStateReceiverEmails = (
+    pkg: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType,
+    user?: UserType
+): string[] => {
+    const stateReceiverEmails: string[] = []
+    //Only add current user email if user is passed in a role is state user
+    if (user?.email && user?.role === 'STATE_USER') {
+        stateReceiverEmails.push(user.email)
+    }
+
+    pkg.stateContacts.forEach((contact) =>
+        stateReceiverEmails.push(contact.email)
+    )
+
+    return pruneDuplicateEmails(stateReceiverEmails)
 }
 
 // Clean out HTML tags from an HTML based template
@@ -129,7 +151,8 @@ export {
     stripHTMLFromTemplate,
     CHIP_PROGRAMS_UUID,
     includesChipPrograms,
-    generateReviewerEmails,
+    generateCMSReviewerEmails,
+    generateStateReceiverEmails,
     renderTemplate,
     SubmissionTypeRecord,
 }
