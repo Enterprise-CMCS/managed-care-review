@@ -23,12 +23,6 @@ jobs:
         with:
           fetch-depth: 20
 
-      - name: get non-sensitive values
-        shell: bash
-        run: env
-        env:
-          DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME}}
-
       - name: Check for secrets
         uses: ./.github/actions/check_secrets
         with:
