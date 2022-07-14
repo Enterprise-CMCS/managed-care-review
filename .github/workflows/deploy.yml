@@ -25,7 +25,9 @@ jobs:
 
       - name: get non-sensitive values
         shell: bash
-        run: echo ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME}}
+        run: env
+        env:
+          DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME}}
 
       - name: Check for secrets
         uses: ./.github/actions/check_secrets
