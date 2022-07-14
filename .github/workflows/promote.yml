@@ -123,7 +123,6 @@ jobs:
       aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      cloudfront_storybook_domain_name: ${{ secrets.DEV_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
 
   promote-app-dev:
     needs: [promote-infra-dev, build-prisma-client-lambda-layer, unit-tests]
@@ -186,7 +185,6 @@ jobs:
     secrets:
       aws_access_key_id: ${{ secrets.VAL_AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.VAL_AWS_SECRET_ACCESS_KEY }}
-      cloudfront_storybook_domain_name: ${{ secrets.VAL_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
 
   promote-app-val:
@@ -251,7 +249,6 @@ jobs:
     secrets:
       aws_access_key_id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
       aws_secret_access_key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
-      cloudfront_storybook_domain_name: ${{ secrets.PROD_CLOUDFRONT_STORYBOOK_DOMAIN_NAME }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
 
   promote-app-prod:
