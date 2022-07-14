@@ -5,7 +5,10 @@ import {
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { UserType } from '../domain-models'
-import { formatCalendarDate } from '../../../app-web/src/common-code/dateHelpers'
+import {
+    formatDateTime,
+    formatCalendarDate,
+} from '../../../app-web/src/common-code/dateHelpers/calendarDate'
 import { EmailConfiguration, EmailData, StateAnalystsEmails } from './'
 import { generateRateName } from '../../../app-web/src/common-code/healthPlanFormDataType'
 
@@ -274,7 +277,7 @@ const unlockPackageCMSEmail = (
     const bodyHTML = `Submission ${unlockData.packageName} was unlocked<br />
         <br />
         <b>Unlocked by:</b> ${unlockData.updatedBy}<br />
-        <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}<br />
+        <b>Unlocked on:</b> ${formatDateTime(unlockData.updatedAt)}<br />
         <b>Reason for unlock:</b> ${unlockData.updatedReason}<br /><br />
         ${rateNameText}
         You will receive another notification when the state resubmits.
@@ -317,7 +320,7 @@ const unlockPackageStateEmail = (
     } was unlocked by CMS<br />
         <br />
         <b>Unlocked by:</b> ${unlockData.updatedBy}<br />
-        <b>Unlocked on:</b> ${formatCalendarDate(unlockData.updatedAt)}<br />
+        <b>Unlocked on:</b> ${formatDateTime(unlockData.updatedAt)}<br />
         <b>Reason for unlock:</b> ${unlockData.updatedReason}<br /><br />
         ${rateNameText}
         <b>You must revise the submission before CMS can continue reviewing it.<br />
@@ -358,9 +361,7 @@ const resubmittedStateEmail = (
     } was successfully resubmitted<br />
         <br />
         <b>Submitted by:</b> ${resubmittedData.updatedBy}<br />
-        <b>Updated on:</b> ${formatCalendarDate(
-            resubmittedData.updatedAt
-        )}<br />
+        <b>Updated on:</b> ${formatDateTime(resubmittedData.updatedAt)}<br />
         <b>Changes made:</b> ${resubmittedData.updatedReason}<br />
         ${rateNameText}
         <br />
@@ -405,9 +406,7 @@ const resubmittedCMSEmail = (
     }<br />
         <br />
         <b>Submitted by:</b> ${resubmittedData.updatedBy}<br />
-        <b>Updated on:</b> ${formatCalendarDate(
-            resubmittedData.updatedAt
-        )}<br />
+        <b>Updated on:</b> ${formatDateTime(resubmittedData.updatedAt)}<br />
         <b>Changes made:</b> ${resubmittedData.updatedReason}<br />
         ${rateNameText}
         <br />

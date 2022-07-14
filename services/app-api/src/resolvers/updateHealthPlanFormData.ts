@@ -37,9 +37,10 @@ export function updateHealthPlanFormDataResolver(
             )
             throw new ForbiddenError('user not authorized to modify state data')
         }
-
         const formDataResult = base64ToDomain(input.healthPlanFormData)
+        console.log('formDataResult: ', formDataResult)
         if (formDataResult instanceof Error) {
+            console.log('formDataResult is an error: ', formDataResult)
             const errMessage =
                 `Failed to parse out form data in request: ${input.pkgID}  ` +
                 formDataResult.message
@@ -61,7 +62,9 @@ export function updateHealthPlanFormDataResolver(
         }
 
         const unlockedFormData: UnlockedHealthPlanFormDataType = formDataResult
+        console.log('unlockedFormData: ', unlockedFormData)
         const result = await store.findHealthPlanPackage(input.pkgID)
+        console.log('result: ', result)
 
         if (isStoreError(result)) {
             console.log('Error finding a package', result)
@@ -81,6 +84,7 @@ export function updateHealthPlanFormDataResolver(
         }
 
         const planPackage: HealthPlanPackageType = result
+        console.log('planPackage: ', planPackage)
 
         // Authorize the update
         const stateFromCurrentUser = context.user.state_code
@@ -101,6 +105,7 @@ export function updateHealthPlanFormDataResolver(
         // Check the package is in an update-able state
         const planPackageStatus = packageStatus(planPackage)
         if (planPackageStatus instanceof Error) {
+            console.log('planPackageStatus is an error: ', planPackageStatus)
             const errMessage = `No revisions found on package: ${input.pkgID}`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)

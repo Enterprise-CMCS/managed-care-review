@@ -19,8 +19,8 @@ type ContractAmendmentInfo = {
 }
 
 type RateAmendmentInfo = {
-    effectiveDateStart?: Date
-    effectiveDateEnd?: Date
+    effectiveDateStart?: CalendarDate
+    effectiveDateEnd?: CalendarDate
 }
 
 type ContractType = 'BASE' | 'AMENDMENT'
@@ -103,7 +103,7 @@ type Month = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
 
 type Year = number
 
-type CalendarDate = `${Month}/${Day}/${Year}` | undefined
+type CalendarDate = `${Year}-${Month}-${Day}` | undefined
 
 // MAIN
 type UnlockedHealthPlanFormDataType = {
@@ -123,8 +123,8 @@ type UnlockedHealthPlanFormDataType = {
     contractType?: ContractType
     contractExecutionStatus?: ContractExecutionStatus
     contractDocuments: SubmissionDocument[]
-    contractDateStart?: Date
-    contractDateEnd?: Date
+    contractDateStart?: CalendarDate
+    contractDateEnd?: CalendarDate
     managedCareEntities: string[]
     federalAuthorities: FederalAuthority[]
     contractAmendmentInfo?: ContractAmendmentInfo
@@ -132,8 +132,8 @@ type UnlockedHealthPlanFormDataType = {
     rateCapitationType?: RateCapitationType
     rateDocuments: SubmissionDocument[]
     rateDateStart?: CalendarDate
-    rateDateEnd?: Date
-    rateDateCertified?: Date
+    rateDateEnd?: CalendarDate
+    rateDateCertified?: CalendarDate
     rateAmendmentInfo?: RateAmendmentInfo
 }
 
@@ -141,11 +141,11 @@ type RateDataType = {
     rateType?: 'AMENDMENT' | 'NEW' | null
     rateCapitationType?: RateCapitationType
     rateDateStart?: CalendarDate
-    rateDateEnd?: Date
-    rateDateCertified?: Date
+    rateDateEnd?: CalendarDate
+    rateDateCertified?: CalendarDate
     rateAmendmentInfo?: {
-        effectiveDateEnd?: Date
-        effectiveDateStart?: Date
+        effectiveDateEnd?: CalendarDate
+        effectiveDateStart?: CalendarDate
     } | null
 }
 

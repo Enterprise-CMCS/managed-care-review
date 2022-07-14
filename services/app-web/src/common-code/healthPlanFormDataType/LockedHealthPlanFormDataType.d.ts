@@ -30,8 +30,8 @@ export type LockedHealthPlanFormDataType = {
     contractType: ContractType
     contractExecutionStatus: ContractExecutionStatus
     contractDocuments: SubmissionDocument[]
-    contractDateStart: Date
-    contractDateEnd: Date
+    contractDateStart: CalendarDate
+    contractDateEnd: CalendarDate
     managedCareEntities: string[]
     federalAuthorities: FederalAuthority[]
     contractAmendmentInfo?: ContractAmendmentInfo
@@ -39,8 +39,8 @@ export type LockedHealthPlanFormDataType = {
     rateCapitationType?: RateCapitationType
     rateDocuments: SubmissionDocument[]
     rateDateStart?: CalendarDate
-    rateDateEnd?: Date
-    rateDateCertified?: Date
+    rateDateEnd?: CalendarDate
+    rateDateCertified?: CalendarDate
     rateAmendmentInfo?: RateAmendmentInfo
     stateContacts: StateContact[]
     actuaryContacts: ActuaryContact[]

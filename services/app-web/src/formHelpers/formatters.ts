@@ -30,12 +30,12 @@ const formatYesNoForProto = (
 // Convert api data for use in form.  Form fields must be a string.
 // Empty values as an empty string, dates in date picker as YYYY-MM-DD, boolean as "Yes" "No" values
 const formatForForm = (
-    attribute: boolean | Date | string | null | undefined
+    attribute: boolean | CalendarDate | string | null | undefined
 ): string => {
     if (attribute === null || attribute === undefined) {
         return ''
-    } else if (attribute instanceof Date) {
-        return dayjs(attribute).utc().format('YYYY-MM-DD')
+        // } else if (attribute instanceof Date) {
+        //     return dayjs(attribute).utc().format('YYYY-MM-DD')
     } else if (typeof attribute === 'boolean') {
         return attribute ? 'YES' : 'NO'
     } else {
@@ -49,11 +49,12 @@ const formatFormDateForDomain = (
     if (attribute === '') {
         return undefined
     }
+    // string looks like YYYY-MM-DD
     const parsedDate = attribute.split('-')
-    const month = parseInt(parsedDate[0])
-    const day = parseInt(parsedDate[1])
-    const year = parseInt(parsedDate[2])
-    return `${month}/${day}/${year}` as CalendarDate
+    const month = parseInt(parsedDate[1])
+    const day = parseInt(parsedDate[2])
+    const year = parseInt(parsedDate[0])
+    return `${year}-${month}-${day}` as CalendarDate
 }
 
 export {

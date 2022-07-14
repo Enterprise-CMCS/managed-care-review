@@ -125,7 +125,7 @@ const protoDateToDomainCalendarDate = (
         return undefined
     }
     // prettier-ignore
-    return `${protoDate.month}/${protoDate.day}/${'protoDate.year'}` as CalendarDate
+    return `${protoDate.year}-${protoDate.month}-${protoDate.day}` as CalendarDate
 }
 /*
     Convert proto enum (e.g. SUBMISSION_TYPE_CONTRACT_ONLY) to domain enum (e.g. CONTRACT_ONLY)
@@ -303,8 +303,12 @@ function parseProtoRateAmendment(
     }
 
     return {
-        effectiveDateEnd: protoDateToDomain(rateAmendment.effectiveDateEnd),
-        effectiveDateStart: protoDateToDomain(rateAmendment.effectiveDateStart),
+        effectiveDateEnd: protoDateToDomainCalendarDate(
+            rateAmendment.effectiveDateEnd
+        ),
+        effectiveDateStart: protoDateToDomainCalendarDate(
+            rateAmendment.effectiveDateStart
+        ),
     }
 }
 
@@ -388,10 +392,10 @@ const toDomain = (
             formDataMessage?.contractInfo?.contractExecutionStatus
         ),
 
-        contractDateStart: protoDateToDomain(
+        contractDateStart: protoDateToDomainCalendarDate(
             formDataMessage.contractInfo?.contractDateStart
         ),
-        contractDateEnd: protoDateToDomain(
+        contractDateEnd: protoDateToDomainCalendarDate(
             formDataMessage.contractInfo?.contractDateEnd
         ),
         contractDocuments: parseProtoDocuments(
@@ -417,8 +421,10 @@ const toDomain = (
         ),
         rateDocuments: parseProtoDocuments(rateInfo?.rateDocuments),
         rateDateStart: protoDateToDomainCalendarDate(rateInfo?.rateDateStart),
-        rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
-        rateDateCertified: protoDateToDomain(rateInfo?.rateDateCertified),
+        rateDateEnd: protoDateToDomainCalendarDate(rateInfo?.rateDateEnd),
+        rateDateCertified: protoDateToDomainCalendarDate(
+            rateInfo?.rateDateCertified
+        ),
         actuaryCommunicationPreference: enumToDomain(
             mcreviewproto.ActuaryCommunicationType,
             rateInfo?.actuaryCommunicationPreference

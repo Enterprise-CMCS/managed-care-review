@@ -30,10 +30,10 @@ const calendarDomainDateToProtoDate = (
         return undefined
     }
 
-    const parsedCalendarDate = domainDate.split('/')
-    const month = parseInt(parsedCalendarDate[0])
-    const day = parseInt(parsedCalendarDate[1])
-    const year = parseInt(parsedCalendarDate[2])
+    const parsedCalendarDate = domainDate.split('-')
+    const month = parseInt(parsedCalendarDate[1])
+    const day = parseInt(parsedCalendarDate[2])
+    const year = parseInt(parsedCalendarDate[0])
 
     return {
         day: day,
@@ -164,10 +164,12 @@ const toProtoBuffer = (
                 domainData.contractExecutionStatus,
                 mcreviewproto.ContractExecutionStatus
             ),
-            contractDateStart: domainDateToProtoDate(
+            contractDateStart: calendarDomainDateToProtoDate(
                 domainData.contractDateStart
             ),
-            contractDateEnd: domainDateToProtoDate(domainData.contractDateEnd),
+            contractDateEnd: calendarDomainDateToProtoDate(
+                domainData.contractDateEnd
+            ),
             managedCareEntities: domainEnumArrayToProto(
                 mcreviewproto.ManagedCareEntity,
                 domainData.managedCareEntities
@@ -200,8 +202,10 @@ const toProtoBuffer = (
                 rateDateStart: calendarDomainDateToProtoDate(
                     domainData.rateDateStart
                 ),
-                rateDateEnd: domainDateToProtoDate(domainData.rateDateEnd),
-                rateDateCertified: domainDateToProtoDate(
+                rateDateEnd: calendarDomainDateToProtoDate(
+                    domainData.rateDateEnd
+                ),
+                rateDateCertified: calendarDomainDateToProtoDate(
                     domainData.rateDateCertified
                 ),
                 rateDocuments: domainData.rateDocuments.map((doc) => ({
