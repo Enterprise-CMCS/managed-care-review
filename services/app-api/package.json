@@ -66,7 +66,7 @@
         "jest-raw-loader": "^1.0.1",
         "lint-staged": "^13.0.1",
         "prettier": "^2.4.1",
-        "prisma": "^3.11.1",
+        "prisma": "^4.0.0",
         "serverless": "^3.19.0",
         "serverless-associate-waf": "^1.2.1",
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
