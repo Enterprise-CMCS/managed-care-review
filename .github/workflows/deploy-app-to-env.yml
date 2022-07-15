@@ -21,12 +21,6 @@ on:
         required: true
       react_app_auth_mode:
         required: true
-      cloudfront_domain_name:
-        required: true
-      cloudfront_certificate_arn:
-        required: true
-      storybook_domain_name:
-        required: true
 
 jobs:
   app-web:
@@ -98,9 +92,6 @@ jobs:
           DATABASE_URL: AWS_SM
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
           EMAILER_MODE: SES
-          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.cloudfront_domain_name }}
-          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.cloudfront_certificate_arn }}
-          STORYBOOK_DOMAIN_NAME: ${{ secrets.storybook_domain_name }}
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 
