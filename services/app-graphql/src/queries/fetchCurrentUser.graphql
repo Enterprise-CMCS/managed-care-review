@@ -16,6 +16,7 @@ query fetchCurrentUser {
                 programs {
                     id
                     name
+                    fullName
                 }
             }
         }

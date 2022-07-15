@@ -12,6 +12,7 @@ const submissionData: HealthPlanPackage = {
         programs: [
             {
                 id: 'd95394e5-44d1-45df-8151-1cc1ee66f100',
+                fullName: 'Prepaid Medical Assistance Program',
                 name: 'PMAP',
             },
         ],

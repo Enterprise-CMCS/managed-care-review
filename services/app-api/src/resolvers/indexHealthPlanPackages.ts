@@ -42,7 +42,8 @@ export function indexHealthPlanPackagesResolver(
             setSuccessAttributesOnActiveSpan(span)
             return { totalCount: edges.length, edges }
         } else if (isCMSUser(user)) {
-            const results = await store.findAllHealthPlanPackagesByState('MN')
+            const results = await store.findAllHealthPlanPackagesBySubmittedAt()
+
             if (isStoreError(results)) {
                 const errMessage = `Issue finding packages for CMS user of type ${results.code}. Message: ${results.message}`
                 logError('indexHealthPlanPackages', errMessage)
@@ -61,6 +62,7 @@ export function indexHealthPlanPackagesResolver(
             })
 
             logSuccess('indexHealthPlanPackages')
+
             setSuccessAttributesOnActiveSpan(span)
             return { totalCount: edges.length, edges }
         } else {
