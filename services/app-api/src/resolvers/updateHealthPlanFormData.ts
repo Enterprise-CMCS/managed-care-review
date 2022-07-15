@@ -38,7 +38,6 @@ export function updateHealthPlanFormDataResolver(
             throw new ForbiddenError('user not authorized to modify state data')
         }
         const formDataResult = base64ToDomain(input.healthPlanFormData)
-        console.log('formDataResult: ', formDataResult)
         if (formDataResult instanceof Error) {
             console.log('formDataResult is an error: ', formDataResult)
             const errMessage =
@@ -62,7 +61,6 @@ export function updateHealthPlanFormDataResolver(
         }
 
         const unlockedFormData: UnlockedHealthPlanFormDataType = formDataResult
-        console.log('unlockedFormData: ', unlockedFormData)
         const result = await store.findHealthPlanPackage(input.pkgID)
         console.log('result: ', result)
 
