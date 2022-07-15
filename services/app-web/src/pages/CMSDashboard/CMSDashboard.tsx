@@ -96,8 +96,6 @@ export const CMSDashboard = (): React.ReactElement => {
                 // should display draft submissions to a CMS user - this is also filtered out on the api side
                 return
             }
-            console.log(sub.state.programs)
-            console.log(currentSubmissionData.programIDs)
             const programs = sub.state.programs
             submissionRows.push({
                 id: sub.id,
@@ -135,7 +133,6 @@ export const CMSDashboard = (): React.ReactElement => {
                                         <th>ID</th>
                                         <th>Programs</th>
                                         <th>Submitted</th>
-                                        <th>Last updated</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
@@ -184,11 +181,6 @@ export const CMSDashboard = (): React.ReactElement => {
                                                                   'MM/DD/YYYY'
                                                               )
                                                             : ''}
-                                                    </td>
-                                                    <td>
-                                                        {dayjs(
-                                                            dashboardSubmission.updatedAt
-                                                        ).format('MM/DD/YYYY')}
                                                     </td>
                                                     <td data-testid="submission-status">
                                                         <StatusTag
