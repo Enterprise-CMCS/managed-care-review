@@ -58,8 +58,8 @@ const contractAmendmentInfoSchema = z.object({
 })
 
 const rateAmendmentInfoSchema = z.object({
-    effectiveDateStart: z.date().optional(),
-    effectiveDateEnd: z.date().optional(),
+    effectiveDateStart: z.string().optional(),
+    effectiveDateEnd: z.string().optional(),
 })
 
 const contractTypeSchema = z.union([z.literal('BASE'), z.literal('AMENDMENT')])

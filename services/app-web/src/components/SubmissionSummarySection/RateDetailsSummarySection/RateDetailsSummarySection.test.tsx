@@ -3,6 +3,7 @@ import {
     mockContractAndRatesDraft,
     mockStateSubmission,
 } from '../../../testHelpers/apolloHelpers'
+import { CalendarDate } from '../../../common-code/healthPlanFormDataType'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
 import { formatRateNameDate } from '../../../common-code/dateHelpers'
@@ -103,12 +104,12 @@ describe('RateDetailsSummarySection', () => {
     it('can render correct rate name for AMENDMENT rate submission', () => {
         const submission = {
             ...mockContractAndRatesDraft(),
-            rateDateStart: new Date('2022-01-25'),
-            rateDateEnd: new Date('2023-01-25'),
-            rateDateCertified: new Date('2022-01-26'),
+            rateDateStart: '2022-01-25' as CalendarDate,
+            rateDateEnd: '2023-01-25' as CalendarDate,
+            rateDateCertified: '2022-01-26' as CalendarDate,
             rateAmendmentInfo: {
-                effectiveDateStart: new Date('2022-02-25'),
-                effectiveDateEnd: new Date('2023-02-26'),
+                effectiveDateStart: '2022-02-25' as CalendarDate,
+                effectiveDateEnd: '2023-02-26' as CalendarDate,
             },
         }
 
