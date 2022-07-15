@@ -9,6 +9,7 @@ mutation unlockHealthPlanPackage($input: UnlockHealthPlanPackageInput!) {
                 programs {
                     id
                     name
+                    fullName
                 }
             }
             status

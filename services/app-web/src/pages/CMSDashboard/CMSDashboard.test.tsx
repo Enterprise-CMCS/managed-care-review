@@ -3,6 +3,7 @@ import {
     fetchCurrentUserMock,
     indexHealthPlanPackagesMockSuccess,
     mockDraftHealthPlanPackage,
+    mockMNState,
     mockSubmittedHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
 } from '../../testHelpers/apolloHelpers'
@@ -143,5 +144,51 @@ describe('CMSDashboard', () => {
 
         const tag2 = within(rows[2]).getByTestId('submission-status')
         expect(tag2).toHaveTextContent('Submitted')
+    })
+
+    it('displays program status tags as expected', async () => {
+        const mockUser = {
+            __typename: 'CMSUser' as const,
+            role: 'CMS User',
+            name: 'Bob it user',
+            email: 'bob@dmas.mn.gov',
+        }
+
+        const mockMN = mockMNState() // this is the state used in apolloHelpers
+        const unlocked1 = mockUnlockedHealthPlanPackage({
+            programIDs: [mockMN.programs[0].id],
+        })
+        const unlocked2 = mockUnlockedHealthPlanPackage({
+            programIDs: [
+                mockMN.programs[0].id,
+                mockMN.programs[1].id,
+                mockMN.programs[2].id,
+            ],
+        })
+        unlocked1.id = 'test-unlocked1'
+        unlocked2.id = 'test-unlocked2'
+
+        const submissions = [unlocked1, unlocked2]
+
+        renderWithProviders(<CMSDashboard />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
+                    indexHealthPlanPackagesMockSuccess(submissions),
+                ],
+            },
+        })
+
+        const rows = await screen.findAllByRole('row')
+
+        const tags1 = within(rows[1]).getAllByTestId('program-tag')
+        expect(tags1[0]).toHaveTextContent(mockMN.programs[0].name)
+        expect(tags1).toHaveLength(1)
+
+        const tags2 = within(rows[2]).getAllByTestId('program-tag')
+        expect(tags2).toHaveLength(3)
+        expect(tags2[0]).toHaveTextContent(mockMN.programs[0].name)
+        expect(tags2[1]).toHaveTextContent(mockMN.programs[1].name)
+        expect(tags2[2]).toHaveTextContent(mockMN.programs[2].name)
     })
 })

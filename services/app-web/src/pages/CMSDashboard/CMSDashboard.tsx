@@ -3,32 +3,29 @@ import classnames from 'classnames'
 import dayjs from 'dayjs'
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import {
-    packageName,
-    programNames,
-} from '../../common-code/healthPlanFormDataType'
+import { packageName } from '../../common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { Loading } from '../../components/Loading'
 import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
 import { useAuth } from '../../contexts/AuthContext'
 import {
     HealthPlanPackageStatus,
+    Program,
     SubmissionType as GQLSubmissionType,
     useIndexHealthPlanPackagesQuery,
 } from '../../gen/gqlClient'
 import styles from '../StateDashboard/StateDashboard.module.scss'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
-import type { ProgramArgType } from '../../common-code/healthPlanFormDataType'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
 
 // We only pull a subset of data out of the submission and revisions for display in Dashboard
 type SubmissionInDashboard = {
     id: string
     name: string
-    programIDs: Array<string>
     submittedAt?: string
     updatedAt: string
     status: HealthPlanPackageStatus
+    programs: Program[]
     submissionType: GQLSubmissionType
 }
 
@@ -78,8 +75,6 @@ export const CMSDashboard = (): React.ReactElement => {
     if (loginStatus === 'LOADING' || !loggedInUser || loading || !data) {
         return <Loading />
     }
-    const programs: ProgramArgType[] = []
-    // const programs = loggedInUser.state.programs
     const submissionRows: SubmissionInDashboard[] = []
 
     data?.indexHealthPlanPackages.edges
@@ -101,13 +96,14 @@ export const CMSDashboard = (): React.ReactElement => {
                 // should display draft submissions to a CMS user - this is also filtered out on the api side
                 return
             }
-
+            console.log(sub.state.programs)
+            console.log(currentSubmissionData.programIDs)
+            const programs = sub.state.programs
             submissionRows.push({
                 id: sub.id,
                 name: packageName(currentSubmissionData, programs),
-                programIDs: programNames(
-                    programs,
-                    currentSubmissionData.programIDs
+                programs: programs.filter((program) =>
+                    currentSubmissionData.programIDs.includes(program.id)
                 ),
                 submittedAt: sub.initiallySubmittedAt,
                 status: sub.status,
@@ -123,10 +119,10 @@ export const CMSDashboard = (): React.ReactElement => {
 
     return (
         <>
-            <div id="dashboard-page" className={styles.wrapper}>
+            <div id="cms-dashboard-page" className={styles.wrapper}>
                 <GridContainer
                     className={styles.container}
-                    data-testid="dashboard-page"
+                    data-testid="cms-dashboard-page"
                 >
                     <section className={styles.panel}>
                         <div className={styles.panelHeader}>
@@ -161,16 +157,20 @@ export const CMSDashboard = (): React.ReactElement => {
                                                             }
                                                         </NavLink>
                                                     </td>
-                                                    <td>
-                                                        {dashboardSubmission.programIDs.map(
-                                                            (id) => {
+                                                    <td data-destid="submission-programs">
+                                                        {dashboardSubmission.programs.map(
+                                                            (program) => {
                                                                 return (
                                                                     <Tag
                                                                         data-testid="program-tag"
-                                                                        key={id}
+                                                                        key={
+                                                                            program.id
+                                                                        }
                                                                         className={`radius-pill ${styles.programTag}`}
                                                                     >
-                                                                        {id}
+                                                                        {
+                                                                            program.name
+                                                                        }
                                                                     </Tag>
                                                                 )
                                                             }
