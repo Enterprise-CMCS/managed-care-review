@@ -49,11 +49,11 @@ const formatFormDateForDomain = (
     if (attribute === '') {
         return undefined
     }
-    // string looks like YYYY-MM-DD
+    // attribute looks like YYYY-MM-DD
     const parsedDate = attribute.split('-')
-    const month = parseInt(parsedDate[1])
-    const day = parseInt(parsedDate[2])
-    const year = parseInt(parsedDate[0])
+    const month = parsedDate[1]
+    const day = parsedDate[2]
+    const year = parsedDate[0]
     return `${year}-${month}-${day}` as CalendarDate
 }
 

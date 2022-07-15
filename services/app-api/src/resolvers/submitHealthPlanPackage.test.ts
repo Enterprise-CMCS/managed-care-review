@@ -11,10 +11,7 @@ import {
 } from '../testHelpers/gqlHelpers'
 import { testEmailConfig, testEmailer } from '../testHelpers/emailerHelpers'
 import { base64ToDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import {
-    CalendarDate,
-    packageName,
-} from '../../../app-web/src/common-code/healthPlanFormDataType'
+import { packageName } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 
 describe('submitHealthPlanPackage', () => {
@@ -184,9 +181,9 @@ describe('submitHealthPlanPackage', () => {
 
         const draft = await createAndUpdateTestHealthPlanPackage(server, {
             submissionType: 'CONTRACT_ONLY',
-            rateDateStart: '2025-05-01' as CalendarDate,
-            rateDateEnd: '2026-04-20' as CalendarDate,
-            rateDateCertified: '2025-03-15' as CalendarDate,
+            rateDateStart: '2025-05-01',
+            rateDateEnd: '2026-04-20',
+            rateDateCertified: '2025-03-15',
         })
 
         const draftID = draft.id
@@ -485,9 +482,9 @@ describe('submitHealthPlanPackage', () => {
         })
         const draft = await createAndUpdateTestHealthPlanPackage(server, {
             submissionType: 'CONTRACT_ONLY',
-            rateDateStart: '2025-05-01' as CalendarDate,
-            rateDateEnd: '2026-04-20' as CalendarDate,
-            rateDateCertified: '2025-03-15' as CalendarDate,
+            rateDateStart: '2025-05-01',
+            rateDateEnd: '2026-04-20',
+            rateDateCertified: '2025-03-15',
         })
         const draftID = draft.id
 

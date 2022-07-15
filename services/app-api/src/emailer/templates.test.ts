@@ -8,10 +8,7 @@ import {
     mockUnlockedContractAndRatesFormData,
     mockUnlockedContractOnlyFormData,
 } from '../testHelpers/emailerHelpers'
-import {
-    LockedHealthPlanFormDataType,
-    CalendarDate,
-} from '../../../app-web/src/common-code/healthPlanFormDataType'
+import { LockedHealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     newPackageCMSEmail,
     newPackageStateEmail,
@@ -57,8 +54,8 @@ describe('Email templates', () => {
         it('includes expected data summary for a contract only submission', () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractOnlyFormData(),
-                contractDateStart: '2021-01-01' as CalendarDate,
-                contractDateEnd: '2025-01-01' as CalendarDate,
+                contractDateStart: '2021-01-01',
+                contractDateEnd: '2025-01-01',
             }
             const template = newPackageCMSEmail(
                 sub,
@@ -90,10 +87,10 @@ describe('Email templates', () => {
         it('includes expected data summary for a contract and rates submission CMS email', () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAndRatesFormData(),
-                contractDateStart: '2021-01-01' as CalendarDate,
-                contractDateEnd: '2025-01-01' as CalendarDate,
-                rateDateStart: '2021-01-01' as CalendarDate,
-                rateDateEnd: '2022-01-01' as CalendarDate,
+                contractDateStart: '2021-01-01',
+                contractDateEnd: '2025-01-01',
+                rateDateStart: '2021-01-01',
+                rateDateEnd: '2022-01-01',
             }
             const template = newPackageCMSEmail(
                 sub,
@@ -102,7 +99,7 @@ describe('Email templates', () => {
                 []
             )
             const rateName = `some-title-RATE-20210101-20220101-CERTIFICATION-${formatRateNameDate(
-                '2021-12-31' as CalendarDate
+                '2021-12-31'
             )}`
 
             expect(template).toEqual(
@@ -136,10 +133,10 @@ describe('Email templates', () => {
         it('includes expected data summary for a contract amendment submission', () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAmendmentFormData(),
-                contractDateStart: '2021-01-01' as CalendarDate,
-                contractDateEnd: '2025-01-01' as CalendarDate,
-                rateDateStart: '2021-01-01' as CalendarDate,
-                rateDateEnd: '2022-01-01' as CalendarDate,
+                contractDateStart: '2021-01-01',
+                contractDateEnd: '2025-01-01',
+                rateDateStart: '2021-01-01',
+                rateDateEnd: '2022-01-01',
             }
             const template = newPackageCMSEmail(
                 sub,
@@ -148,7 +145,7 @@ describe('Email templates', () => {
                 []
             )
             const rateName = `some-title-RATE-20210101-20220101-CERTIFICATION-${formatRateNameDate(
-                '2021-12-31' as CalendarDate
+                '2021-12-31'
             )}`
 
             expect(template).toEqual(
@@ -183,13 +180,13 @@ describe('Email templates', () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAndRatesFormData(),
                 rateType: 'AMENDMENT',
-                contractDateStart: '2021-01-01' as CalendarDate,
-                contractDateEnd: '2025-01-01' as CalendarDate,
-                rateDateStart: '2021-01-01' as CalendarDate,
-                rateDateEnd: '2022-01-01' as CalendarDate,
+                contractDateStart: '2021-01-01',
+                contractDateEnd: '2025-01-01',
+                rateDateStart: '2021-01-01',
+                rateDateEnd: '2022-01-01',
                 rateAmendmentInfo: {
-                    effectiveDateStart: '2021-06-05' as CalendarDate,
-                    effectiveDateEnd: '2021-12-31' as CalendarDate,
+                    effectiveDateStart: '2021-06-05',
+                    effectiveDateEnd: '2021-12-31',
                 },
             }
             const template = newPackageCMSEmail(
@@ -199,7 +196,7 @@ describe('Email templates', () => {
                 []
             )
             const rateName = `some-title-RATE-20210605-20211231-AMENDMENT-${formatRateNameDate(
-                '2021-12-31' as CalendarDate
+                '2021-12-31'
             )}`
 
             expect(template).toEqual(
@@ -575,10 +572,10 @@ describe('Email templates', () => {
         it('includes expected data summary for a contract and rates submission State email', () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAndRatesFormData(),
-                contractDateStart: '2021-01-01' as CalendarDate,
-                contractDateEnd: '2025-01-01' as CalendarDate,
-                rateDateStart: '2021-01-01' as CalendarDate,
-                rateDateEnd: '2022-01-01' as CalendarDate,
+                contractDateStart: '2021-01-01',
+                contractDateEnd: '2025-01-01',
+                rateDateStart: '2021-01-01',
+                rateDateEnd: '2022-01-01',
             }
             const user = mockUser()
             const template = newPackageStateEmail(
@@ -588,7 +585,7 @@ describe('Email templates', () => {
                 testEmailConfig
             )
             const rateName = `some-title-RATE-20210101-20220101-CERTIFICATION-${formatRateNameDate(
-                '2021-12-31' as CalendarDate
+                '2021-12-31'
             )}`
 
             expect(template).toEqual(
@@ -624,13 +621,13 @@ describe('Email templates', () => {
             const sub: LockedHealthPlanFormDataType = {
                 ...mockContractAndRatesFormData(),
                 rateType: 'AMENDMENT',
-                contractDateStart: '2021-01-01' as CalendarDate,
-                contractDateEnd: '2025-01-01' as CalendarDate,
-                rateDateStart: '2021-01-01' as CalendarDate,
-                rateDateEnd: '2022-01-01' as CalendarDate,
+                contractDateStart: '2021-01-01',
+                contractDateEnd: '2025-01-01',
+                rateDateStart: '2021-01-01',
+                rateDateEnd: '2022-01-01',
                 rateAmendmentInfo: {
-                    effectiveDateStart: '2021-06-05' as CalendarDate,
-                    effectiveDateEnd: '2021-12-31' as CalendarDate,
+                    effectiveDateStart: '2021-06-05',
+                    effectiveDateEnd: '2021-12-31',
                 },
             }
             const user = mockUser()
@@ -641,7 +638,7 @@ describe('Email templates', () => {
                 testEmailConfig
             )
             const rateName = `some-title-RATE-20210605-20211231-AMENDMENT-${formatRateNameDate(
-                '2021-12-31' as CalendarDate
+                '2021-12-31'
             )}`
 
             expect(template).toEqual(

@@ -8,8 +8,8 @@ function formatCalendarDate(date: CalendarDate | undefined): string {
         return ''
     }
     const parsedCalendarDate = date.split('-')
-    const month = parsedCalendarDate[1].padStart(2, '0')
-    const day = parsedCalendarDate[2].padStart(2, '0')
+    const month = parsedCalendarDate[1]
+    const day = parsedCalendarDate[2]
     const year = parsedCalendarDate[0]
     return `${month}/${day}/${year}`
 }
@@ -26,8 +26,8 @@ function formatRateNameDate(date: CalendarDate | undefined): string {
         return ''
     }
     const parsedCalendarDate = date.split('-')
-    const month = parsedCalendarDate[1].padStart(2, '0')
-    const day = parsedCalendarDate[2].padStart(2, '0')
+    const month = parsedCalendarDate[1]
+    const day = parsedCalendarDate[2]
     const year = parsedCalendarDate[0]
     return `${year}${month}${day}`
 }

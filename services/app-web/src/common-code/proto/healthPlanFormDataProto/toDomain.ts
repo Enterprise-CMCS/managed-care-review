@@ -124,8 +124,12 @@ const protoDateToDomainCalendarDate = (
         console.log('LOG: Invalid Proto Date', protoDate)
         return undefined
     }
+    // proto dates are numbers; we have to add leading zeros where necessary
+    const year = protoDate.year.toString()
+    const month = protoDate.month.toString().padStart(2, '0')
+    const day = protoDate.day.toString().padStart(2, '0')
     // prettier-ignore
-    return `${protoDate.year}-${protoDate.month}-${protoDate.day}` as CalendarDate
+    return `${year}-${month}-${day}` as CalendarDate
 }
 /*
     Convert proto enum (e.g. SUBMISSION_TYPE_CONTRACT_ONLY) to domain enum (e.g. CONTRACT_ONLY)

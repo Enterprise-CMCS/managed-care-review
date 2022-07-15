@@ -6,7 +6,6 @@ import FETCH_HEALTH_PLAN_PACKAGE from '../../../app-graphql/src/queries/fetchHea
 import UPDATE_HEALTH_PLAN_FORM_DATA from '../../../app-graphql/src/mutations/updateHealthPlanFormData.graphql'
 import typeDefs from '../../../app-graphql/src/schema.graphql'
 import {
-    CalendarDate,
     HealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
@@ -160,8 +159,8 @@ const createAndUpdateTestHealthPlanPackage = async (
     ;(draft.actuaryCommunicationPreference = 'OACT_TO_ACTUARY' as const),
         (draft.contractType = 'BASE' as const)
     draft.contractExecutionStatus = 'EXECUTED' as const
-    draft.contractDateStart = '2025-05-01' as CalendarDate
-    draft.contractDateEnd = '2026-04-30' as CalendarDate
+    draft.contractDateStart = '2025-05-01'
+    draft.contractDateEnd = '2026-04-30'
     draft.contractDocuments = [
         {
             name: 'contractDocument.pdf',
@@ -172,11 +171,11 @@ const createAndUpdateTestHealthPlanPackage = async (
     draft.managedCareEntities = ['MCO']
     draft.federalAuthorities = ['STATE_PLAN' as const]
     draft.rateType = 'NEW' as const
-    draft.contractDateStart = '2025-05-01' as CalendarDate
-    draft.contractDateEnd = '2026-04-30' as CalendarDate
-    draft.rateDateEnd = '2026-04-30' as CalendarDate
-    draft.rateDateStart = '2025-05-01' as CalendarDate
-    draft.rateDateCertified = '2025-03-15' as CalendarDate
+    draft.contractDateStart = '2025-05-01'
+    draft.contractDateEnd = '2026-04-30'
+    draft.rateDateEnd = '2026-04-30'
+    draft.rateDateStart = '2025-05-01'
+    draft.rateDateCertified = '2025-03-15'
     draft.rateDocuments = [
         {
             name: 'rateDocument.pdf',

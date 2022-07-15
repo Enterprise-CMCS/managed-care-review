@@ -1,7 +1,6 @@
 import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
-    CalendarDate,
 } from '../healthPlanFormDataType'
 
 function newHealthPlanFormData(): UnlockedHealthPlanFormDataType {
@@ -39,8 +38,8 @@ function basicHealthPlanFormData(): UnlockedHealthPlanFormDataType {
         documents: [],
         contractType: 'BASE',
         contractExecutionStatus: 'EXECUTED',
-        contractDateStart: '2021-04-22' as CalendarDate,
-        contractDateEnd: '2022-04-21' as CalendarDate,
+        contractDateStart: '2021-04-22',
+        contractDateEnd: '2022-04-21',
         contractDocuments: [],
         rateDocuments: [],
         managedCareEntities: [],
@@ -66,8 +65,8 @@ function contractOnly(): UnlockedHealthPlanFormDataType {
         rateDocuments: [],
         contractType: 'BASE',
         contractExecutionStatus: 'EXECUTED',
-        contractDateStart: '2021-04-22' as CalendarDate,
-        contractDateEnd: '2022-04-21' as CalendarDate,
+        contractDateStart: '2021-04-22',
+        contractDateEnd: '2022-04-21',
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         stateContacts: [],
@@ -91,8 +90,8 @@ function contractAmendedOnly(): UnlockedHealthPlanFormDataType {
         rateDocuments: [],
         contractType: 'AMENDMENT',
         contractExecutionStatus: 'EXECUTED',
-        contractDateStart: '2021-04-22' as CalendarDate,
-        contractDateEnd: '2022-04-21' as CalendarDate,
+        contractDateStart: '2021-04-22',
+        contractDateEnd: '2022-04-21',
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         stateContacts: [],
@@ -134,8 +133,8 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
         documents: [],
         contractType: 'BASE',
         contractExecutionStatus: 'EXECUTED',
-        contractDateStart: '2021-04-22' as CalendarDate,
-        contractDateEnd: '2022-04-21' as CalendarDate,
+        contractDateStart: '2021-04-22',
+        contractDateEnd: '2022-04-21',
         contractDocuments: [],
         rateDocuments: [],
         managedCareEntities: [],
@@ -195,8 +194,8 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
         ],
         contractType: 'BASE',
         contractExecutionStatus: 'EXECUTED',
-        contractDateStart: '2021-04-22' as CalendarDate,
-        contractDateEnd: '2022-04-21' as CalendarDate,
+        contractDateStart: '2021-04-22',
+        contractDateEnd: '2022-04-21',
         contractDocuments: [
             {
                 s3URL: 's3://bucketname/key/foo.png',
@@ -262,20 +261,20 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
         ],
         contractType: 'BASE',
         contractExecutionStatus: 'EXECUTED',
-        contractDateStart: '2021-04-22' as CalendarDate,
-        contractDateEnd: '2022-04-21' as CalendarDate,
+        contractDateStart: '2021-04-22',
+        contractDateEnd: '2022-04-21',
         contractDocuments: [],
         rateDocuments: [],
         managedCareEntities: ['PIHP'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateType: 'AMENDMENT',
         rateCapitationType: 'RATE_CELL',
-        rateDateStart: '2021-04-22' as CalendarDate,
-        rateDateEnd: '2022-03-29' as CalendarDate,
-        rateDateCertified: '2021-04-23' as CalendarDate,
+        rateDateStart: '2021-04-22',
+        rateDateEnd: '2022-03-29',
+        rateDateCertified: '2021-04-23',
         rateAmendmentInfo: {
-            effectiveDateStart: '2022-05-21' as CalendarDate,
-            effectiveDateEnd: '2022-09-21' as CalendarDate,
+            effectiveDateStart: '2022-05-21',
+            effectiveDateEnd: '2022-09-21',
         },
         stateContacts: [
             {
@@ -333,8 +332,8 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
         ],
         contractType: 'AMENDMENT',
         contractExecutionStatus: 'UNEXECUTED',
-        contractDateStart: '2021-04-22' as CalendarDate,
-        contractDateEnd: '2022-04-21' as CalendarDate,
+        contractDateStart: '2021-04-22',
+        contractDateEnd: '2022-04-21',
         contractDocuments: [
             {
                 s3URL: 's3://bucketname/key/foo.png',
@@ -373,12 +372,12 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateType: 'AMENDMENT',
         rateCapitationType: 'RATE_RANGE',
-        rateDateStart: '2021-04-22' as CalendarDate,
-        rateDateEnd: '2022-03-29' as CalendarDate,
-        rateDateCertified: '2021-04-23' as CalendarDate,
+        rateDateStart: '2021-04-22',
+        rateDateEnd: '2022-03-29',
+        rateDateCertified: '2021-04-23',
         rateAmendmentInfo: {
-            effectiveDateStart: '2022-05-21' as CalendarDate,
-            effectiveDateEnd: '2022-09-21' as CalendarDate,
+            effectiveDateStart: '2022-05-21',
+            effectiveDateEnd: '2022-09-21',
         },
         stateContacts: [
             {
@@ -431,8 +430,8 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
         ],
         contractType: 'AMENDMENT',
         contractExecutionStatus: 'UNEXECUTED',
-        contractDateStart: '2021-04-22' as CalendarDate,
-        contractDateEnd: '2022-04-21' as CalendarDate,
+        contractDateStart: '2021-04-22',
+        contractDateEnd: '2022-04-21',
         contractDocuments: [],
         contractAmendmentInfo: {
             modifiedProvisions: {
@@ -470,12 +469,12 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
                 documentCategories: ['RATES_RELATED'],
             },
         ],
-        rateDateStart: '2021-04-22' as CalendarDate,
-        rateDateEnd: '2022-03-29' as CalendarDate,
-        rateDateCertified: '2021-04-23' as CalendarDate,
+        rateDateStart: '2021-04-22',
+        rateDateEnd: '2022-03-29',
+        rateDateCertified: '2021-04-23',
         rateAmendmentInfo: {
-            effectiveDateStart: '2022-05-21' as CalendarDate,
-            effectiveDateEnd: '2022-09-21' as CalendarDate,
+            effectiveDateStart: '2022-05-21',
+            effectiveDateEnd: '2022-09-21',
         },
         stateContacts: [
             {
@@ -523,8 +522,8 @@ function basicLockedHealthPlanFormData(): LockedHealthPlanFormDataType {
         documents: [],
         contractType: 'BASE',
         contractExecutionStatus: 'EXECUTED',
-        contractDateStart: '2021-04-22' as CalendarDate,
-        contractDateEnd: '2022-04-21' as CalendarDate,
+        contractDateStart: '2021-04-22',
+        contractDateEnd: '2022-04-21',
         contractDocuments: [
             {
                 s3URL: 's3://bucketname/key/foo.png',
