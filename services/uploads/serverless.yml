@@ -3,6 +3,7 @@ service: uploads
 frameworkVersion: '^3.19.0'
 
 plugins:
+  - serverless-offline-ssm
   - serverless-plugin-scripts
   - serverless-s3-local
   - serverless-offline
@@ -18,8 +19,8 @@ provider:
   region: us-east-1
   iam:
     role:
-      path: ${self:custom.iamPath}
-      permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
+      path: ${ssm:/configuration/iam/path, "/"}
+      permissionsBoundary: ${ssm:/configuration/iam/full_permissions_boundary_policy}
       statements:
         - Effect: 'Allow'
           Action:
@@ -43,8 +44,6 @@ provider:
 
 custom:
   region: ${aws:region}
-  iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
-  iamPath: ${env:IAM_PATH, "/"}
   scripts:
     hooks:
       # This script is run locally when running 'serverless deploy'
@@ -54,6 +53,12 @@ custom:
       deploy:finalize: |
         rm lambda_layer.zip
         serverless invoke --stage ${sls:stage} --function avDownloadDefinitions -t Event
+  serverless-offline-ssm:
+    stages:
+      - local
+      - offline
+    ssm:
+      '/configuration/iam/full_permissions_boundary_policy': 'arn:aws:iam::local:policy/local/developer-boundary-policy'
   s3:
     # when vhostBuckets are enabled all non-localhost hostnames are re-written as buckets
     # setting this false allows the workaround for docker to work.

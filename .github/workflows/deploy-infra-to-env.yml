@@ -16,22 +16,6 @@ on:
         required: true
       aws_default_region:
         required: true
-      iam_path:
-        required: true
-      full_iam_permissions_boundary_policy:
-        required: true
-      cloudfront_certificate_arn:
-        required: false
-      cloudfront_domain_name:
-        required: false
-      cloudfront_storybook_domain_name:
-        required: false
-      ses_source_email_address:
-        required: true
-      okta_metadata_url:
-        required: true
-      nr_license_key:
-        required: true
 
 jobs:
   postgres:
@@ -50,8 +34,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          IAM_PATH: ${{ secrets.iam_path }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
         run: |
           pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -72,9 +54,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          IAM_PATH: ${{ secrets.iam_path }}
-          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.cloudfront_certificate_arn }}
-          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.cloudfront_domain_name }}
         run: |
           pushd services/ui && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -94,10 +73,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          IAM_PATH: ${{ secrets.iam_path }}
-          CLOUDFRONT_CERTIFICATE_ARN: ${{ secrets.cloudfront_certificate_arn }}
-          CLOUDFRONT_STORYBOOK_DOMAIN_NAME: ${{ secrets.cloudfront_storybook_domain_name }}
-
         run: |
           pushd services/storybook && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -117,9 +92,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
-          IAM_PATH: ${{ secrets.iam_path }}
-          NR_LICENSE_KEY: ${{ secrets.nr_license_key }}
         run: |
           pushd services/uploads && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -139,9 +111,6 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          NR_LICENSE_KEY: ${{ secrets.nr_license_key }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
-          IAM_PATH: ${{ secrets.iam_path }}
         run: |
           pushd services/infra-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -162,10 +131,5 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          IAM_PATH: ${{ secrets.iam_path }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
-          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
-          OKTA_METADATA_URL: ${{ secrets.okta_metadata_url }}
-
         run: |
           pushd services/ui-auth && npx serverless deploy --stage ${{ inputs.stage_name }}

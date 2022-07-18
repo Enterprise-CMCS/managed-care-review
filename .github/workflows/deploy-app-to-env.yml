@@ -19,31 +19,7 @@ on:
         required: true
       aws_default_region:
         required: true
-      iam_path:
-        required: true
-      ld_sdk_key:
-        required: true
-      react_app_ld_client_id:
-        required: true
-      full_iam_permissions_boundary_policy:
-        required: true
-      nr_license_key:
-        required: true
       react_app_auth_mode:
-        required: true
-      react_app_otel_collector_url:
-        required: true
-      ses_source_email_address:
-        required: true
-      ses_review_team_email_addresses:
-        required: true
-      ses_rates_email_addresses:
-        required: true
-      ses_review_help_email_address:
-        required: true
-      ses_rate_help_email_address:
-        required: true
-      ses_dev_team_help_email_address:
         required: true
 
 jobs:
@@ -67,10 +43,7 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          IAM_PATH: ${{ secrets.iam_path }}
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
-          NR_LICENSE_KEY: ${{ secrets.nr_license_key}}
-          REACT_APP_LD_CLIENT_ID: ${{ secrets.react_app_ld_client_id }}
 
         run: |
           pushd services/app-web && npx serverless deploy --stage ${{ inputs.stage_name }}
@@ -118,19 +91,7 @@ jobs:
           APP_VERSION: ${{ inputs.app_version }}
           DATABASE_URL: AWS_SM
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
-          IAM_PATH: ${{ secrets.iam_path }}
-          FULL_IAM_PERMISSIONS_BOUNDARY_POLICY: ${{ secrets.full_iam_permissions_boundary_policy }}
           EMAILER_MODE: SES
-          SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${{ secrets.ses_review_team_email_addresses }}
-          SES_RATES_EMAIL_ADDRESSES: ${{ secrets.ses_rates_email_addresses }}
-          SES_SOURCE_EMAIL_ADDRESS: ${{ secrets.ses_source_email_address }}
-          SES_REVIEW_HELP_EMAIL_ADDRESS: ${{ secrets.ses_review_help_email_address }}
-          SES_RATE_HELP_EMAIL_ADDRESS: ${{ secrets.ses_rate_help_email_address }}
-          SES_DEV_TEAM_HELP_EMAIL_ADDRESS: ${{ secrets.ses_dev_team_help_email_address }}
-          NR_LICENSE_KEY: ${{ secrets.nr_license_key}}
-          REACT_APP_OTEL_COLLECTOR_URL: ${{ secrets.react_app_otel_collector_url }}
-          LD_SDK_KEY: ${{ secrets.ld_sdk_key }}
-
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 
