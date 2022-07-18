@@ -1,0 +1,6 @@
+<b>Unlocked by:</b> <%= it.unlockedBy %><br />
+<b>Unlocked on:</b> <%= it.unlockedOn %><br />
+<b>Reason for unlock:</b> <%= it.unlockedReason %><br />
+<% if (it.shouldIncludeRates) { %>
+<b>Rate name</b>: <%= it.rateName %><br />
+<% } %>

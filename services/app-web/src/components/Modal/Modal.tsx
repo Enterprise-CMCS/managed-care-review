@@ -7,8 +7,11 @@ import {
     ModalRef,
     ModalProps as UswdsModalProps,
     Button,
-    Alert,
 } from '@trussworks/react-uswds'
+import {
+    GenericApiErrorBanner,
+    GenericApiErrorProps,
+} from '../Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import styles from './Modal.module.scss'
 
 import { ActionButton } from '../ActionButton'
@@ -25,7 +28,7 @@ interface ModalComponentProps {
     modalRef: React.RefObject<ModalRef>
     submitButtonProps?: JSX.IntrinsicElements['button']
     isSubmitting?: boolean
-    modalAlert?: string
+    modalAlert?: GenericApiErrorProps
 }
 
 export type ModalProps = ModalComponentProps & UswdsModalProps
@@ -75,9 +78,10 @@ export const Modal = ({
                 <ModalHeading id={`${id}-heading`}>{modalHeading}</ModalHeading>
             )}
             {modalAlert && (
-                <Alert type="error" heading={`${onSubmitText} Error`}>
-                    {modalAlert}
-                </Alert>
+                <GenericApiErrorBanner
+                    heading={modalAlert.heading}
+                    message={modalAlert.message}
+                />
             )}
             <div id={`${id}-modal-description`}>{children}</div>
             <ModalFooter>

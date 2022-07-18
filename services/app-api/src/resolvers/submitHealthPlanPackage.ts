@@ -16,7 +16,7 @@ import {
     HealthPlanPackageType,
     packageStatus,
 } from '../domain-models'
-import { Emailer, UpdatedEmailData, StateAnalystsEmails } from '../emailer'
+import { Emailer, UpdatedEmailData } from '../emailer'
 import { MutationResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
@@ -26,7 +26,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import { getStateAnalystEmails } from '../parameterStore'
+import { EmailParameterStore } from '../parameterStore'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
@@ -116,12 +116,14 @@ function submit(
 // submitHealthPlanPackageResolver is a state machine transition for HealthPlanPackage
 export function submitHealthPlanPackageResolver(
     store: Store,
-    emailer: Emailer
+    emailer: Emailer,
+    emailParameterStore: EmailParameterStore
 ): MutationResolvers['submitHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
-        const { submittedReason } = input
+        const { submittedReason, pkgID } = input
         setResolverDetailsOnActiveSpan('submitHealthPlanPackage', user, span)
+        span?.setAttribute('mcreview.package_id', pkgID)
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
@@ -258,12 +260,18 @@ export function submitHealthPlanPackageResolver(
         // Send emails!
         const name = packageName(lockedFormData, programs)
         const status = packageStatus(updatedPackage)
-        const stateAnalystsEmails: StateAnalystsEmails =
-            await getStateAnalystEmails(
-                updatedPackage.stateCode,
-                span,
-                'submitHealthPlanPackage'
+
+        // Get state analysts emails from parameter store
+        let stateAnalystsEmails =
+            await emailParameterStore.getStateAnalystsEmails(
+                updatedPackage.stateCode
             )
+        //If error log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
+        if (stateAnalystsEmails instanceof Error) {
+            logError('getStateAnalystsEmails', stateAnalystsEmails.message)
+            setErrorAttributesOnActiveSpan(stateAnalystsEmails.message, span)
+            stateAnalystsEmails = []
+        }
 
         let cmsPackageEmailResult
         let statePackageEmailResult

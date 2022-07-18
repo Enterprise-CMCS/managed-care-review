@@ -1,2 +1,6 @@
-export { getParameterStore } from './parameterStore'
-export { getStateAnalystEmails } from './getStateAnalystEmails'
+export {
+    newAWSEmailParameterStore,
+    newLocalEmailParameterStore,
+} from './emailParameterStore'
+
+export type { EmailParameterStore } from './emailParameterStore'

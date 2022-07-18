@@ -11,7 +11,7 @@ import {
     HealthPlanPackageType,
     packageStatus,
 } from '../domain-models'
-import { Emailer, StateAnalystsEmails } from '../emailer'
+import { Emailer } from '../emailer'
 import { MutationResolvers } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
@@ -20,7 +20,7 @@ import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
-import { getStateAnalystEmails } from '../parameterStore'
+import { EmailParameterStore } from '../parameterStore'
 
 // unlock is a state machine transforming a LockedFormDatya and turning it into UnlockedFormData
 // Since Unlocked is a strict subset of Locked, this can't error today.
@@ -40,12 +40,14 @@ function unlock(
 // unlockHealthPlanPackageResolver is a state machine transition for HealthPlanPackage
 export function unlockHealthPlanPackageResolver(
     store: Store,
-    emailer: Emailer
+    emailer: Emailer,
+    emailParameterStore: EmailParameterStore
 ): MutationResolvers['unlockHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
         const { unlockedReason, pkgID } = input
         setResolverDetailsOnActiveSpan('unlockHealthPlanPackage', user, span)
+        span?.setAttribute('mcreview.package_id', pkgID)
 
         // This resolver is only callable by CMS users
         if (!isCMSUser(user)) {
@@ -137,12 +139,16 @@ export function unlockHealthPlanPackageResolver(
 
         // Send emails!
         const name = packageName(draft, programs)
-        const stateAnalystsEmails: StateAnalystsEmails =
-            await getStateAnalystEmails(
-                draft.stateCode,
-                span,
-                'unlockHealthPlanPackage'
-            )
+
+        // Get state analysts emails from parameter store
+        let stateAnalystsEmails =
+            await emailParameterStore.getStateAnalystsEmails(draft.stateCode)
+        //If error, log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
+        if (stateAnalystsEmails instanceof Error) {
+            logError('getStateAnalystsEmails', stateAnalystsEmails.message)
+            setErrorAttributesOnActiveSpan(stateAnalystsEmails.message, span)
+            stateAnalystsEmails = []
+        }
 
         const updatedEmailData = {
             ...unlockInfo,
@@ -152,16 +158,11 @@ export function unlockHealthPlanPackageResolver(
             await emailer.sendUnlockPackageCMSEmail(
                 draft,
                 updatedEmailData,
-                name,
                 stateAnalystsEmails
             )
 
         const unlockPackageStateEmailResult =
-            await emailer.sendUnlockPackageStateEmail(
-                draft,
-                updatedEmailData,
-                name
-            )
+            await emailer.sendUnlockPackageStateEmail(draft, updatedEmailData)
 
         if (unlockPackageCMSEmailResult instanceof Error) {
             logError(
