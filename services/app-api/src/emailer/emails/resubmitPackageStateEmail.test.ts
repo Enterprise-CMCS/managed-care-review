@@ -4,7 +4,7 @@ import {
     mockContractAndRatesFormData,
 } from '../../testHelpers/emailerHelpers'
 import { resubmitPackageStateEmail } from './index'
-import { CalendarDate } from 'app-web/src/common-code/healthPlanFormDataType'
+import { CalendarDate } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 const resubmitData = {
     packageName: 'MCR-VA-CCCPLUS-0002',

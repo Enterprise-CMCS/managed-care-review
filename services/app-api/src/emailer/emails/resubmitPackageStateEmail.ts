@@ -11,7 +11,7 @@ import {
 } from '../templateHelpers'
 
 import type { EmailData, EmailConfiguration } from '../'
-import { formatDateTime } from 'app-web/src/common-code/dateHelpers/calendarDate'
+import { formatDateTime } from '../../../../app-web/src/common-code/dateHelpers/calendarDate'
 
 export const resubmitPackageStateEmail = async (
     pkg: LockedHealthPlanFormDataType,

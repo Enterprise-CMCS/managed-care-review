@@ -1,7 +1,7 @@
 import { testEmailConfig } from '../../testHelpers/emailerHelpers'
 import { unlockPackageStateEmail } from './index'
 import { unlockedWithFullContracts } from '../../../../app-web/src/common-code/healthPlanFormDataMocks'
-import { CalendarDate } from 'app-web/src/common-code/healthPlanFormDataType'
+import { CalendarDate } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 const unlockData = {
     packageName: 'MCR-VA-CCCPLUS-0002',

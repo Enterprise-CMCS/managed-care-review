@@ -4,7 +4,7 @@ import {
     testStateAnalystsEmails,
     mockContractOnlyFormData,
 } from '../../testHelpers/emailerHelpers'
-import { CalendarDate } from 'app-web/src/common-code/healthPlanFormDataType'
+import { CalendarDate } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { resubmitPackageCMSEmail } from './index'
 
 describe('with rates', () => {

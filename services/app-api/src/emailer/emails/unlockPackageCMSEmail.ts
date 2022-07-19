@@ -9,7 +9,7 @@ import {
     renderTemplate,
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
-import { formatDateTime } from 'app-web/src/common-code/dateHelpers/calendarDate'
+import { formatDateTime } from '../../../../app-web/src/common-code/dateHelpers/calendarDate'
 
 export const unlockPackageCMSEmail = async (
     pkg: UnlockedHealthPlanFormDataType,

@@ -5,7 +5,7 @@ import {
     mockUnlockedContractOnlyFormData,
 } from '../../testHelpers/emailerHelpers'
 import { unlockPackageCMSEmail } from './index'
-import { CalendarDate } from 'app-web/src/common-code/healthPlanFormDataType'
+import { CalendarDate } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 const unlockData = {
     packageName: 'MCR-VA-CCCPLUS-0001',

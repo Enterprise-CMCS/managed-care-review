@@ -11,7 +11,7 @@ import {
 
 import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
 import { URL } from 'url'
-import { formatDateTime } from 'app-web/src/common-code/dateHelpers/calendarDate'
+import { formatDateTime } from '../../../../app-web/src/common-code/dateHelpers/calendarDate'
 
 export const resubmitPackageCMSEmail = async (
     pkg: LockedHealthPlanFormDataType,
