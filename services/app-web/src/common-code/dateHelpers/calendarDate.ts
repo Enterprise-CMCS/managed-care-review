@@ -25,10 +25,12 @@ function formatRateNameDate(date: CalendarDate | undefined): string {
     if (!date) {
         return ''
     }
+    console.log('maz date', date)
     const parsedCalendarDate = date.split('-')
     const month = parsedCalendarDate[1]
     const day = parsedCalendarDate[2]
     const year = parsedCalendarDate[0]
+    console.log('maz output', `${month}/${day}/${year}`)
     return `${year}${month}${day}`
 }
 

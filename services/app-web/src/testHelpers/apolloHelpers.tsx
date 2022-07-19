@@ -273,7 +273,7 @@ export function mockStateSubmission(): LockedHealthPlanFormDataType {
         rateDateStart: '2022-05-23',
         rateDateEnd: '2022-05-23',
         rateDateCertified: '2022-05-23',
-        rateAmendmentInfo: null,
+        rateAmendmentInfo: undefined,
         stateContacts: [
             {
                 name: 'Test Person',
@@ -350,7 +350,7 @@ export function mockStateSubmissionContractAmendment(): LockedHealthPlanFormData
         rateDateStart: '2022-05-23',
         rateDateEnd: '2022-05-23',
         rateDateCertified: '2022-05-23',
-        rateAmendmentInfo: null,
+        rateAmendmentInfo: undefined,
         stateContacts: [
             {
                 name: 'Test Person',

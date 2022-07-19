@@ -222,7 +222,7 @@ const mockContractAndRatesFormData = (
         rateDateStart: '2021-01-01',
         rateDateEnd: '2025-01-01',
         rateDateCertified: '2021-12-31',
-        rateAmendmentInfo: null,
+        rateAmendmentInfo: undefined,
         stateContacts: [
             {
                 name: 'Test Person',
@@ -430,7 +430,7 @@ const mockContractAmendmentFormData = (
         rateDateStart: '2021-01-01',
         rateDateEnd: '2025-01-01',
         rateDateCertified: '2021-12-31',
-        rateAmendmentInfo: null,
+        rateAmendmentInfo: undefined,
         stateContacts: [
             {
                 name: 'Test Person',

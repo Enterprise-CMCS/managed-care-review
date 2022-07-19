@@ -240,7 +240,7 @@ const toProtoBuffer = (
                         rateAmendmentInfo.effectiveDateStart
                     ),
                     effectiveDateEnd: calendarDomainDateToProtoDate(
-                        rateAmendmentInfo.effectiveDateEndq
+                        rateAmendmentInfo.effectiveDateEnd
                     ),
                 },
                 actuaryCommunicationPreference: domainEnumToProto(

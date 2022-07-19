@@ -1,6 +1,7 @@
 import { testEmailConfig } from '../../testHelpers/emailerHelpers'
 import { unlockPackageStateEmail } from './index'
 import { unlockedWithFullContracts } from '../../../../app-web/src/common-code/healthPlanFormDataMocks'
+import { CalendarDate } from 'app-web/src/common-code/healthPlanFormDataType'
 
 const unlockData = {
     packageName: 'MCR-VA-CCCPLUS-0002',
@@ -10,14 +11,14 @@ const unlockData = {
 }
 const sub = {
     ...unlockedWithFullContracts(),
-    contractDateStart: new Date('2021-01-01'),
-    contractDateEnd: new Date('2021-12-31'),
-    rateDateStart: new Date('2021-02-02'),
-    rateDateEnd: new Date('2021-11-31'),
-    rateDateCertified: new Date('2020-12-01'),
+    contractDateStart: '2021-01-01' as CalendarDate,
+    contractDateEnd: '2021-12-31' as CalendarDate,
+    rateDateStart: '2021-02-02' as CalendarDate,
+    rateDateEnd: '2021-11-31' as CalendarDate,
+    rateDateCertified: '2020-12-01' as CalendarDate,
     rateAmendmentInfo: {
-        effectiveDateStart: new Date('06/05/2021'),
-        effectiveDateEnd: new Date('12/31/2021'),
+        effectiveDateStart: '2021-06-05' as CalendarDate,
+        effectiveDateEnd: '2021-12-31' as CalendarDate,
     },
 }
 
@@ -86,6 +87,9 @@ test('body content is correct', async () => {
 })
 
 test('renders overall email as expected', async () => {
+    console.log('maz sub: ', sub)
+    console.log('maz unlockData: ', unlockData)
+    console.log('maz testEmailConfig: ', testEmailConfig)
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,

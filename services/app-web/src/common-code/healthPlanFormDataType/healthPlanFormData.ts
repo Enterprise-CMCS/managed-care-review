@@ -191,30 +191,37 @@ const generateRateName = (
     let rateName = `${submissionName}-RATE`
 
     if (rateType === 'AMENDMENT' && rateAmendmentInfo?.effectiveDateStart) {
+        console.log('1')
         rateName = rateName.concat(
             '-',
             formatRateNameDate(rateAmendmentInfo.effectiveDateStart)
         )
     } else if ((rateType === 'NEW' || !rateType) && rateDateStart) {
+        console.log('2')
         rateName = rateName.concat('-', formatRateNameDate(rateDateStart))
     }
 
     if (rateType === 'AMENDMENT' && rateAmendmentInfo?.effectiveDateEnd) {
+        console.log('3')
         rateName = rateName.concat(
             '-',
             formatRateNameDate(rateAmendmentInfo.effectiveDateEnd)
         )
     } else if ((rateType === 'NEW' || !rateType) && rateDateEnd) {
+        console.log('4')
         rateName = rateName.concat('-', formatRateNameDate(rateDateEnd))
     }
 
     if (rateType === 'AMENDMENT') {
+        console.log('5')
         rateName = rateName.concat('-', 'AMENDMENT')
     } else if (rateType === 'NEW') {
+        console.log('6')
         rateName = rateName.concat('-', 'CERTIFICATION')
     }
 
     if (rateDateCertified) {
+        console.log('7')
         rateName = rateName = rateName.concat(
             '-',
             formatRateNameDate(rateDateCertified)

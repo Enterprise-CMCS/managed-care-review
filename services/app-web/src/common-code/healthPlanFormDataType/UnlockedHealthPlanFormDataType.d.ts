@@ -328,6 +328,7 @@ export type {
     ContractAmendmentInfo,
     ContractExecutionStatus,
     RateDataType,
+    RateAmendmentInfo,
     RateCapitationType,
     CalendarDate,
 }
