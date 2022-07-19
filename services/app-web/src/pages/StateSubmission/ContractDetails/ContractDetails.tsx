@@ -111,7 +111,6 @@ export const ContractDetails = ({
     previousDocuments,
     updateDraft,
 }: HealthPlanFormPageProps): React.ReactElement => {
-    console.log('draftSubmission', draftSubmission)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const navigate = useNavigate()
     // Contract documents state management

@@ -128,7 +128,6 @@ const protoDateToDomainCalendarDate = (
     const year = protoDate.year.toString()
     const month = protoDate.month.toString().padStart(2, '0')
     const day = protoDate.day.toString().padStart(2, '0')
-    // prettier-ignore
     return `${year}-${month}-${day}` as CalendarDate
 }
 /*
