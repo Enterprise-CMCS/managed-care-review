@@ -5,10 +5,7 @@ import {
     mockContractAndRatesFormData,
     mockUser,
 } from '../../testHelpers/emailerHelpers'
-import {
-    LockedHealthPlanFormDataType,
-    CalendarDate,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { LockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { newPackageStateEmail } from './index'
 import { formatRateNameDate } from '../../../../app-web/src/common-code/dateHelpers'
 
@@ -197,10 +194,10 @@ test('includes information about what is next', async () => {
 test('includes expected data summary for a contract and rates submission State email', async () => {
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractAndRatesFormData(),
-        contractDateStart: '2021-01-01' as CalendarDate,
-        contractDateEnd: '2025-01-01' as CalendarDate,
-        rateDateStart: '2021-01-01' as CalendarDate,
-        rateDateEnd: '2022-01-01' as CalendarDate,
+        contractDateStart: '2021-01-01',
+        contractDateEnd: '2025-01-01',
+        rateDateStart: '2021-01-01',
+        rateDateEnd: '2022-01-01',
     }
     const user = mockUser()
     const template = await newPackageStateEmail(
@@ -246,13 +243,13 @@ test('includes expected data summary for a rate amendment submission State email
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractAndRatesFormData(),
         rateType: 'AMENDMENT',
-        contractDateStart: '2021-01-01' as CalendarDate,
-        contractDateEnd: '2025-01-01' as CalendarDate,
-        rateDateStart: '2021-01-01' as CalendarDate,
-        rateDateEnd: '2022-01-01' as CalendarDate,
+        contractDateStart: '2021-01-01',
+        contractDateEnd: '2025-01-01',
+        rateDateStart: '2021-01-01',
+        rateDateEnd: '2022-01-01',
         rateAmendmentInfo: {
-            effectiveDateStart: '2021-06-05' as CalendarDate,
-            effectiveDateEnd: '2021-12-31' as CalendarDate,
+            effectiveDateStart: '2021-06-05',
+            effectiveDateEnd: '2021-12-31',
         },
     }
     const user = mockUser()
@@ -291,14 +288,14 @@ test('renders overall email as expected', async () => {
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractAndRatesFormData(),
         rateType: 'AMENDMENT',
-        contractDateStart: '2021-01-01' as CalendarDate,
-        contractDateEnd: '2021-12-31' as CalendarDate,
-        rateDateStart: '2021-02-02' as CalendarDate,
-        rateDateEnd: '2021-11-31' as CalendarDate,
-        rateDateCertified: '2020-12-01' as CalendarDate,
+        contractDateStart: '2021-01-01',
+        contractDateEnd: '2021-12-31',
+        rateDateStart: '2021-02-02',
+        rateDateEnd: '2021-11-31',
+        rateDateCertified: '2020-12-01',
         rateAmendmentInfo: {
-            effectiveDateStart: '2021-06-05' as CalendarDate,
-            effectiveDateEnd: '2021-12-31' as CalendarDate,
+            effectiveDateStart: '2021-06-05',
+            effectiveDateEnd: '2021-12-31',
         },
     }
     const user = mockUser()

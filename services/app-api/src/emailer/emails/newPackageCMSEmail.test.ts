@@ -7,10 +7,7 @@ import {
     mockContractOnlyFormData,
     mockContractAndRatesFormData,
 } from '../../testHelpers/emailerHelpers'
-import {
-    LockedHealthPlanFormDataType,
-    CalendarDate,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { LockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { newPackageCMSEmail } from './index'
 import { formatRateNameDate } from '../../../../app-web/src/common-code/dateHelpers'
 
@@ -65,8 +62,8 @@ test('subject line is correct', async () => {
 test('includes expected data summary for a contract only submission', async () => {
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractOnlyFormData(),
-        contractDateStart: '2021-01-01' as CalendarDate,
-        contractDateEnd: '2025-01-01' as CalendarDate,
+        contractDateStart: '2021-01-01',
+        contractDateEnd: '2025-01-01',
     }
     const template = await newPackageCMSEmail(
         sub,
@@ -99,10 +96,10 @@ test('includes expected data summary for a contract only submission', async () =
 test('includes expected data summary for a contract and rates submission CMS email', async () => {
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractAndRatesFormData(),
-        contractDateStart: '2021-01-01' as CalendarDate,
-        contractDateEnd: '2025-01-01' as CalendarDate,
-        rateDateStart: '2021-01-01' as CalendarDate,
-        rateDateEnd: '2022-01-01' as CalendarDate,
+        contractDateStart: '2021-01-01',
+        contractDateEnd: '2025-01-01',
+        rateDateStart: '2021-01-01',
+        rateDateEnd: '2022-01-01',
     }
     const template = await newPackageCMSEmail(
         sub,
@@ -146,10 +143,10 @@ test('includes expected data summary for a contract and rates submission CMS ema
 test('includes expected data summary for a contract amendment submission', async () => {
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractAmendmentFormData(),
-        contractDateStart: '2021-01-01' as CalendarDate,
-        contractDateEnd: '2025-01-01' as CalendarDate,
-        rateDateStart: '2021-01-01' as CalendarDate,
-        rateDateEnd: '2022-01-01' as CalendarDate,
+        contractDateStart: '2021-01-01',
+        contractDateEnd: '2025-01-01',
+        rateDateStart: '2021-01-01',
+        rateDateEnd: '2022-01-01',
     }
     const template = await newPackageCMSEmail(
         sub,
@@ -194,13 +191,13 @@ test('includes expected data summary for a rate amendment submission CMS email',
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractAndRatesFormData(),
         rateType: 'AMENDMENT',
-        contractDateStart: '2021-01-01' as CalendarDate,
-        contractDateEnd: '2025-01-01' as CalendarDate,
-        rateDateStart: '2021-01-01' as CalendarDate,
-        rateDateEnd: '2022-01-01' as CalendarDate,
+        contractDateStart: '2021-01-01',
+        contractDateEnd: '2025-01-01',
+        rateDateStart: '2021-01-01',
+        rateDateEnd: '2022-01-01',
         rateAmendmentInfo: {
-            effectiveDateStart: '2021-06-05' as CalendarDate,
-            effectiveDateEnd: '2021-12-31' as CalendarDate,
+            effectiveDateStart: '2021-06-05',
+            effectiveDateEnd: '2021-12-31',
         },
     }
     const template = await newPackageCMSEmail(
@@ -454,11 +451,11 @@ test('does not include rate name on contract only submission', async () => {
 test('renders overall email as expected', async () => {
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractAndRatesFormData(),
-        contractDateStart: '2021-01-01' as CalendarDate,
-        contractDateEnd: '2021-12-31' as CalendarDate,
-        rateDateStart: '2021-02-02' as CalendarDate,
-        rateDateEnd: '2021-11-31' as CalendarDate,
-        rateDateCertified: '2020-12-01' as CalendarDate,
+        contractDateStart: '2021-01-01',
+        contractDateEnd: '2021-12-31',
+        rateDateStart: '2021-02-02',
+        rateDateEnd: '2021-11-31',
+        rateDateCertified: '2020-12-01',
     }
     const result = await newPackageCMSEmail(
         sub,

@@ -4,7 +4,7 @@ import {
     testStateAnalystsEmails,
     mockContractOnlyFormData,
 } from '../../testHelpers/emailerHelpers'
-import { CalendarDate } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { LockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { resubmitPackageCMSEmail } from './index'
 
 describe('with rates', () => {
@@ -348,13 +348,13 @@ test('renders overall email as expected', async () => {
         updatedAt: new Date('02/01/2022'),
         updatedReason: 'Added more contract details.',
     }
-    const submission = {
+    const submission: LockedHealthPlanFormDataType = {
         ...mockContractOnlyFormData(),
-        contractDateStart: '2021-01-01' as CalendarDate,
-        contractDateEnd: '2021-12-31' as CalendarDate,
-        rateDateStart: '2021-02-02' as CalendarDate,
-        rateDateEnd: '2021-11-31' as CalendarDate,
-        rateDateCertified: '2020-12-01' as CalendarDate,
+        contractDateStart: '2021-01-01',
+        contractDateEnd: '2021-12-31',
+        rateDateStart: '2021-02-02',
+        rateDateEnd: '2021-11-31',
+        rateDateCertified: '2020-12-01',
     }
     const testStateAnalystEmails = testStateAnalystsEmails
     const template = await resubmitPackageCMSEmail(

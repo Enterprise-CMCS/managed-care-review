@@ -5,7 +5,7 @@ import {
     mockUnlockedContractOnlyFormData,
 } from '../../testHelpers/emailerHelpers'
 import { unlockPackageCMSEmail } from './index'
-import { CalendarDate } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { UnlockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 const unlockData = {
     packageName: 'MCR-VA-CCCPLUS-0001',
@@ -13,13 +13,13 @@ const unlockData = {
     updatedAt: new Date('01/01/2022'),
     updatedReason: 'Adding rate development guide.',
 }
-const submission = {
+const submission: UnlockedHealthPlanFormDataType = {
     ...mockUnlockedContractAndRatesFormData(),
-    contractDateStart: '2021-01-01' as CalendarDate,
-    contractDateEnd: '2021-12-31' as CalendarDate,
-    rateDateStart: '2021-02-02' as CalendarDate,
-    rateDateEnd: '2021-11-31' as CalendarDate,
-    rateDateCertified: '2020-12-01' as CalendarDate,
+    contractDateStart: '2021-01-01',
+    contractDateEnd: '2021-12-31',
+    rateDateStart: '2021-02-02',
+    rateDateEnd: '2021-11-31',
+    rateDateCertified: '2020-12-01',
 }
 const testStateAnalystEmails = testStateAnalystsEmails
 

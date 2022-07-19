@@ -1,7 +1,7 @@
 import { testEmailConfig } from '../../testHelpers/emailerHelpers'
 import { unlockPackageStateEmail } from './index'
 import { unlockedWithFullContracts } from '../../../../app-web/src/common-code/healthPlanFormDataMocks'
-import { CalendarDate } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { UnlockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 const unlockData = {
     packageName: 'MCR-VA-CCCPLUS-0002',
@@ -9,16 +9,16 @@ const unlockData = {
     updatedAt: new Date('02/01/2022'),
     updatedReason: 'Adding rate certification.',
 }
-const sub = {
+const sub: UnlockedHealthPlanFormDataType = {
     ...unlockedWithFullContracts(),
-    contractDateStart: '2021-01-01' as CalendarDate,
-    contractDateEnd: '2021-12-31' as CalendarDate,
-    rateDateStart: '2021-02-02' as CalendarDate,
-    rateDateEnd: '2021-11-31' as CalendarDate,
-    rateDateCertified: '2020-12-01' as CalendarDate,
+    contractDateStart: '2021-01-01',
+    contractDateEnd: '2021-12-31',
+    rateDateStart: '2021-02-02',
+    rateDateEnd: '2021-11-31',
+    rateDateCertified: '2020-12-01',
     rateAmendmentInfo: {
-        effectiveDateStart: '2021-06-05' as CalendarDate,
-        effectiveDateEnd: '2021-12-31' as CalendarDate,
+        effectiveDateStart: '2021-06-05',
+        effectiveDateEnd: '2021-12-31',
     },
 }
 

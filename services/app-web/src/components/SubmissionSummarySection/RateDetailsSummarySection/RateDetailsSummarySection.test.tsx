@@ -3,7 +3,7 @@ import {
     mockContractAndRatesDraft,
     mockStateSubmission,
 } from '../../../testHelpers/apolloHelpers'
-import { CalendarDate } from '../../../common-code/healthPlanFormDataType'
+import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
 import { formatRateNameDate } from '../../../common-code/dateHelpers'
@@ -102,14 +102,14 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('can render correct rate name for AMENDMENT rate submission', () => {
-        const submission = {
+        const submission: HealthPlanFormDataType = {
             ...mockContractAndRatesDraft(),
-            rateDateStart: '2022-01-25' as CalendarDate,
-            rateDateEnd: '2023-01-25' as CalendarDate,
-            rateDateCertified: '2022-01-26' as CalendarDate,
+            rateDateStart: '2022-01-25',
+            rateDateEnd: '2023-01-25',
+            rateDateCertified: '2022-01-26',
             rateAmendmentInfo: {
-                effectiveDateStart: '2022-02-25' as CalendarDate,
-                effectiveDateEnd: '2023-02-26' as CalendarDate,
+                effectiveDateStart: '2022-02-25',
+                effectiveDateEnd: '2023-02-26',
             },
         }
 
@@ -122,9 +122,9 @@ describe('RateDetailsSummarySection', () => {
         )
 
         const rateName = `MN-PMAP-0001-RATE-${formatRateNameDate(
-            submission.rateAmendmentInfo.effectiveDateStart
+            submission.rateAmendmentInfo?.effectiveDateStart
         )}-${formatRateNameDate(
-            submission.rateAmendmentInfo.effectiveDateEnd
+            submission.rateAmendmentInfo?.effectiveDateEnd
         )}-AMENDMENT-${formatRateNameDate(submission.rateDateCertified)}`
 
         expect(screen.getByText(rateName)).toBeInTheDocument()
