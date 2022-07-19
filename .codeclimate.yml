@@ -49,9 +49,9 @@ plugins:
       languages:
         javascript:
           count_threshold: 3
-  eslint:
-    enabled: true
-    channel: 'eslint-7'
+  # eslint:
+  #   enabled: true
+  #   channel: 'eslint-7'
 
 exclude_patterns:
   - 'config/'
