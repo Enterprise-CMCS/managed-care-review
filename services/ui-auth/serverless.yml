@@ -3,6 +3,7 @@ service: ui-auth
 frameworkVersion: '^3.19.0'
 
 plugins:
+  - serverless-offline-ssm
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   - serverless-iam-helper
@@ -13,10 +14,14 @@ custom:
   document_uploads_bucket_arn: ${cf:uploads-${sls:stage}.DocumentUploadsBucketArn}
   api_gateway_rest_api_name: ${cf:infra-api-${sls:stage}.ApiGatewayRestApiId}
   application_endpoint_url: ${cf:ui-${sls:stage}.CloudFrontEndpointUrl}
-  okta_metadata_url: ${env:OKTA_METADATA_URL}
-  iamPath: ${env:IAM_PATH, "/"}
-  iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
-  sesSourceEmailAddress: ${env:SES_SOURCE_EMAIL_ADDRESS, ""}
+  okta_metadata_url: ${ssm:/configuration/okta_metadata_url}
+  sesSourceEmailAddress: ${ssm:/configuration/email/sourceAddress, "" }
+  serverless-offline-ssm:
+    stages:
+      - local
+      - offline
+    ssm:
+      '/configuration/iam/full_permissions_boundary_policy': 'arn:aws:iam::local:policy/local/developer-boundary-policy'
   serverlessTerminationProtection:
     stages:
       - dev
@@ -30,8 +35,8 @@ provider:
   region: us-east-1
   iam:
     role:
-      path: ${self:custom.iamPath}
-      permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
+      path: ${ssm:/configuration/iam/path, "/"}
+      permissionsBoundary: ${ssm:/configuration/iam/full_permissions_boundary_policy}
       statements:
         - Effect: 'Allow'
           Action:

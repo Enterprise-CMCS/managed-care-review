@@ -4,18 +4,23 @@ variablesResolutionMode: 20210326
 frameworkVersion: '^3.19.0'
 
 plugins:
+  - serverless-offline-ssm
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   - serverless-iam-helper
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
-  iamPath: ${env:IAM_PATH, "/"}
-  nrLicenseKey: ${env:NR_LICENSE_KEY, ""}
+  nrLicenseKey: ${ssm:/configuration/nr_license_key}
   nrMetricStreamName: 'NewRelic-Metric-Stream'
   nrFirehoseStreamName: 'NewRelic-Delivery-Stream'
   nrExternalId: '3407984'
+  serverless-offline-ssm:
+    stages:
+      - local
+      - offline
+    ssm:
+      '/configuration/iam/full_permissions_boundary_policy': 'arn:aws:iam::local:policy/local/developer-boundary-policy'
   serverlessTerminationProtection:
     stages:
       - dev
@@ -29,8 +34,8 @@ provider:
   region: us-east-1
   iam:
     role:
-      path: ${self:custom.iamPath}
-      permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
+      path: ${ssm:/configuration/iam/path, "/"}
+      permissionsBoundary: ${ssm:/configuration/iam/full_permissions_boundary_policy}
       statements:
         - Effect: 'Allow'
           Action:

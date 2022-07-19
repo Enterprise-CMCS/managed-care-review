@@ -3,6 +3,7 @@ service: postgres
 frameworkVersion: '^3.19.0'
 
 plugins:
+  - serverless-offline-ssm
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   - serverless-iam-helper
@@ -13,8 +14,8 @@ provider:
   region: us-east-1
   iam:
     role:
-      path: ${self:custom.iamPath}
-      permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
+      path: ${ssm:/configuration/iam/path, "/"}
+      permissionsBoundary: ${ssm:/configuration/iam/full_permissions_boundary_policy}
       statements:
         - Effect: 'Allow'
           Action:
@@ -39,8 +40,6 @@ provider:
 
 custom:
   stage: ${opt:stage, self:provider.stage}
-  iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
-  iamPath: ${env:IAM_PATH, "/"}
   databaseName: !Sub aurora_${self:service}_${sls:stage}_${AWS::AccountId}
   vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
   sgId: ${ssm:/configuration/${sls:stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
@@ -49,6 +48,12 @@ custom:
     - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
     - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
   rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-rotator'
+  serverless-offline-ssm:
+    stages:
+      - local
+      - offline
+    ssm:
+      '/configuration/iam/full_permissions_boundary_policy': 'arn:aws:iam::local:policy/local/developer-boundary-policy'
   serverlessTerminationProtection:
     stages:
       - dev

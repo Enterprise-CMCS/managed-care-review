@@ -23,23 +23,15 @@ custom:
   applicationEndpoint: ${env:APPLICATION_ENDPOINT, cf:ui-${sls:stage}.CloudFrontEndpointUrl}
   appApiGatewayId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.ApiGatewayRestApiId}
   appApiGatewayRootResourceId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.AppApiGatewayRootResourceId}
-  emailSource: ${env:SES_SOURCE_EMAIL_ADDRESS}
-  emailerMode: ${env:EMAILER_MODE}
+  emailerMode: ${env:EMAILER_MODE, ssm:/configuration/emailer_mode}
   parameterStoreMode: ${env:PARAMETER_STORE_MODE, ssm:/configuration/parameterStoreMode}
-  emailReviewTeamAddresses: ${env:SES_REVIEW_TEAM_EMAIL_ADDRESSES}
-  emailRatesTeamAddresses: ${env:SES_RATES_EMAIL_ADDRESSES}
-  emailReviewHelpAddress: ${env:SES_REVIEW_HELP_EMAIL_ADDRESS}
-  emailRateHelpAddress: ${env:SES_RATE_HELP_EMAIL_ADDRESS}
-  emailDevTeamHelpAddress: ${env:SES_DEV_TEAM_HELP_EMAIL_ADDRESS}
-  auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${sls:stage}.PostgresAuroraArn}
-  iamPath: ${env:IAM_PATH, "/"}
-  iamPermissionsBoundaryPolicy: ${env:FULL_IAM_PERMISSIONS_BOUNDARY_POLICY, ""}
+  auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${sls:stage}.PostgresAuroraArn }
   document_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.DocumentUploadsBucketArn}
   secretsManagerSecret: aurora_postgres_${sls:stage} #pragma: allowlist secret
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
-  reactAppOtelCollectorUrl: ${env:REACT_APP_OTEL_COLLECTOR_URL}
+  reactAppOtelCollectorUrl: ${env:REACT_APP_OTEL_COLLECTOR_URL, ssm:/configuration/react_app_otel_collector_url}
   dbURL: ${env:DATABASE_URL}
-  ldSDKKey: ${env:LD_SDK_KEY}
+  ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key}
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
@@ -64,6 +56,13 @@ custom:
       '/configuration/default/vpc/subnets/private/a/id': 'offline'
       '/configuration/default/vpc/subnets/private/b/id': 'offline'
       '/configuration/default/vpc/subnets/private/c/id': 'offline'
+      '/configuration/iam/full_permissions_boundary_policy': 'arn:aws:iam::local:policy/local/developer-boundary-policy'
+      '/configuration/email/sourceAddress': ${env:SES_SOURCE_EMAIL_ADDRESS, 'offline'}
+      '/configuration/email/reviewTeamAddresses': ${env:SES_REVIEW_TEAM_EMAIL_ADDRESSES, 'offline'}
+      '/configuration/email/ratesAddresses': ${env:SES_RATES_EMAIL_ADDRESSES, 'offline'}
+      '/configuration/email/reviewHelpAddress': ${env:SES_REVIEW_HELP_EMAIL_ADDRESS, 'offline'}
+      '/configuration/email/rateHelpAddress': ${env:SES_RATE_HELP_EMAIL_ADDRESS, 'offline'}
+      '/configuration/email/devTeamHelpAddress': ${env:SES_DEV_TEAM_HELP_EMAIL_ADDRESS, 'offline'}
   vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
   sgId: ${ssm:/configuration/${sls:stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
   privateSubnets:
@@ -83,8 +82,8 @@ provider:
     - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-2-0:1
   iam:
     role:
-      path: ${self:custom.iamPath}
-      permissionsBoundary: ${self:custom.iamPermissionsBoundaryPolicy}
+      path: ${ssm:/configuration/iam/path, "/"}
+      permissionsBoundary: ${ssm:/configuration/iam/full_permissions_boundary_policy}
       statements:
         - Effect: 'Allow' # cognito user lookup
           Action:
@@ -128,12 +127,12 @@ provider:
     SECRETS_MANAGER_SECRET: ${self:custom.secretsManagerSecret}
     EMAILER_MODE: ${self:custom.emailerMode}
     PARAMETER_STORE_MODE: ${self:custom.parameterStoreMode}
-    SES_SOURCE_EMAIL_ADDRESS: ${self:custom.emailSource}
-    SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${self:custom.emailReviewTeamAddresses}
-    SES_REVIEW_HELP_EMAIL_ADDRESS: ${self:custom.emailReviewHelpAddress}
-    SES_RATE_HELP_EMAIL_ADDRESS: ${self:custom.emailRateHelpAddress}
-    SES_DEV_TEAM_HELP_EMAIL_ADDRESS: ${self:custom.emailDevTeamHelpAddress}
-    SES_RATES_EMAIL_ADDRESSES: ${self:custom.emailRatesTeamAddresses}
+    SES_SOURCE_EMAIL_ADDRESS: ${ssm:/configuration/email/sourceAddress}
+    SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${ssm:/configuration/email/reviewTeamAddresses}
+    SES_REVIEW_HELP_EMAIL_ADDRESS: ${ssm:/configuration/email/reviewHelpAddress}
+    SES_RATE_HELP_EMAIL_ADDRESS: ${ssm:/configuration/email/rateHelpAddress}
+    SES_DEV_TEAM_HELP_EMAIL_ADDRESS: ${ssm:/configuration/email/devTeamHelpAddress}
+    SES_RATES_EMAIL_ADDRESSES: ${ssm:/configuration/email/ratesAddresses}
     APPLICATION_ENDPOINT: ${self:custom.applicationEndpoint, 'http://localhost:3000'}
     AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
     OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
