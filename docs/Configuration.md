@@ -127,13 +127,11 @@ Read by `app-api`
 
 Sets additional "to" addresses for emails about packages that contain rates, sent to rate reviewers (there may be multiple). Value is comma separated string.
 
-
 ### `SES_REVIEW_HELP_EMAIL_ADDRESS`, `SES_RATE_HELP_EMAIL_ADDRESS`, `SES_DEV_TEAM_HELP_EMAIL_ADDRESS`
 
 Read by `app-api`
 
 Single email addresses, used in email bodies to indicate where a state user could go for help with any issues about the submission.
-
 
 ### `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`
 
@@ -188,3 +186,15 @@ This key allows uploads to CodeClimate for our code coverage stats.
 Read by Trace Context
 
 This URL defines where we export traces to. It should differ between local dev and deployed environments.
+
+### `LD_SDK_KEY`
+
+Read by `app-api`
+
+This is the key for Launch Darkly SDK access in our backend. There is one per environment of local/dev/val/prod.
+
+### `REACT_APP_LD_CLIENT_ID`
+
+Read by `app-web`
+
+This is the client ID for Launch Darkly in our frontend. This key is designed to have limited access since it's exposed in our client side code. There is one per environment of local/dev/val/prod.
