@@ -3,10 +3,13 @@ import classnames from 'classnames'
 import dayjs from 'dayjs'
 import React from 'react'
 import { NavLink } from 'react-router-dom'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+
+import { featureFlags } from '../../common-code/featureFlags'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { Loading } from '../../components/Loading'
-import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
+import { SubmissionStatusRecord, SubmissionTypeRecord } from '../../constants/healthPlanPackages'
 import { useAuth } from '../../contexts/AuthContext'
 import {
     HealthPlanPackageStatus,
@@ -26,7 +29,8 @@ type SubmissionInDashboard = {
     updatedAt: string
     status: HealthPlanPackageStatus
     programs: Program[]
-    submissionType: GQLSubmissionType
+    submissionType: string
+    state: string
 }
 
 const isSubmitted = (status: HealthPlanPackageStatus) =>
@@ -56,9 +60,12 @@ const StatusTag = ({
 
 export const CMSDashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
-
     const { loading, data, error } = useIndexHealthPlanPackagesQuery()
-
+    const ldClient = useLDClient()
+    const showCMSDashboard: boolean = ldClient?.variation(
+        featureFlags.CMS_DASHBOARD,
+        false
+    )
     if (error) {
         recordJSException(
             `indexHealthPlanPackagesQuery: Error indexing submissions. Error message:${error.message}`
@@ -93,7 +100,7 @@ export const CMSDashboard = (): React.ReactElement => {
                 return null
             }
             if (sub.status === 'DRAFT') {
-                // should display draft submissions to a CMS user - this is also filtered out on the api side
+                // should not display draft submissions to a CMS user - this is also filtered out on the api side
                 return
             }
             const programs = sub.state.programs
@@ -106,12 +113,27 @@ export const CMSDashboard = (): React.ReactElement => {
                 submittedAt: sub.initiallySubmittedAt,
                 status: sub.status,
                 updatedAt: currentSubmissionData.updatedAt,
-                submissionType: currentSubmissionData.submissionType,
+                submissionType: SubmissionTypeRecord[currentSubmissionData.submissionType],
+                state: sub.state.name,
             })
         })
 
     // Sort by updatedAt for current revision
     submissionRows.sort((a, b) => (a['updatedAt'] > b['updatedAt'] ? -1 : 1))
+    console.log('showCMSDashboard: ', showCMSDashboard)
+    // if (!showCMSDashboard)
+    //     return (
+    //         <div id="cms-dashboard-page" className={styles.container}>
+    //             <GridContainer>
+    //                 <h1>CMS Dashboard</h1>
+    //                 <p>
+    //                     The dashboard for CMS users has not been implemented
+    //                     yet, you will need to access a specific submission by
+    //                     URL for now.
+    //                 </p>
+    //             </GridContainer>
+    //         </div>
+    //     )
 
     const hasSubmissions = submissionRows.length > 0
 
@@ -131,8 +153,10 @@ export const CMSDashboard = (): React.ReactElement => {
                                 <thead>
                                     <tr>
                                         <th>ID</th>
+                                        <th>State</th>
+                                        <th>Submission type</th>
                                         <th>Programs</th>
-                                        <th>Submitted</th>
+                                        <th>Submission date</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
@@ -153,6 +177,20 @@ export const CMSDashboard = (): React.ReactElement => {
                                                                 dashboardSubmission.name
                                                             }
                                                         </NavLink>
+                                                    </td>
+                                                    <td data-testid="submission-state">
+                                                        <span>
+                                                            {
+                                                                dashboardSubmission.state
+                                                            }
+                                                        </span>
+                                                    </td>
+                                                    <td data-testid="submission-type">
+                                                        <span>
+                                                            {
+                                                                dashboardSubmission.submissionType
+                                                            }
+                                                        </span>
                                                     </td>
                                                     <td data-destid="submission-programs">
                                                         {dashboardSubmission.programs.map(
