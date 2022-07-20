@@ -1,5 +1,5 @@
 import { screen, within } from '@testing-library/react'
-import { ldClientMock, resetLDMocks } from 'jest-launchdarkly-mock'
+// import { ldClientMock, resetLDMocks } from 'jest-launchdarkly-mock'
 import {
     fetchCurrentUserMock,
     indexHealthPlanPackagesMockSuccess,
@@ -18,6 +18,7 @@ describe('CMSDashboard', () => {
         name: 'Bob it user',
         email: 'bob@dmas.mn.gov',
     }
+    // eslint-disable-next-line jest/no-commented-out-tests
     // it('displays has not been implemented message when cms-dashboard feature flag is off', async () => {
     //     const submitted = mockSubmittedHealthPlanPackage()
     //     // mock the variation function to return true
@@ -162,7 +163,9 @@ describe('CMSDashboard', () => {
     })
 
     it('displays each health plan package status tag as expected', async () => {
-        const unlocked = mockUnlockedHealthPlanPackage()
+        const unlocked = mockUnlockedHealthPlanPackage({
+            updatedAt: new Date('2298-01-01'),
+        })
         const submitted = mockSubmittedHealthPlanPackage()
         submitted.id = 'test-abc-submitted'
         unlocked.id = 'test-abc-unlocked'
@@ -196,7 +199,8 @@ describe('CMSDashboard', () => {
 
         const mockMN = mockMNState() // this is the state used in apolloHelpers
         const unlocked1 = mockUnlockedHealthPlanPackage({
-               programIDs: [
+            updatedAt: new Date('2298-01-01'),
+            programIDs: [
                 mockMN.programs[0].id,
                 mockMN.programs[1].id,
                 mockMN.programs[2].id,
