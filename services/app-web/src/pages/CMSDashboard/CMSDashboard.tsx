@@ -3,18 +3,20 @@ import classnames from 'classnames'
 import dayjs from 'dayjs'
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { useLDClient, useFlags } from 'launchdarkly-react-client-sdk'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 import { featureFlags } from '../../common-code/featureFlags'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { Loading } from '../../components/Loading'
-import { SubmissionStatusRecord, SubmissionTypeRecord } from '../../constants/healthPlanPackages'
+import {
+    SubmissionStatusRecord,
+    SubmissionTypeRecord,
+} from '../../constants/healthPlanPackages'
 import { useAuth } from '../../contexts/AuthContext'
 import {
     HealthPlanPackageStatus,
     Program,
-    SubmissionType as GQLSubmissionType,
     useIndexHealthPlanPackagesQuery,
 } from '../../gen/gqlClient'
 import styles from '../StateDashboard/StateDashboard.module.scss'
@@ -30,7 +32,7 @@ type SubmissionInDashboard = {
     status: HealthPlanPackageStatus
     programs: Program[]
     submissionType: string
-    state: string
+    stateName: string
 }
 
 const isSubmitted = (status: HealthPlanPackageStatus) =>
@@ -62,23 +64,22 @@ export const CMSDashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
     const { loading, data, error } = useIndexHealthPlanPackagesQuery()
     const ldClient = useLDClient()
-    console.log(ldClient, "client exists")
-     const flags = useFlags()
 
-     console.log('here are the flags:', flags)
-    const showCMSDashboard = true
-    
-    // ldClient?.variation(
-    //     featureFlags.CMS_DASHBOARD,
-    //     false
-    // )
+    const showCMSDashboard = ldClient?.variation(
+        featureFlags.CMS_DASHBOARD,
+        false
+    )
+
     if (error) {
         recordJSException(
             `indexHealthPlanPackagesQuery: Error indexing submissions. Error message:${error.message}`
         )
         return (
-            <div id="dashboard-page" className={styles.wrapper}>
-                <GridContainer className={styles.container}>
+            <div id="cms-dashboard-page" className={styles.wrapper}>
+                <GridContainer
+                    data-testid="cms-dashboard-page"
+                    className={styles.container}
+                >
                     <GenericApiErrorBanner />
                 </GridContainer>
             </div>
@@ -119,18 +120,20 @@ export const CMSDashboard = (): React.ReactElement => {
                 submittedAt: sub.initiallySubmittedAt,
                 status: sub.status,
                 updatedAt: currentSubmissionData.updatedAt,
-                submissionType: SubmissionTypeRecord[currentSubmissionData.submissionType],
-                state: sub.state.name,
+                submissionType:
+                    SubmissionTypeRecord[currentSubmissionData.submissionType],
+                stateName: sub.state.name,
             })
         })
 
     // Sort by updatedAt for current revision
     submissionRows.sort((a, b) => (a['updatedAt'] > b['updatedAt'] ? -1 : 1))
     console.log('showCMSDashboard: ', showCMSDashboard)
+
     if (!showCMSDashboard)
         return (
             <div id="cms-dashboard-page" className={styles.container}>
-                <GridContainer>
+                <GridContainer data-testid="cms-dashboard-page">
                     <h1>CMS Dashboard</h1>
                     <p>
                         The dashboard for CMS users has not been implemented
@@ -185,10 +188,10 @@ export const CMSDashboard = (): React.ReactElement => {
                                                             }
                                                         </NavLink>
                                                     </td>
-                                                    <td data-testid="submission-state">
+                                                    <td data-testid="submission-stateName">
                                                         <span>
                                                             {
-                                                                dashboardSubmission.state
+                                                                dashboardSubmission.stateName
                                                             }
                                                         </span>
                                                     </td>
@@ -241,7 +244,10 @@ export const CMSDashboard = (): React.ReactElement => {
                                 </tbody>
                             </Table>
                         ) : (
-                            <div className={styles.panelEmpty}>
+                            <div
+                                data-testid="cms-dashboard-page"
+                                className={styles.panelEmpty}
+                            >
                                 <h3>You have no submissions yet</h3>
                             </div>
                         )}
