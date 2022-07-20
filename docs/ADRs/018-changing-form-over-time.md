@@ -41,34 +41,51 @@ You can see that each field has a type, and those types can include enums or oth
 
 ## Options Considered
 
+### Data Storage
+
+The first question we have to answer about changing form data is whether we want to maintain old FormDatas as they were submitted, or just migrate the data as the form changes. 
+
+#### Keep Old Submissions Intact
+
+This strategy preserves all the data we received for each package as it was when submitted. We store the data in the format it was entered in in the database and display it as it was whenever someone accesses it. 
+
+#### Migrate Submission Data
+
+This strategy would migrate old data as the shape of our form changes. If we removed a question, it would be removed from old submissions. If we add a question, a dummy answer would be added to the old submissions. This would mean that our code would only ever have to deal with the most recent version of the data, every time a submission was loaded, no matter how old, the data would come back in the same shape. 
+
+The drawback, and ultimately the deal breaker, is that we would then lose some actual answers submitted by states in the past. We decided that it was crucial to keep a complete record of what a state submitted in the past regardless of how the form has changed since. Reviews of these contracts take place on a timeline of years, we don't want to lose the record of what was submitted since that might be referenced over time in the adjudication of the submission. 
+
+
 ### Schema Migration
+
+Since we want to keep old data intact and we need to be able to change the schema of the data over time, that means that our application will need to be able to deal with loading different schemas of data if it is viewing a recent or an old version of the form. 
 
 There are a variety of different changes to the form that will require changing the shape of our data. Two simple ones are adding a new field or removing an old one. More complex ones could be changing the type of a field or changing the values of an enum. We identified two broad strategies for dealing with this, one more invasive than the other. 
 
-First we can simply always add optional fields and only remove optional fields. By that I mean optional at the typescript field level. This forces our code that deals with the form data to always check on these fields and deal appropriately with the case where the data is missing. Since this mostly concerns the single page where we display the package summary, it's mostly a question of leaving question/answers off the page when they don't exist in the data. This works in both directions. Displaying an old submission that doesn't have one of the new questions on it, omit it. Displaying a new submission that doesn't have a question that has been removed, omit it. 
+First we can simply always add optional fields and only remove optional fields. By that I mean optional at the typescript field level. This forces our code that deals with the form data to always check on these fields and deal appropriately with the case where the data is missing. Since this mostly concerns the single page where we display the package summary, it's mostly a question of leaving question/answers off the page when they don't exist in the data. This works in both directions. Displaying an old submission that doesn't have one of the new questions on it, omit it. Displaying a new submission that doesn't have a question that has been removed, omit it. If a field's type needs to change, that can be accommodated by adding a new field and removing the old one. 
 
 The drawback to this is that our summary page has to be able to display every single question ever asked on the form. As the form changes, our summary page will grow continuously, and in a kind of patchwork where different submissions across time will display different subsets of all the questions. We can mitigate this by building tests around rendering the summary for old submissions. 
 
-The other strategy is to version the data. If another 
+The other strategy is to version the data. After a change to the form, we can create a new datatype, "FormDataV2" that has the correct fields. Our pages that deal with the form data can then be customized for the new type. We'd likely have a SummaryPageV1 component and a SummaryPageV2 component. They would share a lot of sub-components but would only display the data for a single version of the form. And we could continue to use non-optional fields to statically enforce the completeness of the form. A required field can be depended upon to exist in the FormData object.
 
+The drawback to this strategy is that it introduces a lot of overhead to form changes. The more the form changes, the more versions we have to track, bloating our data types and the code that has to deal with them. 
 
-### Data Storage
+The nice thing about these two strategies is that they are complimentary. We have decided to start by just adding optional fields to the existing FormData type. Our summary page will be able to display old versions of the data simply by omitting questions for any optional fields not present. If at some point the accumulation of old questions on that page become too onerous to maintain, or if we need to drastically change the shape of the form data, we can version the data then, making a clean brake and simplifying things again. 
 
+### Data Display
 
+Finally we come to the details of how we want to display different versions of this data. There were design questions and technical questions we considered. 
 
--- data storage
-* migrate data over time
-* keep old submissions intact
+In line with our desire to maintain the complete record of past submissions, it makes sense for us to attempt to display the summary of an old submission in the same state as it was originally submitted. Rather than displaying questions with blank answers, we want to just omit questions and answers all together when a submission is missing a field. This makes an old submission missing a new question appear the same way it did when originally submitted, rather than appearing like it's missing something. 
 
--- schema migration
-* add/remove new fields one at a time
-* version the data 
+### On Updating Old Data
 
--- data display 
-* freeze the old UI in place to display old submissions
-* add logic to the summary page to display all the fields in a given submission, omitting missing fields. 
+We also discussed what to do when someone edits a submission that has become out of date. 
 
+#### Edit using the old schema
 
-## How we did it
+Allow a user to re-submit using the same questions that they answered the first time they submitted the form. This would require us maintaining a version of the form inputs that matches old versions of the form. It would preserve all the questions asked at the original time of submission, even if the edits came years later
 
+#### Edit using the new schema
 
+When someone edits an out of date submission, the submission will be migrated to the new schema. This means that our form entry UI does not need to be aware of past versions, and it means that we expect states to answer new questions if they go back in to edit an old submission, bringing it up to date in the process. This is the route we chose to follow. 
