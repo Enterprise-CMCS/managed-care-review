@@ -16,8 +16,8 @@ import {
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 import { mockStoreThatErrors } from '../testHelpers/storeHelpers'
 import { testEmailConfig, testEmailer } from '../testHelpers/emailerHelpers'
-import { base64ToDomain } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
-import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
+import { base64ToDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import { packageName } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     getTestStateAnalystsEmails,
     mockEmailParameterStoreError,

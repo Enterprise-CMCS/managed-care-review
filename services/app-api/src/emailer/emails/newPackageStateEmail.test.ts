@@ -194,10 +194,10 @@ test('includes information about what is next', async () => {
 test('includes expected data summary for a contract and rates submission State email', async () => {
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractAndRatesFormData(),
-        contractDateStart: new Date('01/01/2021'),
-        contractDateEnd: new Date('01/01/2025'),
-        rateDateStart: new Date('01/01/2021'),
-        rateDateEnd: new Date('01/01/2022'),
+        contractDateStart: '2021-01-01',
+        contractDateEnd: '2025-01-01',
+        rateDateStart: '2021-01-01',
+        rateDateEnd: '2022-01-01',
     }
     const user = mockUser()
     const template = await newPackageStateEmail(
@@ -207,7 +207,7 @@ test('includes expected data summary for a contract and rates submission State e
         testEmailConfig
     )
     const rateName = `some-title-RATE-20210101-20220101-CERTIFICATION-${formatRateNameDate(
-        new Date()
+        '2021-12-31'
     )}`
 
     expect(template).toEqual(
@@ -243,13 +243,13 @@ test('includes expected data summary for a rate amendment submission State email
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractAndRatesFormData(),
         rateType: 'AMENDMENT',
-        contractDateStart: new Date('01/01/2021'),
-        contractDateEnd: new Date('01/01/2025'),
-        rateDateStart: new Date('01/01/2021'),
-        rateDateEnd: new Date('01/01/2022'),
+        contractDateStart: '2021-01-01',
+        contractDateEnd: '2025-01-01',
+        rateDateStart: '2021-01-01',
+        rateDateEnd: '2022-01-01',
         rateAmendmentInfo: {
-            effectiveDateStart: new Date('06/05/2021'),
-            effectiveDateEnd: new Date('12/31/2021'),
+            effectiveDateStart: '2021-06-05',
+            effectiveDateEnd: '2021-12-31',
         },
     }
     const user = mockUser()
@@ -260,7 +260,7 @@ test('includes expected data summary for a rate amendment submission State email
         testEmailConfig
     )
     const rateName = `some-title-RATE-20210605-20211231-AMENDMENT-${formatRateNameDate(
-        new Date()
+        '2021-12-31'
     )}`
 
     expect(template).toEqual(
@@ -288,14 +288,14 @@ test('renders overall email as expected', async () => {
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractAndRatesFormData(),
         rateType: 'AMENDMENT',
-        contractDateStart: new Date('2021-01-01'),
-        contractDateEnd: new Date('2021-12-31'),
-        rateDateStart: new Date('2021-02-02'),
-        rateDateEnd: new Date('2021-11-31'),
-        rateDateCertified: new Date('2020-12-01'),
+        contractDateStart: '2021-01-01',
+        contractDateEnd: '2021-12-31',
+        rateDateStart: '2021-02-02',
+        rateDateEnd: '2021-11-31',
+        rateDateCertified: '2020-12-01',
         rateAmendmentInfo: {
-            effectiveDateStart: new Date('06/05/2021'),
-            effectiveDateEnd: new Date('12/31/2021'),
+            effectiveDateStart: '2021-06-05',
+            effectiveDateEnd: '2021-12-31',
         },
     }
     const user = mockUser()

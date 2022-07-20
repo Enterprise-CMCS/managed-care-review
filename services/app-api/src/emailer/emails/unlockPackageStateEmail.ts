@@ -1,7 +1,6 @@
 import { URL } from 'url'
 
 import { UnlockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { generateRateName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     renderTemplate,
@@ -10,6 +9,7 @@ import {
     generateStateReceiverEmails,
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration } from '../'
+import { formatDateTime } from '../../../../app-web/src/common-code/dateHelpers/calendarDate'
 
 export const unlockPackageStateEmail = async (
     pkg: UnlockedHealthPlanFormDataType,
@@ -23,7 +23,7 @@ export const unlockPackageStateEmail = async (
     const data = {
         packageName: unlockData.packageName,
         unlockedBy: unlockData.updatedBy,
-        unlockedOn: formatCalendarDate(unlockData.updatedAt),
+        unlockedOn: formatDateTime(unlockData.updatedAt),
         unlockedReason: unlockData.updatedReason,
         shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
         rateName: generateRateName(pkg, unlockData.packageName),

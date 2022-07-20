@@ -3,6 +3,7 @@ import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
     isLockedHealthPlanFormData,
+    CalendarDate,
 } from '../../healthPlanFormDataType'
 
 /*
@@ -19,6 +20,25 @@ const domainDateToProtoDate = (
         day: domainDate.getUTCDate(),
         month: domainDate.getUTCMonth(),
         year: domainDate.getUTCFullYear(),
+    }
+}
+
+const calendarDomainDateToProtoDate = (
+    domainDate: CalendarDate | undefined
+): mcreviewproto.IHealthPlanFormData['createdAt'] => {
+    if (!domainDate) {
+        return undefined
+    }
+
+    const parsedCalendarDate = domainDate.split('-')
+    const month = parseInt(parsedCalendarDate[1])
+    const day = parseInt(parsedCalendarDate[2])
+    const year = parseInt(parsedCalendarDate[0])
+
+    return {
+        day: day,
+        month: month,
+        year: year,
     }
 }
 
@@ -144,10 +164,12 @@ const toProtoBuffer = (
                 domainData.contractExecutionStatus,
                 mcreviewproto.ContractExecutionStatus
             ),
-            contractDateStart: domainDateToProtoDate(
+            contractDateStart: calendarDomainDateToProtoDate(
                 domainData.contractDateStart
             ),
-            contractDateEnd: domainDateToProtoDate(domainData.contractDateEnd),
+            contractDateEnd: calendarDomainDateToProtoDate(
+                domainData.contractDateEnd
+            ),
             managedCareEntities: domainEnumArrayToProto(
                 mcreviewproto.ManagedCareEntity,
                 domainData.managedCareEntities
@@ -177,9 +199,13 @@ const toProtoBuffer = (
                     domainData.rateCapitationType,
                     mcreviewproto.RateCapitationType
                 ),
-                rateDateStart: domainDateToProtoDate(domainData.rateDateStart),
-                rateDateEnd: domainDateToProtoDate(domainData.rateDateEnd),
-                rateDateCertified: domainDateToProtoDate(
+                rateDateStart: calendarDomainDateToProtoDate(
+                    domainData.rateDateStart
+                ),
+                rateDateEnd: calendarDomainDateToProtoDate(
+                    domainData.rateDateEnd
+                ),
+                rateDateCertified: calendarDomainDateToProtoDate(
                     domainData.rateDateCertified
                 ),
                 rateDocuments: domainData.rateDocuments.map((doc) => ({
@@ -210,10 +236,10 @@ const toProtoBuffer = (
                     }
                 ),
                 rateAmendmentInfo: rateAmendmentInfo && {
-                    effectiveDateStart: domainDateToProtoDate(
+                    effectiveDateStart: calendarDomainDateToProtoDate(
                         rateAmendmentInfo.effectiveDateStart
                     ),
-                    effectiveDateEnd: domainDateToProtoDate(
+                    effectiveDateEnd: calendarDomainDateToProtoDate(
                         rateAmendmentInfo.effectiveDateEnd
                     ),
                 },

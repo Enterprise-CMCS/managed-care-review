@@ -37,7 +37,6 @@ export function updateHealthPlanFormDataResolver(
             )
             throw new ForbiddenError('user not authorized to modify state data')
         }
-
         const formDataResult = base64ToDomain(input.healthPlanFormData)
         if (formDataResult instanceof Error) {
             const errMessage =
