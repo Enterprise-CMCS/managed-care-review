@@ -61,7 +61,7 @@ export async function findAllHealthPlanPackagesBySubmittedAt(
                 `ERROR submission ${submissionWithRevisions.id} does not have a current revision`
             )
             console.error(
-                `ERROR findAllHealthPlanPackagesBySubmittedAt has to revisions. There are ${errors.length} error(s)`
+                `ERROR findAllHealthPlanPackagesBySubmittedAt has no revisions. There are ${errors.length} error(s)`
             )
             return
         }

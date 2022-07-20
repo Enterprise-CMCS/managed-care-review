@@ -1,13 +1,40 @@
+import { Span } from '@opentelemetry/api'
 import { ForbiddenError } from 'apollo-server-lambda'
 import { isStateUser, HealthPlanPackageType, isCMSUser } from '../domain-models'
 import { QueryResolvers } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
-import { isStoreError, Store } from '../postgres'
+import { isStoreError, Store, StoreError } from '../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
+
+const validateAndReturnHealthPlanPackages = (
+    results: HealthPlanPackageType[] | StoreError,
+    span?: Span
+) => {
+    if (isStoreError(results)) {
+        const errMessage = `Issue indexing packages of type ${results.code}. Message: ${results.message}`
+        logError('indexHealthPlanPackages', errMessage)
+        setErrorAttributesOnActiveSpan(errMessage, span)
+        throw new Error(errMessage)
+    }
+
+    const packages: HealthPlanPackageType[] = results
+
+    const edges = packages.map((sub) => {
+        return {
+            node: {
+                ...sub,
+            },
+        }
+    })
+
+    logSuccess('indexHealthPlanPackages')
+    setSuccessAttributesOnActiveSpan(span)
+    return { totalCount: edges.length, edges }
+}
 
 export function indexHealthPlanPackagesResolver(
     store: Store
@@ -20,51 +47,11 @@ export function indexHealthPlanPackagesResolver(
             const results = await store.findAllHealthPlanPackagesByState(
                 user.state_code
             )
-
-            if (isStoreError(results)) {
-                const errMessage = `Issue finding packages for state user of type ${results.code}. Message: ${results.message}`
-                logError('indexHealthPlanPackages', errMessage)
-                setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new Error(errMessage)
-            }
-
-            const packages: HealthPlanPackageType[] = results
-
-            const edges = packages.map((sub) => {
-                return {
-                    node: {
-                        ...sub,
-                    },
-                }
-            })
-
-            logSuccess('indexHealthPlanPackages')
-            setSuccessAttributesOnActiveSpan(span)
-            return { totalCount: edges.length, edges }
+            return validateAndReturnHealthPlanPackages(results, span)
         } else if (isCMSUser(user)) {
             const results = await store.findAllHealthPlanPackagesBySubmittedAt()
 
-            if (isStoreError(results)) {
-                const errMessage = `Issue finding packages for CMS user of type ${results.code}. Message: ${results.message}`
-                logError('indexHealthPlanPackages', errMessage)
-                setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new Error(errMessage)
-            }
-
-            const packages: HealthPlanPackageType[] = results
-
-            const edges = packages.map((sub) => {
-                return {
-                    node: {
-                        ...sub,
-                    },
-                }
-            })
-
-            logSuccess('indexHealthPlanPackages')
-
-            setSuccessAttributesOnActiveSpan(span)
-            return { totalCount: edges.length, edges }
+            return validateAndReturnHealthPlanPackages(results, span)
         } else {
             const errMsg = 'user not authorized to fetch state data'
             logError('indexHealthPlanPackages', errMsg)
