@@ -3,6 +3,9 @@ import classnames from 'classnames'
 import dayjs from 'dayjs'
 import React from 'react'
 import { NavLink } from 'react-router-dom'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+
+import { featureFlags } from '../../common-code/featureFlags'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { Loading } from '../../components/Loading'
@@ -56,9 +59,12 @@ const StatusTag = ({
 
 export const CMSDashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
-
     const { loading, data, error } = useIndexHealthPlanPackagesQuery()
-
+    const ldClient = useLDClient()
+    const showCMSDashboard: boolean = ldClient?.variation(
+        featureFlags.CMS_DASHBOARD,
+        false
+    )
     if (error) {
         recordJSException(
             `indexHealthPlanPackagesQuery: Error indexing submissions. Error message:${error.message}`
@@ -93,7 +99,7 @@ export const CMSDashboard = (): React.ReactElement => {
                 return null
             }
             if (sub.status === 'DRAFT') {
-                // should display draft submissions to a CMS user - this is also filtered out on the api side
+                // should not display draft submissions to a CMS user - this is also filtered out on the api side
                 return
             }
             const programs = sub.state.programs
@@ -112,6 +118,20 @@ export const CMSDashboard = (): React.ReactElement => {
 
     // Sort by updatedAt for current revision
     submissionRows.sort((a, b) => (a['updatedAt'] > b['updatedAt'] ? -1 : 1))
+    console.log(showCMSDashboard)
+    // if (!showCMSDashboard)
+    //     return (
+    //         <div id="cms-dashboard-page" className={styles.container}>
+    //             <GridContainer>
+    //                 <h1>CMS Dashboard</h1>
+    //                 <p>
+    //                     The dashboard for CMS users has not been implemented
+    //                     yet, you will need to access a specific submission by
+    //                     URL for now.
+    //                 </p>
+    //             </GridContainer>
+    //         </div>
+    //     )
 
     const hasSubmissions = submissionRows.length > 0
 

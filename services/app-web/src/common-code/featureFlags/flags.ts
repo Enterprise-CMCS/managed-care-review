@@ -7,7 +7,10 @@ export const featureFlags = {
      Toggles the /health api endpoint
     */
     API_ENABLE_HEALTH_ENDPOINT: 'enable-health-endpoint',
-
+    /*
+     Toggles the CMS dashboard view
+    */
+    CMS_DASHBOARD: 'enable-health-endpoint',
     /*
      Displays a banner in the frontend dashboard. Added for testing React integration with LD.
     */

@@ -18,7 +18,40 @@ describe('CMSDashboard', () => {
         email: 'bob@dmas.mn.gov',
     }
 
-    it('displays submissions table', async () => {
+    // eslint-disable-next-line jest/no-commented-out-tests
+    // it('displays has not been implemented message when cms-dashboard feature flag is off', async () => {
+    //     const submitted = mockSubmittedHealthPlanPackage()
+
+    //      renderWithProviders(<CMSDashboard />, {
+    //          apolloProvider: {
+    //              mocks: [
+    //                  fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
+    //                  indexHealthPlanPackagesMockSuccess([submitted]),
+    //              ],
+    //          },
+    //      })
+    //     await screen.findByText('CMS Dashboard')
+    //     expect(screen.queryByRole('table')).toBeNull()
+    //     expect(screen.getByText(/The dashboard for CMS users has not been implemented yet/)).toBeInTheDocument()
+    // })
+
+    it('displays no submission text when no submitted packages exist', async () => {
+        renderWithProviders(<CMSDashboard />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
+                    indexHealthPlanPackagesMockSuccess([]),
+                ],
+            },
+        })
+        await screen.findByText('Submissions')
+        expect(screen.queryByRole('table')).toBeNull()
+        expect(
+            screen.getByText(/You have no submissions yet/)
+        ).toBeInTheDocument()
+    })
+
+    it('displays submissions table when submitted packages exist', async () => {
         const submitted = mockSubmittedHealthPlanPackage()
         const unlocked = mockUnlockedHealthPlanPackage()
         submitted.id = 'test-submitted'
@@ -34,6 +67,7 @@ describe('CMSDashboard', () => {
             },
         })
 
+        await screen.findByText('Submissions')
         const rows = await screen.findAllByRole('row')
         expect(screen.getByRole('table')).toBeInTheDocument()
         expect(rows).toHaveLength(3)
@@ -70,7 +104,7 @@ describe('CMSDashboard', () => {
                 ],
             },
         })
-
+        await screen.findByText('Submissions')
         const rows = await screen.findAllByRole('row') // remember, 0 index element is the table header
 
         const link1 = within(rows[1]).getByRole('link')
@@ -106,6 +140,7 @@ describe('CMSDashboard', () => {
             },
         })
 
+        await screen.findByText('Submissions')
         const rows = await screen.findAllByRole('row')
         rows.shift() // remove the column header row
 
@@ -136,7 +171,7 @@ describe('CMSDashboard', () => {
                 ],
             },
         })
-
+        await screen.findByText('Submissions')
         const rows = await screen.findAllByRole('row')
 
         const tag1 = within(rows[1]).getByTestId('submission-status')
@@ -178,7 +213,7 @@ describe('CMSDashboard', () => {
                 ],
             },
         })
-
+        await screen.findByText('Submissions')
         const rows = await screen.findAllByRole('row')
 
         const tags1 = within(rows[1]).getAllByTestId('program-tag')
