@@ -21,7 +21,6 @@ import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 
 import { recordJSException } from '../../otelHelpers/tracingHelper'
-import { MaintenanceMessage } from './MaintenanceMessage'
 
 // We only pull a subset of data out of the submission and revisions for display in Dashboard
 type SubmissionInDashboard = {
@@ -152,9 +151,6 @@ export const StateDashboard = (): React.ReactElement => {
                                 <SubmissionSuccessMessage
                                     submissionName={justSubmittedSubmissionName}
                                 />
-                            )}
-                            {testFrontendBanner && (
-                                <MaintenanceMessage message="This is a test message from launch darkly" />
                             )}
 
                             <div className={styles.panelHeader}>
