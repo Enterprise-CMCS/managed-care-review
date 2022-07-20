@@ -1,4 +1,5 @@
 import { screen, within } from '@testing-library/react'
+import { ldClientMock, resetLDMocks } from 'jest-launchdarkly-mock'
 import {
     fetchCurrentUserMock,
     indexHealthPlanPackagesMockSuccess,
@@ -17,23 +18,27 @@ describe('CMSDashboard', () => {
         name: 'Bob it user',
         email: 'bob@dmas.mn.gov',
     }
-
-    // eslint-disable-next-line jest/no-commented-out-tests
-    // it('displays has not been implemented message when cms-dashboard feature flag is off', async () => {
-    //     const submitted = mockSubmittedHealthPlanPackage()
-
-    //      renderWithProviders(<CMSDashboard />, {
-    //          apolloProvider: {
-    //              mocks: [
-    //                  fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
-    //                  indexHealthPlanPackagesMockSuccess([submitted]),
-    //              ],
-    //          },
-    //      })
-    //     await screen.findByText('CMS Dashboard')
-    //     expect(screen.queryByRole('table')).toBeNull()
-    //     expect(screen.getByText(/The dashboard for CMS users has not been implemented yet/)).toBeInTheDocument()
-    // })
+    it('displays has not been implemented message when cms-dashboard feature flag is off', async () => {
+        const submitted = mockSubmittedHealthPlanPackage()
+        // mock the variation function to return true
+        ldClientMock.variation.mockReturnValue(false)
+        renderWithProviders(<CMSDashboard />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
+                    indexHealthPlanPackagesMockSuccess([submitted]),
+                ],
+            },
+        })
+          expect(ldClientMock.variation).toBeCalledWith('cms-dashboard')
+        await screen.findByText('CMS Dashboard')
+        expect(screen.queryByRole('table')).toBeNull()
+        expect(
+            screen.getByText(
+                /The dashboard for CMS users has not been implemented yet/
+            )
+        ).toBeInTheDocument()
+    })
 
     it('displays no submission text when no submitted packages exist', async () => {
         renderWithProviders(<CMSDashboard />, {

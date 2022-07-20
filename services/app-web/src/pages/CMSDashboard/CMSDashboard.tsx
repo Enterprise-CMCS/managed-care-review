@@ -9,7 +9,7 @@ import { featureFlags } from '../../common-code/featureFlags'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { Loading } from '../../components/Loading'
-import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
+import { SubmissionStatusRecord, SubmissionTypeRecord } from '../../constants/healthPlanPackages'
 import { useAuth } from '../../contexts/AuthContext'
 import {
     HealthPlanPackageStatus,
@@ -29,7 +29,8 @@ type SubmissionInDashboard = {
     updatedAt: string
     status: HealthPlanPackageStatus
     programs: Program[]
-    submissionType: GQLSubmissionType
+    submissionType: string
+    state: string
 }
 
 const isSubmitted = (status: HealthPlanPackageStatus) =>
@@ -112,13 +113,14 @@ export const CMSDashboard = (): React.ReactElement => {
                 submittedAt: sub.initiallySubmittedAt,
                 status: sub.status,
                 updatedAt: currentSubmissionData.updatedAt,
-                submissionType: currentSubmissionData.submissionType,
+                submissionType: SubmissionTypeRecord[currentSubmissionData.submissionType],
+                state: sub.state.name,
             })
         })
 
     // Sort by updatedAt for current revision
     submissionRows.sort((a, b) => (a['updatedAt'] > b['updatedAt'] ? -1 : 1))
-    console.log(showCMSDashboard)
+    console.log('showCMSDashboard: ', showCMSDashboard)
     // if (!showCMSDashboard)
     //     return (
     //         <div id="cms-dashboard-page" className={styles.container}>
@@ -151,8 +153,10 @@ export const CMSDashboard = (): React.ReactElement => {
                                 <thead>
                                     <tr>
                                         <th>ID</th>
+                                        <th>State</th>
+                                        <th>Submission type</th>
                                         <th>Programs</th>
-                                        <th>Submitted</th>
+                                        <th>Submission date</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
@@ -173,6 +177,20 @@ export const CMSDashboard = (): React.ReactElement => {
                                                                 dashboardSubmission.name
                                                             }
                                                         </NavLink>
+                                                    </td>
+                                                    <td data-testid="submission-state">
+                                                        <span>
+                                                            {
+                                                                dashboardSubmission.state
+                                                            }
+                                                        </span>
+                                                    </td>
+                                                    <td data-testid="submission-type">
+                                                        <span>
+                                                            {
+                                                                dashboardSubmission.submissionType
+                                                            }
+                                                        </span>
                                                     </td>
                                                     <td data-destid="submission-programs">
                                                         {dashboardSubmission.programs.map(

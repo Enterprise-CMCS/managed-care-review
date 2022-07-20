@@ -10,7 +10,7 @@ export const featureFlags = {
     /*
      Toggles the CMS dashboard view
     */
-    CMS_DASHBOARD: 'enable-health-endpoint',
+    CMS_DASHBOARD: 'cms-dashboard',
     /*
      Displays a banner in the frontend dashboard. Added for testing React integration with LD.
     */
