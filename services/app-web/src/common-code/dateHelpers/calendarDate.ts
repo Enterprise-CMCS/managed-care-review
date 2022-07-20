@@ -18,7 +18,7 @@ function formatDateTime(date: Date | undefined): string {
     if (!date) {
         return ''
     }
-    return dayjs(date).tz('UTC').format('MM/DD/YYYY')
+    return dayjs(date).format('MM/DD/YYYY')
 }
 
 function formatRateNameDate(date: CalendarDate | undefined): string {

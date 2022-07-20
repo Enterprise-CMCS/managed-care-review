@@ -87,9 +87,6 @@ test('body content is correct', async () => {
 })
 
 test('renders overall email as expected', async () => {
-    console.log('maz sub: ', sub)
-    console.log('maz unlockData: ', unlockData)
-    console.log('maz testEmailConfig: ', testEmailConfig)
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
