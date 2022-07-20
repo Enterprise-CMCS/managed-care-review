@@ -76,7 +76,8 @@ The nice thing about these two strategies is that they are complimentary. We hav
 
 Finally we come to the details of how we want to display different versions of this data. There were design questions and technical questions we considered. 
 
-In line with our desire to maintain the complete record of past submissions, it makes sense for us to attempt to display the summary of an old submission in the same state as it was originally submitted. Rather than displaying questions with blank answers, we want to just omit questions and answers all together when a submission is missing a field. This makes an old submission missing a new question appear the same way it did when originally submitted, rather than appearing like it's missing something. 
+In line with our desire to maintain the complete record of past submissions, it makes sense for us to attempt to display the summary of an old submission in the same state as it was originally submitted. Rather than displaying questions with blank answers, we want to just omit questions and answers all together when a submission is missing a field. This makes an old submission missing a new question appear the same way it did when originally submitted, rather than appearing like it's missing something expected. 
+
 
 ### On Updating Old Data
 
