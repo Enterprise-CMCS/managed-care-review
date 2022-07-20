@@ -196,14 +196,14 @@ describe('CMSDashboard', () => {
 
         const mockMN = mockMNState() // this is the state used in apolloHelpers
         const unlocked1 = mockUnlockedHealthPlanPackage({
-            programIDs: [mockMN.programs[0].id],
-        })
-        const unlocked2 = mockUnlockedHealthPlanPackage({
-            programIDs: [
+               programIDs: [
                 mockMN.programs[0].id,
                 mockMN.programs[1].id,
                 mockMN.programs[2].id,
             ],
+        })
+        const unlocked2 = mockUnlockedHealthPlanPackage({
+            programIDs: [mockMN.programs[0].id],
         })
         unlocked1.id = 'test-unlocked1'
         unlocked2.id = 'test-unlocked2'
