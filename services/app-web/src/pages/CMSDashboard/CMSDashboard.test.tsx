@@ -31,7 +31,7 @@ describe('CMSDashboard', () => {
     //             ],
     //         },
     //     })
-    //       expect(ldClientMock.variation).toBeCalledWith('cms-dashboard')
+    //       expect(ldClientMock.variation).toHaveBeenCalledWith('cms-dashboard')
     //     await screen.findByText('CMS Dashboard')
     //     expect(screen.queryByRole('table')).toBeNull()
     //     expect(
@@ -163,9 +163,7 @@ describe('CMSDashboard', () => {
     })
 
     it('displays each health plan package status tag as expected', async () => {
-        const unlocked = mockUnlockedHealthPlanPackage({
-            updatedAt: new Date('2298-01-01'),
-        })
+        const unlocked = mockUnlockedHealthPlanPackage()
         const submitted = mockSubmittedHealthPlanPackage()
         submitted.id = 'test-abc-submitted'
         unlocked.id = 'test-abc-unlocked'
@@ -180,16 +178,16 @@ describe('CMSDashboard', () => {
             },
         })
         await screen.findByText('Submissions')
-        const rows = await screen.findAllByRole('row')
-
-        const tag1 = within(rows[1]).getByTestId('submission-status')
+        const unlockedRow = await screen.findByTestId(`row-${unlocked.id}`)
+        const tag1 = within(unlockedRow).getByTestId('submission-status')
         expect(tag1).toHaveTextContent('Unlocked')
 
-        const tag2 = within(rows[2]).getByTestId('submission-status')
+        const submittedRow = await screen.findByTestId(`row-${submitted.id}`)
+        const tag2 = within(submittedRow).getByTestId('submission-status')
         expect(tag2).toHaveTextContent('Submitted')
     })
 
-    it('displays program status tags as expected', async () => {
+    it('displays program tags as expected', async () => {
         const mockUser = {
             __typename: 'CMSUser' as const,
             role: 'CMS User',
@@ -199,6 +197,9 @@ describe('CMSDashboard', () => {
 
         const mockMN = mockMNState() // this is the state used in apolloHelpers
         const unlocked1 = mockUnlockedHealthPlanPackage({
+            programIDs: [mockMN.programs[0].id],
+        })
+        const unlocked2 = mockUnlockedHealthPlanPackage({
             updatedAt: new Date('2298-01-01'),
             programIDs: [
                 mockMN.programs[0].id,
@@ -206,9 +207,7 @@ describe('CMSDashboard', () => {
                 mockMN.programs[2].id,
             ],
         })
-        const unlocked2 = mockUnlockedHealthPlanPackage({
-            programIDs: [mockMN.programs[0].id],
-        })
+   
         unlocked1.id = 'test-unlocked1'
         unlocked2.id = 'test-unlocked2'
 
@@ -223,13 +222,13 @@ describe('CMSDashboard', () => {
             },
         })
         await screen.findByText('Submissions')
-        const rows = await screen.findAllByRole('row')
-
-        const tags1 = within(rows[1]).getAllByTestId('program-tag')
+        const row1 = await screen.findByTestId(`row-${unlocked1.id}`)
+        const tags1 = within(row1).getAllByTestId('program-tag')
         expect(tags1[0]).toHaveTextContent(mockMN.programs[0].name)
         expect(tags1).toHaveLength(1)
-
-        const tags2 = within(rows[2]).getAllByTestId('program-tag')
+        
+         const row2 = await screen.findByTestId(`row-${unlocked2.id}`)
+        const tags2 = within(row2).getAllByTestId('program-tag')
         expect(tags2).toHaveLength(3)
         expect(tags2[0]).toHaveTextContent(mockMN.programs[0].name)
         expect(tags2[1]).toHaveTextContent(mockMN.programs[1].name)

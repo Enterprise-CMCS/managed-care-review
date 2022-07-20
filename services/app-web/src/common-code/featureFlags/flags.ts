@@ -11,10 +11,6 @@ export const featureFlags = {
      Toggles the CMS dashboard view
     */
     CMS_DASHBOARD: 'cms-dashboard',
-    /*
-     Displays a banner in the frontend dashboard. Added for testing React integration with LD.
-    */
-    REACT_TEST_FRONTEND_BANNER: 'test-frontend-banner',
     /* 
      Enables the modal that alerts the user to an expiring session
     */

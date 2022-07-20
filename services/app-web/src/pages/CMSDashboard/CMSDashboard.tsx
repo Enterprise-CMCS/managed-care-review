@@ -3,7 +3,7 @@ import classnames from 'classnames'
 import dayjs from 'dayjs'
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { useLDClient, useFlags } from 'launchdarkly-react-client-sdk'
 
 import { featureFlags } from '../../common-code/featureFlags'
 import { packageName } from '../../common-code/healthPlanFormDataType'
@@ -62,10 +62,16 @@ export const CMSDashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
     const { loading, data, error } = useIndexHealthPlanPackagesQuery()
     const ldClient = useLDClient()
-    const showCMSDashboard: boolean = ldClient?.variation(
-        featureFlags.CMS_DASHBOARD,
-        false
-    )
+    console.log(ldClient, "client exists")
+     const flags = useFlags()
+
+     console.log('here are the flags:', flags)
+    const showCMSDashboard = true
+    
+    // ldClient?.variation(
+    //     featureFlags.CMS_DASHBOARD,
+    //     false
+    // )
     if (error) {
         recordJSException(
             `indexHealthPlanPackagesQuery: Error indexing submissions. Error message:${error.message}`
@@ -121,19 +127,19 @@ export const CMSDashboard = (): React.ReactElement => {
     // Sort by updatedAt for current revision
     submissionRows.sort((a, b) => (a['updatedAt'] > b['updatedAt'] ? -1 : 1))
     console.log('showCMSDashboard: ', showCMSDashboard)
-    // if (!showCMSDashboard)
-    //     return (
-    //         <div id="cms-dashboard-page" className={styles.container}>
-    //             <GridContainer>
-    //                 <h1>CMS Dashboard</h1>
-    //                 <p>
-    //                     The dashboard for CMS users has not been implemented
-    //                     yet, you will need to access a specific submission by
-    //                     URL for now.
-    //                 </p>
-    //             </GridContainer>
-    //         </div>
-    //     )
+    if (!showCMSDashboard)
+        return (
+            <div id="cms-dashboard-page" className={styles.container}>
+                <GridContainer>
+                    <h1>CMS Dashboard</h1>
+                    <p>
+                        The dashboard for CMS users has not been implemented
+                        yet, you will need to access a specific submission by
+                        URL for now.
+                    </p>
+                </GridContainer>
+            </div>
+        )
 
     const hasSubmissions = submissionRows.length > 0
 
@@ -165,6 +171,7 @@ export const CMSDashboard = (): React.ReactElement => {
                                         (dashboardSubmission) => {
                                             return (
                                                 <tr
+                                                    data-testid={`row-${dashboardSubmission.id}`}
                                                     key={dashboardSubmission.id}
                                                 >
                                                     <td data-testid="submission-id">
