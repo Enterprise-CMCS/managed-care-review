@@ -1,4 +1,4 @@
-import { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
 
 export type ParameterStore = {
     getStateAnalystsEmails: (stateCode: string) => Promise<string[] | Error>
