@@ -95,7 +95,6 @@ jobs:
           EMAILER_MODE: SES
           NR_LICENSE_KEY: ${{ secrets.nr_license_key }}
         run: |
-        run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 
       - name: run migrations
