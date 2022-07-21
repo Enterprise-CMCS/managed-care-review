@@ -136,6 +136,7 @@ jobs:
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       react_app_auth_mode: IDM
+      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   dev-cypress:
     name: dev - cypress
@@ -199,6 +200,7 @@ jobs:
       aws_secret_access_key: ${{ secrets.VAL_AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       react_app_auth_mode: IDM
+      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   cypress-val:
     name: val - cypress
@@ -262,6 +264,7 @@ jobs:
       aws_secret_access_key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       react_app_auth_mode: IDM
+      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   cypress-prod:
     name: prod - cypress
