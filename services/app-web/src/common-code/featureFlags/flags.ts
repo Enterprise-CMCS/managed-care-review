@@ -7,11 +7,10 @@ export const featureFlags = {
      Toggles the /health api endpoint
     */
     API_ENABLE_HEALTH_ENDPOINT: 'enable-health-endpoint',
-
     /*
-     Displays a banner in the frontend dashboard. Added for testing React integration with LD.
+     Toggles the CMS dashboard view
     */
-    REACT_TEST_FRONTEND_BANNER: 'test-frontend-banner',
+    CMS_DASHBOARD: 'cms-dashboard',
     /* 
      Enables the modal that alerts the user to an expiring session
     */

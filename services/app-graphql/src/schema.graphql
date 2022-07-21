@@ -108,6 +108,7 @@ type State {
 type Program {
     id: ID!
     name: String!
+    fullName: String!
 }
 
 enum HealthPlanPackageStatus {

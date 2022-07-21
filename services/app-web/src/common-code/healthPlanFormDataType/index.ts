@@ -42,3 +42,4 @@ export {
 } from './healthPlanFormData'
 
 export type { HealthPlanFormDataType } from './HealthPlanFormDataType'
+export type { ProgramArgType } from './healthPlanFormData'

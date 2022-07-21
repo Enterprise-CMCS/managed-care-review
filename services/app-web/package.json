@@ -129,6 +129,7 @@
         "eslint-plugin-react": "^7.26.1",
         "eslint-plugin-react-hooks": "^4.3.0",
         "graphql.macro": "^1.4.2",
+        "jest-launchdarkly-mock": "^1.0.6",
         "lint-staged": "^13.0.1",
         "prettier": "^2.3.2",
         "react-scripts": "5.0.1",
