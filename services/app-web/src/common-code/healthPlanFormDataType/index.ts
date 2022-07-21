@@ -19,7 +19,6 @@ export type {
     SubmissionDocument,
     SubmissionType,
     RateDataType,
-    CalendarDate,
 } from './UnlockedHealthPlanFormDataType'
 
 export type { ModifiedProvisions } from './ModifiedProvisions'
