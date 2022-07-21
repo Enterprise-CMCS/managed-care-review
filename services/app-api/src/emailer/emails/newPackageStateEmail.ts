@@ -45,10 +45,10 @@ export const newPackageStateEmail = async (
                 ? 'Rating period'
                 : 'Rate amendment effective dates',
         rateDatesStart: hasRateAmendmentInfo
-            ? formatCalendarDate(pkg.rateAmendmentInfo?.effectiveDateStart)
+            ? formatCalendarDate(pkg.rateAmendmentInfo.effectiveDateStart)
             : formatCalendarDate(pkg.rateDateStart),
         rateDatesEnd: hasRateAmendmentInfo
-            ? formatCalendarDate(pkg.rateAmendmentInfo?.effectiveDateEnd)
+            ? formatCalendarDate(pkg.rateAmendmentInfo.effectiveDateEnd)
             : formatCalendarDate(pkg.rateDateEnd),
         submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
     }

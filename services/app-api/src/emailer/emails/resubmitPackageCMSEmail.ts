@@ -2,6 +2,7 @@ import {
     LockedHealthPlanFormDataType,
     generateRateName,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import {
     stripHTMLFromTemplate,
     UpdatedEmailData,
@@ -11,7 +12,6 @@ import {
 
 import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
 import { URL } from 'url'
-import { formatDateTime } from '../../../../app-web/src/common-code/dateHelpers/calendarDate'
 
 export const resubmitPackageCMSEmail = async (
     pkg: LockedHealthPlanFormDataType,
@@ -30,7 +30,7 @@ export const resubmitPackageCMSEmail = async (
     const data = {
         packageName: resubmittedData.packageName,
         resubmittedBy: resubmittedData.updatedBy,
-        resubmittedOn: formatDateTime(resubmittedData.updatedAt),
+        resubmittedOn: formatCalendarDate(resubmittedData.updatedAt),
         resubmissionReason: resubmittedData.updatedReason,
         shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
         rateName: generateRateName(pkg, resubmittedData.packageName),

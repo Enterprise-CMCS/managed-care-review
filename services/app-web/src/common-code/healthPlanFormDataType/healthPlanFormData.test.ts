@@ -393,12 +393,12 @@ describe('submission type assertions', () => {
         {
             rateData: {
                 rateType: 'AMENDMENT',
-                rateDateStart: '2021-04-22',
-                rateDateEnd: '2022-03-29',
-                rateDateCertified: '2021-05-23',
+                rateDateStart: new Date('2021/04/22'),
+                rateDateEnd: new Date('2022/03/29'),
+                rateDateCertified: new Date('2021/05/23'),
                 rateAmendmentInfo: {
-                    effectiveDateStart: '2022-05-21',
-                    effectiveDateEnd: '2022-09-21',
+                    effectiveDateStart: new Date('2022/05/21'),
+                    effectiveDateEnd: new Date('2022/09/21'),
                 },
             },
             submissionName: 'MN-TEST-AMENDMENT',
@@ -408,9 +408,9 @@ describe('submission type assertions', () => {
         {
             rateData: {
                 rateType: 'NEW',
-                rateDateStart: '2021-04-22',
-                rateDateEnd: '2022-03-29',
-                rateDateCertified: '2021-04-22',
+                rateDateStart: new Date('2021/04/22'),
+                rateDateEnd: new Date('2022/03/29'),
+                rateDateCertified: new Date('2021/04/22'),
             },
             submissionName: 'OH-TEST-NAME',
             expectedName:
@@ -419,12 +419,12 @@ describe('submission type assertions', () => {
         {
             rateData: {
                 rateType: 'NEW',
-                rateDateStart: '2021-04-22',
-                rateDateEnd: '2022-03-29',
-                rateDateCertified: '2021-04-22',
+                rateDateStart: new Date('2021/04/22'),
+                rateDateEnd: new Date('2022/03/29'),
+                rateDateCertified: new Date('2021/04/22'),
                 rateAmendmentInfo: {
-                    effectiveDateStart: '2022-05-21',
-                    effectiveDateEnd: '2022-09-21',
+                    effectiveDateStart: new Date('2022/05/21'),
+                    effectiveDateEnd: new Date('2022/09/21'),
                 },
             },
             submissionName: 'MN-NEW-WITH-AMENDMENT-DATES',
@@ -435,8 +435,8 @@ describe('submission type assertions', () => {
             rateData: {
                 rateType: 'NEW',
                 rateAmendmentInfo: {
-                    effectiveDateStart: '2022-05-21',
-                    effectiveDateEnd: '2022-09-21',
+                    effectiveDateStart: new Date('2022/05/21'),
+                    effectiveDateEnd: new Date('2022/09/21'),
                 },
             },
             submissionName: 'MN-NEW-NO-DATES',
@@ -453,10 +453,10 @@ describe('submission type assertions', () => {
         {
             rateData: {
                 rateType: 'NEW',
-                rateDateStart: '2021-04-22',
+                rateDateStart: new Date('2021/04/22'),
                 rateAmendmentInfo: {
-                    effectiveDateStart: '2022-05-21',
-                    effectiveDateEnd: '2022-09-21',
+                    effectiveDateStart: new Date('2022/05/21'),
+                    effectiveDateEnd: new Date('2022/09/21'),
                 },
             },
             submissionName: 'MN-NEW-INCOMPLETE-DATES',
@@ -465,10 +465,10 @@ describe('submission type assertions', () => {
         {
             rateData: {
                 rateType: 'AMENDMENT',
-                rateDateStart: '2021-04-22',
-                rateDateEnd: '2022-03-29',
+                rateDateStart: new Date('2021/04/22'),
+                rateDateEnd: new Date('2022/03/29'),
                 rateAmendmentInfo: {
-                    effectiveDateStart: '2022-05-21',
+                    effectiveDateStart: new Date('2022/05/21'),
                 },
             },
             submissionName: 'MN-AMENDMENT-INCOMPLETE',
@@ -476,12 +476,12 @@ describe('submission type assertions', () => {
         },
         {
             rateData: {
-                rateDateStart: '2021-04-22',
-                rateDateEnd: '2022-03-29',
-                rateDateCertified: '2021-05-23',
+                rateDateStart: new Date('2021/04/22'),
+                rateDateEnd: new Date('2022/03/29'),
+                rateDateCertified: new Date('2021/05/23'),
                 rateAmendmentInfo: {
-                    effectiveDateStart: '2022-05-21',
-                    effectiveDateEnd: '2022-09-21',
+                    effectiveDateStart: new Date('2022/05/21'),
+                    effectiveDateEnd: new Date('2022/09/21'),
                 },
             },
             submissionName: 'MN-NO-TYPE',

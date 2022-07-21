@@ -5,9 +5,7 @@ schema {
 
 type Query {
     fetchCurrentUser: User!
-    fetchHealthPlanPackage(
-        input: FetchHealthPlanPackageInput!
-    ): FetchHealthPlanPackagePayload!
+    fetchHealthPlanPackage(input: FetchHealthPlanPackageInput!): FetchHealthPlanPackagePayload!
     indexHealthPlanPackages: IndexHealthPlanPackagesPayload!
 }
 
@@ -25,6 +23,7 @@ type Mutation {
     submitHealthPlanPackage(
         input: SubmitHealthPlanPackageInput!
     ): SubmitHealthPlanPackagePayload!
+
 }
 
 input CreateHealthPlanPackageInput {

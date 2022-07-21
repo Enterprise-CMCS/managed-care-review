@@ -1,4 +1,5 @@
 import { MockedResponse } from '@apollo/client/testing'
+import dayjs from 'dayjs'
 import { GraphQLError } from 'graphql'
 import {
     basicLockedHealthPlanFormData,
@@ -65,8 +66,8 @@ export function mockDraft(): UnlockedHealthPlanFormDataType {
         contractType: 'BASE',
         contractExecutionStatus: 'EXECUTED',
         contractDocuments: [],
-        contractDateStart: '2022-05-23',
-        contractDateEnd: '2022-05-25',
+        contractDateStart: new Date(),
+        contractDateEnd: dayjs().add(2, 'days').toDate(),
         contractAmendmentInfo: undefined,
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
@@ -96,8 +97,8 @@ export function mockContactAndRatesDraft(): UnlockedHealthPlanFormDataType {
         contractType: 'BASE',
         contractExecutionStatus: 'EXECUTED',
         contractDocuments: [],
-        contractDateStart: '2022-05-23',
-        contractDateEnd: '2022-05-25',
+        contractDateStart: new Date(),
+        contractDateEnd: dayjs().add(2, 'days').toDate(),
         contractAmendmentInfo: undefined,
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
@@ -131,17 +132,17 @@ export function mockCompleteDraft(): UnlockedHealthPlanFormDataType {
         contractType: 'BASE',
         contractExecutionStatus: 'EXECUTED',
         contractDocuments: [],
-        contractDateStart: '2022-05-23',
-        contractDateEnd: '2022-05-23',
+        contractDateStart: new Date(),
+        contractDateEnd: new Date(),
         contractAmendmentInfo: undefined,
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateType: 'NEW',
         rateCapitationType: 'RATE_CELL',
         rateDocuments: [],
-        rateDateStart: '2022-05-23',
-        rateDateEnd: '2022-05-23',
-        rateDateCertified: '2022-05-23',
+        rateDateStart: new Date(),
+        rateDateEnd: new Date(),
+        rateDateCertified: new Date(),
         rateAmendmentInfo: undefined,
         stateContacts: [
             {
@@ -170,8 +171,8 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
         contractType: 'AMENDMENT',
         contractExecutionStatus: 'EXECUTED',
         contractDocuments: [],
-        contractDateStart: '2022-05-23',
-        contractDateEnd: '2022-05-23',
+        contractDateStart: new Date(),
+        contractDateEnd: new Date(),
         contractAmendmentInfo: {
             modifiedProvisions: {
                 modifiedBenefitsProvided: true,
@@ -197,12 +198,12 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
         rateType: 'AMENDMENT',
         rateCapitationType: 'RATE_CELL',
         rateDocuments: [],
-        rateDateStart: '2022-05-23',
-        rateDateEnd: '2022-05-23',
-        rateDateCertified: '2022-05-23',
+        rateDateStart: new Date(),
+        rateDateEnd: new Date(),
+        rateDateCertified: new Date(),
         rateAmendmentInfo: {
-            effectiveDateStart: '2022-05-23',
-            effectiveDateEnd: '2022-05-23',
+            effectiveDateStart: new Date(),
+            effectiveDateEnd: new Date(),
         },
         stateContacts: [
             {
@@ -256,8 +257,8 @@ export function mockStateSubmission(): LockedHealthPlanFormDataType {
                 documentCategories: ['CONTRACT' as const],
             },
         ],
-        contractDateStart: '2022-05-23',
-        contractDateEnd: '2022-05-23',
+        contractDateStart: new Date(),
+        contractDateEnd: new Date(),
         contractAmendmentInfo: undefined,
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
@@ -270,10 +271,10 @@ export function mockStateSubmission(): LockedHealthPlanFormDataType {
                 documentCategories: ['RATES' as const],
             },
         ],
-        rateDateStart: '2022-05-23',
-        rateDateEnd: '2022-05-23',
-        rateDateCertified: '2022-05-23',
-        rateAmendmentInfo: undefined,
+        rateDateStart: new Date(),
+        rateDateEnd: new Date(),
+        rateDateCertified: new Date(),
+        rateAmendmentInfo: null,
         stateContacts: [
             {
                 name: 'Test Person',
@@ -314,8 +315,8 @@ export function mockStateSubmissionContractAmendment(): LockedHealthPlanFormData
                 documentCategories: ['CONTRACT' as const],
             },
         ],
-        contractDateStart: '2022-05-23',
-        contractDateEnd: '2022-05-23',
+        contractDateStart: new Date(),
+        contractDateEnd: new Date(),
         contractAmendmentInfo: {
             modifiedProvisions: {
                 modifiedBenefitsProvided: true,
@@ -347,10 +348,10 @@ export function mockStateSubmissionContractAmendment(): LockedHealthPlanFormData
                 documentCategories: ['RATES' as const],
             },
         ],
-        rateDateStart: '2022-05-23',
-        rateDateEnd: '2022-05-23',
-        rateDateCertified: '2022-05-23',
-        rateAmendmentInfo: undefined,
+        rateDateStart: new Date(),
+        rateDateEnd: new Date(),
+        rateDateCertified: new Date(),
+        rateAmendmentInfo: null,
         stateContacts: [
             {
                 name: 'Test Person',
