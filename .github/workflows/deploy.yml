@@ -1,5 +1,8 @@
 name: Deploy
 
+permissions:
+  pull-requests: write
+
 on:
   push:
     branches:
