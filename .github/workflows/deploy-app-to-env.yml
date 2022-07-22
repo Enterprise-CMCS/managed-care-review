@@ -21,6 +21,8 @@ on:
         required: true
       react_app_auth_mode:
         required: true
+      nr_license_key:
+        required: true
 
 jobs:
   app-web:
@@ -44,7 +46,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
-
         run: |
           pushd services/app-web && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -92,6 +93,7 @@ jobs:
           DATABASE_URL: AWS_SM
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
           EMAILER_MODE: SES
+          NR_LICENSE_KEY: ${{ secrets.nr_license_key }}
         run: |
           pushd services/app-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 

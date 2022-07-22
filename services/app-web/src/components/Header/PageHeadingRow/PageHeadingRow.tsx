@@ -5,7 +5,35 @@ import styles from '../Header.module.scss'
 
 import { PageHeading } from '../../../components/PageHeading'
 import { StateIcon, StateIconProps } from '../StateIcon/StateIcon'
-import { User, StateUser } from '../../../gen/gqlClient'
+import { User, StateUser, CmsUser } from '../../../gen/gqlClient'
+
+const CMSUserRow = ({
+    user,
+    heading,
+}: {
+    user: CmsUser
+    heading?: string
+}) => {
+    return (
+        <div className={styles.dashboardHeading}>
+            <GridContainer>
+                <Grid row className="flex-align-center">
+                    <PageHeading>
+                        <span>CMS</span>
+                        {heading && (
+                            <span
+                                className="font-heading-lg text-light"
+                                data-testid="submission-name"
+                            >
+                                {heading}
+                            </span>
+                        )}
+                    </PageHeading>
+                </Grid>
+            </GridContainer>
+        </div>
+    )
+}
 
 const StateUserRow = ({
     user,
@@ -78,7 +106,7 @@ export const PageHeadingRow = ({
     }
 
     if (loggedInUser.__typename === 'CMSUser') {
-        return null
+        return <CMSUserRow user={loggedInUser} heading={heading} />
     } else if (loggedInUser.__typename === 'StateUser') {
         return <StateUserRow user={loggedInUser} heading={heading} />
     } else {

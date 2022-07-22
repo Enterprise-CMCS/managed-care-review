@@ -38,7 +38,10 @@ function mockStoreThatErrors(): Store {
     }
 
     return {
-        findAllHealthPlanPackages: async (_stateCode) => {
+        findAllHealthPlanPackagesByState: async (_stateCode) => {
+            return genericStoreError
+        },
+        findAllHealthPlanPackagesBySubmittedAt: async () => {
             return genericStoreError
         },
         insertHealthPlanPackage: async (_args) => {

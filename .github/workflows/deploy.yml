@@ -12,6 +12,8 @@ jobs:
   begin-deployment:
     name: Begin Deployment
     runs-on: ubuntu-latest
+    permissions:
+      deployments: write
     outputs:
       deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
       stage-name: ${{ steps.stage-name.outputs.stage-name-for-branch}}
@@ -224,6 +226,7 @@ jobs:
       aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       react_app_auth_mode: AWS_COGNITO
+      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   finishing-prep:
     name: Finishing Prep

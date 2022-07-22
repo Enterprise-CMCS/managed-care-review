@@ -9,7 +9,7 @@ import {
     HealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { ProgramType } from '../domain-models'
+import { ProgramType, StateCodeType } from '../domain-models'
 import { Emailer, newLocalEmailer } from '../emailer'
 import {
     CreateHealthPlanPackageInput,
@@ -25,6 +25,7 @@ import {
     newLocalEmailParameterStore,
     EmailParameterStore,
 } from '../parameterStore'
+import statePrograms from '../data/statePrograms.json'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -32,7 +33,14 @@ function defaultFloridaProgram(): ProgramType {
     return {
         id: '5c10fe9f-bec9-416f-a20c-718b152ad633',
         name: 'MMA',
+        fullName: 'Managed Medical Assistance Program ',
     }
+}
+
+function getProgramsFromState(stateCode: StateCodeType): ProgramType[] {
+    const state = statePrograms.states.find((st) => st.code === stateCode)
+
+    return state?.programs || []
 }
 
 const defaultContext = (): Context => {
@@ -88,10 +96,16 @@ const constructTestEmailer = (): Emailer => {
 }
 
 const createTestHealthPlanPackage = async (
-    server: ApolloServer
+    server: ApolloServer,
+    stateCode?: StateCodeType
 ): Promise<HealthPlanPackage> => {
+    const programs = stateCode
+        ? getProgramsFromState(stateCode)
+        : [defaultFloridaProgram()]
+
+    const programIDs = programs.map((program) => program.id)
     const input: CreateHealthPlanPackageInput = {
-        programIDs: [defaultFloridaProgram().id],
+        programIDs: programIDs,
         submissionType: 'CONTRACT_ONLY' as const,
         submissionDescription: 'A created submission',
     }
@@ -144,9 +158,10 @@ const updateTestHealthPlanFormData = async (
 
 const createAndUpdateTestHealthPlanPackage = async (
     server: ApolloServer,
-    partialUpdates?: Partial<UnlockedHealthPlanFormDataType>
+    partialUpdates?: Partial<UnlockedHealthPlanFormDataType>,
+    stateCode?: StateCodeType
 ): Promise<HealthPlanPackage> => {
-    const pkg = await createTestHealthPlanPackage(server)
+    const pkg = await createTestHealthPlanPackage(server, stateCode)
     const draft = latestFormData(pkg)
 
     ;(draft.submissionType = 'CONTRACT_AND_RATES' as const),

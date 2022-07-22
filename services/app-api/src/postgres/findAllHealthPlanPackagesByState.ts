@@ -37,7 +37,7 @@ export async function findAllPackagesWrapper(
     }
 }
 
-export async function findAllHealthPlanPackages(
+export async function findAllHealthPlanPackagesByState(
     client: PrismaClient,
     stateCode: string
 ): Promise<HealthPlanPackageType[] | StoreError> {

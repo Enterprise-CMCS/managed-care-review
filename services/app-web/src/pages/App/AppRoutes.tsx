@@ -13,8 +13,8 @@ import { useTitle } from '../../hooks/useTitle'
 import { LocalLogin } from '../../localAuth'
 import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
 import { CognitoLogin } from '../Auth/CognitoLogin'
-import { CMSDashboard } from '../Dashboard/CMSDashboard'
-import { Dashboard } from '../Dashboard/Dashboard'
+import { CMSDashboard } from '../CMSDashboard/CMSDashboard'
+import { StateDashboard } from '../StateDashboard/StateDashboard'
 import { AuthenticatedRouteWrapper } from '../Wrapper/AuthenticatedRouteWrapper'
 import { Error404 } from '../Errors/Error404'
 import { Help } from '../Help/Help'
@@ -52,12 +52,15 @@ const StateUserRoutes = ({
     return (
         <AuthenticatedRouteWrapper setAlert={setAlert} authMode={authMode}>
             <Routes>
-                <Route path={RoutesRecord.ROOT} element={<Dashboard />} />
-                <Route path={RoutesRecord.DASHBOARD} element={<Dashboard />} />
+                <Route path={RoutesRecord.ROOT} element={<StateDashboard />} />
+                <Route
+                    path={RoutesRecord.DASHBOARD}
+                    element={<StateDashboard />}
+                />
                 <Route path={RoutesRecord.HELP} element={<Help />} />
                 <Route
                     path={RoutesRecord.SUBMISSIONS}
-                    element={<Dashboard />}
+                    element={<StateDashboard />}
                 />
                 <Route
                     path={RoutesRecord.SUBMISSIONS_NEW}

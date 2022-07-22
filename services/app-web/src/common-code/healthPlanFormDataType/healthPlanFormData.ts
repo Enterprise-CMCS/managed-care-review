@@ -142,7 +142,8 @@ const naturalSort = (a: string, b: string): number => {
 // implement it, we can use it interchangeably
 interface ProgramArgType {
     id: string
-    name: string
+    name: string // short name. This is used most often in the application including in submission name
+    fullName: string // full name is used in submission summary page
 }
 
 // Pull out the programs names for display from the program IDs
@@ -237,3 +238,5 @@ export {
     packageName,
     generateRateName,
 }
+
+export type { ProgramArgType }

@@ -9,6 +9,7 @@ mutation createHealthPlanPackage($input: CreateHealthPlanPackageInput!) {
                 programs {
                     id
                     name
+                    fullName
                 }
             }
             status

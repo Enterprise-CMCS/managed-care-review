@@ -5,6 +5,15 @@ query indexHealthPlanPackages {
             node {
                 id
                 stateCode
+                state {
+                    code
+                    name
+                    programs {
+                        id
+                        name
+                        fullName
+                    }
+                }
                 status
                 initiallySubmittedAt
                 revisions {
