@@ -12,6 +12,8 @@ jobs:
   begin-deployment:
     name: Begin Deployment
     runs-on: ubuntu-latest
+    permissions:
+      deployments: write
     outputs:
       deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
       stage-name: ${{ steps.stage-name.outputs.stage-name-for-branch}}
