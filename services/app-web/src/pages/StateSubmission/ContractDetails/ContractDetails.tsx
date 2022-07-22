@@ -50,6 +50,7 @@ import {
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { formatYesNoForProto } from '../../../formHelpers/formatters'
+import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -521,11 +522,12 @@ export const ContractDetails = ({
                                             </Link>
                                             <span>
                                                 This input only accepts PDF,
-                                                CSV, DOC, DOCX, XLS, XLSX files.
+                                                CSV, DOC, DOCX, XLS, XLSX, XLSM
+                                                files.
                                             </span>
                                         </>
                                     }
-                                    accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                    accept={ACCEPTED_SUBMISSION_FILE_TYPES}
                                     initialItems={fileItemsFromDraftSubmission}
                                     uploadFile={handleUploadFile}
                                     scanFile={handleScanFile}

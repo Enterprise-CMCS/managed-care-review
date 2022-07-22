@@ -121,7 +121,10 @@ export const FileProcessor = ({
     const isPDF = name.indexOf('.pdf') > 0
     const isWord = name.indexOf('.doc') > 0 || name.indexOf('.pages') > 0
     const isVideo = name.indexOf('.mov') > 0 || name.indexOf('.mp4') > 0
-    const isExcel = name.indexOf('.xls') > 0 || name.indexOf('.numbers') > 0
+    const isExcel =
+        name.indexOf('.xls') > 0 ||
+        name.indexOf('.numbers') > 0 ||
+        name.indexOf('.xlsm') > 0
     const isGeneric = !isPDF && !isWord && !isVideo && !isExcel
 
     const imageClasses = classnames('usa-file-input__preview-image', {
