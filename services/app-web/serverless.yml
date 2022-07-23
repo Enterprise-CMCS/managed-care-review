@@ -75,12 +75,5 @@ custom:
         export REACT_APP_OTEL_COLLECTOR_URL=${self:custom.api_url}/otel
         export REACT_APP_LD_CLIENT_ID=${self:custom.react_app_ld_client_id}
 
-        # run the app-api build and the storybook build in parallel. 
-        # this isn't elegant but saves us CI time, it's probably more correct to break
-        # these out into separate processes. N.B. the output of these two commands
-        # will be interleaved.
-        yarn run build &
-        P1=$!
-        yarn build-storybook &
-        P2=$!
-        wait $P1 && wait $P2
+        yarn run build
+        yarn build-storybook
