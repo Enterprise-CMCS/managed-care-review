@@ -15,6 +15,7 @@ import {
     mockDraft,
 } from '../../../testHelpers/apolloHelpers'
 import { Documents } from './Documents'
+import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 
 describe('Documents', () => {
     it('renders without errors', async () => {
@@ -90,10 +91,7 @@ describe('Documents', () => {
             'Upload any additional supporting documents'
         )
         expect(input).toBeInTheDocument()
-        expect(input).toHaveAttribute(
-            'accept',
-            'application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        )
+        expect(input).toHaveAttribute('accept', ACCEPTED_SUBMISSION_FILE_TYPES)
         await userEvent.upload(input, [
             TEST_DOC_FILE,
             TEST_PDF_FILE,

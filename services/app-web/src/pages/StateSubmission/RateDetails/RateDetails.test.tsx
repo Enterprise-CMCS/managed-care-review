@@ -15,6 +15,7 @@ import {
     dragAndDrop,
 } from '../../../testHelpers/jestHelpers'
 import { RateDetails } from './RateDetails'
+import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 
 describe('RateDetails', () => {
     const emptyRateDetailsDraft = {
@@ -338,7 +339,7 @@ describe('RateDetails', () => {
             expect(input).toBeInTheDocument()
             expect(input).toHaveAttribute(
                 'accept',
-                'application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                ACCEPTED_SUBMISSION_FILE_TYPES
             )
             await userEvent.upload(input, [
                 TEST_DOC_FILE,
