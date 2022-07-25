@@ -29,7 +29,7 @@ const fileTypes = {
     PDF: ['.pdf'],
     WORD: ['.doc', '.pages'],
     VIDEO: ['.mov', '.mp4'],
-    EXCEL: ['.xls', '.xlsx', '.xlsm', '.xltm', '.xlam', '.numbers'],
+    EXCEL: ['.xls', '.xlsx', '.xlsm', '.xltm', '.xlam'],
 }
 
 const DocumentError = ({
