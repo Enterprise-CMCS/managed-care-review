@@ -24,6 +24,13 @@ export type FileItemT = {
     documentCategories: DocumentCategoryType[]
 }
 
+const fileTypes = {
+    PDF: ['.pdf'],
+    WORD: ['.doc', '.pages'],
+    VIDEO: ['.mov', '.mp4'],
+    EXCEL: ['.xls', '.xlsm', '.xltm', '.xlam', '.numbers'],
+}
+
 const DocumentError = ({
     hasDuplicateNameError,
     hasScanningError,
@@ -117,14 +124,12 @@ export const FileProcessor = ({
     const isLoading = status === 'PENDING'
     const isScanning = status === 'SCANNING'
     const isComplete = status === 'UPLOAD_COMPLETE'
+    const fileType = name.slice(name.lastIndexOf('.'))
 
-    const isPDF = name.indexOf('.pdf') > 0
-    const isWord = name.indexOf('.doc') > 0 || name.indexOf('.pages') > 0
-    const isVideo = name.indexOf('.mov') > 0 || name.indexOf('.mp4') > 0
-    const isExcel =
-        name.indexOf('.xls') > 0 ||
-        name.indexOf('.numbers') > 0 ||
-        name.indexOf('.xlsm') > 0
+    const isPDF = fileTypes.PDF.indexOf(fileType) > 0
+    const isWord = fileTypes.WORD.indexOf(fileType) > 0
+    const isVideo = fileTypes.VIDEO.indexOf(fileType) > 0
+    const isExcel = fileTypes.EXCEL.indexOf(fileType) > 0
     const isGeneric = !isPDF && !isWord && !isVideo && !isExcel
 
     const imageClasses = classnames('usa-file-input__preview-image', {
