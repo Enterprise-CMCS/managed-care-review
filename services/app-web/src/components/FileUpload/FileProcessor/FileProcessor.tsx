@@ -2,6 +2,7 @@ import React from 'react'
 import classnames from 'classnames'
 import { FileRow } from '../FileRow/FileRow'
 import { FileListItem } from '../FileListItem/FileListItem'
+import * as path from 'path'
 
 import styles from '../FileUpload.module.scss'
 import { DocumentCategoryType } from '../../../common-code/healthPlanFormDataType'
@@ -124,7 +125,7 @@ export const FileProcessor = ({
     const isLoading = status === 'PENDING'
     const isScanning = status === 'SCANNING'
     const isComplete = status === 'UPLOAD_COMPLETE'
-    const fileType = name.slice(name.lastIndexOf('.'))
+    const fileType = path.extname(name)
 
     const isPDF = fileTypes.PDF.indexOf(fileType) >= 0
     const isWord = fileTypes.WORD.indexOf(fileType) >= 0
