@@ -19,6 +19,11 @@ import {
 } from '../../healthPlanFormDataType'
 import { toDomain } from './toDomain'
 import { toProtoBuffer } from './toProtoBuffer'
+import fs from 'fs'
+import path from 'path'
+
+// this is relative to app-web since that's where tests are run from
+const TEST_DATA_PATH = 'src/common-code/proto/healthPlanFormDataProto/testData/'
 
 describe('Validate encoding to protobuf and decoding back to domain model', () => {
     if (!isLockedHealthPlanFormData(basicLockedHealthPlanFormData())) {
@@ -27,25 +32,62 @@ describe('Validate encoding to protobuf and decoding back to domain model', () =
         )
     }
 
-    test.each([
-        newHealthPlanFormData(),
-        basicHealthPlanFormData(),
-        contractOnly(),
-        unlockedWithContacts(),
-        unlockedWithDocuments(),
-        unlockedWithFullRates(),
-        unlockedWithFullContracts(),
-        unlockedWithALittleBitOfEverything(),
-        basicLockedHealthPlanFormData(),
-        contractAmendedOnly(),
+    interface testType {
+        [name: string]: () =>
+            | UnlockedHealthPlanFormDataType
+            | LockedHealthPlanFormDataType
+    }
+
+    test.each<testType>([
+        { newHealthPlanFormData },
+        { basicHealthPlanFormData },
+        { contractOnly },
+        { unlockedWithContacts },
+        { unlockedWithDocuments },
+        { unlockedWithFullRates },
+        { unlockedWithFullContracts },
+        { unlockedWithALittleBitOfEverything },
+        { basicLockedHealthPlanFormData },
+        { contractAmendedOnly },
     ])(
         'given valid domain model %j expect protobufs to be symmetric)',
-        (
-            domainObject:
-                | UnlockedHealthPlanFormDataType
-                | LockedHealthPlanFormDataType
-        ) => {
-            expect(toDomain(toProtoBuffer(domainObject))).toEqual(domainObject)
+        (testCase: testType) => {
+            const testName = Object.keys(testCase)[0]
+            const domainObjectGenerator = testCase[testName]
+            const domainObject = domainObjectGenerator()
+            const protoBytes = toProtoBuffer(domainObject)
+            const fileDate = new Date().toISOString().split('T')[0]
+            const fileName = `${testName}-${fileDate}.proto`
+            const filePath = path.join(TEST_DATA_PATH, fileName)
+
+            // TODO: Only writeFileSync when something has changed?
+            // --- if the most recent proto is different from todays, we write a new one
+            // --- if the most recent solution is different from todays, we write a new one? -- we offer to write a new one?
+            // --- if we change the solution, we can't still expect old protos to match? Just new ones?
+            // --- if we add a field, we expect an old one to still decode, but to have undefined for the new fields.
+
+            fs.writeFileSync(filePath, protoBytes)
+
+            // find all test data that is associated with this specific test
+            // assert that it decodes correctly
+
+            // find every file in testData
+            const testFiles = fs.readdirSync(TEST_DATA_PATH)
+            const testCaseFileNames = testFiles.filter((f) =>
+                f.startsWith(testName + '-')
+            )
+
+            for (const testInputFileName of testCaseFileNames) {
+                const testFilePath = path.join(
+                    TEST_DATA_PATH,
+                    testInputFileName
+                )
+                const testProtoBytes = fs.readFileSync(testFilePath)
+
+                expect(toDomain(testProtoBytes)).toEqual(domainObject)
+            }
+
+            expect(toDomain(protoBytes)).toEqual(domainObject)
         }
     )
 })
