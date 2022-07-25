@@ -2,7 +2,7 @@ import React from 'react'
 import classnames from 'classnames'
 import { FileRow } from '../FileRow/FileRow'
 import { FileListItem } from '../FileListItem/FileListItem'
-import * as path from 'path'
+import * as path from 'path-browserify'
 
 import styles from '../FileUpload.module.scss'
 import { DocumentCategoryType } from '../../../common-code/healthPlanFormDataType'
@@ -126,6 +126,8 @@ export const FileProcessor = ({
     const isScanning = status === 'SCANNING'
     const isComplete = status === 'UPLOAD_COMPLETE'
     const fileType = path.extname(name)
+
+    console.log(fileType)
 
     const isPDF = fileTypes.PDF.indexOf(fileType) >= 0
     const isWord = fileTypes.WORD.indexOf(fileType) >= 0
