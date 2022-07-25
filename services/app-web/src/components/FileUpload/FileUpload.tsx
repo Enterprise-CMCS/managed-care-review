@@ -14,6 +14,8 @@ import { FileItemT } from './FileProcessor/FileProcessor'
 import { FileItemsList } from './FileItemList/FileItemsList'
 import { pluralize } from '../../common-code/formatters'
 
+import { recordUserInputException } from '../../otelHelpers'
+
 export type S3FileData = {
     key: string
     s3URL: string
@@ -126,12 +128,19 @@ export const FileUpload = ({
     const isAcceptableFile = (file: File): boolean => {
         const acceptedTypes = inputProps?.accept?.split(',') || []
         if (acceptedTypes === []) return true
-
-        return acceptedTypes.some(
+        const acceptedFile = acceptedTypes.some(
             (fileType) =>
                 file.name.indexOf(fileType) > 0 ||
                 file.type.includes(fileType.replace(/\*/g, ''))
         )
+
+        if (!acceptedFile) {
+            recordUserInputException(
+                `FileUpload: File upload error. Error Message: File ${file.name} of type ${file.type} is not an accepted file type`
+            )
+        }
+
+        return acceptedFile
     }
 
     // Generate initial list of FileItem stored component state
