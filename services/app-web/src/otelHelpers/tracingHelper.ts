@@ -3,8 +3,7 @@ import opentelemetry, { Span } from '@opentelemetry/api'
 const serviceNameOTEL = 'app-web-' + process.env.REACT_APP_STAGE_NAME
 
 function getTracer() {
-    const tracer = opentelemetry.trace.getTracer(serviceNameOTEL)
-    return tracer
+    return opentelemetry.trace.getTracer(serviceNameOTEL)
 }
 
 // Add a span to existing trace or if none, start and end and new span
@@ -48,4 +47,12 @@ function recordJSException(error: string | Error): void {
     span.end()
 }
 
-export { getTracer, recordSpan, recordJSException }
+function recordUserInputException(error: string | Error): void {
+    const tracer = getTracer()
+    const span = tracer.startSpan('UserInputException')
+    span.recordException(error)
+    console.error(error)
+    span.end()
+}
+
+export { getTracer, recordSpan, recordJSException, recordUserInputException }

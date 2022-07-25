@@ -171,6 +171,9 @@ resources:
                 - !Sub ${DocumentUploadsBucket.Arn}/*.xls
                 - !Sub ${DocumentUploadsBucket.Arn}/*.xlsx
                 - !Sub ${DocumentUploadsBucket.Arn}/*.zip
+                - !Sub ${DocumentUploadsBucket.Arn}/*.xlsm
+                - !Sub ${DocumentUploadsBucket.Arn}/*.xltm
+                - !Sub ${DocumentUploadsBucket.Arn}/*.xlam
             - Effect: Deny
               Action: 's3:*'
               Principal: '*'

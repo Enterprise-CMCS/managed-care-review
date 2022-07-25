@@ -1,1 +1,6 @@
-export { getTracer, recordSpan, recordJSException } from './tracingHelper'
+export {
+    getTracer,
+    recordSpan,
+    recordJSException,
+    recordUserInputException,
+} from './tracingHelper'
