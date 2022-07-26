@@ -10212,10 +10212,10 @@ aws-lambda@^1.0.7:
     js-yaml "^3.14.1"
     watchpack "^2.0.0-beta.10"
 
-aws-sdk@^2.1018.0, aws-sdk@^2.1136.0, aws-sdk@^2.1170.0, aws-sdk@^2.224.1, aws-sdk@^2.346.0, aws-sdk@^2.814.0, aws-sdk@^2.991.0:
-  version "2.1177.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1177.0.tgz#b6f377df30d0ef5d9f7b464b0b57baa26d0baaf3"
-  integrity sha512-0Ui7hBofMom6F9N4em357NzsUt0pXDLuuUS1Ojf7Vu7S/LjVjB5zwmY7L4H5wuf5KDOjSmNX8/zG6QfGGc5X/w==
+aws-sdk@^2.1018.0, aws-sdk@^2.1136.0, aws-sdk@^2.1174.0, aws-sdk@^2.224.1, aws-sdk@^2.346.0, aws-sdk@^2.814.0, aws-sdk@^2.991.0:
+  version "2.1181.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1181.0.tgz#6ec2997881ae3df76e56d7150fc2992f12ce43dc"
+  integrity sha512-AAHSknRFAIjXBA/XNAL7gS79agr1LbS0oGimOJqJauGSJfWNaOpDc7z6OLNUQqGa5Joc3maD5QJcSKp1Pm/deQ==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -23525,9 +23525,9 @@ serverless-webpack@^5.7.1:
     ts-node ">= 8.3.0"
 
 serverless@^3.19.0:
-  version "3.20.0"
-  resolved "https://registry.yarnpkg.com/serverless/-/serverless-3.20.0.tgz#b56451877a5c14d55c3f4a53128f39d2e6919321"
-  integrity sha512-MYdpV2W0Tgc+AwzqXu2U0Ah6eeVRk8tHsoXrULLfqZbDzvITEuUJk+Na8KhOLBGm5t5JBBvkUmv08Si6h/6iiw==
+  version "3.21.0"
+  resolved "https://registry.yarnpkg.com/serverless/-/serverless-3.21.0.tgz#1e2009f08ec95d96f61122846f680784280f4e63"
+  integrity sha512-swDn12DWEN3jyb/DPrr+a5Gy+DcV+cI+Yuii+zjxGTPGrEDfLymPBEtx3e7YmxKWn174ekmRCfRNbbtffo3LcQ==
   dependencies:
     "@serverless/dashboard-plugin" "^6.2.2"
     "@serverless/platform-client" "^4.3.2"
@@ -23535,7 +23535,7 @@ serverless@^3.19.0:
     ajv "^8.11.0"
     ajv-formats "^2.1.1"
     archiver "^5.3.1"
-    aws-sdk "^2.1170.0"
+    aws-sdk "^2.1174.0"
     bluebird "^3.7.2"
     cachedir "^2.3.0"
     chalk "^4.1.2"
