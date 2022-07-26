@@ -55,7 +55,8 @@ const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
         sub.rateType !== undefined &&
         sub.rateDateCertified !== undefined &&
         sub.rateDateStart !== undefined &&
-        sub.rateDateEnd !== undefined
+        sub.rateDateEnd !== undefined &&
+        (sub.rateProgramIDs !== undefined || sub.rateProgramIDs !== [])
 
     // Contract only should have no rate fields
     if (sub.submissionType === 'CONTRACT_ONLY') {
