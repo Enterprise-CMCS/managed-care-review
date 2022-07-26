@@ -304,6 +304,8 @@ const toDomain = (
         rateInfos,
     } = formDataMessage
 
+    console.log(formDataMessage)
+
     // First things first, let's check the protoName and protoVersion
     if (protoName !== 'STATE_SUBMISSION' && protoVersion !== 1) {
         console.log(
@@ -386,6 +388,8 @@ const toDomain = (
         rateDateStart: protoDateToDomain(rateInfo?.rateDateStart),
         rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
         rateDateCertified: protoDateToDomain(rateInfo?.rateDateCertified),
+        //TODO: TALK TO MacRae about why this would error if default to undefined instead of empty array.
+        rateProgramIDs: rateInfo?.rateProgramIds ?? [],
         actuaryCommunicationPreference: enumToDomain(
             mcreviewproto.ActuaryCommunicationType,
             rateInfo?.actuaryCommunicationPreference
