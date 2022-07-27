@@ -1,12 +1,15 @@
 import React from 'react'
 import styles from './ProgramSelect.module.scss'
-import Select, { AriaOnFocus, Props as SelectProps } from 'react-select'
+import Select, { AriaOnFocus, MultiValue, ActionMeta } from 'react-select'
 import { Program } from '../../gen/gqlClient'
 
 export type ProgramSelectPropType = {
     statePrograms: Program[]
     programIDs: string[]
-    onChange: SelectProps['onChange']
+    onChange: (
+        newValue: MultiValue<ProgramOption>,
+        actionMeta: ActionMeta<ProgramOption>
+    ) => string[] | []
 }
 
 interface ProgramOption {
