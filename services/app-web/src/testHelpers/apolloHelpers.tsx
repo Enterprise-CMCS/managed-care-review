@@ -206,6 +206,7 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
             effectiveDateStart: new Date(),
             effectiveDateEnd: new Date(),
         },
+        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         stateContacts: [
             {
                 name: 'State Contact 1',
