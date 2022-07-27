@@ -2,6 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react'
 import {
     mockContractAndRatesDraft,
     mockStateSubmission,
+    mockMNState,
 } from '../../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
@@ -10,6 +11,7 @@ import { formatRateNameDate } from '../../../common-code/dateHelpers'
 describe('RateDetailsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()
     const stateSubmission = mockStateSubmission()
+    const statePrograms = mockMNState().programs
 
     it('can render draft submission without errors', () => {
         renderWithProviders(
@@ -17,7 +19,7 @@ describe('RateDetailsSummarySection', () => {
                 submission={draftSubmission}
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
-                statePrograms={[]}
+                statePrograms={statePrograms}
             />
         )
 
@@ -37,7 +39,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 submission={stateSubmission}
                 submissionName="MN-MSHO-0003"
-                statePrograms={[]}
+                statePrograms={statePrograms}
             />
         )
 
@@ -57,10 +59,15 @@ describe('RateDetailsSummarySection', () => {
                 submission={draftSubmission}
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
-                statePrograms={[]}
+                statePrograms={statePrograms}
             />
         )
 
+        expect(
+            screen.getByRole('definition', {
+                name: 'Programs this rate certification covers',
+            })
+        ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', { name: 'Rate certification type' })
         ).toBeInTheDocument()
@@ -93,7 +100,7 @@ describe('RateDetailsSummarySection', () => {
                 submission={submission}
                 navigateTo="rate-details"
                 submissionName="MN-MSHO-0003"
-                statePrograms={[]}
+                statePrograms={statePrograms}
             />
         )
         const rateName = `MN-MSHO-0003-RATE-${formatRateNameDate(
@@ -121,7 +128,7 @@ describe('RateDetailsSummarySection', () => {
                 submission={submission}
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
-                statePrograms={[]}
+                statePrograms={statePrograms}
             />
         )
 
@@ -139,7 +146,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 submission={stateSubmission}
                 submissionName="MN-MSHO-0003"
-                statePrograms={[]}
+                statePrograms={statePrograms}
             />
         )
 
@@ -199,7 +206,7 @@ describe('RateDetailsSummarySection', () => {
                 submission={testSubmission}
                 navigateTo="/rate-details'"
                 submissionName="MN-PMAP-0001"
-                statePrograms={[]}
+                statePrograms={statePrograms}
             />
         )
 
@@ -248,7 +255,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 submission={draftSubmission}
                 submissionName="MN-PMAP-0001"
-                statePrograms={[]}
+                statePrograms={statePrograms}
             />
         )
 
@@ -264,7 +271,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 submission={stateSubmission}
                 submissionName="MN-PMAP-0001"
-                statePrograms={[]}
+                statePrograms={statePrograms}
             />
         )
         expect(
@@ -279,7 +286,7 @@ describe('RateDetailsSummarySection', () => {
                 submission={draftSubmission}
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
-                statePrograms={[]}
+                statePrograms={statePrograms}
             />
         )
         expect(
@@ -301,7 +308,7 @@ describe('RateDetailsSummarySection', () => {
                 submission={draftSubmission}
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
-                statePrograms={[]}
+                statePrograms={statePrograms}
             />
         )
         expect(
@@ -314,5 +321,28 @@ describe('RateDetailsSummarySection', () => {
                 'Certification of rate ranges of capitation rates per rate cell'
             )
         ).toBeInTheDocument()
+    })
+    it('renders programs that apply to rate certification', async () => {
+        const draftSubmission = mockContractAndRatesDraft()
+        draftSubmission.rateProgramIDs = [
+            'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+            'd95394e5-44d1-45df-8151-1cc1ee66f100',
+        ]
+        draftSubmission.rateCapitationType = 'RATE_RANGE'
+        renderWithProviders(
+            <RateDetailsSummarySection
+                submission={draftSubmission}
+                navigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+            />
+        )
+        const programElement = screen.getByRole('definition', {
+            name: 'Programs this rate certification covers',
+        })
+        expect(programElement).toBeInTheDocument()
+
+        const programList = within(programElement).getByText('SNBC, PMAP')
+        expect(programList).toBeInTheDocument()
     })
 })
