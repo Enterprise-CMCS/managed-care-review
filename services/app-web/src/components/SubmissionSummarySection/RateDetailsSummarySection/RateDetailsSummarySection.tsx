@@ -11,6 +11,7 @@ import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import { generateRateName } from '../../../common-code/healthPlanFormDataType/'
 import styles from '../SubmissionSummarySection.module.scss'
 import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import { Program } from '../../../gen/gqlClient'
 
 export type RateDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -18,6 +19,7 @@ export type RateDetailsSummarySectionProps = {
     documentDateLookupTable?: DocumentDateLookupTable
     isCMSUser?: boolean
     submissionName: string
+    statePrograms: Program[]
 }
 
 export const RateDetailsSummarySection = ({
@@ -26,6 +28,7 @@ export const RateDetailsSummarySection = ({
     documentDateLookupTable,
     isCMSUser,
     submissionName,
+    statePrograms,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
     const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && navigateTo !== undefined
@@ -45,6 +48,13 @@ export const RateDetailsSummarySection = ({
             ? 'Certification of capitation rates specific to each rate cell'
             : 'Certification of rate ranges of capitation rates per rate cell'
         : ''
+
+    const ratePrograms =
+        submission.rateProgramIDs && submission.rateProgramIDs.length > 0
+            ? statePrograms
+                  .filter((p) => submission.rateProgramIDs?.includes(p.id))
+                  .map((p) => p.name)
+            : undefined
 
     useEffect(() => {
         // get all the keys for the documents we want to zip
@@ -100,6 +110,13 @@ export const RateDetailsSummarySection = ({
                 </h3>
 
                 <DoubleColumnGrid>
+                    {ratePrograms && (
+                        <DataDetail
+                            id="ratePrograms"
+                            label="Programs this rate certification covers"
+                            data={ratePrograms}
+                        />
+                    )}
                     <DataDetail
                         id="rateType"
                         label="Rate certification type"

@@ -17,6 +17,7 @@ describe('RateDetailsSummarySection', () => {
                 submission={draftSubmission}
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
+                statePrograms={[]}
             />
         )
 
@@ -36,6 +37,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 submission={stateSubmission}
                 submissionName="MN-MSHO-0003"
+                statePrograms={[]}
             />
         )
 
@@ -55,6 +57,7 @@ describe('RateDetailsSummarySection', () => {
                 submission={draftSubmission}
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
+                statePrograms={[]}
             />
         )
 
@@ -90,6 +93,7 @@ describe('RateDetailsSummarySection', () => {
                 submission={submission}
                 navigateTo="rate-details"
                 submissionName="MN-MSHO-0003"
+                statePrograms={[]}
             />
         )
         const rateName = `MN-MSHO-0003-RATE-${formatRateNameDate(
@@ -117,6 +121,7 @@ describe('RateDetailsSummarySection', () => {
                 submission={submission}
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
+                statePrograms={[]}
             />
         )
 
@@ -134,6 +139,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 submission={stateSubmission}
                 submissionName="MN-MSHO-0003"
+                statePrograms={[]}
             />
         )
 
@@ -193,6 +199,7 @@ describe('RateDetailsSummarySection', () => {
                 submission={testSubmission}
                 navigateTo="/rate-details'"
                 submissionName="MN-PMAP-0001"
+                statePrograms={[]}
             />
         )
 
@@ -241,6 +248,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 submission={draftSubmission}
                 submissionName="MN-PMAP-0001"
+                statePrograms={[]}
             />
         )
 
@@ -256,6 +264,7 @@ describe('RateDetailsSummarySection', () => {
             <RateDetailsSummarySection
                 submission={stateSubmission}
                 submissionName="MN-PMAP-0001"
+                statePrograms={[]}
             />
         )
         expect(
@@ -270,6 +279,7 @@ describe('RateDetailsSummarySection', () => {
                 submission={draftSubmission}
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
+                statePrograms={[]}
             />
         )
         expect(
@@ -291,6 +301,7 @@ describe('RateDetailsSummarySection', () => {
                 submission={draftSubmission}
                 navigateTo="rate-details"
                 submissionName="MN-PMAP-0001"
+                statePrograms={[]}
             />
         )
         expect(
