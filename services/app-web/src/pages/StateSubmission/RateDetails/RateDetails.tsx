@@ -8,7 +8,7 @@ import {
     DatePicker,
     Label,
 } from '@trussworks/react-uswds'
-import { Formik, FormikErrors } from 'formik'
+import { Field, Formik, FormikErrors } from 'formik'
 import { useNavigate } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -27,6 +27,7 @@ import {
     ErrorSummary,
     FieldRadio,
     PoliteErrorMessage,
+    ProgramSelect,
 } from '../../../components'
 import {
     formatForForm,
@@ -40,6 +41,7 @@ import { useS3 } from '../../../contexts/S3Context'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
+import { useStatePrograms } from '../../../hooks/useStatePrograms'
 
 type FormError =
     FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
@@ -67,6 +69,7 @@ export interface RateDetailsFormValues {
     rateDateCertified: string
     effectiveDateStart: string
     effectiveDateEnd: string
+    rateProgramIDs: string[]
 }
 export const RateDetails = ({
     draftSubmission,
@@ -76,6 +79,8 @@ export const RateDetails = ({
 }: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const navigate = useNavigate()
+
+    const statePrograms = useStatePrograms()
 
     // Rate documents state management
     const { deleteFile, getKey, getS3URL, scanFile, uploadFile } = useS3()
@@ -214,6 +219,7 @@ export const RateDetails = ({
                     draftSubmission.rateAmendmentInfo?.effectiveDateEnd
                 )) ??
             '',
+        rateProgramIDs: draftSubmission?.rateProgramIDs ?? [],
     }
 
     const isRateTypeEmpty = (values: RateDetailsFormValues): boolean =>
@@ -284,6 +290,7 @@ export const RateDetails = ({
             values.rateDateCertified
         )
         draftSubmission.rateDocuments = rateDocuments
+        draftSubmission.rateProgramIDs = values.rateProgramIDs
 
         if (values.rateType === 'AMENDMENT') {
             draftSubmission.rateAmendmentInfo = {
@@ -401,6 +408,42 @@ export const RateDetails = ({
                                         deleteFile={handleDeleteFile}
                                         onFileItemsUpdate={onFileItemsUpdate}
                                     />
+                                </FormGroup>
+                                <FormGroup
+                                    error={showFieldErrors(
+                                        errors.rateProgramIDs
+                                    )}
+                                >
+                                    <Label htmlFor="programIDs">
+                                        Programs this rate certification covers
+                                    </Label>
+                                    {showFieldErrors(errors.rateProgramIDs) && (
+                                        <PoliteErrorMessage>
+                                            {errors.rateProgramIDs}
+                                        </PoliteErrorMessage>
+                                    )}
+                                    <Field name="programIDs">
+                                        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                                        {/* @ts-ignore */}
+                                        {({ form }) => (
+                                            <ProgramSelect
+                                                statePrograms={statePrograms}
+                                                programIDs={
+                                                    values.rateProgramIDs
+                                                }
+                                                onChange={(selectedOption) =>
+                                                    form.setFieldValue(
+                                                        'rateProgramIDs',
+                                                        selectedOption.map(
+                                                            (item: {
+                                                                value: string
+                                                            }) => item.value
+                                                        )
+                                                    )
+                                                }
+                                            />
+                                        )}
+                                    </Field>
                                 </FormGroup>
                                 <FormGroup
                                     error={showFieldErrors(errors.rateType)}

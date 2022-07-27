@@ -86,5 +86,6 @@ const RateDetailsFormSchema = Yup.object().shape({
                 'The end date must come after the start date'
             ),
     }),
+    rateProgramIDs: Yup.array().min(1, 'You must select a program'),
 })
 export { RateDetailsFormSchema }
