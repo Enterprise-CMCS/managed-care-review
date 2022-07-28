@@ -1,7 +1,7 @@
 import { useAuth } from '../contexts/AuthContext'
 import { Program } from '../gen/gqlClient'
 
-// Determine current route name type (e.g. SUBMISSION_TYPE) using the getRouteName utility
+// Get state programs from logged in state user data
 const useStatePrograms = (): Program[] | [] => {
     const { loggedInUser } = useAuth()
     let statePrograms: Program[] = []
