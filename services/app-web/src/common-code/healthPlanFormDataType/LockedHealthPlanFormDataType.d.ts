@@ -41,6 +41,7 @@ export type LockedHealthPlanFormDataType = {
     rateDateEnd?: Date
     rateDateCertified?: Date
     rateAmendmentInfo?: RateAmendmentInfo
+    rateProgramIDs?: string[]
     stateContacts: StateContact[]
     actuaryContacts: ActuaryContact[]
     actuaryCommunicationPreference?: ActuaryCommunicationType

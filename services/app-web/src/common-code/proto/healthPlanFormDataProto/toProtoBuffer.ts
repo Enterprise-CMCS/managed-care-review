@@ -209,6 +209,7 @@ const toProtoBuffer = (
                         }
                     }
                 ),
+                rateProgramIds: domainData.rateProgramIDs,
                 rateAmendmentInfo: rateAmendmentInfo && {
                     effectiveDateStart: domainDateToProtoDate(
                         rateAmendmentInfo.effectiveDateStart

@@ -16,6 +16,7 @@ import {
 } from '../../../testHelpers/jestHelpers'
 import { RateDetails } from './RateDetails'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
+import selectEvent from 'react-select-event'
 
 describe('RateDetails', () => {
     const emptyRateDetailsDraft = {
@@ -197,6 +198,25 @@ describe('RateDetails', () => {
     })
 
     it('progressively disclose new rate form fields as expected', async () => {
+        const mockUser = {
+            __typename: 'StateUser' as const,
+            role: 'STATE_USER',
+            name: 'Sheena in Minnesota',
+            email: 'Sheena@dmas.mn.gov',
+            state: {
+                name: 'Minnesota',
+                code: 'MN',
+                programs: [
+                    { id: 'first', name: 'Program 1', fullName: 'Program 1' },
+                    {
+                        id: 'second',
+                        name: 'Program Test',
+                        fullName: 'Program Test',
+                    },
+                    { id: 'third', name: 'Program 3', fullName: 'Program 3' },
+                ],
+            },
+        }
         renderWithProviders(
             <RateDetails
                 draftSubmission={emptyRateDetailsDraft}
@@ -205,11 +225,19 @@ describe('RateDetails', () => {
             />,
             {
                 apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockUser,
+                            statusCode: 200,
+                        }),
+                    ],
                 },
             }
         )
-
+        // TODO: Enable test after rate certification program feature is fully implemented
+        // expect(
+        //     screen.getByText('Programs this rate certification covers')
+        // ).toBeInTheDocument()
         expect(screen.getByText('Rate certification type')).toBeInTheDocument()
         screen.getByLabelText('New rate certification').click()
         expect(
@@ -227,6 +255,7 @@ describe('RateDetails', () => {
 
         // check that now we can see hidden things
         await waitFor(() => {
+            expect(screen.queryByText('Rating period')).toBeInTheDocument()
             expect(screen.queryByText('Rating period')).toBeInTheDocument()
             expect(screen.queryByText('Start date')).toBeInTheDocument()
             expect(screen.queryByText('End date')).toBeInTheDocument()
@@ -249,7 +278,24 @@ describe('RateDetails', () => {
             expect(
                 screen.queryByText('You must provide a start and an end date')
             ).toBeInTheDocument()
+
+            // TODO: Enable test after rate certification program feature is fully implemented
+            // expect(
+            //     screen.queryAllByText('You must select a program')
+            // ).toHaveLength(2)
         })
+
+        // TODO: Enable test after rate certification program feature is fully implemented
+        //Select programs for rate certification
+        // const combobox = await screen.findByRole('combobox')
+        //
+        // await selectEvent.openMenu(combobox)
+        // await waitFor(() => {
+        //     expect(screen.getByText('Program 3')).toBeInTheDocument()
+        // })
+        // await selectEvent.select(combobox, 'Program 1')
+        // await selectEvent.openMenu(combobox)
+        // await selectEvent.select(combobox, 'Program 3')
 
         // fill out form and clear errors
         screen.getAllByLabelText('Start date')[0].focus()
@@ -265,6 +311,61 @@ describe('RateDetails', () => {
         await waitFor(() =>
             expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
         )
+    })
+
+    // TODO: Enable test after rate certification program feature is fully implemented
+    it.skip('displays program options based on current user state', async () => {
+        const mockUser = {
+            __typename: 'StateUser' as const,
+            role: 'STATE_USER',
+            name: 'Sheena in Minnesota',
+            email: 'Sheena@dmas.mn.gov',
+            state: {
+                name: 'Minnesota',
+                code: 'MN',
+                programs: [
+                    { id: 'first', name: 'Program 1', fullName: 'Program 1' },
+                    {
+                        id: 'second',
+                        name: 'Program Test',
+                        fullName: 'Program Test',
+                    },
+                    { id: 'third', name: 'Program 3', fullName: 'Program 3' },
+                ],
+            },
+        }
+        renderWithProviders(
+            <RateDetails
+                draftSubmission={emptyRateDetailsDraft}
+                updateDraft={jest.fn()}
+                previousDocuments={[]}
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockUser,
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            }
+        )
+        const combobox = await screen.findByRole('combobox')
+
+        await selectEvent.openMenu(combobox)
+
+        await waitFor(() => {
+            expect(screen.getByText('Program 3')).toBeInTheDocument()
+        })
+
+        await selectEvent.select(combobox, 'Program 1')
+        await selectEvent.openMenu(combobox)
+        await selectEvent.select(combobox, 'Program 3')
+
+        // in react-select, only items that are selected have a "remove item" label
+        expect(screen.getByLabelText('Remove Program 1')).toBeInTheDocument()
+        expect(screen.getByLabelText('Remove Program 3')).toBeInTheDocument()
     })
 
     describe('Rate documents file upload', () => {

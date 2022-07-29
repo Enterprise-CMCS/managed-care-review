@@ -167,4 +167,5 @@ export const unlockedHealthPlanFormDataSchema = z.object({
     rateDateEnd: z.date().optional(),
     rateDateCertified: z.date().optional(),
     rateAmendmentInfo: rateAmendmentInfoSchema.optional(),
+    rateProgramIDs: z.array(z.string()),
 })

@@ -12,7 +12,6 @@ import {
     useNavigate,
     useLocation,
 } from 'react-router-dom'
-import Select, { AriaOnFocus } from 'react-select'
 import * as Yup from 'yup'
 import {
     ErrorSummary,
@@ -21,9 +20,7 @@ import {
     PoliteErrorMessage,
 } from '../../../components'
 import { SubmissionTypeRecord } from '../../../constants/healthPlanPackages'
-import { useAuth } from '../../../contexts/AuthContext'
 import {
-    Program,
     HealthPlanPackage,
     SubmissionType as SubmissionTypeT,
     useCreateHealthPlanPackageMutation,
@@ -31,8 +28,9 @@ import {
 } from '../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
-import { GenericApiErrorBanner } from '../../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
+import { GenericApiErrorBanner, ProgramSelect } from '../../../components'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
+import { useStatePrograms } from '../../../hooks/useStatePrograms'
 
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
@@ -55,13 +53,6 @@ type SubmissionTypeProps = {
     updateDraft?: HealthPlanFormPageProps['updateDraft'] // overwrite HealthPlanFormProps because this can be undefined when we start a new submission
 }
 
-interface ProgramOption {
-    readonly value: string
-    readonly label: string
-    readonly isFixed?: boolean
-    readonly isDisabled?: boolean
-}
-
 type FormError =
     FormikErrors<SubmissionTypeFormValues>[keyof FormikErrors<SubmissionTypeFormValues>]
 export const SubmissionType = ({
@@ -71,31 +62,15 @@ export const SubmissionType = ({
 }: SubmissionTypeProps): React.ReactElement => {
     const [showFormAlert, setShowFormAlert] = React.useState(false)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const { loggedInUser } = useAuth()
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
     const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
         React.useState(false)
-
-    let programs: Program[] = []
-    if (loggedInUser && loggedInUser.__typename === 'StateUser') {
-        programs = loggedInUser.state.programs
-    }
 
     const navigate = useNavigate()
     const location = useLocation()
     const isNewSubmission = location.pathname === '/submissions/new'
 
-    const programOptions: Array<{ value: string; label: string }> =
-        programs.map((program) => {
-            return { value: program.id, label: program.name }
-        })
-
-    const onFocus: AriaOnFocus<ProgramOption> = ({ focused, isDisabled }) => {
-        const msg = `You are currently focused on option ${focused.label}${
-            isDisabled ? ', disabled' : ''
-        }`
-        return msg
-    }
+    const statePrograms = useStatePrograms()
 
     const [createHealthPlanPackage, { error }] =
         useCreateHealthPlanPackageMutation({
@@ -284,42 +259,16 @@ export const SubmissionType = ({
                                     {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                                     {/* @ts-ignore */}
                                     {({ form }) => (
-                                        <Select
-                                            defaultValue={values.programIDs.map(
-                                                (programID) => {
-                                                    const program =
-                                                        programs.find(
-                                                            (p) =>
-                                                                p.id ===
-                                                                programID
-                                                        )
-                                                    if (!program) {
-                                                        return {
-                                                            value: programID,
-                                                            label: 'Unknown Program',
-                                                        }
-                                                    }
-                                                    return {
-                                                        value: program.id,
-                                                        label: program.name,
-                                                    }
-                                                }
-                                            )}
-                                            className={styles.multiSelect}
-                                            classNamePrefix="program-select"
-                                            id="programIDs"
-                                            name="programIDs"
-                                            aria-label="programs (required)"
-                                            options={programOptions}
-                                            isMulti
-                                            ariaLiveMessages={{
-                                                onFocus,
-                                            }}
+                                        <ProgramSelect
+                                            statePrograms={statePrograms}
+                                            programIDs={values.programIDs}
                                             onChange={(selectedOption) =>
                                                 form.setFieldValue(
                                                     'programIDs',
                                                     selectedOption.map(
-                                                        (item) => item.value
+                                                        (item: {
+                                                            value: string
+                                                        }) => item.value
                                                     )
                                                 )
                                             }

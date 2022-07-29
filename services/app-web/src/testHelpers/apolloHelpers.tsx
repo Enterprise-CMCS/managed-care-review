@@ -78,6 +78,7 @@ export function mockDraft(): UnlockedHealthPlanFormDataType {
         rateDateEnd: undefined,
         rateDateCertified: undefined,
         rateAmendmentInfo: undefined,
+        rateProgramIDs: undefined,
         stateContacts: [],
         actuaryContacts: [],
         actuaryCommunicationPreference: undefined,
@@ -205,6 +206,7 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
             effectiveDateStart: new Date(),
             effectiveDateEnd: new Date(),
         },
+        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         stateContacts: [
             {
                 name: 'State Contact 1',
@@ -275,6 +277,7 @@ export function mockStateSubmission(): LockedHealthPlanFormDataType {
         rateDateEnd: new Date(),
         rateDateCertified: new Date(),
         rateAmendmentInfo: null,
+        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         stateContacts: [
             {
                 name: 'Test Person',
@@ -352,6 +355,7 @@ export function mockStateSubmissionContractAmendment(): LockedHealthPlanFormData
         rateDateEnd: new Date(),
         rateDateCertified: new Date(),
         rateAmendmentInfo: null,
+        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         stateContacts: [
             {
                 name: 'Test Person',

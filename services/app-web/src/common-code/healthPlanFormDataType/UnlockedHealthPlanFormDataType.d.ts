@@ -96,6 +96,7 @@ type UnlockedHealthPlanFormDataType = {
     rateDateEnd?: Date
     rateDateCertified?: Date
     rateAmendmentInfo?: RateAmendmentInfo
+    rateProgramIDs?: string[]
 }
 
 type RateDataType = {
@@ -108,6 +109,7 @@ type RateDataType = {
         effectiveDateEnd?: Date
         effectiveDateStart?: Date
     } | null
+    rateProgramIDs?: string[]
 }
 
 export type {

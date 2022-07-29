@@ -299,6 +299,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                         submissionName={packageName(packageData, statePrograms)}
                         documentDateLookupTable={documentDates}
                         isCMSUser={isCMSUser}
+                        statePrograms={statePrograms}
                     />
                 )}
 

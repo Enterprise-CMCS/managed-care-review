@@ -17,6 +17,7 @@ function newHealthPlanFormData(): UnlockedHealthPlanFormDataType {
         documents: [],
         contractDocuments: [],
         rateDocuments: [],
+        rateProgramIDs: [],
         managedCareEntities: [],
         federalAuthorities: [],
         stateContacts: [],
@@ -42,6 +43,7 @@ function basicHealthPlanFormData(): UnlockedHealthPlanFormDataType {
         contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
         contractDocuments: [],
         rateDocuments: [],
+        rateProgramIDs: [],
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         stateContacts: [],
@@ -63,6 +65,7 @@ function contractOnly(): UnlockedHealthPlanFormDataType {
         documents: [],
         contractDocuments: [],
         rateDocuments: [],
+        rateProgramIDs: [],
         contractType: 'BASE',
         contractExecutionStatus: 'EXECUTED',
         contractDateStart: new Date(Date.UTC(2021, 4, 22)),
@@ -88,6 +91,7 @@ function contractAmendedOnly(): UnlockedHealthPlanFormDataType {
         documents: [],
         contractDocuments: [],
         rateDocuments: [],
+        rateProgramIDs: [],
         contractType: 'AMENDMENT',
         contractExecutionStatus: 'EXECUTED',
         contractDateStart: new Date(Date.UTC(2021, 4, 22)),
@@ -137,6 +141,7 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
         contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
         contractDocuments: [],
         rateDocuments: [],
+        rateProgramIDs: [],
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         stateContacts: [
@@ -204,6 +209,7 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
             },
         ],
         rateDocuments: [],
+        rateProgramIDs: [],
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         stateContacts: [
@@ -276,6 +282,7 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
             effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
             effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
         },
+        rateProgramIDs: ['snbc'],
         stateContacts: [
             {
                 name: 'foo bar',
@@ -379,6 +386,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
             effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
             effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
         },
+        rateProgramIDs: ['snbc'],
         stateContacts: [
             {
                 name: 'foo bar',
@@ -476,6 +484,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
             effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
             effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
         },
+        rateProgramIDs: ['snbc'],
         stateContacts: [
             {
                 name: 'foo bar',
@@ -549,6 +558,7 @@ function basicLockedHealthPlanFormData(): LockedHealthPlanFormDataType {
             },
         ],
         rateDocuments: [],
+        rateProgramIDs: [],
     }
 }
 

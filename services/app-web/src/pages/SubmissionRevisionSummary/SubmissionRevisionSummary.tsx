@@ -184,6 +184,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                         submission={packageData}
                         documentDateLookupTable={documentDates}
                         submissionName={packageName(packageData, statePrograms)}
+                        statePrograms={statePrograms}
                     />
                 )}
 

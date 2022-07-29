@@ -10,11 +10,12 @@ import {
 describe('SubmissionTypeSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()
     const stateSubmission = mockStateSubmission()
+    const statePrograms = mockMNState().programs
     it('can render draft submission without errors', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
-                statePrograms={mockMNState().programs}
+                statePrograms={statePrograms}
                 navigateTo="submission-type"
                 submissionName="MN-PMAP-0001"
             />
@@ -35,7 +36,7 @@ describe('SubmissionTypeSummarySection', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={stateSubmission}
-                statePrograms={mockMNState().programs}
+                statePrograms={statePrograms}
                 submissionName="MN-MSHO-0003"
             />
         )
@@ -53,7 +54,7 @@ describe('SubmissionTypeSummarySection', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
-                statePrograms={mockMNState().programs}
+                statePrograms={statePrograms}
                 navigateTo="submission-type"
                 submissionName="MN-PMAP-0001"
             />
@@ -73,7 +74,7 @@ describe('SubmissionTypeSummarySection', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={{ ...stateSubmission, status: 'SUBMITTED' }}
-                statePrograms={mockMNState().programs}
+                statePrograms={statePrograms}
                 navigateTo="submission-type"
                 submissionName="MN-MSHO-0003"
             />
@@ -95,7 +96,7 @@ describe('SubmissionTypeSummarySection', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
-                statePrograms={mockMNState().programs}
+                statePrograms={statePrograms}
                 navigateTo="submission-type"
                 submissionName="MN-PMAP-0001"
             />
@@ -108,7 +109,7 @@ describe('SubmissionTypeSummarySection', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
-                statePrograms={mockMNState().programs}
+                statePrograms={statePrograms}
                 navigateTo="submission-type"
                 headerChildComponent={<button>Test button</button>}
                 submissionName="MN-PMAP-0001"
