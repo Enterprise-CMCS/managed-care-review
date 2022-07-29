@@ -30,6 +30,7 @@ notes/
 /scripts/get-changed-services/index.js*
 /scripts/destroy_stage.js*
 /scripts/import-programs.js*
+/scripts/migrate_protos/*.js*
 
 services/app-web/public/env-config.js
 services/app-web/storybook-static

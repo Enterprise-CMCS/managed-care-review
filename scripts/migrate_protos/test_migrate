@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+echo "hello"
+
+git checkout ../services/app-web/src/common-code/proto/healthPlanFormDataProto/dataForTestingTheOldEncodingsTest
+
+tsc
+npx node ./migrate_protos/migrate_protos.js
