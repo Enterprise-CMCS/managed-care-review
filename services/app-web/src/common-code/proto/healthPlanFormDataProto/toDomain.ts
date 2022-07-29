@@ -304,8 +304,6 @@ const toDomain = (
         rateInfos,
     } = formDataMessage
 
-    console.log(formDataMessage)
-
     // First things first, let's check the protoName and protoVersion
     if (protoName !== 'STATE_SUBMISSION' && protoVersion !== 1) {
         console.log(
