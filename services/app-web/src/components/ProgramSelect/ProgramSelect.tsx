@@ -1,15 +1,11 @@
 import React from 'react'
 import styles from './ProgramSelect.module.scss'
-import Select, { AriaOnFocus, MultiValue, ActionMeta } from 'react-select'
+import Select, { AriaOnFocus, Props } from 'react-select'
 import { Program } from '../../gen/gqlClient'
 
 export type ProgramSelectPropType = {
     statePrograms: Program[]
     programIDs: string[]
-    onChange: (
-        newValue: MultiValue<ProgramOption>,
-        actionMeta: ActionMeta<ProgramOption>
-    ) => string[] | []
 }
 
 interface ProgramOption {
@@ -22,12 +18,11 @@ interface ProgramOption {
 export const ProgramSelect = ({
     statePrograms,
     programIDs,
-    onChange,
-}: ProgramSelectPropType) => {
-    const programOptions: Array<{ value: string; label: string }> =
-        statePrograms.map((program) => {
-            return { value: program.id, label: program.name }
-        })
+    ...selectProps
+}: ProgramSelectPropType & Props<ProgramOption, true>) => {
+    const programOptions: ProgramOption[] = statePrograms.map((program) => {
+        return { value: program.id, label: program.name }
+    })
 
     const onFocus: AriaOnFocus<ProgramOption> = ({
         focused,
@@ -40,6 +35,7 @@ export const ProgramSelect = ({
 
     return (
         <Select
+            {...selectProps}
             defaultValue={programIDs.map((programID) => {
                 const program = statePrograms.find((p) => p.id === programID)
                 if (!program) {
@@ -60,7 +56,6 @@ export const ProgramSelect = ({
             aria-label="programs (required)"
             options={programOptions}
             isMulti
-            onChange={onChange}
             ariaLiveMessages={{
                 onFocus,
             }}
