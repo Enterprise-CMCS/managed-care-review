@@ -388,7 +388,6 @@ const toDomain = (
         rateDateStart: protoDateToDomain(rateInfo?.rateDateStart),
         rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
         rateDateCertified: protoDateToDomain(rateInfo?.rateDateCertified),
-        //TODO: TALK TO MacRae about why this would error if default to undefined instead of empty array.
         rateProgramIDs: rateInfo?.rateProgramIds ?? [],
         actuaryCommunicationPreference: enumToDomain(
             mcreviewproto.ActuaryCommunicationType,
