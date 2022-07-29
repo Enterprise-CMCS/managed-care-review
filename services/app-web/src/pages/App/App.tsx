@@ -17,6 +17,7 @@ import TraceProvider from '../../contexts/TraceContext'
 import { AuthModeType } from '../../common-code/config'
 import { S3Provider } from '../../contexts/S3Context'
 import type { S3ClientT } from '../../s3'
+import { useTealium } from '../../hooks/useTealium'
 
 export type AppProps = {
     authMode: AuthModeType
@@ -32,7 +33,7 @@ function App({
     useEffect(() => {
         logEvent('on_load', { success: true })
     }, [])
-
+    useTealium({ featureFlag: false })
     return (
         <ErrorBoundary FallbackComponent={ErrorBoundaryRoot}>
             <BrowserRouter>
