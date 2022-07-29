@@ -36,12 +36,14 @@ import {
     formatFormDateForDomain,
 } from '../../../formHelpers'
 import { isS3Error } from '../../../s3'
-import { RateDetailsFormSchema } from './RateDetailsSchema'
+import { RateDetailsFormSchema as DefaultRateDetailsFormSchema } from './RateDetailsSchema'
 import { useS3 } from '../../../contexts/S3Context'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { useStatePrograms } from '../../../hooks/useStatePrograms'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../../common-code/featureFlags';
 
 type FormError =
     FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
@@ -81,6 +83,15 @@ export const RateDetails = ({
     const navigate = useNavigate()
 
     const statePrograms = useStatePrograms()
+
+    const ldClient = useLDClient()
+
+    //If rate program feature flag is off, then turn off displaying program list and omit from Yup schema.
+    const showRatePrograms = ldClient?.variation(
+        featureFlags.RATE_CERT_PROGRAMS,
+        false
+    )
+    const RateDetailsFormSchema = showRatePrograms ? DefaultRateDetailsFormSchema : DefaultRateDetailsFormSchema.omit(['rateProgramIDs'])
 
     // Rate documents state management
     const { deleteFile, getKey, getS3URL, scanFile, uploadFile } = useS3()
@@ -409,42 +420,44 @@ export const RateDetails = ({
                                         onFileItemsUpdate={onFileItemsUpdate}
                                     />
                                 </FormGroup>
-                                <FormGroup
-                                    error={showFieldErrors(
-                                        errors.rateProgramIDs
-                                    )}
-                                >
-                                    <Label htmlFor="programIDs">
-                                        Programs this rate certification covers
-                                    </Label>
-                                    {showFieldErrors(errors.rateProgramIDs) && (
-                                        <PoliteErrorMessage>
-                                            {errors.rateProgramIDs}
-                                        </PoliteErrorMessage>
-                                    )}
-                                    <Field name="programIDs">
-                                        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-                                        {/* @ts-ignore */}
-                                        {({ form }) => (
-                                            <ProgramSelect
-                                                statePrograms={statePrograms}
-                                                programIDs={
-                                                    values.rateProgramIDs
-                                                }
-                                                onChange={(selectedOption) =>
-                                                    form.setFieldValue(
-                                                        'rateProgramIDs',
-                                                        selectedOption.map(
-                                                            (item: {
-                                                                value: string
-                                                            }) => item.value
-                                                        )
-                                                    )
-                                                }
-                                            />
+                                {showRatePrograms && (
+                                    <FormGroup
+                                        error={showFieldErrors(
+                                            errors.rateProgramIDs
                                         )}
-                                    </Field>
-                                </FormGroup>
+                                    >
+                                        <Label htmlFor="programIDs">
+                                            Programs this rate certification covers
+                                        </Label>
+                                        {showFieldErrors(errors.rateProgramIDs) && (
+                                            <PoliteErrorMessage>
+                                                {errors.rateProgramIDs}
+                                            </PoliteErrorMessage>
+                                        )}
+                                        <Field name="programIDs">
+                                            {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                                            {/* @ts-ignore */}
+                                            {({ form }) => (
+                                                <ProgramSelect
+                                                    statePrograms={statePrograms}
+                                                    programIDs={
+                                                        values.rateProgramIDs
+                                                    }
+                                                    onChange={(selectedOption) =>
+                                                        form.setFieldValue(
+                                                            'rateProgramIDs',
+                                                            selectedOption.map(
+                                                                (item: {
+                                                                    value: string
+                                                                }) => item.value
+                                                            )
+                                                        )
+                                                    }
+                                                />
+                                            )}
+                                        </Field>
+                                    </FormGroup>
+                                )}
                                 <FormGroup
                                     error={showFieldErrors(errors.rateType)}
                                 >

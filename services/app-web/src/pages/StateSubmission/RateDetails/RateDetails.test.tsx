@@ -234,9 +234,10 @@ describe('RateDetails', () => {
                 },
             }
         )
-        expect(
-            screen.getByText('Programs this rate certification covers')
-        ).toBeInTheDocument()
+        // TODO: Enable test after rate certification program feature is fully implemented
+        // expect(
+        //     screen.getByText('Programs this rate certification covers')
+        // ).toBeInTheDocument()
         expect(screen.getByText('Rate certification type')).toBeInTheDocument()
         screen.getByLabelText('New rate certification').click()
         expect(
@@ -268,7 +269,7 @@ describe('RateDetails', () => {
 
         // check for expected errors
         await waitFor(() => {
-            expect(screen.queryAllByTestId('errorMessage')).toHaveLength(3)
+            expect(screen.queryAllByTestId('errorMessage')).toHaveLength(2)
             expect(
                 screen.queryAllByText(
                     'You must enter the date the document was certified'
@@ -277,20 +278,24 @@ describe('RateDetails', () => {
             expect(
                 screen.queryByText('You must provide a start and an end date')
             ).toBeInTheDocument()
-            expect(
-                screen.queryAllByText('You must select a program')
-            ).toHaveLength(2)
+
+            // TODO: Enable test after rate certification program feature is fully implemented
+            // expect(
+            //     screen.queryAllByText('You must select a program')
+            // ).toHaveLength(2)
         })
 
+        // TODO: Enable test after rate certification program feature is fully implemented
         //Select programs for rate certification
-        const combobox = await screen.findByRole('combobox')
-        await selectEvent.openMenu(combobox)
-        await waitFor(() => {
-            expect(screen.getByText('Program 3')).toBeInTheDocument()
-        })
-        await selectEvent.select(combobox, 'Program 1')
-        await selectEvent.openMenu(combobox)
-        await selectEvent.select(combobox, 'Program 3')
+        // const combobox = await screen.findByRole('combobox')
+        //
+        // await selectEvent.openMenu(combobox)
+        // await waitFor(() => {
+        //     expect(screen.getByText('Program 3')).toBeInTheDocument()
+        // })
+        // await selectEvent.select(combobox, 'Program 1')
+        // await selectEvent.openMenu(combobox)
+        // await selectEvent.select(combobox, 'Program 3')
 
         // fill out form and clear errors
         screen.getAllByLabelText('Start date')[0].focus()
@@ -308,7 +313,8 @@ describe('RateDetails', () => {
         )
     })
 
-    it('displays program options based on current user state', async () => {
+    // TODO: Enable test after rate certification program feature is fully implemented
+    it.skip('displays program options based on current user state', async () => {
         const mockUser = {
             __typename: 'StateUser' as const,
             role: 'STATE_USER',

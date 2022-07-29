@@ -197,14 +197,16 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     cy.findByLabelText('Start date').type('02/29/2024')
     cy.findByLabelText('End date').type('02/28/2025')
     cy.findByLabelText('Date certified').type('03/01/2024')
-    cy.findByRole('combobox', { name: 'programs (required)' }).click({
-        force: true,
-    })
-    cy.findByText('PMAP').click()
+
+    // TODO: Disabled until we figure out how we want to implement feature flags for cypress testing
+    // cy.findByRole('combobox', { name: 'programs (required)' }).click({
+    //     force: true,
+    // })
+    // cy.findByText('PMAP').click()
+
     cy.findByTestId('file-input-input').attachFile(
         'documents/trussel-guide.pdf'
     )
-
     cy.verifyDocumentsHaveNoErrors()
     cy.waitForDocumentsToLoad()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
@@ -223,10 +225,13 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
     cy.findAllByLabelText('End date').eq(0).type('02/28/2025')
     cy.findAllByLabelText('Start date').eq(1).type('03/01/2024')
     cy.findAllByLabelText('End date').eq(1).type('03/01/2025')
-    cy.findByRole('combobox', { name: 'programs (required)' }).click({
-        force: true,
-    })
-    cy.findByText('PMAP').click()
+
+    // TODO: Disabled until we figure out how we want to implement feature flags for cypress testing
+    // cy.findByRole('combobox', { name: 'programs (required)' }).click({
+    //     force: true,
+    // })
+    // cy.findByText('PMAP').click()
+
     cy.findByLabelText('Date certified for rate amendment').type('03/01/2024')
     cy.findByTestId('file-input-input').attachFile(
         'documents/trussel-guide.pdf'
