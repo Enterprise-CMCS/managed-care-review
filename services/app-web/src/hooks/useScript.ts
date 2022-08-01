@@ -5,6 +5,7 @@ type CustomScriptParams = {
     src: HTMLScriptElement['src'] // require src so that script file must be defined as distinct file
     async?: HTMLScriptElement['async']
     type?: HTMLScriptElement['type']
+    useInlineScriptNotSrc?: boolean
 } & HTMLAttributes<HTMLScriptElement>
 
 // Function to create custom scripts. Used to load third party js.
@@ -12,11 +13,12 @@ const createScript = ({
     type = 'text/javascript',
     id,
     src,
+    useInlineScriptNotSrc,
 }: CustomScriptParams): HTMLScriptElement => {
     const script = document.createElement('script')
     script.type = type
-    script.src = src
     script.id = id
+    if (!useInlineScriptNotSrc) script.src = src
     return script
 }
 
