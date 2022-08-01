@@ -101,15 +101,18 @@ test('includes expected data summary for a contract and rates submission CMS ema
         rateDateStart: new Date('01/01/2021'),
         rateDateEnd: new Date('01/01/2022'),
     }
+
+    const rateName = `some-title-RATE-20210101-20220101-CERTIFICATION-${formatRateNameDate(
+        new Date()
+    )}`
+
     const template = await newPackageCMSEmail(
         sub,
         'some-title',
         testEmailConfig,
-        []
+        [],
+        rateName
     )
-    const rateName = `some-title-RATE-20210101-20220101-CERTIFICATION-${formatRateNameDate(
-        new Date()
-    )}`
 
     expect(template).toEqual(
         expect.objectContaining({
@@ -148,15 +151,18 @@ test('includes expected data summary for a contract amendment submission', async
         rateDateStart: new Date('01/01/2021'),
         rateDateEnd: new Date('01/01/2022'),
     }
+
+    const rateName = `some-title-RATE-20210101-20220101-CERTIFICATION-${formatRateNameDate(
+        new Date()
+    )}`
+
     const template = await newPackageCMSEmail(
         sub,
         'some-title',
         testEmailConfig,
-        []
+        [],
+        rateName
     )
-    const rateName = `some-title-RATE-20210101-20220101-CERTIFICATION-${formatRateNameDate(
-        new Date()
-    )}`
 
     expect(template).toEqual(
         expect.objectContaining({
@@ -200,15 +206,17 @@ test('includes expected data summary for a rate amendment submission CMS email',
             effectiveDateEnd: new Date('12/31/2021'),
         },
     }
+    const rateName = `some-title-RATE-20210605-20211231-AMENDMENT-${formatRateNameDate(
+        new Date()
+    )}`
+
     const template = await newPackageCMSEmail(
         sub,
         'some-title',
         testEmailConfig,
-        []
+        [],
+        rateName
     )
-    const rateName = `some-title-RATE-20210605-20211231-AMENDMENT-${formatRateNameDate(
-        new Date()
-    )}`
 
     expect(template).toEqual(
         expect.objectContaining({
@@ -457,11 +465,13 @@ test('renders overall email as expected', async () => {
         rateDateEnd: new Date('2021-11-31'),
         rateDateCertified: new Date('2020-12-01'),
     }
+
     const result = await newPackageCMSEmail(
         sub,
         'CMS-new-submission-snapshot',
         testEmailConfig,
-        []
+        [],
+        'CMS-new-submission-snapshot-RATE-20210202-20211201-CERTIFICATION-20201201'
     )
     if (result instanceof Error) {
         console.error(result)

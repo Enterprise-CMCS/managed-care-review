@@ -2,7 +2,6 @@ import { URL } from 'url'
 
 import { UnlockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
-import { generateRateName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     renderTemplate,
     stripHTMLFromTemplate,
@@ -14,7 +13,8 @@ import type { EmailData, EmailConfiguration } from '../'
 export const unlockPackageStateEmail = async (
     pkg: UnlockedHealthPlanFormDataType,
     unlockData: UpdatedEmailData,
-    config: EmailConfiguration
+    config: EmailConfiguration,
+    rateName?: string
 ): Promise<EmailData | Error> => {
     const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
@@ -26,7 +26,7 @@ export const unlockPackageStateEmail = async (
         unlockedOn: formatCalendarDate(unlockData.updatedAt),
         unlockedReason: unlockData.updatedReason,
         shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
-        rateName: generateRateName(pkg, unlockData.packageName),
+        rateName,
         submissionURL: new URL(
             `submissions/${pkg.id}/review-and-submit`,
             config.baseUrl

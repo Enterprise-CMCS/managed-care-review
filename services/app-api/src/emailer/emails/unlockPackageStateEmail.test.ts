@@ -89,7 +89,8 @@ test('renders overall email as expected', async () => {
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig
+        testEmailConfig,
+        'MCR-VA-CCCPLUS-0002-RATE-20210605-20211231-AMENDMENT-20201201'
     )
 
     if (template instanceof Error) {

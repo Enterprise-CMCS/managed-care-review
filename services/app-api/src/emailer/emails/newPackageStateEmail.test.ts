@@ -200,15 +200,16 @@ test('includes expected data summary for a contract and rates submission State e
         rateDateEnd: new Date('01/01/2022'),
     }
     const user = mockUser()
+    const rateName = `some-title-RATE-20210101-20220101-CERTIFICATION-${formatRateNameDate(
+        new Date()
+    )}`
     const template = await newPackageStateEmail(
         sub,
         'some-title',
         user,
-        testEmailConfig
+        testEmailConfig,
+        rateName
     )
-    const rateName = `some-title-RATE-20210101-20220101-CERTIFICATION-${formatRateNameDate(
-        new Date()
-    )}`
 
     expect(template).toEqual(
         expect.objectContaining({
@@ -253,15 +254,17 @@ test('includes expected data summary for a rate amendment submission State email
         },
     }
     const user = mockUser()
+    const rateName = `some-title-RATE-20210605-20211231-AMENDMENT-${formatRateNameDate(
+        new Date()
+    )}`
+
     const template = await newPackageStateEmail(
         sub,
         'some-title',
         user,
-        testEmailConfig
+        testEmailConfig,
+        rateName
     )
-    const rateName = `some-title-RATE-20210605-20211231-AMENDMENT-${formatRateNameDate(
-        new Date()
-    )}`
 
     expect(template).toEqual(
         expect.objectContaining({
@@ -303,7 +306,8 @@ test('renders overall email as expected', async () => {
         sub,
         'MN-new-submission-snapshot',
         user,
-        testEmailConfig
+        testEmailConfig,
+        'MN-new-submission-snapshot-RATE-20210605-20211231-AMENDMENT-20201201'
     )
     if (result instanceof Error) {
         console.error(result)

@@ -360,7 +360,8 @@ test('renders overall email as expected', async () => {
         submission,
         resubmitData,
         testEmailConfig,
-        testStateAnalystEmails
+        testStateAnalystEmails,
+        'MCR-VA-CCCPLUS-0002-RATE-20210202-20211201-CERTIFICATION-20201201'
     )
     if (template instanceof Error) {
         console.error(testStateAnalystEmails)

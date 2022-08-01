@@ -3,7 +3,6 @@ import { URL } from 'url'
 import { LockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { EmailConfiguration, EmailData } from '..'
-import { generateRateName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { UserType } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
@@ -16,7 +15,8 @@ export const newPackageStateEmail = async (
     pkg: LockedHealthPlanFormDataType,
     packageName: string,
     user: UserType,
-    config: EmailConfiguration
+    config: EmailConfiguration,
+    rateName?: string
 ): Promise<EmailData | Error> => {
     const isUnitTest = config.baseUrl === 'http://localhost'
     const receiverEmails = generateStateReceiverEmails(pkg, user)
@@ -39,7 +39,7 @@ export const newPackageStateEmail = async (
                 : 'Contract effective dates',
         contractDatesStart: formatCalendarDate(pkg.contractDateStart),
         contractDatesEnd: formatCalendarDate(pkg.contractDateEnd),
-        rateName: generateRateName(pkg, packageName),
+        rateName,
         rateDateLabel:
             pkg.rateType === 'NEW'
                 ? 'Rating period'

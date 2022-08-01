@@ -1,7 +1,4 @@
-import {
-    LockedHealthPlanFormDataType,
-    generateRateName,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { LockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { UserType } from '../../domain-models'
 import {
@@ -17,7 +14,8 @@ export const resubmitPackageStateEmail = async (
     pkg: LockedHealthPlanFormDataType,
     user: UserType,
     resubmittedData: UpdatedEmailData,
-    config: EmailConfiguration
+    config: EmailConfiguration,
+    rateName?: string
 ): Promise<EmailData | Error> => {
     const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
@@ -29,7 +27,7 @@ export const resubmitPackageStateEmail = async (
         resubmittedOn: formatCalendarDate(resubmittedData.updatedAt),
         resubmissionReason: resubmittedData.updatedReason,
         shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
-        rateName: generateRateName(pkg, resubmittedData.packageName),
+        rateName,
     }
 
     const result = await renderTemplate<typeof data>(
