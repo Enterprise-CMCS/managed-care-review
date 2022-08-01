@@ -35,7 +35,6 @@ export const ProgramSelect = ({
 
     return (
         <Select
-            {...selectProps}
             defaultValue={programIDs.map((programID) => {
                 const program = statePrograms.find((p) => p.id === programID)
                 if (!program) {
@@ -59,6 +58,7 @@ export const ProgramSelect = ({
             ariaLiveMessages={{
                 onFocus,
             }}
+            {...selectProps}
         />
     )
 }
