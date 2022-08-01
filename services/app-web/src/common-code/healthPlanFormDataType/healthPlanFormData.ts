@@ -2,7 +2,6 @@ import { UnlockedHealthPlanFormDataType } from './UnlockedHealthPlanFormDataType
 import { ModifiedProvisions } from './ModifiedProvisions'
 import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import { HealthPlanFormDataType } from './HealthPlanFormDataType'
-import { RateDataType } from '.'
 import { formatRateNameDate } from '../../common-code/dateHelpers'
 
 const isContractOnly = (
@@ -163,10 +162,14 @@ function programNames(
 
 function packageName(
     submission: HealthPlanFormDataType,
-    statePrograms: ProgramArgType[]
+    statePrograms: ProgramArgType[],
+    programIDs?: string[]
 ): string {
     const padNumber = submission.stateNumber.toString().padStart(4, '0')
-    const pNames = programNames(statePrograms, submission.programIDs)
+    const pNames =
+        programIDs && programIDs.length > 0
+            ? programNames(statePrograms, programIDs)
+            : programNames(statePrograms, submission.programIDs)
     const formattedProgramNames = pNames
         .sort(naturalSort)
         .map((n) =>
@@ -180,8 +183,8 @@ function packageName(
 }
 
 const generateRateName = (
-    rateData: RateDataType,
-    submissionName: string
+    rateData: HealthPlanFormDataType,
+    statePrograms: ProgramArgType[]
 ): string => {
     const {
         rateType,
@@ -189,8 +192,13 @@ const generateRateName = (
         rateDateCertified,
         rateDateEnd,
         rateDateStart,
+        rateProgramIDs,
     } = rateData
-    let rateName = `${submissionName}-RATE`
+    let rateName = `${packageName(
+        rateData,
+        statePrograms,
+        rateProgramIDs
+    )}-RATE`
 
     if (rateType === 'AMENDMENT' && rateAmendmentInfo?.effectiveDateStart) {
         rateName = rateName.concat(
