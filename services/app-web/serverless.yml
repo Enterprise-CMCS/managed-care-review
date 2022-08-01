@@ -32,7 +32,7 @@ custom:
   storybook_cloudfront_distribution_id: ${cf:storybook-${sls:stage}.CloudFrontDistributionId}
   react_app_auth_mode: ${env:REACT_APP_AUTH_MODE}
   nr_license_key: ${env:NR_LICENSE_KEY, ssm:/configuration/nr_license_key}
-  tealium_profile: ${{ env.TEALIUM_PROFILE }}
+  react_app_tealium_profile: ${{ env.REACT_APP_TEALIUM_PROFILE, ssm:/configuration/react_app_tealium_profile }}
   react_app_ld_client_id: ${env:REACT_APP_LD_CLIENT_ID, ssm:/configuration/react_app_ld_client_id}
   serverlessTerminationProtection:
     stages:
@@ -75,7 +75,7 @@ custom:
         export REACT_APP_STAGE_NAME=${sls:stage}
         export REACT_APP_OTEL_COLLECTOR_URL=${self:custom.api_url}/otel
         export REACT_APP_LD_CLIENT_ID=${self:custom.react_app_ld_client_id}
-        export TEALIUM_PROFILE=${{self.custom.tealium_profile}
+        export REACT_APP_TEALIUM_PROFILE=${self.custom.react_app_tealium_profile}
 
         # run the app-api build and the storybook build in parallel. 
         # this isn't elegant but saves us CI time, it's probably more correct to break

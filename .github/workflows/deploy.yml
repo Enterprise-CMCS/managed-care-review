@@ -225,7 +225,6 @@ jobs:
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       react_app_auth_mode: AWS_COGNITO
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
-      tealium_profile: ${{ secrets.TEALIUM_PROFILE}}
 
   finishing-prep:
     name: Finishing Prep

@@ -199,7 +199,7 @@ Read by `app-web`
 
 This is the client ID for Launch Darkly in our frontend. This key is designed to have limited access since it's exposed in our client side code. There is one per environment of local/dev/val/prod.
 
-### `TEALIUM_PROFILE`
+### `REACT_APP_TEALIUM_PROFILE`
 
 Read by `app-web`
 

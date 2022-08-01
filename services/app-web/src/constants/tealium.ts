@@ -4,10 +4,11 @@ const TEALIUM_NODE_ENV_MAP = {
     production: 'prod',
     test: 'qa',
     development: 'dev',
+    local: 'dev',
 }
 
 const CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
-    ROOT: 'summary',
+    ROOT: 'root',
     AUTH: 'login',
     DASHBOARD: 'table',
     HELP: 'glossary',

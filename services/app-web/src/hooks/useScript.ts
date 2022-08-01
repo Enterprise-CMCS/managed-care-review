@@ -1,35 +1,38 @@
-import { useEffect } from 'react'
-const createScript = ({
-    async = true,
-    text = 'text/javascript',
-    src,
-    innerHTML,
-}: {
+import { HTMLAttributes, useEffect } from 'react'
+
+type CustomScriptParams = {
+    id: HTMLScriptElement['id'] // require ids to be able to reference specific scripts from React code
+    src: HTMLScriptElement['src'] // require src so that script file must be defined as distinct file
     async?: HTMLScriptElement['async']
-    text?: HTMLScriptElement['text']
-    src?: HTMLScriptElement['src']
-    innerHTML?: HTMLScriptElement['innerHTML']
-}): HTMLScriptElement => {
-    if (!src && !innerHTML) {
-        console.error(
-            'CODING ERROR: script tags must be set up with either a src or inner HTML'
-        )
-    }
+    type?: HTMLScriptElement['type']
+} & HTMLAttributes<HTMLScriptElement>
 
+// Function to create custom scripts. Used to load third party js.
+const createScript = ({
+    type = 'text/javascript',
+    id,
+    src,
+}: CustomScriptParams): HTMLScriptElement => {
     const script = document.createElement('script')
-    script.async = async
-    script.text = text
-    script.src = src || ' '
-    script.innerHTML = innerHTML || ''
-
+    script.type = type
+    script.src = src
+    script.id = id
     return script
 }
 
 // Add script pointing to third party URL to bottom of page, with handling for a boolean flag on or off
-const useScript = (url: string, featureFlag: boolean): void => {
+const useScript = ({
+    url,
+    id,
+    featureFlag,
+}: {
+    url: string
+    id: string
+    featureFlag: boolean
+}): void => {
     useEffect(() => {
         if (featureFlag) {
-            const script = createScript({ src: url })
+            const script = createScript({ src: url, id })
 
             document.body.appendChild(script)
 
@@ -37,7 +40,7 @@ const useScript = (url: string, featureFlag: boolean): void => {
                 document.body.removeChild(script)
             }
         }
-    }, [url, featureFlag])
+    }, [url, id, featureFlag])
 }
 
 export { useScript, createScript }

@@ -7,9 +7,7 @@ import { assertNever, AuthModeType } from '../../common-code/config'
 import { PageTitlesRecord, RoutesRecord, RouteT } from '../../constants/routes'
 import { getRouteName } from '../../routeHelpers'
 import { useAuth } from '../../contexts/AuthContext'
-import { useOTEL } from '../../hooks/useOTEL'
 import { usePage } from '../../contexts/PageContext'
-import { useTealium } from '../../hooks/useTealium'
 import { useTitle } from '../../hooks/useTitle'
 import { LocalLogin } from '../../localAuth'
 import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
@@ -240,10 +238,6 @@ export const AppRoutes = ({
     useEffect(() => {
         updateHeading({})
     }, [pathname, updateHeading])
-
-    // Logging & Metrics
-    useOTEL()
-    useTealium()
 
     if (!loggedInUser) {
         return <UnauthenticatedRoutes authMode={authMode} />

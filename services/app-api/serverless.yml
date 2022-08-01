@@ -32,6 +32,7 @@ custom:
   reactAppOtelCollectorUrl: ${env:REACT_APP_OTEL_COLLECTOR_URL, ssm:/configuration/react_app_otel_collector_url}
   dbURL: ${env:DATABASE_URL}
   ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key}
+  reactAppTealiumProfile: ${env:REACT_APP_TEALIUM_PROFILE, ssm:/configuration/react_app_tealium_profile}
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
@@ -137,6 +138,7 @@ provider:
     AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
     OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
     LD_SDK_KEY: ${self:custom.ldSDKKey}
+    REACT_APP_TEALIUM_PROFILE: ${self:custom.reactAppTealiumProfile}
 
 layers:
   prismaClientMigration:
