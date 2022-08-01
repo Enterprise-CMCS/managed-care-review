@@ -260,6 +260,8 @@ export const SubmissionType = ({
                                     {/* @ts-ignore */}
                                     {({ form }) => (
                                         <ProgramSelect
+                                            id="programIDs"
+                                            name="programIDs"
                                             statePrograms={statePrograms}
                                             programIDs={values.programIDs}
                                             onChange={(selectedOption) =>
