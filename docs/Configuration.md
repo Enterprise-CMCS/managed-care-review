@@ -198,9 +198,3 @@ This is the key for Launch Darkly SDK access in our backend. There is one per en
 Read by `app-web`
 
 This is the client ID for Launch Darkly in our frontend. This key is designed to have limited access since it's exposed in our client side code. There is one per environment of local/dev/val/prod.
-
-### `REACT_APP_TEALIUM_PROFILE`
-
-Read by `app-web`
-
-Tealium is the data platform CMS uses for Google Analytics. Our application has a specific profile name that is referenced to send tagged data from our application

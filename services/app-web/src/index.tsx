@@ -101,12 +101,6 @@ if (otelCollectorUrl === undefined) {
         'To configure OTEL, you must set REACT_APP_OTEL_COLLECTOR_URL'
     )
 }
-const tealiumProfile = process.env.REACT_APP_TEALIUM_PROFILE
-if (tealiumProfile === undefined) {
-    throw new Error(
-        'To configure Tealium, you must set REACT_APP_TEALIUM_PROFILE'
-    )
-}
 
 const ldClientId = process.env.REACT_APP_LD_CLIENT_ID
 if (ldClientId === undefined) {

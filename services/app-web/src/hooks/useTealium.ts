@@ -9,23 +9,23 @@ import {
     CONTENT_TYPE_BY_ROUTE,
 } from '../constants/tealium'
 
-// Tealium is the interface for Google Analytics and other data tracking
-// The Universal Tag (utag) is a small piece of JavaScript code called utag.js that contains all of the generated code necessary to load third-party tags onto your site.
-// It enables Tealium iQ Tag Management to fire tags. Must be added after the data layer script tag.
-// See CMS documentation site: https://confluence.cms.gov/display/BLSTANALYT/Page+Tracking+Template+-+Single+Page+Applications
-// See tealium documentation:
-
+/*
+Tealium is the data layer for Google Analytics and other data tracking at CMS
+    The hooks in this file have two purposes:
+    1. Loads JavaScript code called utag.js into the application. This contains all of the generated code necessary to use Tealium and third-party tags.
+    2. Tracks new page views using the Tealium Universal Data Format, defined in this doc: https://docs.tealium.com/platforms/javascript/universal-data-object/
+*/
 const useTealium = (): void => {
     const { currentRoute, pathname } = useCurrentRoute()
     const { heading } = usePage()
     const { loggedInUser } = useAuth()
 
-    // LOAD TEALIUM EFFECT - should only fire only on initial app load
     useEffect(() => {
-        if (process.env.REACT_APP_STAGE_NAME === 'local') return // do not add tealium for local dev
+        // Do not add tealium for local dev
+        if (process.env.REACT_APP_STAGE_NAME === 'local') return
 
         const tealiumEnv = TEALIUM_NODE_ENV_MAP[process.env.NODE_ENV]
-        const tealiumProfile = process.env.REACT_APP_TEALIUM_PROFILE
+        const tealiumProfile = 'cms-mcreview'
         if (!tealiumEnv || !tealiumProfile) {
             console.error(
                 `Missing key configuration for Tealium. tealiumEnv: ${tealiumEnv} tealiumProfile: ${tealiumProfile}`
@@ -73,13 +73,13 @@ const useTealium = (): void => {
             document.body.removeChild(loadTagsSnippet)
             document.head.removeChild(initializeTagManagerSnippet)
         }
-    }, [])
+    }, []) // this effect should only fire on initial app load
 
-    // ADD TAGS EFFECT -  should fire on each page load
     useEffect(() => {
-        if (process.env.REACT_APP_STAGE_NAME === 'local') return // do not add tags for local dev
+        // Do not add tags for local dev
+        if (process.env.REACT_APP_STAGE_NAME === 'local') return
 
-        // Guardrail - use a default utag value to protect against trying to call utag before its loaded.
+        // Guardrail - protect against trying to call utag before its loaded.
         if (!window.utag) {
             console.error(
                 'PROGRAMMING ERROR: tried to use tealium utag before it was loaded'
@@ -99,7 +99,7 @@ const useTealium = (): void => {
         }
         utag.view(tagData)
         console.log('utag view called with: ', tagData)
-    }, [currentRoute, loggedInUser, pathname, heading])
+    }, [currentRoute, loggedInUser, pathname, heading]) // this effect should fire on each page view or if something changes about logged in user
 }
 
 export { useTealium }
