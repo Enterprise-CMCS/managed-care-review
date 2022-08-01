@@ -8,9 +8,9 @@ import {
 import {
     generateRateName,
     hasValidSupportingDocumentCategories,
+    HealthPlanFormDataType,
     LockedHealthPlanFormDataType,
     packageName,
-    RateDataType,
 } from '.'
 import {
     hasValidContract,
@@ -385,13 +385,16 @@ describe('submission type assertions', () => {
         expect(packageName(sub, programs)).toBe(expectedName)
     })
 
+    const mockContractAndRateSub = mockContractAndRatesDraft()
+
     const rateNameTestArray: {
-        rateData: RateDataType
-        submissionName: string
+        submission: HealthPlanFormDataType
+        testDescription: string
         expectedName: string
     }[] = [
         {
-            rateData: {
+            submission: {
+                ...mockContractAndRateSub,
                 rateType: 'AMENDMENT',
                 rateDateStart: new Date('2021/04/22'),
                 rateDateEnd: new Date('2022/03/29'),
@@ -400,24 +403,28 @@ describe('submission type assertions', () => {
                     effectiveDateStart: new Date('2022/05/21'),
                     effectiveDateEnd: new Date('2022/09/21'),
                 },
+                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
             },
-            submissionName: 'MN-TEST-AMENDMENT',
+            testDescription: 'Amendment rate test',
             expectedName:
-                'MN-TEST-AMENDMENT-RATE-20220521-20220921-AMENDMENT-20210523',
+                'MCR-MN-0005-SNBC-RATE-20220521-20220921-AMENDMENT-20210523',
         },
         {
-            rateData: {
+            submission: {
+                ...mockContractAndRateSub,
                 rateType: 'NEW',
                 rateDateStart: new Date('2021/04/22'),
                 rateDateEnd: new Date('2022/03/29'),
                 rateDateCertified: new Date('2021/04/22'),
+                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
             },
-            submissionName: 'OH-TEST-NAME',
+            testDescription: 'New rate test',
             expectedName:
-                'OH-TEST-NAME-RATE-20210422-20220329-CERTIFICATION-20210422',
+                'MCR-MN-0005-SNBC-RATE-20210422-20220329-CERTIFICATION-20210422',
         },
         {
-            rateData: {
+            submission: {
+                ...mockContractAndRateSub,
                 rateType: 'NEW',
                 rateDateStart: new Date('2021/04/22'),
                 rateDateEnd: new Date('2022/03/29'),
@@ -426,56 +433,72 @@ describe('submission type assertions', () => {
                     effectiveDateStart: new Date('2022/05/21'),
                     effectiveDateEnd: new Date('2022/09/21'),
                 },
+                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
             },
-            submissionName: 'MN-NEW-WITH-AMENDMENT-DATES',
+            testDescription: 'MN-NEW-WITH-AMENDMENT-DATES',
             expectedName:
-                'MN-NEW-WITH-AMENDMENT-DATES-RATE-20210422-20220329-CERTIFICATION-20210422',
+                'MCR-MN-0005-SNBC-RATE-20210422-20220329-CERTIFICATION-20210422',
         },
         {
-            rateData: {
+            submission: {
+                ...mockContractAndRateSub,
                 rateType: 'NEW',
+                rateDateStart: undefined,
+                rateDateEnd: undefined,
+                rateDateCertified: undefined,
                 rateAmendmentInfo: {
                     effectiveDateStart: new Date('2022/05/21'),
                     effectiveDateEnd: new Date('2022/09/21'),
                 },
+                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
             },
-            submissionName: 'MN-NEW-NO-DATES',
-            expectedName: 'MN-NEW-NO-DATES-RATE-CERTIFICATION',
+            testDescription: 'New rate with no dates',
+            expectedName: 'MCR-MN-0005-SNBC-RATE-CERTIFICATION',
         },
         {
-            rateData: {
+            submission: {
+                ...mockContractAndRateSub,
                 rateType: 'AMENDMENT',
                 rateAmendmentInfo: {},
+                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
             },
-            submissionName: 'MN-AMENDMENT-NO-DATES',
-            expectedName: 'MN-AMENDMENT-NO-DATES-RATE-AMENDMENT',
+            testDescription: 'Amendment rate with no dates',
+            expectedName: 'MCR-MN-0005-SNBC-RATE-AMENDMENT',
         },
         {
-            rateData: {
+            submission: {
+                ...mockContractAndRateSub,
                 rateType: 'NEW',
                 rateDateStart: new Date('2021/04/22'),
+                rateDateEnd: undefined,
                 rateAmendmentInfo: {
                     effectiveDateStart: new Date('2022/05/21'),
                     effectiveDateEnd: new Date('2022/09/21'),
                 },
+                rateDateCertified: undefined,
+                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
             },
-            submissionName: 'MN-NEW-INCOMPLETE-DATES',
-            expectedName: 'MN-NEW-INCOMPLETE-DATES-RATE-20210422-CERTIFICATION',
+            testDescription: 'New rate with imcomplete dates',
+            expectedName: 'MCR-MN-0005-SNBC-RATE-20210422-CERTIFICATION',
         },
         {
-            rateData: {
+            submission: {
+                ...mockContractAndRateSub,
                 rateType: 'AMENDMENT',
                 rateDateStart: new Date('2021/04/22'),
                 rateDateEnd: new Date('2022/03/29'),
                 rateAmendmentInfo: {
                     effectiveDateStart: new Date('2022/05/21'),
                 },
+                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
             },
-            submissionName: 'MN-AMENDMENT-INCOMPLETE',
-            expectedName: 'MN-AMENDMENT-INCOMPLETE-RATE-20220521-AMENDMENT',
+            testDescription: 'Incomplete amendment rate dates',
+            expectedName: 'MCR-MN-0005-SNBC-RATE-20220521-AMENDMENT',
         },
         {
-            rateData: {
+            submission: {
+                ...mockContractAndRateSub,
+                rateType: undefined,
                 rateDateStart: new Date('2021/04/22'),
                 rateDateEnd: new Date('2022/03/29'),
                 rateDateCertified: new Date('2021/05/23'),
@@ -483,17 +506,39 @@ describe('submission type assertions', () => {
                     effectiveDateStart: new Date('2022/05/21'),
                     effectiveDateEnd: new Date('2022/09/21'),
                 },
+                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
             },
-            submissionName: 'MN-NO-TYPE',
-            expectedName: 'MN-NO-TYPE-RATE-20210422-20220329-20210523',
+            testDescription: 'Rate type not specified',
+            expectedName: 'MCR-MN-0005-SNBC-RATE-20210422-20220329-20210523',
+        },
+        {
+            submission: {
+                ...mockContractAndRateSub,
+                programIDs: [
+                    'd95394e5-44d1-45df-8151-1cc1ee66f100',
+                    'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
+                ],
+                rateType: undefined,
+                rateDateStart: new Date('2021/04/22'),
+                rateDateEnd: new Date('2022/03/29'),
+                rateDateCertified: new Date('2021/05/23'),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date('2022/05/21'),
+                    effectiveDateEnd: new Date('2022/09/21'),
+                },
+                rateProgramIDs: undefined,
+            },
+            testDescription:
+                'Rate programs not specified should default to package programs',
+            expectedName:
+                'MCR-MN-0005-MSC+-PMAP-RATE-20210422-20220329-20210523',
         },
     ]
     test.each(rateNameTestArray)(
-        'submission rate name is correct',
-        ({ rateData, submissionName, expectedName }) => {
-            expect(generateRateName(rateData, submissionName)).toMatch(
-                expectedName
-            )
+        'Rate Name Test: $testDescription',
+        ({ submission, expectedName }) => {
+            const programs = mockMNState().programs
+            expect(generateRateName(submission, programs)).toMatch(expectedName)
         }
     )
 })
