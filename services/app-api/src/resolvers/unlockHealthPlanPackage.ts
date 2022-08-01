@@ -3,6 +3,7 @@ import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
     packageName,
+    generateRateName,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import {
@@ -138,7 +139,12 @@ export function unlockHealthPlanPackageResolver(
         }
 
         // Send emails!
+        const isContractAndRate = draft.submissionType === 'CONTRACT_AND_RATES'
+
         const name = packageName(draft, programs)
+        const rateName = isContractAndRate
+            ? generateRateName(draft, programs)
+            : undefined
 
         // Get state analysts emails from parameter store
         let stateAnalystsEmails =
@@ -158,11 +164,16 @@ export function unlockHealthPlanPackageResolver(
             await emailer.sendUnlockPackageCMSEmail(
                 draft,
                 updatedEmailData,
-                stateAnalystsEmails
+                stateAnalystsEmails,
+                rateName
             )
 
         const unlockPackageStateEmailResult =
-            await emailer.sendUnlockPackageStateEmail(draft, updatedEmailData)
+            await emailer.sendUnlockPackageStateEmail(
+                draft,
+                updatedEmailData,
+                rateName
+            )
 
         if (unlockPackageCMSEmailResult instanceof Error) {
             logError(

@@ -9,6 +9,7 @@ import {
     isLockedHealthPlanFormData,
     LockedHealthPlanFormDataType,
     packageName,
+    generateRateName,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     UpdateInfoType,
@@ -258,8 +259,14 @@ export function submitHealthPlanPackageResolver(
         }
 
         // Send emails!
+        const isContractAndRate =
+            lockedFormData.submissionType === 'CONTRACT_AND_RATES'
+
         const name = packageName(lockedFormData, programs)
         const status = packageStatus(updatedPackage)
+        const rateName = isContractAndRate
+            ? generateRateName(lockedFormData, programs)
+            : undefined
 
         // Get state analysts emails from parameter store
         let stateAnalystsEmails =
@@ -285,23 +292,27 @@ export function submitHealthPlanPackageResolver(
             cmsPackageEmailResult = await emailer.sendResubmittedCMSEmail(
                 lockedFormData,
                 updatedEmailData,
-                stateAnalystsEmails
+                stateAnalystsEmails,
+                rateName
             )
             statePackageEmailResult = await emailer.sendResubmittedStateEmail(
                 lockedFormData,
                 updatedEmailData,
-                user
+                user,
+                rateName
             )
         } else if (status === 'SUBMITTED') {
             cmsPackageEmailResult = await emailer.sendCMSNewPackage(
                 lockedFormData,
                 name,
-                stateAnalystsEmails
+                stateAnalystsEmails,
+                rateName
             )
             statePackageEmailResult = await emailer.sendStateNewPackage(
                 lockedFormData,
                 name,
-                user
+                user,
+                rateName
             )
         }
 

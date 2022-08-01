@@ -11,7 +11,10 @@ import {
 } from '../testHelpers/gqlHelpers'
 import { testEmailConfig, testEmailer } from '../testHelpers/emailerHelpers'
 import { base64ToDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import { packageName } from '../../../app-web/src/common-code/healthPlanFormDataType'
+import {
+    generateRateName,
+    packageName,
+} from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 import {
     getTestStateAnalystsEmails,
@@ -369,12 +372,14 @@ describe('submitHealthPlanPackage', () => {
 
         const programs = [defaultFloridaProgram()]
         const name = packageName(sub, programs)
+        const rateName = generateRateName(sub, programs)
 
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 subject: expect.stringContaining(`${name} was sent to CMS`),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining([currentUser.email]),
+                bodyHTML: expect.stringContaining(rateName),
             })
         )
     })

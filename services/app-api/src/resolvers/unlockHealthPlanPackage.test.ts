@@ -17,7 +17,10 @@ import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 import { mockStoreThatErrors } from '../testHelpers/storeHelpers'
 import { testEmailConfig, testEmailer } from '../testHelpers/emailerHelpers'
 import { base64ToDomain } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
-import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
+import {
+    generateRateName,
+    packageName,
+} from 'app-web/src/common-code/healthPlanFormDataType'
 import {
     getTestStateAnalystsEmails,
     mockEmailParameterStoreError,
@@ -472,6 +475,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const programs = [defaultFloridaProgram()]
         const name = packageName(sub, programs)
+        const rateName = generateRateName(sub, programs)
         const stateAnalystsEmails = getTestStateAnalystsEmails(sub)
 
         const cmsEmails = [
@@ -486,6 +490,7 @@ describe('unlockHealthPlanPackage', () => {
                 subject: expect.stringContaining(`${name} was unlocked`),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
+                bodyHTML: expect.stringContaining(rateName),
             })
         )
     })
