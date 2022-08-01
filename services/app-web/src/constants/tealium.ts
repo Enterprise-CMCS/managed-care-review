@@ -1,10 +1,17 @@
 import { RouteT } from './routes'
 
-const TEALIUM_NODE_ENV_MAP = {
-    production: 'prod',
-    test: 'qa',
-    development: 'dev',
-    local: 'dev',
+// map stage names to tealium env name
+const getTealiumEnv = (stage: string) => {
+    switch (stage) {
+        case 'prod':
+            return 'prod'
+        case 'val':
+            return 'qa'
+        case 'main':
+            return 'dev'
+        default:
+            return 'dev'
+    }
 }
 
 const CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
@@ -26,4 +33,4 @@ const CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     UNKNOWN_ROUTE: '404',
 }
 
-export { TEALIUM_NODE_ENV_MAP, CONTENT_TYPE_BY_ROUTE }
+export { getTealiumEnv, CONTENT_TYPE_BY_ROUTE }

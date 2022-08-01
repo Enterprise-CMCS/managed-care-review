@@ -4,10 +4,7 @@ import { useCurrentRoute } from './useCurrentRoute'
 import { createScript } from './useScript'
 import { PageTitlesRecord } from '../constants/routes'
 import { useAuth } from '../contexts/AuthContext'
-import {
-    TEALIUM_NODE_ENV_MAP,
-    CONTENT_TYPE_BY_ROUTE,
-} from '../constants/tealium'
+import { getTealiumEnv, CONTENT_TYPE_BY_ROUTE } from '../constants/tealium'
 
 /*
 Tealium is the data layer for Google Analytics and other data tracking at CMS
@@ -24,7 +21,9 @@ const useTealium = (): void => {
         // Do not add tealium for local dev
         if (process.env.REACT_APP_STAGE_NAME === 'local') return
 
-        const tealiumEnv = TEALIUM_NODE_ENV_MAP[process.env.NODE_ENV]
+        const tealiumEnv = getTealiumEnv(
+            process.env.REACT_APP_STAGE_NAME || 'main'
+        )
         const tealiumProfile = 'cms-mcreview'
         if (!tealiumEnv || !tealiumProfile) {
             console.error(
@@ -93,7 +92,7 @@ const useTealium = (): void => {
             page_name: `${heading}: ${PageTitlesRecord[currentRoute]}`,
             page_path: pathname,
             site_domain: 'cms.gov',
-            site_environment: `${process.env.NODE_ENV}`,
+            site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
             site_section: `${currentRoute}`,
             logged_in: `${Boolean(loggedInUser) ?? false}`,
         }
