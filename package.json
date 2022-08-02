@@ -28,6 +28,9 @@
         "type": "git",
         "url": "git+https://github.com/CMSgov/managed-care-review.git"
     },
+    "nyc": {
+        "report-dir": "coverage-cypress"
+    },
     "author": "",
     "license": "CC0-1.0",
     "bugs": {
