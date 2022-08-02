@@ -4,6 +4,7 @@ import Select, { AriaOnFocus, Props } from 'react-select'
 import { Program } from '../../gen/gqlClient'
 
 export type ProgramSelectPropType = {
+    name: string
     statePrograms: Program[]
     programIDs: string[]
 }
@@ -16,6 +17,7 @@ interface ProgramOption {
 }
 
 export const ProgramSelect = ({
+    name,
     statePrograms,
     programIDs,
     ...selectProps
@@ -50,8 +52,8 @@ export const ProgramSelect = ({
             })}
             className={styles.multiSelect}
             classNamePrefix="program-select"
-            id="programIDs"
-            name="programIDs"
+            id="programSelect"
+            name={name}
             aria-label="programs (required)"
             options={programOptions}
             isMulti

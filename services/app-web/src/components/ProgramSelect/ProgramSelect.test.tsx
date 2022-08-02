@@ -14,6 +14,7 @@ describe('ProgramSelect', () => {
         })
         renderWithProviders(
             <ProgramSelect
+                name="programSelect"
                 statePrograms={mockStatePrograms}
                 programIDs={[]}
                 onChange={mockOnChange}
@@ -38,6 +39,7 @@ describe('ProgramSelect', () => {
         })
         renderWithProviders(
             <ProgramSelect
+                name="programSelect"
                 statePrograms={mockStatePrograms}
                 programIDs={[]}
                 onChange={mockOnChange}
@@ -74,6 +76,7 @@ describe('ProgramSelect', () => {
         })
         renderWithProviders(
             <ProgramSelect
+                name="programSelect"
                 statePrograms={mockStatePrograms}
                 programIDs={[
                     '3fd36500-bf2c-47bc-80e8-e7aa417184c5',
