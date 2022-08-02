@@ -1,7 +1,7 @@
 import { RouteT } from './routes'
 
 // map stage names to tealium env name
-const getTealiumEnv = (stage: string) => {
+function getTealiumEnv(stage: string) {
     switch (stage) {
         case 'prod':
             return 'prod'
