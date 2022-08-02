@@ -207,6 +207,21 @@ export const SubmissionType = ({
         }
     }
 
+    const generateErrorSummaryErrors = (
+        errors: FormikErrors<SubmissionTypeFormValues>
+    ) => {
+        const errorSummaryErrors = { ...errors }
+        //If package program(s) is not selected and error is in FormikErrors, replace programIDs key with #programIDs.
+        // This is done in order to be able to focus the input element by id from react-select component.
+        if (errorSummaryErrors.programIDs) {
+            delete errorSummaryErrors.programIDs
+            Object.assign(errorSummaryErrors, {
+                '#programIDs': errors.programIDs,
+            })
+        }
+        return errorSummaryErrors
+    }
+
     return (
         <Formik
             initialValues={submissionTypeInitialValues}
@@ -241,7 +256,7 @@ export const SubmissionType = ({
 
                             {shouldValidate && (
                                 <ErrorSummary
-                                    errors={errors}
+                                    errors={generateErrorSummaryErrors(errors)}
                                     headingRef={errorSummaryHeadingRef}
                                 />
                             )}
@@ -260,8 +275,8 @@ export const SubmissionType = ({
                                     {/* @ts-ignore */}
                                     {({ form }) => (
                                         <ProgramSelect
-                                            id="programIDs"
                                             name="programIDs"
+                                            inputId="programIDs"
                                             statePrograms={statePrograms}
                                             programIDs={values.programIDs}
                                             onChange={(selectedOption) =>

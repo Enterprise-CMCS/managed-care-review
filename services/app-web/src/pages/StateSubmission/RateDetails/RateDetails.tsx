@@ -87,7 +87,7 @@ export const RateDetails = ({
     const ldClient = useLDClient()
 
     //If rate program feature flag is off, then turn off displaying program list and omit from Yup schema.
-    const showRatePrograms = ldClient?.variation(
+    const showRatePrograms = !ldClient?.variation(
         featureFlags.RATE_CERT_PROGRAMS,
         false
     )
@@ -334,6 +334,26 @@ export const RateDetails = ({
         }
     }
 
+    const generateErrorSummaryErrors = (
+        errors: FormikErrors<RateDetailsFormValues>
+    ) => {
+        const errorSummaryErrors = { ...errors }
+        //If rate certification program(s) is not selected and error is in FormikErrors, replace rateProgramIDs key with #rateProgramIDs.
+        // This is done in order to be able to focus the input element by id from react-select component.
+        if (errorSummaryErrors.rateProgramIDs) {
+            delete errorSummaryErrors.rateProgramIDs
+            Object.assign(errorSummaryErrors, {
+                '#rateProgramIDs': errors.rateProgramIDs,
+            })
+        }
+        if (documentsErrorMessage) {
+            Object.assign(errorSummaryErrors, {
+                [documentsErrorKey]: documentsErrorMessage,
+            })
+        }
+        return errorSummaryErrors
+    }
+
     return (
         <Formik
             initialValues={rateDetailsInitialValues}
@@ -374,15 +394,9 @@ export const RateDetails = ({
                             <FormGroup error={showFileUploadError}>
                                 {shouldValidate && (
                                     <ErrorSummary
-                                        errors={
-                                            documentsErrorMessage
-                                                ? {
-                                                      [documentsErrorKey]:
-                                                          documentsErrorMessage,
-                                                      ...errors,
-                                                  }
-                                                : errors
-                                        }
+                                        errors={generateErrorSummaryErrors(
+                                            errors
+                                        )}
                                         headingRef={errorSummaryHeadingRef}
                                     />
                                 )}
@@ -438,8 +452,8 @@ export const RateDetails = ({
                                         {/* @ts-ignore */}
                                         {({ form }) => (
                                             <ProgramSelect
-                                                id="rateProgramIDs"
                                                 name="rateProgramIDs"
+                                                inputId="rateProgramIDs"
                                                 statePrograms={statePrograms}
                                                 programIDs={
                                                     values.rateProgramIDs
