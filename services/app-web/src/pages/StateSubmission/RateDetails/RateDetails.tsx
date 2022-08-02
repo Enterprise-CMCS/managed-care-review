@@ -87,7 +87,7 @@ export const RateDetails = ({
     const ldClient = useLDClient()
 
     //If rate program feature flag is off, then turn off displaying program list and omit from Yup schema.
-    const showRatePrograms = !ldClient?.variation(
+    const showRatePrograms = ldClient?.variation(
         featureFlags.RATE_CERT_PROGRAMS,
         false
     )
