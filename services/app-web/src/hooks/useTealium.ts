@@ -45,8 +45,8 @@ const useTealium = (): void => {
         // Load utag.js - Add to body element- ASYNC load inline script
         const inlineScript =
             document.createTextNode(`(function (t, e, a, l, i, u, m) {
-            t = 'cmsgov/' + ${tealiumProfile}
-            e = ${tealiumEnv}
+            t = 'cmsgov/${tealiumProfile}'
+            e = '${tealiumEnv}'
             a = '/' + t + '/' + e + '/utag.js'
             l = '//tags.tiqcdn.com/utag' + a
             i = document
@@ -69,7 +69,7 @@ const useTealium = (): void => {
         document.body.appendChild(loadTagsSnippet)
 
         return () => {
-            document.body.removeChild(loadTagsSnippet)
+            // document.body.removeChild(loadTagsSnippet)
             document.head.removeChild(initializeTagManagerSnippet)
         }
     }, []) // this effect should only fire on initial app load
