@@ -12,6 +12,7 @@ import {
     unlockTestHealthPlanPackage,
     updateTestHealthPlanFormData,
     resubmitTestHealthPlanPackage,
+    defaultFloridaRateProgram,
 } from '../testHelpers/gqlHelpers'
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 import { mockStoreThatErrors } from '../testHelpers/storeHelpers'
@@ -455,27 +456,23 @@ describe('unlockHealthPlanPackage', () => {
         })
 
         // Unlock
-        const unlockResult = await cmsServer.executeOperation({
-            query: UNLOCK_HEALTH_PLAN_PACKAGE,
-            variables: {
-                input: {
-                    pkgID: stateSubmission.id,
-                    unlockedReason: 'Super duper good reason.',
-                },
-            },
-        })
+        const unlockResult = await unlockTestHealthPlanPackage(
+            cmsServer,
+            stateSubmission.id,
+            'Super duper good reason.'
+        )
 
-        const currentRevision =
-            unlockResult?.data?.unlockHealthPlanPackage?.pkg.revisions[0].node
+        const currentRevision = unlockResult.revisions[0].node.formDataProto
 
-        const sub = base64ToDomain(currentRevision.formDataProto)
+        const sub = base64ToDomain(currentRevision)
         if (sub instanceof Error) {
             throw sub
         }
 
         const programs = [defaultFloridaProgram()]
+        const ratePrograms = [defaultFloridaRateProgram()]
         const name = packageName(sub, programs)
-        const rateName = generateRateName(sub, programs)
+        const rateName = generateRateName(sub, ratePrograms)
         const stateAnalystsEmails = getTestStateAnalystsEmails(sub)
 
         const cmsEmails = [
@@ -490,6 +487,84 @@ describe('unlockHealthPlanPackage', () => {
                 subject: expect.stringContaining(`${name} was unlocked`),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
+                bodyHTML: expect.stringContaining(rateName),
+            })
+        )
+    })
+
+    it('generates rate name using package programs if rate programs not specified', async () => {
+        const config = testEmailConfig
+        const mockEmailer = testEmailer(config)
+
+        //mock invoke email submit lambda
+        const stateServer = await constructTestPostgresServer()
+
+        // First, create a new submitted submission
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: {
+                    name: 'Zuko',
+                    role: 'CMS_USER',
+                    email: 'zuko@example.com',
+                },
+            },
+            emailer: mockEmailer,
+        })
+
+        // Unlock and edit
+        const firstUnlockResult = await unlockTestHealthPlanPackage(
+            cmsServer,
+            stateSubmission.id,
+            'Super duper good reason.'
+        )
+
+        const firstUnlockFormData =
+            firstUnlockResult.revisions[0].node.formDataProto
+
+        const unlockedFormData = base64ToDomain(firstUnlockFormData)
+        if (unlockedFormData instanceof Error) {
+            throw unlockedFormData
+        }
+
+        //Set rate programs to empty string
+        unlockedFormData.rateProgramIDs = []
+
+        //Update package
+        const updatedSub = await updateTestHealthPlanFormData(
+            stateServer,
+            unlockedFormData
+        )
+
+        //Resubmit package
+        await resubmitTestHealthPlanPackage(stateServer, updatedSub.id, 'Test')
+
+        const finalUnlockResult = await unlockTestHealthPlanPackage(
+            cmsServer,
+            stateSubmission.id,
+            'Test unlock reason.'
+        )
+
+        const finalUnlockFormData =
+            finalUnlockResult.revisions[0].node.formDataProto
+
+        const sub = base64ToDomain(finalUnlockFormData)
+        if (sub instanceof Error) {
+            throw sub
+        }
+
+        const programs = [defaultFloridaProgram()]
+        const name = packageName(sub, programs)
+        const rateName = generateRateName(sub, programs)
+
+        // email subject line is correct for CMS email
+        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                subject: expect.stringContaining(`${name} was unlocked`),
+                //Rate name should have defaulted back to using package programs to generate name
                 bodyHTML: expect.stringContaining(rateName),
             })
         )

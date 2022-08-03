@@ -8,6 +8,8 @@ import {
     unlockTestHealthPlanPackage,
     resubmitTestHealthPlanPackage,
     createAndSubmitTestHealthPlanPackage,
+    defaultFloridaRateProgram,
+    updateTestHealthPlanFormData,
 } from '../testHelpers/gqlHelpers'
 import { testEmailConfig, testEmailer } from '../testHelpers/emailerHelpers'
 import { base64ToDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
@@ -371,14 +373,83 @@ describe('submitHealthPlanPackage', () => {
         }
 
         const programs = [defaultFloridaProgram()]
+        const ratePrograms = [defaultFloridaRateProgram()]
         const name = packageName(sub, programs)
-        const rateName = generateRateName(sub, programs)
+        const rateName = generateRateName(sub, ratePrograms)
 
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 subject: expect.stringContaining(`${name} was sent to CMS`),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining([currentUser.email]),
+                bodyHTML: expect.stringContaining(rateName),
+            })
+        )
+    })
+
+    it('generates rate name by package programs when rate programs are not specified', async () => {
+        const config = testEmailConfig
+        const mockEmailer = testEmailer(config)
+        //mock invoke email submit lambda
+        const stateServer = await constructTestPostgresServer({
+            emailer: mockEmailer,
+        })
+
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: {
+                    name: 'Zuko',
+                    role: 'CMS_USER',
+                    email: 'zuko@example.com',
+                },
+            },
+        })
+
+        const unlockResult = await unlockTestHealthPlanPackage(
+            cmsServer,
+            stateSubmission.id,
+            'Test unlock reason.'
+        )
+
+        const unlockedRevisionFormData =
+            unlockResult.revisions[0].node.formDataProto
+
+        const unlockedFormData = base64ToDomain(unlockedRevisionFormData)
+        if (unlockedFormData instanceof Error) {
+            throw unlockedFormData
+        }
+
+        //Set rate programs to empty string
+        unlockedFormData.rateProgramIDs = []
+
+        //Update and resubmit
+        await updateTestHealthPlanFormData(stateServer, unlockedFormData)
+
+        const submitResult = await resubmitTestHealthPlanPackage(
+            stateServer,
+            unlockedFormData.id,
+            'Test resubmitted reason'
+        )
+
+        const currentRevision = submitResult.revisions[0].node.formDataProto
+
+        const sub = base64ToDomain(currentRevision)
+        if (sub instanceof Error) {
+            throw sub
+        }
+
+        const programs = [defaultFloridaProgram()]
+        const name = packageName(sub, programs)
+        const rateName = generateRateName(sub, programs)
+
+        // email subject line is correct for CMS email and contains correct email body text
+        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                subject: expect.stringContaining(`${name} was resubmitted`),
+                //Rate name should have defaulted back to using package programs to generate name
                 bodyHTML: expect.stringContaining(rateName),
             })
         )
