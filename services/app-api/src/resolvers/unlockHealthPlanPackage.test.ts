@@ -492,7 +492,7 @@ describe('unlockHealthPlanPackage', () => {
         )
     })
 
-    it('generates rate name using package programs if rate programs not specified', async () => {
+    it('generates rate name by package programs when rate programs are not specified', async () => {
         const config = testEmailConfig
         const mockEmailer = testEmailer(config)
 
