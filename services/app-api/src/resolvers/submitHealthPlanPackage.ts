@@ -247,37 +247,35 @@ export function submitHealthPlanPackageResolver(
 
         const updatedPackage: HealthPlanPackageType = updateResult
 
+        const isContractAndRate =
+            lockedFormData.submissionType === 'CONTRACT_AND_RATES'
+
+        const combinedProgramIDs = [...lockedFormData.programIDs]
+        if (isContractAndRate && lockedFormData.rateProgramIDs) {
+            lockedFormData.rateProgramIDs.forEach(
+                (id) =>
+                    !combinedProgramIDs.includes(id) &&
+                    combinedProgramIDs.push(id)
+            )
+        }
+
         const programs = store.findPrograms(
             updatedPackage.stateCode,
-            lockedFormData.programIDs
+            combinedProgramIDs
         )
-        if (!programs || programs.length !== lockedFormData.programIDs.length) {
-            const errMessage = `Can't find programs ${lockedFormData.programIDs} from state ${lockedFormData.stateCode}, ${lockedFormData.id}`
+        if (!programs || programs.length !== combinedProgramIDs.length) {
+            const errMessage = `Can't find programs ${combinedProgramIDs} from state ${lockedFormData.stateCode}, ${lockedFormData.id}`
             logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
         // Send emails!
-        const isContractAndRate =
-            lockedFormData.submissionType === 'CONTRACT_AND_RATES'
-
-        //Get rate programs, default to package programs if not found, but still is a type CONTRACT_AND_RATES
-        const ratePrograms =
-            lockedFormData.rateProgramIDs &&
-            lockedFormData.rateProgramIDs.length > 0
-                ? await store.findPrograms(
-                      updatedPackage.stateCode,
-                      lockedFormData.rateProgramIDs
-                  )
-                : programs
-
         const name = packageName(lockedFormData, programs)
         const status = packageStatus(updatedPackage)
-        const rateName =
-            isContractAndRate && ratePrograms
-                ? generateRateName(lockedFormData, ratePrograms)
-                : undefined
+        const rateName = isContractAndRate
+            ? generateRateName(lockedFormData, programs)
+            : undefined
 
         // Get state analysts emails from parameter store
         let stateAnalystsEmails =

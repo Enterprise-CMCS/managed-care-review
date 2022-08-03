@@ -130,31 +130,30 @@ export function unlockHealthPlanPackageResolver(
             throw new Error(errMessage)
         }
 
-        const programs = store.findPrograms(draft.stateCode, draft.programIDs)
-        if (!programs || programs.length !== draft.programIDs.length) {
-            const errMessage = `Can't find programs ${draft.programIDs} from state ${draft.stateCode}, ${draft.id}`
+        const isContractAndRate = draft.submissionType === 'CONTRACT_AND_RATES'
+
+        const combinedProgramIDs = [...draft.programIDs]
+        if (isContractAndRate && draft.rateProgramIDs) {
+            draft.rateProgramIDs.forEach(
+                (id) =>
+                    !combinedProgramIDs.includes(id) &&
+                    combinedProgramIDs.push(id)
+            )
+        }
+
+        const programs = store.findPrograms(draft.stateCode, combinedProgramIDs)
+        if (!programs || programs.length !== combinedProgramIDs.length) {
+            const errMessage = `Can't find programs ${combinedProgramIDs} from state ${draft.stateCode}, ${draft.id}`
             logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
         // Send emails!
-        const isContractAndRate = draft.submissionType === 'CONTRACT_AND_RATES'
-
-        //Get rate programs, default to package programs if not found, but still is a type CONTRACT_AND_RATES
-        const ratePrograms =
-            draft.rateProgramIDs && draft.rateProgramIDs.length > 0
-                ? await store.findPrograms(
-                      draft.stateCode,
-                      draft.rateProgramIDs
-                  )
-                : programs
-
         const name = packageName(draft, programs)
-        const rateName =
-            isContractAndRate && ratePrograms
-                ? generateRateName(draft, ratePrograms)
-                : undefined
+        const rateName = isContractAndRate
+            ? generateRateName(draft, programs)
+            : undefined
 
         // Get state analysts emails from parameter store
         let stateAnalystsEmails =
