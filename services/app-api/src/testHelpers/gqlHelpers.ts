@@ -37,6 +37,14 @@ function defaultFloridaProgram(): ProgramType {
     }
 }
 
+function defaultFloridaRateProgram(): ProgramType {
+    return {
+        id: '3b8d8fa1-1fa6-4504-9c5b-ef522877fe1e',
+        fullName: 'Long-term Care Program',
+        name: 'LTC',
+    }
+}
+
 function getProgramsFromState(stateCode: StateCodeType): ProgramType[] {
     const state = statePrograms.states.find((st) => st.code === stateCode)
 
@@ -207,6 +215,7 @@ const createAndUpdateTestHealthPlanPackage = async (
             documentCategories: ['RATES' as const],
         },
     ]
+    draft.rateProgramIDs = [defaultFloridaRateProgram().id]
 
     Object.assign(draft, partialUpdates)
 
@@ -339,4 +348,5 @@ export {
     resubmitTestHealthPlanPackage,
     defaultContext,
     defaultFloridaProgram,
+    defaultFloridaRateProgram,
 }
