@@ -207,6 +207,22 @@ export const SubmissionType = ({
         }
     }
 
+    const generateErrorSummaryErrors = (
+        errors: FormikErrors<SubmissionTypeFormValues>
+    ) => {
+        const errorObject = {}
+        const formikErrors = { ...errors }
+
+        if (formikErrors.programIDs) {
+            Object.assign(errorObject, {
+                '#programIDs': formikErrors.programIDs,
+            })
+            delete formikErrors.programIDs
+        }
+
+        return { ...errorObject, ...formikErrors }
+    }
+
     return (
         <Formik
             initialValues={submissionTypeInitialValues}
@@ -241,7 +257,7 @@ export const SubmissionType = ({
 
                             {shouldValidate && (
                                 <ErrorSummary
-                                    errors={errors}
+                                    errors={generateErrorSummaryErrors(errors)}
                                     headingRef={errorSummaryHeadingRef}
                                 />
                             )}
@@ -260,10 +276,11 @@ export const SubmissionType = ({
                                     {/* @ts-ignore */}
                                     {({ form }) => (
                                         <ProgramSelect
-                                            id="programIDs"
                                             name="programIDs"
+                                            inputId="programIDs"
                                             statePrograms={statePrograms}
                                             programIDs={values.programIDs}
+                                            aria-label="programs (required)"
                                             onChange={(selectedOption) =>
                                                 form.setFieldValue(
                                                     'programIDs',

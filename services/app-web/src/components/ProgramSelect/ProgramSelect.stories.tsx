@@ -11,6 +11,7 @@ const statePrograms = mockMNState().programs
 
 export const Default: Story<ProgramSelectPropType> = () => (
     <ProgramSelect
+        name="programSelect"
         statePrograms={statePrograms}
         programIDs={['ea16a6c0-5fc6-4df8-adac-c627e76660ab']}
     />

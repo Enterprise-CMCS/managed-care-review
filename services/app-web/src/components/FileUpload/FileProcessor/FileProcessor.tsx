@@ -127,8 +127,6 @@ export const FileProcessor = ({
     const isComplete = status === 'UPLOAD_COMPLETE'
     const fileType = path.extname(name)
 
-    console.log(fileType)
-
     const isPDF = fileTypes.PDF.indexOf(fileType) >= 0
     const isWord = fileTypes.WORD.indexOf(fileType) >= 0
     const isVideo = fileTypes.VIDEO.indexOf(fileType) >= 0
