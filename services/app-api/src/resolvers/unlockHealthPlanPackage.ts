@@ -141,10 +141,20 @@ export function unlockHealthPlanPackageResolver(
         // Send emails!
         const isContractAndRate = draft.submissionType === 'CONTRACT_AND_RATES'
 
+        //Get rate programs, default to package programs if not found, but still is a type CONTRACT_AND_RATES
+        const ratePrograms =
+            draft.rateProgramIDs && draft.rateProgramIDs.length > 0
+                ? await store.findPrograms(
+                      draft.stateCode,
+                      draft.rateProgramIDs
+                  )
+                : programs
+
         const name = packageName(draft, programs)
-        const rateName = isContractAndRate
-            ? generateRateName(draft, programs)
-            : undefined
+        const rateName =
+            isContractAndRate && ratePrograms
+                ? generateRateName(draft, ratePrograms)
+                : undefined
 
         // Get state analysts emails from parameter store
         let stateAnalystsEmails =

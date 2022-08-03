@@ -262,11 +262,22 @@ export function submitHealthPlanPackageResolver(
         const isContractAndRate =
             lockedFormData.submissionType === 'CONTRACT_AND_RATES'
 
+        //Get rate programs, default to package programs if not found, but still is a type CONTRACT_AND_RATES
+        const ratePrograms =
+            lockedFormData.rateProgramIDs &&
+            lockedFormData.rateProgramIDs.length > 0
+                ? await store.findPrograms(
+                      updatedPackage.stateCode,
+                      lockedFormData.rateProgramIDs
+                  )
+                : programs
+
         const name = packageName(lockedFormData, programs)
         const status = packageStatus(updatedPackage)
-        const rateName = isContractAndRate
-            ? generateRateName(lockedFormData, programs)
-            : undefined
+        const rateName =
+            isContractAndRate && ratePrograms
+                ? generateRateName(lockedFormData, ratePrograms)
+                : undefined
 
         // Get state analysts emails from parameter store
         let stateAnalystsEmails =
