@@ -279,6 +279,7 @@ export const SubmissionType = ({
                                             inputId="programIDs"
                                             statePrograms={statePrograms}
                                             programIDs={values.programIDs}
+                                            aria-label="programs (required)"
                                             onChange={(selectedOption) =>
                                                 form.setFieldValue(
                                                     'programIDs',

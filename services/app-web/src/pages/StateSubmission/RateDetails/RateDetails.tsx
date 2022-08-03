@@ -458,6 +458,7 @@ export const RateDetails = ({
                                                 programIDs={
                                                     values.rateProgramIDs
                                                 }
+                                                aria-label="programs (required)"
                                                 onChange={(selectedOption) =>
                                                     form.setFieldValue(
                                                         'rateProgramIDs',

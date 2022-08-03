@@ -52,9 +52,8 @@ export const ProgramSelect = ({
             })}
             className={styles.multiSelect}
             classNamePrefix="program-select"
-            id="programSelect"
+            id={`${name}-programSelect`}
             name={name}
-            aria-label="programs (required)"
             options={programOptions}
             isMulti
             ariaLiveMessages={{
