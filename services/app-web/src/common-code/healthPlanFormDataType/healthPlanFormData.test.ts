@@ -526,7 +526,7 @@ describe('submission type assertions', () => {
                     effectiveDateStart: new Date('2022/05/21'),
                     effectiveDateEnd: new Date('2022/09/21'),
                 },
-                rateProgramIDs: undefined,
+                rateProgramIDs: [],
             },
             testDescription:
                 'Rate programs not specified should default to package programs',
