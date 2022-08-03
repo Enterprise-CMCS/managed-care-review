@@ -167,6 +167,8 @@ function packageName(
 ): string {
     const padNumber = submission.stateNumber.toString().padStart(4, '0')
     const pNames =
+        // This ternary is needed because programIDs passed in could be undefined or an empty string, in that case
+        // we want to default to using programIDs from submission
         programIDs && programIDs.length > 0
             ? programNames(statePrograms, programIDs)
             : programNames(statePrograms, submission.programIDs)
