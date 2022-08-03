@@ -5,6 +5,7 @@
 const AWS = require('aws-sdk');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const clamav = require('./clamav');
 const s3 = new AWS.S3();
 const utils = require('./utils');
@@ -17,6 +18,11 @@ const constants = require('./constants');
  * @return {int} Length of S3 object in bytes.
  */
 async function sizeOf(key, bucket) {
+    console.log('key: ' + key);
+    console.log('bucket: ' + bucket);
+    var sts = new AWS.STS();
+    var params = {};
+
     let res = await s3.headObject({ Key: key, Bucket: bucket }).promise();
     return res.ContentLength;
 }
@@ -33,25 +39,18 @@ async function isS3FileTooBig(s3ObjectKey, s3ObjectBucket) {
 }
 
 /**
- * Returns the /tmp local path from an s3ObjectKey
- * @param {string} s3ObjectKey Key of the s3 object
- * @return {string} Path of the s3 object on the local fs
- **/
-function pathFromObjectKey(s3ObjectKey) {
-    const downloadDir = `/tmp/download`;
-
-    // remove problematic characters from filename
-    let sanitizedFilename = s3ObjectKey.replace(/[^a-zA-Z0-9]/g, '');
-    return `${downloadDir}/${path.basename(sanitizedFilename)}`;
-}
-
+ * Download a file from S3 to a local temp directory.
+ * @param {string} s3ObjectKey       Key of S3 Object
+ * @param {string} s3ObjectBucket    Bucket of S3 object
+ * @return {Promise<string>}         Path to downloaded file
+ */
 function downloadFileFromS3(s3ObjectKey, s3ObjectBucket) {
-    const downloadDir = `/tmp/download`;
-    if (!fs.existsSync(downloadDir)) {
-        fs.mkdirSync(downloadDir);
+    if (!fs.existsSync(constants.TMP_DOWNLOAD_PATH)) {
+        fs.mkdirSync(constants.TMP_DOWNLOAD_PATH);
     }
 
-    let localPath = pathFromObjectKey(s3ObjectKey);
+    const tmpFileName = `${crypto.randomUUID()}.tmp`;
+    let localPath = `${constants.TMP_DOWNLOAD_PATH}${tmpFileName}`;
     let writeStream = fs.createWriteStream(localPath);
 
     utils.generateSystemMessage(
@@ -70,7 +69,7 @@ function downloadFileFromS3(s3ObjectKey, s3ObjectBucket) {
                 utils.generateSystemMessage(
                     `Finished downloading new object ${s3ObjectKey}`
                 );
-                resolve();
+                resolve(localPath);
             })
             .on('error', function (err) {
                 console.log(err);
@@ -107,10 +106,8 @@ async function lambdaHandleEvent(event, context) {
             constants.PATH_TO_AV_DEFINITIONS
         );
         utils.generateSystemMessage('Download File from S3');
-        await downloadFileFromS3(s3ObjectKey, s3ObjectBucket);
+        const filePath = await downloadFileFromS3(s3ObjectKey, s3ObjectBucket);
         utils.generateSystemMessage('Set virusScanStatus');
-
-        let filePath = pathFromObjectKey(s3ObjectKey);
         virusScanStatus = clamav.scanLocalFile(filePath);
         utils.generateSystemMessage(`virusScanStatus=${virusScanStatus}`);
     }
