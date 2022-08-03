@@ -172,6 +172,10 @@ const createAndUpdateTestHealthPlanPackage = async (
     const pkg = await createTestHealthPlanPackage(server, stateCode)
     const draft = latestFormData(pkg)
 
+    const ratePrograms = stateCode
+        ? getProgramsFromState(stateCode)
+        : [defaultFloridaRateProgram()]
+
     ;(draft.submissionType = 'CONTRACT_AND_RATES' as const),
         (draft.submissionDescription = 'An updated submission')
     draft.stateContacts = [
@@ -215,7 +219,8 @@ const createAndUpdateTestHealthPlanPackage = async (
             documentCategories: ['RATES' as const],
         },
     ]
-    draft.rateProgramIDs = [defaultFloridaRateProgram().id]
+    //We only want one rate ID and use last program in list to differentiate from programID if possible.
+    draft.rateProgramIDs = [ratePrograms.reverse()[0].id]
 
     Object.assign(draft, partialUpdates)
 
