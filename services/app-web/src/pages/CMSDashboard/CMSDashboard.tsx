@@ -128,7 +128,6 @@ export const CMSDashboard = (): React.ReactElement => {
 
     // Sort by updatedAt for current revision
     submissionRows.sort((a, b) => (a['updatedAt'] > b['updatedAt'] ? -1 : 1))
-    console.log('showCMSDashboard: ', showCMSDashboard)
 
     if (!showCMSDashboard)
         return (

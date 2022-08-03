@@ -10,11 +10,10 @@ import {
     indexHealthPlanPackagesMockSuccess,
 } from '../../testHelpers/apolloHelpers'
 
-test.todo(
-    'App displays ErrorBoundary fallback component when there is JS error on page'
-)
-
 window.scrollTo = jest.fn()
+jest.mock('../../hooks/useTealium', () => ({
+    useTealium: jest.fn().mockReturnValue([]),
+}))
 
 describe('App Body and routes', () => {
     afterEach(() => {
