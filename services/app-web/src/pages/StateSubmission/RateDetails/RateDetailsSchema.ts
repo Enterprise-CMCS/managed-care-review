@@ -5,6 +5,7 @@ import { validateDateFormat } from '../../../formHelpers'
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 const RateDetailsFormSchema = Yup.object().shape({
+    rateProgramIDs: Yup.array().min(1, 'You must select a program'),
     rateType: Yup.string().defined('You must choose a rate certification type'),
     rateCapitationType: Yup.string().defined(
         "You must select whether you're certifying rates or rate ranges"
@@ -86,6 +87,5 @@ const RateDetailsFormSchema = Yup.object().shape({
                 'The end date must come after the start date'
             ),
     }),
-    rateProgramIDs: Yup.array().min(1, 'You must select a program'),
 })
 export { RateDetailsFormSchema }

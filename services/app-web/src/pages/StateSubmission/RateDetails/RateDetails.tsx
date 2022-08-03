@@ -337,21 +337,22 @@ export const RateDetails = ({
     const generateErrorSummaryErrors = (
         errors: FormikErrors<RateDetailsFormValues>
     ) => {
-        const errorSummaryErrors = { ...errors }
-        //If rate certification program(s) is not selected and error is in FormikErrors, replace rateProgramIDs key with #rateProgramIDs.
-        // This is done in order to be able to focus the input element by id from react-select component.
-        if (errorSummaryErrors.rateProgramIDs) {
-            delete errorSummaryErrors.rateProgramIDs
-            Object.assign(errorSummaryErrors, {
-                '#rateProgramIDs': errors.rateProgramIDs,
-            })
-        }
+        const errorObject = {}
+        const formikErrors = { ...errors }
+
         if (documentsErrorMessage) {
-            Object.assign(errorSummaryErrors, {
+            Object.assign(errorObject, {
                 [documentsErrorKey]: documentsErrorMessage,
             })
         }
-        return errorSummaryErrors
+        if (formikErrors.rateProgramIDs) {
+            Object.assign(errorObject, {
+                '#rateProgramIDs': formikErrors.rateProgramIDs,
+            })
+            delete formikErrors.rateProgramIDs
+        }
+
+        return { ...errorObject, ...formikErrors }
     }
 
     return (

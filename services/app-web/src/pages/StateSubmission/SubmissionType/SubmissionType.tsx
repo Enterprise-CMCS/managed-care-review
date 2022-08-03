@@ -210,16 +210,17 @@ export const SubmissionType = ({
     const generateErrorSummaryErrors = (
         errors: FormikErrors<SubmissionTypeFormValues>
     ) => {
-        const errorSummaryErrors = { ...errors }
-        //If package program(s) is not selected and error is in FormikErrors, replace programIDs key with #programIDs.
-        // This is done in order to be able to focus the input element by id from react-select component.
-        if (errorSummaryErrors.programIDs) {
-            delete errorSummaryErrors.programIDs
-            Object.assign(errorSummaryErrors, {
-                '#programIDs': errors.programIDs,
+        const errorObject = {}
+        const formikErrors = { ...errors }
+
+        if (formikErrors.programIDs) {
+            Object.assign(errorObject, {
+                '#programIDs': formikErrors.programIDs,
             })
+            delete formikErrors.programIDs
         }
-        return errorSummaryErrors
+
+        return { ...errorObject, ...formikErrors }
     }
 
     return (
