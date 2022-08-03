@@ -22,18 +22,18 @@ const createScript = ({
     return script
 }
 
-// Add script pointing to third party URL to bottom of page, with handling for a boolean flag on or off
+// Add script pointing to third party URL to bottom of pag
 const useScript = ({
     url,
     id,
-    featureFlag,
+    showScript,
 }: {
     url: string
     id: string
-    featureFlag: boolean
+    showScript: boolean
 }): void => {
     useEffect(() => {
-        if (featureFlag) {
+        if (showScript) {
             const script = createScript({ src: url, id })
 
             document.body.appendChild(script)
@@ -42,7 +42,7 @@ const useScript = ({
                 document.body.removeChild(script)
             }
         }
-    }, [url, id, featureFlag])
+    }, [url, id, showScript])
 }
 
 export { useScript, createScript }
