@@ -45,7 +45,7 @@ function downloadFileFromS3(s3ObjectKey, s3ObjectBucket) {
     }
 
     const tmpFileName = `${crypto.randomUUID()}.tmp`;
-    let localPath = `${constants.TMP_DOWNLOAD_PATH}${tmpFileName}`;
+    let localPath = path.join(constants.TMP_DOWNLOAD_PATH, tmpFileName);
     let writeStream = fs.createWriteStream(localPath);
 
     utils.generateSystemMessage(
