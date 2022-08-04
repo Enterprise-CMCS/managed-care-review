@@ -8,8 +8,6 @@ import {
     isContractAndRates,
     isLockedHealthPlanFormData,
     LockedHealthPlanFormDataType,
-    packageName,
-    generateRateName,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     UpdateInfoType,
@@ -17,7 +15,7 @@ import {
     HealthPlanPackageType,
     packageStatus,
 } from '../domain-models'
-import { Emailer, UpdatedEmailData } from '../emailer'
+import { Emailer } from '../emailer'
 import { MutationResolvers, State } from '../gen/gqlServer'
 import { logError, logSuccess } from '../logger'
 import { isStoreError, Store } from '../postgres'
@@ -28,6 +26,7 @@ import {
 } from './attributeHelper'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { EmailParameterStore } from '../parameterStore'
+import { findAllPackageProgramIds } from '../emailer/templateHelpers'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
@@ -191,16 +190,16 @@ export function submitHealthPlanPackageResolver(
             throw new Error(errMessage)
         }
 
-        //Set submitInfo default to initial submission
-        const submitInfo: UpdateInfoType = {
+        //Set updateInfo default to initial submission
+        const updateInfo: UpdateInfoType = {
             updatedAt: new Date(),
             updatedBy: context.user.email,
             updatedReason: 'Initial submission',
         }
 
-        //If this is a resubmission set submitInfo updated reason to input.
+        //If this is a resubmission set updateInfo updated reason to input.
         if (planPackageStatus === 'UNLOCKED' && submittedReason) {
-            submitInfo.updatedReason = submittedReason
+            updateInfo.updatedReason = submittedReason
             //Throw error if resubmitted without reason. We want to require an input reason for resubmission, but not for
             // initial submission
         } else if (planPackageStatus === 'UNLOCKED' && !submittedReason) {
@@ -236,7 +235,7 @@ export function submitHealthPlanPackageResolver(
             planPackage.id,
             currentRevision.id,
             lockedFormData,
-            submitInfo
+            updateInfo
         )
         if (isStoreError(updateResult)) {
             const errMessage = `Issue updating a package of type ${updateResult.code}. Message: ${updateResult.message}`
@@ -247,35 +246,23 @@ export function submitHealthPlanPackageResolver(
 
         const updatedPackage: HealthPlanPackageType = updateResult
 
-        const isContractAndRate =
-            lockedFormData.submissionType === 'CONTRACT_AND_RATES'
+        //Combine programs ids from package and remove dupes
+        const combinedProgramIDs = findAllPackageProgramIds(lockedFormData)
 
-        const combinedProgramIDs = [...lockedFormData.programIDs]
-        if (isContractAndRate && lockedFormData.rateProgramIDs) {
-            lockedFormData.rateProgramIDs.forEach(
-                (id) =>
-                    !combinedProgramIDs.includes(id) &&
-                    combinedProgramIDs.push(id)
-            )
-        }
-
+        //Get program data from combined program ids
         const programs = store.findPrograms(
             updatedPackage.stateCode,
             combinedProgramIDs
         )
-        if (!programs || programs.length !== combinedProgramIDs.length) {
-            const errMessage = `Can't find programs ${combinedProgramIDs} from state ${lockedFormData.stateCode}, ${lockedFormData.id}`
-            logError('unlockHealthPlanPackage', errMessage)
+        if (programs instanceof Error) {
+            const errMessage = `${programs.message}, ${lockedFormData.id}`
+            logError('submitHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
         // Send emails!
-        const name = packageName(lockedFormData, programs)
         const status = packageStatus(updatedPackage)
-        const rateName = isContractAndRate
-            ? generateRateName(lockedFormData, programs)
-            : undefined
 
         // Get state analysts emails from parameter store
         let stateAnalystsEmails =
@@ -294,34 +281,28 @@ export function submitHealthPlanPackageResolver(
 
         if (status === 'RESUBMITTED') {
             logSuccess('It was resubmitted')
-            const updatedEmailData: UpdatedEmailData = {
-                ...submitInfo,
-                packageName: name,
-            }
             cmsPackageEmailResult = await emailer.sendResubmittedCMSEmail(
                 lockedFormData,
-                updatedEmailData,
+                updateInfo,
                 stateAnalystsEmails,
-                rateName
+                programs
             )
             statePackageEmailResult = await emailer.sendResubmittedStateEmail(
                 lockedFormData,
-                updatedEmailData,
+                updateInfo,
                 user,
-                rateName
+                programs
             )
         } else if (status === 'SUBMITTED') {
             cmsPackageEmailResult = await emailer.sendCMSNewPackage(
                 lockedFormData,
-                name,
                 stateAnalystsEmails,
-                rateName
+                programs
             )
             statePackageEmailResult = await emailer.sendStateNewPackage(
                 lockedFormData,
-                name,
                 user,
-                rateName
+                programs
             )
         }
 

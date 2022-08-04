@@ -2,8 +2,6 @@ import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
-    packageName,
-    generateRateName,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import {
@@ -22,8 +20,9 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
 import { EmailParameterStore } from '../parameterStore'
+import { findAllPackageProgramIds } from '../emailer/templateHelpers'
 
-// unlock is a state machine transforming a LockedFormDatya and turning it into UnlockedFormData
+// unlock is a state machine transforming a LockedFormData and turning it into UnlockedFormData
 // Since Unlocked is a strict subset of Locked, this can't error today.
 function unlock(
     submission: LockedHealthPlanFormDataType
@@ -111,7 +110,7 @@ export function unlockHealthPlanPackageResolver(
         const draft: UnlockedHealthPlanFormDataType = unlock(formDataResult)
 
         // Create a new revision with this draft in it
-        const unlockInfo: UpdateInfoType = {
+        const updateInfo: UpdateInfoType = {
             updatedAt: new Date(),
             updatedBy: context.user.email,
             updatedReason: unlockedReason,
@@ -119,7 +118,7 @@ export function unlockHealthPlanPackageResolver(
 
         const revisionResult = await store.insertHealthPlanRevision(
             pkgID,
-            unlockInfo,
+            updateInfo,
             draft
         )
 
@@ -130,30 +129,19 @@ export function unlockHealthPlanPackageResolver(
             throw new Error(errMessage)
         }
 
-        const isContractAndRate = draft.submissionType === 'CONTRACT_AND_RATES'
+        //Combine programs ids from package and remove duplicates
+        const combinedProgramIDs = findAllPackageProgramIds(draft)
 
-        const combinedProgramIDs = [...draft.programIDs]
-        if (isContractAndRate && draft.rateProgramIDs) {
-            draft.rateProgramIDs.forEach(
-                (id) =>
-                    !combinedProgramIDs.includes(id) &&
-                    combinedProgramIDs.push(id)
-            )
-        }
-
+        //Get program data from combined program ids
         const programs = store.findPrograms(draft.stateCode, combinedProgramIDs)
-        if (!programs || programs.length !== combinedProgramIDs.length) {
-            const errMessage = `Can't find programs ${combinedProgramIDs} from state ${draft.stateCode}, ${draft.id}`
+        if (programs instanceof Error) {
+            const errMessage = `${programs.message}, ${draft.id}`
             logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
         }
 
         // Send emails!
-        const name = packageName(draft, programs)
-        const rateName = isContractAndRate
-            ? generateRateName(draft, programs)
-            : undefined
 
         // Get state analysts emails from parameter store
         let stateAnalystsEmails =
@@ -165,23 +153,19 @@ export function unlockHealthPlanPackageResolver(
             stateAnalystsEmails = []
         }
 
-        const updatedEmailData = {
-            ...unlockInfo,
-            packageName: name,
-        }
         const unlockPackageCMSEmailResult =
             await emailer.sendUnlockPackageCMSEmail(
                 draft,
-                updatedEmailData,
+                updateInfo,
                 stateAnalystsEmails,
-                rateName
+                programs
             )
 
         const unlockPackageStateEmailResult =
             await emailer.sendUnlockPackageStateEmail(
                 draft,
-                updatedEmailData,
-                rateName
+                updateInfo,
+                programs
             )
 
         if (unlockPackageCMSEmailResult instanceof Error) {
