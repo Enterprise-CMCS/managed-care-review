@@ -344,5 +344,5 @@ jobs:
 
       - name: Collate test coverage reports
         run: |
-          ls services/app-web/coverage
+          ls ./services/app-web/coverage
           yarn run test:coverage

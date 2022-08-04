@@ -30,7 +30,7 @@
         "posttest:coverage": "yarn run report:combined",
         "mkdir:reports": "mkdir -p reports",
         "precopy:reports": "yarn run mkdir:reports",
-        "copy:reports": "cp coverage-cypress/coverage-final.json reports/from-cypress.json && cp services/app-web/coverage/coverage-final.json reports/from-jest.json && cp services/app-api/coverage/coverage-final.json reports/from-api.json",
+        "copy:reports": "cp ./coverage-cypress/coverage-final.json ./reports/from-cypress.json && cp ./services/app-web/coverage/coverage-final.json ./reports/from-jest.json && cp ./services/app-api/coverage/coverage-final.json ./reports/from-api.json",
         "precombine:reports": "yarn run copy:reports && mkdir -p .nyc_output",
         "combine:reports": "npx nyc merge reports && mv coverage.json .nyc_output/out.json",
         "prereport:combined": "yarn run combine:reports",
