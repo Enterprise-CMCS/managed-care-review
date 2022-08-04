@@ -4,7 +4,6 @@ import {
     Emailer,
     newPackageCMSEmail,
     newPackageStateEmail,
-    UpdatedEmailData,
     unlockPackageCMSEmail,
     unlockPackageStateEmail,
     resubmitPackageStateEmail,
@@ -15,7 +14,7 @@ import {
     ProgramArgType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { UserType, StateUserType } from '../domain-models'
+import { UserType, StateUserType, ProgramType } from '../domain-models'
 
 const testEmailConfig: EmailConfiguration = {
     stage: 'LOCAL',
@@ -67,16 +66,14 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         ),
         sendCMSNewPackage: async function (
             submission,
-            submissionName,
             stateAnalystsEmails,
-            rateName
+            programs
         ): Promise<void | Error> {
             const emailData = await newPackageCMSEmail(
                 submission,
-                submissionName,
                 config,
                 stateAnalystsEmails,
-                rateName
+                programs
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -86,16 +83,14 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         },
         sendStateNewPackage: async function (
             submission,
-            submissionName,
             user,
-            rateName
+            programs
         ): Promise<void | Error> {
             const emailData = await newPackageStateEmail(
                 submission,
-                submissionName,
                 user,
                 config,
-                rateName
+                programs
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -105,16 +100,16 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         },
         sendUnlockPackageCMSEmail: async function (
             submission,
-            updatedEmailData,
+            updateInfo,
             stateAnalystsEmails,
-            rateName
+            programs
         ): Promise<void | Error> {
             const emailData = await unlockPackageCMSEmail(
                 submission,
-                updatedEmailData,
+                updateInfo,
                 config,
                 stateAnalystsEmails,
-                rateName
+                programs
             )
 
             if (emailData instanceof Error) {
@@ -125,14 +120,14 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         },
         sendUnlockPackageStateEmail: async function (
             submission,
-            updatedEmailData,
-            rateName
+            updateInfo,
+            programs
         ): Promise<void | Error> {
             const emailData = await unlockPackageStateEmail(
                 submission,
-                updatedEmailData,
+                updateInfo,
                 config,
-                rateName
+                programs
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -141,17 +136,17 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
             }
         },
         sendResubmittedStateEmail: async function (
-            submission: LockedHealthPlanFormDataType,
-            updatedEmailData: UpdatedEmailData,
+            submission,
+            updateInfo,
             user: UserType,
-            rateName
+            programs
         ): Promise<void | Error> {
             const emailData = await resubmitPackageStateEmail(
                 submission,
                 user,
-                updatedEmailData,
+                updateInfo,
                 config,
-                rateName
+                programs
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -161,16 +156,16 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         },
         sendResubmittedCMSEmail: async function (
             submission,
-            updatedEmailData,
+            updateInfo,
             stateAnalystsEmails,
-            rateName
+            programs
         ): Promise<void | Error> {
             const emailData = await resubmitPackageCMSEmail(
                 submission,
-                updatedEmailData,
+                updateInfo,
                 config,
                 stateAnalystsEmails,
-                rateName
+                programs
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -219,6 +214,11 @@ export function mockMNState(): State {
                 id: '3fd36500-bf2c-47bc-80e8-e7aa417184c5',
                 fullName: 'Minnesota Senior Health Options',
                 name: 'MSHO',
+            },
+            {
+                id: '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
+                fullName: 'CHIP',
+                name: 'CHIP',
             },
         ],
         code: 'MN',
@@ -279,6 +279,7 @@ const mockContractAndRatesFormData = (
             },
         ],
         actuaryContacts: [],
+        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
         ...submissionPartial,
     }
 }
@@ -336,6 +337,7 @@ const mockUnlockedContractAndRatesFormData = (
             },
         ],
         actuaryContacts: [],
+        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
         ...submissionPartial,
     }
 }
@@ -487,8 +489,25 @@ const mockContractAmendmentFormData = (
             },
         ],
         actuaryContacts: [],
+        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
         ...submissionPartial,
     }
+}
+
+const findProgramsHelper = (
+    stateCode: string,
+    programIDs: string[]
+): ProgramType[] | Error => {
+    const programs = mockMNState().programs.filter((program) =>
+        programIDs.includes(program.id)
+    )
+
+    if (!programs || programIDs.length !== programs.length) {
+        const errMessage = `Can't find programs ${programIDs} from state ${stateCode}`
+        return new Error(errMessage)
+    }
+
+    return programs
 }
 
 export {
@@ -503,4 +522,5 @@ export {
     mockUnlockedContractOnlyFormData,
     mockUser,
     testEmailer,
+    findProgramsHelper,
 }
