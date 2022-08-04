@@ -341,3 +341,6 @@ jobs:
         with:
           name: cypress-videos
           path: tests/cypress/videos
+
+      - name: Collate test coverage reports
+        run: yarn run test:coverage

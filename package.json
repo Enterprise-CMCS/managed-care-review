@@ -18,11 +18,23 @@
     "scripts": {
         "clean": "lerna clean",
         "test": "lerna run test",
+        "appwebtest": "sh ./app_web_test.sh",
+        "appapitest": "sh ./app_api_test.sh",
         "lint": "lerna run lint --parallel",
         "format": "yarn prettier --write",
         "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
         "cypress:open": "cypress open --env AUTH_MODE=LOCAL",
-        "cypress:run": "cypress run --env AUTH_MODE=LOCAL"
+        "cypress:run": "rm -rf .nyc_output && ./node_modules/.bin/cypress run --env AUTH_MODE=LOCAL --headless --browser chrome",
+        "test:coverage": "echo combining reports",
+        "pretest:coverage": "rm -rf .nyc_output",
+        "posttest:coverage": "yarn run report:combined",
+        "mkdir:reports": "mkdir -p reports",
+        "precopy:reports": "yarn run mkdir:reports",
+        "copy:reports": "cp coverage-cypress/coverage-final.json reports/from-cypress.json && cp services/app-web/coverage/coverage-final.json reports/from-jest.json && cp services/app-api/coverage/coverage-final.json reports/from-api.json",
+        "precombine:reports": "yarn run copy:reports && mkdir -p .nyc_output",
+        "combine:reports": "npx nyc merge reports && mv coverage.json .nyc_output/out.json",
+        "prereport:combined": "yarn run combine:reports",
+        "report:combined": "mkdir -p coverage-all && npx nyc report --reporter lcov --reporter text --reporter json-summary --report-dir coverage-all"
     },
     "repository": {
         "type": "git",
@@ -30,6 +42,41 @@
     },
     "nyc": {
         "report-dir": "coverage-cypress"
+    },
+    "jest": {
+        "coveragePathIgnorePatterns": [
+            "/*.stories.tsx",
+            "src/s3",
+            "src/api",
+            "src/testHelpers",
+            "src/localAuth",
+            "src/gen",
+            "src/components/Header/StateIcon/StateIcon.tsx",
+            "src/pages/Auth/CheckAuth.tsx",
+            "src/pages/Auth/CognitoLogin.tsx",
+            "src/pages/Auth/Signup",
+            "src/pages/Auth/ConfirmSignUp",
+            "src/pages/Help/Help.tsx",
+            "App.tsx",
+            "index.ts",
+            "log_event.ts",
+            "reportWebVitals.ts"
+        ],
+        "coverageReporters": [
+            [
+                "json",
+                {
+                    "projectRoot": "../../"
+                }
+            ],
+            [
+                "lcov",
+                {
+                    "projectRoot": "../../"
+                }
+            ],
+            "text"
+        ]
     },
     "author": "",
     "license": "CC0-1.0",

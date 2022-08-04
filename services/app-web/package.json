@@ -43,6 +43,12 @@
         ],
         "coverageReporters": [
             [
+                "json",
+                {
+                    "projectRoot": "../../"
+                }
+            ],
+            [
                 "lcov",
                 {
                     "projectRoot": "../../"
