@@ -302,7 +302,7 @@ jobs:
     needs: [deploy-app, finishing-prep]
     if: always() && needs.finishing-prep.result == 'success'
     runs-on: ubuntu-latest
-    container: cypress/browsers:node14.17.0-chrome91-ff89
+    container: cypress/browsers:node16.14.0-chrome99-ff97
     permissions:
       deployments: write
     strategy:
@@ -315,7 +315,7 @@ jobs:
 
       - name: Cypress -- Chrome
         id: cypress
-        uses: cypress-io/github-action@v2
+        uses: cypress-io/github-action@v4
         with:
           config: baseUrl=${{ needs.finishing-prep.outputs.application-endpoint }}
           record: true
