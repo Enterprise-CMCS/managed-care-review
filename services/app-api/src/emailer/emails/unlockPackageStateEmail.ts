@@ -1,32 +1,39 @@
 import { URL } from 'url'
 
-import { UnlockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import {
+    UnlockedHealthPlanFormDataType,
+    packageName as generatePackageName,
+    generateRateName,
+} from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import {
     renderTemplate,
     stripHTMLFromTemplate,
-    UpdatedEmailData,
     generateStateReceiverEmails,
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration } from '../'
+import { ProgramType, UpdateInfoType } from '../../domain-models'
 
 export const unlockPackageStateEmail = async (
     pkg: UnlockedHealthPlanFormDataType,
-    unlockData: UpdatedEmailData,
+    updateInfo: UpdateInfoType,
     config: EmailConfiguration,
-    rateName?: string
+    programs: ProgramType[]
 ): Promise<EmailData | Error> => {
     const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
     const receiverEmails = generateStateReceiverEmails(pkg)
+    const packageName = generatePackageName(pkg, programs)
+
+    const isContractAndRates = pkg.submissionType === 'CONTRACT_AND_RATES'
 
     const data = {
-        packageName: unlockData.packageName,
-        unlockedBy: unlockData.updatedBy,
-        unlockedOn: formatCalendarDate(unlockData.updatedAt),
-        unlockedReason: unlockData.updatedReason,
+        packageName,
+        unlockedBy: updateInfo.updatedBy,
+        unlockedOn: formatCalendarDate(updateInfo.updatedAt),
+        unlockedReason: updateInfo.updatedReason,
         shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
-        rateName,
+        rateName: isContractAndRates && generateRateName(pkg, programs),
         submissionURL: new URL(
             `submissions/${pkg.id}/review-and-submit`,
             config.baseUrl
@@ -44,9 +51,9 @@ export const unlockPackageStateEmail = async (
         return {
             toAddresses: receiverEmails,
             sourceEmail: config.emailSource,
-            subject: `${isTestEnvironment ? `[${config.stage}] ` : ''}${
-                unlockData.packageName
-            } was unlocked by CMS`,
+            subject: `${
+                isTestEnvironment ? `[${config.stage}] ` : ''
+            }${packageName} was unlocked by CMS`,
             bodyText: stripHTMLFromTemplate(result),
             bodyHTML: result,
         }

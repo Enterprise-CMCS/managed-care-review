@@ -1,6 +1,10 @@
 import { URL } from 'url'
 
-import { LockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import {
+    LockedHealthPlanFormDataType,
+    packageName as generatePackageName,
+    generateRateName,
+} from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { EmailConfiguration, EmailData, StateAnalystsEmails } from '..'
 import {
@@ -9,13 +13,13 @@ import {
     generateCMSReviewerEmails,
     renderTemplate,
 } from '../templateHelpers'
+import { ProgramType } from '../../domain-models'
 
 export const newPackageCMSEmail = async (
     pkg: LockedHealthPlanFormDataType,
-    packageName: string,
     config: EmailConfiguration,
     stateAnalystsEmails: StateAnalystsEmails,
-    rateName?: string
+    programs: ProgramType[]
 ): Promise<EmailData | Error> => {
     // config
     const isUnitTest = config.baseUrl === 'http://localhost'
@@ -25,12 +29,15 @@ export const newPackageCMSEmail = async (
         pkg,
         stateAnalystsEmails
     )
+    const packageName = generatePackageName(pkg, programs)
 
     const hasRateAmendmentInfo =
         pkg.rateType === 'AMENDMENT' && pkg.rateAmendmentInfo
 
+    const isContractAndRate = pkg.submissionType === 'CONTRACT_AND_RATES'
+
     const data = {
-        shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
+        shouldIncludeRates: isContractAndRate,
         packageName: packageName,
         submissionType: SubmissionTypeRecord[pkg.submissionType],
         stateCode: pkg.stateCode,
@@ -41,7 +48,7 @@ export const newPackageCMSEmail = async (
                 : 'Contract effective dates',
         contractDatesStart: formatCalendarDate(pkg.contractDateStart),
         contractDatesEnd: formatCalendarDate(pkg.contractDateEnd),
-        rateName,
+        rateName: isContractAndRate && generateRateName(pkg, programs),
         rateDateLabel:
             pkg.rateType === 'NEW'
                 ? 'Rating period'

@@ -1,9 +1,13 @@
 import { URL } from 'url'
 
-import { LockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import {
+    LockedHealthPlanFormDataType,
+    packageName as generatePackageName,
+    generateRateName,
+} from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { EmailConfiguration, EmailData } from '..'
-import { UserType } from '../../domain-models'
+import { ProgramType, UserType } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
     SubmissionTypeRecord,
@@ -13,23 +17,25 @@ import {
 
 export const newPackageStateEmail = async (
     pkg: LockedHealthPlanFormDataType,
-    packageName: string,
     user: UserType,
     config: EmailConfiguration,
-    rateName?: string
+    programs: ProgramType[]
 ): Promise<EmailData | Error> => {
     const isUnitTest = config.baseUrl === 'http://localhost'
     const receiverEmails = generateStateReceiverEmails(pkg, user)
+    const packageName = generatePackageName(pkg, programs)
 
     const hasRateAmendmentInfo =
         pkg.rateType === 'AMENDMENT' && pkg.rateAmendmentInfo
 
+    const isContractAndRates = pkg.submissionType === 'CONTRACT_AND_RATES'
+
     const data = {
-        shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
+        shouldIncludeRates: isContractAndRates,
         cmsReviewHelpEmailAddress: config.cmsReviewHelpEmailAddress,
         cmsRateHelpEmailAddress: config.cmsRateHelpEmailAddress,
         cmsDevTeamHelpEmailAddress: config.cmsDevTeamHelpEmailAddress,
-        packageName: packageName,
+        packageName,
         submissionType: SubmissionTypeRecord[pkg.submissionType],
         submissionDescription: pkg.submissionDescription,
         contractType: pkg.contractType,
@@ -39,7 +45,7 @@ export const newPackageStateEmail = async (
                 : 'Contract effective dates',
         contractDatesStart: formatCalendarDate(pkg.contractDateStart),
         contractDatesEnd: formatCalendarDate(pkg.contractDateEnd),
-        rateName,
+        rateName: isContractAndRates && generateRateName(pkg, programs),
         rateDateLabel:
             pkg.rateType === 'NEW'
                 ? 'Rating period'
