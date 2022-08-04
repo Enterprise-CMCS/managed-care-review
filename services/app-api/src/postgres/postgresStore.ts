@@ -24,7 +24,7 @@ type Store = {
     findPrograms: (
         stateCode: string,
         programIDs: Array<string>
-    ) => ProgramType[] | undefined
+    ) => ProgramType[] | Error
 
     findHealthPlanPackage: (
         draftUUID: string
