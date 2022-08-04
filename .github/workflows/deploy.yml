@@ -345,4 +345,8 @@ jobs:
       - name: Collate test coverage reports
         run: |
           ls
+          echo $(pwd)
+          ls ./services
+          ls services
+          ls /services/
           yarn run test:coverage
