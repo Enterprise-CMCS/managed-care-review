@@ -1,14 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renders overall email as expected 1`] = `
-"Submission MCR-VA-CCCPLUS-0002 was unlocked by CMS<br />
+"Submission MCR-MN-0003-SNBC was unlocked by CMS<br />
 <br />
 <b>Unlocked by:</b> josh@example.com<br />
 <b>Unlocked on:</b> 02/01/2022<br />
 <b>Reason for unlock:</b> Adding rate certification.<br />
-<b>Rate name</b>: MCR-VA-CCCPLUS-0002-RATE-20210605-20211231-AMENDMENT-20201201<br />
+<b>Rate name</b>: MCR-MN-0003-MSHO-RATE-20210202-20211201-CERTIFICATION-20201201<br />
 <br />
 <b>You must revise the submission before CMS can continue reviewing it.<br />
-<a href=\\"http://localhost/submissions/test-abc-123/review-and-submit\\">Open the submission in MC-Review to make edits.</a>
+<a href=\\"http://localhost/submissions/test-abc-125/review-and-submit\\">Open the submission in MC-Review to make edits.</a>
 "
 `;

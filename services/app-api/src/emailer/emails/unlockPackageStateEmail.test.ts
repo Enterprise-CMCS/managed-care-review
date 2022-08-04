@@ -1,15 +1,19 @@
-import { testEmailConfig } from '../../testHelpers/emailerHelpers'
+import {
+    testEmailConfig,
+    mockUnlockedContractAndRatesFormData,
+    findProgramsHelper as findPrograms,
+} from '../../testHelpers/emailerHelpers'
 import { unlockPackageStateEmail } from './index'
-import { unlockedWithFullContracts } from '../../../../app-web/src/common-code/healthPlanFormDataMocks'
+import { findAllPackageProgramIds } from '../templateHelpers'
+import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
 
 const unlockData = {
-    packageName: 'MCR-VA-CCCPLUS-0002',
     updatedBy: 'josh@example.com',
     updatedAt: new Date('02/01/2022'),
     updatedReason: 'Adding rate certification.',
 }
 const sub = {
-    ...unlockedWithFullContracts(),
+    ...mockUnlockedContractAndRatesFormData(),
     contractDateStart: new Date('2021-01-01'),
     contractDateEnd: new Date('2021-12-31'),
     rateDateStart: new Date('2021-02-02'),
@@ -21,11 +25,19 @@ const sub = {
     },
 }
 
+const programs = findPrograms(sub.stateCode, findAllPackageProgramIds(sub))
+
+if (programs instanceof Error) {
+    throw new Error(programs.message)
+}
+
 test('subject line is correct and clearly states submission is unlocked', async () => {
+    const name = packageName(sub, programs)
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig
+        testEmailConfig,
+        programs
     )
 
     if (template instanceof Error) {
@@ -35,9 +47,7 @@ test('subject line is correct and clearly states submission is unlocked', async 
 
     expect(template).toEqual(
         expect.objectContaining({
-            subject: expect.stringContaining(
-                `${unlockData.packageName} was unlocked by CMS`
-            ),
+            subject: expect.stringContaining(`${name} was unlocked by CMS`),
         })
     )
 })
@@ -46,7 +56,8 @@ test('body content is correct', async () => {
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig
+        testEmailConfig,
+        programs
     )
 
     if (template instanceof Error) {
@@ -90,7 +101,7 @@ test('renders overall email as expected', async () => {
         sub,
         unlockData,
         testEmailConfig,
-        'MCR-VA-CCCPLUS-0002-RATE-20210605-20211231-AMENDMENT-20201201'
+        programs
     )
 
     if (template instanceof Error) {

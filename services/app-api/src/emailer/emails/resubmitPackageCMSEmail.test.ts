@@ -3,25 +3,37 @@ import {
     mockContractAndRatesFormData,
     testStateAnalystsEmails,
     mockContractOnlyFormData,
+    findProgramsHelper as findPrograms,
 } from '../../testHelpers/emailerHelpers'
 import { resubmitPackageCMSEmail } from './index'
+import { findAllPackageProgramIds } from '../templateHelpers'
+import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 describe('with rates', () => {
     const resubmitData = {
-        packageName: 'MCR-VA-CCCPLUS-0002',
         updatedBy: 'bob@example.com',
         updatedAt: new Date('02/01/2022'),
         updatedReason: 'Added rate certification.',
     }
     const submission = mockContractAndRatesFormData()
     const testStateAnalystEmails = testStateAnalystsEmails
+    const programs = findPrograms(
+        submission.stateCode,
+        findAllPackageProgramIds(submission)
+    )
+
+    if (programs instanceof Error) {
+        throw new Error(programs.message)
+    }
 
     it('contains correct subject and clearly states submission edits are completed', async () => {
+        const name = packageName(submission, programs)
         const template = await resubmitPackageCMSEmail(
             submission,
             resubmitData,
             testEmailConfig,
-            testStateAnalystEmails
+            testStateAnalystEmails,
+            programs
         )
 
         if (template instanceof Error) {
@@ -31,11 +43,9 @@ describe('with rates', () => {
 
         expect(template).toEqual(
             expect.objectContaining({
-                subject: expect.stringContaining(
-                    `${resubmitData.packageName} was resubmitted`
-                ),
+                subject: expect.stringContaining(`${name} was resubmitted`),
                 bodyText: expect.stringMatching(
-                    `The state completed their edits on submission ${resubmitData.packageName}`
+                    `The state completed their edits on submission ${name}`
                 ),
             })
         )
@@ -45,7 +55,8 @@ describe('with rates', () => {
             submission,
             resubmitData,
             testEmailConfig,
-            testStateAnalystEmails
+            testStateAnalystEmails,
+            programs
         )
 
         if (template instanceof Error) {
@@ -97,7 +108,8 @@ describe('with rates', () => {
             submission,
             resubmitData,
             testEmailConfig,
-            testStateAnalystEmails
+            testStateAnalystEmails,
+            programs
         )
         const reviewerEmails = [
             ...testEmailConfig.cmsReviewSharedEmails,
@@ -127,11 +139,22 @@ describe('with rates', () => {
     it('CHIP contract and rate resubmission does include state specific analysts emails', async () => {
         const sub = mockContractAndRatesFormData()
         sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
+
+        const chipPrograms = findPrograms(
+            sub.stateCode,
+            findAllPackageProgramIds(sub)
+        )
+
+        if (chipPrograms instanceof Error) {
+            throw new Error(chipPrograms.message)
+        }
+
         const template = await resubmitPackageCMSEmail(
             sub,
             resubmitData,
             testEmailConfig,
-            testStateAnalystEmails
+            testStateAnalystEmails,
+            chipPrograms
         )
 
         if (template instanceof Error) {
@@ -150,11 +173,21 @@ describe('with rates', () => {
     it('CHIP contract and rate resubmission does not include ratesReviewSharedEmails, cmsRateHelpEmailAddress or state specific analysts emails', async () => {
         const sub = mockContractAndRatesFormData()
         sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
+        const chipPrograms = findPrograms(
+            submission.stateCode,
+            findAllPackageProgramIds(submission)
+        )
+
+        if (chipPrograms instanceof Error) {
+            throw new Error(chipPrograms.message)
+        }
+
         const template = await resubmitPackageCMSEmail(
             sub,
             resubmitData,
             testEmailConfig,
-            []
+            [],
+            chipPrograms
         )
         const excludedEmails = [
             ...testEmailConfig.ratesReviewSharedEmails,
@@ -185,7 +218,6 @@ describe('with rates', () => {
 
 describe('contract only', () => {
     const resubmitData = {
-        packageName: 'MCR-VA-CCCPLUS-0003',
         updatedBy: 'bob@example.com',
         updatedAt: new Date('02/01/2022'),
         updatedReason: 'Added more contract details.',
@@ -193,12 +225,22 @@ describe('contract only', () => {
     const submission = mockContractOnlyFormData()
     const testStateAnalystEmails = testStateAnalystsEmails
 
+    const programs = findPrograms(
+        submission.stateCode,
+        findAllPackageProgramIds(submission)
+    )
+
+    if (programs instanceof Error) {
+        throw new Error(programs.message)
+    }
+
     it('does not include ratesReviewSharedEmails', async () => {
         const contractOnlyTemplate = await resubmitPackageCMSEmail(
             submission,
             resubmitData,
             testEmailConfig,
-            testStateAnalystEmails
+            testStateAnalystEmails,
+            programs
         )
         const rateReviewerEmails = [...testEmailConfig.ratesReviewSharedEmails]
 
@@ -221,7 +263,8 @@ describe('contract only', () => {
             submission,
             resubmitData,
             testEmailConfig,
-            testStateAnalystEmails
+            testStateAnalystEmails,
+            programs
         )
 
         if (contractOnlyTemplate instanceof Error) {
@@ -243,7 +286,8 @@ describe('contract only', () => {
             submission,
             resubmitData,
             testEmailConfig,
-            testStateAnalystEmails
+            testStateAnalystEmails,
+            programs
         )
 
         if (contractOnlyTemplate instanceof Error) {
@@ -263,7 +307,8 @@ describe('contract only', () => {
             mockContractOnlyFormData(),
             resubmitData,
             testEmailConfig,
-            []
+            [],
+            programs
         )
 
         if (template instanceof Error) {
@@ -287,7 +332,8 @@ describe('contract only', () => {
             sub,
             resubmitData,
             testEmailConfig,
-            testStateAnalystEmails
+            testStateAnalystEmails,
+            programs
         )
 
         if (template instanceof Error) {
@@ -307,11 +353,21 @@ describe('contract only', () => {
     it('CHIP contract only resubmission does not include ratesReviewSharedEmails, cmsRateHelpEmailAddress or state specific analysts emails', async () => {
         const sub = mockContractOnlyFormData()
         sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
+        const chipPrograms = findPrograms(
+            submission.stateCode,
+            findAllPackageProgramIds(submission)
+        )
+
+        if (chipPrograms instanceof Error) {
+            throw new Error(chipPrograms.message)
+        }
+
         const template = await resubmitPackageCMSEmail(
             sub,
             resubmitData,
             testEmailConfig,
-            []
+            [],
+            chipPrograms
         )
         const excludedEmails = [
             ...testEmailConfig.ratesReviewSharedEmails,
@@ -342,7 +398,6 @@ describe('contract only', () => {
 
 test('renders overall email as expected', async () => {
     const resubmitData = {
-        packageName: 'MCR-VA-CCCPLUS-0003',
         updatedBy: 'bob@example.com',
         updatedAt: new Date('02/01/2022'),
         updatedReason: 'Added more contract details.',
@@ -356,12 +411,21 @@ test('renders overall email as expected', async () => {
         rateDateCertified: new Date('2020-12-01'),
     }
     const testStateAnalystEmails = testStateAnalystsEmails
+    const programs = findPrograms(
+        submission.stateCode,
+        findAllPackageProgramIds(submission)
+    )
+
+    if (programs instanceof Error) {
+        throw new Error(programs.message)
+    }
+
     const template = await resubmitPackageCMSEmail(
         submission,
         resubmitData,
         testEmailConfig,
         testStateAnalystEmails,
-        'MCR-VA-CCCPLUS-0002-RATE-20210202-20211201-CERTIFICATION-20201201'
+        programs
     )
     if (template instanceof Error) {
         console.error(testStateAnalystEmails)
