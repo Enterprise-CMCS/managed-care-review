@@ -23,6 +23,7 @@ export default defineConfig({
             on('task', {
                 pa11y: pa11y(),
             })
+            return newConfig
         },
     },
     projectId: 'tt5hbz',
