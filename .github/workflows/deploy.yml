@@ -270,6 +270,19 @@ jobs:
           echo $endpoint
           echo "::set-output name=app-endpoint::$endpoint"
 
+      - name: get storybook endpoint
+        id: save-storybook-endpoint
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          cd services
+          endpoint=$(./output.sh storybook CloudFrontEndpointUrl $STAGE_NAME)
+          echo $endpoint
+          echo "::set-output name=storybook-endpoint::$endpoint"
+
   end-deployment:
     needs: [begin-deployment, deploy-app, finishing-prep]
     if: always() && needs.begin-deployment.result == 'success'
