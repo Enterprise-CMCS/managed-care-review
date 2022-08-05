@@ -346,7 +346,7 @@ jobs:
         run: |
           ls
           echo $(pwd)
-          ls ./services
-          ls services
-          ls /services/
+          cd ./services
+          echo $(pwd)
+          ls
           yarn run test:coverage
