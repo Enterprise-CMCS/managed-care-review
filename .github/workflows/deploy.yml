@@ -342,12 +342,12 @@ jobs:
           name: cypress-videos
           path: tests/cypress/videos
       - name: list directory
-          run: |
-            ls
-            echo $(pwd)
-            cd ./cypress-coverage
-            echo $(pwd)
-            ls
+        run: |
+          ls
+          echo $(pwd)
+          cd ./cypress-coverage
+          echo $(pwd)
+          ls
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
