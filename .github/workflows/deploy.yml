@@ -343,14 +343,12 @@ jobs:
           path: tests/cypress/videos
       - name: list directory
         steps:
-          - uses: actions/checkout@v3
-          - name: Collate test coverage reports
-            run: |
-              ls
-              echo $(pwd)
-              cd ./coverage-cypress
-              echo $(pwd)
-              ls
+          run: |
+            ls
+            echo $(pwd)
+            cd ./coverage-cypress
+            echo $(pwd)
+            ls
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
