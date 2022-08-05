@@ -344,7 +344,7 @@ jobs:
       - name: upload unit test stats
         uses: actions/upload-artifact@v3
         with:
-          name: partial-cypress-coverage
+          name: partial-cypress-coverage-${{ matrix.containers}}
           path: ./coverage-cypress/lcov.info
 
       # - name: publish code coverage
