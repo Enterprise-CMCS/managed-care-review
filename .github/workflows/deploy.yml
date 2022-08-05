@@ -342,8 +342,6 @@ jobs:
           name: cypress-videos
           path: tests/cypress/videos
       - name: list directory
-        steps:
-          - name: list it
             run: |
               ls
               echo $(pwd)
