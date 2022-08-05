@@ -343,7 +343,7 @@ jobs:
           path: tests/cypress/videos
   coverage:
     name: test-coverage
-    needs: [deploy-app, finishing-prep]
+    needs: [cypress-run]
     if: always() && needs.finishing-prep.result == 'success'
     runs-on: ubuntu-latest
     permissions:
