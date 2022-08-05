@@ -345,7 +345,7 @@ jobs:
         run: |
           ls
           echo $(pwd)
-          cd ./cypress-coverage
+          cd ./coverage-cypress
           echo $(pwd)
           ls
 
