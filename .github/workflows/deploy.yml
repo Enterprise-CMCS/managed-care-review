@@ -341,12 +341,11 @@ jobs:
         with:
           name: cypress-videos
           path: tests/cypress/videos
-
-      - name: Collate test coverage reports
+  Coverage:
+    - name: Collate test coverage reports
         run: |
           ls
           echo $(pwd)
-          cd ./services/app-api
+          cd ./services/app-web
           echo $(pwd)
           ls
-          yarn run test:coverage
