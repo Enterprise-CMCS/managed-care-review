@@ -345,7 +345,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: partial-cypress-coverage
-          path: ./coverage-cypress/lcov-${{ matrix.containers }}.info
+          path: ./coverage-cypress/lcov.info
 
       # - name: publish code coverage
       #   uses: paambaati/codeclimate-action@v3.0.0
