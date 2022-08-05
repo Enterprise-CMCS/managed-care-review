@@ -341,6 +341,15 @@ jobs:
         with:
           name: cypress-videos
           path: tests/cypress/videos
+      - name: publish code coverage
+        uses: paambaati/codeclimate-action@v3.0.0
+        continue-on-error: true
+        env:
+          CC_TEST_REPORTER_ID: cace182021fe88d327fa8d95355ac6081f420e094a214fe77feb5df2f0259e9d
+        with:
+          debug: true
+          coverageLocations: |
+            ${{github.workspace}}/coverage-cypress/lcov.info:lcov
   coverage:
     name: test-coverage
     needs: [cypress]
