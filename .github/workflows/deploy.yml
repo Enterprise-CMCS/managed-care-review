@@ -279,7 +279,7 @@ jobs:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           cd services
-          endpoint=$(./output.sh story CloudFrontEndpointUrl $STAGE_NAME)
+          endpoint=$(./output.sh storybook CloudFrontEndpointUrl $STAGE_NAME)
           echo $endpoint
           echo "::set-output name=storybook-endpoint::$endpoint"
 
