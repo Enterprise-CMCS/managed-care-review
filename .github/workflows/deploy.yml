@@ -343,12 +343,14 @@ jobs:
           path: tests/cypress/videos
       - name: list directory
         steps:
-          run: |
-            ls
-            echo $(pwd)
-            cd ./coverage-cypress
-            echo $(pwd)
-            ls
+          - uses: actions/checkout@v3
+          - name: list it
+            run: |
+              ls
+              echo $(pwd)
+              cd ./cypress-coverage
+              echo $(pwd)
+              ls
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
