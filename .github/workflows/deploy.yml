@@ -346,7 +346,7 @@ jobs:
         run: |
           ls
           echo $(pwd)
-          cd ./services
+          cd ./services/app-api
           echo $(pwd)
           ls
           yarn run test:coverage
