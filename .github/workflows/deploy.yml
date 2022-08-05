@@ -343,7 +343,6 @@ jobs:
           path: tests/cypress/videos
       - name: list directory
         steps:
-          - uses: actions/checkout@v3
           - name: list it
             run: |
               ls
