@@ -342,10 +342,11 @@ jobs:
           name: cypress-videos
           path: tests/cypress/videos
   Coverage:
-    - name: Collate test coverage reports
-        run: |
-          ls
-          echo $(pwd)
-          cd ./services/app-web
-          echo $(pwd)
-          ls
+    name: test coverage
+      - name: Collate test coverage reports
+          run: |
+            ls
+            echo $(pwd)
+            cd ./services/app-web
+            echo $(pwd)
+            ls
