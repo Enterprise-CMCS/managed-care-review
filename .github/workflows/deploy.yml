@@ -341,12 +341,21 @@ jobs:
         with:
           name: cypress-videos
           path: tests/cypress/videos
-  Coverage:
-    name: test coverage
+  coverage:
+    name: test-coverage
+    needs: [deploy-app, finishing-prep]
+    if: always() && needs.finishing-prep.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      deployments: write
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v3
       - name: Collate test coverage reports
-          run: |
-            ls
-            echo $(pwd)
-            cd ./services/app-web
-            echo $(pwd)
-            ls
+        run: |
+          ls
+          echo $(pwd)
+          cd ./services/app-web
+          echo $(pwd)
+          ls
