@@ -161,17 +161,17 @@ function programNames(
 }
 
 function packageName(
-    submission: HealthPlanFormDataType,
+    pkg: HealthPlanFormDataType,
     statePrograms: ProgramArgType[],
     programIDs?: string[]
 ): string {
-    const padNumber = submission.stateNumber.toString().padStart(4, '0')
+    const padNumber = pkg.stateNumber.toString().padStart(4, '0')
     const pNames =
         // This ternary is needed because programIDs passed in could be undefined or an empty string, in that case
         // we want to default to using programIDs from submission
         programIDs && programIDs.length > 0
             ? programNames(statePrograms, programIDs)
-            : programNames(statePrograms, submission.programIDs)
+            : programNames(statePrograms, pkg.programIDs)
     const formattedProgramNames = pNames
         .sort(naturalSort)
         .map((n) =>
@@ -181,11 +181,11 @@ function packageName(
                 .toUpperCase()
         )
         .join('-')
-    return `MCR-${submission.stateCode.toUpperCase()}-${padNumber}-${formattedProgramNames}`
+    return `MCR-${pkg.stateCode.toUpperCase()}-${padNumber}-${formattedProgramNames}`
 }
 
 const generateRateName = (
-    submission: HealthPlanFormDataType,
+    pkg: HealthPlanFormDataType,
     statePrograms: ProgramArgType[]
 ): string => {
     const {
@@ -195,13 +195,9 @@ const generateRateName = (
         rateDateEnd,
         rateDateStart,
         rateProgramIDs,
-    } = submission
+    } = pkg
 
-    let rateName = `${packageName(
-        submission,
-        statePrograms,
-        rateProgramIDs
-    )}-RATE`
+    let rateName = `${packageName(pkg, statePrograms, rateProgramIDs)}-RATE`
 
     if (rateType === 'AMENDMENT' && rateAmendmentInfo?.effectiveDateStart) {
         rateName = rateName.concat(
