@@ -99,6 +99,12 @@ jobs:
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         run: ./dev test web --unit
 
+      - name: upload unit test coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: unit-test-coverage
+          path: ./services/app-web/coverage/coverage-final.json
+
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
         continue-on-error: true
@@ -141,6 +147,12 @@ jobs:
           REACT_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         run: ./dev test api --unit
+
+      - name: upload api test coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: api-test-coverage
+          path: ./services/app-api/coverage/coverage-final.json
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
@@ -341,11 +353,17 @@ jobs:
         with:
           name: cypress-videos
           path: tests/cypress/videos
-      - name: upload unit test stats
+      - name: upload partial cypress coverage
         uses: actions/upload-artifact@v3
         with:
           name: partial-cypress-coverage-${{ matrix.containers}}
           path: ./coverage-cypress/lcov.info
+
+      - name: upload partial cypress coverage json
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-json-coverage
+          path: ./coverage-cypress/coverage-final-${{ matrix.containers }}.json
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
