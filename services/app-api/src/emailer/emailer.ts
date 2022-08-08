@@ -12,7 +12,7 @@ import {
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { UserType, UpdateInfoType } from '../domain-models'
+import { UserType, UpdateInfoType, ProgramType } from '../domain-models'
 
 type EmailConfiguration = {
     stage: string
@@ -44,30 +44,36 @@ type Emailer = {
     sendEmail: (emailData: EmailData) => Promise<void | Error>
     sendCMSNewPackage: (
         submission: LockedHealthPlanFormDataType,
-        stateAnalystsEmails: StateAnalystsEmails
+        stateAnalystsEmails: StateAnalystsEmails,
+        statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendStateNewPackage: (
         submission: LockedHealthPlanFormDataType,
-        user: UserType
+        user: UserType,
+        statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendUnlockPackageCMSEmail: (
         submission: UnlockedHealthPlanFormDataType,
         updateInfo: UpdateInfoType,
-        stateAnalystsEmails: StateAnalystsEmails
+        stateAnalystsEmails: StateAnalystsEmails,
+        statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendUnlockPackageStateEmail: (
         submission: UnlockedHealthPlanFormDataType,
-        updateInfo: UpdateInfoType
+        updateInfo: UpdateInfoType,
+        statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendResubmittedStateEmail: (
         submission: LockedHealthPlanFormDataType,
         updateInfo: UpdateInfoType,
-        user: UserType
+        user: UserType,
+        statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendResubmittedCMSEmail: (
         submission: LockedHealthPlanFormDataType,
         updateInfo: UpdateInfoType,
-        stateAnalystsEmails: StateAnalystsEmails
+        stateAnalystsEmails: StateAnalystsEmails,
+        statePrograms: ProgramType[]
     ) => Promise<void | Error>
 }
 
@@ -88,11 +94,16 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
                 return new Error('SES email send failed. ' + err)
             }
         },
-        sendCMSNewPackage: async function (submission, stateAnalystsEmails) {
+        sendCMSNewPackage: async function (
+            submission,
+            stateAnalystsEmails,
+            statePrograms
+        ) {
             const emailData = await newPackageCMSEmail(
                 submission,
                 config,
-                stateAnalystsEmails
+                stateAnalystsEmails,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -100,11 +111,12 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
                 return await this.sendEmail(emailData)
             }
         },
-        sendStateNewPackage: async function (submission, user) {
+        sendStateNewPackage: async function (submission, user, statePrograms) {
             const emailData = await newPackageStateEmail(
                 submission,
                 user,
-                config
+                config,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -115,13 +127,15 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
         sendUnlockPackageCMSEmail: async function (
             submission,
             updateInfo,
-            stateAnalystsEmails
+            stateAnalystsEmails,
+            statePrograms
         ) {
             const emailData = await unlockPackageCMSEmail(
                 submission,
                 updateInfo,
                 config,
-                stateAnalystsEmails
+                stateAnalystsEmails,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -129,11 +143,16 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
                 return await this.sendEmail(emailData)
             }
         },
-        sendUnlockPackageStateEmail: async function (submission, updateInfo) {
+        sendUnlockPackageStateEmail: async function (
+            submission,
+            updateInfo,
+            statePrograms
+        ) {
             const emailData = await unlockPackageStateEmail(
                 submission,
                 updateInfo,
-                config
+                config,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -144,13 +163,15 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
         sendResubmittedStateEmail: async function (
             submission,
             updateInfo,
-            user: UserType
+            user,
+            statePrograms
         ) {
             const emailData = await resubmitPackageStateEmail(
                 submission,
                 user,
                 updateInfo,
-                config
+                config,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -161,13 +182,15 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
         sendResubmittedCMSEmail: async function (
             submission,
             updateInfo,
-            stateAnalystsEmails
+            stateAnalystsEmails,
+            statePrograms
         ) {
             const emailData = await resubmitPackageCMSEmail(
                 submission,
                 updateInfo,
                 config,
-                stateAnalystsEmails
+                stateAnalystsEmails,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -191,11 +214,16 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
         sendEmail: async (emailData: EmailData): Promise<void | Error> => {
             localEmailerLogger(emailData)
         },
-        sendCMSNewPackage: async (submission, stateAnalystsEmails) => {
+        sendCMSNewPackage: async (
+            submission,
+            stateAnalystsEmails,
+            statePrograms
+        ) => {
             const result = await newPackageCMSEmail(
                 submission,
                 config,
-                stateAnalystsEmails
+                stateAnalystsEmails,
+                statePrograms
             )
             if (result instanceof Error) {
                 console.error(result)
@@ -204,8 +232,13 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
                 localEmailerLogger(result)
             }
         },
-        sendStateNewPackage: async (submission, user) => {
-            const result = await newPackageStateEmail(submission, user, config)
+        sendStateNewPackage: async (submission, user, statePrograms) => {
+            const result = await newPackageStateEmail(
+                submission,
+                user,
+                config,
+                statePrograms
+            )
             if (result instanceof Error) {
                 console.error(result)
                 return result
@@ -216,13 +249,15 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
         sendUnlockPackageCMSEmail: async (
             submission,
             updateInfo,
-            stateAnalystsEmails
+            stateAnalystsEmails,
+            statePrograms
         ) => {
             const emailData = await unlockPackageCMSEmail(
                 submission,
                 updateInfo,
                 config,
-                stateAnalystsEmails
+                stateAnalystsEmails,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -230,11 +265,16 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
                 localEmailerLogger(emailData)
             }
         },
-        sendUnlockPackageStateEmail: async (submission, updateInfo) => {
+        sendUnlockPackageStateEmail: async (
+            submission,
+            updateInfo,
+            statePrograms
+        ) => {
             const emailData = await unlockPackageStateEmail(
                 submission,
                 updateInfo,
-                config
+                config,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -242,12 +282,18 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
                 localEmailerLogger(emailData)
             }
         },
-        sendResubmittedStateEmail: async (submission, updateInfo, user) => {
+        sendResubmittedStateEmail: async (
+            submission,
+            updateInfo,
+            user,
+            statePrograms
+        ) => {
             const emailData = await resubmitPackageStateEmail(
                 submission,
                 user,
                 updateInfo,
-                config
+                config,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -258,13 +304,15 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
         sendResubmittedCMSEmail: async (
             submission,
             updateInfo,
-            stateAnalystsEmails
+            stateAnalystsEmails,
+            statePrograms
         ) => {
             const emailData = await resubmitPackageCMSEmail(
                 submission,
                 updateInfo,
                 config,
-                stateAnalystsEmails
+                stateAnalystsEmails,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
