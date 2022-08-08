@@ -14,7 +14,7 @@ import {
     ProgramArgType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { UserType, StateUserType } from '../domain-models'
+import { StateUserType } from '../domain-models'
 
 const testEmailConfig: EmailConfiguration = {
     stage: 'LOCAL',
@@ -66,12 +66,14 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         ),
         sendCMSNewPackage: async function (
             submission,
-            stateAnalystsEmails
+            stateAnalystsEmails,
+            statePrograms
         ): Promise<void | Error> {
             const emailData = await newPackageCMSEmail(
                 submission,
                 config,
-                stateAnalystsEmails
+                stateAnalystsEmails,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -81,12 +83,14 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         },
         sendStateNewPackage: async function (
             submission,
-            user
+            user,
+            statePrograms
         ): Promise<void | Error> {
             const emailData = await newPackageStateEmail(
                 submission,
                 user,
-                config
+                config,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -97,13 +101,15 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         sendUnlockPackageCMSEmail: async function (
             submission,
             updateInfo,
-            stateAnalystsEmails
+            stateAnalystsEmails,
+            statePrograms
         ): Promise<void | Error> {
             const emailData = await unlockPackageCMSEmail(
                 submission,
                 updateInfo,
                 config,
-                stateAnalystsEmails
+                stateAnalystsEmails,
+                statePrograms
             )
 
             if (emailData instanceof Error) {
@@ -114,12 +120,14 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         },
         sendUnlockPackageStateEmail: async function (
             submission,
-            updateInfo
+            updateInfo,
+            statePrograms
         ): Promise<void | Error> {
             const emailData = await unlockPackageStateEmail(
                 submission,
                 updateInfo,
-                config
+                config,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -130,13 +138,15 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         sendResubmittedStateEmail: async function (
             submission,
             updateInfo,
-            user: UserType
+            user,
+            statePrograms
         ): Promise<void | Error> {
             const emailData = await resubmitPackageStateEmail(
                 submission,
                 user,
                 updateInfo,
-                config
+                config,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -147,13 +157,15 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         sendResubmittedCMSEmail: async function (
             submission,
             updateInfo,
-            stateAnalystsEmails
+            stateAnalystsEmails,
+            statePrograms
         ): Promise<void | Error> {
             const emailData = await resubmitPackageCMSEmail(
                 submission,
                 updateInfo,
                 config,
-                stateAnalystsEmails
+                stateAnalystsEmails,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -205,6 +217,25 @@ export function mockMNState(): State {
             },
         ],
         code: 'MN',
+    }
+}
+
+export function mockMSState(): State {
+    return {
+        name: 'Mississippi',
+        programs: [
+            {
+                id: 'e0819153-5894-4153-937e-aad00ab01a8f',
+                fullName: 'Mississippi Coordinated Access Network',
+                name: 'MSCAN',
+            },
+            {
+                id: '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
+                fullName: 'CHIP',
+                name: 'CHIP',
+            },
+        ],
+        code: 'MS',
     }
 }
 
