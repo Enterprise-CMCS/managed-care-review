@@ -516,7 +516,7 @@ test('renders overall email as expected', async () => {
         rateDateEnd: new Date('2021-11-31'),
         rateDateCertified: new Date('2020-12-01'),
     }
-    const statePrograms = mockMSState().programs
+    const statePrograms = mockMNState().programs
     const result = await newPackageCMSEmail(
         sub,
         testEmailConfig,
