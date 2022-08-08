@@ -14,7 +14,7 @@ import {
     ProgramArgType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { UserType, StateUserType, ProgramType } from '../domain-models'
+import { UserType, StateUserType } from '../domain-models'
 
 const testEmailConfig: EmailConfiguration = {
     stage: 'LOCAL',
@@ -66,14 +66,12 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         ),
         sendCMSNewPackage: async function (
             submission,
-            stateAnalystsEmails,
-            programs
+            stateAnalystsEmails
         ): Promise<void | Error> {
             const emailData = await newPackageCMSEmail(
                 submission,
                 config,
-                stateAnalystsEmails,
-                programs
+                stateAnalystsEmails
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -83,14 +81,12 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         },
         sendStateNewPackage: async function (
             submission,
-            user,
-            programs
+            user
         ): Promise<void | Error> {
             const emailData = await newPackageStateEmail(
                 submission,
                 user,
-                config,
-                programs
+                config
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -101,15 +97,13 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         sendUnlockPackageCMSEmail: async function (
             submission,
             updateInfo,
-            stateAnalystsEmails,
-            programs
+            stateAnalystsEmails
         ): Promise<void | Error> {
             const emailData = await unlockPackageCMSEmail(
                 submission,
                 updateInfo,
                 config,
-                stateAnalystsEmails,
-                programs
+                stateAnalystsEmails
             )
 
             if (emailData instanceof Error) {
@@ -120,14 +114,12 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         },
         sendUnlockPackageStateEmail: async function (
             submission,
-            updateInfo,
-            programs
+            updateInfo
         ): Promise<void | Error> {
             const emailData = await unlockPackageStateEmail(
                 submission,
                 updateInfo,
-                config,
-                programs
+                config
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -138,15 +130,13 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         sendResubmittedStateEmail: async function (
             submission,
             updateInfo,
-            user: UserType,
-            programs
+            user: UserType
         ): Promise<void | Error> {
             const emailData = await resubmitPackageStateEmail(
                 submission,
                 user,
                 updateInfo,
-                config,
-                programs
+                config
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -157,15 +147,13 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         sendResubmittedCMSEmail: async function (
             submission,
             updateInfo,
-            stateAnalystsEmails,
-            programs
+            stateAnalystsEmails
         ): Promise<void | Error> {
             const emailData = await resubmitPackageCMSEmail(
                 submission,
                 updateInfo,
                 config,
-                stateAnalystsEmails,
-                programs
+                stateAnalystsEmails
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -214,11 +202,6 @@ export function mockMNState(): State {
                 id: '3fd36500-bf2c-47bc-80e8-e7aa417184c5',
                 fullName: 'Minnesota Senior Health Options',
                 name: 'MSHO',
-            },
-            {
-                id: '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
-                fullName: 'CHIP',
-                name: 'CHIP',
             },
         ],
         code: 'MN',
@@ -494,22 +477,6 @@ const mockContractAmendmentFormData = (
     }
 }
 
-const findProgramsHelper = (
-    stateCode: string,
-    programIDs: string[]
-): ProgramType[] | Error => {
-    const programs = mockMNState().programs.filter((program) =>
-        programIDs.includes(program.id)
-    )
-
-    if (!programs || programIDs.length !== programs.length) {
-        const errMessage = `Can't find programs ${programIDs} from state ${stateCode}`
-        return new Error(errMessage)
-    }
-
-    return programs
-}
-
 export {
     testEmailConfig,
     testStateAnalystsEmails,
@@ -522,5 +489,4 @@ export {
     mockUnlockedContractOnlyFormData,
     mockUser,
     testEmailer,
-    findProgramsHelper,
 }
