@@ -362,8 +362,8 @@ jobs:
       - name: upload partial cypress coverage json
         uses: actions/upload-artifact@v3
         with:
-          name: cypress-json-coverage
-          path: ./coverage-cypress/coverage-final-${{ matrix.containers }}.json
+          name: cypress-json-coverage-${{ matrix.containers}}
+          path: ./coverage-cypress/coverage-final.json
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
