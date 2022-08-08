@@ -7,7 +7,8 @@ import {
     SubmissionType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { EmailConfiguration, StateAnalystsEmails } from '.'
-import { UserType } from '../domain-models'
+import { ProgramType, UserType } from '../domain-models'
+import { logError } from '../logger'
 
 // ETA SETUP
 Eta.configure({
@@ -132,12 +133,29 @@ const findAllPackageProgramIds = (
 ): string[] => {
     const programs = [...pkg.programIDs]
     if (pkg.submissionType === 'CONTRACT_AND_RATES' && pkg.rateProgramIDs) {
-        //return Array.from(new Set([...pkg.programIDs, ...pkg.rateProgramIDs]))
         pkg.rateProgramIDs.forEach(
             (id) => !programs.includes(id) && programs.push(id)
         )
     }
-    return pkg.programIDs
+    return programs
+}
+
+//Find state programs from package programs ids
+const findPackagePrograms = (
+    pkg: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType,
+    statePrograms: ProgramType[]
+): ProgramType[] | Error => {
+    const programIDs = findAllPackageProgramIds(pkg)
+    const programs = statePrograms.filter((program) =>
+        programIDs.includes(program.id)
+    )
+    if (!programs || programs.length !== programIDs.length) {
+        const errMessage = `Can't find programs ${programIDs} from state ${pkg.stateCode}`
+        logError('newPackageCMSEmail', errMessage)
+        return new Error(errMessage)
+    }
+
+    return programs
 }
 
 // Clean out HTML tags from an HTML based template
@@ -166,4 +184,5 @@ export {
     renderTemplate,
     SubmissionTypeRecord,
     findAllPackageProgramIds,
+    findPackagePrograms,
 }
