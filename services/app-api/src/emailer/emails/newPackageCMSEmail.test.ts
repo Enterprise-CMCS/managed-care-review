@@ -6,6 +6,8 @@ import {
     mockContractAmendmentFormData,
     mockContractOnlyFormData,
     mockContractAndRatesFormData,
+    mockMNState,
+    mockMSState,
 } from '../../testHelpers/emailerHelpers'
 import {
     generateRateName,
@@ -13,12 +15,17 @@ import {
     packageName,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { newPackageCMSEmail } from './index'
-import { findAllPackageProgramIds } from '../templateHelpers'
-import { findPrograms } from '../../postgres'
+import { findPackagePrograms } from '../templateHelpers'
 
 test('to addresses list includes review email addresses from email config', async () => {
     const sub = mockContractOnlyFormData()
-    const template = await newPackageCMSEmail(sub, testEmailConfig, [])
+    const statePrograms = mockMNState().programs
+    const template = await newPackageCMSEmail(
+        sub,
+        testEmailConfig,
+        [],
+        statePrograms
+    )
     testEmailConfig.cmsReviewSharedEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
@@ -30,10 +37,12 @@ test('to addresses list includes review email addresses from email config', asyn
 
 test('to addresses list does not include duplicate review email addresses', async () => {
     const sub = mockContractAndRatesFormData()
+    const statePrograms = mockMNState().programs
     const template = await newPackageCMSEmail(
         sub,
         testDuplicateEmailConfig,
-        testDuplicateStateAnalystsEmails
+        testDuplicateStateAnalystsEmails,
+        statePrograms
     )
 
     if (template instanceof Error) {
@@ -46,15 +55,22 @@ test('to addresses list does not include duplicate review email addresses', asyn
 
 test('subject line is correct', async () => {
     const sub = mockContractOnlyFormData()
-    const programs = findPrograms(sub.stateCode, findAllPackageProgramIds(sub))
+    const statePrograms = mockMNState().programs
 
-    if (programs instanceof Error) {
-        throw new Error(programs.message)
+    const packagePrograms = findPackagePrograms(sub, statePrograms)
+
+    if (packagePrograms instanceof Error) {
+        throw new Error(packagePrograms.message)
     }
 
-    const name = packageName(sub, programs)
+    const name = packageName(sub, packagePrograms)
 
-    const template = await newPackageCMSEmail(sub, testEmailConfig, [])
+    const template = await newPackageCMSEmail(
+        sub,
+        testEmailConfig,
+        [],
+        statePrograms
+    )
 
     expect(template).toEqual(
         expect.objectContaining({
@@ -71,7 +87,14 @@ test('includes expected data summary for a contract only submission', async () =
         contractDateStart: new Date('01/01/2021'),
         contractDateEnd: new Date('01/01/2025'),
     }
-    const template = await newPackageCMSEmail(sub, testEmailConfig, [])
+    const statePrograms = mockMNState().programs
+    const template = await newPackageCMSEmail(
+        sub,
+        testEmailConfig,
+        [],
+        statePrograms
+    )
+
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
@@ -102,14 +125,20 @@ test('includes expected data summary for a contract and rates submission CMS ema
         rateDateStart: new Date('01/01/2021'),
         rateDateEnd: new Date('01/01/2022'),
     }
-    const programs = findPrograms(sub.stateCode, findAllPackageProgramIds(sub))
+    const statePrograms = mockMNState().programs
+    const packagePrograms = findPackagePrograms(sub, statePrograms)
 
-    if (programs instanceof Error) {
-        throw new Error(programs.message)
+    if (packagePrograms instanceof Error) {
+        throw new Error(packagePrograms.message)
     }
 
-    const rateName = generateRateName(sub, programs)
-    const template = await newPackageCMSEmail(sub, testEmailConfig, [])
+    const rateName = generateRateName(sub, packagePrograms)
+    const template = await newPackageCMSEmail(
+        sub,
+        testEmailConfig,
+        [],
+        statePrograms
+    )
 
     expect(template).toEqual(
         expect.objectContaining({
@@ -148,14 +177,20 @@ test('includes expected data summary for a contract amendment submission', async
         rateDateStart: new Date('01/01/2021'),
         rateDateEnd: new Date('01/01/2022'),
     }
-    const programs = findPrograms(sub.stateCode, findAllPackageProgramIds(sub))
+    const statePrograms = mockMNState().programs
+    const packagePrograms = findPackagePrograms(sub, statePrograms)
 
-    if (programs instanceof Error) {
-        throw new Error(programs.message)
+    if (packagePrograms instanceof Error) {
+        throw new Error(packagePrograms.message)
     }
 
-    const rateName = generateRateName(sub, programs)
-    const template = await newPackageCMSEmail(sub, testEmailConfig, [])
+    const rateName = generateRateName(sub, packagePrograms)
+    const template = await newPackageCMSEmail(
+        sub,
+        testEmailConfig,
+        [],
+        statePrograms
+    )
 
     expect(template).toEqual(
         expect.objectContaining({
@@ -199,15 +234,21 @@ test('includes expected data summary for a rate amendment submission CMS email',
             effectiveDateEnd: new Date('12/31/2021'),
         },
     }
-    const programs = findPrograms(sub.stateCode, findAllPackageProgramIds(sub))
+    const statePrograms = mockMNState().programs
+    const packagePrograms = findPackagePrograms(sub, statePrograms)
 
-    if (programs instanceof Error) {
-        throw new Error(programs.message)
+    if (packagePrograms instanceof Error) {
+        throw new Error(packagePrograms.message)
     }
 
-    const rateName = generateRateName(sub, programs)
+    const rateName = generateRateName(sub, packagePrograms)
 
-    const template = await newPackageCMSEmail(sub, testEmailConfig, [])
+    const template = await newPackageCMSEmail(
+        sub,
+        testEmailConfig,
+        [],
+        statePrograms
+    )
 
     expect(template).toEqual(
         expect.objectContaining({
@@ -232,7 +273,13 @@ test('includes expected data summary for a rate amendment submission CMS email',
 
 test('includes link to submission', async () => {
     const sub = mockContractAmendmentFormData()
-    const template = await newPackageCMSEmail(sub, testEmailConfig, [])
+    const statePrograms = mockMNState().programs
+    const template = await newPackageCMSEmail(
+        sub,
+        testEmailConfig,
+        [],
+        statePrograms
+    )
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
@@ -245,10 +292,12 @@ test('includes link to submission', async () => {
 test('includes state specific analyst on contract only submission', async () => {
     const sub = mockContractAndRatesFormData()
     const testStateAnalystEmails = testStateAnalystsEmails
+    const statePrograms = mockMNState().programs
     const template = await newPackageCMSEmail(
         sub,
         testEmailConfig,
-        testStateAnalystEmails
+        testStateAnalystEmails,
+        statePrograms
     )
     const reviewerEmails = [
         ...testEmailConfig.cmsReviewSharedEmails,
@@ -266,10 +315,12 @@ test('includes state specific analyst on contract only submission', async () => 
 test('includes state specific analyst on contract and rate submission', async () => {
     const sub = mockContractAndRatesFormData()
     const testStateAnalystEmails = testStateAnalystsEmails
+    const statePrograms = mockMNState().programs
     const template = await newPackageCMSEmail(
         sub,
         testEmailConfig,
-        testStateAnalystEmails
+        testStateAnalystEmails,
+        statePrograms
     )
     const reviewerEmails = [
         ...testEmailConfig.cmsReviewSharedEmails,
@@ -288,7 +339,13 @@ test('includes state specific analyst on contract and rate submission', async ()
 test('does not include state specific analyst on contract and rate submission', async () => {
     const sub = mockContractAndRatesFormData()
     const testStateAnalystEmails = testStateAnalystsEmails
-    const template = await newPackageCMSEmail(sub, testEmailConfig, [])
+    const statePrograms = mockMNState().programs
+    const template = await newPackageCMSEmail(
+        sub,
+        testEmailConfig,
+        [],
+        statePrograms
+    )
 
     testStateAnalystEmails.forEach((emailAddress) => {
         expect(template).toEqual(
@@ -301,7 +358,13 @@ test('does not include state specific analyst on contract and rate submission', 
 
 test('includes ratesReviewSharedEmails on contract and rate submission', async () => {
     const sub = mockContractAndRatesFormData()
-    const template = await newPackageCMSEmail(sub, testEmailConfig, [])
+    const statePrograms = mockMNState().programs
+    const template = await newPackageCMSEmail(
+        sub,
+        testEmailConfig,
+        [],
+        statePrograms
+    )
     const reviewerEmails = [
         ...testEmailConfig.cmsReviewSharedEmails,
         ...testEmailConfig.ratesReviewSharedEmails,
@@ -317,7 +380,13 @@ test('includes ratesReviewSharedEmails on contract and rate submission', async (
 
 test('does not include ratesReviewSharedEmails on contract only submission', async () => {
     const sub = mockContractOnlyFormData()
-    const template = await newPackageCMSEmail(sub, testEmailConfig, [])
+    const statePrograms = mockMNState().programs
+    const template = await newPackageCMSEmail(
+        sub,
+        testEmailConfig,
+        [],
+        statePrograms
+    )
     const ratesReviewerEmails = [...testEmailConfig.ratesReviewSharedEmails]
     ratesReviewerEmails.forEach((emailAddress) => {
         expect(template).toEqual(
@@ -329,16 +398,17 @@ test('does not include ratesReviewSharedEmails on contract only submission', asy
 })
 
 test('CHIP contract only submission does include state specific analysts emails', async () => {
-    const sub = mockContractOnlyFormData()
-    //Set CHIP program for rate certification programs
-    sub.stateCode = 'MS'
-    sub.programIDs = ['e0819153-5894-4153-937e-aad00ab01a8f']
-    sub.rateProgramIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
+    const sub = mockContractOnlyFormData({
+        stateCode: 'MS',
+        programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
+    })
+    const statePrograms = mockMSState().programs
     const testStateAnalystEmails = testStateAnalystsEmails
     const template = await newPackageCMSEmail(
         sub,
         testEmailConfig,
-        testStateAnalystEmails
+        testStateAnalystEmails,
+        statePrograms
     )
     testStateAnalystEmails.forEach((emailAddress) => {
         expect(template).toEqual(
@@ -350,16 +420,18 @@ test('CHIP contract only submission does include state specific analysts emails'
 })
 
 test('CHIP contract and rate submission does include state specific analysts emails', async () => {
-    const sub = mockContractAndRatesFormData()
-    //Set CHIP program for rate certification programs
-    sub.stateCode = 'MS'
-    sub.programIDs = ['e0819153-5894-4153-937e-aad00ab01a8f']
-    sub.rateProgramIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
+    const sub = mockContractAndRatesFormData({
+        stateCode: 'MS',
+        programIDs: ['e0819153-5894-4153-937e-aad00ab01a8f'],
+        rateProgramIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
+    })
+    const statePrograms = mockMSState().programs
     const testStateAnalystEmails = testStateAnalystsEmails
     const template = await newPackageCMSEmail(
         sub,
         testEmailConfig,
-        testStateAnalystEmails
+        testStateAnalystEmails,
+        statePrograms
     )
     testStateAnalystEmails.forEach((emailAddress) => {
         expect(template).toEqual(
@@ -371,12 +443,17 @@ test('CHIP contract and rate submission does include state specific analysts ema
 })
 
 test('CHIP contract only submission does not include ratesReviewSharedEmails and cmsRateHelpEmailAddress', async () => {
-    const sub = mockContractOnlyFormData()
-    //Set CHIP program for rate certification programs
-    sub.stateCode = 'MS'
-    sub.programIDs = ['e0819153-5894-4153-937e-aad00ab01a8f']
-    sub.rateProgramIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
-    const template = await newPackageCMSEmail(sub, testEmailConfig, [])
+    const sub = mockContractOnlyFormData({
+        stateCode: 'MS',
+        programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
+    })
+    const statePrograms = mockMSState().programs
+    const template = await newPackageCMSEmail(
+        sub,
+        testEmailConfig,
+        [],
+        statePrograms
+    )
     const excludedEmails = [...testEmailConfig.ratesReviewSharedEmails]
 
     excludedEmails.forEach((emailAddress) => {
@@ -389,12 +466,18 @@ test('CHIP contract only submission does not include ratesReviewSharedEmails and
 })
 
 test('CHIP contract and rate submission does not include ratesReviewSharedEmails and cmsRateHelpEmailAddress', async () => {
-    const sub = mockContractAndRatesFormData()
-    //Set CHIP program for rate certification programs
-    sub.stateCode = 'MS'
-    sub.programIDs = ['e0819153-5894-4153-937e-aad00ab01a8f']
-    sub.rateProgramIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
-    const template = await newPackageCMSEmail(sub, testEmailConfig, [])
+    const sub = mockContractAndRatesFormData({
+        stateCode: 'MS',
+        programIDs: ['e0819153-5894-4153-937e-aad00ab01a8f'],
+        rateProgramIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
+    })
+    const statePrograms = mockMSState().programs
+    const template = await newPackageCMSEmail(
+        sub,
+        testEmailConfig,
+        [],
+        statePrograms
+    )
     const excludedEmails = [
         ...testEmailConfig.ratesReviewSharedEmails,
         testEmailConfig.cmsRateHelpEmailAddress,
@@ -410,7 +493,13 @@ test('CHIP contract and rate submission does not include ratesReviewSharedEmails
 
 test('does not include rate name on contract only submission', async () => {
     const sub = mockContractOnlyFormData()
-    const template = await newPackageCMSEmail(sub, testEmailConfig, [])
+    const statePrograms = mockMSState().programs
+    const template = await newPackageCMSEmail(
+        sub,
+        testEmailConfig,
+        [],
+        statePrograms
+    )
     expect(template).toEqual(
         expect.not.objectContaining({
             bodyText: expect.stringMatching(/Rate name:/),
@@ -427,7 +516,13 @@ test('renders overall email as expected', async () => {
         rateDateEnd: new Date('2021-11-31'),
         rateDateCertified: new Date('2020-12-01'),
     }
-    const result = await newPackageCMSEmail(sub, testEmailConfig, [])
+    const statePrograms = mockMSState().programs
+    const result = await newPackageCMSEmail(
+        sub,
+        testEmailConfig,
+        [],
+        statePrograms
+    )
     if (result instanceof Error) {
         console.error(result)
         return

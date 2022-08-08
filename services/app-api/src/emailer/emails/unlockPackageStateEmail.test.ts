@@ -1,11 +1,11 @@
 import {
     testEmailConfig,
     mockUnlockedContractAndRatesFormData,
+    mockMNState,
 } from '../../testHelpers/emailerHelpers'
 import { unlockPackageStateEmail } from './index'
-import { findAllPackageProgramIds } from '../templateHelpers'
+import { findPackagePrograms } from '../templateHelpers'
 import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
-import { findPrograms } from '../../postgres'
 
 const unlockData = {
     updatedBy: 'josh@example.com',
@@ -24,19 +24,20 @@ const sub = {
         effectiveDateEnd: new Date('12/31/2021'),
     },
 }
+const defaultStatePrograms = mockMNState().programs
+const packagePrograms = findPackagePrograms(sub, defaultStatePrograms)
 
-const programs = findPrograms(sub.stateCode, findAllPackageProgramIds(sub))
-
-if (programs instanceof Error) {
-    throw new Error(programs.message)
+if (packagePrograms instanceof Error) {
+    throw new Error(packagePrograms.message)
 }
 
 test('subject line is correct and clearly states submission is unlocked', async () => {
-    const name = packageName(sub, programs)
+    const name = packageName(sub, packagePrograms)
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig
+        testEmailConfig,
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {
@@ -55,7 +56,8 @@ test('body content is correct', async () => {
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig
+        testEmailConfig,
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {
@@ -98,7 +100,8 @@ test('renders overall email as expected', async () => {
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig
+        testEmailConfig,
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {

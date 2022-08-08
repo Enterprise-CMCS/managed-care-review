@@ -3,11 +3,12 @@ import {
     mockContractAndRatesFormData,
     testStateAnalystsEmails,
     mockContractOnlyFormData,
+    mockMNState,
+    mockMSState,
 } from '../../testHelpers/emailerHelpers'
 import { resubmitPackageCMSEmail } from './index'
-import { findAllPackageProgramIds } from '../templateHelpers'
+import { findPackagePrograms } from '../templateHelpers'
 import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { findPrograms } from '../../postgres'
 
 describe('with rates', () => {
     const resubmitData = {
@@ -17,22 +18,24 @@ describe('with rates', () => {
     }
     const submission = mockContractAndRatesFormData()
     const testStateAnalystEmails = testStateAnalystsEmails
-    const programs = findPrograms(
-        submission.stateCode,
-        findAllPackageProgramIds(submission)
+    const defaultStatePrograms = mockMNState().programs
+    const packagePrograms = findPackagePrograms(
+        submission,
+        defaultStatePrograms
     )
 
-    if (programs instanceof Error) {
-        throw new Error(programs.message)
+    if (packagePrograms instanceof Error) {
+        throw new Error(packagePrograms.message)
     }
 
     it('contains correct subject and clearly states submission edits are completed', async () => {
-        const name = packageName(submission, programs)
+        const name = packageName(submission, packagePrograms)
         const template = await resubmitPackageCMSEmail(
             submission,
             resubmitData,
             testEmailConfig,
-            testStateAnalystEmails
+            testStateAnalystEmails,
+            defaultStatePrograms
         )
 
         if (template instanceof Error) {
@@ -54,7 +57,8 @@ describe('with rates', () => {
             submission,
             resubmitData,
             testEmailConfig,
-            testStateAnalystEmails
+            testStateAnalystEmails,
+            defaultStatePrograms
         )
 
         if (template instanceof Error) {
@@ -106,7 +110,8 @@ describe('with rates', () => {
             submission,
             resubmitData,
             testEmailConfig,
-            testStateAnalystEmails
+            testStateAnalystEmails,
+            defaultStatePrograms
         )
         const reviewerEmails = [
             ...testEmailConfig.cmsReviewSharedEmails,
@@ -134,13 +139,17 @@ describe('with rates', () => {
         })
     })
     it('CHIP contract and rate resubmission does include state specific analysts emails', async () => {
-        const sub = mockContractAndRatesFormData()
-        sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
+        const sub = mockContractAndRatesFormData({
+            stateCode: 'MS',
+            programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
+        })
+        const msStatePrograms = mockMSState().programs
         const template = await resubmitPackageCMSEmail(
             sub,
             resubmitData,
             testEmailConfig,
-            testStateAnalystEmails
+            testStateAnalystEmails,
+            msStatePrograms
         )
 
         if (template instanceof Error) {
@@ -157,13 +166,17 @@ describe('with rates', () => {
         })
     })
     it('CHIP contract and rate resubmission does not include ratesReviewSharedEmails, cmsRateHelpEmailAddress or state specific analysts emails', async () => {
-        const sub = mockContractAndRatesFormData()
-        sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
+        const sub = mockContractAndRatesFormData({
+            stateCode: 'MS',
+            programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
+        })
+        const msStatePrograms = mockMSState().programs
         const template = await resubmitPackageCMSEmail(
             sub,
             resubmitData,
             testEmailConfig,
-            []
+            [],
+            msStatePrograms
         )
         const excludedEmails = [
             ...testEmailConfig.ratesReviewSharedEmails,
@@ -201,13 +214,14 @@ describe('contract only', () => {
     const submission = mockContractOnlyFormData()
     const testStateAnalystEmails = testStateAnalystsEmails
 
-    const programs = findPrograms(
-        submission.stateCode,
-        findAllPackageProgramIds(submission)
+    const defaultStatePrograms = mockMNState().programs
+    const packagePrograms = findPackagePrograms(
+        submission,
+        defaultStatePrograms
     )
 
-    if (programs instanceof Error) {
-        throw new Error(programs.message)
+    if (packagePrograms instanceof Error) {
+        throw new Error(packagePrograms.message)
     }
 
     it('does not include ratesReviewSharedEmails', async () => {
@@ -215,7 +229,8 @@ describe('contract only', () => {
             submission,
             resubmitData,
             testEmailConfig,
-            testStateAnalystEmails
+            testStateAnalystEmails,
+            defaultStatePrograms
         )
         const rateReviewerEmails = [...testEmailConfig.ratesReviewSharedEmails]
 
@@ -238,7 +253,8 @@ describe('contract only', () => {
             submission,
             resubmitData,
             testEmailConfig,
-            testStateAnalystEmails
+            testStateAnalystEmails,
+            defaultStatePrograms
         )
 
         if (contractOnlyTemplate instanceof Error) {
@@ -260,7 +276,8 @@ describe('contract only', () => {
             submission,
             resubmitData,
             testEmailConfig,
-            testStateAnalystEmails
+            testStateAnalystEmails,
+            defaultStatePrograms
         )
 
         if (contractOnlyTemplate instanceof Error) {
@@ -280,7 +297,8 @@ describe('contract only', () => {
             mockContractOnlyFormData(),
             resubmitData,
             testEmailConfig,
-            []
+            [],
+            defaultStatePrograms
         )
 
         if (template instanceof Error) {
@@ -298,13 +316,17 @@ describe('contract only', () => {
     })
 
     it('CHIP contract only resubmission does state specific analysts emails', async () => {
-        const sub = mockContractOnlyFormData()
-        sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
+        const sub = mockContractOnlyFormData({
+            stateCode: 'MS',
+            programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
+        })
+        const msStatePrograms = mockMSState().programs
         const template = await resubmitPackageCMSEmail(
             sub,
             resubmitData,
             testEmailConfig,
-            testStateAnalystEmails
+            testStateAnalystEmails,
+            msStatePrograms
         )
 
         if (template instanceof Error) {
@@ -322,14 +344,18 @@ describe('contract only', () => {
     })
 
     it('CHIP contract only resubmission does not include ratesReviewSharedEmails, cmsRateHelpEmailAddress or state specific analysts emails', async () => {
-        const sub = mockContractOnlyFormData()
-        sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
+        const sub = mockContractOnlyFormData({
+            stateCode: 'MS',
+            programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
+        })
+        const msStatePrograms = mockMSState().programs
 
         const template = await resubmitPackageCMSEmail(
             sub,
             resubmitData,
             testEmailConfig,
-            []
+            [],
+            msStatePrograms
         )
         const excludedEmails = [
             ...testEmailConfig.ratesReviewSharedEmails,
@@ -372,12 +398,15 @@ test('renders overall email as expected', async () => {
         rateDateEnd: new Date('2021-11-31'),
         rateDateCertified: new Date('2020-12-01'),
     }
+    const defaultStatePrograms = mockMNState().programs
+
     const testStateAnalystEmails = testStateAnalystsEmails
     const template = await resubmitPackageCMSEmail(
         submission,
         resubmitData,
         testEmailConfig,
-        testStateAnalystEmails
+        testStateAnalystEmails,
+        defaultStatePrograms
     )
     if (template instanceof Error) {
         console.error(testStateAnalystEmails)

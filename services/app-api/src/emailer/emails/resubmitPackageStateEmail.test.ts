@@ -2,11 +2,11 @@ import {
     testEmailConfig,
     mockUser,
     mockContractAndRatesFormData,
+    mockMNState,
 } from '../../testHelpers/emailerHelpers'
 import { resubmitPackageStateEmail } from './index'
-import { findAllPackageProgramIds } from '../templateHelpers'
+import { findPackagePrograms } from '../templateHelpers'
 import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
-import { findPrograms } from '../../postgres'
 
 const resubmitData = {
     updatedBy: 'bob@example.com',
@@ -22,23 +22,21 @@ const submission = {
     rateDateEnd: new Date('2021-11-31'),
     rateDateCertified: new Date('2020-12-01'),
 }
+const defaultStatePrograms = mockMNState().programs
+const packagePrograms = findPackagePrograms(submission, defaultStatePrograms)
 
-const programs = findPrograms(
-    submission.stateCode,
-    findAllPackageProgramIds(submission)
-)
-
-if (programs instanceof Error) {
-    throw new Error(programs.message)
+if (packagePrograms instanceof Error) {
+    throw new Error(packagePrograms.message)
 }
 
 test('contains correct subject and clearly states successful resubmission', async () => {
-    const name = packageName(submission, programs)
+    const name = packageName(submission, packagePrograms)
     const template = await resubmitPackageStateEmail(
         submission,
         user,
         resubmitData,
-        testEmailConfig
+        testEmailConfig,
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {
@@ -61,7 +59,8 @@ test('contains correct information in body of email', async () => {
         submission,
         user,
         resubmitData,
-        testEmailConfig
+        testEmailConfig,
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {
@@ -103,7 +102,8 @@ test('renders overall email as expected', async () => {
         submission,
         user,
         resubmitData,
-        testEmailConfig
+        testEmailConfig,
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {

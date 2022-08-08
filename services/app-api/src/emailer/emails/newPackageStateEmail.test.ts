@@ -4,6 +4,7 @@ import {
     mockContractOnlyFormData,
     mockContractAndRatesFormData,
     mockUser,
+    mockMNState,
 } from '../../testHelpers/emailerHelpers'
 import {
     LockedHealthPlanFormDataType,
@@ -11,13 +12,18 @@ import {
     packageName,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { newPackageStateEmail } from './index'
-import { findAllPackageProgramIds } from '../templateHelpers'
-import { findPrograms } from '../../postgres'
+import { findPackagePrograms } from '../templateHelpers'
 
 test('to addresses list includes current user', async () => {
     const sub = mockContractOnlyFormData()
     const user = mockUser()
-    const template = await newPackageStateEmail(sub, user, testEmailConfig)
+    const defaultStatePrograms = mockMNState().programs
+    const template = await newPackageStateEmail(
+        sub,
+        user,
+        testEmailConfig,
+        defaultStatePrograms
+    )
     expect(template).toEqual(
         expect.objectContaining({
             toAddresses: expect.arrayContaining([user.email]),
@@ -42,7 +48,13 @@ test('to addresses list includes all state contacts on submission', async () => 
         ],
     }
     const user = mockUser()
-    const template = await newPackageStateEmail(sub, user, testEmailConfig)
+    const defaultStatePrograms = mockMNState().programs
+    const template = await newPackageStateEmail(
+        sub,
+        user,
+        testEmailConfig,
+        defaultStatePrograms
+    )
     sub.stateContacts.forEach((contact) => {
         expect(template).toEqual(
             expect.objectContaining({
@@ -69,7 +81,13 @@ test('to addresses list does not include duplicate state contacts on submission'
         ],
     }
     const user = mockUser()
-    const template = await newPackageStateEmail(sub, user, testEmailConfig)
+    const defaultStatePrograms = mockMNState().programs
+    const template = await newPackageStateEmail(
+        sub,
+        user,
+        testEmailConfig,
+        defaultStatePrograms
+    )
 
     if (template instanceof Error) {
         console.error(template)
@@ -85,15 +103,21 @@ test('to addresses list does not include duplicate state contacts on submission'
 test('subject line is correct and clearly states submission is complete', async () => {
     const sub = mockContractOnlyFormData()
     const user = mockUser()
-    const programs = findPrograms(sub.stateCode, findAllPackageProgramIds(sub))
+    const defaultStatePrograms = mockMNState().programs
+    const packagePrograms = findPackagePrograms(sub, defaultStatePrograms)
 
-    if (programs instanceof Error) {
-        throw new Error(programs.message)
+    if (packagePrograms instanceof Error) {
+        throw new Error(packagePrograms.message)
     }
 
-    const name = packageName(sub, programs)
+    const name = packageName(sub, packagePrograms)
 
-    const template = await newPackageStateEmail(sub, user, testEmailConfig)
+    const template = await newPackageStateEmail(
+        sub,
+        user,
+        testEmailConfig,
+        defaultStatePrograms
+    )
 
     expect(template).toEqual(
         expect.objectContaining({
@@ -108,15 +132,21 @@ test('subject line is correct and clearly states submission is complete', async 
 test('includes mcog, rate, and team email addresses', async () => {
     const sub = mockContractOnlyFormData()
     const user = mockUser()
-    const programs = findPrograms(sub.stateCode, findAllPackageProgramIds(sub))
+    const defaultStatePrograms = mockMNState().programs
+    const packagePrograms = findPackagePrograms(sub, defaultStatePrograms)
 
-    if (programs instanceof Error) {
-        throw new Error(programs.message)
+    if (packagePrograms instanceof Error) {
+        throw new Error(packagePrograms.message)
     }
 
-    const name = packageName(sub, programs)
+    const name = packageName(sub, packagePrograms)
 
-    const template = await newPackageStateEmail(sub, user, testEmailConfig)
+    const template = await newPackageStateEmail(
+        sub,
+        user,
+        testEmailConfig,
+        defaultStatePrograms
+    )
 
     expect(template).toEqual(
         expect.objectContaining({
@@ -147,7 +177,13 @@ test('includes mcog, rate, and team email addresses', async () => {
 test('includes link to submission', async () => {
     const sub = mockContractAmendmentFormData()
     const user = mockUser()
-    const template = await newPackageStateEmail(sub, user, testEmailConfig)
+    const defaultStatePrograms = mockMNState().programs
+    const template = await newPackageStateEmail(
+        sub,
+        user,
+        testEmailConfig,
+        defaultStatePrograms
+    )
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining(
@@ -167,7 +203,13 @@ test('includes link to submission', async () => {
 test('includes information about what is next', async () => {
     const sub = mockContractAmendmentFormData()
     const user = mockUser()
-    const template = await newPackageStateEmail(sub, user, testEmailConfig)
+    const defaultStatePrograms = mockMNState().programs
+    const template = await newPackageStateEmail(
+        sub,
+        user,
+        testEmailConfig,
+        defaultStatePrograms
+    )
     expect(template).toEqual(
         expect.objectContaining({
             bodyText: expect.stringContaining('What comes next:'),
@@ -184,15 +226,21 @@ test('includes expected data summary for a contract and rates submission State e
         rateDateEnd: new Date('01/01/2022'),
     }
     const user = mockUser()
-    const programs = findPrograms(sub.stateCode, findAllPackageProgramIds(sub))
+    const defaultStatePrograms = mockMNState().programs
+    const packagePrograms = findPackagePrograms(sub, defaultStatePrograms)
 
-    if (programs instanceof Error) {
-        throw new Error(programs.message)
+    if (packagePrograms instanceof Error) {
+        throw new Error(packagePrograms.message)
     }
 
-    const rateName = generateRateName(sub, programs)
+    const rateName = generateRateName(sub, packagePrograms)
 
-    const template = await newPackageStateEmail(sub, user, testEmailConfig)
+    const template = await newPackageStateEmail(
+        sub,
+        user,
+        testEmailConfig,
+        defaultStatePrograms
+    )
 
     expect(template).toEqual(
         expect.objectContaining({
@@ -237,15 +285,21 @@ test('includes expected data summary for a rate amendment submission State email
         },
     }
     const user = mockUser()
-    const programs = findPrograms(sub.stateCode, findAllPackageProgramIds(sub))
+    const defaultStatePrograms = mockMNState().programs
+    const packagePrograms = findPackagePrograms(sub, defaultStatePrograms)
 
-    if (programs instanceof Error) {
-        throw new Error(programs.message)
+    if (packagePrograms instanceof Error) {
+        throw new Error(packagePrograms.message)
     }
 
-    const rateName = generateRateName(sub, programs)
+    const rateName = generateRateName(sub, packagePrograms)
 
-    const template = await newPackageStateEmail(sub, user, testEmailConfig)
+    const template = await newPackageStateEmail(
+        sub,
+        user,
+        testEmailConfig,
+        defaultStatePrograms
+    )
 
     expect(template).toEqual(
         expect.objectContaining({
@@ -283,7 +337,13 @@ test('renders overall email as expected', async () => {
         },
     }
     const user = mockUser()
-    const result = await newPackageStateEmail(sub, user, testEmailConfig)
+    const defaultStatePrograms = mockMNState().programs
+    const result = await newPackageStateEmail(
+        sub,
+        user,
+        testEmailConfig,
+        defaultStatePrograms
+    )
     if (result instanceof Error) {
         console.error(result)
         return
