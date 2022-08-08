@@ -140,15 +140,28 @@ export function unlockHealthPlanPackageResolver(
             stateAnalystsEmails = []
         }
 
+        const statePrograms = store.getStatePrograms(draft.stateCode)
+
+        if (statePrograms instanceof Error) {
+            logError('getStatePrograms', statePrograms.message)
+            setErrorAttributesOnActiveSpan(statePrograms.message, span)
+            throw new Error(statePrograms.message)
+        }
+
         const unlockPackageCMSEmailResult =
             await emailer.sendUnlockPackageCMSEmail(
                 draft,
                 updateInfo,
-                stateAnalystsEmails
+                stateAnalystsEmails,
+                statePrograms
             )
 
         const unlockPackageStateEmailResult =
-            await emailer.sendUnlockPackageStateEmail(draft, updateInfo)
+            await emailer.sendUnlockPackageStateEmail(
+                draft,
+                updateInfo,
+                statePrograms
+            )
 
         if (unlockPackageCMSEmailResult instanceof Error) {
             logError(

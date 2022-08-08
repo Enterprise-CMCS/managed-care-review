@@ -260,6 +260,14 @@ export function submitHealthPlanPackageResolver(
             stateAnalystsEmails = []
         }
 
+        const statePrograms = store.getStatePrograms(updatedPackage.stateCode)
+
+        if (statePrograms instanceof Error) {
+            logError('getStatePrograms', statePrograms.message)
+            setErrorAttributesOnActiveSpan(statePrograms.message, span)
+            throw new Error(statePrograms.message)
+        }
+
         let cmsPackageEmailResult
         let statePackageEmailResult
 
@@ -268,21 +276,25 @@ export function submitHealthPlanPackageResolver(
             cmsPackageEmailResult = await emailer.sendResubmittedCMSEmail(
                 lockedFormData,
                 updateInfo,
-                stateAnalystsEmails
+                stateAnalystsEmails,
+                statePrograms
             )
             statePackageEmailResult = await emailer.sendResubmittedStateEmail(
                 lockedFormData,
                 updateInfo,
-                user
+                user,
+                statePrograms
             )
         } else if (status === 'SUBMITTED') {
             cmsPackageEmailResult = await emailer.sendCMSNewPackage(
                 lockedFormData,
-                stateAnalystsEmails
+                stateAnalystsEmails,
+                statePrograms
             )
             statePackageEmailResult = await emailer.sendStateNewPackage(
                 lockedFormData,
-                user
+                user,
+                statePrograms
             )
         }
 
