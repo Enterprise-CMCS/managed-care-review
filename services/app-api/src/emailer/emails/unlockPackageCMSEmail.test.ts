@@ -3,11 +3,11 @@ import {
     testStateAnalystsEmails,
     mockUnlockedContractAndRatesFormData,
     mockUnlockedContractOnlyFormData,
-    findProgramsHelper as findPrograms,
 } from '../../testHelpers/emailerHelpers'
 import { unlockPackageCMSEmail } from './index'
 import { findAllPackageProgramIds } from '../templateHelpers'
 import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
+import { findPrograms } from '../../postgres'
 
 const unlockData = {
     updatedBy: 'leslie@example.com',
@@ -38,8 +38,7 @@ test('subject line is correct and clearly states submission is unlocked', async 
         submission,
         unlockData,
         testEmailConfig,
-        testStateAnalystEmails,
-        programs
+        testStateAnalystEmails
     )
 
     if (template instanceof Error) {
@@ -58,8 +57,7 @@ test('email body contains correct information', async () => {
         submission,
         unlockData,
         testEmailConfig,
-        testStateAnalystEmails,
-        programs
+        testStateAnalystEmails
     )
 
     if (template instanceof Error) {
@@ -97,8 +95,7 @@ test('includes state specific analysts emails on contract and rate submission un
         submission,
         unlockData,
         testEmailConfig,
-        testStateAnalystEmails,
-        programs
+        testStateAnalystEmails
     )
 
     if (template instanceof Error) {
@@ -119,8 +116,7 @@ test('includes ratesReviewSharedEmails on contract and rate submission unlock', 
         submission,
         unlockData,
         testEmailConfig,
-        testStateAnalystEmails,
-        programs
+        testStateAnalystEmails
     )
 
     const reviewerEmails = [
@@ -147,8 +143,7 @@ test('does include state specific analysts emails on contract only submission un
         sub,
         unlockData,
         testEmailConfig,
-        testStateAnalystEmails,
-        programs
+        testStateAnalystEmails
     )
 
     if (template instanceof Error) {
@@ -170,8 +165,7 @@ test('does not include ratesReviewSharedEmails on contract only submission unloc
         sub,
         unlockData,
         testEmailConfig,
-        [],
-        programs
+        []
     )
 
     if (template instanceof Error) {
@@ -194,8 +188,7 @@ test('does not include state specific analysts emails on contract only submissio
         sub,
         unlockData,
         testEmailConfig,
-        [],
-        programs
+        []
     )
 
     if (template instanceof Error) {
@@ -213,22 +206,15 @@ test('does not include state specific analysts emails on contract only submissio
 })
 test('CHIP contract only unlock email does include state specific analysts emails', async () => {
     const sub = mockUnlockedContractOnlyFormData()
-    sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
-    const chipPrograms = findPrograms(
-        sub.stateCode,
-        findAllPackageProgramIds(sub)
-    )
-
-    if (chipPrograms instanceof Error) {
-        throw new Error(chipPrograms.message)
-    }
-
+    //Set CHIP program for rate certification programs
+    sub.stateCode = 'MS'
+    sub.programIDs = ['e0819153-5894-4153-937e-aad00ab01a8f']
+    sub.rateProgramIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
     const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
         testEmailConfig,
-        testStateAnalystEmails,
-        chipPrograms
+        testStateAnalystEmails
     )
 
     if (template instanceof Error) {
@@ -246,27 +232,17 @@ test('CHIP contract only unlock email does include state specific analysts email
 })
 test('CHIP contract only unlock email does not include ratesReviewSharedEmails, cmsRateHelpEmailAddress or state specific analysts emails', async () => {
     const sub = mockUnlockedContractOnlyFormData()
-    sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
-    const chipPrograms = findPrograms(
-        sub.stateCode,
-        findAllPackageProgramIds(sub)
-    )
-
-    if (chipPrograms instanceof Error) {
-        throw new Error(chipPrograms.message)
-    }
-
+    //Set CHIP program for rate certification programs
+    sub.stateCode = 'MS'
+    sub.programIDs = ['e0819153-5894-4153-937e-aad00ab01a8f']
+    sub.rateProgramIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
     const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
         testEmailConfig,
-        [],
-        chipPrograms
+        []
     )
-    const excludedEmails = [
-        ...testEmailConfig.ratesReviewSharedEmails,
-        testEmailConfig.cmsRateHelpEmailAddress,
-    ]
+    const excludedEmails = [...testEmailConfig.ratesReviewSharedEmails]
 
     if (template instanceof Error) {
         console.error(template)
@@ -290,22 +266,15 @@ test('CHIP contract only unlock email does not include ratesReviewSharedEmails, 
 })
 test('CHIP contract and rate unlock email does include state specific analysts emails', async () => {
     const sub = mockUnlockedContractAndRatesFormData()
-    sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
-    const chipPrograms = findPrograms(
-        sub.stateCode,
-        findAllPackageProgramIds(sub)
-    )
-
-    if (chipPrograms instanceof Error) {
-        throw new Error(chipPrograms.message)
-    }
-
+    //Set CHIP program for rate certification programs
+    sub.stateCode = 'MS'
+    sub.programIDs = ['e0819153-5894-4153-937e-aad00ab01a8f']
+    sub.rateProgramIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
     const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
         testEmailConfig,
-        testStateAnalystEmails,
-        chipPrograms
+        testStateAnalystEmails
     )
 
     if (template instanceof Error) {
@@ -323,27 +292,17 @@ test('CHIP contract and rate unlock email does include state specific analysts e
 })
 test('CHIP contract and rate unlock email does not include ratesReviewSharedEmails, cmsRateHelpEmailAddress or state specific analysts emails', async () => {
     const sub = mockUnlockedContractAndRatesFormData()
-    sub.programIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
-    const chipPrograms = findPrograms(
-        sub.stateCode,
-        findAllPackageProgramIds(sub)
-    )
-
-    if (chipPrograms instanceof Error) {
-        throw new Error(chipPrograms.message)
-    }
-
+    //Set CHIP program for rate certification programs
+    sub.stateCode = 'MS'
+    sub.programIDs = ['e0819153-5894-4153-937e-aad00ab01a8f']
+    sub.rateProgramIDs = ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a']
     const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
         testEmailConfig,
-        [],
-        chipPrograms
+        []
     )
-    const excludedEmails = [
-        ...testEmailConfig.ratesReviewSharedEmails,
-        testEmailConfig.cmsRateHelpEmailAddress,
-    ]
+    const excludedEmails = [...testEmailConfig.ratesReviewSharedEmails]
 
     if (template instanceof Error) {
         console.error(template)
@@ -371,8 +330,7 @@ test('does not include rate name on contract only submission unlock', async () =
         sub,
         unlockData,
         testEmailConfig,
-        [],
-        programs
+        []
     )
 
     if (template instanceof Error) {
@@ -393,8 +351,7 @@ test('renders overall email as expected', async () => {
         sub,
         unlockData,
         testEmailConfig,
-        [],
-        programs
+        []
     )
 
     if (template instanceof Error) {

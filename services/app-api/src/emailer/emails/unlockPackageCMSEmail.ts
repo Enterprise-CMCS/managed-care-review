@@ -8,16 +8,18 @@ import {
     stripHTMLFromTemplate,
     generateCMSReviewerEmails,
     renderTemplate,
+    findAllPackageProgramIds,
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
-import { ProgramType, UpdateInfoType } from '../../domain-models'
+import { UpdateInfoType } from '../../domain-models'
+import { logError } from '../../logger'
+import { findPrograms } from '../../postgres'
 
 export const unlockPackageCMSEmail = async (
     pkg: UnlockedHealthPlanFormDataType,
     updateInfo: UpdateInfoType,
     config: EmailConfiguration,
-    stateAnalystsEmails: StateAnalystsEmails,
-    programs: ProgramType[]
+    stateAnalystsEmails: StateAnalystsEmails
 ): Promise<EmailData | Error> => {
     const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
@@ -26,6 +28,15 @@ export const unlockPackageCMSEmail = async (
         pkg,
         stateAnalystsEmails
     )
+    const combinedProgramIDs = findAllPackageProgramIds(pkg)
+    //Get program data from combined program ids
+    const programs = findPrograms(pkg.stateCode, combinedProgramIDs)
+    if (programs instanceof Error) {
+        const errMessage = `${programs.message}, ${pkg.id}`
+        logError('unlockPackageCMSEmail', errMessage)
+        return new Error(errMessage)
+    }
+
     const packageName = generatePackageName(pkg, programs)
 
     const isContractAndRates = pkg.submissionType === 'CONTRACT_AND_RATES'

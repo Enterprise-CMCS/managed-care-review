@@ -2,11 +2,11 @@ import {
     testEmailConfig,
     mockUser,
     mockContractAndRatesFormData,
-    findProgramsHelper as findPrograms,
 } from '../../testHelpers/emailerHelpers'
 import { resubmitPackageStateEmail } from './index'
 import { findAllPackageProgramIds } from '../templateHelpers'
 import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
+import { findPrograms } from '../../postgres'
 
 const resubmitData = {
     updatedBy: 'bob@example.com',
@@ -38,8 +38,7 @@ test('contains correct subject and clearly states successful resubmission', asyn
         submission,
         user,
         resubmitData,
-        testEmailConfig,
-        programs
+        testEmailConfig
     )
 
     if (template instanceof Error) {
@@ -62,8 +61,7 @@ test('contains correct information in body of email', async () => {
         submission,
         user,
         resubmitData,
-        testEmailConfig,
-        programs
+        testEmailConfig
     )
 
     if (template instanceof Error) {
@@ -105,8 +103,7 @@ test('renders overall email as expected', async () => {
         submission,
         user,
         resubmitData,
-        testEmailConfig,
-        programs
+        testEmailConfig
     )
 
     if (template instanceof Error) {

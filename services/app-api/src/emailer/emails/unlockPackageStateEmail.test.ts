@@ -1,11 +1,11 @@
 import {
     testEmailConfig,
     mockUnlockedContractAndRatesFormData,
-    findProgramsHelper as findPrograms,
 } from '../../testHelpers/emailerHelpers'
 import { unlockPackageStateEmail } from './index'
 import { findAllPackageProgramIds } from '../templateHelpers'
 import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
+import { findPrograms } from '../../postgres'
 
 const unlockData = {
     updatedBy: 'josh@example.com',
@@ -36,8 +36,7 @@ test('subject line is correct and clearly states submission is unlocked', async 
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig,
-        programs
+        testEmailConfig
     )
 
     if (template instanceof Error) {
@@ -56,8 +55,7 @@ test('body content is correct', async () => {
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig,
-        programs
+        testEmailConfig
     )
 
     if (template instanceof Error) {
@@ -100,8 +98,7 @@ test('renders overall email as expected', async () => {
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig,
-        programs
+        testEmailConfig
     )
 
     if (template instanceof Error) {

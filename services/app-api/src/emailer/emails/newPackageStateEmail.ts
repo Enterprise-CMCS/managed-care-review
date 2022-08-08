@@ -7,22 +7,33 @@ import {
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { EmailConfiguration, EmailData } from '..'
-import { ProgramType, UserType } from '../../domain-models'
+import { UserType } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
     SubmissionTypeRecord,
     renderTemplate,
     generateStateReceiverEmails,
+    findAllPackageProgramIds,
 } from '../templateHelpers'
+import { logError } from '../../logger'
+import { findPrograms } from '../../postgres'
 
 export const newPackageStateEmail = async (
     pkg: LockedHealthPlanFormDataType,
     user: UserType,
-    config: EmailConfiguration,
-    programs: ProgramType[]
+    config: EmailConfiguration
 ): Promise<EmailData | Error> => {
     const isUnitTest = config.baseUrl === 'http://localhost'
     const receiverEmails = generateStateReceiverEmails(pkg, user)
+    const combinedProgramIDs = findAllPackageProgramIds(pkg)
+    //Get program data from combined program ids
+    const programs = findPrograms(pkg.stateCode, combinedProgramIDs)
+    if (programs instanceof Error) {
+        const errMessage = `${programs.message}, ${pkg.id}`
+        logError('newPackageStateEmail', errMessage)
+        return new Error(errMessage)
+    }
+
     const packageName = generatePackageName(pkg, programs)
 
     const hasRateAmendmentInfo =

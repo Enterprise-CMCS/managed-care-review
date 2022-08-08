@@ -20,7 +20,6 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from './attributeHelper'
 import { EmailParameterStore } from '../parameterStore'
-import { findAllPackageProgramIds } from '../emailer/templateHelpers'
 
 // unlock is a state machine transforming a LockedFormData and turning it into UnlockedFormData
 // Since Unlocked is a strict subset of Locked, this can't error today.
@@ -129,18 +128,6 @@ export function unlockHealthPlanPackageResolver(
             throw new Error(errMessage)
         }
 
-        //Combine programs ids from package and remove duplicates
-        const combinedProgramIDs = findAllPackageProgramIds(draft)
-
-        //Get program data from combined program ids
-        const programs = store.findPrograms(draft.stateCode, combinedProgramIDs)
-        if (programs instanceof Error) {
-            const errMessage = `${programs.message}, ${draft.id}`
-            logError('unlockHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
-        }
-
         // Send emails!
 
         // Get state analysts emails from parameter store
@@ -157,16 +144,11 @@ export function unlockHealthPlanPackageResolver(
             await emailer.sendUnlockPackageCMSEmail(
                 draft,
                 updateInfo,
-                stateAnalystsEmails,
-                programs
+                stateAnalystsEmails
             )
 
         const unlockPackageStateEmailResult =
-            await emailer.sendUnlockPackageStateEmail(
-                draft,
-                updateInfo,
-                programs
-            )
+            await emailer.sendUnlockPackageStateEmail(draft, updateInfo)
 
         if (unlockPackageCMSEmailResult instanceof Error) {
             logError(

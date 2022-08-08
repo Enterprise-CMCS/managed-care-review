@@ -10,19 +10,30 @@ import {
     renderTemplate,
     stripHTMLFromTemplate,
     generateStateReceiverEmails,
+    findAllPackageProgramIds,
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration } from '../'
-import { ProgramType, UpdateInfoType } from '../../domain-models'
+import { UpdateInfoType } from '../../domain-models'
+import { logError } from '../../logger'
+import { findPrograms } from '../../postgres'
 
 export const unlockPackageStateEmail = async (
     pkg: UnlockedHealthPlanFormDataType,
     updateInfo: UpdateInfoType,
-    config: EmailConfiguration,
-    programs: ProgramType[]
+    config: EmailConfiguration
 ): Promise<EmailData | Error> => {
     const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
     const receiverEmails = generateStateReceiverEmails(pkg)
+    const combinedProgramIDs = findAllPackageProgramIds(pkg)
+    //Get program data from combined program ids
+    const programs = findPrograms(pkg.stateCode, combinedProgramIDs)
+    if (programs instanceof Error) {
+        const errMessage = `${programs.message}, ${pkg.id}`
+        logError('unlockPackageStateEmail', errMessage)
+        return new Error(errMessage)
+    }
+
     const packageName = generatePackageName(pkg, programs)
 
     const isContractAndRates = pkg.submissionType === 'CONTRACT_AND_RATES'

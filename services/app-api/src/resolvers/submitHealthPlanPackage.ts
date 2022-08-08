@@ -26,7 +26,6 @@ import {
 } from './attributeHelper'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { EmailParameterStore } from '../parameterStore'
-import { findAllPackageProgramIds } from '../emailer/templateHelpers'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
@@ -246,21 +245,6 @@ export function submitHealthPlanPackageResolver(
 
         const updatedPackage: HealthPlanPackageType = updateResult
 
-        //Combine programs ids from package and remove dupes
-        const combinedProgramIDs = findAllPackageProgramIds(lockedFormData)
-
-        //Get program data from combined program ids
-        const programs = store.findPrograms(
-            updatedPackage.stateCode,
-            combinedProgramIDs
-        )
-        if (programs instanceof Error) {
-            const errMessage = `${programs.message}, ${lockedFormData.id}`
-            logError('submitHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
-        }
-
         // Send emails!
         const status = packageStatus(updatedPackage)
 
@@ -284,25 +268,21 @@ export function submitHealthPlanPackageResolver(
             cmsPackageEmailResult = await emailer.sendResubmittedCMSEmail(
                 lockedFormData,
                 updateInfo,
-                stateAnalystsEmails,
-                programs
+                stateAnalystsEmails
             )
             statePackageEmailResult = await emailer.sendResubmittedStateEmail(
                 lockedFormData,
                 updateInfo,
-                user,
-                programs
+                user
             )
         } else if (status === 'SUBMITTED') {
             cmsPackageEmailResult = await emailer.sendCMSNewPackage(
                 lockedFormData,
-                stateAnalystsEmails,
-                programs
+                stateAnalystsEmails
             )
             statePackageEmailResult = await emailer.sendStateNewPackage(
                 lockedFormData,
-                user,
-                programs
+                user
             )
         }
 
