@@ -392,3 +392,7 @@ jobs:
           cd ./services/app-web
           echo $(pwd)
           ls
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v3
+      - name: Display structure of downloaded files
+        run: ls -R
