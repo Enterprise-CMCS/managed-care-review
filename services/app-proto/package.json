@@ -20,7 +20,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "protobufjs": "^6.11.2"
+        "protobufjs": "^7.0.0"
     },
     "devDependencies": {
         "lint-staged": "^13.0.1"
