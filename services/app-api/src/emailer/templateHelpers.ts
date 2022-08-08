@@ -130,8 +130,12 @@ const generateStateReceiverEmails = (
 const findAllPackageProgramIds = (
     pkg: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
 ): string[] => {
+    const programs = [...pkg.programIDs]
     if (pkg.submissionType === 'CONTRACT_AND_RATES' && pkg.rateProgramIDs) {
-        return Array.from(new Set([...pkg.programIDs, ...pkg.rateProgramIDs]))
+        //return Array.from(new Set([...pkg.programIDs, ...pkg.rateProgramIDs]))
+        pkg.rateProgramIDs.forEach(
+            (id) => !programs.includes(id) && programs.push(id)
+        )
     }
     return pkg.programIDs
 }
