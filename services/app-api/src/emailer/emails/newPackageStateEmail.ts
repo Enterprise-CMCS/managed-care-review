@@ -7,34 +7,30 @@ import {
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { EmailConfiguration, EmailData } from '..'
-import { UserType } from '../../domain-models'
+import { ProgramType, UserType } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
     SubmissionTypeRecord,
     renderTemplate,
     generateStateReceiverEmails,
-    findAllPackageProgramIds,
+    findPackagePrograms,
 } from '../templateHelpers'
-import { logError } from '../../logger'
-import { findPrograms } from '../../postgres'
 
 export const newPackageStateEmail = async (
     pkg: LockedHealthPlanFormDataType,
     user: UserType,
-    config: EmailConfiguration
+    config: EmailConfiguration,
+    statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
     const isUnitTest = config.baseUrl === 'http://localhost'
     const receiverEmails = generateStateReceiverEmails(pkg, user)
-    const combinedProgramIDs = findAllPackageProgramIds(pkg)
-    //Get program data from combined program ids
-    const programs = findPrograms(pkg.stateCode, combinedProgramIDs)
-    if (programs instanceof Error) {
-        const errMessage = `${programs.message}, ${pkg.id}`
-        logError('newPackageStateEmail', errMessage)
-        return new Error(errMessage)
+    const packagePrograms = findPackagePrograms(pkg, statePrograms)
+
+    if (packagePrograms instanceof Error) {
+        return packagePrograms
     }
 
-    const packageName = generatePackageName(pkg, programs)
+    const packageName = generatePackageName(pkg, packagePrograms)
 
     const hasRateAmendmentInfo =
         pkg.rateType === 'AMENDMENT' && pkg.rateAmendmentInfo
@@ -56,7 +52,7 @@ export const newPackageStateEmail = async (
                 : 'Contract effective dates',
         contractDatesStart: formatCalendarDate(pkg.contractDateStart),
         contractDatesEnd: formatCalendarDate(pkg.contractDateEnd),
-        rateName: isContractAndRates && generateRateName(pkg, programs),
+        rateName: isContractAndRates && generateRateName(pkg, packagePrograms),
         rateDateLabel:
             pkg.rateType === 'NEW'
                 ? 'Rating period'

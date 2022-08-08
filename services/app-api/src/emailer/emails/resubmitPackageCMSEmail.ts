@@ -8,20 +8,19 @@ import {
     stripHTMLFromTemplate,
     generateCMSReviewerEmails,
     renderTemplate,
-    findAllPackageProgramIds,
+    findPackagePrograms,
 } from '../templateHelpers'
 
 import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
 import { URL } from 'url'
-import { UpdateInfoType } from '../../domain-models'
-import { logError } from '../../logger'
-import { findPrograms } from '../../postgres'
+import { ProgramType, UpdateInfoType } from '../../domain-models'
 
 export const resubmitPackageCMSEmail = async (
     pkg: LockedHealthPlanFormDataType,
     updateInfo: UpdateInfoType,
     config: EmailConfiguration,
-    stateAnalystsEmails: StateAnalystsEmails
+    stateAnalystsEmails: StateAnalystsEmails,
+    statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
     const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
@@ -30,16 +29,13 @@ export const resubmitPackageCMSEmail = async (
         pkg,
         stateAnalystsEmails
     )
-    const combinedProgramIDs = findAllPackageProgramIds(pkg)
-    //Get program data from combined program ids
-    const programs = findPrograms(pkg.stateCode, combinedProgramIDs)
-    if (programs instanceof Error) {
-        const errMessage = `${programs.message}, ${pkg.id}`
-        logError('resubmitPackageCMSEmail', errMessage)
-        return new Error(errMessage)
+    const packagePrograms = findPackagePrograms(pkg, statePrograms)
+
+    if (packagePrograms instanceof Error) {
+        return packagePrograms
     }
 
-    const packageName = generatePackageName(pkg, programs)
+    const packageName = generatePackageName(pkg, packagePrograms)
 
     const isContractAndRates = pkg.submissionType === 'CONTRACT_AND_RATES'
 
@@ -49,7 +45,7 @@ export const resubmitPackageCMSEmail = async (
         resubmittedOn: formatCalendarDate(updateInfo.updatedAt),
         resubmissionReason: updateInfo.updatedReason,
         shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
-        rateName: isContractAndRates && generateRateName(pkg, programs),
+        rateName: isContractAndRates && generateRateName(pkg, packagePrograms),
         submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
     }
 

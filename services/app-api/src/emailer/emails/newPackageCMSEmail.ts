@@ -12,15 +12,15 @@ import {
     SubmissionTypeRecord,
     generateCMSReviewerEmails,
     renderTemplate,
-    findAllPackageProgramIds,
+    findPackagePrograms,
 } from '../templateHelpers'
-import { logError } from '../../logger'
-import { findPrograms } from '../../postgres'
+import { ProgramType } from '../../domain-models'
 
 export const newPackageCMSEmail = async (
     pkg: LockedHealthPlanFormDataType,
     config: EmailConfiguration,
-    stateAnalystsEmails: StateAnalystsEmails
+    stateAnalystsEmails: StateAnalystsEmails,
+    statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
     // config
     const isUnitTest = config.baseUrl === 'http://localhost'
@@ -30,24 +30,21 @@ export const newPackageCMSEmail = async (
         pkg,
         stateAnalystsEmails
     )
-    const combinedProgramIDs = findAllPackageProgramIds(pkg)
-    //Get program data from combined program ids
-    const programs = findPrograms(pkg.stateCode, combinedProgramIDs)
-    if (programs instanceof Error) {
-        const errMessage = `${programs.message}, ${pkg.id}`
-        logError('newPackageCMSEmail', errMessage)
-        return new Error(errMessage)
+    const packagePrograms = findPackagePrograms(pkg, statePrograms)
+
+    if (packagePrograms instanceof Error) {
+        return packagePrograms
     }
 
-    const packageName = generatePackageName(pkg, programs)
+    const packageName = generatePackageName(pkg, packagePrograms)
 
     const hasRateAmendmentInfo =
         pkg.rateType === 'AMENDMENT' && pkg.rateAmendmentInfo
 
-    const isContractAndRate = pkg.submissionType === 'CONTRACT_AND_RATES'
+    const isContractAndRates = pkg.submissionType === 'CONTRACT_AND_RATES'
 
     const data = {
-        shouldIncludeRates: isContractAndRate,
+        shouldIncludeRates: isContractAndRates,
         packageName: packageName,
         submissionType: SubmissionTypeRecord[pkg.submissionType],
         stateCode: pkg.stateCode,
@@ -58,7 +55,7 @@ export const newPackageCMSEmail = async (
                 : 'Contract effective dates',
         contractDatesStart: formatCalendarDate(pkg.contractDateStart),
         contractDatesEnd: formatCalendarDate(pkg.contractDateEnd),
-        rateName: isContractAndRate && generateRateName(pkg, programs),
+        rateName: isContractAndRates && generateRateName(pkg, packagePrograms),
         rateDateLabel:
             pkg.rateType === 'NEW'
                 ? 'Rating period'

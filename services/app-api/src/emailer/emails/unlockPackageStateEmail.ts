@@ -10,31 +10,27 @@ import {
     renderTemplate,
     stripHTMLFromTemplate,
     generateStateReceiverEmails,
-    findAllPackageProgramIds,
+    findPackagePrograms,
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration } from '../'
-import { UpdateInfoType } from '../../domain-models'
-import { logError } from '../../logger'
-import { findPrograms } from '../../postgres'
+import { ProgramType, UpdateInfoType } from '../../domain-models'
 
 export const unlockPackageStateEmail = async (
     pkg: UnlockedHealthPlanFormDataType,
     updateInfo: UpdateInfoType,
-    config: EmailConfiguration
+    config: EmailConfiguration,
+    statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
     const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
     const receiverEmails = generateStateReceiverEmails(pkg)
-    const combinedProgramIDs = findAllPackageProgramIds(pkg)
-    //Get program data from combined program ids
-    const programs = findPrograms(pkg.stateCode, combinedProgramIDs)
-    if (programs instanceof Error) {
-        const errMessage = `${programs.message}, ${pkg.id}`
-        logError('unlockPackageStateEmail', errMessage)
-        return new Error(errMessage)
+    const packagePrograms = findPackagePrograms(pkg, statePrograms)
+
+    if (packagePrograms instanceof Error) {
+        return packagePrograms
     }
 
-    const packageName = generatePackageName(pkg, programs)
+    const packageName = generatePackageName(pkg, packagePrograms)
 
     const isContractAndRates = pkg.submissionType === 'CONTRACT_AND_RATES'
 
@@ -44,7 +40,7 @@ export const unlockPackageStateEmail = async (
         unlockedOn: formatCalendarDate(updateInfo.updatedAt),
         unlockedReason: updateInfo.updatedReason,
         shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
-        rateName: isContractAndRates && generateRateName(pkg, programs),
+        rateName: isContractAndRates && generateRateName(pkg, packagePrograms),
         submissionURL: new URL(
             `submissions/${pkg.id}/review-and-submit`,
             config.baseUrl
