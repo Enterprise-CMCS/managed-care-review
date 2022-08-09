@@ -31,4 +31,6 @@ export const featureFlags = {
      * Enables selection of programs that apply to rate certification
      */
     RATE_CERT_PROGRAMS: 'rate-certification-programs',
-}
+} as const
+
+export type FeatureFlagType = typeof featureFlags[keyof typeof featureFlags]
