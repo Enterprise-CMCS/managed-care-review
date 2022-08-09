@@ -411,3 +411,8 @@ jobs:
           mkdir -p coverage-all && npx nyc report --reporter lcov --reporter text --reporter json-summary --report-dir coverage-all
           cd coverage-all
           ls -R
+      - name: upload combined test coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: combined-test-coverage
+          path: ./coverage-all/
