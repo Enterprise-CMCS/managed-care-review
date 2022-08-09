@@ -7,10 +7,6 @@ export const featureFlags = {
      Toggles the /health api endpoint
     */
     API_ENABLE_HEALTH_ENDPOINT: 'enable-health-endpoint',
-    /*
-     Toggles the CMS dashboard view
-    */
-    CMS_DASHBOARD: 'cms-dashboard',
     /* 
      Enables the modal that alerts the user to an expiring session
     */

@@ -2,6 +2,7 @@ import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
 } from '../healthPlanFormDataType'
+import { mockMNState } from '../../testHelpers/apolloHelpers'
 
 function newHealthPlanFormData(): UnlockedHealthPlanFormDataType {
     return {
@@ -426,7 +427,11 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
         status: 'DRAFT',
         stateCode: 'MN',
         stateNumber: 5,
-        programIDs: ['snbc'],
+        programIDs: [
+            mockMNState().programs[0].id,
+            mockMNState().programs[1].id,
+            mockMNState().programs[2].id,
+        ],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
         documents: [
@@ -525,7 +530,7 @@ function basicLockedHealthPlanFormData(): LockedHealthPlanFormDataType {
         stateNumber: 5,
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
         documents: [],

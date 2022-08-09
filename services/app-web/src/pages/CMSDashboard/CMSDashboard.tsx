@@ -3,9 +3,7 @@ import classnames from 'classnames'
 import dayjs from 'dayjs'
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
 
-import { featureFlags } from '../../common-code/featureFlags'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { Loading } from '../../components/Loading'
@@ -63,12 +61,6 @@ const StatusTag = ({
 export const CMSDashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
     const { loading, data, error } = useIndexHealthPlanPackagesQuery()
-    const ldClient = useLDClient()
-
-    const showCMSDashboard = ldClient?.variation(
-        featureFlags.CMS_DASHBOARD,
-        false
-    )
 
     if (error) {
         recordJSException(
@@ -90,18 +82,17 @@ export const CMSDashboard = (): React.ReactElement => {
         return <Loading />
     }
     const submissionRows: SubmissionInDashboard[] = []
-
     data?.indexHealthPlanPackages.edges
         .map((edge) => edge.node)
         .forEach((sub) => {
             const currentRevision = sub.revisions[0]
-            const currentSubmissionData = base64ToDomain(
+            const currentFormData = base64ToDomain(
                 currentRevision.node.formDataProto
             )
 
-            if (currentSubmissionData instanceof Error) {
+            if (currentFormData instanceof Error) {
                 recordJSException(
-                    `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${sub.id} Error message: ${currentSubmissionData.message}`
+                    `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${sub.id} Error message: ${currentFormData.message}`
                 )
 
                 return null
@@ -110,39 +101,65 @@ export const CMSDashboard = (): React.ReactElement => {
                 // should not display draft submissions to a CMS user - this is also filtered out on the api side
                 return
             }
+
+            // Calculate proper submission data to display in each row
+            // if UNLOCKED package, form data could be in progress of being edited, show the static form data from the last submitted revision
+            // also, use lastUpdated from unlockData (if unlocked) or last submit (if initial submission)
+            // otherwise, use data from current revision for Submitted or Resubmitted packages
+            let packageDataToDisplay = currentFormData
+            let lastUpdated = currentFormData.updatedAt
+            if (sub.status === 'UNLOCKED') {
+                const previousRevision = sub.revisions[1]
+                const previousFormData = base64ToDomain(
+                    previousRevision.node.formDataProto
+                )
+
+                if (previousFormData instanceof Error) {
+                    recordJSException(
+                        `indexHealthPlanPackagesQuery: Error decoding proto for display of an unlocked submission. ID: ${sub.id} Error message: ${previousFormData.message}`
+                    )
+
+                    return
+                }
+
+                packageDataToDisplay = previousFormData
+
+                if (
+                    !previousRevision?.node?.unlockInfo?.updatedAt &&
+                    !previousRevision?.node?.submitInfo?.updatedAt
+                ) {
+                    recordJSException(
+                        `indexHealthPlanPackagesQuery: Error finding updatedAt for an UNLOCKED SUBMISSION. Check the revision data is properly formatted. ID: ${sub.id}`
+                    )
+
+                    return
+                }
+                lastUpdated =
+                    previousRevision?.node?.unlockInfo?.updatedAt ??
+                    previousRevision?.node?.submitInfo?.updatedAt ??
+                    lastUpdated
+                console.log(lastUpdated)
+            }
+
             const programs = sub.state.programs
+
             submissionRows.push({
                 id: sub.id,
-                name: packageName(currentSubmissionData, programs),
+                name: packageName(packageDataToDisplay, programs),
                 programs: programs.filter((program) =>
-                    currentSubmissionData.programIDs.includes(program.id)
+                    packageDataToDisplay.programIDs.includes(program.id)
                 ),
                 submittedAt: sub.initiallySubmittedAt,
                 status: sub.status,
-                updatedAt: currentSubmissionData.updatedAt,
+                updatedAt: lastUpdated,
                 submissionType:
-                    SubmissionTypeRecord[currentSubmissionData.submissionType],
+                    SubmissionTypeRecord[packageDataToDisplay.submissionType],
                 stateName: sub.state.name,
             })
         })
 
-    // Sort by updatedAt for current revision
+    // Sort by the visible updatedAt for the displayed package (could be either current or the previous is submission in UNLOCKED)
     submissionRows.sort((a, b) => (a['updatedAt'] > b['updatedAt'] ? -1 : 1))
-
-    if (!showCMSDashboard)
-        return (
-            <div id="cms-dashboard-page" className={styles.container}>
-                <GridContainer data-testid="cms-dashboard-page">
-                    <h1>CMS Dashboard</h1>
-                    <p>
-                        The dashboard for CMS users has not been implemented
-                        yet, you will need to access a specific submission by
-                        URL for now.
-                    </p>
-                </GridContainer>
-            </div>
-        )
-
     const hasSubmissions = submissionRows.length > 0
 
     return (
@@ -165,6 +182,7 @@ export const CMSDashboard = (): React.ReactElement => {
                                         <th>Submission type</th>
                                         <th>Programs</th>
                                         <th>Submission date</th>
+                                        <th>Last updated</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
@@ -201,7 +219,7 @@ export const CMSDashboard = (): React.ReactElement => {
                                                             }
                                                         </span>
                                                     </td>
-                                                    <td data-destid="submission-programs">
+                                                    <td data-testid="submission-programs">
                                                         {dashboardSubmission.programs.map(
                                                             (program) => {
                                                                 return (
@@ -227,6 +245,17 @@ export const CMSDashboard = (): React.ReactElement => {
                                                               ).format(
                                                                   'MM/DD/YYYY'
                                                               )
+                                                            : ''}
+                                                    </td>
+                                                    <td data-testid="submission-last-updated">
+                                                        {dashboardSubmission.updatedAt
+                                                            ? dayjs(
+                                                                  dashboardSubmission.updatedAt
+                                                              )
+                                                                  .tz('UTC')
+                                                                  .format(
+                                                                      'MM/DD/YYYY'
+                                                                  )
                                                             : ''}
                                                     </td>
                                                     <td data-testid="submission-status">
