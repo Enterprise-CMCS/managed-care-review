@@ -134,6 +134,7 @@ export const CMSDashboard = (): React.ReactElement => {
 
                     return
                 }
+                // Last updated at value should be CMS unlock time (if its unlocked) or else state submit time (if its just submitted). Fall back to last updated at for the current revision (this shouldn't happen but just making explicit what the fallback is)
                 lastUpdated =
                     previousRevision?.node?.unlockInfo?.updatedAt ??
                     previousRevision?.node?.submitInfo?.updatedAt ??
@@ -157,7 +158,7 @@ export const CMSDashboard = (): React.ReactElement => {
             })
         })
 
-    // Sort by the visible updatedAt for the displayed package (could be either current or the previous is submission in UNLOCKED)
+    // Sort rows by the CMS updatedAt date
     submissionRows.sort((a, b) => (a['updatedAt'] > b['updatedAt'] ? -1 : 1))
     const hasSubmissions = submissionRows.length > 0
 
