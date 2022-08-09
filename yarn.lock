@@ -6702,6 +6702,13 @@
   dependencies:
     "@opentelemetry/api" "^1.0.0"
 
+"@opentelemetry/api-metrics@0.29.2":
+  version "0.29.2"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/api-metrics/-/api-metrics-0.29.2.tgz#daa823e0965754222b49a6ae6133df8b39ff8fd2"
+  integrity sha512-yRdF5beqKuEdsPNoO7ijWCQ9HcyN0Tlgicf8RS6gzGOI54d6Hj7yKquJ6+X9XV+CSRbRWJYb+lOsXyso7uyX2g==
+  dependencies:
+    "@opentelemetry/api" "^1.0.0"
+
 "@opentelemetry/api@^1.0.0", "@opentelemetry/api@^1.0.1", "@opentelemetry/api@^1.1.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.1.0.tgz#563539048255bbe1a5f4f586a4a10a1bb737f44a"
@@ -6765,6 +6772,17 @@
     "@opentelemetry/sdk-trace-web" "^1.0.0"
     "@opentelemetry/semantic-conventions" "^1.0.0"
 
+"@opentelemetry/instrumentation-document-load@^0.29.0":
+  version "0.29.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-document-load/-/instrumentation-document-load-0.29.0.tgz#7ad8737ea71f0f58e610cf10c8edc8ff0deca7be"
+  integrity sha512-zD8vTU8Ddh9jyEDiueR9NIEyaquwXWx059FY+vj0QjSJU5NUJGnWMpJiFWW3gWWmvEae8lX+wKX3aIwci+TJWg==
+  dependencies:
+    "@opentelemetry/core" "^1.0.0"
+    "@opentelemetry/instrumentation" "^0.29.2"
+    "@opentelemetry/sdk-trace-base" "^1.0.0"
+    "@opentelemetry/sdk-trace-web" "^1.0.0"
+    "@opentelemetry/semantic-conventions" "^1.0.0"
+
 "@opentelemetry/instrumentation-fetch@^0.28.0":
   version "0.28.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-fetch/-/instrumentation-fetch-0.28.0.tgz#20843ff66d1c4ebe4d6ad5e29690540a8d0cf49a"
@@ -6810,6 +6828,16 @@
   integrity sha512-hcL+U02vp0vcouoMjoJArP0USBuBXnWF+sAt+Z5k77ROEcSCHZh0DkWigWGMyN8w3M5SpoqRlJiXLDM+9RtXNg==
   dependencies:
     "@opentelemetry/api-metrics" "0.28.0"
+    require-in-the-middle "^5.0.3"
+    semver "^7.3.2"
+    shimmer "^1.2.1"
+
+"@opentelemetry/instrumentation@^0.29.2":
+  version "0.29.2"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation/-/instrumentation-0.29.2.tgz#70e6d4e1a84508f5e9d8c7c426adcd7b0dba6c95"
+  integrity sha512-LXx5V0ONNATQFCE8C5uqnxWSm4rcXLssdLHdXjtGdxRmURqj/JO8jYefqXCD0LzsqEQ6yxOx2GZ0dgXvhBVdTw==
+  dependencies:
+    "@opentelemetry/api-metrics" "0.29.2"
     require-in-the-middle "^5.0.3"
     semver "^7.3.2"
     shimmer "^1.2.1"
