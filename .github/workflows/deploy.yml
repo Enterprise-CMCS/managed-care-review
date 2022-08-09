@@ -395,4 +395,19 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v3
       - name: Display structure of downloaded files
-        run: ls -R
+        run: |
+          ls -R
+          mkdir -p reports
+          mkdir -p .nyc_output
+          cp ./api-test-coverage/coverage-final.json ./reports/from-api.json
+          cp ./unit-test-coverage/coverage-final.json ./reports/from-unit-test.json
+          cp ./cypress-json-coverage-1/coverage-final.json ./reports/from-cypress-1.json
+          cp ./cypress-json-coverage-2/coverage-final.json ./reports/from-cypress-2.json
+          cp ./cypress-json-coverage-3/coverage-final.json ./reports/from-cypress-3.json
+          cp ./cypress-json-coverage-4/coverage-final.json ./reports/from-cypress-4.json
+          cp ./cypress-json-coverage-5/coverage-final.json ./reports/from-cypress-5.json
+          cp ./cypress-json-coverage-6/coverage-final.json ./reports/from-cypress-6.json
+          npx nyc merge reports && mv coverage.json .nyc_output/out.json
+          mkdir -p coverage-all && npx nyc report --reporter lcov --reporter text --reporter json-summary --report-dir coverage-all
+          cd coverage-all
+          ls -R
