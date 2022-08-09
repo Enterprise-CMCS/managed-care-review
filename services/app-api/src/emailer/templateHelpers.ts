@@ -7,7 +7,8 @@ import {
     SubmissionType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { EmailConfiguration, StateAnalystsEmails } from '.'
-import { UserType } from '../domain-models'
+import { ProgramType, UserType } from '../domain-models'
+import { logError } from '../logger'
 
 // ETA SETUP
 Eta.configure({
@@ -48,13 +49,6 @@ const renderTemplate = async <T>(
 
 // SHARED EMAIL LOGIC
 // Types
-type UpdatedEmailData = {
-    packageName: string
-    updatedBy: string
-    updatedAt: Date
-    updatedReason: string
-    stateAnalystsEmail?: string[]
-}
 
 // Constants
 // This should reference UUIDS in the statePrograms.json in src/data/
@@ -82,7 +76,7 @@ const pruneDuplicateEmails = (emails: string[]): string[] =>
 // Determine who should be notified as a reviewer for a given health plan package and state
 const generateCMSReviewerEmails = (
     config: EmailConfiguration,
-    submission: LockedHealthPlanFormDataType | UnlockedHealthPlanFormDataType,
+    pkg: LockedHealthPlanFormDataType | UnlockedHealthPlanFormDataType,
     stateAnalystsEmails: StateAnalystsEmails
 ): string[] => {
     //Combine CMS emails along with State specific analyst emails.
@@ -90,6 +84,8 @@ const generateCMSReviewerEmails = (
         ...config.cmsReviewSharedEmails,
         ...stateAnalystsEmails,
     ]
+
+    const programIDs = findAllPackageProgramIds(pkg)
 
     //chipReviewerEmails does not include OACT and DMCP emails
     const chipReviewerEmails = cmsReviewSharedEmails.filter(
@@ -101,12 +97,13 @@ const generateCMSReviewerEmails = (
     ]
 
     if (
-        submission.submissionType === 'CONTRACT_AND_RATES' &&
-        submission.stateCode !== 'PR' &&
-        !includesChipPrograms(submission.programIDs)
+        pkg.submissionType === 'CONTRACT_AND_RATES' &&
+        pkg.stateCode !== 'PR' &&
+        !includesChipPrograms(programIDs)
     ) {
         return pruneDuplicateEmails(contractAndRateReviewerEmails)
-    } else if (includesChipPrograms(submission.programIDs)) {
+        //
+    } else if (includesChipPrograms(programIDs)) {
         return pruneDuplicateEmails(chipReviewerEmails)
     }
 
@@ -128,6 +125,37 @@ const generateStateReceiverEmails = (
     )
 
     return pruneDuplicateEmails(stateReceiverEmails)
+}
+
+//Finds all programs ids in a package and combines them into one array removing duplicates.
+const findAllPackageProgramIds = (
+    pkg: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
+): string[] => {
+    const programs = [...pkg.programIDs]
+    if (pkg.submissionType === 'CONTRACT_AND_RATES' && pkg.rateProgramIDs) {
+        pkg.rateProgramIDs.forEach(
+            (id) => !programs.includes(id) && programs.push(id)
+        )
+    }
+    return programs
+}
+
+//Find state programs from package programs ids
+const findPackagePrograms = (
+    pkg: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType,
+    statePrograms: ProgramType[]
+): ProgramType[] | Error => {
+    const programIDs = findAllPackageProgramIds(pkg)
+    const programs = statePrograms.filter((program) =>
+        programIDs.includes(program.id)
+    )
+    if (!programs || programs.length !== programIDs.length) {
+        const errMessage = `Can't find programs ${programIDs} from state ${pkg.stateCode}`
+        logError('newPackageCMSEmail', errMessage)
+        return new Error(errMessage)
+    }
+
+    return programs
 }
 
 // Clean out HTML tags from an HTML based template
@@ -155,6 +183,6 @@ export {
     generateStateReceiverEmails,
     renderTemplate,
     SubmissionTypeRecord,
+    findAllPackageProgramIds,
+    findPackagePrograms,
 }
-
-export type { UpdatedEmailData }

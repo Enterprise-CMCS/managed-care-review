@@ -37,6 +37,14 @@ function defaultFloridaProgram(): ProgramType {
     }
 }
 
+function defaultFloridaRateProgram(): ProgramType {
+    return {
+        id: '3b8d8fa1-1fa6-4504-9c5b-ef522877fe1e',
+        fullName: 'Long-term Care Program',
+        name: 'LTC',
+    }
+}
+
 function getProgramsFromState(stateCode: StateCodeType): ProgramType[] {
     const state = statePrograms.states.find((st) => st.code === stateCode)
 
@@ -164,6 +172,10 @@ const createAndUpdateTestHealthPlanPackage = async (
     const pkg = await createTestHealthPlanPackage(server, stateCode)
     const draft = latestFormData(pkg)
 
+    const ratePrograms = stateCode
+        ? getProgramsFromState(stateCode)
+        : [defaultFloridaRateProgram()]
+
     ;(draft.submissionType = 'CONTRACT_AND_RATES' as const),
         (draft.submissionDescription = 'An updated submission')
     draft.stateContacts = [
@@ -207,6 +219,8 @@ const createAndUpdateTestHealthPlanPackage = async (
             documentCategories: ['RATES' as const],
         },
     ]
+    //We only want one rate ID and use last program in list to differentiate from programID if possible.
+    draft.rateProgramIDs = [ratePrograms.reverse()[0].id]
 
     Object.assign(draft, partialUpdates)
 
@@ -339,4 +353,5 @@ export {
     resubmitTestHealthPlanPackage,
     defaultContext,
     defaultFloridaProgram,
+    defaultFloridaRateProgram,
 }

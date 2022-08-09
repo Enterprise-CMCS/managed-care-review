@@ -2,7 +2,6 @@ import { UnlockedHealthPlanFormDataType } from './UnlockedHealthPlanFormDataType
 import { ModifiedProvisions } from './ModifiedProvisions'
 import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import { HealthPlanFormDataType } from './HealthPlanFormDataType'
-import { RateDataType } from '.'
 import { formatRateNameDate } from '../../common-code/dateHelpers'
 
 const isContractOnly = (
@@ -162,11 +161,17 @@ function programNames(
 }
 
 function packageName(
-    submission: HealthPlanFormDataType,
-    statePrograms: ProgramArgType[]
+    pkg: HealthPlanFormDataType,
+    statePrograms: ProgramArgType[],
+    programIDs?: string[]
 ): string {
-    const padNumber = submission.stateNumber.toString().padStart(4, '0')
-    const pNames = programNames(statePrograms, submission.programIDs)
+    const padNumber = pkg.stateNumber.toString().padStart(4, '0')
+    const pNames =
+        // This ternary is needed because programIDs passed in could be undefined or an empty string, in that case
+        // we want to default to using programIDs from submission
+        programIDs && programIDs.length > 0
+            ? programNames(statePrograms, programIDs)
+            : programNames(statePrograms, pkg.programIDs)
     const formattedProgramNames = pNames
         .sort(naturalSort)
         .map((n) =>
@@ -176,12 +181,12 @@ function packageName(
                 .toUpperCase()
         )
         .join('-')
-    return `MCR-${submission.stateCode.toUpperCase()}-${padNumber}-${formattedProgramNames}`
+    return `MCR-${pkg.stateCode.toUpperCase()}-${padNumber}-${formattedProgramNames}`
 }
 
 const generateRateName = (
-    rateData: RateDataType,
-    submissionName: string
+    pkg: HealthPlanFormDataType,
+    statePrograms: ProgramArgType[]
 ): string => {
     const {
         rateType,
@@ -189,8 +194,10 @@ const generateRateName = (
         rateDateCertified,
         rateDateEnd,
         rateDateStart,
-    } = rateData
-    let rateName = `${submissionName}-RATE`
+        rateProgramIDs,
+    } = pkg
+
+    let rateName = `${packageName(pkg, statePrograms, rateProgramIDs)}-RATE`
 
     if (rateType === 'AMENDMENT' && rateAmendmentInfo?.effectiveDateStart) {
         rateName = rateName.concat(

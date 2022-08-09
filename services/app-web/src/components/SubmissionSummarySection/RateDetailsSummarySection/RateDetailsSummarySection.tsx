@@ -51,7 +51,7 @@ export const RateDetailsSummarySection = ({
         false
     )
 
-    const rateName = generateRateName(submission, submissionName)
+    const rateName = generateRateName(submission, statePrograms)
 
     const rateCapitationType = submission.rateCapitationType
         ? submission.rateCapitationType === 'RATE_CELL'
