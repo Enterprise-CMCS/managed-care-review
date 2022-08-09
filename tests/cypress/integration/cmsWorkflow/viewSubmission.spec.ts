@@ -1,89 +1,70 @@
 describe('CMS User can view submission', () => {
-    //     it('state user can complete a submission, CMS user can retrieve it', () => {
-    //         cy.logInAsStateUser()
-    //         cy.waitForApiToLoad()
-    //         cy.startNewContractAndRatesSubmission()
-    //         cy.navigateForm('CONTINUE')
-    //         cy.findByText(/^MN-PMAP-/).should('exist')
-    //         // Fill out contract details
-    //         cy.findByText('Base contract').click()
-    //         cy.findByLabelText('Start date').type('04/01/2024')
-    //         cy.findByLabelText('End date').type('03/31/2025').blur()
-    //         cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
-    //         cy.findByLabelText('1932(a) State Plan Authority').safeClick()
-    //         cy.findAllByTestId('errorMessage').should('have.length', 0)
-    //         cy.navigateForm('CONTINUE')
-    //         //Fill out rate details
-    //         cy.findByText('New rate certification').click()
-    //         cy.findByLabelText('Start date').type('02/29/2024')
-    //         cy.findByLabelText('End date').type('02/28/2025')
-    //         cy.findByLabelText('Date certified').type('03/01/2024')
-    //         cy.navigateForm('CONTINUE')
-    //         // fill out state contacts
-    //         cy.findAllByLabelText('Name').eq(0).type('Test Person')
-    //         cy.findAllByLabelText('Title/Role').eq(0).type('Fancy Title')
-    //         cy.findAllByLabelText('Email').eq(0).type('test@test.com')
-    //         // add actuary contact
-    //         cy.findAllByLabelText('Name').eq(1).type('Act Person')
-    //         cy.findAllByLabelText('Title/Role').eq(1).type('Act Title')
-    //         cy.findAllByLabelText('Email').eq(1).type('act@test.com')
-    //         cy.findByLabelText('Mercer').safeClick()
-    //         // actuary communication preference
-    //         cy.findByText(
-    //             `OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`
-    //         ).click()
-    //         // Continue button navigates to documents page
-    //         cy.findByRole('button', {
-    //             name: 'Continue',
-    //         }).safeClick()
-    //         // Add documents
-    //         cy.findByTestId('file-input-input').attachFile(
-    //             'documents/trussel-guide.pdf'
-    //         )
-    //         cy.findByText(/Upload failed/).should('not.exist')
-    //         cy.findByText('Duplicate file, please remove').should('not.exist')
-    //         cy.waitForDocumentsToLoad()
-    //         // Navigate review and submit page
-    //         cy.navigateForm('CONTINUE')
-    //         // Store submission name for reference later
-    //         let submissionId = ''
-    //         cy.location().then((fullUrl) => {
-    //             const { pathname } = fullUrl
-    //             const pathnameArray = pathname.split('/')
-    //             submissionId = pathnameArray[2]
-    //         })
-    //         // Submit, sent to dashboard
-    //         cy.navigateForm('SUBMIT')
-    //         cy.findByRole('dialog').should('exist')
-    //         cy.navigateForm('SUBMIT')
-    //         cy.waitForApiToLoad()
-    //         cy.findByText('Dashboard').should('exist')
-    //         cy.findByText('PMAP').should('exist')
-    //         // View submission summary
-    //         cy.location().then((loc) => {
-    //             expect(loc.search).to.match(/.*justSubmitted=*/)
-    //             const submissionName = loc.search.split('=').pop()
-    //             cy.findByText(`${submissionName} was sent to CMS`).should('exist')
-    //             cy.findByText(submissionName).should('exist').click()
-    //             cy.url({ timeout: 10_000 }).should('contain', submissionId)
-    //             cy.findByTestId('submission-summary').should('exist')
-    //             cy.findByRole('heading', {
-    //                 name: `Minnesota ${submissionName}`,
-    //             }).should('exist')
-    //             cy.findByText('Rate details').should('exist')
-    //             cy.findByText('New rate certification').should('exist')
-    //             cy.findByText('02/29/2024 - 02/28/2025').should('exist')
-    //             cy.findByRole('button', {
-    //                 name: 'Sign out',
-    //             })
-    //                 .should('exist')
-    //                 .click()
-    //             ////// Now login as a CMS User. With seed data this can go away, but that's alot for now
-    //             const submissionPath = `/submissions/${submissionId}`
-    //             cy.log('GOING TO', submissionPath)
-    //             cy.visit(submissionPath)
-    //             cy.logInAsCMSUser({ initialURL: submissionPath })
-    //             cy.findByTestId('submission-summary').should('exist')
-    //         })
-    //     })
+        // state user adds a new package
+        cy.logInAsStateUser()
+        cy.startNewContractAndRatesSubmission()
+        cy.fillOutBaseContractDetails()
+        cy.navigateForm('CONTINUE')
+        cy.fillOutNewRateCertification()
+        cy.navigateForm('CONTINUE')
+        cy.fillOutStateContact()
+        cy.fillOutActuaryContact()
+        cy.navigateForm('CONTINUE')
+        cy.fillOutSupportingDocuments()
+        cy.navigateForm('CONTINUE')
+
+        // store submission id for reference later
+        let submissionId = ''
+        cy.location().then((fullUrl) => {
+            const { pathname } = fullUrl
+            const pathnameArray = pathname.split('/')
+            submissionId = pathnameArray[2]
+        })
+
+        // submit package
+        cy.findByRole('heading', { level: 2, name: /Review and submit/ })
+        cy.submitStateSubmissionForm()
+        cy.findByText('Dashboard').should('exist')
+        cy.findByText('Programs').should('exist')
+
+        // store submission name for later
+        cy.location().then((loc) => {
+            expect(loc.search).to.match(/.*justSubmitted=*/)
+            const submissionName = loc.search.split('=').pop()
+            if (submissionName === undefined) {
+                throw new Error('No submission name found' + loc.search)
+            }
+
+        // sign out state user
+            cy.findByRole('button', {
+                    name: 'Sign out',
+                })
+                    .should('exist')
+                    .click()
+            //  sign in CMS user 
+            cy.logInAsCMSUser()
+            cy.findByTestId('dashboard').should('exist')
+            cy.findByText('Dashboard').should('exist') 
+            cy.findByText(submissionName).should('exist')
+            // check the table of submissions--find a draft row, then the link in the ID column
+            cy.get('table')
+                .contains('span', 'Submitted')
+                .eq(1)
+                .parents('tr')
+                .findByTestId('submission-id')
+                .find('a')
+                .should('have.attr', 'href')
+                // draft submission URL is /submissions/${submission.id}/type
+                .and('include', 'type')
+            cy.get('table')
+                .contains('span', 'draft')
+                .eq(0)
+            cy.get('table')
+                .contains('span', 'Submitted')
+                .eq(0)
+                .parents('tr')
+                .findByTestId('submission-date')
+                .should('not.be.empty')
+            })
+        })
+    
 })

@@ -138,7 +138,6 @@ export const CMSDashboard = (): React.ReactElement => {
                     previousRevision?.node?.unlockInfo?.updatedAt ??
                     previousRevision?.node?.submitInfo?.updatedAt ??
                     lastUpdated
-                console.log(lastUpdated)
             }
 
             const programs = sub.state.programs

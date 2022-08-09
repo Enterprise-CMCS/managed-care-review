@@ -535,7 +535,7 @@ export function mockUnlockedHealthPlanPackage(
     const b64Previous = domainToBase64({
         ...unlockedWithALittleBitOfEverything(),
     })
-    console.log(unlockInfo)
+
     return {
         id: 'test-id-123',
         status: 'UNLOCKED',
