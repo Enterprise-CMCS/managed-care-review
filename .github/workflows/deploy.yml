@@ -406,7 +406,7 @@ jobs:
           cp ./cypress-json-coverage-4/coverage-final.json ./cypress_temp/from-cypress-4.json
           cp ./cypress-json-coverage-5/coverage-final.json ./cypress_temp/from-cypress-5.json
           cp ./cypress-json-coverage-6/coverage-final.json ./cypress_temp/from-cypress-6.json
-          npx nyc merge cypress_temp
+          npx nyc merge cypress_temp ./reports/from-cypress.json
           echo temp merge done
           ls ./cypress_temp
           cp ./api-test-coverage/coverage-final.json ./reports/from-api.json
