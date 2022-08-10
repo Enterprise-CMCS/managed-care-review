@@ -6,7 +6,7 @@ import {
 } from '../../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
-import { formatRateNameDate } from '../../../common-code/dateHelpers'
+import { generateRateName } from '../../../common-code/healthPlanFormDataType'
 
 describe('RateDetailsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()
@@ -89,6 +89,9 @@ describe('RateDetailsSummarySection', () => {
 
     it('can render correct rate name for new rate submission', () => {
         const submission = mockStateSubmission()
+        submission.rateProgramIDs = undefined
+
+        const statePrograms = mockMNState().programs
         renderWithProviders(
             <RateDetailsSummarySection
                 submission={submission}
@@ -97,11 +100,7 @@ describe('RateDetailsSummarySection', () => {
                 statePrograms={statePrograms}
             />
         )
-        const rateName = `MN-MSHO-0003-RATE-${formatRateNameDate(
-            submission.rateDateStart
-        )}-${formatRateNameDate(
-            submission.rateDateEnd
-        )}-CERTIFICATION-${formatRateNameDate(submission.rateDateCertified)}`
+        const rateName = generateRateName(submission, statePrograms)
         expect(screen.getByText(rateName)).toBeInTheDocument()
     })
 
@@ -117,6 +116,8 @@ describe('RateDetailsSummarySection', () => {
             },
         }
 
+        const statePrograms = mockMNState().programs
+
         renderWithProviders(
             <RateDetailsSummarySection
                 submission={submission}
@@ -126,16 +127,13 @@ describe('RateDetailsSummarySection', () => {
             />
         )
 
-        const rateName = `MN-PMAP-0001-RATE-${formatRateNameDate(
-            submission.rateAmendmentInfo.effectiveDateStart
-        )}-${formatRateNameDate(
-            submission.rateAmendmentInfo.effectiveDateEnd
-        )}-AMENDMENT-${formatRateNameDate(submission.rateDateCertified)}`
+        const rateName = generateRateName(submission, statePrograms)
 
         expect(screen.getByText(rateName)).toBeInTheDocument()
     })
 
     it('can render all rate details fields for new rate certification submission', () => {
+        const statePrograms = mockMNState().programs
         renderWithProviders(
             <RateDetailsSummarySection
                 submission={stateSubmission}
@@ -144,13 +142,7 @@ describe('RateDetailsSummarySection', () => {
             />
         )
 
-        const rateName = `MN-MSHO-0003-RATE-${formatRateNameDate(
-            stateSubmission.rateDateStart
-        )}-${formatRateNameDate(
-            stateSubmission.rateDateEnd
-        )}-CERTIFICATION-${formatRateNameDate(
-            stateSubmission.rateDateCertified
-        )}`
+        const rateName = generateRateName(stateSubmission, statePrograms)
 
         expect(screen.getByText(rateName)).toBeInTheDocument()
         expect(
@@ -317,7 +309,7 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
     })
     // TODO: Enable test after rate certification program feature is fully implemented
-    it.skip('renders programs that apply to rate certification', async () => {
+    it('renders programs that apply to rate certification', async () => {
         const draftSubmission = mockContractAndRatesDraft()
         draftSubmission.rateProgramIDs = [
             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',

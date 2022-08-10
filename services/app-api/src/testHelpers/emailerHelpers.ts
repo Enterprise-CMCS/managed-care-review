@@ -4,7 +4,6 @@ import {
     Emailer,
     newPackageCMSEmail,
     newPackageStateEmail,
-    UpdatedEmailData,
     unlockPackageCMSEmail,
     unlockPackageStateEmail,
     resubmitPackageStateEmail,
@@ -12,9 +11,10 @@ import {
 } from '../emailer'
 import {
     LockedHealthPlanFormDataType,
+    ProgramArgType,
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { UserType, StateUserType } from '../domain-models'
+import { StateUserType } from '../domain-models'
 
 const testEmailConfig: EmailConfiguration = {
     stage: 'LOCAL',
@@ -66,14 +66,14 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         ),
         sendCMSNewPackage: async function (
             submission,
-            submissionName,
-            stateAnalystsEmails
+            stateAnalystsEmails,
+            statePrograms
         ): Promise<void | Error> {
             const emailData = await newPackageCMSEmail(
                 submission,
-                submissionName,
                 config,
-                stateAnalystsEmails
+                stateAnalystsEmails,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -83,14 +83,14 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         },
         sendStateNewPackage: async function (
             submission,
-            submissionName,
-            user
+            user,
+            statePrograms
         ): Promise<void | Error> {
             const emailData = await newPackageStateEmail(
                 submission,
-                submissionName,
                 user,
-                config
+                config,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -100,14 +100,16 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         },
         sendUnlockPackageCMSEmail: async function (
             submission,
-            updatedEmailData,
-            stateAnalystsEmails
+            updateInfo,
+            stateAnalystsEmails,
+            statePrograms
         ): Promise<void | Error> {
             const emailData = await unlockPackageCMSEmail(
                 submission,
-                updatedEmailData,
+                updateInfo,
                 config,
-                stateAnalystsEmails
+                stateAnalystsEmails,
+                statePrograms
             )
 
             if (emailData instanceof Error) {
@@ -118,12 +120,14 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         },
         sendUnlockPackageStateEmail: async function (
             submission,
-            updatedEmailData
+            updateInfo,
+            statePrograms
         ): Promise<void | Error> {
             const emailData = await unlockPackageStateEmail(
                 submission,
-                updatedEmailData,
-                config
+                updateInfo,
+                config,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -132,15 +136,17 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
             }
         },
         sendResubmittedStateEmail: async function (
-            submission: LockedHealthPlanFormDataType,
-            updatedEmailData: UpdatedEmailData,
-            user: UserType
+            submission,
+            updateInfo,
+            user,
+            statePrograms
         ): Promise<void | Error> {
             const emailData = await resubmitPackageStateEmail(
                 submission,
                 user,
-                updatedEmailData,
-                config
+                updateInfo,
+                config,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -150,14 +156,16 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         },
         sendResubmittedCMSEmail: async function (
             submission,
-            updatedEmailData,
-            stateAnalystsEmails
+            updateInfo,
+            stateAnalystsEmails,
+            statePrograms
         ): Promise<void | Error> {
             const emailData = await resubmitPackageCMSEmail(
                 submission,
-                updatedEmailData,
+                updateInfo,
                 config,
-                stateAnalystsEmails
+                stateAnalystsEmails,
+                statePrograms
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -177,6 +185,60 @@ const mockUser = (): StateUserType => {
     }
 }
 
+type State = {
+    name: string
+    programs: ProgramArgType[]
+    code: string
+}
+
+export function mockMNState(): State {
+    return {
+        name: 'Minnesota',
+        programs: [
+            {
+                id: 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                fullName: 'Special Needs Basic Care',
+                name: 'SNBC',
+            },
+            {
+                id: 'd95394e5-44d1-45df-8151-1cc1ee66f100',
+                fullName: 'Prepaid Medical Assistance Program',
+                name: 'PMAP',
+            },
+            {
+                id: 'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
+                fullName: 'Minnesota Senior Care Plus ',
+                name: 'MSC+',
+            },
+            {
+                id: '3fd36500-bf2c-47bc-80e8-e7aa417184c5',
+                fullName: 'Minnesota Senior Health Options',
+                name: 'MSHO',
+            },
+        ],
+        code: 'MN',
+    }
+}
+
+export function mockMSState(): State {
+    return {
+        name: 'Mississippi',
+        programs: [
+            {
+                id: 'e0819153-5894-4153-937e-aad00ab01a8f',
+                fullName: 'Mississippi Coordinated Access Network',
+                name: 'MSCAN',
+            },
+            {
+                id: '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
+                fullName: 'CHIP',
+                name: 'CHIP',
+            },
+        ],
+        code: 'MS',
+    }
+}
+
 const mockContractAndRatesFormData = (
     submissionPartial?: Partial<LockedHealthPlanFormDataType>
 ): LockedHealthPlanFormDataType => {
@@ -187,7 +249,7 @@ const mockContractAndRatesFormData = (
         stateNumber: 3,
         id: 'test-abc-125',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A submitted submission',
         submittedAt: new Date(),
@@ -231,6 +293,7 @@ const mockContractAndRatesFormData = (
             },
         ],
         actuaryContacts: [],
+        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
         ...submissionPartial,
     }
 }
@@ -245,7 +308,7 @@ const mockUnlockedContractAndRatesFormData = (
         stateNumber: 3,
         id: 'test-abc-125',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A submitted submission',
         documents: [
@@ -288,6 +351,7 @@ const mockUnlockedContractAndRatesFormData = (
             },
         ],
         actuaryContacts: [],
+        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
         ...submissionPartial,
     }
 }
@@ -302,7 +366,7 @@ const mockUnlockedContractOnlyFormData = (
         stateNumber: 3,
         id: 'test-abc-125',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A submitted submission',
         documents: [
@@ -348,7 +412,7 @@ const mockContractOnlyFormData = (
         stateNumber: 3,
         id: 'test-abc-125',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A submitted submission',
         submittedAt: new Date(),
@@ -395,7 +459,7 @@ const mockContractAmendmentFormData = (
         stateNumber: 3,
         id: 'test-abc-125',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A submitted submission',
         submittedAt: new Date(),
@@ -439,6 +503,7 @@ const mockContractAmendmentFormData = (
             },
         ],
         actuaryContacts: [],
+        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
         ...submissionPartial,
     }
 }

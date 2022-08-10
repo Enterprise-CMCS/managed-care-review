@@ -2,14 +2,15 @@ import {
     testEmailConfig,
     mockUser,
     mockContractAndRatesFormData,
+    mockMNState,
 } from '../../testHelpers/emailerHelpers'
 import { resubmitPackageStateEmail } from './index'
+import { findPackagePrograms } from '../templateHelpers'
+import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
 
 const resubmitData = {
-    packageName: 'MCR-VA-CCCPLUS-0002',
     updatedBy: 'bob@example.com',
     updatedAt: new Date('02/01/2022'),
-    rateDateCertified: new Date('2020-12-01'),
     updatedReason: 'Added rate certification.',
 }
 const user = mockUser()
@@ -21,12 +22,21 @@ const submission = {
     rateDateEnd: new Date('2021-11-31'),
     rateDateCertified: new Date('2020-12-01'),
 }
+const defaultStatePrograms = mockMNState().programs
+const packagePrograms = findPackagePrograms(submission, defaultStatePrograms)
+
+if (packagePrograms instanceof Error) {
+    throw new Error(packagePrograms.message)
+}
+
 test('contains correct subject and clearly states successful resubmission', async () => {
+    const name = packageName(submission, packagePrograms)
     const template = await resubmitPackageStateEmail(
         submission,
         user,
         resubmitData,
-        testEmailConfig
+        testEmailConfig,
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {
@@ -36,11 +46,9 @@ test('contains correct subject and clearly states successful resubmission', asyn
 
     expect(template).toEqual(
         expect.objectContaining({
-            subject: expect.stringContaining(
-                `${resubmitData.packageName} was resubmitted`
-            ),
+            subject: expect.stringContaining(`${name} was resubmitted`),
             bodyText: expect.stringMatching(
-                `${resubmitData.packageName} was successfully resubmitted`
+                `${name} was successfully resubmitted`
             ),
         })
     )
@@ -51,7 +59,8 @@ test('contains correct information in body of email', async () => {
         submission,
         user,
         resubmitData,
-        testEmailConfig
+        testEmailConfig,
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {
@@ -93,7 +102,8 @@ test('renders overall email as expected', async () => {
         submission,
         user,
         resubmitData,
-        testEmailConfig
+        testEmailConfig,
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {

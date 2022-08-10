@@ -334,6 +334,27 @@ export const RateDetails = ({
         }
     }
 
+    const generateErrorSummaryErrors = (
+        errors: FormikErrors<RateDetailsFormValues>
+    ) => {
+        const errorObject = {}
+        const formikErrors = { ...errors }
+
+        if (documentsErrorMessage) {
+            Object.assign(errorObject, {
+                [documentsErrorKey]: documentsErrorMessage,
+            })
+        }
+        if (formikErrors.rateProgramIDs) {
+            Object.assign(errorObject, {
+                '#rateProgramIDs': formikErrors.rateProgramIDs,
+            })
+            delete formikErrors.rateProgramIDs
+        }
+
+        return { ...errorObject, ...formikErrors }
+    }
+
     return (
         <Formik
             initialValues={rateDetailsInitialValues}
@@ -374,15 +395,9 @@ export const RateDetails = ({
                             <FormGroup error={showFileUploadError}>
                                 {shouldValidate && (
                                     <ErrorSummary
-                                        errors={
-                                            documentsErrorMessage
-                                                ? {
-                                                      [documentsErrorKey]:
-                                                          documentsErrorMessage,
-                                                      ...errors,
-                                                  }
-                                                : errors
-                                        }
+                                        errors={generateErrorSummaryErrors(
+                                            errors
+                                        )}
                                         headingRef={errorSummaryHeadingRef}
                                     />
                                 )}
@@ -438,12 +453,13 @@ export const RateDetails = ({
                                         {/* @ts-ignore */}
                                         {({ form }) => (
                                             <ProgramSelect
-                                                id="rateProgramIDs"
                                                 name="rateProgramIDs"
+                                                inputId="rateProgramIDs"
                                                 statePrograms={statePrograms}
                                                 programIDs={
                                                     values.rateProgramIDs
                                                 }
+                                                aria-label="programs (required)"
                                                 onChange={(selectedOption) =>
                                                     form.setFieldValue(
                                                         'rateProgramIDs',
