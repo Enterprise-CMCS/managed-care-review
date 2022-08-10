@@ -4,6 +4,7 @@ import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import { HealthPlanFormDataType } from './HealthPlanFormDataType'
 import { RateDataType } from '.'
 import { formatRateNameDate } from '../../common-code/dateHelpers'
+import { ProgramArgType } from '.'
 
 const isContractOnly = (
     sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
@@ -141,12 +142,6 @@ const naturalSort = (a: string, b: string): number => {
 // Since these functions are in common code, we don't want to rely on the api or gql program types
 // instead we create an interface with what is required for these functions, since both those types
 // implement it, we can use it interchangeably
-interface ProgramArgType {
-    id: string
-    name: string // short name. This is used most often in the application including in submission name
-    fullName: string // full name is used in submission summary page
-}
-
 // Pull out the programs names for display from the program IDs
 function programNames(
     programs: ProgramArgType[],
@@ -239,5 +234,3 @@ export {
     packageName,
     generateRateName,
 }
-
-export type { ProgramArgType }
