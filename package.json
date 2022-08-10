@@ -25,7 +25,7 @@
         "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
         "cypress:open": "cypress open --env AUTH_MODE=LOCAL",
         "cypress:run": "rm -rf .nyc_output && ./node_modules/.bin/cypress run --env AUTH_MODE=LOCAL --headless --browser chrome",
-        "test:coverage": "echo combining reports",
+        "test:coverage": "yarn run appwebtest && yarn run appapitest && yarn run cypress:run",
         "pretest:coverage": "rm -rf .nyc_output",
         "posttest:coverage": "yarn run report:combined",
         "mkdir:reports": "mkdir -p reports",
