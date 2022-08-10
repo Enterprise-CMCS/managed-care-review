@@ -35,3 +35,7 @@ model State {
   latestStateSubmissionNumber Int                      @default(0)
   statePackages               HealthPlanPackageTable[]
 }
+
+model ProtoMigrationsTable {
+  migrationName String @id
+}
