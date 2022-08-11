@@ -17,7 +17,7 @@ import {
     Program,
     useIndexHealthPlanPackagesQuery,
 } from '../../gen/gqlClient'
-import { mostRecentDate, isDate } from '../../common-code/dateHelpers'
+import { mostRecentDate } from '../../common-code/dateHelpers'
 import styles from '../StateDashboard/StateDashboard.module.scss'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
@@ -157,11 +157,11 @@ export const CMSDashboard = (): React.ReactElement => {
                 ])
             }
 
-            if (!isDate(lastUpdated)) {
+            if (!lastUpdated) {
                 recordJSException(
                     `CMSDashboard: Cannot find valid last updated date from submit and unlock info. Falling back to current revision's last edit timestamp. ID: ${sub.id}`
                 )
-                lastUpdated = currentFormData.updatedAt as Date
+                lastUpdated = new Date(currentFormData.updatedAt)
             }
             const programs = sub.state.programs
 
