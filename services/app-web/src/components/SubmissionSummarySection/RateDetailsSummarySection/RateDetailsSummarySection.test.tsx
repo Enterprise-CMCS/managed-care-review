@@ -309,27 +309,28 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
     })
     // TODO: Enable test after rate certification program feature is fully implemented
-    it('renders programs that apply to rate certification', async () => {
-        const draftSubmission = mockContractAndRatesDraft()
-        draftSubmission.rateProgramIDs = [
-            'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
-            'd95394e5-44d1-45df-8151-1cc1ee66f100',
-        ]
-        draftSubmission.rateCapitationType = 'RATE_RANGE'
-        renderWithProviders(
-            <RateDetailsSummarySection
-                submission={draftSubmission}
-                navigateTo="rate-details"
-                submissionName="MN-PMAP-0001"
-                statePrograms={statePrograms}
-            />
-        )
-        const programElement = screen.getByRole('definition', {
-            name: 'Programs this rate certification covers',
-        })
-        expect(programElement).toBeInTheDocument()
+    // eslint-disable-next-line jest/no-commented-out-tests
+    // it.skip('renders programs that apply to rate certification', async () => {
+    //     const draftSubmission = mockContractAndRatesDraft()
+    //     draftSubmission.rateProgramIDs = [
+    //         'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+    //         'd95394e5-44d1-45df-8151-1cc1ee66f100',
+    //     ]
+    //     draftSubmission.rateCapitationType = 'RATE_RANGE'
+    //     renderWithProviders(
+    //         <RateDetailsSummarySection
+    //             submission={draftSubmission}
+    //             navigateTo="rate-details"
+    //             submissionName="MN-PMAP-0001"
+    //             statePrograms={statePrograms}
+    //         />
+    //     )
+    //     const programElement = screen.getByRole('definition', {
+    //         name: 'Programs this rate certification covers',
+    //     })
+    //     expect(programElement).toBeInTheDocument()
 
-        const programList = within(programElement).getByText('SNBC, PMAP')
-        expect(programList).toBeInTheDocument()
-    })
+    //     const programList = within(programElement).getByText('SNBC, PMAP')
+    //     expect(programList).toBeInTheDocument()
+    // })
 })
