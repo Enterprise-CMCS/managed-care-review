@@ -132,15 +132,15 @@ describe('CMSDashboard', () => {
             {},
             { updatedAt: new Date() }
         )
-        const unlocked2008 = mockUnlockedHealthPlanPackage(
+        const unlocked202108 = mockUnlockedHealthPlanPackage(
             {},
             {
-                updatedAt: new Date('2008-01-01'),
+                updatedAt: new Date('2021-08-01'),
             }
         )
-        const unlocked2009 = mockUnlockedHealthPlanPackage(
+        const unlocked202109 = mockUnlockedHealthPlanPackage(
             {},
-            { updatedAt: new Date('2009-01-01') }
+            { updatedAt: new Date('2021-09-01') }
         )
         const unlockedToday = mockUnlockedHealthPlanPackage(
             {},
@@ -156,17 +156,17 @@ describe('CMSDashboard', () => {
 
         submitted1.id = 'test-abc-submitted'
         submitted2.id = 'test-abc-submitted-most-recent'
-        unlocked2008.id = 'test-abc-unlocked2098'
-        unlocked2009.id = 'test-abc-unlocked2100'
+        unlocked202108.id = 'test-abc-unlocked202108'
+        unlocked202109.id = 'test-abc-unlocked202109'
         unlockedToday.id = 'test-abc-unlocked-top-of-list'
 
         // intentionally listed in a scrambled order to test sorting
         const submissions = [
             submitted1,
-            unlocked2008,
+            unlocked202108,
             submitted2,
             unlockedToday,
-            unlocked2009,
+            unlocked202109,
         ]
 
         renderWithProviders(<CMSDashboard />, {
@@ -181,8 +181,6 @@ describe('CMSDashboard', () => {
         const rows = await screen.findAllByRole('row') // remember, 0 index element is the table header
 
         const link1 = within(rows[1]).getByRole('link')
-        console.log(JSON.stringify(submitted1.revisions[0]))
-        console.log(JSON.stringify(submitted2.revisions[0]))
         expect(link1).toHaveAttribute('href', `/submissions/${submitted2.id}`)
 
         const link2 = within(rows[2]).getByRole('link')
@@ -195,10 +193,16 @@ describe('CMSDashboard', () => {
         expect(link3).toHaveAttribute('href', `/submissions/${submitted1.id}`)
 
         const link4 = within(rows[4]).getByRole('link')
-        expect(link4).toHaveAttribute('href', `/submissions/${unlocked2009.id}`)
+        expect(link4).toHaveAttribute(
+            'href',
+            `/submissions/${unlocked202109.id}`
+        )
 
         const link5 = within(rows[5]).getByRole('link')
-        expect(link5).toHaveAttribute('href', `/submissions/${unlocked2008.id}`)
+        expect(link5).toHaveAttribute(
+            'href',
+            `/submissions/${unlocked202108.id}`
+        )
     })
 
     it('displays submission type as expected for current revision that is submitted/resubmitted', async () => {
@@ -305,7 +309,7 @@ describe('CMSDashboard', () => {
                 updatedAt: new Date('2022-01-15'),
                 programIDs: [mockMN.programs[2].id],
             },
-            { updatedAt: new Date('2022-01-22') }
+            { updatedAt: new Date('2100-01-22') }
         )
         unlocked.id = 'test-state-edit-in-progress-unlocked'
 
@@ -344,6 +348,6 @@ describe('CMSDashboard', () => {
         const lastUpdated = within(unlockedRow).getByTestId(
             'submission-last-updated'
         )
-        expect(lastUpdated).toHaveTextContent('01/22/2022')
+        expect(lastUpdated).toHaveTextContent('01/22/2100')
     })
 })

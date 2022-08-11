@@ -562,15 +562,15 @@ export function mockUnlockedHealthPlanPackage(
             {
                 node: {
                     id: 'revision2',
-                    createdAt: new Date(),
+                    createdAt: new Date('2020-07-01'),
                     unlockInfo: {
-                        updatedAt: new Date(),
+                        updatedAt: new Date('2020-08-01'),
                         updatedBy: 'bob@dmas.mn.gov',
                         updatedReason: 'Test unlock reason',
                         ...unlockInfo,
                     },
                     submitInfo: {
-                        updatedAt: new Date(),
+                        updatedAt: new Date('2020-07-15'),
                         updatedBy: 'bob@dmas.mn.gov',
                         updatedReason: 'Second Submit',
                     },

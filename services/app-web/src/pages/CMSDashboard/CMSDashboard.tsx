@@ -17,16 +17,18 @@ import {
     Program,
     useIndexHealthPlanPackagesQuery,
 } from '../../gen/gqlClient'
+import { mostRecentDate, isDate } from '../../common-code/dateHelpers'
 import styles from '../StateDashboard/StateDashboard.module.scss'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
 
 // We only pull a subset of data out of the submission and revisions for display in Dashboard
+// Depending on submission status, CMS users look at data from current or previous revision
 type SubmissionInDashboard = {
     id: string
     name: string
     submittedAt?: string
-    updatedAt: string
+    updatedAt: Date
     status: HealthPlanPackageStatus
     programs: Program[]
     submissionType: string
@@ -90,6 +92,13 @@ export const CMSDashboard = (): React.ReactElement => {
                 currentRevision.node.formDataProto
             )
 
+            // Errors - data handling
+            if (sub.status === 'DRAFT') {
+                recordJSException(
+                    `indexHealthPlanPackagesQuery: should not return draft submissions for CMS user. ID: ${sub.id}`
+                )
+                return
+            }
             if (currentFormData instanceof Error) {
                 recordJSException(
                     `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${sub.id} Error message: ${currentFormData.message}`
@@ -97,24 +106,29 @@ export const CMSDashboard = (): React.ReactElement => {
 
                 return null
             }
-            if (sub.status === 'DRAFT') {
-                // should not display draft submissions to a CMS user - this is also filtered out on the api side
-                return
+
+            if (
+                currentRevision?.node?.submitInfo?.updatedAt === undefined &&
+                currentRevision?.node?.unlockInfo?.updatedAt === undefined
+            ) {
+                recordJSException(
+                    `indexHealthPlanPackagesQuery: Error finding submit and unlock dates for submissions in CMSDashboard. ID: ${sub.id}`
+                )
             }
 
-            // Calculate proper submission data to display in each row
-            // if Unlocked package, form data could be in progress of being edited, show the static form data from the last submitted revision
-            // otherwise, use current data for Submitted or Resubmitted packages
+            // Set package display data
             let packageDataToDisplay = currentFormData
-            let lastUpdated =
-                currentRevision?.node?.submitInfo?.updatedAt ??
-                currentFormData.updatedAt
-            if (sub.status === 'UNLOCKED') {
-                const previousRevision = sub.revisions[1]
-                const previousFormData = base64ToDomain(
-                    previousRevision.node.formDataProto
-                )
+            let lastUpdated = mostRecentDate([
+                currentRevision?.node?.submitInfo?.updatedAt,
+                currentRevision?.node?.unlockInfo?.updatedAt,
+            ])
 
+            if (sub.status === 'UNLOCKED') {
+                // Errors - data handling
+                const previousRevision = sub?.revisions[1]
+                const previousFormData = base64ToDomain(
+                    previousRevision?.node?.formDataProto
+                )
                 if (previousFormData instanceof Error) {
                     recordJSException(
                         `indexHealthPlanPackagesQuery: Error decoding proto for display of an unlocked submission. ID: ${sub.id} Error message: ${previousFormData.message}`
@@ -123,20 +137,32 @@ export const CMSDashboard = (): React.ReactElement => {
                     return
                 }
 
-                packageDataToDisplay = previousFormData
-
-                if (!previousRevision?.node?.unlockInfo?.updatedAt) {
+                if (
+                    previousRevision?.node?.submitInfo?.updatedAt ===
+                        undefined &&
+                    previousRevision?.node?.unlockInfo?.updatedAt === undefined
+                ) {
                     recordJSException(
-                        `indexHealthPlanPackagesQuery: Error finding updatedAt for an UNLOCKED SUBMISSION. Check the revision data is properly formatted. ID: ${sub.id}`
+                        `indexHealthPlanPackagesQuery: Error finding submit and unlock dates of an unlocked submission. ID: ${sub.id}`
                     )
-
-                    return
                 }
-                // Last updated at value should be CMS unlock time (if its unlocked) or else state submit time (if its just submitted).
-                lastUpdated =
-                    previousRevision?.node?.unlockInfo?.updatedAt ?? lastUpdated
+
+                // reset package display data since unlock submissions rely on previous revision data
+                packageDataToDisplay = previousFormData
+                lastUpdated = mostRecentDate([
+                    currentRevision?.node?.submitInfo?.updatedAt,
+                    currentRevision?.node?.unlockInfo?.updatedAt,
+                    previousRevision?.node?.submitInfo?.updatedAt,
+                    previousRevision?.node?.unlockInfo?.updatedAt,
+                ])
             }
 
+            if (!isDate(lastUpdated)) {
+                recordJSException(
+                    `CMSDashboard: Cannot find valid last updated date from submit and unlock info. Falling back to current revision's last edit timestamp. ID: ${sub.id}`
+                )
+                lastUpdated = currentFormData.updatedAt as Date
+            }
             const programs = sub.state.programs
 
             submissionRows.push({
