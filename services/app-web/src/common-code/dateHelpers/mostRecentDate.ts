@@ -12,7 +12,7 @@ const mostRecentDate = (dates: Array<Date | undefined>): Date | undefined => {
         return undefined
     }
 
-    const times = dates.filter(isDate).map((date) => date.getTime())
+    const times = dates.filter(isDate).map((date) => new Date(date).getTime())
 
     return new Date(Math.max(...times))
 }
