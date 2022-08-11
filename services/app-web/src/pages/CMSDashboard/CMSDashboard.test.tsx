@@ -93,7 +93,6 @@ describe('CMSDashboard', () => {
     })
 
     it('displays submissions table excluding any in progress drafts', async () => {
-        // set draft current revision to a far future updatedAt. Set unlocked to nearer future. This allows us to test sorting.
         const draft = mockDraftHealthPlanPackage()
         const submitted = mockSubmittedHealthPlanPackage()
         const unlocked = mockUnlockedHealthPlanPackage()
@@ -129,35 +128,45 @@ describe('CMSDashboard', () => {
     })
 
     it('displays submissions table sorted by that revisions last updated column', async () => {
-        const submitted = mockSubmittedHealthPlanPackage()
-        // unlockInfo updated at is used for unlocked packages
-        const unlocked2098 = mockUnlockedHealthPlanPackage(
+        const submitted1 = mockSubmittedHealthPlanPackage(
+            {},
+            { updatedAt: new Date() }
+        )
+        const unlocked2008 = mockUnlockedHealthPlanPackage(
             {},
             {
-                updatedAt: new Date('2098-01-01'),
+                updatedAt: new Date('2008-01-01'),
             }
         )
-        const unlocked2100 = mockUnlockedHealthPlanPackage(
+        const unlocked2009 = mockUnlockedHealthPlanPackage(
             {},
-            { updatedAt: new Date('2100-01-01') }
+            { updatedAt: new Date('2009-01-01') }
         )
-        const unlocked2020 = mockUnlockedHealthPlanPackage(
+        const unlockedToday = mockUnlockedHealthPlanPackage(
             {},
             {
-                updatedAt: new Date('2020-01-01'),
+                updatedAt: new Date(), // this will be most recent unlock
             }
         )
 
-        submitted.id = 'test-abc-submitted'
-        unlocked2098.id = 'test-abc-unlocked2098'
-        unlocked2100.id = 'test-abc-unlocked2100'
-        unlocked2020.id = 'test-abc-unlocked3'
+        const submitted2 = mockSubmittedHealthPlanPackage(
+            {},
+            { updatedAt: new Date() }
+        ) // this will be most recent submitted, and also the very top of the list
 
+        submitted1.id = 'test-abc-submitted'
+        submitted2.id = 'test-abc-submitted-most-recent'
+        unlocked2008.id = 'test-abc-unlocked2098'
+        unlocked2009.id = 'test-abc-unlocked2100'
+        unlockedToday.id = 'test-abc-unlocked-top-of-list'
+
+        // intentionally listed in a scrambled order to test sorting
         const submissions = [
-            unlocked2098,
-            submitted,
-            unlocked2020,
-            unlocked2100,
+            submitted1,
+            unlocked2008,
+            submitted2,
+            unlockedToday,
+            unlocked2009,
         ]
 
         renderWithProviders(<CMSDashboard />, {
@@ -172,16 +181,24 @@ describe('CMSDashboard', () => {
         const rows = await screen.findAllByRole('row') // remember, 0 index element is the table header
 
         const link1 = within(rows[1]).getByRole('link')
-        expect(link1).toHaveAttribute('href', `/submissions/${unlocked2100.id}`)
+        console.log(JSON.stringify(submitted1.revisions[0]))
+        console.log(JSON.stringify(submitted2.revisions[0]))
+        expect(link1).toHaveAttribute('href', `/submissions/${submitted2.id}`)
 
         const link2 = within(rows[2]).getByRole('link')
-        expect(link2).toHaveAttribute('href', `/submissions/${unlocked2098.id}`)
+        expect(link2).toHaveAttribute(
+            'href',
+            `/submissions/${unlockedToday.id}`
+        )
 
         const link3 = within(rows[3]).getByRole('link')
-        expect(link3).toHaveAttribute('href', `/submissions/${submitted.id}`)
+        expect(link3).toHaveAttribute('href', `/submissions/${submitted1.id}`)
 
         const link4 = within(rows[4]).getByRole('link')
-        expect(link4).toHaveAttribute('href', `/submissions/${unlocked2020.id}`)
+        expect(link4).toHaveAttribute('href', `/submissions/${unlocked2009.id}`)
+
+        const link5 = within(rows[5]).getByRole('link')
+        expect(link5).toHaveAttribute('href', `/submissions/${unlocked2008.id}`)
     })
 
     it('displays submission type as expected for current revision that is submitted/resubmitted', async () => {

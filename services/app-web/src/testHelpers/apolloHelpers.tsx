@@ -427,7 +427,8 @@ export function mockDraftHealthPlanPackage(
 }
 
 export function mockSubmittedHealthPlanPackage(
-    submissionData?: Partial<UnlockedHealthPlanFormDataType>
+    submissionData?: Partial<UnlockedHealthPlanFormDataType>,
+    submitInfo?: Partial<UpdateInformation>
 ): HealthPlanPackage {
     // get a submitted DomainModel submission
     // turn it into proto
@@ -437,19 +438,20 @@ export function mockSubmittedHealthPlanPackage(
     return {
         id: 'test-id-123',
         status: 'SUBMITTED',
-        initiallySubmittedAt: '2022-01-01',
+        initiallySubmittedAt: '2022-01-02',
         stateCode: 'MN',
         state: mockMNState(),
         revisions: [
             {
                 node: {
                     id: 'revision1',
-                    createdAt: new Date(),
+                    createdAt: new Date('2021-01-01'),
                     unlockInfo: null,
                     submitInfo: {
-                        updatedAt: '2021-01-01',
+                        updatedAt: new Date('2021-01-02'),
                         updatedBy: 'test@example.com',
                         updatedReason: 'Initial submit',
+                        ...submitInfo,
                     },
                     formDataProto: b64,
                 },
@@ -581,7 +583,7 @@ export function mockUnlockedHealthPlanPackage(
                     createdAt: new Date('2020-01-01'),
                     unlockInfo: null,
                     submitInfo: {
-                        updatedAt: '2021-01-01',
+                        updatedAt: new Date('2021-01-02'),
                         updatedBy: 'test@example.com',
                         updatedReason: 'Initial submit',
                     },

@@ -103,11 +103,12 @@ export const CMSDashboard = (): React.ReactElement => {
             }
 
             // Calculate proper submission data to display in each row
-            // if UNLOCKED package, form data could be in progress of being edited, show the static form data from the last submitted revision
-            // also, use lastUpdated from unlockData (if unlocked) or last submit (if initial submission)
-            // otherwise, use data from current revision for Submitted or Resubmitted packages
+            // if Unlocked package, form data could be in progress of being edited, show the static form data from the last submitted revision
+            // otherwise, use current data for Submitted or Resubmitted packages
             let packageDataToDisplay = currentFormData
-            let lastUpdated = currentFormData.updatedAt
+            let lastUpdated =
+                currentRevision?.node?.submitInfo?.updatedAt ??
+                currentFormData.updatedAt
             if (sub.status === 'UNLOCKED') {
                 const previousRevision = sub.revisions[1]
                 const previousFormData = base64ToDomain(
@@ -124,21 +125,16 @@ export const CMSDashboard = (): React.ReactElement => {
 
                 packageDataToDisplay = previousFormData
 
-                if (
-                    !previousRevision?.node?.unlockInfo?.updatedAt &&
-                    !previousRevision?.node?.submitInfo?.updatedAt
-                ) {
+                if (!previousRevision?.node?.unlockInfo?.updatedAt) {
                     recordJSException(
                         `indexHealthPlanPackagesQuery: Error finding updatedAt for an UNLOCKED SUBMISSION. Check the revision data is properly formatted. ID: ${sub.id}`
                     )
 
                     return
                 }
-                // Last updated at value should be CMS unlock time (if its unlocked) or else state submit time (if its just submitted). Fall back to last updated at for the current revision (this shouldn't happen but just making explicit what the fallback is)
+                // Last updated at value should be CMS unlock time (if its unlocked) or else state submit time (if its just submitted).
                 lastUpdated =
-                    previousRevision?.node?.unlockInfo?.updatedAt ??
-                    previousRevision?.node?.submitInfo?.updatedAt ??
-                    lastUpdated
+                    previousRevision?.node?.unlockInfo?.updatedAt ?? lastUpdated
             }
 
             const programs = sub.state.programs

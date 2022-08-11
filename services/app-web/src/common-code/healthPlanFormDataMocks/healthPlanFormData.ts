@@ -46,7 +46,7 @@ function newHealthPlanFormData(): UnlockedHealthPlanFormDataType {
         stateNumber: 5,
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
         documents: [],
@@ -68,7 +68,7 @@ function basicHealthPlanFormData(): UnlockedHealthPlanFormDataType {
         stateNumber: 5,
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
         documents: [],
@@ -94,7 +94,7 @@ function contractOnly(): UnlockedHealthPlanFormDataType {
         stateNumber: 5,
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
         documents: [],
@@ -120,7 +120,7 @@ function contractAmendedOnly(): UnlockedHealthPlanFormDataType {
         stateNumber: 5,
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
         documents: [],
@@ -166,7 +166,7 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
         stateNumber: 5,
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
         documents: [],
@@ -217,7 +217,7 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
         stateNumber: 5,
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
         documents: [
@@ -285,7 +285,7 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
         stateNumber: 5,
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
         documents: [
@@ -317,7 +317,7 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
             effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
             effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
         },
-        rateProgramIDs: ['snbc'],
+        rateProgramIDs: [mockMNState().programs[0].id],
         stateContacts: [
             {
                 name: 'foo bar',
@@ -357,7 +357,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
         stateNumber: 5,
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
         documents: [
@@ -421,7 +421,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
             effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
             effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
         },
-        rateProgramIDs: ['snbc'],
+        rateProgramIDs: [mockMNState().programs[0].id],
         stateContacts: [
             {
                 name: 'foo bar',
@@ -523,7 +523,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
             effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
             effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
         },
-        rateProgramIDs: ['snbc'],
+        rateProgramIDs: [mockMNState().programs[0].id],
         stateContacts: [
             {
                 name: 'foo bar',
