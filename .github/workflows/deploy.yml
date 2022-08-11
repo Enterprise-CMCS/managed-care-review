@@ -398,16 +398,7 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v3
-      - name: Collate test coverage reports
-        run: |
-          ls
-          echo $(pwd)
-          cd ./services/app-web
-          echo $(pwd)
-          ls
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v3
-      - name: Display structure of downloaded files
+      - name: Create combined test coverage report
         run: |
           ls -R
           mkdir -p reports
@@ -428,7 +419,7 @@ jobs:
           mkdir -p coverage-all && npx nyc report --reporter lcov --reporter text --reporter json-summary --report-dir coverage-all
           cd coverage-all
           ls -R
-      - name: upload combined test coverage
+      - name: Upload combined test coverage
         uses: actions/upload-artifact@v3
         with:
           name: combined-test-coverage
