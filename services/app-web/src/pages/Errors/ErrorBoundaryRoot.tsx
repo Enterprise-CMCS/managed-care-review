@@ -1,9 +1,10 @@
 import { GenericErrorPage } from './GenericErrorPage'
 import { recordJSException, recordSpan } from '../../otelHelpers/tracingHelper'
 import { useEffect } from 'react'
-
+import { EmptyHeader } from '../../components/Header/EmptyHeader'
+import styles from '../App/AppBody.module.scss'
 // It is possible to have different error boundary fallback components at different levels of the hierarchy.
-// This is the root error boundary. If it is visible, this means that the React frontend has crashed entirely.
+// This is the root error boundary. If it is visible, this means that the React frontend has crashed entirely and the entire tree is gone.
 
 function ErrorBoundaryRoot({
     error,
@@ -25,7 +26,16 @@ function ErrorBoundaryRoot({
         })
     }, [error])
 
-    return <GenericErrorPage />
+    return (
+        <div id="ErrorBoundaryRoot" className={styles.app}>
+            <EmptyHeader>
+                <div></div>
+            </EmptyHeader>
+            <main id="main-content" className={styles.mainContent} role="main">
+                <GenericErrorPage />
+            </main>
+        </div>
+    )
 }
 
 export { ErrorBoundaryRoot }

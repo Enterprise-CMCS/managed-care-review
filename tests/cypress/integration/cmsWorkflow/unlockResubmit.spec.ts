@@ -1,6 +1,6 @@
 import * as path from 'path'
 
-describe('dashboard', () => {
+describe('CMS user', () => {
     it('can unlock and resubmit', () => {
         cy.logInAsStateUser()
 
