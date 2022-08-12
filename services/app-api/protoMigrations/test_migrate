@@ -4,7 +4,7 @@ set -e
 
 echo "hello"
 
-git checkout ../../app-web/src/common-code/proto/healthPlanFormDataProto/dataForTestingTheOldEncodingsTest
+git checkout tests/protos/
 
-npx tsc
-npx node ./protoMigrations/migrate_protos.js db
+../node_modules/.bin/tsc
+npx node ./protoMigrations/build/migrate_protos.js

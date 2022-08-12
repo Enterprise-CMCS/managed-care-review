@@ -35,7 +35,8 @@ notes/
 services/app-web/public/env-config.js
 services/app-web/storybook-static
 services/app-web/build
-services/app-api/protoMigrations/**/*.js*
+services/app-api/protoMigrations/**/*.js
+services/app-api/protoMigrations/**/*.js.map
 services/uploads/local_buckets
 
 .envrc.local

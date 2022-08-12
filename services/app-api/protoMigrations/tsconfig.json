@@ -1,7 +1,20 @@
 {
     "extends": "../tsconfig.json",
     "compilerOptions": {
-        "target": "es2017"
+        "outDir": "./build",
+
+        "baseUrl": "/",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "target": "es5",
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "allowJs": true,
+        "module": "commonjs",
+        "lib": ["esnext"]
     },
-    "files": ["migrate_protos.ts"],
+    "files": ["migrate_protos.ts", "gen/healthPlanFormDataProto.d.ts", "gen/healthPlanFormDataProto.js"],
 }
