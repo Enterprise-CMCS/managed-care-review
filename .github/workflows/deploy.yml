@@ -397,6 +397,7 @@ jobs:
     strategy:
       fail-fast: false
     steps:
+      - uses: actions/checkout@v3
       - name: Collate test coverage reports
         run: |
           ls
