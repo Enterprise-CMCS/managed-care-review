@@ -397,7 +397,6 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v3
       - name: Collate test coverage reports
         run: |
           ls
@@ -405,7 +404,7 @@ jobs:
           cd ./services/app-web
           echo $(pwd)
           ls
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
 
       - name: Create combined test coverage report

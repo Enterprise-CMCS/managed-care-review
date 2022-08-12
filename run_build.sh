@@ -5,10 +5,10 @@ echo $(pwd)
 echo $REACT_APP_STAGE_NAME
 if [ "$REACT_APP_STAGE_NAME" == "prod" ] || [ "$REACT_APP_STAGE_NAME" == "val" ];
     then
-        echo "prod or val"
+        echo "building for prod or val without instrumentation"
         yarn run build_prod
     else
-        echo "instrumenting"
+        echo "instrumenting for cypress"
         yarn run build_instrumented
 fi
 
