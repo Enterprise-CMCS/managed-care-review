@@ -18,7 +18,7 @@ function decodeOrError(
     }
 }
 
-interface TempMigrationType {
+interface MigrationType {
     name: string
     module: {
         migrateProto: (
@@ -29,14 +29,14 @@ interface TempMigrationType {
 
 interface MigratorType {
     ranMigrations(): Promise<string[]>
-    runMigrations(migrations: TempMigrationType[]): Promise<void>
+    runMigrations(migrations: MigrationType[]): Promise<void>
 }
 
 function dbMigrator(dbConnString: string): MigratorType {
     const prismaClient = new PrismaClient({
         datasources: {
             db: {
-                url: process.env.DATABASE_URL,
+                url: dbConnString,
             },
         },
     })
@@ -50,7 +50,7 @@ function dbMigrator(dbConnString: string): MigratorType {
             return migrations
         },
 
-        async runMigrations(migrations: TempMigrationType[]) {
+        async runMigrations(migrations: MigrationType[]) {
             const revs = await prismaClient.healthPlanRevisionTable.findMany()
 
             console.log(revs)
@@ -203,25 +203,30 @@ async function main() {
         throw new Error('unimplemented migrator')
     }
 
-    const mig1 = await import(
-        './healthPlanFormDataMigrations/0001_add_one_month.js'
-    )
-    const mig2 = await import(
-        './healthPlanFormDataMigrations/0002_reset_description.js'
-    )
+    const migrationFiles = fs
+        .readdirSync('./protoMigrations/build/healthPlanFormDataMigrations')
+        .filter((m) => m.endsWith('.js') && !m.endsWith('.test.js'))
+    console.log('Figration Miles', migrationFiles)
 
-    const migrations: TempMigrationType[] = [
-        {
-            name: '0001_add_one_month',
-            module: mig1,
-        },
-        {
-            name: '0002_reset_description',
-            module: mig2,
-        },
-    ]
+    const migrations: MigrationType[] = []
+    for (const migrationFile of migrationFiles) {
+        const fullPath = './healthPlanFormDataMigrations/' + migrationFile
 
-    console.log('all Migrations: ', mig1)
+        const migrationName = migrationFile.substring(
+            0,
+            migrationFile.lastIndexOf('.')
+        )
+
+        const migration = await import(fullPath)
+        console.log(migrationName, migration)
+
+        migrations.push({
+            name: migrationName,
+            module: migration,
+        })
+    }
+
+    console.log('all migrations', migrations)
 
     const previouslyAppliedMigrationNames = await migrator.ranMigrations()
 
