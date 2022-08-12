@@ -182,7 +182,7 @@ function fileMigrator(protoPath: string): MigratorType {
     }
 }
 
-async function main(): Promise<void> {
+async function main() {
     const args = process.argv.slice(2)
     console.log('args', args)
 
