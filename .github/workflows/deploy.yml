@@ -404,6 +404,10 @@ jobs:
           mkdir -p reports
           mkdir -p cypress_temp
           mkdir -p .nyc_output
+          echo "listing current folder"
+          ls
+          echo "listing a cypress folder"
+          ls ./cypress-json-coverage-1/
           cp ./cypress-json-coverage-1/coverage-final.json ./cypress_temp/from-cypress-1.json
           cp ./cypress-json-coverage-2/coverage-final.json ./cypress_temp/from-cypress-2.json
           cp ./cypress-json-coverage-3/coverage-final.json ./cypress_temp/from-cypress-3.json
