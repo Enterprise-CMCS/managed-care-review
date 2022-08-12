@@ -59,6 +59,10 @@ Cypress.Commands.add(
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
         } 
         cy.wait('@fetchCurrentUserQuery', { timeout: 20000 })
-        cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 }) // we only allow CMS users to go to a specific submission on login
+        if (initialURL !== '/') { 
+            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 }) // for cases where CMs user goes to specific submission on login
+        } else {
+            cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80000 }) 
+        }
     }
 )
