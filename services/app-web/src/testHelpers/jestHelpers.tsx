@@ -66,6 +66,7 @@ const WithLocation = ({
     return null
 }
 
+//WARNING: This required tests using this function to clear mocks afterwards.
 const ldUseClientSpy = (featureFlags: Partial<Record<FeatureFlagTypes, FlagValueTypes>>) => {
     jest.spyOn(LaunchDarkly, 'useLDClient').mockImplementation((): any => {
         return {
@@ -77,6 +78,10 @@ const ldUseClientSpy = (featureFlags: Partial<Record<FeatureFlagTypes, FlagValue
             // flag. We do not want to apply the value passed in featureFlags to each useLDClient especially if the flag
             // passed in useLDClient does not exist in featureFlags passed into ldUseClientSpy.
             variation: (flag: FeatureFlagTypes, defaultValue: FlagValueTypes | undefined) => {
+                if (featureFlags[flag] === undefined && defaultValue === undefined) {
+                    //ldClient.variation doesn't require a default value, throwing error here if a defaultValue was not provided.
+                    throw new Error('ldUseClientSpy returned an invalid value of undefined')
+                }
                 return featureFlags[flag] === undefined ? defaultValue : featureFlags[flag]
             },
         }
