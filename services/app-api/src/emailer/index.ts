@@ -8,7 +8,6 @@ export {
     resubmitPackageStateEmail,
     resubmitPackageCMSEmail,
 } from './emails'
-export type { UpdatedEmailData } from './templateHelpers'
 export type {
     EmailConfiguration,
     EmailData,

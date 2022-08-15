@@ -2,7 +2,6 @@ import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
-    packageName,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import {
@@ -22,7 +21,7 @@ import {
 } from './attributeHelper'
 import { EmailParameterStore } from '../parameterStore'
 
-// unlock is a state machine transforming a LockedFormDatya and turning it into UnlockedFormData
+// unlock is a state machine transforming a LockedFormData and turning it into UnlockedFormData
 // Since Unlocked is a strict subset of Locked, this can't error today.
 function unlock(
     submission: LockedHealthPlanFormDataType
@@ -110,7 +109,7 @@ export function unlockHealthPlanPackageResolver(
         const draft: UnlockedHealthPlanFormDataType = unlock(formDataResult)
 
         // Create a new revision with this draft in it
-        const unlockInfo: UpdateInfoType = {
+        const updateInfo: UpdateInfoType = {
             updatedAt: new Date(),
             updatedBy: context.user.email,
             updatedReason: unlockedReason,
@@ -118,7 +117,7 @@ export function unlockHealthPlanPackageResolver(
 
         const revisionResult = await store.insertHealthPlanRevision(
             pkgID,
-            unlockInfo,
+            updateInfo,
             draft
         )
 
@@ -129,16 +128,7 @@ export function unlockHealthPlanPackageResolver(
             throw new Error(errMessage)
         }
 
-        const programs = store.findPrograms(draft.stateCode, draft.programIDs)
-        if (!programs || programs.length !== draft.programIDs.length) {
-            const errMessage = `Can't find programs ${draft.programIDs} from state ${draft.stateCode}, ${draft.id}`
-            logError('unlockHealthPlanPackage', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
-        }
-
         // Send emails!
-        const name = packageName(draft, programs)
 
         // Get state analysts emails from parameter store
         let stateAnalystsEmails =
@@ -150,19 +140,28 @@ export function unlockHealthPlanPackageResolver(
             stateAnalystsEmails = []
         }
 
-        const updatedEmailData = {
-            ...unlockInfo,
-            packageName: name,
+        const statePrograms = store.getStatePrograms(draft.stateCode)
+
+        if (statePrograms instanceof Error) {
+            logError('getStatePrograms', statePrograms.message)
+            setErrorAttributesOnActiveSpan(statePrograms.message, span)
+            throw new Error(statePrograms.message)
         }
+
         const unlockPackageCMSEmailResult =
             await emailer.sendUnlockPackageCMSEmail(
                 draft,
-                updatedEmailData,
-                stateAnalystsEmails
+                updateInfo,
+                stateAnalystsEmails,
+                statePrograms
             )
 
         const unlockPackageStateEmailResult =
-            await emailer.sendUnlockPackageStateEmail(draft, updatedEmailData)
+            await emailer.sendUnlockPackageStateEmail(
+                draft,
+                updateInfo,
+                statePrograms
+            )
 
         if (unlockPackageCMSEmailResult instanceof Error) {
             logError(

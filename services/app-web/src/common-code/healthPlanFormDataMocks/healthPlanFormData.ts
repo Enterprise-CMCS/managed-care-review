@@ -1,7 +1,42 @@
 import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
+    ProgramArgType,
 } from '../healthPlanFormDataType'
+
+type State = {
+    code: string
+    name: string
+    programs: ProgramArgType[]
+}
+export function mockMNState(): State {
+    return {
+        name: 'Minnesota',
+        programs: [
+            {
+                id: 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                fullName: 'Special Needs Basic Care',
+                name: 'SNBC',
+            },
+            {
+                id: 'd95394e5-44d1-45df-8151-1cc1ee66f100',
+                fullName: 'Prepaid Medical Assistance Program',
+                name: 'PMAP',
+            },
+            {
+                id: 'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
+                fullName: 'Minnesota Senior Care Plus ',
+                name: 'MSC+',
+            },
+            {
+                id: '3fd36500-bf2c-47bc-80e8-e7aa417184c5',
+                fullName: 'Minnesota Senior Health Options',
+                name: 'MSHO',
+            },
+        ],
+        code: 'MN',
+    }
+}
 
 function newHealthPlanFormData(): UnlockedHealthPlanFormDataType {
     return {
@@ -11,7 +46,7 @@ function newHealthPlanFormData(): UnlockedHealthPlanFormDataType {
         stateNumber: 5,
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
         documents: [],
@@ -33,7 +68,7 @@ function basicHealthPlanFormData(): UnlockedHealthPlanFormDataType {
         stateNumber: 5,
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
         documents: [],
@@ -59,7 +94,7 @@ function contractOnly(): UnlockedHealthPlanFormDataType {
         stateNumber: 5,
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
         documents: [],
@@ -85,7 +120,7 @@ function contractAmendedOnly(): UnlockedHealthPlanFormDataType {
         stateNumber: 5,
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
         documents: [],
@@ -131,7 +166,7 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
         stateNumber: 5,
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
         documents: [],
@@ -182,7 +217,7 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
         stateNumber: 5,
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
         documents: [
@@ -250,7 +285,7 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
         stateNumber: 5,
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
         documents: [
@@ -282,7 +317,7 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
             effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
             effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
         },
-        rateProgramIDs: ['snbc'],
+        rateProgramIDs: [mockMNState().programs[0].id],
         stateContacts: [
             {
                 name: 'foo bar',
@@ -322,7 +357,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
         stateNumber: 5,
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
         documents: [
@@ -386,7 +421,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
             effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
             effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
         },
-        rateProgramIDs: ['snbc'],
+        rateProgramIDs: [mockMNState().programs[0].id],
         stateContacts: [
             {
                 name: 'foo bar',
@@ -426,7 +461,11 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
         status: 'DRAFT',
         stateCode: 'MN',
         stateNumber: 5,
-        programIDs: ['snbc'],
+        programIDs: [
+            mockMNState().programs[0].id,
+            mockMNState().programs[1].id,
+            mockMNState().programs[2].id,
+        ],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A real submission',
         documents: [
@@ -484,7 +523,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
             effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
             effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
         },
-        rateProgramIDs: ['snbc'],
+        rateProgramIDs: [mockMNState().programs[0].id],
         stateContacts: [
             {
                 name: 'foo bar',
@@ -525,7 +564,7 @@ function basicLockedHealthPlanFormData(): LockedHealthPlanFormDataType {
         stateNumber: 5,
         id: 'test-abc-123',
         stateCode: 'MN',
-        programIDs: ['snbc'],
+        programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real submission',
         documents: [],

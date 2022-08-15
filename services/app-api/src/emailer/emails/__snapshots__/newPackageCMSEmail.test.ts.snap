@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renders overall email as expected 1`] = `
-"Managed Care submission: <b>CMS-new-submission-snapshot</b> was received from <b>MN</b>.
+"Managed Care submission: <b>MCR-MN-0003-SNBC</b> was received from <b>MN</b>.
 <br /><br />
 <b>Submission type</b>: Contract action and rate certification<br />
 <b>Contract effective dates</b>: 01/01/2021 to 12/31/2021<br />
-<b>Rate name</b>: CMS-new-submission-snapshot-RATE-20210202-20211201-CERTIFICATION-20201201<br />
+<b>Rate name</b>: MCR-MN-0003-MSHO-RATE-20210202-20211201-CERTIFICATION-20201201<br />
 <b>Rating period</b>: 02/02/2021 to 12/01/2021<br />
 <b>Submission description</b>: A submitted submission<br />
 <br />

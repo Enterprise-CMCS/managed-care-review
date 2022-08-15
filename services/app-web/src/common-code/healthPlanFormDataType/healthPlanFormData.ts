@@ -2,8 +2,8 @@ import { UnlockedHealthPlanFormDataType } from './UnlockedHealthPlanFormDataType
 import { ModifiedProvisions } from './ModifiedProvisions'
 import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import { HealthPlanFormDataType } from './HealthPlanFormDataType'
-import { RateDataType } from '.'
 import { formatRateNameDate } from '../../common-code/dateHelpers'
+import { ProgramArgType } from '.'
 
 const isContractOnly = (
     sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
@@ -141,12 +141,6 @@ const naturalSort = (a: string, b: string): number => {
 // Since these functions are in common code, we don't want to rely on the api or gql program types
 // instead we create an interface with what is required for these functions, since both those types
 // implement it, we can use it interchangeably
-interface ProgramArgType {
-    id: string
-    name: string // short name. This is used most often in the application including in submission name
-    fullName: string // full name is used in submission summary page
-}
-
 // Pull out the programs names for display from the program IDs
 function programNames(
     programs: ProgramArgType[],
@@ -162,11 +156,17 @@ function programNames(
 }
 
 function packageName(
-    submission: HealthPlanFormDataType,
-    statePrograms: ProgramArgType[]
+    pkg: HealthPlanFormDataType,
+    statePrograms: ProgramArgType[],
+    programIDs?: string[]
 ): string {
-    const padNumber = submission.stateNumber.toString().padStart(4, '0')
-    const pNames = programNames(statePrograms, submission.programIDs)
+    const padNumber = pkg.stateNumber.toString().padStart(4, '0')
+    const pNames =
+        // This ternary is needed because programIDs passed in could be undefined or an empty string, in that case
+        // we want to default to using programIDs from submission
+        programIDs && programIDs.length > 0
+            ? programNames(statePrograms, programIDs)
+            : programNames(statePrograms, pkg.programIDs)
     const formattedProgramNames = pNames
         .sort(naturalSort)
         .map((n) =>
@@ -176,12 +176,12 @@ function packageName(
                 .toUpperCase()
         )
         .join('-')
-    return `MCR-${submission.stateCode.toUpperCase()}-${padNumber}-${formattedProgramNames}`
+    return `MCR-${pkg.stateCode.toUpperCase()}-${padNumber}-${formattedProgramNames}`
 }
 
 const generateRateName = (
-    rateData: RateDataType,
-    submissionName: string
+    pkg: HealthPlanFormDataType,
+    statePrograms: ProgramArgType[]
 ): string => {
     const {
         rateType,
@@ -189,8 +189,10 @@ const generateRateName = (
         rateDateCertified,
         rateDateEnd,
         rateDateStart,
-    } = rateData
-    let rateName = `${submissionName}-RATE`
+        rateProgramIDs,
+    } = pkg
+
+    let rateName = `${packageName(pkg, statePrograms, rateProgramIDs)}-RATE`
 
     if (rateType === 'AMENDMENT' && rateAmendmentInfo?.effectiveDateStart) {
         rateName = rateName.concat(
@@ -239,5 +241,3 @@ export {
     packageName,
     generateRateName,
 }
-
-export type { ProgramArgType }

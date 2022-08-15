@@ -1,15 +1,19 @@
-import { testEmailConfig } from '../../testHelpers/emailerHelpers'
+import {
+    testEmailConfig,
+    mockUnlockedContractAndRatesFormData,
+    mockMNState,
+} from '../../testHelpers/emailerHelpers'
 import { unlockPackageStateEmail } from './index'
-import { unlockedWithFullContracts } from '../../../../app-web/src/common-code/healthPlanFormDataMocks'
+import { findPackagePrograms } from '../templateHelpers'
+import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
 
 const unlockData = {
-    packageName: 'MCR-VA-CCCPLUS-0002',
     updatedBy: 'josh@example.com',
     updatedAt: new Date('02/01/2022'),
     updatedReason: 'Adding rate certification.',
 }
 const sub = {
-    ...unlockedWithFullContracts(),
+    ...mockUnlockedContractAndRatesFormData(),
     contractDateStart: new Date('2021-01-01'),
     contractDateEnd: new Date('2021-12-31'),
     rateDateStart: new Date('2021-02-02'),
@@ -20,12 +24,20 @@ const sub = {
         effectiveDateEnd: new Date('12/31/2021'),
     },
 }
+const defaultStatePrograms = mockMNState().programs
+const packagePrograms = findPackagePrograms(sub, defaultStatePrograms)
+
+if (packagePrograms instanceof Error) {
+    throw new Error(packagePrograms.message)
+}
 
 test('subject line is correct and clearly states submission is unlocked', async () => {
+    const name = packageName(sub, packagePrograms)
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig
+        testEmailConfig,
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {
@@ -35,9 +47,7 @@ test('subject line is correct and clearly states submission is unlocked', async 
 
     expect(template).toEqual(
         expect.objectContaining({
-            subject: expect.stringContaining(
-                `${unlockData.packageName} was unlocked by CMS`
-            ),
+            subject: expect.stringContaining(`${name} was unlocked by CMS`),
         })
     )
 })
@@ -46,7 +56,8 @@ test('body content is correct', async () => {
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig
+        testEmailConfig,
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {
@@ -89,7 +100,8 @@ test('renders overall email as expected', async () => {
     const template = await unlockPackageStateEmail(
         sub,
         unlockData,
-        testEmailConfig
+        testEmailConfig,
+        defaultStatePrograms
     )
 
     if (template instanceof Error) {
