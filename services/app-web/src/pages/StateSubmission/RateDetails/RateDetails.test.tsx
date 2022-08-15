@@ -199,7 +199,7 @@ describe('RateDetails', () => {
         })
     })
 
-    it('progressively disclose new rate form fields as expected u237fiwb18dgbjdfwd', async () => {
+    it('progressively disclose new rate form fields as expected', async () => {
         const mockUser = {
             __typename: 'StateUser' as const,
             role: 'STATE_USER',
