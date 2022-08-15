@@ -2,6 +2,7 @@
  * Contains a list of all our feature flags in Launch Darkly. This is used to give us type safety
  * around flag names when we're enabling/disabling features in our code.
  */
+
 export const featureFlags = {
     /*
      Toggles the /health api endpoint
@@ -11,7 +12,7 @@ export const featureFlags = {
      Toggles the CMS dashboard view
     */
     CMS_DASHBOARD: 'cms-dashboard',
-    /* 
+    /*
      Enables the modal that alerts the user to an expiring session
     */
     SESSION_EXPIRING_MODAL: 'session-expiring-modal',
@@ -33,4 +34,6 @@ export const featureFlags = {
     RATE_CERT_PROGRAMS: 'rate-certification-programs',
 } as const
 
-export type FeatureFlagType = typeof featureFlags[keyof typeof featureFlags]
+export type FeatureFlagTypes = typeof featureFlags[keyof typeof featureFlags]
+
+export type FlagValueTypes = boolean | string | number | object | []
