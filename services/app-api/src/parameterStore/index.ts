@@ -1,6 +1,6 @@
 export {
     newAWSEmailParameterStore,
     newLocalEmailParameterStore,
-} from './emailParameterStore'
+} from './emailParameterStore/emailParameterStore'
 
-export type { EmailParameterStore } from './emailParameterStore'
+export type { EmailParameterStore } from './emailParameterStore/emailParameterStore'
