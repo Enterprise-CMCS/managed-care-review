@@ -17,7 +17,7 @@ export const getRatesReviewSharedEmails = async (): Promise<
 export const getRatesReviewSharedEmailsLocal = async (): Promise<
     string[] | Error
 > => [
-    `Rate Submission Reviewer 1" <rate.reviewer.1@example.com>`,
+    `"Rate Submission Reviewer 1" <rate.reviewer.1@example.com>`,
     `"Rate Submission Reviewer 2" <rate.reviewer.2@example.com>`,
     `"Rate Submission Reviewer 3" <rate.reviewer.3@example.com>`,
 ]
