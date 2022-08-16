@@ -190,9 +190,9 @@ describe('submitHealthPlanPackage', () => {
 
         const draft = await createAndUpdateTestHealthPlanPackage(server, {
             submissionType: 'CONTRACT_ONLY',
-            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
-            rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
-            rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+            rateDateStart: '2025-05-01',
+            rateDateEnd: '2026-04-20',
+            rateDateCertified: '2025-03-15',
         })
 
         const draftID = draft.id
@@ -624,9 +624,9 @@ describe('submitHealthPlanPackage', () => {
         })
         const draft = await createAndUpdateTestHealthPlanPackage(server, {
             submissionType: 'CONTRACT_ONLY',
-            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
-            rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
-            rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+            rateDateStart: '2025-05-01',
+            rateDateEnd: '2026-04-20',
+            rateDateCertified: '2025-03-15',
         })
         const draftID = draft.id
 

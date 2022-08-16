@@ -3,7 +3,6 @@ import {
     packageName as generatePackageName,
     generateRateName,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { UserType, UpdateInfoType, ProgramType } from '../../domain-models'
 import {
     renderTemplate,
@@ -13,6 +12,7 @@ import {
 } from '../templateHelpers'
 
 import type { EmailData, EmailConfiguration } from '../'
+import { formatDateTime } from '../../../../app-web/src/common-code/dateHelpers/calendarDate'
 
 export const resubmitPackageStateEmail = async (
     pkg: LockedHealthPlanFormDataType,
@@ -37,7 +37,7 @@ export const resubmitPackageStateEmail = async (
     const data = {
         packageName,
         resubmittedBy: updateInfo.updatedBy,
-        resubmittedOn: formatCalendarDate(updateInfo.updatedAt),
+        resubmittedOn: formatDateTime(updateInfo.updatedAt),
         resubmissionReason: updateInfo.updatedReason,
         shouldIncludeRates: isContractAndRates,
         rateName: isContractAndRates && generateRateName(pkg, programs),

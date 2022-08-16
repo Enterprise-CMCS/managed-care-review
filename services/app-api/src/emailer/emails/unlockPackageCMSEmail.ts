@@ -3,7 +3,6 @@ import {
     packageName as generatePackageName,
     generateRateName,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import {
     stripHTMLFromTemplate,
     generateCMSReviewerEmails,
@@ -12,6 +11,7 @@ import {
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
 import { ProgramType, UpdateInfoType } from '../../domain-models'
+import { formatDateTime } from 'app-web/src/common-code/dateHelpers/calendarDate'
 
 export const unlockPackageCMSEmail = async (
     pkg: UnlockedHealthPlanFormDataType,
@@ -40,7 +40,7 @@ export const unlockPackageCMSEmail = async (
     const data = {
         packageName,
         unlockedBy: updateInfo.updatedBy,
-        unlockedOn: formatCalendarDate(updateInfo.updatedAt),
+        unlockedOn: formatDateTime(updateInfo.updatedAt),
         unlockedReason: updateInfo.updatedReason,
         shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
         rateName: isContractAndRates && generateRateName(pkg, packagePrograms),

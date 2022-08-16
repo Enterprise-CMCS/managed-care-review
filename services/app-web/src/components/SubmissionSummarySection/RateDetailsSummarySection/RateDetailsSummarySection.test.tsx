@@ -4,6 +4,7 @@ import {
     mockStateSubmission,
     mockMNState,
 } from '../../../testHelpers/apolloHelpers'
+import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
 import { generateRateName } from '../../../common-code/healthPlanFormDataType';
@@ -105,14 +106,14 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('can render correct rate name for AMENDMENT rate submission', () => {
-        const submission = {
+        const submission: HealthPlanFormDataType = {
             ...mockContractAndRatesDraft(),
-            rateDateStart: new Date('2022-01-25'),
-            rateDateEnd: new Date('2023-01-25'),
-            rateDateCertified: new Date('2022-01-26'),
+            rateDateStart: '2022-01-25',
+            rateDateEnd: '2023-01-25',
+            rateDateCertified: '2022-01-26',
             rateAmendmentInfo: {
-                effectiveDateStart: new Date('2022-02-25'),
-                effectiveDateEnd: new Date('2023-02-26'),
+                effectiveDateStart: '2022-02-25',
+                effectiveDateEnd: '2023-02-26',
             },
         }
 

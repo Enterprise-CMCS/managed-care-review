@@ -396,12 +396,12 @@ describe('submission type assertions', () => {
             submission: {
                 ...mockContractAndRateSub,
                 rateType: 'AMENDMENT',
-                rateDateStart: new Date('2021/04/22'),
-                rateDateEnd: new Date('2022/03/29'),
-                rateDateCertified: new Date('2021/05/23'),
+                rateDateStart: '2021-04-22',
+                rateDateEnd: '2022-03-29',
+                rateDateCertified: '2021-05-23',
                 rateAmendmentInfo: {
-                    effectiveDateStart: new Date('2022/05/21'),
-                    effectiveDateEnd: new Date('2022/09/21'),
+                    effectiveDateStart: '2022-05-21',
+                    effectiveDateEnd: '2022-09-21',
                 },
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
             },
@@ -413,9 +413,9 @@ describe('submission type assertions', () => {
             submission: {
                 ...mockContractAndRateSub,
                 rateType: 'NEW',
-                rateDateStart: new Date('2021/04/22'),
-                rateDateEnd: new Date('2022/03/29'),
-                rateDateCertified: new Date('2021/04/22'),
+                rateDateStart: '2021-04-22',
+                rateDateEnd: '2022-03-29',
+                rateDateCertified: '2021-04-22',
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
             },
             testDescription: 'New rate test',
@@ -426,12 +426,12 @@ describe('submission type assertions', () => {
             submission: {
                 ...mockContractAndRateSub,
                 rateType: 'NEW',
-                rateDateStart: new Date('2021/04/22'),
-                rateDateEnd: new Date('2022/03/29'),
-                rateDateCertified: new Date('2021/04/22'),
+                rateDateStart: '2021-04-22',
+                rateDateEnd: '2022-03-29',
+                rateDateCertified: '2021-04-22',
                 rateAmendmentInfo: {
-                    effectiveDateStart: new Date('2022/05/21'),
-                    effectiveDateEnd: new Date('2022/09/21'),
+                    effectiveDateStart: '2022-05-21',
+                    effectiveDateEnd: '2022-09-21',
                 },
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
             },
@@ -447,8 +447,8 @@ describe('submission type assertions', () => {
                 rateDateEnd: undefined,
                 rateDateCertified: undefined,
                 rateAmendmentInfo: {
-                    effectiveDateStart: new Date('2022/05/21'),
-                    effectiveDateEnd: new Date('2022/09/21'),
+                    effectiveDateStart: '2022-05-21',
+                    effectiveDateEnd: '2022-09-21',
                 },
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
             },
@@ -469,11 +469,11 @@ describe('submission type assertions', () => {
             submission: {
                 ...mockContractAndRateSub,
                 rateType: 'NEW',
-                rateDateStart: new Date('2021/04/22'),
+                rateDateStart: '2021-04-22',
                 rateDateEnd: undefined,
                 rateAmendmentInfo: {
-                    effectiveDateStart: new Date('2022/05/21'),
-                    effectiveDateEnd: new Date('2022/09/21'),
+                    effectiveDateStart: '2022-05-21',
+                    effectiveDateEnd: '2022-09-21',
                 },
                 rateDateCertified: undefined,
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
@@ -485,10 +485,10 @@ describe('submission type assertions', () => {
             submission: {
                 ...mockContractAndRateSub,
                 rateType: 'AMENDMENT',
-                rateDateStart: new Date('2021/04/22'),
-                rateDateEnd: new Date('2022/03/29'),
+                rateDateStart: '2021-04-22',
+                rateDateEnd: '2022-03-29',
                 rateAmendmentInfo: {
-                    effectiveDateStart: new Date('2022/05/21'),
+                    effectiveDateStart: '2022-05-21',
                 },
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
             },
@@ -499,12 +499,12 @@ describe('submission type assertions', () => {
             submission: {
                 ...mockContractAndRateSub,
                 rateType: undefined,
-                rateDateStart: new Date('2021/04/22'),
-                rateDateEnd: new Date('2022/03/29'),
-                rateDateCertified: new Date('2021/05/23'),
+				rateDateStart: '2021-04-22',
+                rateDateEnd: '2022-03-29',
+                rateDateCertified: '2021-05-23',                    
                 rateAmendmentInfo: {
-                    effectiveDateStart: new Date('2022/05/21'),
-                    effectiveDateEnd: new Date('2022/09/21'),
+    				effectiveDateStart: '2022-05-21',
+                    effectiveDateEnd: '2022-09-21',
                 },
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
             },
@@ -519,12 +519,12 @@ describe('submission type assertions', () => {
                     'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
                 ],
                 rateType: undefined,
-                rateDateStart: new Date('2021/04/22'),
-                rateDateEnd: new Date('2022/03/29'),
-                rateDateCertified: new Date('2021/05/23'),
+                rateDateStart: '2021-04-22',
+                rateDateEnd: '2022-03-29',
+                rateDateCertified: '2021-05-23',
                 rateAmendmentInfo: {
-                    effectiveDateStart: new Date('2022/05/21'),
-                    effectiveDateEnd: new Date('2022/09/21'),
+                    effectiveDateStart: '2022-05-21',
+                    effectiveDateEnd: '2022-09-21',
                 },
                 rateProgramIDs: [],
             },
@@ -534,6 +534,7 @@ describe('submission type assertions', () => {
                 'MCR-MN-0005-MSC+-PMAP-RATE-20210422-20220329-20210523',
         },
     ]
+
     test.each(rateNameTestArray)(
         'Rate Name Test: $testDescription',
         ({ submission, expectedName }) => {
