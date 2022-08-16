@@ -31,7 +31,6 @@ const useTealium = (): {
     useEffect(() => {
         // Do not add tealium for local dev
         if (process.env.REACT_APP_STAGE_NAME === 'local') {
-            console.log('mock load tealium')
             return
         }
 
