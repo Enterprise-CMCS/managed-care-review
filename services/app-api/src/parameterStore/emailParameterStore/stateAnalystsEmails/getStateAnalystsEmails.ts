@@ -1,4 +1,4 @@
-import { getParameterStore } from './awsParameterStore'
+import { getParameterStore } from '../../awsParameterStore'
 
 export const getStateAnalystsEmails = async (
     stateCode: string
