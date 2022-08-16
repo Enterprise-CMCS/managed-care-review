@@ -71,7 +71,7 @@ describe('Validate encoding to protobuf and decoding back to domain model', () =
             const mostRecentProtoBytes = fs.readFileSync(mostRecentTestfilePath)
 
             // If our .proto bytes output has changed since the last time we wrote out a proto, write a new proto out.
-            // This should probably be overrideable at some point.
+            // This should probably be overrideable at some point if we don't want to make a new proto
             if (!mostRecentProtoBytes.equals(protoBytes)) {
                 console.log(testName, 'has changed, writing a new version')
                 fs.writeFileSync(filePath, protoBytes)
