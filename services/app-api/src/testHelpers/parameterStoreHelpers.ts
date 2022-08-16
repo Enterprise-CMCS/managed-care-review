@@ -29,13 +29,13 @@ const getTestStateAnalystsEmails = (
 ]
 
 const getTestCmsReviewSharedEmails = (): string[] => [
-    `CMS Reviewer 1" <CMS.reviewer.1@example.com>`,
+    `"CMS Reviewer 1" <CMS.reviewer.1@example.com>`,
     `"CMS Reviewer 2" <CMS.reviewer.2@example.com>`,
     `"CMS Reviewer 3" <CMS.reviewer.3@example.com>`,
 ]
 
 const getTestRatesReviewSharedEmails = (): string[] => [
-    `Rate Submission Reviewer 1" <rate.reviewer.1@example.com>`,
+    `"Rate Submission Reviewer 1" <rate.reviewer.1@example.com>`,
     `"Rate Submission Reviewer 2" <rate.reviewer.2@example.com>`,
     `"Rate Submission Reviewer 3" <rate.reviewer.3@example.com>`,
 ]
