@@ -1,5 +1,3 @@
-// import * as mig1 from '../../services/app-api/protoMigrations/healthPlanFormDataMigrations/0001_add_one_month.js'
-// import * as mig1 from './foobar.js'
 import fs from 'fs'
 import path from 'path'
 
@@ -186,6 +184,10 @@ async function main() {
     const args = process.argv.slice(2)
     console.log('args', args)
 
+    const usage = `USAGE: 
+./migrate_protos.js db :: run migrations against all protos in the db
+./migrate_protos.js files [PATH TO .PROTOS] :: run migrations against all protos in given directory`
+
     const connectionType =
         args.length > 0 && args[0] === 'db' ? 'DATABASE' : 'FILES'
 
@@ -198,7 +200,12 @@ async function main() {
 
         migrator = dbMigrator(dbConn)
     } else if (connectionType === 'FILES') {
-        migrator = fileMigrator('protoMigrations/tests/protos')
+        if (args.length !== 2 || args[0] !== 'files') {
+            console.log(usage)
+            process.exit(1)
+        }
+        const pathToProtos = args[1]
+        migrator = fileMigrator(pathToProtos)
     } else {
         throw new Error('unimplemented migrator')
     }
