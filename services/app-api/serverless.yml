@@ -128,7 +128,6 @@ provider:
     SES_REVIEW_HELP_EMAIL_ADDRESS: ${ssm:/configuration/email/reviewHelpAddress}
     SES_RATE_HELP_EMAIL_ADDRESS: ${ssm:/configuration/email/rateHelpAddress}
     SES_DEV_TEAM_HELP_EMAIL_ADDRESS: ${ssm:/configuration/email/devTeamHelpAddress}
-    SES_RATES_EMAIL_ADDRESSES: ${ssm:/configuration/email/ratesAddresses}
     APPLICATION_ENDPOINT: ${self:custom.applicationEndpoint, 'http://localhost:3000'}
     AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
     OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
