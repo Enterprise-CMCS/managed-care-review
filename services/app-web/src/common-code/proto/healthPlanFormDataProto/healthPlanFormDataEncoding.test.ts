@@ -3,14 +3,7 @@ import { mcreviewproto } from '../../../gen/healthPlanFormDataProto'
 import {
     basicLockedHealthPlanFormData,
     basicHealthPlanFormData,
-    contractOnly,
-    contractAmendedOnly,
     unlockedWithALittleBitOfEverything,
-    unlockedWithContacts,
-    unlockedWithDocuments,
-    unlockedWithFullContracts,
-    unlockedWithFullRates,
-    newHealthPlanFormData,
 } from '../../healthPlanFormDataMocks'
 import {
     UnlockedHealthPlanFormDataType,
@@ -39,57 +32,53 @@ describe('Validate encoding to protobuf and decoding back to domain model', () =
     }
 
     test.each<testType>([
-        { newHealthPlanFormData },
-        { basicHealthPlanFormData },
-        { contractOnly },
-        { unlockedWithContacts },
-        { unlockedWithDocuments },
-        { unlockedWithFullRates },
-        { unlockedWithFullContracts },
+        // { newHealthPlanFormData },
+        // { basicHealthPlanFormData },
+        // { contractOnly },
+        // { unlockedWithContacts },
+        // { unlockedWithDocuments },
+        // { unlockedWithFullRates },
+        // { unlockedWithFullContracts },
         { unlockedWithALittleBitOfEverything },
-        { basicLockedHealthPlanFormData },
-        { contractAmendedOnly },
-    ])(
-        'given valid domain model %j expect protobufs to be symmetric)',
-        (testCase: testType) => {
-            const testName = Object.keys(testCase)[0]
-            const domainObjectGenerator = testCase[testName]
-            const domainObject = domainObjectGenerator()
-            const protoBytes = toProtoBuffer(domainObject)
-            const fileDate = new Date().toISOString().split('T')[0]
-            const fileName = `${testName}-${fileDate}.proto`
-            const filePath = path.join(TEST_DATA_PATH, fileName)
+        // { basicLockedHealthPlanFormData },
+        // { contractAmendedOnly },
+    ])('write proto %j to disk if changed)', (testCase: testType) => {
+        const testName = Object.keys(testCase)[0]
+        const domainObjectGenerator = testCase[testName]
+        const domainObject = domainObjectGenerator()
+        const protoBytes = toProtoBuffer(domainObject)
+        const fileDate = new Date().toISOString().split('T')[0]
+        const fileName = `${testName}-${fileDate}.proto`
+        const filePath = path.join(TEST_DATA_PATH, fileName)
 
-            // TODO: Only writeFileSync when something has changed?
-            // --- if the most recent proto is different from todays, we write a new one
-            // --- if the most recent solution is different from todays, we write a new one? -- we offer to write a new one?
-            // --- if we change the solution, we can't still expect old protos to match? Just new ones?
-            // --- if we add a field, we expect an old one to still decode, but to have undefined for the new fields.
+        // find every file in testData that is for this test case
+        const testFiles = fs.readdirSync(TEST_DATA_PATH)
+        const testCaseFileNames = testFiles.filter((f) =>
+            f.startsWith(testName + '-')
+        )
 
+        if (testCaseFileNames.length === 0) {
+            console.log('Writing initial test file for', testName)
             fs.writeFileSync(filePath, protoBytes)
-
-            // find all test data that is associated with this specific test
-            // assert that it decodes correctly
-
-            // find every file in testData
-            const testFiles = fs.readdirSync(TEST_DATA_PATH)
-            const testCaseFileNames = testFiles.filter((f) =>
-                f.startsWith(testName + '-')
+        } else {
+            // The last one is the most recent
+            const mostRecentTestfileName =
+                testCaseFileNames[testCaseFileNames.length - 1]
+            const mostRecentTestfilePath = path.join(
+                TEST_DATA_PATH,
+                mostRecentTestfileName
             )
+            const mostRecentProtoBytes = fs.readFileSync(mostRecentTestfilePath)
 
-            for (const testInputFileName of testCaseFileNames) {
-                const testFilePath = path.join(
-                    TEST_DATA_PATH,
-                    testInputFileName
-                )
-                const testProtoBytes = fs.readFileSync(testFilePath)
-
-                expect(toDomain(testProtoBytes)).toEqual(domainObject)
+            // If our .proto bytes output has changed since the last time we wrote out a proto, write a new proto out.
+            // This should probably be overrideable at some point.
+            if (!mostRecentProtoBytes.equals(protoBytes)) {
+                console.log(testName, 'has changed, writing a new version')
+                fs.writeFileSync(filePath, protoBytes)
             }
-
-            expect(toDomain(protoBytes)).toEqual(domainObject)
         }
-    )
+        expect(protoBytes).not.toBe([])
+    })
 })
 
 describe('handles invalid data as expected', () => {

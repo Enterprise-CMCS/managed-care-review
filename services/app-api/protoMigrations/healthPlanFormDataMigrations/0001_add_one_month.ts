@@ -14,5 +14,32 @@ export function migrateProto(
         oldProto.contractInfo.contractDateStart.month += 1
     }
 
+    if (oldProto.contractInfo?.contractDateEnd?.month) {
+        oldProto.contractInfo.contractDateEnd.month += 1
+    }
+
+    const rateInfos = oldProto.rateInfos || []
+    for (const rateInfo of rateInfos) {
+        if (rateInfo.rateDateStart?.month) {
+            rateInfo.rateDateStart.month += 1
+        }
+
+        if (rateInfo.rateDateEnd?.month) {
+            rateInfo.rateDateEnd.month += 1
+        }
+
+        if (rateInfo.rateDateCertified?.month) {
+            rateInfo.rateDateCertified.month += 1
+        }
+
+        if (rateInfo.rateAmendmentInfo?.effectiveDateStart?.month) {
+            rateInfo.rateAmendmentInfo.effectiveDateStart.month += 1
+        }
+
+        if (rateInfo.rateAmendmentInfo?.effectiveDateEnd?.month) {
+            rateInfo.rateAmendmentInfo.effectiveDateEnd.month += 1
+        }
+    }
+
     return oldProto
 }

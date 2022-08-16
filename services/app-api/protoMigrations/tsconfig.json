@@ -16,5 +16,5 @@
         "module": "commonjs",
         "lib": ["esnext"]
     },
-    "files": ["migrate_protos.ts", "gen/healthPlanFormDataProto.d.ts", "gen/healthPlanFormDataProto.js"],
+    "include": ["migrate_protos.ts", "gen/healthPlanFormDataProto.d.ts", "gen/healthPlanFormDataProto.js", "healthPlanFormDataMigrations/*.ts"],
 }

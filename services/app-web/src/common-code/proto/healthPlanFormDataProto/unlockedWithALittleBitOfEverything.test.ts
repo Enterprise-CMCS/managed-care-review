@@ -17,8 +17,16 @@ describe('unlockedWithALittleBitOfEverything migration', () => {
         }
         // assert all the migrations we care about have run
 
-        // add_one_month
-        expect(formData.contractDateStart?.getMonth()).toBe(3)
+        // add_one_month // check this against an actual date, don't perpetuate the bug
+        expect(formData.contractDateStart?.getMonth()).toBe(5)
+        expect(formData.contractDateEnd?.getMonth()).toBe(5)
+        expect(formData.rateDateStart?.getMonth()).toBe(5)
+        expect(formData.rateDateEnd?.getMonth()).toBe(5)
+        expect(formData.rateDateCertified?.getMonth()).toBe(5)
+        expect(formData.rateAmendmentInfo?.effectiveDateStart?.getMonth()).toBe(
+            5
+        )
+        expect(formData.rateAmendmentInfo?.effectiveDateEnd?.getMonth()).toBe(5)
 
         // copy_programs_to_rate
 

@@ -414,7 +414,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
     return {
         id: 'test-abc-123',
         createdAt: new Date(Date.UTC(2021, 4, 10)),
-        updatedAt: new Date(),
+        updatedAt: new Date(2021, 4, 10, 12, 11, 10),
         status: 'DRAFT',
         stateCode: 'MN',
         stateNumber: 5,
