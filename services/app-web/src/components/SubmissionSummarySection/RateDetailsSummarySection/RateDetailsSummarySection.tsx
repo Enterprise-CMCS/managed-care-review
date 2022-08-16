@@ -12,8 +12,8 @@ import { generateRateName } from '../../../common-code/healthPlanFormDataType/'
 import styles from '../SubmissionSummarySection.module.scss'
 import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { Program } from '../../../gen/gqlClient'
-import {useLDClient} from 'launchdarkly-react-client-sdk';
-import {featureFlags} from '../../../common-code/featureFlags';
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../../common-code/featureFlags'
 
 export type RateDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType

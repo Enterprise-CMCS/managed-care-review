@@ -4,14 +4,19 @@ import {
     mockStateSubmission,
     mockMNState,
 } from '../../../testHelpers/apolloHelpers'
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import {
+    renderWithProviders,
+    ldUseClientSpy,
+} from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
-import { generateRateName } from '../../../common-code/healthPlanFormDataType';
+import { generateRateName } from '../../../common-code/healthPlanFormDataType'
 
 describe('RateDetailsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()
     const stateSubmission = mockStateSubmission()
     const statePrograms = mockMNState().programs
+
+    afterEach(() => jest.clearAllMocks())
 
     it('can render draft submission without errors', () => {
         renderWithProviders(
@@ -308,8 +313,9 @@ describe('RateDetailsSummarySection', () => {
             )
         ).toBeInTheDocument()
     })
-    // TODO: Enable test after rate certification program feature is fully implemented
-    it.skip('renders programs that apply to rate certification', async () => {
+    it('renders programs that apply to rate certification', async () => {
+        ldUseClientSpy({ 'rate-certification-programs': true })
+
         const draftSubmission = mockContractAndRatesDraft()
         draftSubmission.rateProgramIDs = [
             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
