@@ -152,12 +152,6 @@ async function initializeGQLHandler(): Promise<Handler> {
     const applicationEndpoint = process.env.APPLICATION_ENDPOINT
     const emailSource = process.env.SES_SOURCE_EMAIL_ADDRESS
     const emailerMode = process.env.EMAILER_MODE
-    const cmsReviewSharedEmails = process.env.SES_REVIEW_TEAM_EMAIL_ADDRESSES
-    const cmsReviewHelpEmailAddress = process.env.SES_REVIEW_HELP_EMAIL_ADDRESS
-    const cmsRateHelpEmailAddress = process.env.SES_RATE_HELP_EMAIL_ADDRESS
-    const cmsDevTeamHelpEmailAddress =
-        process.env.SES_DEV_TEAM_HELP_EMAIL_ADDRESS
-    const ratesReviewSharedEmails = process.env.SES_RATES_EMAIL_ADDRESSES
     const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
     const parameterStoreMode = process.env.PARAMETER_STORE_MODE
 
@@ -183,33 +177,6 @@ async function initializeGQLHandler(): Promise<Handler> {
     if (emailSource === undefined)
         throw new Error(
             'Configuration Error: SES_SOURCE_EMAIL_ADDRESS is required'
-        )
-
-    if (cmsReviewSharedEmails === undefined)
-        throw new Error(
-            'Configuration Error: SES_REVIEW_TEAM_EMAIL_ADDRESSES is required'
-        )
-
-    if (cmsReviewHelpEmailAddress === undefined) {
-        throw new Error(
-            'Configuration Error: SES_REVIEW_HELP_EMAIL_ADDRESS is required'
-        )
-    }
-
-    if (cmsRateHelpEmailAddress === undefined) {
-        throw new Error(
-            'Configuration Error: SES_RATE_HELP_EMAIL_ADDRESS is required'
-        )
-    }
-
-    if (cmsDevTeamHelpEmailAddress === undefined) {
-        throw new Error(
-            'Configuration Error: SES_DEV_TEAM_HELP_EMAIL_ADDRESS is required'
-        )
-    }
-    if (ratesReviewSharedEmails === undefined)
-        throw new Error(
-            'Configuration Error: SES_RATES_EMAIL_ADDRESSES is required'
         )
 
     if (applicationEndpoint === undefined || applicationEndpoint === '')
@@ -244,33 +211,73 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     const store = NewPostgresStore(pgResult)
 
+    //Configure email parameter store.
+    const emailParameterStore =
+        parameterStoreMode === 'LOCAL'
+            ? newLocalEmailParameterStore()
+            : newAWSEmailParameterStore()
+
+    //Configuring emails using emailParameterStore
+    // Moving setting these emails down here. We needed to grab cmsReviewSharedEmails and ratesReviewSharedEmails from
+    // parameter store using our emailParameterStore because serverless does not like array of strings as env variables.
+    // For more context see this ticket https://qmacbis.atlassian.net/browse/MR-2539.
+    // Eventually we will want to get the rest of the emails in the same manner. For now, we want to get this bug fix asap.
+    const cmsReviewSharedEmails =
+        await emailParameterStore.getCmsReviewSharedEmails()
+    const cmsReviewHelpEmailAddress = process.env.SES_REVIEW_HELP_EMAIL_ADDRESS
+    const cmsRateHelpEmailAddress = process.env.SES_RATE_HELP_EMAIL_ADDRESS
+    const cmsDevTeamHelpEmailAddress =
+        process.env.SES_DEV_TEAM_HELP_EMAIL_ADDRESS
+    const ratesReviewSharedEmails =
+        await emailParameterStore.getRatesReviewSharedEmails()
+
+    if (cmsReviewSharedEmails instanceof Error)
+        throw new Error(`Configuration Error: ${cmsReviewSharedEmails.message}`)
+
+    if (cmsReviewHelpEmailAddress === undefined) {
+        throw new Error(
+            'Configuration Error: SES_REVIEW_HELP_EMAIL_ADDRESS is required'
+        )
+    }
+
+    if (cmsRateHelpEmailAddress === undefined) {
+        throw new Error(
+            'Configuration Error: SES_RATE_HELP_EMAIL_ADDRESS is required'
+        )
+    }
+
+    if (cmsDevTeamHelpEmailAddress === undefined) {
+        throw new Error(
+            'Configuration Error: SES_DEV_TEAM_HELP_EMAIL_ADDRESS is required'
+        )
+    }
+    if (ratesReviewSharedEmails instanceof Error)
+        throw new Error(
+            `Configuration Error: ${ratesReviewSharedEmails.message}`
+        )
+
     const emailer =
         emailerMode == 'LOCAL'
             ? newLocalEmailer({
                   emailSource: 'local@example.com',
                   stage: 'local',
                   baseUrl: applicationEndpoint,
-                  cmsReviewSharedEmails: cmsReviewSharedEmails.split(','),
+                  cmsReviewSharedEmails: cmsReviewSharedEmails,
                   cmsReviewHelpEmailAddress,
                   cmsRateHelpEmailAddress,
                   cmsDevTeamHelpEmailAddress,
-                  ratesReviewSharedEmails: ratesReviewSharedEmails.split(','),
+                  ratesReviewSharedEmails: ratesReviewSharedEmails,
               })
             : newSESEmailer({
                   emailSource: emailSource,
                   stage: stageName,
                   baseUrl: applicationEndpoint,
-                  cmsReviewSharedEmails: cmsReviewSharedEmails.split(','),
+                  cmsReviewSharedEmails: cmsReviewSharedEmails,
                   cmsReviewHelpEmailAddress,
                   cmsRateHelpEmailAddress,
                   cmsDevTeamHelpEmailAddress,
-                  ratesReviewSharedEmails: ratesReviewSharedEmails.split(','),
+                  ratesReviewSharedEmails: ratesReviewSharedEmails,
               })
-
-    const emailParameterStore =
-        parameterStoreMode === 'LOCAL'
-            ? newLocalEmailParameterStore()
-            : newAWSEmailParameterStore()
 
     // Resolvers are defined and tested in the resolvers package
     const resolvers = configureResolvers(store, emailer, emailParameterStore)
