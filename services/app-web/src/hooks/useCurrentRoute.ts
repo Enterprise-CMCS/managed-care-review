@@ -3,11 +3,14 @@ import { RouteT } from '../constants/routes'
 import { getRouteName } from '../routeHelpers'
 
 // Determine current route name type (e.g. SUBMISSION_TYPE) using the getRouteName utility
-const useCurrentRoute = (): { currentRoute: RouteT | 'UNKNOWN_ROUTE' } => {
+const useCurrentRoute = (): {
+    currentRoute: RouteT | 'UNKNOWN_ROUTE'
+    pathname: string
+} => {
     const { pathname } = useLocation()
 
     const routeName = getRouteName(pathname)
-    return { currentRoute: routeName }
+    return { currentRoute: routeName, pathname: pathname }
 }
 
 export { useCurrentRoute }

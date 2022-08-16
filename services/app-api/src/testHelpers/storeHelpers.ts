@@ -57,7 +57,14 @@ function mockStoreThatErrors(): Store {
             return genericStoreError
         },
         findPrograms: () => {
-            return undefined
+            return new Error(
+                'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
+            )
+        },
+        getStatePrograms: () => {
+            return new Error(
+                'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
+            )
         },
     }
 }

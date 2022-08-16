@@ -2,6 +2,7 @@ import React from 'react'
 import classnames from 'classnames'
 import { FileRow } from '../FileRow/FileRow'
 import { FileListItem } from '../FileListItem/FileListItem'
+import * as path from 'path-browserify'
 
 import styles from '../FileUpload.module.scss'
 import { DocumentCategoryType } from '../../../common-code/healthPlanFormDataType'
@@ -22,6 +23,13 @@ export type FileItemT = {
     s3URL?: string // only items uploaded to s3 have this
     status: FileStatus
     documentCategories: DocumentCategoryType[]
+}
+
+const fileTypes = {
+    PDF: ['.pdf'],
+    WORD: ['.doc', '.pages'],
+    VIDEO: ['.mov', '.mp4'],
+    EXCEL: ['.xls', '.xlsx', '.xlsm', '.xltm', '.xlam'],
 }
 
 const DocumentError = ({
@@ -117,11 +125,12 @@ export const FileProcessor = ({
     const isLoading = status === 'PENDING'
     const isScanning = status === 'SCANNING'
     const isComplete = status === 'UPLOAD_COMPLETE'
+    const fileType = path.extname(name)
 
-    const isPDF = name.indexOf('.pdf') > 0
-    const isWord = name.indexOf('.doc') > 0 || name.indexOf('.pages') > 0
-    const isVideo = name.indexOf('.mov') > 0 || name.indexOf('.mp4') > 0
-    const isExcel = name.indexOf('.xls') > 0 || name.indexOf('.numbers') > 0
+    const isPDF = fileTypes.PDF.indexOf(fileType) >= 0
+    const isWord = fileTypes.WORD.indexOf(fileType) >= 0
+    const isVideo = fileTypes.VIDEO.indexOf(fileType) >= 0
+    const isExcel = fileTypes.EXCEL.indexOf(fileType) >= 0
     const isGeneric = !isPDF && !isWord && !isVideo && !isExcel
 
     const imageClasses = classnames('usa-file-input__preview-image', {

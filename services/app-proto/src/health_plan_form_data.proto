@@ -177,6 +177,7 @@ message RateInfo {
   optional ActuaryCommunicationType actuary_communication_preference = 7;
   repeated Document rate_documents = 8;
   optional RateCapitationType rate_capitation_type = 9;
+  repeated string rate_program_ids = 10;
   
   optional RateAmendmentInfo rate_amendment_info = 50;
 

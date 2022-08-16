@@ -16,6 +16,7 @@ import { PageActions } from '../PageActions'
 import classNames from 'classnames'
 import { ErrorSummary } from '../../../components/Form'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
+import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 
 export const Documents = ({
     draftSubmission,
@@ -290,12 +291,12 @@ export const Documents = ({
                                 </Link>
                                 <span>
                                     This input only accepts PDF, CSV, DOC, DOCX,
-                                    XLS, XLSX files.
+                                    XLS, XLSX, XLSM files.
                                 </span>
                             </>
                         }
                         error={errorSummary}
-                        accept="application/pdf,text/csv,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                        accept={ACCEPTED_SUBMISSION_FILE_TYPES}
                         initialItems={fileItemsFromDraftSubmission}
                         uploadFile={handleUploadFile}
                         scanFile={handleScanFile}

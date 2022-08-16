@@ -6,6 +6,7 @@ import {
     basicHealthPlanFormData,
     unlockedWithALittleBitOfEverything,
 } from '../common-code/healthPlanFormDataMocks'
+
 import {
     LockedHealthPlanFormDataType,
     SubmissionDocument,
@@ -29,6 +30,7 @@ import {
     UpdateHealthPlanFormDataMutation,
     CreateHealthPlanPackageDocument,
     CreateHealthPlanPackageMutation,
+    UpdateInformation,
 } from '../gen/gqlClient'
 
 /* For use with Apollo MockedProvider in jest tests */
@@ -78,6 +80,7 @@ export function mockDraft(): UnlockedHealthPlanFormDataType {
         rateDateEnd: undefined,
         rateDateCertified: undefined,
         rateAmendmentInfo: undefined,
+        rateProgramIDs: undefined,
         stateContacts: [],
         actuaryContacts: [],
         actuaryCommunicationPreference: undefined,
@@ -205,6 +208,7 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
             effectiveDateStart: new Date(),
             effectiveDateEnd: new Date(),
         },
+        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         stateContacts: [
             {
                 name: 'State Contact 1',
@@ -275,6 +279,7 @@ export function mockStateSubmission(): LockedHealthPlanFormDataType {
         rateDateEnd: new Date(),
         rateDateCertified: new Date(),
         rateAmendmentInfo: null,
+        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         stateContacts: [
             {
                 name: 'Test Person',
@@ -352,6 +357,7 @@ export function mockStateSubmissionContractAmendment(): LockedHealthPlanFormData
         rateDateEnd: new Date(),
         rateDateCertified: new Date(),
         rateAmendmentInfo: null,
+        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         stateContacts: [
             {
                 name: 'Test Person',
@@ -420,28 +426,32 @@ export function mockDraftHealthPlanPackage(
     }
 }
 
-export function mockSubmittedHealthPlanPackage(): HealthPlanPackage {
+export function mockSubmittedHealthPlanPackage(
+    submissionData?: Partial<UnlockedHealthPlanFormDataType>,
+    submitInfo?: Partial<UpdateInformation>
+): HealthPlanPackage {
     // get a submitted DomainModel submission
     // turn it into proto
-    const submission = basicLockedHealthPlanFormData()
+    const submission = { ...basicLockedHealthPlanFormData(), ...submissionData }
     const b64 = domainToBase64(submission)
 
     return {
         id: 'test-id-123',
         status: 'SUBMITTED',
-        initiallySubmittedAt: '2022-01-01',
+        initiallySubmittedAt: '2022-01-02',
         stateCode: 'MN',
         state: mockMNState(),
         revisions: [
             {
                 node: {
                     id: 'revision1',
-                    createdAt: new Date(),
+                    createdAt: new Date('2021-01-01'),
                     unlockInfo: null,
                     submitInfo: {
-                        updatedAt: '2021-01-01',
+                        updatedAt: new Date('2021-01-02'),
                         updatedBy: 'test@example.com',
                         updatedReason: 'Initial submit',
+                        ...submitInfo,
                     },
                     formDataProto: b64,
                 },
@@ -516,13 +526,17 @@ export function mockSubmittedHealthPlanPackageWithRevisions(): HealthPlanPackage
 }
 
 export function mockUnlockedHealthPlanPackage(
-    submissionData?: Partial<UnlockedHealthPlanFormDataType>
+    submissionData?: Partial<UnlockedHealthPlanFormDataType>,
+    unlockInfo?: Partial<UpdateInformation>
 ): HealthPlanPackage {
     const submission = {
         ...unlockedWithALittleBitOfEverything(),
         ...submissionData,
     }
     const b64 = domainToBase64(submission)
+    const b64Previous = domainToBase64({
+        ...unlockedWithALittleBitOfEverything(),
+    })
 
     return {
         id: 'test-id-123',
@@ -539,6 +553,7 @@ export function mockUnlockedHealthPlanPackage(
                         updatedAt: new Date(),
                         updatedBy: 'bob@dmas.mn.gov',
                         updatedReason: 'Test unlock reason',
+                        ...unlockInfo,
                     },
                     submitInfo: null,
                     formDataProto: b64,
@@ -547,18 +562,19 @@ export function mockUnlockedHealthPlanPackage(
             {
                 node: {
                     id: 'revision2',
-                    createdAt: new Date(),
+                    createdAt: new Date('2020-07-01'),
                     unlockInfo: {
-                        updatedAt: new Date(),
+                        updatedAt: new Date('2020-08-01'),
                         updatedBy: 'bob@dmas.mn.gov',
                         updatedReason: 'Test unlock reason',
+                        ...unlockInfo,
                     },
                     submitInfo: {
-                        updatedAt: new Date(),
+                        updatedAt: new Date('2020-07-15'),
                         updatedBy: 'bob@dmas.mn.gov',
                         updatedReason: 'Second Submit',
                     },
-                    formDataProto: b64,
+                    formDataProto: b64Previous,
                 },
             },
             {
@@ -567,11 +583,11 @@ export function mockUnlockedHealthPlanPackage(
                     createdAt: new Date('2020-01-01'),
                     unlockInfo: null,
                     submitInfo: {
-                        updatedAt: '2021-01-01',
+                        updatedAt: new Date('2021-01-02'),
                         updatedBy: 'test@example.com',
                         updatedReason: 'Initial submit',
                     },
-                    formDataProto: b64,
+                    formDataProto: b64Previous,
                 },
             },
         ],

@@ -229,9 +229,11 @@ export const StateDashboard = (): React.ReactElement => {
                                                         <td>
                                                             {dayjs(
                                                                 dashboardSubmission.updatedAt
-                                                            ).format(
-                                                                'MM/DD/YYYY'
-                                                            )}
+                                                            )
+                                                                .tz('UTC')
+                                                                .format(
+                                                                    'MM/DD/YYYY'
+                                                                )}
                                                         </td>
                                                         <td data-testid="submission-status">
                                                             <StatusTag

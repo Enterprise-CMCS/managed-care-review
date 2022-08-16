@@ -7,10 +7,6 @@ export const featureFlags = {
      Toggles the /health api endpoint
     */
     API_ENABLE_HEALTH_ENDPOINT: 'enable-health-endpoint',
-    /*
-     Toggles the CMS dashboard view
-    */
-    CMS_DASHBOARD: 'cms-dashboard',
     /* 
      Enables the modal that alerts the user to an expiring session
     */
@@ -23,9 +19,12 @@ export const featureFlags = {
      The number of minutes before session expiration that the warning modal appears
     */
     MODAL_COUNTDOWN_DURATION: 'modal-countdown-duration',
-
     /**
      * Graphql resolver returns 500 errors. Used for testing alerting in OTEL/New Relic
      */
     API_GRAPHQL_ERRORS: 'app-api-graphql-errors',
+    /**
+     * Enables selection of programs that apply to rate certification
+     */
+    RATE_CERT_PROGRAMS: 'rate-certification-programs',
 }

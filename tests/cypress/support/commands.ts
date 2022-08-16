@@ -8,6 +8,7 @@ import '@testing-library/cypress/add-commands'
 import 'cypress-file-upload'
 import 'cypress-pipe'
 
+
 const LOCAL_STORAGE_MEMORY = {}
 
 Cypress.Commands.add('saveLocalStorage', () => {

@@ -46,6 +46,7 @@ import { makeDocumentList } from '../../documentHelpers/makeDocumentKeyLookupLis
 import { makeDateTable } from '../../documentHelpers/makeDocumentDateLookupTable'
 import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
+import { useStatePrograms } from '../../hooks/useStatePrograms'
 
 const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
     getRelativePath({
@@ -147,6 +148,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
         DocumentDateLookupTable | undefined
     >({})
 
+    const statePrograms = useStatePrograms()
+
     // Set up graphql calls
     const {
         data: fetchData,
@@ -204,16 +207,11 @@ export const StateSubmissionForm = (): React.ReactElement => {
     // Setup side effects
     useEffect(() => {
         if (formDataFromLatestRevision) {
-            const statePrograms =
-                (loggedInUser &&
-                    'state' in loggedInUser &&
-                    loggedInUser.state.programs) ||
-                []
             const name = packageName(formDataFromLatestRevision, statePrograms)
             setComputedSubmissionName(name)
             updateHeading({ customHeading: name })
         }
-    }, [updateHeading, formDataFromLatestRevision, loggedInUser])
+    }, [updateHeading, formDataFromLatestRevision, loggedInUser, statePrograms])
 
     useEffect(() => {
         if (submissionAndRevisions) {

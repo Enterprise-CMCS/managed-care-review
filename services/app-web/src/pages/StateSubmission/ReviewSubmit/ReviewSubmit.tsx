@@ -12,13 +12,13 @@ import {
     SubmissionTypeSummarySection,
     SupportingDocumentsSummarySection,
 } from '../../../components/SubmissionSummarySection'
-import { useAuth } from '../../../contexts/AuthContext'
 import { PageActionsContainer } from '../PageActions'
 import styles from './ReviewSubmit.module.scss'
 import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { ActionButton } from '../../../components/ActionButton'
 import { DocumentDateLookupTable } from '../../SubmissionSummary/SubmissionSummary'
 import { UnlockSubmitModal } from '../../../components/Modal/UnlockSubmitModal'
+import { useStatePrograms } from '../../../hooks/useStatePrograms'
 
 export const ReviewSubmit = ({
     draftSubmission,
@@ -33,15 +33,10 @@ export const ReviewSubmit = ({
 }): React.ReactElement => {
     const navigate = useNavigate()
     const modalRef = useRef<ModalRef>(null)
-    const { loggedInUser } = useAuth()
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
     // pull the programs off the user
-    const statePrograms =
-        (loggedInUser &&
-            'state' in loggedInUser &&
-            loggedInUser.state.programs) ||
-        []
+    const statePrograms = useStatePrograms()
 
     const isContractActionAndRateCertification =
         draftSubmission.submissionType === 'CONTRACT_AND_RATES'
@@ -68,6 +63,7 @@ export const ReviewSubmit = ({
                     navigateTo="../rate-details"
                     submissionName={submissionName}
                     documentDateLookupTable={documentDateLookupTable}
+                    statePrograms={statePrograms}
                 />
             )}
 

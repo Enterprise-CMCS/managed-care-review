@@ -41,10 +41,7 @@ export function createHealthPlanPackageResolver(
             input.programIDs
         )
 
-        if (
-            programs === undefined ||
-            programs.length !== input.programIDs.length
-        ) {
+        if (programs instanceof Error) {
             const count = input.programIDs.length
             const errMessage = `The program ${pluralize(
                 'id',

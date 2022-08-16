@@ -11,6 +11,9 @@ import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import { generateRateName } from '../../../common-code/healthPlanFormDataType/'
 import styles from '../SubmissionSummarySection.module.scss'
 import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import { Program } from '../../../gen/gqlClient'
+import {useLDClient} from 'launchdarkly-react-client-sdk';
+import {featureFlags} from '../../../common-code/featureFlags';
 
 export type RateDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -18,6 +21,7 @@ export type RateDetailsSummarySectionProps = {
     documentDateLookupTable?: DocumentDateLookupTable
     isCMSUser?: boolean
     submissionName: string
+    statePrograms: Program[]
 }
 
 export const RateDetailsSummarySection = ({
@@ -26,6 +30,7 @@ export const RateDetailsSummarySection = ({
     documentDateLookupTable,
     isCMSUser,
     submissionName,
+    statePrograms,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
     const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && navigateTo !== undefined
@@ -38,13 +43,28 @@ export const RateDetailsSummarySection = ({
         doc.documentCategories.includes('RATES_RELATED')
     )
 
-    const rateName = generateRateName(submission, submissionName)
+    const ldClient = useLDClient()
+
+    //If rate program feature flag is off, then turn off displaying program list and omit from Yup schema.
+    const showRatePrograms = ldClient?.variation(
+        featureFlags.RATE_CERT_PROGRAMS,
+        false
+    )
+
+    const rateName = generateRateName(submission, statePrograms)
 
     const rateCapitationType = submission.rateCapitationType
         ? submission.rateCapitationType === 'RATE_CELL'
             ? 'Certification of capitation rates specific to each rate cell'
             : 'Certification of rate ranges of capitation rates per rate cell'
         : ''
+
+    const ratePrograms =
+        submission.rateProgramIDs && submission.rateProgramIDs.length > 0
+            ? statePrograms
+                  .filter((p) => submission.rateProgramIDs?.includes(p.id))
+                  .map((p) => p.name)
+            : undefined
 
     useEffect(() => {
         // get all the keys for the documents we want to zip
@@ -100,6 +120,13 @@ export const RateDetailsSummarySection = ({
                 </h3>
 
                 <DoubleColumnGrid>
+                    {ratePrograms && showRatePrograms && (
+                        <DataDetail
+                            id="ratePrograms"
+                            label="Programs this rate certification covers"
+                            data={ratePrograms}
+                        />
+                    )}
                     <DataDetail
                         id="rateType"
                         label="Rate certification type"
