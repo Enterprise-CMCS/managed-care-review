@@ -201,8 +201,8 @@ export const SubmissionType = ({
                 draftSubmission.rateDateCertified !== undefined ||
                 draftSubmission.rateDateStart !== undefined ||
                 draftSubmission.rateDateEnd !== undefined ||
-                draftSubmission.rateProgramIDs !== undefined ||
-                draftSubmission.rateProgramIDs !== []
+                (Array.isArray(draftSubmission.rateProgramIDs) &&
+                    !draftSubmission.rateProgramIDs)
 
             if (
                 draftSubmission.submissionType === 'CONTRACT_ONLY' &&
@@ -213,6 +213,22 @@ export const SubmissionType = ({
                 draftSubmission.rateDateStart = undefined
                 draftSubmission.rateDateEnd = undefined
                 draftSubmission.rateProgramIDs = []
+                draftSubmission.rateCapitationType = undefined
+                draftSubmission.documents = draftSubmission.documents.filter(
+                    (document) =>
+                        document.documentCategories.includes(
+                            'CONTRACT_RELATED'
+                        ) || document.documentCategories.includes('CONTRACT')
+                )
+                draftSubmission.rateDocuments =
+                    draftSubmission.rateDocuments.filter(
+                        (document) =>
+                            document.documentCategories.includes(
+                                'CONTRACT_RELATED'
+                            ) ||
+                            document.documentCategories.includes('CONTRACT')
+                    )
+                //console.log(contractOnlyDocs)
             }
 
             try {
