@@ -22,7 +22,7 @@
         "@apollo/gateway": "^2.0.1",
         "@opentelemetry/api": "^1.1.0",
         "@opentelemetry/core": "^1.2.0",
-        "@opentelemetry/exporter-trace-otlp-http": "^0.28.0",
+        "@opentelemetry/exporter-trace-otlp-http": "^0.31.0",
         "@opentelemetry/id-generator-aws-xray": "^1.1.0",
         "@opentelemetry/instrumentation": "^0.28.0",
         "@opentelemetry/instrumentation-http": "^0.28.0",
