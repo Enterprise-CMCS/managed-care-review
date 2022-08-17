@@ -224,31 +224,33 @@ async function initializeGQLHandler(): Promise<Handler> {
     // Eventually we will want to get the rest of the emails in the same manner. For now, we want to get this bug fix asap.
     const cmsReviewSharedEmails =
         await emailParameterStore.getCmsReviewSharedEmails()
-    const cmsReviewHelpEmailAddress = process.env.SES_REVIEW_HELP_EMAIL_ADDRESS
-    const cmsRateHelpEmailAddress = process.env.SES_RATE_HELP_EMAIL_ADDRESS
+    const cmsReviewHelpEmailAddress =
+        await emailParameterStore.getCmsReviewHelpEmail()
+    const cmsRateHelpEmailAddress =
+        await emailParameterStore.getCmsRateHelpEmail()
     const cmsDevTeamHelpEmailAddress =
-        process.env.SES_DEV_TEAM_HELP_EMAIL_ADDRESS
+        await emailParameterStore.getCmsDevTeamHelpEmail()
     const ratesReviewSharedEmails =
         await emailParameterStore.getRatesReviewSharedEmails()
 
     if (cmsReviewSharedEmails instanceof Error)
         throw new Error(`Configuration Error: ${cmsReviewSharedEmails.message}`)
 
-    if (cmsReviewHelpEmailAddress === undefined) {
+    if (cmsReviewHelpEmailAddress instanceof Error) {
         throw new Error(
-            'Configuration Error: SES_REVIEW_HELP_EMAIL_ADDRESS is required'
+            `Configuration Error: ${cmsReviewHelpEmailAddress.message}`
         )
     }
 
-    if (cmsRateHelpEmailAddress === undefined) {
+    if (cmsRateHelpEmailAddress instanceof Error) {
         throw new Error(
-            'Configuration Error: SES_RATE_HELP_EMAIL_ADDRESS is required'
+            `Configuration Error: ${cmsRateHelpEmailAddress.message}`
         )
     }
 
-    if (cmsDevTeamHelpEmailAddress === undefined) {
+    if (cmsDevTeamHelpEmailAddress instanceof Error) {
         throw new Error(
-            'Configuration Error: SES_DEV_TEAM_HELP_EMAIL_ADDRESS is required'
+            `Configuration Error: ${cmsDevTeamHelpEmailAddress.message}`
         )
     }
     if (ratesReviewSharedEmails instanceof Error)

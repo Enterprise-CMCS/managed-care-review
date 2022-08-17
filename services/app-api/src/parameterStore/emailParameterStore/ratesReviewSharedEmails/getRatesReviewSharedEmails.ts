@@ -1,17 +1,9 @@
 import { getParameterStore } from '../../awsParameterStore'
 
 export const getRatesReviewSharedEmails = async (): Promise<
-    string[] | Error
+    string[] | string | Error
 > => {
-    const ratesAddresses = await getParameterStore(
-        `/configuration/email/ratesAddresses`
-    )
-    if (ratesAddresses instanceof Error) {
-        return ratesAddresses
-    } else {
-        //Split string into array using ',' separator and trim each array item.
-        return ratesAddresses.split(',').map((email) => email.trim())
-    }
+    return await getParameterStore(`/configuration/email/ratesAddresses`)
 }
 
 export const getRatesReviewSharedEmailsLocal = async (): Promise<
