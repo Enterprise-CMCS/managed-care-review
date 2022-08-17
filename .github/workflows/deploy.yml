@@ -411,6 +411,7 @@ jobs:
       - name: Create combined test coverage report
         run: |
           echo "Combining coverage reports"
+          # prepage the folders to hold the reports
           mkdir -p reports
           mkdir -p cypress_temp
           mkdir -p .nyc_output
@@ -418,19 +419,24 @@ jobs:
           ls
           echo "listing a cypress folder"
           ls ./cypress-json-coverage-1/
+          # copy the separate cypress reports from parallel runs to one folder
           cp ./cypress-json-coverage-1/coverage-final.json ./cypress_temp/from-cypress-1.json
           cp ./cypress-json-coverage-2/coverage-final.json ./cypress_temp/from-cypress-2.json
           cp ./cypress-json-coverage-3/coverage-final.json ./cypress_temp/from-cypress-3.json
           cp ./cypress-json-coverage-4/coverage-final.json ./cypress_temp/from-cypress-4.json
           cp ./cypress-json-coverage-5/coverage-final.json ./cypress_temp/from-cypress-5.json
           cp ./cypress-json-coverage-6/coverage-final.json ./cypress_temp/from-cypress-6.json
+          # merge the collected cypress reports into one report
           npx nyc merge cypress_temp ./reports/from-cypress.json
           echo "Temp merge done"
           ls ./cypress_temp
+          # copy the web and api coverage reports to the reports folder
           cp ./api-test-coverage/coverage-final.json ./reports/from-api.json
           cp ./unit-test-coverage/coverage-final.json ./reports/from-unit-test.json
           echo "Copied all files"
+          # merge the cypress, web, and api reports into one report
           npx nyc merge reports && mv coverage.json .nyc_output/out.json
+          # generate the html report from the combined coverage report
           mkdir -p coverage-all && npx nyc report --reporter lcov --reporter text --reporter json-summary --report-dir coverage-all
           cd coverage-all
           echo "Coverage reports merged"

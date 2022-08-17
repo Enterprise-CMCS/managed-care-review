@@ -24,6 +24,7 @@ describe('submission type', () => {
 
             // Navigate to type page
             cy.visit(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             // Navigate to dashboard page by clicking save as draft
             cy.navigateForm('SAVE_DRAFT')
@@ -31,6 +32,7 @@ describe('submission type', () => {
 
             // Navigate to back to submission type page
             cy.visit(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             // Navigate to contract details page by clicking continue for contract only submission
             cy.navigateForm('CONTINUE')
@@ -48,6 +50,7 @@ describe('submission type', () => {
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
             cy.visit(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             cy.findByText('Contract action and rate certification').click()
 
@@ -57,6 +60,7 @@ describe('submission type', () => {
 
             // Navigate to type page
             cy.visit(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             cy.findByLabelText('Contract action and rate certification').should(
                 'be.checked'
@@ -89,6 +93,7 @@ describe('submission type', () => {
 
             // Navigate to type page
             cy.visit(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             //Edit some stuff here
             cy.findByRole('combobox', { name: 'programs (required)' }).click()
@@ -105,6 +110,7 @@ describe('submission type', () => {
 
             // Navigate back to submission type page
             cy.visit(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             //Check to make sure edited stuff was saved
             cy.get('[aria-label="Remove PMAP"]').should('exist')

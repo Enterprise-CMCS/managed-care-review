@@ -109,24 +109,6 @@ Read by `app-api`
 
 Sets the "from" address for all emails sent by the system. This address must have been added to SES and validated there, in order to work.
 
-### `SES_REVIEW_TEAM_EMAIL_ADDRESSES`
-
-Read by `app-api`
-
-Sets the "to" addresses for generic emails sent to the shared CMS inbox (there may be multiple). Value is comma separated string.
-
-### `SES_RATES_EMAIL_ADDRESSES`
-
-Read by `app-api`
-
-Sets additional "to" addresses for emails about packages that contain rates, sent to rate reviewers (there may be multiple). Value is comma separated string.
-
-### `SES_RATES_EMAIL_ADDRESSES`
-
-Read by `app-api`
-
-Sets additional "to" addresses for emails about packages that contain rates, sent to rate reviewers (there may be multiple). Value is comma separated string.
-
 ### `SES_REVIEW_HELP_EMAIL_ADDRESS`, `SES_RATE_HELP_EMAIL_ADDRESS`, `SES_DEV_TEAM_HELP_EMAIL_ADDRESS`
 
 Read by `app-api`
