@@ -11,10 +11,15 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands'
+import '@cypress/code-coverage/support'
 import './loginCommands'
 import './stateSubmissionFormCommands'
 import './submissionCommands'
-type FormButtonKey = 'CONTINUE_FROM_START_NEW' | 'CONTINUE' | 'SAVE_DRAFT' | 'BACK' 
+type FormButtonKey =
+    | 'CONTINUE_FROM_START_NEW'
+    | 'CONTINUE'
+    | 'SAVE_DRAFT'
+    | 'BACK'
 
 declare global {
     namespace Cypress {
@@ -41,7 +46,10 @@ declare global {
             fillOutSupportingDocuments(): void
             waitForDocumentsToLoad(): void
             verifyDocumentsHaveNoErrors(): void
-            submitStateSubmissionForm(success?: boolean, resubmission?: boolean): void
+            submitStateSubmissionForm(
+                success?: boolean,
+                resubmission?: boolean
+            ): void
             navigateForm(buttonName: FormButtonKey, waitForLoad?: boolean): void
             navigateToSubmissionByUserInteraction(testId: string): void
         }

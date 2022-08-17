@@ -99,6 +99,12 @@ jobs:
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         run: ./dev test web --unit
 
+      - name: upload unit test coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: unit-test-coverage
+          path: ./services/app-web/coverage/coverage-final.json
+
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
         continue-on-error: true
@@ -141,6 +147,12 @@ jobs:
           REACT_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         run: ./dev test api --unit
+
+      - name: upload api test coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: api-test-coverage
+          path: ./services/app-api/coverage/coverage-final.json
 
       - name: publish code coverage
         uses: paambaati/codeclimate-action@v3.0.0
@@ -354,3 +366,82 @@ jobs:
         with:
           name: cypress-videos
           path: tests/cypress/videos
+      - name: upload partial cypress coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: partial-cypress-coverage-${{ matrix.containers}}
+          path: ./coverage-cypress/lcov.info
+
+      - name: upload partial cypress coverage json
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-json-coverage-${{ matrix.containers}}
+          path: ./coverage-cypress/coverage-final.json
+
+      - name: publish code coverage
+        uses: paambaati/codeclimate-action@v3.0.0
+        continue-on-error: true
+        env:
+          CC_TEST_REPORTER_ID: cace182021fe88d327fa8d95355ac6081f420e094a214fe77feb5df2f0259e9d
+        with:
+          debug: true
+          coverageLocations: |
+            ${{github.workspace}}/coverage-cypress/lcov.info
+  coverage:
+    name: test-coverage
+    needs: [cypress]
+    if: always() && needs.finishing-prep.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      deployments: write
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v3
+      - name: Collate test coverage reports
+        run: |
+          ls
+          echo $(pwd)
+          cd ./services/app-web
+          echo $(pwd)
+          ls
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+
+      - name: Create combined test coverage report
+        run: |
+          echo "Combining all coverage reports"
+          echo "prepare the folders to hold the reports"
+          mkdir -p reports
+          mkdir -p cypress_temp
+          mkdir -p .nyc_output
+          echo "listing current folder"
+          ls
+          echo "listing a cypress folder"
+          ls ./cypress-json-coverage-1/
+          echo "copy the separate cypress reports from parallel runs to one folder"
+          cp ./cypress-json-coverage-1/coverage-final.json ./cypress_temp/from-cypress-1.json
+          cp ./cypress-json-coverage-2/coverage-final.json ./cypress_temp/from-cypress-2.json
+          cp ./cypress-json-coverage-3/coverage-final.json ./cypress_temp/from-cypress-3.json
+          cp ./cypress-json-coverage-4/coverage-final.json ./cypress_temp/from-cypress-4.json
+          cp ./cypress-json-coverage-5/coverage-final.json ./cypress_temp/from-cypress-5.json
+          cp ./cypress-json-coverage-6/coverage-final.json ./cypress_temp/from-cypress-6.json
+          echo "merge the collected cypress reports into one report"
+          npx nyc merge cypress_temp ./reports/from-cypress.json
+          echo "Temp merge done"
+          ls ./cypress_temp
+          echo "copy the web and api coverage reports to the reports folder"
+          cp ./api-test-coverage/coverage-final.json ./reports/from-api.json
+          cp ./unit-test-coverage/coverage-final.json ./reports/from-unit-test.json
+          echo "Copied all files"
+          echo "merge the cypress, web, and api reports into one report"
+          npx nyc merge reports && mv coverage.json .nyc_output/out.json
+          echo "generate the html report from the combined coverage report"
+          mkdir -p coverage-all && npx nyc report --reporter lcov --reporter text --reporter json-summary --report-dir coverage-all
+          cd coverage-all
+          echo "Coverage reports merged"
+      - name: Upload combined test coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: combined-test-coverage
+          path: ./coverage-all/
