@@ -194,6 +194,27 @@ export const SubmissionType = ({
                 values.submissionType as SubmissionTypeT
             draftSubmission.submissionDescription = values.submissionDescription
 
+            //If CONTRACT_ONLY submission has any rate fields, clear it out. CONTRACT_ONLY submissions should never have
+            // valid rate fields
+            const anyValidRates =
+                draftSubmission.rateType !== undefined ||
+                draftSubmission.rateDateCertified !== undefined ||
+                draftSubmission.rateDateStart !== undefined ||
+                draftSubmission.rateDateEnd !== undefined ||
+                draftSubmission.rateProgramIDs !== undefined ||
+                draftSubmission.rateProgramIDs !== []
+
+            if (
+                draftSubmission.submissionType === 'CONTRACT_ONLY' &&
+                anyValidRates
+            ) {
+                draftSubmission.rateType = undefined
+                draftSubmission.rateDateCertified = undefined
+                draftSubmission.rateDateStart = undefined
+                draftSubmission.rateDateEnd = undefined
+                draftSubmission.rateProgramIDs = []
+            }
+
             try {
                 const updatedDraft = await updateDraft(draftSubmission)
                 if (updatedDraft instanceof Error) {
