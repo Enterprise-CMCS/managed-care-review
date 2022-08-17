@@ -58,6 +58,7 @@ custom:
       '/configuration/default/vpc/subnets/private/c/id': 'offline'
       '/configuration/iam/full_permissions_boundary_policy': 'arn:aws:iam::local:policy/local/developer-boundary-policy'
       '/configuration/email/sourceAddress': ${env:SES_SOURCE_EMAIL_ADDRESS, 'offline'}
+      '/configuration/email/reviewHelpAddress': ${env:SES_REVIEW_HELP_EMAIL_ADDRESS, 'offline'}
       '/configuration/email/rateHelpAddress': ${env:SES_RATE_HELP_EMAIL_ADDRESS, 'offline'}
       '/configuration/email/devTeamHelpAddress': ${env:SES_DEV_TEAM_HELP_EMAIL_ADDRESS, 'offline'}
   vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
