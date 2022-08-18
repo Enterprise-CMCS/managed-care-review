@@ -194,43 +194,6 @@ export const SubmissionType = ({
                 values.submissionType as SubmissionTypeT
             draftSubmission.submissionDescription = values.submissionDescription
 
-            //If CONTRACT_ONLY submission has any rate fields, clear it out. CONTRACT_ONLY submissions should never have
-            // valid rate fields
-            const anyValidRates =
-                draftSubmission.rateType !== undefined ||
-                draftSubmission.rateDateCertified !== undefined ||
-                draftSubmission.rateDateStart !== undefined ||
-                draftSubmission.rateDateEnd !== undefined ||
-                (Array.isArray(draftSubmission.rateProgramIDs) &&
-                    !draftSubmission.rateProgramIDs)
-
-            if (
-                draftSubmission.submissionType === 'CONTRACT_ONLY' &&
-                anyValidRates
-            ) {
-                draftSubmission.rateType = undefined
-                draftSubmission.rateDateCertified = undefined
-                draftSubmission.rateDateStart = undefined
-                draftSubmission.rateDateEnd = undefined
-                draftSubmission.rateProgramIDs = []
-                draftSubmission.rateCapitationType = undefined
-                draftSubmission.documents = draftSubmission.documents.filter(
-                    (document) =>
-                        document.documentCategories.includes(
-                            'CONTRACT_RELATED'
-                        ) || document.documentCategories.includes('CONTRACT')
-                )
-                draftSubmission.rateDocuments =
-                    draftSubmission.rateDocuments.filter(
-                        (document) =>
-                            document.documentCategories.includes(
-                                'CONTRACT_RELATED'
-                            ) ||
-                            document.documentCategories.includes('CONTRACT')
-                    )
-                //console.log(contractOnlyDocs)
-            }
-
             try {
                 const updatedDraft = await updateDraft(draftSubmission)
                 if (updatedDraft instanceof Error) {
