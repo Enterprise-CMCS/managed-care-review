@@ -22,7 +22,6 @@ export const resubmitPackageCMSEmail = async (
     stateAnalystsEmails: StateAnalystsEmails,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
-    const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
     const reviewerEmails = generateCMSReviewerEmails(
         config,
@@ -51,8 +50,7 @@ export const resubmitPackageCMSEmail = async (
 
     const result = await renderTemplate<typeof data>(
         'resubmitPackageCMSEmail',
-        data,
-        isUnitTest
+        data
     )
     if (result instanceof Error) {
         return result

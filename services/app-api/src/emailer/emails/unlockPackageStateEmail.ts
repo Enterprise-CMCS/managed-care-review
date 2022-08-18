@@ -13,7 +13,7 @@ import {
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration } from '../'
 import { ProgramType, UpdateInfoType } from '../../domain-models'
-import { formatDateTime } from 'app-web/src/common-code/dateHelpers/calendarDate'
+import { formatDateTime } from '../../../../app-web/src/common-code/dateHelpers/calendarDate'
 
 export const unlockPackageStateEmail = async (
     pkg: UnlockedHealthPlanFormDataType,
@@ -21,7 +21,6 @@ export const unlockPackageStateEmail = async (
     config: EmailConfiguration,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
-    const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
     const receiverEmails = generateStateReceiverEmails(pkg)
     const packagePrograms = findPackagePrograms(pkg, statePrograms)
@@ -49,8 +48,7 @@ export const unlockPackageStateEmail = async (
 
     const result = await renderTemplate<typeof data>(
         'unlockPackageStateEmail',
-        data,
-        isUnitTest
+        data
     )
     if (result instanceof Error) {
         return result

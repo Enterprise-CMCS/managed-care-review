@@ -278,7 +278,7 @@ export function mockStateSubmission(): LockedHealthPlanFormDataType {
         rateDateEnd: '2022-05-23',
         rateDateCertified: '2022-05-23',
         rateAmendmentInfo: undefined,
-		rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         stateContacts: [
             {
                 name: 'Test Person',
@@ -356,7 +356,7 @@ export function mockStateSubmissionContractAmendment(): LockedHealthPlanFormData
         rateDateEnd: '2022-05-23',
         rateDateCertified: '2022-05-23',
         rateAmendmentInfo: undefined,
-rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         stateContacts: [
             {
                 name: 'Test Person',
@@ -426,7 +426,7 @@ export function mockDraftHealthPlanPackage(
 }
 
 export function mockSubmittedHealthPlanPackage(
-    submissionData?: Partial<UnlockedHealthPlanFormDataType>,
+    submissionData?: Partial<LockedHealthPlanFormDataType>,
     submitInfo?: Partial<UpdateInformation>
 ): HealthPlanPackage {
     // get a submitted DomainModel submission

@@ -19,11 +19,7 @@ Eta.configure({
     ],
 })
 
-const renderTemplate = async <T>(
-    templateName: string,
-    data: T,
-    inUnitTest?: boolean
-) => {
+const renderTemplate = async <T>(templateName: string, data: T) => {
     if (!/^[a-zA-Z0-9]+$/.test(templateName)) {
         console.error(
             'CODING ERROR: templateName parameter should not include any punctuation, can only be alphanumeric characters'

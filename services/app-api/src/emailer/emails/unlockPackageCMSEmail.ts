@@ -11,7 +11,7 @@ import {
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
 import { ProgramType, UpdateInfoType } from '../../domain-models'
-import { formatDateTime } from 'app-web/src/common-code/dateHelpers/calendarDate'
+import { formatDateTime } from '../../../../app-web/src/common-code/dateHelpers/calendarDate'
 
 export const unlockPackageCMSEmail = async (
     pkg: UnlockedHealthPlanFormDataType,
