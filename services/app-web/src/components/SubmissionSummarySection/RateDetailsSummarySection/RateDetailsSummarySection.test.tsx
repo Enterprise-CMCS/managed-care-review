@@ -334,7 +334,6 @@ describe('RateDetailsSummarySection', () => {
             name: 'Programs this rate certification covers',
         })
         expect(programElement).toBeInTheDocument()
-
         const programList = within(programElement).getByText('SNBC, PMAP')
         expect(programList).toBeInTheDocument()
     })

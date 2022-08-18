@@ -1,4 +1,5 @@
 import { defineConfig } from 'cypress'
+import task from '@cypress/code-coverage/task'
 import { pa11y, prepareAudit, Browser } from '@cypress-audit/pa11y'
 
 export default defineConfig({
@@ -10,9 +11,10 @@ export default defineConfig({
         screenshotsFolder: 'tests/cypress/screenshots',
         videosFolder: 'tests/cypress/videos',
         setupNodeEvents(on, config) {
-             const newConfig = config
-             newConfig.env.AUTH_MODE = process.env.REACT_APP_AUTH_MODE
-             newConfig.env.TEST_USERS_PASS = process.env.TEST_USERS_PASS
+            task(on, config)
+            const newConfig = config
+            newConfig.env.AUTH_MODE = process.env.REACT_APP_AUTH_MODE
+            newConfig.env.TEST_USERS_PASS = process.env.TEST_USERS_PASS
             on(
                 'before:browser:launch',
                 (browser: Browser = {}, launchOptions) => {
@@ -31,5 +33,5 @@ export default defineConfig({
     retries: {
         runMode: 2,
         openMode: 0,
-    }
+    },
 })

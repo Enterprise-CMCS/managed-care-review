@@ -944,45 +944,6 @@ describe('Documents', () => {
     })
 
     describe('Document categories checkbox', () => {
-        it('not present on contract only submission, categories default to contract-supporting', async () => {
-            const mockUpdateDraftFn = jest.fn()
-            renderWithProviders(
-                <Documents
-                    draftSubmission={{
-                        ...mockDraft(),
-                        submissionType: 'CONTRACT_ONLY',
-                    }}
-                    updateDraft={mockUpdateDraftFn}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                    },
-                }
-            )
-            expect(screen.queryAllByText('Contract-supporting')).toHaveLength(0)
-            expect(screen.queryAllByText('Rate-supporting')).toHaveLength(0)
-
-            const input = screen.getByTestId('file-input-input')
-            await userEvent.upload(input, [TEST_PDF_FILE])
-
-            await waitFor(() => {
-                expect(screen.getByText(/1 complete/)).toBeInTheDocument()
-            })
-
-            screen.getByRole('button', { name: 'Continue' }).click()
-
-            await waitFor(() => {
-                expect(mockUpdateDraftFn).toHaveBeenCalledTimes(1)
-                const documents = mockUpdateDraftFn.mock.calls[0][0].documents
-                expect(documents).toHaveLength(1)
-                expect(documents[0].documentCategories).toContain(
-                    'CONTRACT_RELATED'
-                )
-            })
-        })
-
         it('present on contract and rates submission', async () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
