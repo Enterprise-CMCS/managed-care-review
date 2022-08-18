@@ -163,6 +163,7 @@ describe('CMS user', () => {
                     button.trigger('click')
                 })
                 //Check for view previous submission link in the initial accordion item to exist
+                  cy.findByTestId('revision-link-1').should('exist')
                 cy.navigateToSubmissionByUserInteraction('revision-link-1')
                 //Making sure we are on SubmissionRevisionSummary page and contains version text
                 cy.findByTestId('revision-version')
