@@ -22,7 +22,6 @@ export const newPackageStateEmail = async (
     config: EmailConfiguration,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
-    const isUnitTest = config.baseUrl === 'http://localhost'
     const receiverEmails = generateStateReceiverEmails(pkg, user)
     const packagePrograms = findPackagePrograms(pkg, statePrograms)
 
@@ -68,8 +67,7 @@ export const newPackageStateEmail = async (
 
     const result = await renderTemplate<typeof data>(
         'newPackageStateEmail',
-        data,
-        isUnitTest
+        data
     )
 
     if (result instanceof Error) {
