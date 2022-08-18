@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -e
+
+gen_directories=("../app-web/src/gen/" "../app-api/protoMigrations/gen/")
+
+for gen_directory in "${gen_directories[@]}"; do
+        mkdir -p "gen_directory"
+        echo "generating $gen_directory/healthPlanFormDataProto"
+
+        pbjs -t static-module -w commonjs -o "$gen_directory/healthPlanFormDataProto.js" src/health_plan_form_data.proto
+
+        pbts -o "$gen_directory/healthPlanFormDataProto.d.ts" ../app-web/src/gen/healthPlanFormDataProto.js
+done
