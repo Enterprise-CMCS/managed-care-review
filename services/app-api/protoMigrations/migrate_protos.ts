@@ -5,6 +5,7 @@ import * as genproto from './gen/healthPlanFormDataProto.js'
 
 import { PrismaClient } from '@prisma/client'
 
+// decodes the proto
 function decodeOrError(
     buff: Uint8Array
 ): genproto.mcreviewproto.HealthPlanFormData | Error {
@@ -16,6 +17,7 @@ function decodeOrError(
     }
 }
 
+// MigrationType describes a single migration with a name and a callable function called migrateProto
 interface MigrationType {
     name: string
     module: {
@@ -25,12 +27,13 @@ interface MigrationType {
     }
 }
 
+// MigratorType is a type covering our two different migrators
 interface MigratorType {
-    ranMigrations(): Promise<string[]>
+    listMigrationsThatHaveRun(): Promise<string[]>
     runMigrations(migrations: MigrationType[]): Promise<void>
 }
 
-function dbMigrator(dbConnString: string): MigratorType {
+function newDBMigrator(dbConnString: string): MigratorType {
     const prismaClient = new PrismaClient({
         datasources: {
             db: {
@@ -40,18 +43,18 @@ function dbMigrator(dbConnString: string): MigratorType {
     })
 
     return {
-        async ranMigrations(): Promise<string[]> {
-            const ranMigrationsTable =
+        async listMigrationsThatHaveRun(): Promise<string[]> {
+            const listMigrationsThatHaveRunTable =
                 await prismaClient.protoMigrationsTable.findMany()
-            const migrations = ranMigrationsTable.map((m) => m.migrationName)
+            const migrations = listMigrationsThatHaveRunTable.map(
+                (m) => m.migrationName
+            )
 
             return migrations
         },
 
         async runMigrations(migrations: MigrationType[]) {
             const revs = await prismaClient.healthPlanRevisionTable.findMany()
-
-            console.log(revs)
 
             for (const revision of revs) {
                 const protoBytes = revision.formDataProto
@@ -61,16 +64,11 @@ function dbMigrator(dbConnString: string): MigratorType {
                 if (proto instanceof Error) {
                     throw proto
                 }
-                console.log(proto.status)
-                console.log(proto.contractInfo?.contractDateStart?.month)
 
                 // migrate proto
                 for (const migration of migrations) {
                     migration.module.migrateProto(proto)
                 }
-
-                console.log(proto.contractInfo?.contractDateStart?.month)
-                console.log('desc', proto.submissionDescription)
 
                 const newProtoBytes =
                     genproto.mcreviewproto.HealthPlanFormData.encode(
@@ -101,33 +99,36 @@ function dbMigrator(dbConnString: string): MigratorType {
     }
 }
 
-function fileMigrator(protoPath: string): MigratorType {
+function newFileMigrator(protoPath: string): MigratorType {
     return {
-        async ranMigrations() {
+        async listMigrationsThatHaveRun() {
             // determine migrations to run
-            const ranMigrationsList: string[] = []
-            const ranMigrationsPath = path.join(protoPath, '_ran_migrations')
+            const listMigrationsThatHaveRunList: string[] = []
+            const listMigrationsThatHaveRunPath = path.join(
+                protoPath,
+                '_ran_migrations'
+            )
             try {
-                const ranMigrationsListBytes = fs.readFileSync(
-                    ranMigrationsPath,
+                const listMigrationsThatHaveRunListBytes = fs.readFileSync(
+                    listMigrationsThatHaveRunPath,
                     {
                         encoding: 'utf8',
                     }
                 )
-                console.log('migrationsBYRTE:', ranMigrationsListBytes)
 
-                ranMigrationsListBytes
+                listMigrationsThatHaveRunListBytes
                     .trim()
                     .split('\n')
-                    .forEach((filename) => ranMigrationsList.push(filename))
+                    .forEach((filename) =>
+                        listMigrationsThatHaveRunList.push(filename)
+                    )
             } catch (e) {
                 // if there is no file, treat it like there are no ran migrations.
                 if (e.code != 'ENOENT') {
                     throw e
                 }
             }
-            console.log('ranmigrations:::', ranMigrationsList)
-            return ranMigrationsList
+            return listMigrationsThatHaveRunList
         },
 
         async runMigrations(migrations) {
@@ -135,7 +136,6 @@ function fileMigrator(protoPath: string): MigratorType {
                 .readdirSync(protoPath)
                 .filter((filename) => filename.endsWith('.proto'))
 
-            console.log(testFiles)
             for (const testFile of testFiles) {
                 const tPath = path.join(protoPath, testFile)
                 const protoBytes = fs.readFileSync(tPath)
@@ -145,16 +145,11 @@ function fileMigrator(protoPath: string): MigratorType {
                 if (proto instanceof Error) {
                     throw proto
                 }
-                console.log(proto.status)
-                console.log(proto.contractInfo?.contractDateStart?.month)
 
                 // migrate proto
                 for (const migration of migrations) {
                     migration.module.migrateProto(proto)
                 }
-
-                console.log(proto.contractInfo?.contractDateStart?.month)
-                console.log('desc', proto.submissionDescription)
 
                 //write Proto
                 const newProtoBytes =
@@ -162,17 +157,18 @@ function fileMigrator(protoPath: string): MigratorType {
                         proto
                     ).finish()
 
-                const success = fs.writeFileSync(tPath, newProtoBytes)
-                console.log('write success', success)
+                fs.writeFileSync(tPath, newProtoBytes)
             }
 
             // write run migrations to file
             const ranMigrationNames =
                 migrations.map((m) => m.name).join('\n') + '\n'
-            console.log('WE RAN', ranMigrationNames)
 
-            const ranMigrationsPath = path.join(protoPath, '_ran_migrations')
-            fs.writeFileSync(ranMigrationsPath, ranMigrationNames, {
+            const listMigrationsThatHaveRunPath = path.join(
+                protoPath,
+                '_ran_migrations'
+            )
+            fs.writeFileSync(listMigrationsThatHaveRunPath, ranMigrationNames, {
                 encoding: 'utf8',
                 flag: 'a',
             })
@@ -182,7 +178,6 @@ function fileMigrator(protoPath: string): MigratorType {
 
 async function main() {
     const args = process.argv.slice(2)
-    console.log('args', args)
 
     const usage = `USAGE: 
 ./migrate_protos.js db :: run migrations against all protos in the db
@@ -198,22 +193,22 @@ async function main() {
             throw new Error('DATABASE_URL must be defined in env')
         }
 
-        migrator = dbMigrator(dbConn)
+        migrator = newDBMigrator(dbConn)
     } else if (connectionType === 'FILES') {
         if (args.length !== 2 || args[0] !== 'files') {
             console.log(usage)
             process.exit(1)
         }
         const pathToProtos = args[1]
-        migrator = fileMigrator(pathToProtos)
+        migrator = newFileMigrator(pathToProtos)
     } else {
+        console.log(usage)
         throw new Error('unimplemented migrator')
     }
 
     const migrationFiles = fs
         .readdirSync('./protoMigrations/build/healthPlanFormDataMigrations')
         .filter((m) => m.endsWith('.js') && !m.endsWith('.test.js'))
-    console.log('Figration Miles', migrationFiles)
 
     const migrations: MigrationType[] = []
     for (const migrationFile of migrationFiles) {
@@ -225,7 +220,6 @@ async function main() {
         )
 
         const migration = await import(fullPath)
-        console.log(migrationName, migration)
 
         migrations.push({
             name: migrationName,
@@ -233,15 +227,21 @@ async function main() {
         })
     }
 
-    console.log('all migrations', migrations)
-
-    const previouslyAppliedMigrationNames = await migrator.ranMigrations()
+    const previouslyAppliedMigrationNames =
+        await migrator.listMigrationsThatHaveRun()
 
     const migrationsToRun = migrations.filter((migration) => {
         return !previouslyAppliedMigrationNames.includes(migration.name)
     })
 
-    await migrator.runMigrations(migrationsToRun)
+    console.log(
+        'New Migrations To Run: ',
+        migrationsToRun.map((m) => m.name)
+    )
+
+    if (migrationsToRun.length > 0) {
+        await migrator.runMigrations(migrationsToRun)
+    }
 }
 
 void main()
