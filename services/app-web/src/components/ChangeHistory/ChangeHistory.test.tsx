@@ -188,10 +188,11 @@ describe('Change History', () => {
     })
     it('should list accordion items with links when appropriate', () => {
         render(<ChangeHistory submission={submissionData} />)
-        //Latest resubmission should not have a link.
+        //Latest resubmission should have a link to previous revision
         expect(
             screen.getByTestId('accordionItem_2022-03-25T01:19:46.154Z')
-        ).not.toHaveTextContent('View past submission version')
+        ).toHaveTextContent('View past submission version')
+
         //Unlock history accordion should not have a link
         expect(
             screen.getByTestId('accordionItem_2022-03-25T01:18:44.663Z')
@@ -204,14 +205,17 @@ describe('Change History', () => {
         expect(
             screen.getByTestId('accordionItem_2022-03-24T01:18:44.663Z')
         ).not.toHaveTextContent('View past submission version')
-        //Previous submission should contain a link
-        expect(
-            screen.getByTestId('accordionItem_2022-03-23T02:08:52.259Z')
-        ).toHaveTextContent('View past submission version')
     })
     it('should not list links for initial submission without revisions', () => {
         render(<ChangeHistory submission={formDataProtoInitialSubmission} />)
         //Initial submission should not have a link
+        expect(
+            screen.getByTestId('accordionItem_2022-03-23T02:08:52.259Z')
+        ).not.toHaveTextContent('View past submission version')
+    })
+
+    it('should not include link to previous submission for the initial submission in the list', () => {
+        render(<ChangeHistory submission={submissionData} />)
         expect(
             screen.getByTestId('accordionItem_2022-03-23T02:08:52.259Z')
         ).not.toHaveTextContent('View past submission version')

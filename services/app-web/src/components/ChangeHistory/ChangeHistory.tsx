@@ -10,7 +10,7 @@ type ChangeHistoryProps = {
 
 type flatRevisions = UpdateInformation & {
     kind: 'submit' | 'unlock'
-    revisionVersion: string | undefined
+    previousRevisionVersion: string | undefined
 }
 
 export const ChangeHistory = ({
@@ -34,26 +34,30 @@ export const ChangeHistory = ({
             if (r.node.submitInfo) {
                 const newSubmit: flatRevisions = {} as flatRevisions
 
-                //Only set revisionVersion if not the latest revision.
-                const revisionVersion =
-                    index !== reversedRevisions.length - 1
-                        ? String(index + 1) //Offset version, we want to start at 1
-                        : undefined
-
+                // This is used to link to the previous revision if it exists.
+                // If no previous revision exists and this is the initial revision, set to undefined
+                const previousRevisionVersion =
+                    index === 0 ? undefined : String(index) //Offset version, we want to start at 1
+                console.log(r)
+                console.log(previousRevisionVersion)
                 newSubmit.updatedAt = r.node.submitInfo.updatedAt
                 newSubmit.updatedBy = r.node.submitInfo.updatedBy
                 newSubmit.updatedReason = r.node.submitInfo.updatedReason
                 newSubmit.kind = 'submit'
-                newSubmit.revisionVersion = revisionVersion
+                newSubmit.previousRevisionVersion = previousRevisionVersion
                 //Use unshift to push the latest revision submit info to the beginning of the array
                 result.unshift(newSubmit)
             }
         })
         return result
     }
-    const revisedItems = flattenedRevisions().map((r) => {
+    const flattened = flattenedRevisions()
+
+    const revisedItems = flattened.map((r) => {
         const isInitialSubmission = r.updatedReason === 'Initial submission'
         const isSubsequentSubmission = r.kind === 'submit'
+        console.log(isInitialSubmission)
+        console.log(isSubsequentSubmission)
         return {
             title: (
                 <div>
@@ -68,15 +72,6 @@ export const ChangeHistory = ({
                 <>
                     <span className={styles.tag}>Submitted by:</span>
                     <span> {r.updatedBy}</span>
-                    <br />
-                    {r.revisionVersion && (
-                        <Link
-                            href={`/submissions/${submission.id}/revisions/${r.revisionVersion}`}
-                            data-testid={`revision-link-${r.revisionVersion}`}
-                        >
-                            View past submission version
-                        </Link>
-                    )}
                 </>
             ) : (
                 <>
@@ -96,10 +91,10 @@ export const ChangeHistory = ({
                         </span>
                         <span>{r.updatedReason}</span>
                     </div>
-                    {isSubsequentSubmission && r.revisionVersion && (
+                    {isSubsequentSubmission && r.previousRevisionVersion && (
                         <Link
-                            href={`/submissions/${submission.id}/revisions/${r.revisionVersion}`}
-                            data-testid={`revision-link-${r.revisionVersion}`}
+                            href={`/submissions/${submission.id}/revisions/${r.previousRevisionVersion}`}
+                            data-testid={`revision-link-${r.previousRevisionVersion}`}
                         >
                             View past submission version
                         </Link>
