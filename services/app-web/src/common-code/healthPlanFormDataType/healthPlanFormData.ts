@@ -1,4 +1,7 @@
-import { UnlockedHealthPlanFormDataType } from './UnlockedHealthPlanFormDataType'
+import {
+    SubmissionDocument,
+    UnlockedHealthPlanFormDataType,
+} from './UnlockedHealthPlanFormDataType'
 import { ModifiedProvisions } from './ModifiedProvisions'
 import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import { HealthPlanFormDataType } from './HealthPlanFormDataType'
@@ -71,6 +74,26 @@ const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
                   )
             : validBaseRate
     }
+}
+
+//Returns boolean if package has any valid rate data
+const hasAnyValidRateData = (
+    sub: LockedHealthPlanFormDataType | UnlockedHealthPlanFormDataType
+): boolean => {
+    return (
+        sub.rateType !== undefined ||
+        sub.rateDateCertified !== undefined ||
+        sub.rateDateStart !== undefined ||
+        sub.rateDateEnd !== undefined ||
+        sub.rateCapitationType !== undefined ||
+        sub.rateAmendmentInfo !== undefined ||
+        sub.actuaryContacts !== undefined ||
+        (Array.isArray(sub.rateProgramIDs) && !!sub.rateProgramIDs.length) ||
+        sub.documents.some((document) =>
+            document.documentCategories.includes('CONTRACT_RELATED')
+        ) ||
+        (Array.isArray(sub.rateDocuments) && !!sub.rateDocuments.length)
+    )
 }
 
 const hasValidDocuments = (sub: LockedHealthPlanFormDataType): boolean => {
@@ -228,11 +251,58 @@ const generateRateName = (
     return rateName
 }
 
+const removeRateRelatedDocuments = (
+    documents: SubmissionDocument[]
+): SubmissionDocument[] => {
+    const noRateDocs: SubmissionDocument[] = []
+    documents.forEach((document) => {
+        const ratesRelatedDocIndex =
+            document.documentCategories.indexOf('RATES_RELATED') === -1
+                ? undefined
+                : document.documentCategories.indexOf('RATES_RELATED')
+        const ratesDocIndex =
+            document.documentCategories.indexOf('RATES') === -1
+                ? undefined
+                : document.documentCategories.indexOf('RATES')
+        const includesContractDocs =
+            document.documentCategories.includes('CONTRACT_RELATED') ||
+            document.documentCategories.includes('CONTRACT')
+        if (includesContractDocs) {
+            if (ratesDocIndex) {
+                document.documentCategories.splice(ratesDocIndex, 1)
+            }
+            if (ratesRelatedDocIndex) {
+                document.documentCategories.splice(ratesRelatedDocIndex, 1)
+            }
+            noRateDocs.push(document)
+        }
+    })
+    return noRateDocs
+}
+
+const removeRatesData = (
+    pkg: UnlockedHealthPlanFormDataType
+): UnlockedHealthPlanFormDataType => {
+    pkg.rateType = undefined
+    pkg.rateDateCertified = undefined
+    pkg.rateDateStart = undefined
+    pkg.rateDateEnd = undefined
+    pkg.rateCapitationType = undefined
+    pkg.rateAmendmentInfo = undefined
+    pkg.actuaryContacts = []
+    pkg.rateProgramIDs = []
+    pkg.documents = removeRateRelatedDocuments(pkg.documents)
+    pkg.rateDocuments = []
+
+    return pkg
+}
+
 export {
     hasValidContract,
     hasValidDocuments,
     hasValidSupportingDocumentCategories,
     hasValidRates,
+    hasAnyValidRateData,
     isContractOnly,
     isContractAndRates,
     isLockedHealthPlanFormData,
@@ -240,4 +310,6 @@ export {
     programNames,
     packageName,
     generateRateName,
+    removeRateRelatedDocuments,
+    removeRatesData,
 }
