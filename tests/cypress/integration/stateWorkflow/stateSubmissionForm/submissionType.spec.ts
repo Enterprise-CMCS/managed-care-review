@@ -96,7 +96,9 @@ describe('submission type', () => {
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             //Edit some stuff here
-            cy.findByRole('combobox', { name: 'programs (required)' }).click()
+            cy.findByRole('combobox', {
+                name: 'Programs this contract action covers (required)',
+            }).click()
             cy.findByText('SNBC').click()
             cy.findByText('Contract action and rate certification').click()
             cy.findByRole('textbox', { name: 'Submission description' }).clear()

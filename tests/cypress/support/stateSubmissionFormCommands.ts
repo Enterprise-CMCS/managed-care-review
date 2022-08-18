@@ -26,7 +26,7 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
 Cypress.Commands.add('fillOutContractActionOnly', () => {
     // Must be on '/submissions/new'
     cy.wait(2000)
-    cy.findByRole('combobox', { name: 'programs (required)' }).click({
+    cy.findByRole('combobox', { name: 'Programs this contract action covers (required)' }).click({
         force: true,
     })
     cy.findByText('PMAP').click()
@@ -39,7 +39,7 @@ Cypress.Commands.add('fillOutContractActionOnly', () => {
 Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
     // Must be on '/submissions/new'
     cy.wait(2000)
-    cy.findByRole('combobox', { name: 'programs (required)' }).click({
+    cy.findByRole('combobox', { name: 'Programs this contract action covers (required)' }).click({
         force: true,
     })
     cy.findByText('PMAP').click()
@@ -199,7 +199,7 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     cy.findByLabelText('Date certified').type('03/01/2024')
 
     // TODO: Disabled until we figure out how we want to implement feature flags for cypress testing
-    // cy.findByRole('combobox', { name: 'programs (required)' }).click({
+    // cy.findByRole('combobox', { name: 'Programs this contract action covers (required)' }).click({
     //     force: true,
     // })
     // cy.findByText('PMAP').click()
@@ -227,7 +227,7 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
     cy.findAllByLabelText('End date').eq(1).type('03/01/2025')
 
     // TODO: Disabled until we figure out how we want to implement feature flags for cypress testing
-    // cy.findByRole('combobox', { name: 'programs (required)' }).click({
+    // cy.findByRole('combobox', { name: 'Programs this contract action covers (required)' }).click({
     //     force: true,
     // })
     // cy.findByText('PMAP').click()
