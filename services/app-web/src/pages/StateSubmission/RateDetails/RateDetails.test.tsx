@@ -172,8 +172,6 @@ describe('RateDetails', () => {
 
     it('cannot continue if no documents are added', async () => {
         const mockUpdateDraftFn = jest.fn()
-        ldUseClientSpy({ 'rate-certification-programs': true })
-
         renderWithProviders(
             <RateDetails
                 draftSubmission={emptyRateDetailsDraft}
