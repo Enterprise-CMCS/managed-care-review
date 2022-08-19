@@ -13,6 +13,7 @@ import {
     TEST_XLS_FILE,
     TEST_PNG_FILE,
     dragAndDrop,
+    ldUseClientSpy,
 } from '../../../testHelpers/jestHelpers'
 import { RateDetails } from './RateDetails'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
@@ -171,7 +172,6 @@ describe('RateDetails', () => {
 
     it('cannot continue if no documents are added', async () => {
         const mockUpdateDraftFn = jest.fn()
-
         renderWithProviders(
             <RateDetails
                 draftSubmission={emptyRateDetailsDraft}
@@ -217,6 +217,7 @@ describe('RateDetails', () => {
                 ],
             },
         }
+        ldUseClientSpy({ 'rate-certification-programs': true })
         renderWithProviders(
             <RateDetails
                 draftSubmission={emptyRateDetailsDraft}
@@ -234,10 +235,10 @@ describe('RateDetails', () => {
                 },
             }
         )
-        // TODO: Enable test after rate certification program feature is fully implemented
-        // expect(
-        //     screen.getByText('Programs this rate certification covers')
-        // ).toBeInTheDocument()
+
+        expect(
+            screen.getByText('Programs this rate certification covers')
+        ).toBeInTheDocument()
         expect(screen.getByText('Rate certification type')).toBeInTheDocument()
         screen.getByLabelText('New rate certification').click()
         expect(
@@ -269,7 +270,7 @@ describe('RateDetails', () => {
 
         // check for expected errors
         await waitFor(() => {
-            expect(screen.queryAllByTestId('errorMessage')).toHaveLength(2)
+            expect(screen.queryAllByTestId('errorMessage')).toHaveLength(3)
             expect(
                 screen.queryAllByText(
                     'You must enter the date the document was certified'
@@ -279,23 +280,21 @@ describe('RateDetails', () => {
                 screen.queryByText('You must provide a start and an end date')
             ).toBeInTheDocument()
 
-            // TODO: Enable test after rate certification program feature is fully implemented
-            // expect(
-            //     screen.queryAllByText('You must select a program')
-            // ).toHaveLength(2)
+            expect(
+                screen.queryAllByText('You must select a program')
+            ).toHaveLength(2)
         })
 
-        // TODO: Enable test after rate certification program feature is fully implemented
         //Select programs for rate certification
-        // const combobox = await screen.findByRole('combobox')
-        //
-        // await selectEvent.openMenu(combobox)
-        // await waitFor(() => {
-        //     expect(screen.getByText('Program 3')).toBeInTheDocument()
-        // })
-        // await selectEvent.select(combobox, 'Program 1')
-        // await selectEvent.openMenu(combobox)
-        // await selectEvent.select(combobox, 'Program 3')
+        const combobox = await screen.findByRole('combobox')
+
+        await selectEvent.openMenu(combobox)
+        await waitFor(() => {
+            expect(screen.getByText('Program 3')).toBeInTheDocument()
+        })
+        await selectEvent.select(combobox, 'Program 1')
+        await selectEvent.openMenu(combobox)
+        await selectEvent.select(combobox, 'Program 3')
 
         // fill out form and clear errors
         screen.getAllByLabelText('Start date')[0].focus()
@@ -313,8 +312,7 @@ describe('RateDetails', () => {
         )
     })
 
-    // TODO: Enable test after rate certification program feature is fully implemented
-    it.skip('displays program options based on current user state', async () => {
+    it('displays program options based on current user state', async () => {
         const mockUser = {
             __typename: 'StateUser' as const,
             role: 'STATE_USER',
@@ -334,6 +332,8 @@ describe('RateDetails', () => {
                 ],
             },
         }
+        ldUseClientSpy({ 'rate-certification-programs': true })
+
         renderWithProviders(
             <RateDetails
                 draftSubmission={emptyRateDetailsDraft}

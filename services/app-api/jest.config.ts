@@ -4,7 +4,21 @@ module.exports = {
     transform: {
         '\\.graphql$': 'jest-raw-loader',
     },
-    coverageReporters: [['lcov', { projectRoot: '../../' }], 'text'],
+    coverageReporters: [
+        [
+            'json',
+            {
+                projectRoot: '../../',
+            },
+        ],
+        [
+            'lcov',
+            {
+                projectRoot: '../../',
+            },
+        ],
+        'text',
+    ],
     moduleFileExtensions: ['js', 'json', 'jsx', 'd.ts', 'ts', 'tsx', 'node'],
     coveragePathIgnorePatterns: [
         'testHelpers',

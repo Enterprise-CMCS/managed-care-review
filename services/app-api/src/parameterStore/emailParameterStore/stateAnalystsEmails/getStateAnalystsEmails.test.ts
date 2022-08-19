@@ -1,5 +1,5 @@
 import { getStateAnalystsEmails } from './getStateAnalystsEmails'
-import * as ParameterStore from './awsParameterStore'
+import * as ParameterStore from '../../awsParameterStore'
 
 describe('getStateAnalystEmails', () => {
     it('returns state analysts emails in an array', async () => {

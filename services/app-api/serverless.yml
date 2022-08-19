@@ -58,8 +58,6 @@ custom:
       '/configuration/default/vpc/subnets/private/c/id': 'offline'
       '/configuration/iam/full_permissions_boundary_policy': 'arn:aws:iam::local:policy/local/developer-boundary-policy'
       '/configuration/email/sourceAddress': ${env:SES_SOURCE_EMAIL_ADDRESS, 'offline'}
-      '/configuration/email/reviewTeamAddresses': ${env:SES_REVIEW_TEAM_EMAIL_ADDRESSES, 'offline'}
-      '/configuration/email/ratesAddresses': ${env:SES_RATES_EMAIL_ADDRESSES, 'offline'}
       '/configuration/email/reviewHelpAddress': ${env:SES_REVIEW_HELP_EMAIL_ADDRESS, 'offline'}
       '/configuration/email/rateHelpAddress': ${env:SES_RATE_HELP_EMAIL_ADDRESS, 'offline'}
       '/configuration/email/devTeamHelpAddress': ${env:SES_DEV_TEAM_HELP_EMAIL_ADDRESS, 'offline'}
@@ -128,11 +126,9 @@ provider:
     EMAILER_MODE: ${self:custom.emailerMode}
     PARAMETER_STORE_MODE: ${self:custom.parameterStoreMode}
     SES_SOURCE_EMAIL_ADDRESS: ${ssm:/configuration/email/sourceAddress}
-    SES_REVIEW_TEAM_EMAIL_ADDRESSES: ${ssm:/configuration/email/reviewTeamAddresses}
     SES_REVIEW_HELP_EMAIL_ADDRESS: ${ssm:/configuration/email/reviewHelpAddress}
     SES_RATE_HELP_EMAIL_ADDRESS: ${ssm:/configuration/email/rateHelpAddress}
     SES_DEV_TEAM_HELP_EMAIL_ADDRESS: ${ssm:/configuration/email/devTeamHelpAddress}
-    SES_RATES_EMAIL_ADDRESSES: ${ssm:/configuration/email/ratesAddresses}
     APPLICATION_ENDPOINT: ${self:custom.applicationEndpoint, 'http://localhost:3000'}
     AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
     OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml

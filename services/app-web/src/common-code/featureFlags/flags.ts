@@ -7,7 +7,7 @@ export const featureFlags = {
      Toggles the /health api endpoint
     */
     API_ENABLE_HEALTH_ENDPOINT: 'enable-health-endpoint',
-    /* 
+    /*
      Enables the modal that alerts the user to an expiring session
     */
     SESSION_EXPIRING_MODAL: 'session-expiring-modal',
@@ -27,4 +27,8 @@ export const featureFlags = {
      * Enables selection of programs that apply to rate certification
      */
     RATE_CERT_PROGRAMS: 'rate-certification-programs',
-}
+} as const
+
+export type FeatureFlagTypes = typeof featureFlags[keyof typeof featureFlags]
+
+export type FlagValueTypes = boolean | string | number | object | []
