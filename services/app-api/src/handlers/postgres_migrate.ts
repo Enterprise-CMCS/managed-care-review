@@ -48,17 +48,21 @@ export const main: APIGatewayProxyHandler = async () => {
         console.log('DEBUG WD', process.cwd())
         // Build the script
         process.chdir('services/app-api/protoMigrations')
-        execSync(`../node_modules/.bin/tsc`)
-        console.log('Built Migrator')
+        const buildOutput = execSync(`../node_modules/.bin/tsc`)
+        console.log('Built Migrator', buildOutput.toString())
 
         // Run the script
-        execSync(`${process.execPath} build/migrate_protos.js db`, {
-            env: {
-                DATABASE_URL: dbConnectionURL,
-            },
-        })
-        console.log('Ran the migrations.')
+        const runOutput = execSync(
+            `${process.execPath} build/migrate_protos.js db`,
+            {
+                env: {
+                    DATABASE_URL: dbConnectionURL,
+                },
+            }
+        )
+        console.log('Ran the migrations.', runOutput.toString())
     } catch (err) {
+        console.log('Migration Error: ', err)
         return {
             statusCode: 400,
             body: JSON.stringify({
