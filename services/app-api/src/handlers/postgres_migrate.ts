@@ -5,6 +5,8 @@ import { migrate, newDBMigrator } from '../../protoMigrations/migrate_protos'
 import { getPostgresURL } from './configuration'
 
 export const main: APIGatewayProxyHandler = async () => {
+    console.log('Running postgres_migrate.ts')
+
     const dbURL = process.env.DATABASE_URL
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
 
