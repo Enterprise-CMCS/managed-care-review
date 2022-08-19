@@ -264,21 +264,21 @@ async function initializeGQLHandler(): Promise<Handler> {
                   emailSource: 'local@example.com',
                   stage: 'local',
                   baseUrl: applicationEndpoint,
-                  cmsReviewSharedEmails: cmsReviewSharedEmails,
+                  cmsReviewSharedEmails,
                   cmsReviewHelpEmailAddress,
                   cmsRateHelpEmailAddress,
                   cmsDevTeamHelpEmailAddress,
-                  ratesReviewSharedEmails: ratesReviewSharedEmails,
+                  ratesReviewSharedEmails,
               })
             : newSESEmailer({
                   emailSource: emailSource,
                   stage: stageName,
                   baseUrl: applicationEndpoint,
-                  cmsReviewSharedEmails: cmsReviewSharedEmails,
+                  cmsReviewSharedEmails,
                   cmsReviewHelpEmailAddress,
                   cmsRateHelpEmailAddress,
                   cmsDevTeamHelpEmailAddress,
-                  ratesReviewSharedEmails: ratesReviewSharedEmails,
+                  ratesReviewSharedEmails,
               })
 
     // Resolvers are defined and tested in the resolvers package

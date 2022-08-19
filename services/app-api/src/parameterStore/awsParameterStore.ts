@@ -21,20 +21,17 @@ const getParameterStore = async (
 
         if (Value === undefined || Type === undefined) {
             const errorMessage = `Failed to return parameter ${name}. Value or Type was undefined.`
-            console.error(errorMessage)
-            return new Error(errorMessage)
-        }
-        if (Type !== 'String' && Type !== 'StringList') {
-            const errorMessage = `Failed to return parameter ${name}. Value of Type ${Type} is not supported`
-            console.error(errorMessage)
             return new Error(errorMessage)
         }
 
         if (Type === 'StringList') {
             //Split string into array using ',' separator and trim each array item.
             return Value.split(',').map((email) => email.trim())
-        } else {
+        } else if (Type === 'String') {
             return Value
+        } else {
+            const errorMessage = `Failed to return parameter ${name}. Value of Type ${Type} is not supported`
+            return new Error(errorMessage)
         }
     } catch (err) {
         console.error(
