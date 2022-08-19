@@ -547,6 +547,7 @@ describe('submission type assertions', () => {
     const contractOnlyWithValidRateData: {
         submission: UnlockedHealthPlanFormDataType
         testDescription: string
+        expectedResult: Partial<UnlockedHealthPlanFormDataType>
     }[] = [
         {
             submission: {
@@ -558,6 +559,14 @@ describe('submission type assertions', () => {
                         documentCategories: [
                             'CONTRACT_RELATED' as const,
                             'RATES_RELATED' as const,
+                        ],
+                    },
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also_2.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: [
+                            'RATES_RELATED' as const,
+                            'CONTRACT_RELATED' as const,
                         ],
                     },
                     {
@@ -585,6 +594,29 @@ describe('submission type assertions', () => {
                 ],
             },
             testDescription: 'With all valid rate data ',
+            expectedResult: {
+                rateType: undefined,
+                rateDateCertified: undefined,
+                rateDateStart: undefined,
+                rateDateEnd: undefined,
+                rateCapitationType: undefined,
+                rateAmendmentInfo: undefined,
+                rateProgramIDs: [],
+                actuaryContacts: [],
+                documents: [
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED' as const],
+                    },
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also_2.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED' as const],
+                    },
+                ],
+                rateDocuments: [],
+            },
         },
         {
             submission: {
@@ -594,8 +626,8 @@ describe('submission type assertions', () => {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                         s3URL: 'fakeS3URL',
                         documentCategories: [
-                            'CONTRACT_RELATED' as const,
                             'RATES_RELATED' as const,
+                            'CONTRACT_RELATED' as const,
                         ],
                     },
                     {
@@ -612,31 +644,64 @@ describe('submission type assertions', () => {
                     },
                 ],
             },
-            testDescription: 'With valid rate and rate related documents',
+            testDescription: 'With valid contract and rate related documents',
+            expectedResult: {
+                rateType: undefined,
+                rateDateCertified: undefined,
+                rateDateStart: undefined,
+                rateDateEnd: undefined,
+                rateCapitationType: undefined,
+                rateAmendmentInfo: undefined,
+                rateProgramIDs: [],
+                actuaryContacts: [],
+                documents: [
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED' as const],
+                    },
+                ],
+                rateDocuments: [],
+            },
+        },
+        {
+            submission: {
+                ...mockContractAndRateSub,
+                documents: [
+                    {
+                        name: 'rate_only_supporting_doc.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES_RELATED' as const],
+                    },
+                ],
+                rateDocuments: [
+                    {
+                        name: 'rateDocument.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+            },
+            testDescription: 'With only valid rate related documents',
+            expectedResult: {
+                rateType: undefined,
+                rateDateCertified: undefined,
+                rateDateStart: undefined,
+                rateDateEnd: undefined,
+                rateCapitationType: undefined,
+                rateAmendmentInfo: undefined,
+                rateProgramIDs: [],
+                actuaryContacts: [],
+                documents: [],
+                rateDocuments: [],
+            },
         },
     ]
     test.each(contractOnlyWithValidRateData)(
         'Submit CONTRACT_ONLY with valid rate data: $testDescription',
-        ({ submission }) => {
+        ({ submission, expectedResult }) => {
             expect(removeRatesData(submission)).toEqual(
-                expect.objectContaining({
-                    rateType: undefined,
-                    rateDateCertified: undefined,
-                    rateDateStart: undefined,
-                    rateDateEnd: undefined,
-                    rateCapitationType: undefined,
-                    rateAmendmentInfo: undefined,
-                    rateProgramIDs: [],
-                    actuaryContacts: [],
-                    documents: [
-                        {
-                            name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
-                            s3URL: 'fakeS3URL',
-                            documentCategories: ['CONTRACT_RELATED' as const],
-                        },
-                    ],
-                    rateDocuments: [],
-                })
+                expect.objectContaining(expectedResult)
             )
         }
     )

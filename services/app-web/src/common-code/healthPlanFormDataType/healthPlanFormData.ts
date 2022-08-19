@@ -268,10 +268,10 @@ const removeRateRelatedDocuments = (
             document.documentCategories.includes('CONTRACT_RELATED') ||
             document.documentCategories.includes('CONTRACT')
         if (includesContractDocs) {
-            if (ratesDocIndex) {
+            if (ratesDocIndex !== undefined) {
                 document.documentCategories.splice(ratesDocIndex, 1)
             }
-            if (ratesRelatedDocIndex) {
+            if (ratesRelatedDocIndex !== undefined) {
                 document.documentCategories.splice(ratesRelatedDocIndex, 1)
             }
             noRateDocs.push(document)
