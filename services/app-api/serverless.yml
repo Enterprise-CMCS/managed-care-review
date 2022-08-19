@@ -250,6 +250,8 @@ functions:
       securityGroupIds:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
+    patterns:
+      - 'services/app-api/protoMigrations/healthPlanFormDataMigrations/*'
     layers:
       - !Ref PrismaClientMigrationLambdaLayer
       - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-2-0:1

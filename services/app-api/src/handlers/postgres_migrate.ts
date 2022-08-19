@@ -1,5 +1,7 @@
+import fs from 'fs'
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import { execSync } from 'child_process'
+import { migrate, newDBMigrator } from '../../protoMigrations/migrate_protos'
 import { getPostgresURL } from './configuration'
 
 export const main: APIGatewayProxyHandler = async () => {
@@ -46,21 +48,17 @@ export const main: APIGatewayProxyHandler = async () => {
     // and now, build and run our proto migrations
     try {
         console.log('DEBUG WD', process.cwd())
-        // Build the script
-        process.chdir('services/app-api/protoMigrations')
-        const buildOutput = execSync(`../node_modules/.bin/tsc`)
-        console.log('Built Migrator', buildOutput.toString())
+        fs.readdirSync(process.cwd()).forEach((file) => {
+            console.log(file)
+        })
 
-        // Run the script
-        const runOutput = execSync(
-            `${process.execPath} build/migrate_protos.js db`,
-            {
-                env: {
-                    DATABASE_URL: dbConnectionURL,
-                },
-            }
-        )
-        console.log('Ran the migrations.', runOutput.toString())
+        console.log('Migrating')
+
+        const migrator = newDBMigrator(dbURL)
+
+        await migrate(migrator)
+
+        console.log('Migrated Protos.')
     } catch (err) {
         console.log('Migration Error: ', err)
         return {
