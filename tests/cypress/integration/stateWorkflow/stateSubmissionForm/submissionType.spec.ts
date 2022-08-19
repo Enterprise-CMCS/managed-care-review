@@ -99,7 +99,7 @@ describe('submission type', () => {
             cy.findByRole('combobox', {
                 name: 'Programs this contract action covers (required)',
             }).click()
-            cy.findByText('SNBC').click()
+            cy.findByText('SNBC').click({ force: true })
             cy.findByText('Contract action and rate certification').click()
             cy.findByRole('textbox', { name: 'Submission description' }).clear()
             cy.findByRole('textbox', { name: 'Submission description' }).type(
