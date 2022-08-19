@@ -257,21 +257,16 @@ const removeRateRelatedDocuments = (
     const noRateDocs: SubmissionDocument[] = []
     documents.forEach((document) => {
         const ratesRelatedDocIndex =
-            document.documentCategories.indexOf('RATES_RELATED') === -1
-                ? undefined
-                : document.documentCategories.indexOf('RATES_RELATED')
-        const ratesDocIndex =
-            document.documentCategories.indexOf('RATES') === -1
-                ? undefined
-                : document.documentCategories.indexOf('RATES')
+            document.documentCategories.indexOf('RATES_RELATED')
+        const ratesDocIndex = document.documentCategories.indexOf('RATES')
         const includesContractDocs =
             document.documentCategories.includes('CONTRACT_RELATED') ||
             document.documentCategories.includes('CONTRACT')
         if (includesContractDocs) {
-            if (ratesDocIndex !== undefined) {
+            if (ratesDocIndex !== -1) {
                 document.documentCategories.splice(ratesDocIndex, 1)
             }
-            if (ratesRelatedDocIndex !== undefined) {
+            if (ratesRelatedDocIndex !== -1) {
                 document.documentCategories.splice(ratesRelatedDocIndex, 1)
             }
             noRateDocs.push(document)
