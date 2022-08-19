@@ -148,10 +148,11 @@ describe('CMS user', () => {
                 cy.logInAsCMSUser({ initialURL: submissionURL })
 
                 //  CMS user sees resubmitted submission and active unlock button
+                cy.findByTestId('submission-summary').should('exist')
                 cy.findByRole('button', { name: 'Unlock submission' }).should(
                     'not.be.disabled'
                 )
-
+                
                 //CSM user should not see unlock banner and should see updated submission banner
                 cy.findByTestId('unlockedBanner').should('not.exist')
                 cy.findByTestId('updatedSubmissionBanner').should('exist')
