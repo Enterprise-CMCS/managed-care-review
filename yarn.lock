@@ -6397,16 +6397,16 @@
     node-gyp "^7.1.0"
     read-package-json-fast "^2.0.1"
 
-"@octokit/action@^3.18.0":
-  version "3.18.1"
-  resolved "https://registry.yarnpkg.com/@octokit/action/-/action-3.18.1.tgz#dcf92887d18e98599ec9f02e9937b80745271143"
-  integrity sha512-jl88CBdtk7SE1Jwpxtf5k24XkUCcrUhQfsKNxMWFg4hdzge8o+aEYytrx1X7DwXwOYpuezNXVa03hK/zizt4Dg==
+"@octokit/action@^4.0.6":
+  version "4.0.6"
+  resolved "https://registry.yarnpkg.com/@octokit/action/-/action-4.0.6.tgz#0c9cc7281a2bfb3fea503c84d2f22382e0dd7dad"
+  integrity sha512-jb8KNmL7meXVlQHSV9oQlcqSRit4XkRau9+z91rO5RslhbE3j1qJC3OUfNSL1M8Df+gDZBGtLCW6W4I8aS7iyw==
   dependencies:
-    "@octokit/auth-action" "^1.2.0"
-    "@octokit/core" "^3.6.0"
-    "@octokit/plugin-paginate-rest" "^2.16.8"
-    "@octokit/plugin-rest-endpoint-methods" "^5.12.0"
-    "@octokit/types" "^6.16.1"
+    "@octokit/auth-action" "^2.0.0"
+    "@octokit/core" "^4.0.0"
+    "@octokit/plugin-paginate-rest" "^4.0.0"
+    "@octokit/plugin-rest-endpoint-methods" "^6.0.0"
+    "@octokit/types" "^7.0.0"
     proxy-agent "^5.0.0"
 
 "@octokit/app@^13.0.5":
@@ -6422,13 +6422,13 @@
     "@octokit/types" "^7.0.0"
     "@octokit/webhooks" "^10.0.0"
 
-"@octokit/auth-action@^1.2.0":
-  version "1.3.4"
-  resolved "https://registry.yarnpkg.com/@octokit/auth-action/-/auth-action-1.3.4.tgz#9263ce572e9b2c277fc8d0d3a1a0de21e452bdaf"
-  integrity sha512-wv9yNsc6lVgEHZeGKmktUB0WOFqA4PkVOlF4GL0bS+p4Rvv7ooOl/uh2Mm/eLk7FpI0AoFaQarbgPYvnHQOvfA==
+"@octokit/auth-action@^2.0.0":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@octokit/auth-action/-/auth-action-2.0.1.tgz#6b4757713b5067c022787806c2c666affb73f716"
+  integrity sha512-nh5UTN22jK7ll2BR+zS7yZXB6u9q2lsI+teOhdC/JCfws8guKjH3NynV0ipwERnwP11/GiHJ48Ji+HC5+R92ag==
   dependencies:
     "@octokit/auth-token" "^3.0.0"
-    "@octokit/types" "^6.0.3"
+    "@octokit/types" "^7.0.0"
 
 "@octokit/auth-app@^4.0.0":
   version "4.0.5"
@@ -6503,7 +6503,7 @@
     "@octokit/request-error" "^3.0.0"
     "@octokit/types" "^7.0.0"
 
-"@octokit/core@^3.5.1", "@octokit/core@^3.6.0":
+"@octokit/core@^3.5.1":
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/@octokit/core/-/core-3.6.0.tgz#3376cb9f3008d9b3d110370d90e0a1fcd5fe6085"
   integrity sha512-7RKRKuA4xTjMhY+eG3jthb3hlZCsOwg3rztWh75Xc+ShDWOfDDATWbeZpAHBNRpm4Tv9WgBMOy1zEJYXG6NJ7Q==
@@ -10316,9 +10316,9 @@ aws-lambda@^1.0.7:
     watchpack "^2.0.0-beta.10"
 
 aws-sdk@^2.1018.0, aws-sdk@^2.1136.0, aws-sdk@^2.1195.0, aws-sdk@^2.224.1, aws-sdk@^2.346.0, aws-sdk@^2.814.0, aws-sdk@^2.991.0:
-  version "2.1196.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1196.0.tgz#28951e1c742373397514f295f742eb3a9497c02d"
-  integrity sha512-iOGhCY5IqGfHCJ70p0H/uxkXDh/96KanAMfhnGGbIKbpVliuEV7SYxTfsWORaaUHey+N8FE6OMKfzo7F4X+wQg==
+  version "2.1199.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1199.0.tgz#1279a2086c34232a450f032543fd43e98e3d8232"
+  integrity sha512-N51EMTCMsiVAJDSKCDTMUheLBlPZ7/c/qyCMGirdoF64/JU+gvZ/u+UqkYPhK7XE80b0GqTj676rtp9OkU1kyg==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -11513,10 +11513,10 @@ chrome-trace-event@^1.0.2:
   resolved "https://registry.yarnpkg.com/chrome-trace-event/-/chrome-trace-event-1.0.3.tgz#1015eced4741e15d06664a957dbbf50d041e26ac"
   integrity sha512-p3KULyQg4S7NIHixdwbGX+nFHkoBiA4YQmyWtjb8XngSKV124nJmRysgAeujbUVb15vh+RvFUfCPqU7rXk+hZg==
 
-chromedriver@^103.0.0:
-  version "103.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-103.0.0.tgz#2ef086d62076e3ff6df6cfb84895d11d2c18d9cf"
-  integrity sha512-7BHf6HWt0PeOHCzWO8qlnD13sARzr5AKTtG8Csn+czsuAsajwPxdLNtry5GPh8HYFyl+i0M+yg3bT43AGfgU9w==
+chromedriver@^104.0.0:
+  version "104.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-104.0.0.tgz#2f730f52a567280872567bf3497e1c673b6f4275"
+  integrity sha512-zbHZutN2ATo19xA6nXwwLn+KueD/5w8ap5m4b6bCb8MIaRFnyDwMbFoy7oFAjlSMpCFL3KSaZRiWUwjj//N3yQ==
   dependencies:
     "@testim/chrome-version" "^1.1.2"
     axios "^0.27.2"
