@@ -15,6 +15,10 @@ model HealthPlanPackageTable {
   revisions HealthPlanRevisionTable[]
 }
 
+model ProtoMigrationsTable {
+  migrationName String @id
+}
+
 model HealthPlanRevisionTable {
   id              String                 @id
   createdAt       DateTime
