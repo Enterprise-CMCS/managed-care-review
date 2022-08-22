@@ -6397,16 +6397,16 @@
     node-gyp "^7.1.0"
     read-package-json-fast "^2.0.1"
 
-"@octokit/action@^3.18.0":
-  version "3.18.1"
-  resolved "https://registry.yarnpkg.com/@octokit/action/-/action-3.18.1.tgz#dcf92887d18e98599ec9f02e9937b80745271143"
-  integrity sha512-jl88CBdtk7SE1Jwpxtf5k24XkUCcrUhQfsKNxMWFg4hdzge8o+aEYytrx1X7DwXwOYpuezNXVa03hK/zizt4Dg==
+"@octokit/action@^4.0.6":
+  version "4.0.6"
+  resolved "https://registry.yarnpkg.com/@octokit/action/-/action-4.0.6.tgz#0c9cc7281a2bfb3fea503c84d2f22382e0dd7dad"
+  integrity sha512-jb8KNmL7meXVlQHSV9oQlcqSRit4XkRau9+z91rO5RslhbE3j1qJC3OUfNSL1M8Df+gDZBGtLCW6W4I8aS7iyw==
   dependencies:
-    "@octokit/auth-action" "^1.2.0"
-    "@octokit/core" "^3.6.0"
-    "@octokit/plugin-paginate-rest" "^2.16.8"
-    "@octokit/plugin-rest-endpoint-methods" "^5.12.0"
-    "@octokit/types" "^6.16.1"
+    "@octokit/auth-action" "^2.0.0"
+    "@octokit/core" "^4.0.0"
+    "@octokit/plugin-paginate-rest" "^4.0.0"
+    "@octokit/plugin-rest-endpoint-methods" "^6.0.0"
+    "@octokit/types" "^7.0.0"
     proxy-agent "^5.0.0"
 
 "@octokit/app@^13.0.5":
@@ -6422,13 +6422,13 @@
     "@octokit/types" "^7.0.0"
     "@octokit/webhooks" "^10.0.0"
 
-"@octokit/auth-action@^1.2.0":
-  version "1.3.4"
-  resolved "https://registry.yarnpkg.com/@octokit/auth-action/-/auth-action-1.3.4.tgz#9263ce572e9b2c277fc8d0d3a1a0de21e452bdaf"
-  integrity sha512-wv9yNsc6lVgEHZeGKmktUB0WOFqA4PkVOlF4GL0bS+p4Rvv7ooOl/uh2Mm/eLk7FpI0AoFaQarbgPYvnHQOvfA==
+"@octokit/auth-action@^2.0.0":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@octokit/auth-action/-/auth-action-2.0.1.tgz#6b4757713b5067c022787806c2c666affb73f716"
+  integrity sha512-nh5UTN22jK7ll2BR+zS7yZXB6u9q2lsI+teOhdC/JCfws8guKjH3NynV0ipwERnwP11/GiHJ48Ji+HC5+R92ag==
   dependencies:
     "@octokit/auth-token" "^3.0.0"
-    "@octokit/types" "^6.0.3"
+    "@octokit/types" "^7.0.0"
 
 "@octokit/auth-app@^4.0.0":
   version "4.0.5"
@@ -6503,7 +6503,7 @@
     "@octokit/request-error" "^3.0.0"
     "@octokit/types" "^7.0.0"
 
-"@octokit/core@^3.5.1", "@octokit/core@^3.6.0":
+"@octokit/core@^3.5.1":
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/@octokit/core/-/core-3.6.0.tgz#3376cb9f3008d9b3d110370d90e0a1fcd5fe6085"
   integrity sha512-7RKRKuA4xTjMhY+eG3jthb3hlZCsOwg3rztWh75Xc+ShDWOfDDATWbeZpAHBNRpm4Tv9WgBMOy1zEJYXG6NJ7Q==
