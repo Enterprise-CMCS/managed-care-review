@@ -186,6 +186,75 @@ describe('submitHealthPlanPackage', () => {
         )
     })
 
+    it('does not remove any rate data from CONTRACT_AND_RATES submissionType and submits successfully', async () => {
+        const server = await constructTestPostgresServer()
+
+        //Create and update a contract and rate submission to contract only with rate data
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {
+            submissionType: 'CONTRACT_AND_RATES',
+            documents: [
+                {
+                    name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                    s3URL: 'fakeS3URL',
+                    documentCategories: [
+                        'CONTRACT_RELATED' as const,
+                        'RATES_RELATED' as const,
+                    ],
+                },
+                {
+                    name: 'rate_only_supporting_doc.pdf',
+                    s3URL: 'fakeS3URL',
+                    documentCategories: ['RATES_RELATED' as const],
+                },
+            ],
+        })
+
+        const draftCurrentRevision = draft.revisions[0].node
+        const draftPackageData = base64ToDomain(
+            draftCurrentRevision.formDataProto
+        )
+
+        if (draftPackageData instanceof Error) {
+            throw new Error(draftPackageData.message)
+        }
+
+        const submitResult = await submitTestHealthPlanPackage(server, draft.id)
+        const currentRevision = submitResult.revisions[0].node
+        const packageData = base64ToDomain(currentRevision.formDataProto)
+
+        if (packageData instanceof Error) {
+            throw new Error(packageData.message)
+        }
+
+        expect(packageData).toEqual(
+            expect.objectContaining({
+                rateType: draftPackageData.rateType,
+                rateDateCertified: draftPackageData.rateDateCertified,
+                rateDateStart: draftPackageData.rateDateStart,
+                rateDateEnd: draftPackageData.rateDateEnd,
+                rateCapitationType: draftPackageData.rateCapitationType,
+                rateAmendmentInfo: draftPackageData.rateAmendmentInfo,
+                rateProgramIDs: draftPackageData.rateProgramIDs,
+                actuaryContacts: draftPackageData.actuaryContacts,
+                documents: [
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: [
+                            'CONTRACT_RELATED' as const,
+                            'RATES_RELATED' as const,
+                        ],
+                    },
+                    {
+                        name: 'rate_only_supporting_doc.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES_RELATED' as const],
+                    },
+                ],
+            })
+        )
+    })
+
     it('removes any rate data from CONTRACT_ONLY submissionType and submits successfully', async () => {
         const server = await constructTestPostgresServer()
 
