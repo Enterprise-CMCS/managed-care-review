@@ -18,11 +18,11 @@ type EmailConfiguration = {
     stage: string
     baseUrl: string
     emailSource: string // an email address for the generic application-wide sender
-    cmsReviewSharedEmails: string[] | string // list of shared emails that all new managed care packages must be sent to
-    ratesReviewSharedEmails: string[] | string // list of shared emails that managed care packages with rates must be sent to
-    cmsReviewHelpEmailAddress: string[] | string // email address for the managed care organization group
-    cmsRateHelpEmailAddress: string[] | string // email address for rates help
-    cmsDevTeamHelpEmailAddress: string[] | string // email address for all other help
+    cmsReviewSharedEmails: string[] // list of shared emails that all new managed care packages must be sent to
+    ratesReviewSharedEmails: string[] // list of shared emails that managed care packages with rates must be sent to
+    cmsReviewHelpEmailAddress: string // email address for the managed care organization group
+    cmsRateHelpEmailAddress: string // email address for rates help
+    cmsDevTeamHelpEmailAddress: string // email address for all other help
 }
 
 type StateAnalystsEmails = string[]
