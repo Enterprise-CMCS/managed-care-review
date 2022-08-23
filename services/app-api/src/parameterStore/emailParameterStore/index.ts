@@ -5,7 +5,7 @@ export {
 export {
     getCmsReviewSharedEmails,
     getCmsReviewSharedEmailsLocal,
-} from './cmsReviewSharedEmails/getCmsReviewSharedEmails'
+} from './reviewSharedEmails/getCmsReviewSharedEmails'
 export {
     getRatesReviewSharedEmails,
     getRatesReviewSharedEmailsLocal,
@@ -13,12 +13,16 @@ export {
 export {
     getCmsReviewHelpEmail,
     getCmsReviewHelpEmailLocal,
-} from './getCmsReviewHelpEmail/getCmsReviewHelpEmail'
+} from './cmsReviewHelpEmail/getCmsReviewHelpEmail'
 export {
     getCmsRateHelpEmail,
     getCmsRateHelpEmailLocal,
-} from './getCmsRateHelpEmail/getCmsRateHelpEmail'
+} from './cmsRateHelpEmail/getCmsRateHelpEmail'
 export {
     getCmsDevTeamHelpEmail,
     getCmsDevTeamHelpEmailLocal,
-} from './getCmsDevTeamHelpEmail/getCmsDevTeamHelpEmail'
+} from './cmsDevTeamHelpEmail/getCmsDevTeamHelpEmail'
+export {
+    getSourceEmail,
+    getSourceEmailLocal,
+} from './sourceEmail/getSourceEmail'
