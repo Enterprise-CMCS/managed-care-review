@@ -4,9 +4,10 @@ import * as ParameterStore from '../../awsParameterStore'
 describe('getStateAnalystEmails', () => {
     it('returns state analysts emails in an array', async () => {
         const spy = jest.spyOn(ParameterStore, 'getParameterStore')
-        spy.mockResolvedValue(
-            '"FL Analyst 1" <testFLStateAnalyst1@email.com>, "FL Analyst 2" <testFLStateAnalyst2@email.com>'
-        )
+        spy.mockResolvedValue({
+            value: '"FL Analyst 1" <testFLStateAnalyst1@email.com>, "FL Analyst 2" <testFLStateAnalyst2@email.com>',
+            type: 'StringList',
+        })
         const result = await getStateAnalystsEmails('FL')
         expect(result).toStrictEqual([
             '"FL Analyst 1" <testFLStateAnalyst1@email.com>',
