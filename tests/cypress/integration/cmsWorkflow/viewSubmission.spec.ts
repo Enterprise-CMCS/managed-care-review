@@ -4,14 +4,14 @@ describe('CMS user can view submission', () => {
     cy.logInAsStateUser()
     cy.startNewContractAndRatesSubmission()
     cy.fillOutBaseContractDetails()
-    cy.navigateForm('CONTINUE')
+    cy.navigateFormByButtonClick('CONTINUE')
     cy.fillOutNewRateCertification()
-    cy.navigateForm('CONTINUE')
+    cy.navigateFormByButtonClick('CONTINUE')
     cy.fillOutStateContact()
     cy.fillOutActuaryContact()
-    cy.navigateForm('CONTINUE')
+    cy.navigateFormByButtonClick('CONTINUE')
     cy.fillOutSupportingDocuments()
-    cy.navigateForm('CONTINUE')
+    cy.navigateFormByButtonClick('CONTINUE')
 
     // store submission id for reference later
     let submissionId = ''

@@ -1,4 +1,4 @@
-import { aliasQuery, aliasMutation } from '../utils/graphql-test-utils'
+import { aliasMutation } from '../utils/graphql-test-utils'
 Cypress.Commands.add('startNewContractOnlySubmission', () => {
     // Must be on '/submissions/new'
     cy.findByTestId('dashboard-page').should('exist')
@@ -7,7 +7,7 @@ Cypress.Commands.add('startNewContractOnlySubmission', () => {
 
     cy.fillOutContractActionOnly()
 
-    cy.navigateForm('CONTINUE_FROM_START_NEW')
+    cy.navigateFormByButtonClick('CONTINUE_FROM_START_NEW')
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
@@ -19,7 +19,7 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
 
     cy.fillOutContractActionAndRateCertification()
 
-    cy.navigateForm('CONTINUE_FROM_START_NEW')
+    cy.navigateFormByButtonClick('CONTINUE_FROM_START_NEW')
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
@@ -342,53 +342,5 @@ Cypress.Commands.add(
                 }
             })
         cy.wait('@submitHealthPlanPackageMutation', { timeout: 50000 })
-    }
-)
-
-type FormButtonKey =
-    | 'CONTINUE_FROM_START_NEW'
-    | 'CONTINUE'
-    | 'SAVE_DRAFT'
-    | 'BACK'
-type FormButtons = { [key in FormButtonKey]: string }
-const buttonsWithLabels: FormButtons = {
-    CONTINUE: 'Continue',
-    CONTINUE_FROM_START_NEW: 'Continue',
-    SAVE_DRAFT: 'Save as draft',
-    BACK: 'Back',
-}
-
-Cypress.Commands.add(
-    'navigateForm',
-    (buttonKey: FormButtonKey, waitForLoad = true) => {
-        cy.intercept('POST', '*/graphql', (req) => {
-            aliasQuery(req, 'indexHealthPlanPackages')
-            aliasQuery(req, 'fetchHealthPlanPackage')
-            aliasMutation(req, 'createHealthPlanPackage')
-            aliasMutation(req, 'updateHealthPlanFormData')
-        })
-        cy.findByRole('button', {
-            name: buttonsWithLabels[buttonKey],
-        }).should('not.have.attr', 'aria-disabled')
-        cy.findByRole('button', {
-            name: buttonsWithLabels[buttonKey],
-        }).safeClick()
-
-        if (buttonKey === 'SAVE_DRAFT') {
-            cy.findByTestId('dashboard-page').should('exist')
-        } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
-            if (waitForLoad) {
-                cy.wait('@createHealthPlanPackageMutation', { timeout: 50000 })
-                cy.wait('@fetchHealthPlanPackageQuery')
-            }
-            cy.findByTestId('state-submission-form-page').should('exist')
-        } else if (buttonKey === 'CONTINUE') {
-            if (waitForLoad) {
-                cy.wait('@updateHealthPlanFormDataMutation')
-            }
-            cy.findByTestId('state-submission-form-page').should('exist')
-        } else {
-            cy.findByTestId('state-submission-form-page').should('exist')
-        }
     }
 )

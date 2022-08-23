@@ -8,7 +8,7 @@ describe('submission type', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.visit(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/type`)
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
             cy.findByRole('heading', {
                 level: 2,
@@ -23,19 +23,19 @@ describe('submission type', () => {
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to type page
-            cy.visit(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/type`)
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             // Navigate to dashboard page by clicking save as draft
-            cy.navigateForm('SAVE_DRAFT')
+            cy.navigateFormByButtonClick('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to back to submission type page
-            cy.visit(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/type`)
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             // Navigate to contract details page by clicking continue for contract only submission
-            cy.navigateForm('CONTINUE')
+            cy.navigateFormByButtonClick('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
         })
     })
@@ -49,17 +49,17 @@ describe('submission type', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.visit(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/type`)
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             cy.findByText('Contract action and rate certification').click()
 
             // Navigate to contract details page by clicking continue for contract and rates submission
-            cy.navigateForm('CONTINUE')
+            cy.navigateFormByButtonClick('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
 
             // Navigate to type page
-            cy.visit(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/type`)
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             cy.findByLabelText('Contract action and rate certification').should(
@@ -77,7 +77,7 @@ describe('submission type', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.visit(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/type`)
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
             cy.findByRole('heading', {
                 level: 2,
@@ -92,7 +92,7 @@ describe('submission type', () => {
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to type page
-            cy.visit(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/type`)
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             //Edit some stuff here
@@ -107,11 +107,11 @@ describe('submission type', () => {
             )
 
             // Click Save as draft button to save changes and navigate to dashboard
-            cy.navigateForm('SAVE_DRAFT')
+            cy.navigateFormByButtonClick('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate back to submission type page
-            cy.visit(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/type`)
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             //Check to make sure edited stuff was saved

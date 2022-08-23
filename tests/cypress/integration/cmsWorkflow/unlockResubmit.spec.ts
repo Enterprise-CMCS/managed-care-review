@@ -8,13 +8,13 @@ describe('CMS user', () => {
         cy.startNewContractOnlySubmission()
         cy.fillOutBaseContractDetails()
         cy.findByTestId('unlockedBanner').should('not.exist')
-        cy.navigateForm('CONTINUE')
+        cy.navigateFormByButtonClick('CONTINUE')
         cy.fillOutStateContact()
-        cy.navigateForm('CONTINUE')
+        cy.navigateFormByButtonClick('CONTINUE')
         cy.findByRole('heading', { name: /Supporting documents/ }).should(
             'exist'
         )
-        cy.navigateForm('CONTINUE')
+        cy.navigateFormByButtonClick('CONTINUE')
         cy.findByRole('heading', { name: /Review and submit/ }).should('exist')
 
         // Store submission url for reference later
@@ -92,10 +92,7 @@ describe('CMS user', () => {
                     .should('have.attr', 'href')
                     .and('include', 'review-and-submit')
 
-                cy.visit(reviewURL)
-
-                // State user can resubmit and see resubmitted package in dashboard
-                cy.wait('@fetchHealthPlanPackageQuery')
+                cy.navigateFormByDirectLink(reviewURL)
 
                 //Unlock banner for state user to be present with correct data.
                 cy.findByRole('heading', {
@@ -166,7 +163,7 @@ describe('CMS user', () => {
                 })
                 //Check for view previous submission link in the initial accordion item to exist
                   cy.findByTestId('revision-link-1').should('be.visible')
-                cy.navigateToSubmissionByUserInteraction('revision-link-1')
+                cy.clickSubmissionLink('revision-link-1')
                 //Making sure we are on SubmissionRevisionSummary page and contains version text
                 cy.findByTestId('revision-version')
                     .should('exist')
@@ -176,7 +173,7 @@ describe('CMS user', () => {
                 //Previous submission banner should exist and able to click link to go back to current submission
                 cy.findByTestId('previous-submission-banner').should('exist')
                 //Navigate back to current submission using link inside banner.
-                cy.navigateToSubmissionByUserInteraction(
+                cy.clickSubmissionLink(
                     'currentSubmissionLink'
                 )
                 //MAke sure banner and revision version text are gone.
