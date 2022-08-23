@@ -4,4 +4,3 @@ export {
 } from './emailParameterStore/emailParameterStore'
 
 export type { EmailParameterStore } from './emailParameterStore/emailParameterStore'
-export { ParameterStoreEmailsType } from './awsParameterStore'

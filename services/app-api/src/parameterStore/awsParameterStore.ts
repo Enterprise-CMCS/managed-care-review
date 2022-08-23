@@ -1,7 +1,7 @@
 import { SSM } from 'aws-sdk'
 
 type GetParameterResult = SSM.GetParameterResult
-export type ParameterStoreType = { value: string; type: string } | Error
+type ParameterStoreType = { value: string; type: string } | Error
 
 const ssm = new SSM({ region: 'us-east-1' })
 
