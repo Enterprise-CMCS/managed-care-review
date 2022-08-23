@@ -161,7 +161,8 @@ describe('CMS user', () => {
                 cy.findByTestId('accordion').should('exist')
 
                 cy.get('[data-testid^="accordionButton_"]').each((button) => {
-                    button.trigger('click', {force: true })
+                    button.trigger('click')
+                    button.siblings().hasClass('usa-accordion__content') /// make sure accordion is expanded
                 })
                 //Check for view previous submission link in the initial accordion item to exist
                   cy.findByTestId('revision-link-1').should('be.visible')
