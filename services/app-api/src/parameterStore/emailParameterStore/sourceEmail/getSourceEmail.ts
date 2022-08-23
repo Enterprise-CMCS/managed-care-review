@@ -19,4 +19,4 @@ export const getSourceEmail = async (): Promise<string | Error> => {
 }
 
 export const getSourceEmailLocal = async (): Promise<string | Error> =>
-    `"CMS Source Email" <local@example.com>`
+    `"MC-Review CMS HHS" <local@example.com>`

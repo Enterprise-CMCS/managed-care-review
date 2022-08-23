@@ -19,4 +19,4 @@ export const getCmsRateHelpEmail = async (): Promise<string | Error> => {
 }
 
 export const getCmsRateHelpEmailLocal = async (): Promise<string | Error> =>
-    `"CMS Rate Help" <CMS.rate.help@example.com>`
+    `"Rate Related Help" <rate.help@example.com>`
