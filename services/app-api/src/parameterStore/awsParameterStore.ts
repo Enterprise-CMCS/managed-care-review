@@ -1,37 +1,33 @@
 import { SSM } from 'aws-sdk'
 
 type GetParameterResult = SSM.GetParameterResult
-export type ParameterStoreEmailsType = string[] | string | Error
+export type ParameterStoreType = { value: string; type: string } | Error
 
 const ssm = new SSM({ region: 'us-east-1' })
 
-const getParameterStore = async (
-    name: string
-): Promise<ParameterStoreEmailsType> => {
+const getParameterStore = async (name: string): Promise<ParameterStoreType> => {
     const params = {
         Name: name,
     }
 
     try {
-        const response: GetParameterResult = await ssm
+        const { Parameter: parameter }: GetParameterResult = await ssm
             .getParameter(params)
             .promise()
-        const Value = response?.Parameter?.Value
-        const Type = response?.Parameter?.Value
 
-        if (Value === undefined || Type === undefined) {
-            const errorMessage = `Failed to return parameter ${name}. Value or Type was undefined.`
+        if (!parameter || !parameter.Value || !parameter.Type) {
+            let errorMessage: string
+            if (!parameter) {
+                errorMessage = `Failed to return parameter store ${name} data was undefined.`
+            } else {
+                errorMessage = `Failed to return parameter store ${name}. Value: ${!parameter.Value} or Type: ${!parameter.Type} was undefined.`
+            }
             return new Error(errorMessage)
         }
 
-        if (Type === 'StringList') {
-            //Split string into array using ',' separator and trim each array item.
-            return Value.split(',').map((email) => email.trim())
-        } else if (Type === 'String') {
-            return Value
-        } else {
-            const errorMessage = `Failed to return parameter ${name}. Value of Type ${Type} is not supported`
-            return new Error(errorMessage)
+        return {
+            value: parameter.Value,
+            type: parameter.Type,
         }
     } catch (err) {
         console.error(
