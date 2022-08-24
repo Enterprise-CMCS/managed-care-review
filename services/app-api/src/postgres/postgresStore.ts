@@ -19,6 +19,8 @@ import {
 import { insertHealthPlanRevision } from './insertHealthPlanRevision'
 import { StoreError } from './storeError'
 import { updateHealthPlanRevision } from './updateHealthPlanRevision'
+import { dataExport } from './dataExport'
+import { DataExportType } from '../domain-models/DataExport'
 
 type Store = {
     findPrograms: (
@@ -27,6 +29,8 @@ type Store = {
     ) => ProgramType[] | Error
 
     getStatePrograms: (stateCode: string) => ProgramType[] | Error
+
+    dataExport: (stateCode: string) => Promise<DataExportType | undefined>
 
     findHealthPlanPackage: (
         draftUUID: string
@@ -83,6 +87,7 @@ function NewPostgresStore(client: PrismaClient): Store {
             }),
         findPrograms: findPrograms,
         getStatePrograms: getStatePrograms,
+        dataExport: (stateCode) => dataExport(client),
     }
 }
 

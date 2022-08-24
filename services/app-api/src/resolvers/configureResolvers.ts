@@ -12,6 +12,7 @@ import { unlockHealthPlanPackageResolver } from './unlockHealthPlanPackage'
 import { updateHealthPlanFormDataResolver } from './updateHealthPlanFormData'
 import { stateUserResolver } from './userResolver'
 import { EmailParameterStore } from '../parameterStore'
+import { dataExportResolver } from './dataExport'
 
 export function configureResolvers(
     store: Store,
@@ -25,6 +26,7 @@ export function configureResolvers(
             fetchCurrentUser: fetchCurrentUserResolver(),
             fetchHealthPlanPackage: fetchHealthPlanPackageResolver(store),
             indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
+            dataExport: dataExportResolver(store),
         },
         Mutation: {
             createHealthPlanPackage: createHealthPlanPackageResolver(store),
