@@ -70,7 +70,7 @@ const constructTestPostgresServer = async (opts?: {
 }): Promise<ApolloServer> => {
     // set defaults
     const context = opts?.context || defaultContext()
-    const emailer = opts?.emailer || (await constructTestEmailer())
+    const emailer = opts?.emailer || constructTestEmailer()
     const parameterStore =
         opts?.emailParameterStore || newLocalEmailParameterStore()
 
@@ -89,64 +89,17 @@ const constructTestPostgresServer = async (opts?: {
     })
 }
 
-const constructTestEmailer = async (): Promise<Emailer> => {
-    const emailParameterStore = newLocalEmailParameterStore()
-
-    const emailSource = await emailParameterStore.getSourceEmail()
-    const cmsReviewSharedEmails =
-        await emailParameterStore.getCmsReviewSharedEmails()
-    const cmsReviewHelpEmailAddress =
-        await emailParameterStore.getCmsReviewHelpEmail()
-    const cmsRateHelpEmailAddress =
-        await emailParameterStore.getCmsRateHelpEmail()
-    const cmsDevTeamHelpEmailAddress =
-        await emailParameterStore.getCmsDevTeamHelpEmail()
-    const ratesReviewSharedEmails =
-        await emailParameterStore.getRatesReviewSharedEmails()
-
-    if (emailSource instanceof Error)
-        throw new Error(
-            `constructTestEmailer Configuration Error: ${emailSource.message}`
-        )
-
-    if (cmsReviewSharedEmails instanceof Error)
-        throw new Error(
-            `constructTestEmailer Configuration Error: ${cmsReviewSharedEmails.message}`
-        )
-
-    if (cmsReviewHelpEmailAddress instanceof Error) {
-        throw new Error(
-            `constructTestEmailer Configuration Error: ${cmsReviewHelpEmailAddress.message}`
-        )
-    }
-
-    if (cmsRateHelpEmailAddress instanceof Error) {
-        throw new Error(
-            `constructTestEmailer Configuration Error: ${cmsRateHelpEmailAddress.message}`
-        )
-    }
-
-    if (cmsDevTeamHelpEmailAddress instanceof Error) {
-        throw new Error(
-            `constructTestEmailer Configuration Error: ${cmsDevTeamHelpEmailAddress.message}`
-        )
-    }
-    if (ratesReviewSharedEmails instanceof Error)
-        throw new Error(
-            `constructTestEmailer Configuration Error: ${ratesReviewSharedEmails.message}`
-        )
-
+const constructTestEmailer = (): Emailer => {
     const config = {
-        emailSource,
+        emailSource: 'local@example.com',
         stage: 'localtest',
         baseUrl: 'http://localtest',
-        cmsReviewSharedEmails,
-        ratesReviewSharedEmails,
-        cmsReviewHelpEmailAddress,
-        cmsRateHelpEmailAddress,
-        cmsDevTeamHelpEmailAddress,
+        cmsReviewSharedEmails: ['test@example.com'],
+        ratesReviewSharedEmails: ['testRate@example.com'],
+        cmsReviewHelpEmailAddress: 'mcog@example.com',
+        cmsRateHelpEmailAddress: 'rates@example.com',
+        cmsDevTeamHelpEmailAddress: 'mc-review@example.com',
     }
-
     return newLocalEmailer(config)
 }
 
