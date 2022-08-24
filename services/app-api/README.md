@@ -39,8 +39,41 @@ Sets up authentication based on environment variables. Options are local or Amaz
 
 ### `/resolvers`
 
--   GraphQL resolvers and tests for all queries and mutations. See `configureResolver.ts` for a comprehensive list.
--   `userResolver.ts` needed to ensure the user (which comes from the auth provider, not graphql) is valid.
+- GraphQL resolvers and tests for all queries and mutations. See `configureResolver.ts` for a comprehensive list.
+- `userResolver.ts` needed to ensure the user (which comes from the auth provider, not graphql) is valid.
+
+### `/parameterStore`
+
+- `awsParameterStore.ts` main file that contains general [AWS SSM](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SSM.html) parameter store functions.
+  - `getParameterStore()` is used to retrieve parameter store values. This uses [getParameter](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SSM.html#getParameter-property) operation in AWS SSM
+  
+- `/emailParameterStore/emailParameterStore.ts` this file contains two functions used to configure our automated emails for local and cloud deployment.
+  - `newAWSEmailParameterStore` is for emailer configuration of `DEV`, `VAL` and `PROD` environments done in `/handlers/apollo_gql.ts`. The exception is `getStateAnalystsEmails` where it is called at resolvers before passed to emailer functions.
+  - `newLocalEmailParameterStore` is for emailer configuration of `LOCAL` environment done in `/handlers/apollo_gql.ts`.
+
+- Email parameter store values are located in `AWS > System Manager > Parameter Store`. Environments `Managed Care Dev`, `Managed Care Impl` and `Managed Care Dev Prod` each have a set of email parameter stores.
+  - Parameter stores for emails
+    - /configuration/email/devTeamHelpAddress 
+    - /configuration/email/rateHelpAddress 
+    - /configuration/email/ratesAddresses
+    - /configuration/email/reviewHelpAddress 
+    - /configuration/email/reviewTeamAddresses
+    - /configuration/email/sourceAddress
+    - /configuration/**[state abbreviation]**/stateanalysts/email
+
+## Adding new a new email parameter stores
+  - This requires you to have AWS access, which is managed via Active Directory and Cloudtamer.
+  - After accessing AWS navigate to `System Manager > Parameter Store`.
+  - Locate the `Create parameter` button and press to begin adding a new store.
+  - You will need to create a new name following existing patterns for emails.
+    - For configuration emails `/configuration/email/[name]`
+    - For new state analyst emails `/configuration/[state abbreviation]/stateanalysts/email`
+  - Choose a `Type` for the store, currently all email parameter stores are either `String` or `StringList`
+  - Input values for the parameter store. 
+    - **It's highly recommended to input values in `Dev` and `Impl` that imitate the `Type` of the parameter store. e.g. parameter store `Type` of `StringList` should have a value `string1@example.com,string1@example.com,string1@example.com`**
+  - Press `Create parameter` to create the new store
+  - You will need to repeat this process for `Dev`, `Impl` and `Prod` environments. The name of the parameter stores **MUST** be the same.
+  - Add a new function in `emalParameterStore.ts` to retrieve your value from aws parameter store.
 
 ### `/gen`
 
