@@ -1,14 +1,14 @@
 import { getParameterStore } from '../../awsParameterStore'
 
 export const getSourceEmail = async (): Promise<string | Error> => {
-    const name = `/configuration/email/rateHelpAddress`
-    const reviewHelpAddress = await getParameterStore(name)
+    const name = `/configuration/email/sourceAddress`
+    const sourceAddress = await getParameterStore(name)
 
-    if (reviewHelpAddress instanceof Error) {
-        return reviewHelpAddress
+    if (sourceAddress instanceof Error) {
+        return sourceAddress
     }
 
-    const { type, value } = reviewHelpAddress
+    const { type, value } = sourceAddress
 
     if (type !== 'String') {
         const errorMessage = `Parameter store ${name} value of Type ${type} is not supported`
