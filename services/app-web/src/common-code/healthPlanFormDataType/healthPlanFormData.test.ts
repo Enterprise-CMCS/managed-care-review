@@ -11,6 +11,8 @@ import {
     HealthPlanFormDataType,
     LockedHealthPlanFormDataType,
     packageName,
+    removeRatesData,
+    UnlockedHealthPlanFormDataType,
 } from '.'
 import {
     hasValidContract,
@@ -539,6 +541,168 @@ describe('submission type assertions', () => {
         ({ submission, expectedName }) => {
             const programs = mockMNState().programs
             expect(generateRateName(submission, programs)).toMatch(expectedName)
+        }
+    )
+
+    const contractOnlyWithValidRateData: {
+        submission: UnlockedHealthPlanFormDataType
+        testDescription: string
+        expectedResult: Partial<UnlockedHealthPlanFormDataType>
+    }[] = [
+        {
+            submission: {
+                ...mockContractAndRateSub,
+                documents: [
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: [
+                            'CONTRACT_RELATED' as const,
+                            'RATES_RELATED' as const,
+                        ],
+                    },
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also_2.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: [
+                            'RATES_RELATED' as const,
+                            'CONTRACT_RELATED' as const,
+                        ],
+                    },
+                    {
+                        name: 'rate_only_supporting_doc.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES_RELATED' as const],
+                    },
+                ],
+                rateType: 'NEW',
+                rateDateStart: new Date('2021/04/22'),
+                rateDateEnd: new Date('2022/03/29'),
+                rateDateCertified: new Date('2021/04/22'),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date('2022/05/21'),
+                    effectiveDateEnd: new Date('2022/09/21'),
+                },
+                rateCapitationType: 'RATE_RANGE',
+                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                rateDocuments: [
+                    {
+                        name: 'rateDocument.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+            },
+            testDescription: 'With all valid rate data ',
+            expectedResult: {
+                rateType: undefined,
+                rateDateCertified: undefined,
+                rateDateStart: undefined,
+                rateDateEnd: undefined,
+                rateCapitationType: undefined,
+                rateAmendmentInfo: undefined,
+                rateProgramIDs: [],
+                actuaryContacts: [],
+                documents: [
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED' as const],
+                    },
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also_2.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED' as const],
+                    },
+                ],
+                rateDocuments: [],
+            },
+        },
+        {
+            submission: {
+                ...mockContractAndRateSub,
+                documents: [
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: [
+                            'RATES_RELATED' as const,
+                            'CONTRACT_RELATED' as const,
+                        ],
+                    },
+                    {
+                        name: 'rate_only_supporting_doc.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES_RELATED' as const],
+                    },
+                ],
+                rateDocuments: [
+                    {
+                        name: 'rateDocument.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+            },
+            testDescription: 'With valid contract and rate related documents',
+            expectedResult: {
+                rateType: undefined,
+                rateDateCertified: undefined,
+                rateDateStart: undefined,
+                rateDateEnd: undefined,
+                rateCapitationType: undefined,
+                rateAmendmentInfo: undefined,
+                rateProgramIDs: [],
+                actuaryContacts: [],
+                documents: [
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED' as const],
+                    },
+                ],
+                rateDocuments: [],
+            },
+        },
+        {
+            submission: {
+                ...mockContractAndRateSub,
+                documents: [
+                    {
+                        name: 'rate_only_supporting_doc.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES_RELATED' as const],
+                    },
+                ],
+                rateDocuments: [
+                    {
+                        name: 'rateDocument.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+            },
+            testDescription: 'With only valid rate related documents',
+            expectedResult: {
+                rateType: undefined,
+                rateDateCertified: undefined,
+                rateDateStart: undefined,
+                rateDateEnd: undefined,
+                rateCapitationType: undefined,
+                rateAmendmentInfo: undefined,
+                rateProgramIDs: [],
+                actuaryContacts: [],
+                documents: [],
+                rateDocuments: [],
+            },
+        },
+    ]
+    test.each(contractOnlyWithValidRateData)(
+        'Submit CONTRACT_ONLY with valid rate data: $testDescription',
+        ({ submission, expectedResult }) => {
+            expect(removeRatesData(submission)).toEqual(
+                expect.objectContaining(expectedResult)
+            )
         }
     )
 })

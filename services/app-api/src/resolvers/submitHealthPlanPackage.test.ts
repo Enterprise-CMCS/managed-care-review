@@ -10,6 +10,7 @@ import {
     createAndSubmitTestHealthPlanPackage,
     defaultFloridaRateProgram,
     updateTestHealthPlanFormData,
+    submitTestHealthPlanPackage,
 } from '../testHelpers/gqlHelpers'
 import { testEmailConfig, testEmailer } from '../testHelpers/emailerHelpers'
 import { base64ToDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
@@ -185,31 +186,126 @@ describe('submitHealthPlanPackage', () => {
         )
     })
 
-    it('returns an error if there are invalid rate details fields for submission type', async () => {
+    it('does not remove any rate data from CONTRACT_AND_RATES submissionType and submits successfully', async () => {
         const server = await constructTestPostgresServer()
 
+        //Create and update a contract and rate submission to contract only with rate data
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {
+            submissionType: 'CONTRACT_AND_RATES',
+            documents: [
+                {
+                    name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                    s3URL: 'fakeS3URL',
+                    documentCategories: [
+                        'CONTRACT_RELATED' as const,
+                        'RATES_RELATED' as const,
+                    ],
+                },
+                {
+                    name: 'rate_only_supporting_doc.pdf',
+                    s3URL: 'fakeS3URL',
+                    documentCategories: ['RATES_RELATED' as const],
+                },
+            ],
+        })
+
+        const draftCurrentRevision = draft.revisions[0].node
+        const draftPackageData = base64ToDomain(
+            draftCurrentRevision.formDataProto
+        )
+
+        if (draftPackageData instanceof Error) {
+            throw new Error(draftPackageData.message)
+        }
+
+        const submitResult = await submitTestHealthPlanPackage(server, draft.id)
+        const currentRevision = submitResult.revisions[0].node
+        const packageData = base64ToDomain(currentRevision.formDataProto)
+
+        if (packageData instanceof Error) {
+            throw new Error(packageData.message)
+        }
+
+        expect(packageData).toEqual(
+            expect.objectContaining({
+                rateType: draftPackageData.rateType,
+                rateDateCertified: draftPackageData.rateDateCertified,
+                rateDateStart: draftPackageData.rateDateStart,
+                rateDateEnd: draftPackageData.rateDateEnd,
+                rateCapitationType: draftPackageData.rateCapitationType,
+                rateAmendmentInfo: draftPackageData.rateAmendmentInfo,
+                rateProgramIDs: draftPackageData.rateProgramIDs,
+                actuaryContacts: draftPackageData.actuaryContacts,
+                documents: [
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: [
+                            'CONTRACT_RELATED' as const,
+                            'RATES_RELATED' as const,
+                        ],
+                    },
+                    {
+                        name: 'rate_only_supporting_doc.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES_RELATED' as const],
+                    },
+                ],
+            })
+        )
+    })
+
+    it('removes any rate data from CONTRACT_ONLY submissionType and submits successfully', async () => {
+        const server = await constructTestPostgresServer()
+
+        //Create and update a contract and rate submission to contract only with rate data
         const draft = await createAndUpdateTestHealthPlanPackage(server, {
             submissionType: 'CONTRACT_ONLY',
-            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
-            rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
-            rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
-        })
-
-        const draftID = draft.id
-        const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
-            variables: {
-                input: {
-                    pkgID: draftID,
+            documents: [
+                {
+                    name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                    s3URL: 'fakeS3URL',
+                    documentCategories: [
+                        'CONTRACT_RELATED' as const,
+                        'RATES_RELATED' as const,
+                    ],
                 },
-            },
+                {
+                    name: 'rate_only_supporting_doc.pdf',
+                    s3URL: 'fakeS3URL',
+                    documentCategories: ['RATES_RELATED' as const],
+                },
+            ],
         })
 
-        expect(submitResult.errors).toBeDefined()
+        const submitResult = await submitTestHealthPlanPackage(server, draft.id)
 
-        expect(submitResult.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
-        expect(submitResult.errors?.[0].extensions?.message).toBe(
-            'formData includes invalid rate fields'
+        const currentRevision = submitResult.revisions[0].node
+        const packageData = base64ToDomain(currentRevision.formDataProto)
+
+        if (packageData instanceof Error) {
+            throw new Error(packageData.message)
+        }
+
+        expect(packageData).toEqual(
+            expect.objectContaining({
+                rateType: undefined,
+                rateDateCertified: undefined,
+                rateDateStart: undefined,
+                rateDateEnd: undefined,
+                rateCapitationType: undefined,
+                rateAmendmentInfo: undefined,
+                rateProgramIDs: [],
+                actuaryContacts: [],
+                documents: [
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED' as const],
+                    },
+                ],
+                rateDocuments: [],
+            })
         )
     })
 
@@ -622,10 +718,10 @@ describe('submitHealthPlanPackage', () => {
             emailer: mockEmailer,
         })
         const draft = await createAndUpdateTestHealthPlanPackage(server, {
-            submissionType: 'CONTRACT_ONLY',
+            submissionType: 'CONTRACT_AND_RATES',
             rateDateStart: new Date(Date.UTC(2025, 5, 1)),
             rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
-            rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+            rateDateCertified: undefined,
         })
         const draftID = draft.id
 

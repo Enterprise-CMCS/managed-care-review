@@ -21,6 +21,13 @@ todo.txt
 notes/
 .tool-versions
 
+# testing
+/coverage
+/coverage-all
+/coverage-cypress
+/reports
+.nyc_output
+
 /tests/cypress/screenshots
 /tests/cypress/videos
 
@@ -34,6 +41,7 @@ notes/
 services/app-web/public/env-config.js
 services/app-web/storybook-static
 services/app-web/build
+services/app-api/protoMigrations/build
 services/uploads/local_buckets
 
 .envrc.local

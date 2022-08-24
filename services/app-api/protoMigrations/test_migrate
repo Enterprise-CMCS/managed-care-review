@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+echo "hello"
+
+git checkout tests/protos/
+
+../node_modules/.bin/tsc
+npx node ./protoMigrations/build/migrate_protos.js
