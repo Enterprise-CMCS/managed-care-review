@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-import * as genproto from '../../../app-web/src/gen/healthPlanFormDataProto'
+import * as genproto from '../gen/healthPlanFormDataProto'
 
 import { PrismaClient } from '@prisma/client'
 
