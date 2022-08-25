@@ -1,6 +1,7 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import { execSync } from 'child_process'
 import { getPostgresURL } from './configuration'
+import { migrate, newDBMigrator } from '../../protoMigrations/migrate_protos'
 
 export const main: APIGatewayProxyHandler = async () => {
     const dbURL = process.env.DATABASE_URL
@@ -32,8 +33,25 @@ export const main: APIGatewayProxyHandler = async () => {
         return {
             statusCode: 400,
             body: JSON.stringify({
-                code: 'MIGRATION_FAILED',
-                message: 'Could not migrate the database ' + err,
+                code: 'SCHEMA_MIGRATION_FAILED',
+                message: 'Could not migrate the database schema ' + err,
+            }),
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
+            },
+        }
+    }
+
+    try {
+        const migrator = newDBMigrator(dbConnectionURL)
+        await migrate(migrator)
+    } catch (err) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({
+                code: 'DATA_MIGRATION_FAILED',
+                message: 'Could not migrate the database data ' + err,
             }),
             headers: {
                 'Access-Control-Allow-Origin': '*',
