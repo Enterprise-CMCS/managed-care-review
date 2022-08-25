@@ -47,6 +47,7 @@ export const main: APIGatewayProxyHandler = async () => {
         const migrator = newDBMigrator(dbConnectionURL)
         await migrate(migrator)
     } catch (err) {
+        console.log(err)
         return {
             statusCode: 400,
             body: JSON.stringify({
