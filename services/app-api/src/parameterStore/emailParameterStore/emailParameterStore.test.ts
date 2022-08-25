@@ -47,7 +47,7 @@ describe('emailParameterStore', () => {
         })
     })
     describe('getCmsReviewSharedEmails', () => {
-        it('returns source email as string', async () => {
+        it('returns review shared emails email as array of strings', async () => {
             const spy = jest.spyOn(ParameterStore, 'getParameterStore')
             spy.mockResolvedValue({
                 value: `"CMS Reviewer 1" <CMS.reviewer.1@example.com>,"CMS Reviewer 2" <CMS.reviewer.2@example.com>,"CMS Reviewer 3" <CMS.reviewer.3@example.com>`,
@@ -81,7 +81,7 @@ describe('emailParameterStore', () => {
         })
     })
     describe('getStateAnalystEmails', () => {
-        it('returns state analysts emails in an array', async () => {
+        it('returns state analysts emails as array of strings', async () => {
             const spy = jest.spyOn(ParameterStore, 'getParameterStore')
             spy.mockResolvedValue({
                 value: '"FL Analyst 1" <testFLStateAnalyst1@email.com>, "FL Analyst 2" <testFLStateAnalyst2@email.com>',
@@ -114,7 +114,7 @@ describe('emailParameterStore', () => {
         })
     })
     describe('getRatesReviewSharedEmails', () => {
-        it('returns source email as string', async () => {
+        it('returns rates review shared emails as array of string', async () => {
             const spy = jest.spyOn(ParameterStore, 'getParameterStore')
             spy.mockResolvedValue({
                 value: '"Rate Submission Reviewer 1" <rate.reviewer.1@example.com>,"Rate Submission Reviewer 2" <rate.reviewer.2@example.com>,"Rate Submission Reviewer 3" <rate.reviewer.3@example.com>',
@@ -148,7 +148,7 @@ describe('emailParameterStore', () => {
         })
     })
     describe('getCmsReviewHelpEmail', () => {
-        it('returns source email as string', async () => {
+        it('returns review help email as string', async () => {
             const spy = jest.spyOn(ParameterStore, 'getParameterStore')
             spy.mockResolvedValue({
                 value: `"Contract Related Help" <contract.help@example.com>`,
@@ -180,7 +180,7 @@ describe('emailParameterStore', () => {
         })
     })
     describe('getCmsRateHelpEmail', () => {
-        it('returns source email as string', async () => {
+        it('returns rate help email as string', async () => {
             const spy = jest.spyOn(ParameterStore, 'getParameterStore')
             spy.mockResolvedValue({
                 value: `"Rate Related Help" <rate.help@example.com>`,
@@ -210,7 +210,7 @@ describe('emailParameterStore', () => {
         })
     })
     describe('getCmsDevTeamHelpEmail', () => {
-        it('returns source email as string', async () => {
+        it('returns dev team help email as string', async () => {
             const spy = jest.spyOn(ParameterStore, 'getParameterStore')
             spy.mockResolvedValue({
                 value: `"MC-Review Support" <mc-review@example.com>`,
