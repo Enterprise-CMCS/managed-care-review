@@ -176,9 +176,12 @@ export function newFileMigrator(protoPath: string): MigratorType {
     }
 }
 
-export async function migrate(migrator: MigratorType) {
+export async function migrate(migrator: MigratorType, path?: string) {
+    const migrationPath =
+        path ?? './protoMigrations/build/healthPlanFormDataMigrations'
+
     const migrationFiles = fs
-        .readdirSync('./protoMigrations/build/healthPlanFormDataMigrations')
+        .readdirSync(migrationPath)
         .filter((m) => m.endsWith('.js') && !m.endsWith('.test.js'))
 
     const migrations: MigrationType[] = []

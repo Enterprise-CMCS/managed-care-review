@@ -45,7 +45,7 @@ export const main: APIGatewayProxyHandler = async () => {
 
     try {
         const migrator = newDBMigrator(dbConnectionURL)
-        await migrate(migrator)
+        await migrate(migrator, '/opt/nodejs/healthPlanFormDataMigrations')
     } catch (err) {
         console.log(err)
         return {
