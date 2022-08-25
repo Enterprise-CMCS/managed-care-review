@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import { execSync } from 'child_process'
 import { getPostgresURL } from './configuration'
-import { migrate, newDBMigrator } from '../../protoMigrations/migrate_protos'
+import { migrate, newDBMigrator } from '../../protoMigrations/lib/migrator'
 
 export const main: APIGatewayProxyHandler = async () => {
     const dbURL = process.env.DATABASE_URL
