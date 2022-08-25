@@ -17,6 +17,7 @@
     },
     "include": [
         "migrate_protos.ts",
+        "lib/migrator.ts",
         "gen/healthPlanFormDataProto.d.ts",
         "gen/healthPlanFormDataProto.js",
         "healthPlanFormDataMigrations/*.ts"
