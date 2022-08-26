@@ -152,6 +152,14 @@ functions:
           method: get
           cors: true
 
+  reports:
+    handler: src/handlers/reports.main
+    events:
+      - http:
+          path: reports
+          method: get
+          cors: true
+
   log_event:
     handler: src/handlers/log_event.main
     events:
