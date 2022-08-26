@@ -155,14 +155,14 @@ export function updateHealthPlanFormDataResolver(
         ]
         const unfixedFields = []
         for (const fixedField of fixedFields) {
-            console.log(
-                `ERRMOD ${fixedField}: old: ${previousFormData[fixedField]} new: ${unlockedFormData[fixedField]}`
-            )
             const prevVal = previousFormData[fixedField]
             const newVal = unlockedFormData[fixedField]
 
             if (prevVal instanceof Date && newVal instanceof Date) {
                 if (prevVal.getTime() !== newVal.getTime()) {
+                    console.log(
+                        `ERRMOD ${fixedField}: old: ${previousFormData[fixedField]} new: ${unlockedFormData[fixedField]}`
+                    )
                     unfixedFields.push(fixedField)
                 }
             } else {
@@ -170,6 +170,9 @@ export function updateHealthPlanFormDataResolver(
                     previousFormData[fixedField] !==
                     unlockedFormData[fixedField]
                 ) {
+                    console.log(
+                        `ERRMOD ${fixedField}: old: ${previousFormData[fixedField]} new: ${unlockedFormData[fixedField]}`
+                    )
                     unfixedFields.push(fixedField)
                 }
             }
