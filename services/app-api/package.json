@@ -10,7 +10,8 @@
         "test:once": "jest --runInBand --ci",
         "lint": "tsc --noEmit && eslint . --max-warnings=0",
         "clean": "rm -rf node_modules && yarn cache clean",
-        "generate-code": "yarn prisma generate"
+        "generate-code": "yarn prisma generate",
+        "build": "tsc --noEmit"
     },
     "lint-staged": {
         "*.{js,ts}": [

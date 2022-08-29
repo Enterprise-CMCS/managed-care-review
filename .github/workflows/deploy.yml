@@ -190,6 +190,11 @@ jobs:
         working-directory: services/app-api
         run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn prisma generate
 
+      - name: Generate gql
+        shell: bash
+        run: |
+          lerna run generate-code
+
       - name: Prepare "@prisma/client" lambda layer
         working-directory: services/app-api
         run: ./scripts/prepare-prisma-layer.sh
