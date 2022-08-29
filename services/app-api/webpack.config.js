@@ -58,7 +58,10 @@ module.exports = {
                         },
                     },
                 ],
-                exclude: [/node_modules/, /protoMigrations/],
+                exclude: [
+                    /node_modules/,
+                    /protoMigrations\/healthPlanFormDataMigrations/,
+                ],
             },
             {
                 test: /\.(graphql|gql)$/,

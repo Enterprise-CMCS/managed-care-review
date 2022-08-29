@@ -1,4 +1,4 @@
-import { mcreviewproto } from '../gen/healthPlanFormDataProto'
+import { mcreviewproto } from '../../../app-web/src/gen/healthPlanFormDataProto'
 
 /*
  * This is our first pass at a migration, the intention is to run this migration through prod
