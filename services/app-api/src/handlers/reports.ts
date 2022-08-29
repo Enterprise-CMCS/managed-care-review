@@ -11,13 +11,15 @@ export const main: APIGatewayProxyHandler = async () => {
 
     const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
     if (pgResult instanceof Error) {
-        console.error("Init Error: Postgres couldn't be configured")
+        console.error(
+            "Init Error: Postgres couldn't be configured in data exporter"
+        )
         throw pgResult
     }
 
     const store = NewPostgresStore(pgResult)
-    const stateCode = await store.dataExport('_')
-    console.log('JJ Result: ', stateCode)
+    const dump = await store.generateReports()
+    console.log('JJ Handler Result: ', dump)
     return {
         statusCode: 200,
         body: JSON.stringify({

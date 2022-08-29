@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PrismaClient } from '@prisma/client'
 import {
     UnlockedHealthPlanFormDataType,
@@ -20,6 +21,7 @@ import { insertHealthPlanRevision } from './insertHealthPlanRevision'
 import { StoreError } from './storeError'
 import { updateHealthPlanRevision } from './updateHealthPlanRevision'
 import { dataExport } from './dataExport'
+import { generateReports } from './generateReports'
 import { DataExportType } from '../domain-models/DataExport'
 
 type Store = {
@@ -31,6 +33,7 @@ type Store = {
     getStatePrograms: (stateCode: string) => ProgramType[] | Error
 
     dataExport: (stateCode: string) => Promise<DataExportType | undefined>
+    generateReports: () => Promise<any | undefined>
 
     findHealthPlanPackage: (
         draftUUID: string
@@ -88,6 +91,7 @@ function NewPostgresStore(client: PrismaClient): Store {
         findPrograms: findPrograms,
         getStatePrograms: getStatePrograms,
         dataExport: (stateCode) => dataExport(client),
+        generateReports: () => generateReports(client),
     }
 }
 
