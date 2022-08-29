@@ -93,16 +93,9 @@ export const ContractDetailsSummarySection = ({
     // Get the zip file for the contract
     const { getKey, getBulkDlURL } = useS3()
     const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
-    // This will display rate supporting docs as contract supporting when changing submission type from CONTRACT_AND_RATE
-    // to CONTRACT_ONLY.
-    // This follows what is done on the supporting documents page in the instance of changing submission types. We may
-    // change how we handle rate supporting documents when changing submission type pages, but that is to be determined.
-    const contractSupportingDocuments =
-        submission.submissionType === 'CONTRACT_ONLY'
-            ? submission.documents
-            : submission.documents.filter((doc) =>
-                  doc.documentCategories.includes('CONTRACT_RELATED' as const)
-              )
+    const contractSupportingDocuments = submission.documents.filter((doc) =>
+        doc.documentCategories.includes('CONTRACT_RELATED' as const)
+    )
     const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && navigateTo !== undefined
 
