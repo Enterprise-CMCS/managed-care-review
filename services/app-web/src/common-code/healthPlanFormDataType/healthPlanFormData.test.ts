@@ -607,12 +607,17 @@ describe('submission type assertions', () => {
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                         s3URL: 'fakeS3URL',
-                        documentCategories: ['CONTRACT_RELATED' as const],
+                        documentCategories: ['CONTRACT_RELATED'],
                     },
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also_2.pdf',
                         s3URL: 'fakeS3URL',
-                        documentCategories: ['CONTRACT_RELATED' as const],
+                        documentCategories: ['CONTRACT_RELATED'],
+                    },
+                    {
+                        name: 'rate_only_supporting_doc.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED'],
                     },
                 ],
                 rateDocuments: [],
@@ -660,6 +665,11 @@ describe('submission type assertions', () => {
                         s3URL: 'fakeS3URL',
                         documentCategories: ['CONTRACT_RELATED' as const],
                     },
+                    {
+                        name: 'rate_only_supporting_doc.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED' as const],
+                    },
                 ],
                 rateDocuments: [],
             },
@@ -692,7 +702,13 @@ describe('submission type assertions', () => {
                 rateAmendmentInfo: undefined,
                 rateProgramIDs: [],
                 actuaryContacts: [],
-                documents: [],
+                documents: [
+                    {
+                        name: 'rate_only_supporting_doc.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED' as const],
+                    },
+                ],
                 rateDocuments: [],
             },
         },

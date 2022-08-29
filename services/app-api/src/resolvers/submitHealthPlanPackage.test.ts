@@ -301,7 +301,12 @@ describe('submitHealthPlanPackage', () => {
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
                         s3URL: 'fakeS3URL',
-                        documentCategories: ['CONTRACT_RELATED' as const],
+                        documentCategories: ['CONTRACT_RELATED'],
+                    },
+                    {
+                        name: 'rate_only_supporting_doc.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED'],
                     },
                 ],
                 rateDocuments: [],
