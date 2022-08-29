@@ -58,7 +58,7 @@ module.exports = {
                         },
                     },
                 ],
-                exclude: /node_modules/,
+                exclude: [/node_modules/, /protoMigrations/],
             },
             {
                 test: /\.(graphql|gql)$/,
