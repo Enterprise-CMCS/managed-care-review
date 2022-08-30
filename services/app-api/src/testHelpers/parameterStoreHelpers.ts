@@ -1,12 +1,6 @@
-import { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import { EmailParameterStore } from '../parameterStore'
 
-export type ParameterStore = {
-    getStateAnalystsEmails: (stateCode: string) => Promise<string[] | Error>
-    getCmsReviewSharedEmails: () => Promise<string[] | Error>
-    getRatesReviewSharedEmails: () => Promise<string[] | Error>
-}
-
-function mockEmailParameterStoreError(error?: string): ParameterStore {
+function mockEmailParameterStoreError(error?: string): EmailParameterStore {
     const message = error || 'No store found'
     return {
         getStateAnalystsEmails: async (stateCode: string): Promise<Error> => {
@@ -18,14 +12,24 @@ function mockEmailParameterStoreError(error?: string): ParameterStore {
         getRatesReviewSharedEmails: async (): Promise<Error> => {
             return new Error(message)
         },
+        getCmsReviewHelpEmail: async (): Promise<Error> => {
+            return new Error(message)
+        },
+        getCmsRateHelpEmail: async (): Promise<Error> => {
+            return new Error(message)
+        },
+        getCmsDevTeamHelpEmail: async (): Promise<Error> => {
+            return new Error(message)
+        },
+        getSourceEmail: async (): Promise<Error> => {
+            return new Error(message)
+        },
     }
 }
 
-const getTestStateAnalystsEmails = (
-    submission: HealthPlanFormDataType
-): string[] => [
-    `"${submission.stateCode} State Analyst 1" <${submission.stateCode}StateAnalyst1@example.com>`,
-    `"${submission.stateCode} State Analyst 2" <${submission.stateCode}StateAnalyst2@example.com>`,
+const getTestStateAnalystsEmails = (stateCode: string): string[] => [
+    `"${stateCode} State Analyst 1" <${stateCode}StateAnalyst1@example.com>`,
+    `"${stateCode} State Analyst 2" <${stateCode}StateAnalyst2@example.com>`,
 ]
 
 const getTestCmsReviewSharedEmails = (): string[] => [

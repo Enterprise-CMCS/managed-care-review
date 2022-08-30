@@ -20,8 +20,8 @@ import {
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 import {
-    getTestStateAnalystsEmails,
     mockEmailParameterStoreError,
+    getTestStateAnalystsEmails,
 } from '../testHelpers/parameterStoreHelpers'
 
 describe('submitHealthPlanPackage', () => {
@@ -361,7 +361,7 @@ describe('submitHealthPlanPackage', () => {
 
         const programs = [defaultFloridaProgram()]
         const name = packageName(sub, programs)
-        const stateAnalystsEmails = getTestStateAnalystsEmails(sub)
+        const stateAnalystsEmails = getTestStateAnalystsEmails(sub.stateCode)
 
         const cmsEmails = [
             ...config.cmsReviewSharedEmails,
@@ -484,8 +484,7 @@ describe('submitHealthPlanPackage', () => {
     })
 
     it('generates rate name by package programs when rate programs are not specified', async () => {
-        const config = testEmailConfig
-        const mockEmailer = testEmailer(config)
+        const mockEmailer = testEmailer(testEmailConfig)
         //mock invoke email submit lambda
         const stateServer = await constructTestPostgresServer({
             emailer: mockEmailer,
