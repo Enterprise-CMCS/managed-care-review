@@ -8,20 +8,26 @@ describe('contacts', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/contacts`)
-     
+
+            cy.visit(`/submissions/${draftSubmissionId}/edit/contacts`)
+            cy.wait('@fetchHealthPlanPackageQuery')
+
             // On contacts page, navigate BACK
             cy.navigateFormByButtonClick('BACK')
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
 
             // On contacts page, SAVE_DRAFT
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/contacts`)
+            cy.visit(`/submissions/${draftSubmissionId}/edit/contacts`)
+            cy.wait('@fetchHealthPlanPackageQuery')
+
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
             cy.navigateFormByButtonClick('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // On contacts page, fill out information and CONTINUE
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/contacts`)
+            cy.visit(`/submissions/${draftSubmissionId}/edit/contacts`)
+            cy.wait('@fetchHealthPlanPackageQuery')
+
             cy.fillOutStateContact()
             cy.navigateFormByButtonClick('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
@@ -45,20 +51,25 @@ describe('contacts', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/contacts`)
+            cy.visit(`/submissions/${draftSubmissionId}/edit/contacts`)
+            cy.wait('@fetchHealthPlanPackageQuery')
 
             // On contacts page, navigate BACK
             cy.navigateFormByButtonClick('BACK')
             cy.findByRole('heading', { level: 2, name: /Rate details/ })
 
             // On contacts page, SAVE_DRAFT
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/contacts`)
+            cy.visit(`/submissions/${draftSubmissionId}/edit/contacts`)
+            cy.wait('@fetchHealthPlanPackageQuery')
+
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
             cy.navigateFormByButtonClick('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // On contacts page, fill out information and CONTINUE
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/contacts`)
+            cy.visit(`/submissions/${draftSubmissionId}/edit/contacts`)
+            cy.wait('@fetchHealthPlanPackageQuery')
+
             cy.fillOutStateContact()
             cy.fillOutActuaryContact()
             cy.navigateFormByButtonClick('CONTINUE')
