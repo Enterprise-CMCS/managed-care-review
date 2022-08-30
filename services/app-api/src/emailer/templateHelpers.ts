@@ -96,6 +96,7 @@ const generateCMSReviewerEmails = (
                 email !== dmcpOACTSharedEmail && !oactEmails.includes(email)
         )
 
+    //This list of program IDs combines programs specified for contract certification and rate certification.
     const programIDs = findAllPackageProgramIds(pkg)
 
     // dmcpEmail is added in both CONTRACT_ONLY and CONTRACT_AND_RATES, in case it wasn't included in cmsReviewSharedEmails.
