@@ -1,5 +1,5 @@
 {
-    "extends": "../tsconfig.json",
+    "extends": "../../tsconfig.json",
     "compilerOptions": {
         "outDir": "./build",
         "baseUrl": "/",
@@ -14,12 +14,5 @@
         "allowJs": true,
         "module": "commonjs",
         "lib": ["esnext"]
-    },
-    "include": [
-        "migrate_protos.ts",
-        "lib/migrator.ts",
-        "gen/healthPlanFormDataProto.d.ts",
-        "gen/healthPlanFormDataProto.js",
-        "healthPlanFormDataMigrations/*.ts"
-    ]
+    }
 }

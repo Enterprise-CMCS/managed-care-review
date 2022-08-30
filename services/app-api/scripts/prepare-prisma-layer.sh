@@ -5,6 +5,9 @@ function preparePrismaLayer() {
     rm -rf lambda-layers-prisma-client-migration
     rm -rf lambda-layers-prisma-client-engine
 
+    echo "Generating code ..."
+    lerna run generate-code
+
     echo "Creating migration layer ..."
     mkdir -p lambda-layers-prisma-client-migration/nodejs/node_modules/.prisma
     mkdir -p lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines
@@ -42,10 +45,10 @@ function preparePrismaLayer() {
     rsync -av prisma/ lambda-layers-prisma-client-engine/nodejs/prisma
 
     echo "Copy proto migrations to layer..."
-    rsync -av protoMigrations/healthPlanFormDataMigrations/ lambda-layers-prisma-client-migration/nodejs/healthPlanFormDataMigrations
+    rsync -av ../app-proto/protoMigrations/healthPlanFormDataMigrations/ lambda-layers-prisma-client-migration/nodejs/healthPlanFormDataMigrations
     pwd
     ls -al ..
-    rsync -av ../app-web/src/gen/ lambda-layers-prisma-client-migration/nodejs/gen
+    rsync -av ../app-proto/gen/ lambda-layers-prisma-client-migration/nodejs/gen
 
     echo "Remove Prisma CLI ..."
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/cli
