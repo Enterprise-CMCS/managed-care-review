@@ -1,9 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { Parser, transforms } from 'json2csv'
 import { HealthPlanRevisionTable } from '@prisma/client'
+import { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import { PackagesAndRevisions } from '../postgres/generateReports'
 import {
     base64ToDomain,
     protoToBase64,
@@ -35,19 +36,21 @@ export const main: APIGatewayProxyHandler = async () => {
     }
 
     const store = NewPostgresStore(pgResult)
-    const result = await store.generateReports()
-    const everythingWithUnwrappedProto = result.map((pkg: any) => {
+    const result: PackagesAndRevisions = await store.generateReports()
+    const allUnwrappedProtos = result.map((pkg) => {
         return {
             revisions: convertRevisions(pkg.revisions),
         }
     })
-    const bucket: any = []
-    everythingWithUnwrappedProto.forEach((pkg: any, index: number) => {
-        bucket.push(pkg.revisions[0].formDataProto)
+    const bucket = [] as HealthPlanFormDataType[]
+    allUnwrappedProtos.forEach((pkg, index: number) => {
+        if (pkg.revisions[0].formDataProto instanceof Error) {
+            throw new Error(`Error at index ${index} generating reports array`)
+        } else {
+            bucket.push(pkg.revisions[0].formDataProto)
+        }
     })
     console.log('bucket', bucket)
-    // console.log('everythingWithUnwrappedProto', everythingWithUnwrappedProto)
-    let file = ''
     const parser = new Parser({
         transforms: [
             transforms.flatten({
@@ -58,15 +61,7 @@ export const main: APIGatewayProxyHandler = async () => {
         ],
     })
     const csv = await parser.parse(bucket)
-    file = csv
-    // .then((csv) => {
-    //     file = csv
-    //     console.log('JJJJ csv: ', file)
-    // })
-    // .catch((err) => {
-    //     // console.log('JJJJ err: ', err)
-    // })
-    // console.log('JJ Handler Result: ', result)
+
     // const archive = Archiver('zip', {
     //     zlib: { level: 9 }, // Sets the compression level.
     // })
@@ -75,11 +70,11 @@ export const main: APIGatewayProxyHandler = async () => {
     // archive.finalize().catch((err) => {
     //     // console.log('Error finalizing data export zip file', err)
     // })
-    console.log('FILE: ', file)
+    console.log('FILE: ', csv)
     return {
         statusCode: 200,
-        contentType: 'application/zip',
-        body: file,
+        contentType: 'application/csv',
+        body: csv,
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Credentials': true,
