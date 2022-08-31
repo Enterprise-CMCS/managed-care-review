@@ -10,7 +10,7 @@ type ChangeHistoryProps = {
 
 type flatRevisions = UpdateInformation & {
     kind: 'submit' | 'unlock'
-    previousRevisionVersion: string | undefined
+    revisionVersion: string | undefined
 }
 
 export const ChangeHistory = ({
@@ -34,30 +34,34 @@ export const ChangeHistory = ({
             if (r.node.submitInfo) {
                 const newSubmit: flatRevisions = {} as flatRevisions
 
-                // This is used to link to the previous revision if it exists.
-                // If no previous revision exists and this is the initial revision, set to undefined
-                const previousRevisionVersion =
-                    index === 0 ? undefined : String(index) //Offset version, we want to start at 1
-                console.log(r)
-                console.log(previousRevisionVersion)
+                //Only set revisionVersion if not the latest revision.
+                const revisionVersion =
+                    index !== reversedRevisions.length - 1
+                        ? String(index + 1) //Offset version, we want to start at 1
+                        : undefined
+
                 newSubmit.updatedAt = r.node.submitInfo.updatedAt
                 newSubmit.updatedBy = r.node.submitInfo.updatedBy
                 newSubmit.updatedReason = r.node.submitInfo.updatedReason
                 newSubmit.kind = 'submit'
-                newSubmit.previousRevisionVersion = previousRevisionVersion
+                newSubmit.revisionVersion = revisionVersion
                 //Use unshift to push the latest revision submit info to the beginning of the array
                 result.unshift(newSubmit)
             }
         })
         return result
     }
-    const flattened = flattenedRevisions()
 
-    const revisedItems = flattened.map((r) => {
+    const revisionHistory = flattenedRevisions()
+
+    console.log(submission.revisions)
+
+    const revisedItems = revisionHistory.map((r) => {
         const isInitialSubmission = r.updatedReason === 'Initial submission'
         const isSubsequentSubmission = r.kind === 'submit'
-        console.log(isInitialSubmission)
-        console.log(isSubsequentSubmission)
+        // We want to know if this package has multiple submissions. To have multiple submissions, there must be minimum
+        // 3 revisions in revisionHistory the initial submission revision, unlock revision and resubmission revision.
+        const hasSubsequentSubmissions = revisionHistory.length >= 3
         return {
             title: (
                 <div>
@@ -68,10 +72,22 @@ export const ChangeHistory = ({
                     ET - {isSubsequentSubmission ? 'Submission' : 'Unlock'}
                 </div>
             ),
+            // Display this code if this is the initial submission. We only want to display the link of the initial submission
+            // only if there has been subsequent submissions. We do not want to display a link if the package initial
+            // submission was unlocked, but has not been resubmitted yet.
             content: isInitialSubmission ? (
                 <>
                     <span className={styles.tag}>Submitted by:</span>
                     <span> {r.updatedBy}</span>
+                    <br />
+                    {r.revisionVersion && hasSubsequentSubmissions && (
+                        <Link
+                            href={`/submissions/${submission.id}/revisions/${r.revisionVersion}`}
+                            data-testid={`revision-link-${r.revisionVersion}`}
+                        >
+                            View past submission version
+                        </Link>
+                    )}
                 </>
             ) : (
                 <>
@@ -91,10 +107,10 @@ export const ChangeHistory = ({
                         </span>
                         <span>{r.updatedReason}</span>
                     </div>
-                    {isSubsequentSubmission && r.previousRevisionVersion && (
+                    {isSubsequentSubmission && r.revisionVersion && (
                         <Link
-                            href={`/submissions/${submission.id}/revisions/${r.previousRevisionVersion}`}
-                            data-testid={`revision-link-${r.previousRevisionVersion}`}
+                            href={`/submissions/${submission.id}/revisions/${r.revisionVersion}`}
+                            data-testid={`revision-link-${r.revisionVersion}`}
                         >
                             View past submission version
                         </Link>
