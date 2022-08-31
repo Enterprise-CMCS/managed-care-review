@@ -1,15 +1,22 @@
 import { getParameterStore } from '../../awsParameterStore'
 
 export const getCmsReviewSharedEmails = async (): Promise<string[] | Error> => {
-    const reviewTeamAddresses = await getParameterStore(
-        `/configuration/email/reviewTeamAddresses`
-    )
+    const name = `/configuration/email/reviewTeamAddresses`
+    const reviewTeamAddresses = await getParameterStore(name)
+
     if (reviewTeamAddresses instanceof Error) {
         return reviewTeamAddresses
-    } else {
-        //Split string into array using ',' separator and trim each array item.
-        return reviewTeamAddresses.split(',').map((email) => email.trim())
     }
+
+    const { type, value } = reviewTeamAddresses
+
+    if (type !== 'StringList') {
+        const errorMessage = `Parameter store ${name} value of Type ${type} is not supported`
+        return new Error(errorMessage)
+    }
+
+    //Split string into array using ',' separator and trim each array item.
+    return value.split(',').map((email) => email.trim())
 }
 
 export const getCmsReviewSharedEmailsLocal = async (): Promise<

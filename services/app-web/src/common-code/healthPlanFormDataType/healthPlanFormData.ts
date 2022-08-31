@@ -251,28 +251,25 @@ const generateRateName = (
     return rateName
 }
 
-const removeRateRelatedDocuments = (
+const convertRateSupportingDocs = (
     documents: SubmissionDocument[]
 ): SubmissionDocument[] => {
-    const noRateDocs: SubmissionDocument[] = []
-    documents.forEach((document) => {
-        const ratesRelatedDocIndex =
-            document.documentCategories.indexOf('RATES_RELATED')
-        const ratesDocIndex = document.documentCategories.indexOf('RATES')
-        const includesContractDocs =
-            document.documentCategories.includes('CONTRACT_RELATED') ||
-            document.documentCategories.includes('CONTRACT')
-        if (includesContractDocs) {
-            if (ratesDocIndex !== -1) {
-                document.documentCategories.splice(ratesDocIndex, 1)
-            }
-            if (ratesRelatedDocIndex !== -1) {
-                document.documentCategories.splice(ratesRelatedDocIndex, 1)
-            }
-            noRateDocs.push(document)
-        }
-    })
-    return noRateDocs
+    if (
+        documents.some(
+            (document) =>
+                document.documentCategories.includes('CONTRACT') ||
+                document.documentCategories.includes('RATES')
+        )
+    ) {
+        const errorMessage =
+            'convertRateSupportingDocs does not support CONTRACT or RATES documents.'
+        console.error(errorMessage)
+        throw new Error(errorMessage)
+    }
+    return documents.map((document) => ({
+        ...document,
+        documentCategories: ['CONTRACT_RELATED'],
+    }))
 }
 
 const removeRatesData = (
@@ -286,7 +283,7 @@ const removeRatesData = (
     pkg.rateAmendmentInfo = undefined
     pkg.actuaryContacts = []
     pkg.rateProgramIDs = []
-    pkg.documents = removeRateRelatedDocuments(pkg.documents)
+    pkg.documents = convertRateSupportingDocs(pkg.documents)
     pkg.rateDocuments = []
 
     return pkg
@@ -305,6 +302,6 @@ export {
     programNames,
     packageName,
     generateRateName,
-    removeRateRelatedDocuments,
+    convertRateSupportingDocs,
     removeRatesData,
 }

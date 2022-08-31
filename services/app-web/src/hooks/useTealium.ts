@@ -5,21 +5,34 @@ import { createScript } from './useScript'
 import { PageTitlesRecord } from '../constants/routes'
 import { useAuth } from '../contexts/AuthContext'
 import { getTealiumEnv, CONTENT_TYPE_BY_ROUTE } from '../constants/tealium'
+import type {
+    TealiumLinkDataObject,
+    TealiumViewDataObject,
+    TealiumEvent,
+} from '../constants/tealium'
 
 /*
 Tealium is the data layer for Google Analytics and other data tracking at CMS
     The hooks in this file have two purposes:
     1. Loads JavaScript code called utag.js into the application. This contains all of the generated code necessary to use Tealium and third-party tags.
     2. Tracks new page views using the Tealium Universal Data Format, defined in this doc: https://docs.tealium.com/platforms/javascript/universal-data-object/
+
+    In addition, useTealium returns a function for tracking user events. See Tealium docs on tracking: https://docs.tealium.com/platforms/javascript/track/
 */
-const useTealium = (): void => {
+const useTealium = (): {
+    logTealiumEvent: (linkData: TealiumLinkDataObject) => void
+} => {
     const { currentRoute, pathname } = useCurrentRoute()
     const { heading } = usePage()
     const { loggedInUser } = useAuth()
 
+    // Add Tealium setup
+    // this effect should only fire on initial app load
     useEffect(() => {
         // Do not add tealium for local dev
-        if (process.env.REACT_APP_STAGE_NAME === 'local') return
+        if (process.env.REACT_APP_STAGE_NAME === 'local') {
+            return
+        }
 
         const tealiumEnv = getTealiumEnv(
             process.env.REACT_APP_STAGE_NAME || 'main'
@@ -72,8 +85,10 @@ const useTealium = (): void => {
             // document.body.removeChild(loadTagsSnippet)
             document.head.removeChild(initializeTagManagerSnippet)
         }
-    }, []) // this effect should only fire on initial app load
+    }, [])
 
+    // Add page view
+    // this effect should fire on each page view or if something changes about logged in user
     useEffect(() => {
         // Do not add tags for local dev
         if (process.env.REACT_APP_STAGE_NAME === 'local') return
@@ -86,7 +101,7 @@ const useTealium = (): void => {
         }
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const utag = window.utag || { link: () => {}, view: () => {} }
-        const tagData = {
+        const tagData: TealiumViewDataObject = {
             content_language: 'en',
             content_type: `${CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
             page_name: `${heading}: ${PageTitlesRecord[currentRoute]}`,
@@ -97,8 +112,44 @@ const useTealium = (): void => {
             logged_in: `${Boolean(loggedInUser) ?? false}`,
         }
         utag.view(tagData)
-        console.log('utag view called with: ', tagData)
-    }, [currentRoute, loggedInUser, pathname, heading]) // this effect should fire on each page view or if something changes about logged in user
+    }, [currentRoute, loggedInUser, pathname, heading])
+
+    // Add user event
+    const logTealiumEvent = (linkData: {
+        tealium_event: TealiumEvent
+        content_type?: string
+    }) => {
+        // Do not add events on local dev
+        if (process.env.REACT_APP_STAGE_NAME === 'local') {
+            console.log(`mock tealium event: ${JSON.stringify(linkData)}`)
+            return
+        }
+
+        // Guardrail - protect against trying to call utag before its loaded.
+        if (!window.utag) {
+            console.error(
+                'PROGRAMMING ERROR: tried to use tealium utag before it was loaded'
+            )
+        }
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const utag = window.utag || { link: () => {}, view: () => {} }
+
+        const tagData: TealiumLinkDataObject = {
+            content_language: 'en',
+            page_name: `${heading}: ${PageTitlesRecord[currentRoute]}`,
+            page_path: pathname,
+            site_domain: 'cms.gov',
+            site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
+            site_section: `${currentRoute}`,
+            logged_in: `${Boolean(loggedInUser) ?? false}`,
+            userId: loggedInUser?.email,
+            ...linkData,
+        }
+        console.log('HELLO', tagData)
+        utag.link(tagData)
+    }
+
+    return { logTealiumEvent }
 }
 
 export { useTealium }

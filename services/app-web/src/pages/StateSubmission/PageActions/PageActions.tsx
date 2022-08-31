@@ -3,6 +3,8 @@ import { ButtonGroup } from '@trussworks/react-uswds'
 
 import { PageActionsContainer } from './PageActionsContainer'
 import { ActionButton } from '../../../components/ActionButton'
+import { useTealium } from '../../../hooks'
+
 /*  
    This is the main call to action element displayed at the bottom of form pages.
    We have a preference to use buttons even when a link behavior (redirect) is being used. This to ensure unity of the UI and experience across pages, since different pages have different logic. 
@@ -28,13 +30,23 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
     const isFirstPage = pageVariant === 'FIRST'
     const isLastPage = pageVariant === 'LAST'
     const isFirstPageEditing = pageVariant === 'EDIT_FIRST'
+    const { logTealiumEvent } = useTealium()
+
+    const saveAsDraftOnClickWithLogging = (
+        e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    ) => {
+        logTealiumEvent({ tealium_event: 'save_draft' })
+        if (saveAsDraftOnClick) saveAsDraftOnClick(e)
+    }
     const leftElement =
         isFirstPage || !saveAsDraftOnClick ? undefined : (
             <ActionButton
                 type="button"
                 variant="linkStyle"
                 disabled={actionInProgress}
-                onClick={actionInProgress ? undefined : saveAsDraftOnClick}
+                onClick={
+                    actionInProgress ? undefined : saveAsDraftOnClickWithLogging
+                }
                 data-testid="page-actions-left-primary"
             >
                 Save as draft
