@@ -43,8 +43,6 @@ function preparePrismaLayer() {
 
     echo "Copy proto migrations to layer..."
     rsync -av ../app-proto/protoMigrations/healthPlanFormDataMigrations/ lambda-layers-prisma-client-migration/nodejs/healthPlanFormDataMigrations
-    pwd
-    ls -al ..
     rsync -av ../app-proto/gen/ lambda-layers-prisma-client-migration/nodejs/gen
 
     echo "Remove Prisma CLI ..."
