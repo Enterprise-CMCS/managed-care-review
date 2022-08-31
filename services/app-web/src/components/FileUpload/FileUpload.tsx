@@ -97,24 +97,6 @@ export const FileUpload = ({
         onFileItemsUpdate({ fileItems })
     }, [fileItems, onFileItemsUpdate])
 
-    React.useEffect(() => {
-        /* guard against empty documentCategories when user starts with contract & rates
-        and switches to contract-only */
-        setFileItems((prevItems) => {
-            const newItems = [...prevItems]
-            return newItems.map((item) => {
-                if (renderMode === 'table' && isContractOnly) {
-                    return {
-                        ...item,
-                        documentCategories: ['CONTRACT_RELATED'],
-                    } as FileItemT
-                } else {
-                    return item
-                }
-            })
-        })
-    }, [renderMode, isContractOnly])
-
     const isDuplicateItem = (
         existingList: FileItemT[],
         currentItem: FileItemT
