@@ -1,10 +1,14 @@
 import {
     constructTestPostgresServer,
     createAndSubmitTestHealthPlanPackage,
+    createAndUpdateTestHealthPlanPackage,
     createTestHealthPlanPackage,
 } from '../testHelpers/gqlHelpers'
 import UPDATE_HEALTH_PLAN_FORM_DATA from '../../../app-graphql/src/mutations/updateHealthPlanFormData.graphql'
-import { domainToBase64 } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import {
+    base64ToDomain,
+    domainToBase64,
+} from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
 import {
     basicLockedHealthPlanFormData,
@@ -342,6 +346,57 @@ describe('updateHealthPlanFormData', () => {
         expect(updateResult.errors[0].message).toContain('UNEXPECTED_EXCEPTION')
         expect(updateResult.errors[0].message).toContain(
             'Error updating form data'
+        )
+    })
+
+    it('converts RATES_RELATED documents to CONTRACT_RELATED on contract only submissions', async () => {
+        const server = await constructTestPostgresServer()
+
+        const updatedPackage = await createAndUpdateTestHealthPlanPackage(
+            server,
+            {
+                submissionType: 'CONTRACT_ONLY',
+                documents: [
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: [
+                            'CONTRACT_RELATED' as const,
+                            'RATES_RELATED' as const,
+                        ],
+                    },
+                    {
+                        name: 'rate_only_supporting_doc.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES_RELATED' as const],
+                    },
+                ],
+            }
+        )
+
+        const currentRevision = updatedPackage.revisions[0].node
+
+        const packageData = base64ToDomain(currentRevision.formDataProto)
+
+        if (packageData instanceof Error) {
+            throw new Error(packageData.message)
+        }
+
+        expect(packageData).toEqual(
+            expect.objectContaining({
+                documents: [
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED'],
+                    },
+                    {
+                        name: 'rate_only_supporting_doc.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED'],
+                    },
+                ],
+            })
         )
     })
 })
