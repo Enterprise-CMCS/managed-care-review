@@ -185,9 +185,9 @@ jobs:
         working-directory: services/app-api
         run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
 
-      - name: Generate gql
-        shell: bash
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x lerna run generate-code
+      - name: Generate protos
+        working-directory: services/app-proto
+        run: yarn run protogen
 
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client
