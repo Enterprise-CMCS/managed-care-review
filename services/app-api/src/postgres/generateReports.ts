@@ -6,12 +6,8 @@ export type PackagesAndRevisions = (HealthPlanPackageTable & {
 
 export async function generateReports(
     client: PrismaClient
-): Promise<PackagesAndRevisions | undefined> {
-    const everything: PackagesAndRevisions =
-        await client.healthPlanPackageTable.findMany({
-            include: {
-                revisions: true,
-            },
-        })
+): Promise<HealthPlanRevisionTable[] | undefined> {
+    const everything: HealthPlanRevisionTable[] =
+        await client.healthPlanRevisionTable.findMany()
     return everything
 }

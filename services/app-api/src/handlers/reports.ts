@@ -1,23 +1,41 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { Parser, transforms } from 'json2csv'
 import { HealthPlanRevisionTable } from '@prisma/client'
-import { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
-import { PackagesAndRevisions } from '../postgres/generateReports'
+import { ProgramArgType } from '../../../app-web/src/common-code/healthPlanFormDataType/State'
+// import { PackagesAndRevisions } from '../postgres/generateReports'
 import {
     base64ToDomain,
     protoToBase64,
 } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import statePrograms from '../data/statePrograms.json'
 
-const convertRevisions = (revisions: HealthPlanRevisionTable[]) => {
+const decodeRevisions = (revisions: HealthPlanRevisionTable[]) => {
     return revisions.map((revision) => {
         return {
+            ...revision,
             formDataProto: base64ToDomain(
                 protoToBase64(revision.formDataProto)
             ),
         }
     })
+}
+
+const decorateRevisionsWithProgramNames = (revisions: any) => {
+    const programList = [] as ProgramArgType[]
+    statePrograms.states.forEach((state) => {
+        programList.push(...state.programs)
+    })
+    revisions.forEach((revision: any) => {
+        const names = programList
+            .filter((p) => revision.formDataProto.programIDs.includes(p.id))
+            .map((p) => p.name)
+        console.log('names: ', names)
+        revision.programNames = names
+    })
+    return revisions
 }
 
 export const main: APIGatewayProxyHandler = async () => {
@@ -36,32 +54,38 @@ export const main: APIGatewayProxyHandler = async () => {
     }
 
     const store = NewPostgresStore(pgResult)
-    const result: PackagesAndRevisions = await store.generateReports()
-    const allUnwrappedProtos = result.map((pkg) => {
-        console.log('package: ', pkg)
-        return {
-            revisions: convertRevisions(pkg.revisions),
+    const result: HealthPlanRevisionTable[] = await store.generateReports()
+    const decodedRevisions = decodeRevisions(result)
+    const allUnwrappedRevisions =
+        decorateRevisionsWithProgramNames(decodedRevisions)
+    console.log('result:', result)
+    // const allUnwrappedPackages = result.map((revision) => {
+    //     // console.log('package: ', pkg)
+    //     const decodedRevisions = decodeRevisions(revision)
+    //     const revisions = decorateRevisionsWithProgramNames(decodedRevisions)
+    //     return {
+    //         revisions,
+    //     }
+    // })
+    const bucket = [] as any[]
+
+    allUnwrappedRevisions.forEach((revision: any) => {
+        // pkg.revisions.forEach((revision: any) => {
+        if (revision.formDataProto instanceof Error) {
+            throw new Error(`Error generating reports array`)
+        } else {
+            // console.log('revision', revision)
+            bucket.push(revision)
         }
-    })
-    const bucket = [] as HealthPlanFormDataType[]
-
-    allUnwrappedProtos.forEach((pkg) => {
-        pkg.revisions.forEach((revision) => {
-            if (revision.formDataProto instanceof Error) {
-                throw new Error(`Error generating reports array`)
-            } else {
-                console.log('revision', revision)
-                bucket.push(revision.formDataProto)
-            }
-        })
+        // })
     })
 
-    console.log('bucket', bucket)
+    // console.log('bucket', bucket)
     const parser = new Parser({
         transforms: [
             transforms.flatten({
                 objects: true,
-                arrays: true,
+                arrays: false,
                 separator: ',',
             }),
         ],
