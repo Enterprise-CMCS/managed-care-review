@@ -58,7 +58,7 @@ const StateUserRoutes = ({
                     element={<StateDashboard />}
                 />
                 <Route path={RoutesRecord.HELP} element={<Help />} />
-                <Route path={RoutesRecord.REPORTS} element={<Reports />} />
+
                 <Route
                     path={RoutesRecord.SUBMISSIONS}
                     element={<StateDashboard />}
@@ -108,6 +108,7 @@ const CMSUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_REVISION}
                     element={<SubmissionRevisionSummary />}
                 />
+                <Route path={RoutesRecord.REPORTS} element={<Reports />} />
                 <Route path="*" element={<Error404 />} />
             </Routes>
         </AuthenticatedRouteWrapper>

@@ -38,18 +38,24 @@ export const main: APIGatewayProxyHandler = async () => {
     const store = NewPostgresStore(pgResult)
     const result: PackagesAndRevisions = await store.generateReports()
     const allUnwrappedProtos = result.map((pkg) => {
+        console.log('package: ', pkg)
         return {
             revisions: convertRevisions(pkg.revisions),
         }
     })
     const bucket = [] as HealthPlanFormDataType[]
-    allUnwrappedProtos.forEach((pkg, index: number) => {
-        if (pkg.revisions[0].formDataProto instanceof Error) {
-            throw new Error(`Error at index ${index} generating reports array`)
-        } else {
-            bucket.push(pkg.revisions[0].formDataProto)
-        }
+
+    allUnwrappedProtos.forEach((pkg) => {
+        pkg.revisions.forEach((revision) => {
+            if (revision.formDataProto instanceof Error) {
+                throw new Error(`Error generating reports array`)
+            } else {
+                console.log('revision', revision)
+                bucket.push(revision.formDataProto)
+            }
+        })
     })
+
     console.log('bucket', bucket)
     const parser = new Parser({
         transforms: [
@@ -70,16 +76,16 @@ export const main: APIGatewayProxyHandler = async () => {
     // archive.finalize().catch((err) => {
     //     // console.log('Error finalizing data export zip file', err)
     // })
-    console.log('FILE: ', csv)
+    // console.log('FILE: ', csv)
     return {
         statusCode: 200,
-        contentType: 'application/csv',
+        contentType: 'application/octet-stream',
         body: csv,
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Credentials': true,
-            'Content-Disposition': 'attachment; filename=reports.csv',
-            'Content-Type': 'application/csv',
+            'Content-Disposition': 'attachment',
+            'Content-Type': 'application/octet-stream',
         },
     }
 }
