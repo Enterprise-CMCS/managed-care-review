@@ -1,7 +1,7 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
     UnlockedHealthPlanFormDataType,
-    convertRateToContractDocs,
+    convertRateSupportingDocs,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     base64ToDomain,
@@ -202,7 +202,7 @@ export function updateHealthPlanFormDataResolver(
                 document.documentCategories.includes('RATES_RELATED')
             )
         ) {
-            const convertedDocs = convertRateToContractDocs(
+            const convertedDocs = convertRateSupportingDocs(
                 unlockedFormData.documents
             )
             unlockedFormData.documents = convertedDocs

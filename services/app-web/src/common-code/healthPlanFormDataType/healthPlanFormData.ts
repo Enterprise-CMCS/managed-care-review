@@ -251,17 +251,24 @@ const generateRateName = (
     return rateName
 }
 
-const convertRateToContractDocs = (
+const convertRateSupportingDocs = (
     documents: SubmissionDocument[]
 ): SubmissionDocument[] => {
+    if (
+        documents.some(
+            (document) =>
+                document.documentCategories.includes('CONTRACT') ||
+                document.documentCategories.includes('RATES')
+        )
+    ) {
+        const errorMessage =
+            'convertRateSupportingDocs does not support CONTRACT or RATES documents.'
+        console.error(errorMessage)
+        throw new Error(errorMessage)
+    }
     return documents.map((document) => ({
         ...document,
-        //Convert rate supporting documents to contract supporting and contract to rate documents.
-        documentCategories:
-            document.documentCategories.includes('CONTRACT_RELATED') ||
-            document.documentCategories.includes('RATES_RELATED')
-                ? ['CONTRACT_RELATED']
-                : ['CONTRACT'],
+        documentCategories: ['CONTRACT_RELATED'],
     }))
 }
 
@@ -276,7 +283,7 @@ const removeRatesData = (
     pkg.rateAmendmentInfo = undefined
     pkg.actuaryContacts = []
     pkg.rateProgramIDs = []
-    pkg.documents = convertRateToContractDocs(pkg.documents)
+    pkg.documents = convertRateSupportingDocs(pkg.documents)
     pkg.rateDocuments = []
 
     return pkg
@@ -295,6 +302,6 @@ export {
     programNames,
     packageName,
     generateRateName,
-    convertRateToContractDocs,
+    convertRateSupportingDocs,
     removeRatesData,
 }
