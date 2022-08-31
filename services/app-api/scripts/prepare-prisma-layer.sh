@@ -5,9 +5,6 @@ function preparePrismaLayer() {
     rm -rf lambda-layers-prisma-client-migration
     rm -rf lambda-layers-prisma-client-engine
 
-    echo "Generating code ..."
-    lerna run generate-code
-
     echo "Creating migration layer ..."
     mkdir -p lambda-layers-prisma-client-migration/nodejs/node_modules/.prisma
     mkdir -p lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines
