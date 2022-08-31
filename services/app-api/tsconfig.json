@@ -11,6 +11,8 @@
         "esModuleInterop": true,
         "resolveJsonModule": true,
         "module": "esnext",
-        "lib": ["esnext"]
-    }
+        "lib": ["esnext"],
+        "rootDir": "./src"
+    },
+    "include": ["src"]
 }

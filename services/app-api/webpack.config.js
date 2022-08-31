@@ -58,11 +58,7 @@ module.exports = {
                         },
                     },
                 ],
-                exclude: [
-                    /node_modules/,
-                    /lambda-layers-prisma-client-migration/,
-                    /lambda-layers-prisma-client-engine/,
-                ],
+                exclude: /node_modules/,
             },
             {
                 test: /\.(graphql|gql)$/,
