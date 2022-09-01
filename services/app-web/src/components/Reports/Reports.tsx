@@ -5,16 +5,15 @@ import styles from './Reports.module.scss'
 
 export const Reports = (): React.ReactElement => {
     const getReports = async (): Promise<void> => {
+        // code for downloading a file taken from https://gist.github.com/Sleavely/b243e4400a9e4772b00128d3e99b9946
         await API.get('api', '/reports', {
             responseType: 'blob',
             response: true,
         }).then((response) => {
-            console.log('response', response.data)
             const blob = new Blob([response.data], {
                 type: 'application/octet-stream',
             })
             const filename = 'report.csv'
-
             const blobURL = window.URL.createObjectURL(blob)
             const tempLink = document.createElement('a')
             tempLink.style.display = 'none'

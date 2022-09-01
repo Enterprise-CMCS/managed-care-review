@@ -4,7 +4,7 @@ export type PackagesAndRevisions = (HealthPlanPackageTable & {
     revisions: HealthPlanRevisionTable[]
 })[]
 
-export async function generateReports(
+export async function getAllRevisions(
     client: PrismaClient
 ): Promise<HealthPlanRevisionTable[] | undefined> {
     const everything: HealthPlanRevisionTable[] =

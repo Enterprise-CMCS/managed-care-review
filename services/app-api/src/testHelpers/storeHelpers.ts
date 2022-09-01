@@ -71,7 +71,7 @@ function mockStoreThatErrors(): Store {
                 'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
             )
         },
-        generateReports: async () => {
+        getAllRevisions: async () => {
             return new Error(
                 'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
             )
