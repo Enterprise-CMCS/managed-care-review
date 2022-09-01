@@ -37,7 +37,7 @@ export const main: APIGatewayProxyHandler = async () => {
             statusCode: 400,
             body: JSON.stringify({
                 code: 'SCHEMA_MIGRATION_FAILED',
-                message: 'Could not migrate the database schema ' + err,
+                message: 'Could not migrate the database schema: ' + err,
             }),
             headers: {
                 'Access-Control-Allow-Origin': '*',
@@ -55,7 +55,7 @@ export const main: APIGatewayProxyHandler = async () => {
             statusCode: 400,
             body: JSON.stringify({
                 code: 'DATA_MIGRATION_FAILED',
-                message: 'Could not migrate the database data ' + err,
+                message: 'Could not migrate the database protobufs: ' + err,
             }),
             headers: {
                 'Access-Control-Allow-Origin': '*',
