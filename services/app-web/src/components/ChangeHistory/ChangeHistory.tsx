@@ -54,8 +54,6 @@ export const ChangeHistory = ({
 
     const revisionHistory = flattenedRevisions()
 
-    console.log(submission.revisions)
-
     const revisedItems = revisionHistory.map((r) => {
         const isInitialSubmission = r.updatedReason === 'Initial submission'
         const isSubsequentSubmission = r.kind === 'submit'
