@@ -16,11 +16,11 @@ describe('new submission', () => {
         cy.fillOutContractActionOnly()
 
         // Navigate to contract details page by clicking continue for contract only submission
-        cy.navigateForm('CONTINUE_FROM_START_NEW')
+        cy.navigateFormByButtonClick('CONTINUE_FROM_START_NEW')
         cy.findByRole('heading', { level: 2, name: /Contract details/ })
 
         // check accessibility of filled out SubmissionType page
-        cy.navigateForm('BACK')
+        cy.navigateFormByButtonClick('BACK')
         // Commented out to get react-scripts/webpack 5 upgrade through
         // cy.pa11y({
         //     actions: ['wait for element #form-guidance to be visible'],

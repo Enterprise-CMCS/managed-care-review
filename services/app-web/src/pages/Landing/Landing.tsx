@@ -56,9 +56,7 @@ export const Landing = (): React.ReactElement => {
                                     dual demonstration contracts)
                                 </li>
                                 <li>State directed preprints</li>
-                                <li>Documents for pre-review</li>
                                 <li>Rate-only submissions</li>
-                                <li>CHIP-only submissions</li>
                             </ul>
 
                             <h2>Before you begin:</h2>
