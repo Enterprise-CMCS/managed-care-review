@@ -9,7 +9,6 @@ type Query {
         input: FetchHealthPlanPackageInput!
     ): FetchHealthPlanPackagePayload!
     indexHealthPlanPackages: IndexHealthPlanPackagesPayload!
-    dataExport: DataExport
 }
 
 type Mutation {
@@ -32,10 +31,6 @@ input CreateHealthPlanPackageInput {
     programIDs: [ID!]!
     submissionType: SubmissionType!
     submissionDescription: String!
-}
-
-type DataExport {
-    name: String!
 }
 
 type CreateHealthPlanPackagePayload {

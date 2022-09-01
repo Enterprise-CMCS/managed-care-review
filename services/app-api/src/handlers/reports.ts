@@ -7,6 +7,7 @@ import { ProgramArgType } from '../../../app-web/src/common-code/healthPlanFormD
 import { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import statePrograms from '../data/statePrograms.json'
+import { isStoreError, StoreError } from '../postgres/storeError'
 
 type RevisionWithDecodedProtobuf = {
     formDataProto: HealthPlanFormDataType | Error
@@ -73,7 +74,11 @@ export const main: APIGatewayProxyHandler = async () => {
     }
 
     const store = NewPostgresStore(pgResult)
-    const result: HealthPlanRevisionTable[] = await store.getAllRevisions()
+    const result: HealthPlanRevisionTable[] | StoreError =
+        await store.getAllRevisions()
+    if (isStoreError(result)) {
+        throw new Error('Error getting records; cannot generate report')
+    }
     const allDecodedRevisions: RevisionWithDecodedProtobuf[] =
         decorateRevisionsWithProgramNames(decodeRevisions(result))
 
