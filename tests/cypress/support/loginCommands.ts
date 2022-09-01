@@ -26,8 +26,8 @@ Cypress.Commands.add('logInAsStateUser', () => {
     } else {
         throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
     }
-    cy.wait('@fetchCurrentUserQuery', {timeout: 20000})
-    cy.wait('@indexHealthPlanPackagesQuery', {timeout: 80000}) // this is the first request that engages the db, can take really long if its a fresh PR branch
+    cy.wait('@fetchCurrentUserQuery', { timeout: 20000 })
+    cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80000 }) // this is the first request that engages the db, can take really long if its a fresh PR branch
 })
 
 Cypress.Commands.add(
@@ -36,8 +36,8 @@ Cypress.Commands.add(
         cy.intercept('POST', '*/graphql', (req) => {
             aliasQuery(req, 'fetchCurrentUser')
             aliasQuery(req, 'fetchHealthPlanPackage')
+            aliasQuery(req, 'indexHealthPlanPackages')
         })
-
 
         cy.visit(initialURL)
         cy.findByRole('link', { name: 'Sign In' }).click()
@@ -57,12 +57,12 @@ Cypress.Commands.add(
             cy.findByRole('button', { name: 'Login' }).click()
         } else {
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
-        } 
+        }
         cy.wait('@fetchCurrentUserQuery', { timeout: 20000 })
-        if (initialURL !== '/') { 
+        if (initialURL !== '/') {
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 }) // for cases where CMs user goes to specific submission on login
         } else {
-            cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80000 }) 
+            cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80000 })
         }
     }
 )
