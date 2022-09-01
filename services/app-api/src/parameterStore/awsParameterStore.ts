@@ -1,27 +1,34 @@
 import { SSM } from 'aws-sdk'
 
 type GetParameterResult = SSM.GetParameterResult
+type ParameterStoreType = { value: string; type: string } | Error
 
 const ssm = new SSM({ region: 'us-east-1' })
 
-const getParameterStore = async (name: string): Promise<string | Error> => {
+const getParameterStore = async (name: string): Promise<ParameterStoreType> => {
     const params = {
         Name: name,
     }
 
     try {
-        const response: GetParameterResult = await ssm
+        const { Parameter: parameter }: GetParameterResult = await ssm
             .getParameter(params)
             .promise()
-        const value = response?.Parameter?.Value
 
-        if (value === undefined) {
-            const errorMessage = `Failed to return parameter ${name}. Value was undefined.`
-            console.error(errorMessage)
+        if (!parameter || !parameter.Value || !parameter.Type) {
+            let errorMessage: string
+            if (!parameter) {
+                errorMessage = `Failed to return parameter store ${name} data was undefined.`
+            } else {
+                errorMessage = `Failed to return parameter store ${name}. Value: ${!parameter.Value} or Type: ${!parameter.Type} was undefined.`
+            }
             return new Error(errorMessage)
         }
 
-        return value
+        return {
+            value: parameter.Value,
+            type: parameter.Type,
+        }
     } catch (err) {
         console.error(
             `Failed to fetch parameter ${name}. Error: ${err.message}`

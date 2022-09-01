@@ -473,7 +473,7 @@ describe('unlockHealthPlanPackage', () => {
         const ratePrograms = [defaultFloridaRateProgram()]
         const name = packageName(sub, programs)
         const rateName = generateRateName(sub, ratePrograms)
-        const stateAnalystsEmails = getTestStateAnalystsEmails(sub)
+        const stateAnalystsEmails = getTestStateAnalystsEmails(sub.stateCode)
 
         const cmsEmails = [
             ...config.cmsReviewSharedEmails,
@@ -493,8 +493,7 @@ describe('unlockHealthPlanPackage', () => {
     })
 
     it('generates rate name by package programs when rate programs are not specified', async () => {
-        const config = testEmailConfig
-        const mockEmailer = testEmailer(config)
+        const mockEmailer = testEmailer(testEmailConfig)
 
         //mock invoke email submit lambda
         const stateServer = await constructTestPostgresServer()

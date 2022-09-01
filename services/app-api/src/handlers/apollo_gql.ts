@@ -150,33 +150,15 @@ async function initializeGQLHandler(): Promise<Handler> {
     const dbURL = process.env.DATABASE_URL
     const stageName = process.env.stage
     const applicationEndpoint = process.env.APPLICATION_ENDPOINT
-    const emailSource = process.env.SES_SOURCE_EMAIL_ADDRESS
     const emailerMode = process.env.EMAILER_MODE
     const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
     const parameterStoreMode = process.env.PARAMETER_STORE_MODE
-
-    // Print out all the variables we've been configured with. Leave sensitive ones out, please.
-    console.info('Running With Config: ', {
-        authMode,
-        stageName,
-        dbURL,
-        applicationEndpoint,
-        emailSource,
-        emailerMode,
-        otelCollectorUrl,
-        parameterStoreMode,
-    })
 
     // START Assert configuration is valid
     if (emailerMode !== 'LOCAL' && emailerMode !== 'SES')
         throw new Error(
             'Configuration Error: EMAILER_MODE is not valid. Current value: ' +
                 emailerMode
-        )
-
-    if (emailSource === undefined)
-        throw new Error(
-            'Configuration Error: SES_SOURCE_EMAIL_ADDRESS is required'
         )
 
     if (applicationEndpoint === undefined || applicationEndpoint === '')
@@ -218,37 +200,42 @@ async function initializeGQLHandler(): Promise<Handler> {
             : newAWSEmailParameterStore()
 
     //Configuring emails using emailParameterStore
-    // Moving setting these emails down here. We needed to grab cmsReviewSharedEmails and ratesReviewSharedEmails from
-    // parameter store using our emailParameterStore because serverless does not like array of strings as env variables.
+    // Moving setting these emails down here. We needed to retrieve all emails from parameter store using our
+    // emailParameterStore because serverless does not like array of strings as env variables.
     // For more context see this ticket https://qmacbis.atlassian.net/browse/MR-2539.
-    // Eventually we will want to get the rest of the emails in the same manner. For now, we want to get this bug fix asap.
+    const emailSource = await emailParameterStore.getSourceEmail()
     const cmsReviewSharedEmails =
         await emailParameterStore.getCmsReviewSharedEmails()
-    const cmsReviewHelpEmailAddress = process.env.SES_REVIEW_HELP_EMAIL_ADDRESS
-    const cmsRateHelpEmailAddress = process.env.SES_RATE_HELP_EMAIL_ADDRESS
+    const cmsReviewHelpEmailAddress =
+        await emailParameterStore.getCmsReviewHelpEmail()
+    const cmsRateHelpEmailAddress =
+        await emailParameterStore.getCmsRateHelpEmail()
     const cmsDevTeamHelpEmailAddress =
-        process.env.SES_DEV_TEAM_HELP_EMAIL_ADDRESS
+        await emailParameterStore.getCmsDevTeamHelpEmail()
     const ratesReviewSharedEmails =
         await emailParameterStore.getRatesReviewSharedEmails()
+
+    if (emailSource instanceof Error)
+        throw new Error(`Configuration Error: ${emailSource.message}`)
 
     if (cmsReviewSharedEmails instanceof Error)
         throw new Error(`Configuration Error: ${cmsReviewSharedEmails.message}`)
 
-    if (cmsReviewHelpEmailAddress === undefined) {
+    if (cmsReviewHelpEmailAddress instanceof Error) {
         throw new Error(
-            'Configuration Error: SES_REVIEW_HELP_EMAIL_ADDRESS is required'
+            `Configuration Error: ${cmsReviewHelpEmailAddress.message}`
         )
     }
 
-    if (cmsRateHelpEmailAddress === undefined) {
+    if (cmsRateHelpEmailAddress instanceof Error) {
         throw new Error(
-            'Configuration Error: SES_RATE_HELP_EMAIL_ADDRESS is required'
+            `Configuration Error: ${cmsRateHelpEmailAddress.message}`
         )
     }
 
-    if (cmsDevTeamHelpEmailAddress === undefined) {
+    if (cmsDevTeamHelpEmailAddress instanceof Error) {
         throw new Error(
-            'Configuration Error: SES_DEV_TEAM_HELP_EMAIL_ADDRESS is required'
+            `Configuration Error: ${cmsDevTeamHelpEmailAddress.message}`
         )
     }
     if (ratesReviewSharedEmails instanceof Error)
@@ -256,27 +243,39 @@ async function initializeGQLHandler(): Promise<Handler> {
             `Configuration Error: ${ratesReviewSharedEmails.message}`
         )
 
+    // Print out all the variables we've been configured with. Leave sensitive ones out, please.
+    console.info('Running With Config: ', {
+        authMode,
+        stageName,
+        dbURL,
+        applicationEndpoint,
+        emailSource,
+        emailerMode,
+        otelCollectorUrl,
+        parameterStoreMode,
+    })
+
     const emailer =
         emailerMode == 'LOCAL'
             ? newLocalEmailer({
-                  emailSource: 'local@example.com',
+                  emailSource,
                   stage: 'local',
                   baseUrl: applicationEndpoint,
-                  cmsReviewSharedEmails: cmsReviewSharedEmails,
+                  cmsReviewSharedEmails,
                   cmsReviewHelpEmailAddress,
                   cmsRateHelpEmailAddress,
                   cmsDevTeamHelpEmailAddress,
-                  ratesReviewSharedEmails: ratesReviewSharedEmails,
+                  ratesReviewSharedEmails,
               })
             : newSESEmailer({
-                  emailSource: emailSource,
+                  emailSource,
                   stage: stageName,
                   baseUrl: applicationEndpoint,
-                  cmsReviewSharedEmails: cmsReviewSharedEmails,
+                  cmsReviewSharedEmails,
                   cmsReviewHelpEmailAddress,
                   cmsRateHelpEmailAddress,
                   cmsDevTeamHelpEmailAddress,
-                  ratesReviewSharedEmails: ratesReviewSharedEmails,
+                  ratesReviewSharedEmails,
               })
 
     // Resolvers are defined and tested in the resolvers package
