@@ -5,10 +5,7 @@ import { Parser, transforms } from 'json2csv'
 import { HealthPlanRevisionTable } from '@prisma/client'
 import { ProgramArgType } from '../../../app-web/src/common-code/healthPlanFormDataType/State'
 import { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
-import {
-    base64ToDomain,
-    protoToBase64,
-} from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import statePrograms from '../data/statePrograms.json'
 
 type RevisionWithDecodedProtobuf = {
@@ -33,9 +30,7 @@ const decodeRevisions = (
     return revisions.map((revision) => {
         return {
             ...revision,
-            formDataProto: base64ToDomain(
-                protoToBase64(revision.formDataProto)
-            ),
+            formDataProto: toDomain(revision.formDataProto),
         }
     })
 }
