@@ -22,10 +22,9 @@ export const main: APIGatewayProxyHandler = async () => {
 
     const dbConnectionURL: string = dbConnResult
 
-    let schemaMigration: Buffer
     try {
         // Aurora can have long cold starts, so we extend connection timeout on migrates
-        schemaMigration = execSync(
+        execSync(
             `${process.execPath} /opt/nodejs/node_modules/prisma/build/index.js migrate deploy --schema=/opt/nodejs/prisma/schema.prisma`,
             {
                 env: {
@@ -46,8 +45,6 @@ export const main: APIGatewayProxyHandler = async () => {
             },
         }
     }
-
-    console.log(schemaMigration.toString('utf8'))
 
     try {
         const migrator = newDBMigrator(dbConnectionURL)
