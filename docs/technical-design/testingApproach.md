@@ -2,6 +2,8 @@
 
 ## Backend API Tests
 
+These tests are written using Jest.
+
 -   Write most tests at the API request layer.
     -   A test makes API requests and makes assertions about the responses
     -   We don’t mock the database, it’s behavior is pretty crucial to the functioning of the app
@@ -11,24 +13,20 @@
 
 ## Frontend Component Tests
 
-These tests are written using Jest and Testing Library.
+These tests are written using Jest and Testing Library. We test all our individual components that are big enough to be in Storybook and focus on assertions that confirm that elements render as expect given different sets of props and user interactions.
 
-We test all our individual components that are big enough to be in Storybook
+Example of standard tests for a new form page.
 
--   Assert that things render the expected way given different props
-
-We test every page of our form as well:
-
--   Test that given initial values, the correct values are displayed in fields
--   Test validations run, given some values, does the right error text render
--   Test conditional questions display correctly
+-   Test that for each of the given initial values, the correct values are displayed in fields
+-   Test that the form validations run, given some values, the right error renders
+-   Test that conditional questions display correctly
     -   E.g. if you select “other” is the “other” field displayed?
 -   Test accessibility actions work
     -   E.g. AX focus changes on error
 
 ## Cypress Integration Tests
 
-These tests run against a fully deployed version of the app. Tests that require moving around between different pages of the app, which would require extensive fragile mocking as component tests, should be done here
+These end to end tests are written using Cypress and Cypress Testing Library. They are run against a fully deployed version of the app, specifically for test cases that require moving around between different pages, users, and states of the application. While extensive fragile mocking as component tests, should be done here
 
 -   Test that filling out the form saves and reloads data correctly
 -   Test navigating between different pages saves data correctly
@@ -43,3 +41,8 @@ A Smoke Test:
 
 -   One test that hits all the various components of the app to make sure they are configured correctly
 -   We will use this in our deploy process as a gate between environments
+
+
+## Automated Testing in CI/CD
+
+[ADR 006](adr/006-automated-testing-approach.md) covers our automated testing approach.
