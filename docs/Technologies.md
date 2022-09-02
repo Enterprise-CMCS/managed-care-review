@@ -1,37 +1,91 @@
-# Guidewire Technology
+# Technology
 
-These are all pieces of technology we rely on with resources to help learn them.
+MC-Review is built on Serverless architecture (services deployed as AWS Lambdas) with a React client, Node server, and GraphQL as the api protocol. PostgresAurora is used as the database. The codebase is written primarily in Typescript. Additional technologies of interest are listed below.
+]
 
-## Prisma
+## User authentication
 
-An ORM for Typescript + Postgres. We define the tables and relationships we want in our database in our /services/app-api/prisma/schema.prisma file. Prisma generates a typescript client for making queries as well as migrations for changing our database to match the desired state.
+## Amplify and Cognito
 
--   https://www.prisma.io
--   https://www.prisma.io/docs/concepts/components/prisma-schema
--   https://www.prisma.io/docs/guides/database/developing-with-prisma-migrate
--   https://www.prisma.io/docs/concepts/components/prisma-client
+[Amplify](https://docs.amplify.aws/) is the tool we use for determining authentication permissions via AWS Cognito. The initial authentication is handled through a third party (CMS IDM system) after login all subsequent calls to AWS are mediated by Amplify. Amplify is used across the stack to authenticate things like API calls and s3 uploads.
 
-## React Testing Library
+## Database
 
-Testing library is a javascript test framework for DOM based tests. It lets us write tests where we render into the DOM, then find and interact with elements there like a user would. The library isn't huge so the docs are very accessible.
+### Prisma
 
-https://testing-library.com/docs/
+[Prisma](https://www.prisma.io) is an ORM for Postgres databases. Prisma generates a typescript [client](https://www.prisma.io/docs/concepts/components/prisma-client) for making queries as well as [migrations](https://www.prisma.io/docs/guides/database/developing-with-prisma-migrate) for changing our database to match the desired state.
 
-the expect matchers are from jest-dom: https://github.com/testing-library/jest-dom#custom-matchers
-
-## Protobuf
+### Protobuf
 
 Protobuf is a tool for serializing key-value data. Designed for API requests, the serialized format is space efficient and typed. We're using it to encode form data and save it in our database in a single column. Our protobuf schema is located in /services/app-proto/src/state_submission.proto. We serialize our domain models UnlockedHealthPlanFormDataType and LockedHealthPlanFormDataType into byte arrays which we write and read from postgres.
 
-## Apollo Client
+## API handling
 
-This is a complicated tool. It handles all the GraphQL operations from the client side, and caches the data locally. The docs are good but it's complicated so building stuff and reading the docs at the same time is the most helpful. There are helpful debugging tools for chrome, pretty much required when getting into the nitty gritty of caching behavior.
+### GraphQL 
 
-### cypress
+[GraphQL](https://graphql.org/learn/) is a strictly typed protocol built on top of HTTP that exposes your API as a graph of related entities. It uses a schema to define the API and excels in providing easy retrieval of related entities along with any request (see [Queries](https://graphql.org/learn/queries/)).
 
-We have end to end testing (in the live browser) with [cypress](https://www.cypress.io/). This is configured in the main application `/cypress`.
+### Apollo Server
 
-### pa11y
+[Apollo Server](https://www.apollographql.com/docs/apollo-server/) is the server for our GraphQL API. GraphQL is a schema based, so Apollo Server, reads the schema, sets up the various GraphQL mutations and queries behind the /graphql endpoint and interacts both with auth and with the database to return proper data to our users.
+
+### Apollo Client
+
+[Apollo Client](https://www.apollographql.com/docs/react/) is a state management library for data coming in from GraphQL to the frontend. It handles all the GraphQL operations from the client side, and caches the data locally. Their documentation is extensive and developer tooling is available to assist in debugging requests and cacheing.
+
+### GraphQL Code Generator
+
+[GraphQl Code Generator](https://www.the-guild.dev/graphql/codegen/) compiles typescript files for our API giving us the benefit of typing and more confidence in the types of data in our requests.
+
+## Monitoring
+
+### New Relic
+
+New Relic is used for endpoint monitoring and to observe Open Telemetry data in deployed environments. Read more in [Monitoring](../README.md#monitoring).
+
+### Open Telemetry
+
+Open Telemetry (OTEL) is a ecosystem of tools for collecting data about an application and its services. It provides a standard way to instrument code and is vendor agnostic. We send our OTEL data to New Relic where it helps us assemble tracing of all of our requests and record errors.
+
+### Jaeger
+
+[Jaeger](https://www.jaegertracing.io/) is used to observe Open Telemetry data in local dev. Read more in the [Jaeger docs](https://www.jaegertracing.io/docs/1.35/getting-started/) or visit port [16686](http://localhost:16686)) on local dev.
+
+## Web Application - User Interface and Design
+
+### Create React App
+
+[Create React App](https://facebook.github.io/create-react-app) builds and configures our React client, including typescripts, styles, and static assets. See also [react-scripts](https://github.com/facebook/create-react-app/tree/master/packages/react-scripts).
+
+### React Router
+
+[React Router](https://reactrouter.com/) is a React-based tool for declarative routing, allowing us to configure routes with their associated URLs, handle links and navigation within the application, and use data parameters in our urls successfully.
+
+### Formik
+
+[Formik](https://formik.org/docs/overview) is a React-based tool we use for web form development. It holds key information about the current state of a form on the page in a shared context, which makes validations and conditional logic within the form much simpler to maintain.
+
+### United States Web Design System (USWDS)
+
+The [USWDS United States Web Design System](https://designsystem.digital.gov/) is the standard for federal government web design. It used to provide the main scss classes across the application, along with [`@trussworks/react-uswds`](https://github.com/trussworks/react-uswds) as the component library.
+
+## Testing
+
+More about the MC-Review testing approach can be found in [here](technical-design/testingApproach.md).
+
+### Jest
+
+[Jest](https://jestjs.io/) is a test runner and framework used for unit tests across the entire codebase.
+
+### Cypress
+
+[Cypress](https://www.cypress.io/) is a test runner and framework for end to end testing in a live browser. This is configured in the main application `/cypress`. Test runs for the application can be seen in Github Actions or in [Cypress Dashboard](https://dashboard.cypress.io) for team developers.
+
+### React Testing Library
+
+[Testing library](https://testing-library.com) provides utility functions for testing DOM elements. We use the [version](https://testing-library.com/docs/react-testing-library/intro) specific to React. React Testing Library facilitates tests that find and interact with elements there like a user would. It also allows provides a useful set of [matchers](https://github.com/testing-library/jest-dom#custom-matchers).
+
+### Pa11y and Cypress-Audit
 
 `pa11y` is a tool for accessibility testing. For context, By default, pa11y uses the WCAG2AA standard.
 
@@ -39,23 +93,8 @@ If you would like to run pa11y against individual urls or with custom config as 
 
 To adjust warning levels, ignore certain types of warnings, or create actions (such as button clicks or user login) that happens in test runs reference the [pa11y configuration docs](https://github.com/pa11y/pa11y#configuration).
 
-#### pa11y with cypress-audit
-
 We are running pa11y on every page of our form inside of our Cypress tests using the cypress-audit library. This allows us to sign in and fill out the form using Cypress, and only rely on pa11y to scan those pages. This is also one place in our app where we have implemented a ratchet in CI. The issues present when we started testing with pa11y have been ignored, allowing CI to ensure that we aren't adding new errors in the future. Tickets have been filed to address those existing issues.
 
-### Jaeger
+### Storybook
 
-[Jaeger](https://www.jaegertracing.io/) is used to observe Open Telemetry data in local dev. Read more in the [Jaeger docs](https://www.jaegertracing.io/docs/1.35/getting-started/) or visit port [16686](http://localhost:16686)) on local dev.
-
-### New Relic
-
-New Relic is used for endpoint monitoring and to observe Open Telemetry data in deployed environments. Read more in [Monitoring](../README.md#monitoring).
-
-### Todo:
-
--   GraphQL
--   Apollo Server
--   GraphQL Code Generator
--   Typescript
--   Jest?
--   node?
+[Storybook](https://storybook.js.org/docs/react/get-started/introduction) is a tool for building and deploying UI components in a isolated sandbox. It is often used for testing and reviewing components in a design library. Any shared component of interest in MC-Review is built with a storybook file for easy reference and testing by the design team.
