@@ -40,13 +40,14 @@
         "json2csv": "^5.0.7",
         "launchdarkly-node-server-sdk": "6.4.2",
         "neverthrow": "^4.2.2",
+        "prisma": "^4.0.0",
+        "@prisma/client": "^4.2.1",
         "protobufjs": "^6.11.2",
         "request": "^2.88.2",
         "uuid": "^8.3.2",
         "zod": "^3.11.6"
     },
     "devDependencies": {
-        "@prisma/client": "^4.2.1",
         "@types/archiver": "^5.1.1",
         "@types/aws-lambda": "^8.10.83",
         "@types/glob": "^7.2.0",
@@ -68,7 +69,6 @@
         "jest-raw-loader": "^1.0.1",
         "lint-staged": "^13.0.1",
         "prettier": "^2.4.1",
-        "prisma": "^4.0.0",
         "serverless": "^3.19.0",
         "serverless-associate-waf": "^1.2.1",
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
