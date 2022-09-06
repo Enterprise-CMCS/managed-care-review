@@ -27,7 +27,7 @@ Usage:
 # run against db running at DATABASE_URL
 npx node ./protoMigrations/build/migrate_protos.js db
 
-# run against a directory of .proto files (npx runs as if from the app-api directory)
+# run against a directory of .proto files (npx runs as if from the app-proto directory)
 npx node ./protoMigrations/build/migrate_protos.js files ../app-web/src/common-code/proto/healthPlanFormDataProto/testData
 
 ```

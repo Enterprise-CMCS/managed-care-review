@@ -1,17 +1,31 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
+import { RDS } from 'aws-sdk'
 import { execSync } from 'child_process'
-import { getPostgresURL } from './configuration'
+import { getDBClusterID, getPostgresURL } from './configuration'
 import {
     migrate,
     newDBMigrator,
 } from '../../../app-proto/protoMigrations/lib/migrator'
 
 export const main: APIGatewayProxyHandler = async () => {
+    // get the relevant env vars and check that they exist.
     const dbURL = process.env.DATABASE_URL
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
+    // stage is either set in lambda env or we can set to local for local dev
+    const stage = process.env.stage ?? 'local'
 
     if (!dbURL) {
         throw new Error('Init Error: DATABASE_URL is required to run app-api')
+    }
+
+    if (!secretsManagerSecret) {
+        throw new Error(
+            'Init Error: SECRETS_MANAGER_SECRET is required to run postgres migrate'
+        )
+    }
+
+    if (!stage) {
+        throw new Error('Init Error: STAGE not set in environment')
     }
 
     const dbConnResult = await getPostgresURL(dbURL, secretsManagerSecret)
@@ -39,6 +53,38 @@ export const main: APIGatewayProxyHandler = async () => {
             body: JSON.stringify({
                 code: 'SCHEMA_MIGRATION_FAILED',
                 message: 'Could not migrate the database schema: ' + err,
+            }),
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
+            },
+        }
+    }
+
+    // take a snapshot of the DB before running data migration
+    const dbClusterId = await getDBClusterID(secretsManagerSecret)
+    if (dbClusterId instanceof Error) {
+        console.error('Init Error: failed to get db cluster ID, ', dbClusterId)
+        throw dbClusterId
+    }
+
+    const snapshotID = stage + '-' + Date.now()
+    const params = {
+        DBClusterIdentifier: dbClusterId,
+        DBClusterSnapshotIdentifier: snapshotID,
+    }
+    try {
+        const rds = new RDS({ apiVersion: '2014-10-31' })
+        rds.createDBClusterSnapshot(params)
+    } catch (err) {
+        console.log(err)
+        return {
+            statusCode: 400,
+            body: JSON.stringify({
+                code: 'DB_SNAPSHOT_FAILED',
+                message:
+                    'Could not create a snapshot of the DB before migration: ' +
+                    err,
             }),
             headers: {
                 'Access-Control-Allow-Origin': '*',
