@@ -148,6 +148,7 @@ functions:
     handler: src/handlers/csv.main
     events:
       - schedule: rate(20 minutes)
+    timeout: 60
 
   reports:
     handler: src/handlers/reports.main
