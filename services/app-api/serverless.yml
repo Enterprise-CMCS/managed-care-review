@@ -147,7 +147,7 @@ functions:
   csv:
     handler: src/handlers/csv.main
     events:
-      schedule: rate(1 minute)
+      - schedule: rate(1 minute)
 
   reports:
     handler: src/handlers/reports.main
