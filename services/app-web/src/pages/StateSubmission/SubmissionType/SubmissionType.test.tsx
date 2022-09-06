@@ -145,7 +145,9 @@ describe('SubmissionType', () => {
         )
 
         expect(
-            await screen.getByRole('combobox', { name: 'programs (required)' })
+            await screen.getByRole('combobox', {
+                name: 'Programs this contract action covers (required)',
+            })
         ).toBeInTheDocument()
     })
 

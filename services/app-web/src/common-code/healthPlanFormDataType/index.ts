@@ -39,7 +39,7 @@ export {
     programNames,
     packageName,
     generateRateName,
-    removeRateRelatedDocuments,
+    convertRateSupportingDocs,
     removeRatesData,
 } from './healthPlanFormData'
 
