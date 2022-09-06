@@ -144,6 +144,11 @@ functions:
           method: get
           cors: true
 
+  csv:
+    handler: src/handler/csv.main
+    events:
+      schedule: rate(1 minute)
+
   reports:
     handler: src/handlers/reports.main
     events:
