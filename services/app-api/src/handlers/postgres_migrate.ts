@@ -22,6 +22,7 @@ export const main: APIGatewayProxyHandler = async () => {
 
     const dbConnectionURL: string = dbConnResult
 
+    // run the schema migration. this will add any new tables or fields from schema.prisma to postgres
     try {
         // Aurora can have long cold starts, so we extend connection timeout on migrates
         execSync(
@@ -46,6 +47,7 @@ export const main: APIGatewayProxyHandler = async () => {
         }
     }
 
+    // run the data migration. this will run any data changes to the protobufs stored in postgres
     try {
         const migrator = newDBMigrator(dbConnectionURL)
         await migrate(migrator, '/opt/nodejs/healthPlanFormDataMigrations')
