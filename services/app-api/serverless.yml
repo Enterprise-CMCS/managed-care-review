@@ -145,7 +145,7 @@ functions:
           cors: true
 
   csv:
-    handler: src/handler/csv.main
+    handler: src/handlers/csv.main
     events:
       schedule: rate(1 minute)
 
