@@ -10,5 +10,8 @@ export async function getAllRevisions(
 ): Promise<HealthPlanRevisionTable[] | StoreError> {
     const allRevisions: HealthPlanRevisionTable[] =
         await client.healthPlanRevisionTable.findMany()
+    if (allRevisions instanceof Error) {
+        console.error('getAllRevisions error:', allRevisions)
+    }
     return allRevisions
 }

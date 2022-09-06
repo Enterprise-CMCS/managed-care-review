@@ -62,6 +62,7 @@ export const main: Handler = async () => {
     const dbURL = process.env.DATABASE_URL
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
     if (!dbURL) {
+        console.error('DATABASE_URL not set')
         throw new Error('Init Error: DATABASE_URL is required to run app-api')
     }
 
@@ -77,6 +78,7 @@ export const main: Handler = async () => {
     const result: HealthPlanRevisionTable[] | StoreError =
         await store.getAllRevisions()
     if (isStoreError(result)) {
+        console.error('Error getting revisions from db')
         throw new Error('Error getting records; cannot generate report')
     }
     const allDecodedRevisions: RevisionWithDecodedProtobuf[] =
@@ -85,6 +87,7 @@ export const main: Handler = async () => {
     const bucket = [] as RevisionWithDecodedProtobuf[]
     allDecodedRevisions.forEach((revision) => {
         if (revision.formDataProto instanceof Error) {
+            console.error('Error decoding revision')
             throw new Error(`Error generating reports array`)
         } else {
             bucket.push(revision)
