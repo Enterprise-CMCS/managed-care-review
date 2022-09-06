@@ -147,7 +147,10 @@ functions:
   csv:
     handler: src/handlers/csv.main
     events:
-      - schedule: rate(20 minutes)
+      - schedule: rate(5 minutes)
+    layers:
+      - !Ref PrismaClientEngineLambdaLayer
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-2-0:1
     timeout: 60
 
   reports:
