@@ -14,7 +14,9 @@ import './commands'
 import '@cypress/code-coverage/support'
 import './loginCommands'
 import './stateSubmissionFormCommands'
-import './submissionCommands'
+import './dashboardCommands'
+import './navigateCommands'
+
 type FormButtonKey =
     | 'CONTINUE_FROM_START_NEW'
     | 'CONTINUE'
@@ -50,8 +52,16 @@ declare global {
                 success?: boolean,
                 resubmission?: boolean
             ): void
-            navigateForm(buttonName: FormButtonKey, waitForLoad?: boolean): void
-            navigateToSubmissionByUserInteraction(testId: string): void
+
+            // navigate commands
+            navigateFormByButtonClick(
+                buttonName: FormButtonKey,
+                waitForLoad?: boolean
+            ): void
+            navigateFormByDirectLink(url: string, waitForLoad?: boolean): void
+
+            //dashboard commands
+            clickSubmissionLink(testId: string): void
         }
     }
 }
