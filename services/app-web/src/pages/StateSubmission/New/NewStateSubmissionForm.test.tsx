@@ -41,7 +41,7 @@ describe('NewStateSubmissionForm', () => {
         ).toBeInTheDocument()
 
         const comboBox = await screen.findByRole('combobox', {
-            name: 'programs (required)',
+            name: 'Programs this contract action covers (required)',
         })
         await userEvent.click(comboBox)
 
