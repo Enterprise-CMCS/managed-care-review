@@ -26,39 +26,35 @@ type RevisionWithDecodedProtobuf = {
 /* formProtoData is an encoded protocal buffer in the db,
 so we decode it and put it back on the revision as readable data */
 const decodeRevisions = (
-    revisions: HealthPlanRevisionTable[]
+    revisions: HealthPlanRevisionTable[],
+    programList: ProgramArgType[]
 ): RevisionWithDecodedProtobuf[] => {
-    return revisions.map((revision) => {
-        return {
-            ...revision,
-            formDataProto: toDomain(revision.formDataProto),
-        }
+    const allRevisions = [] as RevisionWithDecodedProtobuf[]
+    revisions.forEach((revision) => {
+        let decodedRevision = {} as RevisionWithDecodedProtobuf
+        const decodedFormDataProto = toDomain(revision.formDataProto)
+        decodedRevision.formDataProto = decodedFormDataProto
+        /* We only store the program IDs in the db,
+        so we look up the program names and add them to the revision */
+        const listOfProgramNames = programList
+            .filter(
+                (p) =>
+                    !(decodedFormDataProto instanceof Error) &&
+                    decodedFormDataProto.programIDs.includes(p.id)
+            )
+            .map((p) => p.name)
+        decodedRevision.programNames = listOfProgramNames
+        decodedRevision = Object.assign(revision, decodedRevision)
+        allRevisions.push(decodedRevision)
     })
+    return allRevisions
 }
 
-/* We only store the program IDs in the db,
-so we look up the program names and add them to the revision */
-const decorateRevisionsWithProgramNames = (
-    revisions: RevisionWithDecodedProtobuf[]
-) => {
+export const main: Handler = async () => {
     const programList = [] as ProgramArgType[]
     statePrograms.states.forEach((state) => {
         programList.push(...state.programs)
     })
-    revisions.forEach((revision) => {
-        const names = programList
-            .filter(
-                (p) =>
-                    !(revision.formDataProto instanceof Error) &&
-                    revision.formDataProto.programIDs.includes(p.id)
-            )
-            .map((p) => p.name)
-        revision.programNames = names
-    })
-    return revisions
-}
-
-export const main: Handler = async () => {
     const dbURL = process.env.DATABASE_URL
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
     if (!dbURL) {
@@ -84,8 +80,10 @@ export const main: Handler = async () => {
         console.error('Error getting revisions from db')
         throw new Error('Error getting records; cannot generate report')
     }
-    const allDecodedRevisions: RevisionWithDecodedProtobuf[] =
-        decorateRevisionsWithProgramNames(decodeRevisions(result))
+    const allDecodedRevisions: RevisionWithDecodedProtobuf[] = decodeRevisions(
+        result,
+        programList
+    )
 
     const bucket = [] as RevisionWithDecodedProtobuf[]
     allDecodedRevisions.forEach((revision) => {
