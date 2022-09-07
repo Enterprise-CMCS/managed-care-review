@@ -65,6 +65,9 @@ export const main: Handler = async () => {
         console.error('DATABASE_URL not set')
         throw new Error('Init Error: DATABASE_URL is required to run app-api')
     }
+    if (!secretsManagerSecret) {
+        console.error('SECRETS_MANAGER_SECRET not set')
+    }
 
     const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
     if (pgResult instanceof Error) {
