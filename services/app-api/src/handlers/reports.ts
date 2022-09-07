@@ -49,7 +49,6 @@ const decodeRevisions = (
 }
 
 export const main: APIGatewayProxyHandler = async (context) => {
-    console.log('JJ CONTEXT', context)
     const programList = [] as ProgramArgType[]
     statePrograms.states.forEach((state) => {
         programList.push(...state.programs)
