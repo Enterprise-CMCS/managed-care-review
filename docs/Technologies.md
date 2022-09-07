@@ -1,11 +1,10 @@
 # Technology
 
 MC-Review is built on Serverless architecture (services deployed as AWS Lambdas) with a React client, Node server, and GraphQL as the api protocol. PostgresAurora is used as the database. The codebase is written primarily in Typescript. Additional technologies of interest are listed below.
-]
 
 ## User authentication
 
-## Amplify and Cognito
+### Amplify and Cognito
 
 [Amplify](https://docs.amplify.aws/) is the tool we use for determining authentication permissions via AWS Cognito. The initial authentication is handled through a third party (CMS IDM system) after login all subsequent calls to AWS are mediated by Amplify. Amplify is used across the stack to authenticate things like API calls and s3 uploads.
 
@@ -31,7 +30,7 @@ Protobuf is a tool for serializing key-value data. Designed for API requests, th
 
 ### Apollo Client
 
-[Apollo Client](https://www.apollographql.com/docs/react/) is a state management library for data coming in from GraphQL to the frontend. It handles all the GraphQL operations from the client side, and caches the data locally. Their documentation is extensive and developer tooling is available to assist in debugging requests and cacheing.
+[Apollo Client](https://www.apollographql.com/docs/react/) is a state management library for data coming in from GraphQL to the frontend. It handles all the GraphQL operations from the client side, and caches the data locally. This includes exporting a set of [built-in hooks](https://www.apollographql.com/docs/react/api/react/hooks/) for interacting with graphql requests. Developer tooling is available to assist in debugging requests and cacheing.
 
 ### GraphQL Code Generator
 
@@ -51,7 +50,7 @@ Open Telemetry (OTEL) is a ecosystem of tools for collecting data about an appli
 
 [Jaeger](https://www.jaegertracing.io/) is used to observe Open Telemetry data in local dev. Read more in the [Jaeger docs](https://www.jaegertracing.io/docs/1.35/getting-started/) or visit port [16686](http://localhost:16686)) on local dev.
 
-## Web Application - User Interface and Design
+## React Web Application
 
 ### Create React App
 
@@ -73,6 +72,10 @@ The [USWDS United States Web Design System](https://designsystem.digital.gov/) i
 
 More about the MC-Review testing approach can be found in [here](technical-design/testingApproach.md).
 
+### Launch Darkly
+
+[LaunchDarkly](https://launchdarkly.com/implementation/) is third party feature flag management tool that includes a online dashboard for viewing/auditing/updating flags and SDKs that are integrated into our codebase. The use of feature flag with LaunchDarkly allows us de-couple the act of delivering code from the act of enabling a new feature to subsets of users.
+
 ### Jest
 
 [Jest](https://jestjs.io/) is a test runner and framework used for unit tests across the entire codebase.
@@ -87,13 +90,7 @@ More about the MC-Review testing approach can be found in [here](technical-desig
 
 ### Pa11y and Cypress-Audit
 
-`pa11y` is a tool for accessibility testing. For context, By default, pa11y uses the WCAG2AA standard.
-
-If you would like to run pa11y against individual urls or with custom config as part of local development, consider installing plain ol' [pa11y](https://github.com/pa11y/pa11y) `yarn global add pa11y`. This allows you to do things like `pa11y --runner axe --runner htmlcs --standard WCAG2AAA http://localhost:3000`.
-
-To adjust warning levels, ignore certain types of warnings, or create actions (such as button clicks or user login) that happens in test runs reference the [pa11y configuration docs](https://github.com/pa11y/pa11y#configuration).
-
-We are running pa11y on every page of our form inside of our Cypress tests using the cypress-audit library. This allows us to sign in and fill out the form using Cypress, and only rely on pa11y to scan those pages. This is also one place in our app where we have implemented a ratchet in CI. The issues present when we started testing with pa11y have been ignored, allowing CI to ensure that we aren't adding new errors in the future. Tickets have been filed to address those existing issues.
+`pa11y` is a tool for accessibility testing. By default, pa11y uses the WCAG2AA standard. We are running pa11y on every page of our form using the cypress-audit library. This allows us to sign in and fill out the form using Cypress, and only rely on pa11y to scan those pages. This is also one place in our app where we have implemented a ratchet in CI. The issues present when we started testing with pa11y have been ignored, allowing CI to ensure that we aren't adding new errors in the future. Tickets have been filed to address those existing issues.
 
 ### Storybook
 
