@@ -26,7 +26,6 @@ describe('contacts', () => {
             cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/contacts`)
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
             cy.fillOutStateContact()
-            cy.findAllByLabelText('Name').eq(0).should('have.value')
             cy.navigateFormByButtonClick('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
 
@@ -70,7 +69,6 @@ describe('contacts', () => {
             })
             cy.fillOutStateContact()
             cy.fillOutActuaryContact()
-            cy.findAllByLabelText('Name').eq(0).should('have.value') 
             cy.navigateFormByButtonClick('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
 

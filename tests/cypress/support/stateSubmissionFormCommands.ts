@@ -246,7 +246,9 @@ Cypress.Commands.add('fillOutStateContact', () => {
     // Must be on '/submissions/:id/contacts'
     cy.findAllByLabelText('Name').eq(0).should('exist')
     cy.findAllByLabelText('Name').eq(0).type('State Contact Person')
-    cy.findAllByLabelText('Name').eq(0).should('have.value')
+    cy.findAllByLabelText('Name')
+        .eq(0)
+        .should('have.value', 'State Contact Person')
     cy.findAllByLabelText('Title/Role').eq(0).type('State Contact Title')
     cy.findAllByLabelText('Email').eq(0).type('statecontact@test.com')
     cy.findAllByTestId('errorMessage').should('have.length', 0)
