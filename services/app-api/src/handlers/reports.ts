@@ -110,6 +110,7 @@ export const main: APIGatewayProxyHandler = async (context) => {
         ],
     })
     const csv = await parser.parse(bucket)
+    console.info('csv: ', csv.substring(0, 10))
 
     return {
         statusCode: 200,
