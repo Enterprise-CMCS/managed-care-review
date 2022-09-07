@@ -244,7 +244,9 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
 
 Cypress.Commands.add('fillOutStateContact', () => {
     // Must be on '/submissions/:id/contacts'
+    cy.findAllByLabelText('Name').eq(0).should('exist')
     cy.findAllByLabelText('Name').eq(0).type('State Contact Person')
+    cy.findAllByLabelText('Name').eq(0).should('have.value')
     cy.findAllByLabelText('Title/Role').eq(0).type('State Contact Title')
     cy.findAllByLabelText('Email').eq(0).type('statecontact@test.com')
     cy.findAllByTestId('errorMessage').should('have.length', 0)
@@ -253,6 +255,7 @@ Cypress.Commands.add('fillOutStateContact', () => {
 Cypress.Commands.add('fillOutActuaryContact', () => {
     // Must be on '/submissions/:id/edit/contacts'
     // Must be a contract and rates submission
+    cy.findAllByLabelText('Name').eq(1).should('exist')
     cy.findAllByLabelText('Name').eq(1).type('Actuary Contact Person')
     cy.findAllByLabelText('Title/Role').eq(1).type('Actuary Contact Title')
     cy.findAllByLabelText('Email').eq(1).type('actuarycontact@test.com')
