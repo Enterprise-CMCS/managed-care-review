@@ -45,6 +45,7 @@ const decodeRevisions = (
         decodedRevision = Object.assign(revision, decodedRevision)
         allRevisions.push(decodedRevision)
     })
+    console.info('decodedRevision: ', allRevisions[0])
     return allRevisions
 }
 
@@ -69,6 +70,8 @@ export const main: APIGatewayProxyHandler = async (context) => {
             "Init Error: Postgres couldn't be configured in data exporter"
         )
         throw pgResult
+    } else {
+        console.info('Postgres configured in data exporter')
     }
 
     const store = NewPostgresStore(pgResult)
@@ -77,6 +80,8 @@ export const main: APIGatewayProxyHandler = async (context) => {
     if (isStoreError(result)) {
         console.error('Error getting revisions from db')
         throw new Error('Error getting records; cannot generate report')
+    } else {
+        console.info('Revisions retrieved from db', result[0])
     }
     const allDecodedRevisions: RevisionWithDecodedProtobuf[] = decodeRevisions(
         result,
@@ -92,6 +97,8 @@ export const main: APIGatewayProxyHandler = async (context) => {
             bucket.push(revision)
         }
     })
+
+    console.info('bucket: ', bucket[0])
 
     const parser = new Parser({
         transforms: [
