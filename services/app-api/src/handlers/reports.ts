@@ -114,13 +114,12 @@ export const main: APIGatewayProxyHandler = async () => {
 
     return {
         statusCode: 200,
-        contentType: 'application/octet-stream',
         body: csv,
         headers: {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Credentials': true,
             'Content-Disposition': 'attachment',
-            'Content-Type': 'application/octet-stream',
+            'Content-Type': 'text/csv',
         },
     }
 }
