@@ -49,7 +49,7 @@ const decodeRevisions = (
     return allRevisions
 }
 
-export const main: APIGatewayProxyHandler = async (context) => {
+export const main: APIGatewayProxyHandler = async () => {
     const programList = [] as ProgramArgType[]
     statePrograms.states.forEach((state) => {
         programList.push(...state.programs)
