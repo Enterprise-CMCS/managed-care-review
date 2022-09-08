@@ -4,7 +4,7 @@ This service compiles protobufs, with types, for use as the mc-review state subm
 
 [Protocol buffers](https://developers.google.com/protocol-buffers), also called protobufs, are Google's language-neutral, platform-neutral, extensible mechanism for serializing structured data.
 
-To read about the strategy behind using protobufs for encoding state submission data, see our ADRs on the subject: [Form Data Model Serialization](https://qmacbis.atlassian.net/wiki/spaces/OY2/pages/2760179717/008+-+Implemented+-+Form+Data+Model+Serialization) and [Decide on data serialization approach for submission data](https://qmacbis.atlassian.net/wiki/spaces/OY2/pages/2741501960/009+-+Implemented+-+Decide+on+data+serialization+approach+for+submission+data)
+To read about the strategy behind using protobufs for encoding state submission data, see our ADRs on the subject: [Form Data Model Serialization](../../docs/architectural-decision-records/008-form-data-serialization.md) and [Decide on data serialization approach for submission data](../../docs/architectural-decision-records/009-data-serialization-framework.md)
 
 In short: our submission form data is complex nested data that is slowly changing over time, needs to be able to read old versions, and is usually accessed as a single piece in the course of review. Protobuf is a well defined serialization format that gives us type and key name safety along with the ability to read old protos without blowing up. By storing that directly in postgres, we are able to keep all of our form data in one piece. We won't have to maintain migrations for every data model change and saving new versions of the proto is as simple as adding another row to the table.
 
