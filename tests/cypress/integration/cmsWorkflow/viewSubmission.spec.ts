@@ -41,6 +41,8 @@ describe('CMS user can view submission', () => {
         })
             .should('exist')
             .click()
+     cy.findByText('Medicaid and CHIP Managed Care Reporting and Review System')
+
     //  sign in CMS user 
     cy.logInAsCMSUser()
     cy.findByTestId('cms-dashboard-page').should('exist')
