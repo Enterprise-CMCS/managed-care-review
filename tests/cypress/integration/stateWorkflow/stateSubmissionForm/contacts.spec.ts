@@ -24,7 +24,7 @@ describe('contacts', () => {
 
             // On contacts page, fill out information and CONTINUE
             cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/contacts`)
-
+            cy.findByRole('heading', { level: 2, name: /Contacts/ })
             cy.fillOutStateContact()
             cy.navigateFormByButtonClick('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
@@ -63,7 +63,10 @@ describe('contacts', () => {
 
             // On contacts page, fill out information and CONTINUE
             cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/contacts`)
-
+            cy.findByRole('heading', {
+                level: 2,
+                name: /Contacts/,
+            })
             cy.fillOutStateContact()
             cy.fillOutActuaryContact()
             cy.navigateFormByButtonClick('CONTINUE')

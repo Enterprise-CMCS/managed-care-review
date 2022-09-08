@@ -40,6 +40,10 @@ Cypress.Commands.add(
             cy.findByTestId('state-submission-form-page').should('exist')
         } else if (buttonKey === 'CONTINUE') {
             if (waitForLoad) {
+            cy.findAllByTestId('errorMessage').should(
+                'have.length',
+                0
+            )
                 cy.wait('@updateHealthPlanFormDataMutation')
             }
             cy.findByTestId('state-submission-form-page').should('exist')
