@@ -1,8 +1,7 @@
 {
-    "extends": "../tsconfig.json",
+    "extends": "../../tsconfig.json",
     "compilerOptions": {
         "outDir": "./build",
-
         "baseUrl": "/",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
@@ -15,6 +14,5 @@
         "allowJs": true,
         "module": "commonjs",
         "lib": ["esnext"]
-    },
-    "include": ["migrate_protos.ts", "gen/healthPlanFormDataProto.d.ts", "gen/healthPlanFormDataProto.js", "healthPlanFormDataMigrations/*.ts"],
+    }
 }

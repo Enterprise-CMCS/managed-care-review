@@ -112,6 +112,13 @@ provider:
           Action:
             - ssm:GetParameter
           Resource: '*'
+        - Effect: 'Allow'
+          Action:
+            - rds:CreateDBClusterSnapshot
+            - rds:CreateDBSnapshot
+            - rds:CopyDBClusterSnapshot
+            - rds:CopyDBSnapshot
+          Resource: '*'
 
   environment:
     stage: ${sls:stage}
