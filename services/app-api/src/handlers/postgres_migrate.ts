@@ -61,36 +61,41 @@ export const main: APIGatewayProxyHandler = async () => {
         }
     }
 
-    // take a snapshot of the DB before running data migration
-    const dbClusterId = await getDBClusterID(secretsManagerSecret)
-    if (dbClusterId instanceof Error) {
-        console.error('Init Error: failed to get db cluster ID, ', dbClusterId)
-        throw dbClusterId
-    }
+    // take a snapshot of the DB before running data migration.
+    // don't take a snapshot if we're in a PR branch
+    if (['dev', 'val', 'prod', 'main'].includes(stage)) {
+        const dbClusterId = await getDBClusterID(secretsManagerSecret)
+        if (dbClusterId instanceof Error) {
+            console.error(
+                'Init Error: failed to get db cluster ID, ',
+                dbClusterId
+            )
+            throw dbClusterId
+        }
 
-    const snapshotID = stage + '-' + Date.now()
-    const params = {
-        DBClusterIdentifier: dbClusterId,
-        DBClusterSnapshotIdentifier: snapshotID,
-    }
-    try {
-        const rds = new RDS({ apiVersion: '2014-10-31' })
-        const output = await rds.createDBClusterSnapshot(params).promise()
-        console.log(output)
-    } catch (err) {
-        console.log(err)
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                code: 'DB_SNAPSHOT_FAILED',
-                message:
-                    'Could not create a snapshot of the DB before migration: ' +
-                    err,
-            }),
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
-            },
+        const snapshotID = stage + '-' + Date.now()
+        const params = {
+            DBClusterIdentifier: dbClusterId,
+            DBClusterSnapshotIdentifier: snapshotID,
+        }
+        try {
+            const rds = new RDS({ apiVersion: '2014-10-31' })
+            await rds.createDBClusterSnapshot(params).promise()
+        } catch (err) {
+            console.log(err)
+            return {
+                statusCode: 400,
+                body: JSON.stringify({
+                    code: 'DB_SNAPSHOT_FAILED',
+                    message:
+                        'Could not create a snapshot of the DB before migration: ' +
+                        err,
+                }),
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': true,
+                },
+            }
         }
     }
 
