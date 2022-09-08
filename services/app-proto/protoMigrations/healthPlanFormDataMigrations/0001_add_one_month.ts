@@ -1,4 +1,4 @@
-import { mcreviewproto } from '../gen/healthPlanFormDataProto'
+import { mcreviewproto } from '../../gen/healthPlanFormDataProto'
 
 /*
  * When we were encoding CalendarDates as js Date objects, we were writing those
