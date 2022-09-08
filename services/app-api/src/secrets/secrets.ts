@@ -7,18 +7,13 @@ interface APISecrets {
 
 async function FetchSecrets(
     secretManagerSecret: string
-): Promise<APISecrets | Error> {
+): Promise<Secret | Error> {
     const secretsResult = await getSecretValue(secretManagerSecret)
     if (secretsResult instanceof Error) {
         console.log('Error: Failed to get secrets', secretsResult)
         return new Error('Failed to talk to AWS SecretsManager')
     }
-
-    const pgConnectionURL = getConnectionURL(secretsResult)
-
-    return {
-        pgConnectionURL,
-    }
+    return secretsResult
 }
 
 interface Secret {
@@ -61,7 +56,7 @@ async function getSecretValue(
     return secret
 }
 
-export function getConnectionURL(secrets: Secret): string {
+function getConnectionURL(secrets: Secret): string {
     const postgresURL = `postgresql://${secrets.username}:${encodeURIComponent(
         secrets.password
     )}@${secrets.host}:${secrets.port}/${
@@ -71,4 +66,4 @@ export function getConnectionURL(secrets: Secret): string {
     return postgresURL
 }
 
-export { APISecrets, FetchSecrets }
+export { APISecrets, FetchSecrets, getConnectionURL }

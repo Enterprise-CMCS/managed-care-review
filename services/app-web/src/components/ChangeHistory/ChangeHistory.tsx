@@ -51,9 +51,15 @@ export const ChangeHistory = ({
         })
         return result
     }
-    const revisedItems = flattenedRevisions().map((r) => {
+
+    const revisionHistory = flattenedRevisions()
+
+    const revisedItems = revisionHistory.map((r) => {
         const isInitialSubmission = r.updatedReason === 'Initial submission'
         const isSubsequentSubmission = r.kind === 'submit'
+        // We want to know if this package has multiple submissions. To have multiple submissions, there must be minimum
+        // 3 revisions in revisionHistory the initial submission revision, unlock revision and resubmission revision.
+        const hasSubsequentSubmissions = revisionHistory.length >= 3
         return {
             title: (
                 <div>
@@ -64,12 +70,15 @@ export const ChangeHistory = ({
                     ET - {isSubsequentSubmission ? 'Submission' : 'Unlock'}
                 </div>
             ),
+            // Display this code if this is the initial submission. We only want to display the link of the initial submission
+            // only if there has been subsequent submissions. We do not want to display a link if the package initial
+            // submission was unlocked, but has not been resubmitted yet.
             content: isInitialSubmission ? (
                 <>
                     <span className={styles.tag}>Submitted by:</span>
                     <span> {r.updatedBy}</span>
                     <br />
-                    {r.revisionVersion && (
+                    {r.revisionVersion && hasSubsequentSubmissions && (
                         <Link
                             href={`/submissions/${submission.id}/revisions/${r.revisionVersion}`}
                             data-testid={`revision-link-${r.revisionVersion}`}

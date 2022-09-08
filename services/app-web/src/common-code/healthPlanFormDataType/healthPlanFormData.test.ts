@@ -6,11 +6,14 @@ import {
     mockStateSubmissionContractAmendment,
 } from '../../testHelpers/apolloHelpers'
 import {
+    convertRateSupportingDocs,
     generateRateName,
     hasValidSupportingDocumentCategories,
     HealthPlanFormDataType,
     LockedHealthPlanFormDataType,
     packageName,
+    removeRatesData,
+    UnlockedHealthPlanFormDataType,
 } from '.'
 import {
     hasValidContract,
@@ -499,11 +502,11 @@ describe('submission type assertions', () => {
             submission: {
                 ...mockContractAndRateSub,
                 rateType: undefined,
-				rateDateStart: '2021-04-22',
+                rateDateStart: '2021-04-22',
                 rateDateEnd: '2022-03-29',
-                rateDateCertified: '2021-05-23',                    
+                rateDateCertified: '2021-05-23',
                 rateAmendmentInfo: {
-    				effectiveDateStart: '2022-05-21',
+                    effectiveDateStart: '2022-05-21',
                     effectiveDateEnd: '2022-09-21',
                 },
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
@@ -542,4 +545,285 @@ describe('submission type assertions', () => {
             expect(generateRateName(submission, programs)).toMatch(expectedName)
         }
     )
+
+    const contractOnlyWithValidRateData: {
+        submission: UnlockedHealthPlanFormDataType
+        testDescription: string
+        expectedResult: Partial<UnlockedHealthPlanFormDataType> | Error
+    }[] = [
+        {
+            submission: {
+                ...mockContractAndRateSub,
+                documents: [
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: [
+                            'CONTRACT_RELATED' as const,
+                            'RATES_RELATED' as const,
+                        ],
+                    },
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also_2.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: [
+                            'RATES_RELATED' as const,
+                            'CONTRACT_RELATED' as const,
+                        ],
+                    },
+                    {
+                        name: 'rate_only_supporting_doc.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES_RELATED' as const],
+                    },
+                ],
+                rateType: 'NEW',
+                rateDateStart: new Date('2021/04/22'),
+                rateDateEnd: new Date('2022/03/29'),
+                rateDateCertified: new Date('2021/04/22'),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date('2022/05/21'),
+                    effectiveDateEnd: new Date('2022/09/21'),
+                },
+                rateCapitationType: 'RATE_RANGE',
+                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                rateDocuments: [
+                    {
+                        name: 'rateDocument.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+            },
+            testDescription: 'With all valid rate data ',
+            expectedResult: {
+                rateType: undefined,
+                rateDateCertified: undefined,
+                rateDateStart: undefined,
+                rateDateEnd: undefined,
+                rateCapitationType: undefined,
+                rateAmendmentInfo: undefined,
+                rateProgramIDs: [],
+                actuaryContacts: [],
+                documents: [
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED'],
+                    },
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also_2.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED'],
+                    },
+                    {
+                        name: 'rate_only_supporting_doc.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED'],
+                    },
+                ],
+                rateDocuments: [],
+            },
+        },
+        {
+            submission: {
+                ...mockContractAndRateSub,
+                documents: [
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: [
+                            'RATES_RELATED' as const,
+                            'CONTRACT_RELATED' as const,
+                        ],
+                    },
+                    {
+                        name: 'rate_only_supporting_doc.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES_RELATED' as const],
+                    },
+                ],
+                rateDocuments: [
+                    {
+                        name: 'rateDocument.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+            },
+            testDescription: 'With valid contract and rate related documents',
+            expectedResult: {
+                rateType: undefined,
+                rateDateCertified: undefined,
+                rateDateStart: undefined,
+                rateDateEnd: undefined,
+                rateCapitationType: undefined,
+                rateAmendmentInfo: undefined,
+                rateProgramIDs: [],
+                actuaryContacts: [],
+                documents: [
+                    {
+                        name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED' as const],
+                    },
+                    {
+                        name: 'rate_only_supporting_doc.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED' as const],
+                    },
+                ],
+                rateDocuments: [],
+            },
+        },
+        {
+            submission: {
+                ...mockContractAndRateSub,
+                documents: [
+                    {
+                        name: 'rate_only_supporting_doc.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES_RELATED' as const],
+                    },
+                ],
+                rateDocuments: [
+                    {
+                        name: 'rateDocument.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+            },
+            testDescription: 'With only valid rate related documents',
+            expectedResult: {
+                rateType: undefined,
+                rateDateCertified: undefined,
+                rateDateStart: undefined,
+                rateDateEnd: undefined,
+                rateCapitationType: undefined,
+                rateAmendmentInfo: undefined,
+                rateProgramIDs: [],
+                actuaryContacts: [],
+                documents: [
+                    {
+                        name: 'rate_only_supporting_doc.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['CONTRACT_RELATED'],
+                    },
+                ],
+                rateDocuments: [],
+            },
+        },
+    ]
+    test.each(contractOnlyWithValidRateData)(
+        'Remove rates data on CONTRACT_ONLY submission: $testDescription',
+        ({ submission, expectedResult }) => {
+            expect(removeRatesData(submission)).toEqual(
+                expect.objectContaining(expectedResult)
+            )
+        }
+    )
+
+    test('convertRateSupportingDocs does convert rate supporting documents to contract supporting', () => {
+        const documents = [
+            {
+                name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                s3URL: 'fakeS3URL',
+                documentCategories: [
+                    'CONTRACT_RELATED' as const,
+                    'RATES_RELATED' as const,
+                ],
+            },
+            {
+                name: 'contract_supporting_that_applies_to_a_rate_also_2.pdf',
+                s3URL: 'fakeS3URL',
+                documentCategories: [
+                    'RATES_RELATED' as const,
+                    'CONTRACT_RELATED' as const,
+                ],
+            },
+            {
+                name: 'contract_supporting_that_applies_to_a_rate_also_3.pdf',
+                s3URL: 'fakeS3URL',
+                documentCategories: ['CONTRACT_RELATED' as const],
+            },
+            {
+                name: 'rate_only_supporting_doc.pdf',
+                s3URL: 'fakeS3URL',
+                documentCategories: ['RATES_RELATED' as const],
+            },
+        ]
+
+        expect(convertRateSupportingDocs(documents)).toEqual([
+            {
+                name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                s3URL: 'fakeS3URL',
+                documentCategories: ['CONTRACT_RELATED'],
+            },
+            {
+                name: 'contract_supporting_that_applies_to_a_rate_also_2.pdf',
+                s3URL: 'fakeS3URL',
+                documentCategories: ['CONTRACT_RELATED'],
+            },
+            {
+                name: 'contract_supporting_that_applies_to_a_rate_also_3.pdf',
+                s3URL: 'fakeS3URL',
+                documentCategories: ['CONTRACT_RELATED'],
+            },
+            {
+                name: 'rate_only_supporting_doc.pdf',
+                s3URL: 'fakeS3URL',
+                documentCategories: ['CONTRACT_RELATED'],
+            },
+        ])
+    })
+
+    test('convertRateSupportingDocs throws error with CONTRACT or RATE documents', () => {
+        const contractDocument = [
+            {
+                name: 'contract_certification.pdf',
+                s3URL: 'fakeS3URL',
+                documentCategories: ['CONTRACT' as const],
+            },
+        ]
+
+        const rateDocument = [
+            {
+                name: 'rates_certification.pdf',
+                s3URL: 'fakeS3URL',
+                documentCategories: ['RATES' as const],
+            },
+        ]
+
+        const mixedDocuments = [
+            {
+                name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
+                s3URL: 'fakeS3URL',
+                documentCategories: [
+                    'CONTRACT_RELATED' as const,
+                    'RATES_RELATED' as const,
+                ],
+            },
+            {
+                name: 'rates_certification.pdf',
+                s3URL: 'fakeS3URL',
+                documentCategories: [
+                    'RATES' as const,
+                    'RATES_RELATED' as const,
+                ],
+            },
+            {
+                name: 'contract_certification.pdf',
+                s3URL: 'fakeS3URL',
+                documentCategories: [
+                    'CONTRACT' as const,
+                    'CONTRACT_RELATED' as const,
+                ],
+            },
+        ]
+
+        expect(() => convertRateSupportingDocs(contractDocument)).toThrow()
+        expect(() => convertRateSupportingDocs(rateDocument)).toThrow()
+        expect(() => convertRateSupportingDocs(mixedDocuments)).toThrow()
+    })
 })

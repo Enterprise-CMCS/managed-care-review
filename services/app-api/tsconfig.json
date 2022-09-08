@@ -12,5 +12,6 @@
         "resolveJsonModule": true,
         "module": "esnext",
         "lib": ["esnext"]
-    }
+    },
+    "include": ["src"]
 }

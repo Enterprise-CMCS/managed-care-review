@@ -1,5 +1,8 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import { UnlockedHealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
+import {
+    UnlockedHealthPlanFormDataType,
+    convertRateSupportingDocs,
+} from '../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     base64ToDomain,
     toDomain,
@@ -154,14 +157,14 @@ export function updateHealthPlanFormDataResolver(
         ]
         const unfixedFields = []
         for (const fixedField of fixedFields) {
-            console.log(
-                `ERRMOD ${fixedField}: old: ${previousFormData[fixedField]} new: ${unlockedFormData[fixedField]}`
-            )
             const prevVal = previousFormData[fixedField]
             const newVal = unlockedFormData[fixedField]
 
             if (prevVal instanceof Date && newVal instanceof Date) {
                 if (prevVal.getTime() !== newVal.getTime()) {
+                    console.log(
+                        `ERRMOD ${fixedField}: old: ${previousFormData[fixedField]} new: ${unlockedFormData[fixedField]}`
+                    )
                     unfixedFields.push(fixedField)
                 }
             } else {
@@ -169,6 +172,9 @@ export function updateHealthPlanFormDataResolver(
                     previousFormData[fixedField] !==
                     unlockedFormData[fixedField]
                 ) {
+                    console.log(
+                        `ERRMOD ${fixedField}: old: ${previousFormData[fixedField]} new: ${unlockedFormData[fixedField]}`
+                    )
                     unfixedFields.push(fixedField)
                 }
             }
@@ -186,6 +192,23 @@ export function updateHealthPlanFormDataResolver(
         }
 
         const editableRevision = planPackage.revisions[0]
+
+        // If CONTRACT_ONLY submission has supporting documents with RATES_RELATED category we convert this to CONTRACT_RELATED.
+        // This was done on the front end in FileUpload.tsx, but we are doing this here to convert these documents when
+        // the submission type has changed in order to save this across the forms because specifically the review and
+        // submit page, will not display documents that are RATE_RELATED under Contract Details sections when changing
+        // submission type to CONTRACT_ONLY.
+        if (
+            unlockedFormData.submissionType === 'CONTRACT_ONLY' &&
+            unlockedFormData.documents.some((document) =>
+                document.documentCategories.includes('RATES_RELATED')
+            )
+        ) {
+            const convertedDocs = convertRateSupportingDocs(
+                unlockedFormData.documents
+            )
+            unlockedFormData.documents = convertedDocs
+        }
 
         // save the new form data to the db
         const updateResult = await store.updateHealthPlanRevision(

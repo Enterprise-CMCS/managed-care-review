@@ -1,4 +1,7 @@
-import { UnlockedHealthPlanFormDataType } from './UnlockedHealthPlanFormDataType'
+import {
+    SubmissionDocument,
+    UnlockedHealthPlanFormDataType,
+} from './UnlockedHealthPlanFormDataType'
 import { ModifiedProvisions } from './ModifiedProvisions'
 import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import { HealthPlanFormDataType } from './HealthPlanFormDataType'
@@ -71,6 +74,26 @@ const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
                   )
             : validBaseRate
     }
+}
+
+//Returns boolean if package has any valid rate data
+const hasAnyValidRateData = (
+    sub: LockedHealthPlanFormDataType | UnlockedHealthPlanFormDataType
+): boolean => {
+    return (
+        sub.rateType !== undefined ||
+        sub.rateDateCertified !== undefined ||
+        sub.rateDateStart !== undefined ||
+        sub.rateDateEnd !== undefined ||
+        sub.rateCapitationType !== undefined ||
+        sub.rateAmendmentInfo !== undefined ||
+        sub.actuaryContacts !== undefined ||
+        (Array.isArray(sub.rateProgramIDs) && !!sub.rateProgramIDs.length) ||
+        sub.documents.some((document) =>
+            document.documentCategories.includes('CONTRACT_RELATED')
+        ) ||
+        (Array.isArray(sub.rateDocuments) && !!sub.rateDocuments.length)
+    )
 }
 
 const hasValidDocuments = (sub: LockedHealthPlanFormDataType): boolean => {
@@ -228,11 +251,50 @@ const generateRateName = (
     return rateName
 }
 
+const convertRateSupportingDocs = (
+    documents: SubmissionDocument[]
+): SubmissionDocument[] => {
+    if (
+        documents.some(
+            (document) =>
+                document.documentCategories.includes('CONTRACT') ||
+                document.documentCategories.includes('RATES')
+        )
+    ) {
+        const errorMessage =
+            'convertRateSupportingDocs does not support CONTRACT or RATES documents.'
+        console.error(errorMessage)
+        throw new Error(errorMessage)
+    }
+    return documents.map((document) => ({
+        ...document,
+        documentCategories: ['CONTRACT_RELATED'],
+    }))
+}
+
+const removeRatesData = (
+    pkg: UnlockedHealthPlanFormDataType
+): UnlockedHealthPlanFormDataType => {
+    pkg.rateType = undefined
+    pkg.rateDateCertified = undefined
+    pkg.rateDateStart = undefined
+    pkg.rateDateEnd = undefined
+    pkg.rateCapitationType = undefined
+    pkg.rateAmendmentInfo = undefined
+    pkg.actuaryContacts = []
+    pkg.rateProgramIDs = []
+    pkg.documents = convertRateSupportingDocs(pkg.documents)
+    pkg.rateDocuments = []
+
+    return pkg
+}
+
 export {
     hasValidContract,
     hasValidDocuments,
     hasValidSupportingDocumentCategories,
     hasValidRates,
+    hasAnyValidRateData,
     isContractOnly,
     isContractAndRates,
     isLockedHealthPlanFormData,
@@ -240,4 +302,6 @@ export {
     programNames,
     packageName,
     generateRateName,
+    convertRateSupportingDocs,
+    removeRatesData,
 }

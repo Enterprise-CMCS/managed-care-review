@@ -28,6 +28,11 @@ export const resubmitPackageCMSEmail = async (
         pkg,
         stateAnalystsEmails
     )
+
+    if (reviewerEmails instanceof Error) {
+        return reviewerEmails
+    }
+
     const packagePrograms = findPackagePrograms(pkg, statePrograms)
 
     if (packagePrograms instanceof Error) {

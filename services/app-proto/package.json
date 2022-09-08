@@ -5,8 +5,11 @@
     "description": "app-proto Typescript definitions and helpers",
     "scripts": {
         "generate-code": "yarn protogen",
-        "protogen": "./generate_proto_code",
+        "protogen": "yarn proto:compile && yarn proto:ts && yarn proto:copy-web",
         "protogen:watch": "find src | entr yarn protogen",
+        "proto:compile": "rm -rf gen && mkdir gen && pbjs -t static-module -w commonjs -o ./gen/healthPlanFormDataProto.js src/health_plan_form_data.proto",
+        "proto:ts": "pbts -o ./gen/healthPlanFormDataProto.d.ts ./gen/healthPlanFormDataProto.js",
+        "proto:copy-web": "rsync -av ./gen/ ../app-web/src/gen",
         "precommit": "lint-staged",
         "lint": "protolint lint ."
     },

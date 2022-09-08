@@ -5,6 +5,7 @@
         "moduleResolution": "node",
         "noFallthroughCasesInSwitch": true,
         "strict": true,
-        "useUnknownInCatchVariables": false
+        "useUnknownInCatchVariables": false,
+        "noErrorTruncation": true,
     }
 }

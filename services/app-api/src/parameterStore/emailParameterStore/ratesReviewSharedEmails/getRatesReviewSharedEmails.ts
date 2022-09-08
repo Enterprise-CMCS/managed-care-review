@@ -3,15 +3,22 @@ import { getParameterStore } from '../../awsParameterStore'
 export const getRatesReviewSharedEmails = async (): Promise<
     string[] | Error
 > => {
-    const ratesAddresses = await getParameterStore(
-        `/configuration/email/ratesAddresses`
-    )
+    const name = `/configuration/email/ratesAddresses`
+    const ratesAddresses = await getParameterStore(name)
+
     if (ratesAddresses instanceof Error) {
         return ratesAddresses
-    } else {
-        //Split string into array using ',' separator and trim each array item.
-        return ratesAddresses.split(',').map((email) => email.trim())
     }
+
+    const { type, value } = ratesAddresses
+
+    if (type !== 'StringList') {
+        const errorMessage = `Parameter store ${name} value of Type ${type} is not supported`
+        return new Error(errorMessage)
+    }
+
+    //Split string into array using ',' separator and trim each array item.
+    return value.split(',').map((email) => email.trim())
 }
 
 export const getRatesReviewSharedEmailsLocal = async (): Promise<

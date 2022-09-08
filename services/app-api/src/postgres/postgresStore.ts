@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, HealthPlanRevisionTable } from '@prisma/client'
 import {
     UnlockedHealthPlanFormDataType,
     HealthPlanFormDataType,
@@ -19,6 +19,7 @@ import {
 import { insertHealthPlanRevision } from './insertHealthPlanRevision'
 import { StoreError } from './storeError'
 import { updateHealthPlanRevision } from './updateHealthPlanRevision'
+import { getAllRevisions } from './getAllRevisions'
 
 type Store = {
     findPrograms: (
@@ -27,6 +28,8 @@ type Store = {
     ) => ProgramType[] | Error
 
     getStatePrograms: (stateCode: string) => ProgramType[] | Error
+
+    getAllRevisions: () => Promise<HealthPlanRevisionTable[] | StoreError>
 
     findHealthPlanPackage: (
         draftUUID: string
@@ -83,6 +86,7 @@ function NewPostgresStore(client: PrismaClient): Store {
             }),
         findPrograms: findPrograms,
         getStatePrograms: getStatePrograms,
+        getAllRevisions: () => getAllRevisions(client),
     }
 }
 

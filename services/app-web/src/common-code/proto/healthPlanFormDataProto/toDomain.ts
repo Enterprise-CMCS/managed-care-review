@@ -345,11 +345,14 @@ const toDomain = (
     } = formDataMessage
 
     // First things first, let's check the protoName and protoVersion
-    if (protoName !== 'STATE_SUBMISSION' && protoVersion !== 1) {
-        console.log(
+    if (protoName !== 'STATE_SUBMISSION') {
+        console.warn(
             `WARNING: We are unboxing a proto our code doesn't recognize:`,
             protoName,
             protoVersion
+        )
+        console.log(
+            'If the version is off this indicates we are loading a proto that has not been fully migrated.'
         )
     }
 
@@ -428,7 +431,7 @@ const toDomain = (
         rateDateCertified: protoDateToDomainCalendarDate(
             rateInfo?.rateDateCertified
         ),
-		rateProgramIDs: rateInfo?.rateProgramIds ?? [],
+        rateProgramIDs: rateInfo?.rateProgramIds ?? [],
         actuaryCommunicationPreference: enumToDomain(
             mcreviewproto.ActuaryCommunicationType,
             rateInfo?.actuaryCommunicationPreference

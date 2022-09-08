@@ -15,6 +15,10 @@ model HealthPlanPackageTable {
   revisions HealthPlanRevisionTable[]
 }
 
+model ProtoMigrationsTable {
+  migrationName String @id
+}
+
 model HealthPlanRevisionTable {
   id              String                 @id
   createdAt       DateTime
@@ -34,8 +38,4 @@ model State {
   name                        String
   latestStateSubmissionNumber Int                      @default(0)
   statePackages               HealthPlanPackageTable[]
-}
-
-model ProtoMigrationsTable {
-  migrationName String @id
 }
