@@ -44,7 +44,7 @@ New Relic is used for endpoint monitoring and to observe Open Telemetry data in 
 
 ### Open Telemetry
 
-Open Telemetry (OTEL) is a ecosystem of tools for collecting data about an application and its services. It provides a standard way to instrument code and is vendor agnostic. We send our OTEL data to New Relic where it helps us assemble tracing of all of our requests and record errors.
+Open Telemetry (OTEL) is an ecosystem of tools for collecting data about an application and its services. It provides a standard way to instrument code and is vendor agnostic. We send our OTEL data to New Relic where it helps us assemble tracing of all of our requests and record errors.
 
 ### Jaeger
 
@@ -54,7 +54,7 @@ Open Telemetry (OTEL) is a ecosystem of tools for collecting data about an appli
 
 ### Create React App
 
-[Create React App](https://facebook.github.io/create-react-app) builds and configures our React client, including typescripts, styles, and static assets. See also [react-scripts](https://github.com/facebook/create-react-app/tree/master/packages/react-scripts).
+[Create React App](https://facebook.github.io/create-react-app) compiles, builds and configures our React client, including scripts, styles, and static assets. See also [react-scripts](https://github.com/facebook/create-react-app/tree/master/packages/react-scripts).
 
 ### React Router
 
@@ -66,7 +66,7 @@ Open Telemetry (OTEL) is a ecosystem of tools for collecting data about an appli
 
 ### United States Web Design System (USWDS)
 
-The [USWDS United States Web Design System](https://designsystem.digital.gov/) is the standard for federal government web design. It used to provide the main scss classes across the application, along with [`@trussworks/react-uswds`](https://github.com/trussworks/react-uswds) as the component library.
+The [USWDS United States Web Design System](https://designsystem.digital.gov/) is the standard for federal government web design. It is used to provide the main scss classes across the application, along with [`@trussworks/react-uswds`](https://github.com/trussworks/react-uswds) as the component library.
 
 ## Testing
 
@@ -74,7 +74,7 @@ More about the MC-Review testing approach can be found in [here](technical-desig
 
 ### Launch Darkly
 
-[LaunchDarkly](https://launchdarkly.com/implementation/) is third party feature flag management tool that includes a online dashboard for viewing/auditing/updating flags and SDKs that are integrated into our codebase. The use of feature flag with LaunchDarkly allows us de-couple the act of delivering code from the act of enabling a new feature to subsets of users.
+[LaunchDarkly](https://launchdarkly.com/implementation/) is third party feature flag management tool that includes a online dashboard for viewing/auditing/updating flags and SDKs that are integrated into our codebase. The use of feature flags with LaunchDarkly allows us to de-couple the act of delivering code from the act of enabling a new feature to subsets of users.
 
 ### Jest
 
@@ -86,7 +86,7 @@ More about the MC-Review testing approach can be found in [here](technical-desig
 
 ### React Testing Library
 
-[Testing library](https://testing-library.com) provides utility functions for testing DOM elements. We use the [version](https://testing-library.com/docs/react-testing-library/intro) specific to React. React Testing Library facilitates tests that find and interact with elements there like a user would. It also allows provides a useful set of [matchers](https://github.com/testing-library/jest-dom#custom-matchers).
+[Testing library](https://testing-library.com) provides utility functions for testing DOM elements. We use the [version](https://testing-library.com/docs/react-testing-library/intro) specific to React. React Testing Library facilitates tests that find and interact with elements like a user would. It also provides a useful set of [matchers](https://github.com/testing-library/jest-dom#custom-matchers).
 
 ### Pa11y and Cypress-Audit
 

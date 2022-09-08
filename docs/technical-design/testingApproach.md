@@ -13,7 +13,7 @@ These tests are written using Jest.
 
 ## Frontend Component Tests
 
-These tests are written using Jest and Testing Library. We test all our individual components that are big enough to be in Storybook and focus on assertions that confirm that elements render as expect given different sets of props and user interactions.
+These tests are written using Jest and Testing Library. We test all our individual components that are big enough to be in Storybook and focus on assertions that confirm that elements render as expected given different sets of props and user interactions.
 
 Example of standard tests for a new form page.
 
@@ -26,7 +26,7 @@ Example of standard tests for a new form page.
 
 ## Cypress Integration Tests
 
-These end to end tests are written using Cypress and Cypress Testing Library. They are run against a fully deployed version of the app, specifically for test cases that require moving around between different pages, users, and states of the application. While extensive fragile mocking as component tests, should be done here
+These end to end tests are written using Cypress and Cypress Testing Library. They are run against a fully deployed version of the app, specifically for test cases that require moving around between different pages, users, and states of the application. In addition, tests that would require extensive mocking as Jest tests should be done with Cypress instead.
 
 -   Test that filling out the form saves and reloads data correctly
 -   Test navigating between different pages saves data correctly
