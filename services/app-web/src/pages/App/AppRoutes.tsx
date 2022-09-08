@@ -21,6 +21,7 @@ import { Landing } from '../Landing/Landing'
 import { NewStateSubmissionForm, StateSubmissionForm } from '../StateSubmission'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
+import { Reports } from '../../components/Reports/Reports'
 import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
 import { featureFlags } from '../../common-code/featureFlags'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
@@ -57,6 +58,7 @@ const StateUserRoutes = ({
                     element={<StateDashboard />}
                 />
                 <Route path={RoutesRecord.HELP} element={<Help />} />
+
                 <Route
                     path={RoutesRecord.SUBMISSIONS}
                     element={<StateDashboard />}
@@ -106,6 +108,7 @@ const CMSUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_REVISION}
                     element={<SubmissionRevisionSummary />}
                 />
+                <Route path={RoutesRecord.REPORTS} element={<Reports />} />
                 <Route path="*" element={<Error404 />} />
             </Routes>
         </AuthenticatedRouteWrapper>
