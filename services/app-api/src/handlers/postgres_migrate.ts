@@ -75,7 +75,7 @@ export const main: APIGatewayProxyHandler = async () => {
     }
     try {
         const rds = new RDS({ apiVersion: '2014-10-31' })
-        const output = rds.createDBClusterSnapshot(params)
+        const output = await rds.createDBClusterSnapshot(params).promise()
         console.log(output)
     } catch (err) {
         console.log(err)
