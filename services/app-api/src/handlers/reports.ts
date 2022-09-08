@@ -45,7 +45,6 @@ const decodeRevisions = (
         decodedRevision = Object.assign(revision, decodedRevision)
         allRevisions.push(decodedRevision)
     })
-    console.info('decodedRevision: ', allRevisions[0])
     return allRevisions
 }
 
@@ -80,8 +79,6 @@ export const main: APIGatewayProxyHandler = async () => {
     if (isStoreError(result)) {
         console.error('Error getting revisions from db')
         throw new Error('Error getting records; cannot generate report')
-    } else {
-        console.info('Revisions retrieved from db', result[0])
     }
     const allDecodedRevisions: RevisionWithDecodedProtobuf[] = decodeRevisions(
         result,
@@ -98,8 +95,6 @@ export const main: APIGatewayProxyHandler = async () => {
         }
     })
 
-    console.info('bucket: ', bucket[0])
-
     const parser = new Parser({
         transforms: [
             transforms.flatten({
@@ -110,7 +105,6 @@ export const main: APIGatewayProxyHandler = async () => {
         ],
     })
     const csv = await parser.parse(bucket)
-    console.info('csv: ', csv.substring(0, 10))
 
     return {
         statusCode: 200,
