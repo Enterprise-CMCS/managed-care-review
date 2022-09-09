@@ -4,7 +4,7 @@
  */
 export const featureFlags = {
     /*
-     Toggles the /health api endpoint
+     Toggles the site maintenance alert on the landing page
     */
     SITE_MAINTENANCE_BANNER: 'site-maintenance-banner',
     /*
