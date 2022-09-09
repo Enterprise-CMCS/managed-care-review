@@ -17,10 +17,7 @@ import { S3Provider } from '../contexts/S3Context'
 import { testS3Client } from './s3Helpers'
 import { S3ClientT } from '../s3'
 import * as LaunchDarkly from 'launchdarkly-react-client-sdk'
-import {
-    FeatureFlagTypes,
-    FlagValueTypes,
-} from '../common-code/featureFlags/flags'
+import { FeatureFlagTypes, FlagValueTypes } from '../common-code/featureFlags'
 
 /* Render */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types

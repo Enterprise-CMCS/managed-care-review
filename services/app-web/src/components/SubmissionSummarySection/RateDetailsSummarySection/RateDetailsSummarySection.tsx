@@ -47,8 +47,8 @@ export const RateDetailsSummarySection = ({
 
     //If rate program feature flag is off, then turn off displaying program list and omit from Yup schema.
     const showRatePrograms = ldClient?.variation(
-        featureFlags.RATE_CERT_PROGRAMS,
-        false
+        featureFlags.RATE_CERT_PROGRAMS.flag,
+        featureFlags.RATE_CERT_PROGRAMS.defaultValue
     )
 
     const rateName = generateRateName(submission, statePrograms)
