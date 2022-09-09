@@ -3,9 +3,6 @@ describe('rate details', () => {
         cy.stubFeatureFlags()
     })
     it('can navigate to and from rate details page', () => {0
-        // Toggle feature flag on
-        cy.interceptFeatureFlags({'rate-certification-programs': true})
-
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
@@ -90,6 +87,28 @@ describe('rate details', () => {
 
             cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
 
+        })
+    })
+
+    it('can get fill out rate details with rate-certification-program feature flag on', () => {
+        // Toggle feature flag on
+        cy.interceptFeatureFlags({'rate-certification-programs': true})
+
+        cy.logInAsStateUser()
+        cy.startNewContractAndRatesSubmission()
+
+        // Navigate to rate details page
+        cy.location().then((fullUrl) => {
+            const { pathname } = fullUrl
+            const pathnameArray = pathname.split('/')
+            const draftSubmissionId = pathnameArray[2]
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/rate-details`)
+
+            cy.fillOutAmendmentToPriorRateCertification()
+
+            // Navigate to contacts page by clicking continue
+            cy.navigateFormByButtonClick('CONTINUE')
+            cy.findByRole('heading', { level: 2, name: /Contacts/ })
         })
     })
 })
