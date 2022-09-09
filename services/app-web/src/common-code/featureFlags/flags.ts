@@ -6,6 +6,10 @@ export const featureFlags = {
     /*
      Toggles the /health api endpoint
     */
+    SITE_MAINTENANCE_BANNER: 'site-maintenance-banner',
+    /*
+     Toggles the /health api endpoint
+    */
     API_ENABLE_HEALTH_ENDPOINT: 'enable-health-endpoint',
     /*
      Enables the modal that alerts the user to an expiring session
