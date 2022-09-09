@@ -1,4 +1,7 @@
 describe('dashboard', () => {
+    beforeEach(() => {
+        cy.stubFeatureFlags()
+    })
     it('can navigate to and from dashboard page', () => {
         cy.logInAsStateUser()
         cy.findByRole('heading', { level: 1, name: /Dashboard/ })

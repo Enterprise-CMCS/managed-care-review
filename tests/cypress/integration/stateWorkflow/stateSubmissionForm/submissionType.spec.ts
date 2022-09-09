@@ -1,4 +1,7 @@
 describe('submission type', () => {
+    beforeEach(() => {
+        cy.stubFeatureFlags()
+    })
     it('can navigate to and from type page', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()

@@ -1,4 +1,7 @@
 describe('contract details', () => {
+    beforeEach(() => {
+        cy.stubFeatureFlags()
+    })
     it('can navigate to and from contract details page', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()

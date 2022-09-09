@@ -1,4 +1,7 @@
 describe('promote', () => {
+    beforeEach(() => {
+        cy.stubFeatureFlags()
+    })
     it('can navigate to landing page', () => {
         cy.visit('/')
         cy.get('#App').should('exist')
