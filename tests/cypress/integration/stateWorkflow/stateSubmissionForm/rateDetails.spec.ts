@@ -1,5 +1,12 @@
+
 describe('rate details', () => {
-    it('can navigate to and from rate details page', () => {
+    beforeEach(() => {
+        cy.stubFeatureFlags()
+    })
+    it('can navigate to and from rate details page', () => {0
+        // Toggle feature flag on
+        cy.interceptFeatureFlags({'rate-certification-programs': true})
+
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
@@ -11,7 +18,7 @@ describe('rate details', () => {
             cy.visit(`/submissions/${draftSubmissionId}/edit/rate-details`)
 
             // Navigate to contract details page by clicking back
-           cy.navigateForm('BACK')
+            cy.navigateForm('BACK')
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
 
             // Navigate to rate details page
