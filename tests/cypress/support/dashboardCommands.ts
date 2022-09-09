@@ -1,7 +1,7 @@
 import { aliasQuery } from '../utils/graphql-test-utils'
 
 Cypress.Commands.add(
-    'navigateToSubmissionByUserInteraction',
+    'clickSubmissionLink',
     (testId: string) => {
         cy.intercept('POST', '*/graphql', (req) => {
             aliasQuery(req, 'fetchHealthPlanPackage')

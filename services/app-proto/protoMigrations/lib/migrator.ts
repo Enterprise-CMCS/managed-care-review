@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 
-import * as genproto from '../../app-web/src/gen/healthPlanFormDataProto'
+import * as genproto from '../../gen/healthPlanFormDataProto'
 
 import { PrismaClient } from '@prisma/client'
 
@@ -28,7 +28,7 @@ interface MigrationType {
 }
 
 // MigratorType is a type covering our two different migrators
-interface MigratorType {
+export interface MigratorType {
     listMigrationsThatHaveRun(): Promise<string[]>
     runMigrations(migrations: MigrationType[]): Promise<void>
 }
@@ -99,7 +99,7 @@ export function newDBMigrator(dbConnString: string): MigratorType {
     }
 }
 
-function newFileMigrator(protoPath: string): MigratorType {
+export function newFileMigrator(protoPath: string): MigratorType {
     return {
         async listMigrationsThatHaveRun() {
             // determine migrations to run
@@ -176,9 +176,12 @@ function newFileMigrator(protoPath: string): MigratorType {
     }
 }
 
-export async function migrate(migrator: MigratorType) {
+export async function migrate(migrator: MigratorType, path?: string) {
+    const migrationPath =
+        path ?? './protoMigrations/build/healthPlanFormDataMigrations'
+
     const migrationFiles = fs
-        .readdirSync('./protoMigrations/build/healthPlanFormDataMigrations')
+        .readdirSync(migrationPath)
         .filter((m) => m.endsWith('.js') && !m.endsWith('.test.js'))
 
     const migrations: MigrationType[] = []
@@ -214,38 +217,3 @@ export async function migrate(migrator: MigratorType) {
         await migrator.runMigrations(migrationsToRun)
     }
 }
-
-async function main() {
-    const args = process.argv.slice(2)
-
-    const usage = `USAGE: 
-./migrate_protos.js db :: run migrations against all protos in the db
-./migrate_protos.js files [PATH TO .PROTOS] :: run migrations against all protos in given directory`
-
-    const connectionType =
-        args.length > 0 && args[0] === 'db' ? 'DATABASE' : 'FILES'
-
-    let migrator: MigratorType | undefined = undefined
-    if (connectionType === 'DATABASE') {
-        const dbConn = process.env.DATABASE_URL
-        if (!dbConn) {
-            throw new Error('DATABASE_URL must be defined in env')
-        }
-
-        migrator = newDBMigrator(dbConn)
-    } else if (connectionType === 'FILES') {
-        if (args.length !== 2 || args[0] !== 'files') {
-            console.log(usage)
-            process.exit(1)
-        }
-        const pathToProtos = args[1]
-        migrator = newFileMigrator(pathToProtos)
-    } else {
-        console.log(usage)
-        throw new Error('unimplemented migrator')
-    }
-
-    await migrate(migrator)
-}
-
-void main()
