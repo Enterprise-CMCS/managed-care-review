@@ -59,11 +59,17 @@ function AuthProvider({
     )
     const [loginStatus, setLoginStatus] =
         useState<LoginStatusType>('LOGGED_OUT')
+    const ldClient = useLDClient()
     const navigate = useNavigate()
+
+    const forceSignoutRedirect: boolean = ldClient?.variation(
+        featureFlags.FORCE_SIGNOUT_REDIRECT,
+        false
+    )
 
     // session expiration modal
     const [sessionIsExpiring, setSessionIsExpiring] = useState<boolean>(false)
-    const ldClient = useLDClient()
+
     const minutesUntilExpiration: number = ldClient?.variation(
         featureFlags.MINUTES_UNTIL_SESSION_EXPIRES,
         30
@@ -162,7 +168,7 @@ function AuthProvider({
                 recordJSException(
                     `[User auth error]: Unable to authenticate user though user seems to be logged in. Message: ${error.message}`
                 )
-                navigate(`/?session-timeout=true`)
+                if (forceSignoutRedirect) navigate(`/?session-timeout=true`)
             }
         } else if (data?.fetchCurrentUser) {
             if (!isAuthenticated) {

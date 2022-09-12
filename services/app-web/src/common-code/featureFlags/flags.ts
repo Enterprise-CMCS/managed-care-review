@@ -28,6 +28,10 @@ export const featureFlags = {
      */
     API_GRAPHQL_ERRORS: 'app-api-graphql-errors',
     /**
+     * Test force signout redirect
+     */
+    FORCE_SIGNOUT_REDIRECT: 'force-signout-redirect',
+    /**
      * Enables selection of programs that apply to rate certification
      */
     RATE_CERT_PROGRAMS: 'rate-certification-programs',
