@@ -156,8 +156,8 @@ export const AppRoutes = ({
         null
     )
     const showExpirationModal: boolean = ldClient?.variation(
-        featureFlags.SESSION_EXPIRING_MODAL,
-        true
+        featureFlags.SESSION_EXPIRING_MODAL.flag,
+        featureFlags.SESSION_EXPIRING_MODAL.defaultValue
     )
     const route = getRouteName(pathname)
     const { updateHeading } = usePage()

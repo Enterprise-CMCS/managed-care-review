@@ -1,6 +1,9 @@
 import * as path from 'path'
 
 describe('CMS user', () => {
+    beforeEach(() => {
+        cy.stubFeatureFlags()
+    })
     it('can unlock and resubmit', () => {
         cy.logInAsStateUser()
 

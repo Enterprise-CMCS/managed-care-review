@@ -1,4 +1,7 @@
 describe('smoke test', () => {
+    beforeEach(() => {
+        cy.stubFeatureFlags()
+    })
     it('can log in as a state user', () => {
         cy.logInAsStateUser()
         cy.location('pathname', { timeout: 10_000 }).should('eq', '/')
