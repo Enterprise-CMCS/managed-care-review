@@ -1,12 +1,14 @@
 import React, { MutableRefObject, useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import * as ld from 'launchdarkly-js-client-sdk'
 import { AuthModeType } from '../common-code/config'
 import { useFetchCurrentUserQuery, User as UserType } from '../gen/gqlClient'
 import { logoutLocalUser } from '../localAuth'
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import * as ld from 'launchdarkly-js-client-sdk'
 import { featureFlags } from '../common-code/featureFlags'
 import { dayjs } from '../common-code/dateHelpers/dayjs'
+import { recordJSException } from '../otelHelpers/tracingHelper'
 
 type LogoutFn = () => Promise<null>
 
@@ -57,6 +59,9 @@ function AuthProvider({
     )
     const [loginStatus, setLoginStatus] =
         useState<LoginStatusType>('LOGGED_OUT')
+    const navigate = useNavigate()
+
+    // session expiration modal
     const [sessionIsExpiring, setSessionIsExpiring] = useState<boolean>(false)
     const ldClient = useLDClient()
     const minutesUntilExpiration: number = ldClient?.variation(
@@ -138,16 +143,26 @@ function AuthProvider({
             const { graphQLErrors, networkError } = error
 
             if (graphQLErrors)
-                graphQLErrors.forEach(({ message, locations, path }) =>
-                    console.log(
+                graphQLErrors.forEach(({ message, locations, path }) => {
+                    recordJSException(
                         `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
                     )
-                )
+                    console.error(
+                        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+                    )
+                })
 
-            if (networkError) console.log(`[Network error]: ${networkError}`)
+            if (networkError) {
+                recordJSException(`[Network error]: Message: ${networkError}`)
+                console.error(`[Network error]: ${networkError}`)
+            }
             if (isAuthenticated) {
                 setLoggedInUser(undefined)
                 setLoginStatus('LOGGED_OUT')
+                recordJSException(
+                    `[User auth error]: Unable to authenticate user though user seems to be logged in. Message: ${error.message}`
+                )
+                navigate(`/?session-timeout=true`)
             }
         } else if (data?.fetchCurrentUser) {
             if (!isAuthenticated) {
