@@ -43,7 +43,7 @@
         "neverthrow": "^4.2.2",
         "protobufjs": "^6.11.2",
         "request": "^2.88.2",
-        "uuid": "^8.3.2",
+        "uuid": "^9.0.0",
         "zod": "^3.11.6"
     },
     "devDependencies": {

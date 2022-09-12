@@ -8,6 +8,13 @@
 
 export const featureFlags = {
     /**
+     Toggles the site maintenance alert on the landing page
+    */
+    SITE_MAINTENANCE_BANNER: {
+        flag: 'site-maintenance-banner',
+        defaultValue: false,
+    },
+    /**
      Toggles the /health api endpoint
     */
     API_ENABLE_HEALTH_ENDPOINT: {
