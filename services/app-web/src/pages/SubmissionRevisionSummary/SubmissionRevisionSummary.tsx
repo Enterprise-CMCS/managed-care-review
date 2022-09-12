@@ -21,7 +21,7 @@ import {
     useFetchHealthPlanPackageQuery,
 } from '../../gen/gqlClient'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
-import { Error404 } from '../Errors/Error404'
+import { Error404 } from '../Errors/Error404Page'
 import { dayjs } from '../../common-code/dateHelpers'
 import styles from './SubmissionRevisionSummary.module.scss'
 import { PreviousSubmissionBanner } from '../../components'

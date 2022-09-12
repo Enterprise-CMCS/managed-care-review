@@ -34,7 +34,7 @@ import {
     UpdateInformation,
 } from '../../gen/gqlClient'
 import { recordJSException } from '../../otelHelpers'
-import { Error404 } from '../Errors/Error404'
+import { Error404 } from '../Errors/Error404Page'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory/ChangeHistory'

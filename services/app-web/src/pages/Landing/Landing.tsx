@@ -4,8 +4,8 @@ import styles from './Landing.module.scss'
 import { featureFlags } from '../../common-code/featureFlags'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { useLocation } from 'react-router-dom'
-import { ErrorAlertSiteUnavailable } from '../../components/Banner/ErrorAlert/ErrorAlertSiteUnavailable'
-import { ErrorAlertSignIn } from '../../components/Banner/ErrorAlert/ErrorAlertSignIn'
+import { ErrorAlertSiteUnavailable } from '../../components/ErrorAlert/ErrorAlertSiteUnavailable'
+import { ErrorAlertSignIn } from '../../components/ErrorAlert/ErrorAlertSignIn'
 
 export const Landing = (): React.ReactElement => {
     const location = useLocation()

@@ -5,23 +5,23 @@ import { ErrorAlertSiteUnavailable } from './ErrorAlertSiteUnavailable'
 import { ErrorAlertSignIn } from './ErrorAlertSignIn'
 
 export default {
-    title: 'Components/Banner/ErrorAlert',
+    title: 'Components/ErrorAlerts',
     component: ErrorAlert,
 }
 
 const Template: Story<ErrorAlertProps> = (args) => <ErrorAlert {...args} />
 
-export const ErrorAlertDefault = Template.bind({})
+export const Default = Template.bind({})
 
-export const ErrorAlertCustomStyles = Template.bind({})
-ErrorAlertCustomStyles.args = {
+export const CustomStyles = Template.bind({})
+CustomStyles.args = {
     message:
-        'Here is an alert with extra padding around it. If you see anything odd,',
-    style: { backgroundColor: 'red' },
+        'Here is an error alert with extra padding and a light gray background. If you see anything odd,',
+    style: { backgroundColor: '#F0F0F0', padding: '2em' },
 }
 
 // List of application context-specific error alert components for quick reference.
-export const ApplicationErrorAlerts = (): React.ReactElement => (
+export const ListOfApplicationErrorAlerts = (): React.ReactElement => (
     <div className="sb-padded">
         <ErrorAlertSiteUnavailable />
         <ErrorAlertSignIn />
