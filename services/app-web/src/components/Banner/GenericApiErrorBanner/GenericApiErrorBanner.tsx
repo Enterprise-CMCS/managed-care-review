@@ -1,6 +1,7 @@
 import React from 'react'
 import styles from '../Banner.module.scss'
 import { Alert, Link } from '@trussworks/react-uswds'
+import { MAIL_TO_SUPPORT } from '../../../constants/errors'
 
 export type GenericApiErrorProps = {
     message?: string
@@ -17,7 +18,7 @@ export const GenericApiErrorBanner = ({
             type="error"
             heading={heading || 'System error'}
             validation
-            data-testid="genericApiErrorBanner"
+            data-testid="error-alert"
         >
             <div className={styles.bannerBodyText}>
                 <p className="usa-alert__text">
@@ -30,9 +31,7 @@ export const GenericApiErrorBanner = ({
                         Please refresh your browser and if you continue to
                         experience an error,&nbsp;
                     </span>
-                    <Link href="mailto: mc-review@cms.hhs.gov, mc-review-team@truss.works">
-                        let us know.
-                    </Link>
+                    <Link href={MAIL_TO_SUPPORT}>let us know.</Link>
                 </p>
             </div>
         </Alert>

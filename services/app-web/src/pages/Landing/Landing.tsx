@@ -1,9 +1,11 @@
 import React from 'react'
-import { Alert, GridContainer, Grid } from '@trussworks/react-uswds'
+import { GridContainer, Grid } from '@trussworks/react-uswds'
 import styles from './Landing.module.scss'
 import { featureFlags } from '../../common-code/featureFlags'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { useLocation } from 'react-router-dom'
+import { ErrorAlertSiteUnavailable } from '../../components/Banner/ErrorAlert/ErrorAlertSiteUnavailable'
+import { ErrorAlertSignIn } from '../../components/Banner/ErrorAlert/ErrorAlertSignIn'
 
 export const Landing = (): React.ReactElement => {
     const location = useLocation()
@@ -17,43 +19,13 @@ export const Landing = (): React.ReactElement => {
         'session-timeout'
     )
 
-    console.log(redirectFromSessionTimeout)
-
     return (
         <>
             <section className={styles.detailsSection}>
                 <GridContainer className={styles.detailsSectionContent}>
-                    {siteMaintenanceBanner && (
-                        <Alert
-                            type="error"
-                            heading="Site Unavailable"
-                            className="margin-bottom-2"
-                        >
-                            MC-Review is currently unavailable due to technical
-                            issues. We are working to resolve these issues as
-                            quickly as possible. If you have questions or need
-                            immediate assistance with your submission, please
-                            email&nbsp;
-                            <a
-                                href="mailto: mc-review@cms.hhs.gov, mc-review-team@truss.works"
-                                className="usa-link"
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                mc-review@cms.hhs.gov
-                            </a>
-                            .
-                        </Alert>
-                    )}
+                    {siteMaintenanceBanner && <ErrorAlertSiteUnavailable />}
                     {redirectFromSessionTimeout && !siteMaintenanceBanner && (
-                        <Alert
-                            type="error"
-                            heading="Session Expired"
-                            className="margin-bottom-2"
-                        >
-                            MC-Review has been logged out due to inactivity.
-                            Please sign in to continue.
-                        </Alert>
+                        <ErrorAlertSignIn />
                     )}
                     <Grid row gap className="margin-top-2">
                         <Grid tablet={{ col: 6 }}>
