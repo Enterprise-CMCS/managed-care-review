@@ -62,7 +62,9 @@ const StatusTag = ({
 
 export const CMSDashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
-    const { loading, data, error } = useIndexHealthPlanPackagesQuery()
+    const { loading, data, error } = useIndexHealthPlanPackagesQuery({
+        fetchPolicy: 'network-only',
+    })
 
     if (error) {
         recordJSException(
