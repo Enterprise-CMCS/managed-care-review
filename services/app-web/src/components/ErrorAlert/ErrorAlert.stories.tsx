@@ -1,11 +1,11 @@
 import { Story } from '@storybook/react'
-
-import { ErrorAlert, ErrorAlertProps } from './ErrorAlert'
-import { ErrorAlertSiteUnavailable } from './ErrorAlertSiteUnavailable'
+import { ErrorAlertProps, ErrorAlert } from './ErrorAlert'
+import { ErrorAlertFailedRequest } from './ErrorAlertFailedRequest'
 import { ErrorAlertSignIn } from './ErrorAlertSignIn'
+import { ErrorAlertSiteUnavailable } from './ErrorAlertSiteUnavailable'
 
 export default {
-    title: 'Components/ErrorAlerts',
+    title: 'Components/ErrorAlert',
     component: ErrorAlert,
 }
 
@@ -13,16 +13,18 @@ const Template: Story<ErrorAlertProps> = (args) => <ErrorAlert {...args} />
 
 export const Default = Template.bind({})
 
-export const CustomStyles = Template.bind({})
-CustomStyles.args = {
+export const CustomStylesWithLetUsKnowLink = Template.bind({})
+CustomStylesWithLetUsKnowLink.args = {
     message:
         'Here is an error alert with extra padding and a light gray background. If you see anything odd,',
     style: { backgroundColor: '#F0F0F0', padding: '2em' },
+    appendLetUsKnow: true,
 }
 
 // List of application context-specific error alert components for quick reference.
 export const ListOfApplicationErrorAlerts = (): React.ReactElement => (
     <div className="sb-padded">
+        <ErrorAlertFailedRequest />
         <ErrorAlertSiteUnavailable />
         <ErrorAlertSignIn />
     </div>

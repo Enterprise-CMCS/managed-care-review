@@ -1,32 +1,40 @@
+import classnames from 'classnames'
 import React from 'react'
 import styles from './ErrorAlert.module.scss'
 import { Alert, Link } from '@trussworks/react-uswds'
 import { MAIL_TO_SUPPORT } from '../../constants/errors'
+
 export type ErrorAlertProps = {
-    message?: string | React.ReactNode
+    message?: React.ReactNode
     heading?: string
+    calltoAction?: React.ReactNode
+    appendLetUsKnow?: boolean
 } & JSX.IntrinsicElements['div']
 
 export const ErrorAlert = ({
     message,
     heading,
+    appendLetUsKnow = false,
+    className,
     ...divProps
 }: ErrorAlertProps): React.ReactElement => {
+    const classes = classnames(styles.messageBodyText, className)
+    const showLink = appendLetUsKnow || !message // our default message includes the link
     return (
         <Alert
             role="alert"
             type="error"
             heading={heading || 'System error'}
             data-testid="error-alert"
-            className={styles.messageBodyText}
+            className={classes}
             {...divProps}
         >
             <span>
                 {message ||
                     "We're having trouble loading this page. Please refresh your browser and if you continue to experience an error,"}
             </span>
-            <Link href={MAIL_TO_SUPPORT}>&nbsp;let us know.</Link>
+
+            {showLink && <Link href={MAIL_TO_SUPPORT}>&nbsp;let us know.</Link>}
         </Alert>
     )
 }
-//

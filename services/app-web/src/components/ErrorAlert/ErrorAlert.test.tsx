@@ -34,14 +34,7 @@ test('renders custom message', async () => {
 
 test('renders with custom styles', async () => {
     const testText = 'custom styles'
-    render(
-        <ErrorAlert
-            message={testText}
-            style={{ color: 'blue', backgroundColor: 'red' }}
-        />
-    )
+    render(<ErrorAlert message={testText} className={'test-class'} />)
     await expect(screen.getByText(testText)).toBeInTheDocument()
-    expect(screen.queryByText('custom styles')).toHaveStyle({
-        backgroundColor: 'red',
-    })
+    expect(screen.queryByTestId('error-alert')).toHaveClass('test-class')
 })

@@ -8,5 +8,6 @@ export const ErrorAlertSiteUnavailable = (): React.ReactElement => (
                             issues. We are working to resolve these issues as
                             quickly as possible. If you have questions or need
                             immediate assistance with your submission, please"
+        appendLetUsKnow
     />
 )
