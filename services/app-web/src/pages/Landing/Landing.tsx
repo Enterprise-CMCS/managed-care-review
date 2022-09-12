@@ -3,13 +3,21 @@ import { Alert, GridContainer, Grid } from '@trussworks/react-uswds'
 import styles from './Landing.module.scss'
 import { featureFlags } from '../../common-code/featureFlags'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { useLocation } from 'react-router-dom'
 
 export const Landing = (): React.ReactElement => {
+    const location = useLocation()
     const ldClient = useLDClient()
     const siteMaintenanceBanner: boolean = ldClient?.variation(
         featureFlags.SITE_MAINTENANCE_BANNER,
         false
     )
+
+    const redirectFromSessionTimeout = new URLSearchParams(location.search).get(
+        'session-timeout'
+    )
+
+    console.log(redirectFromSessionTimeout)
 
     return (
         <>
@@ -35,6 +43,16 @@ export const Landing = (): React.ReactElement => {
                                 mc-review@cms.hhs.gov
                             </a>
                             .
+                        </Alert>
+                    )}
+                    {redirectFromSessionTimeout && !siteMaintenanceBanner && (
+                        <Alert
+                            type="error"
+                            heading="Session Expired"
+                            className="margin-bottom-2"
+                        >
+                            MC-Review has been logged out due to inactivity.
+                            Please sign in to continue.
                         </Alert>
                     )}
                     <Grid row gap className="margin-top-2">

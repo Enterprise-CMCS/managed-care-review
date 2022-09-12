@@ -39,7 +39,7 @@ export const AuthenticatedRouteWrapper = ({
     const logoutSession = useCallback(() => {
         updateSessionExpirationState(false)
         if (logout) {
-            logout().catch((e) => {
+            logout({ sessionTimeout: true }).catch((e) => {
                 console.log('Error with logout: ', e)
                 setAlert &&
                     setAlert(

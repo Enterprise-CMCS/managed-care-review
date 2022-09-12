@@ -18,7 +18,9 @@ type AuthContextType = {
     checkIfSessionsIsAboutToExpire: () => void
     loggedInUser: UserType | undefined
     loginStatus: LoginStatusType
-    logout: undefined | (() => Promise<void>)
+    logout:
+        | undefined
+        | (({ sessionTimeout }: { sessionTimeout: boolean }) => Promise<void>) // sessionTimeout true when logout is due to session ending
     logoutCountdownDuration: number
     sessionExpirationTime: MutableRefObject<dayjs.Dayjs | undefined>
     sessionIsExpiring: boolean
@@ -217,13 +219,18 @@ function AuthProvider({
     const logout =
         loggedInUser === undefined
             ? undefined
-            : () => {
+            : ({ sessionTimeout }: { sessionTimeout: boolean }) => {
                   return new Promise<void>((_resolve, reject) => {
                       realLogout()
                           .then(() => {
                               // Hard navigate back to /
                               // this is more like how things work with IDM anyway.
-                              window.location.href = '/'
+                              if (sessionTimeout) {
+                                  window.location.href =
+                                      '/?session-timeout=true'
+                              } else {
+                                  window.location.href = '/'
+                              }
                           })
                           .catch((e) => {
                               console.log('Logout Failed.', e)

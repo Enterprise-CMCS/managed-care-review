@@ -35,7 +35,7 @@ export const Header = ({
             return
         }
 
-        logout().catch((e) => {
+        logout({ sessionTimeout: false }).catch((e) => {
             console.log('Error with logout: ', e)
             setAlert &&
                 setAlert(
