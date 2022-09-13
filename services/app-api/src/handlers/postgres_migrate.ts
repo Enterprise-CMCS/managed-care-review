@@ -1,4 +1,3 @@
-import fs from 'fs'
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import { RDS } from 'aws-sdk'
 import { execSync } from 'child_process'
@@ -103,7 +102,6 @@ export const main: APIGatewayProxyHandler = async () => {
     // run the data migration. this will run any data changes to the protobufs stored in postgres
     try {
         const migrator = newDBMigrator(dbConnectionURL)
-        console.log(migrator)
         await migrate(migrator, '/opt/nodejs/healthPlanFormDataMigrations')
     } catch (err) {
         console.log(err)
@@ -112,35 +110,6 @@ export const main: APIGatewayProxyHandler = async () => {
             body: JSON.stringify({
                 code: 'DATA_MIGRATION_FAILED',
                 message: 'Could not migrate the database protobufs: ' + err,
-            }),
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
-            },
-        }
-    }
-
-    // and now, build and run our proto migrations
-    try {
-        console.log('DEBUG WD', process.cwd())
-        fs.readdirSync(process.cwd()).forEach((file) => {
-            console.log(file)
-        })
-
-        console.log('Migrating')
-
-        const migrator = newDBMigrator(dbURL)
-
-        await migrate(migrator)
-
-        console.log('Migrated Protos.')
-    } catch (err) {
-        console.log('Migration Error: ', err)
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                code: 'MIGRATION_FAILED',
-                message: 'Could not migrate the protos ' + err,
             }),
             headers: {
                 'Access-Control-Allow-Origin': '*',
