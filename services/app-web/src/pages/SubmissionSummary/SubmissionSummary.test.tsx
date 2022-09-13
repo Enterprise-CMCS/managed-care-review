@@ -74,18 +74,90 @@ describe('SubmissionSummary', () => {
             }
         )
 
-        const banner = expect(
+        expect(
             await screen.findByTestId('updatedSubmissionBanner')
-        )
-        banner.toBeInTheDocument()
-        banner.toHaveClass('usa-alert--info')
-        banner.toHaveTextContent(
+        ).toBeInTheDocument()
+        expect(
+            await screen.findByTestId('updatedSubmissionBanner')
+        ).toHaveClass('usa-alert--info')
+        expect(
+            await screen.findByTestId('updatedSubmissionBanner')
+        ).toHaveTextContent(
             /Updated on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
         )
-        banner.toHaveTextContent('Submitted by: aang@example.com')
-        banner.toHaveTextContent(
-            'Changes made: Placeholder resubmission reason'
+        expect(
+            await screen.findByTestId('updatedSubmissionBanner')
+        ).toHaveTextContent('Submitted by: aang@example.com')
+        expect(
+            await screen.findByTestId('updatedSubmissionBanner')
+        ).toHaveTextContent('Changes made: Placeholder resubmission reason')
+    })
+
+    it('renders back to dashboard link for state users', async () => {
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                    element={<SubmissionSummary />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageMockSuccess({
+                            id: '15',
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15',
+                },
+            }
         )
+        expect(
+            await screen.findByRole('heading', {
+                name: 'Contract details',
+            })
+        ).toBeInTheDocument()
+        expect(
+            await screen.findByRole('link', { name: /Back to state dashboard/ })
+        ).toBeInTheDocument()
+    })
+
+    it('renders back to dashboard link for CMS users', async () => {
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                    element={<SubmissionSummary />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageMockSuccess({
+                            id: '15',
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15',
+                },
+            }
+        )
+
+        expect(
+            await screen.findByRole('link', {
+                name: /Back to dashboard/,
+            })
+        ).toBeInTheDocument()
     })
 
     describe('Submission package data display', () => {
@@ -279,14 +351,23 @@ describe('SubmissionSummary', () => {
                 }
             )
 
-            const banner = expect(await screen.findByTestId('unlockedBanner'))
-            banner.toBeInTheDocument()
-            banner.toHaveClass('usa-alert--warning')
-            banner.toHaveTextContent(
+            expect(
+                await screen.findByTestId('unlockedBanner')
+            ).toBeInTheDocument()
+            expect(await screen.findByTestId('unlockedBanner')).toHaveClass(
+                'usa-alert--warning'
+            )
+            expect(
+                await screen.findByTestId('unlockedBanner')
+            ).toHaveTextContent(
                 /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
             )
-            banner.toHaveTextContent('Unlocked by: bob@dmas.mn.govUnlocked')
-            banner.toHaveTextContent('Reason for unlock: Test unlock reason')
+            expect(
+                await screen.findByTestId('unlockedBanner')
+            ).toHaveTextContent('Unlocked by: bob@dmas.mn.govUnlocked')
+            expect(
+                await screen.findByTestId('unlockedBanner')
+            ).toHaveTextContent('Reason for unlock: Test unlock reason')
         })
     })
 })

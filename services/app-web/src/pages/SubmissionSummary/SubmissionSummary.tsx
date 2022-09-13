@@ -250,25 +250,27 @@ export const SubmissionSummary = (): React.ReactElement => {
                     />
                 )}
 
-                {loggedInUser?.__typename === 'StateUser' ? (
-                    <Link
-                        asCustom={NavLink}
-                        variant="unstyled"
-                        to={{
-                            pathname: '/dashboard',
-                        }}
+                <Link
+                    asCustom={NavLink}
+                    variant="unstyled"
+                    to={{
+                        pathname: '/dashboard',
+                    }}
+                >
+                    <svg
+                        className="usa-icon"
+                        aria-hidden="true"
+                        focusable="false"
+                        role="img"
                     >
-                        <svg
-                            className="usa-icon"
-                            aria-hidden="true"
-                            focusable="false"
-                            role="img"
-                        >
-                            <use xlinkHref={`${sprite}#arrow_back`}></use>
-                        </svg>
+                        <use xlinkHref={`${sprite}#arrow_back`}></use>
+                    </svg>
+                    {loggedInUser?.__typename === 'StateUser' ? (
                         <span>&nbsp;Back to state dashboard</span>
-                    </Link>
-                ) : null}
+                    ) : (
+                        <span>&nbsp;Back to dashboard</span>
+                    )}
+                </Link>
 
                 <SubmissionTypeSummarySection
                     submission={packageData}
