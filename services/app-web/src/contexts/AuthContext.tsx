@@ -9,6 +9,7 @@ import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
 import { featureFlags } from '../common-code/featureFlags'
 import { dayjs } from '../common-code/dateHelpers/dayjs'
 import { recordJSException } from '../otelHelpers/tracingHelper'
+import { handleApolloError } from '../gqlHelpers/apolloErrors'
 
 type LogoutFn = () => Promise<null>
 
@@ -146,28 +147,15 @@ function AuthProvider({
 
     if (!loading) {
         if (error) {
-            const { graphQLErrors, networkError } = error
+            handleApolloError(error, isAuthenticated)
 
-            if (graphQLErrors)
-                graphQLErrors.forEach(({ message, locations, path }) => {
-                    recordJSException(
-                        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-                    )
-                    console.error(
-                        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-                    )
-                })
-
-            if (networkError) {
-                recordJSException(`[Network error]: Message: ${networkError}`)
-                console.error(`[Network error]: ${networkError}`)
-            }
             if (isAuthenticated) {
                 setLoggedInUser(undefined)
                 setLoginStatus('LOGGED_OUT')
                 recordJSException(
                     `[User auth error]: Unable to authenticate user though user seems to be logged in. Message: ${error.message}`
                 )
+                // since we have an auth request error but a potentially logged in user, we log out fully from Auth context and redirect to dashboard for clearer user experience
                 if (forceSignoutRedirect) navigate(`/?session-timeout=true`)
             }
         } else if (data?.fetchCurrentUser) {
