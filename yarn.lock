@@ -18287,14 +18287,13 @@ launchdarkly-node-server-sdk@6.4.2:
     uuid "^8.3.2"
 
 launchdarkly-react-client-sdk@^2.25.2:
-  version "2.26.0"
-  resolved "https://registry.yarnpkg.com/launchdarkly-react-client-sdk/-/launchdarkly-react-client-sdk-2.26.0.tgz#273cdc453ad7336c85918cd4657e8afb6aebb77c"
-  integrity sha512-X17AOpDP66Dp80QZi878Zy99ZmFeuUUV5pUtUY2lrru+t7qz6mqEoIhqq135Knff6BioRVfgiio/opVkxxhsSg==
+  version "2.27.0"
+  resolved "https://registry.yarnpkg.com/launchdarkly-react-client-sdk/-/launchdarkly-react-client-sdk-2.27.0.tgz#18a2f470e3af166d25d2252e4a14f092378fc2cb"
+  integrity sha512-I2mmY5OHbc8bHkfYlt131cRXjSolCzbMtt0lMeN7vC5vMWnjNnLCT08YRrqromnNgPNUtg/7kwPEUTOmUCFqiA==
   dependencies:
     hoist-non-react-statics "^3.3.2"
     launchdarkly-js-client-sdk "2.22.1"
     lodash.camelcase "^4.3.0"
-    uuid "^3.3.2"
 
 lazy-ass@^1.6.0:
   version "1.6.0"
