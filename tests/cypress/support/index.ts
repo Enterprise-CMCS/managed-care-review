@@ -16,6 +16,8 @@ import './loginCommands'
 import './stateSubmissionFormCommands'
 import './dashboardCommands'
 import './navigateCommands'
+import './launchDarklyCommands'
+import { FeatureFlagTypes, FlagValueTypes } from '../../../services/app-web/src/common-code/featureFlags'
 
 type FormButtonKey =
     | 'CONTINUE_FROM_START_NEW'
@@ -62,6 +64,11 @@ declare global {
 
             //dashboard commands
             clickSubmissionLink(testId: string): void
+
+            //Launch Darkly commands
+            stubFeatureFlags(): void
+            interceptFeatureFlags(toggleFlags?: Partial<Record<FeatureFlagTypes, FlagValueTypes>>): void
+            getFeatureFlagStore(featureFlag?: FeatureFlagTypes[]): Promise<Partial<Record<FeatureFlagTypes, FlagValueTypes>>>
         }
     }
 }

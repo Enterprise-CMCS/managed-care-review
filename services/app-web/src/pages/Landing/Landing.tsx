@@ -7,8 +7,8 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 export const Landing = (): React.ReactElement => {
     const ldClient = useLDClient()
     const siteMaintenanceBanner: boolean = ldClient?.variation(
-        featureFlags.SITE_MAINTENANCE_BANNER,
-        false
+        featureFlags.SITE_MAINTENANCE_BANNER.flag,
+        featureFlags.SITE_MAINTENANCE_BANNER.defaultValue
     )
 
     return (

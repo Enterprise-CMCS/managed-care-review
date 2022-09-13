@@ -1,4 +1,7 @@
 describe('review and submit', () => {
+    beforeEach(() => {
+        cy.stubFeatureFlags()
+    })
     it('can navigate to and from review and submit page', () => {
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
