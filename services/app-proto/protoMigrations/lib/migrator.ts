@@ -177,8 +177,7 @@ export function newFileMigrator(protoPath: string): MigratorType {
 }
 
 export async function migrate(migrator: MigratorType, path?: string) {
-    console.log(path)
-    const migrationPath = path ?? './healthPlanFormDataMigrations'
+    const migrationPath = path ?? '../healthPlanFormDataMigrations'
 
     const migrationFiles = fs
         .readdirSync(migrationPath)
