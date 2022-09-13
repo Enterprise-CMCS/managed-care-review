@@ -15,16 +15,18 @@ const handleNetworkError = (
             // Something has caused the user to lose their session outside the scope of MC-Review.
             // Log this so we have a record of it, but not entirely unexpected if user is opening application in multiple and only logging out of one of them.
             recordJSException(
-                `[User auth error]: Code: ${serverError.statusCode} Message: ${serverError.message}`
+                `[User auth error]: Code: ${serverError.statusCode} Message: ${serverError.message} ${serverError.stack}`
             )
         } else {
             // Server could be down. Log this.
             recordJSException(
-                `[Server error]: Code: ${serverError.statusCode} Message: ${serverError.message}`
+                `[Server error]: Code: ${serverError.statusCode} Message: ${serverError.message} ${serverError.stack}`
             )
         }
     } else {
-        recordJSException(`[Network error]: ${networkError}`)
+        recordJSException(
+            `[Network issue]: ${networkError?.message} ${networkError?.stack}`
+        )
     }
 }
 
@@ -42,4 +44,21 @@ const handleApolloError = (error: ApolloError, isAuthenticated: boolean) => {
     if (graphQLErrors) handleGQLErrors(graphQLErrors)
     if (networkError) handleNetworkError(networkError, isAuthenticated)
 }
-export { handleApolloError }
+
+const isLikelyUserAuthError = (
+    error: ApolloError,
+    isAuthenticated: boolean
+) => {
+    const { networkError } = error
+    if (networkError?.name === 'ServerError') {
+        const serverError = networkError as ServerError
+        if (serverError.statusCode === 403 && isAuthenticated) {
+            return true
+        } else {
+            return false
+        }
+    } else {
+        return false
+    }
+}
+export { handleApolloError, isLikelyUserAuthError, handleGQLErrors }

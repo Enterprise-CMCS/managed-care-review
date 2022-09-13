@@ -19,8 +19,12 @@ import {
 } from '../../gen/gqlClient'
 import { mostRecentDate } from '../../common-code/dateHelpers'
 import styles from '../StateDashboard/StateDashboard.module.scss'
-import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
+import {
+    handleApolloError,
+    isLikelyUserAuthError,
+} from '../../gqlHelpers/apolloErrors'
+import { ErrorAlertFailedRequest, ErrorAlertSignIn } from '../../components'
 
 // We only pull a subset of data out of the submission and revisions for display in Dashboard
 // Depending on submission status, CMS users look at data from current or previous revision
@@ -65,21 +69,32 @@ export const CMSDashboard = (): React.ReactElement => {
     const { loading, data, error } = useIndexHealthPlanPackagesQuery({
         fetchPolicy: 'network-only',
     })
-
+    const isAuthenticated = loginStatus === 'LOGGED_IN'
     if (error) {
-        recordJSException(
-            `indexHealthPlanPackagesQuery: Error indexing submissions. Error message:${error.message}`
-        )
-        return (
-            <div id="cms-dashboard-page" className={styles.wrapper}>
-                <GridContainer
-                    data-testid="cms-dashboard-page"
-                    className={styles.container}
-                >
-                    <GenericApiErrorBanner />
-                </GridContainer>
-            </div>
-        )
+        handleApolloError(error, isAuthenticated)
+        if (isLikelyUserAuthError(error, isAuthenticated)) {
+            return (
+                <div id="cms-dashboard-page" className={styles.wrapper}>
+                    <GridContainer
+                        data-testid="cms-dashboard-page"
+                        className={styles.container}
+                    >
+                        <ErrorAlertSignIn />
+                    </GridContainer>
+                </div>
+            )
+        } else {
+            return (
+                <div id="cms-dashboard-page" className={styles.wrapper}>
+                    <GridContainer
+                        data-testid="cms-dashboard-page"
+                        className={styles.container}
+                    >
+                        <ErrorAlertFailedRequest />
+                    </GridContainer>
+                </div>
+            )
+        }
     }
 
     if (loginStatus === 'LOADING' || !loggedInUser || loading || !data) {
