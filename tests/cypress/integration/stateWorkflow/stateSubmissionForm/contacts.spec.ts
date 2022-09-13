@@ -1,4 +1,7 @@
 describe('contacts', () => {
+    beforeEach(() => {
+        cy.stubFeatureFlags()
+    })
     it('can navigate to and from contacts page with contract only submission', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
@@ -8,26 +11,29 @@ describe('contacts', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.visit(`/submissions/${draftSubmissionId}/edit/contacts`)
+
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/contacts`)
 
             // On contacts page, navigate BACK
-            cy.navigateForm('BACK')
+            cy.navigateFormByButtonClick('BACK')
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
 
             // On contacts page, SAVE_DRAFT
-            cy.visit(`/submissions/${draftSubmissionId}/edit/contacts`)
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/contacts`)
+
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
-            cy.navigateForm('SAVE_DRAFT')
+            cy.navigateFormByButtonClick('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // On contacts page, fill out information and CONTINUE
-            cy.visit(`/submissions/${draftSubmissionId}/edit/contacts`)
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/contacts`)
+            cy.findByRole('heading', { level: 2, name: /Contacts/ })
             cy.fillOutStateContact()
-            cy.navigateForm('CONTINUE')
+            cy.navigateFormByButtonClick('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
 
             // check accessibility of filled out contacts page
-            cy.navigateForm('BACK')
+            cy.navigateFormByButtonClick('BACK')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
             // Commented out to get react-scripts/webpack 5 upgrade through
             // cy.pa11y({
@@ -45,27 +51,32 @@ describe('contacts', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.visit(`/submissions/${draftSubmissionId}/edit/contacts`)
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/contacts`)
 
             // On contacts page, navigate BACK
-            cy.navigateForm('BACK')
+            cy.navigateFormByButtonClick('BACK')
             cy.findByRole('heading', { level: 2, name: /Rate details/ })
 
             // On contacts page, SAVE_DRAFT
-            cy.visit(`/submissions/${draftSubmissionId}/edit/contacts`)
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/contacts`)
+
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
-            cy.navigateForm('SAVE_DRAFT')
+            cy.navigateFormByButtonClick('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // On contacts page, fill out information and CONTINUE
-            cy.visit(`/submissions/${draftSubmissionId}/edit/contacts`)
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/contacts`)
+            cy.findByRole('heading', {
+                level: 2,
+                name: /Contacts/,
+            })
             cy.fillOutStateContact()
             cy.fillOutActuaryContact()
-            cy.navigateForm('CONTINUE')
+            cy.navigateFormByButtonClick('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
 
             // check accessibility of filled out contacts page
-            cy.navigateForm('BACK')
+            cy.navigateFormByButtonClick('BACK')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
             // Commented out to get react-scripts/webpack 5 upgrade through
             // cy.pa11y({

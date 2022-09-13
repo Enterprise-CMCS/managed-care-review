@@ -1,12 +1,12 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-
 import { PageActions } from './'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 
 describe('PageActions', () => {
     describe('generic page behavior', () => {
         it('displays Save as Draft, Back and Continue buttons', () => {
-            render(
+            renderWithProviders(
                 <PageActions
                     saveAsDraftOnClick={jest.fn()}
                     backOnClick={jest.fn()}
@@ -30,7 +30,7 @@ describe('PageActions', () => {
         })
         it('calls backOnClick handler when Back button is clicked on a generic page', async () => {
             const backAction = jest.fn()
-            render(
+            renderWithProviders(
                 <PageActions
                     continueOnClick={jest.fn()}
                     saveAsDraftOnClick={jest.fn()}
@@ -43,7 +43,7 @@ describe('PageActions', () => {
         })
         it('calls saveAsDraftClick when Save as draft button is clicked on generic page', async () => {
             const saveAction = jest.fn()
-            render(
+            renderWithProviders(
                 <PageActions
                     continueOnClick={jest.fn()}
                     saveAsDraftOnClick={saveAction}
@@ -58,7 +58,7 @@ describe('PageActions', () => {
         })
         it('calls continueClick when Continue button is clicked on generic page', async () => {
             const continueAction = jest.fn()
-            render(
+            renderWithProviders(
                 <PageActions
                     continueOnClick={continueAction}
                     saveAsDraftOnClick={jest.fn()}
@@ -73,7 +73,7 @@ describe('PageActions', () => {
         })
         it('disables continue action when expected', async () => {
             const continueAction = jest.fn()
-            render(
+            renderWithProviders(
                 <PageActions
                     continueOnClick={continueAction}
                     saveAsDraftOnClick={jest.fn()}
@@ -91,7 +91,7 @@ describe('PageActions', () => {
 
     describe('page variant specific behavior', () => {
         it('displays Cancel and Continue buttons for the first page', () => {
-            render(
+            renderWithProviders(
                 <PageActions
                     pageVariant="FIRST"
                     continueOnClick={jest.fn()}
@@ -113,7 +113,7 @@ describe('PageActions', () => {
             ).toBeInTheDocument()
         })
         it('displays Save as Draft, Back, and Submit buttons for the last page', () => {
-            render(
+            renderWithProviders(
                 <PageActions
                     pageVariant="LAST"
                     continueOnClick={jest.fn()}
@@ -139,7 +139,7 @@ describe('PageActions', () => {
 
         it('calls the backOnClick handler when Cancel button is clicked on first page', async () => {
             const backAction = jest.fn()
-            render(
+            renderWithProviders(
                 <PageActions
                     pageVariant="FIRST"
                     continueOnClick={jest.fn()}
@@ -156,7 +156,7 @@ describe('PageActions', () => {
 
         it('calls continueOnClick when Submit button is clicked on the last page', async () => {
             const continueAction = jest.fn()
-            render(
+            renderWithProviders(
                 <PageActions
                     pageVariant="LAST"
                     continueOnClick={continueAction}
@@ -173,7 +173,7 @@ describe('PageActions', () => {
 
         it('disables submit action when expected on last page', async () => {
             const continueAction = jest.fn()
-            render(
+            renderWithProviders(
                 <PageActions
                     pageVariant="LAST"
                     continueOnClick={continueAction}
@@ -190,7 +190,7 @@ describe('PageActions', () => {
         })
 
         it('displays Save as draft, Cancel and Continue buttons for the first page when editing', () => {
-            render(
+            renderWithProviders(
                 <PageActions
                     pageVariant="EDIT_FIRST"
                     continueOnClick={jest.fn()}
@@ -216,7 +216,7 @@ describe('PageActions', () => {
         })
         it('calls continueOnClick when Continue button is clicked on the first page when editing', async () => {
             const continueAction = jest.fn()
-            render(
+            renderWithProviders(
                 <PageActions
                     pageVariant="EDIT_FIRST"
                     continueOnClick={continueAction}
@@ -232,7 +232,7 @@ describe('PageActions', () => {
         })
         it('calls saveAsDraftOnClick when Save as draft button is clicked on the first page when editing', async () => {
             const saveAsDraftOnClick = jest.fn()
-            render(
+            renderWithProviders(
                 <PageActions
                     pageVariant="EDIT_FIRST"
                     continueOnClick={jest.fn()}
@@ -248,7 +248,7 @@ describe('PageActions', () => {
         })
         it('calls backOnClick when Cancel button is clicked on the first page when editing', async () => {
             const backOnClick = jest.fn()
-            render(
+            renderWithProviders(
                 <PageActions
                     pageVariant="EDIT_FIRST"
                     continueOnClick={jest.fn()}
@@ -270,7 +270,7 @@ describe('PageActions', () => {
             const saveAsDraftAction = jest.fn()
             const backAction = jest.fn()
 
-            render(
+            renderWithProviders(
                 <PageActions
                     continueOnClick={continueAction}
                     saveAsDraftOnClick={jest.fn()}

@@ -265,7 +265,9 @@ export const SubmissionType = ({
                             <FormGroup
                                 error={showFieldErrors(errors.programIDs)}
                             >
-                                <Label htmlFor="programIDs">Programs</Label>
+                                <Label htmlFor="programIDs">
+                                    Programs this contract action covers
+                                </Label>
                                 {showFieldErrors(errors.programIDs) && (
                                     <PoliteErrorMessage>
                                         {errors.programIDs}
@@ -280,7 +282,7 @@ export const SubmissionType = ({
                                             inputId="programIDs"
                                             statePrograms={statePrograms}
                                             programIDs={values.programIDs}
-                                            aria-label="programs (required)"
+                                            aria-label="Programs this contract action covers (required)"
                                             onChange={(selectedOption) =>
                                                 form.setFieldValue(
                                                     'programIDs',

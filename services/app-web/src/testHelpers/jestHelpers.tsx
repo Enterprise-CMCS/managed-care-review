@@ -16,8 +16,8 @@ import { PageProvider } from '../contexts/PageContext'
 import { S3Provider } from '../contexts/S3Context'
 import { testS3Client } from './s3Helpers'
 import { S3ClientT } from '../s3'
-import * as LaunchDarkly from 'launchdarkly-react-client-sdk';
-import { FeatureFlagTypes, FlagValueTypes } from '../common-code/featureFlags/flags';
+import * as LaunchDarkly from 'launchdarkly-react-client-sdk'
+import { FeatureFlagTypes, FlagValueTypes } from '../common-code/featureFlags'
 
 /* Render */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -67,7 +67,10 @@ const WithLocation = ({
 }
 
 //WARNING: This required tests using this function to clear mocks afterwards.
-const ldUseClientSpy = (featureFlags: Partial<Record<FeatureFlagTypes, FlagValueTypes>>) => {
+const ldUseClientSpy = (
+    featureFlags: Partial<Record<FeatureFlagTypes, FlagValueTypes>>
+) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     jest.spyOn(LaunchDarkly, 'useLDClient').mockImplementation((): any => {
         return {
             // Checks to see if flag passed into useLDClient exists in the featureFlag passed in ldUseClientSpy
@@ -77,12 +80,22 @@ const ldUseClientSpy = (featureFlags: Partial<Record<FeatureFlagTypes, FlagValue
             // This is done because testing components may contain more than one instance of useLDClient for a different
             // flag. We do not want to apply the value passed in featureFlags to each useLDClient especially if the flag
             // passed in useLDClient does not exist in featureFlags passed into ldUseClientSpy.
-            variation: (flag: FeatureFlagTypes, defaultValue: FlagValueTypes | undefined) => {
-                if (featureFlags[flag] === undefined && defaultValue === undefined) {
+            variation: (
+                flag: FeatureFlagTypes,
+                defaultValue: FlagValueTypes | undefined
+            ) => {
+                if (
+                    featureFlags[flag] === undefined &&
+                    defaultValue === undefined
+                ) {
                     //ldClient.variation doesn't require a default value, throwing error here if a defaultValue was not provided.
-                    throw new Error('ldUseClientSpy returned an invalid value of undefined')
+                    throw new Error(
+                        'ldUseClientSpy returned an invalid value of undefined'
+                    )
                 }
-                return featureFlags[flag] === undefined ? defaultValue : featureFlags[flag]
+                return featureFlags[flag] === undefined
+                    ? defaultValue
+                    : featureFlags[flag]
             },
         }
     })

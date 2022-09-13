@@ -1,27 +1,28 @@
 import {
     testEmailConfig,
-    mockUnlockedContractAndRatesFormData,
     mockMNState,
 } from '../../testHelpers/emailerHelpers'
 import { unlockPackageStateEmail } from './index'
 import { findPackagePrograms } from '../templateHelpers'
 import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
+import { unlockedWithFullContracts } from '../../../../app-web/src/common-code/healthPlanFormDataMocks'
+import { UnlockedHealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 const unlockData = {
     updatedBy: 'josh@example.com',
     updatedAt: new Date('02/01/2022'),
     updatedReason: 'Adding rate certification.',
 }
-const sub = {
-    ...mockUnlockedContractAndRatesFormData(),
-    contractDateStart: new Date('2021-01-01'),
-    contractDateEnd: new Date('2021-12-31'),
-    rateDateStart: new Date('2021-02-02'),
-    rateDateEnd: new Date('2021-11-31'),
-    rateDateCertified: new Date('2020-12-01'),
+const sub: UnlockedHealthPlanFormDataType = {
+    ...unlockedWithFullContracts(),
+    contractDateStart: '2021-01-01',
+    contractDateEnd: '2021-12-31',
+    rateDateStart: '2021-02-02',
+    rateDateEnd: '2021-11-31',
+    rateDateCertified: '2020-12-01',
     rateAmendmentInfo: {
-        effectiveDateStart: new Date('06/05/2021'),
-        effectiveDateEnd: new Date('12/31/2021'),
+        effectiveDateStart: '2021-06-05',
+        effectiveDateEnd: '2021-12-31',
     },
 }
 const defaultStatePrograms = mockMNState().programs

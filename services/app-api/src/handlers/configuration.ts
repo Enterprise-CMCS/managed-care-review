@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { NewPrismaClient } from '../postgres'
-import { FetchSecrets } from '../secrets'
+import { FetchSecrets, getConnectionURL } from '../secrets'
 
 /*
  * configuration.ts
@@ -35,7 +35,8 @@ async function getPostgresURL(
             return secretsResult
         }
 
-        return secretsResult.pgConnectionURL
+        // assemble the connection URL from the stored secrets
+        return getConnectionURL(secretsResult)
     }
 
     return dbURL
@@ -65,4 +66,16 @@ async function configurePostgres(
     return client
 }
 
-export { configurePostgres, getPostgresURL }
+async function getDBClusterID(secretName: string): Promise<string | Error> {
+    const secretsResult = await FetchSecrets(secretName)
+    if (secretsResult instanceof Error) {
+        console.log(
+            'Init Error: Failed to fetch secrets from Secrets Manager',
+            secretsResult
+        )
+        return secretsResult
+    }
+    return secretsResult.dbClusterIdentifier
+}
+
+export { configurePostgres, getPostgresURL, getDBClusterID }

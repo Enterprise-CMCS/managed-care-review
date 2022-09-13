@@ -19,6 +19,7 @@ export type {
     SubmissionDocument,
     SubmissionType,
     RateDataType,
+    CalendarDate,
 } from './UnlockedHealthPlanFormDataType'
 
 export type { ModifiedProvisions } from './ModifiedProvisions'
@@ -30,6 +31,7 @@ export {
     hasValidContract,
     hasValidDocuments,
     hasValidRates,
+    hasAnyValidRateData,
     hasValidSupportingDocumentCategories,
     isContractAndRates,
     isContractOnly,
@@ -38,6 +40,8 @@ export {
     programNames,
     packageName,
     generateRateName,
+    convertRateSupportingDocs,
+    removeRatesData,
 } from './healthPlanFormData'
 
 export type { HealthPlanFormDataType } from './HealthPlanFormDataType'

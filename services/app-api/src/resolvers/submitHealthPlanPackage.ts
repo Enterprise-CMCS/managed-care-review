@@ -4,10 +4,12 @@ import {
     hasValidContract,
     hasValidDocuments,
     hasValidRates,
+    hasAnyValidRateData,
     hasValidSupportingDocumentCategories,
     isContractAndRates,
     isLockedHealthPlanFormData,
     LockedHealthPlanFormDataType,
+    removeRatesData,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     UpdateInfoType,
@@ -189,6 +191,16 @@ export function submitHealthPlanPackageResolver(
             throw new Error(errMessage)
         }
 
+        // CONTRACT_ONLY submission should not contain any CONTRACT_AND_RATE rates data. We will delete if any valid
+        // rate data is in a CONTRACT_ONLY submission. This deletion is done at submission instead of update to preserve
+        // rates data in case user did not intend or would like to revert the submission type before submitting.
+        if (
+            draftResult.submissionType === 'CONTRACT_ONLY' &&
+            hasAnyValidRateData(draftResult)
+        ) {
+            Object.assign(draftResult, removeRatesData(draftResult))
+        }
+
         //Set updateInfo default to initial submission
         const updateInfo: UpdateInfoType = {
             updatedAt: new Date(),
@@ -217,7 +229,6 @@ export function submitHealthPlanPackageResolver(
 
         // attempt to parse into a StateSubmission
         const submissionResult = submit(draftResult)
-
         if (isSubmissionError(submissionResult)) {
             const errMessage = 'Incomplete package cannot be submitted'
             logError('submitHealthPlanPackage', errMessage)

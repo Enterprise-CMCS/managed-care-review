@@ -22,14 +22,17 @@ A feature typically can be added behind a flag if:
 
 Flags are first added to Launch Darkly via their UI. As an authenticated Launch Darkly user, navigate to our feature flags and click “create flag”. Choose a human readable flag name and a ‘-’ delimited flag key. The flag key is what we use inside our code. Make sure to mark the flag as client side if it is meant to be user visible (rather than API only). If the flag is permanent, mark this as well.
 
-We keep a list of flags in a constants file in `common-code/flags` and all new flags must be added to this file. For example, if you added a flag key of ‘new-testing-flag’, you’d add it to the file as follows:
+We keep a list of flags in a constants file in `app-web/src/common-code/featureFlags` and all new flags must be added to this file. For example, if you added a flag key of ‘new-testing-flag’ with a default value, you’d add it to the file as follows:
 
 ```typescript
 export const featureFlags = {
     /**
      *  Toggles the $blank feature for testing
      */
-    NEW_TESTING_FLAG: 'new-testing-flag',
+    NEW_TESTING_FLAG: {
+        flag: 'new-testing-flag',
+        defaultValue: true
+    },
 }
 ```
 
@@ -42,7 +45,8 @@ import { featureFlags } from '../../common-code/featureFlags'
 
     const ldClient = useLDClient()
     const newTestFlag = ldClient?.variation(
-            featureFlags.NEW_TESTING_FLAG
+            featureFlags.NEW_TESTING_FLAG.flag,
+            featureFlags.NEW_TESTING_FLAG.defaultValue
     )
 ```
 

@@ -11,10 +11,19 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands'
+import '@cypress/code-coverage/support'
 import './loginCommands'
 import './stateSubmissionFormCommands'
-import './submissionCommands'
-type FormButtonKey = 'CONTINUE_FROM_START_NEW' | 'CONTINUE' | 'SAVE_DRAFT' | 'BACK' 
+import './dashboardCommands'
+import './navigateCommands'
+import './launchDarklyCommands'
+import { FeatureFlagTypes, FlagValueTypes } from '../../../services/app-web/src/common-code/featureFlags'
+
+type FormButtonKey =
+    | 'CONTINUE_FROM_START_NEW'
+    | 'CONTINUE'
+    | 'SAVE_DRAFT'
+    | 'BACK'
 
 declare global {
     namespace Cypress {
@@ -41,9 +50,25 @@ declare global {
             fillOutSupportingDocuments(): void
             waitForDocumentsToLoad(): void
             verifyDocumentsHaveNoErrors(): void
-            submitStateSubmissionForm(success?: boolean, resubmission?: boolean): void
-            navigateForm(buttonName: FormButtonKey, waitForLoad?: boolean): void
-            navigateToSubmissionByUserInteraction(testId: string): void
+            submitStateSubmissionForm(
+                success?: boolean,
+                resubmission?: boolean
+            ): void
+
+            // navigate commands
+            navigateFormByButtonClick(
+                buttonName: FormButtonKey,
+                waitForLoad?: boolean
+            ): void
+            navigateFormByDirectLink(url: string, waitForLoad?: boolean): void
+
+            //dashboard commands
+            clickSubmissionLink(testId: string): void
+
+            //Launch Darkly commands
+            stubFeatureFlags(): void
+            interceptFeatureFlags(toggleFlags?: Partial<Record<FeatureFlagTypes, FlagValueTypes>>): void
+            getFeatureFlagStore(featureFlag?: FeatureFlagTypes[]): Promise<Partial<Record<FeatureFlagTypes, FlagValueTypes>>>
         }
     }
 }

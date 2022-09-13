@@ -1,12 +1,42 @@
 import React from 'react'
-import { GridContainer, Grid } from '@trussworks/react-uswds'
+import { Alert, GridContainer, Grid } from '@trussworks/react-uswds'
 import styles from './Landing.module.scss'
+import { featureFlags } from '../../common-code/featureFlags'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 export const Landing = (): React.ReactElement => {
+    const ldClient = useLDClient()
+    const siteMaintenanceBanner: boolean = ldClient?.variation(
+        featureFlags.SITE_MAINTENANCE_BANNER.flag,
+        featureFlags.SITE_MAINTENANCE_BANNER.defaultValue
+    )
+
     return (
         <>
             <section className={styles.detailsSection}>
                 <GridContainer className={styles.detailsSectionContent}>
+                    {siteMaintenanceBanner && (
+                        <Alert
+                            type="error"
+                            heading="Site Unavailable"
+                            className="margin-bottom-2"
+                        >
+                            MC-Review is currently unavailable due to technical
+                            issues. We are working to resolve these issues as
+                            quickly as possible. If you have questions or need
+                            immediate assistance with your submission, please
+                            email&nbsp;
+                            <a
+                                href="mailto: mc-review@cms.hhs.gov, mc-review-team@truss.works"
+                                className="usa-link"
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                mc-review@cms.hhs.gov
+                            </a>
+                            .
+                        </Alert>
+                    )}
                     <Grid row gap className="margin-top-2">
                         <Grid tablet={{ col: 6 }}>
                             <div className={styles.detailsSteps}>
@@ -56,9 +86,7 @@ export const Landing = (): React.ReactElement => {
                                     dual demonstration contracts)
                                 </li>
                                 <li>State directed preprints</li>
-                                <li>Documents for pre-review</li>
                                 <li>Rate-only submissions</li>
-                                <li>CHIP-only submissions</li>
                             </ul>
 
                             <h2>Before you begin:</h2>

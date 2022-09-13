@@ -3,52 +3,10 @@ import { mcreviewproto } from '../../../gen/healthPlanFormDataProto'
 import {
     basicLockedHealthPlanFormData,
     basicHealthPlanFormData,
-    contractOnly,
-    contractAmendedOnly,
-    unlockedWithALittleBitOfEverything,
-    unlockedWithContacts,
-    unlockedWithDocuments,
-    unlockedWithFullContracts,
-    unlockedWithFullRates,
-    newHealthPlanFormData,
 } from '../../healthPlanFormDataMocks'
-import {
-    UnlockedHealthPlanFormDataType,
-    isLockedHealthPlanFormData,
-    LockedHealthPlanFormDataType,
-} from '../../healthPlanFormDataType'
+
 import { toDomain } from './toDomain'
 import { toProtoBuffer } from './toProtoBuffer'
-
-describe('Validate encoding to protobuf and decoding back to domain model', () => {
-    if (!isLockedHealthPlanFormData(basicLockedHealthPlanFormData())) {
-        throw new Error(
-            'Bad test, the state submission is not a state submission'
-        )
-    }
-
-    test.each([
-        newHealthPlanFormData(),
-        basicHealthPlanFormData(),
-        contractOnly(),
-        unlockedWithContacts(),
-        unlockedWithDocuments(),
-        unlockedWithFullRates(),
-        unlockedWithFullContracts(),
-        unlockedWithALittleBitOfEverything(),
-        basicLockedHealthPlanFormData(),
-        contractAmendedOnly(),
-    ])(
-        'given valid domain model %j expect protobufs to be symmetric)',
-        (
-            domainObject:
-                | UnlockedHealthPlanFormDataType
-                | LockedHealthPlanFormDataType
-        ) => {
-            expect(toDomain(toProtoBuffer(domainObject))).toEqual(domainObject)
-        }
-    )
-})
 
 describe('handles invalid data as expected', () => {
     it('toDomain errors when passed an empty proto message', () => {

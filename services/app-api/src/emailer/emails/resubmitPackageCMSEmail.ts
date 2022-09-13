@@ -3,7 +3,6 @@ import {
     packageName as generatePackageName,
     generateRateName,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import {
     stripHTMLFromTemplate,
     generateCMSReviewerEmails,
@@ -14,6 +13,7 @@ import {
 import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
 import { URL } from 'url'
 import { ProgramType, UpdateInfoType } from '../../domain-models'
+import { formatDateTime } from '../../../../app-web/src/common-code/dateHelpers/calendarDate'
 
 export const resubmitPackageCMSEmail = async (
     pkg: LockedHealthPlanFormDataType,
@@ -22,13 +22,17 @@ export const resubmitPackageCMSEmail = async (
     stateAnalystsEmails: StateAnalystsEmails,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
-    const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
     const reviewerEmails = generateCMSReviewerEmails(
         config,
         pkg,
         stateAnalystsEmails
     )
+
+    if (reviewerEmails instanceof Error) {
+        return reviewerEmails
+    }
+
     const packagePrograms = findPackagePrograms(pkg, statePrograms)
 
     if (packagePrograms instanceof Error) {
@@ -42,7 +46,7 @@ export const resubmitPackageCMSEmail = async (
     const data = {
         packageName: packageName,
         resubmittedBy: updateInfo.updatedBy,
-        resubmittedOn: formatCalendarDate(updateInfo.updatedAt),
+        resubmittedOn: formatDateTime(updateInfo.updatedAt),
         resubmissionReason: updateInfo.updatedReason,
         shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
         rateName: isContractAndRates && generateRateName(pkg, packagePrograms),
@@ -51,8 +55,7 @@ export const resubmitPackageCMSEmail = async (
 
     const result = await renderTemplate<typeof data>(
         'resubmitPackageCMSEmail',
-        data,
-        isUnitTest
+        data
     )
     if (result instanceof Error) {
         return result

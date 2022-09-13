@@ -1,4 +1,7 @@
 describe('documents', () => {
+    beforeEach(() => {
+        cy.stubFeatureFlags()
+    })
     it('can navigate to and from the documents page, saving documents each time', () => {
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
@@ -7,10 +10,10 @@ describe('documents', () => {
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
             const draftSubmissionID = pathname.split('/')[2]
-            cy.visit(`/submissions/${draftSubmissionID}/edit/documents`)
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionID}/edit/documents`)
 
             // Add two of the same document
-            cy.visit(`/submissions/${draftSubmissionID}/edit/documents`)
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionID}/edit/documents`)
             cy.findByTestId('file-input-input').attachFile([
                 'documents/trussel-guide.pdf',
             ])
@@ -31,7 +34,7 @@ describe('documents', () => {
             cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.findByText(/1 complete, 1 error, 0 pending/).should('exist')
             cy.findByText('Duplicate file, please remove').should('exist')
-            cy.visit(`/submissions/${draftSubmissionID}/edit/documents`)
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionID}/edit/documents`)
 
             // Add two more valid documents, then navigate back
             cy.findByRole('heading', { name: /Supporting documents/ })
@@ -67,11 +70,11 @@ describe('documents', () => {
             cy.findByText('Duplicate file, please remove').should('exist')
             cy.findAllByRole('row').should('have.length', 4)
             cy.findByText(/2 complete, 1 error, 0 pending/)
-            cy.navigateForm('BACK')
+            cy.navigateFormByButtonClick('BACK')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
             // reload page, see two documents, duplicate was discarded on Back
-            cy.visit(`/submissions/${draftSubmissionID}/edit/documents`)
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionID}/edit/documents`)
             cy.findAllByRole('row').should('have.length', 3)
             cy.findAllByRole('checkbox', {
                 name: 'rate-supporting',
@@ -81,7 +84,7 @@ describe('documents', () => {
             cy.verifyDocumentsHaveNoErrors()
 
             //  Save as draft
-            cy.navigateForm('SAVE_DRAFT')
+            cy.navigateFormByButtonClick('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
         })
     })
@@ -98,7 +101,7 @@ describe('documents', () => {
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
             const draftSubmissionId = pathname.split('/')[2]
-            cy.visit(`/submissions/${draftSubmissionId}/edit/documents`)
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/documents`)
 
             // Drop invalid files and invalid type message appears
             cy.findByTestId('file-input-droptarget')
@@ -133,11 +136,11 @@ describe('documents', () => {
             cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.verifyDocumentsHaveNoErrors()
 
-            cy.navigateForm('CONTINUE')
+            cy.navigateFormByButtonClick('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Review and submit/ })
 
             // check accessibility of filled out documents page
-            cy.navigateForm('BACK')
+            cy.navigateFormByButtonClick('BACK')
             // Commented out to get react-scripts/webpack 5 upgrade through
             // cy.pa11y({
             //     actions: ['wait for element #documents-hint to be visible'],

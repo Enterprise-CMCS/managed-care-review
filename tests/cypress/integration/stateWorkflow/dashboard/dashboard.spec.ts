@@ -1,4 +1,7 @@
 describe('dashboard', () => {
+    beforeEach(() => {
+        cy.stubFeatureFlags()
+    })
     it('can navigate to and from dashboard page', () => {
         cy.logInAsStateUser()
         cy.findByRole('heading', { level: 1, name: /Dashboard/ })
@@ -23,23 +26,23 @@ describe('dashboard', () => {
 
         // add a draft submission
         cy.startNewContractAndRatesSubmission()
-        cy.navigateForm('SAVE_DRAFT')
+        cy.navigateFormByButtonClick('SAVE_DRAFT')
 
         // a submitted submission
         cy.startNewContractAndRatesSubmission()
 
         cy.fillOutBaseContractDetails()
-        cy.navigateForm('CONTINUE')
+        cy.navigateFormByButtonClick('CONTINUE')
 
         cy.fillOutNewRateCertification()
-        cy.navigateForm('CONTINUE')
+        cy.navigateFormByButtonClick('CONTINUE')
 
         cy.fillOutStateContact()
         cy.fillOutActuaryContact()
-        cy.navigateForm('CONTINUE')
+        cy.navigateFormByButtonClick('CONTINUE')
 
         cy.fillOutSupportingDocuments()
-        cy.navigateForm('CONTINUE')
+        cy.navigateFormByButtonClick('CONTINUE')
 
         // Store submission name for reference later
         let submissionId = ''

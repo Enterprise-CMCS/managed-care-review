@@ -1,17 +1,20 @@
 describe('CMS user can view submission', () => {
+    beforeEach(() => {
+        cy.stubFeatureFlags()
+    })
     it('in the CMS dashboard', () => {
     // state user adds a new package
     cy.logInAsStateUser()
     cy.startNewContractAndRatesSubmission()
     cy.fillOutBaseContractDetails()
-    cy.navigateForm('CONTINUE')
+    cy.navigateFormByButtonClick('CONTINUE')
     cy.fillOutNewRateCertification()
-    cy.navigateForm('CONTINUE')
+    cy.navigateFormByButtonClick('CONTINUE')
     cy.fillOutStateContact()
     cy.fillOutActuaryContact()
-    cy.navigateForm('CONTINUE')
+    cy.navigateFormByButtonClick('CONTINUE')
     cy.fillOutSupportingDocuments()
-    cy.navigateForm('CONTINUE')
+    cy.navigateFormByButtonClick('CONTINUE')
 
     // store submission id for reference later
     let submissionId = ''
@@ -41,6 +44,8 @@ describe('CMS user can view submission', () => {
         })
             .should('exist')
             .click()
+     cy.findByText('Medicaid and CHIP Managed Care Reporting and Review System')
+
     //  sign in CMS user 
     cy.logInAsCMSUser()
     cy.findByTestId('cms-dashboard-page').should('exist')

@@ -7,6 +7,7 @@ import {
     ActuarialFirmType,
     FederalAuthority,
     isLockedHealthPlanFormData,
+    CalendarDate,
 } from '../../healthPlanFormDataType'
 
 /**
@@ -93,6 +94,41 @@ const protoDateToDomain = (
     }
 
     return new Date(Date.UTC(protoDate.year, protoDate.month, protoDate.day))
+}
+
+const protoDateToDomainCalendarDate = (
+    protoDate: mcreviewproto.IDate | null | undefined
+): CalendarDate | undefined => {
+    if (!protoDate) {
+        return undefined
+    }
+
+    // intentionally using `== null` here to check for null and undefined but _not_ 0
+    if (
+        protoDate.year == null ||
+        protoDate.month == null ||
+        protoDate.day == null
+    ) {
+        console.log('LOG: Incomplete Proto Date', protoDate)
+        return undefined
+    }
+    if (protoDate.month < 1 || protoDate.month > 12) {
+        console.log('LOG: Invalid Proto Date', protoDate)
+        return undefined
+    }
+    if (protoDate.day < 1 || protoDate.day > 31) {
+        console.log('LOG: Invalid Proto Date', protoDate)
+        return undefined
+    }
+    if (typeof protoDate.year !== 'number') {
+        console.log('LOG: Invalid Proto Date', protoDate)
+        return undefined
+    }
+    // proto dates are numbers; we have to add leading zeros where necessary
+    const year = protoDate.year.toString()
+    const month = protoDate.month.toString().padStart(2, '0')
+    const day = protoDate.day.toString().padStart(2, '0')
+    return `${year}-${month}-${day}` as CalendarDate
 }
 /*
     Convert proto enum (e.g. SUBMISSION_TYPE_CONTRACT_ONLY) to domain enum (e.g. CONTRACT_ONLY)
@@ -270,8 +306,12 @@ function parseProtoRateAmendment(
     }
 
     return {
-        effectiveDateEnd: protoDateToDomain(rateAmendment.effectiveDateEnd),
-        effectiveDateStart: protoDateToDomain(rateAmendment.effectiveDateStart),
+        effectiveDateEnd: protoDateToDomainCalendarDate(
+            rateAmendment.effectiveDateEnd
+        ),
+        effectiveDateStart: protoDateToDomainCalendarDate(
+            rateAmendment.effectiveDateStart
+        ),
     }
 }
 
@@ -305,11 +345,14 @@ const toDomain = (
     } = formDataMessage
 
     // First things first, let's check the protoName and protoVersion
-    if (protoName !== 'STATE_SUBMISSION' && protoVersion !== 1) {
-        console.log(
+    if (protoName !== 'STATE_SUBMISSION') {
+        console.warn(
             `WARNING: We are unboxing a proto our code doesn't recognize:`,
             protoName,
             protoVersion
+        )
+        console.log(
+            'If the version is off this indicates we are loading a proto that has not been fully migrated.'
         )
     }
 
@@ -355,10 +398,10 @@ const toDomain = (
             formDataMessage?.contractInfo?.contractExecutionStatus
         ),
 
-        contractDateStart: protoDateToDomain(
+        contractDateStart: protoDateToDomainCalendarDate(
             formDataMessage.contractInfo?.contractDateStart
         ),
-        contractDateEnd: protoDateToDomain(
+        contractDateEnd: protoDateToDomainCalendarDate(
             formDataMessage.contractInfo?.contractDateEnd
         ),
         contractDocuments: parseProtoDocuments(
@@ -383,9 +426,11 @@ const toDomain = (
             rateInfo?.rateCapitationType
         ),
         rateDocuments: parseProtoDocuments(rateInfo?.rateDocuments),
-        rateDateStart: protoDateToDomain(rateInfo?.rateDateStart),
-        rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
-        rateDateCertified: protoDateToDomain(rateInfo?.rateDateCertified),
+        rateDateStart: protoDateToDomainCalendarDate(rateInfo?.rateDateStart),
+        rateDateEnd: protoDateToDomainCalendarDate(rateInfo?.rateDateEnd),
+        rateDateCertified: protoDateToDomainCalendarDate(
+            rateInfo?.rateDateCertified
+        ),
         rateProgramIDs: rateInfo?.rateProgramIds ?? [],
         actuaryCommunicationPreference: enumToDomain(
             mcreviewproto.ActuaryCommunicationType,

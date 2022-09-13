@@ -4,8 +4,10 @@
     "private": true,
     "scripts": {
         "precommit": "lint-staged",
-        "start": "react-scripts start",
-        "build": "react-scripts build",
+        "start": "react-scripts -r @cypress/instrument-cra start",
+        "build": "sh ../../run_build.sh",
+        "build_prod": "react scripts build",
+        "build_instrumented": "CYPRESS_INSTRUMENT_PRODUCTION=true react-scripts -r @cypress/instrument-cra build",
         "test": "react-scripts test",
         "eject": "react-scripts eject",
         "clean": "rm -rf node_modules && yarn cache clean",
@@ -43,6 +45,12 @@
         ],
         "coverageReporters": [
             [
+                "json",
+                {
+                    "projectRoot": "../../"
+                }
+            ],
+            [
                 "lcov",
                 {
                     "projectRoot": "../../"
@@ -65,6 +73,8 @@
     },
     "dependencies": {
         "@apollo/client": "^3.4.15",
+        "@cypress/code-coverage": "^3.10.0",
+        "@cypress/instrument-cra": "^1.4.0",
         "@opentelemetry/api": "^1.1.0",
         "@opentelemetry/auto-instrumentations-web": "^0.28.0",
         "@opentelemetry/exporter-trace-otlp-http": "^0.28.0",
@@ -81,6 +91,7 @@
         "@types/path-browserify": "^1.0.0",
         "aws-amplify": "^4.3.4",
         "axios": "^0.25.0",
+        "babel-plugin-istanbul": "^6.1.1",
         "dayjs": "^1.10.5",
         "formik": "^2.2.9",
         "graphql": "^16.2.0",
@@ -95,8 +106,8 @@
         "typescript": "^4.4.4",
         "url-parse": "^1.5.2",
         "uswds": "^2.13.1",
-        "uuid": "^8.3.2",
-        "web-vitals": "^2.1.2",
+        "uuid": "^9.0.0",
+        "web-vitals": "^3.0.1",
         "yup": "^0.32.9",
         "zod": "^3.10.1"
     },
@@ -120,12 +131,11 @@
         "@types/react-test-renderer": "^18.0.0",
         "@types/url-parse": "^1.4.3",
         "@types/uuid": "^8.3.1",
-        "@types/yup": "^0.29.11",
         "@typescript-eslint/eslint-plugin": "^5.6.0",
         "@typescript-eslint/parser": "^5.6.0",
         "classnames": "^2.2.6",
         "eslint-config-prettier": "^7.2.0",
-        "eslint-plugin-jest": "^26.6.0",
+        "eslint-plugin-jest": "^27.0.1",
         "eslint-plugin-jsx-a11y": "^6.5.1",
         "eslint-plugin-prettier": "^4.0.0",
         "eslint-plugin-react": "^7.26.1",

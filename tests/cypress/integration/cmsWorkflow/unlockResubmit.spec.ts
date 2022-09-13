@@ -1,6 +1,9 @@
 import * as path from 'path'
 
 describe('CMS user', () => {
+    beforeEach(() => {
+        cy.stubFeatureFlags()
+    })
     it('can unlock and resubmit', () => {
         cy.logInAsStateUser()
 
@@ -8,13 +11,13 @@ describe('CMS user', () => {
         cy.startNewContractOnlySubmission()
         cy.fillOutBaseContractDetails()
         cy.findByTestId('unlockedBanner').should('not.exist')
-        cy.navigateForm('CONTINUE')
+        cy.navigateFormByButtonClick('CONTINUE')
         cy.fillOutStateContact()
-        cy.navigateForm('CONTINUE')
+        cy.navigateFormByButtonClick('CONTINUE')
         cy.findByRole('heading', { name: /Supporting documents/ }).should(
             'exist'
         )
-        cy.navigateForm('CONTINUE')
+        cy.navigateFormByButtonClick('CONTINUE')
         cy.findByRole('heading', { name: /Review and submit/ }).should('exist')
 
         // Store submission url for reference later
@@ -92,10 +95,7 @@ describe('CMS user', () => {
                     .should('have.attr', 'href')
                     .and('include', 'review-and-submit')
 
-                cy.visit(reviewURL)
-
-                // State user can resubmit and see resubmitted package in dashboard
-                cy.wait('@fetchHealthPlanPackageQuery')
+                cy.navigateFormByDirectLink(reviewURL)
 
                 //Unlock banner for state user to be present with correct data.
                 cy.findByRole('heading', {
@@ -148,10 +148,11 @@ describe('CMS user', () => {
                 cy.logInAsCMSUser({ initialURL: submissionURL })
 
                 //  CMS user sees resubmitted submission and active unlock button
+                cy.findByTestId('submission-summary').should('exist')
                 cy.findByRole('button', { name: 'Unlock submission' }).should(
                     'not.be.disabled'
                 )
-
+                
                 //CSM user should not see unlock banner and should see updated submission banner
                 cy.findByTestId('unlockedBanner').should('not.exist')
                 cy.findByTestId('updatedSubmissionBanner').should('exist')
@@ -161,9 +162,11 @@ describe('CMS user', () => {
 
                 cy.get('[data-testid^="accordionButton_"]').each((button) => {
                     button.trigger('click')
+                    button.siblings().hasClass('usa-accordion__content') /// make sure accordion is expanded
                 })
                 //Check for view previous submission link in the initial accordion item to exist
-                cy.navigateToSubmissionByUserInteraction('revision-link-1')
+                  cy.findByTestId('revision-link-1').should('be.visible')
+                cy.clickSubmissionLink('revision-link-1')
                 //Making sure we are on SubmissionRevisionSummary page and contains version text
                 cy.findByTestId('revision-version')
                     .should('exist')
@@ -173,7 +176,7 @@ describe('CMS user', () => {
                 //Previous submission banner should exist and able to click link to go back to current submission
                 cy.findByTestId('previous-submission-banner').should('exist')
                 //Navigate back to current submission using link inside banner.
-                cy.navigateToSubmissionByUserInteraction(
+                cy.clickSubmissionLink(
                     'currentSubmissionLink'
                 )
                 //MAke sure banner and revision version text are gone.
