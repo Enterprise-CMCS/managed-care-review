@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Modal } from '../../components/Modal/Modal'
-import { ModalRef, Alert } from '@trussworks/react-uswds'
+import { ModalRef } from '@trussworks/react-uswds'
 import { createRef, useCallback, useEffect } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { AuthModeType } from '../../common-code/config'
@@ -9,6 +9,8 @@ import { featureFlags } from '../../common-code/featureFlags/flags'
 import styles from '../StateSubmission/ReviewSubmit/ReviewSubmit.module.scss'
 import { dayjs } from '../../common-code/dateHelpers/dayjs'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { recordJSException } from '../../otelHelpers'
+import { ErrorAlertSignIn } from '../../components'
 
 export const AuthenticatedRouteWrapper = ({
     children,
@@ -36,23 +38,18 @@ export const AuthenticatedRouteWrapper = ({
     const ldClient = useLDClient()
     const countdownDuration: number =
         ldClient?.variation(featureFlags.MODAL_COUNTDOWN_DURATION, 2) * 60
-    const logoutSession = useCallback(() => {
-        updateSessionExpirationState(false)
-        if (logout) {
-            logout({ sessionTimeout: true }).catch((e) => {
-                console.log('Error with logout: ', e)
-                setAlert &&
-                    setAlert(
-                        <Alert
-                            data-testid="Error400"
-                            style={{ width: '600px', marginBottom: '5px' }}
-                            type="error"
-                            heading="Oops! Something went wrong"
-                        />
-                    )
-            })
-        }
-    }, [logout, setAlert, updateSessionExpirationState])
+    const logoutSession = useCallback(
+        (forcedSessionSignout: boolean) => {
+            updateSessionExpirationState(false)
+            if (logout) {
+                logout({ sessionTimeout: forcedSessionSignout }).catch((e) => {
+                    recordJSException(`Error with logout: ${e}`)
+                    setAlert && setAlert(<ErrorAlertSignIn />)
+                })
+            }
+        },
+        [logout, setAlert, updateSessionExpirationState]
+    )
 
     const resetSessionTimeout = () => {
         updateSessionExpirationState(false)
@@ -69,7 +66,7 @@ export const AuthenticatedRouteWrapper = ({
 
     useEffect(() => {
         if (logoutCountdownDuration < 1) {
-            logoutSession()
+            logoutSession(true)
         }
     }, [logoutCountdownDuration, logoutSession])
     return (
@@ -82,7 +79,7 @@ export const AuthenticatedRouteWrapper = ({
                     modalHeading="Session Expiring"
                     onSubmitText="Continue Session"
                     onCancelText="Logout"
-                    onCancel={logoutSession}
+                    onCancel={() => logoutSession(false)}
                     submitButtonProps={{ className: styles.submitButton }}
                     onSubmit={resetSessionTimeout}
                     forceAction={true}

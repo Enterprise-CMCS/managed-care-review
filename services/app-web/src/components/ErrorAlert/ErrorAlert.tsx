@@ -34,7 +34,11 @@ export const ErrorAlert = ({
                     "We're having trouble loading this page. Please refresh your browser and if you continue to experience an error,"}
             </span>
 
-            {showLink && <Link href={MAIL_TO_SUPPORT}>&nbsp;let us know.</Link>}
+            {showLink && (
+                <span>
+                    &nbsp;<Link href={MAIL_TO_SUPPORT}>let us know.</Link>
+                </span>
+            )}
         </Alert>
     )
 }
