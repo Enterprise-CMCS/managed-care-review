@@ -11,15 +11,16 @@ The implementation is heavily relent on the data and generated Types in `flags.t
 
 Overall this improves development time of UI tests behind feature flags.
 
-###Feature flag state management in Cypress
+### Feature flag state management in Cypress
 Our custom Launch Darkly commands intercepts feature flag value requests and returns our own values we feed to the commands. Then the application code will be able to access those custom values, but we also needed a way access them with in Cypress throughout the tests. Specifically to determine when to test UI behind a feature flag.
 
 The approach here was to implement state management that could be accessed though Cypress. Integrating `cy.readFile` and `cy.writeFile` into the Launch Darkly helper commands.
 
 The Cypress commands `cy.interceptFeatureFlags` and `cy.stubFeatureFlags` will generate a json file, using `Cy.writeFile`, in `tests/cypress/fixtures/stores/` named `featureFlagStore.json` using data and Types from `flag.ts` located in `app-web/src/common-code/featureFlags`. The `cy.getFeatureFlagStore()`, using `cy.write`, is used to read the `featureFlagStore.json` file and return the object of feature flags with values.
 
-###LaunchDarkly Cypress helper commands
-- **_interceptFeatureFlags_**: This command allows you to intercept LD calls and set flag values. It also generates a `featureFlagStore.json` file in `tests/cypress/fixtures/stores` with default feature flag values along with any specific values passed in.
+### LaunchDarkly Cypress helper commands
+- #### interceptFeatureFlags
+  This command allows you to intercept LD calls and set flag values. It also generates a `featureFlagStore.json` file in `tests/cypress/fixtures/stores` with default feature flag values along with any specific values passed in.
   ```typescript
     //Intercept feature flag with flag values.
     cy.interceptFeatureFlags({
@@ -32,7 +33,8 @@ The Cypress commands `cy.interceptFeatureFlags` and `cy.stubFeatureFlags` will g
   ```
 
 
-- **_stubFeatureFlags_**: This command intercepts all of LD api calls and returns our own response. This will remove the need for waiting on actual Launch Darkly API calls to return. This command is being used on all specs in `beforeEach` to intercept requests on each test, set up default feature flag values in `featureFlagStore.json` and reset the Launch Darkly feature flag store to default values before each test.
+- #### stubFeatureFlags
+  This command intercepts all of LD api calls and returns our own response. This will remove the need for waiting on actual Launch Darkly API calls to return. This command is being used on all specs in `beforeEach` to intercept requests on each test, set up default feature flag values in `featureFlagStore.json` and reset the Launch Darkly feature flag store to default values before each test.
   ```typescript
     describe('rate details', () => {
         beforeEach(() => {
@@ -48,7 +50,8 @@ The Cypress commands `cy.interceptFeatureFlags` and `cy.stubFeatureFlags` will g
   If you `cy.stubFeatureFlags` before each test, there is no need to `cy.interceptFeatureFlags()` to generate default values for feature flags.
 
 
-- **_getFeatureFlagStore_**: This command reads the `featureFlagStore.json` and returns an object of the feature flag values. You can pass in an array of specific feature flags to return those values instead of the entire set of flags. It's important this command is only called after `stubFeatureFlags` or `interceptFeatureFlags` is called or Cypress will error trying finding the `featureFlagStore.json` file.
+- #### getFeatureFlagStore
+  This command reads the `featureFlagStore.json` and returns an object of the feature flag values. You can pass in an array of specific feature flags to return those values instead of the entire set of flags. It's important this command is only called after `stubFeatureFlags` or `interceptFeatureFlags` is called or Cypress will error trying finding the `featureFlagStore.json` file.
   ```typescript
     Cypress.Commands.add('fillOutNewRateCertification', () => {
         cy.wait(2000)
@@ -80,8 +83,8 @@ The Cypress commands `cy.interceptFeatureFlags` and `cy.stubFeatureFlags` will g
     })
   ```
 
-###Adding feature flags
+### Adding feature flags
 Adding a new feature flag for testing is automatically done once you add the flag into list of flags in the `flags.ts` constants file located in `app-web/src/common-code/featureFlags`.
 
-###Removing feature flags
+### Removing feature flags
 Removing a feature flag is also automatically done once you remove the flag from the  list of flags in the `flags.ts`.
