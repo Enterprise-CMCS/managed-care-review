@@ -197,8 +197,8 @@ const createAndUpdateTestHealthPlanPackage = async (
     ;(draft.actuaryCommunicationPreference = 'OACT_TO_ACTUARY' as const),
         (draft.contractType = 'BASE' as const)
     draft.contractExecutionStatus = 'EXECUTED' as const
-    draft.contractDateStart = new Date(Date.UTC(2025, 5, 1))
-    draft.contractDateEnd = new Date(Date.UTC(2026, 4, 30))
+    draft.contractDateStart = '2025-05-01'
+    draft.contractDateEnd = '2026-04-30'
     draft.contractDocuments = [
         {
             name: 'contractDocument.pdf',
@@ -209,9 +209,11 @@ const createAndUpdateTestHealthPlanPackage = async (
     draft.managedCareEntities = ['MCO']
     draft.federalAuthorities = ['STATE_PLAN' as const]
     draft.rateType = 'NEW' as const
-    draft.rateDateStart = new Date(Date.UTC(2025, 5, 1))
-    draft.rateDateEnd = new Date(Date.UTC(2026, 4, 30))
-    draft.rateDateCertified = new Date(Date.UTC(2025, 3, 15))
+    draft.contractDateStart = '2025-05-01'
+    draft.contractDateEnd = '2026-04-30'
+    draft.rateDateEnd = '2026-04-30'
+    draft.rateDateStart = '2025-05-01'
+    draft.rateDateCertified = '2025-03-15'
     draft.rateDocuments = [
         {
             name: 'rateDocument.pdf',

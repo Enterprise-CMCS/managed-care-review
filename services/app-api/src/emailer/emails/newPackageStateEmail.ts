@@ -22,7 +22,6 @@ export const newPackageStateEmail = async (
     config: EmailConfiguration,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
-    const isUnitTest = config.baseUrl === 'http://localhost'
     const receiverEmails = generateStateReceiverEmails(pkg, user)
     const packagePrograms = findPackagePrograms(pkg, statePrograms)
 
@@ -58,18 +57,17 @@ export const newPackageStateEmail = async (
                 ? 'Rating period'
                 : 'Rate amendment effective dates',
         rateDatesStart: hasRateAmendmentInfo
-            ? formatCalendarDate(pkg.rateAmendmentInfo.effectiveDateStart)
+            ? formatCalendarDate(pkg.rateAmendmentInfo?.effectiveDateStart)
             : formatCalendarDate(pkg.rateDateStart),
         rateDatesEnd: hasRateAmendmentInfo
-            ? formatCalendarDate(pkg.rateAmendmentInfo.effectiveDateEnd)
+            ? formatCalendarDate(pkg.rateAmendmentInfo?.effectiveDateEnd)
             : formatCalendarDate(pkg.rateDateEnd),
         submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
     }
 
     const result = await renderTemplate<typeof data>(
         'newPackageStateEmail',
-        data,
-        isUnitTest
+        data
     )
 
     if (result instanceof Error) {
