@@ -63,11 +63,6 @@ function AuthProvider({
     const ldClient = useLDClient()
     const navigate = useNavigate()
 
-    const forceSignoutRedirect: boolean = ldClient?.variation(
-        featureFlags.FORCE_SIGNOUT_REDIRECT,
-        false
-    )
-
     // session expiration modal
     const [sessionIsExpiring, setSessionIsExpiring] = useState<boolean>(false)
 
@@ -159,7 +154,7 @@ function AuthProvider({
                     `[User auth error]: Unable to authenticate user though user seems to be logged in. Message: ${error.message}`
                 )
                 // since we have an auth request error but a potentially logged in user, we log out fully from Auth context and redirect to dashboard for clearer user experience
-                if (forceSignoutRedirect) navigate(`/?session-timeout=true`)
+                navigate(`/?session-timeout=true`)
             }
         } else if (data?.fetchCurrentUser) {
             if (!isAuthenticated) {

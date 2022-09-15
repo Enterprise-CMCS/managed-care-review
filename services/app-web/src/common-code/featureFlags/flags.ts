@@ -50,10 +50,6 @@ export const featureFlags = {
         defaultValue: false,
     },
     /**
-     * Test force signout redirect
-     */
-    FORCE_SIGNOUT_REDIRECT: 'force-signout-redirect',
-    /**
      * Enables selection of programs that apply to rate certification
      */
     RATE_CERT_PROGRAMS: {
