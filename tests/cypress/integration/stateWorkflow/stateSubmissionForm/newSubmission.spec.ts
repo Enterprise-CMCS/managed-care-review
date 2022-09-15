@@ -1,4 +1,7 @@
 describe('new submission', () => {
+    beforeEach(() => {
+        cy.stubFeatureFlags()
+    })
     it('can navigate to and from new page', () => {
         cy.logInAsStateUser()
 

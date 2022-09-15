@@ -1,4 +1,7 @@
 describe('contacts', () => {
+    beforeEach(() => {
+        cy.stubFeatureFlags()
+    })
     it('can navigate to and from contacts page with contract only submission', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()

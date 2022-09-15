@@ -1,4 +1,7 @@
 describe('CMS user can view submission', () => {
+    beforeEach(() => {
+        cy.stubFeatureFlags()
+    })
     it('in the CMS dashboard', () => {
     // state user adds a new package
     cy.logInAsStateUser()

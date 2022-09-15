@@ -1,4 +1,7 @@
 describe('login', () => {
+    beforeEach(() => {
+        cy.stubFeatureFlags()
+    })
     it('can log in and log out as expected', () => {
         cy.logInAsStateUser()
 

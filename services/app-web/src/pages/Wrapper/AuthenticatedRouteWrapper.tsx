@@ -37,7 +37,11 @@ export const AuthenticatedRouteWrapper = ({
     const modalRef = createRef<ModalRef>()
     const ldClient = useLDClient()
     const countdownDuration: number =
-        ldClient?.variation(featureFlags.MODAL_COUNTDOWN_DURATION, 2) * 60
+        ldClient?.variation(
+            featureFlags.MODAL_COUNTDOWN_DURATION.flag,
+            featureFlags.MODAL_COUNTDOWN_DURATION.defaultValue
+        ) * 60
+
     const logoutSession = useCallback(
         (forcedSessionSignout: boolean) => {
             updateSessionExpirationState(false)
@@ -71,7 +75,6 @@ export const AuthenticatedRouteWrapper = ({
     }, [logoutCountdownDuration, logoutSession])
     return (
         <>
-            {' '}
             {
                 <Modal
                     modalRef={modalRef}

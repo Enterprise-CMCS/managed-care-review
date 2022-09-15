@@ -11,8 +11,8 @@ export const Landing = (): React.ReactElement => {
     const location = useLocation()
     const ldClient = useLDClient()
     const siteMaintenanceBanner: boolean = ldClient?.variation(
-        featureFlags.SITE_MAINTENANCE_BANNER,
-        false
+        featureFlags.SITE_MAINTENANCE_BANNER.flag,
+        featureFlags.SITE_MAINTENANCE_BANNER.defaultValue
     )
 
     const redirectFromSessionTimeout = new URLSearchParams(location.search).get(

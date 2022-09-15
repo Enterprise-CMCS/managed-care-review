@@ -72,14 +72,17 @@ function AuthProvider({
     const [sessionIsExpiring, setSessionIsExpiring] = useState<boolean>(false)
 
     const minutesUntilExpiration: number = ldClient?.variation(
-        featureFlags.MINUTES_UNTIL_SESSION_EXPIRES,
-        30
+        featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.flag,
+        featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.defaultValue
     )
     const sessionExpirationTime = useRef<dayjs.Dayjs>(
         dayjs(Date.now()).add(minutesUntilExpiration, 'minute')
     )
     const countdownDurationSeconds: number =
-        ldClient?.variation(featureFlags.MODAL_COUNTDOWN_DURATION, 2) * 60
+        ldClient?.variation(
+            featureFlags.MODAL_COUNTDOWN_DURATION.flag,
+            featureFlags.MODAL_COUNTDOWN_DURATION.defaultValue
+        ) * 60
     const [logoutCountdownDuration, setLogoutCountdownDuration] =
         useState<number>(countdownDurationSeconds)
     const modalCountdownTimers = useRef<NodeJS.Timer[]>([])
