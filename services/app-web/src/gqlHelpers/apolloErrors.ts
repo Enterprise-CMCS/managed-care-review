@@ -13,7 +13,7 @@ const handleNetworkError = (
             return
         } else if (serverError.statusCode === 403 && isAuthenticated) {
             // Something has caused the user to lose their session outside the scope of MC-Review.
-            // Log this so we have a record of it, but not entirely unexpected if user is opening application in multiple and only logging out of one of them.
+            // Log this so we have a record of it, but not entirely unexpected if user is opening application in multiple tabs and only logging out of one of them.
             recordJSException(
                 `[User auth error]: Code: ${serverError.statusCode} Message: ${serverError.message} ${serverError.stack}`
             )
