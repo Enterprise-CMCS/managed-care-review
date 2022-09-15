@@ -32,30 +32,34 @@ describe('Landing', () => {
         ).toBeNull()
     })
 
-    it('displays signin error alert when query parameter included', async () => {
+    it('displays session expired when query parameter included', async () => {
         ldUseClientSpy({ 'site-maintenance-banner': false })
         renderWithProviders(<Landing />, {
             routerProvider: { route: '/?session-timeout' },
         })
         expect(
-            await screen.queryByRole('heading', { name: 'Sign in error' })
+            await screen.queryByRole('heading', { name: 'Session expired' })
         ).toBeNull()
         expect(
-            await screen.queryByText(/There has been a problem signing in/)
+            await screen.queryByText(
+                /You have been logged out due to inactivity/
+            )
         ).toBeNull()
     })
-    it('does not display signin error alert by default', async () => {
+    it('does not display session expired by default', async () => {
         ldUseClientSpy({ 'site-maintenance-banner': false })
         renderWithProviders(<Landing />, {
             routerProvider: { route: '/' },
         })
         expect(
             await screen.queryByRole('heading', {
-                name: 'Sign in error',
+                name: 'Session expired',
             })
         ).toBeNull()
         expect(
-            await screen.queryByText(/There has been a problem signing in/)
+            await screen.queryByText(
+                /You have been logged out due to inactivity/
+            )
         ).toBeNull()
     })
 })

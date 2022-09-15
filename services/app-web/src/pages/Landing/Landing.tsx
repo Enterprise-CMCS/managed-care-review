@@ -4,8 +4,10 @@ import styles from './Landing.module.scss'
 import { featureFlags } from '../../common-code/featureFlags'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { useLocation } from 'react-router-dom'
-import { ErrorAlertSiteUnavailable } from '../../components/ErrorAlert/ErrorAlertSiteUnavailable'
-import { ErrorAlertSignIn } from '../../components/ErrorAlert/ErrorAlertSignIn'
+import {
+    ErrorAlertSiteUnavailable,
+    ErrorAlertSessionExpired,
+} from '../../components'
 
 export const Landing = (): React.ReactElement => {
     const location = useLocation()
@@ -25,7 +27,7 @@ export const Landing = (): React.ReactElement => {
                 <GridContainer className={styles.detailsSectionContent}>
                     {siteMaintenanceBanner && <ErrorAlertSiteUnavailable />}
                     {redirectFromSessionTimeout && !siteMaintenanceBanner && (
-                        <ErrorAlertSignIn />
+                        <ErrorAlertSessionExpired />
                     )}
                     <Grid row gap className="margin-top-2">
                         <Grid tablet={{ col: 6 }}>

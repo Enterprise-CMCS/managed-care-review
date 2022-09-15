@@ -1,6 +1,7 @@
 import { Story } from '@storybook/react'
 import { ErrorAlertProps, ErrorAlert } from './ErrorAlert'
 import { ErrorAlertFailedRequest } from './ErrorAlertFailedRequest'
+import { ErrorAlertSessionExpired } from './ErrorAlertSessionExpired'
 import { ErrorAlertSignIn } from './ErrorAlertSignIn'
 import { ErrorAlertSiteUnavailable } from './ErrorAlertSiteUnavailable'
 
@@ -27,5 +28,6 @@ export const ListOfApplicationErrorAlerts = (): React.ReactElement => (
         <ErrorAlertFailedRequest />
         <ErrorAlertSiteUnavailable />
         <ErrorAlertSignIn />
+        <ErrorAlertSessionExpired />
     </div>
 )

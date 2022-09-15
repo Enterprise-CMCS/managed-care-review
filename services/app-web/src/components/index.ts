@@ -63,4 +63,5 @@ export {
     ErrorAlertSignIn,
     ErrorAlertSiteUnavailable,
     ErrorAlertFailedRequest,
+    ErrorAlertSessionExpired,
 } from './ErrorAlert'
