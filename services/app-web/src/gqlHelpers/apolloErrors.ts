@@ -52,11 +52,7 @@ const isLikelyUserAuthError = (
     const { networkError } = error
     if (networkError?.name === 'ServerError') {
         const serverError = networkError as ServerError
-        if (serverError.statusCode === 403 && isAuthenticated) {
-            return true
-        } else {
-            return false
-        }
+        return serverError.statusCode === 403 && isAuthenticated
     } else {
         return false
     }
