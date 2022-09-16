@@ -6,6 +6,7 @@ import {
 import { GraphQLErrors } from '@apollo/client/errors'
 
 import { recordJSException } from '../otelHelpers'
+import { handleGQLErrors } from './apolloErrors'
 
 // Watch out here, errors returned from these wrappers could be displayed on frontend.
 // Make sure we are recording exceptions with detailed messages but returning errors with basic and user friendly text.
@@ -15,7 +16,7 @@ export const unlockMutationWrapper = async (
     unlockedReason: string
 ): Promise<HealthPlanPackage | GraphQLErrors | Error> => {
     try {
-        const result = await unlockHealthPlanPackage({
+        const { data, errors } = await unlockHealthPlanPackage({
             variables: {
                 input: {
                     pkgID: id,
@@ -24,17 +25,18 @@ export const unlockMutationWrapper = async (
             },
         })
 
-        if (result.errors) {
+        if (errors) {
+            handleGQLErrors(errors)
             recordJSException(
-                `GraphQL error attempting to unlock. ID: ${id} Error message: ${result.errors}`
+                `GraphQL error attempting to unlock. ID: ${id} Error message: ${errors}`
             )
             return new Error('Error attempting to unlock.')
         }
 
-        if (result.data?.unlockHealthPlanPackage.pkg) {
-            return result.data?.unlockHealthPlanPackage.pkg
+        if (data?.unlockHealthPlanPackage.pkg) {
+            return data?.unlockHealthPlanPackage.pkg
         } else {
-            return new Error('No errors, and no unlock result.')
+            return new Error('No errors, but also no unlock data.')
         }
     } catch (error) {
         // this can be an errors object

@@ -1,12 +1,15 @@
 import React, { MutableRefObject, useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import * as ld from 'launchdarkly-js-client-sdk'
 import { AuthModeType } from '../common-code/config'
 import { useFetchCurrentUserQuery, User as UserType } from '../gen/gqlClient'
 import { logoutLocalUser } from '../localAuth'
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import * as ld from 'launchdarkly-js-client-sdk'
 import { featureFlags } from '../common-code/featureFlags'
 import { dayjs } from '../common-code/dateHelpers/dayjs'
+import { recordJSException } from '../otelHelpers/tracingHelper'
+import { handleApolloError } from '../gqlHelpers/apolloErrors'
 
 type LogoutFn = () => Promise<null>
 
@@ -18,7 +21,9 @@ type AuthContextType = {
     checkIfSessionsIsAboutToExpire: () => void
     loggedInUser: UserType | undefined
     loginStatus: LoginStatusType
-    logout: undefined | (() => Promise<void>)
+    logout:
+        | undefined
+        | (({ sessionTimeout }: { sessionTimeout: boolean }) => Promise<void>) // sessionTimeout true when logout is due to session ending
     logoutCountdownDuration: number
     sessionExpirationTime: MutableRefObject<dayjs.Dayjs | undefined>
     sessionIsExpiring: boolean
@@ -55,8 +60,12 @@ function AuthProvider({
     )
     const [loginStatus, setLoginStatus] =
         useState<LoginStatusType>('LOGGED_OUT')
-    const [sessionIsExpiring, setSessionIsExpiring] = useState<boolean>(false)
     const ldClient = useLDClient()
+    const navigate = useNavigate()
+
+    // session expiration modal
+    const [sessionIsExpiring, setSessionIsExpiring] = useState<boolean>(false)
+
     const minutesUntilExpiration: number = ldClient?.variation(
         featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.flag,
         featureFlags.MINUTES_UNTIL_SESSION_EXPIRES.defaultValue
@@ -136,19 +145,16 @@ function AuthProvider({
 
     if (!loading) {
         if (error) {
-            const { graphQLErrors, networkError } = error
+            handleApolloError(error, isAuthenticated)
 
-            if (graphQLErrors)
-                graphQLErrors.forEach(({ message, locations, path }) =>
-                    console.log(
-                        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-                    )
-                )
-
-            if (networkError) console.log(`[Network error]: ${networkError}`)
             if (isAuthenticated) {
                 setLoggedInUser(undefined)
                 setLoginStatus('LOGGED_OUT')
+                recordJSException(
+                    `[User auth error]: Unable to authenticate user though user seems to be logged in. Message: ${error.message}`
+                )
+                // since we have an auth request error but a potentially logged in user, we log out fully from Auth context and redirect to dashboard for clearer user experience
+                navigate(`/?session-timeout=true`)
             }
         } else if (data?.fetchCurrentUser) {
             if (!isAuthenticated) {
@@ -220,13 +226,18 @@ function AuthProvider({
     const logout =
         loggedInUser === undefined
             ? undefined
-            : () => {
+            : ({ sessionTimeout }: { sessionTimeout: boolean }) => {
                   return new Promise<void>((_resolve, reject) => {
                       realLogout()
                           .then(() => {
                               // Hard navigate back to /
                               // this is more like how things work with IDM anyway.
-                              window.location.href = '/'
+                              if (sessionTimeout) {
+                                  window.location.href =
+                                      '/?session-timeout=true'
+                              } else {
+                                  window.location.href = '/'
+                              }
                           })
                           .catch((e) => {
                               console.log('Logout Failed.', e)
