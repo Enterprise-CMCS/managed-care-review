@@ -16584,7 +16584,7 @@ is-buffer@^2.0.0:
   resolved "https://registry.yarnpkg.com/is-buffer/-/is-buffer-2.0.5.tgz#ebc252e400d22ff8d77fa09888821a24a658c191"
   integrity sha512-i2R6zNFDwgEHJyQUtJEk0XFi1i0dPFn/oqjK3/vPCcDeJvW5NQ83V8QbicfF1SupOaB0h8ntgBC2YiE7dfyctQ==
 
-is-builtin-module@^3.1.0:
+is-builtin-module@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/is-builtin-module/-/is-builtin-module-3.2.0.tgz#bb0310dfe881f144ca83f30100ceb10cf58835e0"
   integrity sha512-phDA4oSGt7vl1n5tJvTWooWWAsXLY+2xCnxNqvKhGEzujg+A43wPlPOyDg3C8XQHN+6k/JTQWJ/j0dQh/qr+Hw==
@@ -23420,15 +23420,15 @@ serverless-stack-termination-protection@^2.0.2:
   integrity sha512-pPUVJmH5if8A12KVSTMqNjo7u8rfW0/vJO+UFp19lvkY0t8jfoO3R3DySwTDVcB+jzaCrU/NyEHPtbiDLVjSSw==
 
 serverless-webpack@^5.7.1:
-  version "5.8.0"
-  resolved "https://registry.yarnpkg.com/serverless-webpack/-/serverless-webpack-5.8.0.tgz#930b9c6cbc8a60e87f7207fd4b23a7e20e4770ea"
-  integrity sha512-hN45J+jWpVb8lYFfteqQhE2qlDAoKl1UM7KVJSQK9S2nyJVqgbxGI02WpCCDgofqFUXO1hEyNFnCnrW8dDG3FQ==
+  version "5.9.1"
+  resolved "https://registry.yarnpkg.com/serverless-webpack/-/serverless-webpack-5.9.1.tgz#46bf25d4b013b2bc1e5522c8a2eddee37506f439"
+  integrity sha512-Xkry+xNTjc8MVPXluePxxDhy8/7ZYL8gs0YuxuVbrrAyEbeviPWKGxHg41559fcQEpEoYN/1Ko29b5303iv1vQ==
   dependencies:
     archiver "^5.3.1"
     bluebird "^3.7.2"
     fs-extra "^9.1.0"
     glob "^7.2.3"
-    is-builtin-module "^3.1.0"
+    is-builtin-module "^3.2.0"
     lodash "^4.17.21"
     semver "^7.3.7"
   optionalDependencies:
