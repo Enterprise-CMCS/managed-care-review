@@ -1,6 +1,6 @@
 # Endpoints
 
-There are two ways that we create endpoints in our app. One uses GraphQL, the other creates handlers for AWS Lambda.
+There are two ways that we create endpoints in our app. One uses GraphQL, the other creates AWS Lambda handlers.
 
 When we want to fetch or update information relevant to the app itself--think of submissions, or user info--we'll typically use GraphQL.
 
@@ -38,9 +38,9 @@ We're telling GraphQL that we want a query called dataExport, which returns a fi
 
 #### The domain model
 
-We use Typescript in our app, so all the data flowing from GraphQL through the api layer, to the front end, must also have a type. We keep the types that our shared between the api layer and the front end in our domain models.
+We use Typescript in our app, so all the data flowing from GraphQL through the api layer to the front end must also have a type. We keep the types that are shared between the api layer and the front end in our domain models.
 
-_**Create a new domain model in `/app-api/src/domain-models/DataExport.ts`**_ Let's call it DataExport.ts and put the following type in it.
+_**Create a new domain model in `/app-api/src/domain-models/DataExport.ts`**_ Put the following type in it.
 
 ```typescript
 export type DataExportType = {
@@ -77,6 +77,8 @@ export async function dataExport(
 
 Recall the `schema.prisma` file. We're saying, in the `State` model (`client.state`, in this snippet), get the first record. From that result, give us the `name` field, and we'll assign it to a key of `name` in the object that we return. (Note that our object key can be whatever we want (as long as it matches the types we just made). It doesn't have to match the property name from the result, but in many cases that will make the most sense.)
 
+Also note that here we need the DataExportType that we just created in the domain model.
+
 #### Adding our method to the store
 
 Once we've defined this Prisma method, we can add it to our store, which will in turn make it available to our resolvers.
@@ -97,14 +99,14 @@ dataExport: () => Promise<DataExportType | undefined>
 And then in the NewPostgresStore:
 
 ```typescript
-    dataExport: () => dataExport(client),
+dataExport: () => dataExport(client),
 ```
 
-Now, when we access the store in our app, the dataExport method we defined above will be available to us.
+When we access the store in our app, the dataExport method we defined above will be available to us.
 
 ### Creating the resolver
 
-We use Apollo Client to interface with our data source and to provide information from the store to the front-end; the methods to do that are called "resolvers".
+We use Apollo Client to interface with our data source and to provide information from the store to the front-end; the methods to do that are called "resolvers".  
 _**Create `/app-api/src/resolvers/dataExport.ts`**_.
 Here's the code.
 
@@ -125,7 +127,9 @@ export function dataExportResolver(store: Store): QueryResolvers['dataExport'] {
 }
 ```
 
-The method we just put on the store gets called here. It will return the result of client.state.findFirst() that we defined above. Now we have to add this resolver to our resolver config, so that it can be used on the front end.
+The method we just put on the store gets called here. It will return the result of client.state.findFirst() that we defined above. The return type of `QueryResolvers['dataExport']` is a little mysterious. `QueryResolvers` is a generated file that will include the resolver we're defining here. We'll go over how to generate `QueryResolvers` a little further down.
+
+Now we have to add this resolver to our resolver configuration, so that it can be used on the front end.
 
 _**Go to `/app-api/src/resolvers/configureResolvers.ts`**_
 
@@ -144,15 +148,16 @@ dataExport: dataExportResolver(store),
 ### Generating code
 
 Once we have our backend code in place, we need to run a couple of commands to generate glue types and methods.
-On the command line, navigate to `/services/app-graphql`.
-Run `yarn gqlgen`
 
-Again on the command line, navigate to `/services/app-api`
-Run `yarn prisma generate`
+_**On the command line, navigate to `/services/app-graphql`.**_  
+_**Run `yarn gqlgen`**_
+
+_**Again on the command line, navigate to `/services/app-api`**_  
+_**Run `yarn prisma generate`**_
 
 ### Getting data on the front end
 
-One result of the `gen` commands is to create a hook that we can use on the front end to call our new resolver. The name of the hook will be of the form _useWhatYourResolverIsCalledQuery_ (it will end with "Mutation" if that's what you've created). You can pull it in and get data.
+One result of the `generate` commands is to create a hook that we can use on the front end to call our new resolver. The name of the hook will be of the form _useWhatYourResolverIsCalledQuery_ (it will end with "Mutation" if that's what you've created). You can pull it in and get data.
 
 ```typescript
 import { useDataExportQuery } from '../../gen/gqlClient'
@@ -163,7 +168,7 @@ const { data, loading, error } = useDataExportQuery()
 
 ### Serverless configuration
 
-It's considerably more straightforward to create an endpoint through serverless/AWS. When we create a handler, we're telling serverless to create a new Lambda function for us in AWS. If we configure things correctly, that function will have access to things like our postgres database, which itself is hosted on AWS. Here's one existing handler configuration, found in `/services/app-api/serverless.yml`.
+When we create a handler, we're telling serverless to create a new Lambda function for us in AWS. If we configure it correctly, that function will have access to things like our postgres database, which itself is hosted on AWS. Here's one existing handler configuration, found in `/services/app-api/serverless.yml`.
 
 ```yaml
 reports:
@@ -183,19 +188,19 @@ reports:
         subnetIds: ${self:custom.privateSubnets}
 ```
 
-The code that runs when this handler runs is in `/app-api/src/handlers/reports.ts`.
+The code that runs when this handler is called is in `/app-api/src/handlers/reports.ts`.
 
-The handler points to `/app-api/src/handlers/reports.main`. We're telling the handler where to look for the file that contains the code that will run in the lambda (`src/handlers`) and also the name of the function (`main`). In reports.ts that the exported handler is called `main`. The location and exported method of `reports.ts` have to match what's specified on the `handler:` line in our YAML file.
+The handler points to `/app-api/src/handlers/reports.main`. We're telling the handler where to look for the file that contains the code that will run in the lambda (`src/handlers`) and also the name of the function (`main`). In `reports.ts` the exported handler is called `main`. The location and exported method of `reports.ts` have to match what's specified on the `handler:` line in our YAML file.
 
 We also provide a `path`. This handler will run when someone navigates to the site's base name, slash reports. For prod, it would be `https://mc-review.onemac.cms.gov/reports`.
 
 The `authorizer` line tells AWS that this method can only be invoked by a user who is logged in and has permissions set in AWS IAM. This will typically flow from someone being a state or CMS user, with permission to interact with the main site.
 
-`layers` tie this handler to services that it needs. In this case, it needs database access, so there's a Prisma layer, and it's also being tied our `otel`, or open telemetry service, for observability.
+`layers` tie this handler to services that it needs. In this case, it needs database access, so there's a Prisma layer, and it's also being tied to `otel`, our open telemetry service, for observability.
 
 In order to communicate with those layers, we have to specify which `vpc`, or virtual private cloud, this handler will run within.
 
-Please note that API Gateway handlers have a hard timeout of 30 seconds, which we cannot modify or exceed. If your function takes longer than that to run, you'll need to put some of the functionality in non-ApiGateway Lambdas and consume the output in your endpoint/handler.
+API Gateway handlers have a hard timeout of 30 seconds, which we cannot modify or exceed. If your function takes longer than that to run, you'll need to put some of the functionality in non-ApiGateway Lambdas and consume the output in your endpoint/handler.
 
 ### Handler code
 
