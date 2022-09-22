@@ -1,4 +1,4 @@
-# Endpoints
+# How to create a new endpoint
 
 There are two ways that we create endpoints in our app. One uses GraphQL, the other creates AWS Lambda handlers.
 
