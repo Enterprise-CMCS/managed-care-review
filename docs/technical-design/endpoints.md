@@ -79,7 +79,9 @@ Recall the `schema.prisma` file. We're saying, in the `State` model (`client.sta
 
 Also note that here we need the DataExportType that we just created in the domain model.
 
-#### Adding our method to the store
+#### Adding our method to the Store
+
+We handle the database actions through an exported "Store", rather than calling the methods directly.
 
 Once we've defined this Prisma method, we can add it to our store, which will in turn make it available to our resolvers.
 _**Go to `/app-api/src/postgres/postgresStore.ts`**_.
