@@ -172,7 +172,7 @@ We use AWS Lambda to build RESTful endpoints in our application. When we create 
 
 ### Serverless configuration
 
-When we create a handler, we're telling serverless to create a new Lambda function for us in AWS. If we configure it correctly, that function will have access to things like our postgres database, which itself is hosted on AWS. Here's one existing handler configuration, found in `/services/app-api/serverless.yml`.
+Here is an example of serverless configuration for a Lambda that handles an api request, found in `/services/app-api/serverless.yml`.
 
 ```yaml
 reports:
