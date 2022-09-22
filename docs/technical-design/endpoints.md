@@ -2,7 +2,7 @@
 
 There are two ways that we create endpoints in our app. One uses GraphQL, the other creates AWS Lambda handlers.
 
-When we want to fetch or update information relevant to the app itself--think of submissions, or user info--we'll typically use GraphQL.
+**When we want to fetch or update information relevant to the app itself--think of submissions, or user info--we'll typically use GraphQL.**
 
 When we want to communicate with a service like New Relic, download a file, or, for example, to set up a health-check endpoint, we'll use a handler. The relative merits of each approach should become clear below.
 
