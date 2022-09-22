@@ -108,7 +108,7 @@ When we access the store in our app, the dataExport method we defined above will
 
 ### Creating the resolver
 
-We use Apollo Client to interface with our data source and to provide information from the store to the front-end; the methods to do that are called "resolvers".  
+We use Apollo Client to interface with our data source and to provide information from the store to the front-end; the methods to do that are called ["resolvers"](https://www.apollographql.com/docs/apollo-server/data/resolvers/).  
 _**Create `/app-api/src/resolvers/dataExport.ts`**_.
 Here's the code.
 
