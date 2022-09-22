@@ -58,7 +58,7 @@ You can think of this as the mirror-image of the GraphQL query, but for the appl
 
 Now let's get the data that we want.
 
-_**Create a new file: `/app-api/src/postgres/dataExport.ts`**_. We use Prisma to query the database.
+_**Create a new file: `/app-api/src/postgres/dataExport.ts`**_. We use [Prisma to query the database](https://www.prisma.io/docs/concepts/components/prisma-client/relation-queries).
 
 ```typescript
 import { PrismaClient } from '@prisma/client'
