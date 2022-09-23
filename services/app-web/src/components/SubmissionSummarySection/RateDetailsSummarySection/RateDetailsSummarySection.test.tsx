@@ -4,10 +4,7 @@ import {
     mockStateSubmission,
     mockMNState,
 } from '../../../testHelpers/apolloHelpers'
-import {
-    renderWithProviders,
-    ldUseClientSpy,
-} from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
 import { generateRateName } from '../../../common-code/healthPlanFormDataType'
 
@@ -314,8 +311,6 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
     })
     it('renders programs that apply to rate certification', async () => {
-        ldUseClientSpy({ 'rate-certification-programs': true })
-
         const draftSubmission = mockContractAndRatesDraft()
         draftSubmission.rateProgramIDs = [
             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',

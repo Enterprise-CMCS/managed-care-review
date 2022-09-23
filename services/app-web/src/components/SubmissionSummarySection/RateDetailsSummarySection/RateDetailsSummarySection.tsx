@@ -12,8 +12,6 @@ import { generateRateName } from '../../../common-code/healthPlanFormDataType/'
 import styles from '../SubmissionSummarySection.module.scss'
 import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { Program } from '../../../gen/gqlClient'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
 
 export type RateDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -41,14 +39,6 @@ export const RateDetailsSummarySection = ({
     const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
     const rateSupportingDocuments = submission.documents.filter((doc) =>
         doc.documentCategories.includes('RATES_RELATED')
-    )
-
-    const ldClient = useLDClient()
-
-    //If rate program feature flag is off, then turn off displaying program list and omit from Yup schema.
-    const showRatePrograms = ldClient?.variation(
-        featureFlags.RATE_CERT_PROGRAMS.flag,
-        featureFlags.RATE_CERT_PROGRAMS.defaultValue
     )
 
     const rateName = generateRateName(submission, statePrograms)
@@ -120,7 +110,7 @@ export const RateDetailsSummarySection = ({
                 </h3>
 
                 <DoubleColumnGrid>
-                    {ratePrograms && showRatePrograms && (
+                    {ratePrograms && (
                         <DataDetail
                             id="ratePrograms"
                             label="Programs this rate certification covers"
