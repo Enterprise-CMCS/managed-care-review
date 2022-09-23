@@ -421,47 +421,42 @@ export const RateDetails = ({
                                     onFileItemsUpdate={onFileItemsUpdate}
                                 />
                             </FormGroup>
-                            {showRatePrograms && (
-                                <FormGroup
-                                    error={showFieldErrors(
-                                        errors.rateProgramIDs
-                                    )}
-                                >
-                                    <Label htmlFor="rateProgramIDs">
-                                        Programs this rate certification covers
-                                    </Label>
-                                    {showFieldErrors(errors.rateProgramIDs) && (
-                                        <PoliteErrorMessage>
-                                            {errors.rateProgramIDs}
-                                        </PoliteErrorMessage>
-                                    )}
-                                    <Field name="rateProgramIDs">
-                                        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-                                        {/* @ts-ignore */}
-                                        {({ form }) => (
-                                            <ProgramSelect
-                                                name="rateProgramIDs"
-                                                inputId="rateProgramIDs"
-                                                statePrograms={statePrograms}
-                                                programIDs={
-                                                    values.rateProgramIDs
-                                                }
-                                                aria-label="programs (required)"
-                                                onChange={(selectedOption) =>
-                                                    form.setFieldValue(
-                                                        'rateProgramIDs',
-                                                        selectedOption.map(
-                                                            (item: {
-                                                                value: string
-                                                            }) => item.value
-                                                        )
+                            <FormGroup
+                                error={showFieldErrors(errors.rateProgramIDs)}
+                            >
+                                <Label htmlFor="rateProgramIDs">
+                                    Programs this rate certification covers
+                                </Label>
+                                {showFieldErrors(errors.rateProgramIDs) && (
+                                    <PoliteErrorMessage>
+                                        {errors.rateProgramIDs}
+                                    </PoliteErrorMessage>
+                                )}
+                                <Field name="rateProgramIDs">
+                                    {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                                    {/* @ts-ignore */}
+                                    {({ form }) => (
+                                        <ProgramSelect
+                                            name="rateProgramIDs"
+                                            inputId="rateProgramIDs"
+                                            statePrograms={statePrograms}
+                                            programIDs={values.rateProgramIDs}
+                                            aria-label="programs (required)"
+                                            onChange={(selectedOption) =>
+                                                form.setFieldValue(
+                                                    'rateProgramIDs',
+                                                    selectedOption.map(
+                                                        (item: {
+                                                            value: string
+                                                        }) => item.value
                                                     )
-                                                }
-                                            />
-                                        )}
-                                    </Field>
-                                </FormGroup>
-                            )}
+                                                )
+                                            }
+                                        />
+                                    )}
+                                </Field>
+                            </FormGroup>
+
                             <FormGroup error={showFieldErrors(errors.rateType)}>
                                 <Fieldset
                                     className={styles.radioGroup}
