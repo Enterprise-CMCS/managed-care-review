@@ -62,6 +62,10 @@ jobs:
       - name: Generate Code
         run: lerna run generate-code
 
+      - name: Compile proto migration files
+        working-directory: services/app-api
+        run: yarn run build
+
       - uses: actions/download-artifact@v3
         with:
           name: lambda-layers-prisma-client-migration
