@@ -49,13 +49,6 @@ export const featureFlags = {
         flag: 'app-api-graphql-errors',
         defaultValue: false,
     },
-    /**
-     * Enables selection of programs that apply to rate certification
-     */
-    RATE_CERT_PROGRAMS: {
-        flag: 'rate-certification-programs',
-        defaultValue: false,
-    },
 } as const
 
 export type FlagEnumType = keyof typeof featureFlags
