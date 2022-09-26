@@ -56,6 +56,10 @@ export const featureFlags = {
         flag: 'rate-certification-programs',
         defaultValue: false,
     },
+    MULTI_RATE_SUBMISSIONS: {
+        flag: 'rate-certification-programs',
+        defaultValue: false,
+    },
 } as const
 
 export type FlagEnumType = keyof typeof featureFlags
