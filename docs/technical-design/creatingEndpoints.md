@@ -4,7 +4,7 @@ There are two ways that we create endpoints in our app. One uses GraphQL, the ot
 
 **When we want to fetch or update information relevant to the app itself--think of submissions, or user info--we'll typically use GraphQL.**
 
-**When we want to communicate with a service like New Relic, download a file, or, for example, to set up a health-check endpoint, we'll use a handler.** 
+**When we want to communicate with a service like New Relic, download a file, or, for example, to set up a health-check endpoint, we'll use a handler.**
 
 The relative merits of each approach should become clear below.
 
@@ -202,9 +202,9 @@ We also provide a `path`. This handler will run when someone navigates to the si
 
 The `authorizer` line tells AWS that this method can only be invoked by a user who is logged in and has permissions set in AWS IAM. This will typically flow from someone being a state or CMS user, with permission to interact with the main site.
 
-`layers` tie this handler to services that it needs. In this case, it needs database access, so there's a Prisma layer, and it's also being tied to `otel`, our open telemetry service, for observability.
+`layers` tie this handler to services that it needs. A lambda layer is basically a collection of code that stays in AWS and doesn't need to be uploaded or updated with each deployment. It's an efficient way to make dependencies available without having to upload and build them each time. In the case of our example, we need database access, so we include our Prisma layer, and we're also tying in to `otel`, our open telemetry service, for observability.
 
-In order to communicate with those layers, we have to specify which `vpc`, or virtual private cloud, this handler will run within.
+In order to communicate with those layers, we have to specify which `vpc`, or virtual private cloud, this handler will run within. AWS services are basically islands, and vpcs are a way to enable secure communication between some of the islands under our control. By saying that our handler belongs to a particular vpc, we are telling AWS which services it can communicate with.
 
 API Gateway handlers have a hard timeout of 30 seconds, which we cannot modify or exceed. If your function takes longer than that to run, you'll need to put some of the functionality in non-ApiGateway Lambdas and consume the output in your endpoint/handler.
 
