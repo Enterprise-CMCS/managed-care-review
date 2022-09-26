@@ -92,6 +92,11 @@ const useTealium = (): {
     useEffect(() => {
         // Do not add tealium for local dev or review apps
         if (process.env.REACT_APP_AUTH_MODE !== 'IDM') {
+            console.log(
+                `mock tealium page view: ${JSON.stringify(
+                    `${heading}: ${PageTitlesRecord[currentRoute]}`
+                )}`
+            )
             return
         }
 
