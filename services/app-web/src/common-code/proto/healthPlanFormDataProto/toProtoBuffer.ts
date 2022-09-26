@@ -230,7 +230,7 @@ const toProtoBuffer = (
                           ),
                       }
                   })
-                : [],
+                : undefined,
         documents: domainData.documents.map((doc) => ({
             s3Url: doc.s3URL,
             name: doc.name,
