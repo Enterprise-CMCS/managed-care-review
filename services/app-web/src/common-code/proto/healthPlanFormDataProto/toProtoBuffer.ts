@@ -100,7 +100,7 @@ const getEnumPrefix = (defaultValue: string) => {
 const toProtoBuffer = (
     domainData: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
 ): Uint8Array => {
-    const { contractAmendmentInfo, rateAmendmentInfo } = domainData
+    const { contractAmendmentInfo } = domainData
 
     // The difference between DraftSubmission and StateSubmission is currently very small
     // only status and submittedAt differ from the perspective of the all-optional protobuf
@@ -166,23 +166,22 @@ const toProtoBuffer = (
             })),
             contractAmendmentInfo: contractAmendmentInfo,
         },
-        // 9.21 currently only ever one rate on a domain model, eventually this will be a map
-        rateInfos: [
-            {
+        rateInfos: domainData.rateInfos.map((rateInfo) => {
+            return {
                 rateType: domainEnumToProto(
-                    domainData.rateType,
+                    rateInfo.rateType,
                     mcreviewproto.RateType
                 ),
                 rateCapitationType: domainEnumToProto(
-                    domainData.rateCapitationType,
+                    rateInfo.rateCapitationType,
                     mcreviewproto.RateCapitationType
                 ),
-                rateDateStart: domainDateToProtoDate(domainData.rateDateStart),
-                rateDateEnd: domainDateToProtoDate(domainData.rateDateEnd),
+                rateDateStart: domainDateToProtoDate(rateInfo.rateDateStart),
+                rateDateEnd: domainDateToProtoDate(rateInfo.rateDateEnd),
                 rateDateCertified: domainDateToProtoDate(
-                    domainData.rateDateCertified
+                    rateInfo.rateDateCertified
                 ),
-                rateDocuments: domainData.rateDocuments.map((doc) => ({
+                rateDocuments: rateInfo.rateDocuments.map((doc) => ({
                     s3Url: doc.s3URL,
                     name: doc.name,
                     documentCategories: domainEnumArrayToProto(
@@ -190,6 +189,16 @@ const toProtoBuffer = (
                         doc.documentCategories
                     ),
                 })),
+                rateProgramIds: rateInfo.rateProgramIDs,
+                rateAmendmentInfo: rateInfo.rateAmendmentInfo && {
+                    effectiveDateStart: domainDateToProtoDate(
+                        rateInfo.rateAmendmentInfo.effectiveDateStart
+                    ),
+                    effectiveDateEnd: domainDateToProtoDate(
+                        rateInfo.rateAmendmentInfo.effectiveDateEnd
+                    ),
+                },
+                //Currently, this Actuary data is in domainData, eventually it will be included in the rateInfo to have actuaries for each certification.
                 actuaryContacts: domainData.actuaryContacts.map(
                     (actuaryContact) => {
                         const firmType = domainEnumToProto(
@@ -209,21 +218,12 @@ const toProtoBuffer = (
                         }
                     }
                 ),
-                rateProgramIds: domainData.rateProgramIDs,
-                rateAmendmentInfo: rateAmendmentInfo && {
-                    effectiveDateStart: domainDateToProtoDate(
-                        rateAmendmentInfo.effectiveDateStart
-                    ),
-                    effectiveDateEnd: domainDateToProtoDate(
-                        rateAmendmentInfo.effectiveDateEnd
-                    ),
-                },
                 actuaryCommunicationPreference: domainEnumToProto(
                     domainData.actuaryCommunicationPreference,
                     mcreviewproto.ActuaryCommunicationType
                 ),
-            },
-        ],
+            }
+        }),
         documents: domainData.documents.map((doc) => ({
             s3Url: doc.s3URL,
             name: doc.name,
