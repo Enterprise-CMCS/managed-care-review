@@ -166,64 +166,71 @@ const toProtoBuffer = (
             })),
             contractAmendmentInfo: contractAmendmentInfo,
         },
-        rateInfos: domainData.rateInfos.map((rateInfo) => {
-            return {
-                rateType: domainEnumToProto(
-                    rateInfo.rateType,
-                    mcreviewproto.RateType
-                ),
-                rateCapitationType: domainEnumToProto(
-                    rateInfo.rateCapitationType,
-                    mcreviewproto.RateCapitationType
-                ),
-                rateDateStart: domainDateToProtoDate(rateInfo.rateDateStart),
-                rateDateEnd: domainDateToProtoDate(rateInfo.rateDateEnd),
-                rateDateCertified: domainDateToProtoDate(
-                    rateInfo.rateDateCertified
-                ),
-                rateDocuments: rateInfo.rateDocuments.map((doc) => ({
-                    s3Url: doc.s3URL,
-                    name: doc.name,
-                    documentCategories: domainEnumArrayToProto(
-                        mcreviewproto.DocumentCategory,
-                        doc.documentCategories
-                    ),
-                })),
-                rateProgramIds: rateInfo.rateProgramIDs,
-                rateAmendmentInfo: rateInfo.rateAmendmentInfo && {
-                    effectiveDateStart: domainDateToProtoDate(
-                        rateInfo.rateAmendmentInfo.effectiveDateStart
-                    ),
-                    effectiveDateEnd: domainDateToProtoDate(
-                        rateInfo.rateAmendmentInfo.effectiveDateEnd
-                    ),
-                },
-                //Currently, this Actuary data is in domainData, eventually it will be included in the rateInfo to have actuaries for each certification.
-                actuaryContacts: domainData.actuaryContacts.map(
-                    (actuaryContact) => {
-                        const firmType = domainEnumToProto(
-                            actuaryContact.actuarialFirm,
-                            mcreviewproto.ActuarialFirmType
-                        )
+        rateInfos:
+            domainData.rateInfos && domainData.rateInfos.length
+                ? domainData.rateInfos.map((rateInfo) => {
+                      return {
+                          rateType: domainEnumToProto(
+                              rateInfo.rateType,
+                              mcreviewproto.RateType
+                          ),
+                          rateCapitationType: domainEnumToProto(
+                              rateInfo.rateCapitationType,
+                              mcreviewproto.RateCapitationType
+                          ),
+                          rateDateStart: domainDateToProtoDate(
+                              rateInfo.rateDateStart
+                          ),
+                          rateDateEnd: domainDateToProtoDate(
+                              rateInfo.rateDateEnd
+                          ),
+                          rateDateCertified: domainDateToProtoDate(
+                              rateInfo.rateDateCertified
+                          ),
+                          rateDocuments: rateInfo.rateDocuments.map((doc) => ({
+                              s3Url: doc.s3URL,
+                              name: doc.name,
+                              documentCategories: domainEnumArrayToProto(
+                                  mcreviewproto.DocumentCategory,
+                                  doc.documentCategories
+                              ),
+                          })),
+                          rateProgramIds: rateInfo.rateProgramIDs,
+                          rateAmendmentInfo: rateInfo.rateAmendmentInfo && {
+                              effectiveDateStart: domainDateToProtoDate(
+                                  rateInfo.rateAmendmentInfo.effectiveDateStart
+                              ),
+                              effectiveDateEnd: domainDateToProtoDate(
+                                  rateInfo.rateAmendmentInfo.effectiveDateEnd
+                              ),
+                          },
+                          //Currently, this Actuary data is in domainData, eventually it will be included in the rateInfo to have actuaries for each certification.
+                          actuaryContacts: domainData.actuaryContacts.map(
+                              (actuaryContact) => {
+                                  const firmType = domainEnumToProto(
+                                      actuaryContact.actuarialFirm,
+                                      mcreviewproto.ActuarialFirmType
+                                  )
 
-                        return {
-                            contact: {
-                                name: actuaryContact.name,
-                                titleRole: actuaryContact.titleRole,
-                                email: actuaryContact.email,
-                            },
-                            actuarialFirmType: firmType,
-                            actuarialFirmOther:
-                                actuaryContact.actuarialFirmOther,
-                        }
-                    }
-                ),
-                actuaryCommunicationPreference: domainEnumToProto(
-                    domainData.actuaryCommunicationPreference,
-                    mcreviewproto.ActuaryCommunicationType
-                ),
-            }
-        }),
+                                  return {
+                                      contact: {
+                                          name: actuaryContact.name,
+                                          titleRole: actuaryContact.titleRole,
+                                          email: actuaryContact.email,
+                                      },
+                                      actuarialFirmType: firmType,
+                                      actuarialFirmOther:
+                                          actuaryContact.actuarialFirmOther,
+                                  }
+                              }
+                          ),
+                          actuaryCommunicationPreference: domainEnumToProto(
+                              domainData.actuaryCommunicationPreference,
+                              mcreviewproto.ActuaryCommunicationType
+                          ),
+                      }
+                  })
+                : [],
         documents: domainData.documents.map((doc) => ({
             s3Url: doc.s3URL,
             name: doc.name,
