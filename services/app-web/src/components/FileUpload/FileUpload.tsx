@@ -36,6 +36,7 @@ export type FileUploadProps = {
     onFileItemsUpdate: ({ fileItems }: { fileItems: FileItemT[] }) => void
     isContractOnly?: boolean
     shouldDisplayMissingCategoriesError?: boolean // by default, false. the parent component may read current files list and requirements of the form to determine otherwise.
+    innerInputRef?: (el: HTMLInputElement) => void
 } & JSX.IntrinsicElements['input']
 
 /*  FileUpload handles async file upload to S3 and displays inline errors per file.
@@ -61,6 +62,7 @@ export const FileUpload = ({
     onFileItemsUpdate,
     isContractOnly,
     shouldDisplayMissingCategoriesError = false,
+    innerInputRef,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
     const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
@@ -96,6 +98,13 @@ export const FileUpload = ({
     React.useEffect(() => {
         onFileItemsUpdate({ fileItems })
     }, [fileItems, onFileItemsUpdate])
+
+    //Pass input ref to parent when innerInputRef prop exists.
+    React.useEffect(() => {
+        if (innerInputRef && fileInputRef?.current?.input) {
+            innerInputRef(fileInputRef.current.input)
+        }
+    }, [fileInputRef, innerInputRef])
 
     const isDuplicateItem = (
         existingList: FileItemT[],
