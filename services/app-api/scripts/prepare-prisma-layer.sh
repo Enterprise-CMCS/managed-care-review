@@ -51,7 +51,6 @@ function preparePrismaLayer() {
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/libquery_engine-debian-openssl-1.1.x.so.node 
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/migration-engine-debian-openssl-1.1.x
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/prisma-fmt-debian-openssl-1.1.x
-    rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/.prisma/client/libquery_engine-rhel-openssl-1.0.x.so.node
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/prisma/libquery_engine-rhel-openssl-1.0.x.so.node
 
     rm -rf lambda-layers-prisma-client-engine/nodejs/node_modules/.prisma/client/libquery_engine-debian-openssl-1.1.x.so.node
