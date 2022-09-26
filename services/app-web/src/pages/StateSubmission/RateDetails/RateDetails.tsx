@@ -220,6 +220,11 @@ export const RateDetails = ({
     const [fileItems, setFileItems] =
         React.useState<FileItemT[][]>(initialFileItems)
 
+    useEffect(() => {
+        console.log('UseEffect')
+        console.log(fileItems)
+    }, [fileItems])
+
     const hasValidFiles =
         fileItems.every((item) => item.length > 0) &&
         fileItems.flat().every((item) => item.status === 'UPLOAD_COMPLETE')
@@ -239,26 +244,28 @@ export const RateDetails = ({
     const documentsErrorKey =
         fileItems.length === 0 ? 'rateDocuments' : '#file-items-list'
 
-    const onFileItemsUpdate = async ({
-        index,
-        fileItems,
-    }: {
-        index: number
-        fileItems: FileItemT[]
-    }) => {
-        // console.log(`updateFileItems: ${index}`)
-        // console.log(fileItems)
-        setFileItems((data) => {
-            data.splice(index, 1, fileItems)
-            return data
-        })
+    const onFileItemsUpdate = async (
+        index: number,
+        rateFileItems: FileItemT[]
+    ) => {
+        if (
+            fileItems[index] === undefined ||
+            rateFileItems.length !== fileItems[index].length
+        ) {
+            console.log('onFileItemsUpdate')
+            const files = [...fileItems]
+            files.splice(index, 1, rateFileItems)
+            setFileItems(files)
+        }
     }
 
     const onRemoveRate = (index: number) => {
-        setFileItems((data) => {
-            data.splice(index, 1)
-            return data
-        })
+        if (fileItems[index]) {
+            console.log('onRemoveRate')
+            const files = [...fileItems]
+            files.splice(index, 1)
+            setFileItems(files)
+        }
     }
 
     const handleDeleteFile = async (key: string) => {
@@ -556,9 +563,9 @@ export const RateDetails = ({
                                                             accept={
                                                                 ACCEPTED_SUBMISSION_FILE_TYPES
                                                             }
-                                                            initialItems={fileItemsFromRateInfo(
-                                                                rateInfo
-                                                            )}
+                                                            initialItems={
+                                                                fileItems[index]
+                                                            }
                                                             uploadFile={
                                                                 handleUploadFile
                                                             }
@@ -572,10 +579,8 @@ export const RateDetails = ({
                                                                 fileItems,
                                                             }) =>
                                                                 onFileItemsUpdate(
-                                                                    {
-                                                                        index,
-                                                                        fileItems,
-                                                                    }
+                                                                    index,
+                                                                    fileItems
                                                                 )
                                                             }
                                                             innerInputRef={(
@@ -1122,10 +1127,10 @@ export const RateDetails = ({
                                                                     styles.removeContactBtn
                                                                 }
                                                                 onClick={() => {
-                                                                    onRemoveRate(
+                                                                    remove(
                                                                         index
                                                                     )
-                                                                    remove(
+                                                                    onRemoveRate(
                                                                         index
                                                                     )
                                                                     setNewRateButtonFocus()

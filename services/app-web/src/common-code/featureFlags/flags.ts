@@ -58,7 +58,7 @@ export const featureFlags = {
     },
     MULTI_RATE_SUBMISSIONS: {
         flag: 'rate-certification-programs',
-        defaultValue: false,
+        defaultValue: true,
     },
 } as const
 
