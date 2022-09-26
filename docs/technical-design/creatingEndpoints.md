@@ -38,6 +38,40 @@ query dataExport {
 
 We're telling GraphQL that we want a query called dataExport, which returns a field called "name".
 
+#### The GraphQL schema
+
+_**We'll also add our query and its return type to `/app-graphql/src/schema-graphql`**_
+
+First, we'll add the type
+
+```graphql
+type DataExport {
+    name: String!
+}
+```
+
+And then, on the `Query` type, we'll add our new method
+
+```graphql
+dataExport: DataExport
+```
+
+#### Generating our types
+
+Once we've told GraphQL what query we want and described that data's return type, we can generate type information that can be shared between the web and api layers. We have a generated file at `/app-web/src/gen/gqlClient.tsx`, which contains graphQL types that we can use in the front end.
+
+_**On the command line, navigate to `/services/app-graphql`.**_  
+_**Run `yarn gqlgen`**_
+
+The generated file isn't checked into source control, but if you look inside, you'll now find a new type that you can use on the front-end if necessary.
+
+```typescript
+export type DataExport = {
+    __typename?: 'DataExport'
+    name: Scalars['String']
+}
+```
+
 #### The domain model
 
 We use Typescript in our app, so all the data flowing from GraphQL through the api layer to the front end must also have a type. We keep the types that are shared between the api layer and the front end in our domain models.
@@ -149,14 +183,11 @@ And also add it to the Resolvers object. We've made a query, so this line will b
 dataExport: dataExportResolver(store),
 ```
 
-### Generating code
+### Generating prisma code
 
-Once we have our backend code in place, we need to run a couple of commands to generate glue types and methods.
+Once we have our backend code in place, if we've modified the prisma schema (we did not, in this example), we need to run another generate command.
 
-_**On the command line, navigate to `/services/app-graphql`.**_  
-_**Run `yarn gqlgen`**_
-
-_**Again on the command line, navigate to `/services/app-api`**_  
+_**On the command line, navigate to `/services/app-api`**_  
 _**Run `yarn prisma generate`**_
 
 ### Getting data on the front end
