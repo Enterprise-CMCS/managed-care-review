@@ -62,7 +62,7 @@ import { useFocus } from '../../../hooks'
  * ✓ Modify file upload for multi-rate
  * ✓ Update submit to handle multi-rate files
  * ✓ Focusing on newly added rate certification
- * ☐ Keeping docs associated with the correct rate when a rate is removed
+ * ✓ Keeping docs associated with the correct rate when a rate is removed
  * ✓ toProtobuf for rateInfo
  * ☐ Rename stuff
  * ☐ Accessibility Testing
@@ -90,6 +90,7 @@ interface RateInfosValues {
 }
 
 export interface RateDetailsFormValues {
+    uuid: string
     rateType: RateType | undefined
     rateCapitationType: RateCapitationType | undefined
     rateDateStart: string
@@ -157,9 +158,6 @@ export const RateDetails = ({
     const fileItemsFromRateInfo = (
         rateInfo: RateDetailsFormValues
     ): FileItemT[] => {
-        // console.log('fileItemsFromRateInfo')
-        // console.log(fileItems)
-        //console.log(rateInfo.rateDocuments)
         return (
             (rateInfo?.rateDocuments &&
                 rateInfo?.rateDocuments.map((doc) => {
@@ -192,6 +190,7 @@ export const RateDetails = ({
     const rateDetailsValues = (
         rateInfo?: RateInfoType
     ): RateDetailsFormValues => ({
+        uuid: uuidv4(),
         rateType: rateInfo?.rateType ?? undefined,
         rateCapitationType: rateInfo?.rateCapitationType ?? undefined,
         rateDateStart:
@@ -220,11 +219,6 @@ export const RateDetails = ({
     const [fileItems, setFileItems] =
         React.useState<FileItemT[][]>(initialFileItems)
 
-    useEffect(() => {
-        console.log('UseEffect')
-        console.log(fileItems)
-    }, [fileItems])
-
     const hasValidFiles =
         fileItems.every((item) => item.length > 0) &&
         fileItems.flat().every((item) => item.status === 'UPLOAD_COMPLETE')
@@ -244,27 +238,21 @@ export const RateDetails = ({
     const documentsErrorKey =
         fileItems.length === 0 ? 'rateDocuments' : '#file-items-list'
 
-    const onFileItemsUpdate = async (
-        index: number,
-        rateFileItems: FileItemT[]
-    ) => {
+    const onFileItemsUpdate = (index: number, rateFileItems: FileItemT[]) => {
         if (
-            fileItems[index] === undefined ||
-            rateFileItems.length !== fileItems[index].length
+            JSON.stringify(rateFileItems) !== JSON.stringify(fileItems[index])
         ) {
-            console.log('onFileItemsUpdate')
-            const files = [...fileItems]
-            files.splice(index, 1, rateFileItems)
-            setFileItems(files)
+            const newFiles = [...fileItems]
+            newFiles.splice(index, 1, rateFileItems)
+            setFileItems(newFiles)
         }
     }
 
     const onRemoveRate = (index: number) => {
         if (fileItems[index]) {
-            console.log('onRemoveRate')
-            const files = [...fileItems]
-            files.splice(index, 1)
-            setFileItems(files)
+            const newFiles = [...fileItems]
+            newFiles.splice(index, 1)
+            setFileItems(newFiles)
         }
     }
 
@@ -417,8 +405,6 @@ export const RateDetails = ({
             }
         })
 
-        console.log(draftSubmission)
-
         try {
             const updatedSubmission = await updateDraft(draftSubmission)
             if (updatedSubmission instanceof Error) {
@@ -484,575 +470,119 @@ export const RateDetails = ({
                 isSubmitting,
                 setSubmitting,
                 setFieldValue,
-            }) => (
-                <>
-                    <UswdsForm
-                        className={styles.formContainer}
-                        id="RateDetailsForm"
-                        aria-label="Rate Details Form"
-                        aria-describedby="form-guidance"
-                        onSubmit={(e) => {
-                            setShouldValidate(true)
-                            setFocusErrorSummaryHeading(true)
-                            handleSubmit(e)
-                        }}
-                    >
-                        <fieldset className="usa-fieldset">
-                            <legend className="srOnly">Rate Details</legend>
-                            <span id="form-guidance">
-                                All fields are required
-                            </span>
+            }) => {
+                return (
+                    <>
+                        <UswdsForm
+                            className={styles.formContainer}
+                            id="RateDetailsForm"
+                            aria-label="Rate Details Form"
+                            aria-describedby="form-guidance"
+                            onSubmit={(e) => {
+                                setShouldValidate(true)
+                                setFocusErrorSummaryHeading(true)
+                                handleSubmit(e)
+                            }}
+                        >
+                            <fieldset className="usa-fieldset">
+                                <legend className="srOnly">Rate Details</legend>
+                                <span id="form-guidance">
+                                    All fields are required
+                                </span>
 
-                            {shouldValidate && (
-                                <ErrorSummary
-                                    errors={generateErrorSummaryErrors(errors)}
-                                    headingRef={errorSummaryHeadingRef}
-                                />
-                            )}
-                            <FieldArray name="rateInfos">
-                                {({ remove, push }) => (
-                                    <>
-                                        {rateInfos.length > 0 &&
-                                            rateInfos.map((rateInfo, index) => (
-                                                <div key={`rateInfo-${index}`}>
-                                                    <FormGroup
-                                                        error={
-                                                            showFileUploadError
-                                                        }
-                                                    >
-                                                        <FileUpload
-                                                            id={`rateInfos.${index}.rateDocuments`}
-                                                            name={`rateInfos.${index}.rateDocuments`}
-                                                            label="Upload rate certification"
-                                                            renderMode="list"
-                                                            aria-required
-                                                            error={
-                                                                documentsErrorMessage
-                                                            }
-                                                            hint={
-                                                                <>
-                                                                    <Link
-                                                                        aria-label="Document definitions and requirements (opens in new window)"
-                                                                        href={
-                                                                            '/help#key-documents'
-                                                                        }
-                                                                        variant="external"
-                                                                        target="_blank"
-                                                                    >
-                                                                        Document
-                                                                        definitions
-                                                                        and
-                                                                        requirements
-                                                                    </Link>
-                                                                    <span>
-                                                                        This
-                                                                        input
-                                                                        only
-                                                                        accepts
-                                                                        PDF,
-                                                                        CSV,
-                                                                        DOC,
-                                                                        DOCX,
-                                                                        XLS,
-                                                                        XLSX,
-                                                                        XLSM
-                                                                        files.
-                                                                    </span>
-                                                                </>
-                                                            }
-                                                            accept={
-                                                                ACCEPTED_SUBMISSION_FILE_TYPES
-                                                            }
-                                                            initialItems={
-                                                                fileItems[index]
-                                                            }
-                                                            uploadFile={
-                                                                handleUploadFile
-                                                            }
-                                                            scanFile={
-                                                                handleScanFile
-                                                            }
-                                                            deleteFile={
-                                                                handleDeleteFile
-                                                            }
-                                                            onFileItemsUpdate={({
-                                                                fileItems,
-                                                            }) =>
-                                                                onFileItemsUpdate(
-                                                                    index,
-                                                                    fileItems
-                                                                )
-                                                            }
-                                                            innerInputRef={(
-                                                                el
-                                                            ) =>
-                                                                (newRateNameRef.current =
-                                                                    el)
-                                                            }
-                                                        />
-                                                    </FormGroup>
-                                                    {showRatePrograms && (
+                                {shouldValidate && (
+                                    <ErrorSummary
+                                        errors={generateErrorSummaryErrors(
+                                            errors
+                                        )}
+                                        headingRef={errorSummaryHeadingRef}
+                                    />
+                                )}
+                                <FieldArray name="rateInfos">
+                                    {({ remove, push }) => (
+                                        <>
+                                            {rateInfos.map(
+                                                (rateInfo, index, arr) => (
+                                                    <div key={rateInfo.uuid}>
                                                         <FormGroup
-                                                            error={showFieldErrors(
-                                                                rateErrorHandling(
-                                                                    errors
-                                                                        ?.rateInfos?.[
-                                                                        index
-                                                                    ]
-                                                                )
-                                                                    ?.rateProgramIDs
-                                                            )}
-                                                        >
-                                                            <Label
-                                                                htmlFor={`rateInfos.${index}.rateProgramIDs`}
-                                                            >
-                                                                Programs this
-                                                                rate
-                                                                certification
-                                                                covers
-                                                            </Label>
-                                                            {showFieldErrors(
-                                                                rateErrorHandling(
-                                                                    errors
-                                                                        ?.rateInfos?.[
-                                                                        index
-                                                                    ]
-                                                                )
-                                                                    ?.rateProgramIDs
-                                                            ) && (
-                                                                <PoliteErrorMessage>
-                                                                    {getIn(
-                                                                        errors,
-                                                                        `rateInfos.${index}.rateProgramIDs`
-                                                                    )}
-                                                                </PoliteErrorMessage>
-                                                            )}
-                                                            <Field
-                                                                name={`rateInfos.${index}.rateProgramIDs`}
-                                                            >
-                                                                {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-                                                                {/* @ts-ignore */}
-                                                                {({ form }) => (
-                                                                    <ProgramSelect
-                                                                        name={`rateInfos.${index}.rateProgramIDs`}
-                                                                        inputId={`rateInfos.${index}.rateProgramIDs`}
-                                                                        statePrograms={
-                                                                            statePrograms
-                                                                        }
-                                                                        programIDs={
-                                                                            rateInfo.rateProgramIDs
-                                                                        }
-                                                                        aria-label="programs (required)"
-                                                                        onChange={(
-                                                                            selectedOption
-                                                                        ) =>
-                                                                            form.setFieldValue(
-                                                                                `rateInfos.${index}.rateProgramIDs`,
-                                                                                selectedOption.map(
-                                                                                    (item: {
-                                                                                        value: string
-                                                                                    }) =>
-                                                                                        item.value
-                                                                                )
-                                                                            )
-                                                                        }
-                                                                    />
-                                                                )}
-                                                            </Field>
-                                                        </FormGroup>
-                                                    )}
-                                                    <FormGroup
-                                                        error={showFieldErrors(
-                                                            rateErrorHandling(
-                                                                errors
-                                                                    ?.rateInfos?.[
-                                                                    index
-                                                                ]
-                                                            )?.rateType
-                                                        )}
-                                                    >
-                                                        <Fieldset
-                                                            className={
-                                                                styles.radioGroup
+                                                            error={
+                                                                showFileUploadError
                                                             }
-                                                            legend="Rate certification type"
-                                                            role="radiogroup"
-                                                            aria-required
                                                         >
-                                                            {showFieldErrors(
-                                                                rateErrorHandling(
-                                                                    errors
-                                                                        ?.rateInfos?.[
-                                                                        index
-                                                                    ]
-                                                                )?.rateType
-                                                            ) && (
-                                                                <PoliteErrorMessage>
-                                                                    {getIn(
-                                                                        errors,
-                                                                        `rateInfos.${index}.rateType`
-                                                                    )}
-                                                                </PoliteErrorMessage>
-                                                            )}
-                                                            <Link
-                                                                aria-label="Rate certification type defintions (opens in new window)"
-                                                                href={
-                                                                    '/help#rate-cert-type-definitions'
-                                                                }
-                                                                variant="external"
-                                                                target="_blank"
-                                                            >
-                                                                Rate
-                                                                certification
-                                                                type definitions
-                                                            </Link>
-                                                            <FieldRadio
-                                                                id={`newRate-${index}`}
-                                                                name={`rateInfos.${index}.rateType`}
-                                                                label="New rate certification"
-                                                                value={'NEW'}
-                                                            />
-                                                            <FieldRadio
-                                                                id={`amendmentRate-${index}`}
-                                                                name={`rateInfos.${index}.rateType`}
-                                                                label="Amendment to prior rate certification"
-                                                                value={
-                                                                    'AMENDMENT'
-                                                                }
-                                                            />
-                                                        </Fieldset>
-                                                    </FormGroup>
-
-                                                    <FormGroup
-                                                        error={showFieldErrors(
-                                                            rateErrorHandling(
-                                                                errors
-                                                                    ?.rateInfos?.[
-                                                                    index
-                                                                ]
-                                                            )
-                                                                ?.rateCapitationType
-                                                        )}
-                                                    >
-                                                        <Fieldset
-                                                            className={
-                                                                styles.radioGroup
-                                                            }
-                                                            legend={
-                                                                <div
-                                                                    className={
-                                                                        styles.capitationLegend
-                                                                    }
-                                                                >
-                                                                    <p>
-                                                                        Does the
-                                                                        actuary
-                                                                        certify
-                                                                        capitation
-                                                                        rates
-                                                                        specific
-                                                                        to each
-                                                                        rate
-                                                                        cell or
-                                                                        a rate
-                                                                        range?
-                                                                    </p>
-                                                                    <p
-                                                                        className={
-                                                                            styles.legendSubHeader
-                                                                        }
-                                                                    >
-                                                                        See 42
-                                                                        CFR §§
-                                                                        438.4(b)
-                                                                        and
-                                                                        438.4(c)
-                                                                    </p>
-                                                                </div>
-                                                            }
-                                                            role="radiogroup"
-                                                            aria-required
-                                                        >
-                                                            {showFieldErrors(
-                                                                rateErrorHandling(
-                                                                    errors
-                                                                        ?.rateInfos?.[
-                                                                        index
-                                                                    ]
-                                                                )
-                                                                    ?.rateCapitationType
-                                                            ) && (
-                                                                <PoliteErrorMessage>
-                                                                    {getIn(
-                                                                        errors,
-                                                                        `rateInfos.${index}.rateCapitationType`
-                                                                    )}
-                                                                </PoliteErrorMessage>
-                                                            )}
-                                                            <FieldRadio
-                                                                id={`rateCell-${index}`}
-                                                                name={`rateInfos.${index}.rateCapitationType`}
-                                                                label="Certification of capitation rates specific to each rate cell"
-                                                                value={
-                                                                    'RATE_CELL'
-                                                                }
-                                                            />
-                                                            <FieldRadio
-                                                                id={`rateRange-${index}`}
-                                                                name={`rateInfos.${index}.rateCapitationType`}
-                                                                label="Certification of rate ranges of capitation rates per rate cell"
-                                                                value={
-                                                                    'RATE_RANGE'
-                                                                }
-                                                            />
-                                                        </Fieldset>
-                                                    </FormGroup>
-
-                                                    {!isRateTypeEmpty(
-                                                        rateInfo
-                                                    ) && (
-                                                        <>
-                                                            <FormGroup
+                                                            <FileUpload
+                                                                id={`rateInfos.${index}.rateDocuments`}
+                                                                name={`rateInfos.${index}.rateDocuments`}
+                                                                label="Upload rate certification"
+                                                                renderMode="list"
+                                                                aria-required
                                                                 error={
-                                                                    showFieldErrors(
-                                                                        rateErrorHandling(
-                                                                            errors
-                                                                                ?.rateInfos?.[
-                                                                                index
-                                                                            ]
-                                                                        )
-                                                                            ?.rateDateStart
-                                                                    ) ||
-                                                                    showFieldErrors(
-                                                                        rateErrorHandling(
-                                                                            errors
-                                                                                ?.rateInfos?.[
-                                                                                index
-                                                                            ]
-                                                                        )
-                                                                            ?.rateDateEnd
+                                                                    documentsErrorMessage
+                                                                }
+                                                                hint={
+                                                                    <>
+                                                                        <Link
+                                                                            aria-label="Document definitions and requirements (opens in new window)"
+                                                                            href={
+                                                                                '/help#key-documents'
+                                                                            }
+                                                                            variant="external"
+                                                                            target="_blank"
+                                                                        >
+                                                                            Document
+                                                                            definitions
+                                                                            and
+                                                                            requirements
+                                                                        </Link>
+                                                                        <span>
+                                                                            This
+                                                                            input
+                                                                            only
+                                                                            accepts
+                                                                            PDF,
+                                                                            CSV,
+                                                                            DOC,
+                                                                            DOCX,
+                                                                            XLS,
+                                                                            XLSX,
+                                                                            XLSM
+                                                                            files.
+                                                                        </span>
+                                                                    </>
+                                                                }
+                                                                accept={
+                                                                    ACCEPTED_SUBMISSION_FILE_TYPES
+                                                                }
+                                                                initialItems={
+                                                                    fileItems[
+                                                                        index
+                                                                    ] || []
+                                                                }
+                                                                uploadFile={
+                                                                    handleUploadFile
+                                                                }
+                                                                scanFile={
+                                                                    handleScanFile
+                                                                }
+                                                                deleteFile={
+                                                                    handleDeleteFile
+                                                                }
+                                                                onFileItemsUpdate={({
+                                                                    fileItems,
+                                                                }) =>
+                                                                    onFileItemsUpdate(
+                                                                        index,
+                                                                        fileItems
                                                                     )
                                                                 }
-                                                            >
-                                                                <Fieldset
-                                                                    aria-required
-                                                                    legend={
-                                                                        isRateTypeAmendment(
-                                                                            rateInfo
-                                                                        )
-                                                                            ? 'Rating period of original rate certification'
-                                                                            : 'Rating period'
-                                                                    }
-                                                                >
-                                                                    {showFieldErrors(
-                                                                        rateErrorHandling(
-                                                                            errors
-                                                                                ?.rateInfos?.[
-                                                                                index
-                                                                            ]
-                                                                        )
-                                                                            ?.rateDateStart ||
-                                                                            rateErrorHandling(
-                                                                                errors
-                                                                                    ?.rateInfos?.[
-                                                                                    index
-                                                                                ]
-                                                                            )
-                                                                                ?.rateDateEnd
-                                                                    ) && (
-                                                                        <RateDatesErrorMessage
-                                                                            startDate={
-                                                                                rateInfo.rateDateStart
-                                                                            }
-                                                                            endDate={
-                                                                                rateInfo.rateDateEnd
-                                                                            }
-                                                                            validationErrorMessage={
-                                                                                getIn(
-                                                                                    errors,
-                                                                                    `rateInfos.${index}.rateDateStart`
-                                                                                ) ||
-                                                                                getIn(
-                                                                                    errors,
-                                                                                    `rateInfos.${index}.rateDateEnd`
-                                                                                ) ||
-                                                                                'Invalid date'
-                                                                            }
-                                                                        />
-                                                                    )}
-
-                                                                    <DateRangePicker
-                                                                        className={
-                                                                            styles.dateRangePicker
-                                                                        }
-                                                                        startDateHint="mm/dd/yyyy"
-                                                                        startDateLabel="Start date"
-                                                                        startDatePickerProps={{
-                                                                            disabled:
-                                                                                false,
-                                                                            id: `rateInfos.${index}.rateDateStart`,
-                                                                            name: `rateInfos.${index}.rateDateStart`,
-                                                                            'aria-required':
-                                                                                true,
-                                                                            defaultValue:
-                                                                                rateInfo.rateDateStart,
-                                                                            onChange:
-                                                                                (
-                                                                                    val
-                                                                                ) =>
-                                                                                    setFieldValue(
-                                                                                        `rateInfos.${index}.rateDateStart`,
-                                                                                        formatUserInputDate(
-                                                                                            val
-                                                                                        )
-                                                                                    ),
-                                                                        }}
-                                                                        endDateHint="mm/dd/yyyy"
-                                                                        endDateLabel="End date"
-                                                                        endDatePickerProps={{
-                                                                            disabled:
-                                                                                false,
-                                                                            id: `rateInfos.${index}.rateDateEnd`,
-                                                                            name: `rateInfos.${index}.rateDateEnd`,
-                                                                            'aria-required':
-                                                                                true,
-                                                                            defaultValue:
-                                                                                rateInfo.rateDateEnd,
-                                                                            onChange:
-                                                                                (
-                                                                                    val
-                                                                                ) =>
-                                                                                    setFieldValue(
-                                                                                        `rateInfos.${index}.rateDateEnd`,
-                                                                                        formatUserInputDate(
-                                                                                            val
-                                                                                        )
-                                                                                    ),
-                                                                        }}
-                                                                    />
-                                                                </Fieldset>
-                                                            </FormGroup>
-
-                                                            {isRateTypeAmendment(
-                                                                rateInfo
-                                                            ) && (
-                                                                <>
-                                                                    <FormGroup
-                                                                        error={
-                                                                            showFieldErrors(
-                                                                                rateErrorHandling(
-                                                                                    errors
-                                                                                        ?.rateInfos?.[
-                                                                                        index
-                                                                                    ]
-                                                                                )
-                                                                                    ?.effectiveDateStart
-                                                                            ) ||
-                                                                            showFieldErrors(
-                                                                                rateErrorHandling(
-                                                                                    errors
-                                                                                        ?.rateInfos?.[
-                                                                                        index
-                                                                                    ]
-                                                                                )
-                                                                                    ?.effectiveDateEnd
-                                                                            )
-                                                                        }
-                                                                    >
-                                                                        <Fieldset
-                                                                            aria-required
-                                                                            legend="Effective dates of rate amendment"
-                                                                        >
-                                                                            {showFieldErrors(
-                                                                                rateErrorHandling(
-                                                                                    errors
-                                                                                        ?.rateInfos?.[
-                                                                                        index
-                                                                                    ]
-                                                                                )
-                                                                                    ?.effectiveDateStart ||
-                                                                                    rateErrorHandling(
-                                                                                        errors
-                                                                                            ?.rateInfos?.[
-                                                                                            index
-                                                                                        ]
-                                                                                    )
-                                                                                        ?.effectiveDateEnd
-                                                                            ) && (
-                                                                                <RateDatesErrorMessage
-                                                                                    startDate={
-                                                                                        rateInfo.effectiveDateStart
-                                                                                    }
-                                                                                    endDate={
-                                                                                        rateInfo.effectiveDateEnd
-                                                                                    }
-                                                                                    validationErrorMessage={
-                                                                                        getIn(
-                                                                                            errors,
-                                                                                            `rateInfos.${index}.effectiveDateStart`
-                                                                                        ) ||
-                                                                                        getIn(
-                                                                                            errors,
-                                                                                            `rateInfos.${index}.effectiveDateEnd`
-                                                                                        ) ||
-                                                                                        'Invalid date'
-                                                                                    }
-                                                                                />
-                                                                            )}
-
-                                                                            <DateRangePicker
-                                                                                className={
-                                                                                    styles.dateRangePicker
-                                                                                }
-                                                                                startDateHint="mm/dd/yyyy"
-                                                                                startDateLabel="Start date"
-                                                                                startDatePickerProps={{
-                                                                                    disabled:
-                                                                                        false,
-                                                                                    id: `rateInfos.${index}.effectiveDateStart`,
-                                                                                    name: `rateInfos.${index}.effectiveDateStart`,
-                                                                                    'aria-required':
-                                                                                        true,
-                                                                                    defaultValue:
-                                                                                        rateInfo.effectiveDateStart,
-                                                                                    onChange:
-                                                                                        (
-                                                                                            val
-                                                                                        ) =>
-                                                                                            setFieldValue(
-                                                                                                `rateInfos.${index}.effectiveDateStart`,
-                                                                                                formatUserInputDate(
-                                                                                                    val
-                                                                                                )
-                                                                                            ),
-                                                                                }}
-                                                                                endDateHint="mm/dd/yyyy"
-                                                                                endDateLabel="End date"
-                                                                                endDatePickerProps={{
-                                                                                    disabled:
-                                                                                        false,
-                                                                                    id: `rateInfos.${index}.effectiveDateEnd`,
-                                                                                    name: `rateInfos.${index}.effectiveDateEnd`,
-                                                                                    'aria-required':
-                                                                                        true,
-                                                                                    defaultValue:
-                                                                                        rateInfo.effectiveDateEnd,
-                                                                                    onChange:
-                                                                                        (
-                                                                                            val
-                                                                                        ) =>
-                                                                                            setFieldValue(
-                                                                                                `rateInfos.${index}.effectiveDateEnd`,
-                                                                                                formatUserInputDate(
-                                                                                                    val
-                                                                                                )
-                                                                                            ),
-                                                                                }}
-                                                                            />
-                                                                        </Fieldset>
-                                                                    </FormGroup>
-                                                                </>
-                                                            )}
+                                                                innerInputRef={(
+                                                                    el
+                                                                ) =>
+                                                                    (newRateNameRef.current =
+                                                                        el)
+                                                                }
+                                                            />
+                                                        </FormGroup>
+                                                        {showRatePrograms && (
                                                             <FormGroup
                                                                 error={showFieldErrors(
                                                                     rateErrorHandling(
@@ -1061,25 +591,17 @@ export const RateDetails = ({
                                                                             index
                                                                         ]
                                                                     )
-                                                                        ?.rateDateCertified
+                                                                        ?.rateProgramIDs
                                                                 )}
                                                             >
                                                                 <Label
-                                                                    htmlFor="rateDateCertified"
-                                                                    id="rateDateCertifiedLabel"
+                                                                    htmlFor={`rateInfos.${index}.rateProgramIDs`}
                                                                 >
-                                                                    {isRateTypeAmendment(
-                                                                        rateInfo
-                                                                    )
-                                                                        ? 'Date certified for rate amendment'
-                                                                        : 'Date certified'}
+                                                                    Programs
+                                                                    this rate
+                                                                    certification
+                                                                    covers
                                                                 </Label>
-                                                                <div
-                                                                    className="usa-hint"
-                                                                    id="rateDateCertifiedHint"
-                                                                >
-                                                                    mm/dd/yyyy
-                                                                </div>
                                                                 {showFieldErrors(
                                                                     rateErrorHandling(
                                                                         errors
@@ -1087,122 +609,606 @@ export const RateDetails = ({
                                                                             index
                                                                         ]
                                                                     )
-                                                                        ?.rateDateCertified
+                                                                        ?.rateProgramIDs
                                                                 ) && (
                                                                     <PoliteErrorMessage>
                                                                         {getIn(
                                                                             errors,
-                                                                            `rateInfos.${index}.rateDateCertified`
+                                                                            `rateInfos.${index}.rateProgramIDs`
                                                                         )}
                                                                     </PoliteErrorMessage>
                                                                 )}
-                                                                <DatePicker
-                                                                    aria-required
-                                                                    aria-describedby="rateDateCertifiedLabel rateDateCertifiedHint"
-                                                                    id={`rateInfos.${index}.rateDateCertified`}
-                                                                    name={`rateInfos.${index}.rateDateCertified`}
-                                                                    defaultValue={
-                                                                        rateInfo.rateDateCertified
+                                                                <Field
+                                                                    name={`rateInfos.${index}.rateProgramIDs`}
+                                                                >
+                                                                    {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                                                                    {/* @ts-ignore */}
+                                                                    {({
+                                                                        form,
+                                                                    }) => (
+                                                                        <ProgramSelect
+                                                                            name={`rateInfos.${index}.rateProgramIDs`}
+                                                                            inputId={`rateInfos.${index}.rateProgramIDs`}
+                                                                            statePrograms={
+                                                                                statePrograms
+                                                                            }
+                                                                            programIDs={
+                                                                                rateInfo.rateProgramIDs
+                                                                            }
+                                                                            aria-label="programs (required)"
+                                                                            onChange={(
+                                                                                selectedOption
+                                                                            ) =>
+                                                                                form.setFieldValue(
+                                                                                    `rateInfos.${index}.rateProgramIDs`,
+                                                                                    selectedOption.map(
+                                                                                        (item: {
+                                                                                            value: string
+                                                                                        }) =>
+                                                                                            item.value
+                                                                                    )
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                    )}
+                                                                </Field>
+                                                            </FormGroup>
+                                                        )}
+                                                        <FormGroup
+                                                            error={showFieldErrors(
+                                                                rateErrorHandling(
+                                                                    errors
+                                                                        ?.rateInfos?.[
+                                                                        index
+                                                                    ]
+                                                                )?.rateType
+                                                            )}
+                                                        >
+                                                            <Fieldset
+                                                                className={
+                                                                    styles.radioGroup
+                                                                }
+                                                                legend="Rate certification type"
+                                                                role="radiogroup"
+                                                                aria-required
+                                                            >
+                                                                {showFieldErrors(
+                                                                    rateErrorHandling(
+                                                                        errors
+                                                                            ?.rateInfos?.[
+                                                                            index
+                                                                        ]
+                                                                    )?.rateType
+                                                                ) && (
+                                                                    <PoliteErrorMessage>
+                                                                        {getIn(
+                                                                            errors,
+                                                                            `rateInfos.${index}.rateType`
+                                                                        )}
+                                                                    </PoliteErrorMessage>
+                                                                )}
+                                                                <Link
+                                                                    aria-label="Rate certification type defintions (opens in new window)"
+                                                                    href={
+                                                                        '/help#rate-cert-type-definitions'
                                                                     }
-                                                                    onChange={(
-                                                                        val
-                                                                    ) =>
-                                                                        setFieldValue(
-                                                                            `rateInfos.${index}.rateDateCertified`,
-                                                                            formatUserInputDate(
-                                                                                val
-                                                                            )
-                                                                        )
+                                                                    variant="external"
+                                                                    target="_blank"
+                                                                >
+                                                                    Rate
+                                                                    certification
+                                                                    type
+                                                                    definitions
+                                                                </Link>
+                                                                <FieldRadio
+                                                                    id={`newRate-${index}`}
+                                                                    name={`rateInfos.${index}.rateType`}
+                                                                    label="New rate certification"
+                                                                    value={
+                                                                        'NEW'
                                                                     }
                                                                 />
-                                                            </FormGroup>
-                                                        </>
-                                                    )}
-                                                    {index > 0 &&
-                                                        showMultiRates && (
-                                                            <Button
-                                                                type="button"
-                                                                unstyled
+                                                                <FieldRadio
+                                                                    id={`amendmentRate-${index}`}
+                                                                    name={`rateInfos.${index}.rateType`}
+                                                                    label="Amendment to prior rate certification"
+                                                                    value={
+                                                                        'AMENDMENT'
+                                                                    }
+                                                                />
+                                                            </Fieldset>
+                                                        </FormGroup>
+
+                                                        <FormGroup
+                                                            error={showFieldErrors(
+                                                                rateErrorHandling(
+                                                                    errors
+                                                                        ?.rateInfos?.[
+                                                                        index
+                                                                    ]
+                                                                )
+                                                                    ?.rateCapitationType
+                                                            )}
+                                                        >
+                                                            <Fieldset
                                                                 className={
-                                                                    styles.removeContactBtn
+                                                                    styles.radioGroup
                                                                 }
-                                                                onClick={() => {
-                                                                    remove(
-                                                                        index
-                                                                    )
-                                                                    onRemoveRate(
-                                                                        index
-                                                                    )
-                                                                    setNewRateButtonFocus()
-                                                                }}
+                                                                legend={
+                                                                    <div
+                                                                        className={
+                                                                            styles.capitationLegend
+                                                                        }
+                                                                    >
+                                                                        <p>
+                                                                            Does
+                                                                            the
+                                                                            actuary
+                                                                            certify
+                                                                            capitation
+                                                                            rates
+                                                                            specific
+                                                                            to
+                                                                            each
+                                                                            rate
+                                                                            cell
+                                                                            or a
+                                                                            rate
+                                                                            range?
+                                                                        </p>
+                                                                        <p
+                                                                            className={
+                                                                                styles.legendSubHeader
+                                                                            }
+                                                                        >
+                                                                            See
+                                                                            42
+                                                                            CFR
+                                                                            §§
+                                                                            438.4(b)
+                                                                            and
+                                                                            438.4(c)
+                                                                        </p>
+                                                                    </div>
+                                                                }
+                                                                role="radiogroup"
+                                                                aria-required
                                                             >
-                                                                Remove rate
-                                                            </Button>
+                                                                {showFieldErrors(
+                                                                    rateErrorHandling(
+                                                                        errors
+                                                                            ?.rateInfos?.[
+                                                                            index
+                                                                        ]
+                                                                    )
+                                                                        ?.rateCapitationType
+                                                                ) && (
+                                                                    <PoliteErrorMessage>
+                                                                        {getIn(
+                                                                            errors,
+                                                                            `rateInfos.${index}.rateCapitationType`
+                                                                        )}
+                                                                    </PoliteErrorMessage>
+                                                                )}
+                                                                <FieldRadio
+                                                                    id={`rateCell-${index}`}
+                                                                    name={`rateInfos.${index}.rateCapitationType`}
+                                                                    label="Certification of capitation rates specific to each rate cell"
+                                                                    value={
+                                                                        'RATE_CELL'
+                                                                    }
+                                                                />
+                                                                <FieldRadio
+                                                                    id={`rateRange-${index}`}
+                                                                    name={`rateInfos.${index}.rateCapitationType`}
+                                                                    label="Certification of rate ranges of capitation rates per rate cell"
+                                                                    value={
+                                                                        'RATE_RANGE'
+                                                                    }
+                                                                />
+                                                            </Fieldset>
+                                                        </FormGroup>
+
+                                                        {!isRateTypeEmpty(
+                                                            rateInfo
+                                                        ) && (
+                                                            <>
+                                                                <FormGroup
+                                                                    error={
+                                                                        showFieldErrors(
+                                                                            rateErrorHandling(
+                                                                                errors
+                                                                                    ?.rateInfos?.[
+                                                                                    index
+                                                                                ]
+                                                                            )
+                                                                                ?.rateDateStart
+                                                                        ) ||
+                                                                        showFieldErrors(
+                                                                            rateErrorHandling(
+                                                                                errors
+                                                                                    ?.rateInfos?.[
+                                                                                    index
+                                                                                ]
+                                                                            )
+                                                                                ?.rateDateEnd
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <Fieldset
+                                                                        aria-required
+                                                                        legend={
+                                                                            isRateTypeAmendment(
+                                                                                rateInfo
+                                                                            )
+                                                                                ? 'Rating period of original rate certification'
+                                                                                : 'Rating period'
+                                                                        }
+                                                                    >
+                                                                        {showFieldErrors(
+                                                                            rateErrorHandling(
+                                                                                errors
+                                                                                    ?.rateInfos?.[
+                                                                                    index
+                                                                                ]
+                                                                            )
+                                                                                ?.rateDateStart ||
+                                                                                rateErrorHandling(
+                                                                                    errors
+                                                                                        ?.rateInfos?.[
+                                                                                        index
+                                                                                    ]
+                                                                                )
+                                                                                    ?.rateDateEnd
+                                                                        ) && (
+                                                                            <RateDatesErrorMessage
+                                                                                startDate={
+                                                                                    rateInfo.rateDateStart
+                                                                                }
+                                                                                endDate={
+                                                                                    rateInfo.rateDateEnd
+                                                                                }
+                                                                                validationErrorMessage={
+                                                                                    getIn(
+                                                                                        errors,
+                                                                                        `rateInfos.${index}.rateDateStart`
+                                                                                    ) ||
+                                                                                    getIn(
+                                                                                        errors,
+                                                                                        `rateInfos.${index}.rateDateEnd`
+                                                                                    ) ||
+                                                                                    'Invalid date'
+                                                                                }
+                                                                            />
+                                                                        )}
+
+                                                                        <DateRangePicker
+                                                                            className={
+                                                                                styles.dateRangePicker
+                                                                            }
+                                                                            startDateHint="mm/dd/yyyy"
+                                                                            startDateLabel="Start date"
+                                                                            startDatePickerProps={{
+                                                                                disabled:
+                                                                                    false,
+                                                                                id: `rateInfos.${index}.rateDateStart`,
+                                                                                name: `rateInfos.${index}.rateDateStart`,
+                                                                                'aria-required':
+                                                                                    true,
+                                                                                defaultValue:
+                                                                                    rateInfo.rateDateStart,
+                                                                                onChange:
+                                                                                    (
+                                                                                        val
+                                                                                    ) =>
+                                                                                        setFieldValue(
+                                                                                            `rateInfos.${index}.rateDateStart`,
+                                                                                            formatUserInputDate(
+                                                                                                val
+                                                                                            )
+                                                                                        ),
+                                                                            }}
+                                                                            endDateHint="mm/dd/yyyy"
+                                                                            endDateLabel="End date"
+                                                                            endDatePickerProps={{
+                                                                                disabled:
+                                                                                    false,
+                                                                                id: `rateInfos.${index}.rateDateEnd`,
+                                                                                name: `rateInfos.${index}.rateDateEnd`,
+                                                                                'aria-required':
+                                                                                    true,
+                                                                                defaultValue:
+                                                                                    rateInfo.rateDateEnd,
+                                                                                onChange:
+                                                                                    (
+                                                                                        val
+                                                                                    ) =>
+                                                                                        setFieldValue(
+                                                                                            `rateInfos.${index}.rateDateEnd`,
+                                                                                            formatUserInputDate(
+                                                                                                val
+                                                                                            )
+                                                                                        ),
+                                                                            }}
+                                                                        />
+                                                                    </Fieldset>
+                                                                </FormGroup>
+
+                                                                {isRateTypeAmendment(
+                                                                    rateInfo
+                                                                ) && (
+                                                                    <>
+                                                                        <FormGroup
+                                                                            error={
+                                                                                showFieldErrors(
+                                                                                    rateErrorHandling(
+                                                                                        errors
+                                                                                            ?.rateInfos?.[
+                                                                                            index
+                                                                                        ]
+                                                                                    )
+                                                                                        ?.effectiveDateStart
+                                                                                ) ||
+                                                                                showFieldErrors(
+                                                                                    rateErrorHandling(
+                                                                                        errors
+                                                                                            ?.rateInfos?.[
+                                                                                            index
+                                                                                        ]
+                                                                                    )
+                                                                                        ?.effectiveDateEnd
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            <Fieldset
+                                                                                aria-required
+                                                                                legend="Effective dates of rate amendment"
+                                                                            >
+                                                                                {showFieldErrors(
+                                                                                    rateErrorHandling(
+                                                                                        errors
+                                                                                            ?.rateInfos?.[
+                                                                                            index
+                                                                                        ]
+                                                                                    )
+                                                                                        ?.effectiveDateStart ||
+                                                                                        rateErrorHandling(
+                                                                                            errors
+                                                                                                ?.rateInfos?.[
+                                                                                                index
+                                                                                            ]
+                                                                                        )
+                                                                                            ?.effectiveDateEnd
+                                                                                ) && (
+                                                                                    <RateDatesErrorMessage
+                                                                                        startDate={
+                                                                                            rateInfo.effectiveDateStart
+                                                                                        }
+                                                                                        endDate={
+                                                                                            rateInfo.effectiveDateEnd
+                                                                                        }
+                                                                                        validationErrorMessage={
+                                                                                            getIn(
+                                                                                                errors,
+                                                                                                `rateInfos.${index}.effectiveDateStart`
+                                                                                            ) ||
+                                                                                            getIn(
+                                                                                                errors,
+                                                                                                `rateInfos.${index}.effectiveDateEnd`
+                                                                                            ) ||
+                                                                                            'Invalid date'
+                                                                                        }
+                                                                                    />
+                                                                                )}
+
+                                                                                <DateRangePicker
+                                                                                    className={
+                                                                                        styles.dateRangePicker
+                                                                                    }
+                                                                                    startDateHint="mm/dd/yyyy"
+                                                                                    startDateLabel="Start date"
+                                                                                    startDatePickerProps={{
+                                                                                        disabled:
+                                                                                            false,
+                                                                                        id: `rateInfos.${index}.effectiveDateStart`,
+                                                                                        name: `rateInfos.${index}.effectiveDateStart`,
+                                                                                        'aria-required':
+                                                                                            true,
+                                                                                        defaultValue:
+                                                                                            rateInfo.effectiveDateStart,
+                                                                                        onChange:
+                                                                                            (
+                                                                                                val
+                                                                                            ) =>
+                                                                                                setFieldValue(
+                                                                                                    `rateInfos.${index}.effectiveDateStart`,
+                                                                                                    formatUserInputDate(
+                                                                                                        val
+                                                                                                    )
+                                                                                                ),
+                                                                                    }}
+                                                                                    endDateHint="mm/dd/yyyy"
+                                                                                    endDateLabel="End date"
+                                                                                    endDatePickerProps={{
+                                                                                        disabled:
+                                                                                            false,
+                                                                                        id: `rateInfos.${index}.effectiveDateEnd`,
+                                                                                        name: `rateInfos.${index}.effectiveDateEnd`,
+                                                                                        'aria-required':
+                                                                                            true,
+                                                                                        defaultValue:
+                                                                                            rateInfo.effectiveDateEnd,
+                                                                                        onChange:
+                                                                                            (
+                                                                                                val
+                                                                                            ) =>
+                                                                                                setFieldValue(
+                                                                                                    `rateInfos.${index}.effectiveDateEnd`,
+                                                                                                    formatUserInputDate(
+                                                                                                        val
+                                                                                                    )
+                                                                                                ),
+                                                                                    }}
+                                                                                />
+                                                                            </Fieldset>
+                                                                        </FormGroup>
+                                                                    </>
+                                                                )}
+                                                                <FormGroup
+                                                                    error={showFieldErrors(
+                                                                        rateErrorHandling(
+                                                                            errors
+                                                                                ?.rateInfos?.[
+                                                                                index
+                                                                            ]
+                                                                        )
+                                                                            ?.rateDateCertified
+                                                                    )}
+                                                                >
+                                                                    <Label
+                                                                        htmlFor="rateDateCertified"
+                                                                        id="rateDateCertifiedLabel"
+                                                                    >
+                                                                        {isRateTypeAmendment(
+                                                                            rateInfo
+                                                                        )
+                                                                            ? 'Date certified for rate amendment'
+                                                                            : 'Date certified'}
+                                                                    </Label>
+                                                                    <div
+                                                                        className="usa-hint"
+                                                                        id="rateDateCertifiedHint"
+                                                                    >
+                                                                        mm/dd/yyyy
+                                                                    </div>
+                                                                    {showFieldErrors(
+                                                                        rateErrorHandling(
+                                                                            errors
+                                                                                ?.rateInfos?.[
+                                                                                index
+                                                                            ]
+                                                                        )
+                                                                            ?.rateDateCertified
+                                                                    ) && (
+                                                                        <PoliteErrorMessage>
+                                                                            {getIn(
+                                                                                errors,
+                                                                                `rateInfos.${index}.rateDateCertified`
+                                                                            )}
+                                                                        </PoliteErrorMessage>
+                                                                    )}
+                                                                    <DatePicker
+                                                                        aria-required
+                                                                        aria-describedby="rateDateCertifiedLabel rateDateCertifiedHint"
+                                                                        id={`rateInfos.${index}.rateDateCertified`}
+                                                                        name={`rateInfos.${index}.rateDateCertified`}
+                                                                        defaultValue={
+                                                                            rateInfo.rateDateCertified
+                                                                        }
+                                                                        onChange={(
+                                                                            val
+                                                                        ) =>
+                                                                            setFieldValue(
+                                                                                `rateInfos.${index}.rateDateCertified`,
+                                                                                formatUserInputDate(
+                                                                                    val
+                                                                                )
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                </FormGroup>
+                                                            </>
                                                         )}
-                                                </div>
-                                            ))}
-                                        {showMultiRates && (
-                                            <button
-                                                type="button"
-                                                className={`usa-button usa-button--outline ${styles.addContactBtn}`}
-                                                onClick={() => {
-                                                    push(rateDetailsValues())
-                                                    setFocusNewRate(true)
-                                                }}
-                                                ref={newRateButtonRef}
-                                            >
-                                                Add another rate certification
-                                            </button>
-                                        )}
-                                    </>
-                                )}
-                            </FieldArray>
-                        </fieldset>
-                        <PageActions
-                            backOnClick={async () => {
-                                // do not need to validate or submit if no documents are uploaded
-                                if (fileItems.length === 0) {
-                                    navigate('../contract-details')
-                                } else {
-                                    await handleFormSubmit(
-                                        rateInfos,
-                                        setSubmitting,
-                                        {
-                                            shouldValidateDocuments: false,
-                                            redirectPath: `../contract-details`,
-                                        }
-                                    )
-                                }
-                            }}
-                            saveAsDraftOnClick={async () => {
-                                // do not need to trigger validations if file list is empty
-                                if (fileItems.length === 0) {
-                                    await handleFormSubmit(
-                                        rateInfos,
-                                        setSubmitting,
-                                        {
-                                            shouldValidateDocuments: false,
-                                            redirectPath: '/dashboard',
-                                        }
-                                    )
-                                } else {
-                                    setFocusErrorSummaryHeading(true)
-                                    await handleFormSubmit(
-                                        rateInfos,
-                                        setSubmitting,
-                                        {
-                                            shouldValidateDocuments: true,
-                                            redirectPath: '/dashboard',
-                                        }
-                                    )
-                                }
-                            }}
-                            disableContinue={showFileUploadError}
-                            actionInProgress={isSubmitting}
-                        />
-                    </UswdsForm>
-                </>
-            )}
+                                                        {arr.length > 1 &&
+                                                            showMultiRates && (
+                                                                <Button
+                                                                    type="button"
+                                                                    unstyled
+                                                                    className={
+                                                                        styles.removeContactBtn
+                                                                    }
+                                                                    onClick={() => {
+                                                                        onRemoveRate(
+                                                                            index
+                                                                        )
+                                                                        remove(
+                                                                            index
+                                                                        )
+                                                                        setNewRateButtonFocus()
+                                                                    }}
+                                                                >
+                                                                    Remove rate
+                                                                </Button>
+                                                            )}
+                                                    </div>
+                                                )
+                                            )}
+                                            {showMultiRates && (
+                                                <button
+                                                    type="button"
+                                                    className={`usa-button usa-button--outline ${styles.addContactBtn}`}
+                                                    onClick={() => {
+                                                        const newRate =
+                                                            rateDetailsValues()
+                                                        push(newRate)
+                                                        setFocusNewRate(true)
+                                                    }}
+                                                    ref={newRateButtonRef}
+                                                >
+                                                    Add another rate
+                                                    certification
+                                                </button>
+                                            )}
+                                        </>
+                                    )}
+                                </FieldArray>
+                            </fieldset>
+                            <PageActions
+                                backOnClick={async () => {
+                                    // do not need to validate or submit if no documents are uploaded
+                                    if (fileItems.length === 0) {
+                                        navigate('../contract-details')
+                                    } else {
+                                        await handleFormSubmit(
+                                            rateInfos,
+                                            setSubmitting,
+                                            {
+                                                shouldValidateDocuments: false,
+                                                redirectPath: `../contract-details`,
+                                            }
+                                        )
+                                    }
+                                }}
+                                saveAsDraftOnClick={async () => {
+                                    // do not need to trigger validations if file list is empty
+                                    if (fileItems.length === 0) {
+                                        await handleFormSubmit(
+                                            rateInfos,
+                                            setSubmitting,
+                                            {
+                                                shouldValidateDocuments: false,
+                                                redirectPath: '/dashboard',
+                                            }
+                                        )
+                                    } else {
+                                        setFocusErrorSummaryHeading(true)
+                                        await handleFormSubmit(
+                                            rateInfos,
+                                            setSubmitting,
+                                            {
+                                                shouldValidateDocuments: true,
+                                                redirectPath: '/dashboard',
+                                            }
+                                        )
+                                    }
+                                }}
+                                disableContinue={showFileUploadError}
+                                actionInProgress={isSubmitting}
+                            />
+                        </UswdsForm>
+                    </>
+                )
+            }}
         </Formik>
     )
 }
