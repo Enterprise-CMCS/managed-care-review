@@ -6,7 +6,10 @@ import {
 } from '../../testHelpers/emailerHelpers'
 import { resubmitPackageStateEmail } from './index'
 import { findPackagePrograms } from '../templateHelpers'
-import { packageName } from 'app-web/src/common-code/healthPlanFormDataType'
+import {
+    packageName,
+    LockedHealthPlanFormDataType,
+} from 'app-web/src/common-code/healthPlanFormDataType'
 
 const resubmitData = {
     updatedBy: 'bob@example.com',
@@ -14,13 +17,13 @@ const resubmitData = {
     updatedReason: 'Added rate certification.',
 }
 const user = mockUser()
-const submission = {
+const submission: LockedHealthPlanFormDataType = {
     ...mockContractAndRatesFormData(),
-    contractDateStart: new Date('2021-01-01'),
-    contractDateEnd: new Date('2021-12-31'),
-    rateDateStart: new Date('2021-02-02'),
-    rateDateEnd: new Date('2021-11-31'),
-    rateDateCertified: new Date('2020-12-01'),
+    contractDateStart: '2021-01-01',
+    contractDateEnd: '2021-12-31',
+    rateDateStart: '2021-02-02',
+    rateDateEnd: '2021-11-31',
+    rateDateCertified: '2020-12-01',
 }
 const defaultStatePrograms = mockMNState().programs
 const packagePrograms = findPackagePrograms(submission, defaultStatePrograms)
