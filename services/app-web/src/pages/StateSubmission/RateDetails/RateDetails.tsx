@@ -229,24 +229,6 @@ export const RateDetails = ({
     const documentsErrorKey =
         fileItems.length === 0 ? 'rateDocuments' : '#file-items-list'
 
-    const onFileItemsUpdate = (index: number, rateFileItems: FileItemT[]) => {
-        if (
-            JSON.stringify(rateFileItems) !== JSON.stringify(fileItems[index])
-        ) {
-            const newFiles = [...fileItems]
-            newFiles.splice(index, 1, rateFileItems)
-            setFileItems(newFiles)
-        }
-    }
-
-    const onRemoveRate = (index: number) => {
-        if (fileItems[index]) {
-            const newFiles = [...fileItems]
-            newFiles.splice(index, 1)
-            setFileItems(newFiles)
-        }
-    }
-
     const handleDeleteFile = async (key: string) => {
         const isSubmittedFile =
             previousDocuments &&
@@ -546,7 +528,7 @@ export const RateDetails = ({
                                                                 initialItems={
                                                                     fileItems[
                                                                         index
-                                                                    ] || []
+                                                                    ]
                                                                 }
                                                                 uploadFile={
                                                                     handleUploadFile
@@ -560,9 +542,20 @@ export const RateDetails = ({
                                                                 onFileItemsUpdate={({
                                                                     fileItems,
                                                                 }) =>
-                                                                    onFileItemsUpdate(
-                                                                        index,
-                                                                        fileItems
+                                                                    setFileItems(
+                                                                        (
+                                                                            data
+                                                                        ) => {
+                                                                            console.log(
+                                                                                'setFileItems'
+                                                                            )
+                                                                            data.splice(
+                                                                                index,
+                                                                                1,
+                                                                                fileItems
+                                                                            )
+                                                                            return data
+                                                                        }
                                                                     )
                                                                 }
                                                                 innerInputRef={(
@@ -1117,8 +1110,16 @@ export const RateDetails = ({
                                                                         styles.removeContactBtn
                                                                     }
                                                                     onClick={() => {
-                                                                        onRemoveRate(
-                                                                            index
+                                                                        setFileItems(
+                                                                            (
+                                                                                data
+                                                                            ) => {
+                                                                                data.splice(
+                                                                                    index,
+                                                                                    1
+                                                                                )
+                                                                                return data
+                                                                            }
                                                                         )
                                                                         remove(
                                                                             index
