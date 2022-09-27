@@ -62,7 +62,7 @@ import { useFocus } from '../../../hooks'
  * ✓ Update submit to handle multi-rate files
  * ✓ Focusing on newly added rate certification
  * ✓ Keeping docs associated with the correct rate when a rate is removed
- * ☐ Fix document error messages.
+ * ✓ Fix document error messages.
  * ✓ toProtobuf for rateInfo
  * ✓ Rename stuff
  * ☐ Accessibility Testing
@@ -199,31 +199,49 @@ export const RateDetails = ({
         rateDocuments: rateInfo?.rateDocuments ?? [],
     })
 
-    const initialFileItems: FileItemT[][] = draftSubmission.rateInfos.map(
+    const getDocumentsError = (
+        fileItems: FileItemT[],
+        index: number
+    ): { key: string; error: string } | undefined => {
+        const hasValidFiles =
+            fileItems.length > 0 &&
+            fileItems.every((fileItem) => fileItem.status === 'UPLOAD_COMPLETE')
+        const hasLoadingFiles =
+            fileItems.some((fileItem) => fileItem.status === 'PENDING') ||
+            fileItems.some((fileItem) => fileItem.status === 'SCANNING')
+
+        const documentsErrorMessage = hasLoadingFiles
+            ? 'You must wait for all documents to finish uploading before continuing'
+            : fileItems.length === 0
+            ? 'You must upload at least one document'
+            : !hasValidFiles
+            ? 'You must remove all documents with error messages before continuing'
+            : undefined
+
+        if (documentsErrorMessage) {
+            return {
+                key: `rateInfos.${index}.rateDocuments`,
+                error: documentsErrorMessage,
+            }
+        }
+        return undefined
+    }
+
+    const initialFileItemsMatrix: FileItemT[][] = draftSubmission.rateInfos.map(
         (rateInfo) => fileItemsFromRateInfo(rateInfoFormValues(rateInfo))
     )
 
-    const [fileItems, setFileItems] =
-        React.useState<FileItemT[][]>(initialFileItems)
+    const [fileItemsMatrix, setFileItemsMatrix] = React.useState<FileItemT[][]>(
+        initialFileItemsMatrix
+    )
 
-    const hasValidFiles =
-        fileItems.every((item) => item.length > 0) &&
-        fileItems.flat().every((item) => item.status === 'UPLOAD_COMPLETE')
-    const hasLoadingFiles =
-        fileItems.flat().some((item) => item.status === 'PENDING') ||
-        fileItems.flat().some((item) => item.status === 'SCANNING')
-    const showFileUploadError = shouldValidate && !hasValidFiles
+    const allRatesHasValidFiles =
+        fileItemsMatrix.every((fileItems) => fileItems.length > 0) &&
+        fileItemsMatrix
+            .flat()
+            .every((fileItems) => fileItems.status === 'UPLOAD_COMPLETE')
 
-    const documentsErrorMessage =
-        showFileUploadError && hasLoadingFiles
-            ? 'You must wait for all documents to finish uploading before continuing'
-            : showFileUploadError && fileItems.some((item) => item.length > 0)
-            ? ' You must upload at least one document'
-            : showFileUploadError && !hasValidFiles
-            ? ' You must remove all documents with error messages before continuing'
-            : undefined
-    const documentsErrorKey =
-        fileItems.length === 0 ? 'rateDocuments' : '#file-items-list'
+    const showFileUploadError = shouldValidate && !allRatesHasValidFiles
 
     const handleDeleteFile = async (key: string) => {
         const isSubmittedFile =
@@ -343,7 +361,7 @@ export const RateDetails = ({
         // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
         // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
         if (options.shouldValidateDocuments) {
-            if (!hasValidFiles) {
+            if (!allRatesHasValidFiles) {
                 setShouldValidate(true) // set inline field errors
                 setFocusErrorSummaryHeading(true) // set errors in form-wide error summary
                 setSubmitting(false) // reset formik submit
@@ -355,7 +373,7 @@ export const RateDetails = ({
             return {
                 rateType: rateInfo.rateType,
                 rateCapitationType: rateInfo.rateCapitationType,
-                rateDocuments: processFileItems(fileItems[index]),
+                rateDocuments: processFileItems(fileItemsMatrix[index]),
                 rateDateStart: formatFormDateForDomain(rateInfo.rateDateStart),
                 rateDateEnd: formatFormDateForDomain(rateInfo.rateDateEnd),
                 rateDateCertified: formatFormDateForDomain(
@@ -397,11 +415,18 @@ export const RateDetails = ({
     ) => {
         const rateErrors = errors.rateInfos
         const errorObject: { [field: string]: string } = {}
+        const documentErrors: { [field: string]: string }[] = []
+        fileItemsMatrix.forEach((fileItems, index) => {
+            const error = getDocumentsError(fileItems, index)
+            if (error?.key && error?.error) {
+                documentErrors.push({
+                    [error.key]: error.error,
+                })
+            }
+        })
 
-        if (documentsErrorMessage) {
-            Object.assign(errorObject, {
-                [documentsErrorKey]: documentsErrorMessage,
-            })
+        if (documentErrors) {
+            Object.assign(errorObject, ...documentErrors)
         }
 
         if (rateErrors && Array.isArray(rateErrors)) {
@@ -487,7 +512,15 @@ export const RateDetails = ({
                                                                 renderMode="list"
                                                                 aria-required
                                                                 error={
-                                                                    documentsErrorMessage
+                                                                    (showFileUploadError &&
+                                                                        getDocumentsError(
+                                                                            fileItemsMatrix[
+                                                                                index
+                                                                            ],
+                                                                            index
+                                                                        )
+                                                                            ?.error) ||
+                                                                    undefined
                                                                 }
                                                                 hint={
                                                                     <>
@@ -524,7 +557,7 @@ export const RateDetails = ({
                                                                     ACCEPTED_SUBMISSION_FILE_TYPES
                                                                 }
                                                                 initialItems={
-                                                                    fileItems[
+                                                                    fileItemsMatrix[
                                                                         index
                                                                     ]
                                                                 }
@@ -538,17 +571,16 @@ export const RateDetails = ({
                                                                     handleDeleteFile
                                                                 }
                                                                 onFileItemsUpdate={({
-                                                                    fileItems:
-                                                                        rateFileItems,
+                                                                    fileItems,
                                                                 }) =>
-                                                                    setFileItems(
+                                                                    setFileItemsMatrix(
                                                                         (
                                                                             data
                                                                         ) => {
                                                                             data.splice(
                                                                                 index,
                                                                                 1,
-                                                                                rateFileItems
+                                                                                fileItems
                                                                             )
                                                                             return data
                                                                         }
@@ -1106,7 +1138,7 @@ export const RateDetails = ({
                                                                         styles.removeContactBtn
                                                                     }
                                                                     onClick={() => {
-                                                                        setFileItems(
+                                                                        setFileItemsMatrix(
                                                                             (
                                                                                 data
                                                                             ) => {
@@ -1152,7 +1184,7 @@ export const RateDetails = ({
                             <PageActions
                                 backOnClick={async () => {
                                     // do not need to validate or submit if no documents are uploaded
-                                    if (fileItems.length === 0) {
+                                    if (fileItemsMatrix.flat().length === 0) {
                                         navigate('../contract-details')
                                     } else {
                                         await handleFormSubmit(
@@ -1167,7 +1199,7 @@ export const RateDetails = ({
                                 }}
                                 saveAsDraftOnClick={async () => {
                                     // do not need to trigger validations if file list is empty
-                                    if (fileItems.length === 0) {
+                                    if (fileItemsMatrix.flat().length === 0) {
                                         await handleFormSubmit(
                                             rateInfos,
                                             setSubmitting,
