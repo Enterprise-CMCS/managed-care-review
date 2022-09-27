@@ -38,7 +38,6 @@ import {
     formatFormDateForDomain,
 } from '../../../formHelpers'
 import { isS3Error } from '../../../s3'
-//TODO: Maybe rename this, since we modify it into any array. If we remove FF for rate programs, then we can move Yup.array() into RateDetailsFormSchema
 import { RateDetailsFormSchema } from './RateDetailsSchema'
 import { useS3 } from '../../../contexts/S3Context'
 import { PageActions } from '../PageActions'
@@ -63,6 +62,7 @@ import { useFocus } from '../../../hooks'
  * ✓ Update submit to handle multi-rate files
  * ✓ Focusing on newly added rate certification
  * ✓ Keeping docs associated with the correct rate when a rate is removed
+ * ☐ Fix document error messages.
  * ✓ toProtobuf for rateInfo
  * ☐ Rename stuff
  * ☐ Accessibility Testing
@@ -180,6 +180,7 @@ export const RateDetails = ({
     const rateDetailsValues = (
         rateInfo?: RateInfoType
     ): RateDetailsFormValues => ({
+        //UUID is needed here as a unique component key prop to track mapped rateInfo in Formik Field array. This ensures we remove the correct FileUpload component when removing a rate.
         uuid: uuidv4(),
         rateType: rateInfo?.rateType ?? undefined,
         rateCapitationType: rateInfo?.rateCapitationType ?? undefined,
