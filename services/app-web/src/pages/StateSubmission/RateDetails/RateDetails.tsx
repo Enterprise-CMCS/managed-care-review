@@ -39,7 +39,7 @@ import {
 } from '../../../formHelpers'
 import { isS3Error } from '../../../s3'
 //TODO: Maybe rename this, since we modify it into any array. If we remove FF for rate programs, then we can move Yup.array() into RateDetailsFormSchema
-import { RateDetailsFormSchema as DefaultRateDetailsFormSchema } from './RateDetailsSchema'
+import { RateDetailsFormSchema } from './RateDetailsSchema'
 import { useS3 } from '../../../contexts/S3Context'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
@@ -130,24 +130,14 @@ export const RateDetails = ({
 
     const ldClient = useLDClient()
 
-    const showRatePrograms = ldClient?.variation(
-        featureFlags.RATE_CERT_PROGRAMS.flag,
-        featureFlags.RATE_CERT_PROGRAMS.defaultValue
-    )
     const showMultiRates = ldClient?.variation(
         featureFlags.MULTI_RATE_SUBMISSIONS.flag,
         featureFlags.MULTI_RATE_SUBMISSIONS.defaultValue
     )
 
-    const rateDetailsFormSchema = showRatePrograms
-        ? Yup.object().shape({
-              rateInfos: Yup.array().of(DefaultRateDetailsFormSchema),
-          })
-        : Yup.object().shape({
-              rateInfos: Yup.array().of(
-                  DefaultRateDetailsFormSchema.omit(['rateProgramIDs'])
-              ),
-          })
+    const rateDetailsFormSchema = Yup.object().shape({
+        rateInfos: Yup.array().of(RateDetailsFormSchema),
+    })
 
     // Rate documents state management
     const { deleteFile, getKey, getS3URL, scanFile, uploadFile } = useS3()
@@ -582,78 +572,76 @@ export const RateDetails = ({
                                                                 }
                                                             />
                                                         </FormGroup>
-                                                        {showRatePrograms && (
-                                                            <FormGroup
-                                                                error={showFieldErrors(
-                                                                    rateErrorHandling(
-                                                                        errors
-                                                                            ?.rateInfos?.[
-                                                                            index
-                                                                        ]
-                                                                    )
-                                                                        ?.rateProgramIDs
-                                                                )}
+                                                        <FormGroup
+                                                            error={showFieldErrors(
+                                                                rateErrorHandling(
+                                                                    errors
+                                                                        ?.rateInfos?.[
+                                                                        index
+                                                                    ]
+                                                                )
+                                                                    ?.rateProgramIDs
+                                                            )}
+                                                        >
+                                                            <Label
+                                                                htmlFor={`rateInfos.${index}.rateProgramIDs`}
                                                             >
-                                                                <Label
-                                                                    htmlFor={`rateInfos.${index}.rateProgramIDs`}
-                                                                >
-                                                                    Programs
-                                                                    this rate
-                                                                    certification
-                                                                    covers
-                                                                </Label>
-                                                                {showFieldErrors(
-                                                                    rateErrorHandling(
-                                                                        errors
-                                                                            ?.rateInfos?.[
-                                                                            index
-                                                                        ]
-                                                                    )
-                                                                        ?.rateProgramIDs
-                                                                ) && (
-                                                                    <PoliteErrorMessage>
-                                                                        {getIn(
-                                                                            errors,
-                                                                            `rateInfos.${index}.rateProgramIDs`
-                                                                        )}
-                                                                    </PoliteErrorMessage>
-                                                                )}
-                                                                <Field
-                                                                    name={`rateInfos.${index}.rateProgramIDs`}
-                                                                >
-                                                                    {({
-                                                                        /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
-                                                                        /* @ts-ignore */
-                                                                        form,
-                                                                    }) => (
-                                                                        <ProgramSelect
-                                                                            name={`rateInfos.${index}.rateProgramIDs`}
-                                                                            inputId={`rateInfos.${index}.rateProgramIDs`}
-                                                                            statePrograms={
-                                                                                statePrograms
-                                                                            }
-                                                                            programIDs={
-                                                                                rateInfo.rateProgramIDs
-                                                                            }
-                                                                            aria-label="programs (required)"
-                                                                            onChange={(
-                                                                                selectedOption
-                                                                            ) =>
-                                                                                form.setFieldValue(
-                                                                                    `rateInfos.${index}.rateProgramIDs`,
-                                                                                    selectedOption.map(
-                                                                                        (item: {
-                                                                                            value: string
-                                                                                        }) =>
-                                                                                            item.value
-                                                                                    )
-                                                                                )
-                                                                            }
-                                                                        />
+                                                                Programs this
+                                                                rate
+                                                                certification
+                                                                covers
+                                                            </Label>
+                                                            {showFieldErrors(
+                                                                rateErrorHandling(
+                                                                    errors
+                                                                        ?.rateInfos?.[
+                                                                        index
+                                                                    ]
+                                                                )
+                                                                    ?.rateProgramIDs
+                                                            ) && (
+                                                                <PoliteErrorMessage>
+                                                                    {getIn(
+                                                                        errors,
+                                                                        `rateInfos.${index}.rateProgramIDs`
                                                                     )}
-                                                                </Field>
-                                                            </FormGroup>
-                                                        )}
+                                                                </PoliteErrorMessage>
+                                                            )}
+                                                            <Field
+                                                                name={`rateInfos.${index}.rateProgramIDs`}
+                                                            >
+                                                                {({
+                                                                    /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
+                                                                    /* @ts-ignore */
+                                                                    form,
+                                                                }) => (
+                                                                    <ProgramSelect
+                                                                        name={`rateInfos.${index}.rateProgramIDs`}
+                                                                        inputId={`rateInfos.${index}.rateProgramIDs`}
+                                                                        statePrograms={
+                                                                            statePrograms
+                                                                        }
+                                                                        programIDs={
+                                                                            rateInfo.rateProgramIDs
+                                                                        }
+                                                                        aria-label="programs (required)"
+                                                                        onChange={(
+                                                                            selectedOption
+                                                                        ) =>
+                                                                            form.setFieldValue(
+                                                                                `rateInfos.${index}.rateProgramIDs`,
+                                                                                selectedOption.map(
+                                                                                    (item: {
+                                                                                        value: string
+                                                                                    }) =>
+                                                                                        item.value
+                                                                                )
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                )}
+                                                            </Field>
+                                                        </FormGroup>
                                                         <FormGroup
                                                             error={showFieldErrors(
                                                                 rateErrorHandling(
