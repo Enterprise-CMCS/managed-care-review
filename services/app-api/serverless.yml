@@ -39,7 +39,6 @@ custom:
         - '@prisma/client'
       nodeModulesRelativeDir: '../../'
     excludeRegex: 'darwin|debian'
-    keepOutputDirectory: true
   serverlessTerminationProtection:
     stages:
       - dev
