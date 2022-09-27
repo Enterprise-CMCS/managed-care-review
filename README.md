@@ -1,24 +1,25 @@
 # Managed Care Review ![Build & Deploy](https://github.com/CMSgov/managed-care-review/actions/workflows/promote.yml/badge.svg?branch=main)
 
 <a href="https://codeclimate.com/repos/616dbb175e8227015001784f/maintainability"><img src="https://api.codeclimate.com/v1/badges/42503a338d09d6a358a5/maintainability" /></a> <a href="https://codeclimate.com/repos/616dbb175e8227015001784f/test_coverage"><img src="https://api.codeclimate.com/v1/badges/42503a338d09d6a358a5/test_coverage" /></a>
+[![CodeQL](https://github.com/CMSgov/managed-care-review/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/CMSgov/managed-care-review/actions/workflows/codeql-analysis.yml)
 
 Managed Care Review is an application that accepts Managed Care contract and rate submissions from states and packages them for review by CMS. It uses a Serverless architecture (services deployed as AWS Lambdas) with React and Node as client/server and GraphQL as the api protocol. The codebase is a Typescript monorepo. An [architectural diagram](.images/architecture.svg) is also available.
 
 ## Key Documentation
 
-- [Managed Care Review Confluence page](https://qmacbis.atlassian.net/wiki/spaces/OY2/pages/2465300483/Managed+Care+Review). Includes an overview of the project, information about planned features, and ADRs (architectural decision records).
-- [`./docs`](./docs) folder. Includes architectural decision records and technical design documents.
-- [`./services`](./services) README files. Includes brief summary of the service and key dependencies.
+-   [Managed Care Review Confluence page](https://qmacbis.atlassian.net/wiki/spaces/OY2/pages/2465300483/Managed+Care+Review). Includes an overview of the project, information about planned features, and ADRs (architectural decision records).
+-   [`./docs`](./docs) folder. Includes architectural decision records and technical design documents.
+-   [`./services`](./services) README files. Includes brief summary of the service and key dependencies.
 
 ## Application Requirements
 
-- [ ] Node.js
-- [ ] Serverless - Get help installing it here: [Serverless Getting Started page](https://www.serverless.com/framework/docs/providers/aws/guide/installation/). Learn more about serverless from the [Serverless Stack tutorial](https://serverless-stack.com/).
-- [ ] Yarn - In order to install dependencies, you need to [install yarn](https://classic.yarnpkg.com/en/docs/install/).
-- [ ] AWS Account - You'll need an AWS account with appropriate IAM permissions (admin recommended) to deploy this app in Amazon.
-- [ ] NVM - If you are on a Mac using nvm, you should be able to install all the dependencies as [described below](#installing-node-and-dependencies).
-- [ ] envrc - Used to set environment variables locally
-- [ ] docker - Used to run postgres locally
+-   [ ] Node.js
+-   [ ] Serverless - Get help installing it here: [Serverless Getting Started page](https://www.serverless.com/framework/docs/providers/aws/guide/installation/). Learn more about serverless from the [Serverless Stack tutorial](https://serverless-stack.com/).
+-   [ ] Yarn - In order to install dependencies, you need to [install yarn](https://classic.yarnpkg.com/en/docs/install/).
+-   [ ] AWS Account - You'll need an AWS account with appropriate IAM permissions (admin recommended) to deploy this app in Amazon.
+-   [ ] NVM - If you are on a Mac using nvm, you should be able to install all the dependencies as [described below](#installing-node-and-dependencies).
+-   [ ] envrc - Used to set environment variables locally
+-   [ ] docker - Used to run postgres locally
 
 ### Local Tooling
 
