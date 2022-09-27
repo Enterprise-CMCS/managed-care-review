@@ -1,26 +1,25 @@
 import React from 'react'
-import styles from '../Banner.module.scss'
+import styles from './ErrorAlert.module.scss'
 import { Alert, Link } from '@trussworks/react-uswds'
-import { MAIL_TO_SUPPORT } from '../../../constants/errors'
+import { MAIL_TO_SUPPORT } from '../../constants/errors'
 
-export type GenericApiErrorProps = {
+export type ErrorAlertFailedRequestProps = {
     message?: string
     heading?: string
 }
-
-export const GenericApiErrorBanner = ({
+// TODO: Refactor to use Error Alert and switchover components using GenericApiErrorBanner to use this
+export const ErrorAlertFailedRequest = ({
     message,
-    heading,
-}: GenericApiErrorProps): React.ReactElement => {
+}: ErrorAlertFailedRequestProps): React.ReactElement => {
     return (
         <Alert
             role="alert"
             type="error"
-            heading={heading || 'System error'}
+            heading="System error"
             validation
             data-testid="error-alert"
         >
-            <div className={styles.bannerBodyText}>
+            <div className={styles.messageBodyText}>
                 <p className="usa-alert__text">
                     <b>
                         {message || "We're having trouble loading this page."}

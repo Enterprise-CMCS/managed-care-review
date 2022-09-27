@@ -1,4 +1,4 @@
-import { Alert, Grid, GridContainer } from '@trussworks/react-uswds'
+import { Grid, GridContainer } from '@trussworks/react-uswds'
 import React from 'react'
 import { NavLink } from 'react-router-dom'
 import onemacLogo from '../../assets/images/onemac-logo.svg'
@@ -10,6 +10,8 @@ import { Logo } from '../Logo'
 import styles from './Header.module.scss'
 import { PageHeadingRow } from './PageHeadingRow/PageHeadingRow'
 import { UserLoginInfo } from './UserLoginInfo/UserLoginInfo'
+import { recordJSException } from '../../otelHelpers'
+import { ErrorAlertSignIn } from '../ErrorAlert'
 
 export type HeaderProps = {
     authMode: AuthModeType
@@ -35,17 +37,9 @@ export const Header = ({
             return
         }
 
-        logout().catch((e) => {
-            console.log('Error with logout: ', e)
-            setAlert &&
-                setAlert(
-                    <Alert
-                        data-testid="Error400"
-                        style={{ width: '600px', marginBottom: '5px' }}
-                        type="error"
-                        heading="Oops! Something went wrong"
-                    />
-                )
+        logout({ sessionTimeout: false }).catch((e) => {
+            recordJSException(`Error with logout: ${e}`)
+            setAlert && setAlert(<ErrorAlertSignIn />)
         })
     }
 

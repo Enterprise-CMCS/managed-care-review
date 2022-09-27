@@ -142,7 +142,7 @@ export const RateDetails = ({
     const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
 
     const rateDetailsFormSchema = Yup.object().shape({
-        rateInfos: Yup.array().of(RateDetailsFormSchema),
+        rateInfos: RateDetailsFormSchema
     })
 
     const fileItemsFromRateInfo = (rateInfo: RateInfoFormType): FileItemT[] => {

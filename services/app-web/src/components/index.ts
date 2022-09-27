@@ -57,3 +57,11 @@ export { Modal } from './Modal'
 export { ExpandableText } from './ExpandableText'
 
 export { ProgramSelect } from './ProgramSelect'
+
+export {
+    ErrorAlert,
+    ErrorAlertSignIn,
+    ErrorAlertSiteUnavailable,
+    ErrorAlertFailedRequest,
+    ErrorAlertSessionExpired,
+} from './ErrorAlert'

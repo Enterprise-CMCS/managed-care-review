@@ -13,7 +13,6 @@ import {
     TEST_XLS_FILE,
     TEST_PNG_FILE,
     dragAndDrop,
-    ldUseClientSpy,
 } from '../../../testHelpers/jestHelpers'
 import { RateDetails } from './RateDetails'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
@@ -217,7 +216,7 @@ describe('RateDetails', () => {
                 ],
             },
         }
-        ldUseClientSpy({ 'rate-certification-programs': true })
+
         renderWithProviders(
             <RateDetails
                 draftSubmission={emptyRateDetailsDraft}
@@ -332,7 +331,6 @@ describe('RateDetails', () => {
                 ],
             },
         }
-        ldUseClientSpy({ 'rate-certification-programs': true })
 
         renderWithProviders(
             <RateDetails

@@ -50,15 +50,11 @@ export const featureFlags = {
         defaultValue: false,
     },
     /**
-     * Enables selection of programs that apply to rate certification
+     * Enables multi-rate submission UI
      */
-    RATE_CERT_PROGRAMS: {
-        flag: 'rate-certification-programs',
-        defaultValue: false,
-    },
     MULTI_RATE_SUBMISSIONS: {
         flag: 'rate-certification-programs',
-        defaultValue: true,
+        defaultValue: false,
     },
 } as const
 

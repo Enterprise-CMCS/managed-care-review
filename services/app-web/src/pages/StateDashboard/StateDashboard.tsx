@@ -21,6 +21,11 @@ import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 
 import { recordJSException } from '../../otelHelpers/tracingHelper'
+import {
+    handleApolloError,
+    isLikelyUserAuthError,
+} from '../../gqlHelpers/apolloErrors'
+import { ErrorAlertSignIn } from '../../components'
 
 // We only pull a subset of data out of the submission and revisions for display in Dashboard
 type SubmissionInDashboard = {
@@ -73,13 +78,15 @@ export const StateDashboard = (): React.ReactElement => {
     const { loading, data, error } = useIndexHealthPlanPackagesQuery()
 
     if (error) {
-        recordJSException(
-            `indexHealthPlanPackagesQuery: Error indexing submissions. Error message:${error.message}`
-        )
+        handleApolloError(error, true)
         return (
             <div id="dashboard-page" className={styles.wrapper}>
                 <GridContainer className={styles.container}>
-                    <GenericApiErrorBanner />
+                    {isLikelyUserAuthError(error, true) ? (
+                        <ErrorAlertSignIn />
+                    ) : (
+                        <GenericApiErrorBanner />
+                    )}
                 </GridContainer>
             </div>
         )

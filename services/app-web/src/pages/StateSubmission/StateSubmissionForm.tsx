@@ -4,8 +4,8 @@ import { GridContainer } from '@trussworks/react-uswds'
 import { Routes, Route, useParams } from 'react-router-dom'
 import styles from './StateSubmissionForm.module.scss'
 
-import { Error404 } from '../Errors/Error404'
-import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionStatus'
+import { Error404 } from '../Errors/Error404Page'
+import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionStatusPage'
 
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Loading } from '../../components/Loading'
