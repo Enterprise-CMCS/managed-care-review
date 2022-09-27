@@ -64,9 +64,10 @@ import { useFocus } from '../../../hooks'
  * ✓ Keeping docs associated with the correct rate when a rate is removed
  * ☐ Fix document error messages.
  * ✓ toProtobuf for rateInfo
- * ☐ Rename stuff
+ * ✓ Rename stuff
  * ☐ Accessibility Testing
  * ☐ Update unit and end to end tests
+ * ☐ Final cleanup
  */
 
 const RateDatesErrorMessage = ({
@@ -216,7 +217,7 @@ export const RateDetails = ({
     const documentsErrorMessage =
         showFileUploadError && hasLoadingFiles
             ? 'You must wait for all documents to finish uploading before continuing'
-            : showFileUploadError && fileItems.length === 0
+            : showFileUploadError && fileItems.some((item) => item.length > 0)
             ? ' You must upload at least one document'
             : showFileUploadError && !hasValidFiles
             ? ' You must remove all documents with error messages before continuing'
@@ -279,16 +280,18 @@ export const RateDetails = ({
         setFocusErrorSummaryHeading(false)
     }, [focusErrorSummaryHeading])
 
-    // Rate details form setup
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
     //Return only the first-rate info if multi-rate submission feature flag is off
     const rateInfosInitialValues: RateInfoArrayType = showMultiRates
         ? {
-              rateInfos: draftSubmission.rateInfos.map((rateInfo) =>
-                  rateInfoFormValues(rateInfo)
-              ),
+              rateInfos:
+                  draftSubmission.rateInfos.length > 0
+                      ? draftSubmission.rateInfos.map((rateInfo) =>
+                            rateInfoFormValues(rateInfo)
+                        )
+                      : [rateInfoFormValues()],
           }
         : {
               rateInfos: [rateInfoFormValues(draftSubmission.rateInfos[0])],
@@ -535,19 +538,17 @@ export const RateDetails = ({
                                                                     handleDeleteFile
                                                                 }
                                                                 onFileItemsUpdate={({
-                                                                    fileItems,
+                                                                    fileItems:
+                                                                        rateFileItems,
                                                                 }) =>
                                                                     setFileItems(
                                                                         (
                                                                             data
                                                                         ) => {
-                                                                            console.log(
-                                                                                'setFileItems'
-                                                                            )
                                                                             data.splice(
                                                                                 index,
                                                                                 1,
-                                                                                fileItems
+                                                                                rateFileItems
                                                                             )
                                                                             return data
                                                                         }
