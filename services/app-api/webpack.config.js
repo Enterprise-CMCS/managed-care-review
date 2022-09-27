@@ -90,6 +90,9 @@ module.exports = {
                             );
                     },
                 },
+                {
+                    from: path.resolve(__dirname, '../app-proto/build'),
+                },
             ],
         }),
     ],

@@ -11,7 +11,8 @@
         "proto:ts": "pbts -o ./gen/healthPlanFormDataProto.d.ts ./gen/healthPlanFormDataProto.js",
         "proto:copy-web": "rsync -av ./gen/ ../app-web/src/gen",
         "precommit": "lint-staged",
-        "lint": "protolint lint ."
+        "lint": "protolint lint .",
+        "build": "tsc"
     },
     "lint-staged": {
         "*.proto": [

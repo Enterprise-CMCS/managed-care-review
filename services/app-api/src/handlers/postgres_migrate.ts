@@ -102,7 +102,7 @@ export const main: APIGatewayProxyHandler = async () => {
     // run the data migration. this will run any data changes to the protobufs stored in postgres
     try {
         const migrator = newDBMigrator(dbConnectionURL)
-        await migrate(migrator, '/opt/nodejs/healthPlanFormDataMigrations')
+        await migrate(migrator, '/opt/nodejs/')
     } catch (err) {
         console.log(err)
         return {
