@@ -64,6 +64,10 @@ custom:
     other: true
     val: false
     prod: false
+  deletionPolicy:
+    other: 'Delete'
+    val: 'Retain'
+    prod: 'Retain'
 
 package:
   individually: true
@@ -108,6 +112,7 @@ resources:
 
     PostgresAurora:
       Type: AWS::RDS::DBCluster
+      DeletionPolicy: ${self:custom.deletionPolicy.${opt:stage}, self:custom.deletionPolicy.other}
       Properties:
         Engine: aurora-postgresql
         EngineMode: serverless
