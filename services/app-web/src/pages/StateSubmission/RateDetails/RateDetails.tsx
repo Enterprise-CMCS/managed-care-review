@@ -85,11 +85,11 @@ const RateDatesErrorMessage = ({
     </PoliteErrorMessage>
 )
 
-interface RateInfosValues {
-    rateInfos: RateDetailsFormValues[]
+interface RateInfoArrayType {
+    rateInfos: RateInfoFormType[]
 }
 
-export interface RateDetailsFormValues {
+export interface RateInfoFormType {
     uuid: string
     rateType: RateType | undefined
     rateCapitationType: RateCapitationType | undefined
@@ -103,11 +103,11 @@ export interface RateDetailsFormValues {
 }
 
 type FormError =
-    FormikErrors<RateDetailsFormValues>[keyof FormikErrors<RateDetailsFormValues>]
+    FormikErrors<RateInfoFormType>[keyof FormikErrors<RateInfoFormType>]
 
 const rateErrorHandling = (
-    error: string | FormikErrors<RateDetailsFormValues> | undefined
-): FormikErrors<RateDetailsFormValues> | undefined => {
+    error: string | FormikErrors<RateInfoFormType> | undefined
+): FormikErrors<RateInfoFormType> | undefined => {
     if (typeof error === 'string') {
         return undefined
     }
@@ -120,34 +120,31 @@ export const RateDetails = ({
     showValidations = false,
     updateDraft,
 }: HealthPlanFormPageProps): React.ReactElement => {
-    const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-    const [focusNewRate, setFocusNewRate] = React.useState(false)
-    const newRateNameRef = React.useRef<HTMLElement | null>(null)
-    const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
+    const { deleteFile, getKey, getS3URL, scanFile, uploadFile } = useS3()
     const navigate = useNavigate()
-
     const statePrograms = useStatePrograms()
 
+    // Launch Darkly
     const ldClient = useLDClient()
-
     const showMultiRates = ldClient?.variation(
         featureFlags.MULTI_RATE_SUBMISSIONS.flag,
         featureFlags.MULTI_RATE_SUBMISSIONS.defaultValue
     )
 
+    // Rate documents state management
+    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
+        React.useState(false)
+    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
+    const [shouldValidate, setShouldValidate] = React.useState(showValidations)
+    const [focusNewRate, setFocusNewRate] = React.useState(false)
+    const newRateNameRef = React.useRef<HTMLElement | null>(null)
+    const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
+
     const rateDetailsFormSchema = Yup.object().shape({
         rateInfos: Yup.array().of(RateDetailsFormSchema),
     })
 
-    // Rate documents state management
-    const { deleteFile, getKey, getS3URL, scanFile, uploadFile } = useS3()
-    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
-        React.useState(false)
-    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
-
-    const fileItemsFromRateInfo = (
-        rateInfo: RateDetailsFormValues
-    ): FileItemT[] => {
+    const fileItemsFromRateInfo = (rateInfo: RateInfoFormType): FileItemT[] => {
         return (
             (rateInfo?.rateDocuments &&
                 rateInfo?.rateDocuments.map((doc) => {
@@ -177,9 +174,7 @@ export const RateDetails = ({
         )
     }
 
-    const rateDetailsValues = (
-        rateInfo?: RateInfoType
-    ): RateDetailsFormValues => ({
+    const rateInfoFormValues = (rateInfo?: RateInfoType): RateInfoFormType => ({
         //UUID is needed here as a unique component key prop to track mapped rateInfo in Formik Field array. This ensures we remove the correct FileUpload component when removing a rate.
         uuid: uuidv4(),
         rateType: rateInfo?.rateType ?? undefined,
@@ -204,7 +199,7 @@ export const RateDetails = ({
     })
 
     const initialFileItems: FileItemT[][] = draftSubmission.rateInfos.map(
-        (rateInfo) => fileItemsFromRateInfo(rateDetailsValues(rateInfo))
+        (rateInfo) => fileItemsFromRateInfo(rateInfoFormValues(rateInfo))
     )
 
     const [fileItems, setFileItems] =
@@ -289,14 +284,14 @@ export const RateDetails = ({
         shouldValidate && Boolean(error)
 
     //Return only the first-rate info if multi-rate submission feature flag is off
-    const rateInfosInitialValues: RateInfosValues = showMultiRates
+    const rateInfosInitialValues: RateInfoArrayType = showMultiRates
         ? {
               rateInfos: draftSubmission.rateInfos.map((rateInfo) =>
-                  rateDetailsValues(rateInfo)
+                  rateInfoFormValues(rateInfo)
               ),
           }
         : {
-              rateInfos: [rateDetailsValues(draftSubmission.rateInfos[0])],
+              rateInfos: [rateInfoFormValues(draftSubmission.rateInfos[0])],
           }
 
     const processFileItems = (fileItems: FileItemT[]): SubmissionDocument[] => {
@@ -328,14 +323,14 @@ export const RateDetails = ({
         }, [] as SubmissionDocument[])
     }
 
-    const isRateTypeEmpty = (values: RateDetailsFormValues): boolean =>
+    const isRateTypeEmpty = (values: RateInfoFormType): boolean =>
         values.rateType === undefined
 
-    const isRateTypeAmendment = (values: RateDetailsFormValues): boolean =>
+    const isRateTypeAmendment = (values: RateInfoFormType): boolean =>
         values.rateType === 'AMENDMENT'
 
     const handleFormSubmit = async (
-        rateInfos: RateDetailsFormValues[],
+        rateInfos: RateInfoFormType[],
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
         options: {
             shouldValidateDocuments: boolean
@@ -395,7 +390,7 @@ export const RateDetails = ({
     }
 
     const generateErrorSummaryErrors = (
-        errors: FormikErrors<RateInfosValues>
+        errors: FormikErrors<RateInfoArrayType>
     ) => {
         const rateErrors = errors.rateInfos
         const errorObject: { [field: string]: string } = {}
@@ -1139,7 +1134,7 @@ export const RateDetails = ({
                                                     className={`usa-button usa-button--outline ${styles.addContactBtn}`}
                                                     onClick={() => {
                                                         const newRate =
-                                                            rateDetailsValues()
+                                                            rateInfoFormValues()
                                                         push(newRate)
                                                         setFocusNewRate(true)
                                                     }}
