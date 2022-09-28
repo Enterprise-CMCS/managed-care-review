@@ -21,6 +21,7 @@ import selectEvent from 'react-select-event'
 describe('RateDetails', () => {
     const emptyRateDetailsDraft = {
         ...mockDraft(),
+        rateInfos: [],
         rateType: undefined,
         rateDateStart: undefined,
         rateDateEnd: undefined,
@@ -939,16 +940,27 @@ describe('RateDetails', () => {
             expect(screen.queryByText('Remove files with errors')).toBeNull()
             expect(mockUpdateDraftFn).toHaveBeenCalledWith(
                 expect.objectContaining({
-                    rateDocuments: [
+                    rateInfos: [
                         {
-                            name: 'testFile.doc',
-                            s3URL: expect.any(String),
-                            documentCategories: ['RATES'],
-                        },
-                        {
-                            name: 'testFile.pdf',
-                            s3URL: expect.any(String),
-                            documentCategories: ['RATES'],
+                            rateType: undefined,
+                            rateCapitationType: undefined,
+                            rateDateStart: undefined,
+                            rateDateEnd: undefined,
+                            rateDateCertified: undefined,
+                            rateAmendmentInfo: undefined,
+                            rateProgramIDs: [],
+                            rateDocuments: [
+                                {
+                                    name: 'testFile.doc',
+                                    s3URL: expect.any(String),
+                                    documentCategories: ['RATES'],
+                                },
+                                {
+                                    name: 'testFile.pdf',
+                                    s3URL: expect.any(String),
+                                    documentCategories: ['RATES'],
+                                },
+                            ],
                         },
                     ],
                 })
