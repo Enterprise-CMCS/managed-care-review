@@ -4,7 +4,7 @@ import { useCurrentRoute } from './useCurrentRoute'
 import { createScript } from './useScript'
 import { PageTitlesRecord } from '../constants/routes'
 import { useAuth } from '../contexts/AuthContext'
-import { getTealiumEnv, CONTENT_TYPE_BY_ROUTE } from '../constants/tealium'
+import {CONTENT_TYPE_BY_ROUTE, getTealiumEnv, getTealiumPageName } from '../constants/tealium'
 import type {
     TealiumLinkDataObject,
     TealiumViewDataObject,
@@ -25,6 +25,11 @@ const useTealium = (): {
     const { currentRoute, pathname } = useCurrentRoute()
     const { heading } = usePage()
     const { loggedInUser } = useAuth()
+    const tealiumPageName = getTealiumPageName({
+        heading,
+        route: currentRoute,
+        user: loggedInUser,
+    })
 
     // Add Tealium setup
     // this effect should only fire on initial app load
@@ -90,12 +95,20 @@ const useTealium = (): {
     // Add page view
     // this effect should fire on each page view or if something changes about logged in user
     useEffect(() => {
+        console.log(currentRoute, loggedInUser, pathname, heading)
+        // Do not add page views while page is still loading
+        if (!pathname){
+            return
+        }
+
         // Do not add tealium for local dev or review apps
         if (process.env.REACT_APP_AUTH_MODE !== 'IDM') {
             console.log(
-                `mock tealium page view: ${JSON.stringify(
-                    `${heading}: ${PageTitlesRecord[currentRoute]}`
-                )}`
+                `mock tealium page view: ${getTealiumPageName({
+                    heading,
+                    route: currentRoute,
+                    user: loggedInUser,
+                })}`
             )
             return
         }
@@ -106,12 +119,13 @@ const useTealium = (): {
                 'PROGRAMMING ERROR: tried to use tealium utag before it was loaded'
             )
         }
+        
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const utag = window.utag || { link: () => {}, view: () => {} }
         const tagData: TealiumViewDataObject = {
             content_language: 'en',
             content_type: `${CONTENT_TYPE_BY_ROUTE[currentRoute]}`,
-            page_name: `${heading}: ${PageTitlesRecord[currentRoute]}`,
+            page_name: tealiumPageName,
             page_path: pathname,
             site_domain: 'cms.gov',
             site_environment: `${process.env.REACT_APP_STAGE_NAME}`,
@@ -119,7 +133,7 @@ const useTealium = (): {
             logged_in: `${Boolean(loggedInUser) ?? false}`,
         }
         utag.view(tagData)
-    }, [currentRoute, loggedInUser, pathname, heading])
+    }, [currentRoute, loggedInUser, pathname, tealiumPageName])
 
     // Add user event
     const logTealiumEvent = (linkData: {
