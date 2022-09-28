@@ -185,7 +185,7 @@ export async function migrate(migrator: MigratorType, path?: string) {
 
     const migrations: MigrationType[] = []
     for (const migrationFile of migrationFiles) {
-        const fullPath = './healthPlanFormDataMigrations/' + migrationFile
+        const fullPath = migrationPath + migrationFile
 
         const migrationName = migrationFile.substring(
             0,
