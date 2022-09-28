@@ -179,9 +179,32 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
         contractDateStart: new Date(Date.UTC(2021, 4, 22)),
         contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
         contractDocuments: [],
-        rateInfos: [],
+        rateInfos: [
+            {
+                rateType: 'AMENDMENT',
+                rateCapitationType: 'RATE_CELL',
+                rateDateStart: new Date(Date.UTC(2021, 4, 22)),
+                rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
+                rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
+                    effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
+                },
+                rateProgramIDs: [mockMNState().programs[0].id],
+                rateDocuments: [],
+            }
+        ],
+        rateType: 'AMENDMENT',
+        rateCapitationType: 'RATE_CELL',
+        rateDateStart: new Date(Date.UTC(2021, 4, 22)),
+        rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
+        rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
+        rateAmendmentInfo: {
+            effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
+            effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
+        },
+        rateProgramIDs: [mockMNState().programs[0].id],
         rateDocuments: [],
-        rateProgramIDs: [],
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         stateContacts: [
@@ -248,9 +271,44 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
                 documentCategories: ['CONTRACT'],
             },
         ],
-        rateInfos: [],
-        rateDocuments: [],
-        rateProgramIDs: [],
+        rateInfos: [
+            {
+                rateType: 'AMENDMENT',
+                rateCapitationType: 'RATE_CELL',
+                rateDateStart: new Date(Date.UTC(2021, 4, 22)),
+                rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
+                rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
+                    effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
+                },
+                rateProgramIDs: [mockMNState().programs[0].id],
+                rateDocuments: [
+                    {
+                        s3URL: 's3://bucketname/key/foo.png',
+                        name: 'Rates certification',
+                        documentCategories: ['RATES'],
+                    },
+                ],
+            }
+        ],
+        rateType: 'AMENDMENT',
+        rateCapitationType: 'RATE_CELL',
+        rateDateStart: new Date(Date.UTC(2021, 4, 22)),
+        rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
+        rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
+        rateAmendmentInfo: {
+            effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
+            effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
+        },
+        rateProgramIDs: [mockMNState().programs[0].id],
+        rateDocuments: [
+            {
+                s3URL: 's3://bucketname/key/foo.png',
+                name: 'Rates certification',
+                documentCategories: ['RATES'],
+            },
+        ],
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         stateContacts: [
@@ -311,10 +369,36 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
         contractDateStart: new Date(Date.UTC(2021, 4, 22)),
         contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
         contractDocuments: [],
-        rateDocuments: [],
+        rateDocuments: [
+            {
+                s3URL: 's3://bucketname/key/foo.png',
+                name: 'Rates certification',
+                documentCategories: ['RATES'],
+            },
+        ],
         managedCareEntities: ['PIHP'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-        rateInfos: [],
+        rateInfos: [
+            {
+                rateType: 'AMENDMENT',
+                rateCapitationType: 'RATE_CELL',
+                rateDateStart: new Date(Date.UTC(2021, 4, 22)),
+                rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
+                rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
+                    effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
+                },
+                rateProgramIDs: [mockMNState().programs[0].id],
+                rateDocuments: [
+                    {
+                        s3URL: 's3://bucketname/key/foo.png',
+                        name: 'Rates certification',
+                        documentCategories: ['RATES'],
+                    },
+                ],
+            }
+        ],
         rateType: 'AMENDMENT',
         rateCapitationType: 'RATE_CELL',
         rateDateStart: new Date(Date.UTC(2021, 4, 22)),
@@ -419,7 +503,27 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
         },
         managedCareEntities: ['PIHP'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-        rateInfos: [],
+        rateInfos: [
+            {
+                rateType: 'AMENDMENT',
+                rateCapitationType: 'RATE_RANGE',
+                rateDateStart: new Date(Date.UTC(2021, 4, 22)),
+                rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
+                rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
+                    effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
+                },
+                rateProgramIDs: [mockMNState().programs[0].id],
+                rateDocuments: [
+                    {
+                        s3URL: 's3://bucketname/key/foo.png',
+                        name: 'Rates certification',
+                        documentCategories: ['RATES'],
+                    },
+                ],
+            }
+        ],
         rateType: 'AMENDMENT',
         rateCapitationType: 'RATE_RANGE',
         rateDateStart: new Date(Date.UTC(2021, 4, 22)),
@@ -510,7 +614,32 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
         },
         managedCareEntities: ['PIHP', 'PCCM'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-        rateInfos: [],
+        rateInfos: [
+            {
+                rateType: 'AMENDMENT',
+                rateCapitationType: 'RATE_CELL',
+                rateDocuments: [
+                    {
+                        s3URL: 's3://bucketname/key/foo.png',
+                        name: 'rates cert 1',
+                        documentCategories: ['RATES_RELATED'],
+                    },
+                    {
+                        s3URL: 's3://bucketname/key/foo.png',
+                        name: 'rates cert 2',
+                        documentCategories: ['RATES_RELATED'],
+                    },
+                ],
+                rateDateStart: new Date(Date.UTC(2021, 4, 22)),
+                rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
+                rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
+                    effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
+                },
+                rateProgramIDs: [mockMNState().programs[0].id],
+            }
+        ],
         rateType: 'AMENDMENT',
         rateCapitationType: 'RATE_CELL',
         rateDocuments: [
@@ -597,14 +726,7 @@ function basicLockedHealthPlanFormData(): LockedHealthPlanFormDataType {
                 titleRole: 'Manager',
             },
         ],
-        actuaryContacts: [
-            {
-                name: 'Anne Acturay',
-                email: 'aa@example.com',
-                titleRole: 'Deputy',
-                actuarialFirm: 'STATE_IN_HOUSE',
-            },
-        ],
+        actuaryContacts: [],
         rateInfos: [],
         rateDocuments: [],
         rateProgramIDs: [],
