@@ -499,7 +499,19 @@ export const RateDetails = ({
                                         <>
                                             {rateInfos.map(
                                                 (rateInfo, index, arr) => (
-                                                    <div key={rateInfo.uuid}>
+                                                    <div
+                                                        key={rateInfo.uuid}
+                                                        id={rateInfo.uuid}
+                                                    >
+                                                        <Label
+                                                            htmlFor={
+                                                                rateInfo.uuid
+                                                            }
+                                                        >
+                                                            {index === 0
+                                                                ? 'Rate certification'
+                                                                : `Additional rate certification ${index}`}
+                                                        </Label>
                                                         <FormGroup
                                                             error={
                                                                 showFileUploadError
@@ -1156,6 +1168,7 @@ export const RateDetails = ({
                                                                     }}
                                                                 >
                                                                     Remove rate
+                                                                    certification
                                                                 </Button>
                                                             )}
                                                     </div>
