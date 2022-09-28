@@ -142,7 +142,7 @@ export const RateDetails = ({
     const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
 
     const rateDetailsFormSchema = Yup.object().shape({
-        rateInfos: RateDetailsFormSchema
+        rateInfos: RateDetailsFormSchema,
     })
 
     const fileItemsFromRateInfo = (rateInfo: RateInfoFormType): FileItemT[] => {
@@ -1076,8 +1076,8 @@ export const RateDetails = ({
                                                                     )}
                                                                 >
                                                                     <Label
-                                                                        htmlFor="rateDateCertified"
-                                                                        id="rateDateCertifiedLabel"
+                                                                        htmlFor={`rateInfos.${index}.rateDateCertified`}
+                                                                        id={`rateDateCertifiedLabel.${index}`}
                                                                     >
                                                                         {isRateTypeAmendment(
                                                                             rateInfo
@@ -1087,7 +1087,7 @@ export const RateDetails = ({
                                                                     </Label>
                                                                     <div
                                                                         className="usa-hint"
-                                                                        id="rateDateCertifiedHint"
+                                                                        id={`rateDateCertifiedHint.${index}`}
                                                                     >
                                                                         mm/dd/yyyy
                                                                     </div>
@@ -1109,7 +1109,7 @@ export const RateDetails = ({
                                                                     )}
                                                                     <DatePicker
                                                                         aria-required
-                                                                        aria-describedby="rateDateCertifiedLabel rateDateCertifiedHint"
+                                                                        aria-describedby={`rateDateCertifiedLabel.${index} rateDateCertifiedHint.${index}`}
                                                                         id={`rateInfos.${index}.rateDateCertified`}
                                                                         name={`rateInfos.${index}.rateDateCertified`}
                                                                         defaultValue={
