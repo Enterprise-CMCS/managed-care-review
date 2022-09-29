@@ -21,7 +21,7 @@ const ROUTES = [
     'SUBMISSIONS_SUMMARY',
 ] as const // iterable union type
 type RouteT = typeof ROUTES[number]
-
+type RouteTWithUnknown = RouteT | 'UNKNOWN_ROUTE'
 /*
     Every application url (excluding query parameters) is found in the RoutesRecord.
     These types ensure we use valid route throughout the application
@@ -46,13 +46,18 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_REVISION: '/submissions/:id/revisions/:revisionVersion',
 }
 
-const STATE_SUBMISSION_FORM_ROUTES: RouteT[] = [
+const STATE_SUBMISSION_FORM_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_TYPE',
     'SUBMISSIONS_CONTRACT_DETAILS',
     'SUBMISSIONS_RATE_DETAILS',
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_DOCUMENTS',
     'SUBMISSIONS_REVIEW_SUBMIT',
+]
+
+const STATE_SUBMISSION_SUMMARY_ROUTES: RouteTWithUnknown[] = [
+    'SUBMISSIONS_SUMMARY',
+    'SUBMISSIONS_REVISION',
 ]
 
 /*
@@ -63,7 +68,7 @@ const STATE_SUBMISSION_FORM_ROUTES: RouteT[] = [
     For a quick way to check page headings, look for the h1 of the application in the DOM tree. It is the dark blue row of the header.
 
 */
-const PageHeadingsRecord: Partial<Record<RouteT | 'UNKNOWN_ROUTE', string>> = {
+const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
     ROOT: 'Home',
     DASHBOARD: 'Dashboard',
     SUBMISSIONS_NEW: 'New submission',
@@ -101,6 +106,7 @@ export {
     RoutesRecord,
     ROUTES,
     STATE_SUBMISSION_FORM_ROUTES,
+    STATE_SUBMISSION_SUMMARY_ROUTES,
 }
 
-export type { RouteT }
+export type { RouteT, RouteTWithUnknown }

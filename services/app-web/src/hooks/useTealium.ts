@@ -4,7 +4,11 @@ import { useCurrentRoute } from './useCurrentRoute'
 import { createScript } from './useScript'
 import { PageTitlesRecord } from '../constants/routes'
 import { useAuth } from '../contexts/AuthContext'
-import {CONTENT_TYPE_BY_ROUTE, getTealiumEnv, getTealiumPageName } from '../constants/tealium'
+import {
+    CONTENT_TYPE_BY_ROUTE,
+    getTealiumEnv,
+    getTealiumPageName,
+} from '../constants/tealium'
 import type {
     TealiumLinkDataObject,
     TealiumViewDataObject,
@@ -95,21 +99,9 @@ const useTealium = (): {
     // Add page view
     // this effect should fire on each page view or if something changes about logged in user
     useEffect(() => {
-        console.log(currentRoute, loggedInUser, pathname, heading)
-        // Do not add page views while page is still loading
-        if (!pathname){
-            return
-        }
-
         // Do not add tealium for local dev or review apps
         if (process.env.REACT_APP_AUTH_MODE !== 'IDM') {
-            console.log(
-                `mock tealium page view: ${getTealiumPageName({
-                    heading,
-                    route: currentRoute,
-                    user: loggedInUser,
-                })}`
-            )
+            console.log(`mock tealium page view: ${tealiumPageName}`)
             return
         }
 
@@ -119,7 +111,7 @@ const useTealium = (): {
                 'PROGRAMMING ERROR: tried to use tealium utag before it was loaded'
             )
         }
-        
+
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         const utag = window.utag || { link: () => {}, view: () => {} }
         const tagData: TealiumViewDataObject = {

@@ -1,5 +1,10 @@
 import { User } from '../gen/gqlClient'
-import { PageTitlesRecord, RoutesRecord, RouteT } from './routes'
+import {
+    PageTitlesRecord,
+    RouteT,
+    STATE_SUBMISSION_FORM_ROUTES,
+    STATE_SUBMISSION_SUMMARY_ROUTES,
+} from './routes'
 
 // TYPES
 type TealiumDataObject = {
@@ -43,7 +48,6 @@ const CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     UNKNOWN_ROUTE: '404',
 }
 
-
 type TealiumEvent =
     | 'search'
     | 'submission_view'
@@ -65,10 +69,29 @@ function getTealiumEnv(stage: string) {
     }
 }
 
-const getTealiumPageName = ({route, heading, user} : {route: RouteT | 'UNKNOWN_ROUTE', heading: string | undefined, user: User | undefined} ) => {
-    const formatPageName = ({heading, title}: {title: string, heading?: string}) => {
-        const headingPrefix = heading? `${heading}: ` : '';
-         return`${headingPrefix}${title}`
+const getTealiumPageName = ({
+    route,
+    heading,
+    user,
+}: {
+    route: RouteT | 'UNKNOWN_ROUTE'
+    heading: string | undefined
+    user: User | undefined
+}) => {
+    const addSubmissionNameHeading =
+        STATE_SUBMISSION_FORM_ROUTES.includes(route) ||
+        STATE_SUBMISSION_SUMMARY_ROUTES.includes(route)
+
+    const formatPageName = ({
+        heading,
+        title,
+    }: {
+        title: string
+        heading?: string
+    }) => {
+        const headingPrefix =
+            heading && addSubmissionNameHeading ? `${heading}: ` : ''
+        return `${headingPrefix}${title}`
     }
     switch (route) {
         case 'ROOT':
@@ -86,7 +109,7 @@ const getTealiumPageName = ({route, heading, user} : {route: RouteT | 'UNKNOWN_R
         case 'DASHBOARD':
             if (user && user.__typename === 'CMSUser') {
                 return formatPageName({ title: 'CMS Dashboard' })
-            }else if (user && user.__typename === 'StateUser') {
+            } else if (user && user.__typename === 'StateUser') {
                 return formatPageName({
                     heading,
                     title: 'State dashboard',
@@ -99,5 +122,5 @@ const getTealiumPageName = ({route, heading, user} : {route: RouteT | 'UNKNOWN_R
     }
 }
 
-export { CONTENT_TYPE_BY_ROUTE, getTealiumEnv,getTealiumPageName }
+export { CONTENT_TYPE_BY_ROUTE, getTealiumEnv, getTealiumPageName }
 export type { TealiumLinkDataObject, TealiumViewDataObject, TealiumEvent }
