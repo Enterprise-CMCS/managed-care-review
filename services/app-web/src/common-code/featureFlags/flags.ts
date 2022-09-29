@@ -53,7 +53,7 @@ export const featureFlags = {
      * Enables multi-rate submission UI
      */
     MULTI_RATE_SUBMISSIONS: {
-        flag: 'rate-certification-programs',
+        flag: 'multi-rate-submissions',
         defaultValue: false,
     },
 } as const
