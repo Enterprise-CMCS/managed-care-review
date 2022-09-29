@@ -49,12 +49,20 @@ export const RateDetailsSummarySection = ({
             : 'Certification of rate ranges of capitation rates per rate cell'
         : ''
 
-    const ratePrograms =
-        submission.rateProgramIDs && submission.rateProgramIDs.length > 0
+    const ratePrograms = () => {
+        /* if we have rateProgramIDs, use them, otherwise use programIDs */
+        let programIDs = [] as string[]
+        if (submission.rateProgramIDs && submission.rateProgramIDs.length > 0) {
+            programIDs = submission.rateProgramIDs
+        } else if (submission.programIDs && submission.programIDs.length > 0) {
+            programIDs = submission.programIDs
+        }
+        return programIDs
             ? statePrograms
-                  .filter((p) => submission.rateProgramIDs?.includes(p.id))
+                  .filter((p) => programIDs.includes(p.id))
                   .map((p) => p.name)
             : undefined
+    }
 
     useEffect(() => {
         // get all the keys for the documents we want to zip
@@ -114,7 +122,7 @@ export const RateDetailsSummarySection = ({
                         <DataDetail
                             id="ratePrograms"
                             label="Programs this rate certification covers"
-                            data={ratePrograms}
+                            data={ratePrograms()}
                         />
                     )}
                     <DataDetail
