@@ -212,9 +212,8 @@ export const AppRoutes = ({
             }
             // Then, when we login, read that key, if it exists, go forth.
         } else {
-            console.log('Retrieved For Redirect: ', redirectPath)
-
             if (typeof redirectPath === 'string') {
+                console.log('Retrieved For Redirect: ', redirectPath)
                 navigate(redirectPath)
                 setRedirectPath(null)
             }
