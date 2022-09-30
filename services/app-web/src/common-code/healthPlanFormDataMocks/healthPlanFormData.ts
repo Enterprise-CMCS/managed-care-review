@@ -192,7 +192,7 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
                 },
                 rateProgramIDs: [mockMNState().programs[0].id],
                 rateDocuments: [],
-            }
+            },
         ],
         rateType: 'AMENDMENT',
         rateCapitationType: 'RATE_CELL',
@@ -290,7 +290,7 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
                         documentCategories: ['RATES'],
                     },
                 ],
-            }
+            },
         ],
         rateType: 'AMENDMENT',
         rateCapitationType: 'RATE_CELL',
@@ -397,7 +397,7 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
                         documentCategories: ['RATES'],
                     },
                 ],
-            }
+            },
         ],
         rateType: 'AMENDMENT',
         rateCapitationType: 'RATE_CELL',
@@ -522,7 +522,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
                         documentCategories: ['RATES'],
                     },
                 ],
-            }
+            },
         ],
         rateType: 'AMENDMENT',
         rateCapitationType: 'RATE_RANGE',
@@ -569,7 +569,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
     return {
         id: 'test-abc-123',
         createdAt: new Date(Date.UTC(2021, 4, 10)),
-        updatedAt: new Date(),
+        updatedAt: new Date(Date.UTC(2021, 4, 13)),
         status: 'DRAFT',
         stateCode: 'MN',
         stateNumber: 5,
@@ -591,7 +591,13 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
         contractExecutionStatus: 'UNEXECUTED',
         contractDateStart: new Date(Date.UTC(2021, 4, 22)),
         contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
-        contractDocuments: [],
+        contractDocuments: [
+            {
+                s3URL: 's3://bucketname/key/foo.png',
+                name: 'contract doc',
+                documentCategories: ['CONTRACT'],
+            },
+        ],
         contractAmendmentInfo: {
             modifiedProvisions: {
                 modifiedBenefitsProvided: false,
@@ -638,7 +644,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
                     effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
                 },
                 rateProgramIDs: [mockMNState().programs[0].id],
-            }
+            },
         ],
         rateType: 'AMENDMENT',
         rateCapitationType: 'RATE_CELL',
