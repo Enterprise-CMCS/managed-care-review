@@ -530,7 +530,22 @@ describe('unlockHealthPlanPackage', () => {
         }
 
         //Set rate programs to empty string
-        unlockedFormData.rateProgramIDs = []
+        unlockedFormData.rateInfos = [
+            {
+                rateType: 'NEW' as const,
+                rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+                rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+                rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+                rateDocuments: [
+                    {
+                        name: 'rateDocument.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+                rateProgramIDs: [],
+            },
+        ]
 
         //Update package
         const updatedSub = await updateTestHealthPlanFormData(

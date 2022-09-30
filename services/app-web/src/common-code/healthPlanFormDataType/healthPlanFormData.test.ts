@@ -203,36 +203,44 @@ describe('submission type assertions', () => {
         [
             {
                 ...mockStateSubmission(),
-                rateType: undefined,
+                rateInfos: [
+                    {
+                        rateType: undefined,
+                    },
+                ],
             },
             false,
         ],
         [
             {
                 ...mockStateSubmission(),
-                rateDateStart: undefined,
+                rateInfos: [
+                    {
+                        rateDateStart: undefined,
+                    },
+                ],
             },
             false,
         ],
         [
             {
                 ...mockStateSubmission(),
-                rateDateEnd: undefined,
+                rateInfos: [
+                    {
+                        rateDateEnd: undefined,
+                    },
+                ],
             },
             false,
         ],
         [
             {
                 ...mockStateSubmission(),
-                rateDateCertified: undefined,
-            },
-            false,
-        ],
-        [
-            {
-                ...mockStateSubmission(),
-                submissionType: 'CONTRACT_ONLY',
-                rateDocuments: [],
+                rateInfos: [
+                    {
+                        rateDateCertified: undefined,
+                    },
+                ],
             },
             false,
         ],
@@ -240,7 +248,19 @@ describe('submission type assertions', () => {
             {
                 ...mockStateSubmission(),
                 rateType: 'AMENDMENT',
-                rateAmendmentInfo: undefined,
+                rateInfos: [
+                    {
+                        rateAmendmentInfo: undefined,
+                    },
+                ],
+            },
+            false,
+        ],
+        [
+            {
+                ...mockStateSubmission(),
+                rateType: 'AMENDMENT',
+                rateInfos: [],
             },
             false,
         ],
