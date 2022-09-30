@@ -185,6 +185,23 @@ const createAndUpdateTestHealthPlanPackage = async (
             email: 'email@test.com',
         },
     ]
+    draft.rateInfos = [
+        {
+            rateType: 'NEW' as const,
+            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+            rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+            rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+            rateDocuments: [
+                {
+                    name: 'rateDocument.pdf',
+                    s3URL: 'fakeS3URL',
+                    documentCategories: ['RATES' as const],
+                },
+            ],
+            //We only want one rate ID and use last program in list to differentiate from programID if possible.
+            rateProgramIDs: [ratePrograms.reverse()[0].id],
+        },
+    ]
     draft.actuaryContacts = [
         {
             name: 'test name',
