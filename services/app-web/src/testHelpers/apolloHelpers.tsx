@@ -201,7 +201,21 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
         },
         managedCareEntities: ['MCO'],
         federalAuthorities: ['STATE_PLAN'],
-        rateInfos: [],
+        rateInfos: [
+            {
+                rateType: 'AMENDMENT',
+                rateCapitationType: 'RATE_CELL',
+                rateDocuments: [],
+                rateDateStart: new Date(),
+                rateDateEnd: new Date(),
+                rateDateCertified: new Date(),
+                rateAmendmentInfo: {
+                    effectiveDateStart: new Date(),
+                    effectiveDateEnd: new Date(),
+                },
+                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+            },
+        ],
         rateType: 'AMENDMENT',
         rateCapitationType: 'RATE_CELL',
         rateDocuments: [],
@@ -270,7 +284,24 @@ export function mockStateSubmission(): LockedHealthPlanFormDataType {
         contractAmendmentInfo: undefined,
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-        rateInfos: [],
+        rateInfos: [
+            {
+                rateType: 'NEW',
+                rateCapitationType: 'RATE_CELL',
+                rateDocuments: [
+                    {
+                        s3URL: 's3://bucketname/key/rate',
+                        name: 'rate',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+                rateDateStart: new Date(),
+                rateDateEnd: new Date(),
+                rateDateCertified: new Date(),
+                rateAmendmentInfo: undefined,
+                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+            },
+        ],
         rateType: 'NEW',
         rateCapitationType: 'RATE_CELL',
         rateDocuments: [
@@ -349,7 +380,24 @@ export function mockStateSubmissionContractAmendment(): LockedHealthPlanFormData
         },
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-        rateInfos: [],
+        rateInfos: [
+            {
+                rateType: 'NEW',
+                rateCapitationType: 'RATE_CELL',
+                rateDocuments: [
+                    {
+                        s3URL: 's3://bucketname/key/rate',
+                        name: 'rate',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+                rateDateStart: new Date(),
+                rateDateEnd: new Date(),
+                rateDateCertified: new Date(),
+                rateAmendmentInfo: undefined,
+                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+            },
+        ],
         rateType: 'NEW',
         rateCapitationType: 'RATE_CELL',
         rateDocuments: [
@@ -804,7 +852,130 @@ const fetchStateHealthPlanPackageMockSuccess = ({
     }
 }
 
-const mockSubmittedHealthPlanPackageWithRevision = (): HealthPlanPackage => {
+const mockSubmittedHealthPlanPackageWithRevision = ({
+    currentSubmissionData,
+    previousSubmissionData,
+    initialSubmissionData,
+}: {
+    currentSubmissionData?: Partial<UnlockedHealthPlanFormDataType>
+    previousSubmissionData?: Partial<UnlockedHealthPlanFormDataType>
+    initialSubmissionData?: Partial<UnlockedHealthPlanFormDataType>
+}): HealthPlanPackage => {
+    const currentFiles: Partial<UnlockedHealthPlanFormDataType> = {
+        contractDocuments: [
+            {
+                s3URL: 's3://bucket/1648242632157-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf',
+                name: 'Amerigroup Texas, Inc.pdf',
+                documentCategories: ['CONTRACT'],
+            },
+            {
+                s3URL: 's3://bucket/1648490162641-lifeofgalileo.pdf/lifeofgalileo.pdf',
+                name: 'lifeofgalileo.pdf',
+                documentCategories: ['CONTRACT'],
+            },
+        ],
+        rateInfos: [
+            {
+                rateDocuments: [
+                    {
+                        s3URL: 's3://bucket/1648242665634-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf',
+                        name: 'Amerigroup Texas, Inc.pdf',
+                        documentCategories: ['RATES_RELATED'],
+                    },
+                    {
+                        s3URL: 's3://bucket/1648242711421-Amerigroup Texas Inc copy.pdf/Amerigroup Texas Inc copy.pdf',
+                        name: 'Amerigroup Texas Inc copy.pdf',
+                        documentCategories: ['RATES_RELATED'],
+                    },
+                ],
+            },
+        ],
+        documents: [
+            {
+                s3URL: 's3://bucket/1648242711421-529-10-0020-00003_Superior_Health Plan, Inc.pdf/529-10-0020-00003_Superior_Health Plan, Inc.pdf',
+                name: '529-10-0020-00003_Superior_Health Plan, Inc.pdf',
+                documentCategories: ['CONTRACT_RELATED'],
+            },
+            {
+                s3URL: 's3://bucket/1648242873229-covid-ifc-2-flu-rsv-codes 5-5-2021.pdf/covid-ifc-2-flu-rsv-codes 5-5-2021.pdf',
+                name: 'covid-ifc-2-flu-rsv-codes 5-5-2021.pdf',
+                documentCategories: ['RATES_RELATED'],
+            },
+        ],
+    }
+    const previousFiles: Partial<UnlockedHealthPlanFormDataType> = {
+        contractDocuments: [
+            {
+                s3URL: 's3://bucketname/1648242632157-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf',
+                name: 'Amerigroup Texas, Inc.pdf',
+                documentCategories: ['CONTRACT'],
+            },
+            {
+                s3URL: 's3://bucketname/1648242665634-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf',
+                name: 'Amerigroup Texas, Inc.pdf',
+                documentCategories: ['CONTRACT'],
+            },
+            {
+                s3URL: 's3://bucketname/1648242711421-Amerigroup Texas Inc copy.pdf/Amerigroup Texas Inc copy.pdf',
+                name: 'Amerigroup Texas Inc copy.pdf',
+                documentCategories: ['CONTRACT'],
+            },
+        ],
+        rateInfos: [
+            {
+                rateDocuments: [
+                    {
+                        s3URL: 's3://bucketname/1648242711421-529-10-0020-00003_Superior_Health Plan, Inc.pdf/529-10-0020-00003_Superior_Health Plan, Inc.pdf',
+                        name: '529-10-0020-00003_Superior_Health Plan, Inc.pdf',
+                        documentCategories: ['RATES'],
+                    },
+                    {
+                        s3URL: 's3://bucketname/1648242873229-covid-ifc-2-flu-rsv-codes 5-5-2021.pdf/covid-ifc-2-flu-rsv-codes 5-5-2021.pdf',
+                        name: 'covid-ifc-2-flu-rsv-codes 5-5-2021.pdf',
+                        documentCategories: ['RATES'],
+                    },
+                    {
+                        s3URL: 's3://bucketname/1648242632157-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf',
+                        name: 'Amerigroup Texas, Inc.pdf',
+                        documentCategories: ['RATES'],
+                    },
+                ],
+            },
+        ],
+        documents: [
+            {
+                s3URL: 's3://bucketname/1648242665634-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf',
+                name: 'Amerigroup Texas, Inc.pdf',
+                documentCategories: ['CONTRACT_RELATED'],
+            },
+            {
+                s3URL: 's3://bucketname/1648242711421-Amerigroup Texas Inc copy.pdf/Amerigroup Texas Inc copy.pdf',
+                name: 'Amerigroup Texas Inc copy.pdf',
+                documentCategories: ['CONTRACT_RELATED'],
+            },
+            {
+                s3URL: 's3://bucketname/1648242711421-529-10-0020-00003_Superior_Health Plan, Inc.pdf/529-10-0020-00003_Superior_Health Plan, Inc.pdf',
+                name: '529-10-0020-00003_Superior_Health Plan, Inc.pdf',
+                documentCategories: ['RATES_RELATED'],
+            },
+        ],
+    }
+
+    const currentProto = domainToBase64({
+        ...unlockedWithALittleBitOfEverything(),
+        ...currentFiles,
+        ...currentSubmissionData,
+    })
+    const previousProto = domainToBase64({
+        ...unlockedWithALittleBitOfEverything(),
+        ...previousFiles,
+        ...previousSubmissionData,
+    })
+    const initialProto = domainToBase64({
+        ...mockContactAndRatesDraft(),
+        ...previousFiles,
+        ...initialSubmissionData,
+    })
     return {
         __typename: 'HealthPlanPackage',
         id: '07f9efbf-d4d1-44ae-8674-56d9d6b75ce6',
@@ -835,8 +1006,7 @@ const mockSubmittedHealthPlanPackageWithRevision = (): HealthPlanPackage => {
                         updatedReason: 'Placeholder resubmission reason',
                     },
                     createdAt: '2022-03-28T17:54:39.175Z',
-                    formDataProto:
-                        'ChBTVEFURV9TVUJNSVNTSU9OEAEaJDA3ZjllZmJmLWQ0ZDEtNDRhZS04Njc0LTU2ZDlkNmI3NWNlNiIJU1VCTUlUVEVEKgcI5g8QAhgZMgwI0O2HkgYQwMC2xgM6DAjQ7YeSBhCAvPnFA0gYUBJaBHBtYXBgA2onZGVzY3JpcHRpb24gb2YgY29udHJhY3Qgb25seSBzdWJtaXNzaW9uchUKAWESAWEaDWFAZXhhbXBsZS5jb2168AEIARIHCOYPEAIYBRoHCOYPEAIYEyIBASoBATJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjYzMjE1Ny1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQEyXAoRbGlmZW9mZ2FsaWxlby5wZGYSRHMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4NDkwMTYyNjQxLWxpZmVvZmdhbGlsZW8ucGRmL2xpZmVvZmdhbGlsZW8ucGRmGgEBOAGCAYABCh1BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZhJcczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI3MTE0MjEtQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYvQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYaAQOCAbcBCi81MjktMTAtMDAyMC0wMDAwM19TdXBlcmlvcl9IZWFsdGggUGxhbiwgSW5jLnBkZhKAAXMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyNzExNDIxLTUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmLzUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmGgEEggGbAQomY292aWQtaWZjLTItZmx1LXJzdi1jb2RlcyA1LTUtMjAyMS5wZGYSbnMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyODczMjI5LWNvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmL2NvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmGgEEkgOyARABGgcI5g8QAhgZIgcI5g8QAhgaKgcI5g8QAhgZMhsKFQoBYhIBYhoNYkBleGFtcGxlLmNvbRABGgA4AUJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjY2NTYzNC1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQI=', //pragma: allowlist secret
+                    formDataProto: currentProto,
                 },
             },
             {
@@ -857,8 +1027,7 @@ const mockSubmittedHealthPlanPackageWithRevision = (): HealthPlanPackage => {
                         updatedReason: 'Placeholder resubmission reason',
                     },
                     createdAt: '2022-03-25T21:13:56.176Z',
-                    formDataProto:
-                        'ChBTVEFURV9TVUJNSVNTSU9OEAEaJDA3ZjllZmJmLWQ0ZDEtNDRhZS04Njc0LTU2ZDlkNmI3NWNlNiIJU1VCTUlUVEVEKgcI5g8QAhgZMgsIw+H4kQYQwICXGzoLCMPh+JEGEMCAlxtIGFASWgRwbWFwYANqJ2Rlc2NyaXB0aW9uIG9mIGNvbnRyYWN0IG9ubHkgc3VibWlzc2lvbnIVCgFhEgFhGg1hQGV4YW1wbGUuY29tepIBCAESBwjmDxACGAUaBwjmDxACGBMiAQEqAQEydAoZQW1lcmlncm91cCBUZXhhcywgSW5jLnBkZhJUczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI2MzIxNTctQW1lcmlncm91cCBUZXhhcywgSW5jLnBkZi9BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmGgEBOAGCAYABCh1BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZhJcczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI3MTE0MjEtQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYvQW1lcmlncm91cCBUZXhhcyBJbmMgY29weS5wZGYaAQOCAbcBCi81MjktMTAtMDAyMC0wMDAwM19TdXBlcmlvcl9IZWFsdGggUGxhbiwgSW5jLnBkZhKAAXMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyNzExNDIxLTUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmLzUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmGgEEggGbAQomY292aWQtaWZjLTItZmx1LXJzdi1jb2RlcyA1LTUtMjAyMS5wZGYSbnMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyODczMjI5LWNvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmL2NvdmlkLWlmYy0yLWZsdS1yc3YtY29kZXMgNS01LTIwMjEucGRmGgEEkgOyARABGgcI5g8QAhgZIgcI5g8QAhgaKgcI5g8QAhgZMhsKFQoBYhIBYhoNYkBleGFtcGxlLmNvbRABGgA4AUJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjY2NTYzNC1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQI=', // pragma: allowlist secret
+                    formDataProto: previousProto,
                 },
             },
             {
@@ -874,8 +1043,7 @@ const mockSubmittedHealthPlanPackageWithRevision = (): HealthPlanPackage => {
                         updatedReason: 'Initial submission',
                     },
                     createdAt: '2022-03-25T03:28:56.244Z',
-                    formDataProto:
-                        'ChBTVEFURV9TVUJNSVNTSU9OEAEaJDA3ZjllZmJmLWQ0ZDEtNDRhZS04Njc0LTU2ZDlkNmI3NWNlNiIJU1VCTUlUVEVEKgcI5g8QAhgZMgwI8OD4kQYQgOKiyAE6DAjw4PiRBhDA3eXHAUgYUBJaBHBtYXBgA2onZGVzY3JpcHRpb24gb2YgY29udHJhY3Qgb25seSBzdWJtaXNzaW9uchUKAWESAWEaDWFAZXhhbXBsZS5jb216kgEIARIHCOYPEAIYBRoHCOYPEAIYEyIBASoBATJ0ChlBbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmElRzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjYzMjE1Ny1BbWVyaWdyb3VwIFRleGFzLCBJbmMucGRmL0FtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYaAQE4AYIBgAEKHUFtZXJpZ3JvdXAgVGV4YXMgSW5jIGNvcHkucGRmElxzMzovL2xvY2FsLXVwbG9hZHMvMTY0ODI0MjcxMTQyMS1BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZi9BbWVyaWdyb3VwIFRleGFzIEluYyBjb3B5LnBkZhoBA4IBtwEKLzUyOS0xMC0wMDIwLTAwMDAzX1N1cGVyaW9yX0hlYWx0aCBQbGFuLCBJbmMucGRmEoABczM6Ly9sb2NhbC11cGxvYWRzLzE2NDgyNDI3MTE0MjEtNTI5LTEwLTAwMjAtMDAwMDNfU3VwZXJpb3JfSGVhbHRoIFBsYW4sIEluYy5wZGYvNTI5LTEwLTAwMjAtMDAwMDNfU3VwZXJpb3JfSGVhbHRoIFBsYW4sIEluYy5wZGYaAQSSA7IBEAEaBwjmDxACGBkiBwjmDxACGBoqBwjmDxACGBkyGwoVCgFiEgFiGg1iQGV4YW1wbGUuY29tEAEaADgBQnQKGUFtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYSVHMzOi8vbG9jYWwtdXBsb2Fkcy8xNjQ4MjQyNjY1NjM0LUFtZXJpZ3JvdXAgVGV4YXMsIEluYy5wZGYvQW1lcmlncm91cCBUZXhhcywgSW5jLnBkZhoBAg==', // pragma: allowlist secret
+                    formDataProto: initialProto,
                 },
             },
         ],
