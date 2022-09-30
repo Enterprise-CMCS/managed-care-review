@@ -1,4 +1,5 @@
 import {
+    RateInfoType,
     SubmissionDocument,
     UnlockedHealthPlanFormDataType,
 } from './UnlockedHealthPlanFormDataType'
@@ -16,9 +17,8 @@ const isContractAndRates = (
     sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
 ): boolean => sub.submissionType === 'CONTRACT_AND_RATES'
 
-const isRateAmendment = (
-    sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
-): boolean => sub.rateType === 'AMENDMENT'
+const isRateAmendment = (rateInfo: RateInfoType): boolean =>
+    rateInfo.rateType === 'AMENDMENT'
 
 const hasValidModifiedProvisions = (
     provisions: ModifiedProvisions | undefined
@@ -54,25 +54,37 @@ const hasValidContract = (sub: LockedHealthPlanFormDataType): boolean =>
         ))
 
 const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
-    const validBaseRate =
-        sub.rateType !== undefined &&
-        sub.rateDateCertified !== undefined &&
-        sub.rateDateStart !== undefined &&
-        sub.rateDateEnd !== undefined &&
-        (sub.rateProgramIDs !== undefined || sub.rateProgramIDs !== [])
+    const validRates =
+        sub.rateInfos.length === 0
+            ? false
+            : sub.rateInfos.every((rateInfo) => {
+                  const validBaseRate =
+                      rateInfo.rateType !== undefined &&
+                      rateInfo.rateDateCertified !== undefined &&
+                      rateInfo.rateDateStart !== undefined &&
+                      rateInfo.rateDateEnd !== undefined &&
+                      (rateInfo.rateProgramIDs !== undefined ||
+                          rateInfo.rateProgramIDs !== [])
+
+                  if (isRateAmendment(rateInfo)) {
+                      return (
+                          validBaseRate &&
+                          Boolean(
+                              rateInfo.rateAmendmentInfo &&
+                                  rateInfo.rateAmendmentInfo.effectiveDateEnd &&
+                                  rateInfo.rateAmendmentInfo.effectiveDateStart
+                          )
+                      )
+                  }
+
+                  return validBaseRate
+              })
 
     // Contract only should have no rate fields
     if (sub.submissionType === 'CONTRACT_ONLY') {
-        return !validBaseRate ? true : false
+        return !validRates ? true : false
     } else {
-        return isRateAmendment(sub)
-            ? validBaseRate &&
-                  Boolean(
-                      sub.rateAmendmentInfo &&
-                          sub.rateAmendmentInfo.effectiveDateEnd &&
-                          sub.rateAmendmentInfo.effectiveDateStart
-                  )
-            : validBaseRate
+        return validRates
     }
 }
 
@@ -81,18 +93,11 @@ const hasAnyValidRateData = (
     sub: LockedHealthPlanFormDataType | UnlockedHealthPlanFormDataType
 ): boolean => {
     return (
-        sub.rateType !== undefined ||
-        sub.rateDateCertified !== undefined ||
-        sub.rateDateStart !== undefined ||
-        sub.rateDateEnd !== undefined ||
-        sub.rateCapitationType !== undefined ||
-        sub.rateAmendmentInfo !== undefined ||
-        sub.actuaryContacts !== undefined ||
-        (Array.isArray(sub.rateProgramIDs) && !!sub.rateProgramIDs.length) ||
+        //Any rate inside array of rateInfo would mean there is rate data.
+        Boolean(sub.rateInfos.length) ||
         sub.documents.some((document) =>
             document.documentCategories.includes('CONTRACT_RELATED')
-        ) ||
-        (Array.isArray(sub.rateDocuments) && !!sub.rateDocuments.length)
+        )
     )
 }
 
@@ -275,6 +280,7 @@ const convertRateSupportingDocs = (
 const removeRatesData = (
     pkg: UnlockedHealthPlanFormDataType
 ): UnlockedHealthPlanFormDataType => {
+    pkg.rateInfos = []
     pkg.rateType = undefined
     pkg.rateDateCertified = undefined
     pkg.rateDateStart = undefined
