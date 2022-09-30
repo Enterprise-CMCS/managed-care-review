@@ -69,7 +69,7 @@ const STATE_SUBMISSION_SUMMARY_ROUTES: RouteTWithUnknown[] = [
 
 */
 const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
-    ROOT: 'Home',
+    ROOT: 'Dashboard',
     DASHBOARD: 'Dashboard',
     SUBMISSIONS_NEW: 'New submission',
     UNKNOWN_ROUTE: '404',
