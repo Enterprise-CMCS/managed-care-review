@@ -109,7 +109,7 @@ export const FileUpload = ({
 
     const isAcceptableFile = (file: File): boolean => {
         const acceptedTypes = inputProps?.accept?.split(',') || []
-        if (acceptedTypes === []) return true
+        if (acceptedTypes.length === 0) return true
         const acceptedFile = acceptedTypes.some(
             (fileType) =>
                 file.name.indexOf(fileType) > 0 ||
