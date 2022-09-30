@@ -247,13 +247,13 @@ describe('SubmissionSummary', () => {
         it('extracts the correct dates from the submission and displays them in tables', async () => {
             const submission = mockSubmittedHealthPlanPackageWithRevision({
                 currentSubmissionData: {
-                    updatedAt: new Date(Date.UTC(2022, 4, 13)),
+                    updatedAt: new Date('2022-05-12T21:13:20.420Z'),
                 },
                 previousSubmissionData: {
-                    updatedAt: new Date(Date.UTC(2022, 3, 13)),
+                    updatedAt: new Date('2022-04-12T21:13:20.420Z'),
                 },
                 initialSubmissionData: {
-                    updatedAt: new Date(Date.UTC(2022, 2, 13)),
+                    updatedAt: new Date('2022-03-12T21:13:20.420Z'),
                 },
             })
             renderWithProviders(
