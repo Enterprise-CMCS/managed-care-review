@@ -15,14 +15,14 @@ describe('Header', () => {
     })
 
     describe('when logged out', () => {
-        it('displays Medicaid logo image link that redirects to /dashboard', async () => {
+        it('displays Medicaid logo image link that redirects to /', async () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />)
             const logoImage = screen.getByRole('img')
             const logoLink = screen.getByRole('link', {
                 name: /One Mac/i,
             })
             expect(logoLink).toBeVisible()
-            expect(logoLink).toHaveAttribute('href', '/dashboard')
+            expect(logoLink).toHaveAttribute('href', '/')
             expect(logoLink).toContainElement(logoImage)
         })
 
@@ -60,7 +60,7 @@ describe('Header', () => {
     })
 
     describe('when logged in', () => {
-        it('displays Medicaid logo image link that redirects to /dashboard', () => {
+        it('displays Medicaid logo image link that redirects to /', () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -71,7 +71,7 @@ describe('Header', () => {
                 name: /One Mac/i,
             })
             expect(logoLink).toBeVisible()
-            expect(logoLink).toHaveAttribute('href', '/dashboard')
+            expect(logoLink).toHaveAttribute('href', '/')
             expect(logoLink).toContainElement(logoImage)
         })
 

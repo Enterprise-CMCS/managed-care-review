@@ -4,10 +4,6 @@ title: Technical Design Discussion Template
 
 ## Title of Design Doc
 
-- Contributors:
-- Proposal Date:
-- Feedback Accepted Until:
-
 ## Overview
 
 In one or two sentences,

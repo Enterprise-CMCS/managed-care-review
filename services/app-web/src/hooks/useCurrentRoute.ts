@@ -10,7 +10,7 @@ const useCurrentRoute = (): {
     const { pathname } = useLocation()
 
     const routeName = getRouteName(pathname)
-    return { currentRoute: routeName, pathname: pathname }
+    return { currentRoute: routeName, pathname }
 }
 
 export { useCurrentRoute }

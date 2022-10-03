@@ -14,6 +14,7 @@ import { usePage } from '../../contexts/PageContext'
 import {
     STATE_SUBMISSION_FORM_ROUTES,
     RouteT,
+    RouteTWithUnknown,
     RoutesRecord,
 } from '../../constants/routes'
 import { getRelativePath } from '../../routeHelpers'
@@ -88,7 +89,9 @@ const PageBannerAlerts = ({
     )
 }
 
-const activeFormPages = (draft: UnlockedHealthPlanFormDataType): RouteT[] => {
+const activeFormPages = (
+    draft: UnlockedHealthPlanFormDataType
+): RouteTWithUnknown[] => {
     // If submission type is contract only, rate details is left out of the step indicator
     return STATE_SUBMISSION_FORM_ROUTES.filter(
         (formPage) =>
