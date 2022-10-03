@@ -47,7 +47,7 @@ describe('SubmissionSummary', () => {
 
     it('renders submission updated banner', async () => {
         const submissionsWithRevisions =
-            mockSubmittedHealthPlanPackageWithRevision()
+            mockSubmittedHealthPlanPackageWithRevision({})
         renderWithProviders(
             <Routes>
                 <Route
@@ -245,6 +245,17 @@ describe('SubmissionSummary', () => {
         })
 
         it('extracts the correct dates from the submission and displays them in tables', async () => {
+            const submission = mockSubmittedHealthPlanPackageWithRevision({
+                currentSubmissionData: {
+                    updatedAt: new Date('2022-05-12T21:13:20.420Z'),
+                },
+                previousSubmissionData: {
+                    updatedAt: new Date('2022-04-12T21:13:20.420Z'),
+                },
+                initialSubmissionData: {
+                    updatedAt: new Date('2022-03-12T21:13:20.420Z'),
+                },
+            })
             renderWithProviders(
                 <Routes>
                     <Route
@@ -260,14 +271,13 @@ describe('SubmissionSummary', () => {
                                 statusCode: 200,
                             }),
                             fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                                stateSubmission:
-                                    mockSubmittedHealthPlanPackageWithRevision(),
+                                id: submission.id,
+                                stateSubmission: submission,
                             }),
                         ],
                     },
                     routerProvider: {
-                        route: '/submissions/15',
+                        route: `/submissions/${submission.id}`,
                     },
                 }
             )
@@ -277,12 +287,12 @@ describe('SubmissionSummary', () => {
                 expect(
                     within(rows[0]).getByText('Date added')
                 ).toBeInTheDocument()
-                expect(within(rows[1]).getByText('3/25/22')).toBeInTheDocument()
-                expect(within(rows[2]).getByText('3/28/22')).toBeInTheDocument()
+                expect(within(rows[1]).getByText('3/12/22')).toBeInTheDocument()
+                expect(within(rows[2]).getByText('5/12/22')).toBeInTheDocument()
                 expect(
-                    within(rows[7]).getByText('Date added')
+                    within(rows[5]).getByText('Date added')
                 ).toBeInTheDocument()
-                expect(within(rows[9]).getByText('3/25/22')).toBeInTheDocument()
+                expect(within(rows[7]).getByText('3/12/22')).toBeInTheDocument()
             })
         })
 

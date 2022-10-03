@@ -72,7 +72,7 @@ export async function insertHealthPlanPackage(
         programIDs: args.programIDs,
         submissionDescription: args.submissionDescription,
         stateCode: args.stateCode,
-
+        rateInfos: [],
         documents: [],
         contractDocuments: [],
         rateDocuments: [],

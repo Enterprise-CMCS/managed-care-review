@@ -273,6 +273,23 @@ const mockContractAndRatesFormData = (
         contractDateEnd: new Date(),
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+        rateInfos: [
+            {
+                rateType: 'NEW',
+                rateDocuments: [
+                    {
+                        s3URL: 'bar',
+                        name: 'foo',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+                rateDateStart: new Date(),
+                rateDateEnd: new Date(),
+                rateDateCertified: new Date(),
+                rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+                rateAmendmentInfo: undefined,
+            },
+        ],
         rateType: 'NEW',
         rateDocuments: [
             {
@@ -284,7 +301,7 @@ const mockContractAndRatesFormData = (
         rateDateStart: new Date(),
         rateDateEnd: new Date(),
         rateDateCertified: new Date(),
-        rateAmendmentInfo: null,
+        rateAmendmentInfo: undefined,
         stateContacts: [
             {
                 name: 'Test Person',
@@ -331,6 +348,23 @@ const mockUnlockedContractAndRatesFormData = (
         contractDateEnd: new Date(),
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+        rateInfos: [
+            {
+                rateType: 'NEW',
+                rateDocuments: [
+                    {
+                        s3URL: 'bar',
+                        name: 'foo',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+                rateDateStart: new Date(),
+                rateDateEnd: new Date(),
+                rateDateCertified: new Date(),
+                rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+                rateAmendmentInfo: undefined,
+            },
+        ],
         rateType: 'NEW',
         rateDocuments: [
             {
@@ -389,6 +423,7 @@ const mockUnlockedContractOnlyFormData = (
         contractDateEnd: new Date(),
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+        rateInfos: [],
         rateDocuments: [],
         stateContacts: [
             {
@@ -436,6 +471,7 @@ const mockContractOnlyFormData = (
         contractDateEnd: new Date(),
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+        rateInfos: [],
         rateDocuments: [],
         stateContacts: [
             {
@@ -483,6 +519,23 @@ const mockContractAmendmentFormData = (
         contractDateEnd: new Date(),
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
+        rateInfos: [
+            {
+                rateType: 'NEW',
+                rateDocuments: [
+                    {
+                        s3URL: 'bar',
+                        name: 'foo',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+                rateDateStart: new Date(),
+                rateDateEnd: new Date(),
+                rateDateCertified: new Date(),
+                rateAmendmentInfo: undefined,
+                rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+            },
+        ],
         rateType: 'NEW',
         rateDocuments: [
             {
@@ -494,7 +547,7 @@ const mockContractAmendmentFormData = (
         rateDateStart: new Date(),
         rateDateEnd: new Date(),
         rateDateCertified: new Date(),
-        rateAmendmentInfo: null,
+        rateAmendmentInfo: undefined,
         stateContacts: [
             {
                 name: 'Test Person',

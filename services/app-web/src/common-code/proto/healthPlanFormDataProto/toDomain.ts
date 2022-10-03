@@ -7,6 +7,7 @@ import {
     ActuarialFirmType,
     FederalAuthority,
     isLockedHealthPlanFormData,
+    RateInfoType,
 } from '../../healthPlanFormDataType'
 
 /**
@@ -275,6 +276,41 @@ function parseProtoRateAmendment(
     }
 }
 
+function parseRateInfos(
+    rateInfos: mcreviewproto.IRateInfo[]
+): RecursivePartial<UnlockedHealthPlanFormDataType['rateInfos']> {
+    const rates: RecursivePartial<UnlockedHealthPlanFormDataType['rateInfos']> =
+        []
+
+    if (rateInfos.length > 0) {
+        rateInfos.forEach((rateInfo) => {
+            const rate: RecursivePartial<RateInfoType> = {
+                rateAmendmentInfo: parseProtoRateAmendment(
+                    rateInfo?.rateAmendmentInfo
+                ),
+                rateType: enumToDomain(
+                    mcreviewproto.RateType,
+                    rateInfo?.rateType
+                ),
+                rateCapitationType: enumToDomain(
+                    mcreviewproto.RateCapitationType,
+                    rateInfo?.rateCapitationType
+                ),
+                rateDocuments: parseProtoDocuments(rateInfo?.rateDocuments),
+                rateDateStart: protoDateToDomain(rateInfo?.rateDateStart),
+                rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
+                rateDateCertified: protoDateToDomain(
+                    rateInfo?.rateDateCertified
+                ),
+                rateProgramIDs: rateInfo?.rateProgramIds ?? [],
+            }
+            rates.push(rate)
+        })
+    }
+
+    return rates
+}
+
 // End Parsers
 
 const toDomain = (
@@ -320,6 +356,7 @@ const toDomain = (
 
     // Protos support multiple rate infos for now, but we only support one in our domain models
     // so if there are multiple we'll drop the extras.
+    // This should be removed once all multi-rate UI features have been implemented. We should then only use rate data from rateInfos list of rate data.
     let rateInfo: mcreviewproto.IRateInfo | undefined = undefined
     if (rateInfos.length > 0) {
         rateInfo = rateInfos[0]
@@ -379,6 +416,7 @@ const toDomain = (
         contractAmendmentInfo: parseContractAmendment(
             contractInfo?.contractAmendmentInfo
         ),
+        rateInfos: parseRateInfos(rateInfos),
         rateAmendmentInfo: parseProtoRateAmendment(rateInfo?.rateAmendmentInfo),
         rateType: enumToDomain(mcreviewproto.RateType, rateInfo?.rateType),
         rateCapitationType: enumToDomain(

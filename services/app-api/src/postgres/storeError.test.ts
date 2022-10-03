@@ -62,7 +62,7 @@ describe('storeError', () => {
             programIDs: ['smmc'],
             submissionDescription: 'description',
             stateCode: 'FL',
-
+            rateInfos: [],
             documents: [],
             contractDocuments: [],
             rateDocuments: [],

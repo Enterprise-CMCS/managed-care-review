@@ -66,6 +66,17 @@ type RateCapitationType = 'RATE_CELL' | 'RATE_RANGE'
 
 type ManagedCareEntity = 'MCO' | 'PIHP' | 'PAHP' | 'PCCM'
 
+type RateInfoType = {
+    rateType?: RateType
+    rateCapitationType?: RateCapitationType
+    rateDocuments: SubmissionDocument[]
+    rateDateStart?: Date
+    rateDateEnd?: Date
+    rateDateCertified?: Date
+    rateAmendmentInfo?: RateAmendmentInfo
+    rateProgramIDs?: string[]
+}
+
 // MAIN
 type UnlockedHealthPlanFormDataType = {
     id: string
@@ -89,6 +100,7 @@ type UnlockedHealthPlanFormDataType = {
     managedCareEntities: string[]
     federalAuthorities: FederalAuthority[]
     contractAmendmentInfo?: ContractAmendmentInfo
+    rateInfos: RateInfoType[]
     rateType?: RateType
     rateCapitationType?: RateCapitationType
     rateDocuments: SubmissionDocument[]
@@ -129,4 +141,5 @@ export type {
     ContractExecutionStatus,
     RateDataType,
     RateCapitationType,
+    RateInfoType,
 }

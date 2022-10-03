@@ -114,6 +114,17 @@ const rateCapitationTypeSchema = z.union([
     z.literal('RATE_RANGE'),
 ])
 
+const rateInfosTypeSchema = z.object({
+    rateType: rateTypeSchema.optional(),
+    rateCapitationType: rateCapitationTypeSchema.optional(),
+    rateDocuments: z.array(submissionDocumentSchema).optional(),
+    rateDateStart: z.date().optional(),
+    rateDateEnd: z.date().optional(),
+    rateDateCertified: z.date().optional(),
+    rateAmendmentInfo: rateAmendmentInfoSchema.optional(),
+    rateProgramIDs: z.array(z.string()),
+})
+
 // Commenting out because this wasn't being used but was raising lint warning -hw
 // const managedCareEntitySchema = z.union([
 //     z.literal('MCO'),
@@ -160,6 +171,7 @@ export const unlockedHealthPlanFormDataSchema = z.object({
     managedCareEntities: z.array(z.string()),
     federalAuthorities: z.array(federalAuthoritySchema),
     contractAmendmentInfo: contractAmendmentInfoSchema.optional(),
+    rateInfos: z.array(rateInfosTypeSchema),
     rateType: rateTypeSchema.optional(),
     rateCapitationType: rateCapitationTypeSchema.optional(),
     rateDocuments: z.array(submissionDocumentSchema).optional(),

@@ -19,6 +19,7 @@ export type {
     SubmissionDocument,
     SubmissionType,
     RateDataType,
+    RateInfoType,
 } from './UnlockedHealthPlanFormDataType'
 
 export type { ModifiedProvisions } from './ModifiedProvisions'

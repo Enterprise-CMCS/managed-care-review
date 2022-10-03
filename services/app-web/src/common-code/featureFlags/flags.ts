@@ -49,6 +49,13 @@ export const featureFlags = {
         flag: 'app-api-graphql-errors',
         defaultValue: false,
     },
+    /**
+     * Enables multi-rate submission UI
+     */
+    MULTI_RATE_SUBMISSIONS: {
+        flag: 'multi-rate-submissions',
+        defaultValue: false,
+    },
 } as const
 
 export type FlagEnumType = keyof typeof featureFlags

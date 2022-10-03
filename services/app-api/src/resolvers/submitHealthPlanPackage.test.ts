@@ -162,10 +162,15 @@ describe('submitHealthPlanPackage', () => {
 
         const draft = await createAndUpdateTestHealthPlanPackage(server, {
             submissionType: 'CONTRACT_AND_RATES',
-            rateType: undefined,
-            rateDateStart: undefined,
-            rateDateEnd: undefined,
-            rateDateCertified: undefined,
+            rateInfos: [
+                {
+                    rateType: undefined,
+                    rateDateStart: undefined,
+                    rateDateEnd: undefined,
+                    rateDateCertified: undefined,
+                    rateDocuments: [],
+                },
+            ],
         })
 
         const draftID = draft.id
@@ -523,7 +528,22 @@ describe('submitHealthPlanPackage', () => {
         }
 
         //Set rate programs to empty string
-        unlockedFormData.rateProgramIDs = []
+        unlockedFormData.rateInfos = [
+            {
+                rateType: 'NEW' as const,
+                rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+                rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+                rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+                rateDocuments: [
+                    {
+                        name: 'rateDocument.pdf',
+                        s3URL: 'fakeS3URL',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+                rateProgramIDs: [],
+            },
+        ]
 
         //Update and resubmit
         await updateTestHealthPlanFormData(stateServer, unlockedFormData)
@@ -724,9 +744,14 @@ describe('submitHealthPlanPackage', () => {
         })
         const draft = await createAndUpdateTestHealthPlanPackage(server, {
             submissionType: 'CONTRACT_AND_RATES',
-            rateDateStart: new Date(Date.UTC(2025, 5, 1)),
-            rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
-            rateDateCertified: undefined,
+            rateInfos: [
+                {
+                    rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+                    rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+                    rateDateCertified: undefined,
+                    rateDocuments: [],
+                },
+            ],
         })
         const draftID = draft.id
 
