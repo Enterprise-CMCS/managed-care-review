@@ -49,27 +49,6 @@ import { featureFlags } from '../../../common-code/featureFlags'
 import * as Yup from 'yup'
 import { useFocus } from '../../../hooks'
 
-/**
- * TODO: Still needs done
- * ✓ Add rateInfo to toDomain and update types
- * ✓ Pass rateInfo  from StateSubmissionForm to child components
- * ✓ Update rate yup schema to handle array of rate details
- * ✓ Update functions to handle multi-rate initial data for Formik to render multi-rates
- * ✓ Implement add and remove new rates
- * ✓ Fix form errors and focus links
- * ✓ Update submit to handle multi-rates, minus files
- * ✓ Modify file upload for multi-rate
- * ✓ Update submit to handle multi-rate files
- * ✓ Focusing on newly added rate certification
- * ✓ Keeping docs associated with the correct rate when a rate is removed
- * ✓ Fix document error messages.
- * ✓ toProtobuf for rateInfo
- * ✓ Rename stuff
- * ☐ Accessibility Testing
- * ☐ Update unit and end to end tests
- * ☐ Final cleanup
- */
-
 const RateDatesErrorMessage = ({
     startDate,
     endDate,
@@ -569,7 +548,7 @@ export const RateDetails = ({
                                                                     ACCEPTED_SUBMISSION_FILE_TYPES
                                                                 }
                                                                 initialItems={
-                                                                    fileItemsMatrix[
+                                                                    initialFileItemsMatrix[
                                                                         index
                                                                     ]
                                                                 }
@@ -584,20 +563,24 @@ export const RateDetails = ({
                                                                 }
                                                                 onFileItemsUpdate={({
                                                                     fileItems,
-                                                                }) =>
+                                                                }) => {
                                                                     setFileItemsMatrix(
                                                                         (
-                                                                            data
+                                                                            fileMatrix
                                                                         ) => {
-                                                                            data.splice(
+                                                                            const newFiles =
+                                                                                [
+                                                                                    ...fileMatrix,
+                                                                                ]
+                                                                            newFiles.splice(
                                                                                 index,
                                                                                 1,
                                                                                 fileItems
                                                                             )
-                                                                            return data
+                                                                            return newFiles
                                                                         }
                                                                     )
-                                                                }
+                                                                }}
                                                                 innerInputRef={(
                                                                     el
                                                                 ) =>
@@ -1152,13 +1135,17 @@ export const RateDetails = ({
                                                                     onClick={() => {
                                                                         setFileItemsMatrix(
                                                                             (
-                                                                                data
+                                                                                fileMatrix
                                                                             ) => {
-                                                                                data.splice(
+                                                                                const newMatrix =
+                                                                                    [
+                                                                                        ...fileMatrix,
+                                                                                    ]
+                                                                                newMatrix.splice(
                                                                                     index,
                                                                                     1
                                                                                 )
-                                                                                return data
+                                                                                return newMatrix
                                                                             }
                                                                         )
                                                                         remove(
