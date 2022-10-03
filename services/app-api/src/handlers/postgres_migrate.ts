@@ -2,10 +2,6 @@ import { APIGatewayProxyHandler } from 'aws-lambda'
 import { RDS } from 'aws-sdk'
 import { execSync } from 'child_process'
 import { getDBClusterID, getPostgresURL } from './configuration'
-import {
-    migrate,
-    newDBMigrator,
-} from '../../../app-proto/protoMigrations/lib/migrator'
 
 export const main: APIGatewayProxyHandler = async () => {
     // get the relevant env vars and check that they exist.
@@ -101,8 +97,14 @@ export const main: APIGatewayProxyHandler = async () => {
 
     // run the data migration. this will run any data changes to the protobufs stored in postgres
     try {
-        const migrator = newDBMigrator(dbConnectionURL)
-        await migrate(migrator, '/opt/nodejs/')
+        execSync(
+            `${process.execPath} /opt/nodejs/protoMigrator/migrate_protos.js db`,
+            {
+                env: {
+                    DATABASE_URL: dbConnectionURL + '&connect_timeout=60',
+                },
+            }
+        )
     } catch (err) {
         console.log(err)
         return {
