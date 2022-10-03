@@ -48,7 +48,7 @@ export const Header = ({
             <div className={styles.banner}>
                 <GridContainer>
                     <Grid row className="flex-justify flex-align-center">
-                        <NavLink className={styles.bannerLogo} to="/dashboard">
+                        <NavLink className={styles.bannerLogo} to="/">
                             <Logo
                                 src={onemacLogo}
                                 alt="One Mac"

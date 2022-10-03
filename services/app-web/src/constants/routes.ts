@@ -1,6 +1,6 @@
 /*
     Every application route is named here.
-    These types ensure we use valid routes throughout the application.
+    These types ensure we use valid routes throughout the application.. 
 */
 const ROUTES = [
     'ROOT',
@@ -21,7 +21,12 @@ const ROUTES = [
     'SUBMISSIONS_SUMMARY',
 ] as const // iterable union type
 type RouteT = typeof ROUTES[number]
+type RouteTWithUnknown = RouteT | 'UNKNOWN_ROUTE'
+/*
+    Every application url (excluding query parameters) is found in the RoutesRecord.
+    These types ensure we use valid route throughout the application
 
+*/
 const RoutesRecord: Record<RouteT, string> = {
     ROOT: '/',
     AUTH: '/auth',
@@ -41,7 +46,7 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_REVISION: '/submissions/:id/revisions/:revisionVersion',
 }
 
-const STATE_SUBMISSION_FORM_ROUTES: RouteT[] = [
+const STATE_SUBMISSION_FORM_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_TYPE',
     'SUBMISSIONS_CONTRACT_DETAILS',
     'SUBMISSIONS_RATE_DETAILS',
@@ -50,18 +55,31 @@ const STATE_SUBMISSION_FORM_ROUTES: RouteT[] = [
     'SUBMISSIONS_REVIEW_SUBMIT',
 ]
 
+const STATE_SUBMISSION_SUMMARY_ROUTES: RouteTWithUnknown[] = [
+    'SUBMISSIONS_SUMMARY',
+    'SUBMISSIONS_REVISION',
+]
+
 /*
-    Static page headings used in <header> h1 when logged in. Dynamic headings, when necessary, are set in page specific parent component.
-    Every route does not need a page heading in the record. It is a design choice what goes here. For example, we do not any headings when logged in user is on a Not Found page
+    Page headings used in the <header> when user logged in.
+    Dynamic headings, when necessary, are set in page specific parent component.
+    Every route does not need a page heading in the record. 
+    It is a design choice what goes here. For example, we do not any headings when logged in user is on the help page.
+    For a quick way to check page headings, look for the h1 of the application in the DOM tree. It is the dark blue row of the header.
+
 */
-const PageHeadingsRecord: Record<string, string> = {
+const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
     ROOT: 'Dashboard',
     DASHBOARD: 'Dashboard',
     SUBMISSIONS_NEW: 'New submission',
+    UNKNOWN_ROUTE: '404',
 }
 
-// Static page titles used in <title>.
-// Every route must have a page title in the record for accessibility reasons. Dynamic page titles, when necessary, are set in AppRoutes
+/* 
+    Static page titles used in <title>.
+    Every route must have a page title in the record for accessibility reasons. Dynamic page titles, when necessary, are set in AppRoutes
+    For a quick way to check page titles, look at the tab text in your browser. 
+*/
 const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     ROOT: 'Home',
     AUTH: 'Login',
@@ -88,6 +106,7 @@ export {
     RoutesRecord,
     ROUTES,
     STATE_SUBMISSION_FORM_ROUTES,
+    STATE_SUBMISSION_SUMMARY_ROUTES,
 }
 
-export type { RouteT }
+export type { RouteT, RouteTWithUnknown }
