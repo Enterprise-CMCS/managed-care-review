@@ -183,9 +183,6 @@ export async function migrate(migrator: MigratorType, path?: string) {
         .readdirSync(migrationPath)
         .filter((m) => m.endsWith('.js') && !m.endsWith('.test.js'))
 
-    console.log(migrationPath)
-    console.log(migrationFiles)
-
     const migrations: MigrationType[] = []
     for (const migrationFile of migrationFiles) {
         const fullPath = `${migrationPath}/${migrationFile}`
@@ -224,11 +221,17 @@ async function main() {
     const args = process.argv.slice(2)
 
     const usage = `USAGE: 
-./migrate_protos.js db :: run migrations against all protos in the db
+./migrate_protos.js db [PATH TO PROTOS] :: run migrations against all protos in the db
 ./migrate_protos.js files [PATH TO .PROTOS] :: run migrations against all protos in given directory`
 
     const connectionType =
         args.length > 0 && args[0] === 'db' ? 'DATABASE' : 'FILES'
+
+    const pathToProtos = args[1]
+    if (pathToProtos === undefined) {
+        console.log(usage)
+        process.exit(1)
+    }
 
     let migrator: MigratorType | undefined = undefined
     if (connectionType === 'DATABASE') {
@@ -243,17 +246,13 @@ async function main() {
             console.log(usage)
             process.exit(1)
         }
-        const pathToProtos = args[1]
         migrator = newFileMigrator(pathToProtos)
     } else {
         console.log(usage)
         throw new Error('unimplemented migrator')
     }
 
-    await migrate(
-        migrator,
-        '/opt/nodejs/protoMigrator/healthPlanFormDataMigrations'
-    )
+    await migrate(migrator, pathToProtos)
 }
 
 void main()

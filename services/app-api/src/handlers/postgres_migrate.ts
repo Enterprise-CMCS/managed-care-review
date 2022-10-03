@@ -98,7 +98,7 @@ export const main: APIGatewayProxyHandler = async () => {
     // run the data migration. this will run any data changes to the protobufs stored in postgres
     try {
         execSync(
-            `${process.execPath} /opt/nodejs/protoMigrator/migrate_protos.js db`,
+            `${process.execPath} /opt/nodejs/protoMigrator/migrate_protos.js db '/opt/nodejs/protoMigrator/healthPlanFormDataMigrations'`,
             {
                 env: {
                     DATABASE_URL: dbConnectionURL + '&connect_timeout=60',
