@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react'
+import { usePrevious } from '../../hooks'
 import { v4 as uuidv4 } from 'uuid'
 import {
     FormGroup,
@@ -68,6 +69,7 @@ export const FileUpload = ({
     const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
     const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
     const summaryRef = useRef<HTMLHeadingElement>(null) // reference to the heading that we will focus
+    const previousFileItems = usePrevious(fileItems)
 
     const handleCheckboxClick = (
         event: React.ChangeEvent<HTMLInputElement>
@@ -96,8 +98,10 @@ export const FileUpload = ({
     const inputRequired = inputProps['aria-required'] || inputProps.required
     // update fileItems in parent
     React.useEffect(() => {
-        onFileItemsUpdate({ fileItems })
-    }, [fileItems, onFileItemsUpdate])
+        if (JSON.stringify(fileItems) !== JSON.stringify(previousFileItems)) {
+            onFileItemsUpdate({ fileItems })
+        }
+    }, [fileItems, previousFileItems, onFileItemsUpdate])
 
     //Pass input ref to parent when innerInputRef prop exists.
     React.useEffect(() => {
