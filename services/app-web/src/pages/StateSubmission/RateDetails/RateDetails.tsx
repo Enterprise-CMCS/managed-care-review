@@ -493,7 +493,13 @@ export const RateDetails = ({
                                                         </Label>
                                                         <FormGroup
                                                             error={
-                                                                showFileUploadError
+                                                                showFileUploadError &&
+                                                                !!getDocumentsError(
+                                                                    fileItemsMatrix[
+                                                                        index
+                                                                    ],
+                                                                    index
+                                                                )
                                                             }
                                                         >
                                                             <FileUpload
@@ -548,7 +554,7 @@ export const RateDetails = ({
                                                                     ACCEPTED_SUBMISSION_FILE_TYPES
                                                                 }
                                                                 initialItems={
-                                                                    initialFileItemsMatrix[
+                                                                    fileItemsMatrix[
                                                                         index
                                                                     ]
                                                                 }
@@ -563,7 +569,7 @@ export const RateDetails = ({
                                                                 }
                                                                 onFileItemsUpdate={({
                                                                     fileItems,
-                                                                }) => {
+                                                                }) =>
                                                                     setFileItemsMatrix(
                                                                         (
                                                                             fileMatrix
@@ -580,7 +586,7 @@ export const RateDetails = ({
                                                                             return newFiles
                                                                         }
                                                                     )
-                                                                }}
+                                                                }
                                                                 innerInputRef={(
                                                                     el
                                                                 ) =>
