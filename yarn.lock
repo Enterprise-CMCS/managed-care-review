@@ -6411,16 +6411,16 @@
     read-package-json-fast "^2.0.1"
 
 "@octokit/action@^4.0.6":
-  version "4.0.6"
-  resolved "https://registry.yarnpkg.com/@octokit/action/-/action-4.0.6.tgz#0c9cc7281a2bfb3fea503c84d2f22382e0dd7dad"
-  integrity sha512-jb8KNmL7meXVlQHSV9oQlcqSRit4XkRau9+z91rO5RslhbE3j1qJC3OUfNSL1M8Df+gDZBGtLCW6W4I8aS7iyw==
+  version "4.0.8"
+  resolved "https://registry.yarnpkg.com/@octokit/action/-/action-4.0.8.tgz#3b0d2f5661470aa1c961c74f52eee536dfa847e5"
+  integrity sha512-PWGZgY+QVLpFjjzTPpIk/z9hYAF6y9XlEqOXTESgGTPUF2Egw73yEcC9cQqTZmOpyUuFu94NP4iflOBTdc1jUg==
   dependencies:
     "@octokit/auth-action" "^2.0.0"
     "@octokit/core" "^4.0.0"
     "@octokit/plugin-paginate-rest" "^4.0.0"
     "@octokit/plugin-rest-endpoint-methods" "^6.0.0"
     "@octokit/types" "^7.0.0"
-    proxy-agent "^5.0.0"
+    https-proxy-agent "^5.0.1"
 
 "@octokit/app@^13.0.5":
   version "13.0.7"
