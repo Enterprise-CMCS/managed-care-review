@@ -2,5 +2,8 @@
 <b>Updated on:</b> <%= it.resubmittedOn %><br />
 <b>Changes made:</b> <%= it.resubmissionReason %><br />
 <% if (it.shouldIncludeRates) { %>
-<b>Rate name</b>: <%= it.rateName %><br />
+<% it.rateInfos.forEach(function(rate){ %>
+<b>Rate name</b>: <%= rate.rateName %>
+<br />
+<% }) %>
 <% } %>

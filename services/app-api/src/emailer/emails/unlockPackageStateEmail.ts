@@ -24,6 +24,8 @@ export const unlockPackageStateEmail = async (
     const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
     const receiverEmails = generateStateReceiverEmails(pkg)
+
+    //This checks to make sure all programs contained in submission exists for the state.
     const packagePrograms = findPackagePrograms(pkg, statePrograms)
 
     if (packagePrograms instanceof Error) {
@@ -32,7 +34,9 @@ export const unlockPackageStateEmail = async (
 
     const packageName = generatePackageName(pkg, packagePrograms)
 
-    const isContractAndRates = pkg.submissionType === 'CONTRACT_AND_RATES'
+    const isContractAndRates =
+        pkg.submissionType === 'CONTRACT_AND_RATES' &&
+        Boolean(pkg.rateInfos.length)
 
     const data = {
         packageName,
@@ -40,7 +44,11 @@ export const unlockPackageStateEmail = async (
         unlockedOn: formatCalendarDate(updateInfo.updatedAt),
         unlockedReason: updateInfo.updatedReason,
         shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
-        rateName: isContractAndRates && generateRateName(pkg, packagePrograms),
+        rateInfos:
+            isContractAndRates &&
+            pkg.rateInfos.map((rate) => ({
+                rateName: generateRateName(pkg, rate, statePrograms),
+            })),
         submissionURL: new URL(
             `submissions/${pkg.id}/review-and-submit`,
             config.baseUrl

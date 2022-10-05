@@ -24,15 +24,19 @@ export const resubmitPackageStateEmail = async (
     const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
     const receiverEmails = generateStateReceiverEmails(pkg, user)
-    const programs = findPackagePrograms(pkg, statePrograms)
 
-    if (programs instanceof Error) {
-        return programs
+    //This checks to make sure all programs contained in submission exists for the state.
+    const packagePrograms = findPackagePrograms(pkg, statePrograms)
+
+    if (packagePrograms instanceof Error) {
+        return packagePrograms
     }
 
-    const packageName = generatePackageName(pkg, programs)
+    const packageName = generatePackageName(pkg, packagePrograms)
 
-    const isContractAndRates = pkg.submissionType === 'CONTRACT_AND_RATES'
+    const isContractAndRates =
+        pkg.submissionType === 'CONTRACT_AND_RATES' &&
+        Boolean(pkg.rateInfos.length)
 
     const data = {
         packageName,
@@ -40,7 +44,11 @@ export const resubmitPackageStateEmail = async (
         resubmittedOn: formatCalendarDate(updateInfo.updatedAt),
         resubmissionReason: updateInfo.updatedReason,
         shouldIncludeRates: isContractAndRates,
-        rateName: isContractAndRates && generateRateName(pkg, programs),
+        rateInfos:
+            isContractAndRates &&
+            pkg.rateInfos.map((rate) => ({
+                rateName: generateRateName(pkg, rate, statePrograms),
+            })),
     }
 
     const result = await renderTemplate<typeof data>(

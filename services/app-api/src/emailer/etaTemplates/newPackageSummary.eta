@@ -2,11 +2,15 @@
 <br />
 <b><%= it.contractDatesLabel %></b>: <%= it.contractDatesStart %> to <%= it.contractDatesEnd %>
 <br />
+<br />
 <% if (it.shouldIncludeRates) { %>
-<b>Rate name</b>: <%= it.rateName %>
+<% it.rateInfos.forEach(function(rate){ %>
+<b>Rate name</b>: <%= rate.rateName %>
 <br />
-<b><%= it.rateDateLabel %></b>: <%= it.rateDatesStart %> to <%= it.rateDatesEnd %>
+<b><%= rate.rateDateLabel %></b>: <%= rate.rateDatesStart %> to <%= rate.rateDatesEnd %>
 <br />
+<br />
+<% }) %>
 <% } %>
 <b>Submission description</b>: <%= it.submissionDescription %>
 <br />

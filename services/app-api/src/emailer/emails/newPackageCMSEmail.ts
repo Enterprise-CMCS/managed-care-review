@@ -35,6 +35,7 @@ export const newPackageCMSEmail = async (
         return reviewerEmails
     }
 
+    //This checks to make sure all programs contained in submission exists for the state.
     const packagePrograms = findPackagePrograms(pkg, statePrograms)
 
     if (packagePrograms instanceof Error) {
@@ -43,10 +44,9 @@ export const newPackageCMSEmail = async (
 
     const packageName = generatePackageName(pkg, packagePrograms)
 
-    const hasRateAmendmentInfo =
-        pkg.rateType === 'AMENDMENT' && pkg.rateAmendmentInfo
-
-    const isContractAndRates = pkg.submissionType === 'CONTRACT_AND_RATES'
+    const isContractAndRates =
+        pkg.submissionType === 'CONTRACT_AND_RATES' &&
+        Boolean(pkg.rateInfos.length)
 
     const data = {
         shouldIncludeRates: isContractAndRates,
@@ -60,17 +60,27 @@ export const newPackageCMSEmail = async (
                 : 'Contract effective dates',
         contractDatesStart: formatCalendarDate(pkg.contractDateStart),
         contractDatesEnd: formatCalendarDate(pkg.contractDateEnd),
-        rateName: isContractAndRates && generateRateName(pkg, packagePrograms),
-        rateDateLabel:
-            pkg.rateType === 'NEW'
-                ? 'Rating period'
-                : 'Rate amendment effective dates',
-        rateDatesStart: hasRateAmendmentInfo
-            ? formatCalendarDate(pkg.rateAmendmentInfo.effectiveDateStart)
-            : formatCalendarDate(pkg.rateDateStart),
-        rateDatesEnd: hasRateAmendmentInfo
-            ? formatCalendarDate(pkg.rateAmendmentInfo.effectiveDateEnd)
-            : formatCalendarDate(pkg.rateDateEnd),
+        rateInfos:
+            isContractAndRates &&
+            pkg.rateInfos.map((rate) => ({
+                rateName: generateRateName(pkg, rate, statePrograms),
+                rateDateLabel:
+                    rate.rateType === 'NEW'
+                        ? 'Rating period'
+                        : 'Rate amendment effective dates',
+                rateDatesStart:
+                    rate.rateType === 'AMENDMENT' && rate.rateAmendmentInfo
+                        ? formatCalendarDate(
+                              rate.rateAmendmentInfo.effectiveDateStart
+                          )
+                        : formatCalendarDate(rate.rateDateStart),
+                rateDatesEnd:
+                    rate.rateType === 'AMENDMENT' && rate.rateAmendmentInfo
+                        ? formatCalendarDate(
+                              rate.rateAmendmentInfo.effectiveDateEnd
+                          )
+                        : formatCalendarDate(rate.rateDateEnd),
+            })),
         submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
     }
 
