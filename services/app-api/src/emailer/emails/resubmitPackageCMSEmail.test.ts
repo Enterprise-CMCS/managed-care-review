@@ -7,8 +7,11 @@ import {
     mockMSState,
 } from '../../testHelpers/emailerHelpers'
 import { resubmitPackageCMSEmail } from './index'
-import { findPackagePrograms } from '../templateHelpers'
-import { packageName } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import {
+    generateRateName,
+    LockedHealthPlanFormDataType,
+    packageName,
+} from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 describe('with rates', () => {
     const resubmitData = {
@@ -19,17 +22,9 @@ describe('with rates', () => {
     const submission = mockContractAndRatesFormData()
     const testStateAnalystEmails = testStateAnalystsEmails
     const defaultStatePrograms = mockMNState().programs
-    const packagePrograms = findPackagePrograms(
-        submission,
-        defaultStatePrograms
-    )
-
-    if (packagePrograms instanceof Error) {
-        throw new Error(packagePrograms.message)
-    }
 
     it('contains correct subject and clearly states submission edits are completed', async () => {
-        const name = packageName(submission, packagePrograms)
+        const name = packageName(submission, defaultStatePrograms)
         const template = await resubmitPackageCMSEmail(
             submission,
             resubmitData,
@@ -52,9 +47,31 @@ describe('with rates', () => {
             })
         )
     })
-    it('contains correct information in body of email', async () => {
+    it('contains correct information in body of email for single rate submission', async () => {
+        const sub: LockedHealthPlanFormDataType = {
+            ...mockContractAndRatesFormData(),
+            contractDateStart: new Date('01/01/2021'),
+            contractDateEnd: new Date('01/01/2025'),
+            rateInfos: [
+                {
+                    rateType: 'NEW',
+                    rateDocuments: [
+                        {
+                            s3URL: 'bar',
+                            name: 'foo',
+                            documentCategories: ['RATES' as const],
+                        },
+                    ],
+                    rateDateCertified: new Date('01/02/2021'),
+                    rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+                    rateAmendmentInfo: undefined,
+                    rateDateStart: new Date('01/01/2021'),
+                    rateDateEnd: new Date('01/01/2022'),
+                },
+            ],
+        }
         const template = await resubmitPackageCMSEmail(
-            submission,
+            sub,
             resubmitData,
             testEmailConfig,
             testStateAnalystEmails,
@@ -99,9 +116,128 @@ describe('with rates', () => {
                 ),
             })
         )
+        //Expect only have 1 rate name
+        expect(template.bodyText?.match(/Rate name/g)?.length).toBe(1)
         expect(template).toEqual(
             expect.objectContaining({
-                bodyText: expect.stringMatching(/Rate name:/),
+                bodyText: expect.stringContaining(
+                    generateRateName(
+                        sub,
+                        sub.rateInfos[0],
+                        defaultStatePrograms
+                    )
+                ),
+            })
+        )
+    })
+    it('contains correct information in body of email for multi-rate submission', async () => {
+        const sub: LockedHealthPlanFormDataType = {
+            ...mockContractAndRatesFormData(),
+            contractDateStart: new Date('01/01/2021'),
+            contractDateEnd: new Date('01/01/2025'),
+            rateInfos: [
+                {
+                    rateType: 'NEW',
+                    rateDocuments: [
+                        {
+                            s3URL: 'bar',
+                            name: 'foo',
+                            documentCategories: ['RATES' as const],
+                        },
+                    ],
+                    rateDateCertified: new Date('01/02/2021'),
+                    rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+                    rateAmendmentInfo: undefined,
+                    rateDateStart: new Date('01/01/2021'),
+                    rateDateEnd: new Date('01/01/2022'),
+                },
+                {
+                    rateType: 'NEW',
+                    rateDocuments: [
+                        {
+                            s3URL: 'bar',
+                            name: 'foo',
+                            documentCategories: ['RATES' as const],
+                        },
+                    ],
+                    rateDateCertified: new Date('02/02/2022'),
+                    rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                    rateAmendmentInfo: undefined,
+                    rateDateStart: new Date('02/01/2022'),
+                    rateDateEnd: new Date('02/01/2023'),
+                },
+                {
+                    rateType: 'AMENDMENT',
+                    rateDocuments: [
+                        {
+                            s3URL: 'bar',
+                            name: 'foo',
+                            documentCategories: ['RATES' as const],
+                        },
+                    ],
+                    rateDateCertified: new Date('01/02/2021'),
+                    rateProgramIDs: [
+                        'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
+                        'd95394e5-44d1-45df-8151-1cc1ee66f100',
+                    ],
+                    rateDateStart: new Date('01/01/2022'),
+                    rateDateEnd: new Date('01/01/2023'),
+                    rateAmendmentInfo: {
+                        effectiveDateStart: new Date('06/05/2021'),
+                        effectiveDateEnd: new Date('12/31/2021'),
+                    },
+                },
+            ],
+        }
+        const template = await resubmitPackageCMSEmail(
+            sub,
+            resubmitData,
+            testEmailConfig,
+            testStateAnalystEmails,
+            defaultStatePrograms
+        )
+
+        if (template instanceof Error) {
+            console.error(template)
+            return
+        }
+
+        //Expect only have 3 rate names
+        expect(template.bodyText?.match(/Rate name/g)?.length).toBe(3)
+        //First Rate certification
+        expect(template).toEqual(
+            expect.objectContaining({
+                bodyText: expect.stringContaining(
+                    generateRateName(
+                        sub,
+                        sub.rateInfos[0],
+                        defaultStatePrograms
+                    )
+                ),
+            })
+        )
+        //Second Rate certification
+        expect(template).toEqual(
+            expect.objectContaining({
+                bodyText: expect.stringContaining(
+                    generateRateName(
+                        sub,
+                        sub.rateInfos[1],
+                        defaultStatePrograms
+                    )
+                ),
+            })
+        )
+        //Third Rate certification
+        expect(template).toEqual(
+            expect.objectContaining({
+                bodyText: expect.stringContaining(
+                    generateRateName(
+                        sub,
+                        sub.rateInfos[2],
+                        defaultStatePrograms
+                    )
+                ),
             })
         )
     })
@@ -142,6 +278,23 @@ describe('with rates', () => {
         const sub = mockContractAndRatesFormData({
             stateCode: 'MS',
             programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
+            rateInfos: [
+                {
+                    rateType: 'NEW',
+                    rateDocuments: [
+                        {
+                            s3URL: 'bar',
+                            name: 'foo',
+                            documentCategories: ['RATES' as const],
+                        },
+                    ],
+                    rateDateCertified: new Date('01/02/2021'),
+                    rateProgramIDs: ['e0819153-5894-4153-937e-aad00ab01a8f'],
+                    rateAmendmentInfo: undefined,
+                    rateDateStart: new Date('01/01/2021'),
+                    rateDateEnd: new Date('01/01/2022'),
+                },
+            ],
         })
         const msStatePrograms = mockMSState().programs
         const template = await resubmitPackageCMSEmail(
@@ -169,6 +322,23 @@ describe('with rates', () => {
         const sub = mockContractAndRatesFormData({
             stateCode: 'MS',
             programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
+            rateInfos: [
+                {
+                    rateType: 'NEW',
+                    rateDocuments: [
+                        {
+                            s3URL: 'bar',
+                            name: 'foo',
+                            documentCategories: ['RATES' as const],
+                        },
+                    ],
+                    rateDateCertified: new Date('01/02/2021'),
+                    rateProgramIDs: ['e0819153-5894-4153-937e-aad00ab01a8f'],
+                    rateAmendmentInfo: undefined,
+                    rateDateStart: new Date('01/01/2021'),
+                    rateDateEnd: new Date('01/01/2022'),
+                },
+            ],
         })
         const msStatePrograms = mockMSState().programs
         const template = await resubmitPackageCMSEmail(
@@ -213,16 +383,7 @@ describe('contract only', () => {
     }
     const submission = mockContractOnlyFormData()
     const testStateAnalystEmails = testStateAnalystsEmails
-
     const defaultStatePrograms = mockMNState().programs
-    const packagePrograms = findPackagePrograms(
-        submission,
-        defaultStatePrograms
-    )
-
-    if (packagePrograms instanceof Error) {
-        throw new Error(packagePrograms.message)
-    }
 
     it('does not include ratesReviewSharedEmails', async () => {
         const contractOnlyTemplate = await resubmitPackageCMSEmail(
@@ -390,13 +551,42 @@ test('renders overall email as expected', async () => {
         updatedAt: new Date('02/01/2022'),
         updatedReason: 'Added more contract details.',
     }
-    const submission = {
-        ...mockContractOnlyFormData(),
+    const submission: LockedHealthPlanFormDataType = {
+        ...mockContractAndRatesFormData(),
         contractDateStart: new Date('2021-01-01'),
         contractDateEnd: new Date('2021-12-31'),
-        rateDateStart: new Date('2021-02-02'),
-        rateDateEnd: new Date('2021-11-31'),
-        rateDateCertified: new Date('2020-12-01'),
+        rateInfos: [
+            {
+                rateType: 'NEW',
+                rateDocuments: [
+                    {
+                        s3URL: 'bar',
+                        name: 'foo',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+                rateDateCertified: new Date('01/02/2021'),
+                rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+                rateAmendmentInfo: undefined,
+                rateDateStart: new Date('01/01/2021'),
+                rateDateEnd: new Date('01/01/2022'),
+            },
+            {
+                rateType: 'NEW',
+                rateDocuments: [
+                    {
+                        s3URL: 'bar',
+                        name: 'foo',
+                        documentCategories: ['RATES' as const],
+                    },
+                ],
+                rateDateCertified: new Date('02/02/2022'),
+                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                rateAmendmentInfo: undefined,
+                rateDateStart: new Date('02/01/2022'),
+                rateDateEnd: new Date('02/01/2023'),
+            },
+        ],
     }
     const defaultStatePrograms = mockMNState().programs
 
