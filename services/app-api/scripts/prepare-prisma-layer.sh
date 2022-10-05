@@ -10,6 +10,8 @@ function preparePrismaLayer() {
     mkdir -p lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines
     mkdir -p lambda-layers-prisma-client-migration/nodejs/node_modules/prisma
     mkdir -p lambda-layers-prisma-client-migration/nodejs/prisma
+    mkdir -p lambda-layers-prisma-client-migration/nodejs/protoMigrator
+    mkdir -p lambda-layers-prisma-client-migration/nodejs/gen
 
     echo "Creating engine layer ..."
     mkdir -p lambda-layers-prisma-client-engine/nodejs/node_modules/.prisma
@@ -35,9 +37,13 @@ function preparePrismaLayer() {
     rsync -av ../../node_modules/.prisma/ lambda-layers-prisma-client-engine/nodejs/node_modules/.prisma
     rsync -av ../../node_modules/@prisma/engines/dist/ lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/engines/dist
 
-    echo "Copy migration files to layer..."
+    echo "Copy schema migration files to layer..."
     rsync -av prisma/ lambda-layers-prisma-client-migration/nodejs/prisma
     rsync -av prisma/ lambda-layers-prisma-client-engine/nodejs/prisma
+
+    echo "Copy proto migration files to layer..."
+    rsync -av ../app-proto/build/ lambda-layers-prisma-client-migration/nodejs/protoMigrator
+    rsync -av ../app-proto/gen/ lambda-layers-prisma-client-migration/nodejs/gen
 
     echo "Remove Prisma CLI ..."
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/cli

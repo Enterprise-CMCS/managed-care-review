@@ -50,7 +50,7 @@ jobs:
           pushd services/app-web && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   app-api:
-    if: ${{ contains(inputs.changed_services, 'app-api') }}
+    if: ${{ contains(inputs.changed_services, 'app-api') || contains(inputs.changed_services, 'app-proto') }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository

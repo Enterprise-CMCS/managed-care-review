@@ -1,18 +1,21 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
+        "module": "commonjs",
+        "lib": ["es2021"],
+        "target": "es2021",
+        "moduleResolution": "node",
+
+        "baseUrl": "/",
         "outDir": "./build",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "preserveConstEnums": true,
-        "sourceMap": true,
-        "target": "es5",
+        "sourceMap": false,
         "skipLibCheck": true,
         "esModuleInterop": true,
         "resolveJsonModule": true,
-        "allowJs": true,
-        "module": "commonjs",
-        "lib": ["esnext"]
+        "allowJs": true
     },
-    "include": ["protoMigrations/healthPlanFormDataMigrations"]
+    "include": ["protoMigrations"]
 }
