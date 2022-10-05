@@ -104,7 +104,9 @@ const hasAnyValidRateData = (
 const hasValidDocuments = (sub: LockedHealthPlanFormDataType): boolean => {
     const validRateDocuments =
         sub.submissionType === 'CONTRACT_AND_RATES'
-            ? sub.rateDocuments?.length !== 0
+            ? sub.rateInfos.every((rateInfo) =>
+                  Boolean(rateInfo.rateDocuments.length)
+              )
             : true
 
     const validContractDocuments = sub.contractDocuments.length !== 0
@@ -209,6 +211,7 @@ function packageName(
 
 const generateRateName = (
     pkg: HealthPlanFormDataType,
+    rateData: RateInfoType,
     statePrograms: ProgramArgType[]
 ): string => {
     const {
@@ -218,7 +221,7 @@ const generateRateName = (
         rateDateEnd,
         rateDateStart,
         rateProgramIDs,
-    } = pkg
+    } = rateData
 
     let rateName = `${packageName(pkg, statePrograms, rateProgramIDs)}-RATE`
 
