@@ -283,11 +283,11 @@ const mockContractAndRatesFormData = (
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                rateDateStart: new Date(),
-                rateDateEnd: new Date(),
-                rateDateCertified: new Date(),
+                rateDateCertified: new Date('01/02/2021'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                 rateAmendmentInfo: undefined,
+                rateDateStart: new Date('01/01/2021'),
+                rateDateEnd: new Date('01/01/2022'),
             },
         ],
         rateType: 'NEW',
@@ -298,10 +298,11 @@ const mockContractAndRatesFormData = (
                 documentCategories: ['RATES' as const],
             },
         ],
-        rateDateStart: new Date(),
-        rateDateEnd: new Date(),
-        rateDateCertified: new Date(),
+        rateDateCertified: new Date('01/02/2021'),
+        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
         rateAmendmentInfo: undefined,
+        rateDateStart: new Date('01/01/2021'),
+        rateDateEnd: new Date('01/01/2022'),
         stateContacts: [
             {
                 name: 'Test Person',
@@ -310,7 +311,6 @@ const mockContractAndRatesFormData = (
             },
         ],
         actuaryContacts: [],
-        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
         ...submissionPartial,
     }
 }
