@@ -8,9 +8,15 @@ plugins:
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   - serverless-iam-helper
+  - '@enterprise-cmcs/serverless-waf-plugin'
+  - serverless-associate-waf
 
 custom:
   stage: ${opt:stage, self:provider.stage}
+  webAclName: ${self:custom.stage}-${self:service}-webacl
+  associateWaf:
+    name: ${self:custom.webAclName}
+    version: V2
   nrLicenseKey: ${ssm:/configuration/nr_license_key}
   nrMetricStreamName: 'NewRelic-Metric-Stream'
   nrFirehoseStreamName: 'NewRelic-Delivery-Stream'
