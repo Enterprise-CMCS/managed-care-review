@@ -472,7 +472,7 @@ describe('unlockHealthPlanPackage', () => {
         const programs = [defaultFloridaProgram()]
         const ratePrograms = [defaultFloridaRateProgram()]
         const name = packageName(sub, programs)
-        const rateName = generateRateName(sub, ratePrograms)
+        const rateName = generateRateName(sub, sub.rateInfos[0], ratePrograms)
         const stateAnalystsEmails = getTestStateAnalystsEmails(sub.stateCode)
 
         const cmsEmails = [
@@ -572,7 +572,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const programs = [defaultFloridaProgram()]
         const name = packageName(sub, programs)
-        const rateName = generateRateName(sub, programs)
+        const rateName = generateRateName(sub, sub.rateInfos[0], programs)
 
         // email subject line is correct for CMS email
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
