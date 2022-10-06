@@ -3,15 +3,8 @@
 exports[`renders overall email as expected 1`] = `
 "MCR-MN-0003-SNBC was successfully submitted.
 <br /><br />
-<b>Submission type</b>: Contract action and rate certification<br />
-<b>Contract effective dates</b>: 01/01/2021 to 12/31/2021<br />
-<br />
-<b>Rate name</b>: MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20210102<br />
-<b>Rating period</b>: 01/01/2021 to 01/01/2022<br />
-<br />
-<b>Rate name</b>: MCR-MN-0003-SNBC-RATE-20220201-20230201-CERTIFICATION-20220202<br />
-<b>Rating period</b>: 02/01/2022 to 02/01/2023<br />
-<br />
+<b>Submission type</b>: Contract action only<br />
+<b>Contract effective dates</b>: 10/06/2022 to 10/06/2022<br />
 <b>Submission description</b>: A submitted submission<br />
 <br />
 <a href=\\"http://localhost/submissions/test-abc-125\\">View submission</a>
