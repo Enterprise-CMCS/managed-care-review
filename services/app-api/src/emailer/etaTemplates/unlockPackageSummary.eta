@@ -3,10 +3,6 @@
 <b>Reason for unlock:</b> <%= it.unlockedReason %><br />
 <% if (it.shouldIncludeRates) { %>
 <% it.rateInfos.forEach(function(rate){ %>
-<b>Rate name</b>: <%= rate.rateName %>
-<br />
-<b><%= rate.rateDateLabel %></b>: <%= rate.rateDatesStart %> to <%= rate.rateDatesEnd %>
-<br />
-<br />
+<b>Rate name</b>: <%= rate.rateName %><br />
 <% }) %>
 <% } %>

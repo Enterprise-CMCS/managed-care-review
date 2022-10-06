@@ -3,7 +3,6 @@
 <b>Changes made:</b> <%= it.resubmissionReason %><br />
 <% if (it.shouldIncludeRates) { %>
 <% it.rateInfos.forEach(function(rate){ %>
-<b>Rate name</b>: <%= rate.rateName %>
-<br />
+<b>Rate name</b>: <%= rate.rateName %><br />
 <% }) %>
 <% } %>
