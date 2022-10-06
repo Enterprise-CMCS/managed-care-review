@@ -116,8 +116,12 @@ describe('with rates', () => {
                 ),
             })
         )
-        //Expect only have 1 rate name
-        expect(template.bodyText?.match(/Rate name/g)?.length).toBe(1)
+        //Expect only have 1 rate names using regex to match name pattern specific to rate names.
+        expect(
+            template.bodyText?.match(
+                /-RATE-[\d]{8}-[\d]{8}-(?:CERTIFICATION|AMENDMENT)-[\d]{8}/g
+            )?.length
+        ).toBe(1)
         expect(template).toEqual(
             expect.objectContaining({
                 bodyText: expect.stringContaining(
@@ -202,8 +206,12 @@ describe('with rates', () => {
             return
         }
 
-        //Expect only have 3 rate names
-        expect(template.bodyText?.match(/Rate name/g)?.length).toBe(3)
+        //Expect only have 3 rate names using regex to match name pattern specific to rate names.
+        expect(
+            template.bodyText?.match(
+                /-RATE-[\d]{8}-[\d]{8}-(?:CERTIFICATION|AMENDMENT)-[\d]{8}/g
+            )?.length
+        ).toBe(3)
         //First Rate certification
         expect(template).toEqual(
             expect.objectContaining({
@@ -448,7 +456,7 @@ describe('contract only', () => {
 
         expect(contractOnlyTemplate).toEqual(
             expect.not.objectContaining({
-                bodyText: expect.stringMatching(/Rate name:/),
+                bodyText: expect.stringMatching(/Rate names:/),
             })
         )
     })
