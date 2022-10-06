@@ -6,7 +6,10 @@ exports[`renders overall email as expected 1`] = `
 <b>Submitted by:</b> bob@example.com<br />
 <b>Updated on:</b> 02/01/2022<br />
 <b>Changes made:</b> Added rate certification.<br />
-<b>Rate name</b>: MCR-MN-0003-MSHO-RATE-20210202-20211201-CERTIFICATION-20201201<br />
+<b>Rate names</b>:
+<ul>
+<li>MCR-MN-0003-MSHO-RATE-20210202-20211201-CERTIFICATION-20201201</li>
+</ul>
 <br />
 If you need to make any further changes, please contact CMS.
 "

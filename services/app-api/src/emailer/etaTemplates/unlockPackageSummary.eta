@@ -2,7 +2,10 @@
 <b>Unlocked on:</b> <%= it.unlockedOn %><br />
 <b>Reason for unlock:</b> <%= it.unlockedReason %><br />
 <% if (it.shouldIncludeRates) { %>
+<b>Rate names</b>:
+<ul>
 <% it.rateInfos.forEach(function(rate){ %>
-<b>Rate name</b>: <%= rate.rateName %><br />
+<li><%= rate.rateName %></li>
 <% }) %>
+</ul>
 <% } %>
