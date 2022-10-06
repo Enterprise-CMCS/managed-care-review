@@ -309,7 +309,7 @@ test('includes expected data summary for a contract and rates submission State e
     )
 })
 
-test('includes expected data summary for multi-rate contract and rates submission State email', async () => {
+test('includes expected data summary for a multi-rate contract and rates submission State email', async () => {
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractAndRatesFormData(),
         contractDateStart: new Date('01/01/2021'),

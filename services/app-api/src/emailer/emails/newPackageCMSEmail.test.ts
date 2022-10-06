@@ -193,7 +193,7 @@ test('includes expected data summary for a contract and rates submission CMS ema
     )
 })
 
-test('includes expected data summary for a multi-rate certification contract and rates submission CMS email', async () => {
+test('includes expected data summary for a multi-rate contract and rates submission CMS email', async () => {
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractAndRatesFormData(),
         contractDateStart: new Date('01/01/2021'),

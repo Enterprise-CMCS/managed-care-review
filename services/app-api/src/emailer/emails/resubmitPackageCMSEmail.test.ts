@@ -47,7 +47,7 @@ describe('with rates', () => {
             })
         )
     })
-    it('contains correct information in body of email for single rate submission', async () => {
+    it('includes expected data summary for a contract and rates resubmission CMS email', async () => {
         const sub: LockedHealthPlanFormDataType = {
             ...mockContractAndRatesFormData(),
             contractDateStart: new Date('01/01/2021'),
@@ -130,7 +130,7 @@ describe('with rates', () => {
             })
         )
     })
-    it('contains correct information in body of email for multi-rate submission', async () => {
+    it('includes expected data summary for a multi-rate contract and rates resubmission CMS email', async () => {
         const sub: LockedHealthPlanFormDataType = {
             ...mockContractAndRatesFormData(),
             contractDateStart: new Date('01/01/2021'),

@@ -64,7 +64,7 @@ test('subject line is correct and clearly states submission is unlocked', async 
         })
     )
 })
-test('email body contains correct information for single rate cert submission', async () => {
+test('includes expected data summary for a contract and rates submission unlock CMS email', async () => {
     const template = await unlockPackageCMSEmail(
         sub,
         unlockData,
@@ -107,7 +107,7 @@ test('email body contains correct information for single rate cert submission', 
         })
     )
 })
-test('email body contains correct information for multi-rate cert submission', async () => {
+test('includes expected data summary for a multi-rate contract and rates submission unlock CMS email', async () => {
     const sub: UnlockedHealthPlanFormDataType = {
         ...mockUnlockedContractAndRatesFormData(),
         contractDateStart: new Date('01/01/2021'),
