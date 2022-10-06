@@ -7,8 +7,6 @@ plugins:
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   - serverless-iam-helper
-  - '@enterprise-cmcs/serverless-waf-plugin'
-  - serverless-associate-waf
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -28,10 +26,6 @@ custom:
       - val
       - prod
       - main
-  webAclName: ${sls:stage}-${self:service}-webacl
-  associateWaf:
-    name: ${self:custom.webAclName}
-    version: V2
 
 provider:
   name: aws
@@ -64,7 +58,7 @@ resources:
             - ${sls:stage}
             - 'main'
   Resources:
-    ApiGatewayRestApi:
+    AppApiGateway:
       Type: AWS::ApiGateway::RestApi
       Properties:
         Name: ${self:service}-${sls:stage}-app-api-gateway
@@ -76,7 +70,7 @@ resources:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
           gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
         ResponseType: DEFAULT_4XX
-        RestApiId: !Ref ApiGatewayRestApi
+        RestApiId: !Ref AppApiGateway
     GatewayResponseDefault5XX:
       Type: 'AWS::ApiGateway::GatewayResponse'
       Properties:
@@ -84,7 +78,7 @@ resources:
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
           gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
         ResponseType: DEFAULT_5XX
-        RestApiId: !Ref ApiGatewayRestApi
+        RestApiId: !Ref AppApiGateway
 
     NewRelicInfraIntegrations:
       Type: AWS::IAM::Role
@@ -227,11 +221,11 @@ resources:
   Outputs:
     ApiGatewayRestApiId:
       Value:
-        Ref: ApiGatewayRestApi
+        Ref: AppApiGateway
     ApiGatewayRestApiUrl:
-      Value: !Sub https://${ApiGatewayRestApi}.execute-api.${self:provider.region}.amazonaws.com/${sls:stage}
+      Value: !Sub https://${AppApiGateway}.execute-api.${self:provider.region}.amazonaws.com/${sls:stage}
     AppApiGatewayRootResourceId:
       Value:
         Fn::GetAtt:
-          - ApiGatewayRestApi
+          - AppApiGateway
           - RootResourceId

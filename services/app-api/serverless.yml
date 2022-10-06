@@ -16,6 +16,8 @@ plugins:
   - serverless-s3-bucket-helper
   - serverless-idempotency-helper
   - serverless-iam-helper
+  - '@enterprise-cmcs/serverless-waf-plugin'
+  - serverless-associate-waf
 
 custom:
   region: ${aws:region}
@@ -39,6 +41,10 @@ custom:
         - '@prisma/client'
       nodeModulesRelativeDir: '../../'
     excludeRegex: 'darwin|debian'
+  webAclName: ${sls:stage}-${self:service}-webacl
+  associateWaf:
+    name: ${self:custom.webAclName}
+    version: V2
   serverlessTerminationProtection:
     stages:
       - dev
