@@ -211,7 +211,7 @@ function packageName(
 
 const generateRateName = (
     pkg: HealthPlanFormDataType,
-    rateData: RateInfoType,
+    rateInfo: RateInfoType,
     statePrograms: ProgramArgType[]
 ): string => {
     const {
@@ -221,7 +221,7 @@ const generateRateName = (
         rateDateEnd,
         rateDateStart,
         rateProgramIDs,
-    } = rateData
+    } = rateInfo
 
     let rateName = `${packageName(pkg, statePrograms, rateProgramIDs)}-RATE`
 
