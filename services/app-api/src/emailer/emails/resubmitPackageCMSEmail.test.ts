@@ -610,5 +610,7 @@ test('renders overall email as expected', async () => {
         console.error(testStateAnalystEmails)
         return
     }
+
+    console.log(template.bodyHTML)
     expect(template.bodyHTML).toMatchSnapshot()
 })
