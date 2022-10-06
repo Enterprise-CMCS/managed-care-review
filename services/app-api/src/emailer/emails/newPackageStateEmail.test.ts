@@ -513,44 +513,7 @@ test('includes expected data summary for a rate amendment submission State email
 })
 
 test('renders overall email as expected', async () => {
-    const sub: LockedHealthPlanFormDataType = {
-        ...mockContractAndRatesFormData(),
-        rateType: 'AMENDMENT',
-        contractDateStart: new Date('2021-01-01'),
-        contractDateEnd: new Date('2021-12-31'),
-        rateInfos: [
-            {
-                rateType: 'NEW',
-                rateDocuments: [
-                    {
-                        s3URL: 'bar',
-                        name: 'foo',
-                        documentCategories: ['RATES' as const],
-                    },
-                ],
-                rateDateCertified: new Date('01/02/2021'),
-                rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
-                rateAmendmentInfo: undefined,
-                rateDateStart: new Date('01/01/2021'),
-                rateDateEnd: new Date('01/01/2022'),
-            },
-            {
-                rateType: 'NEW',
-                rateDocuments: [
-                    {
-                        s3URL: 'bar',
-                        name: 'foo',
-                        documentCategories: ['RATES' as const],
-                    },
-                ],
-                rateDateCertified: new Date('02/02/2022'),
-                rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                rateAmendmentInfo: undefined,
-                rateDateStart: new Date('02/01/2022'),
-                rateDateEnd: new Date('02/01/2023'),
-            },
-        ],
-    }
+    const sub: LockedHealthPlanFormDataType = mockContractOnlyFormData()
     const user = mockUser()
     const defaultStatePrograms = mockMNState().programs
     const result = await newPackageStateEmail(
