@@ -477,7 +477,7 @@ export const RateDetails = ({
                                     {({ remove, push }) => (
                                         <>
                                             {rateInfos.map(
-                                                (rateInfo, index, arr) => (
+                                                (rateInfo, index) => (
                                                     <div
                                                         key={rateInfo.uuid}
                                                         id={rateInfo.uuid}
@@ -1130,7 +1130,7 @@ export const RateDetails = ({
                                                                 </FormGroup>
                                                             </>
                                                         )}
-                                                        {arr.length > 1 &&
+                                                        {index >= 1 &&
                                                             showMultiRates && (
                                                                 <Button
                                                                     type="button"
