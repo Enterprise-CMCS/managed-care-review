@@ -8,7 +8,7 @@ plugins:
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   - serverless-iam-helper
-  - serverless-waf-plugin
+  - '@enterprise-cmcs/serverless-waf-plugin'
 
 custom:
   stage: ${opt:stage, self:provider.stage}
