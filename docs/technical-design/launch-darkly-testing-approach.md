@@ -18,6 +18,14 @@ The approach here was to implement state management that could be accessed thoug
 
 The Cypress commands `cy.interceptFeatureFlags` and `cy.stubFeatureFlags` will generate a json file, using `Cy.writeFile`, in `tests/cypress/fixtures/stores/` named `featureFlagStore.json` using data and Types from `flag.ts` located in `app-web/src/common-code/featureFlags`. The `cy.getFeatureFlagStore()`, using `cy.write`, is used to read the `featureFlagStore.json` file and return the object of feature flags with values.
 
+### Prerequisites
+Before testing locally, make sure to have the following prerequisites.
+
+ - Launch Darkly API key: A valid Launch Darkly API key will need to be your `.envrc.local`, see code block below. Cypress will be making the actual request to Launch Darkly, we will just be intercepting the response. If we had an invalid key here, the request to would return a 404 before we could intercept the response. **This will cause the integration to break in testing.**
+```json
+export REACT_APP_LD_CLIENT_ID='Place Launch Darkly ID here'
+```
+
 ### LaunchDarkly Cypress helper commands
 - #### interceptFeatureFlags
   This command allows you to intercept LD calls and set flag values. It also generates a `featureFlagStore.json` file in `tests/cypress/fixtures/stores` with default feature flag values along with any specific values passed in.

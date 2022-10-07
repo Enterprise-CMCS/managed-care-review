@@ -155,15 +155,20 @@ const generateStateReceiverEmails = (
     return pruneDuplicateEmails(stateReceiverEmails)
 }
 
-//Finds all programs ids in a package and combines them into one array removing duplicates.
+//Finds all package program and rate program ids in a package and combines them into one array removing duplicates.
 const findAllPackageProgramIds = (
     pkg: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
 ): string[] => {
     const programs = [...pkg.programIDs]
-    if (pkg.submissionType === 'CONTRACT_AND_RATES' && pkg.rateProgramIDs) {
-        pkg.rateProgramIDs.forEach(
-            (id) => !programs.includes(id) && programs.push(id)
+    if (pkg.submissionType === 'CONTRACT_AND_RATES' && !!pkg.rateInfos.length) {
+        const ratePrograms = pkg.rateInfos.flatMap(
+            (rateInfo) => rateInfo.rateProgramIDs
         )
+        if (ratePrograms?.length) {
+            ratePrograms.forEach(
+                (id) => id && !programs.includes(id) && programs.push(id)
+            )
+        }
     }
     return programs
 }

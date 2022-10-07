@@ -2,4 +2,4 @@ The state completed their edits on submission <%= it.packageName %><br />
 <br />
 <%~ includeFile('./resubmitPackageSummary', it) %>
 <br />
-<a href="<%= it.submissionURL %>">View submission</a>
+<a href="<%= it.submissionURL %>">View the full submission</a>

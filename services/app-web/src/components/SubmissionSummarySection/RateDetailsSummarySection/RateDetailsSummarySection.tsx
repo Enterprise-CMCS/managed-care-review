@@ -41,7 +41,9 @@ export const RateDetailsSummarySection = ({
         doc.documentCategories.includes('RATES_RELATED')
     )
 
-    const rateName = generateRateName(submission, statePrograms)
+    const rateName = submission.rateInfos[0]
+        ? generateRateName(submission, submission.rateInfos[0], statePrograms)
+        : undefined
 
     const rateCapitationType = submission.rateCapitationType
         ? submission.rateCapitationType === 'RATE_CELL'
@@ -62,6 +64,15 @@ export const RateDetailsSummarySection = ({
                   .filter((p) => programIDs.includes(p.id))
                   .map((p) => p.name)
             : undefined
+    }
+
+    const rateCertificationType = () => {
+        if (submission.rateType === 'AMENDMENT') {
+            return 'Amendment to prior rate certification'
+        }
+        if (submission.rateType === 'NEW') {
+            return 'New rate certification'
+        }
     }
 
     useEffect(() => {
@@ -128,11 +139,7 @@ export const RateDetailsSummarySection = ({
                     <DataDetail
                         id="rateType"
                         label="Rate certification type"
-                        data={
-                            submission.rateAmendmentInfo
-                                ? 'Amendment to prior rate certification'
-                                : 'New rate certification'
-                        }
+                        data={rateCertificationType()}
                     />
                     <DataDetail
                         id="rateCapitationType"
@@ -142,7 +149,7 @@ export const RateDetailsSummarySection = ({
                     <DataDetail
                         id="ratingPeriod"
                         label={
-                            submission.rateAmendmentInfo
+                            submission.rateType === 'AMENDMENT'
                                 ? 'Rating period of original rate certification'
                                 : 'Rating period'
                         }
