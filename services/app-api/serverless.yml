@@ -294,7 +294,13 @@ resources:
   Resources:
     ApiGwWebAclAssociation:
       Type: AWS::WAFv2::WebACLAssociation
-      DependsOn: GraphqlLambdaFunction
+      DependsOn:
+        - GraphqlLambdaFunction
+        - HealthLambdaFunction
+        - HelloLambdaFunction
+        - ReportsLambdaFunction
+        - OtelLambdaFunction
+        - MigrateLambdaFunction
       Properties:
         ResourceArn: arn:aws:apigateway:${self:provider.region}::/restapis/${self:custom.appApiGatewayId}/stages/${sls:stage}
         WebACLArn: ${self:custom.appApiWafAclArn}
