@@ -250,17 +250,6 @@ resources:
     #       SampledRequestsEnabled: true
     #       MetricName: ${sls:stage}-webacl
 
-    ApiGwWebAclAssociation:
-      Type: AWS::WAFv2::WebACLAssociation
-      DependsOn:
-        - AppApiGateway
-        - AppApiGatewayAcl
-      Properties:
-        ResourceArn: !Sub
-          - arn:aws:apigateway:${self:provider.region}::/restapis/${GatewayRef}/stages/${sls:stage}
-          - { GatewayRef: !Ref AppApiGateway }
-        WebACLArn: !GetAtt WafPluginAcl.Arn
-
   Outputs:
     ApiGatewayRestApiId:
       Value:
@@ -272,3 +261,5 @@ resources:
         Fn::GetAtt:
           - AppApiGateway
           - RootResourceId
+    WafPluginAcl:
+      Value: !Ref WafPluginAcl

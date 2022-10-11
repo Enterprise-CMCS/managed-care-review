@@ -22,6 +22,7 @@ custom:
   applicationEndpoint: ${env:APPLICATION_ENDPOINT, cf:ui-${sls:stage}.CloudFrontEndpointUrl}
   appApiGatewayId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.ApiGatewayRestApiId}
   appApiGatewayRootResourceId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.AppApiGatewayRootResourceId}
+  appApiWafAclArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.WafPluginAcl}
   emailerMode: ${env:EMAILER_MODE, ssm:/configuration/emailer_mode}
   parameterStoreMode: ${env:PARAMETER_STORE_MODE, ssm:/configuration/parameterStoreMode}
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${sls:stage}.PostgresAuroraArn }
@@ -290,6 +291,13 @@ functions:
           authorizer: aws_iam
 
 resources:
+  Resources:
+    ApiGwWebAclAssociation:
+      Type: AWS::WAFv2::WebACLAssociation
+      DependsOn: GraphqlLambdaFunction
+      Properties:
+        ResourceArn: arn:aws:apigateway:${self:provider.region}::/restapis/${self:custom.appApiGatewayId}/stages/${sls:stage}
+        WebACLArn: ${self:custom.appApiWafAclArn}
   Outputs:
     ApiAuthMode:
       Value: ${self:custom.reactAppAuthMode}
