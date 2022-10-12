@@ -80,13 +80,84 @@ describe('rate details', () => {
             cy.navigateFormByButtonClick('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
-            
+
             cy.fillOutStateContact()
             cy.fillOutActuaryContact()
             cy.navigateFormByButtonClick('CONTINUE')
 
             cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
 
+        })
+    })
+
+    it('can add and remove multiple rate certifications and navigate to and from rate details page', () => {
+        cy.interceptFeatureFlags({'multi-rate-submissions': true})
+        cy.logInAsStateUser()
+        cy.startNewContractAndRatesSubmission()
+
+        // Navigate to rate details page
+        cy.location().then((fullUrl) => {
+            const { pathname } = fullUrl
+            const pathnameArray = pathname.split('/')
+            const draftSubmissionId = pathnameArray[2]
+            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/rate-details`)
+
+            //Add three more rate certification forms, four total.
+            cy.findByRole('button', { name: 'Add another rate certification'}).click()
+            cy.findByRole('button', { name: 'Add another rate certification'}).click()
+            cy.findByRole('button', { name: 'Add another rate certification'}).click()
+
+            //Fil out every rate certification form
+            cy.findAllByTestId('rate-certification-form').each((form, index) => {
+                cy.wrap(form).within(() => {
+                    //Fill out last rate certification as new rate
+                    if (index === 3) {
+                        cy.fillOutNewRateCertification()
+                    } else {
+                        cy.fillOutAmendmentToPriorRateCertification()
+                    }
+                })
+            })
+
+            // Navigate to contacts page by clicking continue
+            cy.navigateFormByButtonClick('CONTINUE')
+            cy.findByRole('heading', { level: 2, name: /Contacts/ })
+            cy.fillOutStateContact()
+            cy.fillOutActuaryContact()
+
+            // Navigate back to rate details page
+            cy.navigateFormByButtonClick('BACK')
+            cy.findByRole('heading', { level: 2, name: /Rate details/ })
+
+            //Remove second and third rate certification
+            cy.findAllByTestId('rate-certification-form').each((form, index) => {
+                if (index === 1 || index === 2) {
+                    cy.wrap(form).within(() => cy.findByRole('button', { name: 'Remove rate certification'}).click())
+                }
+            })
+
+            // Navigate to contacts page by clicking continue
+            cy.navigateFormByButtonClick('CONTINUE')
+            cy.findByRole('heading', { level: 2, name: /Contacts/ })
+
+            // Navigate back to rate details page
+            cy.navigateFormByButtonClick('BACK')
+            cy.findByRole('heading', { level: 2, name: /Rate details/ })
+
+            //Add a third rate certification form and fill it out.
+            cy.findByRole('button', { name: 'Add another rate certification'}).click()
+            cy.findAllByTestId('rate-certification-form').each((form, index, arr) => {
+                cy.wrap(form).within(() => {
+                    //Fill out the last rate certification form
+                    if (index === arr.length - 1) {
+                        cy.fillOutAmendmentToPriorRateCertification()
+                    }
+                })
+            })
+
+            // Navigate to contacts page by clicking continue
+            cy.navigateFormByButtonClick('CONTINUE')
+            cy.findByRole('heading', { level: 2, name: /Contacts/ })
         })
     })
 })
