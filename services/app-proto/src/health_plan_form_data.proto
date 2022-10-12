@@ -178,6 +178,7 @@ message RateInfo {
   repeated Document rate_documents = 8;
   optional RateCapitationType rate_capitation_type = 9;
   repeated string rate_program_ids = 10;
+  optional string rate_program_name = 11;
   
   optional RateAmendmentInfo rate_amendment_info = 50;
 
