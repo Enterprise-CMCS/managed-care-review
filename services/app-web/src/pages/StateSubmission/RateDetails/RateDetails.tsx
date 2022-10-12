@@ -574,16 +574,16 @@ export const RateDetails = ({
                                                                         (
                                                                             fileMatrix
                                                                         ) => {
-                                                                            const newFiles =
+                                                                            const newMatrix =
                                                                                 [
                                                                                     ...fileMatrix,
                                                                                 ]
-                                                                            newFiles.splice(
+                                                                            newMatrix.splice(
                                                                                 index,
                                                                                 1,
                                                                                 fileItems
                                                                             )
-                                                                            return newFiles
+                                                                            return newMatrix
                                                                         }
                                                                     )
                                                                 }
@@ -1175,6 +1175,18 @@ export const RateDetails = ({
                                                         const newRate =
                                                             rateInfoFormValues()
                                                         push(newRate)
+                                                        setFileItemsMatrix(
+                                                            (fileMatrix) => {
+                                                                const newMatrix =
+                                                                    [
+                                                                        ...fileMatrix,
+                                                                    ]
+                                                                newMatrix.push(
+                                                                    []
+                                                                )
+                                                                return newMatrix
+                                                            }
+                                                        )
                                                         setFocusNewRate(true)
                                                     }}
                                                     ref={newRateButtonRef}
