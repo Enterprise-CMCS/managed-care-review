@@ -426,11 +426,11 @@ export const RateDetails = ({
 
         return errorObject
     }
-    
+
     const handleRateInfoLegend = (index: number) => {
         return index === 0
-        ? 'Rate certification'
-        : `Additional rate certification ${index}`
+            ? 'Rate certification'
+            : `Additional rate certification ${index}`
     }
 
     return (
@@ -485,7 +485,7 @@ export const RateDetails = ({
                                             {rateInfos.map(
                                                 (rateInfo, index, arr) => (
                                                     <Fieldset
-                                                        data-testid={`rateInfos.${index}.container`}
+                                                        data-testid={`rate-certification-form`}
                                                         key={rateInfo.uuid}
                                                         id={`rateInfos.${index}.container.${rateInfo.uuid}`}
                                                         legend={handleRateInfoLegend(
