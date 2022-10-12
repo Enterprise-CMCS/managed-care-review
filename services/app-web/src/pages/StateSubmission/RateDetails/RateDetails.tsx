@@ -574,16 +574,16 @@ export const RateDetails = ({
                                                                         (
                                                                             fileMatrix
                                                                         ) => {
-                                                                            const newFiles =
+                                                                            const newMatrix =
                                                                                 [
                                                                                     ...fileMatrix,
                                                                                 ]
-                                                                            newFiles.splice(
+                                                                            newMatrix.splice(
                                                                                 index,
                                                                                 1,
                                                                                 fileItems
                                                                             )
-                                                                            return newFiles
+                                                                            return newMatrix
                                                                         }
                                                                     )
                                                                 }
