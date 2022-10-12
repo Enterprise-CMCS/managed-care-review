@@ -261,5 +261,8 @@ resources:
         Fn::GetAtt:
           - AppApiGateway
           - RootResourceId
-    WafPluginAcl:
-      Value: !Ref WafPluginAcl
+    WafPluginAclArn:
+      Value:
+        Fn::GetAtt:
+          - WafPluginAcl
+          - Arn
