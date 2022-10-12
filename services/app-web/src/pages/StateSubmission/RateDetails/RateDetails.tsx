@@ -1175,6 +1175,18 @@ export const RateDetails = ({
                                                         const newRate =
                                                             rateInfoFormValues()
                                                         push(newRate)
+                                                        setFileItemsMatrix(
+                                                            (fileMatrix) => {
+                                                                const newMatrix =
+                                                                    [
+                                                                        ...fileMatrix,
+                                                                    ]
+                                                                newMatrix.push(
+                                                                    []
+                                                                )
+                                                                return newMatrix
+                                                            }
+                                                        )
                                                         setFocusNewRate(true)
                                                     }}
                                                     ref={newRateButtonRef}
