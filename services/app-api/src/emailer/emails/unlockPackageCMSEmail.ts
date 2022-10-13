@@ -32,6 +32,7 @@ export const unlockPackageCMSEmail = async (
         return reviewerEmails
     }
 
+    //This checks to make sure all programs contained in submission exists for the state.
     const packagePrograms = findPackagePrograms(pkg, statePrograms)
 
     if (packagePrograms instanceof Error) {
@@ -48,7 +49,11 @@ export const unlockPackageCMSEmail = async (
         unlockedOn: formatCalendarDate(updateInfo.updatedAt),
         unlockedReason: updateInfo.updatedReason,
         shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
-        rateName: isContractAndRates && generateRateName(pkg, packagePrograms),
+        rateInfos:
+            isContractAndRates &&
+            pkg.rateInfos.map((rate) => ({
+                rateName: generateRateName(pkg, rate, statePrograms),
+            })),
     }
 
     const result = await renderTemplate<typeof data>(

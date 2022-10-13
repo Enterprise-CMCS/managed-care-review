@@ -56,7 +56,25 @@ describe('templateHelpers', () => {
         {
             submission: mockUnlockedContractAndRatesFormData({
                 stateCode: 'MS',
-                rateProgramIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
+                rateInfos: [
+                    {
+                        rateType: 'NEW',
+                        rateDocuments: [
+                            {
+                                s3URL: 'bar',
+                                name: 'foo',
+                                documentCategories: ['RATES' as const],
+                            },
+                        ],
+                        rateDateStart: new Date(),
+                        rateDateEnd: new Date(),
+                        rateDateCertified: new Date(),
+                        rateProgramIDs: [
+                            '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
+                        ],
+                        rateAmendmentInfo: undefined,
+                    },
+                ],
             }),
             emailConfig: testEmailConfig,
             stateAnalystsEmails: testStateAnalystsEmails,

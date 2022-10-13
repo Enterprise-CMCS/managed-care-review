@@ -102,7 +102,11 @@ describe('RateDetailsSummarySection', () => {
                 statePrograms={statePrograms}
             />
         )
-        const rateName = generateRateName(submission, statePrograms)
+        const rateName = generateRateName(
+            submission,
+            submission.rateInfos[0],
+            statePrograms
+        )
         expect(screen.getByText(rateName)).toBeInTheDocument()
     })
 
@@ -129,7 +133,11 @@ describe('RateDetailsSummarySection', () => {
             />
         )
 
-        const rateName = generateRateName(submission, statePrograms)
+        const rateName = generateRateName(
+            submission,
+            submission.rateInfos[0],
+            statePrograms
+        )
 
         expect(screen.getByText(rateName)).toBeInTheDocument()
     })
@@ -144,7 +152,11 @@ describe('RateDetailsSummarySection', () => {
             />
         )
 
-        const rateName = generateRateName(stateSubmission, statePrograms)
+        const rateName = generateRateName(
+            stateSubmission,
+            stateSubmission.rateInfos[0],
+            statePrograms
+        )
 
         expect(screen.getByText(rateName)).toBeInTheDocument()
         expect(

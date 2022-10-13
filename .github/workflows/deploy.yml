@@ -187,7 +187,7 @@ jobs:
 
       - name: Generate protos
         working-directory: services/app-proto
-        run: yarn run protogen
+        run: yarn run protogen && yarn run build
 
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client

@@ -2,5 +2,16 @@
 <b>Unlocked on:</b> <%= it.unlockedOn %><br />
 <b>Reason for unlock:</b> <%= it.unlockedReason %><br />
 <% if (it.shouldIncludeRates) { %>
-<b>Rate name</b>: <%= it.rateName %><br />
+<% if (it.rateInfos.length > 1) { %>
+<b>Rate names</b>:
+<ul style=<%~'"margin-top: 0px;"'%>>
+<% it.rateInfos.forEach(function(rate){ %>
+<li><%= rate.rateName %></li>
+<% }) %>
+</ul>
+<% } else { %>
+<% it.rateInfos.forEach(function(rate){ %>
+<b>Rate name</b>: <%= rate.rateName %><br />
+<% }) %>
+<% } %>
 <% } %>

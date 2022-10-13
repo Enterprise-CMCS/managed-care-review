@@ -243,8 +243,8 @@ const mockContractAndRatesFormData = (
     submissionPartial?: Partial<LockedHealthPlanFormDataType>
 ): LockedHealthPlanFormDataType => {
     return {
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date('01/01/2021'),
+        updatedAt: new Date('02/01/2021'),
         status: 'SUBMITTED',
         stateNumber: 3,
         id: 'test-abc-125',
@@ -252,7 +252,7 @@ const mockContractAndRatesFormData = (
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A submitted submission',
-        submittedAt: new Date(),
+        submittedAt: new Date('02/01/2021'),
         documents: [
             {
                 s3URL: 'bar',
@@ -269,8 +269,8 @@ const mockContractAndRatesFormData = (
                 documentCategories: ['CONTRACT' as const],
             },
         ],
-        contractDateStart: new Date(),
-        contractDateEnd: new Date(),
+        contractDateStart: new Date('01/01/2021'),
+        contractDateEnd: new Date('01/01/2022'),
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [
@@ -283,11 +283,11 @@ const mockContractAndRatesFormData = (
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                rateDateStart: new Date(),
-                rateDateEnd: new Date(),
-                rateDateCertified: new Date(),
+                rateDateCertified: new Date('01/02/2021'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                 rateAmendmentInfo: undefined,
+                rateDateStart: new Date('01/01/2021'),
+                rateDateEnd: new Date('01/01/2022'),
             },
         ],
         rateType: 'NEW',
@@ -298,10 +298,11 @@ const mockContractAndRatesFormData = (
                 documentCategories: ['RATES' as const],
             },
         ],
-        rateDateStart: new Date(),
-        rateDateEnd: new Date(),
-        rateDateCertified: new Date(),
+        rateDateCertified: new Date('01/02/2021'),
+        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
         rateAmendmentInfo: undefined,
+        rateDateStart: new Date('01/01/2021'),
+        rateDateEnd: new Date('01/01/2022'),
         stateContacts: [
             {
                 name: 'Test Person',
@@ -310,7 +311,6 @@ const mockContractAndRatesFormData = (
             },
         ],
         actuaryContacts: [],
-        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
         ...submissionPartial,
     }
 }
@@ -319,8 +319,8 @@ const mockUnlockedContractAndRatesFormData = (
     submissionPartial?: Partial<UnlockedHealthPlanFormDataType>
 ): UnlockedHealthPlanFormDataType => {
     return {
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date('01/01/2021'),
+        updatedAt: new Date('02/01/2021'),
         status: 'DRAFT',
         stateNumber: 3,
         id: 'test-abc-125',
@@ -344,8 +344,8 @@ const mockUnlockedContractAndRatesFormData = (
                 documentCategories: ['CONTRACT' as const],
             },
         ],
-        contractDateStart: new Date(),
-        contractDateEnd: new Date(),
+        contractDateStart: new Date('01/01/2021'),
+        contractDateEnd: new Date('01/01/2022'),
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [
@@ -358,9 +358,9 @@ const mockUnlockedContractAndRatesFormData = (
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                rateDateStart: new Date(),
-                rateDateEnd: new Date(),
-                rateDateCertified: new Date(),
+                rateDateStart: new Date('01/01/2021'),
+                rateDateEnd: new Date('01/01/2022'),
+                rateDateCertified: new Date('01/02/2021'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                 rateAmendmentInfo: undefined,
             },
@@ -373,9 +373,9 @@ const mockUnlockedContractAndRatesFormData = (
                 documentCategories: ['RATES' as const],
             },
         ],
-        rateDateStart: new Date(),
-        rateDateEnd: new Date(),
-        rateDateCertified: new Date(),
+        rateDateStart: new Date('01/01/2021'),
+        rateDateEnd: new Date('01/01/2022'),
+        rateDateCertified: new Date('01/02/2021'),
         rateAmendmentInfo: undefined,
         stateContacts: [
             {
@@ -394,8 +394,8 @@ const mockUnlockedContractOnlyFormData = (
     submissionPartial?: Partial<UnlockedHealthPlanFormDataType>
 ): UnlockedHealthPlanFormDataType => {
     return {
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date('01/01/2021'),
+        updatedAt: new Date('02/01/2021'),
         status: 'DRAFT',
         stateNumber: 3,
         id: 'test-abc-125',
@@ -419,8 +419,8 @@ const mockUnlockedContractOnlyFormData = (
                 documentCategories: ['CONTRACT' as const],
             },
         ],
-        contractDateStart: new Date(),
-        contractDateEnd: new Date(),
+        contractDateStart: new Date('01/01/2021'),
+        contractDateEnd: new Date('01/01/2022'),
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [],
@@ -441,8 +441,8 @@ const mockContractOnlyFormData = (
     submissionPartial?: Partial<LockedHealthPlanFormDataType>
 ): LockedHealthPlanFormDataType => {
     return {
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date('01/01/2021'),
+        updatedAt: new Date('02/01/2021'),
         status: 'SUBMITTED',
         stateNumber: 3,
         id: 'test-abc-125',
@@ -450,7 +450,7 @@ const mockContractOnlyFormData = (
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A submitted submission',
-        submittedAt: new Date(),
+        submittedAt: new Date('02/01/2021'),
         documents: [
             {
                 s3URL: 'bar',
@@ -467,8 +467,8 @@ const mockContractOnlyFormData = (
                 documentCategories: ['CONTRACT' as const],
             },
         ],
-        contractDateStart: new Date(),
-        contractDateEnd: new Date(),
+        contractDateStart: new Date('01/01/2021'),
+        contractDateEnd: new Date('01/01/2022'),
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [],
@@ -489,8 +489,8 @@ const mockContractAmendmentFormData = (
     submissionPartial?: Partial<LockedHealthPlanFormDataType>
 ): LockedHealthPlanFormDataType => {
     return {
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: new Date('01/01/2021'),
+        updatedAt: new Date('02/01/2021'),
         status: 'SUBMITTED',
         stateNumber: 3,
         id: 'test-abc-125',
@@ -498,7 +498,7 @@ const mockContractAmendmentFormData = (
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A submitted submission',
-        submittedAt: new Date(),
+        submittedAt: new Date('02/01/2021'),
         documents: [
             {
                 s3URL: 'bar',
@@ -515,8 +515,8 @@ const mockContractAmendmentFormData = (
                 documentCategories: ['CONTRACT' as const],
             },
         ],
-        contractDateStart: new Date(),
-        contractDateEnd: new Date(),
+        contractDateStart: new Date('01/01/2021'),
+        contractDateEnd: new Date('01/01/2022'),
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [
@@ -529,9 +529,9 @@ const mockContractAmendmentFormData = (
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                rateDateStart: new Date(),
-                rateDateEnd: new Date(),
-                rateDateCertified: new Date(),
+                rateDateStart: new Date('01/01/2021'),
+                rateDateEnd: new Date('01/01/2022'),
+                rateDateCertified: new Date('01/02/2021'),
                 rateAmendmentInfo: undefined,
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
             },
@@ -544,9 +544,9 @@ const mockContractAmendmentFormData = (
                 documentCategories: ['RATES' as const],
             },
         ],
-        rateDateStart: new Date(),
-        rateDateEnd: new Date(),
-        rateDateCertified: new Date(),
+        rateDateStart: new Date('01/01/2021'),
+        rateDateEnd: new Date('01/01/2022'),
+        rateDateCertified: new Date('01/02/2021'),
         rateAmendmentInfo: undefined,
         stateContacts: [
             {

@@ -483,7 +483,7 @@ export const RateDetails = ({
                                     {({ remove, push }) => (
                                         <>
                                             {rateInfos.map(
-                                                (rateInfo, index, arr) => (
+                                                (rateInfo, index) => (
                                                     <Fieldset
                                                         data-testid={`rate-certification-form`}
                                                         key={rateInfo.uuid}
@@ -578,16 +578,16 @@ export const RateDetails = ({
                                                                         (
                                                                             fileMatrix
                                                                         ) => {
-                                                                            const newFiles =
+                                                                            const newMatrix =
                                                                                 [
                                                                                     ...fileMatrix,
                                                                                 ]
-                                                                            newFiles.splice(
+                                                                            newMatrix.splice(
                                                                                 index,
                                                                                 1,
                                                                                 fileItems
                                                                             )
-                                                                            return newFiles
+                                                                            return newMatrix
                                                                         }
                                                                     )
                                                                 }
@@ -1134,7 +1134,7 @@ export const RateDetails = ({
                                                                 </FormGroup>
                                                             </>
                                                         )}
-                                                        {arr.length > 1 &&
+                                                        {index >= 1 &&
                                                             showMultiRates && (
                                                                 <Button
                                                                     type="button"
@@ -1179,6 +1179,18 @@ export const RateDetails = ({
                                                         const newRate =
                                                             rateInfoFormValues()
                                                         push(newRate)
+                                                        setFileItemsMatrix(
+                                                            (fileMatrix) => {
+                                                                const newMatrix =
+                                                                    [
+                                                                        ...fileMatrix,
+                                                                    ]
+                                                                newMatrix.push(
+                                                                    []
+                                                                )
+                                                                return newMatrix
+                                                            }
+                                                        )
                                                         setFocusNewRate(true)
                                                     }}
                                                     ref={newRateButtonRef}
