@@ -81,7 +81,7 @@ export async function insertHealthPlanPackage(
         managedCareEntities: [],
         federalAuthorities: [],
     }
-
+    console.log('draft in insert: ', draft)
     const protobuf = toProtoBuffer(draft)
 
     const buffer = Buffer.from(protobuf)

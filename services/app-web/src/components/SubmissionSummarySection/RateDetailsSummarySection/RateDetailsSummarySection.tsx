@@ -8,7 +8,6 @@ import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
-import { generateRateName } from '../../../common-code/healthPlanFormDataType/'
 import styles from '../SubmissionSummarySection.module.scss'
 import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { Program } from '../../../gen/gqlClient'
@@ -41,9 +40,7 @@ export const RateDetailsSummarySection = ({
         doc.documentCategories.includes('RATES_RELATED')
     )
 
-    const rateName = submission.rateInfos[0]
-        ? generateRateName(submission, submission.rateInfos[0], statePrograms)
-        : undefined
+    const rateName = submission.rateInfos[0].rateProgramName
 
     const rateCapitationType = submission.rateCapitationType
         ? submission.rateCapitationType === 'RATE_CELL'

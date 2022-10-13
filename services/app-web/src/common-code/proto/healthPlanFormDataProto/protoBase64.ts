@@ -13,6 +13,7 @@ function protoToBase64(input: Uint8Array): string {
 
 function base64ToDomain(input: string): HealthPlanFormDataType | Error {
     const protoBinData = Buffer.from(input, 'base64')
+    console.log('protoBinData: ', protoBinData)
     return toDomain(protoBinData)
 }
 

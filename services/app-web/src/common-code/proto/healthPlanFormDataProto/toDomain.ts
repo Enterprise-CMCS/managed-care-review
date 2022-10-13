@@ -285,6 +285,7 @@ function parseRateProgramName(
     if (!rateProgramName) {
         return undefined
     }
+    console.log('rateProgramName: ', rateProgramName)
     return rateProgramName
 }
 
@@ -332,7 +333,7 @@ const toDomain = (
     buff: Uint8Array
 ): UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType | Error => {
     const formDataMessage = decodeOrError(buff)
-
+    console.log('formDataMessage: ', formDataMessage)
     if (formDataMessage instanceof Error) {
         return formDataMessage
     }
@@ -376,7 +377,7 @@ const toDomain = (
     if (rateInfos.length > 0) {
         rateInfo = rateInfos[0]
     }
-
+    console.log('rateInfos: ', rateInfos)
     // SO, rather than repeat this whole thing for Draft and State submissions, because they are so
     // similar right now, we're just going to & them together for parsing out all the optional stuff
     // from the protobuf for now. If Draft and State submission diverged further in the future this
@@ -451,7 +452,7 @@ const toDomain = (
         actuaryContacts: parseActuaryContacts(rateInfo),
         documents: parseProtoDocuments(formDataMessage.documents),
     }
-
+    console.log('maybeUnlockedFormData: ', maybeUnlockedFormData)
     // Now that we've gotten things into our combined draft & state domain format.
     // we confirm that all the required fields are present to turn this into an UnlockedHealthPlanFormDataType or a LockedHealthPlanFormDataType
     if (status === 'DRAFT') {
@@ -459,11 +460,11 @@ const toDomain = (
         const maybeDraft =
             maybeUnlockedFormData as RecursivePartial<UnlockedHealthPlanFormDataType>
         maybeDraft.status = 'DRAFT'
-
+        console.log('maybeDraft: ', maybeDraft)
         // This parse returns an actual UnlockedHealthPlanFormDataType, so all our partial & casting is put to rest
         const parseResult =
             unlockedHealthPlanFormDataSchema.safeParse(maybeDraft)
-
+        console.log('parseResult: ', parseResult)
         if (parseResult.success === false) {
             return parseResult.error
         }

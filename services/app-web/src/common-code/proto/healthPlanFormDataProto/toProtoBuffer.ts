@@ -10,7 +10,7 @@ import { ProgramArgType } from '../../healthPlanFormDataType/State'
 
 const findPrograms = (
     stateCode: string,
-    programIDs: string[]
+    programIDs: string[] = ['1111', '2222']
 ): ProgramArgType[] => {
     const programs = statePrograms.states
         .find((state) => state.code === stateCode)
@@ -223,7 +223,7 @@ const toProtoBuffer = (
                               domainData.rateInfos[index],
                               findPrograms(
                                   domainData.stateCode,
-                                  domainData.programIDs
+                                  domainData.rateInfos[index].rateProgramIDs
                               )
                           ),
                           rateProgramIds: rateInfo.rateProgramIDs,

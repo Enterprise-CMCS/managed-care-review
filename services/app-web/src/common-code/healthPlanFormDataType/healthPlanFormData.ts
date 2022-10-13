@@ -222,6 +222,9 @@ const generateRateName = (
         rateDateStart,
         rateProgramIDs,
     } = rateInfo
+    console.log('pkg: ', pkg)
+    console.log('rateInfo: ', rateInfo)
+    console.log('statePrograms: ', statePrograms)
 
     let rateName = `${packageName(pkg, statePrograms, rateProgramIDs)}-RATE`
 
@@ -252,7 +255,7 @@ const generateRateName = (
     if (rateDateCertified) {
         rateName = rateName.concat('-', formatRateNameDate(rateDateCertified))
     }
-
+    console.log('rateName: ', rateName)
     return rateName
 }
 
