@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
     screen,
     waitFor,
@@ -532,7 +533,7 @@ describe('RateDetails', () => {
                 )
                 .click()
 
-            // add docuemnts
+            // add documents
             const input = screen.getByLabelText('Upload rate certification')
             await userEvent.upload(input, [TEST_DOC_FILE])
 
@@ -568,18 +569,27 @@ describe('RateDetails', () => {
         }
 
         const clickAddNewRate = async (screen: Screen) => {
+            const rateCertsBeforeAddingNewRate = rateCertifications(screen)
+
             const addAnotherButton = screen.getByRole('button', {
                 name: /Add another rate/,
             })
 
             expect(addAnotherButton).toBeInTheDocument()
             fireEvent.click(addAnotherButton)
+            await waitFor(() =>
+                expect(rateCertifications(screen)).toHaveLength(
+                    rateCertsBeforeAddingNewRate.length + 1
+                )
+            )
         }
 
         const rateCertifications = (screen: Screen) => {
-            return screen.getAllByRole('group', {
-                name: /certification/,
-            })
+            return screen.getAllByTestId('rate-certification-form')
+        }
+
+        const lastRateCertificationFromList = (screen: Screen) => {
+            return rateCertifications(screen).pop()
         }
 
         it('renders add another rate button, which adds another set of rate certification fields to the form', async () => {
@@ -612,7 +622,7 @@ describe('RateDetails', () => {
             })
         })
 
-        it('accepts documents on new rate', async () => {
+        it('accepts documents on second rate', async () => {
             renderWithProviders(
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
@@ -629,18 +639,17 @@ describe('RateDetails', () => {
             await fillOutFirstRate(screen)
 
             await clickAddNewRate(screen)
-
-            const newRateCert = screen.getByTestId('rateInfos.1.container')
-            expect(newRateCert).toBeInTheDocument()
-            const newRateInput = within(newRateCert).getByRole('input', {
-                name: 'rateInfos.1.rateDocuments (required)',
-            })
+            const newRateCert = lastRateCertificationFromList(screen)
+            expect(newRateCert).toBeDefined()
+            const newRateInput = within(newRateCert!).getByLabelText(
+                'Upload rate certification'
+            )
             expect(newRateInput).toBeInTheDocument()
 
             await userEvent.upload(newRateInput, [TEST_PDF_FILE])
             await waitFor(() => {
                 expect(
-                    within(newRateCert).getByText(TEST_PDF_FILE.name)
+                    within(newRateCert!).getByText(TEST_PDF_FILE.name)
                 ).toBeInTheDocument()
             })
         })
@@ -661,13 +670,7 @@ describe('RateDetails', () => {
                 }
             )
             await fillOutFirstRate(screen)
-
-            const addAnotherButton = screen.getByRole('button', {
-                name: /Add another rate/,
-            })
-
-            expect(addAnotherButton).toBeInTheDocument()
-            fireEvent.click(addAnotherButton)
+            await clickAddNewRate(screen)
 
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
@@ -698,13 +701,7 @@ describe('RateDetails', () => {
                 }
             )
             await fillOutFirstRate(screen)
-
-            const addAnotherButton = screen.getByRole('button', {
-                name: /Add another rate/,
-            })
-
-            expect(addAnotherButton).toBeInTheDocument()
-            fireEvent.click(addAnotherButton)
+            await clickAddNewRate(screen)
 
             await waitFor(() => {
                 const rateInfoContainers = screen.getAllByRole('group', {
@@ -756,6 +753,16 @@ describe('RateDetails', () => {
                             name: 'Program 3',
                             fullName: 'Program 3',
                         },
+                        {
+                            id: 'snbc',
+                            name: 'SNBC',
+                            fullName: 'SNBC',
+                        },
+                        {
+                            id: 'pmap',
+                            name: 'PMAP',
+                            fullName: 'PMAP',
+                        },
                     ],
                 },
             }
@@ -779,42 +786,52 @@ describe('RateDetails', () => {
             )
 
             await fillOutFirstRate(screen)
-
-            const addAnotherButton = screen.getByRole('button', {
-                name: /Add another rate/,
-            })
-
-            expect(addAnotherButton).toBeInTheDocument()
-            fireEvent.click(addAnotherButton)
-
+            await clickAddNewRate(screen)
+            const newRateCert = lastRateCertificationFromList(screen)
+            expect(newRateCert).toBeDefined()
             expect(
-                screen.getByText('Programs this rate certification covers')
+                within(newRateCert!).getByText(
+                    'Programs this rate certification covers'
+                )
             ).toBeInTheDocument()
             expect(
-                screen.getByText('Rate certification type')
+                within(newRateCert!).getByText('Rate certification type')
             ).toBeInTheDocument()
-            screen.getByLabelText('New rate certification').click()
+            within(newRateCert!)
+                .getByLabelText('New rate certification')
+                .click()
             expect(
-                screen.getByText(
+                within(newRateCert!).getByText(
                     'Does the actuary certify capitation rates specific to each rate cell or a rate range?'
                 )
             ).toBeInTheDocument()
-            screen
+            within(newRateCert!)
                 .getByLabelText(
                     'Certification of capitation rates specific to each rate cell'
                 )
                 .click()
-            const input = screen.getByLabelText('Upload rate certification')
+            const input = within(newRateCert!).getByLabelText(
+                'Upload rate certification'
+            )
             await userEvent.upload(input, [TEST_DOC_FILE])
 
             // check that now we can see hidden things
             await waitFor(() => {
-                expect(screen.queryByText('Rating period')).toBeInTheDocument()
-                expect(screen.queryByText('Rating period')).toBeInTheDocument()
-                expect(screen.queryByText('Start date')).toBeInTheDocument()
-                expect(screen.queryByText('End date')).toBeInTheDocument()
-                expect(screen.queryByText('Date certified')).toBeInTheDocument()
-                expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
+                expect(
+                    within(newRateCert!).queryByText('Rating period')
+                ).toBeInTheDocument()
+                expect(
+                    within(newRateCert!).queryByText('Rating period')
+                ).toBeInTheDocument()
+                expect(
+                    within(newRateCert!).queryByText('Start date')
+                ).toBeInTheDocument()
+                expect(
+                    within(newRateCert!).queryByText('End date')
+                ).toBeInTheDocument()
+                expect(
+                    within(newRateCert!).queryByText('Date certified')
+                ).toBeInTheDocument()
             })
             // click "continue"
             const continueButton = screen.getByRole('button', {
@@ -843,24 +860,26 @@ describe('RateDetails', () => {
             })
 
             //Select programs for rate certification
-            const combobox = await screen.findByRole('combobox')
+            const combobox = await within(newRateCert!).findByRole('combobox')
 
             await selectEvent.openMenu(combobox)
             await waitFor(() => {
-                expect(screen.getByText('Program 3')).toBeInTheDocument()
+                expect(
+                    within(newRateCert!).getByText('Program 3')
+                ).toBeInTheDocument()
             })
             await selectEvent.select(combobox, 'Program 1')
             await selectEvent.openMenu(combobox)
             await selectEvent.select(combobox, 'Program 3')
 
             // fill out form and clear errors
-            screen.getAllByLabelText('Start date')[0].focus()
+            within(newRateCert!).getAllByLabelText('Start date')[0].focus()
             await userEvent.paste('01/01/2022')
 
-            screen.getAllByLabelText('End date')[0].focus()
+            within(newRateCert!).getAllByLabelText('End date')[0].focus()
             await userEvent.paste('12/31/2022')
 
-            screen.getAllByLabelText('Date certified')[0].focus()
+            within(newRateCert!).getAllByLabelText('Date certified')[0].focus()
             await userEvent.paste('12/01/2021')
 
             //wait for all errors to clear
