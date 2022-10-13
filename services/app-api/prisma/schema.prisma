@@ -43,7 +43,7 @@ model State {
 
 model User {
   id         Int     @id @default(autoincrement())
-  cmsID      String  @unique
+  euaID      String  @unique
   givenName  String
   familyName String
   email      String  @unique

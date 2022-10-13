@@ -4,7 +4,7 @@ CREATE TYPE "Role" AS ENUM ('CMS_USER', 'STATE_USER');
 -- CreateTable
 CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
-    "cmsID" TEXT NOT NULL,
+    "euaID" TEXT NOT NULL,
     "givenName" TEXT NOT NULL,
     "familyName" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE "_StateToUser" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_cmsID_key" ON "User"("cmsID");
+CREATE UNIQUE INDEX "User_euaID_key" ON "User"("euaID");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
