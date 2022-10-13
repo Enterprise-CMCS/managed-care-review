@@ -276,6 +276,18 @@ function parseProtoRateAmendment(
     }
 }
 
+function parseRateProgramName(
+    rateProgramName:
+        | mcreviewproto.RateInfo['rateProgramName']
+        | null
+        | undefined
+): string | undefined {
+    if (!rateProgramName) {
+        return undefined
+    }
+    return rateProgramName
+}
+
 function parseRateInfos(
     rateInfos: mcreviewproto.IRateInfo[]
 ): RecursivePartial<UnlockedHealthPlanFormDataType['rateInfos']> {
@@ -303,6 +315,9 @@ function parseRateInfos(
                     rateInfo?.rateDateCertified
                 ),
                 rateProgramIDs: rateInfo?.rateProgramIds ?? [],
+                rateProgramName: parseRateProgramName(
+                    rateInfo?.rateProgramName
+                ),
             }
             rates.push(rate)
         })

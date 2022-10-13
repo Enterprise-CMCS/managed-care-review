@@ -3,7 +3,30 @@ import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
     isLockedHealthPlanFormData,
+    generateRateName,
 } from '../../healthPlanFormDataType'
+import statePrograms from '../../data/statePrograms.json'
+import { ProgramArgType } from '../../healthPlanFormDataType/State'
+
+const findPrograms = (
+    stateCode: string,
+    programIDs: string[]
+): ProgramArgType[] => {
+    const programs = statePrograms.states
+        .find((state) => state.code === stateCode)
+        ?.programs.filter((program) => programIDs.includes(program.id))
+
+    if (!programs || programIDs.length !== programs.length) {
+        return [
+            {
+                id: 'error',
+                name: 'no programs found',
+                fullName: 'no programs found',
+            },
+        ]
+    }
+    return programs
+}
 
 /*
     Convert domain date to proto timestamp
@@ -168,7 +191,7 @@ const toProtoBuffer = (
         },
         rateInfos:
             domainData.rateInfos && domainData.rateInfos.length
-                ? domainData.rateInfos.map((rateInfo) => {
+                ? domainData.rateInfos.map((rateInfo, index) => {
                       return {
                           rateType: domainEnumToProto(
                               rateInfo.rateType,
@@ -195,6 +218,14 @@ const toProtoBuffer = (
                                   doc.documentCategories
                               ),
                           })),
+                          rateProgramName: generateRateName(
+                              domainData,
+                              domainData.rateInfos[index],
+                              findPrograms(
+                                  domainData.stateCode,
+                                  domainData.programIDs
+                              )
+                          ),
                           rateProgramIds: rateInfo.rateProgramIDs,
                           rateAmendmentInfo: rateInfo.rateAmendmentInfo && {
                               effectiveDateStart: domainDateToProtoDate(
