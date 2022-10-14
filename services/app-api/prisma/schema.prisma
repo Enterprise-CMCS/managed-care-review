@@ -54,4 +54,5 @@ model User {
 enum Role {
   CMS_USER
   STATE_USER
+  ADMIN_USER
 }
