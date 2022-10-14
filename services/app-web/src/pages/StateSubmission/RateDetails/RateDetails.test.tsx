@@ -506,63 +506,85 @@ describe('RateDetails', () => {
             jest.clearAllMocks()
         })
 
-        const fillOutFirstRate = async (screen: Screen) => {
-            // trigger errors (used later to confirm we filled out every field)
-            const continueButton = screen.getByRole('button', {
-                name: 'Continue',
-            })
-
-            fireEvent.click(continueButton)
-
+        const fillOutIndexRate = async (screen: Screen, index: number) => {
+            const targetRateCert = rateCertifications(screen)[index]
+            expect(targetRateCert).toBeDefined()
+            const withinTargetRateCert = within(targetRateCert)
             //  fill in radio buttons
             expect(
-                screen.getByText('Programs this rate certification covers')
+                withinTargetRateCert.getByText(
+                    'Programs this rate certification covers'
+                )
             ).toBeInTheDocument()
             expect(
-                screen.getByText('Rate certification type')
+                withinTargetRateCert.getByText('Rate certification type')
             ).toBeInTheDocument()
-            screen.getByLabelText('New rate certification').click()
+            withinTargetRateCert
+                .getByLabelText('New rate certification')
+                .click()
             expect(
-                screen.getByText(
+                withinTargetRateCert.getByText(
                     'Does the actuary certify capitation rates specific to each rate cell or a rate range?'
                 )
             ).toBeInTheDocument()
-            screen
+            withinTargetRateCert
                 .getByLabelText(
                     'Certification of capitation rates specific to each rate cell'
                 )
                 .click()
 
             // add documents
-            const input = screen.getByLabelText('Upload rate certification')
+            const input = withinTargetRateCert.getByLabelText(
+                'Upload rate certification'
+            )
             await userEvent.upload(input, [TEST_DOC_FILE])
 
             // check that now we can see dates, since that is triggered after selecting tyhpe
             await waitFor(() => {
-                expect(screen.queryByText('Start date')).toBeInTheDocument()
-                expect(screen.queryByText('End date')).toBeInTheDocument()
-                expect(screen.queryByText('Date certified')).toBeInTheDocument()
+                expect(
+                    withinTargetRateCert.queryByText('Start date')
+                ).toBeInTheDocument()
+                expect(
+                    withinTargetRateCert.queryByText('End date')
+                ).toBeInTheDocument()
+                expect(
+                    withinTargetRateCert.queryByText('Date certified')
+                ).toBeInTheDocument()
             })
 
-            const combobox = await screen.findByRole('combobox')
+            const combobox = await withinTargetRateCert.findByRole('combobox')
             await selectEvent.openMenu(combobox)
             await selectEvent.select(combobox, 'SNBC')
             await selectEvent.openMenu(combobox)
             await selectEvent.select(combobox, 'PMAP')
-            expect(screen.getByLabelText('Remove SNBC')).toBeInTheDocument()
-            expect(screen.getByLabelText('Remove PMAP')).toBeInTheDocument()
+            expect(
+                withinTargetRateCert.getByLabelText('Remove SNBC')
+            ).toBeInTheDocument()
+            expect(
+                withinTargetRateCert.getByLabelText('Remove PMAP')
+            ).toBeInTheDocument()
 
             // fill in dates
-            screen.getAllByLabelText('Start date')[0].focus()
+            withinTargetRateCert.getAllByLabelText('Start date')[0].focus()
             await userEvent.paste('01/01/2022')
 
-            screen.getAllByLabelText('End date')[0].focus()
+            withinTargetRateCert.getAllByLabelText('End date')[0].focus()
             await userEvent.paste('12/31/2022')
 
-            screen.getAllByLabelText('Date certified')[0].focus()
+            withinTargetRateCert.getAllByLabelText('Date certified')[0].focus()
             await userEvent.paste('12/01/2021')
+        }
 
-            //wait for all errors to clear
+        const fillOutFirstRate = async (screen: Screen) => {
+            // trigger errors (used later to confirm we filled out every field)
+            fireEvent.click(
+                screen.getByRole('button', {
+                    name: 'Continue',
+                })
+            )
+
+            await fillOutIndexRate(screen, 0)
+            // wait for all errors to clear
             await waitFor(() =>
                 expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
             )
@@ -582,6 +604,47 @@ describe('RateDetails', () => {
                     rateCertsBeforeAddingNewRate.length + 1
                 )
             )
+        }
+
+        const clickRemoveIndexRate = async (
+            screen: Screen,
+            indexOfRateCertToRemove: number
+        ) => {
+            // Remember, user cannot never remove the first rate certification -- MR-2231
+            const rateCertsBeforeRemoving = rateCertifications(screen)
+            // Confirm there is a rate to remove
+            expect(rateCertsBeforeRemoving.length).toBeGreaterThanOrEqual(2)
+
+            // Confirm there is one less rate removal button than rate certs
+            const removeRateButtonsBeforeClick = screen.getAllByRole('button', {
+                name: /Remove rate certification/,
+            })
+            expect(removeRateButtonsBeforeClick.length).toBeGreaterThanOrEqual(
+                1
+            )
+            expect(removeRateButtonsBeforeClick).toHaveLength(
+                rateCertsBeforeRemoving.length - 1
+            )
+
+            // Remove rate cert
+            const removeRateButton =
+                removeRateButtonsBeforeClick[indexOfRateCertToRemove - 1]
+
+            expect(removeRateButton).toBeInTheDocument()
+            fireEvent.click(removeRateButton)
+
+            await waitFor(() => {
+                // Confirm that there is one less rate certification on the page
+                expect(rateCertifications(screen)).toHaveLength(
+                    rateCertsBeforeRemoving.length - 1
+                )
+                // Confirm that there is one less rate removal button (might even be zero buttons on page if all additional rates removed)
+                expect(
+                    screen.getAllByRole('button', {
+                        name: /Remove rate certification/,
+                    })
+                ).toHaveLength(removeRateButtonsBeforeClick.length - 1)
+            })
         }
 
         const rateCertifications = (screen: Screen) => {
@@ -619,6 +682,45 @@ describe('RateDetails', () => {
             await waitFor(() => {
                 const rateCertsAfterAddAnother = rateCertifications(screen)
                 expect(rateCertsAfterAddAnother).toHaveLength(2)
+            })
+        })
+
+        it('renders remove rate certification button, which removes set of rate certification fields from the form', async () => {
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                            }),
+                        ],
+                    },
+                }
+            )
+            const rateCertsOnLoad = rateCertifications(screen)
+            expect(rateCertsOnLoad).toHaveLength(1)
+
+            await fillOutFirstRate(screen)
+            await clickAddNewRate(screen)
+            await fillOutIndexRate(screen, 1)
+            await clickAddNewRate(screen)
+            await fillOutIndexRate(screen, 2)
+
+            await waitFor(() => {
+                const rateCertsAfterAddAnother = rateCertifications(screen)
+                expect(rateCertsAfterAddAnother).toHaveLength(3)
+            })
+
+            await clickRemoveIndexRate(screen, 1)
+
+            await waitFor(() => {
+                const rateCertsAfterRemove = rateCertifications(screen)
+                expect(rateCertsAfterRemove).toHaveLength(2)
             })
         })
 
