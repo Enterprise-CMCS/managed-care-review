@@ -240,24 +240,22 @@ function parseActuaryContacts(
         return []
     }
 
-    const actuaryContacts = replaceNullsWithUndefineds(
-        rateInfo.actuaryContacts
-    ).map((aContact) => {
-        const cleanContact = replaceNullsWithUndefineds(aContact)
+    return replaceNullsWithUndefineds(rateInfo.actuaryContacts).map(
+        (aContact) => {
+            const cleanContact = replaceNullsWithUndefineds(aContact)
 
-        return {
-            name: cleanContact?.contact?.name,
-            titleRole: cleanContact?.contact?.titleRole,
-            email: cleanContact?.contact?.email,
-            actuarialFirm: enumToDomain(
-                mcreviewproto.ActuarialFirmType,
-                aContact.actuarialFirmType
-            ) as ActuarialFirmType,
-            actuarialFirmOther: cleanContact.actuarialFirmOther,
+            return {
+                name: cleanContact?.contact?.name,
+                titleRole: cleanContact?.contact?.titleRole,
+                email: cleanContact?.contact?.email,
+                actuarialFirm: enumToDomain(
+                    mcreviewproto.ActuarialFirmType,
+                    aContact.actuarialFirmType
+                ) as ActuarialFirmType,
+                actuarialFirmOther: cleanContact.actuarialFirmOther,
+            }
         }
-    })
-
-    return actuaryContacts
+    )
 }
 
 function parseProtoRateAmendment(
@@ -303,6 +301,11 @@ function parseRateInfos(
                     rateInfo?.rateDateCertified
                 ),
                 rateProgramIDs: rateInfo?.rateProgramIds ?? [],
+                actuaryContacts: parseActuaryContacts(rateInfo),
+                actuaryCommunicationPreference: enumToDomain(
+                    mcreviewproto.ActuaryCommunicationType,
+                    rateInfo?.actuaryCommunicationPreference
+                ),
             }
             rates.push(rate)
         })
