@@ -15,7 +15,7 @@ export const main = async () => {
     const snapshots = await client.send(describeCommand)
 
     // find snapshots older than 14 days, filter them out
-    const timestamp = new Date().getTime() - 14 * 24 * 60 * 60 * 1000 // d * hr * min * s * ms
+    const timestamp = new Date().getTime() - 30 * 24 * 60 * 60 * 1000 // d * hr * min * s * ms
     const oldSnapshots = snapshots.DBClusterSnapshots?.filter((snapshot) => {
         if (
             snapshot.SnapshotCreateTime != undefined &&
