@@ -26,6 +26,7 @@ describe('RateDetails', () => {
         rateDateStart: undefined,
         rateDateEnd: undefined,
         rateDateCertified: undefined,
+        actuaryContacts: [],
     }
 
     afterEach(() => jest.clearAllMocks())
@@ -949,6 +950,15 @@ describe('RateDetails', () => {
                             rateDateCertified: undefined,
                             rateAmendmentInfo: undefined,
                             rateProgramIDs: [],
+                            actuaryContacts: [
+                                {
+                                    actuarialFirm: undefined,
+                                    actuarialFirmOther: '',
+                                    email: '',
+                                    name: '',
+                                    titleRole: '',
+                                },
+                            ],
                             rateDocuments: [
                                 {
                                     name: 'testFile.doc',
