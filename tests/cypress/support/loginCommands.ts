@@ -8,7 +8,7 @@ Cypress.Commands.add('logInAsStateUser', () => {
     })
 
     cy.visit('/')
-    cy.findByRole('link', { name: 'Sign In', timeout: 20000 }).click()
+    cy.findByRole('link', { name: 'Sign In' }).click()
     const authMode = Cypress.env('AUTH_MODE')
     console.log(authMode, 'authmode')
 
@@ -39,8 +39,8 @@ Cypress.Commands.add(
             aliasQuery(req, 'indexHealthPlanPackages')
         })
 
-        cy.visit('/')
-        cy.findByRole('link', { name: 'Sign In', timeout: 20000 }).click()
+        cy.visit(initialURL)
+        cy.findByRole('link', { name: 'Sign In' }).click()
         const authMode = Cypress.env('AUTH_MODE')
         console.log(authMode, 'authmode')
 
@@ -60,7 +60,6 @@ Cypress.Commands.add(
         }
         cy.wait('@fetchCurrentUserQuery', { timeout: 20000 })
         if (initialURL !== '/') {
-            cy.visit(initialURL)
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 }) // for cases where CMs user goes to specific submission on login
         } else {
             cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80000 })
