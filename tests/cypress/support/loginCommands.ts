@@ -8,7 +8,7 @@ Cypress.Commands.add('logInAsStateUser', () => {
     })
 
     cy.visit('/')
-    cy.findByRole('link', { name: 'Sign In' }).click()
+    cy.findByRole('link', { name: 'Sign In', timeout: 20000 }).click()
     const authMode = Cypress.env('AUTH_MODE')
     console.log(authMode, 'authmode')
 
@@ -40,7 +40,7 @@ Cypress.Commands.add(
         })
 
         cy.visit(initialURL)
-        cy.findByRole('link', { name: 'Sign In' }).click()
+        cy.findByRole('link', { name: 'Sign In', timeout: 20000 }).click()
         const authMode = Cypress.env('AUTH_MODE')
         console.log(authMode, 'authmode')
 
