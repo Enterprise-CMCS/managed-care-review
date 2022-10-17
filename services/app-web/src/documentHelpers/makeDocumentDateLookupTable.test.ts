@@ -51,6 +51,7 @@ describe('makeDateTable', () => {
             rateInfos: [
                 {
                     rateDocuments: [],
+                    actuaryContacts: [],
                 },
             ],
         }

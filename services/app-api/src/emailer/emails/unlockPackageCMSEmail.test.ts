@@ -37,6 +37,15 @@ const sub: UnlockedHealthPlanFormDataType = {
             rateDateCertified: new Date('2020-12-01'),
             rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
             rateAmendmentInfo: undefined,
+            actuaryContacts: [
+                {
+                    actuarialFirm: 'DELOITTE',
+                    name: 'Actuary Contact 1',
+                    titleRole: 'Test Actuary Contact 1',
+                    email: 'actuarycontact1@example.com',
+                },
+            ],
+            actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         },
     ],
 }
@@ -131,6 +140,15 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
             {
                 rateType: 'NEW',
@@ -146,6 +164,15 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('02/01/2022'),
                 rateDateEnd: new Date('02/01/2023'),
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'MERCER',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
             {
                 rateType: 'AMENDMENT',
@@ -167,6 +194,15 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     effectiveDateStart: new Date('06/05/2021'),
                     effectiveDateEnd: new Date('12/31/2021'),
                 },
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'OPTUMAS',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
     }
@@ -433,6 +469,15 @@ test('CHIP contract and rate unlock email does include state specific analysts e
                 rateDateCertified: new Date(),
                 rateProgramIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
                 rateAmendmentInfo: undefined,
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
     })
@@ -477,6 +522,15 @@ test('CHIP contract and rate unlock email does not include ratesReviewSharedEmai
                 rateDateCertified: new Date(),
                 rateProgramIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
                 rateAmendmentInfo: undefined,
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
     })

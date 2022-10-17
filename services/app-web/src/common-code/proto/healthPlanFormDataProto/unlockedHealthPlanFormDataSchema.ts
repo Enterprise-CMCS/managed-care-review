@@ -123,6 +123,8 @@ const rateInfosTypeSchema = z.object({
     rateDateCertified: z.date().optional(),
     rateAmendmentInfo: rateAmendmentInfoSchema.optional(),
     rateProgramIDs: z.array(z.string()),
+    actuaryContacts: z.array(actuaryContactSchema),
+    actuaryCommunicationPreference: actuaryCommunicationTypeSchema.optional(),
 })
 
 // Commenting out because this wasn't being used but was raising lint warning -hw
