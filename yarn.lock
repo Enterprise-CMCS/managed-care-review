@@ -19165,18 +19165,18 @@ launchdarkly-eventsource@1.4.4:
   resolved "https://registry.yarnpkg.com/launchdarkly-eventsource/-/launchdarkly-eventsource-1.4.4.tgz#fa595af8602e487c61520787170376c6a1104459"
   integrity sha512-GL+r2Y3WccJlhFyL2buNKel+9VaMnYpbE/FfCkOST5jSNSFodahlxtGyrE8o7R+Qhobyq0Ree4a7iafJDQi9VQ==
 
-launchdarkly-js-client-sdk@2.22.1:
-  version "2.22.1"
-  resolved "https://registry.yarnpkg.com/launchdarkly-js-client-sdk/-/launchdarkly-js-client-sdk-2.22.1.tgz#e6064c79bc575eea0aa4364be41754d54d89ae6a"
-  integrity sha512-EAdw7B8w4m/WZGmHHLj9gbYBP6lCqJs5TQDCM9kWJOnvHBz7DJIxOdqazNMDn5AzBxfvaMG7cpLms+Cur5LD5g==
+launchdarkly-js-client-sdk@2.23.0:
+  version "2.23.0"
+  resolved "https://registry.yarnpkg.com/launchdarkly-js-client-sdk/-/launchdarkly-js-client-sdk-2.23.0.tgz#19d875c7c1e637078baf5a67c7e7e926af853a29"
+  integrity sha512-dLzwD0oHV/RwT0bhrPwGaeujQWZ7PNY2ATf6JiT0DnILYQ3CSJdXkRFtxQlQEiIlZqzeJhdogWcJAXuUuUxivA==
   dependencies:
-    escape-string-regexp "^1.0.5"
-    launchdarkly-js-sdk-common "3.6.0"
+    escape-string-regexp "^4.0.0"
+    launchdarkly-js-sdk-common "3.7.0"
 
-launchdarkly-js-sdk-common@3.6.0:
-  version "3.6.0"
-  resolved "https://registry.yarnpkg.com/launchdarkly-js-sdk-common/-/launchdarkly-js-sdk-common-3.6.0.tgz#d146be5bbd86a019c4bedc52e66c37a1ffa7bb3d"
-  integrity sha512-wCdBoBiYXlP64jTrC0dOXY2B345LSJO/IvitbdW4kBKmJ1DkeufpqV0s5DBlwE0RLzDmaQx3mRTmcoNAIhIoaA==
+launchdarkly-js-sdk-common@3.7.0:
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/launchdarkly-js-sdk-common/-/launchdarkly-js-sdk-common-3.7.0.tgz#aac368e6c7363eb47c288249f369d87a8d429e59"
+  integrity sha512-sfRXKGh8obOIGMKssbofDeSLQic1mgQJaPcwo+Sbqq6VEVXZgJgw7x1209lareMJsDwYdI5GCyxNHn4d8H2i1w==
   dependencies:
     base64-js "^1.3.0"
     fast-deep-equal "^2.0.1"
@@ -19196,12 +19196,12 @@ launchdarkly-node-server-sdk@6.4.2:
     uuid "^8.3.2"
 
 launchdarkly-react-client-sdk@^2.25.2:
-  version "2.27.0"
-  resolved "https://registry.yarnpkg.com/launchdarkly-react-client-sdk/-/launchdarkly-react-client-sdk-2.27.0.tgz#18a2f470e3af166d25d2252e4a14f092378fc2cb"
-  integrity sha512-I2mmY5OHbc8bHkfYlt131cRXjSolCzbMtt0lMeN7vC5vMWnjNnLCT08YRrqromnNgPNUtg/7kwPEUTOmUCFqiA==
+  version "2.28.0"
+  resolved "https://registry.yarnpkg.com/launchdarkly-react-client-sdk/-/launchdarkly-react-client-sdk-2.28.0.tgz#2978bd1be6d900ad4098495bcda6ff51e95cbbb8"
+  integrity sha512-XtAJJlqE0LSXjG4NE+2k8e9teyBp7lpjlkZx0j0lu7eUN6m1Kry8SoIdHsc8v28s2JNse80GGY4CSy2pl5nx+g==
   dependencies:
     hoist-non-react-statics "^3.3.2"
-    launchdarkly-js-client-sdk "2.22.1"
+    launchdarkly-js-client-sdk "2.23.0"
     lodash.camelcase "^4.3.0"
 
 lazy-ass@^1.6.0:
