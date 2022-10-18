@@ -122,6 +122,8 @@ describe('CMS user', () => {
                     )
                     .should('exist')
 
+                //DO UPDATE HERE
+
                 cy.submitStateSubmissionForm(true, true)
 
                 cy.findByText('Dashboard').should('exist')
@@ -187,6 +189,11 @@ describe('CMS user', () => {
                 cy.clickSubmissionLink(
                     'currentSubmissionLink'
                 )
+                //Make sure banner and revision version text are gone.
+                cy.findByTestId('previous-submission-banner').should(
+                    'not.exist'
+                )
+                cy.findByTestId('revision-version').should('not.exist')
 
                 //Turn on multi-rate-submissions
                 cy.interceptFeatureFlags({'multi-rate-submissions': true})
@@ -240,9 +247,6 @@ describe('CMS user', () => {
 
                 //Navigate to review and submit page and resubmit
                 cy.navigateFormByDirectLink(reviewURL)
-                cy.submitStateSubmissionForm(true, true)
-                cy.findByText('Dashboard').should('exist')
-                cy.findByText('Programs').should('exist')
             })
         })
     })
