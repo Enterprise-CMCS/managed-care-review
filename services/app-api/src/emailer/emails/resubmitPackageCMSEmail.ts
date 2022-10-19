@@ -1,7 +1,6 @@
 import {
     LockedHealthPlanFormDataType,
     packageName as generatePackageName,
-    generateRateName,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import {
@@ -56,7 +55,7 @@ export const resubmitPackageCMSEmail = async (
         rateInfos:
             isContractAndRates &&
             pkg.rateInfos.map((rate) => ({
-                rateName: generateRateName(pkg, rate, statePrograms),
+                rateName: rate.rateProgramName,
             })),
         submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
     }

@@ -3,7 +3,6 @@ import { URL } from 'url'
 import {
     LockedHealthPlanFormDataType,
     packageName as generatePackageName,
-    generateRateName,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import { EmailConfiguration, EmailData } from '..'
@@ -56,7 +55,7 @@ export const newPackageStateEmail = async (
         rateInfos:
             isContractAndRates &&
             pkg.rateInfos.map((rate) => ({
-                rateName: generateRateName(pkg, rate, statePrograms),
+                rateName: rate.rateProgramName,
                 rateDateLabel:
                     rate.rateType === 'NEW'
                         ? 'Rating period'

@@ -6,7 +6,6 @@ import {
 } from '../../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
-import { generateRateName } from '../../../common-code/healthPlanFormDataType'
 
 describe('RateDetailsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()
@@ -92,6 +91,8 @@ describe('RateDetailsSummarySection', () => {
     it('can render correct rate name for new rate submission', () => {
         const submission = mockStateSubmission()
         submission.rateProgramIDs = undefined
+        submission.rateInfos[0].rateProgramName =
+            'MCR-MN-0005-SNBC-RATE-20221013-20221013-CERTIFICATION-20221013'
 
         const statePrograms = mockMNState().programs
         renderWithProviders(
@@ -102,11 +103,8 @@ describe('RateDetailsSummarySection', () => {
                 statePrograms={statePrograms}
             />
         )
-        const rateName = generateRateName(
-            submission,
-            submission.rateInfos[0],
-            statePrograms
-        )
+        const rateName =
+            'MCR-MN-0005-SNBC-RATE-20221013-20221013-CERTIFICATION-20221013'
         expect(screen.getByText(rateName)).toBeInTheDocument()
     })
 
@@ -122,6 +120,9 @@ describe('RateDetailsSummarySection', () => {
             },
         }
 
+        submission.rateInfos[0].rateProgramName =
+            'MCR-MN-0005-SNBC-RATE-20221013-20221013-CERTIFICATION-20221013'
+
         const statePrograms = mockMNState().programs
 
         renderWithProviders(
@@ -133,17 +134,16 @@ describe('RateDetailsSummarySection', () => {
             />
         )
 
-        const rateName = generateRateName(
-            submission,
-            submission.rateInfos[0],
-            statePrograms
-        )
+        const rateName =
+            'MCR-MN-0005-SNBC-RATE-20221013-20221013-CERTIFICATION-20221013'
 
         expect(screen.getByText(rateName)).toBeInTheDocument()
     })
 
     it('can render all rate details fields for new rate certification submission', () => {
         const statePrograms = mockMNState().programs
+        stateSubmission.rateInfos[0].rateProgramName =
+            'MCR-MN-0005-SNBC-RATE-20221014-20221014-CERTIFICATION-20221014'
         renderWithProviders(
             <RateDetailsSummarySection
                 submission={stateSubmission}
@@ -152,11 +152,8 @@ describe('RateDetailsSummarySection', () => {
             />
         )
 
-        const rateName = generateRateName(
-            stateSubmission,
-            stateSubmission.rateInfos[0],
-            statePrograms
-        )
+        const rateName =
+            'MCR-MN-0005-SNBC-RATE-20221014-20221014-CERTIFICATION-20221014'
 
         expect(screen.getByText(rateName)).toBeInTheDocument()
         expect(

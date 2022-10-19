@@ -123,6 +123,7 @@ const getEnumPrefix = (defaultValue: string) => {
 const toProtoBuffer = (
     domainData: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
 ): Uint8Array => {
+    console.log('jjdomainData in toproto: ', domainData)
     const { contractAmendmentInfo } = domainData
 
     // The difference between DraftSubmission and StateSubmission is currently very small

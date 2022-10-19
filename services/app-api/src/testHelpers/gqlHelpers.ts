@@ -138,6 +138,7 @@ const updateTestHealthPlanFormData = async (
     server: ApolloServer,
     updatedFormData: HealthPlanFormDataType
 ): Promise<HealthPlanPackage> => {
+    console.log('jjupdate: ', updatedFormData)
     const updatedB64 = domainToBase64(updatedFormData)
 
     const updateResult = await server.executeOperation({
@@ -240,6 +241,7 @@ const createAndUpdateTestHealthPlanPackage = async (
     draft.rateProgramIDs = [ratePrograms.reverse()[0].id]
 
     Object.assign(draft, partialUpdates)
+    console.log('jjinitialdraft: ', draft)
 
     const updatedDraft = await updateTestHealthPlanFormData(server, draft)
 
