@@ -7,7 +7,10 @@ import {
     fetchCurrentUserMock,
 } from '../../../testHelpers/apolloHelpers'
 
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import {
+    renderWithProviders,
+    ldUseClientSpy,
+} from '../../../testHelpers/jestHelpers'
 import { Contacts } from './'
 import userEvent from '@testing-library/user-event'
 
@@ -15,6 +18,7 @@ describe('Contacts', () => {
     afterEach(() => jest.clearAllMocks())
 
     it('renders without errors', async () => {
+        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
@@ -38,6 +42,7 @@ describe('Contacts', () => {
     })
 
     it('displays correct form guidance for contract only submission', async () => {
+        ldUseClientSpy({ 'multi-rate-submissions': false })
         renderWithProviders(
             <Contacts draftSubmission={mockDraft()} updateDraft={jest.fn()} />,
             {
@@ -53,6 +58,7 @@ describe('Contacts', () => {
     })
 
     it('displays correct form guidance for contract and rates submission', async () => {
+        ldUseClientSpy({ 'multi-rate-submissions': false })
         renderWithProviders(
             <Contacts
                 draftSubmission={mockContactAndRatesDraft()}
@@ -71,6 +77,7 @@ describe('Contacts', () => {
     })
 
     it('checks saved mocked state contacts correctly', async () => {
+        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
@@ -92,6 +99,7 @@ describe('Contacts', () => {
     })
 
     it('should error and not continue if state contacts are not filled out', async () => {
+        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mock = mockDraft()
         const mockUpdateDraftFn = jest.fn()
         const emptyContactsDraft = {
@@ -135,6 +143,7 @@ describe('Contacts', () => {
     })
 
     it('after "Add state contact" button click, should focus on the field name of the new contact', async () => {
+        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mock = mockDraft()
         const mockUpdateDraftFn = jest.fn()
 
@@ -168,6 +177,7 @@ describe('Contacts', () => {
     })
 
     it('after "Add actuary contact" button click, it should focus on the field name of the new actuary contact', async () => {
+        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mock = mockContactAndRatesDraft()
         const mockUpdateDraftFn = jest.fn()
 
@@ -207,6 +217,7 @@ describe('Contacts', () => {
     })
 
     it('after state contact "Remove contact" button click, should focus on add new contact button', async () => {
+        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mock = mockDraft()
         const mockUpdateDraftFn = jest.fn()
 
@@ -236,6 +247,7 @@ describe('Contacts', () => {
     })
 
     it('after actuary contact "Remove contact" button click, should focus on add new actuary contact button', async () => {
+        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mock = mockContactAndRatesDraft()
         const mockUpdateDraftFn = jest.fn()
 
@@ -264,6 +276,7 @@ describe('Contacts', () => {
     })
 
     it('when there are multiple state contacts, they should numbered', async () => {
+        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mock = mockContactAndRatesDraft()
         const mockUpdateDraftFn = jest.fn()
 
@@ -287,6 +300,7 @@ describe('Contacts', () => {
     })
 
     it('when there are multiple actuary contacts, they should numbered', async () => {
+        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mock = mockContactAndRatesDraft()
         const mockUpdateDraftFn = jest.fn()
 
@@ -312,6 +326,7 @@ describe('Contacts', () => {
 
     /* This test is likely to time out if we use userEvent.type().  Converted to .paste() */
     it('when there are multiple state and actuary contacts, remove button works as expected', async () => {
+        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mock = mockContactAndRatesDraft()
         const mockUpdateDraftFn = jest.fn()
 

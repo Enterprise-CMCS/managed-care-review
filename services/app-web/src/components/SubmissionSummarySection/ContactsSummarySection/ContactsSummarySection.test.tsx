@@ -1,5 +1,8 @@
 import { screen } from '@testing-library/react'
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import {
+    renderWithProviders,
+    ldUseClientSpy,
+} from '../../../testHelpers/jestHelpers'
 import { ContactsSummarySection } from '.'
 import {
     mockContractAndRatesDraft,
@@ -9,8 +12,10 @@ import {
 describe('ContactsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()
     const stateSubmission = mockStateSubmission()
+    afterEach(() => jest.clearAllMocks())
 
     it('can render draft submission without errors', () => {
+        ldUseClientSpy({ 'multi-rate-submissions': false })
         renderWithProviders(
             <ContactsSummarySection
                 submission={draftSubmission}
@@ -36,6 +41,7 @@ describe('ContactsSummarySection', () => {
     })
 
     it('can render state submission without errors', () => {
+        ldUseClientSpy({ 'multi-rate-submissions': false })
         renderWithProviders(
             <ContactsSummarySection submission={stateSubmission} />
         )
@@ -50,6 +56,7 @@ describe('ContactsSummarySection', () => {
     })
 
     it('can render all state and actuary contact fields', () => {
+        ldUseClientSpy({ 'multi-rate-submissions': false })
         renderWithProviders(
             <ContactsSummarySection
                 submission={draftSubmission}
@@ -98,6 +105,7 @@ describe('ContactsSummarySection', () => {
     })
 
     it('can render only state contacts for contract only submission', () => {
+        ldUseClientSpy({ 'multi-rate-submissions': false })
         renderWithProviders(
             <ContactsSummarySection
                 submission={{
