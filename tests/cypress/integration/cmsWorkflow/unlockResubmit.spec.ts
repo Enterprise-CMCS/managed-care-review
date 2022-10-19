@@ -7,19 +7,12 @@ describe('CMS user', () => {
     it('can unlock and resubmit', () => {
         cy.logInAsStateUser()
 
-        // Start new contract and rate submission
-        cy.startNewContractAndRatesSubmission()
+        // fill out an entire submission
+        cy.startNewContractOnlySubmission()
         cy.fillOutBaseContractDetails()
-
-        //Continue to rate details page and full out one rate certification
-        cy.navigateFormByButtonClick('CONTINUE')
-        cy.findByRole('heading', { level: 2, name: /Rate details/ })
-        cy.fillOutNewRateCertification()
-
-        //Continue with rest of the submission
+        cy.findByTestId('unlockedBanner').should('not.exist')
         cy.navigateFormByButtonClick('CONTINUE')
         cy.fillOutStateContact()
-        cy.fillOutActuaryContact()
         cy.navigateFormByButtonClick('CONTINUE')
         cy.findByRole('heading', { name: /Supporting documents/ }).should(
             'exist'
@@ -31,7 +24,6 @@ describe('CMS user', () => {
         cy.location().then((fullUrl) => {
             const reviewURL = fullUrl.toString()
             const submissionURL = reviewURL.replace('edit/review-and-submit', '')
-            const rateDetailsURL = reviewURL.replace('review-and-submit', 'rate-details')
             fullUrl.pathname = path.dirname(fullUrl)
 
             // Submit, sent to dashboard
@@ -187,83 +179,14 @@ describe('CMS user', () => {
                 cy.clickSubmissionLink(
                     'currentSubmissionLink'
                 )
-                //Make sure banner and revision version text are gone.
+                //MAke sure banner and revision version text are gone.
                 cy.findByTestId('previous-submission-banner').should(
                     'not.exist'
                 )
                 cy.findByTestId('revision-version').should('not.exist')
-
-                //Turn on multi-rate-submissions
-                cy.interceptFeatureFlags({'multi-rate-submissions': true})
-
-                //Unlock submission
-                cy.findByRole('button', { name: 'Unlock submission' }).click()
-                cy.findAllByTestId('modalWindow').eq(1).should('be.visible')
-                cy.get('#unlockSubmitModalInput').type(
-                    'Unlock submission to add another rate certification.'
-                )
-                cy.findByRole('button', { name: 'Unlock' }).click()
-
-                cy.wait(2000)
-
-                cy.findByRole('button', { name: 'Unlock submission' }).should(
-                    'be.disabled'
-                )
-                cy.findAllByTestId('modalWindow').eq(1).should('be.hidden')
-
-                //Unlock banner for CMS user to be present with correct data.
-                cy.findByTestId('unlockedBanner')
-                    .should('exist')
-                    .and('contain.text', 'zuko@example.com')
-                    .and('contain.text', 'Unlock submission to add another rate certification.')
-                    .contains(
-                        /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
-                    )
-                    .should('exist')
-
-                //Sign out and sign in as state user
-                cy.findByRole('button', { name: 'Sign out' }).click()
-                cy.findByText(
-                    'Medicaid and CHIP Managed Care Reporting and Review System'
-                )
-                cy.logInAsStateUser()
-                cy.findByText('Submissions').should('exist')
-
-                //Navigate to rate details page of unlocked submission.
-                cy.navigateFormByDirectLink(rateDetailsURL)
-                cy.findByRole('heading', { level: 2, name: /Rate details/ })
-
-                //Add new rate certification and fill it out only the second form
-                cy.findByRole('button', { name: 'Add another rate certification'}).click()
-                cy.findAllByTestId('rate-certification-form').each((form, index) =>
-                    cy.wrap(form).within(() => index === 1 && cy.fillOutNewRateCertification())
-                )
-
-                //Continue to save rate details and move to next page
-                cy.navigateFormByButtonClick('CONTINUE')
-                cy.findByRole('heading', { level: 2, name: /Contacts/ })
-
-                //Navigate to review and submit page and resubmit
-                cy.navigateFormByDirectLink(reviewURL)
-                cy.submitStateSubmissionForm(true, true)
-
-                cy.findByText('Dashboard').should('exist')
-
-                cy.get('table')
-                    .should('exist')
-                    .findByText(submissionName)
-                    .parent()
-                    .siblings('[data-testid="submission-status"]')
-                    .should('have.text', 'Submitted')
-
-                cy.get('table')
-                    .findByText(submissionName)
-                    .should('have.attr', 'href')
-                    .and('not.include', 'review-and-submit')
             })
         })
     })
-
 
     /**
      * This test below caused some strange failing tests looking for text after logging in as State or CMS user
