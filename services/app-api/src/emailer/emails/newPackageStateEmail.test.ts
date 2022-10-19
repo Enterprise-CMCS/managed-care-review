@@ -525,8 +525,8 @@ test('includes expected data summary for a rate amendment submission State email
 test('renders overall email for a new package with a rate amendment as expected', async () => {
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractAndRatesFormData(),
-        contractDateStart: new Date('10/07/2022'),
-        contractDateEnd: new Date('10/07/2022'),
+        contractDateStart: new Date('01/01/2021'),
+        contractDateEnd: new Date('01/01/2022'),
         rateInfos: [
             {
                 rateType: 'AMENDMENT',
