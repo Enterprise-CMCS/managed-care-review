@@ -8,30 +8,12 @@ import {
 import statePrograms from '../../data/statePrograms.json'
 import { ProgramArgType } from '../../healthPlanFormDataType/State'
 
-const findRatePrograms = (
-    domainData: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType,
-    index: number
-): ProgramArgType[] => {
-    let programIDs = [] as string[]
-    const stateCode = domainData.stateCode
-    const packageProgramIDs = domainData.programIDs
-    const rateProgramIDs = domainData.rateInfos[index].rateProgramIDs
-    /* as we do elsewhere, use rateProgramIDs if they exist, otherwise fall back to programIDs */
-    if (rateProgramIDs && rateProgramIDs.length > 0) {
-        programIDs = rateProgramIDs
-    } else {
-        programIDs = packageProgramIDs
-    }
+const findStatePrograms = (stateCode: string): ProgramArgType[] => {
+    const programs = statePrograms.states.find(
+        (state) => state.code === stateCode
+    )?.programs
 
-    const programs = statePrograms.states
-        .find((state) => state.code === stateCode)
-        ?.programs.filter((program) => programIDs.includes(program.id))
-
-    if (
-        !programs ||
-        programs.length === 0 ||
-        programIDs.length !== programs.length
-    ) {
+    if (!programs) {
         return []
     }
     return programs
@@ -229,8 +211,8 @@ const toProtoBuffer = (
                           })),
                           rateProgramName: generateRateName(
                               domainData,
-                              domainData.rateInfos[index],
-                              findRatePrograms(domainData, index)
+                              rateInfo,
+                              findStatePrograms(domainData.stateCode)
                           ),
                           rateProgramIds: rateInfo.rateProgramIDs,
                           rateAmendmentInfo: rateInfo.rateAmendmentInfo && {
