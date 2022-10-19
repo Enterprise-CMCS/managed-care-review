@@ -89,7 +89,13 @@ export const ContactsSummarySection = ({
             {submission.submissionType === 'CONTRACT_AND_RATES' && (
                 <>
                     <dl>
-                        <SectionHeader header="Actuary contacts" />
+                        <SectionHeader
+                            header={
+                                showAddtlActuaryText
+                                    ? 'Additional actuary contacts'
+                                    : 'Actuary contacts'
+                            }
+                        />
                         <GridContainer>
                             <Grid row>
                                 {submission.addtlActuaryContacts.map(
