@@ -8,11 +8,9 @@ import {
 import statePrograms from '../../data/statePrograms.json'
 import { ProgramArgType } from '../../healthPlanFormDataType/State'
 
-const findPrograms = (
+const findRatePrograms = (
     domainData: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType,
     index: number
-    // stateCode: string,
-    // programIDs: string[] = ['1111', '2222']
 ): ProgramArgType[] => {
     let programIDs = [] as string[]
     const stateCode = domainData.stateCode
@@ -237,7 +235,7 @@ const toProtoBuffer = (
                           rateProgramName: generateRateName(
                               domainData,
                               domainData.rateInfos[index],
-                              findPrograms(domainData, index)
+                              findRatePrograms(domainData, index)
                           ),
                           rateProgramIds: rateInfo.rateProgramIDs,
                           rateAmendmentInfo: rateInfo.rateAmendmentInfo && {
