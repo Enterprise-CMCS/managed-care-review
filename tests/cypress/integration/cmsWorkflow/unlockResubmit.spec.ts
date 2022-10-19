@@ -8,16 +8,24 @@ describe('CMS user', () => {
         cy.logInAsStateUser()
 
         // fill out an entire submission
-        cy.startNewContractOnlySubmission()
+        cy.startNewContractAndRatesSubmission()
         cy.fillOutBaseContractDetails()
-        cy.findByTestId('unlockedBanner').should('not.exist')
         cy.navigateFormByButtonClick('CONTINUE')
+
+        cy.findByRole('heading', { name: /Rate details/ }).should('exist')
+        cy.fillOutNewRateCertification()
+        cy.navigateFormByButtonClick('CONTINUE')
+
+        cy.findByRole('heading', { name: /Contacts/ }).should('exist')
         cy.fillOutStateContact()
+        cy.fillOutActuaryContact()
         cy.navigateFormByButtonClick('CONTINUE')
+
         cy.findByRole('heading', { name: /Supporting documents/ }).should(
             'exist'
         )
         cy.navigateFormByButtonClick('CONTINUE')
+
         cy.findByRole('heading', { name: /Review and submit/ }).should('exist')
 
         // Store submission url for reference later
