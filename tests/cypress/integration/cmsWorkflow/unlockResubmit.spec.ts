@@ -122,8 +122,6 @@ describe('CMS user', () => {
                     )
                     .should('exist')
 
-                //DO UPDATE HERE
-
                 cy.submitStateSubmissionForm(true, true)
 
                 cy.findByText('Dashboard').should('exist')
@@ -247,6 +245,21 @@ describe('CMS user', () => {
 
                 //Navigate to review and submit page and resubmit
                 cy.navigateFormByDirectLink(reviewURL)
+                cy.submitStateSubmissionForm(true, true)
+
+                cy.findByText('Dashboard').should('exist')
+
+                cy.get('table')
+                    .should('exist')
+                    .findByText(submissionName)
+                    .parent()
+                    .siblings('[data-testid="submission-status"]')
+                    .should('have.text', 'Submitted')
+
+                cy.get('table')
+                    .findByText(submissionName)
+                    .should('have.attr', 'href')
+                    .and('not.include', 'review-and-submit')
             })
         })
     })
