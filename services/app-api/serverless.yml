@@ -22,6 +22,7 @@ custom:
   applicationEndpoint: ${env:APPLICATION_ENDPOINT, cf:ui-${sls:stage}.CloudFrontEndpointUrl}
   appApiGatewayId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.ApiGatewayRestApiId}
   appApiGatewayRootResourceId: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.AppApiGatewayRootResourceId}
+  appApiWafAclArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:infra-api-${sls:stage}.WafPluginAclArn}
   emailerMode: ${env:EMAILER_MODE, ssm:/configuration/emailer_mode}
   parameterStoreMode: ${env:PARAMETER_STORE_MODE, ssm:/configuration/parameterStoreMode}
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${sls:stage}.PostgresAuroraArn }
@@ -289,7 +290,21 @@ functions:
               - traceparent
           authorizer: aws_iam
 
+  cleanup:
+    handler: src/handlers/cleanup.main
+    events:
+      - schedule: cron(0 14 ? * MON-FRI *)
+    layers:
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-2-0:1
+
 resources:
+  Resources:
+    ApiGwWebAclAssociation:
+      Type: AWS::WAFv2::WebACLAssociation
+      DependsOn: 'ApiGatewayDeployment${sls:instanceId}'
+      Properties:
+        ResourceArn: arn:aws:apigateway:${self:provider.region}::/restapis/${self:custom.appApiGatewayId}/stages/${sls:stage}
+        WebACLArn: ${self:custom.appApiWafAclArn}
   Outputs:
     ApiAuthMode:
       Value: ${self:custom.reactAppAuthMode}

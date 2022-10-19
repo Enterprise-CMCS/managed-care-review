@@ -38,4 +38,21 @@ model State {
   name                        String
   latestStateSubmissionNumber Int                      @default(0)
   statePackages               HealthPlanPackageTable[]
+  users                       User[]
+}
+
+model User {
+  id         Int     @id @default(autoincrement())
+  euaID      String  @unique
+  givenName  String
+  familyName String
+  email      String  @unique
+  role       Role
+  states     State[]
+}
+
+enum Role {
+  CMS_USER
+  STATE_USER
+  ADMIN_USER
 }
