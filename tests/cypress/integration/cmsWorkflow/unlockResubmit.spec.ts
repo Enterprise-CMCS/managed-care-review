@@ -192,6 +192,58 @@ describe('CMS user', () => {
                     'not.exist'
                 )
                 cy.findByTestId('revision-version').should('not.exist')
+
+                //Turn multi-rate feature flag on
+                cy.interceptFeatureFlags({ 'multi-rate-submissions': true })
+
+                //Unlock submission again
+                cy.findByRole('button', { name: 'Unlock submission' }).click()
+                cy.findAllByTestId('modalWindow').eq(1).should('be.visible')
+                cy.get('#unlockSubmitModalInput').type(
+                    'Unlock submission to add another rate cert.'
+                )
+                cy.findByRole('button', { name: 'Unlock' }).click()
+
+                cy.wait(2000)
+
+                cy.findByRole('button', { name: 'Unlock submission' }).should(
+                    'be.disabled'
+                )
+                cy.findAllByTestId('modalWindow').eq(1).should('be.hidden')
+
+                //Unlock banner for CMS user to be present with correct data.
+                cy.findByTestId('unlockedBanner')
+                    .should('exist')
+                    .and('contain.text', 'zuko@example.com')
+                    .and('contain.text', 'Unlock submission to add another rate cert.')
+                    .contains(
+                        /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+                    )
+                    .should('exist')
+
+                //Sign out
+                cy.findByRole('button', { name: 'Sign out' }).click()
+                cy.wait(5000)
+                cy.findByText(
+                    'Medicaid and CHIP Managed Care Reporting and Review System'
+                )
+
+                cy.logInAsStateUser()
+
+                // State user sees unlocked submission - check tag then submission link
+                cy.findByText('Submissions').should('exist')
+                cy.get('table')
+                    .should('exist')
+                    .findByText(submissionName)
+                    .parent()
+                    .siblings('[data-testid="submission-status"]')
+                    .should('have.text', 'Unlocked')
+
+                cy.get('table')
+                    .should('exist')
+                    .findByText(submissionName)
+                    .should('have.attr', 'href')
+                    .and('include', 'review-and-submit')
             })
         })
     })
