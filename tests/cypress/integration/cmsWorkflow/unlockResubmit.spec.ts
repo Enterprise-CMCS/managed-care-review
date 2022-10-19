@@ -31,6 +31,7 @@ describe('CMS user', () => {
         // Store submission url for reference later
         cy.location().then((fullUrl) => {
             const reviewURL = fullUrl.toString()
+            const rateDetailsURL = reviewURL.replace('edit/review-and-submit', 'edit/rate-details')
             const submissionURL = reviewURL.replace('edit/review-and-submit', '')
             fullUrl.pathname = path.dirname(fullUrl)
 
@@ -244,6 +245,26 @@ describe('CMS user', () => {
                     .findByText(submissionName)
                     .should('have.attr', 'href')
                     .and('include', 'review-and-submit')
+
+                cy.navigateFormByDirectLink(reviewURL)
+                cy.findByRole('heading', {
+                    level: 2,
+                    name: /Review and submit/,
+                })
+                cy.findByRole('heading', {
+                    name: `Minnesota ${submissionName}`,
+                }).should('exist')
+                cy.findByTestId('unlockedBanner')
+                    .should('exist')
+                    .and('contain.text', 'zuko@example.com')
+                    .and('contain.text', 'Unlock submission to add another rate cert.')
+                    .contains(
+                        /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET+/i
+                    )
+                    .should('exist')
+
+                cy.navigateFormByDirectLink(rateDetailsURL)
+                cy.findByRole('heading', { name: /Rate details/ }).should('exist')
             })
         })
     })
