@@ -167,10 +167,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
     })
 
     const submissionAndRevisions = fetchData?.fetchHealthPlanPackage?.pkg
-    console.log(
-        'the proto: ',
-        submissionAndRevisions?.revisions[0].node.formDataProto
-    )
     const [updateFormData] = useUpdateHealthPlanFormDataMutation()
 
     // When the new API is done, we'll call the new API here
@@ -222,13 +218,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     useEffect(() => {
         if (submissionAndRevisions) {
-            console.log('submissionAndRevisions: ', submissionAndRevisions)
             const currentRevisionPackageOrError =
                 getCurrentRevisionFromHealthPlanPackage(submissionAndRevisions)
-            console.log(
-                'currentRevisionPackageOrError',
-                currentRevisionPackageOrError
-            )
             // set form data
             if (currentRevisionPackageOrError instanceof Error) {
                 setFormDataError('MALFORMATTED_DATA')

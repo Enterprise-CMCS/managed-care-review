@@ -9,14 +9,30 @@ import statePrograms from '../../data/statePrograms.json'
 import { ProgramArgType } from '../../healthPlanFormDataType/State'
 
 const findPrograms = (
-    stateCode: string,
-    programIDs: string[] = ['1111', '2222']
+    domainData: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType,
+    index: number
+    // stateCode: string,
+    // programIDs: string[] = ['1111', '2222']
 ): ProgramArgType[] => {
+    let programIDs = [] as string[]
+    const stateCode = domainData.stateCode
+    const packageProgramIDs = domainData.programIDs
+    const rateProgramIDs = domainData.rateInfos[index].rateProgramIDs
+    if (rateProgramIDs && rateProgramIDs.length > 0) {
+        programIDs = rateProgramIDs
+    } else {
+        programIDs = packageProgramIDs
+    }
+
     const programs = statePrograms.states
         .find((state) => state.code === stateCode)
         ?.programs.filter((program) => programIDs.includes(program.id))
 
-    if (!programs || programIDs.length !== programs.length) {
+    if (
+        !programs ||
+        programs.length === 0 ||
+        programIDs.length !== programs.length
+    ) {
         return [
             {
                 id: 'error',
@@ -123,7 +139,6 @@ const getEnumPrefix = (defaultValue: string) => {
 const toProtoBuffer = (
     domainData: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
 ): Uint8Array => {
-    console.log('jjdomainData in toproto: ', domainData)
     const { contractAmendmentInfo } = domainData
 
     // The difference between DraftSubmission and StateSubmission is currently very small
@@ -222,10 +237,7 @@ const toProtoBuffer = (
                           rateProgramName: generateRateName(
                               domainData,
                               domainData.rateInfos[index],
-                              findPrograms(
-                                  domainData.stateCode,
-                                  domainData.rateInfos[index].rateProgramIDs
-                              )
+                              findPrograms(domainData, index)
                           ),
                           rateProgramIds: rateInfo.rateProgramIDs,
                           rateAmendmentInfo: rateInfo.rateAmendmentInfo && {

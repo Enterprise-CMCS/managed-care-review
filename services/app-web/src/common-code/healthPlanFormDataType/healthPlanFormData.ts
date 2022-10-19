@@ -179,8 +179,6 @@ function programNames(
     return programIDs.map((id) => {
         const program = programs.find((p) => p.id === id)
         if (!program) {
-            console.log('jjunknown: ', id)
-            console.log('jjunknownprograms: ', programs)
             return 'Unknown Program'
         }
         return program.name
@@ -193,9 +191,6 @@ function packageName(
     programIDs?: string[]
 ): string {
     const padNumber = pkg.stateNumber.toString().padStart(4, '0')
-    console.log('jjstatePrograms: ', statePrograms)
-    console.log('jjRateIDS', programIDs)
-    console.log('jjProgramIDS', pkg.programIDs)
     const pNames =
         // This ternary is needed because programIDs passed in could be undefined or an empty string, in that case
         // we want to default to using programIDs from submission
@@ -257,7 +252,6 @@ const generateRateName = (
     if (rateDateCertified) {
         rateName = rateName.concat('-', formatRateNameDate(rateDateCertified))
     }
-    console.log('jjratename : ', rateName)
     return rateName
 }
 

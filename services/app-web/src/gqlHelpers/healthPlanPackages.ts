@@ -31,14 +31,6 @@ const getCurrentRevisionFromHealthPlanPackage = (
                 }
             }
         ).node
-        console.log('newestRev', newestRev)
-
-        submissionAndRevisions.revisions.forEach((rev) => {
-            console.log(
-                'each revision: ',
-                base64ToDomain(rev.node.formDataProto)
-            )
-        })
 
         // Decode form data submitted by the state
         const healthPlanPackageFormDataResult = base64ToDomain(

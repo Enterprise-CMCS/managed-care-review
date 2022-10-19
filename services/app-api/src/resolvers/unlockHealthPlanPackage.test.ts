@@ -492,7 +492,7 @@ describe('unlockHealthPlanPackage', () => {
         )
     })
 
-    it.only('generates rate name by package programs when rate programs are not specified', async () => {
+    it('generates rate name by package programs when rate programs are not specified', async () => {
         const mockEmailer = testEmailer(testEmailConfig)
 
         //mock invoke email submit lambda
@@ -515,11 +515,6 @@ describe('unlockHealthPlanPackage', () => {
         })
 
         // Unlock and edit
-
-        console.log(
-            'jjstatesubmission: ',
-            stateSubmission.revisions[0].node.formDataProto
-        )
         const firstUnlockResult = await unlockTestHealthPlanPackage(
             cmsServer,
             stateSubmission.id,
@@ -560,8 +555,6 @@ describe('unlockHealthPlanPackage', () => {
             unlockedFormData
         )
 
-        console.log('jjunlockedformdata: ', unlockedFormData)
-
         //Resubmit package
         await resubmitTestHealthPlanPackage(stateServer, updatedSub.id, 'Test')
 
@@ -573,7 +566,6 @@ describe('unlockHealthPlanPackage', () => {
 
         const finalUnlockFormData =
             finalUnlockResult.revisions[0].node.formDataProto
-        console.log('jjfinalUnlockFormData: ', finalUnlockFormData)
         const sub = base64ToDomain(finalUnlockFormData)
         if (sub instanceof Error) {
             throw sub
