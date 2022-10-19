@@ -16,6 +16,7 @@ const findRatePrograms = (
     const stateCode = domainData.stateCode
     const packageProgramIDs = domainData.programIDs
     const rateProgramIDs = domainData.rateInfos[index].rateProgramIDs
+    /* as we do elsewhere, use rateProgramIDs if they exist, otherwise fall back to programIDs */
     if (rateProgramIDs && rateProgramIDs.length > 0) {
         programIDs = rateProgramIDs
     } else {
@@ -31,13 +32,7 @@ const findRatePrograms = (
         programs.length === 0 ||
         programIDs.length !== programs.length
     ) {
-        return [
-            {
-                id: 'error',
-                name: 'no programs found',
-                fullName: 'no programs found',
-            },
-        ]
+        return []
     }
     return programs
 }
