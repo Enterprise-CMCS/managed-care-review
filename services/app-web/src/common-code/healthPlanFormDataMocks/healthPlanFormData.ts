@@ -57,7 +57,7 @@ function newHealthPlanFormData(): UnlockedHealthPlanFormDataType {
         managedCareEntities: [],
         federalAuthorities: [],
         stateContacts: [],
-        actuaryContacts: [],
+        addtlActuaryContacts: [],
     }
 }
 
@@ -84,7 +84,7 @@ function basicHealthPlanFormData(): UnlockedHealthPlanFormDataType {
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         stateContacts: [],
-        actuaryContacts: [],
+        addtlActuaryContacts: [],
     }
 }
 
@@ -111,7 +111,7 @@ function contractOnly(): UnlockedHealthPlanFormDataType {
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         stateContacts: [],
-        actuaryContacts: [],
+        addtlActuaryContacts: [],
     }
 }
 
@@ -138,7 +138,7 @@ function contractAmendedOnly(): UnlockedHealthPlanFormDataType {
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         stateContacts: [],
-        actuaryContacts: [],
+        addtlActuaryContacts: [],
         contractAmendmentInfo: {
             modifiedProvisions: {
                 modifiedBenefitsProvided: true,
@@ -219,7 +219,7 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
                 email: 'lodar@example.com',
             },
         ],
-        actuaryContacts: [
+        addtlActuaryContacts: [
             {
                 name: 'foo bar',
                 titleRole: 'manager',
@@ -323,7 +323,7 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
                 email: 'lodar@example.com',
             },
         ],
-        actuaryContacts: [
+        addtlActuaryContacts: [
             {
                 name: 'foo bar',
                 titleRole: 'manager',
@@ -421,7 +421,7 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
                 email: 'lodar@example.com',
             },
         ],
-        actuaryContacts: [
+        addtlActuaryContacts: [
             {
                 name: 'foo bar',
                 titleRole: 'manager',
@@ -436,7 +436,7 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
                 actuarialFirm: 'MERCER' as const,
             },
         ],
-        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
     }
 }
 
@@ -546,7 +546,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
                 email: 'lodar@example.com',
             },
         ],
-        actuaryContacts: [
+        addtlActuaryContacts: [
             {
                 name: 'foo bar',
                 titleRole: 'manager',
@@ -561,7 +561,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
                 actuarialFirm: 'MERCER' as const,
             },
         ],
-        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
     }
 }
 
@@ -680,7 +680,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
                 email: 'lodar@example.com',
             },
         ],
-        actuaryContacts: [
+        addtlActuaryContacts: [
             {
                 name: 'foo bar',
                 titleRole: 'manager',
@@ -695,7 +695,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
                 actuarialFirm: 'MERCER' as const,
             },
         ],
-        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
     }
 }
 
@@ -732,7 +732,7 @@ function basicLockedHealthPlanFormData(): LockedHealthPlanFormDataType {
                 titleRole: 'Manager',
             },
         ],
-        actuaryContacts: [],
+        addtlActuaryContacts: [],
         rateInfos: [],
         rateDocuments: [],
         rateProgramIDs: [],

@@ -83,8 +83,8 @@ export function mockDraft(): UnlockedHealthPlanFormDataType {
         rateAmendmentInfo: undefined,
         rateProgramIDs: undefined,
         stateContacts: [],
-        actuaryContacts: [],
-        actuaryCommunicationPreference: undefined,
+        addtlActuaryContacts: [],
+        addtlActuaryCommunicationPreference: undefined,
     }
 }
 
@@ -115,8 +115,8 @@ export function mockContactAndRatesDraft(): UnlockedHealthPlanFormDataType {
         rateDateCertified: undefined,
         rateAmendmentInfo: undefined,
         stateContacts: [],
-        actuaryContacts: [],
-        actuaryCommunicationPreference: undefined,
+        addtlActuaryContacts: [],
+        addtlActuaryCommunicationPreference: undefined,
         status: 'DRAFT',
         stateNumber: 5,
     }
@@ -157,8 +157,8 @@ export function mockCompleteDraft(): UnlockedHealthPlanFormDataType {
                 email: 'test@test.com',
             },
         ],
-        actuaryContacts: [],
-        actuaryCommunicationPreference: undefined,
+        addtlActuaryContacts: [],
+        addtlActuaryCommunicationPreference: undefined,
     }
 }
 
@@ -239,7 +239,7 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
                 email: 'statecontact2@test.com',
             },
         ],
-        actuaryContacts: [
+        addtlActuaryContacts: [
             {
                 actuarialFirm: 'DELOITTE',
                 name: 'Actuary Contact 1',
@@ -247,7 +247,7 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
                 email: 'actuarycontact1@test.com',
             },
         ],
-        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
     }
 }
 
@@ -323,8 +323,8 @@ export function mockStateSubmission(): LockedHealthPlanFormDataType {
                 email: 'test@test.com',
             },
         ],
-        actuaryContacts: [],
-        actuaryCommunicationPreference: undefined,
+        addtlActuaryContacts: [],
+        addtlActuaryCommunicationPreference: undefined,
     }
 }
 
@@ -419,8 +419,8 @@ export function mockStateSubmissionContractAmendment(): LockedHealthPlanFormData
                 email: 'test@test.com',
             },
         ],
-        actuaryContacts: [],
-        actuaryCommunicationPreference: undefined,
+        addtlActuaryContacts: [],
+        addtlActuaryCommunicationPreference: undefined,
     }
 }
 

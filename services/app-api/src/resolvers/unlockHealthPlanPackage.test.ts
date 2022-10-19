@@ -159,7 +159,7 @@ describe('unlockHealthPlanPackage', () => {
         formData.federalAuthorities = ['VOLUNTARY' as const]
         formData.rateDocuments = []
         formData.stateContacts = []
-        formData.actuaryContacts = []
+        formData.addtlActuaryContacts = []
 
         await updateTestHealthPlanFormData(stateServer, formData)
 
