@@ -187,7 +187,7 @@ describe('CMS user', () => {
                 cy.clickSubmissionLink(
                     'currentSubmissionLink'
                 )
-                //MAke sure banner and revision version text are gone.
+                //Make sure banner and revision version text are gone.
                 cy.findByTestId('previous-submission-banner').should(
                     'not.exist'
                 )
