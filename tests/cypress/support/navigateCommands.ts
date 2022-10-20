@@ -61,5 +61,5 @@ Cypress.Commands.add(
             aliasQuery(req, 'fetchHealthPlanPackage')
         })
     cy.visit(url)
-    if (waitForLoad)  cy.wait('@fetchHealthPlanPackageQuery')
+    if (waitForLoad)  cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 })
     })
