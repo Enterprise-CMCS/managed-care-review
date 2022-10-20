@@ -46,7 +46,7 @@ export const resubmitPackageStateEmail = async (
         rateInfos:
             isContractAndRates &&
             pkg.rateInfos.map((rate) => ({
-                rateName: rate.rateProgramName,
+                rateName: rate.rateCertificationName,
             })),
     }
 

@@ -55,7 +55,7 @@ export const newPackageStateEmail = async (
         rateInfos:
             isContractAndRates &&
             pkg.rateInfos.map((rate) => ({
-                rateName: rate.rateProgramName,
+                rateName: rate.rateCertificationName,
                 rateDateLabel:
                     rate.rateType === 'NEW'
                         ? 'Rating period'

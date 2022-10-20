@@ -40,7 +40,7 @@ export const RateDetailsSummarySection = ({
         doc.documentCategories.includes('RATES_RELATED')
     )
 
-    const rateName = submission.rateInfos[0]?.rateProgramName
+    const rateName = submission.rateInfos[0]?.rateCertificationName
 
     const rateCapitationType = submission.rateCapitationType
         ? submission.rateCapitationType === 'RATE_CELL'

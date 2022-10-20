@@ -191,7 +191,7 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
                     effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
                 },
                 rateProgramIDs: [mockMNState().programs[0].id],
-                rateProgramName:
+                rateCertificationName:
                     'MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523',
                 rateDocuments: [],
             },
@@ -285,7 +285,7 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
                     effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
                 },
                 rateProgramIDs: [mockMNState().programs[0].id],
-                rateProgramName:
+                rateCertificationName:
                     'MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523',
                 rateDocuments: [
                     {
@@ -394,7 +394,7 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
                     effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
                 },
                 rateProgramIDs: [mockMNState().programs[0].id],
-                rateProgramName:
+                rateCertificationName:
                     'MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523',
                 rateDocuments: [
                     {
@@ -521,7 +521,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
                     effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
                 },
                 rateProgramIDs: [mockMNState().programs[0].id],
-                rateProgramName:
+                rateCertificationName:
                     'MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523',
                 rateDocuments: [
                     {
@@ -652,7 +652,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
                     effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
                 },
                 rateProgramIDs: [mockMNState().programs[0].id],
-                rateProgramName:
+                rateCertificationName:
                     'MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523',
             },
         ],

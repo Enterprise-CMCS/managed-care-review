@@ -91,7 +91,7 @@ describe('RateDetailsSummarySection', () => {
     it('can render correct rate name for new rate submission', () => {
         const submission = mockStateSubmission()
         submission.rateProgramIDs = undefined
-        submission.rateInfos[0].rateProgramName =
+        submission.rateInfos[0].rateCertificationName =
             'MCR-MN-0005-SNBC-RATE-20221013-20221013-CERTIFICATION-20221013'
 
         const statePrograms = mockMNState().programs
@@ -120,7 +120,7 @@ describe('RateDetailsSummarySection', () => {
             },
         }
 
-        submission.rateInfos[0].rateProgramName =
+        submission.rateInfos[0].rateCertificationName =
             'MCR-MN-0005-SNBC-RATE-20221013-20221013-CERTIFICATION-20221013'
 
         const statePrograms = mockMNState().programs
@@ -142,7 +142,7 @@ describe('RateDetailsSummarySection', () => {
 
     it('can render all rate details fields for new rate certification submission', () => {
         const statePrograms = mockMNState().programs
-        stateSubmission.rateInfos[0].rateProgramName =
+        stateSubmission.rateInfos[0].rateCertificationName =
             'MCR-MN-0005-SNBC-RATE-20221014-20221014-CERTIFICATION-20221014'
         renderWithProviders(
             <RateDetailsSummarySection

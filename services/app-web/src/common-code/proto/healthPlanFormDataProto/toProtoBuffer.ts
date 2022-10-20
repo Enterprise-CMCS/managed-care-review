@@ -209,7 +209,7 @@ const toProtoBuffer = (
                                   doc.documentCategories
                               ),
                           })),
-                          rateProgramName: generateRateName(
+                          rateCertificationName: generateRateName(
                               domainData,
                               rateInfo,
                               findStatePrograms(domainData.stateCode)

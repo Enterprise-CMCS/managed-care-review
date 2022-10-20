@@ -584,13 +584,6 @@ describe('unlockHealthPlanPackage', () => {
                 bodyHTML: expect.stringContaining(rateName),
             })
         )
-        // expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
-        //     expect.objectContaining({
-        //         subject: expect.stringContaining(`${name} was unlocked`),
-        //         //Rate name should have defaulted back to using package programs to generate name
-        //         bodyHTML: expect.stringContaining(rateName),
-        //     })
-        // )
     })
 
     it('does send unlock email when request for state analysts emails fails', async () => {

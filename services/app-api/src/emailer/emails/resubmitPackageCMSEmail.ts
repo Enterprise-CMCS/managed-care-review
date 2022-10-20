@@ -55,7 +55,7 @@ export const resubmitPackageCMSEmail = async (
         rateInfos:
             isContractAndRates &&
             pkg.rateInfos.map((rate) => ({
-                rateName: rate.rateProgramName,
+                rateName: rate.rateCertificationName,
             })),
         submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
     }

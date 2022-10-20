@@ -276,16 +276,16 @@ function parseProtoRateAmendment(
     }
 }
 
-function parseRateProgramName(
-    rateProgramName:
-        | mcreviewproto.RateInfo['rateProgramName']
+function parseRateCertificationName(
+    rateCertificationName:
+        | mcreviewproto.RateInfo['rateCertificationName']
         | null
         | undefined
 ): string | undefined {
-    if (!rateProgramName) {
+    if (!rateCertificationName) {
         return undefined
     }
-    return rateProgramName
+    return rateCertificationName
 }
 
 function parseRateInfos(
@@ -315,8 +315,8 @@ function parseRateInfos(
                     rateInfo?.rateDateCertified
                 ),
                 rateProgramIDs: rateInfo?.rateProgramIds ?? [],
-                rateProgramName: parseRateProgramName(
-                    rateInfo?.rateProgramName
+                rateCertificationName: parseRateCertificationName(
+                    rateInfo?.rateCertificationName
                 ),
             }
             rates.push(rate)
