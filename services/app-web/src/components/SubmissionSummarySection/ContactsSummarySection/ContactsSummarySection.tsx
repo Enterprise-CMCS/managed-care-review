@@ -134,7 +134,9 @@ export const ContactsSummarySection = ({
                         <GridContainer>
                             <Grid row>
                                 <span className="text-bold">
-                                    Actuary communication preference
+                                    {showAddtlActuaryText
+                                        ? 'Actuaries’ communication preference'
+                                        : 'Actuary communication preference'}
                                 </span>
                                 {submission.addtlActuaryCommunicationPreference
                                     ? ActuaryCommunicationRecord[
