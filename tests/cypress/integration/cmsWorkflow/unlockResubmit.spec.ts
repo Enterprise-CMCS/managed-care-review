@@ -198,6 +198,7 @@ describe('CMS user', () => {
                  * **/
                 // //Turn multi-rate feature flag on
                 // cy.interceptFeatureFlags({ 'multi-rate-submissions': true })
+                // const rateDetailsURL = reviewURL.replace('review-and-submit', 'rate-details')
                 //
                 // //Unlock submission again
                 // cy.findByRole('button', { name: 'Unlock submission' }).click()
