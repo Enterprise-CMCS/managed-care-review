@@ -85,9 +85,10 @@ describe('CMS user', () => {
                 )
 
                 cy.logInAsStateUser()
+                cy.wait(2000)
 
                 // State user sees unlocked submission - check tag then submission link
-                cy.findByText('Submissions', { timeout: 10000 }).should('exist')
+                cy.findByRole('heading', { name: /Submissions/ }).should('exist')
                 cy.get('table')
                     .should('exist')
                     .findByText(submissionName)
@@ -218,9 +219,10 @@ describe('CMS user', () => {
                 )
 
                 cy.logInAsStateUser()
+                cy.wait(2000)
 
                 // State user sees unlocked submission - check tag then submission link
-                cy.findByText('Submissions', { timeout: 10000 }).should('exist')
+                cy.findByRole('heading', { name: /Submissions/ }).should('exist')
                 cy.get('table')
                     .should('exist')
                     .findByText(submissionName)
