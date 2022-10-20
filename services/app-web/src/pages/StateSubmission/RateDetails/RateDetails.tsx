@@ -427,6 +427,12 @@ export const RateDetails = ({
         return errorObject
     }
 
+    const handleRateInfoLegend = (index: number) => {
+        return index === 0
+            ? 'Rate certification'
+            : `Additional rate certification ${index}`
+    }
+
     return (
         <Formik
             initialValues={rateInfosInitialValues}
@@ -478,19 +484,17 @@ export const RateDetails = ({
                                         <>
                                             {rateInfos.map(
                                                 (rateInfo, index) => (
-                                                    <div
+                                                    <Fieldset
+                                                        data-testid={`rate-certification-form`}
                                                         key={rateInfo.uuid}
-                                                        id={rateInfo.uuid}
+                                                        id={`rateInfos.${index}.container.${rateInfo.uuid}`}
+                                                        legend={handleRateInfoLegend(
+                                                            index
+                                                        )}
+                                                        className={
+                                                            styles.rateCertContainer
+                                                        }
                                                     >
-                                                        <Label
-                                                            htmlFor={
-                                                                rateInfo.uuid
-                                                            }
-                                                        >
-                                                            {index === 0
-                                                                ? 'Rate certification'
-                                                                : `Additional rate certification ${index}`}
-                                                        </Label>
                                                         <FormGroup
                                                             error={
                                                                 showFileUploadError &&
@@ -1164,7 +1168,7 @@ export const RateDetails = ({
                                                                     certification
                                                                 </Button>
                                                             )}
-                                                    </div>
+                                                    </Fieldset>
                                                 )
                                             )}
                                             {showMultiRates && (
