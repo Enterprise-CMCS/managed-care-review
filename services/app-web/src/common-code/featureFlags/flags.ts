@@ -15,13 +15,6 @@ export const featureFlags = {
         defaultValue: false,
     },
     /**
-     Toggles the /health api endpoint
-    */
-    API_ENABLE_HEALTH_ENDPOINT: {
-        flag: 'enable-health-endpoint',
-        defaultValue: true,
-    },
-    /**
      Enables the modal that alerts the user to an expiring session
     */
     SESSION_EXPIRING_MODAL: {
@@ -41,13 +34,6 @@ export const featureFlags = {
     MODAL_COUNTDOWN_DURATION: {
         flag: 'modal-countdown-duration',
         defaultValue: 2,
-    },
-    /**
-     * Graphql resolver returns 500 errors. Used for testing alerting in OTEL/New Relic
-     */
-    API_GRAPHQL_ERRORS: {
-        flag: 'app-api-graphql-errors',
-        defaultValue: false,
     },
     /**
      * Enables multi-rate submission UI

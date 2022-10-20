@@ -75,6 +75,7 @@ type RateInfoType = {
     rateDateCertified?: Date
     rateAmendmentInfo?: RateAmendmentInfo
     rateProgramIDs?: string[]
+    rateCertificationName?: string
 }
 
 // MAIN
