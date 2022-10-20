@@ -48,6 +48,7 @@ describe('CMS user', () => {
             )
             cy.logInAsCMSUser({ initialURL: submissionURL})
 
+            cy.findByRole('heading', { name: /Loading/}). should('not.exist')
             // click on the unlock button, type in reason and confirm
             cy.wait(2000)
             cy.findByRole('button', { name: 'Unlock submission' }).click()
@@ -85,8 +86,8 @@ describe('CMS user', () => {
                 )
 
                 cy.logInAsStateUser()
-                cy.wait(2000)
 
+                cy.findByRole('heading', { name: /Loading/}). should('not.exist')
                 // State user sees unlocked submission - check tag then submission link
                 cy.findByRole('heading', { name: /Submissions/ }).should('exist')
                 cy.get('table')
@@ -151,6 +152,7 @@ describe('CMS user', () => {
                 // Login as CMS User
                 cy.logInAsCMSUser({ initialURL: submissionURL })
 
+                cy.findByRole('heading', { name: /Loading/}). should('not.exist')
                 //  CMS user sees resubmitted submission and active unlock button
                 cy.findByTestId('submission-summary').should('exist')
                 cy.findByRole('button', { name: 'Unlock submission' }).should(
@@ -219,8 +221,8 @@ describe('CMS user', () => {
                 )
 
                 cy.logInAsStateUser()
-                cy.wait(2000)
 
+                cy.findByRole('heading', { name: /Loading/}). should('not.exist')
                 // State user sees unlocked submission - check tag then submission link
                 cy.findByRole('heading', { name: /Submissions/ }).should('exist')
                 cy.get('table')
@@ -237,6 +239,8 @@ describe('CMS user', () => {
                     .and('include', 'review-and-submit')
 
                 cy.navigateFormByDirectLink(reviewURL)
+
+                cy.findByRole('heading', { name: /Loading/}). should('not.exist')
                 cy.findByRole('heading', {
                     level: 2,
                     name: /Review and submit/,
@@ -252,6 +256,38 @@ describe('CMS user', () => {
 
                 cy.navigateFormByDirectLink(rateDetailsURL)
                 cy.findByRole('heading', { name: /Rate details/ }).should('exist')
+
+                cy.findByRole('button', { name: 'Add another rate certification'}).click()
+                cy.findAllByTestId('rate-certification-form').each( (form, index) =>
+                    cy.wrap((form)).within(() => index === 1 && cy.fillOutNewRateCertification())
+                )
+                cy.navigateFormByButtonClick('CONTINUE')
+
+                cy.findByRole('heading', { name: /Contacts/ }).should('exist')
+                cy.navigateFormByDirectLink(reviewURL)
+                cy.findByRole('heading', {
+                    level: 2,
+                    name: /Review and submit/,
+                })
+
+                cy.submitStateSubmissionForm(true, true)
+
+                cy.findByText('Dashboard').should('exist')
+
+                cy.get('table')
+                    .should('exist')
+                    .findByText(submissionName)
+                    .parent()
+                    .siblings('[data-testid="submission-status"]')
+                    .should('have.text', 'Submitted')
+
+                cy.get('table')
+                    .findByText(submissionName)
+                    .should('have.attr', 'href')
+                    .and('not.include', 'review-and-submit')
+
+                //turn off feature flag
+                cy.interceptFeatureFlags({ 'multi-rate-submissions': false })
             })
         })
     })
