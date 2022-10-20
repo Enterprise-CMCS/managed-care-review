@@ -123,8 +123,8 @@ describe('contacts', () => {
             //Fill out each additional actuary contacts
             cy.findAllByTestId('actuary-contact').each(actuary => cy.wrap(actuary).within(() => {
                 cy.findByLabelText('Name').click().type('Actuary Contact Person')
-                cy.findByLabelText('Title/Role').type('Actuary Contact Title')
-                cy.findByLabelText('Email').type('actuarycontact@test.com')
+                cy.findByLabelText('Title/Role').click().type('Actuary Contact Title')
+                cy.findByLabelText('Email').click().type('actuarycontact@test.com')
                 cy.findByLabelText('Mercer').safeClick()
             }))
 
