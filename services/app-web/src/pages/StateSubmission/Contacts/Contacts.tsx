@@ -149,6 +149,11 @@ const flattenErrors = (
                 flattened[errorKey] = value
             })
         })
+
+        if (errors.actuaryCommunicationPreference) {
+            flattened['actuaryCommunicationPreference'] =
+                errors.actuaryCommunicationPreference
+        }
     }
 
     return flattened
@@ -537,8 +542,8 @@ export const Contacts = ({
 
                                         <p>
                                             {showAddtlActuaryText
-                                                ? `Provide contact information for any additional actuaries who worked directly on this submission.`
-                                                : `Provide contact information for the actuaries who worked directly on this submission.`}
+                                                ? 'Provide contact information for any additional actuaries who worked directly on this submission.'
+                                                : 'Provide contact information for the actuaries who worked directly on this submission.'}
                                         </p>
                                         <legend className="srOnly">
                                             Actuary contacts
@@ -564,6 +569,7 @@ export const Contacts = ({
                                                                         styles.actuaryContact
                                                                     }
                                                                     key={index}
+                                                                    data-testid="actuary-contact"
                                                                 >
                                                                     <Fieldset
                                                                         legend={handleContactLegend(
