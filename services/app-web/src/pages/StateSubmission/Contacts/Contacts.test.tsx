@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 
 import {
     mockDraft,
@@ -18,7 +18,6 @@ describe('Contacts', () => {
     afterEach(() => jest.clearAllMocks())
 
     it('renders without errors', async () => {
-        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
@@ -42,7 +41,6 @@ describe('Contacts', () => {
     })
 
     it('displays correct form guidance for contract only submission', async () => {
-        ldUseClientSpy({ 'multi-rate-submissions': false })
         renderWithProviders(
             <Contacts draftSubmission={mockDraft()} updateDraft={jest.fn()} />,
             {
@@ -58,7 +56,6 @@ describe('Contacts', () => {
     })
 
     it('displays correct form guidance for contract and rates submission', async () => {
-        ldUseClientSpy({ 'multi-rate-submissions': false })
         renderWithProviders(
             <Contacts
                 draftSubmission={mockContactAndRatesDraft()}
@@ -77,7 +74,6 @@ describe('Contacts', () => {
     })
 
     it('checks saved mocked state contacts correctly', async () => {
-        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
@@ -99,7 +95,6 @@ describe('Contacts', () => {
     })
 
     it('should error and not continue if state contacts are not filled out', async () => {
-        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mock = mockDraft()
         const mockUpdateDraftFn = jest.fn()
         const emptyContactsDraft = {
@@ -143,7 +138,6 @@ describe('Contacts', () => {
     })
 
     it('after "Add state contact" button click, should focus on the field name of the new contact', async () => {
-        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mock = mockDraft()
         const mockUpdateDraftFn = jest.fn()
 
@@ -177,7 +171,6 @@ describe('Contacts', () => {
     })
 
     it('after "Add actuary contact" button click, it should focus on the field name of the new actuary contact', async () => {
-        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mock = mockContactAndRatesDraft()
         const mockUpdateDraftFn = jest.fn()
 
@@ -217,7 +210,6 @@ describe('Contacts', () => {
     })
 
     it('after state contact "Remove contact" button click, should focus on add new contact button', async () => {
-        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mock = mockDraft()
         const mockUpdateDraftFn = jest.fn()
 
@@ -247,7 +239,6 @@ describe('Contacts', () => {
     })
 
     it('after actuary contact "Remove contact" button click, should focus on add new actuary contact button', async () => {
-        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mock = mockContactAndRatesDraft()
         const mockUpdateDraftFn = jest.fn()
 
@@ -276,7 +267,6 @@ describe('Contacts', () => {
     })
 
     it('when there are multiple state contacts, they should numbered', async () => {
-        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mock = mockContactAndRatesDraft()
         const mockUpdateDraftFn = jest.fn()
 
@@ -300,7 +290,6 @@ describe('Contacts', () => {
     })
 
     it('when there are multiple actuary contacts, they should numbered', async () => {
-        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mock = mockContactAndRatesDraft()
         const mockUpdateDraftFn = jest.fn()
 
@@ -326,7 +315,6 @@ describe('Contacts', () => {
 
     /* This test is likely to time out if we use userEvent.type().  Converted to .paste() */
     it('when there are multiple state and actuary contacts, remove button works as expected', async () => {
-        ldUseClientSpy({ 'multi-rate-submissions': false })
         const mock = mockContactAndRatesDraft()
         const mockUpdateDraftFn = jest.fn()
 
@@ -426,5 +414,102 @@ describe('Contacts', () => {
         )
 
         expect(screen.queryByText('Additional actuary contact 1')).toBeNull()
+    })
+
+    it('text renders correctly when multi-rate-submissions flag is turned on', async () => {
+        ldUseClientSpy({ 'multi-rate-submissions': true })
+        const mock = mockContactAndRatesDraft()
+        const mockUpdateDraftFn = jest.fn()
+
+        renderWithProviders(
+            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        //Make sure text on page is correct with multi-rate-submissions flag on, without any actuaries.
+        expect(
+            screen.queryByText('A state contact is required')
+        ).toBeInTheDocument()
+        expect(
+            screen.queryByText('Additional Actuary Contacts')
+        ).toBeInTheDocument()
+        expect(
+            screen.queryByText(
+                'Provide contact information for any additional actuaries who worked directly on this submission.'
+            )
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('button', { name: 'Add actuary contact' })
+        ).toBeInTheDocument()
+        expect(
+            screen.queryByText(
+                'Communication preference between CMS Office of the Actuary (OACT) and all state’s actuaries (i.e. certifying actuaries and additional actuary contacts)'
+            )
+        ).toBeInTheDocument()
+        expect(
+            screen.queryByText(
+                'OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.'
+            )
+        ).toBeInTheDocument()
+        expect(
+            screen.queryByText(
+                'OACT can communicate directly with the state, and the state will relay all written communication to their actuaries and set up time for any potential verbal discussions.'
+            )
+        ).toBeInTheDocument()
+        expect(screen.queryAllByTestId('actuary-contact')).toHaveLength(0)
+
+        //Add two actuaries
+        await userEvent.click(
+            screen.getByRole('button', { name: /Add actuary contact/ })
+        )
+        await userEvent.click(
+            screen.getByRole('button', { name: /Add actuary contact/ })
+        )
+
+        //Check each actuary field sets have correct text
+        await waitFor(() => {
+            expect(screen.queryAllByTestId('actuary-contact')).toHaveLength(2)
+            const actuaryContactOne =
+                screen.queryAllByTestId('actuary-contact')[0]
+            expect(
+                within(actuaryContactOne).queryByText(
+                    'Additional actuary contact 1'
+                )
+            ).toBeInTheDocument()
+            expect(
+                within(actuaryContactOne).queryByText('Name')
+            ).toBeInTheDocument()
+            expect(
+                within(actuaryContactOne).queryByText('Title/Role')
+            ).toBeInTheDocument()
+            expect(
+                within(actuaryContactOne).queryByRole('button', {
+                    name: /Remove contact/,
+                })
+            ).toBeInTheDocument()
+
+            const actuaryContactTwo =
+                screen.queryAllByTestId('actuary-contact')[1]
+            expect(
+                within(actuaryContactTwo).queryByText(
+                    'Additional actuary contact 2'
+                )
+            ).toBeInTheDocument()
+            expect(
+                within(actuaryContactTwo).queryByText('Name')
+            ).toBeInTheDocument()
+            expect(
+                within(actuaryContactTwo).queryByText('Title/Role')
+            ).toBeInTheDocument()
+            expect(
+                within(actuaryContactOne).queryByRole('button', {
+                    name: /Remove contact/,
+                })
+            ).toBeInTheDocument()
+        })
     })
 })
