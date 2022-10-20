@@ -68,6 +68,9 @@ describe('CMS user', () => {
                 .should('exist')
                 .and('contain.text', 'zuko@example.com')
                 .and('contain.text', 'Unlock submission reason.')
+                .contains(
+                    /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+                )
                 .should('exist')
 
             cy.wait(2000)
@@ -114,6 +117,9 @@ describe('CMS user', () => {
                     .should('exist')
                     .and('contain.text', 'zuko@example.com')
                     .and('contain.text', 'Unlock submission reason.')
+                    .contains(
+                        /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET+/i
+                    )
                     .should('exist')
 
                 cy.submitStateSubmissionForm(true, true)
@@ -172,6 +178,9 @@ describe('CMS user', () => {
                 //Making sure we are on SubmissionRevisionSummary page and contains version text
                 cy.findByTestId('revision-version')
                     .should('exist')
+                    .contains(
+                        /(0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET version/i
+                    )
                 //Previous submission banner should exist and able to click link to go back to current submission
                 cy.findByTestId('previous-submission-banner').should('exist')
                 //Navigate back to current submission using link inside banner.
@@ -210,6 +219,9 @@ describe('CMS user', () => {
                 //     .should('exist')
                 //     .and('contain.text', 'zuko@example.com')
                 //     .and('contain.text', 'Unlock submission to add another rate cert.')
+                //     .contains(
+                //         /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET+/i
+                //     )
                 //     .should('exist')
                 //
                 // //Sign out
@@ -249,6 +261,9 @@ describe('CMS user', () => {
                 //     .should('exist')
                 //     .and('contain.text', 'zuko@example.com')
                 //     .and('contain.text', 'Unlock submission to add another rate cert.')
+                //     .contains(
+                //         /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET+/i
+                //     )
                 //     .should('exist')
                 //
                 // cy.navigateFormByDirectLink(rateDetailsURL)
