@@ -126,24 +126,24 @@ describe('contacts', () => {
                 cy.findAllByLabelText('Title/Role').type('Actuary Contact Title')
                 cy.findAllByLabelText('Email').type('actuarycontact@test.com')
                 cy.findAllByLabelText('Mercer').safeClick()
-            }))
+            })).then(() => {
+                // Actuary communication preference
+                cy.findByText(
+                    `OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`
+                ).click()
 
-            // Actuary communication preference
-            cy.findByText(
-                `OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`
-            ).click()
+                cy.navigateFormByButtonClick('CONTINUE')
+                cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
 
-            cy.navigateFormByButtonClick('CONTINUE')
-            cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
-
-            // check accessibility of filled out contacts page
-            cy.navigateFormByButtonClick('BACK')
-            cy.findByRole('heading', { level: 2, name: /Contacts/ })
-            // Commented out to get react-scripts/webpack 5 upgrade through
-            // cy.pa11y({
-            //     actions: ['wait for element #form-guidance to be visible'],
-            //     hideElements: '.usa-step-indicator',
-            // })
+                // check accessibility of filled out contacts page
+                cy.navigateFormByButtonClick('BACK')
+                cy.findByRole('heading', { level: 2, name: /Contacts/ })
+                // Commented out to get react-scripts/webpack 5 upgrade through
+                // cy.pa11y({
+                //     actions: ['wait for element #form-guidance to be visible'],
+                //     hideElements: '.usa-step-indicator',
+                // })
+            })
         })
     })
 })
