@@ -140,8 +140,10 @@ test('includes expected data summary for a contract and rates submission CMS ema
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                rateDateCertified: new Date(),
+                rateDateCertified: new Date('10/17/2022'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+                rateCertificationName:
+                    'MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20221017',
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
@@ -214,8 +216,10 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                rateDateCertified: new Date(),
+                rateDateCertified: new Date('10/17/2022'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+                rateCertificationName:
+                    'MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20221017',
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
@@ -229,8 +233,10 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                rateDateCertified: new Date(),
+                rateDateCertified: new Date('10/17/2022'),
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                rateCertificationName:
+                    'MCR-MN-0003-SNBC-RATE-20220201-20230201-CERTIFICATION-20221017',
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('02/01/2022'),
                 rateDateEnd: new Date('02/01/2023'),
@@ -244,11 +250,13 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                rateDateCertified: new Date(),
+                rateDateCertified: new Date('10/17/2022'),
                 rateProgramIDs: [
                     'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
                     'd95394e5-44d1-45df-8151-1cc1ee66f100',
                 ],
+                rateCertificationName:
+                    'MCR-MN-0003-MSC+-PMAP-RATE-20210605-20211231-AMENDMENT-20221017',
                 rateDateStart: new Date('01/01/2022'),
                 rateDateEnd: new Date('01/01/2023'),
                 rateAmendmentInfo: {
@@ -354,8 +362,10 @@ test('includes expected data summary for a contract amendment submission', async
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                rateDateCertified: new Date(),
+                rateDateCertified: new Date('10/17/2022'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+                rateCertificationName:
+                    'MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20221017',
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
@@ -422,8 +432,10 @@ test('includes expected data summary for a rate amendment submission CMS email',
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                rateDateCertified: new Date(),
+                rateDateCertified: new Date('10/17/2022'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+                rateCertificationName:
+                    'MCR-MN-0003-MSHO-RATE-20210605-20211231-AMENDMENT-20221017',
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
                 rateAmendmentInfo: {
@@ -820,6 +832,8 @@ test('renders overall email as expected', async () => {
                 ],
                 rateDateCertified: new Date('01/02/2021'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+                rateCertificationName:
+                    'MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20210102',
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
@@ -835,6 +849,8 @@ test('renders overall email as expected', async () => {
                 ],
                 rateDateCertified: new Date('02/02/2022'),
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                rateCertificationName:
+                    'MCR-MN-0003-SNBC-RATE-20220201-20230201-CERTIFICATION-20220202',
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('02/01/2022'),
                 rateDateEnd: new Date('02/01/2023'),
