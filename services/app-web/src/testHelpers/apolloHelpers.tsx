@@ -1210,8 +1210,8 @@ const unlockHealthPlanPackageMockError = ({
 
 const indexHealthPlanPackagesMockSuccess = (
     submissions: HealthPlanPackage[] = [
-        mockUnlockedHealthPlanPackage(),
-        mockSubmittedHealthPlanPackage(),
+        { ...mockUnlockedHealthPlanPackage(), id: 'test-id-123' },
+        { ...mockSubmittedHealthPlanPackage(), id: 'test-id-124' },
     ]
 ): MockedResponse<IndexHealthPlanPackagesQuery> => {
     const submissionEdges = submissions.map((sub) => {
