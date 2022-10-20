@@ -8,6 +8,9 @@ Cypress.Commands.add('logInAsStateUser', () => {
     })
 
     cy.visit('/')
+    cy.findByText(
+        'Medicaid and CHIP Managed Care Reporting and Review System'
+    )
     cy.findByRole('link', { name: 'Sign In', timeout: 20000 }).click()
     const authMode = Cypress.env('AUTH_MODE')
     console.log(authMode, 'authmode')
@@ -26,7 +29,8 @@ Cypress.Commands.add('logInAsStateUser', () => {
     } else {
         throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
     }
-    cy.wait('@fetchCurrentUserQuery', { timeout: 20000 }).wait('@indexHealthPlanPackagesQuery', { timeout: 80000 }) // this is the first request that engages the db, can take really long if its a fresh PR branch
+    cy.wait('@fetchCurrentUserQuery', { timeout: 20000 })
+    cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80000 }) // this is the first request that engages the db, can take really long if its a fresh PR branch
 })
 
 Cypress.Commands.add(
