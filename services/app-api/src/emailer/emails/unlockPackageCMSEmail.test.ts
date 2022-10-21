@@ -142,7 +142,7 @@ describe('unlockPackageCMSEmail', () => {
                             documentCategories: ['RATES' as const],
                         },
                     ],
-                    rateDateCertified: new Date(),
+                    rateDateCertified: new Date('10/17/2022'),
                     rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                     rateAmendmentInfo: undefined,
                     rateDateStart: new Date('01/01/2021'),
@@ -168,7 +168,7 @@ describe('unlockPackageCMSEmail', () => {
                             documentCategories: ['RATES' as const],
                         },
                     ],
-                    rateDateCertified: new Date(),
+                    rateDateCertified: new Date('10/17/2022'),
                     rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                     rateCertificationName:
                         'MCR-MN-0003-SNBC-RATE-20220201-20230201-CERTIFICATION-20221017',
@@ -194,7 +194,7 @@ describe('unlockPackageCMSEmail', () => {
                             documentCategories: ['RATES' as const],
                         },
                     ],
-                    rateDateCertified: new Date(),
+                    rateDateCertified: new Date('10/17/2022'),
                     rateProgramIDs: [
                         'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
                         'd95394e5-44d1-45df-8151-1cc1ee66f100',
