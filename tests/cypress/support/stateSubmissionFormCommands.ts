@@ -206,6 +206,16 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     cy.findByTestId('file-input-input').attachFile(
         'documents/trussel-guide.pdf'
     )
+
+    cy.getFeatureFlagStore(['multi-rate-submissions']).then(store => {
+        if (store['multi-rate-submissions']) {
+            cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
+            cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
+            cy.findAllByLabelText('Email').eq(0).type('actuarycontact@test.com')
+            cy.findAllByLabelText('Mercer').eq(0).safeClick()
+        }
+    })
+
     cy.verifyDocumentsHaveNoErrors()
     cy.waitForDocumentsToLoad()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
@@ -233,6 +243,15 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
     cy.findByTestId('file-input-input').attachFile(
         'documents/trussel-guide.pdf'
     )
+
+    cy.getFeatureFlagStore(['multi-rate-submissions']).then(store => {
+        if (store['multi-rate-submissions']) {
+            cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
+            cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
+            cy.findAllByLabelText('Email').eq(0).type('actuarycontact@test.com')
+            cy.findAllByLabelText('Mercer').eq(0).safeClick()
+        }
+    })
 
     cy.verifyDocumentsHaveNoErrors()
     cy.waitForDocumentsToLoad()
