@@ -264,9 +264,23 @@ export const Contacts = ({
         values: ContactsFormValues,
         formikHelpers: FormikHelpers<ContactsFormValues>
     ) => {
-        // const updatedDraft = updatesFromSubmission(draftSubmission)
         draftSubmission.stateContacts = values.stateContacts
         draftSubmission.actuaryContacts = values.actuaryContacts
+
+        /**
+         * TODO: Delete this part when we merge in work on Contacts page
+         * Temporary fix until we merge in work on Contacts page
+         */
+
+        if (draftSubmission.rateInfos[0]) {
+            draftSubmission.rateInfos[0].actuaryContacts =
+                values.actuaryContacts
+        }
+
+        /**
+         *End of temp code
+         */
+
         draftSubmission.actuaryCommunicationPreference =
             values.actuaryCommunicationPreference
 
