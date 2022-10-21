@@ -540,7 +540,7 @@ describe('RateDetails', () => {
             )
             await userEvent.upload(input, [TEST_DOC_FILE])
 
-            // check that now we can see dates, since that is triggered after selecting tyhpe
+            // check that now we can see dates, since that is triggered after selecting type
             await waitFor(() => {
                 expect(
                     withinTargetRateCert.queryByText('Start date')
@@ -550,6 +550,15 @@ describe('RateDetails', () => {
                 ).toBeInTheDocument()
                 expect(
                     withinTargetRateCert.queryByText('Date certified')
+                ).toBeInTheDocument()
+                expect(
+                    withinTargetRateCert.queryByText('Name')
+                ).toBeInTheDocument()
+                expect(
+                    withinTargetRateCert.queryByText('Title/Role')
+                ).toBeInTheDocument()
+                expect(
+                    withinTargetRateCert.queryByText('Email')
                 ).toBeInTheDocument()
             })
 
@@ -574,6 +583,18 @@ describe('RateDetails', () => {
 
             withinTargetRateCert.getAllByLabelText('Date certified')[0].focus()
             await userEvent.paste('12/01/2021')
+
+            // fill out actuary contact
+            withinTargetRateCert.getByLabelText('Name').focus()
+            await userEvent.paste(`Actuary Contact Person ${index}`)
+
+            withinTargetRateCert.getByLabelText('Title/Role').focus()
+            await userEvent.paste(`Actuary Contact Title ${index}`)
+
+            withinTargetRateCert.getByLabelText('Email').focus()
+            await userEvent.paste(`actuarycontact${index}@test.com`)
+
+            await userEvent.click(withinTargetRateCert.getByLabelText('Mercer'))
         }
 
         const fillOutFirstRate = async (screen: Screen) => {
@@ -945,7 +966,7 @@ describe('RateDetails', () => {
 
             // check for expected errors
             await waitFor(() => {
-                expect(screen.queryAllByTestId('errorMessage')).toHaveLength(3)
+                expect(screen.queryAllByTestId('errorMessage')).toHaveLength(7)
                 expect(
                     screen.queryAllByText(
                         'You must enter the date the document was certified'
@@ -956,9 +977,20 @@ describe('RateDetails', () => {
                         'You must provide a start and an end date'
                     )
                 ).toBeInTheDocument()
-
                 expect(
                     screen.queryAllByText('You must select a program')
+                ).toHaveLength(2)
+                expect(
+                    screen.queryAllByText('You must provide a name')
+                ).toHaveLength(2)
+                expect(
+                    screen.queryAllByText('You must provide a title/role')
+                ).toHaveLength(2)
+                expect(
+                    screen.queryAllByText('You must provide an email address')
+                ).toHaveLength(2)
+                expect(
+                    screen.queryAllByText('You must select an actuarial firm')
                 ).toHaveLength(2)
             })
 
@@ -984,6 +1016,18 @@ describe('RateDetails', () => {
 
             within(newRateCert!).getAllByLabelText('Date certified')[0].focus()
             await userEvent.paste('12/01/2021')
+
+            // fill out actuary contact
+            within(newRateCert!).getByLabelText('Name').focus()
+            await userEvent.paste(`Actuary Contact Person 2`)
+
+            within(newRateCert!).getByLabelText('Title/Role').focus()
+            await userEvent.paste(`Actuary Contact Title 2`)
+
+            within(newRateCert!).getByLabelText('Email').focus()
+            await userEvent.paste(`actuarycontact2@test.com`)
+
+            await userEvent.click(within(newRateCert!).getByLabelText('Mercer'))
 
             //wait for all errors to clear
             await waitFor(() =>
