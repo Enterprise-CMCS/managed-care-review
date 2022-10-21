@@ -555,6 +555,8 @@ describe('unlockHealthPlanPackage', () => {
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ]
+        // there's a rateProgramIDs in rateInfos and also on the form data itself; clear them both
+        unlockedFormData.rateProgramIDs = []
 
         //Update package
         const updatedSub = await updateTestHealthPlanFormData(
@@ -573,7 +575,6 @@ describe('unlockHealthPlanPackage', () => {
 
         const finalUnlockFormData =
             finalUnlockResult.revisions[0].node.formDataProto
-
         const sub = base64ToDomain(finalUnlockFormData)
         if (sub instanceof Error) {
             throw sub
@@ -584,7 +585,8 @@ describe('unlockHealthPlanPackage', () => {
         const rateName = generateRateName(sub, sub.rateInfos[0], programs)
 
         // email subject line is correct for CMS email
-        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            4,
             expect.objectContaining({
                 subject: expect.stringContaining(`${name} was unlocked`),
                 //Rate name should have defaulted back to using package programs to generate name

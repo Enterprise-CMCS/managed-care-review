@@ -261,12 +261,8 @@ const generateRateName = (
     }
 
     if (rateDateCertified) {
-        rateName = rateName = rateName.concat(
-            '-',
-            formatRateNameDate(rateDateCertified)
-        )
+        rateName = rateName.concat('-', formatRateNameDate(rateDateCertified))
     }
-
     return rateName
 }
 

@@ -123,6 +123,7 @@ const rateInfosTypeSchema = z.object({
     rateDateCertified: z.date().optional(),
     rateAmendmentInfo: rateAmendmentInfoSchema.optional(),
     rateProgramIDs: z.array(z.string()),
+    rateCertificationName: z.string().optional(),
     actuaryContacts: z.array(actuaryContactSchema),
     actuaryCommunicationPreference: actuaryCommunicationTypeSchema.optional(),
 })

@@ -3,7 +3,21 @@ import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
     isLockedHealthPlanFormData,
+    generateRateName,
 } from '../../healthPlanFormDataType'
+import statePrograms from '../../data/statePrograms.json'
+import { ProgramArgType } from '../../healthPlanFormDataType/State'
+
+const findStatePrograms = (stateCode: string): ProgramArgType[] => {
+    const programs = statePrograms.states.find(
+        (state) => state.code === stateCode
+    )?.programs
+
+    if (!programs) {
+        return []
+    }
+    return programs
+}
 
 /*
     Convert domain date to proto timestamp
@@ -168,7 +182,7 @@ const toProtoBuffer = (
         },
         rateInfos:
             domainData.rateInfos && domainData.rateInfos.length
-                ? domainData.rateInfos.map((rateInfo) => {
+                ? domainData.rateInfos.map((rateInfo, index) => {
                       return {
                           rateType: domainEnumToProto(
                               rateInfo.rateType,
@@ -195,6 +209,11 @@ const toProtoBuffer = (
                                   doc.documentCategories
                               ),
                           })),
+                          rateCertificationName: generateRateName(
+                              domainData,
+                              rateInfo,
+                              findStatePrograms(domainData.stateCode)
+                          ),
                           rateProgramIds: rateInfo.rateProgramIDs,
                           rateAmendmentInfo: rateInfo.rateAmendmentInfo && {
                               effectiveDateStart: domainDateToProtoDate(

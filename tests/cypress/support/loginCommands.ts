@@ -8,7 +8,10 @@ Cypress.Commands.add('logInAsStateUser', () => {
     })
 
     cy.visit('/')
-    cy.findByRole('link', { name: 'Sign In' }).click()
+    cy.findByText(
+        'Medicaid and CHIP Managed Care Reporting and Review System'
+    )
+    cy.findByRole('link', { name: 'Sign In', timeout: 20000 }).click()
     const authMode = Cypress.env('AUTH_MODE')
     console.log(authMode, 'authmode')
 
@@ -40,6 +43,10 @@ Cypress.Commands.add(
         })
 
         cy.visit(initialURL)
+        //Add assertion looking for test on the page before findByRole
+        cy.findByText(
+            'Medicaid and CHIP Managed Care Reporting and Review System'
+        )
         cy.findByRole('link', { name: 'Sign In' }).click()
         const authMode = Cypress.env('AUTH_MODE')
         console.log(authMode, 'authmode')

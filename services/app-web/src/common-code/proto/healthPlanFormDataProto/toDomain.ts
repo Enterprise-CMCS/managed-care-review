@@ -240,22 +240,24 @@ function parseActuaryContacts(
         return []
     }
 
-    return replaceNullsWithUndefineds(rateInfo.actuaryContacts).map(
-        (aContact) => {
-            const cleanContact = replaceNullsWithUndefineds(aContact)
+    const actuaryContacts = replaceNullsWithUndefineds(
+        rateInfo.actuaryContacts
+    ).map((aContact) => {
+        const cleanContact = replaceNullsWithUndefineds(aContact)
 
-            return {
-                name: cleanContact?.contact?.name,
-                titleRole: cleanContact?.contact?.titleRole,
-                email: cleanContact?.contact?.email,
-                actuarialFirm: enumToDomain(
-                    mcreviewproto.ActuarialFirmType,
-                    aContact.actuarialFirmType
-                ) as ActuarialFirmType,
-                actuarialFirmOther: cleanContact.actuarialFirmOther,
-            }
+        return {
+            name: cleanContact?.contact?.name,
+            titleRole: cleanContact?.contact?.titleRole,
+            email: cleanContact?.contact?.email,
+            actuarialFirm: enumToDomain(
+                mcreviewproto.ActuarialFirmType,
+                aContact.actuarialFirmType
+            ) as ActuarialFirmType,
+            actuarialFirmOther: cleanContact.actuarialFirmOther,
         }
-    )
+    })
+
+    return actuaryContacts
 }
 
 function parseProtoRateAmendment(
@@ -272,6 +274,18 @@ function parseProtoRateAmendment(
         effectiveDateEnd: protoDateToDomain(rateAmendment.effectiveDateEnd),
         effectiveDateStart: protoDateToDomain(rateAmendment.effectiveDateStart),
     }
+}
+
+function parseRateCertificationName(
+    rateCertificationName:
+        | mcreviewproto.RateInfo['rateCertificationName']
+        | null
+        | undefined
+): string | undefined {
+    if (!rateCertificationName) {
+        return undefined
+    }
+    return rateCertificationName
 }
 
 function parseRateInfos(
@@ -301,6 +315,9 @@ function parseRateInfos(
                     rateInfo?.rateDateCertified
                 ),
                 rateProgramIDs: rateInfo?.rateProgramIds ?? [],
+                rateCertificationName: parseRateCertificationName(
+                    rateInfo?.rateCertificationName
+                ),
                 actuaryContacts: parseActuaryContacts(rateInfo),
                 actuaryCommunicationPreference: enumToDomain(
                     mcreviewproto.ActuaryCommunicationType,
@@ -320,7 +337,6 @@ const toDomain = (
     buff: Uint8Array
 ): UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType | Error => {
     const formDataMessage = decodeOrError(buff)
-
     if (formDataMessage instanceof Error) {
         return formDataMessage
     }
@@ -364,7 +380,6 @@ const toDomain = (
     if (rateInfos.length > 0) {
         rateInfo = rateInfos[0]
     }
-
     // SO, rather than repeat this whole thing for Draft and State submissions, because they are so
     // similar right now, we're just going to & them together for parsing out all the optional stuff
     // from the protobuf for now. If Draft and State submission diverged further in the future this
@@ -439,7 +454,6 @@ const toDomain = (
         actuaryContacts: parseActuaryContacts(rateInfo),
         documents: parseProtoDocuments(formDataMessage.documents),
     }
-
     // Now that we've gotten things into our combined draft & state domain format.
     // we confirm that all the required fields are present to turn this into an UnlockedHealthPlanFormDataType or a LockedHealthPlanFormDataType
     if (status === 'DRAFT') {
@@ -447,11 +461,9 @@ const toDomain = (
         const maybeDraft =
             maybeUnlockedFormData as RecursivePartial<UnlockedHealthPlanFormDataType>
         maybeDraft.status = 'DRAFT'
-
         // This parse returns an actual UnlockedHealthPlanFormDataType, so all our partial & casting is put to rest
         const parseResult =
             unlockedHealthPlanFormDataSchema.safeParse(maybeDraft)
-
         if (parseResult.success === false) {
             return parseResult.error
         }

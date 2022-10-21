@@ -8,6 +8,7 @@ plugins:
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   - serverless-iam-helper
+  - '@enterprise-cmcs/serverless-waf-plugin'
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -15,6 +16,7 @@ custom:
   nrMetricStreamName: 'NewRelic-Metric-Stream'
   nrFirehoseStreamName: 'NewRelic-Delivery-Stream'
   nrExternalId: '3407984'
+  webAclName: ${self:custom.stage}-${self:service}-webacl
   serverless-offline-ssm:
     stages:
       - local
@@ -248,17 +250,6 @@ resources:
     #       SampledRequestsEnabled: true
     #       MetricName: ${sls:stage}-webacl
 
-    # ApiGwWebAclAssociation:
-    #   Type: AWS::WAFv2::WebACLAssociation
-    #   DependsOn:
-    #     - AppApiGateway
-    #     - AppApiGatewayAcl
-    #   Properties:
-    #     ResourceArn: !Sub
-    #       - arn:aws:apigateway:${self:provider.region}::/restapis/${GatewayRef}/stages/${sls:stage}
-    #       - { GatewayRef: !Ref AppApiGateway }
-    #     WebACLArn: !GetAtt AppApiGatewayAcl.Arn
-
   Outputs:
     ApiGatewayRestApiId:
       Value:
@@ -270,3 +261,8 @@ resources:
         Fn::GetAtt:
           - AppApiGateway
           - RootResourceId
+    WafPluginAclArn:
+      Value:
+        Fn::GetAtt:
+          - WafPluginAcl
+          - Arn

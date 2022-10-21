@@ -191,6 +191,8 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
                     effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
                 },
                 rateProgramIDs: [mockMNState().programs[0].id],
+                rateCertificationName:
+                    'MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523',
                 rateDocuments: [],
                 actuaryContacts: [
                     {
@@ -300,6 +302,8 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
                     effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
                 },
                 rateProgramIDs: [mockMNState().programs[0].id],
+                rateCertificationName:
+                    'MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523',
                 rateDocuments: [
                     {
                         s3URL: 's3://bucketname/key/foo.png',
@@ -424,6 +428,8 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
                     effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
                 },
                 rateProgramIDs: [mockMNState().programs[0].id],
+                rateCertificationName:
+                    'MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523',
                 rateDocuments: [
                     {
                         s3URL: 's3://bucketname/key/foo.png',
@@ -565,6 +571,8 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
                     effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
                 },
                 rateProgramIDs: [mockMNState().programs[0].id],
+                rateCertificationName:
+                    'MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523',
                 rateDocuments: [
                     {
                         s3URL: 's3://bucketname/key/foo.png',
@@ -710,6 +718,8 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
                     effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
                 },
                 rateProgramIDs: [mockMNState().programs[0].id],
+                rateCertificationName:
+                    'MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523',
                 actuaryContacts: [
                     {
                         name: 'foo bar',
