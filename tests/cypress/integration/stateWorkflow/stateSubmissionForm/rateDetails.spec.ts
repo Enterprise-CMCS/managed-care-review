@@ -148,7 +148,7 @@ describe('rate details', () => {
             cy.findByRole('button', { name: 'Add another rate certification'}).click()
             cy.findAllByTestId('rate-certification-form').each((form, index, arr) => {
                 cy.wrap(form).within(() => {
-                    //Fill out the last rate certification form
+                    //Fill out the last rate certification form and actuarial contacts
                     if (index === arr.length - 1) {
                         cy.fillOutAmendmentToPriorRateCertification()
                     }
