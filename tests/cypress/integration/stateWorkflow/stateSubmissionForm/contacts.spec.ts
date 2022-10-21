@@ -120,13 +120,28 @@ describe('contacts', () => {
             cy.findByRole('button', { name: /Add actuary contact/}).safeClick()
             cy.findByRole('button', { name: /Add actuary contact/}).safeClick()
 
+            //Actuary contact should have 2 sets of actuary inputs
+            cy.findAllByTestId('actuary-contact').should('have.length', 2)
+
             //Fill out each additional actuary contacts
-            cy.findAllByTestId('actuary-contact').each(actuary => cy.wrap(actuary).within(() => {
-                cy.findByLabelText('Name').click().type('Actuary Contact Person')
-                cy.findByLabelText('Title/Role').click().type('Actuary Contact Title')
-                cy.findByLabelText('Email').click().type('actuarycontact@test.com')
-                cy.findByLabelText('Mercer').safeClick()
-            }))
+            // cy.findAllByTestId('actuary-contact').each(actuary => cy.wrap(actuary).within(() => {
+            //     cy.findByLabelText('Name').click().type('Actuary Contact Person')
+            //     cy.findByLabelText('Title/Role').type('Actuary Contact Title')
+            //     cy.findByLabelText('Email').type('actuarycontact@test.com')
+            //     cy.findByLabelText('Mercer').safeClick()
+            // }))
+
+            //Fill out first actuary contact
+            cy.findAllByLabelText('Name').eq(1).click().type('Actuary Contact Person')
+            cy.findAllByLabelText('Title/Role').eq(1).type('Actuary Contact Title')
+            cy.findAllByLabelText('Email').eq(1).type('actuarycontact@test.com')
+            cy.findAllByLabelText('Mercer').eq(0).safeClick()
+
+            //Fill out second actuary contact
+            cy.findAllByLabelText('Name').eq(2).click().type('Actuary Contact Person')
+            cy.findAllByLabelText('Title/Role').eq(2).type('Actuary Contact Title')
+            cy.findAllByLabelText('Email').eq(2).type('actuarycontact@test.com')
+            cy.findAllByLabelText('Mercer').eq(1).safeClick()
 
             // Actuary communication preference
             cy.findByText(
