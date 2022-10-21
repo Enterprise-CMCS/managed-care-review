@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
@@ -9,7 +9,10 @@ import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
-import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import {
+    HealthPlanFormDataType,
+    RateInfoType,
+} from '../../../common-code/healthPlanFormDataType'
 import { Program } from '../../../gen/gqlClient'
 
 export type RateDetailsSummarySectionProps = {
@@ -40,19 +43,21 @@ export const RateDetailsSummarySection = ({
         doc.documentCategories.includes('RATES_RELATED')
     )
 
-    const rateName = submission.rateInfos[0]?.rateCertificationName
+    const rateCapitationType = (rateInfo: RateInfoType) =>
+        rateInfo.rateCapitationType
+            ? rateInfo.rateCapitationType === 'RATE_CELL'
+                ? 'Certification of capitation rates specific to each rate cell'
+                : 'Certification of rate ranges of capitation rates per rate cell'
+            : ''
 
-    const rateCapitationType = submission.rateCapitationType
-        ? submission.rateCapitationType === 'RATE_CELL'
-            ? 'Certification of capitation rates specific to each rate cell'
-            : 'Certification of rate ranges of capitation rates per rate cell'
-        : ''
-
-    const ratePrograms = () => {
+    const ratePrograms = (
+        submission: HealthPlanFormDataType,
+        rateInfo: RateInfoType
+    ) => {
         /* if we have rateProgramIDs, use them, otherwise use programIDs */
         let programIDs = [] as string[]
-        if (submission.rateProgramIDs && submission.rateProgramIDs.length > 0) {
-            programIDs = submission.rateProgramIDs
+        if (rateInfo.rateProgramIDs && rateInfo.rateProgramIDs.length > 0) {
+            programIDs = rateInfo.rateProgramIDs
         } else if (submission.programIDs && submission.programIDs.length > 0) {
             programIDs = submission.programIDs
         }
@@ -63,11 +68,11 @@ export const RateDetailsSummarySection = ({
             : undefined
     }
 
-    const rateCertificationType = () => {
-        if (submission.rateType === 'AMENDMENT') {
+    const rateCertificationType = (rateInfo: RateInfoType) => {
+        if (rateInfo.rateType === 'AMENDMENT') {
             return 'Amendment to prior rate certification'
         }
-        if (submission.rateType === 'NEW') {
+        if (rateInfo.rateType === 'NEW') {
             return 'New rate certification'
         }
     }
@@ -117,72 +122,91 @@ export const RateDetailsSummarySection = ({
                         />
                     )}
                 </SectionHeader>
-
-                <h3
-                    aria-label={`Rate ID: ${rateName}`}
-                    className={styles.rateName}
-                >
-                    {rateName}
-                </h3>
-
-                <DoubleColumnGrid>
-                    {ratePrograms && (
-                        <DataDetail
-                            id="ratePrograms"
-                            label="Programs this rate certification covers"
-                            data={ratePrograms()}
-                        />
-                    )}
-                    <DataDetail
-                        id="rateType"
-                        label="Rate certification type"
-                        data={rateCertificationType()}
-                    />
-                    <DataDetail
-                        id="rateCapitationType"
-                        label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
-                        data={rateCapitationType}
-                    />
-                    <DataDetail
-                        id="ratingPeriod"
-                        label={
-                            submission.rateType === 'AMENDMENT'
-                                ? 'Rating period of original rate certification'
-                                : 'Rating period'
-                        }
-                        data={`${formatCalendarDate(
-                            submission.rateDateStart
-                        )} to ${formatCalendarDate(submission.rateDateEnd)}`}
-                    />
-                    <DataDetail
-                        id="dateCertified"
-                        label={
-                            submission.rateAmendmentInfo
-                                ? 'Date certified for rate amendment'
-                                : 'Date certified'
-                        }
-                        data={formatCalendarDate(submission.rateDateCertified)}
-                    />
-                    {submission.rateAmendmentInfo ? (
-                        <DataDetail
-                            id="effectiveRatingPeriod"
-                            label="Rate amendment effective dates"
-                            data={`${formatCalendarDate(
-                                submission.rateAmendmentInfo.effectiveDateStart
-                            )} to ${formatCalendarDate(
-                                submission.rateAmendmentInfo.effectiveDateEnd
-                            )}`}
-                        />
-                    ) : null}
-                </DoubleColumnGrid>
+                {submission.rateInfos.map((rateInfo, index) => {
+                    return (
+                        <React.Fragment
+                            key={`${
+                                rateInfo.rateCertificationName
+                            }${JSON.stringify(rateInfo.rateDocuments)}`}
+                        >
+                            <h3
+                                aria-label={`Rate ID: ${rateInfo.rateCertificationName}`}
+                                className={styles.rateName}
+                            >
+                                {rateInfo.rateCertificationName}
+                            </h3>
+                            <DoubleColumnGrid>
+                                {ratePrograms && (
+                                    <DataDetail
+                                        id="ratePrograms"
+                                        label="Programs this rate certification covers"
+                                        data={ratePrograms(
+                                            submission,
+                                            rateInfo
+                                        )}
+                                    />
+                                )}
+                                <DataDetail
+                                    id="rateType"
+                                    label="Rate certification type"
+                                    data={rateCertificationType(rateInfo)}
+                                />
+                                <DataDetail
+                                    id="rateCapitationType"
+                                    label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
+                                    data={rateCapitationType(rateInfo)}
+                                />
+                                <DataDetail
+                                    id="ratingPeriod"
+                                    label={
+                                        rateInfo.rateType === 'AMENDMENT'
+                                            ? 'Rating period of original rate certification'
+                                            : 'Rating period'
+                                    }
+                                    data={`${formatCalendarDate(
+                                        rateInfo.rateDateStart
+                                    )} to ${formatCalendarDate(
+                                        rateInfo.rateDateEnd
+                                    )}`}
+                                />
+                                <DataDetail
+                                    id="dateCertified"
+                                    label={
+                                        rateInfo.rateAmendmentInfo
+                                            ? 'Date certified for rate amendment'
+                                            : 'Date certified'
+                                    }
+                                    data={formatCalendarDate(
+                                        rateInfo.rateDateCertified
+                                    )}
+                                />
+                                {rateInfo.rateAmendmentInfo ? (
+                                    <DataDetail
+                                        id="effectiveRatingPeriod"
+                                        label="Rate amendment effective dates"
+                                        data={`${formatCalendarDate(
+                                            rateInfo.rateAmendmentInfo
+                                                .effectiveDateStart
+                                        )} to ${formatCalendarDate(
+                                            rateInfo.rateAmendmentInfo
+                                                .effectiveDateEnd
+                                        )}`}
+                                    />
+                                ) : null}
+                            </DoubleColumnGrid>
+                            <UploadedDocumentsTable
+                                documents={rateInfo.rateDocuments}
+                                documentDateLookupTable={
+                                    documentDateLookupTable
+                                }
+                                isCMSUser={isCMSUser}
+                                caption="Rate certification"
+                                documentCategory="Rate certification"
+                            />
+                        </React.Fragment>
+                    )
+                })}
             </dl>
-            <UploadedDocumentsTable
-                documents={submission.rateDocuments}
-                documentDateLookupTable={documentDateLookupTable}
-                isCMSUser={isCMSUser}
-                caption="Rate certification"
-                documentCategory="Rate certification"
-            />
             <UploadedDocumentsTable
                 documents={rateSupportingDocuments}
                 documentDateLookupTable={documentDateLookupTable}
