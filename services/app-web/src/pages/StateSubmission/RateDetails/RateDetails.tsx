@@ -57,14 +57,15 @@ import { ActuaryContactFields } from '../Contacts'
 
 /**
  * TODO
- * ▢ Refactor Contact page actuary contact to save to first rate info actuary contact
- * ▢ Review API tests for update in toProtobuffer and toDomain
- * ▢ Make ActuaryContactFields more reusable
- * ▢ Refactor Contacts page to use ActuaryContactFields for actuary contact fields
+ * ✗ Refactor Contact page actuary contact to save to first rate info actuary contact
+ * ✗ Review API tests for update in toProtobuffer and toDomain
+ * ▢ Merge in changes to Contact page actuary contact.
+ *      ▢ Make ActuaryContactFields more reusable
+ *      ▢ Refactor Contacts page to use ActuaryContactFields for actuary contact fields
  * ▢ Check screen reader for actuary contact inputs on rate details page
- * ▢ Wait for Hana's mutli-rate unit and cypress tests to merge into main then merge main into this branch
- * ▢ Add Unit Tests
- * ▢ Add Cypress Tests
+ * ✓ Wait for Hana's mutli-rate unit and cypress tests to merge into main then merge main into this branch
+ *      ✓ Update Unit Tests
+ *      ✓ Update Cypress Tests
  */
 
 const RateDatesErrorMessage = ({
@@ -141,9 +142,11 @@ export const RateDetails = ({
     const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
 
     const rateDetailsFormSchema = showMultiRates
-        ? Yup.object().shape({
-              rateInfos:
-                  RateDetailsFormSchema.defined().concat(ActuaryContactSchema),
+        ? //Concat RateDetailsFormSchema to ActuaryContactSchema for error summary order
+          Yup.object().shape({
+              rateInfos: ActuaryContactSchema.defined().concat(
+                  RateDetailsFormSchema
+              ),
           })
         : Yup.object().shape({
               rateInfos: RateDetailsFormSchema,

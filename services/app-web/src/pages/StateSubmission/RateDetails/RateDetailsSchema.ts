@@ -119,9 +119,7 @@ const ActuaryContactSchema = Yup.array().of(
                     .nullable(),
             })
         ),
-        actuaryCommunicationPreference: Yup.string().required(
-            'You must select a communication preference'
-        ),
+        actuaryCommunicationPreference: Yup.string().optional(),
     })
 )
 
