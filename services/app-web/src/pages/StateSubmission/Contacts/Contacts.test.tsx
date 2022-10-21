@@ -352,7 +352,7 @@ describe('Contacts', () => {
 
         await userEvent.click(
             screen.getByText(
-                `OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`
+                `OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`
             )
         )
 

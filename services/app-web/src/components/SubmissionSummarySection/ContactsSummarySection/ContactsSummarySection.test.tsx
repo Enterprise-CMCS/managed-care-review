@@ -96,7 +96,7 @@ describe('ContactsSummarySection', () => {
         ).toBeInTheDocument()
         expect(
             screen.queryByText(
-                'OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.'
+                'OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.'
             )
         ).toBeInTheDocument()
     })
@@ -149,7 +149,7 @@ describe('ContactsSummarySection', () => {
         ).toBeInTheDocument()
         expect(
             screen.queryByText(
-                'OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.'
+                'OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.'
             )
         ).toBeInTheDocument()
     })

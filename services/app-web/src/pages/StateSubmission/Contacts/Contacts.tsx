@@ -904,7 +904,7 @@ export const Contacts = ({
                                                         <FieldRadio
                                                             id="OACTtoActuary"
                                                             name="actuaryCommunicationPreference"
-                                                            label={`OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`}
+                                                            label={`OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`}
                                                             value={
                                                                 'OACT_TO_ACTUARY'
                                                             }
@@ -913,7 +913,7 @@ export const Contacts = ({
                                                         <FieldRadio
                                                             id="OACTtoState"
                                                             name="actuaryCommunicationPreference"
-                                                            label={`OACT can communicate directly with the state, and the state will relay all written communication to their actuary and set up time for any potential verbal discussions.`}
+                                                            label={`OACT can communicate directly with the state, and the state will relay all written communication to their actuaries and set up time for any potential verbal discussions.`}
                                                             value={
                                                                 'OACT_TO_STATE'
                                                             }

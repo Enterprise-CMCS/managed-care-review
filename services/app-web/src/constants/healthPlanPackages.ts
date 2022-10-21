@@ -80,8 +80,8 @@ const ActuaryFirmsRecord: Record<ActuarialFirmType, string> = {
 }
 
 const ActuaryCommunicationRecord: Record<ActuaryCommunicationType, string> = {
-    OACT_TO_ACTUARY: `OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`,
-    OACT_TO_STATE: `OACT can communicate directly with the state, and the state will relay all written communication to their actuary and set up time for any potential verbal discussions.`,
+    OACT_TO_ACTUARY: `OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`,
+    OACT_TO_STATE: `OACT can communicate directly with the state, and the state will relay all written communication to their actuaries and set up time for any potential verbal discussions.`,
 }
 
 const SubmissionStatusRecord: Record<HealthPlanPackageStatus, string> = {
