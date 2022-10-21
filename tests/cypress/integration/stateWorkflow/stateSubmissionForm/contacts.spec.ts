@@ -123,14 +123,6 @@ describe('contacts', () => {
             //Actuary contact should have 2 sets of actuary inputs
             cy.findAllByTestId('actuary-contact').should('have.length', 2)
 
-            //Fill out each additional actuary contacts
-            // cy.findAllByTestId('actuary-contact').each(actuary => cy.wrap(actuary).within(() => {
-            //     cy.findByLabelText('Name').click().type('Actuary Contact Person')
-            //     cy.findByLabelText('Title/Role').type('Actuary Contact Title')
-            //     cy.findByLabelText('Email').type('actuarycontact@test.com')
-            //     cy.findByLabelText('Mercer').safeClick()
-            // }))
-
             //Fill out first actuary contact
             cy.findAllByLabelText('Name').eq(1).click().type('Actuary Contact Person')
             cy.findAllByLabelText('Title/Role').eq(1).type('Actuary Contact Title')
