@@ -43,10 +43,11 @@ export const RateDetailsSummarySection = ({
 
     /* falling back to generated name for old submissions that don't have the name on first load */
     const rateName = () => {
-        const certName = submission.rateInfos[0].rateCertificationName
+        const certName = submission.rateInfos[0]?.rateCertificationName
+        const rateInfo = submission.rateInfos[0] ?? submission
         const generatedName = generateRateName(
             submission,
-            submission.rateInfos[0],
+            rateInfo,
             statePrograms
         )
         if (certName) {
