@@ -339,7 +339,7 @@ const toDomain = (
 
     // toLatestVersion
     const formDataMessage = toLatestProtoVersion(formDataMessageAnyVersion)
-    console.log('formdata', formDataMessage)
+
     const {
         id,
         status,
