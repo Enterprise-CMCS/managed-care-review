@@ -24,9 +24,9 @@ const updateToVersion3 = (oldProto: mcreviewproto.HealthPlanFormData) => {
 
         // Use actuary contacts fields from the first rateInfo to fill in data for new field addtlActuaryContacts
         updatedProto.addtlActuaryContacts =
-            oldProto.rateInfos[0].actuaryContacts
+            oldProto.rateInfos[0]?.actuaryContacts ?? []
         updatedProto.addtlActuaryCommunicationPreference =
-            oldProto.rateInfos[0].actuaryCommunicationPreference
+            oldProto.rateInfos[0]?.actuaryCommunicationPreference
 
         // Bump version
         updatedProto.protoVersion = 3
