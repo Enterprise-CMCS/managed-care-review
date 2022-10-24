@@ -4,12 +4,12 @@ import { AxiosResponse } from 'axios'
 function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
     const fakeFetchResponse: Response = {
         headers: new Headers({
-            ok: axiosResponse.headers['ok'],
-            redirected: axiosResponse.headers['redirected'],
-            status: axiosResponse.headers['status'],
-            statusText: axiosResponse.headers['statusText'],
-            type: axiosResponse.headers['type'],
-            url: axiosResponse.headers['url'],
+            ok: axiosResponse.headers['ok'] || '',
+            redirected: axiosResponse.headers['redirected'] || '',
+            status: axiosResponse.headers['status'] || '',
+            statusText: axiosResponse.headers['statusText'] || '',
+            type: axiosResponse.headers['type'] || '',
+            url: axiosResponse.headers['url'] || '',
         }),
         status: axiosResponse.status,
         ok: axiosResponse.status >= 200 && axiosResponse.status < 300,
