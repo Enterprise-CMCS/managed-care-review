@@ -2,7 +2,7 @@ import fs from 'fs'
 import { toLatestProtoVersion } from '../toLatestVersion'
 import { decodeOrError } from '../toDomain'
 
-describe('v1 to v2', () => {
+describe('v2 to v3', () => {
     it('should convert a single actuary contact and communication preference as expected', () => {
         const protoBytes = fs.readFileSync(
             'src/common-code/proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-08-19.proto'
