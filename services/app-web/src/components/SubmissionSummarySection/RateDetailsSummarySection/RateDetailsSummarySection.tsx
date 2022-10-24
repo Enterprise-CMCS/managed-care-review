@@ -7,6 +7,7 @@ import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
+import { generateRateName } from '../../../common-code/healthPlanFormDataType'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
 import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
@@ -40,7 +41,23 @@ export const RateDetailsSummarySection = ({
         doc.documentCategories.includes('RATES_RELATED')
     )
 
-    const rateName = submission.rateInfos[0]?.rateCertificationName
+    /* falling back to generated name for old submissions that don't have the name on first load */
+    const rateName = () => {
+        const certName = submission.rateInfos[0]?.rateCertificationName
+        const rateInfo = submission.rateInfos[0] ?? submission
+        const generatedName = generateRateName(
+            submission,
+            rateInfo,
+            statePrograms
+        )
+        if (certName) {
+            return certName
+        } else if (generatedName) {
+            return generatedName
+        } else {
+            return undefined
+        }
+    }
 
     const rateCapitationType = submission.rateCapitationType
         ? submission.rateCapitationType === 'RATE_CELL'
@@ -119,10 +136,10 @@ export const RateDetailsSummarySection = ({
                 </SectionHeader>
 
                 <h3
-                    aria-label={`Rate ID: ${rateName}`}
+                    aria-label={`Rate ID: ${rateName()}`}
                     className={styles.rateName}
                 >
-                    {rateName}
+                    {rateName()}
                 </h3>
 
                 <DoubleColumnGrid>
