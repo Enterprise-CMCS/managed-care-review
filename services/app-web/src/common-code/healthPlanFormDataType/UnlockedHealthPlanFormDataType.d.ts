@@ -90,8 +90,8 @@ type UnlockedHealthPlanFormDataType = {
     submissionType: SubmissionType
     submissionDescription: string
     stateContacts: StateContact[]
-    actuaryContacts: ActuaryContact[]
-    actuaryCommunicationPreference?: ActuaryCommunicationType
+    addtlActuaryContacts: ActuaryContact[]
+    addtlActuaryCommunicationPreference?: ActuaryCommunicationType
     documents: SubmissionDocument[]
     contractType?: ContractType
     contractExecutionStatus?: ContractExecutionStatus

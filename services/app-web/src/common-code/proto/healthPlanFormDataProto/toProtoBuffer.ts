@@ -224,7 +224,7 @@ const toProtoBuffer = (
                               ),
                           },
                           //Currently, this Actuary data is in domainData, eventually it will be included in the rateInfo to have actuaries for each certification.
-                          actuaryContacts: domainData.actuaryContacts.map(
+                          actuaryContacts: domainData.addtlActuaryContacts.map(
                               (actuaryContact) => {
                                   const firmType = domainEnumToProto(
                                       actuaryContact.actuarialFirm,
@@ -244,12 +244,34 @@ const toProtoBuffer = (
                               }
                           ),
                           actuaryCommunicationPreference: domainEnumToProto(
-                              domainData.actuaryCommunicationPreference,
+                              domainData.addtlActuaryCommunicationPreference,
                               mcreviewproto.ActuaryCommunicationType
                           ),
                       }
                   })
                 : undefined,
+        addtlActuaryContacts: domainData.addtlActuaryContacts.map(
+            (actuaryContact) => {
+                const firmType = domainEnumToProto(
+                    actuaryContact.actuarialFirm,
+                    mcreviewproto.ActuarialFirmType
+                )
+
+                return {
+                    contact: {
+                        name: actuaryContact.name,
+                        titleRole: actuaryContact.titleRole,
+                        email: actuaryContact.email,
+                    },
+                    actuarialFirmType: firmType,
+                    actuarialFirmOther: actuaryContact.actuarialFirmOther,
+                }
+            }
+        ),
+        addtlActuaryCommunicationPreference: domainEnumToProto(
+            domainData.addtlActuaryCommunicationPreference,
+            mcreviewproto.ActuaryCommunicationType
+        ),
         documents: domainData.documents.map((doc) => ({
             s3Url: doc.s3URL,
             name: doc.name,

@@ -234,14 +234,14 @@ function parseContractAmendment(
 }
 
 function parseActuaryContacts(
-    rateInfo: mcreviewproto.IRateInfo | null | undefined
-): RecursivePartial<UnlockedHealthPlanFormDataType['actuaryContacts']> {
-    if (!rateInfo?.actuaryContacts) {
+    actuaryContacts: mcreviewproto.IActuaryContact[] | null | undefined
+): RecursivePartial<UnlockedHealthPlanFormDataType['addtlActuaryContacts']> {
+    if (!actuaryContacts) {
         return []
     }
 
-    const actuaryContacts = replaceNullsWithUndefineds(
-        rateInfo.actuaryContacts
+    const parsedActuaryContacts = replaceNullsWithUndefineds(
+        actuaryContacts
     ).map((aContact) => {
         const cleanContact = replaceNullsWithUndefineds(aContact)
 
@@ -257,7 +257,7 @@ function parseActuaryContacts(
         }
     })
 
-    return actuaryContacts
+    return parsedActuaryContacts
 }
 
 function parseProtoRateAmendment(
@@ -352,6 +352,8 @@ const toDomain = (
         stateContacts,
         contractInfo,
         rateInfos,
+        addtlActuaryContacts,
+        addtlActuaryCommunicationPreference,
     } = formDataMessage
 
     // First things first, let's check the protoName and protoVersion
@@ -441,12 +443,12 @@ const toDomain = (
         rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
         rateDateCertified: protoDateToDomain(rateInfo?.rateDateCertified),
         rateProgramIDs: rateInfo?.rateProgramIds ?? [],
-        actuaryCommunicationPreference: enumToDomain(
+        addtlActuaryCommunicationPreference: enumToDomain(
             mcreviewproto.ActuaryCommunicationType,
-            rateInfo?.actuaryCommunicationPreference
+            addtlActuaryCommunicationPreference
         ),
         stateContacts: cleanedStateContacts,
-        actuaryContacts: parseActuaryContacts(rateInfo),
+        addtlActuaryContacts: parseActuaryContacts(addtlActuaryContacts),
         documents: parseProtoDocuments(formDataMessage.documents),
     }
     // Now that we've gotten things into our combined draft & state domain format.

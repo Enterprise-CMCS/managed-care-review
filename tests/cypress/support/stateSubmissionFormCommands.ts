@@ -263,7 +263,7 @@ Cypress.Commands.add('fillOutActuaryContact', () => {
 
     // Actuary communication preference
     cy.findByText(
-        `OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`
+        `OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`
     ).click()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })

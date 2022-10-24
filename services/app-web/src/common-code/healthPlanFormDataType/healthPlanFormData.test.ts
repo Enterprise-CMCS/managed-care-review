@@ -722,7 +722,7 @@ describe('submission type assertions', () => {
                 rateCapitationType: undefined,
                 rateAmendmentInfo: undefined,
                 rateProgramIDs: [],
-                actuaryContacts: [],
+                addtlActuaryContacts: [],
                 documents: [
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
@@ -779,7 +779,7 @@ describe('submission type assertions', () => {
                 rateCapitationType: undefined,
                 rateAmendmentInfo: undefined,
                 rateProgramIDs: [],
-                actuaryContacts: [],
+                addtlActuaryContacts: [],
                 documents: [
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
@@ -823,7 +823,7 @@ describe('submission type assertions', () => {
                 rateCapitationType: undefined,
                 rateAmendmentInfo: undefined,
                 rateProgramIDs: [],
-                actuaryContacts: [],
+                addtlActuaryContacts: [],
                 documents: [
                     {
                         name: 'rate_only_supporting_doc.pdf',

@@ -310,7 +310,7 @@ const mockContractAndRatesFormData = (
                 email: 'test+state+contact@example.com',
             },
         ],
-        actuaryContacts: [],
+        addtlActuaryContacts: [],
         ...submissionPartial,
     }
 }
@@ -384,7 +384,7 @@ const mockUnlockedContractAndRatesFormData = (
                 email: 'test+state+contact@example.com',
             },
         ],
-        actuaryContacts: [],
+        addtlActuaryContacts: [],
         rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
         ...submissionPartial,
     }
@@ -432,7 +432,7 @@ const mockUnlockedContractOnlyFormData = (
                 email: 'test+state+contact@example.com',
             },
         ],
-        actuaryContacts: [],
+        addtlActuaryContacts: [],
         ...submissionPartial,
     }
 }
@@ -480,7 +480,7 @@ const mockContractOnlyFormData = (
                 email: 'test+state+contact@example.com',
             },
         ],
-        actuaryContacts: [],
+        addtlActuaryContacts: [],
         ...submissionPartial,
     }
 }
@@ -555,7 +555,7 @@ const mockContractAmendmentFormData = (
                 email: 'test+state+contact@example.com',
             },
         ],
-        actuaryContacts: [],
+        addtlActuaryContacts: [],
         rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
         ...submissionPartial,
     }
