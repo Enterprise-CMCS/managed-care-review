@@ -648,6 +648,76 @@ export function mockUnlockedHealthPlanPackage(
     }
 }
 
+export function mockUnlockedHealthPlanPackageWithOldProtos(
+    unlockedWithOldProto: UnlockedHealthPlanFormDataType,
+    submissionData?: Partial<UnlockedHealthPlanFormDataType>,
+    unlockInfo?: Partial<UpdateInformation>
+): HealthPlanPackage {
+    const submission = {
+        ...unlockedWithOldProto,
+        ...submissionData,
+    }
+    const b64 = domainToBase64(submission)
+    const b64Previous = domainToBase64({
+        ...unlockedWithOldProto,
+    })
+
+    return {
+        id: 'test-id-123',
+        status: 'UNLOCKED',
+        initiallySubmittedAt: '2020-01-01',
+        stateCode: 'MN',
+        state: mockMNState(),
+        revisions: [
+            {
+                node: {
+                    id: 'revision3',
+                    createdAt: new Date('2020-09-01'),
+                    unlockInfo: {
+                        updatedAt: new Date('2020-09-02'),
+                        updatedBy: 'bob@dmas.mn.gov',
+                        updatedReason: 'Test unlock reason',
+                        ...unlockInfo,
+                    },
+                    submitInfo: null,
+                    formDataProto: b64,
+                },
+            },
+            {
+                node: {
+                    id: 'revision2',
+                    createdAt: new Date('2020-07-01'),
+                    unlockInfo: {
+                        updatedAt: new Date('2020-08-01'),
+                        updatedBy: 'bob@dmas.mn.gov',
+                        updatedReason: 'Test unlock reason',
+                        ...unlockInfo,
+                    },
+                    submitInfo: {
+                        updatedAt: new Date('2020-07-15'),
+                        updatedBy: 'bob@dmas.mn.gov',
+                        updatedReason: 'Second Submit',
+                    },
+                    formDataProto: b64Previous,
+                },
+            },
+            {
+                node: {
+                    id: 'revision1',
+                    createdAt: new Date('2020-01-01'),
+                    unlockInfo: null,
+                    submitInfo: {
+                        updatedAt: new Date('2021-01-02'),
+                        updatedBy: 'test@example.com',
+                        updatedReason: 'Initial submit',
+                    },
+                    formDataProto: b64Previous,
+                },
+            },
+        ],
+    }
+}
+
 export function mockUnlockedHealthPlanPackageWithDocuments(): HealthPlanPackage {
     // SETUP
     // for this test we want to have a package with a few different revisions

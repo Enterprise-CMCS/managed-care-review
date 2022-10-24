@@ -1,7 +1,11 @@
+import fs from 'fs'
 import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router'
 import { basicLockedHealthPlanFormData } from '../../common-code/healthPlanFormDataMocks'
-import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
+import {
+    domainToBase64,
+    toDomain,
+} from '../../common-code/proto/healthPlanFormDataProto'
 import { RoutesRecord } from '../../constants/routes'
 import {
     fetchCurrentUserMock,
@@ -9,9 +13,11 @@ import {
     mockUnlockedHealthPlanPackage,
     mockValidCMSUser,
     mockSubmittedHealthPlanPackageWithRevision,
+    mockUnlockedHealthPlanPackageWithOldProtos,
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
+import { isLockedHealthPlanFormData } from '../../common-code/healthPlanFormDataType'
 
 describe('SubmissionSummary', () => {
     it('renders without errors', async () => {
@@ -331,6 +337,65 @@ describe('SubmissionSummary', () => {
                     })
                 ).toBeDisabled()
             })
+        })
+
+        it('loads old protos correctly', async () => {
+            const oldProtoFiles = fs
+                .readdirSync(
+                    'src/common-code/proto/healthPlanFormDataProto/testData/'
+                )
+                .filter((f) => f.endsWith('.proto') && f.includes('21'))
+            console.log(oldProtoFiles)
+            for (const file of oldProtoFiles) {
+                const proto = fs.readFileSync(
+                    `src/common-code/proto/healthPlanFormDataProto/testData/${file}`
+                )
+
+                const domainData = toDomain(proto)
+
+                if (domainData instanceof Error) {
+                    throw domainData
+                }
+
+                if (isLockedHealthPlanFormData(domainData)) {
+                    console.error('expected unlocked data, got locked data')
+                    return
+                }
+
+                renderWithProviders(
+                    <Routes>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<SubmissionSummary />}
+                        />
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: mockValidCMSUser(),
+                                    statusCode: 200,
+                                }),
+                                fetchStateHealthPlanPackageMockSuccess({
+                                    id: '15',
+                                    stateSubmission:
+                                        mockUnlockedHealthPlanPackageWithOldProtos(
+                                            domainData
+                                        ),
+                                }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: '/submissions/15',
+                        },
+                    }
+                )
+
+                await waitFor(() => {
+                    expect(document.body).toHaveTextContent(/Submission type/)
+                    expect(document.body).toMatchSnapshot()
+                })
+            }
         })
 
         it('displays unlock banner with correct data for an unlocked submission', async () => {
