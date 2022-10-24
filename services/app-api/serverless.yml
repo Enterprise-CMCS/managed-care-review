@@ -118,6 +118,8 @@ provider:
             - rds:CreateDBSnapshot
             - rds:CopyDBClusterSnapshot
             - rds:CopyDBSnapshot
+            - rds:DescribeDBClusterSnapshots
+            - rds:DeleteDBClusterSnapshot
           Resource: '*'
 
   environment:
@@ -289,6 +291,13 @@ functions:
               - b3
               - traceparent
           authorizer: aws_iam
+
+  cleanup:
+    handler: src/handlers/cleanup.main
+    events:
+      - schedule: cron(0 14 ? * MON-FRI *)
+    layers:
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-2-0:1
 
 resources:
   Resources:
