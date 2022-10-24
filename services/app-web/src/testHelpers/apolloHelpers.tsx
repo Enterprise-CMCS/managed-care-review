@@ -12,7 +12,10 @@ import {
     SubmissionDocument,
     UnlockedHealthPlanFormDataType,
 } from '../common-code/healthPlanFormDataType'
-import { domainToBase64 } from '../common-code/proto/healthPlanFormDataProto'
+import {
+    domainToBase64,
+    protoToBase64,
+} from '../common-code/proto/healthPlanFormDataProto'
 import {
     FetchCurrentUserDocument,
     FetchHealthPlanPackageDocument,
@@ -649,18 +652,10 @@ export function mockUnlockedHealthPlanPackage(
 }
 
 export function mockUnlockedHealthPlanPackageWithOldProtos(
-    unlockedWithOldProto: UnlockedHealthPlanFormDataType,
-    submissionData?: Partial<UnlockedHealthPlanFormDataType>,
-    unlockInfo?: Partial<UpdateInformation>
+    unlockedWithOldProto: Buffer
 ): HealthPlanPackage {
-    const submission = {
-        ...unlockedWithOldProto,
-        ...submissionData,
-    }
-    const b64 = domainToBase64(submission)
-    const b64Previous = domainToBase64({
-        ...unlockedWithOldProto,
-    })
+    // other mocks take a submission and convert it to a proto, but here we pass in a proto
+    const b64 = protoToBase64(unlockedWithOldProto)
 
     return {
         id: 'test-id-123',
@@ -677,7 +672,6 @@ export function mockUnlockedHealthPlanPackageWithOldProtos(
                         updatedAt: new Date('2020-09-02'),
                         updatedBy: 'bob@dmas.mn.gov',
                         updatedReason: 'Test unlock reason',
-                        ...unlockInfo,
                     },
                     submitInfo: null,
                     formDataProto: b64,
@@ -691,14 +685,13 @@ export function mockUnlockedHealthPlanPackageWithOldProtos(
                         updatedAt: new Date('2020-08-01'),
                         updatedBy: 'bob@dmas.mn.gov',
                         updatedReason: 'Test unlock reason',
-                        ...unlockInfo,
                     },
                     submitInfo: {
                         updatedAt: new Date('2020-07-15'),
                         updatedBy: 'bob@dmas.mn.gov',
                         updatedReason: 'Second Submit',
                     },
-                    formDataProto: b64Previous,
+                    formDataProto: b64,
                 },
             },
             {
@@ -711,7 +704,7 @@ export function mockUnlockedHealthPlanPackageWithOldProtos(
                         updatedBy: 'test@example.com',
                         updatedReason: 'Initial submit',
                     },
-                    formDataProto: b64Previous,
+                    formDataProto: b64,
                 },
             },
         ],

@@ -2,10 +2,7 @@ import fs from 'fs'
 import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router'
 import { basicLockedHealthPlanFormData } from '../../common-code/healthPlanFormDataMocks'
-import {
-    domainToBase64,
-    toDomain,
-} from '../../common-code/proto/healthPlanFormDataProto'
+import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
 import { RoutesRecord } from '../../constants/routes'
 import {
     fetchCurrentUserMock,
@@ -17,7 +14,6 @@ import {
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
-import { isLockedHealthPlanFormData } from '../../common-code/healthPlanFormDataType'
 
 describe('SubmissionSummary', () => {
     it('renders without errors', async () => {
@@ -344,24 +340,13 @@ describe('SubmissionSummary', () => {
                 .readdirSync(
                     'src/common-code/proto/healthPlanFormDataProto/testData/'
                 )
-                .filter((f) => f.endsWith('.proto') && f.includes('21'))
-            console.log(oldProtoFiles)
-            for (const file of oldProtoFiles) {
+                .filter((f) => f.endsWith('.proto'))
+
+            for (const fileName of oldProtoFiles) {
                 const proto = fs.readFileSync(
-                    `src/common-code/proto/healthPlanFormDataProto/testData/${file}`
+                    `src/common-code/proto/healthPlanFormDataProto/testData/${fileName}`
                 )
-
-                const domainData = toDomain(proto)
-
-                if (domainData instanceof Error) {
-                    throw domainData
-                }
-
-                if (isLockedHealthPlanFormData(domainData)) {
-                    console.error('expected unlocked data, got locked data')
-                    return
-                }
-
+                // pass in the old protos and make sure the UI hasn't changed
                 renderWithProviders(
                     <Routes>
                         <Route
@@ -380,7 +365,7 @@ describe('SubmissionSummary', () => {
                                     id: '15',
                                     stateSubmission:
                                         mockUnlockedHealthPlanPackageWithOldProtos(
-                                            domainData
+                                            proto
                                         ),
                                 }),
                             ],
@@ -392,6 +377,7 @@ describe('SubmissionSummary', () => {
                 )
 
                 await waitFor(() => {
+                    // there's an async rendering issue with the snapshots unless we run another test first
                     expect(document.body).toHaveTextContent(/Submission type/)
                     expect(document.body).toMatchSnapshot()
                 })
