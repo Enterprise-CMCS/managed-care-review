@@ -14,12 +14,12 @@ Right now when we use proto data directly after it is deserialized to typescript
 */
 import { mcreviewproto } from '../../../gen/healthPlanFormDataProto'
 
-const CURRENT_PROTO_VERSION = 2
+const CURRENT_PROTO_VERSION = 3
 
-const updateToVersion2 = (oldProto: mcreviewproto.HealthPlanFormData) => {
+const updateToVersion3 = (oldProto: mcreviewproto.HealthPlanFormData) => {
     // We can assume the proto version exists because error would have been thrown in toDomain
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    if (oldProto.protoVersion! < 2) {
+    if (oldProto.protoVersion! < 3) {
         const updatedProto = Object.assign({}, oldProto)
 
         // Use actuary contacts fields from the first rateInfo to fill in data for new field addtlActuaryContacts
@@ -29,7 +29,7 @@ const updateToVersion2 = (oldProto: mcreviewproto.HealthPlanFormData) => {
             oldProto.rateInfos[0]?.actuaryCommunicationPreference
 
         // Bump version
-        updatedProto.protoVersion = 2
+        updatedProto.protoVersion = 3
         return updatedProto
     } else {
         return oldProto
@@ -56,10 +56,11 @@ const toLatestProtoVersion = (proto: mcreviewproto.HealthPlanFormData) => {
             `Trying to open outdated proto. State: ${proto.stateCode}, Package ID: ${proto.id}, Outdated proto version: ${protoVersion}`
         )
 
-        const v2Compatible = updateToVersion2(proto)
+        const v3Compatible = updateToVersion3(proto)
+
         // future incompatible version update functions can go here ...
 
-        const latestProto = v2Compatible
+        const latestProto = v3Compatible
         return latestProto
     }
 }

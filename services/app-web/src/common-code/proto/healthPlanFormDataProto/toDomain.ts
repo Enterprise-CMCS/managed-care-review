@@ -479,4 +479,4 @@ const toDomain = (
     return new Error('Unknown or missing status on this proto. Cannot decode.')
 }
 
-export { toDomain }
+export { toDomain, decodeOrError }
