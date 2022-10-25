@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SubmissionSummary CMS user unlock submission loads old protos correctly 1`] = `
+exports[`SubmissionSummary Outdated submissions loads outdated health plan packages with old protos as expected 1`] = `
 <body
   style="padding-right: 0px;"
 >
@@ -1157,7 +1157,7 @@ and all appointments for verbal discussions.
 </body>
 `;
 
-exports[`SubmissionSummary CMS user unlock submission loads old protos correctly 2`] = `
+exports[`SubmissionSummary Outdated submissions loads outdated health plan packages with old protos as expected 2`] = `
 <body
   style="padding-right: 0px;"
 >
