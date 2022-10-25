@@ -37,18 +37,23 @@ export const ContactsSummarySection = ({
 }: ContactsSummarySectionProps): React.ReactElement => {
     // Launch Darkly
     const ldClient = useLDClient()
-    const showAddtlActuaryText = ldClient?.variation(
+    const showMultiRates = ldClient?.variation(
         featureFlags.MULTI_RATE_SUBMISSIONS.flag,
         featureFlags.MULTI_RATE_SUBMISSIONS.defaultValue
     )
 
     const handleActuaryTitle = (index: number) => {
-        if (showAddtlActuaryText) {
+        if (showMultiRates) {
             return 'Additional actuary contact'
         } else {
             return index ? 'Additional actuary contact' : 'Certifying actuary'
         }
     }
+
+    const actuaries = showMultiRates
+        ? submission.addtlActuaryContacts
+        : submission.rateInfos[0]?.actuaryContacts ?? []
+
     return (
         <section id="stateContacts" className={styles.summarySection}>
             <dl>
@@ -91,42 +96,40 @@ export const ContactsSummarySection = ({
                     <dl>
                         <SectionHeader
                             header={
-                                showAddtlActuaryText
+                                showMultiRates
                                     ? 'Additional actuary contacts'
                                     : 'Actuary contacts'
                             }
                         />
                         <GridContainer>
                             <Grid row>
-                                {submission.addtlActuaryContacts.map(
-                                    (actuaryContact, index) => (
-                                        <Grid
-                                            col={6}
-                                            key={'actuarycontact_' + index}
-                                        >
-                                            <span className="text-bold">
-                                                {handleActuaryTitle(index)}
-                                            </span>
+                                {actuaries.map((actuaryContact, index) => (
+                                    <Grid
+                                        col={6}
+                                        key={'actuarycontact_' + index}
+                                    >
+                                        <span className="text-bold">
+                                            {handleActuaryTitle(index)}
+                                        </span>
+                                        <br />
+                                        <address>
+                                            {actuaryContact.name}
                                             <br />
-                                            <address>
-                                                {actuaryContact.name}
-                                                <br />
-                                                {actuaryContact.titleRole}
-                                                <br />
-                                                <Link
-                                                    href={`mailto:${actuaryContact.email}`}
-                                                    target="_blank"
-                                                    variant="external"
-                                                    rel="noreferrer"
-                                                >
-                                                    {actuaryContact.email}
-                                                </Link>
-                                                <br />
-                                                {getActuaryFirm(actuaryContact)}
-                                            </address>
-                                        </Grid>
-                                    )
-                                )}
+                                            {actuaryContact.titleRole}
+                                            <br />
+                                            <Link
+                                                href={`mailto:${actuaryContact.email}`}
+                                                target="_blank"
+                                                variant="external"
+                                                rel="noreferrer"
+                                            >
+                                                {actuaryContact.email}
+                                            </Link>
+                                            <br />
+                                            {getActuaryFirm(actuaryContact)}
+                                        </address>
+                                    </Grid>
+                                ))}
                             </Grid>
                         </GridContainer>
                     </dl>
@@ -134,7 +137,7 @@ export const ContactsSummarySection = ({
                         <GridContainer>
                             <Grid row>
                                 <span className="text-bold">
-                                    {showAddtlActuaryText
+                                    {showMultiRates
                                         ? 'Actuaries’ communication preference'
                                         : 'Actuary communication preference'}
                                 </span>
