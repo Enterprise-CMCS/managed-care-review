@@ -169,7 +169,7 @@ export const Contacts = ({
 }): React.ReactElement => {
     // Launch Darkly
     const ldClient = useLDClient()
-    const showAddtlActuaryText = ldClient?.variation(
+    const showMultiRates = ldClient?.variation(
         featureFlags.MULTI_RATE_SUBMISSIONS.flag,
         featureFlags.MULTI_RATE_SUBMISSIONS.defaultValue
     )
@@ -250,7 +250,7 @@ export const Contacts = ({
     if (
         actuaryContacts.length === 0 &&
         includeActuaryContacts &&
-        !showAddtlActuaryText
+        !showMultiRates
     ) {
         actuaryContacts.push(emptyActuaryContact)
     }
@@ -273,11 +273,11 @@ export const Contacts = ({
         if (contactText === 'State') {
             return `State contacts ${count} ${required}`
         } else if (contactText === 'Actuary') {
-            if (!index && !showAddtlActuaryText)
+            if (!index && !showMultiRates)
                 return `Certifying actuary ${required}`
             else
                 return `Additional actuary contact ${
-                    showAddtlActuaryText ? index + 1 : index
+                    showMultiRates ? index + 1 : index
                 }`
         }
     }
@@ -343,8 +343,7 @@ export const Contacts = ({
                                     State contacts
                                 </legend>
                                 <span id="form-guidance">
-                                    {includeActuaryContacts &&
-                                    !showAddtlActuaryText
+                                    {includeActuaryContacts && !showMultiRates
                                         ? 'A state and an actuary contact are required'
                                         : 'A state contact is required'}
                                 </span>
@@ -535,13 +534,13 @@ export const Contacts = ({
                                 <>
                                     <fieldset className="usa-fieldset">
                                         <h3>
-                                            {showAddtlActuaryText
+                                            {showMultiRates
                                                 ? 'Additional Actuary Contacts'
                                                 : 'Actuary contacts'}
                                         </h3>
 
                                         <p>
-                                            {showAddtlActuaryText
+                                            {showMultiRates
                                                 ? 'Provide contact information for any additional actuaries who worked directly on this submission.'
                                                 : 'Provide contact information for the actuaries who worked directly on this submission.'}
                                         </p>
@@ -829,7 +828,7 @@ export const Contacts = ({
 
                                                                         {(index >
                                                                             0 ||
-                                                                            showAddtlActuaryText) && (
+                                                                            showMultiRates) && (
                                                                             <Button
                                                                                 type="button"
                                                                                 unstyled
@@ -867,7 +866,7 @@ export const Contacts = ({
                                                             newActuaryContactButtonRef
                                                         }
                                                     >
-                                                        {showAddtlActuaryText
+                                                        {showMultiRates
                                                             ? `Add actuary contact`
                                                             : `Add another actuary contact`}
                                                     </button>
@@ -875,7 +874,7 @@ export const Contacts = ({
                                             )}
                                         </FieldArray>
 
-                                        {!showAddtlActuaryText && (
+                                        {!showMultiRates && (
                                             <>
                                                 <legend className="srOnly">
                                                     Actuarial communication
@@ -925,7 +924,7 @@ export const Contacts = ({
                                         )}
                                     </fieldset>
 
-                                    {showAddtlActuaryText && (
+                                    {showMultiRates && (
                                         <fieldset className="usa-fieldset">
                                             <h3>
                                                 Actuaries' communication
