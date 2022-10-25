@@ -319,10 +319,10 @@ const mockContractAndRatesFormData = (
                 email: 'test+state+contact@example.com',
             },
         ],
-        actuaryContacts: [
+        addtlActuaryContacts: [
             {
                 actuarialFirm: 'DELOITTE',
-                name: 'Actuary Contact 1',
+                name: 'Additional Contact 1',
                 titleRole: 'Test Actuary Contact 1',
                 email: 'actuarycontact1@example.com',
             },
@@ -410,7 +410,7 @@ const mockUnlockedContractAndRatesFormData = (
                 email: 'test+state+contact@example.com',
             },
         ],
-        actuaryContacts: [
+        addtlActuaryContacts: [
             {
                 actuarialFirm: 'DELOITTE',
                 name: 'Actuary Contact 1',
@@ -466,7 +466,7 @@ const mockUnlockedContractOnlyFormData = (
                 email: 'test+state+contact@example.com',
             },
         ],
-        actuaryContacts: [],
+        addtlActuaryContacts: [],
         ...submissionPartial,
     }
 }
@@ -514,7 +514,7 @@ const mockContractOnlyFormData = (
                 email: 'test+state+contact@example.com',
             },
         ],
-        actuaryContacts: [],
+        addtlActuaryContacts: [],
         ...submissionPartial,
     }
 }
@@ -598,7 +598,7 @@ const mockContractAmendmentFormData = (
                 email: 'test+state+contact@example.com',
             },
         ],
-        actuaryContacts: [
+        addtlActuaryContacts: [
             {
                 actuarialFirm: 'DELOITTE',
                 name: 'Actuary Contact 1',

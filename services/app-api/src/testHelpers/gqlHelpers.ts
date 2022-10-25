@@ -211,7 +211,7 @@ const createAndUpdateTestHealthPlanPackage = async (
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
         },
     ]
-    draft.actuaryContacts = [
+    draft.addtlActuaryContacts = [
         {
             name: 'test name',
             titleRole: 'test title',
@@ -220,7 +220,7 @@ const createAndUpdateTestHealthPlanPackage = async (
             actuarialFirmOther: '',
         },
     ]
-    ;(draft.actuaryCommunicationPreference = 'OACT_TO_ACTUARY' as const),
+    ;(draft.addtlActuaryCommunicationPreference = 'OACT_TO_ACTUARY' as const),
         (draft.contractType = 'BASE' as const)
     draft.contractExecutionStatus = 'EXECUTED' as const
     draft.contractDateStart = new Date(Date.UTC(2025, 5, 1))

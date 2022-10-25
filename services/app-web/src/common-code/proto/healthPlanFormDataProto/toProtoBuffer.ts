@@ -7,6 +7,7 @@ import {
 } from '../../healthPlanFormDataType'
 import statePrograms from '../../data/statePrograms.json'
 import { ProgramArgType } from '../../healthPlanFormDataType/State'
+import { CURRENT_PROTO_VERSION } from './toLatestVersion'
 
 const findStatePrograms = (stateCode: string): ProgramArgType[] => {
     const programs = statePrograms.states.find(
@@ -124,7 +125,7 @@ const toProtoBuffer = (
         // to differentiate between different versions of different messages
         // changes to the proto file at some point will require incrementing "proto version"
         protoName: 'STATE_SUBMISSION',
-        protoVersion: 1,
+        protoVersion: CURRENT_PROTO_VERSION,
 
         ...domainData, // For this conversion, we  can spread unnecessary fields because protobuf discards them
 
@@ -244,12 +245,34 @@ const toProtoBuffer = (
                               }
                           ),
                           actuaryCommunicationPreference: domainEnumToProto(
-                              domainData.actuaryCommunicationPreference,
+                              domainData.addtlActuaryCommunicationPreference,
                               mcreviewproto.ActuaryCommunicationType
                           ),
                       }
                   })
                 : undefined,
+        addtlActuaryContacts: domainData.addtlActuaryContacts.map(
+            (actuaryContact) => {
+                const firmType = domainEnumToProto(
+                    actuaryContact.actuarialFirm,
+                    mcreviewproto.ActuarialFirmType
+                )
+
+                return {
+                    contact: {
+                        name: actuaryContact.name,
+                        titleRole: actuaryContact.titleRole,
+                        email: actuaryContact.email,
+                    },
+                    actuarialFirmType: firmType,
+                    actuarialFirmOther: actuaryContact.actuarialFirmOther,
+                }
+            }
+        ),
+        addtlActuaryCommunicationPreference: domainEnumToProto(
+            domainData.addtlActuaryCommunicationPreference,
+            mcreviewproto.ActuaryCommunicationType
+        ),
         documents: domainData.documents.map((doc) => ({
             s3Url: doc.s3URL,
             name: doc.name,

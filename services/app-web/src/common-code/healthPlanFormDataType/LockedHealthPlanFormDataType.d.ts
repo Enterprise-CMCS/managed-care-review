@@ -45,6 +45,6 @@ export type LockedHealthPlanFormDataType = {
     rateAmendmentInfo?: RateAmendmentInfo
     rateProgramIDs?: string[]
     stateContacts: StateContact[]
-    actuaryContacts: ActuaryContact[]
-    actuaryCommunicationPreference?: ActuaryCommunicationType
+    addtlActuaryContacts: ActuaryContact[]
+    addtlActuaryCommunicationPreference?: ActuaryCommunicationType
 }

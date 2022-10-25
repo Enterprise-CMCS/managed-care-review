@@ -1,6 +1,10 @@
 import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { UploadedDocumentsTable } from './UploadedDocumentsTable'
+import {
+    fetchCurrentUserMock,
+    mockValidCMSUser,
+} from '../../../testHelpers/apolloHelpers'
 
 describe('UploadedDocumentsTable', () => {
     it('renders documents without errors', async () => {
@@ -16,7 +20,12 @@ describe('UploadedDocumentsTable', () => {
                 documents={testDocuments}
                 caption="Contract"
                 documentCategory="Contract"
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
         )
         await waitFor(() => {
             expect(
@@ -54,7 +63,12 @@ describe('UploadedDocumentsTable', () => {
                 caption="Contract supporting"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
         )
 
         await waitFor(() => {
@@ -111,7 +125,12 @@ describe('UploadedDocumentsTable', () => {
                 caption="Contract supporting"
                 documentCategory="Contract-supporting"
                 isSupportingDocuments
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
         )
         await waitFor(() => {
             // confirm those documents are prefixed with asterisk
@@ -166,7 +185,17 @@ describe('UploadedDocumentsTable', () => {
                 isSupportingDocuments
                 documentDateLookupTable={dateLookupTable}
                 isCMSUser={true}
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            }
         )
         await waitFor(() => {
             const rows = screen.getAllByRole('row')
@@ -216,7 +245,17 @@ describe('UploadedDocumentsTable', () => {
                 isSupportingDocuments
                 documentDateLookupTable={dateLookupTable}
                 isCMSUser={true}
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            }
         )
         await waitFor(() => {
             expect(screen.getByTestId('tag')).toHaveTextContent('NEW')
@@ -261,9 +300,16 @@ describe('UploadedDocumentsTable', () => {
                 isSupportingDocuments
                 documentDateLookupTable={dateLookupTable}
                 isCMSUser={false}
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
         )
         await waitFor(() => {
+            const rows = screen.getAllByRole('row')
+            expect(rows).toHaveLength(4)
             expect(screen.queryByTestId('tag')).not.toBeInTheDocument()
         })
     })

@@ -163,8 +163,9 @@ export const unlockedHealthPlanFormDataSchema = z.object({
     submissionType: submissionTypeSchema,
     submissionDescription: z.string(),
     stateContacts: z.array(stateContactSchema),
-    actuaryContacts: z.array(actuaryContactSchema),
-    actuaryCommunicationPreference: actuaryCommunicationTypeSchema.optional(),
+    addtlActuaryContacts: z.array(actuaryContactSchema),
+    addtlActuaryCommunicationPreference:
+        actuaryCommunicationTypeSchema.optional(),
     documents: z.array(submissionDocumentSchema),
     contractType: contractTypeSchema.optional(),
     contractExecutionStatus: contractExecutionStatusSchema.optional(),

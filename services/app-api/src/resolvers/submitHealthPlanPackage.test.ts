@@ -257,7 +257,7 @@ describe('submitHealthPlanPackage', () => {
                 rateCapitationType: draftPackageData.rateCapitationType,
                 rateAmendmentInfo: draftPackageData.rateAmendmentInfo,
                 rateProgramIDs: draftPackageData.rateProgramIDs,
-                actuaryContacts: draftPackageData.actuaryContacts,
+                addtlActuaryContacts: draftPackageData.addtlActuaryContacts,
                 documents: [
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
@@ -318,7 +318,7 @@ describe('submitHealthPlanPackage', () => {
                 rateCapitationType: undefined,
                 rateAmendmentInfo: undefined,
                 rateProgramIDs: [],
-                actuaryContacts: [],
+                addtlActuaryContacts: [],
                 documents: [
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
