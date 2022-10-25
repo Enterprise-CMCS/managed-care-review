@@ -9,6 +9,7 @@ import {
     isLockedHealthPlanFormData,
     RateInfoType,
 } from '../../healthPlanFormDataType'
+import { toLatestProtoVersion } from './toLatestVersion'
 
 /**
  * Recursively replaces all nulls with undefineds.
@@ -331,14 +332,15 @@ function parseRateInfos(
 const toDomain = (
     buff: Uint8Array
 ): UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType | Error => {
-    const formDataMessage = decodeOrError(buff)
-    if (formDataMessage instanceof Error) {
-        return formDataMessage
+    const formDataMessageAnyVersion = decodeOrError(buff)
+    if (formDataMessageAnyVersion instanceof Error) {
+        return formDataMessageAnyVersion
     }
 
+    // toLatestVersion
+    const formDataMessage = toLatestProtoVersion(formDataMessageAnyVersion)
+
     const {
-        protoName,
-        protoVersion,
         id,
         status,
         createdAt,
@@ -355,18 +357,6 @@ const toDomain = (
         addtlActuaryContacts,
         addtlActuaryCommunicationPreference,
     } = formDataMessage
-
-    // First things first, let's check the protoName and protoVersion
-    if (protoName !== 'STATE_SUBMISSION') {
-        console.warn(
-            `WARNING: We are unboxing a proto our code doesn't recognize:`,
-            protoName,
-            protoVersion
-        )
-        console.log(
-            'If the version is off this indicates we are loading a proto that has not been fully migrated.'
-        )
-    }
 
     const cleanedStateContacts = replaceNullsWithUndefineds(stateContacts)
 
@@ -489,4 +479,4 @@ const toDomain = (
     return new Error('Unknown or missing status on this proto. Cannot decode.')
 }
 
-export { toDomain }
+export { toDomain, decodeOrError }
