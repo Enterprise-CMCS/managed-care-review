@@ -42,7 +42,7 @@ exports[`SubmissionSummary CMS user unlock submission loads old protos correctly
                 <b>
                   Unlocked on: 
                 </b>
-                09/01/20 8:00pm
+                09/02/20 1:00am
                  ET
               </p>
               <p
@@ -829,14 +829,14 @@ and all appointments for verbal discussions.
               class="usa-accordion__heading"
             >
               <button
-                aria-controls="Tue Sep 01 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+                aria-controls="9/2/2020, 12:00:00 AM"
                 aria-expanded="false"
                 class="usa-accordion__button"
-                data-testid="accordionButton_Tue Sep 01 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+                data-testid="accordionButton_9/2/2020, 12:00:00 AM"
                 type="button"
               >
                 <div>
-                  09/01/20 8:00pm
+                  09/02/20 1:00am
                    
                   ET - 
                   Unlock
@@ -845,9 +845,9 @@ and all appointments for verbal discussions.
             </h4>
             <div
               class="usa-accordion__content usa-prose"
-              data-testid="accordionItem_Tue Sep 01 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+              data-testid="accordionItem_9/2/2020, 12:00:00 AM"
               hidden=""
-              id="Tue Sep 01 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+              id="9/2/2020, 12:00:00 AM"
             >
               <div>
                 <span
@@ -875,14 +875,14 @@ and all appointments for verbal discussions.
               class="usa-accordion__heading"
             >
               <button
-                aria-controls="Tue Jul 14 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+                aria-controls="7/15/2020, 12:00:00 AM"
                 aria-expanded="false"
                 class="usa-accordion__button"
-                data-testid="accordionButton_Tue Jul 14 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+                data-testid="accordionButton_7/15/2020, 12:00:00 AM"
                 type="button"
               >
                 <div>
-                  07/14/20 8:00pm
+                  07/15/20 1:00am
                    
                   ET - 
                   Submission
@@ -891,9 +891,9 @@ and all appointments for verbal discussions.
             </h4>
             <div
               class="usa-accordion__content usa-prose"
-              data-testid="accordionItem_Tue Jul 14 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+              data-testid="accordionItem_7/15/2020, 12:00:00 AM"
               hidden=""
-              id="Tue Jul 14 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+              id="7/15/2020, 12:00:00 AM"
             >
               <div>
                 <span
@@ -928,14 +928,14 @@ and all appointments for verbal discussions.
               class="usa-accordion__heading"
             >
               <button
-                aria-controls="Fri Jul 31 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+                aria-controls="8/1/2020, 12:00:00 AM"
                 aria-expanded="false"
                 class="usa-accordion__button"
-                data-testid="accordionButton_Fri Jul 31 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+                data-testid="accordionButton_8/1/2020, 12:00:00 AM"
                 type="button"
               >
                 <div>
-                  07/31/20 8:00pm
+                  08/01/20 1:00am
                    
                   ET - 
                   Unlock
@@ -944,9 +944,9 @@ and all appointments for verbal discussions.
             </h4>
             <div
               class="usa-accordion__content usa-prose"
-              data-testid="accordionItem_Fri Jul 31 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+              data-testid="accordionItem_8/1/2020, 12:00:00 AM"
               hidden=""
-              id="Fri Jul 31 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+              id="8/1/2020, 12:00:00 AM"
             >
               <div>
                 <span
@@ -974,14 +974,14 @@ and all appointments for verbal discussions.
               class="usa-accordion__heading"
             >
               <button
-                aria-controls="Fri Jan 01 2021 18:00:00 GMT-0600 (Central Standard Time)"
+                aria-controls="1/2/2021, 12:00:00 AM"
                 aria-expanded="false"
                 class="usa-accordion__button"
-                data-testid="accordionButton_Fri Jan 01 2021 18:00:00 GMT-0600 (Central Standard Time)"
+                data-testid="accordionButton_1/2/2021, 12:00:00 AM"
                 type="button"
               >
                 <div>
-                  01/01/21 7:00pm
+                  01/02/21 1:00am
                    
                   ET - 
                   Submission
@@ -990,9 +990,9 @@ and all appointments for verbal discussions.
             </h4>
             <div
               class="usa-accordion__content usa-prose"
-              data-testid="accordionItem_Fri Jan 01 2021 18:00:00 GMT-0600 (Central Standard Time)"
+              data-testid="accordionItem_1/2/2021, 12:00:00 AM"
               hidden=""
-              id="Fri Jan 01 2021 18:00:00 GMT-0600 (Central Standard Time)"
+              id="1/2/2021, 12:00:00 AM"
             >
               <div>
                 <span
@@ -1199,7 +1199,7 @@ exports[`SubmissionSummary CMS user unlock submission loads old protos correctly
                 <b>
                   Unlocked on: 
                 </b>
-                09/01/20 8:00pm
+                09/02/20 1:00am
                  ET
               </p>
               <p
@@ -1987,14 +1987,14 @@ and all appointments for verbal discussions.
               class="usa-accordion__heading"
             >
               <button
-                aria-controls="Tue Sep 01 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+                aria-controls="9/2/2020, 12:00:00 AM"
                 aria-expanded="false"
                 class="usa-accordion__button"
-                data-testid="accordionButton_Tue Sep 01 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+                data-testid="accordionButton_9/2/2020, 12:00:00 AM"
                 type="button"
               >
                 <div>
-                  09/01/20 8:00pm
+                  09/02/20 1:00am
                    
                   ET - 
                   Unlock
@@ -2003,9 +2003,9 @@ and all appointments for verbal discussions.
             </h4>
             <div
               class="usa-accordion__content usa-prose"
-              data-testid="accordionItem_Tue Sep 01 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+              data-testid="accordionItem_9/2/2020, 12:00:00 AM"
               hidden=""
-              id="Tue Sep 01 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+              id="9/2/2020, 12:00:00 AM"
             >
               <div>
                 <span
@@ -2033,14 +2033,14 @@ and all appointments for verbal discussions.
               class="usa-accordion__heading"
             >
               <button
-                aria-controls="Tue Jul 14 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+                aria-controls="7/15/2020, 12:00:00 AM"
                 aria-expanded="false"
                 class="usa-accordion__button"
-                data-testid="accordionButton_Tue Jul 14 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+                data-testid="accordionButton_7/15/2020, 12:00:00 AM"
                 type="button"
               >
                 <div>
-                  07/14/20 8:00pm
+                  07/15/20 1:00am
                    
                   ET - 
                   Submission
@@ -2049,9 +2049,9 @@ and all appointments for verbal discussions.
             </h4>
             <div
               class="usa-accordion__content usa-prose"
-              data-testid="accordionItem_Tue Jul 14 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+              data-testid="accordionItem_7/15/2020, 12:00:00 AM"
               hidden=""
-              id="Tue Jul 14 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+              id="7/15/2020, 12:00:00 AM"
             >
               <div>
                 <span
@@ -2086,14 +2086,14 @@ and all appointments for verbal discussions.
               class="usa-accordion__heading"
             >
               <button
-                aria-controls="Fri Jul 31 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+                aria-controls="8/1/2020, 12:00:00 AM"
                 aria-expanded="false"
                 class="usa-accordion__button"
-                data-testid="accordionButton_Fri Jul 31 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+                data-testid="accordionButton_8/1/2020, 12:00:00 AM"
                 type="button"
               >
                 <div>
-                  07/31/20 8:00pm
+                  08/01/20 1:00am
                    
                   ET - 
                   Unlock
@@ -2102,9 +2102,9 @@ and all appointments for verbal discussions.
             </h4>
             <div
               class="usa-accordion__content usa-prose"
-              data-testid="accordionItem_Fri Jul 31 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+              data-testid="accordionItem_8/1/2020, 12:00:00 AM"
               hidden=""
-              id="Fri Jul 31 2020 19:00:00 GMT-0500 (Central Daylight Time)"
+              id="8/1/2020, 12:00:00 AM"
             >
               <div>
                 <span
@@ -2132,14 +2132,14 @@ and all appointments for verbal discussions.
               class="usa-accordion__heading"
             >
               <button
-                aria-controls="Fri Jan 01 2021 18:00:00 GMT-0600 (Central Standard Time)"
+                aria-controls="1/2/2021, 12:00:00 AM"
                 aria-expanded="false"
                 class="usa-accordion__button"
-                data-testid="accordionButton_Fri Jan 01 2021 18:00:00 GMT-0600 (Central Standard Time)"
+                data-testid="accordionButton_1/2/2021, 12:00:00 AM"
                 type="button"
               >
                 <div>
-                  01/01/21 7:00pm
+                  01/02/21 1:00am
                    
                   ET - 
                   Submission
@@ -2148,9 +2148,9 @@ and all appointments for verbal discussions.
             </h4>
             <div
               class="usa-accordion__content usa-prose"
-              data-testid="accordionItem_Fri Jan 01 2021 18:00:00 GMT-0600 (Central Standard Time)"
+              data-testid="accordionItem_1/2/2021, 12:00:00 AM"
               hidden=""
-              id="Fri Jan 01 2021 18:00:00 GMT-0600 (Central Standard Time)"
+              id="1/2/2021, 12:00:00 AM"
             >
               <div>
                 <span
