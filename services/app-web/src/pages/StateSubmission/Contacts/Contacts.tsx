@@ -227,7 +227,9 @@ export const Contacts = ({
         shouldValidate && Boolean(error)
 
     const stateContacts = draftSubmission.stateContacts
-    const actuaryContacts = draftSubmission.addtlActuaryContacts
+    const actuaryContacts = showMultiRates
+        ? draftSubmission.addtlActuaryContacts
+        : draftSubmission.rateInfos[0]?.actuaryContacts ?? []
 
     const emptyStateContact = {
         name: '',
@@ -289,15 +291,18 @@ export const Contacts = ({
         // const updatedDraft = updatesFromSubmission(draftSubmission)
         draftSubmission.stateContacts = values.stateContacts
 
-        /**
-         * TODO: Once Contacts page work is merged in, we will need to switch where we save this with flag on and off
-         *  Flag On: Save this to new fields
-         *  Flag Off: Save this to rateInfo[0] actuary contacts
-         */
-
-        draftSubmission.addtlActuaryContacts = values.actuaryContacts
-        draftSubmission.addtlActuaryCommunicationPreference =
-            values.actuaryCommunicationPreference
+        //Multi-rate submission flag on: Save additional actuaries to top level actuary contacts
+        //Multi-rate submission flag off: Save actuaries to first rate certification in rateInfo
+        if (showMultiRates && includeActuaryContacts) {
+            draftSubmission.addtlActuaryContacts = values.actuaryContacts
+            draftSubmission.addtlActuaryCommunicationPreference =
+                values.actuaryCommunicationPreference
+        } else if (includeActuaryContacts) {
+            draftSubmission.rateInfos[0].actuaryContacts =
+                values.actuaryContacts
+            draftSubmission.rateInfos[0].actuaryCommunicationPreference =
+                values.actuaryCommunicationPreference
+        }
 
         try {
             const updatedSubmission = await updateDraft(draftSubmission)
