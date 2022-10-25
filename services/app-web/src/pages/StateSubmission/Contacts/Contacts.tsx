@@ -270,6 +270,10 @@ export const Contacts = ({
         /**
          * TODO: Delete this part when we merge in work on Contacts page
          * Temporary fix until we merge in work on Contacts page
+         *
+         * TODO: Once Contacts page work is merged in, we will need to switch where we save this with flag on and off
+         *  Flag On: Save this to new fields
+         *  Flag Off: Save this to rateInfo[0] actuary contacts
          */
 
         if (draftSubmission.rateInfos[0]) {
