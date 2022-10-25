@@ -55,19 +55,6 @@ import * as Yup from 'yup'
 import { useFocus } from '../../../hooks'
 import { ActuaryContactFields } from '../Contacts'
 
-/**
- * TODO
- * ✗ Refactor Contact page actuary contact to save to first rate info actuary contact
- * ✗ Review API tests for update in toProtobuffer and toDomain
- * ▢ Merge in changes to Contact page actuary contact.
- *      ▢ Make ActuaryContactFields more reusable
- *      ▢ Refactor Contacts page to use ActuaryContactFields for actuary contact fields
- * ▢ Check screen reader for actuary contact inputs on rate details page
- * ✓ Wait for Hana's mutli-rate unit and cypress tests to merge into main then merge main into this branch
- *      ✓ Update Unit Tests
- *      ✓ Update Cypress Tests
- */
-
 const RateDatesErrorMessage = ({
     startDate,
     endDate,
