@@ -12,7 +12,10 @@ import {
     SubmissionDocument,
     UnlockedHealthPlanFormDataType,
 } from '../common-code/healthPlanFormDataType'
-import { domainToBase64 } from '../common-code/proto/healthPlanFormDataProto'
+import {
+    domainToBase64,
+    protoToBase64,
+} from '../common-code/proto/healthPlanFormDataProto'
 import {
     FetchCurrentUserDocument,
     FetchHealthPlanPackageDocument,
@@ -642,6 +645,66 @@ export function mockUnlockedHealthPlanPackage(
                         updatedReason: 'Initial submit',
                     },
                     formDataProto: b64Previous,
+                },
+            },
+        ],
+    }
+}
+
+export function mockUnlockedHealthPlanPackageWithOldProtos(
+    unlockedWithOldProto: Buffer
+): HealthPlanPackage {
+    // other mocks take a submission and convert it to a proto, but here we pass in a proto
+    const b64 = protoToBase64(unlockedWithOldProto)
+
+    return {
+        id: 'test-id-123',
+        status: 'UNLOCKED',
+        initiallySubmittedAt: '2020-01-01',
+        stateCode: 'MN',
+        state: mockMNState(),
+        revisions: [
+            {
+                node: {
+                    id: 'revision3',
+                    createdAt: new Date('2020-09-01'),
+                    unlockInfo: {
+                        updatedAt: new Date('2020-09-02'),
+                        updatedBy: 'bob@dmas.mn.gov',
+                        updatedReason: 'Test unlock reason',
+                    },
+                    submitInfo: null,
+                    formDataProto: b64,
+                },
+            },
+            {
+                node: {
+                    id: 'revision2',
+                    createdAt: new Date('2020-07-01'),
+                    unlockInfo: {
+                        updatedAt: new Date('2020-08-01'),
+                        updatedBy: 'bob@dmas.mn.gov',
+                        updatedReason: 'Test unlock reason',
+                    },
+                    submitInfo: {
+                        updatedAt: new Date('2020-07-15'),
+                        updatedBy: 'bob@dmas.mn.gov',
+                        updatedReason: 'Second Submit',
+                    },
+                    formDataProto: b64,
+                },
+            },
+            {
+                node: {
+                    id: 'revision1',
+                    createdAt: new Date('2020-01-01'),
+                    unlockInfo: null,
+                    submitInfo: {
+                        updatedAt: new Date('2021-01-02'),
+                        updatedBy: 'test@example.com',
+                        updatedReason: 'Initial submit',
+                    },
+                    formDataProto: b64,
                 },
             },
         ],

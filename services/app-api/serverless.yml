@@ -118,6 +118,8 @@ provider:
             - rds:CreateDBSnapshot
             - rds:CopyDBClusterSnapshot
             - rds:CopyDBSnapshot
+            - rds:DescribeDBClusterSnapshots
+            - rds:DeleteDBClusterSnapshot
           Resource: '*'
 
   environment:
