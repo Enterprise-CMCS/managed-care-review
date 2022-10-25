@@ -327,7 +327,7 @@ const mockContractAndRatesFormData = (
                 email: 'actuarycontact1@example.com',
             },
         ],
-        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         ...submissionPartial,
     }
 }
@@ -413,12 +413,12 @@ const mockUnlockedContractAndRatesFormData = (
         addtlActuaryContacts: [
             {
                 actuarialFirm: 'DELOITTE',
-                name: 'Actuary Contact 1',
+                name: 'Additional Contact 1',
                 titleRole: 'Test Actuary Contact 1',
                 email: 'actuarycontact1@example.com',
             },
         ],
-        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
         ...submissionPartial,
     }
@@ -601,12 +601,12 @@ const mockContractAmendmentFormData = (
         addtlActuaryContacts: [
             {
                 actuarialFirm: 'DELOITTE',
-                name: 'Actuary Contact 1',
+                name: 'Additional Contact 1',
                 titleRole: 'Test Actuary Contact 1',
                 email: 'actuarycontact1@example.com',
             },
         ],
-        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
         ...submissionPartial,
     }

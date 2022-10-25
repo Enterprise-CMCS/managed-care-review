@@ -252,7 +252,7 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
                 actuarialFirm: 'MERCER' as const,
             },
         ],
-        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
     }
 }
 
@@ -375,7 +375,7 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
                 actuarialFirm: 'MERCER' as const,
             },
         ],
-        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
     }
 }
 
