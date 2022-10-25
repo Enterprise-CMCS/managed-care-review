@@ -667,16 +667,9 @@ export function mockUnlockedHealthPlanPackageWithOldProtos(
             {
                 node: {
                     id: 'revision3',
-                    createdAt: new Date('2020-09-01').toLocaleString('en-US', {
-                        timeZone: 'UTC',
-                    }),
+                    createdAt: new Date('2020-09-01'),
                     unlockInfo: {
-                        updatedAt: new Date('2020-09-02').toLocaleString(
-                            'en-US',
-                            {
-                                timeZone: 'UTC',
-                            }
-                        ),
+                        updatedAt: new Date('2020-09-02'),
                         updatedBy: 'bob@dmas.mn.gov',
                         updatedReason: 'Test unlock reason',
                     },
@@ -687,26 +680,14 @@ export function mockUnlockedHealthPlanPackageWithOldProtos(
             {
                 node: {
                     id: 'revision2',
-                    createdAt: new Date('2020-07-01').toLocaleString('en-US', {
-                        timeZone: 'UTC',
-                    }),
+                    createdAt: new Date('2020-07-01'),
                     unlockInfo: {
-                        updatedAt: new Date('2020-08-01').toLocaleString(
-                            'en-US',
-                            {
-                                timeZone: 'UTC',
-                            }
-                        ),
+                        updatedAt: new Date('2020-08-01'),
                         updatedBy: 'bob@dmas.mn.gov',
                         updatedReason: 'Test unlock reason',
                     },
                     submitInfo: {
-                        updatedAt: new Date('2020-07-15').toLocaleString(
-                            'en-US',
-                            {
-                                timeZone: 'UTC',
-                            }
-                        ),
+                        updatedAt: new Date('2020-07-15'),
                         updatedBy: 'bob@dmas.mn.gov',
                         updatedReason: 'Second Submit',
                     },
@@ -716,17 +697,10 @@ export function mockUnlockedHealthPlanPackageWithOldProtos(
             {
                 node: {
                     id: 'revision1',
-                    createdAt: new Date('2020-01-01').toLocaleString('en-US', {
-                        timeZone: 'UTC',
-                    }),
+                    createdAt: new Date('2020-01-01'),
                     unlockInfo: null,
                     submitInfo: {
-                        updatedAt: new Date('2021-01-02').toLocaleString(
-                            'en-US',
-                            {
-                                timeZone: 'UTC',
-                            }
-                        ),
+                        updatedAt: new Date('2021-01-02'),
                         updatedBy: 'test@example.com',
                         updatedReason: 'Initial submit',
                     },
