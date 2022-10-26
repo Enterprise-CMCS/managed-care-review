@@ -50,9 +50,25 @@ export const ContactsSummarySection = ({
         }
     }
 
+    /**
+     * Multi-rate-submissions flag off:
+     * Certifying actuary is displayed in Actuary Contacts second along with additional actuary contacts.
+     *
+     * We do this by combining the certifying actuary of the first-rate certification with the actuaries in
+     * addtlActuaryContacts into one array.
+     */
+    const combineActuaries = () => {
+        if (submission.rateInfos[0]?.actuaryContacts.length) {
+            const certifyingActuary: ActuaryContact =
+                submission.rateInfos[0]?.actuaryContacts[0]
+            return [certifyingActuary, ...submission.addtlActuaryContacts]
+        }
+        return []
+    }
+
     const actuaries = showMultiRates
         ? submission.addtlActuaryContacts
-        : submission.rateInfos[0]?.actuaryContacts ?? []
+        : combineActuaries()
 
     return (
         <section id="stateContacts" className={styles.summarySection}>
