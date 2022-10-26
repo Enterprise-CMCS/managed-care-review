@@ -115,6 +115,7 @@ const rateCapitationTypeSchema = z.union([
 ])
 
 const rateInfosTypeSchema = z.object({
+    id: z.string().optional(),
     rateType: rateTypeSchema.optional(),
     rateCapitationType: rateCapitationTypeSchema.optional(),
     rateDocuments: z.array(submissionDocumentSchema).optional(),
