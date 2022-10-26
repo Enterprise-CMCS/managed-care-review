@@ -181,6 +181,7 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
         contractDocuments: [],
         rateInfos: [
             {
+                id: 'test-rate-certification-one',
                 rateType: 'AMENDMENT',
                 rateCapitationType: 'RATE_CELL',
                 rateDateStart: new Date(Date.UTC(2021, 4, 22)),
@@ -275,6 +276,7 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
         ],
         rateInfos: [
             {
+                id: 'test-rate-certification-one',
                 rateType: 'AMENDMENT',
                 rateCapitationType: 'RATE_CELL',
                 rateDateStart: new Date(Date.UTC(2021, 4, 22)),
@@ -384,6 +386,7 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [
             {
+                id: 'test-rate-certification-one',
                 rateType: 'AMENDMENT',
                 rateCapitationType: 'RATE_CELL',
                 rateDateStart: new Date(Date.UTC(2021, 4, 22)),
@@ -511,6 +514,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [
             {
+                id: 'test-rate-certification-one',
                 rateType: 'AMENDMENT',
                 rateCapitationType: 'RATE_RANGE',
                 rateDateStart: new Date(Date.UTC(2021, 4, 22)),
@@ -630,6 +634,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [
             {
+                id: 'test-rate-certification-one',
                 rateType: 'AMENDMENT',
                 rateCapitationType: 'RATE_CELL',
                 rateDocuments: [
