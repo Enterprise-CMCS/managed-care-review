@@ -744,7 +744,7 @@ describe('RateDetails', () => {
                 const rateCertsAfterRemove = rateCertifications(screen)
                 expect(rateCertsAfterRemove).toHaveLength(2)
             })
-        })
+        }, 10000)
 
         it('accepts documents on second rate', async () => {
             renderWithProviders(
