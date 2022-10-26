@@ -20,6 +20,8 @@ import {
     RateType,
     RateCapitationType,
     RateInfoType,
+    ActuaryContact,
+    ActuaryCommunicationType,
 } from '../../../common-code/healthPlanFormDataType'
 
 import {
@@ -38,7 +40,10 @@ import {
     formatFormDateForDomain,
 } from '../../../formHelpers'
 import { isS3Error } from '../../../s3'
-import { RateDetailsFormSchema } from './RateDetailsSchema'
+import {
+    RateDetailsFormSchema,
+    ActuaryContactSchema,
+} from './RateDetailsSchema'
 import { useS3 } from '../../../contexts/S3Context'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
@@ -48,6 +53,7 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
 import * as Yup from 'yup'
 import { useFocus } from '../../../hooks'
+import { ActuaryContactFields } from '../Contacts'
 
 const RateDatesErrorMessage = ({
     startDate,
@@ -70,7 +76,7 @@ interface RateInfoArrayType {
 }
 
 export interface RateInfoFormType {
-    uuid: string
+    key: string
     rateType: RateType | undefined
     rateCapitationType: RateCapitationType | undefined
     rateDateStart: string
@@ -80,12 +86,14 @@ export interface RateInfoFormType {
     effectiveDateEnd: string
     rateProgramIDs: string[]
     rateDocuments: SubmissionDocument[]
+    actuaryContacts: ActuaryContact[]
+    actuaryCommunicationPreference?: ActuaryCommunicationType
 }
 
 type FormError =
     FormikErrors<RateInfoFormType>[keyof FormikErrors<RateInfoFormType>]
 
-const rateErrorHandling = (
+export const rateErrorHandling = (
     error: string | FormikErrors<RateInfoFormType> | undefined
 ): FormikErrors<RateInfoFormType> | undefined => {
     if (typeof error === 'string') {
@@ -120,9 +128,16 @@ export const RateDetails = ({
     const newRateNameRef = React.useRef<HTMLElement | null>(null)
     const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
 
-    const rateDetailsFormSchema = Yup.object().shape({
-        rateInfos: RateDetailsFormSchema,
-    })
+    const rateDetailsFormSchema = showMultiRates
+        ? //Concat RateDetailsFormSchema to ActuaryContactSchema for error summary order
+          Yup.object().shape({
+              rateInfos: ActuaryContactSchema.defined().concat(
+                  RateDetailsFormSchema
+              ),
+          })
+        : Yup.object().shape({
+              rateInfos: RateDetailsFormSchema,
+          })
 
     const fileItemsFromRateInfo = (rateInfo: RateInfoFormType): FileItemT[] => {
         return (
@@ -156,7 +171,7 @@ export const RateDetails = ({
 
     const rateInfoFormValues = (rateInfo?: RateInfoType): RateInfoFormType => ({
         //UUID is needed here as a unique component key prop to track mapped rateInfo in Formik Field array. This ensures we remove the correct FileUpload component when removing a rate.
-        uuid: uuidv4(),
+        key: uuidv4(),
         rateType: rateInfo?.rateType ?? undefined,
         rateCapitationType: rateInfo?.rateCapitationType ?? undefined,
         rateDateStart:
@@ -176,6 +191,20 @@ export const RateDetails = ({
             '',
         rateProgramIDs: rateInfo?.rateProgramIDs ?? [],
         rateDocuments: rateInfo?.rateDocuments ?? [],
+        actuaryContacts:
+            rateInfo?.actuaryContacts && rateInfo?.actuaryContacts.length > 0
+                ? rateInfo.actuaryContacts
+                : [
+                      {
+                          name: '',
+                          titleRole: '',
+                          email: '',
+                          actuarialFirm: undefined,
+                          actuarialFirmOther: '',
+                      },
+                  ],
+        actuaryCommunicationPreference:
+            rateInfo?.actuaryCommunicationPreference ?? undefined,
     })
 
     const getDocumentsError = (
@@ -370,6 +399,9 @@ export const RateDetails = ({
                           }
                         : undefined,
                 rateProgramIDs: rateInfo.rateProgramIDs,
+                actuaryContacts: rateInfo.actuaryContacts,
+                actuaryCommunicationPreference:
+                    rateInfo.actuaryCommunicationPreference,
             }
         })
 
@@ -419,6 +451,23 @@ export const RateDetails = ({
                                 ? `#rateInfos.${index}.${field}`
                                 : `rateInfos.${index}.${field}`
                         errorObject[errorKey] = value
+                    }
+                    //If the field is actuaryContacts then the value should be an array with at least one object of errors
+                    if (
+                        field === 'actuaryContacts' &&
+                        Array.isArray(value) &&
+                        Array.length > 0
+                    ) {
+                        //Currently, rate certifications only have 1 actuary contact
+                        const actuaryContact = value[0]
+                        Object.entries(actuaryContact).forEach(
+                            ([contactField, contactValue]) => {
+                                if (typeof contactValue === 'string') {
+                                    const errorKey = `rateInfos.${index}.actuaryContacts.0.${contactField}`
+                                    errorObject[errorKey] = contactValue
+                                }
+                            }
+                        )
                     }
                 })
             })
@@ -486,8 +535,8 @@ export const RateDetails = ({
                                                 (rateInfo, index) => (
                                                     <Fieldset
                                                         data-testid={`rate-certification-form`}
-                                                        key={rateInfo.uuid}
-                                                        id={`rateInfos.${index}.container.${rateInfo.uuid}`}
+                                                        key={rateInfo.key}
+                                                        id={`rateInfos.${index}.container.${rateInfo.key}`}
                                                         legend={handleRateInfoLegend(
                                                             index
                                                         )}
@@ -1133,6 +1182,24 @@ export const RateDetails = ({
                                                                     />
                                                                 </FormGroup>
                                                             </>
+                                                        )}
+                                                        {showMultiRates && (
+                                                            <FormGroup>
+                                                                <ActuaryContactFields
+                                                                    actuaryContact={
+                                                                        rateInfo
+                                                                            .actuaryContacts[0]
+                                                                    }
+                                                                    errors={
+                                                                        errors
+                                                                    }
+                                                                    shouldValidate={
+                                                                        shouldValidate
+                                                                    }
+                                                                    fieldNamePrefix={`rateInfos.${index}.actuaryContacts.0`}
+                                                                    fieldSetLegend="Certifying Actuary"
+                                                                />
+                                                            </FormGroup>
                                                         )}
                                                         {index >= 1 &&
                                                             showMultiRates && (

@@ -64,7 +64,18 @@ const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
                       rateInfo.rateDateStart !== undefined &&
                       rateInfo.rateDateEnd !== undefined &&
                       (rateInfo.rateProgramIDs !== undefined ||
-                          rateInfo.rateProgramIDs !== [])
+                          rateInfo.rateProgramIDs !== []) &&
+                      rateInfo.actuaryContacts.every(
+                          (actuaryContact) =>
+                              actuaryContact.name !== undefined &&
+                              actuaryContact.titleRole !== undefined &&
+                              actuaryContact.email !== undefined &&
+                              ((actuaryContact.actuarialFirm !== undefined &&
+                                  actuaryContact.actuarialFirm !== 'OTHER') ||
+                                  (actuaryContact.actuarialFirm === 'OTHER' &&
+                                      actuaryContact.actuarialFirmOther !==
+                                          undefined))
+                      )
 
                   if (isRateAmendment(rateInfo)) {
                       return (

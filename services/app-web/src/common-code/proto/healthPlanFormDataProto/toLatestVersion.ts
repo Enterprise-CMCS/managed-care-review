@@ -22,9 +22,12 @@ const updateToVersion3 = (oldProto: mcreviewproto.HealthPlanFormData) => {
     if (oldProto.protoVersion! < 3) {
         const updatedProto = Object.assign({}, oldProto)
 
-        // Use actuary contacts fields from the first rateInfo to fill in data for new field addtlActuaryContacts
-        updatedProto.addtlActuaryContacts =
-            oldProto.rateInfos[0]?.actuaryContacts ?? []
+        // Use actuary contacts fields from the second actuary contact onward to fill in data for new field addtlActuaryContacts
+        // The first actuary is the certifying actuary contact and will be displayed on the Rate Details.
+        updatedProto.addtlActuaryContacts = oldProto.rateInfos[0]
+            ?.actuaryContacts?.length
+            ? oldProto.rateInfos[0]?.actuaryContacts?.slice(1)
+            : []
         updatedProto.addtlActuaryCommunicationPreference =
             oldProto.rateInfos[0]?.actuaryCommunicationPreference
 

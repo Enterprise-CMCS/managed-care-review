@@ -30,6 +30,8 @@ import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
+import { ActuaryContactFields } from './ActuaryContactFields'
+
 export interface ContactsFormValues {
     stateContacts: stateContactValue[]
     actuaryContacts: actuaryContactValue[]
@@ -108,15 +110,6 @@ type FormError =
 const stateContactErrorHandling = (
     error: string | FormikErrors<stateContactValue> | undefined
 ): FormikErrors<stateContactValue> | undefined => {
-    if (typeof error === 'string') {
-        return undefined
-    }
-    return error
-}
-
-const actuaryContactErrorHandling = (
-    error: string | FormikErrors<actuaryContactValue> | undefined
-): FormikErrors<actuaryContactValue> | undefined => {
     if (typeof error === 'string') {
         return undefined
     }
@@ -227,7 +220,9 @@ export const Contacts = ({
         shouldValidate && Boolean(error)
 
     const stateContacts = draftSubmission.stateContacts
-    const actuaryContacts = draftSubmission.addtlActuaryContacts
+    const actuaryContacts = showMultiRates
+        ? draftSubmission.addtlActuaryContacts
+        : draftSubmission.rateInfos[0]?.actuaryContacts ?? []
 
     const emptyStateContact = {
         name: '',
@@ -288,9 +283,19 @@ export const Contacts = ({
     ) => {
         // const updatedDraft = updatesFromSubmission(draftSubmission)
         draftSubmission.stateContacts = values.stateContacts
-        draftSubmission.addtlActuaryContacts = values.actuaryContacts
-        draftSubmission.addtlActuaryCommunicationPreference =
-            values.actuaryCommunicationPreference
+
+        //Multi-rate submission flag on: Save additional actuaries to top level actuary contacts
+        //Multi-rate submission flag off: Save actuaries to first rate certification in rateInfo
+        if (showMultiRates && includeActuaryContacts) {
+            draftSubmission.addtlActuaryContacts = values.actuaryContacts
+            draftSubmission.addtlActuaryCommunicationPreference =
+                values.actuaryCommunicationPreference
+        } else if (includeActuaryContacts) {
+            draftSubmission.rateInfos[0].actuaryContacts =
+                values.actuaryContacts
+            draftSubmission.rateInfos[0].actuaryCommunicationPreference =
+                values.actuaryCommunicationPreference
+        }
 
         try {
             const updatedSubmission = await updateDraft(draftSubmission)
@@ -570,283 +575,48 @@ export const Contacts = ({
                                                                     key={index}
                                                                     data-testid="actuary-contact"
                                                                 >
-                                                                    <Fieldset
-                                                                        legend={handleContactLegend(
+                                                                    <ActuaryContactFields
+                                                                        actuaryContact={
+                                                                            _actuaryContact
+                                                                        }
+                                                                        errors={
+                                                                            errors
+                                                                        }
+                                                                        shouldValidate={
+                                                                            shouldValidate
+                                                                        }
+                                                                        fieldNamePrefix={`actuaryContacts.${index}`}
+                                                                        fieldSetLegend={handleContactLegend(
                                                                             index,
                                                                             'Actuary'
                                                                         )}
-                                                                    >
-                                                                        <FormGroup
-                                                                            error={showFieldErrors(
-                                                                                actuaryContactErrorHandling(
-                                                                                    errors
-                                                                                        ?.actuaryContacts?.[
-                                                                                        index
-                                                                                    ]
+                                                                        innerRef={(
+                                                                            el: HTMLElement
+                                                                        ) =>
+                                                                            (newActuaryContactNameRef.current =
+                                                                                el)
+                                                                        }
+                                                                    />
+                                                                    {(index >
+                                                                        0 ||
+                                                                        showMultiRates) && (
+                                                                        <Button
+                                                                            type="button"
+                                                                            unstyled
+                                                                            className={
+                                                                                styles.removeContactBtn
+                                                                            }
+                                                                            onClick={() => {
+                                                                                remove(
+                                                                                    index
                                                                                 )
-                                                                                    ?.name
-                                                                            )}
+                                                                                setNewActuaryContactButtonFocus()
+                                                                            }}
                                                                         >
-                                                                            <label
-                                                                                htmlFor={`actuaryContacts.${index}.name`}
-                                                                            >
-                                                                                Name
-                                                                            </label>
-                                                                            {showFieldErrors(
-                                                                                `True`
-                                                                            ) && (
-                                                                                <ErrorMessage
-                                                                                    name={`actuaryContacts.${index}.name`}
-                                                                                    component="div"
-                                                                                    className="usa-error-message"
-                                                                                />
-                                                                            )}
-                                                                            <Field
-                                                                                name={`actuaryContacts.${index}.name`}
-                                                                                id={`actuaryContacts.${index}.name`}
-                                                                                aria-required={
-                                                                                    index ===
-                                                                                    0
-                                                                                }
-                                                                                type="text"
-                                                                                className="usa-input"
-                                                                                innerRef={(
-                                                                                    el: HTMLElement
-                                                                                ) =>
-                                                                                    (newActuaryContactNameRef.current =
-                                                                                        el)
-                                                                                }
-                                                                            />
-                                                                        </FormGroup>
-
-                                                                        <FormGroup
-                                                                            error={showFieldErrors(
-                                                                                actuaryContactErrorHandling(
-                                                                                    errors
-                                                                                        ?.actuaryContacts?.[
-                                                                                        index
-                                                                                    ]
-                                                                                )
-                                                                                    ?.titleRole
-                                                                            )}
-                                                                        >
-                                                                            <label
-                                                                                htmlFor={`actuaryContacts.${index}.titleRole`}
-                                                                            >
-                                                                                Title/Role
-                                                                            </label>
-                                                                            {showFieldErrors(
-                                                                                `True`
-                                                                            ) && (
-                                                                                <ErrorMessage
-                                                                                    name={`actuaryContacts.${index}.titleRole`}
-                                                                                    component="div"
-                                                                                    className="usa-error-message"
-                                                                                />
-                                                                            )}
-                                                                            <Field
-                                                                                name={`actuaryContacts.${index}.titleRole`}
-                                                                                id={`actuaryContacts.${index}.titleRole`}
-                                                                                aria-required={
-                                                                                    index ===
-                                                                                    0
-                                                                                }
-                                                                                type="text"
-                                                                                className="usa-input"
-                                                                            />
-                                                                        </FormGroup>
-
-                                                                        <FormGroup
-                                                                            error={showFieldErrors(
-                                                                                actuaryContactErrorHandling(
-                                                                                    errors
-                                                                                        ?.actuaryContacts?.[
-                                                                                        index
-                                                                                    ]
-                                                                                )
-                                                                                    ?.email
-                                                                            )}
-                                                                        >
-                                                                            <label
-                                                                                htmlFor={`actuaryContacts.${index}.email`}
-                                                                            >
-                                                                                Email
-                                                                            </label>
-                                                                            {showFieldErrors(
-                                                                                `True`
-                                                                            ) && (
-                                                                                <ErrorMessage
-                                                                                    name={`actuaryContacts.${index}.email`}
-                                                                                    component="div"
-                                                                                    className="usa-error-message"
-                                                                                />
-                                                                            )}
-                                                                            <Field
-                                                                                name={`actuaryContacts.${index}.email`}
-                                                                                id={`actuaryContacts.${index}.email`}
-                                                                                aria-required={
-                                                                                    index ===
-                                                                                    0
-                                                                                }
-                                                                                type="text"
-                                                                                className="usa-input"
-                                                                            />
-                                                                        </FormGroup>
-
-                                                                        <FormGroup
-                                                                            error={showFieldErrors(
-                                                                                actuaryContactErrorHandling(
-                                                                                    errors
-                                                                                        ?.actuaryContacts?.[
-                                                                                        index
-                                                                                    ]
-                                                                                )
-                                                                                    ?.actuarialFirm
-                                                                            )}
-                                                                        >
-                                                                            <label
-                                                                                htmlFor={`actuaryContacts.${index}.actuarialFirm`}
-                                                                            >
-                                                                                Actuarial
-                                                                                firm
-                                                                            </label>
-                                                                            {showFieldErrors(
-                                                                                `True`
-                                                                            ) && (
-                                                                                <ErrorMessage
-                                                                                    name={`actuaryContacts.${index}.actuarialFirm`}
-                                                                                    component="div"
-                                                                                    className="usa-error-message"
-                                                                                />
-                                                                            )}
-                                                                            <FieldRadio
-                                                                                id={`mercer-${index}`}
-                                                                                name={`actuaryContacts.${index}.actuarialFirm`}
-                                                                                label="Mercer"
-                                                                                value={
-                                                                                    'MERCER'
-                                                                                }
-                                                                                aria-required
-                                                                            />
-                                                                            <FieldRadio
-                                                                                id={`milliman-${index}`}
-                                                                                name={`actuaryContacts.${index}.actuarialFirm`}
-                                                                                label="Milliman"
-                                                                                value={
-                                                                                    'MILLIMAN'
-                                                                                }
-                                                                                aria-required
-                                                                            />
-                                                                            <FieldRadio
-                                                                                id={`optumas-${index}`}
-                                                                                name={`actuaryContacts.${index}.actuarialFirm`}
-                                                                                label="Optumas"
-                                                                                value={
-                                                                                    'OPTUMAS'
-                                                                                }
-                                                                                aria-required
-                                                                            />
-                                                                            <FieldRadio
-                                                                                id={`guidehouse-${index}`}
-                                                                                name={`actuaryContacts.${index}.actuarialFirm`}
-                                                                                label="Guidehouse"
-                                                                                value={
-                                                                                    'GUIDEHOUSE'
-                                                                                }
-                                                                                aria-required
-                                                                            />
-                                                                            <FieldRadio
-                                                                                id={`deloitte-${index}`}
-                                                                                name={`actuaryContacts.${index}.actuarialFirm`}
-                                                                                label="Deloitte"
-                                                                                value={
-                                                                                    'DELOITTE'
-                                                                                }
-                                                                                aria-required
-                                                                            />
-                                                                            <FieldRadio
-                                                                                id={`stateInHouse-${index}`}
-                                                                                name={`actuaryContacts.${index}.actuarialFirm`}
-                                                                                label="State in-house"
-                                                                                value={
-                                                                                    'STATE_IN_HOUSE'
-                                                                                }
-                                                                                aria-required
-                                                                            />
-                                                                            <FieldRadio
-                                                                                id={`other-${index}`}
-                                                                                name={`actuaryContacts.${index}.actuarialFirm`}
-                                                                                label="Other"
-                                                                                value={
-                                                                                    'OTHER'
-                                                                                }
-                                                                                aria-required
-                                                                            />
-
-                                                                            {values
-                                                                                .actuaryContacts[
-                                                                                index
-                                                                            ]
-                                                                                .actuarialFirm ===
-                                                                                'OTHER' && (
-                                                                                <FormGroup
-                                                                                    error={showFieldErrors(
-                                                                                        actuaryContactErrorHandling(
-                                                                                            errors
-                                                                                                ?.actuaryContacts?.[
-                                                                                                index
-                                                                                            ]
-                                                                                        )
-                                                                                            ?.actuarialFirmOther
-                                                                                    )}
-                                                                                >
-                                                                                    <label
-                                                                                        htmlFor={`actuaryContacts.${index}.actuarialFirmOther`}
-                                                                                    >
-                                                                                        Other
-                                                                                        actuarial
-                                                                                        firm
-                                                                                    </label>
-                                                                                    {showFieldErrors(
-                                                                                        `True`
-                                                                                    ) && (
-                                                                                        <ErrorMessage
-                                                                                            name={`actuaryContacts.${index}.actuarialFirmOther`}
-                                                                                            component="div"
-                                                                                            className="usa-error-message"
-                                                                                        />
-                                                                                    )}
-                                                                                    <Field
-                                                                                        name={`actuaryContacts.${index}.actuarialFirmOther`}
-                                                                                        id={`actuaryContacts.${index}.actuarialFirmOther`}
-                                                                                        type="text"
-                                                                                        className="usa-input"
-                                                                                    />
-                                                                                </FormGroup>
-                                                                            )}
-                                                                        </FormGroup>
-
-                                                                        {(index >
-                                                                            0 ||
-                                                                            showMultiRates) && (
-                                                                            <Button
-                                                                                type="button"
-                                                                                unstyled
-                                                                                className={
-                                                                                    styles.removeContactBtn
-                                                                                }
-                                                                                onClick={() => {
-                                                                                    remove(
-                                                                                        index
-                                                                                    )
-                                                                                    setNewActuaryContactButtonFocus()
-                                                                                }}
-                                                                            >
-                                                                                Remove
-                                                                                contact
-                                                                            </Button>
-                                                                        )}
-                                                                    </Fieldset>
+                                                                            Remove
+                                                                            contact
+                                                                        </Button>
+                                                                    )}
                                                                 </div>
                                                             )
                                                         )}

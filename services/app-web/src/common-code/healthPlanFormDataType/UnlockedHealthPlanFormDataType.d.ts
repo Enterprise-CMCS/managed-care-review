@@ -76,6 +76,8 @@ type RateInfoType = {
     rateAmendmentInfo?: RateAmendmentInfo
     rateProgramIDs?: string[]
     rateCertificationName?: string
+    actuaryContacts: ActuaryContact[]
+    actuaryCommunicationPreference?: ActuaryCommunicationType
 }
 
 // MAIN

@@ -214,6 +214,15 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
                     effectiveDateEnd: new Date(),
                 },
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@test.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
         rateType: 'AMENDMENT',
@@ -300,6 +309,15 @@ export function mockStateSubmission(): LockedHealthPlanFormDataType {
                 rateDateCertified: new Date(),
                 rateAmendmentInfo: undefined,
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@test.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
         rateType: 'NEW',
@@ -396,6 +414,15 @@ export function mockStateSubmissionContractAmendment(): LockedHealthPlanFormData
                 rateDateCertified: new Date(),
                 rateAmendmentInfo: undefined,
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@test.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
         rateType: 'NEW',
@@ -888,6 +915,7 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                         documentCategories: ['RATES_RELATED'],
                     },
                 ],
+                actuaryContacts: [],
             },
         ],
         documents: [
@@ -940,6 +968,7 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                         documentCategories: ['RATES'],
                     },
                 ],
+                actuaryContacts: [],
             },
         ],
         documents: [

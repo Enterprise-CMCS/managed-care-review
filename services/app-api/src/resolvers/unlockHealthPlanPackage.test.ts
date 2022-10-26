@@ -544,6 +544,15 @@ describe('unlockHealthPlanPackage', () => {
                     },
                 ],
                 rateProgramIDs: [],
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ]
         // there's a rateProgramIDs in rateInfos and also on the form data itself; clear them both

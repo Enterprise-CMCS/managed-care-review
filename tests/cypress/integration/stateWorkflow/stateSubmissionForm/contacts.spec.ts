@@ -56,10 +56,10 @@ describe('contacts', () => {
             // On contacts page, navigate BACK
             cy.navigateFormByButtonClick('BACK')
             cy.findByRole('heading', { level: 2, name: /Rate details/ })
+            cy.fillOutNewRateCertification()
+            cy.navigateFormByButtonClick('CONTINUE')
 
             // On contacts page, SAVE_DRAFT
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/contacts`)
-
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
             cy.navigateFormByButtonClick('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
@@ -100,10 +100,10 @@ describe('contacts', () => {
             // On contacts page, navigate BACK
             cy.navigateFormByButtonClick('BACK')
             cy.findByRole('heading', { level: 2, name: /Rate details/ })
+            cy.fillOutNewRateCertification()
+            cy.navigateFormByButtonClick('CONTINUE')
 
             // On contacts page, SAVE_DRAFT
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/contacts`)
-
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
             cy.navigateFormByButtonClick('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })

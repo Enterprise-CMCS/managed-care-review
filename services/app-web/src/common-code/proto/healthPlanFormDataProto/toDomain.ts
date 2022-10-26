@@ -319,6 +319,13 @@ function parseRateInfos(
                 rateCertificationName: parseRateCertificationName(
                     rateInfo?.rateCertificationName
                 ),
+                actuaryContacts: parseActuaryContacts(
+                    rateInfo?.actuaryContacts
+                ),
+                actuaryCommunicationPreference: enumToDomain(
+                    mcreviewproto.ActuaryCommunicationType,
+                    rateInfo?.actuaryCommunicationPreference
+                ),
             }
             rates.push(rate)
         })

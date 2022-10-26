@@ -194,6 +194,22 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
                 rateCertificationName:
                     'MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523',
                 rateDocuments: [],
+                actuaryContacts: [
+                    {
+                        name: 'foo bar',
+                        titleRole: 'manager',
+                        email: 'soandso@example.com',
+                        actuarialFirm: 'OTHER' as const,
+                        actuarialFirmOther: 'ACME',
+                    },
+                    {
+                        name: 'Fine Bab',
+                        titleRole: 'supervisor',
+                        email: 'lodar@example.com',
+                        actuarialFirm: 'MERCER' as const,
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
         rateType: 'AMENDMENT',
@@ -236,6 +252,7 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
                 actuarialFirm: 'MERCER' as const,
             },
         ],
+        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
     }
 }
 
@@ -294,6 +311,22 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
                         documentCategories: ['RATES'],
                     },
                 ],
+                actuaryContacts: [
+                    {
+                        name: 'foo bar',
+                        titleRole: 'manager',
+                        email: 'soandso@example.com',
+                        actuarialFirm: 'OTHER' as const,
+                        actuarialFirmOther: 'ACME',
+                    },
+                    {
+                        name: 'Fine Bab',
+                        titleRole: 'supervisor',
+                        email: 'lodar@example.com',
+                        actuarialFirm: 'MERCER' as const,
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
         rateType: 'AMENDMENT',
@@ -342,6 +375,7 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
                 actuarialFirm: 'MERCER' as const,
             },
         ],
+        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
     }
 }
 
@@ -403,6 +437,22 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
                         documentCategories: ['RATES'],
                     },
                 ],
+                actuaryContacts: [
+                    {
+                        name: 'foo bar',
+                        titleRole: 'manager',
+                        email: 'soandso@example.com',
+                        actuarialFirm: 'OTHER' as const,
+                        actuarialFirmOther: 'ACME',
+                    },
+                    {
+                        name: 'Fine Bab',
+                        titleRole: 'supervisor',
+                        email: 'lodar@example.com',
+                        actuarialFirm: 'MERCER' as const,
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
         rateType: 'AMENDMENT',
@@ -530,6 +580,22 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
                         documentCategories: ['RATES'],
                     },
                 ],
+                actuaryContacts: [
+                    {
+                        name: 'foo bar',
+                        titleRole: 'manager',
+                        email: 'soandso@example.com',
+                        actuarialFirm: 'OTHER' as const,
+                        actuarialFirmOther: 'ACME',
+                    },
+                    {
+                        name: 'Fine Bab',
+                        titleRole: 'supervisor',
+                        email: 'lodar@example.com',
+                        actuarialFirm: 'MERCER' as const,
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
         rateType: 'AMENDMENT',
@@ -654,6 +720,22 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
                 rateProgramIDs: [mockMNState().programs[0].id],
                 rateCertificationName:
                     'MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523',
+                actuaryContacts: [
+                    {
+                        name: 'foo bar',
+                        titleRole: 'manager',
+                        email: 'soandso@example.com',
+                        actuarialFirm: 'OTHER' as const,
+                        actuarialFirmOther: 'ACME',
+                    },
+                    {
+                        name: 'Fine Bab',
+                        titleRole: 'supervisor',
+                        email: 'lodar@example.com',
+                        actuarialFirm: 'MERCER' as const,
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
         rateType: 'AMENDMENT',

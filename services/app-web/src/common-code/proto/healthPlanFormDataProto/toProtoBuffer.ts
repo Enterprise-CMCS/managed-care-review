@@ -225,7 +225,7 @@ const toProtoBuffer = (
                               ),
                           },
                           //Currently, this Actuary data is in domainData, eventually it will be included in the rateInfo to have actuaries for each certification.
-                          actuaryContacts: domainData.addtlActuaryContacts.map(
+                          actuaryContacts: rateInfo.actuaryContacts.map(
                               (actuaryContact) => {
                                   const firmType = domainEnumToProto(
                                       actuaryContact.actuarialFirm,
