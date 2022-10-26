@@ -141,7 +141,7 @@ describe('ContactsSummarySection', () => {
         ).toBeInTheDocument()
         expect(
             screen.getByRole('link', {
-                name: 'actuarycontact1@test.com',
+                name: 'additionalactuarycontact1@test.com',
             })
         ).toBeInTheDocument()
         expect(

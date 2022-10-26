@@ -254,9 +254,9 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
         addtlActuaryContacts: [
             {
                 actuarialFirm: 'DELOITTE',
-                name: 'Actuary Contact 1',
-                titleRole: 'Test Actuary Contact 1',
-                email: 'actuarycontact1@test.com',
+                name: 'Additional Actuary Contact',
+                titleRole: 'Test Actuary Contact',
+                email: 'additionalactuarycontact1@test.com',
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
