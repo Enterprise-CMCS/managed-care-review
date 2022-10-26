@@ -10,91 +10,70 @@ type FormError =
     FormikErrors<RateInfoFormType>[keyof FormikErrors<RateInfoFormType>]
 
 type ActuaryFormPropType = {
-    actuaryContacts: ActuaryContact[]
-    rateIndex?: number
+    actuaryContact: ActuaryContact
     errors: FormikErrors<FormikValues>
     shouldValidate: boolean
+    fieldNamePrefix: string
+    fieldSetLegend?: string
+    innerRef?: (el: HTMLElement) => void
 }
 
 export const ActuaryContactFields = ({
-    actuaryContacts,
-    rateIndex,
+    actuaryContact,
     errors,
     shouldValidate,
+    fieldNamePrefix,
+    fieldSetLegend = 'Actuary Contact',
+    innerRef,
 }: ActuaryFormPropType) => {
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
-    if (!actuaryContacts[0]) {
+    if (!actuaryContact) {
         return null
     }
 
     return (
-        <Fieldset legend="Certifying actuary">
+        <Fieldset legend={fieldSetLegend}>
             <FormGroup
                 error={showFieldErrors(
-                    getIn(
-                        errors,
-                        `rateInfos.${rateIndex}.actuaryContacts.0.name`
-                    )
+                    getIn(errors, `${fieldNamePrefix}.name`)
                 )}
             >
-                <label
-                    htmlFor={`rateInfos.${rateIndex}.actuaryContacts.0.name`}
-                >
-                    Name
-                </label>
-                {showFieldErrors(
-                    getIn(
-                        errors,
-                        `rateInfos.${rateIndex}.actuaryContacts.0.name`
-                    )
-                ) && (
+                <label htmlFor={`${fieldNamePrefix}.name`}>Name</label>
+                {showFieldErrors(getIn(errors, `${fieldNamePrefix}.name`)) && (
                     <PoliteErrorMessage>
-                        {getIn(
-                            errors,
-                            `rateInfos.${rateIndex}.actuaryContacts.0.name`
-                        )}
+                        {getIn(errors, `${fieldNamePrefix}.name`)}
                     </PoliteErrorMessage>
                 )}
                 <Field
-                    name={`rateInfos.${rateIndex}.actuaryContacts.0.name`}
-                    id={`rateInfos.${rateIndex}.actuaryContacts.0.name`}
+                    name={`${fieldNamePrefix}.name`}
+                    id={`${fieldNamePrefix}.name`}
                     aria-required
                     type="text"
                     className="usa-input"
+                    innerRef={innerRef}
                 />
             </FormGroup>
 
             <FormGroup
                 error={showFieldErrors(
-                    getIn(
-                        errors,
-                        `rateInfos.${rateIndex}.actuaryContacts.0.titleRole`
-                    )
+                    getIn(errors, `${fieldNamePrefix}.titleRole`)
                 )}
             >
-                <label
-                    htmlFor={`rateInfos.${rateIndex}.actuaryContacts.0.titleRole`}
-                >
+                <label htmlFor={`${fieldNamePrefix}.titleRole`}>
                     Title/Role
                 </label>
                 {showFieldErrors(
-                    getIn(
-                        errors,
-                        `rateInfos.${rateIndex}.actuaryContacts.0.titleRole`
-                    )
+                    getIn(errors, `${fieldNamePrefix}.titleRole`)
                 ) && (
                     <PoliteErrorMessage>
-                        {getIn(
-                            errors,
-                            `rateInfos.${rateIndex}.actuaryContacts.0.titleRole`
-                        )}
+                        {getIn(errors, `${fieldNamePrefix}.titleRole`)}
                     </PoliteErrorMessage>
                 )}
                 <Field
-                    name={`rateInfos.${rateIndex}.actuaryContacts.0.titleRole`}
-                    id={`rateInfos.${rateIndex}.actuaryContacts.0.titleRole`}
+                    name={`${fieldNamePrefix}.titleRole`}
+                    id={`${fieldNamePrefix}.titleRole`}
                     aria-required
                     type="text"
                     className="usa-input"
@@ -103,33 +82,18 @@ export const ActuaryContactFields = ({
 
             <FormGroup
                 error={showFieldErrors(
-                    getIn(
-                        errors,
-                        `rateInfos.${rateIndex}.actuaryContacts.0.email`
-                    )
+                    getIn(errors, `${fieldNamePrefix}.email`)
                 )}
             >
-                <label
-                    htmlFor={`rateInfos.${rateIndex}.actuaryContacts.0.email`}
-                >
-                    Email
-                </label>
-                {showFieldErrors(
-                    getIn(
-                        errors,
-                        `rateInfos.${rateIndex}.actuaryContacts.0.email`
-                    )
-                ) && (
+                <label htmlFor={`${fieldNamePrefix}.email`}>Email</label>
+                {showFieldErrors(getIn(errors, `${fieldNamePrefix}.email`)) && (
                     <PoliteErrorMessage>
-                        {getIn(
-                            errors,
-                            `rateInfos.${rateIndex}.actuaryContacts.0.email`
-                        )}
+                        {getIn(errors, `${fieldNamePrefix}.email`)}
                     </PoliteErrorMessage>
                 )}
                 <Field
-                    name={`rateInfos.${rateIndex}.actuaryContacts.0.email`}
-                    id={`rateInfos.${rateIndex}.actuaryContacts.0.email`}
+                    name={`${fieldNamePrefix}.email`}
+                    id={`${fieldNamePrefix}.email`}
                     aria-required
                     type="text"
                     className="usa-input"
@@ -138,110 +102,99 @@ export const ActuaryContactFields = ({
 
             <FormGroup
                 error={showFieldErrors(
-                    getIn(
-                        errors,
-                        `rateInfos.${rateIndex}.actuaryContacts.0.actuarialFirm`
-                    )
+                    getIn(errors, `${fieldNamePrefix}.actuarialFirm`)
                 )}
             >
-                <label
-                    htmlFor={`rateInfos.${rateIndex}.actuaryContacts.0.actuarialFirm`}
-                >
+                <label htmlFor={`${fieldNamePrefix}.actuarialFirm`}>
                     Actuarial firm
                 </label>
                 {showFieldErrors(
-                    getIn(
-                        errors,
-                        `rateInfos.${rateIndex}.actuaryContacts.0.actuarialFirm`
-                    )
+                    getIn(errors, `${fieldNamePrefix}.actuarialFirm`)
                 ) && (
                     <PoliteErrorMessage>
-                        {getIn(
-                            errors,
-                            `rateInfos.${rateIndex}.actuaryContacts.0.actuarialFirm`
-                        )}
+                        {getIn(errors, `${fieldNamePrefix}.actuarialFirm`)}
                     </PoliteErrorMessage>
                 )}
                 <FieldRadio
-                    id={`mercer-${rateIndex}`}
-                    name={`rateInfos.${rateIndex}.actuaryContacts.0.actuarialFirm`}
+                    id={`${fieldNamePrefix}-mercer`}
+                    name={`${fieldNamePrefix}.actuarialFirm`}
                     label="Mercer"
                     value={'MERCER'}
                     aria-required
                 />
                 <FieldRadio
-                    id={`milliman-${rateIndex}`}
-                    name={`rateInfos.${rateIndex}.actuaryContacts.0.actuarialFirm`}
+                    id={`${fieldNamePrefix}-milliman`}
+                    name={`${fieldNamePrefix}.actuarialFirm`}
                     label="Milliman"
                     value={'MILLIMAN'}
                     aria-required
                 />
                 <FieldRadio
-                    id={`optumas-${rateIndex}`}
-                    name={`rateInfos.${rateIndex}.actuaryContacts.0.actuarialFirm`}
+                    id={`${fieldNamePrefix}-optumas`}
+                    name={`${fieldNamePrefix}.actuarialFirm`}
                     label="Optumas"
                     value={'OPTUMAS'}
                     aria-required
                 />
                 <FieldRadio
-                    id={`guidehouse-${rateIndex}`}
-                    name={`rateInfos.${rateIndex}.actuaryContacts.0.actuarialFirm`}
+                    id={`${fieldNamePrefix}-guidehouse`}
+                    name={`${fieldNamePrefix}.actuarialFirm`}
                     label="Guidehouse"
                     value={'GUIDEHOUSE'}
                     aria-required
                 />
                 <FieldRadio
-                    id={`deloitte-${rateIndex}`}
-                    name={`rateInfos.${rateIndex}.actuaryContacts.0.actuarialFirm`}
+                    id={`${fieldNamePrefix}-deloitte`}
+                    name={`${fieldNamePrefix}.actuarialFirm`}
                     label="Deloitte"
                     value={'DELOITTE'}
                     aria-required
                 />
                 <FieldRadio
-                    id={`stateInHouse-${rateIndex}`}
-                    name={`rateInfos.${rateIndex}.actuaryContacts.0.actuarialFirm`}
+                    id={`${fieldNamePrefix}-stateInHouse`}
+                    name={`${fieldNamePrefix}.actuarialFirm`}
                     label="State in-house"
                     value={'STATE_IN_HOUSE'}
                     aria-required
                 />
                 <FieldRadio
-                    id={`other-${rateIndex}`}
-                    name={`rateInfos.${rateIndex}.actuaryContacts.0.actuarialFirm`}
+                    id={`${fieldNamePrefix}-other`}
+                    name={`${fieldNamePrefix}.actuarialFirm`}
                     label="Other"
                     value={'OTHER'}
                     aria-required
                 />
 
-                {actuaryContacts[0]?.actuarialFirm === 'OTHER' && (
+                {actuaryContact.actuarialFirm === 'OTHER' && (
                     <FormGroup
                         error={showFieldErrors(
                             getIn(
                                 errors,
-                                `rateInfos.${rateIndex}.actuaryContacts.0.actuarialFirmOther`
+                                `${fieldNamePrefix}.actuarialFirmOther`
                             )
                         )}
                     >
                         <label
-                            htmlFor={`rateInfos.${rateIndex}.actuaryContacts.0.actuarialFirmOther`}
+                            htmlFor={`${fieldNamePrefix}.actuarialFirmOther`}
                         >
                             Other actuarial firm
                         </label>
                         {showFieldErrors(
                             getIn(
                                 errors,
-                                `rateInfos.${rateIndex}.actuaryContacts.0.actuarialFirmOther`
+                                `${fieldNamePrefix}.actuarialFirmOther`
                             )
                         ) && (
                             <PoliteErrorMessage>
                                 {getIn(
                                     errors,
-                                    `rateInfos.${rateIndex}.actuaryContacts.0.actuarialFirmOther`
+                                    `${fieldNamePrefix}.actuarialFirmOther`
                                 )}
                             </PoliteErrorMessage>
                         )}
                         <Field
-                            name={`rateInfos.${rateIndex}.actuaryContacts.0.actuarialFirmOther`}
-                            id={`rateInfos.${rateIndex}.actuaryContacts.0.actuarialFirmOther`}
+                            name={`${fieldNamePrefix}.actuarialFirmOther`}
+                            id={`${fieldNamePrefix}.actuarialFirmOther`}
                             type="text"
                             className="usa-input"
                         />

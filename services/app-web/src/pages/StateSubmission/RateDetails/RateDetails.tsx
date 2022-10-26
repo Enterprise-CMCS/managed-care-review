@@ -139,8 +139,6 @@ export const RateDetails = ({
               rateInfos: RateDetailsFormSchema,
           })
 
-    console.log(rateDetailsFormSchema)
-
     const fileItemsFromRateInfo = (rateInfo: RateInfoFormType): FileItemT[] => {
         return (
             (rateInfo?.rateDocuments &&
@@ -1188,11 +1186,9 @@ export const RateDetails = ({
                                                         {showMultiRates && (
                                                             <FormGroup>
                                                                 <ActuaryContactFields
-                                                                    actuaryContacts={
-                                                                        rateInfo.actuaryContacts
-                                                                    }
-                                                                    rateIndex={
-                                                                        index
+                                                                    actuaryContact={
+                                                                        rateInfo
+                                                                            .actuaryContacts[0]
                                                                     }
                                                                     errors={
                                                                         errors
@@ -1200,6 +1196,8 @@ export const RateDetails = ({
                                                                     shouldValidate={
                                                                         shouldValidate
                                                                     }
+                                                                    fieldNamePrefix={`rateInfos.${index}.actuaryContacts.0`}
+                                                                    fieldSetLegend="Certifying Actuary"
                                                                 />
                                                             </FormGroup>
                                                         )}
