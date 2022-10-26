@@ -7,7 +7,7 @@ import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
-// import { generateRateName } from '../../../common-code/healthPlanFormDataType'
+import { generateRateName } from '../../../common-code/healthPlanFormDataType'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
@@ -51,22 +51,21 @@ export const RateDetailsSummarySection = ({
                 : 'Certification of rate ranges of capitation rates per rate cell'
             : ''
     /* falling back to generated name for old submissions that don't have the name on first load */
-    // const rateName = () => {
-    //     const certName = submission.rateInfos[0]?.rateCertificationName
-    //     const rateInfo = submission.rateInfos[0] ?? submission
-    //     const generatedName = generateRateName(
-    //         submission,
-    //         rateInfo,
-    //         statePrograms
-    //     )
-    //     if (certName) {
-    //         return certName
-    //     } else if (generatedName) {
-    //         return generatedName
-    //     } else {
-    //         return undefined
-    //     }
-    // }
+    const rateName = (rateInfo: RateInfoType) => {
+        const certName = rateInfo.rateCertificationName
+        const generatedName = generateRateName(
+            submission,
+            rateInfo,
+            statePrograms
+        )
+        if (certName) {
+            return certName
+        } else if (generatedName) {
+            return generatedName
+        } else {
+            return undefined
+        }
+    }
 
     const ratePrograms = (
         submission: HealthPlanFormDataType,
@@ -143,15 +142,15 @@ export const RateDetailsSummarySection = ({
                 {submission.rateInfos.map((rateInfo, index) => {
                     return (
                         <React.Fragment
-                            key={`${
-                                rateInfo.rateCertificationName
-                            }${JSON.stringify(rateInfo.rateDocuments)}`}
+                            key={`${rateName(rateInfo)}${JSON.stringify(
+                                rateInfo.rateDocuments
+                            )}`}
                         >
                             <h3
-                                aria-label={`Rate ID: ${rateInfo.rateCertificationName}`}
+                                aria-label={`Rate ID: ${rateName(rateInfo)}`}
                                 className={styles.rateName}
                             >
-                                {rateInfo.rateCertificationName}
+                                {rateName(rateInfo)}
                             </h3>
                             <DoubleColumnGrid>
                                 {ratePrograms && (
