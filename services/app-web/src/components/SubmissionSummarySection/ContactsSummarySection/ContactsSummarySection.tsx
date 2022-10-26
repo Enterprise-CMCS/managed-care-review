@@ -7,6 +7,8 @@ import {
 } from '../../../constants/healthPlanPackages'
 import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { ActuaryContact } from '../../../common-code/healthPlanFormDataType'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../../common-code/featureFlags'
 
 export type ContactsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -33,6 +35,25 @@ export const ContactsSummarySection = ({
     submission,
     navigateTo,
 }: ContactsSummarySectionProps): React.ReactElement => {
+    // Launch Darkly
+    const ldClient = useLDClient()
+    const showMultiRates = ldClient?.variation(
+        featureFlags.MULTI_RATE_SUBMISSIONS.flag,
+        featureFlags.MULTI_RATE_SUBMISSIONS.defaultValue
+    )
+
+    const handleActuaryTitle = (index: number) => {
+        if (showMultiRates) {
+            return 'Additional actuary contact'
+        } else {
+            return index ? 'Additional actuary contact' : 'Certifying actuary'
+        }
+    }
+
+    const actuaries = showMultiRates
+        ? submission.addtlActuaryContacts
+        : submission.rateInfos[0]?.actuaryContacts ?? []
+
     return (
         <section id="stateContacts" className={styles.summarySection}>
             <dl>
@@ -73,42 +94,42 @@ export const ContactsSummarySection = ({
             {submission.submissionType === 'CONTRACT_AND_RATES' && (
                 <>
                     <dl>
-                        <div className={styles.summarySectionSubHeader}>
-                            <h2>Actuary contacts</h2>
-                        </div>
+                        <SectionHeader
+                            header={
+                                showMultiRates
+                                    ? 'Additional actuary contacts'
+                                    : 'Actuary contacts'
+                            }
+                        />
                         <GridContainer>
                             <Grid row>
-                                {submission.actuaryContacts.map(
-                                    (actuaryContact, index) => (
-                                        <Grid
-                                            col={6}
-                                            key={'actuarycontact_' + index}
-                                        >
-                                            <span className="text-bold">
-                                                {index
-                                                    ? 'Additional actuary contact'
-                                                    : 'Certifying actuary'}
-                                            </span>
+                                {actuaries.map((actuaryContact, index) => (
+                                    <Grid
+                                        col={6}
+                                        key={'actuarycontact_' + index}
+                                    >
+                                        <span className="text-bold">
+                                            {handleActuaryTitle(index)}
+                                        </span>
+                                        <br />
+                                        <address>
+                                            {actuaryContact.name}
                                             <br />
-                                            <address>
-                                                {actuaryContact.name}
-                                                <br />
-                                                {actuaryContact.titleRole}
-                                                <br />
-                                                <Link
-                                                    href={`mailto:${actuaryContact.email}`}
-                                                    target="_blank"
-                                                    variant="external"
-                                                    rel="noreferrer"
-                                                >
-                                                    {actuaryContact.email}
-                                                </Link>
-                                                <br />
-                                                {getActuaryFirm(actuaryContact)}
-                                            </address>
-                                        </Grid>
-                                    )
-                                )}
+                                            {actuaryContact.titleRole}
+                                            <br />
+                                            <Link
+                                                href={`mailto:${actuaryContact.email}`}
+                                                target="_blank"
+                                                variant="external"
+                                                rel="noreferrer"
+                                            >
+                                                {actuaryContact.email}
+                                            </Link>
+                                            <br />
+                                            {getActuaryFirm(actuaryContact)}
+                                        </address>
+                                    </Grid>
+                                ))}
                             </Grid>
                         </GridContainer>
                     </dl>
@@ -116,12 +137,14 @@ export const ContactsSummarySection = ({
                         <GridContainer>
                             <Grid row>
                                 <span className="text-bold">
-                                    Actuary communication preference
+                                    {showMultiRates
+                                        ? 'Actuaries’ communication preference'
+                                        : 'Actuary communication preference'}
                                 </span>
-                                {submission.actuaryCommunicationPreference
+                                {submission.addtlActuaryCommunicationPreference
                                     ? ActuaryCommunicationRecord[
                                           submission
-                                              .actuaryCommunicationPreference
+                                              .addtlActuaryCommunicationPreference
                                       ]
                                     : ''}
                             </Grid>

@@ -229,6 +229,41 @@ describe('submission type assertions', () => {
                 ...mockStateSubmission(),
                 rateInfos: [
                     {
+                        rateType: 'NEW',
+                        rateCapitationType: 'RATE_CELL',
+                        rateDocuments: [
+                            {
+                                s3URL: 's3://bucketname/key/rate',
+                                name: 'rate',
+                                documentCategories: ['RATES' as const],
+                            },
+                        ],
+                        rateDateStart: new Date(),
+                        rateDateEnd: new Date(),
+                        rateDateCertified: new Date(),
+                        rateAmendmentInfo: undefined,
+                        rateProgramIDs: [
+                            'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                        ],
+                        actuaryContacts: [
+                            {
+                                actuarialFirm: 'OTHER' as const,
+                                name: 'Actuary Contact 1',
+                                titleRole: 'Test Actuary Contact 1',
+                                email: 'actuarycontact1@test.com',
+                            },
+                        ],
+                        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                    },
+                ],
+            },
+            false,
+        ],
+        [
+            {
+                ...mockStateSubmission(),
+                rateInfos: [
+                    {
                         rateType: undefined,
                     },
                 ],
@@ -468,6 +503,7 @@ describe('submission type assertions', () => {
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
+                        actuaryContacts: [],
                     },
                 ],
             },
@@ -488,6 +524,7 @@ describe('submission type assertions', () => {
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
+                        actuaryContacts: [],
                     },
                 ],
             },
@@ -512,6 +549,7 @@ describe('submission type assertions', () => {
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
                         rateDocuments: [],
+                        actuaryContacts: [],
                     },
                 ],
             },
@@ -536,6 +574,7 @@ describe('submission type assertions', () => {
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
                         rateDocuments: [],
+                        actuaryContacts: [],
                     },
                 ],
             },
@@ -553,6 +592,7 @@ describe('submission type assertions', () => {
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
                         rateDocuments: [],
+                        actuaryContacts: [],
                     },
                 ],
             },
@@ -576,6 +616,7 @@ describe('submission type assertions', () => {
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
                         rateDocuments: [],
+                        actuaryContacts: [],
                     },
                 ],
             },
@@ -597,6 +638,7 @@ describe('submission type assertions', () => {
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
+                        actuaryContacts: [],
                     },
                 ],
             },
@@ -620,6 +662,7 @@ describe('submission type assertions', () => {
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
+                        actuaryContacts: [],
                     },
                 ],
             },
@@ -645,6 +688,7 @@ describe('submission type assertions', () => {
                         },
                         rateDocuments: [],
                         rateProgramIDs: [],
+                        actuaryContacts: [],
                     },
                 ],
             },
@@ -722,7 +766,7 @@ describe('submission type assertions', () => {
                 rateCapitationType: undefined,
                 rateAmendmentInfo: undefined,
                 rateProgramIDs: [],
-                actuaryContacts: [],
+                addtlActuaryContacts: [],
                 documents: [
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
@@ -779,7 +823,7 @@ describe('submission type assertions', () => {
                 rateCapitationType: undefined,
                 rateAmendmentInfo: undefined,
                 rateProgramIDs: [],
-                actuaryContacts: [],
+                addtlActuaryContacts: [],
                 documents: [
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
@@ -823,7 +867,7 @@ describe('submission type assertions', () => {
                 rateCapitationType: undefined,
                 rateAmendmentInfo: undefined,
                 rateProgramIDs: [],
-                actuaryContacts: [],
+                addtlActuaryContacts: [],
                 documents: [
                     {
                         name: 'rate_only_supporting_doc.pdf',

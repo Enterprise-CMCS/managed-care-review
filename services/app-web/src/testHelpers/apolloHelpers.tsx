@@ -86,8 +86,8 @@ export function mockDraft(): UnlockedHealthPlanFormDataType {
         rateAmendmentInfo: undefined,
         rateProgramIDs: undefined,
         stateContacts: [],
-        actuaryContacts: [],
-        actuaryCommunicationPreference: undefined,
+        addtlActuaryContacts: [],
+        addtlActuaryCommunicationPreference: undefined,
     }
 }
 
@@ -118,8 +118,8 @@ export function mockContactAndRatesDraft(): UnlockedHealthPlanFormDataType {
         rateDateCertified: undefined,
         rateAmendmentInfo: undefined,
         stateContacts: [],
-        actuaryContacts: [],
-        actuaryCommunicationPreference: undefined,
+        addtlActuaryContacts: [],
+        addtlActuaryCommunicationPreference: undefined,
         status: 'DRAFT',
         stateNumber: 5,
     }
@@ -160,8 +160,8 @@ export function mockCompleteDraft(): UnlockedHealthPlanFormDataType {
                 email: 'test@test.com',
             },
         ],
-        actuaryContacts: [],
-        actuaryCommunicationPreference: undefined,
+        addtlActuaryContacts: [],
+        addtlActuaryCommunicationPreference: undefined,
     }
 }
 
@@ -217,6 +217,15 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
                     effectiveDateEnd: new Date(),
                 },
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@test.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
         rateType: 'AMENDMENT',
@@ -242,7 +251,7 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
                 email: 'statecontact2@test.com',
             },
         ],
-        actuaryContacts: [
+        addtlActuaryContacts: [
             {
                 actuarialFirm: 'DELOITTE',
                 name: 'Actuary Contact 1',
@@ -250,7 +259,7 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
                 email: 'actuarycontact1@test.com',
             },
         ],
-        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
     }
 }
 
@@ -303,6 +312,15 @@ export function mockStateSubmission(): LockedHealthPlanFormDataType {
                 rateDateCertified: new Date(),
                 rateAmendmentInfo: undefined,
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@test.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
         rateType: 'NEW',
@@ -326,8 +344,8 @@ export function mockStateSubmission(): LockedHealthPlanFormDataType {
                 email: 'test@test.com',
             },
         ],
-        actuaryContacts: [],
-        actuaryCommunicationPreference: undefined,
+        addtlActuaryContacts: [],
+        addtlActuaryCommunicationPreference: undefined,
     }
 }
 
@@ -399,6 +417,15 @@ export function mockStateSubmissionContractAmendment(): LockedHealthPlanFormData
                 rateDateCertified: new Date(),
                 rateAmendmentInfo: undefined,
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@test.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
         rateType: 'NEW',
@@ -422,8 +449,8 @@ export function mockStateSubmissionContractAmendment(): LockedHealthPlanFormData
                 email: 'test@test.com',
             },
         ],
-        actuaryContacts: [],
-        actuaryCommunicationPreference: undefined,
+        addtlActuaryContacts: [],
+        addtlActuaryCommunicationPreference: undefined,
     }
 }
 
@@ -951,6 +978,7 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                         documentCategories: ['RATES_RELATED'],
                     },
                 ],
+                actuaryContacts: [],
             },
         ],
         documents: [
@@ -1003,6 +1031,7 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                         documentCategories: ['RATES'],
                     },
                 ],
+                actuaryContacts: [],
             },
         ],
         documents: [
@@ -1273,8 +1302,8 @@ const unlockHealthPlanPackageMockError = ({
 
 const indexHealthPlanPackagesMockSuccess = (
     submissions: HealthPlanPackage[] = [
-        mockUnlockedHealthPlanPackage(),
-        mockSubmittedHealthPlanPackage(),
+        { ...mockUnlockedHealthPlanPackage(), id: 'test-id-123' },
+        { ...mockSubmittedHealthPlanPackage(), id: 'test-id-124' },
     ]
 ): MockedResponse<IndexHealthPlanPackagesQuery> => {
     const submissionEdges = submissions.map((sub) => {
