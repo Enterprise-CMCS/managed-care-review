@@ -9,6 +9,8 @@ import { HealthPlanFormDataType } from './HealthPlanFormDataType'
 import { formatRateNameDate } from '../../common-code/dateHelpers'
 import { ProgramArgType } from '.'
 
+// TODO: Refactor into multiple files and add unit tests to these functions
+
 const isContractOnly = (
     sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
 ): boolean => sub.submissionType === 'CONTRACT_ONLY'
