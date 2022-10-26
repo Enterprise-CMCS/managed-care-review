@@ -162,7 +162,7 @@ export const Contacts = ({
 }): React.ReactElement => {
     // Launch Darkly
     const ldClient = useLDClient()
-    const showMultiRates = !ldClient?.variation(
+    const showMultiRates = ldClient?.variation(
         featureFlags.MULTI_RATE_SUBMISSIONS.flag,
         featureFlags.MULTI_RATE_SUBMISSIONS.defaultValue
     )
