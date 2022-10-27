@@ -104,27 +104,6 @@ type UnlockedHealthPlanFormDataType = {
     federalAuthorities: FederalAuthority[]
     contractAmendmentInfo?: ContractAmendmentInfo
     rateInfos: RateInfoType[]
-    rateType?: RateType
-    rateCapitationType?: RateCapitationType
-    rateDocuments: SubmissionDocument[]
-    rateDateStart?: Date
-    rateDateEnd?: Date
-    rateDateCertified?: Date
-    rateAmendmentInfo?: RateAmendmentInfo
-    rateProgramIDs?: string[]
-}
-
-type RateDataType = {
-    rateType?: 'AMENDMENT' | 'NEW' | null
-    rateCapitationType?: RateCapitationType
-    rateDateStart?: Date
-    rateDateEnd?: Date
-    rateDateCertified?: Date
-    rateAmendmentInfo?: {
-        effectiveDateEnd?: Date
-        effectiveDateStart?: Date
-    } | null
-    rateProgramIDs?: string[]
 }
 
 export type {
@@ -142,7 +121,6 @@ export type {
     UnlockedHealthPlanFormDataType,
     ContractAmendmentInfo,
     ContractExecutionStatus,
-    RateDataType,
     RateCapitationType,
     RateInfoType,
 }
