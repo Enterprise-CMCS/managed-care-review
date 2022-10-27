@@ -298,6 +298,7 @@ function parseRateInfos(
     if (rateInfos.length > 0) {
         rateInfos.forEach((rateInfo) => {
             const rate: RecursivePartial<RateInfoType> = {
+                id: rateInfo.id ?? undefined,
                 rateAmendmentInfo: parseProtoRateAmendment(
                     rateInfo?.rateAmendmentInfo
                 ),
