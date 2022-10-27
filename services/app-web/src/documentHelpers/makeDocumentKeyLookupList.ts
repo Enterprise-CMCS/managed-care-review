@@ -35,14 +35,27 @@ export const makeDocumentList = (
             )
         }
         docBuckets.forEach((bucket) => {
-            revisionData[bucket].forEach((doc) => {
-                const key = getKey(doc.s3URL)
-                if (key && index === 0) {
-                    lookupList.currentDocuments.push(key)
-                } else if (key && index > 0) {
-                    lookupList.previousDocuments.push(key)
-                }
-            })
+            if (bucket === 'rateDocuments') {
+                revisionData.rateInfos.forEach(rateInfo => {
+                    rateInfo[bucket].forEach((doc) => {
+                        const key = getKey(doc.s3URL)
+                        if (key && index === 0) {
+                            lookupList.currentDocuments.push(key)
+                        } else if (key && index > 0) {
+                            lookupList.previousDocuments.push(key)
+                        }
+                    })
+                })
+            } else {
+                revisionData[bucket].forEach((doc) => {
+                    const key = getKey(doc.s3URL)
+                    if (key && index === 0) {
+                        lookupList.currentDocuments.push(key)
+                    } else if (key && index > 0) {
+                        lookupList.previousDocuments.push(key)
+                    }
+                })
+            }
         })
     }
 
