@@ -2922,23 +2922,23 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 </div>
               </div>
             </div>
+            <div
+              class=""
+            >
+              <b
+                class="captionContainer"
+              >
+                <span>
+                  Rate certification
+                </span>
+              </b>
+              <p
+                class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
+              >
+                No documents
+              </p>
+            </div>
           </dl>
-          <div
-            class=""
-          >
-            <b
-              class="captionContainer"
-            >
-              <span>
-                Rate certification
-              </span>
-            </b>
-            <p
-              class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
-            >
-              No documents
-            </p>
-          </div>
           <div
             class="withMarginTop"
           >
@@ -3472,6 +3472,1181 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
         </div>
       </div>
     </div>
+  </div>
+  <div>
+    <div
+      class="grid-container"
+      data-testid="gridContainer"
+    />
+  </div>
+  <div>
+    <div
+      class="grid-container"
+      data-testid="gridContainer"
+    />
+  </div>
+</body>
+`;
+
+exports[`SubmissionSummary Outdated submissions loads outdated health plan packages with old protos as expected 4`] = `
+<body
+  style="padding-right: 0px;"
+>
+  <div>
+    <div
+      class="background"
+    >
+      <div
+        class="grid-container container"
+        data-testid="submission-summary"
+      >
+        <div
+          class="usa-alert usa-alert--warning usa-alert--validation banner"
+          data-testid="unlockedBanner"
+          role="alert"
+        >
+          <div
+            class="usa-alert__body"
+          >
+            <h4
+              class="usa-alert__heading"
+            >
+              Submission unlocked
+            </h4>
+            <div
+              class="bannerBodyText"
+            >
+              <p
+                class="usa-alert__text"
+              >
+                <b>
+                  Unlocked by: 
+                </b>
+                bob@dmas.mn.gov
+              </p>
+              <p
+                class="usa-alert__text"
+              >
+                <b>
+                  Unlocked on: 
+                </b>
+                09/01/20 8:00pm
+                 ET
+              </p>
+              <p
+                class="expandableBlock"
+              >
+                <span
+                  aria-expanded="false"
+                  class="usa-alert__text textContracted"
+                  data-testid="clampElement"
+                >
+                  <b>
+                    Reason for unlock: 
+                  </b>
+                  Test unlock reason
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <a
+          class=""
+          href="/dashboard"
+        >
+          <svg
+            aria-hidden="true"
+            class="usa-icon"
+            focusable="false"
+            role="img"
+          >
+            <use
+              xlink:href="sprite.svg#arrow_back"
+            />
+          </svg>
+          <span>
+             Back to dashboard
+          </span>
+        </a>
+        <section
+          class="summarySection"
+          id="submissionTypeSection"
+        >
+          <div
+            class="summarySectionHeader summarySectionHeaderBorder"
+          >
+            <h2
+              id="submissionName"
+            >
+              MCR-MN-0005-MSC+-PMAP-SNBC
+            </h2>
+            <div>
+              <button
+                aria-controls="unlock"
+                class="usa-button usa-button--outline submitButton"
+                data-open-modal="true"
+                data-testid="form-submit"
+                disabled=""
+                type="button"
+              >
+                Unlock submission
+              </button>
+            </div>
+          </div>
+          <dl>
+            <div
+              class="grid-row grid-gap row"
+              data-testid="grid-row-0"
+            >
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="dataDetail"
+                >
+                  <dt
+                    id="program"
+                  >
+                    Program(s)
+                  </dt>
+                  <dd
+                    aria-labelledby="program"
+                    role="definition"
+                  >
+                    SNBC, PMAP, MSC+
+                  </dd>
+                </div>
+              </div>
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="dataDetail"
+                >
+                  <dt
+                    id="submissionType"
+                  >
+                    Submission type
+                  </dt>
+                  <dd
+                    aria-labelledby="submissionType"
+                    role="definition"
+                  >
+                    Contract action and rate certification
+                  </dd>
+                </div>
+              </div>
+            </div>
+            <div
+              class="grid-row grid-gap reviewDataRow"
+              data-testid="grid"
+            >
+              <div
+                class="grid-col-12"
+                data-testid="grid"
+              >
+                <div
+                  class="dataDetail"
+                >
+                  <dt
+                    id="submissionDescription"
+                  >
+                    Submission description
+                  </dt>
+                  <dd
+                    aria-labelledby="submissionDescription"
+                    role="definition"
+                  >
+                    A real submission
+                  </dd>
+                </div>
+              </div>
+            </div>
+          </dl>
+        </section>
+        <section
+          class="summarySection"
+          id="contractDetailsSection"
+        >
+          <div
+            class="summarySectionHeader summarySectionHeaderBorder"
+          >
+            <h2>
+              Contract details
+            </h2>
+            <div />
+          </div>
+          <dl>
+            <div
+              class="grid-row grid-gap row"
+              data-testid="grid-row-0"
+            >
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="dataDetail"
+                >
+                  <dt
+                    id="contractType"
+                  >
+                    Contract action type
+                  </dt>
+                  <dd
+                    aria-labelledby="contractType"
+                    role="definition"
+                  >
+                    Contract amendment
+                  </dd>
+                </div>
+              </div>
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="dataDetail"
+                >
+                  <dt
+                    id="contractExecutionStatus"
+                  >
+                    Contract status
+                  </dt>
+                  <dd
+                    aria-labelledby="contractExecutionStatus"
+                    role="definition"
+                  >
+                    Unexecuted by some or all parties
+                  </dd>
+                </div>
+              </div>
+            </div>
+            <div
+              class="grid-row grid-gap row"
+              data-testid="grid-row-1"
+            >
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="dataDetail"
+                >
+                  <dt
+                    id="contractEffectiveDates"
+                  >
+                    Contract amendment effective dates
+                  </dt>
+                  <dd
+                    aria-labelledby="contractEffectiveDates"
+                    role="definition"
+                  >
+                    05/22/2021 to 05/21/2022
+                  </dd>
+                </div>
+              </div>
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="dataDetail"
+                >
+                  <dt
+                    id="managedCareEntities"
+                  >
+                    Managed care entities
+                  </dt>
+                  <dd
+                    aria-labelledby="managedCareEntities"
+                    role="definition"
+                  >
+                    <ul>
+                      <li>
+                        Prepaid Inpatient Health Plan (PIHP)
+                      </li>
+                      <li>
+                        Primary Care Case Management Entity (PCCM Entity)
+                      </li>
+                    </ul>
+                  </dd>
+                </div>
+              </div>
+            </div>
+            <div
+              class="grid-row grid-gap row"
+              data-testid="grid-row-2"
+            >
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="dataDetail"
+                >
+                  <dt
+                    id="federalAuthorities"
+                  >
+                    Active federal operating authority
+                  </dt>
+                  <dd
+                    aria-labelledby="federalAuthorities"
+                    role="definition"
+                  >
+                    <ul>
+                      <li>
+                        1915(a) Voluntary Authority
+                      </li>
+                      <li>
+                        1937 Benchmark Authority
+                      </li>
+                    </ul>
+                  </dd>
+                </div>
+              </div>
+            </div>
+            <div
+              class="grid-row grid-gap row"
+              data-testid="grid-row-0"
+            >
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="dataDetail"
+                >
+                  <dt
+                    id="modifiedProvisions"
+                  >
+                    This contract action includes new or modified provisions related to the following
+                  </dt>
+                  <dd
+                    aria-labelledby="modifiedProvisions"
+                    role="definition"
+                  >
+                    <ul>
+                      <li>
+                        Medicaid beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)
+                      </li>
+                      <li>
+                        Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)
+                      </li>
+                      <li>
+                        State directed payments in accordance with 42 CFR § 438.6(c)
+                      </li>
+                      <li>
+                        Pass-through payments in accordance with 42 CFR § 438.6(d)
+                      </li>
+                      <li>
+                        Payments to MCOs and PIHPs for enrollees that are a patient in an institution for mental disease in accordance with 42 CFR § 438.6(e)
+                      </li>
+                      <li>
+                        Medical loss ratio standards in accordance with 42 CFR § 438.8
+                      </li>
+                      <li>
+                        Network adequacy standards
+                      </li>
+                      <li>
+                        Non-risk payment arrangements
+                      </li>
+                    </ul>
+                  </dd>
+                </div>
+              </div>
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="dataDetail"
+                >
+                  <dt
+                    id="unmodifiedProvisions"
+                  >
+                    This contract action does NOT include new or modified provisions related to the following
+                  </dt>
+                  <dd
+                    aria-labelledby="unmodifiedProvisions"
+                    role="definition"
+                  >
+                    <ul>
+                      <li>
+                        Benefits provided by the managed care plans
+                      </li>
+                      <li>
+                        Geographic areas served by the managed care plans
+                      </li>
+                      <li>
+                        Incentive arrangements in accordance with 42 CFR § 438.6(b)(2)
+                      </li>
+                      <li>
+                        Withhold arrangements in accordance with 42 CFR § 438.6(b)(3)
+                      </li>
+                      <li>
+                        Other financial, payment, incentive or related contractual provisions
+                      </li>
+                      <li>
+                        Enrollment/disenrollment process
+                      </li>
+                      <li>
+                        Grievance and appeal system
+                      </li>
+                      <li>
+                        Length of the contract period
+                      </li>
+                    </ul>
+                  </dd>
+                </div>
+              </div>
+            </div>
+          </dl>
+          <div
+            class=""
+          >
+            <b
+              class="captionContainer"
+            >
+              <span>
+                Contract
+              </span>
+            </b>
+            <p
+              class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
+            >
+              No documents
+            </p>
+          </div>
+          <div
+            class="withMarginTop"
+          >
+            <b
+              class="captionContainer"
+            >
+              <span>
+                Contract supporting documents
+              </span>
+            </b>
+            <p
+              class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
+            >
+              No supporting documents
+            </p>
+          </div>
+        </section>
+        <section
+          class="summarySection"
+          id="rateDetails"
+        >
+          <dl>
+            <div
+              class="summarySectionHeader summarySectionHeaderBorder"
+            >
+              <h2>
+                Rate details
+              </h2>
+              <div />
+            </div>
+            <h3
+              aria-label="Rate ID: MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523"
+              class="rateName"
+            >
+              MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523
+            </h3>
+            <div
+              class="grid-row grid-gap row"
+              data-testid="grid-row-0"
+            >
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="dataDetail"
+                >
+                  <dt
+                    id="ratePrograms"
+                  >
+                    Programs this rate certification covers
+                  </dt>
+                  <dd
+                    aria-labelledby="ratePrograms"
+                    role="definition"
+                  >
+                    SNBC
+                  </dd>
+                </div>
+              </div>
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="dataDetail"
+                >
+                  <dt
+                    id="rateType"
+                  >
+                    Rate certification type
+                  </dt>
+                  <dd
+                    aria-labelledby="rateType"
+                    role="definition"
+                  >
+                    Amendment to prior rate certification
+                  </dd>
+                </div>
+              </div>
+            </div>
+            <div
+              class="grid-row grid-gap row"
+              data-testid="grid-row-1"
+            >
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="dataDetail"
+                >
+                  <dt
+                    id="rateCapitationType"
+                  >
+                    Does the actuary certify capitation rates specific to each rate cell or a rate range?
+                  </dt>
+                  <dd
+                    aria-labelledby="rateCapitationType"
+                    role="definition"
+                  >
+                    Certification of capitation rates specific to each rate cell
+                  </dd>
+                </div>
+              </div>
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="dataDetail"
+                >
+                  <dt
+                    id="ratingPeriod"
+                  >
+                    Rating period of original rate certification
+                  </dt>
+                  <dd
+                    aria-labelledby="ratingPeriod"
+                    role="definition"
+                  >
+                    05/22/2021 to 04/29/2022
+                  </dd>
+                </div>
+              </div>
+            </div>
+            <div
+              class="grid-row grid-gap row"
+              data-testid="grid-row-2"
+            >
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="dataDetail"
+                >
+                  <dt
+                    id="dateCertified"
+                  >
+                    Date certified for rate amendment
+                  </dt>
+                  <dd
+                    aria-labelledby="dateCertified"
+                    role="definition"
+                  >
+                    05/23/2021
+                  </dd>
+                </div>
+              </div>
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="dataDetail"
+                >
+                  <dt
+                    id="effectiveRatingPeriod"
+                  >
+                    Rate amendment effective dates
+                  </dt>
+                  <dd
+                    aria-labelledby="effectiveRatingPeriod"
+                    role="definition"
+                  >
+                    06/21/2022 to 10/21/2022
+                  </dd>
+                </div>
+              </div>
+            </div>
+            <div
+              class=""
+            >
+              <b
+                class="captionContainer"
+              >
+                <span>
+                  Rate certification
+                </span>
+              </b>
+              <p
+                class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
+              >
+                No documents
+              </p>
+            </div>
+          </dl>
+          <div
+            class="withMarginTop"
+          >
+            <b
+              class="captionContainer"
+            >
+              <span>
+                Rate supporting documents
+              </span>
+            </b>
+            <p
+              class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
+            >
+              No supporting documents
+            </p>
+          </div>
+        </section>
+        <section
+          class="summarySection"
+          id="stateContacts"
+        >
+          <dl>
+            <div
+              class="summarySectionHeader summarySectionHeaderBorder"
+            >
+              <h2>
+                State contacts
+              </h2>
+              <div />
+            </div>
+            <div
+              class="grid-container"
+              data-testid="gridContainer"
+            >
+              <div
+                class="grid-row"
+                data-testid="grid"
+              >
+                <div
+                  class="grid-col-6"
+                  data-testid="grid"
+                >
+                  <span
+                    class="text-bold"
+                  >
+                    Contact 
+                    1
+                  </span>
+                  <br />
+                  <address>
+                    foo bar
+                    <br />
+                    manager
+                    <br />
+                    <a
+                      class="usa-link usa-link--external"
+                      href="mailto:soandso@example.com"
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      soandso@example.com
+                    </a>
+                    <br />
+                  </address>
+                </div>
+                <div
+                  class="grid-col-6"
+                  data-testid="grid"
+                >
+                  <span
+                    class="text-bold"
+                  >
+                    Contact 
+                    2
+                  </span>
+                  <br />
+                  <address>
+                    Fine Bab
+                    <br />
+                    supervisor
+                    <br />
+                    <a
+                      class="usa-link usa-link--external"
+                      href="mailto:lodar@example.com"
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      lodar@example.com
+                    </a>
+                    <br />
+                  </address>
+                </div>
+              </div>
+            </div>
+          </dl>
+          <dl>
+            <div
+              class="summarySectionHeader summarySectionHeaderBorder"
+            >
+              <h2>
+                Actuary contacts
+              </h2>
+              <div />
+            </div>
+            <div
+              class="grid-container"
+              data-testid="gridContainer"
+            >
+              <div
+                class="grid-row"
+                data-testid="grid"
+              >
+                <div
+                  class="grid-col-6"
+                  data-testid="grid"
+                >
+                  <span
+                    class="text-bold"
+                  >
+                    Certifying actuary
+                  </span>
+                  <br />
+                  <address>
+                    foo bar
+                    <br />
+                    manager
+                    <br />
+                    <a
+                      class="usa-link usa-link--external"
+                      href="mailto:soandso@example.com"
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      soandso@example.com
+                    </a>
+                    <br />
+                    ACME
+                  </address>
+                </div>
+                <div
+                  class="grid-col-6"
+                  data-testid="grid"
+                >
+                  <span
+                    class="text-bold"
+                  >
+                    Additional actuary contact
+                  </span>
+                  <br />
+                  <address>
+                    Fine Bab
+                    <br />
+                    supervisor
+                    <br />
+                    <a
+                      class="usa-link usa-link--external"
+                      href="mailto:lodar@example.com"
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      lodar@example.com
+                    </a>
+                    <br />
+                    Mercer
+                  </address>
+                </div>
+              </div>
+            </div>
+          </dl>
+          <dl>
+            <div
+              class="grid-container"
+              data-testid="gridContainer"
+            >
+              <div
+                class="grid-row"
+                data-testid="grid"
+              >
+                <span
+                  class="text-bold"
+                >
+                  Actuary communication preference
+                </span>
+                OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.
+              </div>
+            </div>
+          </dl>
+        </section>
+        <section
+          class="summarySection"
+          id="changeHistory"
+        >
+          <div
+            class="summarySectionHeader "
+          >
+            <h2>
+              Change history
+            </h2>
+            <div />
+          </div>
+          <div
+            aria-multiselectable="true"
+            class="usa-accordion"
+            data-testid="accordion"
+          >
+            <h4
+              class="usa-accordion__heading"
+            >
+              <button
+                aria-controls="Wed Sep 02 2020 00:00:00 GMT+0000 (Coordinated Universal Time)"
+                aria-expanded="false"
+                class="usa-accordion__button"
+                data-testid="accordionButton_Wed Sep 02 2020 00:00:00 GMT+0000 (Coordinated Universal Time)"
+                type="button"
+              >
+                <div>
+                  09/01/20 8:00pm
+                   
+                  ET - 
+                  Unlock
+                </div>
+              </button>
+            </h4>
+            <div
+              class="usa-accordion__content usa-prose"
+              data-testid="accordionItem_Wed Sep 02 2020 00:00:00 GMT+0000 (Coordinated Universal Time)"
+              hidden=""
+              id="Wed Sep 02 2020 00:00:00 GMT+0000 (Coordinated Universal Time)"
+            >
+              <div>
+                <span
+                  class="tag"
+                >
+                  Unlocked by: 
+                   
+                </span>
+                <span>
+                  bob@dmas.mn.gov
+                </span>
+              </div>
+              <div>
+                <span
+                  class="tag"
+                >
+                  Reason for unlock: 
+                </span>
+                <span>
+                  Test unlock reason
+                </span>
+              </div>
+            </div>
+            <h4
+              class="usa-accordion__heading"
+            >
+              <button
+                aria-controls="Wed Jul 15 2020 00:00:00 GMT+0000 (Coordinated Universal Time)"
+                aria-expanded="false"
+                class="usa-accordion__button"
+                data-testid="accordionButton_Wed Jul 15 2020 00:00:00 GMT+0000 (Coordinated Universal Time)"
+                type="button"
+              >
+                <div>
+                  07/14/20 8:00pm
+                   
+                  ET - 
+                  Submission
+                </div>
+              </button>
+            </h4>
+            <div
+              class="usa-accordion__content usa-prose"
+              data-testid="accordionItem_Wed Jul 15 2020 00:00:00 GMT+0000 (Coordinated Universal Time)"
+              hidden=""
+              id="Wed Jul 15 2020 00:00:00 GMT+0000 (Coordinated Universal Time)"
+            >
+              <div>
+                <span
+                  class="tag"
+                >
+                  Submitted by: 
+                   
+                </span>
+                <span>
+                  bob@dmas.mn.gov
+                </span>
+              </div>
+              <div>
+                <span
+                  class="tag"
+                >
+                  Changes made: 
+                </span>
+                <span>
+                  Second Submit
+                </span>
+              </div>
+              <a
+                class="usa-link"
+                data-testid="revision-link-2"
+                href="/submissions/15/revisions/2"
+              >
+                View past submission version
+              </a>
+            </div>
+            <h4
+              class="usa-accordion__heading"
+            >
+              <button
+                aria-controls="Sat Aug 01 2020 00:00:00 GMT+0000 (Coordinated Universal Time)"
+                aria-expanded="false"
+                class="usa-accordion__button"
+                data-testid="accordionButton_Sat Aug 01 2020 00:00:00 GMT+0000 (Coordinated Universal Time)"
+                type="button"
+              >
+                <div>
+                  07/31/20 8:00pm
+                   
+                  ET - 
+                  Unlock
+                </div>
+              </button>
+            </h4>
+            <div
+              class="usa-accordion__content usa-prose"
+              data-testid="accordionItem_Sat Aug 01 2020 00:00:00 GMT+0000 (Coordinated Universal Time)"
+              hidden=""
+              id="Sat Aug 01 2020 00:00:00 GMT+0000 (Coordinated Universal Time)"
+            >
+              <div>
+                <span
+                  class="tag"
+                >
+                  Unlocked by: 
+                   
+                </span>
+                <span>
+                  bob@dmas.mn.gov
+                </span>
+              </div>
+              <div>
+                <span
+                  class="tag"
+                >
+                  Reason for unlock: 
+                </span>
+                <span>
+                  Test unlock reason
+                </span>
+              </div>
+            </div>
+            <h4
+              class="usa-accordion__heading"
+            >
+              <button
+                aria-controls="Sat Jan 02 2021 00:00:00 GMT+0000 (Coordinated Universal Time)"
+                aria-expanded="false"
+                class="usa-accordion__button"
+                data-testid="accordionButton_Sat Jan 02 2021 00:00:00 GMT+0000 (Coordinated Universal Time)"
+                type="button"
+              >
+                <div>
+                  01/01/21 7:00pm
+                   
+                  ET - 
+                  Submission
+                </div>
+              </button>
+            </h4>
+            <div
+              class="usa-accordion__content usa-prose"
+              data-testid="accordionItem_Sat Jan 02 2021 00:00:00 GMT+0000 (Coordinated Universal Time)"
+              hidden=""
+              id="Sat Jan 02 2021 00:00:00 GMT+0000 (Coordinated Universal Time)"
+            >
+              <div>
+                <span
+                  class="tag"
+                >
+                  Submitted by: 
+                   
+                </span>
+                <span>
+                  test@example.com
+                </span>
+              </div>
+              <div>
+                <span
+                  class="tag"
+                >
+                  Changes made: 
+                </span>
+                <span>
+                  Initial submit
+                </span>
+              </div>
+              <a
+                class="usa-link"
+                data-testid="revision-link-1"
+                href="/submissions/15/revisions/1"
+              >
+                View past submission version
+              </a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+  <div
+    aria-describedby="unlock-description"
+    aria-labelledby="unlock-heading"
+    class="usa-modal-wrapper is-hidden"
+    data-force-action="false"
+    id="unlock"
+    role="dialog"
+  >
+    <div
+      aria-controls="unlock"
+      class="usa-modal-overlay"
+      data-testid="modalOverlay"
+    >
+      <div
+        class="usa-modal modal undefined"
+        data-force-action="false"
+        data-testid="modalWindow"
+        tabindex="-1"
+      >
+        <div
+          class="usa-modal__content"
+        >
+          <div
+            class="usa-modal__main"
+          >
+            <h2
+              class="usa-modal__heading"
+              id="unlock-heading"
+            >
+              Reason for unlocking submission
+            </h2>
+            <div
+              id="unlock-modal-description"
+            >
+              <form>
+                <div
+                  class="usa-form-group"
+                  data-testid="formGroup"
+                >
+                  <span
+                    id="modal-input-hint"
+                    role="note"
+                  >
+                    Provide reason for unlocking
+                  </span>
+                  <textarea
+                    aria-labelledby="unlock-submit-modal-input-hint"
+                    aria-required="true"
+                    class="usa-textarea modalInputTextarea"
+                    data-testid="unlockSubmitModalInput"
+                    id="unlockSubmitModalInput"
+                    name="unlockSubmitModalInput"
+                  />
+                </div>
+              </form>
+            </div>
+            <div
+              class="usa-modal__footer"
+              data-testid="modalFooter"
+            >
+              <ul
+                class="usa-button-group float-right"
+              >
+                <li
+                  class="usa-button-group__item"
+                >
+                  <button
+                    aria-label="Cancel"
+                    class="usa-button usa-button--outline"
+                    data-testid="unlock-modal-cancel"
+                    id="unlock-cancel"
+                    type="button"
+                  >
+                    Cancel
+                  </button>
+                </li>
+                <li
+                  class="usa-button-group__item"
+                >
+                  <button
+                    class="usa-button successButton"
+                    data-testid="unlock-modal-submit"
+                    id="unlock-submit"
+                    type="submit"
+                  >
+                    <span
+                      class=""
+                    >
+                      Unlock
+                    </span>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <button
+            aria-controls="unlock"
+            aria-label="Close this window"
+            class="usa-button usa-modal__close"
+            data-close-modal="true"
+            data-testid="button"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="usa-icon"
+              focusable="false"
+              height="1em"
+              role="img"
+              viewBox="0 0 24 24"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M0 0h24v24H0z"
+                fill="none"
+              />
+              <path
+                d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div
+      class="grid-container"
+      data-testid="gridContainer"
+    />
   </div>
   <div>
     <div
