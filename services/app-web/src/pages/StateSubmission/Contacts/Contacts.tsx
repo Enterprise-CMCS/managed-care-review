@@ -303,15 +303,9 @@ export const Contacts = ({
         draftSubmission.stateContacts = values.stateContacts
 
         /**
-         * Multi-rate-submissions flag off:
-         * Certifying actuary is on this page along with additional actuaries in one array, values.actuaryContacts from
-         * formik. In v2 of the protobuf, it was directly saved into the first-rate certification actuaryContacts field.
-         * So we need to now save this data that conforms to v3 of the protobuf where certifying actuary is saved to each
-         * rate certification data and the additional actuaries to on the top level in addtlActuaryContacts.
-         *
-         * We can do that by saving the first actuary (the certifying actuary) in values.actuaryContacts value from
-         * formik, to the first-rate certifications actuaryContacts at index 0, which is the first actuary contact. Then
-         * we save the rest of the actuary contacts in values.actuaryContacts to the addtlActuaryContacts field
+         * Multi-rate-submissions flag on: formik values.actuaryContacts are saved as additional actuaryContacts
+         * Multi-rate-submissions flag off: first formik values.actuaryContacts is saved as the certifying actuary on the
+         * first rate info. Any other  values.actuaryContacts are saved as additional actuary contacts
          */
         if (showMultiRates && includeActuaryContacts) {
             draftSubmission.addtlActuaryContacts = values.actuaryContacts
