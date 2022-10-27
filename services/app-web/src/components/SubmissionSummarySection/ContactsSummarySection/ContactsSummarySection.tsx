@@ -15,7 +15,7 @@ export type ContactsSummarySectionProps = {
     navigateTo?: string
 }
 
-const getActuaryFirm = (actuaryContact: ActuaryContact): string => {
+export const getActuaryFirm = (actuaryContact: ActuaryContact): string => {
     if (
         actuaryContact.actuarialFirmOther &&
         actuaryContact.actuarialFirm === 'OTHER'
