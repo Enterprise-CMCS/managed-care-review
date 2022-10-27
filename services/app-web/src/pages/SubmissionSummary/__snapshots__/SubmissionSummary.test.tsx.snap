@@ -602,23 +602,23 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 </div>
               </div>
             </div>
+            <div
+              class=""
+            >
+              <b
+                class="captionContainer"
+              >
+                <span>
+                  Rate certification
+                </span>
+              </b>
+              <p
+                class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
+              >
+                No documents
+              </p>
+            </div>
           </dl>
-          <div
-            class=""
-          >
-            <b
-              class="captionContainer"
-            >
-              <span>
-                Rate certification
-              </span>
-            </b>
-            <p
-              class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
-            >
-              No documents
-            </p>
-          </div>
           <div
             class="withMarginTop"
           >
@@ -1759,23 +1759,23 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 </div>
               </div>
             </div>
+            <div
+              class=""
+            >
+              <b
+                class="captionContainer"
+              >
+                <span>
+                  Rate certification
+                </span>
+              </b>
+              <p
+                class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
+              >
+                No documents
+              </p>
+            </div>
           </dl>
-          <div
-            class=""
-          >
-            <b
-              class="captionContainer"
-            >
-              <span>
-                Rate certification
-              </span>
-            </b>
-            <p
-              class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
-            >
-              No documents
-            </p>
-          </div>
           <div
             class="withMarginTop"
           >
