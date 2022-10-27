@@ -39,6 +39,15 @@ const sub: UnlockedHealthPlanFormDataType = {
             rateAmendmentInfo: undefined,
             rateCertificationName:
                 'MCR-MN-0003-MSHO-RATE-20210202-20211201-CERTIFICATION-20201201',
+            actuaryContacts: [
+                {
+                    actuarialFirm: 'DELOITTE',
+                    name: 'Actuary Contact 1',
+                    titleRole: 'Test Actuary Contact 1',
+                    email: 'actuarycontact1@example.com',
+                },
+            ],
+            actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         },
     ],
 }
@@ -135,11 +144,20 @@ describe('unlockPackageCMSEmail', () => {
                     ],
                     rateDateCertified: new Date('10/17/2022'),
                     rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
-                    rateCertificationName:
-                        'MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20221017',
                     rateAmendmentInfo: undefined,
                     rateDateStart: new Date('01/01/2021'),
                     rateDateEnd: new Date('01/01/2022'),
+                    rateCertificationName:
+                        'MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20221017',
+                    actuaryContacts: [
+                        {
+                            actuarialFirm: 'DELOITTE',
+                            name: 'Actuary Contact 1',
+                            titleRole: 'Test Actuary Contact 1',
+                            email: 'actuarycontact1@example.com',
+                        },
+                    ],
+                    actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
                 },
                 {
                     rateType: 'NEW',
@@ -157,6 +175,15 @@ describe('unlockPackageCMSEmail', () => {
                     rateAmendmentInfo: undefined,
                     rateDateStart: new Date('02/01/2022'),
                     rateDateEnd: new Date('02/01/2023'),
+                    actuaryContacts: [
+                        {
+                            actuarialFirm: 'MERCER',
+                            name: 'Actuary Contact 1',
+                            titleRole: 'Test Actuary Contact 1',
+                            email: 'actuarycontact1@example.com',
+                        },
+                    ],
+                    actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
                 },
                 {
                     rateType: 'AMENDMENT',
@@ -180,6 +207,15 @@ describe('unlockPackageCMSEmail', () => {
                         effectiveDateStart: new Date('06/05/2021'),
                         effectiveDateEnd: new Date('12/31/2021'),
                     },
+                    actuaryContacts: [
+                        {
+                            actuarialFirm: 'OPTUMAS',
+                            name: 'Actuary Contact 1',
+                            titleRole: 'Test Actuary Contact 1',
+                            email: 'actuarycontact1@example.com',
+                        },
+                    ],
+                    actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
                 },
             ],
         }
@@ -458,6 +494,15 @@ describe('unlockPackageCMSEmail', () => {
                     rateDateCertified: new Date(),
                     rateProgramIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
                     rateAmendmentInfo: undefined,
+                    actuaryContacts: [
+                        {
+                            actuarialFirm: 'DELOITTE',
+                            name: 'Actuary Contact 1',
+                            titleRole: 'Test Actuary Contact 1',
+                            email: 'actuarycontact1@example.com',
+                        },
+                    ],
+                    actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
                 },
             ],
         })
@@ -502,6 +547,15 @@ describe('unlockPackageCMSEmail', () => {
                     rateDateCertified: new Date(),
                     rateProgramIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
                     rateAmendmentInfo: undefined,
+                    actuaryContacts: [
+                        {
+                            actuarialFirm: 'DELOITTE',
+                            name: 'Actuary Contact 1',
+                            titleRole: 'Test Actuary Contact 1',
+                            email: 'actuarycontact1@example.com',
+                        },
+                    ],
+                    actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
                 },
             ],
         })

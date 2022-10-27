@@ -4,7 +4,10 @@ import {
     mockStateSubmission,
     mockMNState,
 } from '../../../testHelpers/apolloHelpers'
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import {
+    ldUseClientSpy,
+    renderWithProviders,
+} from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
 import { RateInfoType } from '../../../common-code/healthPlanFormDataType'
 
@@ -31,6 +34,14 @@ describe('RateDetailsSummarySection', () => {
                 effectiveDateEnd: new Date('12/31/2021'),
             },
             rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+            actuaryContacts: [
+                {
+                    actuarialFirm: 'DELOITTE',
+                    name: 'Jimmy Jimerson',
+                    titleRole: 'Certifying Actuary',
+                    email: 'jj.actuary@test.com',
+                },
+            ],
         },
         {
             rateType: 'AMENDMENT',
@@ -50,6 +61,14 @@ describe('RateDetailsSummarySection', () => {
                 effectiveDateEnd: new Date('12/31/2022'),
             },
             rateProgramIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
+            actuaryContacts: [
+                {
+                    actuarialFirm: 'DELOITTE',
+                    name: 'Timmy Timerson',
+                    titleRole: 'Certifying Actuary',
+                    email: 'tt.actuary@test.com',
+                },
+            ],
         },
     ]
 
@@ -213,6 +232,7 @@ describe('RateDetailsSummarySection', () => {
             ...draftSubmission,
             rateInfos: [
                 {
+                    ...draftSubmission.rateInfos[0],
                     rateDocuments: [
                         {
                             s3URL: 's3://foo/bar/rate',
@@ -478,6 +498,36 @@ describe('RateDetailsSummarySection', () => {
             expect(
                 within(rateDocsTables[1]).getByRole('row', {
                     name: /rate docs test 2/,
+                })
+            ).toBeInTheDocument()
+        })
+    })
+
+    it('renders multiple rate certifications with certifying actuary', async () => {
+        ldUseClientSpy({ 'multi-rate-submissions': true })
+        const draftSubmission = mockContractAndRatesDraft()
+        draftSubmission.rateInfos = mockRateInfos
+        renderWithProviders(
+            <RateDetailsSummarySection
+                submission={draftSubmission}
+                navigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+            />
+        )
+        await waitFor(() => {
+            const certifyingActuary = screen.getAllByRole('definition', {
+                name: 'Certifying actuary',
+            })
+            expect(certifyingActuary).toHaveLength(2)
+            expect(
+                within(certifyingActuary[0]).queryByRole('link', {
+                    name: 'jj.actuary@test.com',
+                })
+            ).toBeInTheDocument()
+            expect(
+                within(certifyingActuary[1]).queryByRole('link', {
+                    name: 'tt.actuary@test.com',
                 })
             ).toBeInTheDocument()
         })

@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
-import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
+import {
+    getActuaryFirm,
+    UploadedDocumentsTable,
+} from '../../../components/SubmissionSummarySection'
 import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
@@ -15,6 +18,9 @@ import {
     RateInfoType,
 } from '../../../common-code/healthPlanFormDataType'
 import { Program } from '../../../gen/gqlClient'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../../common-code/featureFlags'
+import { Link } from '@trussworks/react-uswds'
 
 export type RateDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -33,6 +39,12 @@ export const RateDetailsSummarySection = ({
     submissionName,
     statePrograms,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
+    // Launch Darkly
+    const ldClient = useLDClient()
+    const showMultiRates = ldClient?.variation(
+        featureFlags.MULTI_RATE_SUBMISSIONS.flag,
+        featureFlags.MULTI_RATE_SUBMISSIONS.defaultValue
+    )
     const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && navigateTo !== undefined
     //Checks if submission is a previous submission
@@ -139,7 +151,7 @@ export const RateDetailsSummarySection = ({
                         />
                     )}
                 </SectionHeader>
-                {submission.rateInfos.map((rateInfo, index) => {
+                {submission.rateInfos.map((rateInfo) => {
                     return (
                         <React.Fragment
                             key={`${rateName(rateInfo)}${JSON.stringify(
@@ -210,6 +222,53 @@ export const RateDetailsSummarySection = ({
                                         )}`}
                                     />
                                 ) : null}
+                                {showMultiRates && rateInfo.actuaryContacts[0] && (
+                                    <div
+                                        className={
+                                            styles.certifyingActuaryDetail
+                                        }
+                                    >
+                                        <dt
+                                            id="certifyingActuary"
+                                            className="text-bold"
+                                        >
+                                            Certifying actuary
+                                        </dt>
+                                        <dd
+                                            role="definition"
+                                            aria-labelledby="certifyingActuary"
+                                        >
+                                            <address>
+                                                {
+                                                    rateInfo.actuaryContacts[0]
+                                                        .name
+                                                }
+                                                <br />
+                                                {
+                                                    rateInfo.actuaryContacts[0]
+                                                        .titleRole
+                                                }
+                                                <br />
+                                                <Link
+                                                    href={`mailto:${rateInfo.actuaryContacts[0].email}`}
+                                                    target="_blank"
+                                                    variant="external"
+                                                    rel="noreferrer"
+                                                >
+                                                    {
+                                                        rateInfo
+                                                            .actuaryContacts[0]
+                                                            .email
+                                                    }
+                                                </Link>
+                                                <br />
+                                                {getActuaryFirm(
+                                                    rateInfo.actuaryContacts[0]
+                                                )}
+                                            </address>
+                                        </dd>
+                                    </div>
+                                )}
                             </DoubleColumnGrid>
                             <UploadedDocumentsTable
                                 documents={rateInfo.rateDocuments}

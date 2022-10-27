@@ -147,6 +147,15 @@ test('includes expected data summary for a contract and rates submission CMS ema
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
     }
@@ -223,6 +232,15 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
             {
                 rateType: 'NEW',
@@ -240,6 +258,15 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('02/01/2022'),
                 rateDateEnd: new Date('02/01/2023'),
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'STATE_IN_HOUSE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
             {
                 rateType: 'AMENDMENT',
@@ -263,6 +290,15 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     effectiveDateStart: new Date('06/05/2021'),
                     effectiveDateEnd: new Date('12/31/2021'),
                 },
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'MERCER',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
     }
@@ -369,6 +405,15 @@ test('includes expected data summary for a contract amendment submission', async
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
     }
@@ -442,6 +487,15 @@ test('includes expected data summary for a rate amendment submission CMS email',
                     effectiveDateStart: new Date('06/05/2021'),
                     effectiveDateEnd: new Date('12/31/2021'),
                 },
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
     }
@@ -690,6 +744,15 @@ test('CHIP contract and rate submission does include state specific analysts ema
                 rateDateCertified: new Date(),
                 rateProgramIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
                 rateAmendmentInfo: undefined,
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
     })
@@ -764,6 +827,15 @@ test('CHIP contract and rate submission does not include ratesReviewSharedEmails
                 rateDateCertified: new Date('2020-12-01'),
                 rateProgramIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
                 rateAmendmentInfo: undefined,
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
     })
@@ -837,6 +909,15 @@ test('renders overall email as expected', async () => {
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
             {
                 rateType: 'NEW',
@@ -854,6 +935,15 @@ test('renders overall email as expected', async () => {
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('02/01/2022'),
                 rateDateEnd: new Date('02/01/2023'),
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'MERCER',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
     }
