@@ -222,7 +222,7 @@ export const Contacts = ({
 
     /**
      * Multi-rate-submissions flag off:
-     * Certifying actuary is displayed and fill out on this page so we need to display it along with additional actuaries
+     * Certifying actuary is displayed and filled out on this page, so we need to display it along with additional actuaries
      * when flag is off.
      *
      * We do this by combining the certifying actuary of the first-rate certification with the actuaries in
