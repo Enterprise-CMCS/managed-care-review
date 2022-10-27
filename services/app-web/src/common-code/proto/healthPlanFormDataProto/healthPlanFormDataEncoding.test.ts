@@ -64,55 +64,13 @@ describe('Validate encoding to protobuf and decoding back to domain model', () =
     })
 
     it('encodes to protobuf and back to domain model without corrupting existing rate info id', () => {
-        const draftFormDataWithNoRateID: UnlockedHealthPlanFormDataType = {
-            ...unlockedWithFullRates(),
-            rateInfos: [
-                {
-                    id: 'test-rate-certification-one',
-                    rateType: 'AMENDMENT',
-                    rateCapitationType: 'RATE_CELL',
-                    rateDateStart: new Date(Date.UTC(2021, 4, 22)),
-                    rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
-                    rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
-                    rateAmendmentInfo: {
-                        effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
-                        effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
-                    },
-                    rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                    rateCertificationName:
-                        'MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523',
-                    rateDocuments: [
-                        {
-                            s3URL: 's3://bucketname/key/foo.png',
-                            name: 'Rates certification',
-                            documentCategories: ['RATES'],
-                        },
-                    ],
-                },
-                {
-                    id: 'test-rate-certification-two',
-                    rateType: 'AMENDMENT',
-                    rateCapitationType: 'RATE_CELL',
-                    rateDateStart: new Date(Date.UTC(2021, 4, 22)),
-                    rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
-                    rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
-                    rateAmendmentInfo: {
-                        effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
-                        effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
-                    },
-                    rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                    rateCertificationName:
-                        'MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523',
-                    rateDocuments: [
-                        {
-                            s3URL: 's3://bucketname/key/foo.png',
-                            name: 'Rates certification',
-                            documentCategories: ['RATES'],
-                        },
-                    ],
-                },
-            ],
-        }
+        const draftFormDataWithNoRateID = unlockedWithFullRates()
+        draftFormDataWithNoRateID.rateInfos[0].id =
+            'test-rate-certification-one'
+        draftFormDataWithNoRateID.rateInfos.push({
+            ...draftFormDataWithNoRateID.rateInfos[0],
+            id: 'test-rate-certification-two',
+        })
 
         //Encode data to protobuf and back to domain model
         const domainData = toDomain(toProtoBuffer(draftFormDataWithNoRateID))
