@@ -52,8 +52,6 @@ function newHealthPlanFormData(): UnlockedHealthPlanFormDataType {
         documents: [],
         contractDocuments: [],
         rateInfos: [],
-        rateDocuments: [],
-        rateProgramIDs: [],
         managedCareEntities: [],
         federalAuthorities: [],
         stateContacts: [],
@@ -79,8 +77,6 @@ function basicHealthPlanFormData(): UnlockedHealthPlanFormDataType {
         contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
         contractDocuments: [],
         rateInfos: [],
-        rateDocuments: [],
-        rateProgramIDs: [],
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         stateContacts: [],
@@ -102,8 +98,6 @@ function contractOnly(): UnlockedHealthPlanFormDataType {
         documents: [],
         contractDocuments: [],
         rateInfos: [],
-        rateDocuments: [],
-        rateProgramIDs: [],
         contractType: 'BASE',
         contractExecutionStatus: 'EXECUTED',
         contractDateStart: new Date(Date.UTC(2021, 4, 22)),
@@ -129,8 +123,6 @@ function contractAmendedOnly(): UnlockedHealthPlanFormDataType {
         documents: [],
         contractDocuments: [],
         rateInfos: [],
-        rateDocuments: [],
-        rateProgramIDs: [],
         contractType: 'AMENDMENT',
         contractExecutionStatus: 'EXECUTED',
         contractDateStart: new Date(Date.UTC(2021, 4, 22)),
@@ -212,17 +204,6 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
-        rateType: 'AMENDMENT',
-        rateCapitationType: 'RATE_CELL',
-        rateDateStart: new Date(Date.UTC(2021, 4, 22)),
-        rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
-        rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
-        rateAmendmentInfo: {
-            effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
-            effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
-        },
-        rateProgramIDs: [mockMNState().programs[0].id],
-        rateDocuments: [],
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         stateContacts: [
@@ -329,23 +310,6 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
-        rateType: 'AMENDMENT',
-        rateCapitationType: 'RATE_CELL',
-        rateDateStart: new Date(Date.UTC(2021, 4, 22)),
-        rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
-        rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
-        rateAmendmentInfo: {
-            effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
-            effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
-        },
-        rateProgramIDs: [mockMNState().programs[0].id],
-        rateDocuments: [
-            {
-                s3URL: 's3://bucketname/key/foo.png',
-                name: 'Rates certification',
-                documentCategories: ['RATES'],
-            },
-        ],
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         stateContacts: [
@@ -407,13 +371,6 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
         contractDateStart: new Date(Date.UTC(2021, 4, 22)),
         contractDateEnd: new Date(Date.UTC(2022, 4, 21)),
         contractDocuments: [],
-        rateDocuments: [
-            {
-                s3URL: 's3://bucketname/key/foo.png',
-                name: 'Rates certification',
-                documentCategories: ['RATES'],
-            },
-        ],
         managedCareEntities: ['PIHP'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [
@@ -455,16 +412,6 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
-        rateType: 'AMENDMENT',
-        rateCapitationType: 'RATE_CELL',
-        rateDateStart: new Date(Date.UTC(2021, 4, 22)),
-        rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
-        rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
-        rateAmendmentInfo: {
-            effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
-            effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
-        },
-        rateProgramIDs: [mockMNState().programs[0].id],
         stateContacts: [
             {
                 name: 'foo bar',
@@ -530,13 +477,6 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
                 documentCategories: ['CONTRACT'],
             },
         ],
-        rateDocuments: [
-            {
-                s3URL: 's3://bucketname/key/foo.png',
-                name: 'Rates certification',
-                documentCategories: ['RATES'],
-            },
-        ],
         contractAmendmentInfo: {
             modifiedProvisions: {
                 modifiedBenefitsProvided: true,
@@ -598,16 +538,6 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
-        rateType: 'AMENDMENT',
-        rateCapitationType: 'RATE_RANGE',
-        rateDateStart: new Date(Date.UTC(2021, 4, 22)),
-        rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
-        rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
-        rateAmendmentInfo: {
-            effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
-            effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
-        },
-        rateProgramIDs: [mockMNState().programs[0].id],
         stateContacts: [
             {
                 name: 'foo bar',
@@ -738,28 +668,6 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
-        rateType: 'AMENDMENT',
-        rateCapitationType: 'RATE_CELL',
-        rateDocuments: [
-            {
-                s3URL: 's3://bucketname/key/foo.png',
-                name: 'rates cert 1',
-                documentCategories: ['RATES_RELATED'],
-            },
-            {
-                s3URL: 's3://bucketname/key/foo.png',
-                name: 'rates cert 2',
-                documentCategories: ['RATES_RELATED'],
-            },
-        ],
-        rateDateStart: new Date(Date.UTC(2021, 4, 22)),
-        rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
-        rateDateCertified: new Date(Date.UTC(2021, 4, 23)),
-        rateAmendmentInfo: {
-            effectiveDateStart: new Date(Date.UTC(2022, 5, 21)),
-            effectiveDateEnd: new Date(Date.UTC(2022, 9, 21)),
-        },
-        rateProgramIDs: [mockMNState().programs[0].id],
         stateContacts: [
             {
                 name: 'foo bar',
@@ -826,8 +734,6 @@ function basicLockedHealthPlanFormData(): LockedHealthPlanFormDataType {
         ],
         addtlActuaryContacts: [],
         rateInfos: [],
-        rateDocuments: [],
-        rateProgramIDs: [],
     }
 }
 

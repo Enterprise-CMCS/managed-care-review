@@ -293,17 +293,9 @@ const removeRatesData = (
     pkg: UnlockedHealthPlanFormDataType
 ): UnlockedHealthPlanFormDataType => {
     pkg.rateInfos = []
-    pkg.rateType = undefined
-    pkg.rateDateCertified = undefined
-    pkg.rateDateStart = undefined
-    pkg.rateDateEnd = undefined
-    pkg.rateCapitationType = undefined
-    pkg.rateAmendmentInfo = undefined
     pkg.addtlActuaryContacts = []
     pkg.addtlActuaryCommunicationPreference = undefined
-    pkg.rateProgramIDs = []
     pkg.documents = convertRateSupportingDocs(pkg.documents)
-    pkg.rateDocuments = []
 
     return pkg
 }
