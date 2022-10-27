@@ -77,6 +77,8 @@ type RateInfoType = {
     rateAmendmentInfo?: RateAmendmentInfo
     rateProgramIDs?: string[]
     rateCertificationName?: string
+    actuaryContacts: ActuaryContact[]
+    actuaryCommunicationPreference?: ActuaryCommunicationType
 }
 
 // MAIN
@@ -91,8 +93,8 @@ type UnlockedHealthPlanFormDataType = {
     submissionType: SubmissionType
     submissionDescription: string
     stateContacts: StateContact[]
-    actuaryContacts: ActuaryContact[]
-    actuaryCommunicationPreference?: ActuaryCommunicationType
+    addtlActuaryContacts: ActuaryContact[]
+    addtlActuaryCommunicationPreference?: ActuaryCommunicationType
     documents: SubmissionDocument[]
     contractType?: ContractType
     contractExecutionStatus?: ContractExecutionStatus

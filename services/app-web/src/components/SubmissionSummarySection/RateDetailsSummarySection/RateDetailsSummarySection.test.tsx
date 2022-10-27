@@ -4,13 +4,73 @@ import {
     mockStateSubmission,
     mockMNState,
 } from '../../../testHelpers/apolloHelpers'
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import {
+    ldUseClientSpy,
+    renderWithProviders,
+} from '../../../testHelpers/jestHelpers'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
+import { RateInfoType } from '../../../common-code/healthPlanFormDataType'
 
 describe('RateDetailsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()
     const stateSubmission = mockStateSubmission()
     const statePrograms = mockMNState().programs
+    const mockRateInfos: RateInfoType[] = [
+        {
+            rateType: 'NEW',
+            rateCapitationType: 'RATE_CELL',
+            rateDocuments: [
+                {
+                    s3URL: 's3://foo/bar/rate',
+                    name: 'rate docs test 1',
+                    documentCategories: ['RATES' as const],
+                },
+            ],
+            rateDateStart: new Date('01/01/2021'),
+            rateDateEnd: new Date('12/31/2021'),
+            rateDateCertified: new Date('12/31/2020'),
+            rateAmendmentInfo: {
+                effectiveDateStart: new Date('01/01/2021'),
+                effectiveDateEnd: new Date('12/31/2021'),
+            },
+            rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+            actuaryContacts: [
+                {
+                    actuarialFirm: 'DELOITTE',
+                    name: 'Jimmy Jimerson',
+                    titleRole: 'Certifying Actuary',
+                    email: 'jj.actuary@test.com',
+                },
+            ],
+        },
+        {
+            rateType: 'AMENDMENT',
+            rateCapitationType: 'RATE_RANGE',
+            rateDocuments: [
+                {
+                    s3URL: 's3://foo/bar/rate2',
+                    name: 'rate docs test 2',
+                    documentCategories: ['RATES' as const],
+                },
+            ],
+            rateDateStart: new Date('01/01/2022'),
+            rateDateEnd: new Date('12/31/2022'),
+            rateDateCertified: new Date('12/31/2021'),
+            rateAmendmentInfo: {
+                effectiveDateStart: new Date('01/01/2022'),
+                effectiveDateEnd: new Date('12/31/2022'),
+            },
+            rateProgramIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
+            actuaryContacts: [
+                {
+                    actuarialFirm: 'DELOITTE',
+                    name: 'Timmy Timerson',
+                    titleRole: 'Certifying Actuary',
+                    email: 'tt.actuary@test.com',
+                },
+            ],
+        },
+    ]
 
     afterEach(() => jest.clearAllMocks())
 
@@ -167,14 +227,19 @@ describe('RateDetailsSummarySection', () => {
         ).toBeInTheDocument()
     })
 
-    it('render supporting rates docs when they exist', async () => {
+    it('renders supporting rates docs when they exist', async () => {
         const testSubmission = {
             ...draftSubmission,
-            rateDocuments: [
+            rateInfos: [
                 {
-                    s3URL: 's3://foo/bar/rate',
-                    name: 'rate docs test 1',
-                    documentCategories: ['RATES' as const],
+                    ...draftSubmission.rateInfos[0],
+                    rateDocuments: [
+                        {
+                            s3URL: 's3://foo/bar/rate',
+                            name: 'rate docs test 1',
+                            documentCategories: ['RATES' as const],
+                        },
+                    ],
                 },
             ],
             documents: [
@@ -212,7 +277,7 @@ describe('RateDetailsSummarySection', () => {
                 name: /Rate supporting documents/,
             })
             const rateDocsTable = screen.getByRole('table', {
-                name: 'Rate certification',
+                name: /Rate certification/,
             })
 
             expect(rateDocsTable).toBeInTheDocument()
@@ -277,6 +342,7 @@ describe('RateDetailsSummarySection', () => {
             })
         ).toBeNull()
     })
+
     it('renders rate cell capitation type', () => {
         renderWithProviders(
             <RateDetailsSummarySection
@@ -297,9 +363,10 @@ describe('RateDetailsSummarySection', () => {
             )
         ).toBeInTheDocument()
     })
+
     it('renders rate range capitation type', () => {
         const draftSubmission = mockContractAndRatesDraft()
-        draftSubmission.rateCapitationType = 'RATE_RANGE'
+        draftSubmission.rateInfos[0].rateCapitationType = 'RATE_RANGE'
         renderWithProviders(
             <RateDetailsSummarySection
                 submission={draftSubmission}
@@ -319,9 +386,10 @@ describe('RateDetailsSummarySection', () => {
             )
         ).toBeInTheDocument()
     })
+
     it('renders programs that apply to rate certification', async () => {
         const draftSubmission = mockContractAndRatesDraft()
-        draftSubmission.rateProgramIDs = [
+        draftSubmission.rateInfos[0].rateProgramIDs = [
             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
             'd95394e5-44d1-45df-8151-1cc1ee66f100',
         ]
@@ -345,6 +413,7 @@ describe('RateDetailsSummarySection', () => {
     it('renders rate program names even when rate program ids are missing', async () => {
         const draftSubmission = mockContractAndRatesDraft()
         draftSubmission.rateProgramIDs = []
+        draftSubmission.rateInfos[0].rateProgramIDs = []
         draftSubmission.programIDs = [
             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
             'd95394e5-44d1-45df-8151-1cc1ee66f100',
@@ -364,5 +433,103 @@ describe('RateDetailsSummarySection', () => {
         expect(programElement).toBeInTheDocument()
         const programList = within(programElement).getByText('SNBC, PMAP')
         expect(programList).toBeInTheDocument()
+    })
+
+    it('renders multiple rate certifications with program names', async () => {
+        const draftSubmission = mockContractAndRatesDraft()
+        draftSubmission.rateProgramIDs = []
+        draftSubmission.rateInfos = mockRateInfos
+        renderWithProviders(
+            <RateDetailsSummarySection
+                submission={draftSubmission}
+                navigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+            />
+        )
+        const programList = screen.getAllByRole('definition', {
+            name: 'Programs this rate certification covers',
+        })
+        expect(programList).toHaveLength(2)
+        expect(programList[0]).toHaveTextContent('SNBC')
+        expect(programList[1]).toHaveTextContent('PMAP')
+    })
+    it('renders multiple rate certifications with rate type', async () => {
+        const draftSubmission = mockContractAndRatesDraft()
+        draftSubmission.rateInfos = mockRateInfos
+
+        renderWithProviders(
+            <RateDetailsSummarySection
+                submission={draftSubmission}
+                navigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+            />
+        )
+        const certType = screen.getAllByRole('definition', {
+            name: 'Rate certification type',
+        })
+        expect(certType).toHaveLength(2)
+        expect(certType[0]).toHaveTextContent('New')
+        expect(certType[1]).toHaveTextContent('Amendment')
+    })
+
+    it('renders multiple rate certifications with documents', async () => {
+        const draftSubmission = mockContractAndRatesDraft()
+        draftSubmission.rateInfos = mockRateInfos
+        renderWithProviders(
+            <RateDetailsSummarySection
+                submission={draftSubmission}
+                navigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+            />
+        )
+        await waitFor(() => {
+            const rateDocsTables = screen.getAllByRole('table', {
+                name: /Rate certification/,
+            })
+            expect(rateDocsTables).toHaveLength(2)
+            expect(
+                within(rateDocsTables[0]).getByRole('row', {
+                    name: /rate docs test 1/,
+                })
+            ).toBeInTheDocument()
+            expect(
+                within(rateDocsTables[1]).getByRole('row', {
+                    name: /rate docs test 2/,
+                })
+            ).toBeInTheDocument()
+        })
+    })
+
+    it('renders multiple rate certifications with certifying actuary', async () => {
+        ldUseClientSpy({ 'multi-rate-submissions': true })
+        const draftSubmission = mockContractAndRatesDraft()
+        draftSubmission.rateInfos = mockRateInfos
+        renderWithProviders(
+            <RateDetailsSummarySection
+                submission={draftSubmission}
+                navigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+            />
+        )
+        await waitFor(() => {
+            const certifyingActuary = screen.getAllByRole('definition', {
+                name: 'Certifying actuary',
+            })
+            expect(certifyingActuary).toHaveLength(2)
+            expect(
+                within(certifyingActuary[0]).queryByRole('link', {
+                    name: 'jj.actuary@test.com',
+                })
+            ).toBeInTheDocument()
+            expect(
+                within(certifyingActuary[1]).queryByRole('link', {
+                    name: 'tt.actuary@test.com',
+                })
+            ).toBeInTheDocument()
+        })
     })
 })

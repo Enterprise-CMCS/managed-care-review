@@ -125,6 +125,8 @@ const rateInfosTypeSchema = z.object({
     rateAmendmentInfo: rateAmendmentInfoSchema.optional(),
     rateProgramIDs: z.array(z.string()),
     rateCertificationName: z.string().optional(),
+    actuaryContacts: z.array(actuaryContactSchema),
+    actuaryCommunicationPreference: actuaryCommunicationTypeSchema.optional(),
 })
 
 // Commenting out because this wasn't being used but was raising lint warning -hw
@@ -162,8 +164,9 @@ export const unlockedHealthPlanFormDataSchema = z.object({
     submissionType: submissionTypeSchema,
     submissionDescription: z.string(),
     stateContacts: z.array(stateContactSchema),
-    actuaryContacts: z.array(actuaryContactSchema),
-    actuaryCommunicationPreference: actuaryCommunicationTypeSchema.optional(),
+    addtlActuaryContacts: z.array(actuaryContactSchema),
+    addtlActuaryCommunicationPreference:
+        actuaryCommunicationTypeSchema.optional(),
     documents: z.array(submissionDocumentSchema),
     contractType: contractTypeSchema.optional(),
     contractExecutionStatus: contractExecutionStatusSchema.optional(),

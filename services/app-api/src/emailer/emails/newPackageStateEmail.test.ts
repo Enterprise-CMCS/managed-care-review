@@ -260,6 +260,15 @@ test('includes expected data summary for a contract and rates submission State e
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'MERCER',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
     }
@@ -337,6 +346,15 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'MERCER',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
             {
                 rateType: 'NEW',
@@ -354,6 +372,15 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('02/01/2022'),
                 rateDateEnd: new Date('02/01/2023'),
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
             {
                 rateType: 'AMENDMENT',
@@ -377,6 +404,15 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     effectiveDateStart: new Date('06/05/2021'),
                     effectiveDateEnd: new Date('12/31/2021'),
                 },
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'STATE_IN_HOUSE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
     }
@@ -475,6 +511,15 @@ test('includes expected data summary for a rate amendment submission State email
                     effectiveDateStart: new Date('06/05/2021'),
                     effectiveDateEnd: new Date('12/31/2021'),
                 },
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'MERCER',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
     }
@@ -547,6 +592,15 @@ test('renders overall email for a new package with a rate amendment as expected'
                 },
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'MERCER',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
     }
