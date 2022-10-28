@@ -148,7 +148,10 @@ export async function userFromCognitoAuthProvider(
     try {
         if (store) {
             const userFromPG = await store.getUser(userInfo.userId)
-            console.log('user from PG: ' + userFromPG)
+            // try a basic type guard here -- a User will have an euaID.
+            if ('euaID' in userFromPG) {
+                console.log('found this user: ' + JSON.stringify(userFromPG))
+            }
         }
     } catch (e) {
         console.log(e)
