@@ -3,6 +3,7 @@ import { CognitoIdentityServiceProvider } from 'aws-sdk'
 import { UserType } from '../domain-models'
 import { performance } from 'perf_hooks'
 import { Store } from '../postgres'
+import { User } from '@prisma/client'
 
 export function parseAuthProvider(
     authProvider: string
@@ -145,40 +146,49 @@ export async function userFromCognitoAuthProvider(
 
     const userInfo = parseResult.value
 
+    // look up the user in PG. If we don't have it here, then we need to
+    // fetch it from Cognito.
+    if (store != undefined) {
+        await lookupUserAurora(store, userInfo.userId)
+    }
+
+    // User was not in PG, so we look it up in Cognito
+    return lookupUserCognito(userInfo.userId, userInfo.poolId)
+}
+
+async function lookupUserCognito(
+    userId: string,
+    poolId: string
+): Promise<Result<UserType, Error>> {
+    const fetchResult = await fetchUserFromCognito(userId, poolId)
+
+    // this is asserting that this is an error object, probably a better way to do that.
+    if ('name' in fetchResult) {
+        return err(fetchResult)
+    }
+
+    const currentUser: CognitoIdentityServiceProvider.UserType = fetchResult
+
+    // we lose some type safety here...
+    const attributes = userAttrDict(currentUser)
+
+    const user = userTypeFromAttributes(attributes)
+    return user
+}
+
+async function lookupUserAurora(
+    store: Store,
+    userID: string
+): Promise<User | undefined> {
     try {
-        if (store) {
-            const userFromPG = await store.getUser(userInfo.userId)
-            // try a basic type guard here -- a User will have an euaID.
-            if ('euaID' in userFromPG) {
-                console.log('found this user: ' + JSON.stringify(userFromPG))
-            }
+        const userFromPG = await store.getUser(userID)
+        // try a basic type guard here -- a User will have an euaID.
+        if ('euaID' in userFromPG) {
+            console.log('found this user: ' + JSON.stringify(userFromPG))
+            return userFromPG
         }
     } catch (e) {
         console.log(e)
     }
-
-    // calling a dependency so we have to try
-    try {
-        const fetchResult = await fetchUserFromCognito(
-            userInfo.userId,
-            userInfo.poolId
-        )
-
-        // this is asserting that this is an error object, probably a better way to do that.
-        if ('name' in fetchResult) {
-            return err(fetchResult)
-        }
-
-        const currentUser: CognitoIdentityServiceProvider.UserType = fetchResult
-
-        // we lose some type safety here...
-        const attributes = userAttrDict(currentUser)
-
-        const user = userTypeFromAttributes(attributes)
-
-        return user
-    } catch (e) {
-        console.log('cognito ERR', e)
-        return err(e)
-    }
+    return
 }
