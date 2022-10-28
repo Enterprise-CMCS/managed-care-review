@@ -1,11 +1,15 @@
-import { S3 } from 'aws-sdk'
+import {
+    S3Client,
+    PutObjectRequest,
+    GetObjectCommand,
+    HeadObjectCommand,
+} from '@aws-sdk/client-s3'
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import Archiver from 'archiver'
-import { Readable, Stream } from 'stream'
 
 import { assertIsAuthMode } from '../../../app-web/src/common-code/config'
 
-const s3 = new S3({ region: 'us-east-1' })
+const s3 = new S3Client({ region: 'us-east-1' })
 const authMode = process.env.REACT_APP_AUTH_MODE
 assertIsAuthMode(authMode)
 
@@ -71,7 +75,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
     }
 
     type S3DownloadStreamDetails = {
-        stream: Readable
+        stream: ReadableStream
         key: string
         filename: string
     }
@@ -82,13 +86,17 @@ export const main: APIGatewayProxyHandler = async (event) => {
     const s3DownloadStreams: S3DownloadStreamDetails[] = await Promise.all(
         bulkDlRequest.keys.map(async (key: string) => {
             const params = { Bucket: bulkDlRequest.bucket, Key: key }
-            const metadata = await s3.headObject(params).promise()
+            const headCommand = new HeadObjectCommand(params)
+            const metadata = await s3.send(headCommand)
+            const getCommand = new GetObjectCommand(params)
+            const filename = parseContentDisposition(
+                metadata.ContentDisposition ?? key
+            )
+            const s3Item = await s3.send(getCommand)
             return {
-                stream: s3.getObject(params).createReadStream(),
+                stream: s3Item.Body,
                 key: key,
-                filename: parseContentDisposition(
-                    metadata.ContentDisposition ?? key
-                ),
+                filename,
             }
         })
     )
@@ -96,7 +104,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 
     const streamPassThrough = new Stream.PassThrough()
 
-    const params: S3.PutObjectRequest = {
+    const params: PutObjectRequest = {
         ACL: 'private',
         Body: streamPassThrough,
         Bucket: bulkDlRequest.bucket,
