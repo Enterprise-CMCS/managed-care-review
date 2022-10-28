@@ -250,13 +250,6 @@ describe('submitHealthPlanPackage', () => {
 
         expect(packageData).toEqual(
             expect.objectContaining({
-                rateType: draftPackageData.rateType,
-                rateDateCertified: draftPackageData.rateDateCertified,
-                rateDateStart: draftPackageData.rateDateStart,
-                rateDateEnd: draftPackageData.rateDateEnd,
-                rateCapitationType: draftPackageData.rateCapitationType,
-                rateAmendmentInfo: draftPackageData.rateAmendmentInfo,
-                rateProgramIDs: draftPackageData.rateProgramIDs,
                 addtlActuaryContacts: draftPackageData.addtlActuaryContacts,
                 documents: [
                     {
@@ -311,14 +304,8 @@ describe('submitHealthPlanPackage', () => {
 
         expect(packageData).toEqual(
             expect.objectContaining({
-                rateType: undefined,
-                rateDateCertified: undefined,
-                rateDateStart: undefined,
-                rateDateEnd: undefined,
-                rateCapitationType: undefined,
-                rateAmendmentInfo: undefined,
-                rateProgramIDs: [],
-                addtlActuaryContacts: [],
+                rateInfos: expect.arrayContaining([]),
+                addtlActuaryContacts: expect.arrayContaining([]),
                 documents: [
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
@@ -331,7 +318,6 @@ describe('submitHealthPlanPackage', () => {
                         documentCategories: ['CONTRACT_RELATED'],
                     },
                 ],
-                rateDocuments: [],
             })
         )
     })

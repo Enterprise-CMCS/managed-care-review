@@ -28,22 +28,24 @@ describe('unlockedWithALittleBitOfEverything migration', () => {
         expect(formData.contractDateEnd?.toISOString().split('T')[0]).toBe(
             '2022-05-21'
         )
-        expect(formData.rateDateStart?.toISOString().split('T')[0]).toBe(
-            '2021-05-22'
-        )
-        expect(formData.rateDateEnd?.toISOString().split('T')[0]).toBe(
-            '2022-04-29'
-        )
-        expect(formData.rateDateCertified?.toISOString().split('T')[0]).toBe(
-            '2021-05-23'
-        )
         expect(
-            formData.rateAmendmentInfo?.effectiveDateStart
+            formData.rateInfos[0]?.rateDateStart?.toISOString().split('T')[0]
+        ).toBe('2021-05-22')
+        expect(
+            formData.rateInfos[0]?.rateDateEnd?.toISOString().split('T')[0]
+        ).toBe('2022-04-29')
+        expect(
+            formData.rateInfos[0]?.rateDateCertified
+                ?.toISOString()
+                .split('T')[0]
+        ).toBe('2021-05-23')
+        expect(
+            formData.rateInfos[0]?.rateAmendmentInfo?.effectiveDateStart
                 ?.toISOString()
                 .split('T')[0]
         ).toBe('2022-06-21')
         expect(
-            formData.rateAmendmentInfo?.effectiveDateEnd
+            formData.rateInfos[0]?.rateAmendmentInfo?.effectiveDateEnd
                 ?.toISOString()
                 .split('T')[0]
         ).toBe('2022-10-21')

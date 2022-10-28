@@ -109,7 +109,7 @@ export const RateDetailsSummarySection = ({
     useEffect(() => {
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
-            const keysFromDocs = submission.rateDocuments
+            const keysFromDocs = submission.rateInfos.flatMap(rateInfo => rateInfo.rateDocuments)
                 .concat(rateSupportingDocuments)
                 .map((doc) => {
                     const key = getKey(doc.s3URL)

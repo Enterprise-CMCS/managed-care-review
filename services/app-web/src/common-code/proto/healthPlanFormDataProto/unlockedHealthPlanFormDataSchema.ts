@@ -177,12 +177,4 @@ export const unlockedHealthPlanFormDataSchema = z.object({
     federalAuthorities: z.array(federalAuthoritySchema),
     contractAmendmentInfo: contractAmendmentInfoSchema.optional(),
     rateInfos: z.array(rateInfosTypeSchema),
-    rateType: rateTypeSchema.optional(),
-    rateCapitationType: rateCapitationTypeSchema.optional(),
-    rateDocuments: z.array(submissionDocumentSchema).optional(),
-    rateDateStart: z.date().optional(),
-    rateDateEnd: z.date().optional(),
-    rateDateCertified: z.date().optional(),
-    rateAmendmentInfo: rateAmendmentInfoSchema.optional(),
-    rateProgramIDs: z.array(z.string()),
 })
