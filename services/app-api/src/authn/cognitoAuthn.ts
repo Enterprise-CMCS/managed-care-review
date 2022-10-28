@@ -2,6 +2,7 @@ import { Result, ok, err } from 'neverthrow'
 import { CognitoIdentityServiceProvider } from 'aws-sdk'
 import { UserType } from '../domain-models'
 import { performance } from 'perf_hooks'
+import { Store } from '../postgres'
 
 export function parseAuthProvider(
     authProvider: string
@@ -134,7 +135,8 @@ export function userTypeFromAttributes(attributes: {
 
 // userFromCognitoAuthProvider hits the Cogntio API to get the information in the authProvider
 export async function userFromCognitoAuthProvider(
-    authProvider: string
+    authProvider: string,
+    store?: Store
 ): Promise<Result<UserType, Error>> {
     const parseResult = parseAuthProvider(authProvider)
     if (parseResult.isErr()) {
@@ -142,6 +144,15 @@ export async function userFromCognitoAuthProvider(
     }
 
     const userInfo = parseResult.value
+
+    try {
+        if (store) {
+            const userFromPG = await store.getUser(userInfo.userId)
+            console.log('user from PG: ' + userFromPG)
+        }
+    } catch (e) {
+        console.log(e)
+    }
 
     // calling a dependency so we have to try
     try {

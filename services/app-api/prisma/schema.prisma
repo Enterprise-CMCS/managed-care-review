@@ -42,7 +42,7 @@ model State {
 }
 
 model User {
-  id         Int     @id @default(autoincrement())
+  id         String  @id
   euaID      String  @unique
   givenName  String
   familyName String
