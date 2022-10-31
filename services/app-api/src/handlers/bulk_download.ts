@@ -94,7 +94,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
             )
             const s3Item = await s3.send(getCommand)
             return {
-                stream: s3Item.Body,
+                stream: s3Item.Body as Readable,
                 key: key,
                 filename,
             }
