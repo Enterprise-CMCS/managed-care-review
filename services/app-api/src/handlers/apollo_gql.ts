@@ -57,6 +57,8 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
         const authProvider =
             event.requestContext.identity.cognitoAuthenticationProvider
 
+        console.log(JSON.stringify(event.requestContext))
+
         if (authProvider) {
             try {
                 // check if the user is stored in postgres
