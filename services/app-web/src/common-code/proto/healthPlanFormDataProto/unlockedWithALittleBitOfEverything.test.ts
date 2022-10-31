@@ -4,7 +4,7 @@ import { toDomain } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
 describe('unlockedWithALittleBitOfEverything migration', () => {
     it('version 2022-08-19 matches the expected values', async () => {
         // read the file from the filesystem
-        console.log(fs.readdirSync('.'))
+        console.log('directory: ', fs.readdirSync('.'))
         const protoBytes = fs.readFileSync(
             'src/common-code/proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-08-19.proto'
         )
