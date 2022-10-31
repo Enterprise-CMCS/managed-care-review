@@ -149,7 +149,8 @@ export async function userFromCognitoAuthProvider(
     // look up the user in PG. If we don't have it here, then we need to
     // fetch it from Cognito.
     if (store != undefined) {
-        await lookupUserAurora(store, userInfo.userId)
+        const aurora = await lookupUserAurora(store, userInfo.userId)
+        console.log(aurora)
     }
 
     // User was not in PG, so we look it up in Cognito
