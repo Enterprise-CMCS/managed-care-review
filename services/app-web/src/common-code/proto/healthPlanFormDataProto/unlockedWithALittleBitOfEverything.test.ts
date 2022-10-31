@@ -49,5 +49,8 @@ describe('unlockedWithALittleBitOfEverything migration', () => {
                 ?.toISOString()
                 .split('T')[0]
         ).toBe('2022-10-21')
+        expect(formData.rateInfos[0].rateCertificationName).toBe(
+            'MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523'
+        )
     })
 })
