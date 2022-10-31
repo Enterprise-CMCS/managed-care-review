@@ -8060,12 +8060,19 @@
   dependencies:
     "@opentelemetry/semantic-conventions" "1.2.0"
 
-"@opentelemetry/core@1.5.0", "@opentelemetry/core@^1.0.0", "@opentelemetry/core@^1.2.0":
+"@opentelemetry/core@1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/core/-/core-1.5.0.tgz#717bceee15d4c69d4c7321c1fe0f5a562b60eb81"
   integrity sha512-B3DIMkQN0DANrr7XrMLS4pR6d2o/jqT09x4nZJz6wSJ9SHr4eQIqeFBNeEUQG1I+AuOcH2UbJtgFm7fKxLqd+w==
   dependencies:
     "@opentelemetry/semantic-conventions" "1.5.0"
+
+"@opentelemetry/core@1.7.0", "@opentelemetry/core@^1.0.0", "@opentelemetry/core@^1.2.0":
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/core/-/core-1.7.0.tgz#83bdd1b7a4ceafcdffd6590420657caec5f7b34c"
+  integrity sha512-AVqAi5uc8DrKJBimCTFUT4iFI+5eXpo4sYmGbQ0CypG0piOTHE2g9c5aSoTGYXu3CzOmJZf7pT6Xh+nwm5d6yQ==
+  dependencies:
+    "@opentelemetry/semantic-conventions" "1.7.0"
 
 "@opentelemetry/exporter-trace-otlp-http@^0.28.0":
   version "0.28.0"
@@ -8180,13 +8187,21 @@
     "@opentelemetry/core" "1.2.0"
     "@opentelemetry/semantic-conventions" "1.2.0"
 
-"@opentelemetry/resources@1.5.0", "@opentelemetry/resources@^1.2.0":
+"@opentelemetry/resources@1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/resources/-/resources-1.5.0.tgz#ce7fbdaec3494e41bc279ddbed3c478ee2570b03"
   integrity sha512-YeEfC6IY54U3xL3P2+UAiom+r50ZF2jM0J47RV5uTFGF19Xjd5zazSwDPgmxtAd6DwLX0/5S5iqrsH4nEXMYoA==
   dependencies:
     "@opentelemetry/core" "1.5.0"
     "@opentelemetry/semantic-conventions" "1.5.0"
+
+"@opentelemetry/resources@1.7.0", "@opentelemetry/resources@^1.2.0":
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/resources/-/resources-1.7.0.tgz#90ccd3a6a86b4dfba4e833e73944bd64958d78c5"
+  integrity sha512-u1M0yZotkjyKx8dj+46Sg5thwtOTBmtRieNXqdCRiWUp6SfFiIP0bI+1XK3LhuXqXkBXA1awJZaTqKduNMStRg==
+  dependencies:
+    "@opentelemetry/core" "1.7.0"
+    "@opentelemetry/semantic-conventions" "1.7.0"
 
 "@opentelemetry/sdk-trace-base@1.2.0":
   version "1.2.0"
@@ -8197,7 +8212,7 @@
     "@opentelemetry/resources" "1.2.0"
     "@opentelemetry/semantic-conventions" "1.2.0"
 
-"@opentelemetry/sdk-trace-base@1.5.0", "@opentelemetry/sdk-trace-base@^1.0.0", "@opentelemetry/sdk-trace-base@^1.2.0":
+"@opentelemetry/sdk-trace-base@1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/sdk-trace-base/-/sdk-trace-base-1.5.0.tgz#259439009fff5637e7a379ece7446ce5beb84b77"
   integrity sha512-6lx7YDf67HSQYuWnvq3XgSrWikDJLiGCbrpUP6UWJ5Z47HLcJvwZPRH+cQGJu1DFS3dT2cV3GpAR75/OofPNHQ==
@@ -8205,6 +8220,15 @@
     "@opentelemetry/core" "1.5.0"
     "@opentelemetry/resources" "1.5.0"
     "@opentelemetry/semantic-conventions" "1.5.0"
+
+"@opentelemetry/sdk-trace-base@^1.0.0", "@opentelemetry/sdk-trace-base@^1.2.0":
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/sdk-trace-base/-/sdk-trace-base-1.7.0.tgz#b498424e0c6340a9d80de63fd408c5c2130a60a5"
+  integrity sha512-Iz84C+FVOskmauh9FNnj4+VrA+hG5o+tkMzXuoesvSfunVSioXib0syVFeNXwOm4+M5GdWCuW632LVjqEXStIg==
+  dependencies:
+    "@opentelemetry/core" "1.7.0"
+    "@opentelemetry/resources" "1.7.0"
+    "@opentelemetry/semantic-conventions" "1.7.0"
 
 "@opentelemetry/sdk-trace-node@^1.2.0":
   version "1.5.0"
@@ -8241,10 +8265,15 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.2.0.tgz#1549c1d88dc45d720b8487e39077eacc69636c73"
   integrity sha512-BNKB9fiYVghALJzCuWO3eNYfdTExPVK4ykrtmfNfy0A6UWYhOYjGMXifUmkunDJNL8ju9tBobo8jF0WR9zGy1Q==
 
-"@opentelemetry/semantic-conventions@1.5.0", "@opentelemetry/semantic-conventions@^1.0.0", "@opentelemetry/semantic-conventions@^1.2.0":
+"@opentelemetry/semantic-conventions@1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.5.0.tgz#cea9792bfcf556c87ded17c6ac729348697bb632"
   integrity sha512-wlYG/U6ddW1ilXslnDLLQYJ8nd97W8JJTTfwkGhubx6dzW6SUkd+N4/MzTjjyZlrHQunxHtkHFvVpUKiROvFDw==
+
+"@opentelemetry/semantic-conventions@1.7.0", "@opentelemetry/semantic-conventions@^1.0.0", "@opentelemetry/semantic-conventions@^1.2.0":
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.7.0.tgz#af80a1ef7cf110ea3a68242acd95648991bcd763"
+  integrity sha512-FGBx/Qd09lMaqQcogCHyYrFEpTx4cAjeS+48lMIR12z7LdH+zofGDVQSubN59nL6IpubfKqTeIDu9rNO28iHVA==
 
 "@peculiar/asn1-schema@^2.1.6":
   version "2.3.0"
@@ -8756,23 +8785,6 @@
     global "^4.4.0"
     regenerator-runtime "^0.13.7"
 
-"@storybook/addons@6.5.12":
-  version "6.5.12"
-  resolved "https://registry.yarnpkg.com/@storybook/addons/-/addons-6.5.12.tgz#891767b5f88ea99b956cf19e9e2893594068adc7"
-  integrity sha512-y3cgxZq41YGnuIlBJEuJjSFdMsm8wnvlNOGUP9Q+Er2dgfx8rJz4Q22o4hPjpvpaj4XdBtxCJXI2NeFpN59+Cw==
-  dependencies:
-    "@storybook/api" "6.5.12"
-    "@storybook/channels" "6.5.12"
-    "@storybook/client-logger" "6.5.12"
-    "@storybook/core-events" "6.5.12"
-    "@storybook/csf" "0.0.2--canary.4566f4d.1"
-    "@storybook/router" "6.5.12"
-    "@storybook/theming" "6.5.12"
-    "@types/webpack-env" "^1.16.0"
-    core-js "^3.8.2"
-    global "^4.4.0"
-    regenerator-runtime "^0.13.7"
-
 "@storybook/addons@6.5.13":
   version "6.5.13"
   resolved "https://registry.yarnpkg.com/@storybook/addons/-/addons-6.5.13.tgz#61ec5eab07879400d423d60bb397880d10ee5e73"
@@ -8802,29 +8814,6 @@
     "@storybook/router" "6.5.10"
     "@storybook/semver" "^7.3.2"
     "@storybook/theming" "6.5.10"
-    core-js "^3.8.2"
-    fast-deep-equal "^3.1.3"
-    global "^4.4.0"
-    lodash "^4.17.21"
-    memoizerific "^1.11.3"
-    regenerator-runtime "^0.13.7"
-    store2 "^2.12.0"
-    telejson "^6.0.8"
-    ts-dedent "^2.0.0"
-    util-deprecate "^1.0.2"
-
-"@storybook/api@6.5.12":
-  version "6.5.12"
-  resolved "https://registry.yarnpkg.com/@storybook/api/-/api-6.5.12.tgz#7cc82087fc9298be03f15bf4ab9c4aab294b3bac"
-  integrity sha512-DuUZmMlQxkFNU9Vgkp9aNfCkAongU76VVmygvCuSpMVDI9HQ2lG0ydL+ppL4XKoSMCCoXTY6+rg4hJANnH+1AQ==
-  dependencies:
-    "@storybook/channels" "6.5.12"
-    "@storybook/client-logger" "6.5.12"
-    "@storybook/core-events" "6.5.12"
-    "@storybook/csf" "0.0.2--canary.4566f4d.1"
-    "@storybook/router" "6.5.12"
-    "@storybook/semver" "^7.3.2"
-    "@storybook/theming" "6.5.12"
     core-js "^3.8.2"
     fast-deep-equal "^3.1.3"
     global "^4.4.0"
@@ -9002,15 +8991,6 @@
     ts-dedent "^2.0.0"
     util-deprecate "^1.0.2"
 
-"@storybook/channels@6.5.12":
-  version "6.5.12"
-  resolved "https://registry.yarnpkg.com/@storybook/channels/-/channels-6.5.12.tgz#98baf01691d263e2ac341853361ec69c1a6621bc"
-  integrity sha512-X5XaKbe4b7LXJ4sUakBo00x6pXnW78JkOonHoaKoWsccHLlEzwfBZpVVekhVZnqtCoLT23dB8wjKgA71RYWoiw==
-  dependencies:
-    core-js "^3.8.2"
-    ts-dedent "^2.0.0"
-    util-deprecate "^1.0.2"
-
 "@storybook/channels@6.5.13":
   version "6.5.13"
   resolved "https://registry.yarnpkg.com/@storybook/channels/-/channels-6.5.13.tgz#f3f86b90a7832484ee3dcbc6845f5a47f62f028f"
@@ -9050,14 +9030,6 @@
   version "6.5.10"
   resolved "https://registry.yarnpkg.com/@storybook/client-logger/-/client-logger-6.5.10.tgz#cfea823a5b8444409daa74f854c5d05367986b34"
   integrity sha512-/xA0MHOevXev68hyLMQw8Qo8KczSIdXOxliAgrycMTkDmw5eKeA8TP7B8zP3wGuq/e3MrdD9/8MWhb/IQBNC3w==
-  dependencies:
-    core-js "^3.8.2"
-    global "^4.4.0"
-
-"@storybook/client-logger@6.5.12":
-  version "6.5.12"
-  resolved "https://registry.yarnpkg.com/@storybook/client-logger/-/client-logger-6.5.12.tgz#d9809e13dc7939eb61452a5e94b1ccb61c4a022c"
-  integrity sha512-IrkMr5KZcudX935/C2balFbxLHhkvQnJ78rbVThHDVckQ7l3oIXTh66IMzldeOabVFDZEMiW8AWuGEYof+JtLw==
   dependencies:
     core-js "^3.8.2"
     global "^4.4.0"
@@ -9240,13 +9212,6 @@
   version "6.5.10"
   resolved "https://registry.yarnpkg.com/@storybook/core-events/-/core-events-6.5.10.tgz#66d87c8ea18db8e448018a16a3d0198ddbcbc683"
   integrity sha512-EVb1gO1172klVIAABLOoigFMx0V88uctY0K/qVCO8n6v+wd2+0Ccn63kl+gTxsAC3WZ8XhXh9q2w5ImHklVECw==
-  dependencies:
-    core-js "^3.8.2"
-
-"@storybook/core-events@6.5.12":
-  version "6.5.12"
-  resolved "https://registry.yarnpkg.com/@storybook/core-events/-/core-events-6.5.12.tgz#28bd727cc4216012409bfac412fcb708346c56bc"
-  integrity sha512-0AMyMM19R/lHsYRfWqM8zZTXthasTAK2ExkSRzYi2GkIaVMxRKtM33YRwxKIpJ6KmIKIs8Ru3QCXu1mfCmGzNg==
   dependencies:
     core-js "^3.8.2"
 
@@ -9615,17 +9580,6 @@
     qs "^6.10.0"
     regenerator-runtime "^0.13.7"
 
-"@storybook/router@6.5.12":
-  version "6.5.12"
-  resolved "https://registry.yarnpkg.com/@storybook/router/-/router-6.5.12.tgz#58efbc1f2f301c8584802af1c710b2f6f03f948c"
-  integrity sha512-xHubde9YnBbpkDY5+zGO4Pr6VPxP8H9J2v4OTF3H82uaxCIKR0PKG0utS9pFKIsEiP3aM62Hb9qB8nU+v1nj3w==
-  dependencies:
-    "@storybook/client-logger" "6.5.12"
-    core-js "^3.8.2"
-    memoizerific "^1.11.3"
-    qs "^6.10.0"
-    regenerator-runtime "^0.13.7"
-
 "@storybook/router@6.5.13":
   version "6.5.13"
   resolved "https://registry.yarnpkg.com/@storybook/router/-/router-6.5.13.tgz#c8bfed96f2343b097d416cfc95194038365fce94"
@@ -9727,16 +9681,6 @@
   integrity sha512-BvTQBBcSEwKKcsVmF+Ol6v0RIQUr+bxP7gb10wtfBd23mZTEFA0C1N5FnZr/dDeiBKG1pvf1UKvoYA731y0BsA==
   dependencies:
     "@storybook/client-logger" "6.5.10"
-    core-js "^3.8.2"
-    memoizerific "^1.11.3"
-    regenerator-runtime "^0.13.7"
-
-"@storybook/theming@6.5.12":
-  version "6.5.12"
-  resolved "https://registry.yarnpkg.com/@storybook/theming/-/theming-6.5.12.tgz#7df1b52913d49c5e84fc1f2e837c02d9fa8cc639"
-  integrity sha512-uWOo84qMQ2R6c1C0faZ4Q0nY01uNaX7nXoJKieoiJ6ZqY9PSYxJl1kZLi3uPYnrxLZjzjVyXX8MgdxzbppYItA==
-  dependencies:
-    "@storybook/client-logger" "6.5.12"
     core-js "^3.8.2"
     memoizerific "^1.11.3"
     regenerator-runtime "^0.13.7"
