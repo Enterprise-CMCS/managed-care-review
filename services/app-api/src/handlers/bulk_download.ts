@@ -4,6 +4,7 @@ import {
     GetObjectCommand,
     HeadObjectCommand,
 } from '@aws-sdk/client-s3'
+import { Readable, Stream } from 'stream'
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import Archiver from 'archiver'
 
@@ -75,8 +76,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
     }
 
     type S3DownloadStreamDetails = {
-        stream: ReadableStream
-        key: string
+        stream: Readable
         filename: string
     }
 
