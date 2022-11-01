@@ -8,7 +8,7 @@ import {
 } from '@trussworks/react-uswds'
 
 import { signUp } from './cognitoAuth'
-import { logEvent } from '../../log_event'
+import { recordJSException } from '../../otelHelpers'
 
 export function showError(error: string): void {
     console.log(error)
@@ -74,10 +74,7 @@ export function Signup({
         } catch (err) {
             setIsLoading(false)
             showError('An unexpected error occurred!')
-            logEvent('cognitoAuth.unexpected_error', {
-                'err.code': err.code,
-                'err.message': err.message,
-            })
+            recordJSException(new Error(err))
         }
     }
 

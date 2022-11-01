@@ -170,25 +170,6 @@ functions:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
 
-  log_event:
-    handler: src/handlers/log_event.main
-    events:
-      - http:
-          path: log_event
-          method: post
-          cors:
-            origin: '*'
-            headers:
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-              - X-Amz-User-Agent
-              - x-amzn-trace-id
-              - b3
-              - traceparent
-
   otel:
     handler: src/handlers/otel_proxy.main
     events:
