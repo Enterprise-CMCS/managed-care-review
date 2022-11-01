@@ -48,6 +48,7 @@ async function createUser({
     role,
     password,
     state,
+    identities,
 }: {
     userPoolID: string
     name: string
@@ -55,6 +56,7 @@ async function createUser({
     role: UserRole
     password: string
     state?: string
+    identities: string
 }) {
     const cognito = new AWS.CognitoIdentityServiceProvider({
         apiVersion: '2016-04-19',
@@ -82,6 +84,10 @@ async function createUser({
             {
                 Name: 'custom:role',
                 Value: IDMRole(role),
+            },
+            {
+                Name: 'identities',
+                Value: identities,
             },
         ],
     }
@@ -142,24 +148,28 @@ async function main() {
             email: 'aang@example.com',
             role: 'STATE_USER' as const,
             state: 'MN',
+            identities: '[{"userId": "AAAA"}]',
         },
         {
             name: 'Toph',
             email: 'toph@example.com',
             role: 'STATE_USER' as const,
             state: 'VA',
+            identities: '[{"userId": "BBBB"}]',
         },
         {
             name: 'Zuko',
             email: 'zuko@example.com',
             role: 'CMS_USER' as const,
             state: undefined,
+            identities: '[{"userId": "CCCC"}]',
         },
         {
             name: 'Cabbages',
             email: 'cabbages@example.com',
             role: 'UNKNOWN_USER' as const,
             state: undefined,
+            identities: '[{"userId": "DDDD"}]',
         },
     ]
 
@@ -173,6 +183,7 @@ async function main() {
                 role: user.role,
                 password: testUserPassword,
                 state: user.state,
+                identities: user.identities,
             })
         } catch (e) {
             console.log('Error creating user: ', e)

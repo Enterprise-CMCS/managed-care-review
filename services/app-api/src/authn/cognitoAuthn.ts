@@ -4,6 +4,7 @@ import { UserType } from '../domain-models'
 import { performance } from 'perf_hooks'
 import { Store } from '../postgres'
 import { User } from '@prisma/client'
+import { InsertUserArgsType } from '../postgres/insertUser'
 
 export function parseAuthProvider(
     authProvider: string
@@ -88,7 +89,8 @@ export function userTypeFromAttributes(attributes: {
             'custom:role' in attributes &&
             'email' in attributes &&
             'given_name' in attributes &&
-            'family_name' in attributes
+            'family_name' in attributes &&
+            'identities' in attributes
         )
     ) {
         return err(
@@ -100,6 +102,9 @@ export function userTypeFromAttributes(attributes: {
     }
 
     const fullName = attributes.given_name + ' ' + attributes.family_name
+    // the euaID is in a field  called 'identities' which is a stringified array
+    // that holds a single object, that saves the euaID in a field called userId.
+    const euaID = JSON.parse(attributes['identities'])[0].userId
     // Roles are a list of all the roles a user has in IDM.
     const roleAttribute = attributes['custom:role']
     const roles = roleAttribute.split(',')
@@ -120,6 +125,9 @@ export function userTypeFromAttributes(attributes: {
             email: attributes.email,
             name: fullName,
             state_code: attributes['custom:state_code'],
+            givenName: attributes.given_name,
+            familyName: attributes.family_name,
+            euaID: euaID,
         })
     }
 
@@ -128,6 +136,9 @@ export function userTypeFromAttributes(attributes: {
             role: 'CMS_USER',
             email: attributes.email,
             name: fullName,
+            givenName: attributes.given_name,
+            familyName: attributes.family_name,
+            euaID: euaID,
         })
     }
 
@@ -145,12 +156,40 @@ export async function userFromCognitoAuthProvider(
     }
 
     const userInfo = parseResult.value
+    // if no store is given, we just get user from Cognito
+    if (store == undefined) {
+        return lookupUserCognito(userInfo.userId, userInfo.poolId)
+    }
 
     // look up the user in PG. If we don't have it here, then we need to
     // fetch it from Cognito.
-    if (store != undefined) {
-        const aurora = await lookupUserAurora(store, userInfo.userId)
-        console.log(aurora)
+    const aurora = await lookupUserAurora(store, userInfo.userId)
+
+    // if there is no user returned, lookup in cognito and save to postgres
+    if (aurora === undefined) {
+        const cognitoUserResult = await lookupUserCognito(
+            userInfo.userId,
+            userInfo.poolId
+        )
+
+        if (cognitoUserResult.isErr()) {
+            return err(cognitoUserResult.error)
+        }
+
+        const cognitoUser = cognitoUserResult.value
+
+        // create the user and store it in aurora
+        const userToInsert: InsertUserArgsType = {
+            userID: userInfo.userId,
+            role: cognitoUser.role,
+            givenName: cognitoUser.givenName,
+            familyName: cognitoUser.familyName,
+            email: cognitoUser.email,
+            euaID: cognitoUser.euaID,
+        }
+
+        const result = await store.insertUser(userToInsert)
+        console.log(result)
     }
 
     // User was not in PG, so we look it up in Cognito

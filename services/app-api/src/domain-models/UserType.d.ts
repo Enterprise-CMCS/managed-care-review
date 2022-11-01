@@ -8,12 +8,18 @@ type StateUserType = {
     email: string
     name: string
     state_code: string
+    givenName: string
+    familyName: string
+    euaID: string
 }
 
 type CMSUserType = {
     role: 'CMS_USER'
     email: string
     name: string
+    givenName: string
+    familyName: string
+    euaID: string
 }
 
 export type { CMSUserType, StateUserType, UserType }

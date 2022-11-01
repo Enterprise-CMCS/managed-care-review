@@ -23,6 +23,7 @@ import { getAllRevisions } from './getAllRevisions'
 
 import { getUser } from './getUser'
 import { User } from '@prisma/client'
+import { insertUser, InsertUserArgsType } from './insertUser'
 
 type Store = {
     findPrograms: (
@@ -64,6 +65,8 @@ type Store = {
     ) => Promise<HealthPlanPackageType | StoreError>
 
     getUser: (id: string) => Promise<User | StoreError>
+
+    insertUser: (user: InsertUserArgsType) => Promise<User | StoreError>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -93,6 +96,7 @@ function NewPostgresStore(client: PrismaClient): Store {
         getStatePrograms: getStatePrograms,
         getAllRevisions: () => getAllRevisions(client),
         getUser: (id) => getUser(client, id),
+        insertUser: (args) => insertUser(client, args),
     }
 }
 
