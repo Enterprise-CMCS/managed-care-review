@@ -17,6 +17,7 @@ import './stateSubmissionFormCommands'
 import './dashboardCommands'
 import './navigateCommands'
 import './launchDarklyCommands'
+import './e2e'
 import { FeatureFlagTypes, FlagValueTypes } from '../../../services/app-web/src/common-code/featureFlags'
 
 type FormButtonKey =
