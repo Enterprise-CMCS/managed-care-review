@@ -1,5 +1,6 @@
 import FETCH_HEALTH_PLAN_PACKAGE from '../../../app-graphql/src/queries/fetchHealthPlanPackage.graphql'
 import { base64ToDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import { UserType } from '../domain-models'
 import { todaysDate } from '../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer,
@@ -10,6 +11,25 @@ import {
 } from '../testHelpers/gqlHelpers'
 
 describe('fetchHealthPlanPackage', () => {
+    const testUserCMS: UserType = {
+        name: 'Zuko',
+        role: 'CMS_USER',
+        email: 'zuko@example.com',
+        familyName: 'Zuko',
+        givenName: 'Prince',
+        euaID: 'CCCC',
+    }
+
+    const testUserState: UserType = {
+        name: 'Aang',
+        state_code: 'FL',
+        role: 'STATE_USER',
+        email: 'aang@mn.gov',
+        familyName: 'Aang',
+        givenName: 'Aang',
+        euaID: 'AAGG',
+    }
+
     it('returns package with one revision', async () => {
         const server = await constructTestPostgresServer()
 
@@ -82,11 +102,7 @@ describe('fetchHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'zuko@example.com',
-                },
+                user: testUserCMS,
             },
         })
 
@@ -125,11 +141,7 @@ describe('fetchHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'zuko@example.com',
-                },
+                user: testUserCMS,
             },
         })
 
@@ -219,12 +231,7 @@ describe('fetchHealthPlanPackage', () => {
         // setup a server with a different user
         const otherUserServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Aang',
-                    state_code: 'FL',
-                    role: 'STATE_USER',
-                    email: 'aang@mn.gov',
-                },
+                user: testUserState,
             },
         })
 
@@ -257,12 +264,7 @@ describe('fetchHealthPlanPackage', () => {
         // setup a server with a different user
         const otherUserServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Aang',
-                    state_code: 'VA',
-                    role: 'STATE_USER',
-                    email: 'aang@va.gov',
-                },
+                user: testUserState,
             },
         })
 
@@ -288,11 +290,7 @@ describe('fetchHealthPlanPackage', () => {
         const server = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'zuko@example.com',
-                },
+                user: testUserCMS,
             },
         })
 
@@ -334,11 +332,7 @@ describe('fetchHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'zuko@example.com',
-                },
+                user: testUserCMS,
             },
         })
 
