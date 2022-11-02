@@ -63,6 +63,9 @@ describe('createHealthPlanPackage', () => {
                     name: 'Zuko',
                     role: 'CMS_USER',
                     email: 'aang@va.gov',
+                    givenName: 'Prince',
+                    familyName: 'Zuko',
+                    euaID: 'AANG',
                 },
             },
         })
