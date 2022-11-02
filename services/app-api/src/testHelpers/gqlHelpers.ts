@@ -58,6 +58,9 @@ const defaultContext = (): Context => {
             state_code: 'FL',
             role: 'STATE_USER',
             email: 'james@example.com',
+            familyName: 'Brown',
+            givenName: 'James',
+            euaID: 'WAAH',
         },
     }
 }

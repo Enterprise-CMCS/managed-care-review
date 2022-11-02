@@ -26,8 +26,17 @@ import {
     getTestStateAnalystsEmails,
     mockEmailParameterStoreError,
 } from '../testHelpers/parameterStoreHelpers'
+import { UserType } from '../domain-models'
 
 describe('unlockHealthPlanPackage', () => {
+    const testUser: UserType = {
+        name: 'Zuko',
+        role: 'CMS_USER',
+        email: 'zuko@example.com',
+        familyName: 'Zuko',
+        givenName: 'Prince',
+        euaID: 'CCCC',
+    }
     it('returns a HealthPlanPackage with all revisions', async () => {
         const stateServer = await constructTestPostgresServer()
 
@@ -38,11 +47,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'zuko@example.com',
-                },
+                user: testUser,
             },
         })
 
@@ -107,11 +112,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'zuko@example.com',
-                },
+                user: testUser,
             },
         })
 
@@ -185,11 +186,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'zuko@example.com',
-                },
+                user: testUser,
             },
         })
 
@@ -268,11 +265,7 @@ describe('unlockHealthPlanPackage', () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'zuko@example.com',
-                },
+                user: testUser,
             },
         })
 
@@ -332,11 +325,7 @@ describe('unlockHealthPlanPackage', () => {
     it('returns an error if the submission does not exit', async () => {
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'zuko@example.com',
-                },
+                user: testUser,
             },
         })
 
@@ -367,11 +356,7 @@ describe('unlockHealthPlanPackage', () => {
         const cmsServer = await constructTestPostgresServer({
             store: errorStore,
             context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'zuko@example.com',
-                },
+                user: testUser,
             },
         })
 
@@ -405,11 +390,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'zuko@example.com',
-                },
+                user: testUser,
             },
         })
 
@@ -446,11 +427,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'zuko@example.com',
-                },
+                user: testUser,
             },
             emailer: mockEmailer,
         })
@@ -505,11 +482,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'zuko@example.com',
-                },
+                user: testUser,
             },
             emailer: mockEmailer,
         })
@@ -600,11 +573,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'zuko@example.com',
-                },
+                user: testUser,
             },
             emailer: mockEmailer,
             emailParameterStore: mockEmailParameterStore,
@@ -647,11 +616,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'zuko@example.com',
-                },
+                user: testUser,
             },
             emailParameterStore: mockEmailParameterStore,
         })
