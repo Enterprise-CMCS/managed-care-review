@@ -182,6 +182,9 @@ const mockUser = (): StateUserType => {
         email: 'test+state+user@example.com',
         name: 'Test State User',
         state_code: 'MN',
+        familyName: 'State',
+        givenName: 'User',
+        euaID: 'HBVT',
     }
 }
 

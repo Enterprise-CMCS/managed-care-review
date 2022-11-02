@@ -118,7 +118,7 @@ describe('cognitoAuthn', () => {
                         state_code: 'FL',
                         givenName: 'Generic',
                         familyName: 'Person',
-                        euaID: 'HIJK',
+                        euaID: 'DEFG',
                     }),
                 },
                 {
@@ -129,6 +129,7 @@ describe('cognitoAuthn', () => {
                         given_name: 'Generic',
                         family_name: 'Person',
                         email: 'gp@example.com',
+                        identities: '[{"userId": "TEST"}]',
                     },
                     expectedResult: err(
                         new Error(

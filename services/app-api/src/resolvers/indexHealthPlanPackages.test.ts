@@ -68,6 +68,9 @@ describe('indexHealthPlanPackages', () => {
                         name: 'Zuko',
                         role: 'CMS_USER',
                         email: 'zuko@example.com',
+                        familyName: 'Zuko',
+                        givenName: 'Prince',
+                        euaID: 'UHWF',
                     },
                 },
             })
@@ -162,6 +165,9 @@ describe('indexHealthPlanPackages', () => {
                         state_code: 'FL',
                         role: 'STATE_USER',
                         email: 'aang@mn.gov',
+                        givenName: 'Aang',
+                        familyName: 'Aang',
+                        euaID: 'BWLF',
                     },
                 },
             })
@@ -197,6 +203,9 @@ describe('indexHealthPlanPackages', () => {
                         state_code: 'VA',
                         role: 'STATE_USER',
                         email: 'aang@mn.gov',
+                        familyName: 'Aang',
+                        givenName: 'Aang',
+                        euaID: 'PWEV',
                     },
                 },
             })
@@ -225,6 +234,9 @@ describe('indexHealthPlanPackages', () => {
                         name: 'Zuko',
                         role: 'CMS_USER',
                         email: 'zuko@example.com',
+                        givenName: 'Zuko',
+                        familyName: 'Zuko',
+                        euaID: 'NWBE',
                     },
                 },
             })
@@ -258,6 +270,9 @@ describe('indexHealthPlanPackages', () => {
                         name: 'Zuko',
                         role: 'CMS_USER',
                         email: 'zuko@example.com',
+                        givenName: 'Prince',
+                        familyName: 'Zuko',
+                        euaID: 'JKWE',
                     },
                 },
             })
@@ -330,6 +345,9 @@ describe('indexHealthPlanPackages', () => {
                         name: 'Zuko',
                         role: 'CMS_USER',
                         email: 'zuko@example.com',
+                        familyName: 'Zuko',
+                        givenName: 'Prince',
+                        euaID: 'IWAP',
                     },
                 },
             })
@@ -340,6 +358,9 @@ describe('indexHealthPlanPackages', () => {
                         state_code: 'VA',
                         role: 'STATE_USER',
                         email: 'aang@mn.gov',
+                        familyName: 'AANG',
+                        givenName: 'AANG',
+                        euaID: 'XEVS',
                     },
                 },
             })
