@@ -264,7 +264,15 @@ describe('fetchHealthPlanPackage', () => {
         // setup a server with a different user
         const otherUserServer = await constructTestPostgresServer({
             context: {
-                user: testUserState,
+                user: {
+                    name: 'Aang',
+                    state_code: 'VA',
+                    role: 'STATE_USER',
+                    email: 'aang@va.gov',
+                    familyName: 'Aang',
+                    givenName: 'Aang',
+                    euaID: 'AAGG',
+                },
             },
         })
 
