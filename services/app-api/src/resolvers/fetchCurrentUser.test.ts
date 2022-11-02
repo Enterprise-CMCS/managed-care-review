@@ -25,6 +25,9 @@ describe('currentUser', () => {
                 state_code: 'MI',
                 role: 'STATE_USER',
                 email: 'james@example.com',
+                familyName: 'Brown',
+                givenName: 'James',
+                euaID: 'WAAH',
             },
         }
 
