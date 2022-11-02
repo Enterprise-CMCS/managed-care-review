@@ -9,6 +9,8 @@ import { HealthPlanFormDataType } from './HealthPlanFormDataType'
 import { formatRateNameDate } from '../../common-code/dateHelpers'
 import { ProgramArgType } from '.'
 
+// TODO: Refactor into multiple files and add unit tests to these functions
+
 const isContractOnly = (
     sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
 ): boolean => sub.submissionType === 'CONTRACT_ONLY'
@@ -64,7 +66,18 @@ const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
                       rateInfo.rateDateStart !== undefined &&
                       rateInfo.rateDateEnd !== undefined &&
                       (rateInfo.rateProgramIDs !== undefined ||
-                          rateInfo.rateProgramIDs !== [])
+                          rateInfo.rateProgramIDs !== []) &&
+                      rateInfo.actuaryContacts.every(
+                          (actuaryContact) =>
+                              actuaryContact.name !== undefined &&
+                              actuaryContact.titleRole !== undefined &&
+                              actuaryContact.email !== undefined &&
+                              ((actuaryContact.actuarialFirm !== undefined &&
+                                  actuaryContact.actuarialFirm !== 'OTHER') ||
+                                  (actuaryContact.actuarialFirm === 'OTHER' &&
+                                      actuaryContact.actuarialFirmOther !==
+                                          undefined))
+                      )
 
                   if (isRateAmendment(rateInfo)) {
                       return (
@@ -280,16 +293,9 @@ const removeRatesData = (
     pkg: UnlockedHealthPlanFormDataType
 ): UnlockedHealthPlanFormDataType => {
     pkg.rateInfos = []
-    pkg.rateType = undefined
-    pkg.rateDateCertified = undefined
-    pkg.rateDateStart = undefined
-    pkg.rateDateEnd = undefined
-    pkg.rateCapitationType = undefined
-    pkg.rateAmendmentInfo = undefined
-    pkg.actuaryContacts = []
-    pkg.rateProgramIDs = []
+    pkg.addtlActuaryContacts = []
+    pkg.addtlActuaryCommunicationPreference = undefined
     pkg.documents = convertRateSupportingDocs(pkg.documents)
-    pkg.rateDocuments = []
 
     return pkg
 }

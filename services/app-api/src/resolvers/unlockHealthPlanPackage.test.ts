@@ -158,9 +158,8 @@ describe('unlockHealthPlanPackage', () => {
         formData.contractDocuments = []
         formData.managedCareEntities = ['MCO']
         formData.federalAuthorities = ['VOLUNTARY' as const]
-        formData.rateDocuments = []
         formData.stateContacts = []
-        formData.actuaryContacts = []
+        formData.addtlActuaryContacts = []
 
         await updateTestHealthPlanFormData(stateServer, formData)
 
@@ -517,10 +516,17 @@ describe('unlockHealthPlanPackage', () => {
                     },
                 ],
                 rateProgramIDs: [],
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ]
-        // there's a rateProgramIDs in rateInfos and also on the form data itself; clear them both
-        unlockedFormData.rateProgramIDs = []
 
         //Update package
         const updatedSub = await updateTestHealthPlanFormData(

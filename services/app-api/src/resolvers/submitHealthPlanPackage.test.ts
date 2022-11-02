@@ -173,11 +173,28 @@ describe('submitHealthPlanPackage', () => {
             submissionType: 'CONTRACT_AND_RATES',
             rateInfos: [
                 {
-                    rateType: undefined,
-                    rateDateStart: undefined,
-                    rateDateEnd: undefined,
-                    rateDateCertified: undefined,
-                    rateDocuments: [],
+                    rateType: 'NEW' as const,
+                    rateDateStart: new Date(Date.UTC(2025, 5, 1)),
+                    rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
+                    rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
+                    rateDocuments: [
+                        {
+                            name: 'rateDocument.pdf',
+                            s3URL: 'fakeS3URL',
+                            documentCategories: ['RATES' as const],
+                        },
+                    ],
+                    //We only want one rate ID and use last program in list to differentiate from programID if possible.
+                    rateProgramIDs: ['3b8d8fa1-1fa6-4504-9c5b-ef522877fe1e'],
+                    actuaryContacts: [
+                        {
+                            name: 'test name',
+                            titleRole: 'test title',
+                            email: 'email@example.com',
+                            actuarialFirm: undefined,
+                        },
+                    ],
+                    actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
                 },
             ],
         })
@@ -242,14 +259,7 @@ describe('submitHealthPlanPackage', () => {
 
         expect(packageData).toEqual(
             expect.objectContaining({
-                rateType: draftPackageData.rateType,
-                rateDateCertified: draftPackageData.rateDateCertified,
-                rateDateStart: draftPackageData.rateDateStart,
-                rateDateEnd: draftPackageData.rateDateEnd,
-                rateCapitationType: draftPackageData.rateCapitationType,
-                rateAmendmentInfo: draftPackageData.rateAmendmentInfo,
-                rateProgramIDs: draftPackageData.rateProgramIDs,
-                actuaryContacts: draftPackageData.actuaryContacts,
+                addtlActuaryContacts: draftPackageData.addtlActuaryContacts,
                 documents: [
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
@@ -303,14 +313,8 @@ describe('submitHealthPlanPackage', () => {
 
         expect(packageData).toEqual(
             expect.objectContaining({
-                rateType: undefined,
-                rateDateCertified: undefined,
-                rateDateStart: undefined,
-                rateDateEnd: undefined,
-                rateCapitationType: undefined,
-                rateAmendmentInfo: undefined,
-                rateProgramIDs: [],
-                actuaryContacts: [],
+                rateInfos: expect.arrayContaining([]),
+                addtlActuaryContacts: expect.arrayContaining([]),
                 documents: [
                     {
                         name: 'contract_supporting_that_applies_to_a_rate_also.pdf',
@@ -323,7 +327,6 @@ describe('submitHealthPlanPackage', () => {
                         documentCategories: ['CONTRACT_RELATED'],
                     },
                 ],
-                rateDocuments: [],
             })
         )
     })
@@ -547,6 +550,15 @@ describe('submitHealthPlanPackage', () => {
                     },
                 ],
                 rateProgramIDs: [],
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ]
 
@@ -747,6 +759,7 @@ describe('submitHealthPlanPackage', () => {
                     rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
                     rateDateCertified: undefined,
                     rateDocuments: [],
+                    actuaryContacts: [],
                 },
             ],
         })

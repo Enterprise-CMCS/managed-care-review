@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { ErrorBoundary } from 'react-error-boundary'
 import {
@@ -11,7 +11,6 @@ import { AppBody } from './AppBody'
 import { AuthProvider } from '../../contexts/AuthContext'
 import { ErrorBoundaryRoot } from '../Errors/ErrorBoundaryRoot'
 import { PageProvider } from '../../contexts/PageContext'
-import { logEvent } from '../../log_event'
 import TraceProvider from '../../contexts/TraceContext'
 
 import { AuthModeType } from '../../common-code/config'
@@ -29,10 +28,6 @@ function App({
     apolloClient,
     s3Client,
 }: AppProps): React.ReactElement {
-    useEffect(() => {
-        logEvent('on_load', { success: true })
-    }, [])
-
     return (
         <ErrorBoundary FallbackComponent={ErrorBoundaryRoot}>
             <BrowserRouter>

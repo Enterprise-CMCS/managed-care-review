@@ -75,9 +75,8 @@ export async function insertHealthPlanPackage(
         rateInfos: [],
         documents: [],
         contractDocuments: [],
-        rateDocuments: [],
         stateContacts: [],
-        actuaryContacts: [],
+        addtlActuaryContacts: [],
         managedCareEntities: [],
         federalAuthorities: [],
     }

@@ -115,6 +115,7 @@ const rateCapitationTypeSchema = z.union([
 ])
 
 const rateInfosTypeSchema = z.object({
+    id: z.string().optional(),
     rateType: rateTypeSchema.optional(),
     rateCapitationType: rateCapitationTypeSchema.optional(),
     rateDocuments: z.array(submissionDocumentSchema).optional(),
@@ -124,6 +125,8 @@ const rateInfosTypeSchema = z.object({
     rateAmendmentInfo: rateAmendmentInfoSchema.optional(),
     rateProgramIDs: z.array(z.string()),
     rateCertificationName: z.string().optional(),
+    actuaryContacts: z.array(actuaryContactSchema),
+    actuaryCommunicationPreference: actuaryCommunicationTypeSchema.optional(),
 })
 
 // Commenting out because this wasn't being used but was raising lint warning -hw
@@ -161,8 +164,9 @@ export const unlockedHealthPlanFormDataSchema = z.object({
     submissionType: submissionTypeSchema,
     submissionDescription: z.string(),
     stateContacts: z.array(stateContactSchema),
-    actuaryContacts: z.array(actuaryContactSchema),
-    actuaryCommunicationPreference: actuaryCommunicationTypeSchema.optional(),
+    addtlActuaryContacts: z.array(actuaryContactSchema),
+    addtlActuaryCommunicationPreference:
+        actuaryCommunicationTypeSchema.optional(),
     documents: z.array(submissionDocumentSchema),
     contractType: contractTypeSchema.optional(),
     contractExecutionStatus: contractExecutionStatusSchema.optional(),
@@ -173,12 +177,4 @@ export const unlockedHealthPlanFormDataSchema = z.object({
     federalAuthorities: z.array(federalAuthoritySchema),
     contractAmendmentInfo: contractAmendmentInfoSchema.optional(),
     rateInfos: z.array(rateInfosTypeSchema),
-    rateType: rateTypeSchema.optional(),
-    rateCapitationType: rateCapitationTypeSchema.optional(),
-    rateDocuments: z.array(submissionDocumentSchema).optional(),
-    rateDateStart: z.date().optional(),
-    rateDateEnd: z.date().optional(),
-    rateDateCertified: z.date().optional(),
-    rateAmendmentInfo: rateAmendmentInfoSchema.optional(),
-    rateProgramIDs: z.array(z.string()),
 })

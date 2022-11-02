@@ -288,21 +288,17 @@ const mockContractAndRatesFormData = (
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
-        rateType: 'NEW',
-        rateDocuments: [
-            {
-                s3URL: 'bar',
-                name: 'foo',
-                documentCategories: ['RATES' as const],
-            },
-        ],
-        rateDateCertified: new Date('01/02/2021'),
-        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
-        rateAmendmentInfo: undefined,
-        rateDateStart: new Date('01/01/2021'),
-        rateDateEnd: new Date('01/01/2022'),
         stateContacts: [
             {
                 name: 'Test Person',
@@ -310,7 +306,15 @@ const mockContractAndRatesFormData = (
                 email: 'test+state+contact@example.com',
             },
         ],
-        actuaryContacts: [],
+        addtlActuaryContacts: [
+            {
+                actuarialFirm: 'DELOITTE',
+                name: 'Additional Contact 1',
+                titleRole: 'Test Actuary Contact 1',
+                email: 'actuarycontact1@example.com',
+            },
+        ],
+        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         ...submissionPartial,
     }
 }
@@ -363,20 +367,17 @@ const mockUnlockedContractAndRatesFormData = (
                 rateDateCertified: new Date('01/02/2021'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                 rateAmendmentInfo: undefined,
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
-        rateType: 'NEW',
-        rateDocuments: [
-            {
-                s3URL: 'bar',
-                name: 'foo',
-                documentCategories: ['RATES' as const],
-            },
-        ],
-        rateDateStart: new Date('01/01/2021'),
-        rateDateEnd: new Date('01/01/2022'),
-        rateDateCertified: new Date('01/02/2021'),
-        rateAmendmentInfo: undefined,
         stateContacts: [
             {
                 name: 'Test Person',
@@ -384,8 +385,15 @@ const mockUnlockedContractAndRatesFormData = (
                 email: 'test+state+contact@example.com',
             },
         ],
-        actuaryContacts: [],
-        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+        addtlActuaryContacts: [
+            {
+                actuarialFirm: 'DELOITTE',
+                name: 'Additional Contact 1',
+                titleRole: 'Test Actuary Contact 1',
+                email: 'actuarycontact1@example.com',
+            },
+        ],
+        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         ...submissionPartial,
     }
 }
@@ -424,7 +432,6 @@ const mockUnlockedContractOnlyFormData = (
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [],
-        rateDocuments: [],
         stateContacts: [
             {
                 name: 'Test Person',
@@ -432,7 +439,7 @@ const mockUnlockedContractOnlyFormData = (
                 email: 'test+state+contact@example.com',
             },
         ],
-        actuaryContacts: [],
+        addtlActuaryContacts: [],
         ...submissionPartial,
     }
 }
@@ -472,7 +479,6 @@ const mockContractOnlyFormData = (
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [],
-        rateDocuments: [],
         stateContacts: [
             {
                 name: 'Test Person',
@@ -480,7 +486,7 @@ const mockContractOnlyFormData = (
                 email: 'test+state+contact@example.com',
             },
         ],
-        actuaryContacts: [],
+        addtlActuaryContacts: [],
         ...submissionPartial,
     }
 }
@@ -534,20 +540,17 @@ const mockContractAmendmentFormData = (
                 rateDateCertified: new Date('01/02/2021'),
                 rateAmendmentInfo: undefined,
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+                actuaryContacts: [
+                    {
+                        actuarialFirm: 'DELOITTE',
+                        name: 'Actuary Contact 1',
+                        titleRole: 'Test Actuary Contact 1',
+                        email: 'actuarycontact1@example.com',
+                    },
+                ],
+                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             },
         ],
-        rateType: 'NEW',
-        rateDocuments: [
-            {
-                s3URL: 'bar',
-                name: 'foo',
-                documentCategories: ['RATES' as const],
-            },
-        ],
-        rateDateStart: new Date('01/01/2021'),
-        rateDateEnd: new Date('01/01/2022'),
-        rateDateCertified: new Date('01/02/2021'),
-        rateAmendmentInfo: undefined,
         stateContacts: [
             {
                 name: 'Test Person',
@@ -555,8 +558,15 @@ const mockContractAmendmentFormData = (
                 email: 'test+state+contact@example.com',
             },
         ],
-        actuaryContacts: [],
-        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+        addtlActuaryContacts: [
+            {
+                actuarialFirm: 'DELOITTE',
+                name: 'Additional Contact 1',
+                titleRole: 'Test Actuary Contact 1',
+                email: 'actuarycontact1@example.com',
+            },
+        ],
+        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
         ...submissionPartial,
     }
 }

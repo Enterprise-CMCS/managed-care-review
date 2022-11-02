@@ -9,6 +9,7 @@ import {
     isLockedHealthPlanFormData,
     RateInfoType,
 } from '../../healthPlanFormDataType'
+import { toLatestProtoVersion } from './toLatestVersion'
 
 /**
  * Recursively replaces all nulls with undefineds.
@@ -234,14 +235,14 @@ function parseContractAmendment(
 }
 
 function parseActuaryContacts(
-    rateInfo: mcreviewproto.IRateInfo | null | undefined
-): RecursivePartial<UnlockedHealthPlanFormDataType['actuaryContacts']> {
-    if (!rateInfo?.actuaryContacts) {
+    actuaryContacts: mcreviewproto.IActuaryContact[] | null | undefined
+): RecursivePartial<UnlockedHealthPlanFormDataType['addtlActuaryContacts']> {
+    if (!actuaryContacts) {
         return []
     }
 
-    const actuaryContacts = replaceNullsWithUndefineds(
-        rateInfo.actuaryContacts
+    const parsedActuaryContacts = replaceNullsWithUndefineds(
+        actuaryContacts
     ).map((aContact) => {
         const cleanContact = replaceNullsWithUndefineds(aContact)
 
@@ -257,7 +258,7 @@ function parseActuaryContacts(
         }
     })
 
-    return actuaryContacts
+    return parsedActuaryContacts
 }
 
 function parseProtoRateAmendment(
@@ -265,7 +266,7 @@ function parseProtoRateAmendment(
         | mcreviewproto.RateInfo['rateAmendmentInfo']
         | null
         | undefined
-): RecursivePartial<UnlockedHealthPlanFormDataType['rateAmendmentInfo']> {
+): RecursivePartial<RateInfoType['rateAmendmentInfo']> {
     if (!rateAmendment) {
         return undefined
     }
@@ -297,6 +298,7 @@ function parseRateInfos(
     if (rateInfos.length > 0) {
         rateInfos.forEach((rateInfo) => {
             const rate: RecursivePartial<RateInfoType> = {
+                id: rateInfo.id ?? undefined,
                 rateAmendmentInfo: parseProtoRateAmendment(
                     rateInfo?.rateAmendmentInfo
                 ),
@@ -318,6 +320,13 @@ function parseRateInfos(
                 rateCertificationName: parseRateCertificationName(
                     rateInfo?.rateCertificationName
                 ),
+                actuaryContacts: parseActuaryContacts(
+                    rateInfo?.actuaryContacts
+                ),
+                actuaryCommunicationPreference: enumToDomain(
+                    mcreviewproto.ActuaryCommunicationType,
+                    rateInfo?.actuaryCommunicationPreference
+                ),
             }
             rates.push(rate)
         })
@@ -331,14 +340,15 @@ function parseRateInfos(
 const toDomain = (
     buff: Uint8Array
 ): UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType | Error => {
-    const formDataMessage = decodeOrError(buff)
-    if (formDataMessage instanceof Error) {
-        return formDataMessage
+    const formDataMessageAnyVersion = decodeOrError(buff)
+    if (formDataMessageAnyVersion instanceof Error) {
+        return formDataMessageAnyVersion
     }
 
+    // toLatestVersion
+    const formDataMessage = toLatestProtoVersion(formDataMessageAnyVersion)
+
     const {
-        protoName,
-        protoVersion,
         id,
         status,
         createdAt,
@@ -352,29 +362,12 @@ const toDomain = (
         stateContacts,
         contractInfo,
         rateInfos,
+        addtlActuaryContacts,
+        addtlActuaryCommunicationPreference,
     } = formDataMessage
-
-    // First things first, let's check the protoName and protoVersion
-    if (protoName !== 'STATE_SUBMISSION') {
-        console.warn(
-            `WARNING: We are unboxing a proto our code doesn't recognize:`,
-            protoName,
-            protoVersion
-        )
-        console.log(
-            'If the version is off this indicates we are loading a proto that has not been fully migrated.'
-        )
-    }
 
     const cleanedStateContacts = replaceNullsWithUndefineds(stateContacts)
 
-    // Protos support multiple rate infos for now, but we only support one in our domain models
-    // so if there are multiple we'll drop the extras.
-    // This should be removed once all multi-rate UI features have been implemented. We should then only use rate data from rateInfos list of rate data.
-    let rateInfo: mcreviewproto.IRateInfo | undefined = undefined
-    if (rateInfos.length > 0) {
-        rateInfo = rateInfos[0]
-    }
     // SO, rather than repeat this whole thing for Draft and State submissions, because they are so
     // similar right now, we're just going to & them together for parsing out all the optional stuff
     // from the protobuf for now. If Draft and State submission diverged further in the future this
@@ -430,23 +423,12 @@ const toDomain = (
             contractInfo?.contractAmendmentInfo
         ),
         rateInfos: parseRateInfos(rateInfos),
-        rateAmendmentInfo: parseProtoRateAmendment(rateInfo?.rateAmendmentInfo),
-        rateType: enumToDomain(mcreviewproto.RateType, rateInfo?.rateType),
-        rateCapitationType: enumToDomain(
-            mcreviewproto.RateCapitationType,
-            rateInfo?.rateCapitationType
-        ),
-        rateDocuments: parseProtoDocuments(rateInfo?.rateDocuments),
-        rateDateStart: protoDateToDomain(rateInfo?.rateDateStart),
-        rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
-        rateDateCertified: protoDateToDomain(rateInfo?.rateDateCertified),
-        rateProgramIDs: rateInfo?.rateProgramIds ?? [],
-        actuaryCommunicationPreference: enumToDomain(
+        addtlActuaryCommunicationPreference: enumToDomain(
             mcreviewproto.ActuaryCommunicationType,
-            rateInfo?.actuaryCommunicationPreference
+            addtlActuaryCommunicationPreference
         ),
         stateContacts: cleanedStateContacts,
-        actuaryContacts: parseActuaryContacts(rateInfo),
+        addtlActuaryContacts: parseActuaryContacts(addtlActuaryContacts),
         documents: parseProtoDocuments(formDataMessage.documents),
     }
     // Now that we've gotten things into our combined draft & state domain format.
@@ -487,4 +469,4 @@ const toDomain = (
     return new Error('Unknown or missing status on this proto. Cannot decode.')
 }
 
-export { toDomain }
+export { toDomain, decodeOrError }

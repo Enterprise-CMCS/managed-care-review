@@ -67,6 +67,7 @@ type RateCapitationType = 'RATE_CELL' | 'RATE_RANGE'
 type ManagedCareEntity = 'MCO' | 'PIHP' | 'PAHP' | 'PCCM'
 
 type RateInfoType = {
+    id?: string
     rateType?: RateType
     rateCapitationType?: RateCapitationType
     rateDocuments: SubmissionDocument[]
@@ -76,6 +77,8 @@ type RateInfoType = {
     rateAmendmentInfo?: RateAmendmentInfo
     rateProgramIDs?: string[]
     rateCertificationName?: string
+    actuaryContacts: ActuaryContact[]
+    actuaryCommunicationPreference?: ActuaryCommunicationType
 }
 
 // MAIN
@@ -90,8 +93,8 @@ type UnlockedHealthPlanFormDataType = {
     submissionType: SubmissionType
     submissionDescription: string
     stateContacts: StateContact[]
-    actuaryContacts: ActuaryContact[]
-    actuaryCommunicationPreference?: ActuaryCommunicationType
+    addtlActuaryContacts: ActuaryContact[]
+    addtlActuaryCommunicationPreference?: ActuaryCommunicationType
     documents: SubmissionDocument[]
     contractType?: ContractType
     contractExecutionStatus?: ContractExecutionStatus
@@ -102,27 +105,6 @@ type UnlockedHealthPlanFormDataType = {
     federalAuthorities: FederalAuthority[]
     contractAmendmentInfo?: ContractAmendmentInfo
     rateInfos: RateInfoType[]
-    rateType?: RateType
-    rateCapitationType?: RateCapitationType
-    rateDocuments: SubmissionDocument[]
-    rateDateStart?: Date
-    rateDateEnd?: Date
-    rateDateCertified?: Date
-    rateAmendmentInfo?: RateAmendmentInfo
-    rateProgramIDs?: string[]
-}
-
-type RateDataType = {
-    rateType?: 'AMENDMENT' | 'NEW' | null
-    rateCapitationType?: RateCapitationType
-    rateDateStart?: Date
-    rateDateEnd?: Date
-    rateDateCertified?: Date
-    rateAmendmentInfo?: {
-        effectiveDateEnd?: Date
-        effectiveDateStart?: Date
-    } | null
-    rateProgramIDs?: string[]
 }
 
 export type {
@@ -140,7 +122,6 @@ export type {
     UnlockedHealthPlanFormDataType,
     ContractAmendmentInfo,
     ContractExecutionStatus,
-    RateDataType,
     RateCapitationType,
     RateInfoType,
 }

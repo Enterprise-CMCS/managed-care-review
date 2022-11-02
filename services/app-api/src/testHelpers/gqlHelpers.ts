@@ -142,7 +142,6 @@ const updateTestHealthPlanFormData = async (
     updatedFormData: HealthPlanFormDataType
 ): Promise<HealthPlanPackage> => {
     const updatedB64 = domainToBase64(updatedFormData)
-
     const updateResult = await server.executeOperation({
         query: UPDATE_HEALTH_PLAN_FORM_DATA,
         variables: {
@@ -185,7 +184,7 @@ const createAndUpdateTestHealthPlanPackage = async (
         {
             name: 'test name',
             titleRole: 'test title',
-            email: 'email@test.com',
+            email: 'email@example.com',
         },
     ]
     draft.rateInfos = [
@@ -203,18 +202,28 @@ const createAndUpdateTestHealthPlanPackage = async (
             ],
             //We only want one rate ID and use last program in list to differentiate from programID if possible.
             rateProgramIDs: [ratePrograms.reverse()[0].id],
+            actuaryContacts: [
+                {
+                    name: 'test name',
+                    titleRole: 'test title',
+                    email: 'email@example.com',
+                    actuarialFirm: 'MERCER' as const,
+                    actuarialFirmOther: '',
+                },
+            ],
+            actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
         },
     ]
-    draft.actuaryContacts = [
+    draft.addtlActuaryContacts = [
         {
             name: 'test name',
             titleRole: 'test title',
-            email: 'email@test.com',
+            email: 'email@example.com',
             actuarialFirm: 'MERCER' as const,
             actuarialFirmOther: '',
         },
     ]
-    ;(draft.actuaryCommunicationPreference = 'OACT_TO_ACTUARY' as const),
+    ;(draft.addtlActuaryCommunicationPreference = 'OACT_TO_ACTUARY' as const),
         (draft.contractType = 'BASE' as const)
     draft.contractExecutionStatus = 'EXECUTED' as const
     draft.contractDateStart = new Date(Date.UTC(2025, 5, 1))
@@ -228,19 +237,6 @@ const createAndUpdateTestHealthPlanPackage = async (
     ]
     draft.managedCareEntities = ['MCO']
     draft.federalAuthorities = ['STATE_PLAN' as const]
-    draft.rateType = 'NEW' as const
-    draft.rateDateStart = new Date(Date.UTC(2025, 5, 1))
-    draft.rateDateEnd = new Date(Date.UTC(2026, 4, 30))
-    draft.rateDateCertified = new Date(Date.UTC(2025, 3, 15))
-    draft.rateDocuments = [
-        {
-            name: 'rateDocument.pdf',
-            s3URL: 'fakeS3URL',
-            documentCategories: ['RATES' as const],
-        },
-    ]
-    //We only want one rate ID and use last program in list to differentiate from programID if possible.
-    draft.rateProgramIDs = [ratePrograms.reverse()[0].id]
 
     Object.assign(draft, partialUpdates)
 
