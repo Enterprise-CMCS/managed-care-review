@@ -21,6 +21,7 @@
     },
     "dependencies": {
         "@apollo/gateway": "^2.0.1",
+        "@aws-sdk/client-cognito-identity-provider": "^3.188.0", 
         "@aws-sdk/client-lambda": "^3.188.0",
         "@aws-sdk/client-rds": "^3.188.0",
         "@aws-sdk/client-s3": "^3.188.0",
