@@ -1,22 +1,31 @@
-import AWS from 'aws-sdk'
+import {
+    CognitoIdentityProviderClient,
+    AdminCreateUserCommand,
+    AdminCreateUserCommandInput,
+    AdminSetUserPasswordCommand,
+    AdminSetUserPasswordCommandInput,
+} from '@aws-sdk/client-cognito-identity-provider'
+import {
+    CloudFormationClient,
+    DescribeStacksCommand,
+    DescribeStacksCommandInput,
+} from '@aws-sdk/client-cloudformation'
 
 async function getUserPoolID(stageName: string): Promise<string> {
     const uiAuthStackName = `ui-auth-${stageName}`
 
-    const cf = new AWS.CloudFormation({
-        apiVersion: '2016-04-19',
-        region: 'us-east-1',
-    })
+    const cfClient = new CloudFormationClient({ region: 'us-east-1' })
+    const input: DescribeStacksCommandInput = {
+        StackName: uiAuthStackName,
+    }
+    const command = new DescribeStacksCommand(input)
+    const response = await cfClient.send(command)
 
-    const describe = await cf
-        .describeStacks({ StackName: uiAuthStackName })
-        .promise()
-
-    if (describe.Stacks === undefined) {
-        throw new Error('got back nothing')
+    if (response.Stacks === undefined) {
+        throw new Error('Could not find stack of from ' + uiAuthStackName)
     }
 
-    const userPoolID = describe.Stacks[0].Outputs?.filter(
+    const userPoolID = response.Stacks[0].Outputs?.filter(
         (o) => o.OutputKey === 'UserPoolId'
     )[0].OutputValue
 
@@ -58,12 +67,9 @@ async function createUser({
     state?: string
     identities: string
 }) {
-    const cognito = new AWS.CognitoIdentityServiceProvider({
-        apiVersion: '2016-04-19',
-        region: 'us-east-1',
-    })
+    const client = new CognitoIdentityProviderClient({ region: 'us-east-1' })
 
-    var userProps = {
+    let userProps: AdminCreateUserCommandInput = {
         UserPoolId: userPoolID,
         Username: email,
         MessageAction: 'SUPPRESS',
@@ -94,14 +100,15 @@ async function createUser({
 
     // only set state for STATE_USERS
     if (state) {
-        userProps.UserAttributes.push({
+        userProps.UserAttributes?.push({
             Name: 'custom:state_code',
             Value: state,
         })
     }
 
     try {
-        await cognito.adminCreateUser(userProps).promise()
+        const command = new AdminCreateUserCommand(userProps)
+        await client.send(command)
     } catch (e) {
         // swallow username exists errors. this script is meant to be run repeatedly.
         // @ts-ignore-next-line err is unknown - we need a type assertion for AWSError type
@@ -110,14 +117,14 @@ async function createUser({
         }
     }
 
-    var passwordParams = {
+    let passwordParams: AdminSetUserPasswordCommandInput = {
         Password: password,
         UserPoolId: userPoolID,
         Username: email,
         Permanent: true,
     }
-
-    await cognito.adminSetUserPassword(passwordParams).promise()
+    const setPassCommand = new AdminSetUserPasswordCommand(passwordParams)
+    await client.send(setPassCommand)
 }
 
 async function main() {
