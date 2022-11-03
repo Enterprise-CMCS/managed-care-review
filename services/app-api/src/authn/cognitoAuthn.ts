@@ -89,8 +89,7 @@ export function userTypeFromAttributes(attributes: {
             'custom:role' in attributes &&
             'email' in attributes &&
             'given_name' in attributes &&
-            'family_name' in attributes &&
-            'identities' in attributes
+            'family_name' in attributes
         )
     ) {
         return err(
@@ -102,9 +101,13 @@ export function userTypeFromAttributes(attributes: {
     }
 
     const fullName = attributes.given_name + ' ' + attributes.family_name
+
     // the euaID is in a field  called 'identities' which is a stringified array
     // that holds a single object, that saves the euaID in a field called userId.
+    // this only is found from IDP, not from test users/envs
     const euaID = JSON.parse(attributes['identities'])[0].userId
+    console.log(`eua ID: ${euaID}`)
+
     // Roles are a list of all the roles a user has in IDM.
     const roleAttribute = attributes['custom:role']
     const roles = roleAttribute.split(',')
