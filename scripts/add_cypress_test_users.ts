@@ -8,6 +8,7 @@ import {
     UsernameExistsException,
     InvalidParameterException,
 } from '@aws-sdk/client-cognito-identity-provider'
+
 import {
     CloudFormationClient,
     DescribeStacksCommand,
@@ -103,12 +104,12 @@ async function createUser({
         })
     }
 
+    // create the user
     try {
         const command = new AdminCreateUserCommand(userProps)
         await client.send(command)
     } catch (e) {
         // swallow username exists errors. this script is meant to be run repeatedly.
-        // @ts-ignore-next-line err is unknown - we need a type assertion for AWSError type
         switch (e) {
             case e instanceof UsernameExistsException:
                 console.log('User already exists in Cognito. Continuing.')
@@ -122,6 +123,7 @@ async function createUser({
         }
     }
 
+    // once the user is created, set it's password
     try {
         let passwordParams: AdminSetUserPasswordCommandInput = {
             Password: password,
@@ -132,10 +134,12 @@ async function createUser({
         const setPassCommand = new AdminSetUserPasswordCommand(passwordParams)
         await client.send(setPassCommand)
     } catch (e) {
-        if (e instanceof UserNotFoundException) {
-            console.log('Could not find user. User does not exist in Cognito.')
-            throw new Error(`AWS Error: ${e}`)
-        }
+        switch (e) {
+            case e instanceof UserNotFoundException:
+                console.log('Could not find user. User does not exist in Cognito.')
+                throw new Error(`AWS Error: ${e}`)
+            default:
+                throw new Error(`AWS Error: ${e}`)
     }
 }
 
