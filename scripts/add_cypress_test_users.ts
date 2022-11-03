@@ -22,7 +22,7 @@ async function getUserPoolID(stageName: string): Promise<string> {
     const response = await cfClient.send(command)
 
     if (response.Stacks === undefined) {
-        throw new Error('Could not find stack of from ' + uiAuthStackName)
+        throw new Error(`Could not find stack of name ${uiAuthStackName}`)
     }
 
     const userPoolID = response.Stacks[0].Outputs?.filter(
