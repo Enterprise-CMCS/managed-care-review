@@ -8,7 +8,6 @@ import {
     UsernameExistsException,
     InvalidParameterException,
 } from '@aws-sdk/client-cognito-identity-provider'
-
 import {
     CloudFormationClient,
     DescribeStacksCommand,
@@ -136,10 +135,13 @@ async function createUser({
     } catch (e) {
         switch (e) {
             case e instanceof UserNotFoundException:
-                console.log('Could not find user. User does not exist in Cognito.')
+                console.log(
+                    'Could not find user. User does not exist in Cognito.'
+                )
                 throw new Error(`AWS Error: ${e}`)
             default:
                 throw new Error(`AWS Error: ${e}`)
+        }
     }
 }
 
