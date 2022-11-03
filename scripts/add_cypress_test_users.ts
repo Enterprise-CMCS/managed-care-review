@@ -6,6 +6,7 @@ import {
     AdminSetUserPasswordCommandInput,
     UserNotFoundException,
     UsernameExistsException,
+    InvalidParameterException,
 } from '@aws-sdk/client-cognito-identity-provider'
 import {
     CloudFormationClient,
@@ -59,7 +60,6 @@ async function createUser({
     role,
     password,
     state,
-    identities,
 }: {
     userPoolID: string
     name: string
@@ -67,7 +67,6 @@ async function createUser({
     role: UserRole
     password: string
     state?: string
-    identities: string
 }) {
     const client = new CognitoIdentityProviderClient({ region: 'us-east-1' })
 
@@ -93,10 +92,6 @@ async function createUser({
                 Name: 'custom:role',
                 Value: IDMRole(role),
             },
-            {
-                Name: 'identities',
-                Value: identities,
-            },
         ],
     }
 
@@ -114,10 +109,16 @@ async function createUser({
     } catch (e) {
         // swallow username exists errors. this script is meant to be run repeatedly.
         // @ts-ignore-next-line err is unknown - we need a type assertion for AWSError type
-        if (e instanceof UsernameExistsException) {
-            console.log('User already exists in Cognito. Continuing.')
-        } else {
-            throw new Error(`AWS Error: ${e}`)
+        switch (e) {
+            case e instanceof UsernameExistsException:
+                console.log('User already exists in Cognito. Continuing.')
+                break
+            case e instanceof InvalidParameterException:
+                throw new Error(
+                    `Invalid parameters on Conginto User create: ${e}`
+                )
+            default:
+                throw new Error(`AWS Error: ${e}`)
         }
     }
 
@@ -166,28 +167,24 @@ async function main() {
             email: 'aang@example.com',
             role: 'STATE_USER' as const,
             state: 'MN',
-            identities: '[{"userId": "AAAA"}]',
         },
         {
             name: 'Toph',
             email: 'toph@example.com',
             role: 'STATE_USER' as const,
             state: 'VA',
-            identities: '[{"userId": "BBBB"}]',
         },
         {
             name: 'Zuko',
             email: 'zuko@example.com',
             role: 'CMS_USER' as const,
             state: undefined,
-            identities: '[{"userId": "CCCC"}]',
         },
         {
             name: 'Cabbages',
             email: 'cabbages@example.com',
             role: 'UNKNOWN_USER' as const,
             state: undefined,
-            identities: '[{"userId": "DDDD"}]',
         },
     ]
 
