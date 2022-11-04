@@ -2,9 +2,8 @@ import { Result, ok, err } from 'neverthrow'
 import { CognitoIdentityServiceProvider } from 'aws-sdk'
 import { UserType } from '../domain-models'
 import { performance } from 'perf_hooks'
-import { Store } from '../postgres'
+import { Store, InsertUserArgsType } from '../postgres'
 import { User } from '@prisma/client'
-import { InsertUserArgsType } from '../postgres/insertUser'
 
 export function parseAuthProvider(
     authProvider: string
