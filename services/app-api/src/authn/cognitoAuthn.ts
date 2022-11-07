@@ -189,6 +189,9 @@ export async function userFromCognitoAuthProvider(
             email: cognitoUser.email,
             euaID: cognitoUser.euaID,
         }
+        console.log(
+            'user from cognito to insert: ' + JSON.stringify(userToInsert)
+        )
 
         const result = await store.insertUser(userToInsert)
         console.log(result)
