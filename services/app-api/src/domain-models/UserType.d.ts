@@ -1,7 +1,7 @@
 // CognitoUserType is our type for representing the information we get
 // from Cognito about a given user
 
-type UserType = StateUserType | CMSUserType
+type UserType = StateUserType | CMSUserType | AdminUserType
 
 type StateUserType = {
     role: 'STATE_USER'
@@ -22,4 +22,13 @@ type CMSUserType = {
     euaID: string
 }
 
-export type { CMSUserType, StateUserType, UserType }
+type AdminUserType = {
+    role: 'ADMIN_USER'
+    email: string
+    name: string
+    givenName: string
+    familyName: string
+    euaID: string
+}
+
+export type { CMSUserType, StateUserType, AdminUserType, UserType }

@@ -2,7 +2,7 @@ import { Result, ok, err } from 'neverthrow'
 import { CognitoIdentityServiceProvider } from 'aws-sdk'
 import { UserType } from '../domain-models'
 import { performance } from 'perf_hooks'
-import { Store, InsertUserArgsType } from '../postgres'
+import { Store, InsertUserArgsType, isStoreError } from '../postgres'
 import { User } from '@prisma/client'
 
 export function parseAuthProvider(
@@ -147,6 +147,45 @@ export function userTypeFromAttributes(attributes: {
     return err(new Error('Unsupported user role:  ' + roleAttribute))
 }
 
+// This converts from the Prisma `User` to the app's `UserType`
+export function userTypeFromUser(user: User): Result<UserType, Error> {
+    if (user.role === 'ADMIN_USER') {
+        return ok({
+            role: 'ADMIN_USER',
+            email: user.email,
+            givenName: user.givenName,
+            familyName: user.familyName,
+            name: user.givenName + ' ' + user.familyName,
+            euaID: user.euaID,
+        })
+    }
+
+    if (user.role === 'CMS_USER') {
+        return ok({
+            role: 'CMS_USER',
+            email: user.email,
+            givenName: user.givenName,
+            familyName: user.familyName,
+            name: user.givenName + ' ' + user.familyName,
+            euaID: user.euaID,
+        })
+    }
+
+    if (user.role === 'STATE_USER') {
+        return ok({
+            role: 'STATE_USER',
+            email: user.email,
+            givenName: user.givenName,
+            familyName: user.familyName,
+            name: user.givenName + ' ' + user.familyName,
+            euaID: user.euaID,
+            state_code: 'whoops',
+        })
+    }
+
+    return err(new Error('Unsupported user role:  ' + user.role))
+}
+
 // userFromCognitoAuthProvider hits the Cogntio API to get the information in the authProvider
 export async function userFromCognitoAuthProvider(
     authProvider: string,
@@ -166,22 +205,22 @@ export async function userFromCognitoAuthProvider(
     console.log('looking up user in pg...')
     // look up the user in PG. If we don't have it here, then we need to
     // fetch it from Cognito.
-    const aurora = await lookupUserAurora(store, userInfo.userId)
-    console.log('aurora return: ' + aurora)
+    const auroraUser = await lookupUserAurora(store, userInfo.userId)
 
     // if there is no user returned, lookup in cognito and save to postgres
-    if (aurora === undefined) {
+    if (auroraUser === undefined) {
         console.log('user does not exist in aurora, looking up in cognito...')
         const cognitoUserResult = await lookupUserCognito(
             userInfo.userId,
             userInfo.poolId
         )
-
         if (cognitoUserResult.isErr()) {
             return err(cognitoUserResult.error)
         }
 
         const cognitoUser = cognitoUserResult.value
+
+        console.log('found the user in cognito: ' + cognitoUser)
 
         // create the user and store it in aurora
         const userToInsert: InsertUserArgsType = {
@@ -192,16 +231,20 @@ export async function userFromCognitoAuthProvider(
             email: cognitoUser.email,
             euaID: cognitoUser.euaID,
         }
-        console.log(
-            'user from cognito to insert: ' + JSON.stringify(userToInsert)
-        )
 
-        const result = await store.insertUser(userToInsert)
-        console.log(result)
+        try {
+            const result = await store.insertUser(userToInsert)
+            if (isStoreError(result)) {
+                throw new Error(`Could not insert user: ${result}`)
+            }
+            return userTypeFromUser(result)
+        } catch (e) {
+            console.log(e)
+            throw new Error(`Could not insert user: ${e}`)
+        }
     }
 
-    // User was not in PG, so we look it up in Cognito
-    return lookupUserCognito(userInfo.userId, userInfo.poolId)
+    return userTypeFromUser(auroraUser)
 }
 
 async function lookupUserCognito(
