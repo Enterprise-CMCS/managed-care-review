@@ -159,16 +159,19 @@ export async function userFromCognitoAuthProvider(
 
     const userInfo = parseResult.value
     // if no store is given, we just get user from Cognito
-    if (store == undefined) {
+    if (store === undefined) {
         return lookupUserCognito(userInfo.userId, userInfo.poolId)
     }
 
+    console.log('looking up user in pg...')
     // look up the user in PG. If we don't have it here, then we need to
     // fetch it from Cognito.
     const aurora = await lookupUserAurora(store, userInfo.userId)
+    console.log('aurora return: ' + aurora)
 
     // if there is no user returned, lookup in cognito and save to postgres
     if (aurora === undefined) {
+        console.log('user does not exist in aurora, looking up in cognito...')
         const cognitoUserResult = await lookupUserCognito(
             userInfo.userId,
             userInfo.poolId
@@ -235,5 +238,5 @@ async function lookupUserAurora(
     } catch (e) {
         console.log(e)
     }
-    return
+    return undefined
 }
