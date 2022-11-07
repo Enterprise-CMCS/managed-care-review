@@ -186,6 +186,7 @@ const toProtoBuffer = (
             domainData.rateInfos && domainData.rateInfos.length
                 ? domainData.rateInfos.map((rateInfo) => {
                       return {
+                          id: rateInfo.id ?? uuidv4(),
                           rateType: domainEnumToProto(
                               rateInfo.rateType,
                               mcreviewproto.RateType
