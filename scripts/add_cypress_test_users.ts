@@ -109,16 +109,12 @@ async function createUser({
         await client.send(command)
     } catch (e) {
         // swallow username exists errors. this script is meant to be run repeatedly.
-        switch (e) {
-            case e instanceof UsernameExistsException:
-                console.log('User already exists in Cognito. Continuing.')
-                break
-            case e instanceof InvalidParameterException:
-                throw new Error(
-                    `Invalid parameters on Conginto User create: ${e}`
-                )
-            default:
-                throw new Error(`AWS Error: ${e}`)
+        if (e instanceof UsernameExistsException) {
+            console.log('User already exists in Cognito. Continuing.')
+        } else if (e instanceof InvalidParameterException) {
+            throw new Error(`Invalid parameters on Conginto User create: ${e}`)
+        } else {
+            console.log(`AWS Error: ${e}`)
         }
     }
 
