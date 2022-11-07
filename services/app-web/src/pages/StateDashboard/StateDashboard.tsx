@@ -4,6 +4,7 @@ import dayjs from 'dayjs'
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import {
+    HealthPlanFormDataType,
     packageName,
     programNames,
 } from '../../common-code/healthPlanFormDataType'
@@ -106,6 +107,7 @@ export const StateDashboard = (): React.ReactElement => {
 
     const programs = loggedInUser.state.programs
     const submissionRows: SubmissionInDashboard[] = []
+    const submissionData: HealthPlanFormDataType[] = []
 
     data?.indexHealthPlanPackages.edges
         .map((edge) => edge.node)
@@ -121,6 +123,8 @@ export const StateDashboard = (): React.ReactElement => {
 
                 return null
             }
+
+            submissionData.push(currentSubmissionData)
 
             submissionRows.push({
                 id: sub.id,
@@ -144,6 +148,8 @@ export const StateDashboard = (): React.ReactElement => {
     ).get('justSubmitted')
 
     const hasSubmissions = submissionRows.length > 0
+
+    console.log(submissionData)
 
     return (
         <>

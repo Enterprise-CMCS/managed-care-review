@@ -211,6 +211,8 @@ export const SubmissionSummary = (): React.ReactElement => {
     const isContractActionAndRateCertification =
         packageData.submissionType === 'CONTRACT_AND_RATES'
 
+    console.log(packageData)
+
     return (
         <div className={styles.background}>
             <GridContainer
