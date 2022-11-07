@@ -67,6 +67,7 @@ type RateCapitationType = 'RATE_CELL' | 'RATE_RANGE'
 type ManagedCareEntity = 'MCO' | 'PIHP' | 'PAHP' | 'PCCM'
 
 type RateInfoType = {
+    id?: string
     rateType?: RateType
     rateCapitationType?: RateCapitationType
     rateDocuments: SubmissionDocument[]
