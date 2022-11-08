@@ -18,7 +18,7 @@ graph TD
 graph TD
     A["User clicks link to a package"] -->B["GraphQL resolver"]
     B --> C["Query Prisma (postgres)"]
-    C -->|"data is returned to the resolver for checking" | D["(the same) GraphQL Resolver"]
+    C -->|"data, including protocol buffer, is returned to the resolver" | D["(the same) GraphQL Resolver"]
     D -->|"run various checks"| E["Front-end"]
     E -->|"convert from protocol buffers to frontend domain models"| F["UI"]
 ```
