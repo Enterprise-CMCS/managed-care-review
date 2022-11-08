@@ -5,10 +5,6 @@ import * as genproto from '../gen/healthPlanFormDataProto'
 
 import { PrismaClient } from '@prisma/client'
 
-import { Parser } from 'json2csv'
-
-console.log(Parser)
-
 // decodes the proto
 function decodeOrError(
     buff: Uint8Array
