@@ -8,7 +8,7 @@ The MC-Review site's primary function is to collect form data from states, and p
 graph TD
     A["User enters form data"] -->|"validated by Formik and Yup"| B["Data submit (by clicking 'continue' or 'save as draft')"]
     B -->|"convert data to a base64 protocol buffer<br />(toProtoBuffer)"| C["GraphQL resolver"]
-    C -->|"convert data back to domain models for various checks<br />(toDomain)"| D["Prisma (postgres)"]
+    C -->|"convert data back to  backend domain models for various checks<br />(toDomain)"| D["Prisma (postgres)"]
     D -->|"convert again to protobuf"| E["Written to database"]
 ```
 
