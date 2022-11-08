@@ -18,10 +18,34 @@ const CURRENT_PROTO_VERSION = 3
 
 const updateToVersion3 = (oldProto: mcreviewproto.HealthPlanFormData) => {
     // We can assume the proto version exists because error would have been thrown in toDomain
+    const updatedProto = Object.assign({}, oldProto)
+
+    //TODO: WIP
+    //Use package programs for rate programs if rate programs are not set for `SUBMITTED` packages.
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    if (
+        oldProto.status === 'SUBMITTED' &&
+        oldProto.submissionType === 3 &&
+        oldProto.protoVersion! <= 3 &&
+        updatedProto.rateInfos
+    ) {
+        updatedProto.rateInfos = oldProto.rateInfos.map((rateInfo) => {
+            if (
+                (rateInfo.rateProgramIds &&
+                    rateInfo.rateProgramIds.length === 0) ||
+                !rateInfo.rateProgramIds
+            ) {
+                return {
+                    ...rateInfo,
+                    rateProgramIds: oldProto.programIds,
+                }
+            }
+            return rateInfo
+        })
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     if (oldProto.protoVersion! < 3) {
-        const updatedProto = Object.assign({}, oldProto)
-
         // Use actuary contacts fields from the second actuary contact onward to fill in data for new field addtlActuaryContacts
         // The first actuary is the certifying actuary contact and will be displayed on the Rate Details.
         updatedProto.addtlActuaryContacts = oldProto.rateInfos[0]
