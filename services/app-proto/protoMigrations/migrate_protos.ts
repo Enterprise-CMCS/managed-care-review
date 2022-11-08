@@ -7,6 +7,8 @@ import { PrismaClient } from '@prisma/client'
 
 import { v4 as uuidv4 } from 'uuid'
 
+console.log(uuidv4())
+
 // decodes the proto
 function decodeOrError(
     buff: Uint8Array
