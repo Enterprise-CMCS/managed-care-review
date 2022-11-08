@@ -14485,7 +14485,7 @@ aws-lambda@^1.0.7:
     js-yaml "^3.14.1"
     watchpack "^2.0.0-beta.10"
 
-aws-sdk@^2.1018.0, aws-sdk@^2.1136.0, aws-sdk@^2.1195.0, aws-sdk@^2.224.1, aws-sdk@^2.346.0, aws-sdk@^2.814.0, aws-sdk@^2.991.0:
+aws-sdk@^2.1018.0, aws-sdk@^2.1136.0, aws-sdk@^2.1195.0, aws-sdk@^2.224.1, aws-sdk@^2.346.0, aws-sdk@^2.814.0:
   version "2.1221.0"
   resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.1221.0.tgz#36dd12d7af4b46495a92d77a0fc3be2f8903f252"
   integrity sha512-RKFnhC5RW70xRFixzdvZ50YnNT2DdNh1CoXWBEmPOVEXDEv5ztTmAsgju2vfPQZLkKuMzL8LCBdT3xrr8JdoDg==
