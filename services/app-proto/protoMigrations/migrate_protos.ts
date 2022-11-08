@@ -5,9 +5,9 @@ import * as genproto from '../gen/healthPlanFormDataProto'
 
 import { PrismaClient } from '@prisma/client'
 
-import { v4 as uuidv4 } from 'uuid'
+import { Parser } from 'json2csv'
 
-console.log(uuidv4())
+console.log(Parser)
 
 // decodes the proto
 function decodeOrError(
