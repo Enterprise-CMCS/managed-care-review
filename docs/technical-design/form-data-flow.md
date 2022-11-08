@@ -20,7 +20,7 @@ graph TD
     B --> C["Query Prisma (postgres)"]
     C -->|"data is returned to the resolver for checking" | D["(the same) GraphQL Resolver"]
     D -->|"run various checks"| E["Front-end"]
-    E -->|"convert from protocol buffers to Typescript domain models<br />(toDomain)<br />validate with Zod"| F["UI"]
+    E -->|"convert from protocol buffers to frontend domain models"| F["UI"]
 ```
 
 ### Supplements
