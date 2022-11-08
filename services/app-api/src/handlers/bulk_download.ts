@@ -1,8 +1,9 @@
 import {
     S3Client,
-    PutObjectRequest,
+    PutObjectCommand,
     GetObjectCommand,
     HeadObjectCommand,
+    PutObjectTaggingCommand,
 } from '@aws-sdk/client-s3'
 import { Readable, Stream } from 'stream'
 import { APIGatewayProxyHandler } from 'aws-lambda'
@@ -104,24 +105,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 
     const streamPassThrough = new Stream.PassThrough()
 
-    const params: PutObjectRequest = {
-        ACL: 'private',
-        Body: streamPassThrough,
-        Bucket: bulkDlRequest.bucket,
-        ContentType: 'application/zip',
-        Key: bulkDlRequest.zipFileName,
-        StorageClass: 'STANDARD',
-    }
-
-    const s3Upload = s3.upload(params, (error: Error): void => {
-        if (error) {
-            console.error(
-                `Got error creating stream to s3 ${error.name} ${error.message} ${error.stack}`
-            )
-            throw error
-        }
-    })
-
+    // Zip files
     await new Promise((resolve, reject) => {
         console.log('Starting zip process...')
         const zip = Archiver('zip')
@@ -162,8 +146,20 @@ export const main: APIGatewayProxyHandler = async (event) => {
             },
         }
     })
-
-    await s3Upload.promise()
+    // Upload files
+    try {
+        const commandPutObject = new PutObjectCommand({
+            ACL: 'private',
+            Body: streamPassThrough,
+            Bucket: bulkDlRequest.bucket,
+            ContentType: 'application/zip',
+            Key: bulkDlRequest.zipFileName,
+            StorageClass: 'STANDARD',
+        })
+        await s3.send(commandPutObject)
+    } catch (e) {
+        console.error('Could not upload zip file: ' + e)
+    }
 
     // tag the file as having previously been scanned
     const taggingParams = {
@@ -180,9 +176,12 @@ export const main: APIGatewayProxyHandler = async (event) => {
     }
 
     try {
-        await s3.putObjectTagging(taggingParams).promise()
+        const commandPutObjectTagging = new PutObjectTaggingCommand(
+            taggingParams
+        )
+        await s3.send(commandPutObjectTagging)
     } catch (err) {
-        console.log('Could not tag zip file: ' + err)
+        console.error('Could not tag zip file: ' + err)
     }
 
     console.timeEnd('zipProcess')
