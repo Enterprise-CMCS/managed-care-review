@@ -5,6 +5,8 @@ import * as genproto from '../gen/healthPlanFormDataProto'
 
 import { PrismaClient } from '@prisma/client'
 
+import { v4 as uuidv4 } from 'uuid'
+
 // decodes the proto
 function decodeOrError(
     buff: Uint8Array
