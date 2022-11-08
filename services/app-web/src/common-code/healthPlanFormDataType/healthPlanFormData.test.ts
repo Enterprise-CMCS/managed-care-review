@@ -229,22 +229,7 @@ describe('submission type assertions', () => {
                 ...mockStateSubmission(),
                 rateInfos: [
                     {
-                        rateType: 'NEW',
-                        rateCapitationType: 'RATE_CELL',
-                        rateDocuments: [
-                            {
-                                s3URL: 's3://bucketname/key/rate',
-                                name: 'rate',
-                                documentCategories: ['RATES' as const],
-                            },
-                        ],
-                        rateDateStart: new Date(),
-                        rateDateEnd: new Date(),
-                        rateDateCertified: new Date(),
-                        rateAmendmentInfo: undefined,
-                        rateProgramIDs: [
-                            'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
-                        ],
+                        ...mockStateSubmission().rateInfos[0],
                         actuaryContacts: [
                             {
                                 actuarialFirm: 'OTHER' as const,
@@ -253,7 +238,30 @@ describe('submission type assertions', () => {
                                 email: 'actuarycontact1@test.com',
                             },
                         ],
-                        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                    },
+                ],
+            },
+            false,
+        ],
+        [
+            {
+                ...mockStateSubmission(),
+                rateInfos: [
+                    {
+                        ...mockStateSubmission().rateInfos[0],
+                        actuaryContacts: [],
+                    },
+                ],
+            },
+            false,
+        ],
+        [
+            {
+                ...mockStateSubmission(),
+                rateInfos: [
+                    {
+                        ...mockStateSubmission().rateInfos[0],
+                        rateProgramIDs: [],
                     },
                 ],
             },
@@ -275,6 +283,7 @@ describe('submission type assertions', () => {
                 ...mockStateSubmission(),
                 rateInfos: [
                     {
+                        ...mockStateSubmission().rateInfos[0],
                         rateDateStart: undefined,
                     },
                 ],
@@ -286,6 +295,7 @@ describe('submission type assertions', () => {
                 ...mockStateSubmission(),
                 rateInfos: [
                     {
+                        ...mockStateSubmission().rateInfos[0],
                         rateDateEnd: undefined,
                     },
                 ],
@@ -297,6 +307,7 @@ describe('submission type assertions', () => {
                 ...mockStateSubmission(),
                 rateInfos: [
                     {
+                        ...mockStateSubmission().rateInfos[0],
                         rateDateCertified: undefined,
                     },
                 ],
@@ -306,9 +317,10 @@ describe('submission type assertions', () => {
         [
             {
                 ...mockStateSubmission(),
-                rateType: 'AMENDMENT',
                 rateInfos: [
                     {
+                        ...mockStateSubmission().rateInfos[0],
+                        rateType: 'AMENDMENT',
                         rateAmendmentInfo: undefined,
                     },
                 ],
@@ -318,8 +330,15 @@ describe('submission type assertions', () => {
         [
             {
                 ...mockStateSubmission(),
-                rateType: 'AMENDMENT',
-                rateInfos: [],
+                rateInfos: [
+                    {
+                        ...mockStateSubmission().rateInfos[0],
+                        rateType: 'AMENDMENT',
+                        rateAmendmentInfo: {
+                            effectiveDateStart: new Date(),
+                        },
+                    },
+                ],
             },
             false,
         ],
