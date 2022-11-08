@@ -2,6 +2,7 @@ import {
     RateInfoType,
     SubmissionDocument,
     UnlockedHealthPlanFormDataType,
+    ActuaryContact,
 } from './UnlockedHealthPlanFormDataType'
 import { ModifiedProvisions } from './ModifiedProvisions'
 import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
@@ -55,6 +56,20 @@ const hasValidContract = (sub: LockedHealthPlanFormDataType): boolean =>
             sub.contractAmendmentInfo?.modifiedProvisions
         ))
 
+const hasValidActuaries = (actuaries: ActuaryContact[]): boolean =>
+    actuaries &&
+    actuaries.length > 0 &&
+    actuaries.every(
+        (actuaryContact) =>
+            actuaryContact.name !== undefined &&
+            actuaryContact.titleRole !== undefined &&
+            actuaryContact.email !== undefined &&
+            ((actuaryContact.actuarialFirm !== undefined &&
+                actuaryContact.actuarialFirm !== 'OTHER') ||
+                (actuaryContact.actuarialFirm === 'OTHER' &&
+                    actuaryContact.actuarialFirmOther !== undefined))
+    )
+
 const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
     const validRates =
         sub.rateInfos.length === 0
@@ -67,17 +82,7 @@ const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
                       rateInfo.rateDateEnd !== undefined &&
                       rateInfo.rateProgramIDs !== undefined &&
                       rateInfo.rateProgramIDs.length > 0 &&
-                      rateInfo.actuaryContacts.every(
-                          (actuaryContact) =>
-                              actuaryContact.name !== undefined &&
-                              actuaryContact.titleRole !== undefined &&
-                              actuaryContact.email !== undefined &&
-                              ((actuaryContact.actuarialFirm !== undefined &&
-                                  actuaryContact.actuarialFirm !== 'OTHER') ||
-                                  (actuaryContact.actuarialFirm === 'OTHER' &&
-                                      actuaryContact.actuarialFirmOther !==
-                                          undefined))
-                      )
+                      hasValidActuaries(rateInfo.actuaryContacts)
 
                   if (isRateAmendment(rateInfo)) {
                       return (
