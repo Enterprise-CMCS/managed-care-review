@@ -175,7 +175,6 @@ describe('submitHealthPlanPackage', () => {
                             documentCategories: ['RATES' as const],
                         },
                     ],
-                    //We only want one rate ID and use last program in list to differentiate from programID if possible.
                     rateProgramIDs: ['3b8d8fa1-1fa6-4504-9c5b-ef522877fe1e'],
                     actuaryContacts: [
                         {
