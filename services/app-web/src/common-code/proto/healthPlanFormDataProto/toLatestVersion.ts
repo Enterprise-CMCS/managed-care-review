@@ -55,9 +55,9 @@ const toLatestProtoVersion = (proto: mcreviewproto.HealthPlanFormData) => {
         return proto
     } else {
         // if the proto is an outdated version convert it to the latest
-        console.log(
-            `Trying to open outdated proto. State: ${proto.stateCode}, Package ID: ${proto.id}, Outdated proto version: ${protoVersion}`
-        )
+        // console.log(
+        //     `Trying to open outdated proto. State: ${proto.stateCode}, Package ID: ${proto.id}, Outdated proto version: ${protoVersion}`
+        // )
 
         const v3Compatible = updateToVersion3(proto)
 
