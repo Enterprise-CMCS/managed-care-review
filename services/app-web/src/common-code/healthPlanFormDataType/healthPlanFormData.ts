@@ -65,8 +65,8 @@ const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
                       rateInfo.rateDateCertified !== undefined &&
                       rateInfo.rateDateStart !== undefined &&
                       rateInfo.rateDateEnd !== undefined &&
-                      (rateInfo.rateProgramIDs !== undefined ||
-                          rateInfo.rateProgramIDs !== []) &&
+                      rateInfo.rateProgramIDs !== undefined &&
+                      rateInfo.rateProgramIDs.length > 0 &&
                       rateInfo.actuaryContacts.every(
                           (actuaryContact) =>
                               actuaryContact.name !== undefined &&
