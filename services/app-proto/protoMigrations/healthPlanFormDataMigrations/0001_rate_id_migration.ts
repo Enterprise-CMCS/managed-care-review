@@ -10,9 +10,8 @@ export function migrateProto(
     oldProto: mcreviewproto.IHealthPlanFormData
 ): mcreviewproto.IHealthPlanFormData {
     const { v4: uuidv4 } = require('uuid');
-    //Only generate rate certification id for submissions with at least 1 rate certification and protoVersion v3 and
-    // earlier. Protobuf version 3 is when uuids are being generated for rate certification ids.
-    if (oldProto.rateInfos && oldProto.rateInfos?.length) {
+    //Only perform migration on contract and submission packages that contain a rate certification.
+    if (oldProto.submissionType === 3 && oldProto.rateInfos && oldProto.rateInfos?.length > 0) {
         oldProto.rateInfos = oldProto.rateInfos.map(rateInfo => (
             {
                 ...rateInfo,
