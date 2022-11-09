@@ -122,11 +122,6 @@ describe('0001_rate_id_migration', () => {
             throw migratedFormData
         }
 
-        //Rate certification name generation is a part of a different migration, so to test our rate id migration we will
-        // manually generate a rate id.
-        migratedFormData.rateInfos[0].rateCertificationName =
-            'MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523'
-
         //Encoding to proto and back to domain should still be symmetric
         expect(toDomain(toProtoBuffer(migratedFormData))).toEqual(
             migratedFormData
