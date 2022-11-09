@@ -49,6 +49,7 @@ model User {
   email      String  @unique
   role       Role
   states     State[]
+  stateCode  String?
 }
 
 enum Role {
