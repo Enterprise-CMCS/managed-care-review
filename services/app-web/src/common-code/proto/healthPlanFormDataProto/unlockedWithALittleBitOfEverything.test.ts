@@ -22,6 +22,7 @@ function decodeOrError(
 describe('0000_initial_migration', () => {
     it('version 2022-08-19 matches the expected values', async () => {
         // read the file from the filesystem
+        console.log('directory: ', fs.readdirSync('.'))
         const oldProtoBytes = fs.readFileSync(
             'src/common-code/proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-08-19.proto'
         )
@@ -83,6 +84,9 @@ describe('0000_initial_migration', () => {
                 ?.toISOString()
                 .split('T')[0]
         ).toBe('2022-10-21')
+        expect(migratedFormData.rateInfos[0].rateCertificationName).toBe(
+            'MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523'
+        )
     })
 })
 

@@ -8,8 +8,10 @@ import {
     FederalAuthority,
     isLockedHealthPlanFormData,
     RateInfoType,
+    generateRateName,
 } from '../../healthPlanFormDataType'
 import { toLatestProtoVersion } from './toLatestVersion'
+import { findStatePrograms } from '../../healthPlanFormDataType/findStatePrograms'
 
 /**
  * Recursively replaces all nulls with undefineds.
@@ -289,6 +291,31 @@ function parseRateCertificationName(
     return rateCertificationName
 }
 
+/* if the rateCertificationName is missing, we'll generate it and save it back to the rateInfo */
+const updateRateCertificationNames = (
+    undifferentiatedFormData:
+        | UnlockedHealthPlanFormDataType
+        | LockedHealthPlanFormDataType
+): UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType => {
+    if (
+        undifferentiatedFormData.rateInfos &&
+        undifferentiatedFormData.rateInfos.length > 0
+    ) {
+        undifferentiatedFormData.rateInfos.forEach((rateInfo, index) => {
+            if (rateInfo && !rateInfo.rateCertificationName) {
+                undifferentiatedFormData.rateInfos[
+                    index
+                ].rateCertificationName = generateRateName(
+                    undifferentiatedFormData,
+                    rateInfo,
+                    findStatePrograms(undifferentiatedFormData.stateCode)
+                )
+            }
+        })
+    }
+    return undifferentiatedFormData
+}
+
 function parseRateInfos(
     rateInfos: mcreviewproto.IRateInfo[]
 ): RecursivePartial<UnlockedHealthPlanFormDataType['rateInfos']> {
@@ -431,6 +458,7 @@ const toDomain = (
         addtlActuaryContacts: parseActuaryContacts(addtlActuaryContacts),
         documents: parseProtoDocuments(formDataMessage.documents),
     }
+
     // Now that we've gotten things into our combined draft & state domain format.
     // we confirm that all the required fields are present to turn this into an UnlockedHealthPlanFormDataType or a LockedHealthPlanFormDataType
     if (status === 'DRAFT') {
@@ -444,15 +472,22 @@ const toDomain = (
         if (parseResult.success === false) {
             return parseResult.error
         }
-
-        return parseResult.data as UnlockedHealthPlanFormDataType
+        /* We need a one-off modification here because some older submissions don't have a populated
+        rateCertificationName field.  If it's missing, we'll generate it and add it to the form data.
+        We do it for locked or unlocked submissions. */
+        return updateRateCertificationNames(
+            parseResult.data as UnlockedHealthPlanFormDataType
+        )
     } else if (status === 'SUBMITTED') {
         const maybeLockedFormData =
             maybeUnlockedFormData as RecursivePartial<LockedHealthPlanFormDataType>
         maybeLockedFormData.status = 'SUBMITTED'
 
         if (isLockedHealthPlanFormData(maybeLockedFormData)) {
-            return maybeLockedFormData
+            /* We need a one-off modification here because some older submissions don't have a populated
+        rateCertificationName field.  If it's missing, we'll generate it and add it to the form data.
+        We do it for locked or unlocked submissions. */
+            return updateRateCertificationNames(maybeLockedFormData)
         } else {
             console.log(
                 'ERROR: attempting to parse state submission proto failed.',
