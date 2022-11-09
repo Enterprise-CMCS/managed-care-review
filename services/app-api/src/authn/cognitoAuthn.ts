@@ -103,9 +103,17 @@ export function userTypeFromAttributes(attributes: {
 
     // the euaID is in a field  called 'identities' which is a stringified array
     // that holds a single object, that saves the euaID in a field called userId.
-    // this only is found from IDP, not from test users/envs
-    const euaID = JSON.parse(attributes['identities'])[0].userId
-    console.log(`eua ID: ${euaID}`)
+    // unfortunately we can't add this field in testing PR branches, so we
+    // store it there in a custom:eua attribute
+    let euaID
+    if ('custom:eua' in attributes) {
+        euaID = attributes['custom:eua']
+    }
+
+    if ('identities' in attributes) {
+        euaID = JSON.parse(attributes['identities'])[0].userId
+        console.log(`eua ID: ${euaID}`)
+    }
 
     // Roles are a list of all the roles a user has in IDM.
     const roleAttribute = attributes['custom:role']
