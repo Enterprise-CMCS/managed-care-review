@@ -252,6 +252,7 @@ async function lookupUserCognito(
     poolId: string
 ): Promise<Result<UserType, Error>> {
     const fetchResult = await fetchUserFromCognito(userId, poolId)
+    console.log(`fetch from cognito: ${JSON.stringify(fetchResult)}`)
 
     // this is asserting that this is an error object, probably a better way to do that.
     if ('name' in fetchResult) {
@@ -260,6 +261,7 @@ async function lookupUserCognito(
 
     const currentUser: CognitoIdentityServiceProvider.UserType = fetchResult
 
+    console.log('converting cognito to UserType...')
     // we lose some type safety here...
     const attributes = userAttrDict(currentUser)
 
