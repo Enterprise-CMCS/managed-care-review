@@ -245,7 +245,7 @@ describe('0002_rate_programs_migration', () => {
         expect(migratedFormData.rateInfos[0].rateProgramIDs).toHaveLength(3)
     })
 
-    it('does not override existing rate ids', () => {
+    it('does not override existing rate programs', () => {
         //Get proto with rate ids
         const oldProtoBytes = fs.readFileSync(
             'src/common-code/proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-11-07.proto'
