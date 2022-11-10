@@ -1,11 +1,11 @@
-# How to handle changes in the Health Plan Form Data protocol buffer
+# How to handle changes in the Health Plan Form Data
 
 ## Summary
 
 | Data Layer     | Adding a field | Removing a field | Changing the type of a field |
 | ----------- | ----------- | ----------- | ----------- |
-| Protocol Buffers    |  Go for it!   | Go for it! However, deprecate, don't destroy | Go for it! Test for data loss.
-| Domain Models   | Required field? If so, handle fallbacks for old data and test for data loss      | Go for it! | Handle fallbacks for old data and test for data loss
+| Protocol Buffers    |  Straightforward, just add it!   | Deprecate, don't delete. | Go for it but watch out for data loss.
+| Domain Models   | Use caution for required fields, you will need to handle fallbacks for old data. Straightforward for optional fields.     | Deletion is okay but deprecate if product wants to display this data to users on old submissions. | Use caution here, you will need to handle fallbacks.
 
 ## Further discussion
 
@@ -13,17 +13,17 @@
 
 Relevant filepath: health_plan_form_data.proto
 
-Many changes to the protobuf schema itself are straightforward because protos are flexible, have unique field numbers, and use optional field. This means that adding a field or deprecating a field does not effect the ability of proto decoding. If a newer schema is used to read data written with an older schema, the proto decoder drops fields that are no longer in the schema. It also will not error for fields that are present in new schema but missing from old data (they ar just assigned to undefined or empty list).
+Many changes to the protobuf schema itself are straightforward because protos are flexible, have unique field numbers, and use optional field. This means that adding a field or deprecating a field (`[deprecated = true]`) does not effect the ability of the proto decoder. If a newer schema is used to read data written with an older schema, the proto decoder drops fields that are no longer in the schema. It also will not error for fields that are present in new schema but missing from old data (they ar just assigned to undefined or empty list).
 
-Changing the data *type* of a field in the schema is also possible, but there is a risk that new values lose precision or is truncated. For example, integer types which and changing from an arrays of fields to a single field (the `repeated` marker) will preserve only the X item in the list.
+Changing the data *type* of a field in the schema is also possible, but there is a risk that new values lose precision or is truncated. See discussion of [updating a message type](https://developers.google.com/protocol-buffers/docs/proto3#updating). For example, removing a `repeated` marker from a field will preserve only the X item in the list.
 
-Types of changes that will be breaking to the protobuf layer and require special handling are fundamental changes the structure of the proto (e.g. moving fields and expecting new field to have default values from older fields) and errors in the saved data itself. Similar to working in a regular database, these types of issues require some type of data migration or versioning to address to fix the data either in storage or on read.
+Types of changes that will be likely be problematic at the protobuf layer and require special handling are fundamental changes the structure of the proto (e.g. moving fields and expecting new field to have default values from older fields) and errors in the saved data itself. Similar to working in a regular database, these types of issues require some type of data migration or versioning to address to fix the data either in storage or on read.
 
 ### `toDomain`  (which also calls `toLatestVersion`)
 
 Relevant filepaths:
 
-This is a key data transformation layer in our application, where from serialized protobuf into our typescript domain models. We handle errors for invalid protos here and also parse protos to types that match our domain models.
+This is a key data transformation layer in our application, where we move from serialized protobuf into our typescript domain models. We handle errors for invalid protos here and also parse protos to types that match our domain models.
 
 Unlike protobuf spec, the typescript domain model types are rigid. They have required fields and are typed based on the field string name coming back from the proto. This means when adding required fields or changing the type of fields, `toDomain` will need to handle fallback values for fields that may be missing or invalid on older protos.
 
