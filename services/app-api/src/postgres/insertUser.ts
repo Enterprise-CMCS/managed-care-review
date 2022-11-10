@@ -8,6 +8,7 @@ export type InsertUserArgsType = {
     familyName: string
     email: string
     role: Role
+    stateCode?: string
 }
 
 export async function insertUser(
@@ -24,6 +25,7 @@ export async function insertUser(
                 familyName: user.familyName,
                 email: user.email,
                 role: user.role,
+                stateCode: user.stateCode,
             },
         })
         console.log('insert user return: ' + val)

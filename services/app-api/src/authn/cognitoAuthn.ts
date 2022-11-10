@@ -187,7 +187,7 @@ export function userTypeFromUser(user: User): Result<UserType, Error> {
             familyName: user.familyName,
             name: user.givenName + ' ' + user.familyName,
             euaID: user.euaID,
-            state_code: 'whoops',
+            state_code: user.stateCode ?? '',
         })
     }
 
@@ -238,6 +238,11 @@ export async function userFromCognitoAuthProvider(
             familyName: cognitoUser.familyName,
             email: cognitoUser.email,
             euaID: cognitoUser.euaID,
+        }
+
+        // if it is a state user, insert the state they are from
+        if (cognitoUser.role === 'STATE_USER') {
+            userToInsert.stateCode = cognitoUser.state_code
         }
 
         try {
