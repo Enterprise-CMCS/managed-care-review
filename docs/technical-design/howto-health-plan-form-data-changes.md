@@ -16,7 +16,7 @@ Relevant filepath:
 
 Many changes to the protobuf schema itself are straightforward because protos are flexible, have unique field numbers, and use optional field. This means that adding a field or deprecating a field (`[deprecated = true]`) does not effect the ability of the proto decoder. If a newer schema is used to read data written with an older schema, the proto decoder drops fields that are no longer in the schema. It also will not error for fields that are present in new schema but missing from old data (they ar just assigned to undefined or empty list).
 
-Changing the data *type* of a field in the schema is also possible, but there is a risk that new values lose precision or is truncated. See discussion of [updating a message type](https://developers.google.com/protocol-buffers/docs/proto3#updating). For example, removing a `repeated` marker from a field will preserve only the X item in the list.
+Changing the data *type* of a field in the schema is also possible, but there is a risk that new values lose precision or are truncated. See discussion of [updating a message type](https://developers.google.com/protocol-buffers/docs/proto3#updating). For example, removing a `repeated` marker from a field will preserve only the X item in the list.
 
 Types of changes that will be likely be problematic at the protobuf layer and require special handling are fundamental changes the structure of the proto (e.g. moving fields and expecting new field to have default values from older fields) and errors in the saved data itself. Similar to working in a regular database, these types of issues require some type of data migration or versioning to address to fix the data either in storage or on read.
 
