@@ -14,7 +14,7 @@
 Relevant filepath: 
 - [health_plan_form_data.proto](/services/app-proto/src/health_plan_form_data.proto)
 
-Many changes to the protobuf schema itself are straightforward because protos are flexible, have unique field numbers, and use optional field. This means that adding a field or deprecating a field (`[deprecated = true]`) does not effect the ability of the proto decoder. If a newer schema is used to read data written with an older schema, the proto decoder drops fields that are no longer in the schema. It also will not error for fields that are present in new schema but missing from old data (they ar just assigned to undefined or empty list).
+Many changes to the protobuf schema itself are straightforward because protos are flexible, have unique field numbers, and use optional fields. This means that adding a field or deprecating a field (`[deprecated = true]`) does not affect the ability of the proto decoder. If a newer schema is used to read data written with an older schema, the proto decoder drops fields that are no longer in the schema. It also will not error for fields that are present in the new schema but missing from old data (they are just assigned to undefined or empty list).
 
 Changing the data *type* of a field in the schema is also possible, but there is a risk that new values lose precision or are truncated. See discussion of [updating a message type](https://developers.google.com/protocol-buffers/docs/proto3#updating). For example, removing a `repeated` marker from a field will preserve only the X item in the list.
 
