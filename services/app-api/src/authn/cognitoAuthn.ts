@@ -213,10 +213,13 @@ export async function userFromCognitoAuthProvider(
     console.log('looking up user in pg...')
     // look up the user in PG. If we don't have it here, then we need to
     // fetch it from Cognito.
+    const startRequest = performance.now()
     const auroraUser = await lookupUserAurora(store, userInfo.userId)
     if (auroraUser instanceof Error) {
         return err(auroraUser)
     }
+    const endRequest = performance.now()
+    console.log('look up in postgres takes ms:', endRequest - startRequest)
 
     // if there is no user returned, lookup in cognito and save to postgres
     if (auroraUser === undefined) {
@@ -260,6 +263,7 @@ export async function userFromCognitoAuthProvider(
         }
     }
 
+    // we return the user we got from aurora
     return userTypeFromUser(auroraUser)
 }
 
