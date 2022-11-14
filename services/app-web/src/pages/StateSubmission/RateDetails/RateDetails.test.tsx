@@ -1552,6 +1552,7 @@ describe('RateDetails', () => {
                                     documentCategories: ['RATES'],
                                 },
                             ],
+                            packagesWithSharedRateCerts: [],
                         },
                     ],
                 })

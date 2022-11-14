@@ -186,6 +186,7 @@ describe('submitHealthPlanPackage', () => {
                         },
                     ],
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
+                    packagesWithSharedRateCerts: [],
                 },
             ],
         })
@@ -554,6 +555,7 @@ describe('submitHealthPlanPackage', () => {
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ]
 
@@ -763,6 +765,7 @@ describe('submitHealthPlanPackage', () => {
                     rateDateCertified: undefined,
                     rateDocuments: [],
                     actuaryContacts: [],
+                    packagesWithSharedRateCerts: [],
                 },
             ],
         })

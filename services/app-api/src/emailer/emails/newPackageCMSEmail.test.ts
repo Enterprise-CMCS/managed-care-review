@@ -156,6 +156,7 @@ test('includes expected data summary for a contract and rates submission CMS ema
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
     }
@@ -241,6 +242,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
             {
                 rateType: 'NEW',
@@ -267,6 +269,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
             {
                 rateType: 'AMENDMENT',
@@ -299,6 +302,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
     }
@@ -414,6 +418,7 @@ test('includes expected data summary for a contract amendment submission', async
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
     }
@@ -496,6 +501,7 @@ test('includes expected data summary for a rate amendment submission CMS email',
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
     }
@@ -753,6 +759,7 @@ test('CHIP contract and rate submission does include state specific analysts ema
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
     })
@@ -836,6 +843,7 @@ test('CHIP contract and rate submission does not include ratesReviewSharedEmails
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
     })
@@ -918,6 +926,7 @@ test('renders overall email as expected', async () => {
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
             {
                 rateType: 'NEW',
@@ -944,6 +953,7 @@ test('renders overall email as expected', async () => {
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
     }

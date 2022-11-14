@@ -42,6 +42,7 @@ describe('RateDetailsSummarySection', () => {
                     email: 'jj.actuary@test.com',
                 },
             ],
+            packagesWithSharedRateCerts: [],
         },
         {
             rateType: 'AMENDMENT',
@@ -69,6 +70,7 @@ describe('RateDetailsSummarySection', () => {
                     email: 'tt.actuary@test.com',
                 },
             ],
+            packagesWithSharedRateCerts: [],
         },
     ]
 

@@ -552,6 +552,7 @@ describe('unlockHealthPlanPackage', () => {
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ]
 
