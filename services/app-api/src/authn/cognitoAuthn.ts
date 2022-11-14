@@ -214,6 +214,9 @@ export async function userFromCognitoAuthProvider(
     // look up the user in PG. If we don't have it here, then we need to
     // fetch it from Cognito.
     const auroraUser = await lookupUserAurora(store, userInfo.userId)
+    if (auroraUser instanceof Error) {
+        return err(auroraUser)
+    }
 
     // if there is no user returned, lookup in cognito and save to postgres
     if (auroraUser === undefined) {
@@ -278,14 +281,13 @@ async function lookupUserCognito(
     // we lose some type safety here...
     const attributes = userAttrDict(currentUser)
 
-    const user = userTypeFromAttributes(attributes)
-    return user
+    return userTypeFromAttributes(attributes)
 }
 
 async function lookupUserAurora(
     store: Store,
     userID: string
-): Promise<User | undefined> {
+): Promise<User | undefined | Error> {
     try {
         const userFromPG = await store.getUser(userID)
         // try a basic type guard here -- a User will have an euaID.
@@ -295,6 +297,7 @@ async function lookupUserAurora(
         }
     } catch (e) {
         console.log(e)
+        throw new Error(`Error looking up user in Postgres: ${e}`)
     }
     return undefined
 }
