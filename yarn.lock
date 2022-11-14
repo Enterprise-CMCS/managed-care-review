@@ -19314,10 +19314,10 @@ launchdarkly-js-sdk-common@3.8.1:
     fast-deep-equal "^2.0.1"
     uuid "^3.3.2"
 
-launchdarkly-node-server-sdk@6.4.2:
-  version "6.4.2"
-  resolved "https://registry.yarnpkg.com/launchdarkly-node-server-sdk/-/launchdarkly-node-server-sdk-6.4.2.tgz#10a4fea21762315a095a9377cb23dc8d6e714469"
-  integrity sha512-cZQ/FDpzrXu7rOl2re9+79tX/jOrj+kb1ikbqpk/jEgLvXUHGE7Xr+fsEIbQa80H1PkGwiyWbmnAl31THJfKew==
+launchdarkly-node-server-sdk@6.4.3:
+  version "6.4.3"
+  resolved "https://registry.yarnpkg.com/launchdarkly-node-server-sdk/-/launchdarkly-node-server-sdk-6.4.3.tgz#7a35caee3709d70776173fcd814fa0cd88de1270"
+  integrity sha512-n7L2mAAcKqUUKhCGHRd6soVD3Ws4ME4R+MNShWL0lBBY8yGASIaPAW4rGmkob/hs+grCNRXn8HHlZCufecaX4w==
   dependencies:
     async "^3.1.0"
     launchdarkly-eventsource "1.4.4"
