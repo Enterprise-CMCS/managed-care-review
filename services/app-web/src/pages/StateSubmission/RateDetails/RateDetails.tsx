@@ -88,6 +88,7 @@ export interface RateInfoFormType {
     rateDocuments: SubmissionDocument[]
     actuaryContacts: ActuaryContact[]
     actuaryCommunicationPreference?: ActuaryCommunicationType
+    packagesWithSharedRateCerts: string[]
 }
 
 type FormError =
@@ -128,6 +129,7 @@ export const RateDetails = ({
     const newRateNameRef = React.useRef<HTMLElement | null>(null)
     const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
 
+    //TODO: Check if packagesWithSharedRateCerts is added to schema, console log it.
     const rateDetailsFormSchema = showMultiRates
         ? //Concat RateDetailsFormSchema to ActuaryContactSchema for error summary order
           Yup.object().shape({
@@ -205,6 +207,8 @@ export const RateDetails = ({
                   ],
         actuaryCommunicationPreference:
             rateInfo?.actuaryCommunicationPreference ?? undefined,
+        packagesWithSharedRateCerts:
+            rateInfo?.packagesWithSharedRateCerts ?? [],
     })
 
     const getDocumentsError = (
@@ -402,6 +406,8 @@ export const RateDetails = ({
                 actuaryContacts: rateInfo.actuaryContacts,
                 actuaryCommunicationPreference:
                     rateInfo.actuaryCommunicationPreference,
+                packagesWithSharedRateCerts:
+                    rateInfo.packagesWithSharedRateCerts ?? [],
             }
         })
 

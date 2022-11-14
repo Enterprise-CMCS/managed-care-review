@@ -92,6 +92,7 @@ const RateDetailsFormSchema = Yup.array().of(
                     'The end date must come after the start date'
                 ),
         }),
+        packagesWithSharedRateCerts: Yup.array(),
     })
 )
 
