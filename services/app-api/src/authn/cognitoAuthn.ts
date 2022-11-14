@@ -22,7 +22,6 @@ export function parseAuthProvider(
 
         return ok({ userId: userPoolUserId, poolId: userPoolId })
     } catch (e) {
-        // console.log(e)
         return err(new Error('authProvider doesnt have enough parts'))
     }
 }
@@ -112,7 +111,6 @@ export function userTypeFromAttributes(attributes: {
 
     if ('identities' in attributes) {
         euaID = JSON.parse(attributes['identities'])[0].userId
-        console.log(`eua ID: ${euaID}`)
     }
 
     // Roles are a list of all the roles a user has in IDM.
@@ -210,7 +208,6 @@ export async function userFromCognitoAuthProvider(
         return lookupUserCognito(userInfo.userId, userInfo.poolId)
     }
 
-    console.log('looking up user in pg...')
     // look up the user in PG. If we don't have it here, then we need to
     // fetch it from Cognito.
     const startRequest = performance.now()
@@ -219,11 +216,10 @@ export async function userFromCognitoAuthProvider(
         return err(auroraUser)
     }
     const endRequest = performance.now()
-    console.log('look up in postgres takes ms:', endRequest - startRequest)
+    console.log('User lookup in postgres takes ms:', endRequest - startRequest)
 
     // if there is no user returned, lookup in cognito and save to postgres
     if (auroraUser === undefined) {
-        console.log('user does not exist in aurora, looking up in cognito...')
         const cognitoUserResult = await lookupUserCognito(
             userInfo.userId,
             userInfo.poolId
@@ -233,8 +229,6 @@ export async function userFromCognitoAuthProvider(
         }
 
         const cognitoUser = cognitoUserResult.value
-
-        console.log('found the user in cognito: ' + cognitoUser)
 
         // create the user and store it in aurora
         const userToInsert: InsertUserArgsType = {
@@ -258,7 +252,6 @@ export async function userFromCognitoAuthProvider(
             }
             return userTypeFromUser(result)
         } catch (e) {
-            console.log(e)
             throw new Error(`Could not insert user: ${e}`)
         }
     }
@@ -272,7 +265,6 @@ async function lookupUserCognito(
     poolId: string
 ): Promise<Result<UserType, Error>> {
     const fetchResult = await fetchUserFromCognito(userId, poolId)
-    console.log(`fetch from cognito: ${JSON.stringify(fetchResult)}`)
 
     // this is asserting that this is an error object, probably a better way to do that.
     if ('name' in fetchResult) {
@@ -281,7 +273,6 @@ async function lookupUserCognito(
 
     const currentUser: CognitoIdentityServiceProvider.UserType = fetchResult
 
-    console.log('converting cognito to UserType...')
     // we lose some type safety here...
     const attributes = userAttrDict(currentUser)
 
@@ -296,11 +287,9 @@ async function lookupUserAurora(
         const userFromPG = await store.getUser(userID)
         // try a basic type guard here -- a User will have an euaID.
         if ('euaID' in userFromPG) {
-            console.log('found this user: ' + JSON.stringify(userFromPG))
             return userFromPG
         }
     } catch (e) {
-        console.log(e)
         throw new Error(`Error looking up user in Postgres: ${e}`)
     }
     return undefined
