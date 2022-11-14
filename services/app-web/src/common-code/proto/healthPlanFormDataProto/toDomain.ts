@@ -354,6 +354,8 @@ function parseRateInfos(
                     mcreviewproto.ActuaryCommunicationType,
                     rateInfo?.actuaryCommunicationPreference
                 ),
+                packagesWithSharedRateCerts:
+                    rateInfo.packagesWithSharedRateCerts ?? [],
             }
             rates.push(rate)
         })
