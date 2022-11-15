@@ -226,7 +226,6 @@ const toProtoBuffer = (
                                   rateInfo.rateAmendmentInfo.effectiveDateEnd
                               ),
                           },
-                          //Currently, this Actuary data is in domainData, eventually it will be included in the rateInfo to have actuaries for each certification.
                           actuaryContacts: rateInfo.actuaryContacts.map(
                               (actuaryContact) => {
                                   const firmType = domainEnumToProto(
@@ -250,6 +249,8 @@ const toProtoBuffer = (
                               domainData.addtlActuaryCommunicationPreference,
                               mcreviewproto.ActuaryCommunicationType
                           ),
+                          packagesWithSharedRateCerts:
+                              rateInfo.packagesWithSharedRateCerts,
                       }
                   })
                 : undefined,

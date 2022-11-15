@@ -1034,6 +1034,73 @@ describe('RateDetails', () => {
                 expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
             )
         })
+
+        it('correctly checks shared rate certification checkboxes on each rate certification', async () => {
+            ldUseClientSpy({
+                'rates-across-submissions': true,
+                'multi-rate-submissions': true,
+            })
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                            }),
+                        ],
+                    },
+                }
+            )
+            const rateCertsOnLoad = rateCertifications(screen)
+            expect(rateCertsOnLoad).toHaveLength(1)
+
+            await fillOutFirstRate(screen)
+
+            //Click the first rate certification shared rate cert check box
+            const firstRateCert = rateCertsOnLoad[0]
+            const firstRateCertSharedCheckBox = within(
+                firstRateCert!
+            ).getByLabelText(
+                'This rate certification was uploaded to another submission.'
+            )
+            await userEvent.click(firstRateCertSharedCheckBox)
+
+            await clickAddNewRate(screen)
+
+            await waitFor(() => {
+                const rateCertsAfterAddAnother = rateCertifications(screen)
+                expect(rateCertsAfterAddAnother).toHaveLength(2)
+            })
+            const allRateCerts = rateCertifications(screen)
+            const secondRateCertSharedCheckBox = within(
+                allRateCerts[1]!
+            ).getByRole('checkbox', {
+                name: 'This rate certification was uploaded to another submission.',
+            })
+
+            //expect first rate certification shared rate checkbox to be checked
+            expect(firstRateCertSharedCheckBox).toBeChecked()
+            //expect second rate certification shared check box to not be unchecked
+            expect(secondRateCertSharedCheckBox).not.toBeChecked()
+
+            //Uncheck first rate certification shared rate check box
+            await userEvent.click(firstRateCertSharedCheckBox)
+            //expect both rate certifications shared check boxes to be unchecked
+            expect(firstRateCertSharedCheckBox).not.toBeChecked()
+            expect(secondRateCertSharedCheckBox).not.toBeChecked()
+
+            //Check second rate certification shared rate check box
+            await userEvent.click(secondRateCertSharedCheckBox)
+            //expect first rate certification shared rate checkbox to not be checked
+            expect(firstRateCertSharedCheckBox).not.toBeChecked()
+            //expect second rate certification shared rate checkbox to be checked
+            expect(secondRateCertSharedCheckBox).toBeChecked()
+        })
     })
 
     describe('Continue button', () => {
@@ -1552,6 +1619,7 @@ describe('RateDetails', () => {
                                     documentCategories: ['RATES'],
                                 },
                             ],
+                            packagesWithSharedRateCerts: [],
                         },
                     ],
                 })

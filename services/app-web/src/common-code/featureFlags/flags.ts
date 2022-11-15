@@ -42,6 +42,13 @@ export const featureFlags = {
         flag: 'multi-rate-submissions',
         defaultValue: false,
     },
+    /**
+     * Enables rates across submissions features
+     */
+    RATES_ACROSS_SUBMISSIONS: {
+        flag: 'rates-across-submissions',
+        defaultValue: false,
+    },
 } as const
 
 export type FlagEnumType = keyof typeof featureFlags

@@ -82,6 +82,7 @@ describe('templateHelpers', () => {
                             },
                         ],
                         actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                        packagesWithSharedRateCerts: [],
                     },
                 ],
             }),

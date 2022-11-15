@@ -111,6 +111,7 @@ export function mockContactAndRatesDraft(): UnlockedHealthPlanFormDataType {
                 rateDateCertified: new Date(),
                 rateAmendmentInfo: undefined,
                 actuaryContacts: [],
+                packagesWithSharedRateCerts: [],
             },
         ],
         stateContacts: [],
@@ -151,6 +152,7 @@ export function mockCompleteDraft(): UnlockedHealthPlanFormDataType {
                 rateDateCertified: new Date(),
                 rateAmendmentInfo: undefined,
                 actuaryContacts: [],
+                packagesWithSharedRateCerts: [],
             },
         ],
         stateContacts: [
@@ -226,6 +228,7 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
         stateContacts: [
@@ -310,6 +313,7 @@ export function mockStateSubmission(): LockedHealthPlanFormDataType {
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
         stateContacts: [
@@ -401,6 +405,7 @@ export function mockStateSubmissionContractAmendment(): LockedHealthPlanFormData
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
         stateContacts: [
@@ -940,6 +945,7 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                     },
                 ],
                 actuaryContacts: [],
+                packagesWithSharedRateCerts: [],
             },
         ],
         documents: [
@@ -993,6 +999,7 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                     },
                 ],
                 actuaryContacts: [],
+                packagesWithSharedRateCerts: [],
             },
         ],
         documents: [

@@ -45,6 +45,7 @@ const submission: LockedHealthPlanFormDataType = {
                 },
             ],
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+            packagesWithSharedRateCerts: [],
         },
     ],
 }
@@ -163,6 +164,7 @@ test('includes expected data summary for a multi-rate contract and rates resubmi
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
             {
                 rateType: 'NEW',
@@ -189,6 +191,7 @@ test('includes expected data summary for a multi-rate contract and rates resubmi
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
             {
                 rateType: 'AMENDMENT',
@@ -221,6 +224,7 @@ test('includes expected data summary for a multi-rate contract and rates resubmi
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
     }
