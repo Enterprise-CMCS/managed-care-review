@@ -19,7 +19,7 @@ Eta.configure({
     ],
 })
 
-const renderTemplate = async <T>(
+const renderTemplate = async <T extends object>(
     templateName: string,
     data: T,
     inUnitTest?: boolean
