@@ -19,7 +19,6 @@
         ]
     },
     "dependencies": {
-        "aws-sdk": "^2.1018.0",
         "octokit": "^2.0.4"
     },
     "devDependencies": {
