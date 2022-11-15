@@ -93,7 +93,7 @@ const RateDetailsFormSchema = Yup.array().of(
                 ),
         }),
         packagesWithSharedRateCerts: Yup.array(),
-        sharedRateCert: Yup.boolean().optional(),
+        hasSharedRateCert: Yup.boolean().optional(),
     })
 )
 

@@ -90,7 +90,7 @@ export interface RateInfoFormType {
     actuaryContacts: ActuaryContact[]
     actuaryCommunicationPreference?: ActuaryCommunicationType
     packagesWithSharedRateCerts: string[]
-    sharedRateCert: boolean
+    hasSharedRateCert: boolean
 }
 
 type FormError =
@@ -214,7 +214,9 @@ export const RateDetails = ({
             rateInfo?.actuaryCommunicationPreference ?? undefined,
         packagesWithSharedRateCerts:
             rateInfo?.packagesWithSharedRateCerts ?? [],
-        sharedRateCert: Boolean(rateInfo?.packagesWithSharedRateCerts.length),
+        hasSharedRateCert: Boolean(
+            rateInfo?.packagesWithSharedRateCerts.length
+        ),
     })
 
     const getDocumentsError = (
@@ -663,14 +665,14 @@ export const RateDetails = ({
                                                         {ratesAcrossSubmissions && (
                                                             <FormGroup>
                                                                 <Checkbox
-                                                                    id={`sharedRateCheckBox-${index}`}
-                                                                    name={`rateInfos.${index}.sharedRateCert`}
+                                                                    id={`hasSharedRateCheckBox-${rateInfo.key}`}
+                                                                    name={`rateInfos.${index}.hasSharedRateCert`}
                                                                     label="This rate certification was uploaded to another submission."
                                                                     aria-required={
                                                                         false
                                                                     }
                                                                     checked={
-                                                                        rateInfo.sharedRateCert
+                                                                        rateInfo.hasSharedRateCert
                                                                     }
                                                                     onChange={(
                                                                         e
@@ -679,7 +681,7 @@ export const RateDetails = ({
                                                                             e
                                                                                 .target
                                                                                 .name,
-                                                                            !rateInfo.sharedRateCert
+                                                                            !rateInfo.hasSharedRateCert
                                                                         )
                                                                     }
                                                                 />
