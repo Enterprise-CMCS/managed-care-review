@@ -7600,9 +7600,9 @@
     "@opentelemetry/sdk-trace-base" "1.2.0"
 
 "@opentelemetry/id-generator-aws-xray@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/id-generator-aws-xray/-/id-generator-aws-xray-1.1.0.tgz#f70ab4279c955c832f62e1f83e9d212790021709"
-  integrity sha512-K8APGJHlLcUB5n+B+YU6XAK3NgNdOb++ZWzbrR2lDI0ZOn1vfjhnFEZmoChk0sKUqE1uX+qitcfTXVhpkuyz6w==
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/id-generator-aws-xray/-/id-generator-aws-xray-1.1.1.tgz#d7bf142f10e7edb3caa2980e8c129e50d71d9c5e"
+  integrity sha512-G+zEv0M5N9f+vpD0BIlGFdBwAAYjHL/M9ByfF+6L53JUBZMSPUxb3n0e/OW5WRnlPml5KV3NULSMfMS/JdSJEQ==
   dependencies:
     "@opentelemetry/core" "^1.0.0"
 
