@@ -60,7 +60,6 @@ async function createUser({
     role,
     password,
     state,
-    eua,
 }: {
     userPoolID: string
     name: string
@@ -68,7 +67,6 @@ async function createUser({
     role: UserRole
     password: string
     state?: string
-    eua: string
 }) {
     const client = new CognitoIdentityProviderClient({ region: 'us-east-1' })
 
@@ -93,10 +91,6 @@ async function createUser({
             {
                 Name: 'custom:role',
                 Value: IDMRole(role),
-            },
-            {
-                Name: 'custom:eua', // this only exists in testing branches
-                Value: eua,
             },
         ],
     }
@@ -175,28 +169,24 @@ async function main() {
             email: 'aang@example.com',
             role: 'STATE_USER' as const,
             state: 'MN',
-            eua: 'AAAA',
         },
         {
             name: 'Toph',
             email: 'toph@example.com',
             role: 'STATE_USER' as const,
             state: 'VA',
-            eua: 'BBBB',
         },
         {
             name: 'Zuko',
             email: 'zuko@example.com',
             role: 'CMS_USER' as const,
             state: undefined,
-            eua: 'CCCC',
         },
         {
             name: 'Cabbages',
             email: 'cabbages@example.com',
             role: 'UNKNOWN_USER' as const,
             state: undefined,
-            eua: 'DDDD',
         },
     ]
 

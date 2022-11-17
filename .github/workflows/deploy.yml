@@ -332,7 +332,7 @@ jobs:
     needs: [deploy-app, finishing-prep]
     if: always() && needs.finishing-prep.result == 'success'
     runs-on: ubuntu-latest
-    container: cypress/browsers:node14.17.0-chrome91-ff89
+    container: cypress/browsers:node16.17.0-chrome106
     permissions:
       deployments: write
     strategy:
