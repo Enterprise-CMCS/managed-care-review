@@ -75,7 +75,7 @@ export const main: APIGatewayProxyHandler = async () => {
 
     const store = NewPostgresStore(pgResult)
     const result: HealthPlanRevisionTable[] | StoreError =
-        await store.getAllRevisions()
+        await store.findAllRevisions()
     if (isStoreError(result)) {
         console.error('Error getting revisions from db')
         throw new Error('Error getting records; cannot generate report')

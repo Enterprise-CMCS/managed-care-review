@@ -5,13 +5,21 @@ export type PackagesAndRevisions = (HealthPlanPackageTable & {
     revisions: HealthPlanRevisionTable[]
 })[]
 
-export async function getAllRevisions(
+export async function findAllRevisions(
     client: PrismaClient
 ): Promise<HealthPlanRevisionTable[] | StoreError> {
     const allRevisions: HealthPlanRevisionTable[] =
-        await client.healthPlanRevisionTable.findMany()
+        await client.healthPlanRevisionTable.findMany({
+            where: {
+                pkg: {
+                    stateCode: {
+                        not: 'AS', // exclude test state as per ADR 019
+                    },
+                },
+            },
+        })
     if (allRevisions instanceof Error) {
-        console.error('getAllRevisions error:', allRevisions)
+        console.error('findAllRevisions error:', allRevisions)
     }
     return allRevisions
 }
