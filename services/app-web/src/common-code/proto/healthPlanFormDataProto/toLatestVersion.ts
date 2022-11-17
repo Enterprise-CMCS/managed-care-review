@@ -14,7 +14,7 @@ Right now when we use proto data directly after it is deserialized to typescript
 */
 import { mcreviewproto } from '../../../gen/healthPlanFormDataProto'
 
-const CURRENT_PROTO_VERSION = 3
+const CURRENT_PROTO_VERSION = 4
 
 const updateToVersion3 = (oldProto: mcreviewproto.HealthPlanFormData) => {
     // We can assume the proto version exists because error would have been thrown in toDomain

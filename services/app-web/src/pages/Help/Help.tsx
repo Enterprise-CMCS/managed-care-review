@@ -169,7 +169,7 @@ export const Help = (): React.ReactElement => {
                                 <br />
                                 CHIP:§ 457.1201
                             </td>
-                            <td>Contract - supporting</td>
+                            <td>Contract</td>
                         </tr>
                         <tr>
                             <td>Rate certification</td>
@@ -351,7 +351,7 @@ export const Help = (): React.ReactElement => {
                                     Development Guide
                                 </a>
                             </td>
-                            <td>Rate-supporting</td>
+                            <td>Rate - supporting</td>
                         </tr>
                         <tr>
                             <td>Rate appendix/exhibit</td>
@@ -370,7 +370,7 @@ export const Help = (): React.ReactElement => {
                                 certification must be submitted.{' '}
                             </td>
                             <td>§ 438.7(a)</td>
-                            <td>Rate-supporting</td>
+                            <td>Rate - supporting</td>
                         </tr>
                         <tr>
                             <td>MLR report</td>
@@ -432,7 +432,7 @@ export const Help = (): React.ReactElement => {
                                 impact rates.
                             </td>
                             <td>§ 438.4</td>
-                            <td>Contract-supporting</td>
+                            <td>Contract - supporting</td>
                         </tr>
                         <tr>
                             <td>Per cell rate change documentation</td>
@@ -448,7 +448,7 @@ export const Help = (): React.ReactElement => {
                                 cell up to 1.5% during the rating period.
                             </td>
                             <td>§ 438.7(c)(3)</td>
-                            <td>Contract-supporting</td>
+                            <td>Contract - supporting</td>
                         </tr>
                         <tr>
                             <td>Per cell rate range change documentation</td>
@@ -466,7 +466,7 @@ export const Help = (): React.ReactElement => {
                                 during the rating period.
                             </td>
                             <td>§ 438.4(c)(2)</td>
-                            <td>Contract-supporting</td>
+                            <td>Contract - supporting</td>
                         </tr>
                     </tbody>
                 </Table>

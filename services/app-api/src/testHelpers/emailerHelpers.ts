@@ -299,6 +299,7 @@ const mockContractAndRatesFormData = (
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
         stateContacts: [
@@ -378,6 +379,7 @@ const mockUnlockedContractAndRatesFormData = (
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
         stateContacts: [
@@ -551,6 +553,7 @@ const mockContractAmendmentFormData = (
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
         stateContacts: [

@@ -48,6 +48,7 @@ const sub: UnlockedHealthPlanFormDataType = {
                 },
             ],
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+            packagesWithSharedRateCerts: [],
         },
     ],
 }
@@ -158,6 +159,7 @@ describe('unlockPackageCMSEmail', () => {
                         },
                     ],
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                    packagesWithSharedRateCerts: [],
                 },
                 {
                     rateType: 'NEW',
@@ -184,6 +186,7 @@ describe('unlockPackageCMSEmail', () => {
                         },
                     ],
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                    packagesWithSharedRateCerts: [],
                 },
                 {
                     rateType: 'AMENDMENT',
@@ -216,6 +219,7 @@ describe('unlockPackageCMSEmail', () => {
                         },
                     ],
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                    packagesWithSharedRateCerts: [],
                 },
             ],
         }
@@ -503,6 +507,7 @@ describe('unlockPackageCMSEmail', () => {
                         },
                     ],
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                    packagesWithSharedRateCerts: [],
                 },
             ],
         })
@@ -556,6 +561,7 @@ describe('unlockPackageCMSEmail', () => {
                         },
                     ],
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                    packagesWithSharedRateCerts: [],
                 },
             ],
         })

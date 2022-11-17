@@ -29,7 +29,7 @@ type RecursivelyReplaceNullWithUndefined<T> = T extends null
               : RecursivelyReplaceNullWithUndefined<T[K]>
       }
 
-export function replaceNullsWithUndefineds<T>(
+export function replaceNullsWithUndefineds<T extends object>(
     obj: T
 ): RecursivelyReplaceNullWithUndefined<T> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -354,6 +354,8 @@ function parseRateInfos(
                     mcreviewproto.ActuaryCommunicationType,
                     rateInfo?.actuaryCommunicationPreference
                 ),
+                packagesWithSharedRateCerts:
+                    rateInfo.packagesWithSharedRateCerts ?? [],
             }
             rates.push(rate)
         })

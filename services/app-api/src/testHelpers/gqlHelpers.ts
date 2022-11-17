@@ -211,6 +211,7 @@ const createAndUpdateTestHealthPlanPackage = async (
                 },
             ],
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
+            packagesWithSharedRateCerts: [],
         },
     ]
     draft.addtlActuaryContacts = [

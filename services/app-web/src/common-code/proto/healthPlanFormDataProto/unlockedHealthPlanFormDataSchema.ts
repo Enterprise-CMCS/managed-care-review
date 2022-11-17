@@ -127,6 +127,7 @@ const rateInfosTypeSchema = z.object({
     rateCertificationName: z.string().optional(),
     actuaryContacts: z.array(actuaryContactSchema),
     actuaryCommunicationPreference: actuaryCommunicationTypeSchema.optional(),
+    packagesWithSharedRateCerts: z.array(z.string()),
 })
 
 // Commenting out because this wasn't being used but was raising lint warning -hw

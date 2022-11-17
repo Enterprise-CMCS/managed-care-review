@@ -203,6 +203,7 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
         managedCareEntities: [],
@@ -310,6 +311,7 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
         managedCareEntities: [],
@@ -413,6 +415,7 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
         stateContacts: [
@@ -540,6 +543,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
         stateContacts: [
@@ -671,6 +675,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
         stateContacts: [

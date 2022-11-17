@@ -8,6 +8,7 @@ import {
     DatePicker,
     Label,
     Button,
+    Checkbox,
 } from '@trussworks/react-uswds'
 import { Field, FieldArray, Formik, FormikErrors, getIn } from 'formik'
 import { useNavigate } from 'react-router-dom'
@@ -88,6 +89,8 @@ export interface RateInfoFormType {
     rateDocuments: SubmissionDocument[]
     actuaryContacts: ActuaryContact[]
     actuaryCommunicationPreference?: ActuaryCommunicationType
+    packagesWithSharedRateCerts: string[]
+    hasSharedRateCert: boolean
 }
 
 type FormError =
@@ -117,6 +120,10 @@ export const RateDetails = ({
     const showMultiRates = ldClient?.variation(
         featureFlags.MULTI_RATE_SUBMISSIONS.flag,
         featureFlags.MULTI_RATE_SUBMISSIONS.defaultValue
+    )
+    const ratesAcrossSubmissions = ldClient?.variation(
+        featureFlags.RATES_ACROSS_SUBMISSIONS.flag,
+        featureFlags.RATES_ACROSS_SUBMISSIONS.defaultValue
     )
 
     // Rate documents state management
@@ -205,6 +212,11 @@ export const RateDetails = ({
                   ],
         actuaryCommunicationPreference:
             rateInfo?.actuaryCommunicationPreference ?? undefined,
+        packagesWithSharedRateCerts:
+            rateInfo?.packagesWithSharedRateCerts ?? [],
+        hasSharedRateCert: Boolean(
+            rateInfo?.packagesWithSharedRateCerts.length
+        ),
     })
 
     const getDocumentsError = (
@@ -402,6 +414,8 @@ export const RateDetails = ({
                 actuaryContacts: rateInfo.actuaryContacts,
                 actuaryCommunicationPreference:
                     rateInfo.actuaryCommunicationPreference,
+                packagesWithSharedRateCerts:
+                    rateInfo.packagesWithSharedRateCerts ?? [],
             }
         })
 
@@ -648,6 +662,31 @@ export const RateDetails = ({
                                                                 }
                                                             />
                                                         </FormGroup>
+                                                        {ratesAcrossSubmissions && (
+                                                            <FormGroup>
+                                                                <Checkbox
+                                                                    id={`hasSharedRateCheckBox-${rateInfo.key}`}
+                                                                    name={`rateInfos.${index}.hasSharedRateCert`}
+                                                                    label="This rate certification was uploaded to another submission."
+                                                                    aria-required={
+                                                                        false
+                                                                    }
+                                                                    checked={
+                                                                        rateInfo.hasSharedRateCert
+                                                                    }
+                                                                    onChange={(
+                                                                        e
+                                                                    ) =>
+                                                                        setFieldValue(
+                                                                            e
+                                                                                .target
+                                                                                .name,
+                                                                            !rateInfo.hasSharedRateCert
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </FormGroup>
+                                                        )}
                                                         <FormGroup
                                                             error={showFieldErrors(
                                                                 rateErrorHandling(
