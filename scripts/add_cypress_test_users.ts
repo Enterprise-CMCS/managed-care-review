@@ -200,7 +200,6 @@ async function main() {
                 role: user.role,
                 password: testUserPassword,
                 state: user.state,
-                eua: user.eua,
             })
         } catch (e) {
             console.log('Error creating user: ', e)
