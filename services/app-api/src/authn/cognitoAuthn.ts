@@ -100,19 +100,6 @@ export function userTypeFromAttributes(attributes: {
 
     const fullName = attributes.given_name + ' ' + attributes.family_name
 
-    // the euaID is in a field  called 'identities' which is a stringified array
-    // that holds a single object, that saves the euaID in a field called userId.
-    // unfortunately we can't add this field in testing PR branches, so we
-    // store it there in a custom:eua attribute
-    let euaID
-    if ('custom:eua' in attributes) {
-        euaID = attributes['custom:eua']
-    }
-
-    if ('identities' in attributes) {
-        euaID = JSON.parse(attributes['identities'])[0].userId
-    }
-
     // Roles are a list of all the roles a user has in IDM.
     const roleAttribute = attributes['custom:role']
     const roles = roleAttribute.split(',')
@@ -135,7 +122,6 @@ export function userTypeFromAttributes(attributes: {
             state_code: attributes['custom:state_code'],
             givenName: attributes.given_name,
             familyName: attributes.family_name,
-            euaID: euaID,
         })
     }
 
@@ -146,7 +132,6 @@ export function userTypeFromAttributes(attributes: {
             name: fullName,
             givenName: attributes.given_name,
             familyName: attributes.family_name,
-            euaID: euaID,
         })
     }
 
@@ -162,7 +147,6 @@ export function userTypeFromUser(user: User): Result<UserType, Error> {
             givenName: user.givenName,
             familyName: user.familyName,
             name: user.givenName + ' ' + user.familyName,
-            euaID: user.euaID,
         })
     }
 
@@ -173,7 +157,6 @@ export function userTypeFromUser(user: User): Result<UserType, Error> {
             givenName: user.givenName,
             familyName: user.familyName,
             name: user.givenName + ' ' + user.familyName,
-            euaID: user.euaID,
         })
     }
 
@@ -184,7 +167,6 @@ export function userTypeFromUser(user: User): Result<UserType, Error> {
             givenName: user.givenName,
             familyName: user.familyName,
             name: user.givenName + ' ' + user.familyName,
-            euaID: user.euaID,
             state_code: user.stateCode ?? '',
         })
     }
@@ -237,7 +219,6 @@ export async function userFromCognitoAuthProvider(
             givenName: cognitoUser.givenName,
             familyName: cognitoUser.familyName,
             email: cognitoUser.email,
-            euaID: cognitoUser.euaID,
         }
 
         // if it is a state user, insert the state they are from
@@ -285,8 +266,8 @@ async function lookupUserAurora(
 ): Promise<User | undefined | Error> {
     try {
         const userFromPG = await store.getUser(userID)
-        // try a basic type guard here -- a User will have an euaID.
-        if ('euaID' in userFromPG) {
+        // try a basic type guard here -- a User will have an email.
+        if ('email' in userFromPG) {
             return userFromPG
         }
     } catch (e) {

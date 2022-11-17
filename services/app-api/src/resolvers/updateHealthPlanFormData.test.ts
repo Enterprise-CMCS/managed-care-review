@@ -29,7 +29,6 @@ describe('updateHealthPlanFormData', () => {
         email: 'zuko@example.com',
         familyName: 'Zuko',
         givenName: 'Prince',
-        euaID: 'CCCC',
     }
 
     it('updates valid fields in the formData', async () => {
@@ -127,7 +126,6 @@ describe('updateHealthPlanFormData', () => {
                     email: 'aang@va.gov',
                     familyName: 'Aang',
                     givenName: 'Aang',
-                    euaID: 'XYZA',
                 },
             },
         })

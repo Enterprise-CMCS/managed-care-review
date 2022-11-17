@@ -53,7 +53,6 @@ describe('cognitoAuthn', () => {
                         given_name: 'Generic',
                         family_name: 'Person',
                         email: 'gp@example.com',
-                        identities: '[{"userId": "AAAA"}]',
                     },
                     expectedResult: ok({
                         role: 'STATE_USER',
@@ -62,7 +61,6 @@ describe('cognitoAuthn', () => {
                         state_code: 'VA',
                         givenName: 'Generic',
                         familyName: 'Person',
-                        euaID: 'AAAA',
                     }),
                 },
                 {
@@ -71,7 +69,6 @@ describe('cognitoAuthn', () => {
                         given_name: 'Generic',
                         family_name: 'Person',
                         email: 'gp@example.com',
-                        identities: '[{"userId": "BBBB"}]',
                     },
                     expectedResult: ok({
                         role: 'CMS_USER',
@@ -79,7 +76,6 @@ describe('cognitoAuthn', () => {
                         name: 'Generic Person',
                         familyName: 'Person',
                         givenName: 'Generic',
-                        euaID: 'BBBB',
                     }),
                 },
                 {
@@ -90,7 +86,6 @@ describe('cognitoAuthn', () => {
                         given_name: 'Generic',
                         family_name: 'Person',
                         email: 'gp@example.com',
-                        identities: '[{"userId": "TUVW"}]',
                     },
                     expectedResult: ok({
                         role: 'STATE_USER',
@@ -99,7 +94,6 @@ describe('cognitoAuthn', () => {
                         state_code: 'FL',
                         givenName: 'Generic',
                         familyName: 'Person',
-                        euaID: 'TUVW',
                     }),
                 },
                 {
@@ -109,7 +103,6 @@ describe('cognitoAuthn', () => {
                         given_name: 'Generic',
                         family_name: 'Person',
                         email: 'gp@example.com',
-                        identities: '[{"userId": "DEFG"}]',
                     },
                     expectedResult: ok({
                         role: 'STATE_USER',
@@ -118,7 +111,6 @@ describe('cognitoAuthn', () => {
                         state_code: 'FL',
                         givenName: 'Generic',
                         familyName: 'Person',
-                        euaID: 'DEFG',
                     }),
                 },
                 {
@@ -129,7 +121,6 @@ describe('cognitoAuthn', () => {
                         given_name: 'Generic',
                         family_name: 'Person',
                         email: 'gp@example.com',
-                        identities: '[{"userId": "TEST"}]',
                     },
                     expectedResult: err(
                         new Error(

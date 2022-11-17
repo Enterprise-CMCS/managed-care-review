@@ -17,7 +17,6 @@ describe('fetchHealthPlanPackage', () => {
         email: 'zuko@example.com',
         familyName: 'Zuko',
         givenName: 'Prince',
-        euaID: 'CCCC',
     }
 
     const testUserState: UserType = {
@@ -27,7 +26,6 @@ describe('fetchHealthPlanPackage', () => {
         email: 'aang@mn.gov',
         familyName: 'Aang',
         givenName: 'Aang',
-        euaID: 'AAGG',
     }
 
     it('returns package with one revision', async () => {
@@ -271,7 +269,6 @@ describe('fetchHealthPlanPackage', () => {
                     email: 'aang@va.gov',
                     familyName: 'Aang',
                     givenName: 'Aang',
-                    euaID: 'AAGG',
                 },
             },
         })

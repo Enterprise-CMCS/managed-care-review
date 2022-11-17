@@ -184,7 +184,6 @@ const mockUser = (): StateUserType => {
         state_code: 'MN',
         familyName: 'State',
         givenName: 'User',
-        euaID: 'HBVT',
     }
 }
 

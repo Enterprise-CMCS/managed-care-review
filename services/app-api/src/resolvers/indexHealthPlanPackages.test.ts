@@ -70,7 +70,6 @@ describe('indexHealthPlanPackages', () => {
                         email: 'zuko@example.com',
                         familyName: 'Zuko',
                         givenName: 'Prince',
-                        euaID: 'UHWF',
                     },
                 },
             })
@@ -167,7 +166,6 @@ describe('indexHealthPlanPackages', () => {
                         email: 'aang@mn.gov',
                         givenName: 'Aang',
                         familyName: 'Aang',
-                        euaID: 'BWLF',
                     },
                 },
             })
@@ -205,7 +203,6 @@ describe('indexHealthPlanPackages', () => {
                         email: 'aang@mn.gov',
                         familyName: 'Aang',
                         givenName: 'Aang',
-                        euaID: 'PWEV',
                     },
                 },
             })
@@ -236,7 +233,6 @@ describe('indexHealthPlanPackages', () => {
                         email: 'zuko@example.com',
                         givenName: 'Zuko',
                         familyName: 'Zuko',
-                        euaID: 'NWBE',
                     },
                 },
             })
@@ -272,7 +268,6 @@ describe('indexHealthPlanPackages', () => {
                         email: 'zuko@example.com',
                         givenName: 'Prince',
                         familyName: 'Zuko',
-                        euaID: 'JKWE',
                     },
                 },
             })
@@ -347,7 +342,6 @@ describe('indexHealthPlanPackages', () => {
                         email: 'zuko@example.com',
                         familyName: 'Zuko',
                         givenName: 'Prince',
-                        euaID: 'IWAP',
                     },
                 },
             })
@@ -360,7 +354,6 @@ describe('indexHealthPlanPackages', () => {
                         email: 'aang@mn.gov',
                         familyName: 'AANG',
                         givenName: 'AANG',
-                        euaID: 'XEVS',
                     },
                 },
             })

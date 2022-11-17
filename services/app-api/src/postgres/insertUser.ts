@@ -3,7 +3,6 @@ import { StoreError, convertPrismaErrorToStoreError } from './storeError'
 
 export type InsertUserArgsType = {
     userID: string
-    euaID: string
     givenName: string
     familyName: string
     email: string
@@ -20,7 +19,6 @@ export async function insertUser(
         const val = await client.user.create({
             data: {
                 id: user.userID,
-                euaID: user.euaID,
                 givenName: user.givenName,
                 familyName: user.familyName,
                 email: user.email,

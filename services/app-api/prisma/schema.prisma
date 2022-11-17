@@ -43,7 +43,6 @@ model State {
 
 model User {
   id         String  @id
-  euaID      String  @unique
   givenName  String
   familyName String
   email      String  @unique

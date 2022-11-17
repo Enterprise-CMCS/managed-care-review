@@ -32,7 +32,6 @@ describe('submitHealthPlanPackage', () => {
         email: 'zuko@example.com',
         familyName: 'Zuko',
         givenName: 'Prince',
-        euaID: 'CCCC',
     }
     it('returns a StateSubmission if complete', async () => {
         console.log('TIMEOUT DEBUG: Start Test')

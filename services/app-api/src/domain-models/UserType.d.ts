@@ -10,7 +10,6 @@ type StateUserType = {
     state_code: string
     givenName: string
     familyName: string
-    euaID: string
 }
 
 type CMSUserType = {
@@ -19,7 +18,6 @@ type CMSUserType = {
     name: string
     givenName: string
     familyName: string
-    euaID: string
 }
 
 type AdminUserType = {
@@ -28,7 +26,6 @@ type AdminUserType = {
     name: string
     givenName: string
     familyName: string
-    euaID: string
 }
 
 export type { CMSUserType, StateUserType, AdminUserType, UserType }

@@ -33,7 +33,6 @@ describe('user type assertions', () => {
                 role: 'CMS_USER',
                 givenName: 'Margaret',
                 familyName: 'Burroughs',
-                euaID: 'AAAA',
             })
         ).toBe(true)
         expect(
@@ -44,7 +43,6 @@ describe('user type assertions', () => {
                 state_code: 'IL',
                 givenName: 'Margaret',
                 familyName: 'Burroughs',
-                euaID: 'AAAA',
             })
         ).toBe(false)
     })
@@ -58,7 +56,6 @@ describe('user type assertions', () => {
                 state_code: 'IL',
                 givenName: 'Margaret',
                 familyName: 'Burroughs',
-                euaID: 'AAAA',
             })
         ).toBe(true)
         expect(
@@ -68,7 +65,6 @@ describe('user type assertions', () => {
                 role: 'CMS_USER',
                 givenName: 'Margaret',
                 familyName: 'Burroughs',
-                euaID: 'AAAA',
             })
         ).toBe(false)
     })

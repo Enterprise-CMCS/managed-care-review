@@ -35,7 +35,6 @@ describe('unlockHealthPlanPackage', () => {
         email: 'zuko@example.com',
         familyName: 'Zuko',
         givenName: 'Prince',
-        euaID: 'CCCC',
     }
     it('returns a HealthPlanPackage with all revisions', async () => {
         const stateServer = await constructTestPostgresServer()

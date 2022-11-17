@@ -60,7 +60,6 @@ const defaultContext = (): Context => {
             email: 'james@example.com',
             familyName: 'Brown',
             givenName: 'James',
-            euaID: 'WAAH',
         },
     }
 }
