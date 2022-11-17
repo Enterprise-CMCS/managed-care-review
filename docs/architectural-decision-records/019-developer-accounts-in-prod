@@ -1,8 +1,4 @@
----
-title: Developer Accounts in Prod
----
-
-## ADR 019
+# ADR 019 — Developer Accounts in Prod
 
 - Status: Decided
 - Date: 4/21/21 (this is retroactive ADR)
