@@ -69,7 +69,7 @@ function mockStoreThatErrors(): Store {
         getAllRevisions: async () => {
             return genericStoreError
         },
-        getUser: async (_ID) => {
+        findUser: async (_ID) => {
             return genericStoreError
         },
         insertUser: async (_args) => {

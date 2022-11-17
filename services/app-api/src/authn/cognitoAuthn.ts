@@ -265,7 +265,7 @@ async function lookupUserAurora(
     userID: string
 ): Promise<User | undefined | Error> {
     try {
-        const userFromPG = await store.getUser(userID)
+        const userFromPG = await store.findUser(userID)
         // try a basic type guard here -- a User will have an email.
         if ('email' in userFromPG) {
             return userFromPG

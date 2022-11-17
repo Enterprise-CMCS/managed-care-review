@@ -1,7 +1,7 @@
 import { PrismaClient, User } from '@prisma/client'
 import { convertPrismaErrorToStoreError, StoreError } from './storeError'
 
-export async function getUser(
+export async function findUser(
     client: PrismaClient,
     id: string
 ): Promise<User | StoreError> {
