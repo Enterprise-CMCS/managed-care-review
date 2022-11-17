@@ -1,19 +1,17 @@
 ---
 title: Architectural Decision Record Template
 ---
-
-# 0000 — Title of Decision Record
+## ADR 0000
 
 - Status: [In progress or Decided]
-- Deciders: [Names of deciders]
 - Date: [Date created]
 
 ## Assumptions
-​
+
 A brief listing of any underlying assumptions specific to this decision: cost, timeline, technologies, compliance, etc.
-​
+
 ## Constraints
-​
+
 Include any decisions explicitly out of scope for this ADR.
 ​
 
