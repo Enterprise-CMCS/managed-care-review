@@ -23,6 +23,7 @@ import {
     RateInfoType,
     ActuaryContact,
     ActuaryCommunicationType,
+    packageName,
 } from '../../../common-code/healthPlanFormDataType'
 
 import {
@@ -55,6 +56,11 @@ import { featureFlags } from '../../../common-code/featureFlags'
 import * as Yup from 'yup'
 import { useFocus } from '../../../hooks'
 import { ActuaryContactFields } from '../Contacts'
+import { useIndexHealthPlanPackagesQuery } from '../../../gen/gqlClient'
+import { base64ToDomain } from '../../../common-code/proto/healthPlanFormDataProto'
+import { recordJSException } from '../../../otelHelpers'
+import { dayjs } from '../../../common-code/dateHelpers'
+import Select, { AriaOnFocus } from 'react-select'
 
 const RateDatesErrorMessage = ({
     startDate,
@@ -96,6 +102,13 @@ export interface RateInfoFormType {
 type FormError =
     FormikErrors<RateInfoFormType>[keyof FormikErrors<RateInfoFormType>]
 
+type PackageOptionType = {
+    readonly label: string
+    readonly value: string
+    readonly isFixed?: boolean
+    readonly isDisabled?: boolean
+}
+
 export const rateErrorHandling = (
     error: string | FormikErrors<RateInfoFormType> | undefined
 ): FormikErrors<RateInfoFormType> | undefined => {
@@ -134,6 +147,11 @@ export const RateDetails = ({
     const [focusNewRate, setFocusNewRate] = React.useState(false)
     const newRateNameRef = React.useRef<HTMLElement | null>(null)
     const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
+    const noOptions: PackageOptionType[] = [
+        { label: 'Loading submissions', value: '' },
+    ]
+    const [packageOptions, setPackageOptions] =
+        React.useState<PackageOptionType[]>(noOptions)
 
     const rateDetailsFormSchema = showMultiRates
         ? //Concat RateDetailsFormSchema to ActuaryContactSchema for error summary order
@@ -145,6 +163,60 @@ export const RateDetails = ({
         : Yup.object().shape({
               rateInfos: RateDetailsFormSchema,
           })
+
+    const onFocus: AriaOnFocus<PackageOptionType> = ({
+        focused,
+        isDisabled,
+    }): string => {
+        return `You are currently focused on option ${focused.label}${
+            isDisabled ? ', disabled' : ''
+        }`
+    }
+
+    useIndexHealthPlanPackagesQuery({
+        skip: !ratesAcrossSubmissions,
+        onCompleted: (data) => {
+            const packages: PackageOptionType[] = []
+            data?.indexHealthPlanPackages.edges
+                .map((edge) => edge.node)
+                .forEach((sub) => {
+                    const currentRevision = sub.revisions[0]
+                    const currentSubmissionData = base64ToDomain(
+                        currentRevision.node.formDataProto
+                    )
+                    if (currentSubmissionData instanceof Error) {
+                        recordJSException(
+                            `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${sub.id} Error message: ${currentSubmissionData.message}`
+                        )
+
+                        return null
+                    }
+
+                    if (
+                        currentSubmissionData.id !== draftSubmission.id &&
+                        currentSubmissionData.submissionType ===
+                            'CONTRACT_AND_RATES'
+                    ) {
+                        const submittedAt = currentRevision.node.submitInfo
+                            ?.updatedAt
+                            ? ` (Submitted ${dayjs(
+                                  currentRevision.node.submitInfo.updatedAt
+                              )
+                                  .tz('UTC')
+                                  .format('MM/DD/YYYY')})`
+                            : ''
+                        packages.push({
+                            label: `${packageName(
+                                currentSubmissionData,
+                                statePrograms
+                            )}${submittedAt}`,
+                            value: sub.id,
+                        })
+                    }
+                })
+            setPackageOptions(packages)
+        },
+    })
 
     const fileItemsFromRateInfo = (rateInfo: RateInfoFormType): FileItemT[] => {
         return (
@@ -414,8 +486,9 @@ export const RateDetails = ({
                 actuaryContacts: rateInfo.actuaryContacts,
                 actuaryCommunicationPreference:
                     rateInfo.actuaryCommunicationPreference,
-                packagesWithSharedRateCerts:
-                    rateInfo.packagesWithSharedRateCerts ?? [],
+                packagesWithSharedRateCerts: rateInfo.hasSharedRateCert
+                    ? rateInfo.packagesWithSharedRateCerts
+                    : [],
             }
         })
 
@@ -459,9 +532,10 @@ export const RateDetails = ({
                 if (!rateError) return
                 Object.entries(rateError).forEach(([field, value]) => {
                     if (typeof value === 'string') {
-                        //rateProgramIDs error message needs a # proceeding the key name because this is the only way to be able to link to the ProgramSelect component element see comments in ErrorSummaryMessage component.
+                        //rateProgramIDs error message needs a # proceeding the key name because this is the only way to be able to link to the Select component element see comments in ErrorSummaryMessage component.
                         const errorKey =
-                            field === 'rateProgramIDs'
+                            field === 'rateProgramIDs' ||
+                            field === 'packagesWithSharedRateCerts'
                                 ? `#rateInfos.${index}.${field}`
                                 : `rateInfos.${index}.${field}`
                         errorObject[errorKey] = value
@@ -687,6 +761,90 @@ export const RateDetails = ({
                                                                 />
                                                             </FormGroup>
                                                         )}
+                                                        {ratesAcrossSubmissions &&
+                                                            rateInfo.hasSharedRateCert && (
+                                                                <FormGroup
+                                                                    error={showFieldErrors(
+                                                                        rateErrorHandling(
+                                                                            errors
+                                                                                ?.rateInfos?.[
+                                                                                index
+                                                                            ]
+                                                                        )
+                                                                            ?.packagesWithSharedRateCerts
+                                                                    )}
+                                                                >
+                                                                    {showFieldErrors(
+                                                                        rateErrorHandling(
+                                                                            errors
+                                                                                ?.rateInfos?.[
+                                                                                index
+                                                                            ]
+                                                                        )
+                                                                            ?.packagesWithSharedRateCerts
+                                                                    ) && (
+                                                                        <PoliteErrorMessage>
+                                                                            {getIn(
+                                                                                errors,
+                                                                                `rateInfos.${index}.packagesWithSharedRateCerts`
+                                                                            )}
+                                                                        </PoliteErrorMessage>
+                                                                    )}
+                                                                    <Select
+                                                                        defaultValue={rateInfo.packagesWithSharedRateCerts.map(
+                                                                            (
+                                                                                pkg
+                                                                            ) => {
+                                                                                const name =
+                                                                                    packageOptions?.find(
+                                                                                        (
+                                                                                            options
+                                                                                        ) =>
+                                                                                            options.value ===
+                                                                                            pkg
+                                                                                    )?.label
+                                                                                if (
+                                                                                    !name
+                                                                                ) {
+                                                                                    return {
+                                                                                        value: pkg,
+                                                                                        label: 'Unknown submission',
+                                                                                    }
+                                                                                }
+                                                                                return {
+                                                                                    label: name,
+                                                                                    value: pkg,
+                                                                                }
+                                                                            }
+                                                                        )}
+                                                                        id={`packageSelect-${rateInfo.key}`}
+                                                                        inputId={`rateInfos.${index}.packagesWithSharedRateCerts`}
+                                                                        name={`rateInfos.${index}.packagesWithSharedRateCerts`}
+                                                                        isMulti
+                                                                        isSearchable
+                                                                        options={
+                                                                            packageOptions
+                                                                        }
+                                                                        aria-label="submission (required)"
+                                                                        ariaLiveMessages={{
+                                                                            onFocus,
+                                                                        }}
+                                                                        onChange={(
+                                                                            selectedOption
+                                                                        ) =>
+                                                                            setFieldValue(
+                                                                                `rateInfos.${index}.packagesWithSharedRateCerts`,
+                                                                                selectedOption.map(
+                                                                                    (item: {
+                                                                                        value: string
+                                                                                    }) =>
+                                                                                        item.value
+                                                                                )
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                </FormGroup>
+                                                            )}
                                                         <FormGroup
                                                             error={showFieldErrors(
                                                                 rateErrorHandling(
