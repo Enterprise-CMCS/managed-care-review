@@ -1,7 +1,7 @@
 ---
 title: Architectural Decision Record Template
 ---
-## ADR 0000
+## ADR 0000 — Title
 
 - Status: [In progress or Decided]
 - Date: [Date created]
