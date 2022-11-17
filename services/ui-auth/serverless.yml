@@ -86,10 +86,6 @@ resources:
             AttributeDataType: String
             Mutable: true
             Required: false
-          - Name: eua
-            AttributeDataType: String
-            Mutable: true
-            Required: false
 
     CognitoUserPoolClient:
       Type: AWS::Cognito::UserPoolClient
