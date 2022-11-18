@@ -275,13 +275,11 @@ jobs:
 
       - name: Run migrate to turn on Aurora
         id: run-migrations
-        with:
-          stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
           AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
-          STAGE_NAME: ${{ inputs.stage_name }}
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_NAME-migrate
 
