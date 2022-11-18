@@ -12,6 +12,7 @@ import { localGQLFetch, fakeAmplifyFetch } from './api'
 import { assertIsAuthMode } from './common-code/config'
 import { S3ClientT, newAmplifyS3Client, newLocalS3Client } from './s3'
 import { asyncWithLDProvider } from 'launchdarkly-react-client-sdk'
+import { recordJSException } from './otelHelpers'
 
 const gqlSchema = loader('../../app-web/src/gen/schema.graphql')
 
@@ -132,6 +133,9 @@ if (ldClientId === undefined) {
         </React.StrictMode>
     )
 })().catch((e) => {
+    recordJSException(
+        'LDProvider failed, could not initialized application' + e
+    )
     throw new Error('Could not initialize the application: ' + e)
 })
 
