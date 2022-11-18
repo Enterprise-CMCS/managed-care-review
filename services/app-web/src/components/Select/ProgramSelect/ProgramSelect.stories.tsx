@@ -1,9 +1,9 @@
 import { Story } from '@storybook/react'
-import { ProgramSelect, ProgramSelectPropType } from '../index'
+import { ProgramSelect, ProgramSelectPropType } from './ProgramSelect'
 import { mockMNState } from '../../../testHelpers/apolloHelpers'
 
 export default {
-    title: 'Components/Select/Select',
+    title: 'Components/Select/ProgramSelect',
     component: ProgramSelect,
 }
 
