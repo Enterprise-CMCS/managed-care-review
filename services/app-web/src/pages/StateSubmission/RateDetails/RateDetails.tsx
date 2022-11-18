@@ -191,8 +191,8 @@ export const RateDetails = ({
                                   currentRevision.node.submitInfo.updatedAt
                               )
                                   .tz('UTC')
-                                  .format('MM/DD/YYYY')})`
-                            : ''
+                                  .format('MM/DD/YY')})`
+                            : ` (Draft)`
 
                         packages.push({
                             label: `${packageName(
@@ -203,6 +203,7 @@ export const RateDetails = ({
                         })
                     }
                 })
+            console.log(packages)
             setPackageOptions(packages)
         },
         onError: (error) => {
