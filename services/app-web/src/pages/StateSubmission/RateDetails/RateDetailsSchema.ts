@@ -8,7 +8,7 @@ const RateDetailsFormSchema = Yup.array().of(
     Yup.object().shape({
         packagesWithSharedRateCerts: Yup.array().when('hasSharedRateCert', {
             is: true,
-            then: Yup.array().min(1, 'You must select a submission'),
+            then: Yup.array().min(1, 'You must select at least one submission'),
         }),
         rateProgramIDs: Yup.array().min(1, 'You must select a program'),
         rateType: Yup.string().defined(

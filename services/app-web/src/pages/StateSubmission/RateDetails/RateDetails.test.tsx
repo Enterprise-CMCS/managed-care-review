@@ -1336,7 +1336,9 @@ describe('RateDetails', () => {
             //Expect submission selection error and continue button is disabled
             await waitFor(() => {
                 expect(
-                    screen.getAllByText('You must select a submission')
+                    screen.getAllByText(
+                        'You must select at least one submission'
+                    )
                 ).toHaveLength(2)
                 expect(continueButton).toHaveAttribute('aria-disabled', 'true')
             })
@@ -1356,7 +1358,9 @@ describe('RateDetails', () => {
             //Expect submission selection error to clear and continue button is not disabled
             await waitFor(() => {
                 expect(
-                    screen.queryByText('You must select a submission')
+                    screen.queryByText(
+                        'You must select at least one submission'
+                    )
                 ).not.toBeInTheDocument()
                 expect(continueButton).not.toHaveAttribute('aria-disabled')
             })
