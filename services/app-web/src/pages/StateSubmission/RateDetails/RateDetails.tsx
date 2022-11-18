@@ -1488,8 +1488,9 @@ export const RateDetails = ({
                                     }
                                 }}
                                 disableContinue={
-                                    showFileUploadError ||
-                                    !!Object.keys(errors).length
+                                    (shouldValidate &&
+                                        !!Object.keys(errors).length) ||
+                                    showFileUploadError
                                 }
                                 actionInProgress={isSubmitting}
                             />
