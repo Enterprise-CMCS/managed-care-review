@@ -134,7 +134,7 @@ if (ldClientId === undefined) {
     )
 })().catch((e) => {
     recordJSException(
-        'LDProvider failed, could not initialized application' + e
+        'LDProvider failed, could not initialize the application' + e
     )
     throw new Error('Could not initialize the application: ' + e)
 })
