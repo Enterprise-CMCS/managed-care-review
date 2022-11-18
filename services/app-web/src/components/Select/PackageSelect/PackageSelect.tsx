@@ -9,7 +9,7 @@ export type PackageSelectPropType = {
     initialValues: string[]
     packageOptions: PackageOptionType[]
     draftSubmissionId: string
-    error?: boolean | undefined
+    error?: boolean
 }
 
 type PackageOptionType = {
