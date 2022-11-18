@@ -203,7 +203,6 @@ export const RateDetails = ({
                         })
                     }
                 })
-            console.log(packages)
             setPackageOptions(packages)
         },
         onError: (error) => {
