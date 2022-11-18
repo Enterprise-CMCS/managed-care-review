@@ -34,6 +34,7 @@ import {
     FieldRadio,
     PoliteErrorMessage,
     ProgramSelect,
+    PackageSelect,
 } from '../../../components'
 import {
     formatForForm,
@@ -50,7 +51,7 @@ import { useS3 } from '../../../contexts/S3Context'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
-import { useStatePrograms } from '../../../hooks/useStatePrograms'
+import { useStatePrograms } from '../../../hooks'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
 import * as Yup from 'yup'
@@ -60,7 +61,6 @@ import { useIndexHealthPlanPackagesQuery } from '../../../gen/gqlClient'
 import { base64ToDomain } from '../../../common-code/proto/healthPlanFormDataProto'
 import { recordJSException } from '../../../otelHelpers'
 import { dayjs } from '../../../common-code/dateHelpers'
-import Select, { AriaOnFocus } from 'react-select'
 
 const RateDatesErrorMessage = ({
     startDate,
@@ -134,7 +134,7 @@ export const RateDetails = ({
         featureFlags.MULTI_RATE_SUBMISSIONS.flag,
         featureFlags.MULTI_RATE_SUBMISSIONS.defaultValue
     )
-    const ratesAcrossSubmissions = ldClient?.variation(
+    const showRatesAcrossSubs = ldClient?.variation(
         featureFlags.RATES_ACROSS_SUBMISSIONS.flag,
         featureFlags.RATES_ACROSS_SUBMISSIONS.defaultValue
     )
@@ -147,11 +147,9 @@ export const RateDetails = ({
     const [focusNewRate, setFocusNewRate] = React.useState(false)
     const newRateNameRef = React.useRef<HTMLElement | null>(null)
     const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
-    const noOptions: PackageOptionType[] = [
-        { label: 'Loading submissions', value: '' },
-    ]
-    const [packageOptions, setPackageOptions] =
-        React.useState<PackageOptionType[]>(noOptions)
+    const [packageOptions, setPackageOptions] = React.useState<
+        PackageOptionType[]
+    >([])
 
     const rateDetailsFormSchema = showMultiRates
         ? //Concat RateDetailsFormSchema to ActuaryContactSchema for error summary order
@@ -164,18 +162,9 @@ export const RateDetails = ({
               rateInfos: RateDetailsFormSchema,
           })
 
-    const onFocus: AriaOnFocus<PackageOptionType> = ({
-        focused,
-        isDisabled,
-    }): string => {
-        return `You are currently focused on option ${focused.label}${
-            isDisabled ? ', disabled' : ''
-        }`
-    }
-
-    useIndexHealthPlanPackagesQuery({
-        skip: !ratesAcrossSubmissions,
-        onCompleted: (data) => {
+    const { loading, error } = useIndexHealthPlanPackagesQuery({
+        skip: !showRatesAcrossSubs,
+        onCompleted: async (data) => {
             const packages: PackageOptionType[] = []
             data?.indexHealthPlanPackages.edges
                 .map((edge) => edge.node)
@@ -188,7 +177,6 @@ export const RateDetails = ({
                         recordJSException(
                             `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${sub.id} Error message: ${currentSubmissionData.message}`
                         )
-
                         return null
                     }
 
@@ -205,16 +193,23 @@ export const RateDetails = ({
                                   .tz('UTC')
                                   .format('MM/DD/YYYY')})`
                             : ''
+
                         packages.push({
                             label: `${packageName(
                                 currentSubmissionData,
                                 statePrograms
                             )}${submittedAt}`,
-                            value: sub.id,
+                            value: currentSubmissionData.id,
                         })
                     }
                 })
             setPackageOptions(packages)
+        },
+        onError: (error) => {
+            recordJSException(
+                `indexHealthPlanPackagesQuery: Error querying health plan packages. ID: ${draftSubmission.id} Error message: ${error.message}`
+            )
+            return null
         },
     })
 
@@ -736,7 +731,7 @@ export const RateDetails = ({
                                                                 }
                                                             />
                                                         </FormGroup>
-                                                        {ratesAcrossSubmissions && (
+                                                        {showRatesAcrossSubs && (
                                                             <FormGroup>
                                                                 <Checkbox
                                                                     id={`hasSharedRateCheckBox-${rateInfo.key}`}
@@ -761,7 +756,7 @@ export const RateDetails = ({
                                                                 />
                                                             </FormGroup>
                                                         )}
-                                                        {ratesAcrossSubmissions &&
+                                                        {showRatesAcrossSubs &&
                                                             rateInfo.hasSharedRateCert && (
                                                                 <FormGroup
                                                                     error={showFieldErrors(
@@ -790,45 +785,31 @@ export const RateDetails = ({
                                                                             )}
                                                                         </PoliteErrorMessage>
                                                                     )}
-                                                                    <Select
-                                                                        defaultValue={rateInfo.packagesWithSharedRateCerts.map(
-                                                                            (
-                                                                                pkg
-                                                                            ) => {
-                                                                                const name =
-                                                                                    packageOptions?.find(
-                                                                                        (
-                                                                                            options
-                                                                                        ) =>
-                                                                                            options.value ===
-                                                                                            pkg
-                                                                                    )?.label
-                                                                                if (
-                                                                                    !name
-                                                                                ) {
-                                                                                    return {
-                                                                                        value: pkg,
-                                                                                        label: 'Unknown submission',
-                                                                                    }
-                                                                                }
-                                                                                return {
-                                                                                    label: name,
-                                                                                    value: pkg,
-                                                                                }
-                                                                            }
-                                                                        )}
-                                                                        id={`packageSelect-${rateInfo.key}`}
+                                                                    <PackageSelect
+                                                                        //This key is required here because the combination of react-select, defaultValue, formik and apollo useQuery
+                                                                        // causes issues with the default value when reloading the page
+                                                                        key={`${packageOptions}-${rateInfo.key}`}
                                                                         inputId={`rateInfos.${index}.packagesWithSharedRateCerts`}
                                                                         name={`rateInfos.${index}.packagesWithSharedRateCerts`}
-                                                                        isMulti
-                                                                        isSearchable
-                                                                        options={
+                                                                        statePrograms={
+                                                                            statePrograms
+                                                                        }
+                                                                        initialValues={
+                                                                            rateInfo?.packagesWithSharedRateCerts
+                                                                        }
+                                                                        packageOptions={
                                                                             packageOptions
                                                                         }
-                                                                        aria-label="submission (required)"
-                                                                        ariaLiveMessages={{
-                                                                            onFocus,
-                                                                        }}
+                                                                        draftSubmissionId={
+                                                                            draftSubmission.id
+                                                                        }
+                                                                        isLoading={
+                                                                            loading
+                                                                        }
+                                                                        error={
+                                                                            error instanceof
+                                                                            Error
+                                                                        }
                                                                         onChange={(
                                                                             selectedOption
                                                                         ) =>
@@ -1506,7 +1487,10 @@ export const RateDetails = ({
                                         )
                                     }
                                 }}
-                                disableContinue={showFileUploadError}
+                                disableContinue={
+                                    showFileUploadError ||
+                                    !!Object.keys(errors).length
+                                }
                                 actionInProgress={isSubmitting}
                             />
                         </UswdsForm>
