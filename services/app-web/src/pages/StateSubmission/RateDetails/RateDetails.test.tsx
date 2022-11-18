@@ -30,6 +30,7 @@ import { RateDetails } from './RateDetails'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import selectEvent from 'react-select-event'
 import * as useStatePrograms from '../../../hooks/useStatePrograms'
+import { unlockedWithALittleBitOfEverything } from '../../../common-code/healthPlanFormDataMocks'
 
 describe('RateDetails', () => {
     const emptyRateDetailsDraft = {
@@ -1069,6 +1070,7 @@ describe('RateDetails', () => {
             const mockSubmissions = [
                 {
                     ...mockSubmittedHealthPlanPackage({
+                        ...unlockedWithALittleBitOfEverything(),
                         stateNumber: 4,
                         id: 'test-id-123',
                     }),
@@ -1133,35 +1135,55 @@ describe('RateDetails', () => {
             await selectEvent.openMenu(firstRatePackageCombobox)
             await waitFor(() => {
                 expect(
-                    firstRateCert.getByText('MCR-MN-0005-MSC+-PMAP-SNBC')
+                    firstRateCert.getByText(
+                        'MCR-MN-0004-MSC+-PMAP-SNBC (Submitted 01/02/21)'
+                    )
                 ).toBeInTheDocument()
                 expect(
-                    firstRateCert.getByText('MCR-MN-0006-MSC+-PMAP-SNBC')
+                    firstRateCert.getByText(
+                        'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
+                    )
+                ).toBeInTheDocument()
+                expect(
+                    firstRateCert.getByText(
+                        'MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
+                    )
                 ).toBeInTheDocument()
             })
 
             //Select two packages that have a shared rate cert with this rate cert.
+            await selectEvent.openMenu(firstRatePackageCombobox)
             await selectEvent.select(
                 firstRatePackageCombobox,
-                'MCR-MN-0005-MSC+-PMAP-SNBC'
+                'MCR-MN-0004-MSC+-PMAP-SNBC (Submitted 01/02/21)'
             )
             await selectEvent.openMenu(firstRatePackageCombobox)
             await selectEvent.select(
                 firstRatePackageCombobox,
-                'MCR-MN-0006-MSC+-PMAP-SNBC'
+                'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
+            )
+            await selectEvent.openMenu(firstRatePackageCombobox)
+            await selectEvent.select(
+                firstRatePackageCombobox,
+                'MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
             )
             await selectEvent.openMenu(firstRatePackageCombobox)
 
-            //Expect the two packages to have been selected and 'No options' are left to be selected.
+            //Expect the three packages to have been selected and 'No options' are left to be selected.
             expect(firstRateCert.getByText('No options')).toBeInTheDocument()
             expect(
                 firstRateCert.getByLabelText(
-                    'Remove MCR-MN-0005-MSC+-PMAP-SNBC'
+                    'Remove MCR-MN-0004-MSC+-PMAP-SNBC (Submitted 01/02/21)'
                 )
             ).toBeInTheDocument()
             expect(
                 firstRateCert.getByLabelText(
-                    'Remove MCR-MN-0006-MSC+-PMAP-SNBC'
+                    'Remove MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
+                )
+            ).toBeInTheDocument()
+            expect(
+                firstRateCert.getByLabelText(
+                    'Remove MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
                 )
             ).toBeInTheDocument()
 
@@ -1206,30 +1228,35 @@ describe('RateDetails', () => {
             await selectEvent.openMenu(secondRatePackageCombobox)
             await selectEvent.select(
                 secondRatePackageCombobox,
-                'MCR-MN-0005-MSC+-PMAP-SNBC'
+                'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
             )
             expect(firstRateCertSharedCheckBox).toBeChecked()
             expect(firstRateCert.getAllByRole('combobox')).toHaveLength(2)
             expect(
                 firstRateCert.getByLabelText(
-                    'Remove MCR-MN-0005-MSC+-PMAP-SNBC'
+                    'Remove MCR-MN-0004-MSC+-PMAP-SNBC (Submitted 01/02/21)'
                 )
             ).toBeInTheDocument()
             expect(
                 firstRateCert.getByLabelText(
-                    'Remove MCR-MN-0006-MSC+-PMAP-SNBC'
+                    'Remove MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
+                )
+            ).toBeInTheDocument()
+            expect(
+                firstRateCert.getByLabelText(
+                    'Remove MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
                 )
             ).toBeInTheDocument()
             expect(secondRateCertSharedCheckBox).toBeChecked()
             expect(secondRateCert.getAllByRole('combobox')).toHaveLength(2)
             expect(
                 secondRateCert.getByLabelText(
-                    'Remove MCR-MN-0005-MSC+-PMAP-SNBC'
+                    'Remove MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
                 )
             ).toBeInTheDocument()
             expect(
                 secondRateCert.queryByLabelText(
-                    'Remove MCR-MN-0006-MSC+-PMAP-SNBC'
+                    'Remove MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
                 )
             ).not.toBeInTheDocument()
         })
@@ -1320,10 +1347,14 @@ describe('RateDetails', () => {
             await selectEvent.openMenu(firstRatePackageCombobox)
             await waitFor(() => {
                 expect(
-                    firstRateCert.getByText('MCR-MN-0005-MSC+-PMAP-SNBC')
+                    firstRateCert.getByText(
+                        'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
+                    )
                 ).toBeInTheDocument()
                 expect(
-                    firstRateCert.getByText('MCR-MN-0006-MSC+-PMAP-SNBC')
+                    firstRateCert.getByText(
+                        'MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
+                    )
                 ).toBeInTheDocument()
             })
 
@@ -1346,12 +1377,12 @@ describe('RateDetails', () => {
             //Select two packages that have a shared rate cert with this rate cert.
             await selectEvent.select(
                 firstRatePackageCombobox,
-                'MCR-MN-0005-MSC+-PMAP-SNBC'
+                'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
             )
             await selectEvent.openMenu(firstRatePackageCombobox)
             await selectEvent.select(
                 firstRatePackageCombobox,
-                'MCR-MN-0006-MSC+-PMAP-SNBC'
+                'MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
             )
             await selectEvent.openMenu(firstRatePackageCombobox)
 
