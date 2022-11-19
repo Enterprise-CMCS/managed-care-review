@@ -9,15 +9,7 @@ export async function findAllRevisions(
     client: PrismaClient
 ): Promise<HealthPlanRevisionTable[] | StoreError> {
     const allRevisions: HealthPlanRevisionTable[] =
-        await client.healthPlanRevisionTable.findMany({
-            where: {
-                pkg: {
-                    stateCode: {
-                        not: 'AS', // exclude test state as per ADR 019
-                    },
-                },
-            },
-        })
+        await client.healthPlanRevisionTable.findMany()
     if (allRevisions instanceof Error) {
         console.error('findAllRevisions error:', allRevisions)
     }
