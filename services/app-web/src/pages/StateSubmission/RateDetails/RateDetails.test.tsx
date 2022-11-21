@@ -1204,7 +1204,17 @@ describe('RateDetails', () => {
             )
             expect(firstRateCertSharedCheckBox).toBeChecked()
             expect(firstRateCert.getAllByRole('combobox')).toHaveLength(2)
+            expect(
+                firstRateCert.getByText(
+                    /Please select the submissions that also contain this rate/
+                )
+            ).toBeInTheDocument()
             expect(secondRateCertSharedCheckBox).not.toBeChecked()
+            expect(
+                secondRateCert.queryByText(
+                    /Please select the submissions that also contain this rate/
+                )
+            ).toBeNull()
             expect(secondRateCert.getAllByRole('combobox')).toHaveLength(1)
 
             //Both rate cert check boxes are unchecked and only programs combobox present
