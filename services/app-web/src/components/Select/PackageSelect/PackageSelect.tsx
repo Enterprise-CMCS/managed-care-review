@@ -12,7 +12,7 @@ export type PackageSelectPropType = {
     error?: boolean
 }
 
-type PackageOptionType = {
+export type PackageOptionType = {
     readonly label: string
     readonly value: string
     readonly isFixed?: boolean

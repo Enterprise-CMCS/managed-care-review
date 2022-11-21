@@ -9,7 +9,7 @@ export type ProgramSelectPropType = {
     programIDs: string[]
 }
 
-interface ProgramOption {
+export interface ProgramOptionType {
     readonly value: string
     readonly label: string
     readonly isFixed?: boolean
@@ -21,12 +21,12 @@ export const ProgramSelect = ({
     statePrograms,
     programIDs,
     ...selectProps
-}: ProgramSelectPropType & Props<ProgramOption, true>) => {
-    const programOptions: ProgramOption[] = statePrograms.map((program) => {
+}: ProgramSelectPropType & Props<ProgramOptionType, true>) => {
+    const programOptions: ProgramOptionType[] = statePrograms.map((program) => {
         return { value: program.id, label: program.name }
     })
 
-    const onFocus: AriaOnFocus<ProgramOption> = ({
+    const onFocus: AriaOnFocus<ProgramOptionType> = ({
         focused,
         isDisabled,
     }): string => {
