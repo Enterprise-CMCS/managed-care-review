@@ -1,7 +1,7 @@
 import React from 'react'
-import styles from './ProgramSelect.module.scss'
+import styles from '../Select.module.scss'
 import Select, { AriaOnFocus, Props } from 'react-select'
-import { Program } from '../../gen/gqlClient'
+import { Program } from '../../../gen/gqlClient'
 
 export type ProgramSelectPropType = {
     name: string
@@ -51,7 +51,7 @@ export const ProgramSelect = ({
                 }
             })}
             className={styles.multiSelect}
-            classNamePrefix="program-select"
+            classNamePrefix="select"
             id={`${name}-programSelect`}
             name={name}
             options={programOptions}
