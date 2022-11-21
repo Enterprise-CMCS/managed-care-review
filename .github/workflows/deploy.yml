@@ -326,28 +326,6 @@ jobs:
           state: 'success'
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
-  cypress-install:
-    name: cypress-install
-    needs: [deploy-app, finishing-prep]
-    if: always() && needs.finishing-prep.result == 'success'
-    runs-on: ubuntu-latest
-    container: cypress/browsers:node14.17.0-chrome91-ff89
-    permissions:
-      deployments: write
-    steps:
-      - name: Cypress install
-        id: cypress
-        uses: cypress-io/github-action@4.2.0 # use the explicit version
-        with: 
-          runTests: false
-
-      - name: Save build folder
-        uses: actions/upload-artifact@v3
-        with:
-          name: build
-          if-no-files-found: error
-          path: build
-
   cypress:
     name: cypress-run
     needs: [deploy-app, finishing-prep]
@@ -362,22 +340,13 @@ jobs:
         # run copies of the current job in parallel
         containers: [1, 2, 3, 4, 5, 6]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      
-      - name: Download the build folders
-        uses: actions/download-artifact@v3
-        with:
-          name: build
-          path: build
-            
+      - uses: actions/checkout@v3
+
       - name: Cypress -- Chrome
         id: cypress
-        uses: cypress-io/github-action@4.2.0 # use explicit version
+        uses: cypress-io/github-action@v4
         with:
-          install: false # we already installed in previous version
           config: baseUrl=${{ needs.finishing-prep.outputs.application-endpoint }}
-          wait-on-timeout: 120
           record: true
           parallel: true
           browser: chrome
