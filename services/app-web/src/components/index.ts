@@ -56,7 +56,7 @@ export { Modal } from './Modal'
 
 export { ExpandableText } from './ExpandableText'
 
-export { ProgramSelect } from './ProgramSelect'
+export { ProgramSelect, PackageSelect } from './Select'
 
 export {
     ErrorAlert,

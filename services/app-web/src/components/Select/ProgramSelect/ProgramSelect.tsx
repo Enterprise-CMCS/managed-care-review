@@ -1,7 +1,7 @@
 import React from 'react'
-import styles from './ProgramSelect.module.scss'
+import styles from '../Select.module.scss'
 import Select, { AriaOnFocus, Props } from 'react-select'
-import { Program } from '../../gen/gqlClient'
+import { Program } from '../../../gen/gqlClient'
 
 export type ProgramSelectPropType = {
     name: string
@@ -9,7 +9,7 @@ export type ProgramSelectPropType = {
     programIDs: string[]
 }
 
-interface ProgramOption {
+export interface ProgramOptionType {
     readonly value: string
     readonly label: string
     readonly isFixed?: boolean
@@ -21,12 +21,12 @@ export const ProgramSelect = ({
     statePrograms,
     programIDs,
     ...selectProps
-}: ProgramSelectPropType & Props<ProgramOption, true>) => {
-    const programOptions: ProgramOption[] = statePrograms.map((program) => {
+}: ProgramSelectPropType & Props<ProgramOptionType, true>) => {
+    const programOptions: ProgramOptionType[] = statePrograms.map((program) => {
         return { value: program.id, label: program.name }
     })
 
-    const onFocus: AriaOnFocus<ProgramOption> = ({
+    const onFocus: AriaOnFocus<ProgramOptionType> = ({
         focused,
         isDisabled,
     }): string => {
@@ -51,7 +51,7 @@ export const ProgramSelect = ({
                 }
             })}
             className={styles.multiSelect}
-            classNamePrefix="program-select"
+            classNamePrefix="select"
             id={`${name}-programSelect`}
             name={name}
             options={programOptions}
