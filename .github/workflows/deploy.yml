@@ -337,7 +337,7 @@ jobs:
     steps:
       - name: Cypress install
         id: cypress
-        uses: cypress-io/github-action@4.2.0 #use the explicit version
+        uses: cypress-io/github-action@4.2.0 # use the explicit version
         with: 
           runTests: false
 
@@ -373,9 +373,9 @@ jobs:
             
       - name: Cypress -- Chrome
         id: cypress
-        uses: cypress-io/github-action@4.2.0 #use explicit version
+        uses: cypress-io/github-action@4.2.0 # use explicit version
         with:
-          install: false
+          install: false # we already installed in previous version
           config: baseUrl=${{ needs.finishing-prep.outputs.application-endpoint }}
           wait-on-timeout: 120
           record: true

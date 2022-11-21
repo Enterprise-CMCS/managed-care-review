@@ -160,13 +160,13 @@ jobs:
 
       - name: Cypress on Dev -- Chrome
         id: cypressdev
-        uses: cypress-io/github-action@v4
+        uses: cypress-io/github-action@v4.2.0
         with:
           install: false
           config: baseUrl=https://mc-review-dev.onemac.cms.gov
           spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
           record: true
-          parallel: true
+          parallel: false,
           browser: chrome
           group: 'Chrome'
         env:
@@ -230,7 +230,7 @@ jobs:
           config: baseUrl=https://mc-review-val.onemac.cms.gov
           spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
           record: true
-          parallel: true
+          parallel: false
           browser: chrome
           group: 'Chrome'
         env:
@@ -294,7 +294,7 @@ jobs:
           config: baseUrl=https://mc-review.onemac.cms.gov
           spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
           record: true
-          parallel: true
+          parallel: false
           browser: chrome
           group: 'Chrome'
         env:
