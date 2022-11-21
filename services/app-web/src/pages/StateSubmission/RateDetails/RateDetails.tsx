@@ -726,42 +726,41 @@ export const RateDetails = ({
                                                             />
                                                         </FormGroup>
                                                         {showRatesAcrossSubs && (
-                                                            <Fieldset>
-                                                                <FormGroup>
-                                                                    <Checkbox
-                                                                        id={`hasSharedRateCheckBox-${rateInfo.key}`}
-                                                                        name={`rateInfos.${index}.hasSharedRateCert`}
-                                                                        label="This rate certification was uploaded to another submission."
-                                                                        aria-required={
-                                                                            false
-                                                                        }
-                                                                        checked={
-                                                                            rateInfo.hasSharedRateCert
-                                                                        }
-                                                                        onChange={(
+                                                            <FormGroup
+                                                                error={showFieldErrors(
+                                                                    rateErrorHandling(
+                                                                        errors
+                                                                            ?.rateInfos?.[
+                                                                            index
+                                                                        ]
+                                                                    )
+                                                                        ?.packagesWithSharedRateCerts
+                                                                )}
+                                                            >
+                                                                <Checkbox
+                                                                    id={`hasSharedRateCheckBox-${rateInfo.key}`}
+                                                                    name={`rateInfos.${index}.hasSharedRateCert`}
+                                                                    label="This rate certification was uploaded to another submission."
+                                                                    aria-required={
+                                                                        false
+                                                                    }
+                                                                    checked={
+                                                                        rateInfo.hasSharedRateCert
+                                                                    }
+                                                                    onChange={(
+                                                                        e
+                                                                    ) =>
+                                                                        setFieldValue(
                                                                             e
-                                                                        ) =>
-                                                                            setFieldValue(
-                                                                                e
-                                                                                    .target
-                                                                                    .name,
-                                                                                !rateInfo.hasSharedRateCert
-                                                                            )
-                                                                        }
-                                                                    />
-                                                                </FormGroup>
+                                                                                .target
+                                                                                .name,
+                                                                            !rateInfo.hasSharedRateCert
+                                                                        )
+                                                                    }
+                                                                />
+
                                                                 {rateInfo.hasSharedRateCert && (
-                                                                    <FormGroup
-                                                                        error={showFieldErrors(
-                                                                            rateErrorHandling(
-                                                                                errors
-                                                                                    ?.rateInfos?.[
-                                                                                    index
-                                                                                ]
-                                                                            )
-                                                                                ?.packagesWithSharedRateCerts
-                                                                        )}
-                                                                    >
+                                                                    <>
                                                                         <Label
                                                                             htmlFor={`rateInfos.${index}.rateProgramIDs`}
                                                                         >
@@ -843,9 +842,9 @@ export const RateDetails = ({
                                                                                 )
                                                                             }
                                                                         />
-                                                                    </FormGroup>
+                                                                    </>
                                                                 )}
-                                                            </Fieldset>
+                                                            </FormGroup>
                                                         )}
                                                         <FormGroup
                                                             error={showFieldErrors(
