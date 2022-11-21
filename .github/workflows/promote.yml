@@ -160,7 +160,7 @@ jobs:
 
       - name: Cypress on Dev -- Chrome
         id: cypressdev
-        uses: cypress-io/github-action@v4.2.0
+        uses: cypress-io/github-action@v4
         with:
           install: false
           config: baseUrl=https://mc-review-dev.onemac.cms.gov
