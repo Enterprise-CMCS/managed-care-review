@@ -142,49 +142,8 @@ jobs:
       react_app_auth_mode: IDM
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
-<<<<<<< Updated upstream
-  dev-cypress:
-    name: dev - cypress
-    needs: [promote-app-dev]
-    runs-on: ubuntu-latest
-    container: cypress/browsers:node14.17.0-chrome91-ff89
-    strategy:
-      fail-fast: false
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: Cypress on Dev -- Chrome
-        id: cypressdev
-        uses: cypress-io/github-action@v4
-        with:
-          install: false
-          config: baseUrl=https://mc-review-dev.onemac.cms.gov
-          spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
-          record: true
-          parallel: false
-          browser: chrome
-          group: 'Chrome - dev'
-          ci-build-id: 'dev'
-        env:
-          REACT_APP_AUTH_MODE: IDM
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload cypress video
-        uses: actions/upload-artifact@v3
-        if: failure() && steps.cypressdev.outcome == 'failure'
-        with:
-          name: cypress-videos
-          path: tests/cypress/videos
-
-=======
->>>>>>> Stashed changes
   promote-infra-val:
-    needs: [ promote-app-dev, unit-tests]
+    needs: [promote-app-dev, unit-tests]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
     with:
       stage_name: val
@@ -195,7 +154,7 @@ jobs:
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
 
   promote-app-val:
-    needs: [ promote-app-dev, promote-infra-val, unit-tests]
+    needs: [promote-app-dev, promote-infra-val, unit-tests]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
       stage_name: val
@@ -208,47 +167,6 @@ jobs:
       react_app_auth_mode: IDM
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
-<<<<<<< Updated upstream
-  cypress-val:
-    name: val - cypress
-    needs: [promote-app-val]
-    runs-on: ubuntu-latest
-    container: cypress/browsers:node14.17.0-chrome91-ff89
-    strategy:
-      fail-fast: false
-  
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: Cypress on Val -- Chrome
-        id: cypressval
-        uses: cypress-io/github-action@v4
-        with:
-          install: false
-          config: baseUrl=https://mc-review-val.onemac.cms.gov
-          spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
-          record: true
-          parallel: false
-          browser: chrome
-          group: 'Chrome - val'
-          ci-build-id: 'val'
-        env:
-          REACT_APP_AUTH_MODE: IDM
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload cypress video
-        uses: actions/upload-artifact@v3
-        if: failure() && steps.cypressval.outcome == 'failure'
-        with:
-          name: cypress-videos
-          path: tests/cypress/videos
-
-=======
->>>>>>> Stashed changes
   promote-infra-prod:
     needs: [promote-app-val, unit-tests]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
@@ -299,7 +217,7 @@ jobs:
           parallel: false
           browser: chrome
           group: 'Chrome - prod'
-          ci-build-id: 'prod'
+          ci-build-id: 'cypress-prod'
         env:
           REACT_APP_AUTH_MODE: IDM
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
