@@ -164,7 +164,7 @@ jobs:
           config: baseUrl=https://mc-review-dev.onemac.cms.gov
           spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
           record: true
-          parallel: false,
+          parallel: false
           browser: chrome
           group: 'Chrome - dev'
           ci-build-id: 'dev'
