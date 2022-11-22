@@ -149,9 +149,7 @@ jobs:
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
       fail-fast: false
-      matrix:
-        # run copies of the current job in parallel
-        containers: [1, 2, 3, 4]
+
     steps:
       - uses: actions/checkout@v3
 
@@ -166,9 +164,10 @@ jobs:
           config: baseUrl=https://mc-review-dev.onemac.cms.gov
           spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
           record: true
-          parallel: true
+          parallel: false
           browser: chrome
-          group: 'Chrome'
+          group: 'Chrome - dev'
+          ci-build-id: 'dev'
         env:
           REACT_APP_AUTH_MODE: IDM
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -213,9 +212,7 @@ jobs:
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
       fail-fast: false
-      matrix:
-        # run copies of the current job in parallel
-        containers: [1, 2, 3, 4]
+  
     steps:
       - uses: actions/checkout@v3
 
@@ -230,9 +227,10 @@ jobs:
           config: baseUrl=https://mc-review-val.onemac.cms.gov
           spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
           record: true
-          parallel: true
+          parallel: false
           browser: chrome
-          group: 'Chrome'
+          group: 'Chrome - val'
+          ci-build-id: 'val'
         env:
           REACT_APP_AUTH_MODE: IDM
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -277,9 +275,7 @@ jobs:
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
       fail-fast: false
-      matrix:
-        # run copies of the current job in parallel
-        containers: [1, 2, 3, 4]
+   
     steps:
       - uses: actions/checkout@v3
 
@@ -294,9 +290,10 @@ jobs:
           config: baseUrl=https://mc-review.onemac.cms.gov
           spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
           record: true
-          parallel: true
+          parallel: false
           browser: chrome
-          group: 'Chrome'
+          group: 'Chrome - prod'
+          ci-build-id: 'prod'
         env:
           REACT_APP_AUTH_MODE: IDM
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
