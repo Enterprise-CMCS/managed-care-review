@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`unlockPackageCMSEmail renders overall email as expected 1`] = `
+exports[`renders overall email as expected 1`] = `
 "Submission MCR-MN-0003-SNBC was unlocked<br />
 <br />
 <b>Unlocked by:</b> leslie@example.com<br />

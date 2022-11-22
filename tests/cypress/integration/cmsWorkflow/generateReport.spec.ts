@@ -1,7 +1,4 @@
 describe('Generate reports', () => {
-    beforeEach(() => {
-        cy.stubFeatureFlags()
-    })
     it('CMS user sees option to create report', () => {
         cy.logInAsCMSUser()
         cy.visit('/reports')

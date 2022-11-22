@@ -9,9 +9,11 @@ import { mcreviewproto } from '../../gen/healthPlanFormDataProto'
 export function migrateProto(
     oldProto: mcreviewproto.IHealthPlanFormData
 ): mcreviewproto.IHealthPlanFormData {
-    if (!oldProto.protoVersion || oldProto.protoVersion <= 1) {
-        oldProto.protoVersion = 2
+    if (oldProto.protoVersion !== 1) {
+        console.log('Unexpected proto version!: ', oldProto.protoVersion)
     }
+
+    oldProto.protoVersion = 2
 
     return oldProto
 }

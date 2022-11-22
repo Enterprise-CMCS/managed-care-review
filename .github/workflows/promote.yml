@@ -63,7 +63,7 @@ jobs:
         run: ./dev test --unit
 
       - name: publish code coverage
-        uses: paambaati/codeclimate-action@v3.2.0
+        uses: paambaati/codeclimate-action@v3.1.0
         continue-on-error: true
         env:
           CC_TEST_REPORTER_ID: cace182021fe88d327fa8d95355ac6081f420e094a214fe77feb5df2f0259e9d
@@ -149,7 +149,9 @@ jobs:
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
       fail-fast: false
-
+      matrix:
+        # run copies of the current job in parallel
+        containers: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v3
 
@@ -164,10 +166,9 @@ jobs:
           config: baseUrl=https://mc-review-dev.onemac.cms.gov
           spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
           record: true
-          parallel: false
+          parallel: true
           browser: chrome
-          group: 'Chrome - dev'
-          ci-build-id: 'dev'
+          group: 'Chrome'
         env:
           REACT_APP_AUTH_MODE: IDM
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -212,7 +213,9 @@ jobs:
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
       fail-fast: false
-  
+      matrix:
+        # run copies of the current job in parallel
+        containers: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v3
 
@@ -227,10 +230,9 @@ jobs:
           config: baseUrl=https://mc-review-val.onemac.cms.gov
           spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
           record: true
-          parallel: false
+          parallel: true
           browser: chrome
-          group: 'Chrome - val'
-          ci-build-id: 'val'
+          group: 'Chrome'
         env:
           REACT_APP_AUTH_MODE: IDM
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -275,7 +277,9 @@ jobs:
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
       fail-fast: false
-   
+      matrix:
+        # run copies of the current job in parallel
+        containers: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v3
 
@@ -290,10 +294,9 @@ jobs:
           config: baseUrl=https://mc-review.onemac.cms.gov
           spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
           record: true
-          parallel: false
+          parallel: true
           browser: chrome
-          group: 'Chrome - prod'
-          ci-build-id: 'prod'
+          group: 'Chrome'
         env:
           REACT_APP_AUTH_MODE: IDM
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}

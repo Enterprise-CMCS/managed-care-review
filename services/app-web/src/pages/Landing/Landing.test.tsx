@@ -6,8 +6,6 @@ import {
 import { Landing } from './Landing'
 
 describe('Landing', () => {
-    afterAll(() => jest.clearAllMocks())
-
     it('displays maintenance banner when flag is on', async () => {
         ldUseClientSpy({ 'site-maintenance-banner': true })
         renderWithProviders(<Landing />)

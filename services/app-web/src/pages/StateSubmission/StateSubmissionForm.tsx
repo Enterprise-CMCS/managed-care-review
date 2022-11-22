@@ -220,6 +220,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
         if (submissionAndRevisions) {
             const currentRevisionPackageOrError =
                 getCurrentRevisionFromHealthPlanPackage(submissionAndRevisions)
+
             // set form data
             if (currentRevisionPackageOrError instanceof Error) {
                 setFormDataError('MALFORMATTED_DATA')

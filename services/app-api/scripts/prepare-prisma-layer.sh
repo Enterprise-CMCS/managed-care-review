@@ -44,7 +44,6 @@ function preparePrismaLayer() {
     echo "Copy proto migration files to layer..."
     rsync -av ../app-proto/build/ lambda-layers-prisma-client-migration/nodejs/protoMigrator
     rsync -av ../app-proto/gen/ lambda-layers-prisma-client-migration/nodejs/gen
-    rsync -av ../../node_modules/uuid/ lambda-layers-prisma-client-migration/nodejs/node_modules/uuid
 
     echo "Remove Prisma CLI ..."
     rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/cli

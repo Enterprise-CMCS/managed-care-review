@@ -22,8 +22,6 @@ message HealthPlanFormData {
   repeated Contact state_contacts = 14;
   optional ContractInfo contract_info = 15;
   repeated Document documents = 16;
-  repeated ActuaryContact addtl_actuary_contacts = 17;
-  optional ActuaryCommunicationType addtl_actuary_communication_preference = 18;
 
   repeated RateInfo rate_infos = 50;
 }
@@ -180,10 +178,14 @@ message RateInfo {
   repeated Document rate_documents = 8;
   optional RateCapitationType rate_capitation_type = 9;
   repeated string rate_program_ids = 10;
-  optional string rate_certification_name = 11;
-  repeated string packages_with_shared_rate_certs = 12;
-
+  
   optional RateAmendmentInfo rate_amendment_info = 50;
+
+  message ActuaryContact {
+    optional Contact contact = 1;
+    optional ActuarialFirmType actuarial_firm_type = 2;
+    optional string actuarial_firm_other = 3;
+  }
 
   message RateAmendmentInfo {
     optional Date effective_date_start = 1;
@@ -230,11 +232,6 @@ enum DocumentCategory {
   DOCUMENT_CATEGORY_RATES_RELATED = 4;
 }
 
-message ActuaryContact {
-  optional Contact contact = 1;
-  optional ActuarialFirmType actuarial_firm_type = 2;
-  optional string actuarial_firm_other = 3;
-}
 
 message Document {
   optional string name = 1;

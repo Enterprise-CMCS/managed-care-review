@@ -8,8 +8,6 @@ describe('makeDocumentList', () => {
         rateInfos: [
             {
                 rateDocuments: [],
-                actuaryContacts: [],
-                packagesWithSharedRateCerts: [],
             },
         ],
         documents: [],

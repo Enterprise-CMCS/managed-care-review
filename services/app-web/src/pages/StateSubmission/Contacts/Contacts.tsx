@@ -19,7 +19,6 @@ import { useNavigate } from 'react-router-dom'
 import styles from '../StateSubmissionForm.module.scss'
 
 import {
-    ActuaryContact,
     ActuarialFirmType,
     ActuaryCommunicationType,
 } from '../../../common-code/healthPlanFormDataType'
@@ -29,10 +28,6 @@ import { ErrorSummary, FieldRadio } from '../../../components/Form'
 import { useFocus } from '../../../hooks/useFocus'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
-import { ActuaryContactFields } from './ActuaryContactFields'
-
 export interface ContactsFormValues {
     stateContacts: stateContactValue[]
     actuaryContacts: actuaryContactValue[]
@@ -117,6 +112,15 @@ const stateContactErrorHandling = (
     return error
 }
 
+const actuaryContactErrorHandling = (
+    error: string | FormikErrors<actuaryContactValue> | undefined
+): FormikErrors<actuaryContactValue> | undefined => {
+    if (typeof error === 'string') {
+        return undefined
+    }
+    return error
+}
+
 // Convert the formik errors into a shape that can be passed to ErrorSummary
 const flattenErrors = (
     errors: FormikErrors<ContactsFormValues>
@@ -143,11 +147,6 @@ const flattenErrors = (
                 flattened[errorKey] = value
             })
         })
-
-        if (errors.actuaryCommunicationPreference) {
-            flattened['actuaryCommunicationPreference'] =
-                errors.actuaryCommunicationPreference
-        }
     }
 
     return flattened
@@ -161,13 +160,6 @@ export const Contacts = ({
     showValidations?: HealthPlanFormPageProps['showValidations']
     updateDraft: HealthPlanFormPageProps['updateDraft']
 }): React.ReactElement => {
-    // Launch Darkly
-    const ldClient = useLDClient()
-    const showMultiRates = ldClient?.variation(
-        featureFlags.MULTI_RATE_SUBMISSIONS.flag,
-        featureFlags.MULTI_RATE_SUBMISSIONS.defaultValue
-    )
-
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const [focusNewContact, setFocusNewContact] = React.useState(false)
     const [focusNewActuaryContact, setFocusNewActuaryContact] =
@@ -220,27 +212,8 @@ export const Contacts = ({
     const showFieldErrors = (error?: FormError): boolean | undefined =>
         shouldValidate && Boolean(error)
 
-    /**
-     * Multi-rate-submissions flag off:
-     * Certifying actuary is displayed and filled out on this page, so we need to display it along with additional actuaries
-     * when flag is off.
-     *
-     * We do this by combining the certifying actuary of the first-rate certification with the actuaries in
-     * addtlActuaryContacts into one array.
-     */
-    const combineActuaries = () => {
-        if (draftSubmission.rateInfos[0]?.actuaryContacts.length) {
-            const certifyingActuary: ActuaryContact =
-                draftSubmission.rateInfos[0]?.actuaryContacts[0]
-            return [certifyingActuary, ...draftSubmission.addtlActuaryContacts]
-        }
-        return []
-    }
-
     const stateContacts = draftSubmission.stateContacts
-    const actuaryContacts = showMultiRates
-        ? draftSubmission.addtlActuaryContacts
-        : combineActuaries()
+    const actuaryContacts = draftSubmission.actuaryContacts
 
     const emptyStateContact = {
         name: '',
@@ -260,11 +233,7 @@ export const Contacts = ({
         stateContacts.push(emptyStateContact)
     }
 
-    if (
-        actuaryContacts.length === 0 &&
-        includeActuaryContacts &&
-        !showMultiRates
-    ) {
+    if (actuaryContacts.length === 0 && includeActuaryContacts) {
         actuaryContacts.push(emptyActuaryContact)
     }
 
@@ -272,7 +241,7 @@ export const Contacts = ({
         stateContacts: stateContacts,
         actuaryContacts: actuaryContacts,
         actuaryCommunicationPreference:
-            draftSubmission?.addtlActuaryCommunicationPreference ?? undefined,
+            draftSubmission?.actuaryCommunicationPreference ?? undefined,
     }
 
     // Handler for Contacts legends so that contacts show up as
@@ -286,12 +255,8 @@ export const Contacts = ({
         if (contactText === 'State') {
             return `State contacts ${count} ${required}`
         } else if (contactText === 'Actuary') {
-            if (!index && !showMultiRates)
-                return `Certifying actuary ${required}`
-            else
-                return `Additional actuary contact ${
-                    showMultiRates ? index + 1 : index
-                }`
+            if (!index) return `Certifying actuary ${required}`
+            else return `Additional actuary contact ${index}`
         }
     }
 
@@ -301,27 +266,9 @@ export const Contacts = ({
     ) => {
         // const updatedDraft = updatesFromSubmission(draftSubmission)
         draftSubmission.stateContacts = values.stateContacts
-
-        /**
-         * Multi-rate-submissions flag on: formik values.actuaryContacts are saved as additional actuaryContacts
-         * Multi-rate-submissions flag off: first formik values.actuaryContacts is saved as the certifying actuary on the
-         * first rate info. Any other  values.actuaryContacts are saved as additional actuary contacts
-         */
-        if (showMultiRates && includeActuaryContacts) {
-            draftSubmission.addtlActuaryContacts = values.actuaryContacts
-            draftSubmission.addtlActuaryCommunicationPreference =
-                values.actuaryCommunicationPreference
-        } else if (includeActuaryContacts) {
-            draftSubmission.rateInfos[0].actuaryContacts.splice(
-                0,
-                1,
-                values.actuaryContacts[0]
-            )
-            draftSubmission.addtlActuaryContacts =
-                values.actuaryContacts.splice(1)
-            draftSubmission.addtlActuaryCommunicationPreference =
-                values.actuaryCommunicationPreference
-        }
+        draftSubmission.actuaryContacts = values.actuaryContacts
+        draftSubmission.actuaryCommunicationPreference =
+            values.actuaryCommunicationPreference
 
         try {
             const updatedSubmission = await updateDraft(draftSubmission)
@@ -374,7 +321,7 @@ export const Contacts = ({
                                     State contacts
                                 </legend>
                                 <span id="form-guidance">
-                                    {includeActuaryContacts && !showMultiRates
+                                    {includeActuaryContacts
                                         ? 'A state and an actuary contact are required'
                                         : 'A state contact is required'}
                                 </span>
@@ -562,70 +509,297 @@ export const Contacts = ({
                             </fieldset>
 
                             {includeActuaryContacts && (
-                                <>
-                                    <fieldset className="usa-fieldset">
-                                        <h3>
-                                            {showMultiRates
-                                                ? 'Additional Actuary Contacts'
-                                                : 'Actuary contacts'}
-                                        </h3>
+                                <fieldset className="usa-fieldset">
+                                    <h3>Actuary contacts</h3>
 
-                                        <p>
-                                            {showMultiRates
-                                                ? 'Provide contact information for any additional actuaries who worked directly on this submission.'
-                                                : 'Provide contact information for the actuaries who worked directly on this submission.'}
-                                        </p>
-                                        <legend className="srOnly">
-                                            Actuary contacts
-                                        </legend>
+                                    <p>
+                                        Provide contact information for the
+                                        actuaries who worked directly on this
+                                        submission.
+                                    </p>
+                                    <legend className="srOnly">
+                                        Actuary contacts
+                                    </legend>
 
-                                        <FieldArray name="actuaryContacts">
-                                            {({ remove, push }) => (
-                                                <div
-                                                    className={
-                                                        styles.actuaryContacts
-                                                    }
-                                                    data-testid="state-contacts"
-                                                >
-                                                    {values.actuaryContacts
-                                                        .length > 0 &&
-                                                        values.actuaryContacts.map(
-                                                            (
-                                                                _actuaryContact,
-                                                                index
-                                                            ) => (
-                                                                <div
-                                                                    className={
-                                                                        styles.actuaryContact
-                                                                    }
-                                                                    key={index}
-                                                                    data-testid="actuary-contact"
+                                    <FieldArray name="actuaryContacts">
+                                        {({ remove, push }) => (
+                                            <div
+                                                className={
+                                                    styles.actuaryContacts
+                                                }
+                                                data-testid="state-contacts"
+                                            >
+                                                {values.actuaryContacts.length >
+                                                    0 &&
+                                                    values.actuaryContacts.map(
+                                                        (
+                                                            _actuaryContact,
+                                                            index
+                                                        ) => (
+                                                            <div
+                                                                className={
+                                                                    styles.actuaryContact
+                                                                }
+                                                                key={index}
+                                                            >
+                                                                <Fieldset
+                                                                    legend={handleContactLegend(
+                                                                        index,
+                                                                        'Actuary'
+                                                                    )}
                                                                 >
-                                                                    <ActuaryContactFields
-                                                                        actuaryContact={
-                                                                            _actuaryContact
-                                                                        }
-                                                                        errors={
-                                                                            errors
-                                                                        }
-                                                                        shouldValidate={
-                                                                            shouldValidate
-                                                                        }
-                                                                        fieldNamePrefix={`actuaryContacts.${index}`}
-                                                                        fieldSetLegend={handleContactLegend(
-                                                                            index,
-                                                                            'Actuary'
+                                                                    <FormGroup
+                                                                        error={showFieldErrors(
+                                                                            actuaryContactErrorHandling(
+                                                                                errors
+                                                                                    ?.actuaryContacts?.[
+                                                                                    index
+                                                                                ]
+                                                                            )
+                                                                                ?.name
                                                                         )}
-                                                                        innerRef={(
-                                                                            el: HTMLElement
-                                                                        ) =>
-                                                                            (newActuaryContactNameRef.current =
-                                                                                el)
-                                                                        }
-                                                                    />
-                                                                    {(index >
-                                                                        0 ||
-                                                                        showMultiRates) && (
+                                                                    >
+                                                                        <label
+                                                                            htmlFor={`actuaryContacts.${index}.name`}
+                                                                        >
+                                                                            Name
+                                                                        </label>
+                                                                        {showFieldErrors(
+                                                                            `True`
+                                                                        ) && (
+                                                                            <ErrorMessage
+                                                                                name={`actuaryContacts.${index}.name`}
+                                                                                component="div"
+                                                                                className="usa-error-message"
+                                                                            />
+                                                                        )}
+                                                                        <Field
+                                                                            name={`actuaryContacts.${index}.name`}
+                                                                            id={`actuaryContacts.${index}.name`}
+                                                                            aria-required={
+                                                                                index ===
+                                                                                0
+                                                                            }
+                                                                            type="text"
+                                                                            className="usa-input"
+                                                                            innerRef={(
+                                                                                el: HTMLElement
+                                                                            ) =>
+                                                                                (newActuaryContactNameRef.current =
+                                                                                    el)
+                                                                            }
+                                                                        />
+                                                                    </FormGroup>
+
+                                                                    <FormGroup
+                                                                        error={showFieldErrors(
+                                                                            actuaryContactErrorHandling(
+                                                                                errors
+                                                                                    ?.actuaryContacts?.[
+                                                                                    index
+                                                                                ]
+                                                                            )
+                                                                                ?.titleRole
+                                                                        )}
+                                                                    >
+                                                                        <label
+                                                                            htmlFor={`actuaryContacts.${index}.titleRole`}
+                                                                        >
+                                                                            Title/Role
+                                                                        </label>
+                                                                        {showFieldErrors(
+                                                                            `True`
+                                                                        ) && (
+                                                                            <ErrorMessage
+                                                                                name={`actuaryContacts.${index}.titleRole`}
+                                                                                component="div"
+                                                                                className="usa-error-message"
+                                                                            />
+                                                                        )}
+                                                                        <Field
+                                                                            name={`actuaryContacts.${index}.titleRole`}
+                                                                            id={`actuaryContacts.${index}.titleRole`}
+                                                                            aria-required={
+                                                                                index ===
+                                                                                0
+                                                                            }
+                                                                            type="text"
+                                                                            className="usa-input"
+                                                                        />
+                                                                    </FormGroup>
+
+                                                                    <FormGroup
+                                                                        error={showFieldErrors(
+                                                                            actuaryContactErrorHandling(
+                                                                                errors
+                                                                                    ?.actuaryContacts?.[
+                                                                                    index
+                                                                                ]
+                                                                            )
+                                                                                ?.email
+                                                                        )}
+                                                                    >
+                                                                        <label
+                                                                            htmlFor={`actuaryContacts.${index}.email`}
+                                                                        >
+                                                                            Email
+                                                                        </label>
+                                                                        {showFieldErrors(
+                                                                            `True`
+                                                                        ) && (
+                                                                            <ErrorMessage
+                                                                                name={`actuaryContacts.${index}.email`}
+                                                                                component="div"
+                                                                                className="usa-error-message"
+                                                                            />
+                                                                        )}
+                                                                        <Field
+                                                                            name={`actuaryContacts.${index}.email`}
+                                                                            id={`actuaryContacts.${index}.email`}
+                                                                            aria-required={
+                                                                                index ===
+                                                                                0
+                                                                            }
+                                                                            type="text"
+                                                                            className="usa-input"
+                                                                        />
+                                                                    </FormGroup>
+
+                                                                    <FormGroup
+                                                                        error={showFieldErrors(
+                                                                            actuaryContactErrorHandling(
+                                                                                errors
+                                                                                    ?.actuaryContacts?.[
+                                                                                    index
+                                                                                ]
+                                                                            )
+                                                                                ?.actuarialFirm
+                                                                        )}
+                                                                    >
+                                                                        <label
+                                                                            htmlFor={`actuaryContacts.${index}.actuarialFirm`}
+                                                                        >
+                                                                            Actuarial
+                                                                            firm
+                                                                        </label>
+                                                                        {showFieldErrors(
+                                                                            `True`
+                                                                        ) && (
+                                                                            <ErrorMessage
+                                                                                name={`actuaryContacts.${index}.actuarialFirm`}
+                                                                                component="div"
+                                                                                className="usa-error-message"
+                                                                            />
+                                                                        )}
+                                                                        <FieldRadio
+                                                                            id={`mercer-${index}`}
+                                                                            name={`actuaryContacts.${index}.actuarialFirm`}
+                                                                            label="Mercer"
+                                                                            value={
+                                                                                'MERCER'
+                                                                            }
+                                                                            aria-required
+                                                                        />
+                                                                        <FieldRadio
+                                                                            id={`milliman-${index}`}
+                                                                            name={`actuaryContacts.${index}.actuarialFirm`}
+                                                                            label="Milliman"
+                                                                            value={
+                                                                                'MILLIMAN'
+                                                                            }
+                                                                            aria-required
+                                                                        />
+                                                                        <FieldRadio
+                                                                            id={`optumas-${index}`}
+                                                                            name={`actuaryContacts.${index}.actuarialFirm`}
+                                                                            label="Optumas"
+                                                                            value={
+                                                                                'OPTUMAS'
+                                                                            }
+                                                                            aria-required
+                                                                        />
+                                                                        <FieldRadio
+                                                                            id={`guidehouse-${index}`}
+                                                                            name={`actuaryContacts.${index}.actuarialFirm`}
+                                                                            label="Guidehouse"
+                                                                            value={
+                                                                                'GUIDEHOUSE'
+                                                                            }
+                                                                            aria-required
+                                                                        />
+                                                                        <FieldRadio
+                                                                            id={`deloitte-${index}`}
+                                                                            name={`actuaryContacts.${index}.actuarialFirm`}
+                                                                            label="Deloitte"
+                                                                            value={
+                                                                                'DELOITTE'
+                                                                            }
+                                                                            aria-required
+                                                                        />
+                                                                        <FieldRadio
+                                                                            id={`stateInHouse-${index}`}
+                                                                            name={`actuaryContacts.${index}.actuarialFirm`}
+                                                                            label="State in-house"
+                                                                            value={
+                                                                                'STATE_IN_HOUSE'
+                                                                            }
+                                                                            aria-required
+                                                                        />
+                                                                        <FieldRadio
+                                                                            id={`other-${index}`}
+                                                                            name={`actuaryContacts.${index}.actuarialFirm`}
+                                                                            label="Other"
+                                                                            value={
+                                                                                'OTHER'
+                                                                            }
+                                                                            aria-required
+                                                                        />
+
+                                                                        {values
+                                                                            .actuaryContacts[
+                                                                            index
+                                                                        ]
+                                                                            .actuarialFirm ===
+                                                                            'OTHER' && (
+                                                                            <FormGroup
+                                                                                error={showFieldErrors(
+                                                                                    actuaryContactErrorHandling(
+                                                                                        errors
+                                                                                            ?.actuaryContacts?.[
+                                                                                            index
+                                                                                        ]
+                                                                                    )
+                                                                                        ?.actuarialFirmOther
+                                                                                )}
+                                                                            >
+                                                                                <label
+                                                                                    htmlFor={`actuaryContacts.${index}.actuarialFirmOther`}
+                                                                                >
+                                                                                    Other
+                                                                                    actuarial
+                                                                                    firm
+                                                                                </label>
+                                                                                {showFieldErrors(
+                                                                                    `True`
+                                                                                ) && (
+                                                                                    <ErrorMessage
+                                                                                        name={`actuaryContacts.${index}.actuarialFirmOther`}
+                                                                                        component="div"
+                                                                                        className="usa-error-message"
+                                                                                    />
+                                                                                )}
+                                                                                <Field
+                                                                                    name={`actuaryContacts.${index}.actuarialFirmOther`}
+                                                                                    id={`actuaryContacts.${index}.actuarialFirmOther`}
+                                                                                    type="text"
+                                                                                    className="usa-input"
+                                                                                />
+                                                                            </FormGroup>
+                                                                        )}
+                                                                    </FormGroup>
+
+                                                                    {index >
+                                                                        0 && (
                                                                         <Button
                                                                             type="button"
                                                                             unstyled
@@ -643,135 +817,68 @@ export const Contacts = ({
                                                                             contact
                                                                         </Button>
                                                                     )}
-                                                                </div>
-                                                            )
-                                                        )}
-
-                                                    <button
-                                                        type="button"
-                                                        className={`usa-button usa-button--outline ${styles.addContactBtn}`}
-                                                        onClick={() => {
-                                                            push(
-                                                                emptyActuaryContact
-                                                            )
-                                                            setFocusNewActuaryContact(
-                                                                true
-                                                            )
-                                                        }}
-                                                        ref={
-                                                            newActuaryContactButtonRef
-                                                        }
-                                                    >
-                                                        {showMultiRates
-                                                            ? `Add actuary contact`
-                                                            : `Add another actuary contact`}
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </FieldArray>
-
-                                        {!showMultiRates && (
-                                            <>
-                                                <legend className="srOnly">
-                                                    Actuarial communication
-                                                    preference
-                                                </legend>
-                                                <FormGroup
-                                                    error={showFieldErrors(
-                                                        errors.actuaryCommunicationPreference
+                                                                </Fieldset>
+                                                            </div>
+                                                        )
                                                     )}
-                                                >
-                                                    <Fieldset
-                                                        className={
-                                                            styles.radioGroup
-                                                        }
-                                                        legend="Communication preference between CMS Office of the Actuary (OACT) and the state’s actuary"
-                                                    >
-                                                        {showFieldErrors(
-                                                            `True`
-                                                        ) && (
-                                                            <ErrorMessage
-                                                                name={`actuaryCommunicationPreference`}
-                                                                component="div"
-                                                                className="usa-error-message"
-                                                            />
-                                                        )}
-                                                        <FieldRadio
-                                                            id="OACTtoActuary"
-                                                            name="actuaryCommunicationPreference"
-                                                            label={`OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`}
-                                                            value={
-                                                                'OACT_TO_ACTUARY'
-                                                            }
-                                                            aria-required
-                                                        />
-                                                        <FieldRadio
-                                                            id="OACTtoState"
-                                                            name="actuaryCommunicationPreference"
-                                                            label={`OACT can communicate directly with the state, and the state will relay all written communication to their actuaries and set up time for any potential verbal discussions.`}
-                                                            value={
-                                                                'OACT_TO_STATE'
-                                                            }
-                                                            aria-required
-                                                        />
-                                                    </Fieldset>
-                                                </FormGroup>
-                                            </>
-                                        )}
-                                    </fieldset>
 
-                                    {showMultiRates && (
-                                        <fieldset className="usa-fieldset">
-                                            <h3>
-                                                Actuaries' communication
-                                                preference
-                                            </h3>
-
-                                            <legend className="srOnly">
-                                                Actuarial communication
-                                                preference
-                                            </legend>
-                                            <FormGroup
-                                                error={showFieldErrors(
-                                                    errors.actuaryCommunicationPreference
-                                                )}
-                                            >
-                                                <Fieldset
-                                                    className={
-                                                        styles.radioGroup
+                                                <button
+                                                    type="button"
+                                                    className={`usa-button usa-button--outline ${styles.addContactBtn}`}
+                                                    onClick={() => {
+                                                        push(
+                                                            emptyActuaryContact
+                                                        )
+                                                        setFocusNewActuaryContact(
+                                                            true
+                                                        )
+                                                    }}
+                                                    ref={
+                                                        newActuaryContactButtonRef
                                                     }
-                                                    legend="Communication preference between CMS Office of the Actuary (OACT) and all state’s actuaries (i.e. certifying actuaries and additional actuary contacts)"
                                                 >
-                                                    {showFieldErrors(
-                                                        `True`
-                                                    ) && (
-                                                        <ErrorMessage
-                                                            name={`actuaryCommunicationPreference`}
-                                                            component="div"
-                                                            className="usa-error-message"
-                                                        />
-                                                    )}
-                                                    <FieldRadio
-                                                        id="OACTtoActuary"
-                                                        name="actuaryCommunicationPreference"
-                                                        label={`OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`}
-                                                        value={
-                                                            'OACT_TO_ACTUARY'
-                                                        }
-                                                        aria-required
-                                                    />
-                                                    <FieldRadio
-                                                        id="OACTtoState"
-                                                        name="actuaryCommunicationPreference"
-                                                        label={`OACT can communicate directly with the state, and the state will relay all written communication to their actuaries and set up time for any potential verbal discussions.`}
-                                                        value={'OACT_TO_STATE'}
-                                                        aria-required
-                                                    />
-                                                </Fieldset>
-                                            </FormGroup>
-                                        </fieldset>
-                                    )}
-                                </>
+                                                    Add another actuary contact
+                                                </button>
+                                            </div>
+                                        )}
+                                    </FieldArray>
+
+                                    <legend className="srOnly">
+                                        Actuarial communication preference
+                                    </legend>
+                                    <FormGroup
+                                        error={showFieldErrors(
+                                            errors.actuaryCommunicationPreference
+                                        )}
+                                    >
+                                        <Fieldset
+                                            className={styles.radioGroup}
+                                            legend="Communication preference between CMS Office of the Actuary (OACT) and the state’s actuary"
+                                        >
+                                            {showFieldErrors(`True`) && (
+                                                <ErrorMessage
+                                                    name={`actuaryCommunicationPreference`}
+                                                    component="div"
+                                                    className="usa-error-message"
+                                                />
+                                            )}
+                                            <FieldRadio
+                                                id="OACTtoActuary"
+                                                name="actuaryCommunicationPreference"
+                                                label={`OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`}
+                                                value={'OACT_TO_ACTUARY'}
+                                                aria-required
+                                            />
+                                            <FieldRadio
+                                                id="OACTtoState"
+                                                name="actuaryCommunicationPreference"
+                                                label={`OACT can communicate directly with the state, and the state will relay all written communication to their actuary and set up time for any potential verbal discussions.`}
+                                                value={'OACT_TO_STATE'}
+                                                aria-required
+                                            />
+                                        </Fieldset>
+                                    </FormGroup>
+                                </fieldset>
                             )}
 
                             <PageActions

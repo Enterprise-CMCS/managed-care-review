@@ -154,24 +154,6 @@ export const Help = (): React.ReactElement => {
                             <td>Contract</td>
                         </tr>
                         <tr>
-                            <td>Signature pages</td>
-                            <td>
-                                Contract pages that are signed and dated by all
-                                parties. <br />
-                                <br />
-                                These can be part of the base contract/contract
-                                amendment document, or can be attached
-                                separately.
-                            </td>
-                            <td>For all submissions</td>
-                            <td>
-                                Medicaid: § 438.3(a) <br />
-                                <br />
-                                CHIP:§ 457.1201
-                            </td>
-                            <td>Contract</td>
-                        </tr>
-                        <tr>
                             <td>Rate certification</td>
                             <td>
                                 The actuary’s certification of the rates or rate
@@ -200,6 +182,24 @@ export const Help = (): React.ReactElement => {
                         </tr>
                     </thead>
                     <tbody>
+                        <tr>
+                            <td>Signature pages</td>
+                            <td>
+                                Contract pages that are signed and dated by all
+                                parties. <br />
+                                <br />
+                                These can be part of the base contract/contract
+                                amendment document, or can be attached
+                                separately.
+                            </td>
+                            <td>For all submissions</td>
+                            <td>
+                                Medicaid: § 438.3(a) <br />
+                                <br />
+                                CHIP:§ 457.1201
+                            </td>
+                            <td>Contract - supporting</td>
+                        </tr>
                         <tr>
                             <td>
                                 Redlined contract changes/Contract change
@@ -351,7 +351,7 @@ export const Help = (): React.ReactElement => {
                                     Development Guide
                                 </a>
                             </td>
-                            <td>Rate - supporting</td>
+                            <td>Rate-supporting</td>
                         </tr>
                         <tr>
                             <td>Rate appendix/exhibit</td>
@@ -370,7 +370,7 @@ export const Help = (): React.ReactElement => {
                                 certification must be submitted.{' '}
                             </td>
                             <td>§ 438.7(a)</td>
-                            <td>Rate - supporting</td>
+                            <td>Rate-supporting</td>
                         </tr>
                         <tr>
                             <td>MLR report</td>
@@ -418,55 +418,6 @@ export const Help = (): React.ReactElement => {
                             <td>Optional</td>
                             <td>§ 438.7(a)</td>
                             <td>Rate -supporting</td>
-                        </tr>
-                        <tr>
-                            <td>Actuarial justification</td>
-                            <td>
-                                Document that explains how rates continue to be
-                                actuarially sound, despite contract
-                                modifications.
-                            </td>
-                            <td>
-                                For all “contract action only” submissions which
-                                include modifications that could reasonably
-                                impact rates.
-                            </td>
-                            <td>§ 438.4</td>
-                            <td>Contract - supporting</td>
-                        </tr>
-                        <tr>
-                            <td>Per cell rate change documentation</td>
-                            <td>
-                                Documentation of the percentage change of the
-                                rate adjustment per rate cell in comparison to
-                                the most recently certified actuarially sound
-                                capitation rates.
-                            </td>
-                            <td>
-                                For all “contract action only” submissions that
-                                increase or decrease the capitation rates per
-                                cell up to 1.5% during the rating period.
-                            </td>
-                            <td>§ 438.7(c)(3)</td>
-                            <td>Contract - supporting</td>
-                        </tr>
-                        <tr>
-                            <td>Per cell rate range change documentation</td>
-                            <td>
-                                Documentation of the percentage change of the
-                                rate adjustment per rate cell in comparison to
-                                the most recently contracted rates consistent
-                                with the certified actuarially sound rate
-                                ranges.
-                            </td>
-                            <td>
-                                For all “contract action only” submissions that
-                                increase or decrease the capitation rates per
-                                cell within the certified rate range up to 1%
-                                during the rating period.
-                            </td>
-                            <td>§ 438.4(c)(2)</td>
-                            <td>Contract - supporting</td>
                         </tr>
                     </tbody>
                 </Table>

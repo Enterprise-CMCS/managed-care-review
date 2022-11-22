@@ -1,4 +1,5 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
+import LaunchDarkly from 'launchdarkly-node-server-sdk'
 
 const ldClientKey = process.env.LD_SDK_KEY ?? ''
 if (ldClientKey === '') {
@@ -6,13 +7,45 @@ if (ldClientKey === '') {
 }
 
 export const main: APIGatewayProxyHandler = async () => {
+    const ldClient = LaunchDarkly.init(ldClientKey)
+    try {
+        await ldClient.waitForInitialization()
+    } catch (err) {
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                code: 'LD_SDK_INIT_FAILED',
+                message: err.message,
+            }),
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
+            },
+        }
+    }
+
     // returns stage and version
     const health = {
         stage: process.env.stage,
         version: process.env.appVersion,
+        ld: '',
     }
 
     console.log({ name: 'healthcheck' }) // eslint-disable-line no-console
+
+    const changeHealthResponse = await ldClient.variation(
+        'enable-health-endpoint',
+        { key: 'mc-review-team@truss.works' },
+        false
+    )
+
+    if (changeHealthResponse) {
+        health.ld = 'enabled'
+    } else {
+        health.ld = 'disabled'
+    }
+
+    ldClient.close()
 
     return {
         statusCode: 200,

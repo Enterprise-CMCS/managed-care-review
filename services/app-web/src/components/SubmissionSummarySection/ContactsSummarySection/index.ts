@@ -1,4 +1,1 @@
-export {
-    ContactsSummarySection,
-    getActuaryFirm,
-} from './ContactsSummarySection'
+export { ContactsSummarySection } from './ContactsSummarySection'

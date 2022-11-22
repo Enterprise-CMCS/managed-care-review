@@ -1,8 +1,5 @@
 import { screen } from '@testing-library/react'
-import {
-    renderWithProviders,
-    ldUseClientSpy,
-} from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { ContactsSummarySection } from '.'
 import {
     mockContractAndRatesDraft,
@@ -12,7 +9,6 @@ import {
 describe('ContactsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()
     const stateSubmission = mockStateSubmission()
-    afterEach(() => jest.clearAllMocks())
 
     it('can render draft submission without errors', () => {
         renderWithProviders(
@@ -96,7 +92,7 @@ describe('ContactsSummarySection', () => {
         ).toBeInTheDocument()
         expect(
             screen.queryByText(
-                'OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.'
+                'The CMS Office of the Actuary can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.'
             )
         ).toBeInTheDocument()
     })
@@ -119,38 +115,5 @@ describe('ContactsSummarySection', () => {
         ).toBeInTheDocument()
 
         expect(screen.queryByText('Actuary contacts')).not.toBeInTheDocument()
-    })
-
-    it('renders correct text for actuary contact fields when multi-rate-submissions flag is on', () => {
-        ldUseClientSpy({ 'multi-rate-submissions': true })
-        renderWithProviders(
-            <ContactsSummarySection
-                submission={draftSubmission}
-                navigateTo="contacts"
-            />
-        )
-
-        expect(
-            screen.getByRole('heading', {
-                level: 2,
-                name: 'Additional actuary contacts',
-            })
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByText('Additional actuary contact')
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('link', {
-                name: 'additionalactuarycontact1@test.com',
-            })
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByText('Actuaries’ communication preference')
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByText(
-                'OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.'
-            )
-        ).toBeInTheDocument()
     })
 })

@@ -73,16 +73,6 @@ describe('templateHelpers', () => {
                             '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
                         ],
                         rateAmendmentInfo: undefined,
-                        actuaryContacts: [
-                            {
-                                actuarialFirm: 'DELOITTE',
-                                name: 'Actuary Contact 1',
-                                titleRole: 'Test Actuary Contact 1',
-                                email: 'actuarycontact1@example.com',
-                            },
-                        ],
-                        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                        packagesWithSharedRateCerts: [],
                     },
                 ],
             }),

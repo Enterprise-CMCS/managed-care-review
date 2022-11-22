@@ -91,24 +91,6 @@
     font-size: 16px;
 }
 
-.certifyingActuaryDetail {
-    margin-bottom: units(4);
-
-    @include at-media(tablet) {
-        margin-bottom: 0;
-    }
-
-    dt {
-        font-weight: bold;
-    }
-
-    dd {
-        display: block;
-        margin: 0;
-        line-height: 1.5;
-    }
-}
-
 @media print {
     header,
     footer,

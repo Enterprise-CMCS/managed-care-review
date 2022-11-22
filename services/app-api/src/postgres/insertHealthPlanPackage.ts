@@ -75,11 +75,13 @@ export async function insertHealthPlanPackage(
         rateInfos: [],
         documents: [],
         contractDocuments: [],
+        rateDocuments: [],
         stateContacts: [],
-        addtlActuaryContacts: [],
+        actuaryContacts: [],
         managedCareEntities: [],
         federalAuthorities: [],
     }
+
     const protobuf = toProtoBuffer(draft)
 
     const buffer = Buffer.from(protobuf)

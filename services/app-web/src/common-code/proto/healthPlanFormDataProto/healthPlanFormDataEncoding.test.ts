@@ -48,40 +48,6 @@ describe('Validate encoding to protobuf and decoding back to domain model', () =
             expect(toDomain(toProtoBuffer(domainObject))).toEqual(domainObject)
         }
     )
-
-    it('encodes to protobuf and generates rate id', () => {
-        const draftFormDataWithNoRateID = unlockedWithFullRates()
-        draftFormDataWithNoRateID.rateInfos[0].id = undefined
-
-        //Encode data to protobuf and back to domain model
-        const domainData = toDomain(toProtoBuffer(draftFormDataWithNoRateID))
-
-        if (domainData instanceof Error) {
-            throw Error(domainData.message)
-        }
-
-        expect(domainData.rateInfos[0]?.id).toBeDefined()
-    })
-
-    it('encodes to protobuf and back to domain model without corrupting existing rate info id', () => {
-        const draftFormDataWithNoRateID = unlockedWithFullRates()
-        draftFormDataWithNoRateID.rateInfos[0].id =
-            'test-rate-certification-one'
-        draftFormDataWithNoRateID.rateInfos.push({
-            ...draftFormDataWithNoRateID.rateInfos[0],
-            id: 'test-rate-certification-two',
-        })
-
-        //Encode data to protobuf and back to domain model
-        const domainData = toDomain(toProtoBuffer(draftFormDataWithNoRateID))
-
-        if (domainData instanceof Error) {
-            throw Error(domainData.message)
-        }
-
-        expect(domainData.rateInfos[0]?.id).toBe('test-rate-certification-one')
-        expect(domainData.rateInfos[1]?.id).toBe('test-rate-certification-two')
-    })
 })
 
 describe('handles invalid data as expected', () => {

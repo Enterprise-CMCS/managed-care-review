@@ -255,21 +255,9 @@ test('includes expected data summary for a contract and rates submission State e
                 ],
                 rateDateCertified: new Date('01/02/2021'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
-                rateCertificationName:
-                    'MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20210102',
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'MERCER',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
             },
         ],
     }
@@ -342,21 +330,9 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                 ],
                 rateDateCertified: new Date('01/02/2021'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
-                rateCertificationName:
-                    'MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20210102',
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'MERCER',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
             },
             {
                 rateType: 'NEW',
@@ -369,21 +345,9 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                 ],
                 rateDateCertified: new Date('02/02/2022'),
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                rateCertificationName:
-                    'MCR-MN-0003-SNBC-RATE-20220201-20230201-CERTIFICATION-20220202',
                 rateAmendmentInfo: undefined,
                 rateDateStart: new Date('02/01/2022'),
                 rateDateEnd: new Date('02/01/2023'),
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'DELOITTE',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
             },
             {
                 rateType: 'AMENDMENT',
@@ -399,24 +363,12 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
                     'd95394e5-44d1-45df-8151-1cc1ee66f100',
                 ],
-                rateCertificationName:
-                    'MCR-MN-0003-MSC+-PMAP-RATE-20210605-20211231-AMENDMENT-20210102',
                 rateDateStart: new Date('01/01/2022'),
                 rateDateEnd: new Date('01/01/2023'),
                 rateAmendmentInfo: {
                     effectiveDateStart: new Date('06/05/2021'),
                     effectiveDateEnd: new Date('12/31/2021'),
                 },
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'STATE_IN_HOUSE',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
             },
         ],
     }
@@ -505,26 +457,14 @@ test('includes expected data summary for a rate amendment submission State email
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                rateDateCertified: new Date('10/19/2022'),
+                rateDateCertified: new Date(),
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                rateCertificationName:
-                    'MCR-MN-0003-SNBC-RATE-20210605-20211231-AMENDMENT-20221019',
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
                 rateAmendmentInfo: {
                     effectiveDateStart: new Date('06/05/2021'),
                     effectiveDateEnd: new Date('12/31/2021'),
                 },
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'MERCER',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
             },
         ],
     }
@@ -575,8 +515,6 @@ test('includes expected data summary for a rate amendment submission State email
 test('renders overall email for a new package with a rate amendment as expected', async () => {
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractAndRatesFormData(),
-        contractDateStart: new Date('01/01/2021'),
-        contractDateEnd: new Date('01/01/2022'),
         rateInfos: [
             {
                 rateType: 'AMENDMENT',
@@ -589,24 +527,12 @@ test('renders overall email for a new package with a rate amendment as expected'
                 ],
                 rateDateCertified: new Date('01/02/2021'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
-                rateCertificationName:
-                    'MCR-MN-0003-MSHO-RATE-20210605-20211231-AMENDMENT-20210102',
                 rateAmendmentInfo: {
                     effectiveDateStart: new Date('06/05/2021'),
                     effectiveDateEnd: new Date('12/31/2021'),
                 },
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'MERCER',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
             },
         ],
     }

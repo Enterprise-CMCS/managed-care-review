@@ -3,23 +3,7 @@ import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
     isLockedHealthPlanFormData,
-    generateRateName,
 } from '../../healthPlanFormDataType'
-import statePrograms from '../../data/statePrograms.json'
-import { ProgramArgType } from '../../healthPlanFormDataType/State'
-import { CURRENT_PROTO_VERSION } from './toLatestVersion'
-import { v4 as uuidv4 } from 'uuid'
-
-const findStatePrograms = (stateCode: string): ProgramArgType[] => {
-    const programs = statePrograms.states.find(
-        (state) => state.code === stateCode
-    )?.programs
-
-    if (!programs) {
-        return []
-    }
-    return programs
-}
 
 /*
     Convert domain date to proto timestamp
@@ -126,7 +110,7 @@ const toProtoBuffer = (
         // to differentiate between different versions of different messages
         // changes to the proto file at some point will require incrementing "proto version"
         protoName: 'STATE_SUBMISSION',
-        protoVersion: CURRENT_PROTO_VERSION,
+        protoVersion: 1,
 
         ...domainData, // For this conversion, we  can spread unnecessary fields because protobuf discards them
 
@@ -186,7 +170,6 @@ const toProtoBuffer = (
             domainData.rateInfos && domainData.rateInfos.length
                 ? domainData.rateInfos.map((rateInfo) => {
                       return {
-                          id: rateInfo.id ?? uuidv4(),
                           rateType: domainEnumToProto(
                               rateInfo.rateType,
                               mcreviewproto.RateType
@@ -212,11 +195,6 @@ const toProtoBuffer = (
                                   doc.documentCategories
                               ),
                           })),
-                          rateCertificationName: generateRateName(
-                              domainData,
-                              rateInfo,
-                              findStatePrograms(domainData.stateCode)
-                          ),
                           rateProgramIds: rateInfo.rateProgramIDs,
                           rateAmendmentInfo: rateInfo.rateAmendmentInfo && {
                               effectiveDateStart: domainDateToProtoDate(
@@ -226,7 +204,8 @@ const toProtoBuffer = (
                                   rateInfo.rateAmendmentInfo.effectiveDateEnd
                               ),
                           },
-                          actuaryContacts: rateInfo.actuaryContacts.map(
+                          //Currently, this Actuary data is in domainData, eventually it will be included in the rateInfo to have actuaries for each certification.
+                          actuaryContacts: domainData.actuaryContacts.map(
                               (actuaryContact) => {
                                   const firmType = domainEnumToProto(
                                       actuaryContact.actuarialFirm,
@@ -246,36 +225,12 @@ const toProtoBuffer = (
                               }
                           ),
                           actuaryCommunicationPreference: domainEnumToProto(
-                              domainData.addtlActuaryCommunicationPreference,
+                              domainData.actuaryCommunicationPreference,
                               mcreviewproto.ActuaryCommunicationType
                           ),
-                          packagesWithSharedRateCerts:
-                              rateInfo.packagesWithSharedRateCerts,
                       }
                   })
                 : undefined,
-        addtlActuaryContacts: domainData.addtlActuaryContacts.map(
-            (actuaryContact) => {
-                const firmType = domainEnumToProto(
-                    actuaryContact.actuarialFirm,
-                    mcreviewproto.ActuarialFirmType
-                )
-
-                return {
-                    contact: {
-                        name: actuaryContact.name,
-                        titleRole: actuaryContact.titleRole,
-                        email: actuaryContact.email,
-                    },
-                    actuarialFirmType: firmType,
-                    actuarialFirmOther: actuaryContact.actuarialFirmOther,
-                }
-            }
-        ),
-        addtlActuaryCommunicationPreference: domainEnumToProto(
-            domainData.addtlActuaryCommunicationPreference,
-            mcreviewproto.ActuaryCommunicationType
-        ),
         documents: domainData.documents.map((doc) => ({
             s3Url: doc.s3URL,
             name: doc.name,

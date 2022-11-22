@@ -14,8 +14,7 @@ Familiarizing yourself with these dependencies will help you navigate the codeba
 -   [Apollo Client](https://www.apollographql.com/docs/react/) - state management library for data coming in from graphql
 -   [Formik](https://formik.org/docs/overview) - form development and validation
 -   [Storybook](https://storybook.js.org/docs/react/get-started/introduction) - deployed UI component playground
--   [Yup](https://github.com/jquense/yup) - schema validation - used with Formik but can also be used alone
--   [Zod](https://zod.dev/) - schema validation - used when converting to our domain models
+-   [Yup](https://github.com/jquense/yup) - schema valication - used with Formik but can also be used alone
 -   [Amplify](https://docs.amplify.aws/) - All our comms from app-web to AWS are mediated by Amplify. It handles cognito auth, s3 uploads, and authenticates our API calls.
 
 ## Useful scripts
@@ -62,7 +61,7 @@ Open [http://localhost:6000](http://localhost:6000) to view in the browser.
 -   Use modular styles. This means creating`<component>.module.scss` or `<component>.module.css` files in your component folders.
 -   Learn about [Sass](https://sass-lang.com/documentation/file.SASS_REFERENCE.html) and [CSS modules](https://github.com/css-modules/css-modules) as well [uswds scss classes, tokens, and mixins](https://designsystem.digital.gov/design-tokens/).
 -   Syntax: Sass styles should be written in camelCase. Import styles from a component's stylesheet using something like `import styles from 'InvoicePanel.module.scss'`. Access the styles with dot notation `styles.myclassname`. If fewer than 50% of the styles are used from a stylesheet, import only the styles used (ex. `import { myclassname } from 'MyComponent.module.scss'`).
--   To reference sass variables, bring in uswds scss or project/cms scss as `@import 'styles/uswdsImports.scss';` and `@import 'styles/custom.scss'` accordingly.
+- To reference sass variables, bring in uswds scss or project/cms scss as `@import 'styles/uswdsImports.scss';` and `@import 'styles/custom.scss'` accordingly.
 
 ### `/gen`
 

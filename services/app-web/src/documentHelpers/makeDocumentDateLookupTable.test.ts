@@ -51,8 +51,6 @@ describe('makeDateTable', () => {
             rateInfos: [
                 {
                     rateDocuments: [],
-                    actuaryContacts: [],
-                    packagesWithSharedRateCerts: [],
                 },
             ],
         }

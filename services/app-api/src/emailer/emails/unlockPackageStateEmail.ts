@@ -3,6 +3,7 @@ import { URL } from 'url'
 import {
     UnlockedHealthPlanFormDataType,
     packageName as generatePackageName,
+    generateRateName,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
 import {
@@ -46,7 +47,7 @@ export const unlockPackageStateEmail = async (
         rateInfos:
             isContractAndRates &&
             pkg.rateInfos.map((rate) => ({
-                rateName: rate.rateCertificationName,
+                rateName: generateRateName(pkg, rate, statePrograms),
             })),
         submissionURL: new URL(
             `submissions/${pkg.id}/review-and-submit`,

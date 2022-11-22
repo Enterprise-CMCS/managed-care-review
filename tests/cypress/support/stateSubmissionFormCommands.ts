@@ -206,16 +206,6 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     cy.findByTestId('file-input-input').attachFile(
         'documents/trussel-guide.pdf'
     )
-
-    cy.getFeatureFlagStore(['multi-rate-submissions']).then(store => {
-        if (store['multi-rate-submissions']) {
-            cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
-            cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
-            cy.findAllByLabelText('Email').eq(0).type('actuarycontact@test.com')
-            cy.findAllByLabelText('Mercer').eq(0).safeClick()
-        }
-    })
-
     cy.verifyDocumentsHaveNoErrors()
     cy.waitForDocumentsToLoad()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
@@ -243,15 +233,6 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
     cy.findByTestId('file-input-input').attachFile(
         'documents/trussel-guide.pdf'
     )
-
-    cy.getFeatureFlagStore(['multi-rate-submissions']).then(store => {
-        if (store['multi-rate-submissions']) {
-            cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
-            cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
-            cy.findAllByLabelText('Email').eq(0).type('actuarycontact@test.com')
-            cy.findAllByLabelText('Mercer').eq(0).safeClick()
-        }
-    })
 
     cy.verifyDocumentsHaveNoErrors()
     cy.waitForDocumentsToLoad()
@@ -282,7 +263,7 @@ Cypress.Commands.add('fillOutActuaryContact', () => {
 
     // Actuary communication preference
     cy.findByText(
-        `OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`
+        `OACT can communicate directly with the state’s actuary but should copy the state on all written communication and all appointments for verbal discussions.`
     ).click()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })

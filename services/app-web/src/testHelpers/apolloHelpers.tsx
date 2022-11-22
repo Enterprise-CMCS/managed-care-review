@@ -12,10 +12,7 @@ import {
     SubmissionDocument,
     UnlockedHealthPlanFormDataType,
 } from '../common-code/healthPlanFormDataType'
-import {
-    domainToBase64,
-    protoToBase64,
-} from '../common-code/proto/healthPlanFormDataProto'
+import { domainToBase64 } from '../common-code/proto/healthPlanFormDataProto'
 import {
     FetchCurrentUserDocument,
     FetchHealthPlanPackageDocument,
@@ -77,9 +74,17 @@ export function mockDraft(): UnlockedHealthPlanFormDataType {
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [],
+        rateType: undefined,
+        rateCapitationType: undefined,
+        rateDocuments: [],
+        rateDateStart: undefined,
+        rateDateEnd: undefined,
+        rateDateCertified: undefined,
+        rateAmendmentInfo: undefined,
+        rateProgramIDs: undefined,
         stateContacts: [],
-        addtlActuaryContacts: [],
-        addtlActuaryCommunicationPreference: undefined,
+        actuaryContacts: [],
+        actuaryCommunicationPreference: undefined,
     }
 }
 
@@ -101,22 +106,17 @@ export function mockContactAndRatesDraft(): UnlockedHealthPlanFormDataType {
         contractAmendmentInfo: undefined,
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-        rateInfos: [
-            {
-                rateType: 'NEW',
-                rateCapitationType: 'RATE_CELL',
-                rateDocuments: [],
-                rateDateStart: new Date(),
-                rateDateEnd: new Date(),
-                rateDateCertified: new Date(),
-                rateAmendmentInfo: undefined,
-                actuaryContacts: [],
-                packagesWithSharedRateCerts: [],
-            },
-        ],
+        rateInfos: [],
+        rateType: undefined,
+        rateCapitationType: undefined,
+        rateDocuments: [],
+        rateDateStart: undefined,
+        rateDateEnd: undefined,
+        rateDateCertified: undefined,
+        rateAmendmentInfo: undefined,
         stateContacts: [],
-        addtlActuaryContacts: [],
-        addtlActuaryCommunicationPreference: undefined,
+        actuaryContacts: [],
+        actuaryCommunicationPreference: undefined,
         status: 'DRAFT',
         stateNumber: 5,
     }
@@ -142,19 +142,14 @@ export function mockCompleteDraft(): UnlockedHealthPlanFormDataType {
         contractAmendmentInfo: undefined,
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
-        rateInfos: [
-            {
-                rateType: 'NEW',
-                rateCapitationType: 'RATE_CELL',
-                rateDocuments: [],
-                rateDateStart: new Date(),
-                rateDateEnd: new Date(),
-                rateDateCertified: new Date(),
-                rateAmendmentInfo: undefined,
-                actuaryContacts: [],
-                packagesWithSharedRateCerts: [],
-            },
-        ],
+        rateInfos: [],
+        rateType: 'NEW',
+        rateCapitationType: 'RATE_CELL',
+        rateDocuments: [],
+        rateDateStart: new Date(),
+        rateDateEnd: new Date(),
+        rateDateCertified: new Date(),
+        rateAmendmentInfo: undefined,
         stateContacts: [
             {
                 name: 'Test Person',
@@ -162,8 +157,8 @@ export function mockCompleteDraft(): UnlockedHealthPlanFormDataType {
                 email: 'test@test.com',
             },
         ],
-        addtlActuaryContacts: [],
-        addtlActuaryCommunicationPreference: undefined,
+        actuaryContacts: [],
+        actuaryCommunicationPreference: undefined,
     }
 }
 
@@ -219,18 +214,19 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
                     effectiveDateEnd: new Date(),
                 },
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'DELOITTE',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@test.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
             },
         ],
+        rateType: 'AMENDMENT',
+        rateCapitationType: 'RATE_CELL',
+        rateDocuments: [],
+        rateDateStart: new Date(),
+        rateDateEnd: new Date(),
+        rateDateCertified: new Date(),
+        rateAmendmentInfo: {
+            effectiveDateStart: new Date(),
+            effectiveDateEnd: new Date(),
+        },
+        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         stateContacts: [
             {
                 name: 'State Contact 1',
@@ -243,15 +239,15 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
                 email: 'statecontact2@test.com',
             },
         ],
-        addtlActuaryContacts: [
+        actuaryContacts: [
             {
                 actuarialFirm: 'DELOITTE',
-                name: 'Additional Actuary Contact',
-                titleRole: 'Test Actuary Contact',
-                email: 'additionalactuarycontact1@test.com',
+                name: 'Actuary Contact 1',
+                titleRole: 'Test Actuary Contact 1',
+                email: 'actuarycontact1@test.com',
             },
         ],
-        addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
     }
 }
 
@@ -304,18 +300,22 @@ export function mockStateSubmission(): LockedHealthPlanFormDataType {
                 rateDateCertified: new Date(),
                 rateAmendmentInfo: undefined,
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'DELOITTE',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@test.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
             },
         ],
+        rateType: 'NEW',
+        rateCapitationType: 'RATE_CELL',
+        rateDocuments: [
+            {
+                s3URL: 's3://bucketname/key/rate',
+                name: 'rate',
+                documentCategories: ['RATES' as const],
+            },
+        ],
+        rateDateStart: new Date(),
+        rateDateEnd: new Date(),
+        rateDateCertified: new Date(),
+        rateAmendmentInfo: null,
+        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         stateContacts: [
             {
                 name: 'Test Person',
@@ -323,8 +323,8 @@ export function mockStateSubmission(): LockedHealthPlanFormDataType {
                 email: 'test@test.com',
             },
         ],
-        addtlActuaryContacts: [],
-        addtlActuaryCommunicationPreference: undefined,
+        actuaryContacts: [],
+        actuaryCommunicationPreference: undefined,
     }
 }
 
@@ -396,18 +396,22 @@ export function mockStateSubmissionContractAmendment(): LockedHealthPlanFormData
                 rateDateCertified: new Date(),
                 rateAmendmentInfo: undefined,
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'DELOITTE',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@test.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                packagesWithSharedRateCerts: [],
             },
         ],
+        rateType: 'NEW',
+        rateCapitationType: 'RATE_CELL',
+        rateDocuments: [
+            {
+                s3URL: 's3://bucketname/key/rate',
+                name: 'rate',
+                documentCategories: ['RATES' as const],
+            },
+        ],
+        rateDateStart: new Date(),
+        rateDateEnd: new Date(),
+        rateDateCertified: new Date(),
+        rateAmendmentInfo: null,
+        rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         stateContacts: [
             {
                 name: 'Test Person',
@@ -415,8 +419,8 @@ export function mockStateSubmissionContractAmendment(): LockedHealthPlanFormData
                 email: 'test@test.com',
             },
         ],
-        addtlActuaryContacts: [],
-        addtlActuaryCommunicationPreference: undefined,
+        actuaryContacts: [],
+        actuaryCommunicationPreference: undefined,
     }
 }
 
@@ -638,66 +642,6 @@ export function mockUnlockedHealthPlanPackage(
                         updatedReason: 'Initial submit',
                     },
                     formDataProto: b64Previous,
-                },
-            },
-        ],
-    }
-}
-
-export function mockUnlockedHealthPlanPackageWithOldProtos(
-    unlockedWithOldProto: Buffer
-): HealthPlanPackage {
-    // other mocks take a submission and convert it to a proto, but here we pass in a proto
-    const b64 = protoToBase64(unlockedWithOldProto)
-
-    return {
-        id: 'test-id-123',
-        status: 'UNLOCKED',
-        initiallySubmittedAt: '2020-01-01',
-        stateCode: 'MN',
-        state: mockMNState(),
-        revisions: [
-            {
-                node: {
-                    id: 'revision3',
-                    createdAt: new Date('2020-09-01'),
-                    unlockInfo: {
-                        updatedAt: new Date('2020-09-02'),
-                        updatedBy: 'bob@dmas.mn.gov',
-                        updatedReason: 'Test unlock reason',
-                    },
-                    submitInfo: null,
-                    formDataProto: b64,
-                },
-            },
-            {
-                node: {
-                    id: 'revision2',
-                    createdAt: new Date('2020-07-01'),
-                    unlockInfo: {
-                        updatedAt: new Date('2020-08-01'),
-                        updatedBy: 'bob@dmas.mn.gov',
-                        updatedReason: 'Test unlock reason',
-                    },
-                    submitInfo: {
-                        updatedAt: new Date('2020-07-15'),
-                        updatedBy: 'bob@dmas.mn.gov',
-                        updatedReason: 'Second Submit',
-                    },
-                    formDataProto: b64,
-                },
-            },
-            {
-                node: {
-                    id: 'revision1',
-                    createdAt: new Date('2020-01-01'),
-                    unlockInfo: null,
-                    submitInfo: {
-                        updatedAt: new Date('2021-01-02'),
-                        updatedBy: 'test@example.com',
-                        updatedReason: 'Initial submit',
-                    },
-                    formDataProto: b64,
                 },
             },
         ],
@@ -944,8 +888,6 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                         documentCategories: ['RATES_RELATED'],
                     },
                 ],
-                actuaryContacts: [],
-                packagesWithSharedRateCerts: [],
             },
         ],
         documents: [
@@ -998,8 +940,6 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                         documentCategories: ['RATES'],
                     },
                 ],
-                actuaryContacts: [],
-                packagesWithSharedRateCerts: [],
             },
         ],
         documents: [
@@ -1270,8 +1210,8 @@ const unlockHealthPlanPackageMockError = ({
 
 const indexHealthPlanPackagesMockSuccess = (
     submissions: HealthPlanPackage[] = [
-        { ...mockUnlockedHealthPlanPackage(), id: 'test-id-123' },
-        { ...mockSubmittedHealthPlanPackage(), id: 'test-id-124' },
+        mockUnlockedHealthPlanPackage(),
+        mockSubmittedHealthPlanPackage(),
     ]
 ): MockedResponse<IndexHealthPlanPackagesQuery> => {
     const submissionEdges = submissions.map((sub) => {

@@ -26,17 +26,9 @@ export const makeDateTable = (
                 lookupTable['previousSubmissionDate'] = revisionData.updatedAt
             }
             docBuckets.forEach((bucket) => {
-                if (bucket === 'rateDocuments') {
-                    revisionData.rateInfos.forEach((rateInfo) => {
-                        rateInfo.rateDocuments.forEach(doc => {
-                            lookupTable[doc.name] = revisionData.updatedAt
-                        })
-                    })
-                } else {
-                    revisionData[bucket].forEach((doc) => {
-                        lookupTable[doc.name] = revisionData.updatedAt
-                    })
-                }
+                revisionData[bucket].forEach((doc) => {
+                    lookupTable[doc.name] = revisionData.updatedAt
+                })
             })
         })
         return lookupTable

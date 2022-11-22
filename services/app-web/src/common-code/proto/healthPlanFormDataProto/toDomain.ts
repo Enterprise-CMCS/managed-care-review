@@ -8,10 +8,7 @@ import {
     FederalAuthority,
     isLockedHealthPlanFormData,
     RateInfoType,
-    generateRateName,
 } from '../../healthPlanFormDataType'
-import { toLatestProtoVersion } from './toLatestVersion'
-import { findStatePrograms } from '../../healthPlanFormDataType/findStatePrograms'
 
 /**
  * Recursively replaces all nulls with undefineds.
@@ -29,7 +26,7 @@ type RecursivelyReplaceNullWithUndefined<T> = T extends null
               : RecursivelyReplaceNullWithUndefined<T[K]>
       }
 
-export function replaceNullsWithUndefineds<T extends object>(
+export function replaceNullsWithUndefineds<T>(
     obj: T
 ): RecursivelyReplaceNullWithUndefined<T> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -237,14 +234,14 @@ function parseContractAmendment(
 }
 
 function parseActuaryContacts(
-    actuaryContacts: mcreviewproto.IActuaryContact[] | null | undefined
-): RecursivePartial<UnlockedHealthPlanFormDataType['addtlActuaryContacts']> {
-    if (!actuaryContacts) {
+    rateInfo: mcreviewproto.IRateInfo | null | undefined
+): RecursivePartial<UnlockedHealthPlanFormDataType['actuaryContacts']> {
+    if (!rateInfo?.actuaryContacts) {
         return []
     }
 
-    const parsedActuaryContacts = replaceNullsWithUndefineds(
-        actuaryContacts
+    const actuaryContacts = replaceNullsWithUndefineds(
+        rateInfo.actuaryContacts
     ).map((aContact) => {
         const cleanContact = replaceNullsWithUndefineds(aContact)
 
@@ -260,7 +257,7 @@ function parseActuaryContacts(
         }
     })
 
-    return parsedActuaryContacts
+    return actuaryContacts
 }
 
 function parseProtoRateAmendment(
@@ -268,7 +265,7 @@ function parseProtoRateAmendment(
         | mcreviewproto.RateInfo['rateAmendmentInfo']
         | null
         | undefined
-): RecursivePartial<RateInfoType['rateAmendmentInfo']> {
+): RecursivePartial<UnlockedHealthPlanFormDataType['rateAmendmentInfo']> {
     if (!rateAmendment) {
         return undefined
     }
@@ -277,43 +274,6 @@ function parseProtoRateAmendment(
         effectiveDateEnd: protoDateToDomain(rateAmendment.effectiveDateEnd),
         effectiveDateStart: protoDateToDomain(rateAmendment.effectiveDateStart),
     }
-}
-
-function parseRateCertificationName(
-    rateCertificationName:
-        | mcreviewproto.RateInfo['rateCertificationName']
-        | null
-        | undefined
-): string | undefined {
-    if (!rateCertificationName) {
-        return undefined
-    }
-    return rateCertificationName
-}
-
-/* if the rateCertificationName is missing, we'll generate it and save it back to the rateInfo */
-const updateRateCertificationNames = (
-    undifferentiatedFormData:
-        | UnlockedHealthPlanFormDataType
-        | LockedHealthPlanFormDataType
-): UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType => {
-    if (
-        undifferentiatedFormData.rateInfos &&
-        undifferentiatedFormData.rateInfos.length > 0
-    ) {
-        undifferentiatedFormData.rateInfos.forEach((rateInfo, index) => {
-            if (rateInfo && !rateInfo.rateCertificationName) {
-                undifferentiatedFormData.rateInfos[
-                    index
-                ].rateCertificationName = generateRateName(
-                    undifferentiatedFormData,
-                    rateInfo,
-                    findStatePrograms(undifferentiatedFormData.stateCode)
-                )
-            }
-        })
-    }
-    return undifferentiatedFormData
 }
 
 function parseRateInfos(
@@ -325,7 +285,6 @@ function parseRateInfos(
     if (rateInfos.length > 0) {
         rateInfos.forEach((rateInfo) => {
             const rate: RecursivePartial<RateInfoType> = {
-                id: rateInfo.id ?? undefined,
                 rateAmendmentInfo: parseProtoRateAmendment(
                     rateInfo?.rateAmendmentInfo
                 ),
@@ -344,18 +303,6 @@ function parseRateInfos(
                     rateInfo?.rateDateCertified
                 ),
                 rateProgramIDs: rateInfo?.rateProgramIds ?? [],
-                rateCertificationName: parseRateCertificationName(
-                    rateInfo?.rateCertificationName
-                ),
-                actuaryContacts: parseActuaryContacts(
-                    rateInfo?.actuaryContacts
-                ),
-                actuaryCommunicationPreference: enumToDomain(
-                    mcreviewproto.ActuaryCommunicationType,
-                    rateInfo?.actuaryCommunicationPreference
-                ),
-                packagesWithSharedRateCerts:
-                    rateInfo.packagesWithSharedRateCerts ?? [],
             }
             rates.push(rate)
         })
@@ -369,15 +316,15 @@ function parseRateInfos(
 const toDomain = (
     buff: Uint8Array
 ): UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType | Error => {
-    const formDataMessageAnyVersion = decodeOrError(buff)
-    if (formDataMessageAnyVersion instanceof Error) {
-        return formDataMessageAnyVersion
+    const formDataMessage = decodeOrError(buff)
+
+    if (formDataMessage instanceof Error) {
+        return formDataMessage
     }
 
-    // toLatestVersion
-    const formDataMessage = toLatestProtoVersion(formDataMessageAnyVersion)
-
     const {
+        protoName,
+        protoVersion,
         id,
         status,
         createdAt,
@@ -391,11 +338,29 @@ const toDomain = (
         stateContacts,
         contractInfo,
         rateInfos,
-        addtlActuaryContacts,
-        addtlActuaryCommunicationPreference,
     } = formDataMessage
 
+    // First things first, let's check the protoName and protoVersion
+    if (protoName !== 'STATE_SUBMISSION') {
+        console.warn(
+            `WARNING: We are unboxing a proto our code doesn't recognize:`,
+            protoName,
+            protoVersion
+        )
+        console.log(
+            'If the version is off this indicates we are loading a proto that has not been fully migrated.'
+        )
+    }
+
     const cleanedStateContacts = replaceNullsWithUndefineds(stateContacts)
+
+    // Protos support multiple rate infos for now, but we only support one in our domain models
+    // so if there are multiple we'll drop the extras.
+    // This should be removed once all multi-rate UI features have been implemented. We should then only use rate data from rateInfos list of rate data.
+    let rateInfo: mcreviewproto.IRateInfo | undefined = undefined
+    if (rateInfos.length > 0) {
+        rateInfo = rateInfos[0]
+    }
 
     // SO, rather than repeat this whole thing for Draft and State submissions, because they are so
     // similar right now, we're just going to & them together for parsing out all the optional stuff
@@ -452,12 +417,23 @@ const toDomain = (
             contractInfo?.contractAmendmentInfo
         ),
         rateInfos: parseRateInfos(rateInfos),
-        addtlActuaryCommunicationPreference: enumToDomain(
+        rateAmendmentInfo: parseProtoRateAmendment(rateInfo?.rateAmendmentInfo),
+        rateType: enumToDomain(mcreviewproto.RateType, rateInfo?.rateType),
+        rateCapitationType: enumToDomain(
+            mcreviewproto.RateCapitationType,
+            rateInfo?.rateCapitationType
+        ),
+        rateDocuments: parseProtoDocuments(rateInfo?.rateDocuments),
+        rateDateStart: protoDateToDomain(rateInfo?.rateDateStart),
+        rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
+        rateDateCertified: protoDateToDomain(rateInfo?.rateDateCertified),
+        rateProgramIDs: rateInfo?.rateProgramIds ?? [],
+        actuaryCommunicationPreference: enumToDomain(
             mcreviewproto.ActuaryCommunicationType,
-            addtlActuaryCommunicationPreference
+            rateInfo?.actuaryCommunicationPreference
         ),
         stateContacts: cleanedStateContacts,
-        addtlActuaryContacts: parseActuaryContacts(addtlActuaryContacts),
+        actuaryContacts: parseActuaryContacts(rateInfo),
         documents: parseProtoDocuments(formDataMessage.documents),
     }
 
@@ -468,28 +444,23 @@ const toDomain = (
         const maybeDraft =
             maybeUnlockedFormData as RecursivePartial<UnlockedHealthPlanFormDataType>
         maybeDraft.status = 'DRAFT'
+
         // This parse returns an actual UnlockedHealthPlanFormDataType, so all our partial & casting is put to rest
         const parseResult =
             unlockedHealthPlanFormDataSchema.safeParse(maybeDraft)
+
         if (parseResult.success === false) {
             return parseResult.error
         }
-        /* We need a one-off modification here because some older submissions don't have a populated
-        rateCertificationName field.  If it's missing, we'll generate it and add it to the form data.
-        We do it for locked or unlocked submissions. */
-        return updateRateCertificationNames(
-            parseResult.data as UnlockedHealthPlanFormDataType
-        )
+
+        return parseResult.data as UnlockedHealthPlanFormDataType
     } else if (status === 'SUBMITTED') {
         const maybeLockedFormData =
             maybeUnlockedFormData as RecursivePartial<LockedHealthPlanFormDataType>
         maybeLockedFormData.status = 'SUBMITTED'
 
         if (isLockedHealthPlanFormData(maybeLockedFormData)) {
-            /* We need a one-off modification here because some older submissions don't have a populated
-        rateCertificationName field.  If it's missing, we'll generate it and add it to the form data.
-        We do it for locked or unlocked submissions. */
-            return updateRateCertificationNames(maybeLockedFormData)
+            return maybeLockedFormData
         } else {
             console.log(
                 'ERROR: attempting to parse state submission proto failed.',
@@ -506,4 +477,4 @@ const toDomain = (
     return new Error('Unknown or missing status on this proto. Cannot decode.')
 }
 
-export { toDomain, decodeOrError }
+export { toDomain }

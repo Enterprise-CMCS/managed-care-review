@@ -2,15 +2,12 @@ import {
     RateInfoType,
     SubmissionDocument,
     UnlockedHealthPlanFormDataType,
-    ActuaryContact,
 } from './UnlockedHealthPlanFormDataType'
 import { ModifiedProvisions } from './ModifiedProvisions'
 import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import { HealthPlanFormDataType } from './HealthPlanFormDataType'
 import { formatRateNameDate } from '../../common-code/dateHelpers'
 import { ProgramArgType } from '.'
-
-// TODO: Refactor into multiple files and add unit tests to these functions
 
 const isContractOnly = (
     sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
@@ -56,20 +53,6 @@ const hasValidContract = (sub: LockedHealthPlanFormDataType): boolean =>
             sub.contractAmendmentInfo?.modifiedProvisions
         ))
 
-const hasValidActuaries = (actuaries: ActuaryContact[]): boolean =>
-    actuaries &&
-    actuaries.length > 0 &&
-    actuaries.every(
-        (actuaryContact) =>
-            actuaryContact.name !== undefined &&
-            actuaryContact.titleRole !== undefined &&
-            actuaryContact.email !== undefined &&
-            ((actuaryContact.actuarialFirm !== undefined &&
-                actuaryContact.actuarialFirm !== 'OTHER') ||
-                (actuaryContact.actuarialFirm === 'OTHER' &&
-                    actuaryContact.actuarialFirmOther !== undefined))
-    )
-
 const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
     const validRates =
         sub.rateInfos.length === 0
@@ -80,9 +63,8 @@ const hasValidRates = (sub: LockedHealthPlanFormDataType): boolean => {
                       rateInfo.rateDateCertified !== undefined &&
                       rateInfo.rateDateStart !== undefined &&
                       rateInfo.rateDateEnd !== undefined &&
-                      rateInfo.rateProgramIDs !== undefined &&
-                      rateInfo.rateProgramIDs.length > 0 &&
-                      hasValidActuaries(rateInfo.actuaryContacts)
+                      (rateInfo.rateProgramIDs !== undefined ||
+                          rateInfo.rateProgramIDs !== [])
 
                   if (isRateAmendment(rateInfo)) {
                       return (
@@ -268,8 +250,12 @@ const generateRateName = (
     }
 
     if (rateDateCertified) {
-        rateName = rateName.concat('-', formatRateNameDate(rateDateCertified))
+        rateName = rateName = rateName.concat(
+            '-',
+            formatRateNameDate(rateDateCertified)
+        )
     }
+
     return rateName
 }
 
@@ -298,9 +284,16 @@ const removeRatesData = (
     pkg: UnlockedHealthPlanFormDataType
 ): UnlockedHealthPlanFormDataType => {
     pkg.rateInfos = []
-    pkg.addtlActuaryContacts = []
-    pkg.addtlActuaryCommunicationPreference = undefined
+    pkg.rateType = undefined
+    pkg.rateDateCertified = undefined
+    pkg.rateDateStart = undefined
+    pkg.rateDateEnd = undefined
+    pkg.rateCapitationType = undefined
+    pkg.rateAmendmentInfo = undefined
+    pkg.actuaryContacts = []
+    pkg.rateProgramIDs = []
     pkg.documents = convertRateSupportingDocs(pkg.documents)
+    pkg.rateDocuments = []
 
     return pkg
 }

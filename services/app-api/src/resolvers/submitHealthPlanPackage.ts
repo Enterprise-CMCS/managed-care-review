@@ -231,7 +231,7 @@ export function submitHealthPlanPackageResolver(
         const submissionResult = submit(draftResult)
 
         if (isSubmissionError(submissionResult)) {
-            const errMessage = submissionResult.message
+            const errMessage = 'Incomplete package cannot be submitted'
             logError('submitHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {

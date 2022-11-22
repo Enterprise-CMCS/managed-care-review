@@ -8,7 +8,7 @@ const useStatePrograms = (): Program[] | [] => {
 
     if (loggedInUser && loggedInUser.__typename === 'StateUser') {
         statePrograms = loggedInUser.state.programs
-    } else if (loggedInUser && loggedInUser.__typename === 'CMSUser') {
+    } else {
         console.error(
             `CODING ERROR: useStatePrograms does not currently support CMSUser and will return [].`
         )

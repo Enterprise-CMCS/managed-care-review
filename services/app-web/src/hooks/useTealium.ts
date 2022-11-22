@@ -101,13 +101,15 @@ const useTealium = (): {
     useEffect(() => {
         // Do not add tealium for local dev or review apps
         if (process.env.REACT_APP_AUTH_MODE !== 'IDM') {
-            // console.log(`mock tealium page view: ${tealiumPageName}`)
+            console.log(`mock tealium page view: ${tealiumPageName}`)
             return
         }
 
         // Guardrail - protect against trying to call utag before its loaded.
         if (!window.utag) {
-            return
+            console.error(
+                'PROGRAMMING ERROR: tried to use tealium utag before it was loaded'
+            )
         }
 
         // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -132,7 +134,7 @@ const useTealium = (): {
     }) => {
         // Do not add events on local dev
         if (process.env.REACT_APP_STAGE_NAME === 'local') {
-            // console.log(`mock tealium event: ${JSON.stringify(linkData)}`)
+            console.log(`mock tealium event: ${JSON.stringify(linkData)}`)
             return
         }
 
@@ -156,6 +158,7 @@ const useTealium = (): {
             userId: loggedInUser?.email,
             ...linkData,
         }
+        console.log('HELLO', tagData)
         utag.link(tagData)
     }
 

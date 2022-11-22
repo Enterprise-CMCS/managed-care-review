@@ -30,7 +30,7 @@ Sets up authentication based on environment variables. Options are local or Amaz
 
 ### `/handlers`
 
--   Sets up api endpoints and maps to functions in the `serverless.yml`. Our main endpoint is `/graphql`.
+-   Sets up api endpoints and maps to functions in the `serverless.yml`. Currently, we have two main endpoints - `/log_event` and `/graphql`.
 -   **`apollo_gql.ts`** main api entrypoint - configures all dependencies based on environment variables and type of auth.
 
 ### `/postgres`

@@ -2,7 +2,6 @@ import { screen, waitFor } from '@testing-library/react'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SupportingDocumentsSummarySection } from './SupportingDocumentsSummarySection'
 import {
-    fetchCurrentUserMock,
     mockContractAndRatesDraft,
     mockStateSubmission,
 } from '../../../testHelpers/apolloHelpers'
@@ -37,12 +36,7 @@ describe('SupportingDocumentsSummarySection', () => {
             <SupportingDocumentsSummarySection
                 submission={testSubmission}
                 navigateTo="documents"
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
+            />
         )
 
         await waitFor(() => {
