@@ -6,12 +6,14 @@ import { useS3 } from '../../../contexts/S3Context'
 import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
 import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import styles from './UploadedDocumentsTable.module.scss'
+import { usePreviousSubmission } from '../../../hooks'
 
 export type UploadedDocumentsTableProps = {
     documents: SubmissionDocument[]
     caption: string | null
     documentCategory: string
     documentDateLookupTable?: DocumentDateLookupTable
+    packagesWithSharedRateCerts?: string[]
     isSupportingDocuments?: boolean
     isEditing?: boolean
     isCMSUser?: boolean
@@ -28,10 +30,12 @@ export const UploadedDocumentsTable = ({
     caption,
     documentCategory,
     documentDateLookupTable,
+    packagesWithSharedRateCerts,
     isSupportingDocuments = false,
     isEditing = false,
     isCMSUser,
 }: UploadedDocumentsTableProps): React.ReactElement => {
+    console.log('packagesWithSharedRateCerts', packagesWithSharedRateCerts)
     const { getURL, getKey } = useS3()
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
     const shouldShowEditButton = isEditing && isSupportingDocuments
@@ -46,6 +50,12 @@ export const UploadedDocumentsTable = ({
                 documentDateLookupTable.previousSubmissionDate
         )
     }
+    const hasSharedRateCert =
+        (packagesWithSharedRateCerts &&
+            packagesWithSharedRateCerts.length > 0) ||
+        false
+    const isPreviousSubmission = usePreviousSubmission()
+    const showSharedInfo = hasSharedRateCert && !isPreviousSubmission
     const borderTopGradientStyles = `borderTopLinearGradient ${styles.uploadedDocumentsTable}`
     const supportingDocsTopMarginStyles = isSupportingDocuments
         ? styles.withMarginTop
@@ -108,7 +118,7 @@ export const UploadedDocumentsTable = ({
             </div>
         )
     }
-
+    console.log('refreshedDocs', refreshedDocs)
     return (
         <>
             <table
@@ -124,6 +134,9 @@ export const UploadedDocumentsTable = ({
                         <th scope="col">Document name</th>
                         <th scope="col">Date added</th>
                         <th scope="col">Document category</th>
+                        {showSharedInfo && (
+                            <th scope="col">Linked submission</th>
+                        )}
                     </tr>
                 </thead>
                 <tbody>
@@ -134,6 +147,11 @@ export const UploadedDocumentsTable = ({
                                     {shouldHaveNewTag(doc) ? (
                                         <Tag className={styles.newDocTag}>
                                             NEW
+                                        </Tag>
+                                    ) : null}
+                                    {showSharedInfo ? (
+                                        <Tag className={styles.sharedDocTag}>
+                                            SHARED
                                         </Tag>
                                     ) : null}
                                     <Link
@@ -166,6 +184,20 @@ export const UploadedDocumentsTable = ({
                                     : ''}
                             </td>
                             <td>{documentCategory}</td>
+                            {showSharedInfo
+                                ? packagesWithSharedRateCerts &&
+                                  packagesWithSharedRateCerts.map(
+                                      (packageId) => (
+                                          <td>
+                                              <NavLink
+                                                  to={`/submissions/${packageId}`}
+                                              >
+                                                  {packageId}
+                                              </NavLink>
+                                          </td>
+                                      )
+                                  )
+                                : null}
                         </tr>
                     ))}
                 </tbody>

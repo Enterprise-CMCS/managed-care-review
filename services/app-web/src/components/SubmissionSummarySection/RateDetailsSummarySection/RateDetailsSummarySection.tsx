@@ -256,6 +256,9 @@ export const RateDetailsSummarySection = ({
                             </DoubleColumnGrid>
                             <UploadedDocumentsTable
                                 documents={rateInfo.rateDocuments}
+                                packagesWithSharedRateCerts={
+                                    rateInfo.packagesWithSharedRateCerts
+                                }
                                 documentDateLookupTable={
                                     documentDateLookupTable
                                 }
