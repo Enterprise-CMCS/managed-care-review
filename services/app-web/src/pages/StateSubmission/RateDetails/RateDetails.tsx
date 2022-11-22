@@ -62,6 +62,7 @@ import { useIndexHealthPlanPackagesQuery } from '../../../gen/gqlClient'
 import { base64ToDomain } from '../../../common-code/proto/healthPlanFormDataProto'
 import { recordJSException } from '../../../otelHelpers'
 import { dayjs } from '../../../common-code/dateHelpers'
+import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 
 const RateDatesErrorMessage = ({
     startDate,
@@ -96,7 +97,7 @@ export interface RateInfoFormType {
     rateDocuments: SubmissionDocument[]
     actuaryContacts: ActuaryContact[]
     actuaryCommunicationPreference?: ActuaryCommunicationType
-    packagesWithSharedRateCerts: string[]
+    packagesWithSharedRateCerts: SharedRateCertDisplay[]
     hasSharedRateCert: boolean
 }
 
@@ -276,7 +277,8 @@ export const RateDetails = ({
         packagesWithSharedRateCerts:
             rateInfo?.packagesWithSharedRateCerts ?? [],
         hasSharedRateCert: Boolean(
-            rateInfo?.packagesWithSharedRateCerts.length
+            rateInfo?.packagesWithSharedRateCerts &&
+                rateInfo?.packagesWithSharedRateCerts.length
         ),
     })
 
@@ -812,9 +814,14 @@ export const RateDetails = ({
                                                                             statePrograms={
                                                                                 statePrograms
                                                                             }
-                                                                            initialValues={
-                                                                                rateInfo?.packagesWithSharedRateCerts
-                                                                            }
+                                                                            initialValues={rateInfo.packagesWithSharedRateCerts.map(
+                                                                                (
+                                                                                    item
+                                                                                ) =>
+                                                                                    item.packageId
+                                                                                        ? item.packageId
+                                                                                        : ''
+                                                                            )}
                                                                             packageOptions={
                                                                                 packageOptions
                                                                             }
@@ -834,10 +841,19 @@ export const RateDetails = ({
                                                                                 setFieldValue(
                                                                                     `rateInfos.${index}.packagesWithSharedRateCerts`,
                                                                                     selectedOptions.map(
-                                                                                        (item: {
-                                                                                            value: string
-                                                                                        }) =>
-                                                                                            item.value
+                                                                                        (
+                                                                                            item: PackageOptionType
+                                                                                        ) => {
+                                                                                            return {
+                                                                                                packageName:
+                                                                                                    item.label.replace(
+                                                                                                        /\s\(.*?\)/g,
+                                                                                                        ''
+                                                                                                    ),
+                                                                                                packageId:
+                                                                                                    item.value,
+                                                                                            }
+                                                                                        }
                                                                                     )
                                                                                 )
                                                                             }

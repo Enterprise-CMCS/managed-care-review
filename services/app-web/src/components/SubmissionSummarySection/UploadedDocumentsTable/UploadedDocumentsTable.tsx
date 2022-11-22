@@ -7,13 +7,14 @@ import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
 import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import styles from './UploadedDocumentsTable.module.scss'
 import { usePreviousSubmission } from '../../../hooks'
+import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 
 export type UploadedDocumentsTableProps = {
     documents: SubmissionDocument[]
     caption: string | null
     documentCategory: string
     documentDateLookupTable?: DocumentDateLookupTable
-    packagesWithSharedRateCerts?: string[]
+    packagesWithSharedRateCerts?: SharedRateCertDisplay[]
     isSupportingDocuments?: boolean
     isEditing?: boolean
     isCMSUser?: boolean
@@ -186,17 +187,15 @@ export const UploadedDocumentsTable = ({
                             <td>{documentCategory}</td>
                             {showSharedInfo
                                 ? packagesWithSharedRateCerts &&
-                                  packagesWithSharedRateCerts.map(
-                                      (packageId) => (
-                                          <td>
-                                              <NavLink
-                                                  to={`/submissions/${packageId}`}
-                                              >
-                                                  {packageId}
-                                              </NavLink>
-                                          </td>
-                                      )
-                                  )
+                                  packagesWithSharedRateCerts.map((item) => (
+                                      <td>
+                                          <NavLink
+                                              to={`/submissions/${item.packageId}`}
+                                          >
+                                              {item.packageName}
+                                          </NavLink>
+                                      </td>
+                                  ))
                                 : null}
                         </tr>
                     ))}

@@ -189,6 +189,15 @@ function parseProtoDocuments(
     }))
 }
 
+function parseSharedRateCerts(
+    certs: mcreviewproto.ISharedRateCertDisplay[] | null | undefined
+): RateInfoType['packagesWithSharedRateCerts'] {
+    if (certs === null || certs === undefined) {
+        return undefined
+    }
+    return replaceNullsWithUndefineds(certs)
+}
+
 function parseContractAmendment(
     amendment: mcreviewproto.IContractInfo['contractAmendmentInfo']
 ): UnlockedHealthPlanFormDataType['contractAmendmentInfo'] {
@@ -355,7 +364,9 @@ function parseRateInfos(
                     rateInfo?.actuaryCommunicationPreference
                 ),
                 packagesWithSharedRateCerts:
-                    rateInfo.packagesWithSharedRateCerts ?? [],
+                    parseSharedRateCerts(
+                        rateInfo.packagesWithSharedRateCerts
+                    ) ?? [],
             }
             rates.push(rate)
         })
