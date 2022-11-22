@@ -164,9 +164,10 @@ jobs:
           config: baseUrl=https://mc-review-dev.onemac.cms.gov
           spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
           record: true
-          parallel: false,
+          parallel: false
           browser: chrome
-          group: 'Chrome'
+          group: 'Chrome - dev'
+          ci-build-id: 'dev'
         env:
           REACT_APP_AUTH_MODE: IDM
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -228,7 +229,8 @@ jobs:
           record: true
           parallel: false
           browser: chrome
-          group: 'Chrome'
+          group: 'Chrome - val'
+          ci-build-id: 'val'
         env:
           REACT_APP_AUTH_MODE: IDM
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -290,7 +292,8 @@ jobs:
           record: true
           parallel: false
           browser: chrome
-          group: 'Chrome'
+          group: 'Chrome - prod'
+          ci-build-id: 'prod'
         env:
           REACT_APP_AUTH_MODE: IDM
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
