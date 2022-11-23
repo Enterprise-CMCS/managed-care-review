@@ -8,8 +8,10 @@ import {
     FederalAuthority,
     isLockedHealthPlanFormData,
     RateInfoType,
+    generateRateName,
 } from '../../healthPlanFormDataType'
 import { toLatestProtoVersion } from './toLatestVersion'
+import { findStatePrograms } from '../../healthPlanFormDataType/findStatePrograms'
 
 /**
  * Recursively replaces all nulls with undefineds.
@@ -27,7 +29,7 @@ type RecursivelyReplaceNullWithUndefined<T> = T extends null
               : RecursivelyReplaceNullWithUndefined<T[K]>
       }
 
-export function replaceNullsWithUndefineds<T>(
+export function replaceNullsWithUndefineds<T extends object>(
     obj: T
 ): RecursivelyReplaceNullWithUndefined<T> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -266,7 +268,7 @@ function parseProtoRateAmendment(
         | mcreviewproto.RateInfo['rateAmendmentInfo']
         | null
         | undefined
-): RecursivePartial<UnlockedHealthPlanFormDataType['rateAmendmentInfo']> {
+): RecursivePartial<RateInfoType['rateAmendmentInfo']> {
     if (!rateAmendment) {
         return undefined
     }
@@ -289,6 +291,31 @@ function parseRateCertificationName(
     return rateCertificationName
 }
 
+/* if the rateCertificationName is missing, we'll generate it and save it back to the rateInfo */
+const updateRateCertificationNames = (
+    undifferentiatedFormData:
+        | UnlockedHealthPlanFormDataType
+        | LockedHealthPlanFormDataType
+): UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType => {
+    if (
+        undifferentiatedFormData.rateInfos &&
+        undifferentiatedFormData.rateInfos.length > 0
+    ) {
+        undifferentiatedFormData.rateInfos.forEach((rateInfo, index) => {
+            if (rateInfo && !rateInfo.rateCertificationName) {
+                undifferentiatedFormData.rateInfos[
+                    index
+                ].rateCertificationName = generateRateName(
+                    undifferentiatedFormData,
+                    rateInfo,
+                    findStatePrograms(undifferentiatedFormData.stateCode)
+                )
+            }
+        })
+    }
+    return undifferentiatedFormData
+}
+
 function parseRateInfos(
     rateInfos: mcreviewproto.IRateInfo[]
 ): RecursivePartial<UnlockedHealthPlanFormDataType['rateInfos']> {
@@ -298,6 +325,7 @@ function parseRateInfos(
     if (rateInfos.length > 0) {
         rateInfos.forEach((rateInfo) => {
             const rate: RecursivePartial<RateInfoType> = {
+                id: rateInfo.id ?? undefined,
                 rateAmendmentInfo: parseProtoRateAmendment(
                     rateInfo?.rateAmendmentInfo
                 ),
@@ -326,6 +354,8 @@ function parseRateInfos(
                     mcreviewproto.ActuaryCommunicationType,
                     rateInfo?.actuaryCommunicationPreference
                 ),
+                packagesWithSharedRateCerts:
+                    rateInfo.packagesWithSharedRateCerts ?? [],
             }
             rates.push(rate)
         })
@@ -367,13 +397,6 @@ const toDomain = (
 
     const cleanedStateContacts = replaceNullsWithUndefineds(stateContacts)
 
-    // Protos support multiple rate infos for now, but we only support one in our domain models
-    // so if there are multiple we'll drop the extras.
-    // This should be removed once all multi-rate UI features have been implemented. We should then only use rate data from rateInfos list of rate data.
-    let rateInfo: mcreviewproto.IRateInfo | undefined = undefined
-    if (rateInfos.length > 0) {
-        rateInfo = rateInfos[0]
-    }
     // SO, rather than repeat this whole thing for Draft and State submissions, because they are so
     // similar right now, we're just going to & them together for parsing out all the optional stuff
     // from the protobuf for now. If Draft and State submission diverged further in the future this
@@ -429,17 +452,6 @@ const toDomain = (
             contractInfo?.contractAmendmentInfo
         ),
         rateInfos: parseRateInfos(rateInfos),
-        rateAmendmentInfo: parseProtoRateAmendment(rateInfo?.rateAmendmentInfo),
-        rateType: enumToDomain(mcreviewproto.RateType, rateInfo?.rateType),
-        rateCapitationType: enumToDomain(
-            mcreviewproto.RateCapitationType,
-            rateInfo?.rateCapitationType
-        ),
-        rateDocuments: parseProtoDocuments(rateInfo?.rateDocuments),
-        rateDateStart: protoDateToDomain(rateInfo?.rateDateStart),
-        rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
-        rateDateCertified: protoDateToDomain(rateInfo?.rateDateCertified),
-        rateProgramIDs: rateInfo?.rateProgramIds ?? [],
         addtlActuaryCommunicationPreference: enumToDomain(
             mcreviewproto.ActuaryCommunicationType,
             addtlActuaryCommunicationPreference
@@ -448,6 +460,7 @@ const toDomain = (
         addtlActuaryContacts: parseActuaryContacts(addtlActuaryContacts),
         documents: parseProtoDocuments(formDataMessage.documents),
     }
+
     // Now that we've gotten things into our combined draft & state domain format.
     // we confirm that all the required fields are present to turn this into an UnlockedHealthPlanFormDataType or a LockedHealthPlanFormDataType
     if (status === 'DRAFT') {
@@ -461,15 +474,22 @@ const toDomain = (
         if (parseResult.success === false) {
             return parseResult.error
         }
-
-        return parseResult.data as UnlockedHealthPlanFormDataType
+        /* We need a one-off modification here because some older submissions don't have a populated
+        rateCertificationName field.  If it's missing, we'll generate it and add it to the form data.
+        We do it for locked or unlocked submissions. */
+        return updateRateCertificationNames(
+            parseResult.data as UnlockedHealthPlanFormDataType
+        )
     } else if (status === 'SUBMITTED') {
         const maybeLockedFormData =
             maybeUnlockedFormData as RecursivePartial<LockedHealthPlanFormDataType>
         maybeLockedFormData.status = 'SUBMITTED'
 
         if (isLockedHealthPlanFormData(maybeLockedFormData)) {
-            return maybeLockedFormData
+            /* We need a one-off modification here because some older submissions don't have a populated
+        rateCertificationName field.  If it's missing, we'll generate it and add it to the form data.
+        We do it for locked or unlocked submissions. */
+            return updateRateCertificationNames(maybeLockedFormData)
         } else {
             console.log(
                 'ERROR: attempting to parse state submission proto failed.',

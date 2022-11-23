@@ -78,6 +78,7 @@ describe('with rates', () => {
                         },
                     ],
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                    packagesWithSharedRateCerts: [],
                 },
             ],
         }
@@ -176,6 +177,7 @@ describe('with rates', () => {
                         },
                     ],
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                    packagesWithSharedRateCerts: [],
                 },
                 {
                     rateType: 'NEW',
@@ -202,6 +204,7 @@ describe('with rates', () => {
                         },
                     ],
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                    packagesWithSharedRateCerts: [],
                 },
                 {
                     rateType: 'AMENDMENT',
@@ -234,6 +237,7 @@ describe('with rates', () => {
                         },
                     ],
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                    packagesWithSharedRateCerts: [],
                 },
             ],
         }
@@ -354,6 +358,7 @@ describe('with rates', () => {
                         },
                     ],
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                    packagesWithSharedRateCerts: [],
                 },
             ],
         })
@@ -407,6 +412,7 @@ describe('with rates', () => {
                         },
                     ],
                     actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                    packagesWithSharedRateCerts: [],
                 },
             ],
         })
@@ -651,6 +657,7 @@ test('renders overall email as expected', async () => {
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
             {
                 rateType: 'NEW',
@@ -677,6 +684,7 @@ test('renders overall email as expected', async () => {
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
     }

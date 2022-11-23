@@ -157,7 +157,6 @@ describe('unlockHealthPlanPackage', () => {
         formData.contractDocuments = []
         formData.managedCareEntities = ['MCO']
         formData.federalAuthorities = ['VOLUNTARY' as const]
-        formData.rateDocuments = []
         formData.stateContacts = []
         formData.addtlActuaryContacts = []
 
@@ -487,109 +486,6 @@ describe('unlockHealthPlanPackage', () => {
                 subject: expect.stringContaining(`${name} was unlocked`),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
-                bodyHTML: expect.stringContaining(rateName),
-            })
-        )
-    })
-
-    it('generates rate name by package programs when rate programs are not specified', async () => {
-        const mockEmailer = testEmailer(testEmailConfig)
-
-        //mock invoke email submit lambda
-        const stateServer = await constructTestPostgresServer()
-
-        // First, create a new submitted submission
-        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
-            stateServer
-        )
-
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'zuko@example.com',
-                },
-            },
-            emailer: mockEmailer,
-        })
-
-        // Unlock and edit
-        const firstUnlockResult = await unlockTestHealthPlanPackage(
-            cmsServer,
-            stateSubmission.id,
-            'Super duper good reason.'
-        )
-
-        const firstUnlockFormData =
-            firstUnlockResult.revisions[0].node.formDataProto
-
-        const unlockedFormData = base64ToDomain(firstUnlockFormData)
-        if (unlockedFormData instanceof Error) {
-            throw unlockedFormData
-        }
-
-        //Set rate programs to empty string
-        unlockedFormData.rateInfos = [
-            {
-                rateType: 'NEW' as const,
-                rateDateStart: new Date(Date.UTC(2025, 5, 1)),
-                rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
-                rateDateCertified: new Date(Date.UTC(2025, 3, 15)),
-                rateDocuments: [
-                    {
-                        name: 'rateDocument.pdf',
-                        s3URL: 'fakeS3URL',
-                        documentCategories: ['RATES' as const],
-                    },
-                ],
-                rateProgramIDs: [],
-                actuaryContacts: [
-                    {
-                        actuarialFirm: 'DELOITTE',
-                        name: 'Actuary Contact 1',
-                        titleRole: 'Test Actuary Contact 1',
-                        email: 'actuarycontact1@example.com',
-                    },
-                ],
-                actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-            },
-        ]
-        // there's a rateProgramIDs in rateInfos and also on the form data itself; clear them both
-        unlockedFormData.rateProgramIDs = []
-
-        //Update package
-        const updatedSub = await updateTestHealthPlanFormData(
-            stateServer,
-            unlockedFormData
-        )
-
-        //Resubmit package
-        await resubmitTestHealthPlanPackage(stateServer, updatedSub.id, 'Test')
-
-        const finalUnlockResult = await unlockTestHealthPlanPackage(
-            cmsServer,
-            stateSubmission.id,
-            'Test unlock reason.'
-        )
-
-        const finalUnlockFormData =
-            finalUnlockResult.revisions[0].node.formDataProto
-        const sub = base64ToDomain(finalUnlockFormData)
-        if (sub instanceof Error) {
-            throw sub
-        }
-
-        const programs = [defaultFloridaProgram()]
-        const name = packageName(sub, programs)
-        const rateName = generateRateName(sub, sub.rateInfos[0], programs)
-
-        // email subject line is correct for CMS email
-        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            4,
-            expect.objectContaining({
-                subject: expect.stringContaining(`${name} was unlocked`),
-                //Rate name should have defaulted back to using package programs to generate name
                 bodyHTML: expect.stringContaining(rateName),
             })
         )

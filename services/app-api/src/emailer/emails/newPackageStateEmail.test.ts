@@ -269,6 +269,7 @@ test('includes expected data summary for a contract and rates submission State e
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
     }
@@ -355,6 +356,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
             {
                 rateType: 'NEW',
@@ -381,6 +383,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
             {
                 rateType: 'AMENDMENT',
@@ -413,6 +416,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
     }
@@ -520,6 +524,7 @@ test('includes expected data summary for a rate amendment submission State email
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
     }
@@ -601,6 +606,7 @@ test('renders overall email for a new package with a rate amendment as expected'
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
     }

@@ -67,6 +67,7 @@ type RateCapitationType = 'RATE_CELL' | 'RATE_RANGE'
 type ManagedCareEntity = 'MCO' | 'PIHP' | 'PAHP' | 'PCCM'
 
 type RateInfoType = {
+    id?: string
     rateType?: RateType
     rateCapitationType?: RateCapitationType
     rateDocuments: SubmissionDocument[]
@@ -78,6 +79,7 @@ type RateInfoType = {
     rateCertificationName?: string
     actuaryContacts: ActuaryContact[]
     actuaryCommunicationPreference?: ActuaryCommunicationType
+    packagesWithSharedRateCerts: string[]
 }
 
 // MAIN
@@ -104,27 +106,6 @@ type UnlockedHealthPlanFormDataType = {
     federalAuthorities: FederalAuthority[]
     contractAmendmentInfo?: ContractAmendmentInfo
     rateInfos: RateInfoType[]
-    rateType?: RateType
-    rateCapitationType?: RateCapitationType
-    rateDocuments: SubmissionDocument[]
-    rateDateStart?: Date
-    rateDateEnd?: Date
-    rateDateCertified?: Date
-    rateAmendmentInfo?: RateAmendmentInfo
-    rateProgramIDs?: string[]
-}
-
-type RateDataType = {
-    rateType?: 'AMENDMENT' | 'NEW' | null
-    rateCapitationType?: RateCapitationType
-    rateDateStart?: Date
-    rateDateEnd?: Date
-    rateDateCertified?: Date
-    rateAmendmentInfo?: {
-        effectiveDateEnd?: Date
-        effectiveDateStart?: Date
-    } | null
-    rateProgramIDs?: string[]
 }
 
 export type {
@@ -142,7 +123,6 @@ export type {
     UnlockedHealthPlanFormDataType,
     ContractAmendmentInfo,
     ContractExecutionStatus,
-    RateDataType,
     RateCapitationType,
     RateInfoType,
 }

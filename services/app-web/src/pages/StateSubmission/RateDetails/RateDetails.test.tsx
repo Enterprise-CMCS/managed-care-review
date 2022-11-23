@@ -11,6 +11,10 @@ import userEvent from '@testing-library/user-event'
 import {
     mockDraft,
     fetchCurrentUserMock,
+    indexHealthPlanPackagesMockSuccess,
+    mockUnlockedHealthPlanPackage,
+    mockSubmittedHealthPlanPackage,
+    mockMNState,
 } from '../../../testHelpers/apolloHelpers'
 
 import {
@@ -25,6 +29,8 @@ import {
 import { RateDetails } from './RateDetails'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import selectEvent from 'react-select-event'
+import * as useStatePrograms from '../../../hooks/useStatePrograms'
+import { unlockedWithALittleBitOfEverything } from '../../../common-code/healthPlanFormDataMocks'
 
 describe('RateDetails', () => {
     const emptyRateDetailsDraft = {
@@ -37,50 +43,57 @@ describe('RateDetails', () => {
         actuaryContacts: [],
     }
 
-    afterEach(() => jest.clearAllMocks())
-
-    it('renders without errors', async () => {
-        const mockUpdateDraftFn = jest.fn()
-
-        renderWithProviders(
-            <RateDetails
-                draftSubmission={emptyRateDetailsDraft}
-                updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
-
-        expect(screen.getByText('Rate certification type')).toBeInTheDocument()
-        expect(
-            screen.getByText('Upload rate certification')
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('button', { name: 'Continue' })
-        ).not.toHaveAttribute('aria-disabled')
-    })
-
-    it('displays correct form guidance', async () => {
-        renderWithProviders(
-            <RateDetails
-                draftSubmission={emptyRateDetailsDraft}
-                updateDraft={jest.fn()}
-                previousDocuments={[]}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
-        expect(screen.getByText(/All fields are required/)).toBeInTheDocument()
+    afterEach(() => {
+        jest.clearAllMocks()
+        jest.spyOn(useStatePrograms, 'useStatePrograms').mockRestore()
     })
 
     describe('handles a single rate', () => {
+        it('renders without errors', async () => {
+            const mockUpdateDraftFn = jest.fn()
+
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            expect(
+                screen.getByText('Rate certification type')
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText('Upload rate certification')
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('button', { name: 'Continue' })
+            ).not.toHaveAttribute('aria-disabled')
+        })
+
+        it('displays correct form guidance', async () => {
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={emptyRateDetailsDraft}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            expect(
+                screen.getByText(/All fields are required/)
+            ).toBeInTheDocument()
+        })
+
         it('loads with empty rate type and document upload fields visible', async () => {
             const mockUpdateDraftFn = jest.fn()
 
@@ -1034,6 +1047,365 @@ describe('RateDetails', () => {
                 expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
             )
         })
+
+        it('correctly checks shared rate certification checkboxes and selects shared packages', async () => {
+            ldUseClientSpy({
+                'rates-across-submissions': true,
+                'multi-rate-submissions': true,
+            })
+
+            //Spy on useStatePrograms hook to get up-to-date state programs
+            jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
+                mockMNState().programs
+            )
+
+            //First submission is 'CONTRACT_ONLY' and last submission is the current one. Both should be excluded from
+            // package combobox options.
+            const currentSubmission = {
+                ...emptyRateDetailsDraft,
+                stateNumber: 3,
+                id: 'test-shared-rate',
+            }
+
+            const mockSubmissions = [
+                {
+                    ...mockSubmittedHealthPlanPackage({
+                        ...unlockedWithALittleBitOfEverything(),
+                        stateNumber: 4,
+                        id: 'test-id-123',
+                    }),
+                    id: 'test-id-123',
+                },
+                {
+                    ...mockUnlockedHealthPlanPackage({
+                        stateNumber: 5,
+                        id: 'test-id-124',
+                    }),
+                    id: 'test-id-124',
+                },
+                {
+                    ...mockUnlockedHealthPlanPackage({
+                        stateNumber: 6,
+                        id: 'test-id-125',
+                    }),
+                    id: 'test-id-125',
+                },
+                {
+                    ...mockUnlockedHealthPlanPackage(currentSubmission),
+                    id: 'test-shared-rate',
+                },
+            ]
+
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={currentSubmission}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                            }),
+                            indexHealthPlanPackagesMockSuccess(mockSubmissions),
+                        ],
+                    },
+                }
+            )
+            const rateCertsOnLoad = rateCertifications(screen)
+            expect(rateCertsOnLoad).toHaveLength(1)
+
+            //Fill out first rate certification
+            await fillOutFirstRate(screen)
+
+            //Click the first rate certification shared rate cert check box
+            const firstRateCert = within(rateCertsOnLoad[0]!)
+            const firstRateCertSharedCheckBox = firstRateCert.getByLabelText(
+                'This rate certification was uploaded to another submission.'
+            )
+            await userEvent.click(firstRateCertSharedCheckBox)
+
+            //Expect there to be two combo boxes, packages and programs.
+            const comboBoxes = firstRateCert.getAllByRole('combobox')
+            expect(comboBoxes).toHaveLength(2)
+
+            //Expect the two packages we know to exist.
+            const firstRatePackageCombobox = comboBoxes[0]
+            await selectEvent.openMenu(firstRatePackageCombobox)
+            await waitFor(() => {
+                expect(
+                    firstRateCert.getByText(
+                        'MCR-MN-0004-MSC+-PMAP-SNBC (Submitted 01/02/21)'
+                    )
+                ).toBeInTheDocument()
+                expect(
+                    firstRateCert.getByText(
+                        'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
+                    )
+                ).toBeInTheDocument()
+                expect(
+                    firstRateCert.getByText(
+                        'MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
+                    )
+                ).toBeInTheDocument()
+            })
+
+            //Select two packages that have a shared rate cert with this rate cert.
+            await selectEvent.openMenu(firstRatePackageCombobox)
+            await selectEvent.select(
+                firstRatePackageCombobox,
+                'MCR-MN-0004-MSC+-PMAP-SNBC (Submitted 01/02/21)'
+            )
+            await selectEvent.openMenu(firstRatePackageCombobox)
+            await selectEvent.select(
+                firstRatePackageCombobox,
+                'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
+            )
+            await selectEvent.openMenu(firstRatePackageCombobox)
+            await selectEvent.select(
+                firstRatePackageCombobox,
+                'MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
+            )
+            await selectEvent.openMenu(firstRatePackageCombobox)
+
+            //Expect the three packages to have been selected and 'No options' are left to be selected.
+            expect(firstRateCert.getByText('No options')).toBeInTheDocument()
+            expect(
+                firstRateCert.getByLabelText(
+                    'Remove MCR-MN-0004-MSC+-PMAP-SNBC (Submitted 01/02/21)'
+                )
+            ).toBeInTheDocument()
+            expect(
+                firstRateCert.getByLabelText(
+                    'Remove MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
+                )
+            ).toBeInTheDocument()
+            expect(
+                firstRateCert.getByLabelText(
+                    'Remove MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
+                )
+            ).toBeInTheDocument()
+
+            //Add new rate certification
+            await clickAddNewRate(screen)
+            await waitFor(() => {
+                const rateCertsAfterAddAnother = rateCertifications(screen)
+                expect(rateCertsAfterAddAnother).toHaveLength(2)
+            })
+
+            //Only first rate certification shared rate checkbox is checked and has two comboboxes
+            const secondRateCert = within(rateCertifications(screen)[1]!)
+            const secondRateCertSharedCheckBox = secondRateCert.getByRole(
+                'checkbox',
+                {
+                    name: 'This rate certification was uploaded to another submission.',
+                }
+            )
+            expect(firstRateCertSharedCheckBox).toBeChecked()
+            expect(firstRateCert.getAllByRole('combobox')).toHaveLength(2)
+            expect(
+                firstRateCert.getByText(
+                    /Please select the submissions that also contain this rate/
+                )
+            ).toBeInTheDocument()
+            expect(secondRateCertSharedCheckBox).not.toBeChecked()
+            expect(
+                secondRateCert.queryByText(
+                    /Please select the submissions that also contain this rate/
+                )
+            ).toBeNull()
+            expect(secondRateCert.getAllByRole('combobox')).toHaveLength(1)
+
+            //Both rate cert check boxes are unchecked and only programs combobox present
+            await userEvent.click(firstRateCertSharedCheckBox)
+            expect(firstRateCertSharedCheckBox).not.toBeChecked()
+            expect(firstRateCert.getAllByRole('combobox')).toHaveLength(1)
+            expect(secondRateCertSharedCheckBox).not.toBeChecked()
+            expect(secondRateCert.getAllByRole('combobox')).toHaveLength(1)
+
+            ///Only second rate certification shared rate checkbox is checked and has two comboboxes
+            await userEvent.click(secondRateCertSharedCheckBox)
+            expect(firstRateCertSharedCheckBox).not.toBeChecked()
+            expect(firstRateCert.getAllByRole('combobox')).toHaveLength(1)
+            expect(secondRateCertSharedCheckBox).toBeChecked()
+            expect(secondRateCert.getAllByRole('combobox')).toHaveLength(2)
+
+            //Both rate cert check boxes are check and have selected packages in the comboxes
+            await userEvent.click(firstRateCertSharedCheckBox)
+            const secondRatePackageCombobox =
+                secondRateCert.getAllByRole('combobox')[0]
+            await selectEvent.openMenu(secondRatePackageCombobox)
+            await selectEvent.select(
+                secondRatePackageCombobox,
+                'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
+            )
+            expect(firstRateCertSharedCheckBox).toBeChecked()
+            expect(firstRateCert.getAllByRole('combobox')).toHaveLength(2)
+            expect(
+                firstRateCert.getByLabelText(
+                    'Remove MCR-MN-0004-MSC+-PMAP-SNBC (Submitted 01/02/21)'
+                )
+            ).toBeInTheDocument()
+            expect(
+                firstRateCert.getByLabelText(
+                    'Remove MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
+                )
+            ).toBeInTheDocument()
+            expect(
+                firstRateCert.getByLabelText(
+                    'Remove MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
+                )
+            ).toBeInTheDocument()
+            expect(secondRateCertSharedCheckBox).toBeChecked()
+            expect(secondRateCert.getAllByRole('combobox')).toHaveLength(2)
+            expect(
+                secondRateCert.getByLabelText(
+                    'Remove MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
+                )
+            ).toBeInTheDocument()
+            expect(
+                secondRateCert.queryByLabelText(
+                    'Remove MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
+                )
+            ).not.toBeInTheDocument()
+        })
+
+        it('cannot continue when shared rate checkbox is checked and no package is selected', async () => {
+            ldUseClientSpy({
+                'rates-across-submissions': true,
+                'multi-rate-submissions': true,
+            })
+
+            //Spy on useStatePrograms hook to get up-to-date state programs
+            jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
+                mockMNState().programs
+            )
+
+            //First submission is 'CONTRACT_ONLY' and last submission is the current one. Both should be excluded from
+            // package combobox options.
+            const currentSubmission = {
+                ...emptyRateDetailsDraft,
+                stateNumber: 3,
+                id: 'test-shared-rate',
+            }
+
+            const mockSubmissions = [
+                {
+                    ...mockSubmittedHealthPlanPackage({
+                        stateNumber: 4,
+                        id: 'test-id-123',
+                    }),
+                    id: 'test-id-123',
+                },
+                {
+                    ...mockUnlockedHealthPlanPackage({
+                        stateNumber: 5,
+                        id: 'test-id-124',
+                    }),
+                    id: 'test-id-124',
+                },
+                {
+                    ...mockUnlockedHealthPlanPackage({
+                        stateNumber: 6,
+                        id: 'test-id-125',
+                    }),
+                    id: 'test-id-125',
+                },
+                {
+                    ...mockUnlockedHealthPlanPackage(currentSubmission),
+                    id: 'test-shared-rate',
+                },
+            ]
+
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={currentSubmission}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                            }),
+                            indexHealthPlanPackagesMockSuccess(mockSubmissions),
+                        ],
+                    },
+                }
+            )
+            const rateCertsOnLoad = rateCertifications(screen)
+            expect(rateCertsOnLoad).toHaveLength(1)
+
+            //Fill out first rate certification
+            await fillOutFirstRate(screen)
+
+            //Click the first rate certification shared rate cert check box
+            const firstRateCert = within(rateCertsOnLoad[0]!)
+            const firstRateCertSharedCheckBox = firstRateCert.getByLabelText(
+                'This rate certification was uploaded to another submission.'
+            )
+            await userEvent.click(firstRateCertSharedCheckBox)
+
+            //Expect there to be two combo boxes, packages and programs.
+            const comboBoxes = firstRateCert.getAllByRole('combobox')
+            expect(comboBoxes).toHaveLength(2)
+
+            //Expect the two packages we know to exist.
+            const firstRatePackageCombobox = comboBoxes[0]
+            await selectEvent.openMenu(firstRatePackageCombobox)
+            await waitFor(() => {
+                expect(
+                    firstRateCert.getByText(
+                        'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
+                    )
+                ).toBeInTheDocument()
+                expect(
+                    firstRateCert.getByText(
+                        'MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
+                    )
+                ).toBeInTheDocument()
+            })
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+
+            await userEvent.click(continueButton)
+
+            //Expect submission selection error and continue button is disabled
+            await waitFor(() => {
+                expect(
+                    screen.getAllByText(
+                        'You must select at least one submission'
+                    )
+                ).toHaveLength(2)
+                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
+            })
+
+            //Select two packages that have a shared rate cert with this rate cert.
+            await selectEvent.select(
+                firstRatePackageCombobox,
+                'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
+            )
+            await selectEvent.openMenu(firstRatePackageCombobox)
+            await selectEvent.select(
+                firstRatePackageCombobox,
+                'MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
+            )
+            await selectEvent.openMenu(firstRatePackageCombobox)
+
+            //Expect submission selection error to clear and continue button is not disabled
+            await waitFor(() => {
+                expect(
+                    screen.queryByText(
+                        'You must select at least one submission'
+                    )
+                ).not.toBeInTheDocument()
+                expect(continueButton).not.toHaveAttribute('aria-disabled')
+            })
+        })
     })
 
     describe('Continue button', () => {
@@ -1552,6 +1924,7 @@ describe('RateDetails', () => {
                                     documentCategories: ['RATES'],
                                 },
                             ],
+                            packagesWithSharedRateCerts: [],
                         },
                     ],
                 })

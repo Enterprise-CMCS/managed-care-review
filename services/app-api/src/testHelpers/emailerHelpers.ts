@@ -297,21 +297,9 @@ const mockContractAndRatesFormData = (
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
-        rateType: 'NEW',
-        rateDocuments: [
-            {
-                s3URL: 'bar',
-                name: 'foo',
-                documentCategories: ['RATES' as const],
-            },
-        ],
-        rateDateCertified: new Date('01/02/2021'),
-        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
-        rateAmendmentInfo: undefined,
-        rateDateStart: new Date('01/01/2021'),
-        rateDateEnd: new Date('01/01/2022'),
         stateContacts: [
             {
                 name: 'Test Person',
@@ -389,20 +377,9 @@ const mockUnlockedContractAndRatesFormData = (
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
-        rateType: 'NEW',
-        rateDocuments: [
-            {
-                s3URL: 'bar',
-                name: 'foo',
-                documentCategories: ['RATES' as const],
-            },
-        ],
-        rateDateStart: new Date('01/01/2021'),
-        rateDateEnd: new Date('01/01/2022'),
-        rateDateCertified: new Date('01/02/2021'),
-        rateAmendmentInfo: undefined,
         stateContacts: [
             {
                 name: 'Test Person',
@@ -419,7 +396,6 @@ const mockUnlockedContractAndRatesFormData = (
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
         ...submissionPartial,
     }
 }
@@ -458,7 +434,6 @@ const mockUnlockedContractOnlyFormData = (
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [],
-        rateDocuments: [],
         stateContacts: [
             {
                 name: 'Test Person',
@@ -506,7 +481,6 @@ const mockContractOnlyFormData = (
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [],
-        rateDocuments: [],
         stateContacts: [
             {
                 name: 'Test Person',
@@ -577,20 +551,9 @@ const mockContractAmendmentFormData = (
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
-        rateType: 'NEW',
-        rateDocuments: [
-            {
-                s3URL: 'bar',
-                name: 'foo',
-                documentCategories: ['RATES' as const],
-            },
-        ],
-        rateDateStart: new Date('01/01/2021'),
-        rateDateEnd: new Date('01/01/2022'),
-        rateDateCertified: new Date('01/02/2021'),
-        rateAmendmentInfo: undefined,
         stateContacts: [
             {
                 name: 'Test Person',
@@ -607,7 +570,6 @@ const mockContractAmendmentFormData = (
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-        rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
         ...submissionPartial,
     }
 }

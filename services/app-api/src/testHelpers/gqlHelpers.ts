@@ -209,6 +209,7 @@ const createAndUpdateTestHealthPlanPackage = async (
                 },
             ],
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY' as const,
+            packagesWithSharedRateCerts: [],
         },
     ]
     draft.addtlActuaryContacts = [
@@ -234,19 +235,6 @@ const createAndUpdateTestHealthPlanPackage = async (
     ]
     draft.managedCareEntities = ['MCO']
     draft.federalAuthorities = ['STATE_PLAN' as const]
-    draft.rateType = 'NEW' as const
-    draft.rateDateStart = new Date(Date.UTC(2025, 5, 1))
-    draft.rateDateEnd = new Date(Date.UTC(2026, 4, 30))
-    draft.rateDateCertified = new Date(Date.UTC(2025, 3, 15))
-    draft.rateDocuments = [
-        {
-            name: 'rateDocument.pdf',
-            s3URL: 'fakeS3URL',
-            documentCategories: ['RATES' as const],
-        },
-    ]
-    //We only want one rate ID and use last program in list to differentiate from programID if possible.
-    draft.rateProgramIDs = [ratePrograms.reverse()[0].id]
 
     Object.assign(draft, partialUpdates)
 

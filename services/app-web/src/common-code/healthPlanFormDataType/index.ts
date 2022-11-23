@@ -18,7 +18,6 @@ export type {
     StateContact,
     SubmissionDocument,
     SubmissionType,
-    RateDataType,
     RateInfoType,
 } from './UnlockedHealthPlanFormDataType'
 

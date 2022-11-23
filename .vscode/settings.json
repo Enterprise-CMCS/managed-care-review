@@ -3,6 +3,7 @@
     "launchdarkly.project": "default",
     "launchdarkly.env": "dev",
     "cSpell.words": [
+        "proto",
         "TEALIUM",
         "utag"
     ]

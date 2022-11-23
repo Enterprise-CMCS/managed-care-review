@@ -8,6 +8,7 @@ import {
 import statePrograms from '../../data/statePrograms.json'
 import { ProgramArgType } from '../../healthPlanFormDataType/State'
 import { CURRENT_PROTO_VERSION } from './toLatestVersion'
+import { v4 as uuidv4 } from 'uuid'
 
 const findStatePrograms = (stateCode: string): ProgramArgType[] => {
     const programs = statePrograms.states.find(
@@ -183,8 +184,9 @@ const toProtoBuffer = (
         },
         rateInfos:
             domainData.rateInfos && domainData.rateInfos.length
-                ? domainData.rateInfos.map((rateInfo, index) => {
+                ? domainData.rateInfos.map((rateInfo) => {
                       return {
+                          id: rateInfo.id ?? uuidv4(),
                           rateType: domainEnumToProto(
                               rateInfo.rateType,
                               mcreviewproto.RateType
@@ -224,7 +226,6 @@ const toProtoBuffer = (
                                   rateInfo.rateAmendmentInfo.effectiveDateEnd
                               ),
                           },
-                          //Currently, this Actuary data is in domainData, eventually it will be included in the rateInfo to have actuaries for each certification.
                           actuaryContacts: rateInfo.actuaryContacts.map(
                               (actuaryContact) => {
                                   const firmType = domainEnumToProto(
@@ -248,6 +249,8 @@ const toProtoBuffer = (
                               domainData.addtlActuaryCommunicationPreference,
                               mcreviewproto.ActuaryCommunicationType
                           ),
+                          packagesWithSharedRateCerts:
+                              rateInfo.packagesWithSharedRateCerts,
                       }
                   })
                 : undefined,

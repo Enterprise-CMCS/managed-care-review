@@ -1,24 +1,41 @@
-import { renderWithProviders } from '../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { ProgramSelect } from './ProgramSelect'
-import { mockMNState } from '../../testHelpers/apolloHelpers'
+import {
+    fetchCurrentUserMock,
+    mockMNState,
+} from '../../../testHelpers/apolloHelpers'
 import { screen, waitFor } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import userEvent from '@testing-library/user-event'
 
 describe('ProgramSelect', () => {
+    const mockStatePrograms = mockMNState().programs
+    let mockOnChange = jest.fn()
+    beforeEach(
+        () =>
+            (mockOnChange = jest.fn((programs) => {
+                return programs.map((item: { value: string }) => item.value)
+            }))
+    )
+    afterEach(() => jest.resetAllMocks())
+
     it('displays program options', async () => {
-        const mockStatePrograms = mockMNState().programs
-        const mockOnChange = jest.fn((programs) => {
-            console.log(programs)
-            return programs.map((item: { value: string }) => item.value)
-        })
         renderWithProviders(
             <ProgramSelect
                 name="programSelect"
                 statePrograms={mockStatePrograms}
                 programIDs={[]}
                 onChange={mockOnChange}
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            }
         )
         const combobox = await screen.findByRole('combobox')
 
@@ -32,18 +49,22 @@ describe('ProgramSelect', () => {
         })
     })
     it('can select and return programs in an array', async () => {
-        const mockStatePrograms = mockMNState().programs
-        const mockOnChange = jest.fn((programs) => {
-            console.log(programs)
-            return programs.map((item: { value: string }) => item.value)
-        })
         renderWithProviders(
             <ProgramSelect
                 name="programSelect"
                 statePrograms={mockStatePrograms}
                 programIDs={[]}
                 onChange={mockOnChange}
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            }
         )
         const combobox = await screen.findByRole('combobox')
 
@@ -70,10 +91,6 @@ describe('ProgramSelect', () => {
         expect(screen.getByLabelText('Remove MSHO')).toBeInTheDocument()
     })
     it('can remove all selected programs', async () => {
-        const mockStatePrograms = mockMNState().programs
-        const mockOnChange = jest.fn((programs) => {
-            return programs.map((item: { value: string }) => item.value)
-        })
         renderWithProviders(
             <ProgramSelect
                 name="programSelect"
@@ -83,7 +100,16 @@ describe('ProgramSelect', () => {
                     'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                 ]}
                 onChange={mockOnChange}
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            }
         )
         const combobox = await screen.findByRole('combobox')
 

@@ -181,7 +181,6 @@ message RateInfo {
   optional RateCapitationType rate_capitation_type = 9;
   repeated string rate_program_ids = 10;
   optional string rate_certification_name = 11;
-  repeated string packages_with_shared_rate_certs = 12;
 
   optional RateAmendmentInfo rate_amendment_info = 50;
 

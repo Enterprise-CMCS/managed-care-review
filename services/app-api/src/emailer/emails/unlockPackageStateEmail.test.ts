@@ -46,6 +46,7 @@ const sub: UnlockedHealthPlanFormDataType = {
                 },
             ],
             actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+            packagesWithSharedRateCerts: [],
         },
     ],
 }
@@ -157,6 +158,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
             {
                 rateType: 'NEW',
@@ -183,6 +185,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
             {
                 rateType: 'AMENDMENT',
@@ -215,6 +218,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
     }
@@ -289,7 +293,6 @@ test('includes expected data summary for a multi-rate contract and rates submiss
 test('renders overall email as expected', async () => {
     const sub: UnlockedHealthPlanFormDataType = {
         ...mockUnlockedContractAndRatesFormData(),
-        rateType: 'AMENDMENT',
         contractDateStart: new Date('2021-01-01'),
         contractDateEnd: new Date('2021-12-31'),
         rateInfos: [
@@ -318,6 +321,7 @@ test('renders overall email as expected', async () => {
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
             {
                 rateType: 'NEW',
@@ -344,6 +348,7 @@ test('renders overall email as expected', async () => {
                     },
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+                packagesWithSharedRateCerts: [],
             },
         ],
     }

@@ -14,7 +14,7 @@ Right now when we use proto data directly after it is deserialized to typescript
 */
 import { mcreviewproto } from '../../../gen/healthPlanFormDataProto'
 
-const CURRENT_PROTO_VERSION = 3
+const CURRENT_PROTO_VERSION = 4
 
 const updateToVersion3 = (oldProto: mcreviewproto.HealthPlanFormData) => {
     // We can assume the proto version exists because error would have been thrown in toDomain
@@ -55,9 +55,9 @@ const toLatestProtoVersion = (proto: mcreviewproto.HealthPlanFormData) => {
         return proto
     } else {
         // if the proto is an outdated version convert it to the latest
-        console.log(
-            `Trying to open outdated proto. State: ${proto.stateCode}, Package ID: ${proto.id}, Outdated proto version: ${protoVersion}`
-        )
+        // console.log(
+        //     `Trying to open outdated proto. State: ${proto.stateCode}, Package ID: ${proto.id}, Outdated proto version: ${protoVersion}`
+        // )
 
         const v3Compatible = updateToVersion3(proto)
 
