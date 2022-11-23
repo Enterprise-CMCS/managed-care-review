@@ -36,7 +36,6 @@ export const UploadedDocumentsTable = ({
     isEditing = false,
     isCMSUser,
 }: UploadedDocumentsTableProps): React.ReactElement => {
-    console.log('packagesWithSharedRateCerts', packagesWithSharedRateCerts)
     const { getURL, getKey } = useS3()
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
     const shouldShowEditButton = isEditing && isSupportingDocuments
@@ -119,7 +118,6 @@ export const UploadedDocumentsTable = ({
             </div>
         )
     }
-    console.log('refreshedDocs', refreshedDocs)
     return (
         <>
             <table
@@ -136,7 +134,7 @@ export const UploadedDocumentsTable = ({
                         <th scope="col">Date added</th>
                         <th scope="col">Document category</th>
                         {showSharedInfo && (
-                            <th scope="col">Linked submission</th>
+                            <th scope="col">Linked submissions</th>
                         )}
                     </tr>
                 </thead>
