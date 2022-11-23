@@ -59,10 +59,10 @@ import * as Yup from 'yup'
 import { useFocus } from '../../../hooks'
 import { ActuaryContactFields } from '../Contacts'
 import { useIndexHealthPlanPackagesQuery } from '../../../gen/gqlClient'
-import { base64ToDomain } from '../../../common-code/proto/healthPlanFormDataProto'
 import { recordJSException } from '../../../otelHelpers'
 import { dayjs } from '../../../common-code/dateHelpers'
 import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
+import { getCurrentRevisionFromHealthPlanPackage } from '../../../gqlHelpers'
 
 const RateDatesErrorMessage = ({
     startDate,
@@ -164,26 +164,27 @@ export const RateDetails = ({
             data?.indexHealthPlanPackages.edges
                 .map((edge) => edge.node)
                 .forEach((sub) => {
-                    const currentRevision = sub.revisions[0]
-                    const currentSubmissionData = base64ToDomain(
-                        currentRevision.node.formDataProto
-                    )
-                    if (currentSubmissionData instanceof Error) {
+                    const currentRevisionPackageOrError =
+                        getCurrentRevisionFromHealthPlanPackage(sub)
+                    if (currentRevisionPackageOrError instanceof Error) {
                         recordJSException(
-                            `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${sub.id} Error message: ${currentSubmissionData.message}`
+                            `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${sub.id}`
                         )
-                        return null
+                        return null // TODO make an error state for PackageSelect, right now we just remove from page if this request fails
                     }
+                    const [currentRevision, currentSubmissionData] =
+                        currentRevisionPackageOrError
 
+                    // Exclude active submission and contract_only submissions from list.
                     if (
                         currentSubmissionData.id !== draftSubmission.id &&
                         currentSubmissionData.submissionType ===
                             'CONTRACT_AND_RATES'
                     ) {
-                        const submittedAt = currentRevision.node.submitInfo
+                        const submittedAt = currentRevision.submitInfo
                             ?.updatedAt
                             ? ` (Submitted ${dayjs(
-                                  currentRevision.node.submitInfo.updatedAt
+                                  currentRevision.submitInfo.updatedAt
                               )
                                   .tz('UTC')
                                   .format('MM/DD/YY')})`
@@ -198,7 +199,8 @@ export const RateDetails = ({
                         })
                     }
                 })
-            setPackageOptions(packages)
+            const abbreviatedPackagesList = packages.slice(0, 5)
+            setPackageOptions(abbreviatedPackagesList)
         },
         onError: (error) => {
             recordJSException(
