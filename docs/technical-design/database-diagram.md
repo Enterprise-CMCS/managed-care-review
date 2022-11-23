@@ -112,7 +112,7 @@ Document {
 
 ## QA Single Questions Upload Design
 
-```
+```mermaid
 erDiagram
 
 HealthPlanPackageTable ||--|{ HealthPlanRevisionTable: "has many"
