@@ -3,6 +3,7 @@ service: app-api
 frameworkVersion: '^3.19.0'
 
 package:
+  individually: true
   patterns:
     - '!node_modules/prisma'
     - '!node_modules/.prisma'
