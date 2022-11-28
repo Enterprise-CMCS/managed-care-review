@@ -68,6 +68,10 @@ function preparePrismaLayer() {
     rm -rf lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/migration-engine-debian-openssl-1.1.x
     rm -rf lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/prisma-fmt-debian-openssl-1.1.x
 
+    echo "Use a symlink for client libquery engine to save more space..."
+    rm -rf lambda-layers-prisma-client-migration/nodejs/node_modules/.prisma/client/libquery_engine-rhel-openssl-1.0.x.so.node
+    ln -s lambda-layers-prisma-client-migration/nodejs/node_modules/@prisma/engines/libquery_engine-rhel-openssl-1.0.x.so.node \
+        lambda-layers-prisma-client-migration/nodejs/node_modules/.prisma/client/libquery_engine-rhel-openssl-1.0.x.so.node
 
     echo "Compressing and cleaning migration engine..."
     pushd lambda-layers-prisma-client-migration && tar -zcf /tmp/nodejs.tar.gz . && mv /tmp/nodejs.tar.gz ./nodejs.tar.gz
