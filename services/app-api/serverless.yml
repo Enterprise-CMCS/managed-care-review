@@ -38,15 +38,6 @@ custom:
     includeModules:
       forceExclude:
         - '@prisma/client'
-        - '@aws-sdk/client-ses'
-        - '@aws-sdk/client-amplify'
-        - '@aws-sdk/client-cognito-identity-provider'
-        - '@aws-sdk/client-lambda'
-        - '@aws-sdk/client-rds'
-        - '@aws-sdk/client-s3'
-        - '@aws-sdk/client-secrets-manager'
-        - '@aws-sdk/client-ses'
-        - '@aws-sdk/client-ssm'
       nodeModulesRelativeDir: '../../'
     excludeRegex: 'darwin|debian'
   serverlessTerminationProtection:
