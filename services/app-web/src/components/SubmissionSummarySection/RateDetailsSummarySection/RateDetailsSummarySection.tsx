@@ -350,7 +350,7 @@ export const RateDetailsSummarySection = ({
                                     </div>
                                 )}
                             </DoubleColumnGrid>
-                            {!loading && (
+                            {!loading ? (
                                 <UploadedDocumentsTable
                                     documents={rateInfo.rateDocuments}
                                     packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
@@ -363,6 +363,8 @@ export const RateDetailsSummarySection = ({
                                     caption="Rate certification"
                                     documentCategory="Rate certification"
                                 />
+                            ) : (
+                                <span className="srOnly">'LOADING...'</span>
                             )}
                         </React.Fragment>
                     )
