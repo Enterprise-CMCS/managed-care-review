@@ -17,7 +17,7 @@ import {
     packageName,
     RateInfoType,
 } from '../../../common-code/healthPlanFormDataType'
-import { Program } from '../../../gen/gqlClient'
+import { HealthPlanPackageStatus, Program } from '../../../gen/gqlClient'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { useIndexHealthPlanPackagesQuery } from '../../../gen/gqlClient'
 import { recordJSException } from '../../../otelHelpers'
@@ -26,8 +26,15 @@ import { Link } from '@trussworks/react-uswds'
 import { getCurrentRevisionFromHealthPlanPackage } from '../../../gqlHelpers'
 import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 
-type PackageName = string
-type RatePackageNamesLookup = { [id: string]: PackageName } // packages names keyed by their package id
+// Used for refreshed packages names keyed by their package id
+// package name includes (Draft) for draft packages.
+type PackageNameType = string
+type PackageNamesLookupType = {
+    [id: string]: {
+        packageName: PackageNameType
+        status: HealthPlanPackageStatus
+    }
+}
 
 export type RateDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -46,8 +53,8 @@ export const RateDetailsSummarySection = ({
     submissionName,
     statePrograms,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
-    const [ratePackageNamesLookup, setRatePackageNamesLookup] =
-        React.useState<RatePackageNamesLookup | null>(null)
+    const [packageNamesLookup, setPackageNamesLookup] =
+        React.useState<PackageNamesLookupType | null>(null)
 
     // Launch Darkly
     const ldClient = useLDClient()
@@ -57,72 +64,85 @@ export const RateDetailsSummarySection = ({
     )
     const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && navigateTo !== undefined
+    const isPreviousSubmission = usePreviousSubmission()
 
-    // Used to determine which package name to display for linked rate documents table
+    // Return refreshed package names for state  - used rates across submissions feature
+    // Use package name from api if available, otherwise use packageName coming down from proto as fallback
+    // Display package name appended with text "Draft" when CMS user loads page properly (no errors) but refreshed name is not available
     const refreshPackagesWithSharedRateCert = (
         rateInfo: RateInfoType
     ): SharedRateCertDisplay[] | undefined => {
-        // Use package name from api if available, otherwise use packageName coming down from proto as fallback
         return rateInfo.packagesWithSharedRateCerts?.map(
             ({ packageId, packageName }) => {
                 const refreshedName =
                     packageId &&
-                    ratePackageNamesLookup &&
-                    ratePackageNamesLookup[packageId]
-
+                    packageNamesLookup &&
+                    packageNamesLookup[packageId]?.packageName
+                const isDraftText =
+                    isCMSUser && !refreshedName && !indexPackagesError
+                        ? ' (Draft)'
+                        : ''
                 return {
                     packageId,
-                    packageName: refreshedName ?? packageName,
+                    packageName:
+                        refreshedName ?? `${packageName}${isDraftText}`,
                 }
             }
         )
     }
 
-    // Get updated rate packages and names for the state  -  used in linked rate documents feature
-    const { error, data } = useIndexHealthPlanPackagesQuery()
+    // Request updated rate packages and names for the state  -  used in rates across submissions feature
+    const {
+        error: indexPackagesError,
+        data,
+        loading,
+    } = useIndexHealthPlanPackagesQuery()
+    const refreshedPackagesLookup = data?.indexHealthPlanPackages.edges.reduce(
+        (acc, edge) => {
+            const pkg = edge.node
+            const currentRevisionPackageOrError =
+                getCurrentRevisionFromHealthPlanPackage(pkg)
+            if (currentRevisionPackageOrError instanceof Error) {
+                recordJSException(
+                    `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${pkg.id}`
+                )
+                return acc
+            }
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const [currentRevision, currentSubmissionData] =
+                currentRevisionPackageOrError
 
-    useEffect(() => {
-        const tempRatePackageNamesLookup: RatePackageNamesLookup = {}
-        data?.indexHealthPlanPackages.edges
-            .map((edge) => edge.node)
-            .forEach((pkg) => {
-                const currentRevisionPackageOrError =
-                    getCurrentRevisionFromHealthPlanPackage(pkg)
-                if (currentRevisionPackageOrError instanceof Error) {
-                    recordJSException(
-                        `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${pkg.id}`
-                    )
-                    return null
-                }
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const [currentRevision, currentSubmissionData] =
-                    currentRevisionPackageOrError
-
-                // Exclude active submission package and contract_only from list.
-                if (
-                    currentSubmissionData.submissionType ===
-                    'CONTRACT_AND_RATES'
-                ) {
-                    tempRatePackageNamesLookup[pkg.id] = packageName(
+            // Exclude active submission package and contract_only from list.
+            if (
+                currentSubmissionData.submissionType === 'CONTRACT_AND_RATES' &&
+                currentRevision.submitInfo?.updatedAt &&
+                pkg.id
+            ) {
+                acc[pkg.id] = {
+                    packageName: packageName(
                         currentSubmissionData,
                         statePrograms
-                    )
+                    ),
+                    status: pkg.status,
                 }
-            })
+            }
+            return acc
+        },
+        {} as PackageNamesLookupType
+    )
 
-        if (!ratePackageNamesLookup) {
-            setRatePackageNamesLookup(tempRatePackageNamesLookup)
+    useEffect(() => {
+        if (!packageNamesLookup && refreshedPackagesLookup) {
+            setPackageNamesLookup(refreshedPackagesLookup)
         }
-    }, [data, statePrograms, ratePackageNamesLookup])
+    }, [refreshedPackagesLookup, packageNamesLookup])
 
-    if (error) {
+    if (indexPackagesError) {
         recordJSException(
-            `indexHealthPlanPackagesQuery: Error querying health plan packages. ID: ${submission.id} Error message: ${error.message}`
+            `indexHealthPlanPackagesQuery: Error querying health plan packages. ID: ${submission.id} Error message: ${indexPackagesError.message}`
         )
+        // No displayed error state, we fall back to proto stored names for potential shared rate packages
     }
-
-    // Check if submission is a previous submission
-    const isPreviousSubmission = usePreviousSubmission()
 
     // Get the zip file for the rate details
     const { getKey, getBulkDlURL } = useS3()
@@ -330,18 +350,20 @@ export const RateDetailsSummarySection = ({
                                     </div>
                                 )}
                             </DoubleColumnGrid>
-                            <UploadedDocumentsTable
-                                documents={rateInfo.rateDocuments}
-                                packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
-                                    rateInfo
-                                )}
-                                documentDateLookupTable={
-                                    documentDateLookupTable
-                                }
-                                isCMSUser={isCMSUser}
-                                caption="Rate certification"
-                                documentCategory="Rate certification"
-                            />
+                            {!loading && (
+                                <UploadedDocumentsTable
+                                    documents={rateInfo.rateDocuments}
+                                    packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
+                                        rateInfo
+                                    )}
+                                    documentDateLookupTable={
+                                        documentDateLookupTable
+                                    }
+                                    isCMSUser={isCMSUser}
+                                    caption="Rate certification"
+                                    documentCategory="Rate certification"
+                                />
+                            )}
                         </React.Fragment>
                     )
                 })}

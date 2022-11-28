@@ -60,6 +60,10 @@ export const UploadedDocumentsTable = ({
     const supportingDocsTopMarginStyles = isSupportingDocuments
         ? styles.withMarginTop
         : ''
+
+    const linkedPackageIsDraft = (packageName?: string) =>
+        packageName && packageName.includes('(Draft)')
+
     const tableCaptionJSX = (
         <>
             <span>{caption}</span>
@@ -186,12 +190,19 @@ export const UploadedDocumentsTable = ({
                             {showSharedInfo
                                 ? packagesWithSharedRateCerts &&
                                   packagesWithSharedRateCerts.map((item) => (
-                                      <td>
-                                          <NavLink
-                                              to={`/submissions/${item.packageId}`}
-                                          >
-                                              {item.packageName}
-                                          </NavLink>
+                                      <td key={item.packageName}>
+                                          {isCMSUser &&
+                                          linkedPackageIsDraft(
+                                              item.packageName
+                                          ) ? (
+                                              <span>{item.packageName}</span>
+                                          ) : (
+                                              <NavLink
+                                                  to={`/submissions/${item.packageId}`}
+                                              >
+                                                  {item.packageName}
+                                              </NavLink>
+                                          )}
                                       </td>
                                   ))
                                 : null}
