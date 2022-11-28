@@ -14,12 +14,20 @@ import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
     HealthPlanFormDataType,
+    packageName,
     RateInfoType,
 } from '../../../common-code/healthPlanFormDataType'
 import { Program } from '../../../gen/gqlClient'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { useIndexHealthPlanPackagesQuery } from '../../../gen/gqlClient'
+import { recordJSException } from '../../../otelHelpers'
 import { featureFlags } from '../../../common-code/featureFlags'
 import { Link } from '@trussworks/react-uswds'
+import { getCurrentRevisionFromHealthPlanPackage } from '../../../gqlHelpers'
+import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
+
+type PackageName = string
+type RatePackageNamesLookup = { [id: string]: PackageName } // packages names keyed by their package id
 
 export type RateDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -38,6 +46,9 @@ export const RateDetailsSummarySection = ({
     submissionName,
     statePrograms,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
+    const [ratePackageNamesLookup, setRatePackageNamesLookup] =
+        React.useState<RatePackageNamesLookup | null>(null)
+
     // Launch Darkly
     const ldClient = useLDClient()
     const showMultiRates = ldClient?.variation(
@@ -46,8 +57,73 @@ export const RateDetailsSummarySection = ({
     )
     const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && navigateTo !== undefined
-    //Checks if submission is a previous submission
+
+    // Used to determine which package name to display for linked rate documents table
+    const refreshPackagesWithSharedRateCert = (
+        rateInfo: RateInfoType
+    ): SharedRateCertDisplay[] | undefined => {
+        // Use package name from api if available, otherwise use packageName coming down from proto as fallback
+        return rateInfo.packagesWithSharedRateCerts?.map(
+            ({ packageId, packageName }) => {
+                const refreshedName =
+                    packageId &&
+                    ratePackageNamesLookup &&
+                    ratePackageNamesLookup[packageId]
+
+                return {
+                    packageId,
+                    packageName: refreshedName ?? packageName,
+                }
+            }
+        )
+    }
+
+    // Get updated rate packages and names for the state  -  used in linked rate documents feature
+    const { error, data } = useIndexHealthPlanPackagesQuery()
+
+    useEffect(() => {
+        const tempRatePackageNamesLookup: RatePackageNamesLookup = {}
+        data?.indexHealthPlanPackages.edges
+            .map((edge) => edge.node)
+            .forEach((pkg) => {
+                const currentRevisionPackageOrError =
+                    getCurrentRevisionFromHealthPlanPackage(pkg)
+                if (currentRevisionPackageOrError instanceof Error) {
+                    recordJSException(
+                        `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${pkg.id}`
+                    )
+                    return null
+                }
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const [currentRevision, currentSubmissionData] =
+                    currentRevisionPackageOrError
+
+                // Exclude active submission package and contract_only from list.
+                if (
+                    currentSubmissionData.submissionType ===
+                    'CONTRACT_AND_RATES'
+                ) {
+                    tempRatePackageNamesLookup[pkg.id] = packageName(
+                        currentSubmissionData,
+                        statePrograms
+                    )
+                }
+            })
+
+        if (!ratePackageNamesLookup) {
+            setRatePackageNamesLookup(tempRatePackageNamesLookup)
+        }
+    }, [data, statePrograms, ratePackageNamesLookup])
+
+    if (error) {
+        recordJSException(
+            `indexHealthPlanPackagesQuery: Error querying health plan packages. ID: ${submission.id} Error message: ${error.message}`
+        )
+    }
+
+    // Check if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
+
     // Get the zip file for the rate details
     const { getKey, getBulkDlURL } = useS3()
     const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
@@ -256,9 +332,9 @@ export const RateDetailsSummarySection = ({
                             </DoubleColumnGrid>
                             <UploadedDocumentsTable
                                 documents={rateInfo.rateDocuments}
-                                packagesWithSharedRateCerts={
-                                    rateInfo.packagesWithSharedRateCerts
-                                }
+                                packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
+                                    rateInfo
+                                )}
                                 documentDateLookupTable={
                                     documentDateLookupTable
                                 }
