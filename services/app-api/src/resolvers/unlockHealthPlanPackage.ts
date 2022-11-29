@@ -140,10 +140,10 @@ export function unlockHealthPlanPackageResolver(
             stateAnalystsEmails = []
         }
 
-        const statePrograms = store.getStatePrograms(draft.stateCode)
+        const statePrograms = store.findStatePrograms(draft.stateCode)
 
         if (statePrograms instanceof Error) {
-            logError('getStatePrograms', statePrograms.message)
+            logError('findStatePrograms', statePrograms.message)
             setErrorAttributesOnActiveSpan(statePrograms.message, span)
             throw new Error(statePrograms.message)
         }

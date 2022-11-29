@@ -18,6 +18,7 @@ export async function findAllPackagesWrapper(
         const result = await client.healthPlanPackageTable.findMany({
             where: {
                 revisions: { some: { submittedAt: { not: null } } }, // drafts have no submission status
+                stateCode: { not: 'AS' }, // exclude test state as per ADR 019
             },
             include: {
                 revisions: {

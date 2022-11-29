@@ -23,6 +23,7 @@ import {
     RateInfoType,
     ActuaryContact,
     ActuaryCommunicationType,
+    packageName,
 } from '../../../common-code/healthPlanFormDataType'
 
 import {
@@ -33,7 +34,9 @@ import {
     FieldRadio,
     PoliteErrorMessage,
     ProgramSelect,
+    PackageSelect,
 } from '../../../components'
+import type { PackageOptionType } from '../../../components/Select'
 import {
     formatForForm,
     isDateRangeEmpty,
@@ -49,12 +52,16 @@ import { useS3 } from '../../../contexts/S3Context'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
-import { useStatePrograms } from '../../../hooks/useStatePrograms'
+import { useStatePrograms } from '../../../hooks'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
 import * as Yup from 'yup'
 import { useFocus } from '../../../hooks'
 import { ActuaryContactFields } from '../Contacts'
+import { useIndexHealthPlanPackagesQuery } from '../../../gen/gqlClient'
+import { base64ToDomain } from '../../../common-code/proto/healthPlanFormDataProto'
+import { recordJSException } from '../../../otelHelpers'
+import { dayjs } from '../../../common-code/dateHelpers'
 
 const RateDatesErrorMessage = ({
     startDate,
@@ -121,7 +128,7 @@ export const RateDetails = ({
         featureFlags.MULTI_RATE_SUBMISSIONS.flag,
         featureFlags.MULTI_RATE_SUBMISSIONS.defaultValue
     )
-    const ratesAcrossSubmissions = ldClient?.variation(
+    const showRatesAcrossSubs = ldClient?.variation(
         featureFlags.RATES_ACROSS_SUBMISSIONS.flag,
         featureFlags.RATES_ACROSS_SUBMISSIONS.defaultValue
     )
@@ -134,6 +141,9 @@ export const RateDetails = ({
     const [focusNewRate, setFocusNewRate] = React.useState(false)
     const newRateNameRef = React.useRef<HTMLElement | null>(null)
     const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
+    const [packageOptions, setPackageOptions] = React.useState<
+        PackageOptionType[]
+    >([])
 
     const rateDetailsFormSchema = showMultiRates
         ? //Concat RateDetailsFormSchema to ActuaryContactSchema for error summary order
@@ -145,6 +155,57 @@ export const RateDetails = ({
         : Yup.object().shape({
               rateInfos: RateDetailsFormSchema,
           })
+
+    const { loading, error } = useIndexHealthPlanPackagesQuery({
+        skip: !showRatesAcrossSubs,
+        onCompleted: async (data) => {
+            const packages: PackageOptionType[] = []
+            data?.indexHealthPlanPackages.edges
+                .map((edge) => edge.node)
+                .forEach((sub) => {
+                    const currentRevision = sub.revisions[0]
+                    const currentSubmissionData = base64ToDomain(
+                        currentRevision.node.formDataProto
+                    )
+                    if (currentSubmissionData instanceof Error) {
+                        recordJSException(
+                            `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${sub.id} Error message: ${currentSubmissionData.message}`
+                        )
+                        return null
+                    }
+
+                    if (
+                        currentSubmissionData.id !== draftSubmission.id &&
+                        currentSubmissionData.submissionType ===
+                            'CONTRACT_AND_RATES'
+                    ) {
+                        const submittedAt = currentRevision.node.submitInfo
+                            ?.updatedAt
+                            ? ` (Submitted ${dayjs(
+                                  currentRevision.node.submitInfo.updatedAt
+                              )
+                                  .tz('UTC')
+                                  .format('MM/DD/YY')})`
+                            : ` (Draft)`
+
+                        packages.push({
+                            label: `${packageName(
+                                currentSubmissionData,
+                                statePrograms
+                            )}${submittedAt}`,
+                            value: currentSubmissionData.id,
+                        })
+                    }
+                })
+            setPackageOptions(packages)
+        },
+        onError: (error) => {
+            recordJSException(
+                `indexHealthPlanPackagesQuery: Error querying health plan packages. ID: ${draftSubmission.id} Error message: ${error.message}`
+            )
+            return null
+        },
+    })
 
     const fileItemsFromRateInfo = (rateInfo: RateInfoFormType): FileItemT[] => {
         return (
@@ -414,8 +475,9 @@ export const RateDetails = ({
                 actuaryContacts: rateInfo.actuaryContacts,
                 actuaryCommunicationPreference:
                     rateInfo.actuaryCommunicationPreference,
-                packagesWithSharedRateCerts:
-                    rateInfo.packagesWithSharedRateCerts ?? [],
+                packagesWithSharedRateCerts: rateInfo.hasSharedRateCert
+                    ? rateInfo.packagesWithSharedRateCerts
+                    : [],
             }
         })
 
@@ -459,9 +521,10 @@ export const RateDetails = ({
                 if (!rateError) return
                 Object.entries(rateError).forEach(([field, value]) => {
                     if (typeof value === 'string') {
-                        //rateProgramIDs error message needs a # proceeding the key name because this is the only way to be able to link to the ProgramSelect component element see comments in ErrorSummaryMessage component.
+                        //rateProgramIDs error message needs a # proceeding the key name because this is the only way to be able to link to the Select component element see comments in ErrorSummaryMessage component.
                         const errorKey =
-                            field === 'rateProgramIDs'
+                            field === 'rateProgramIDs' ||
+                            field === 'packagesWithSharedRateCerts'
                                 ? `#rateInfos.${index}.${field}`
                                 : `rateInfos.${index}.${field}`
                         errorObject[errorKey] = value
@@ -662,8 +725,18 @@ export const RateDetails = ({
                                                                 }
                                                             />
                                                         </FormGroup>
-                                                        {ratesAcrossSubmissions && (
-                                                            <FormGroup>
+                                                        {showRatesAcrossSubs && (
+                                                            <FormGroup
+                                                                error={showFieldErrors(
+                                                                    rateErrorHandling(
+                                                                        errors
+                                                                            ?.rateInfos?.[
+                                                                            index
+                                                                        ]
+                                                                    )
+                                                                        ?.packagesWithSharedRateCerts
+                                                                )}
+                                                            >
                                                                 <Checkbox
                                                                     id={`hasSharedRateCheckBox-${rateInfo.key}`}
                                                                     name={`rateInfos.${index}.hasSharedRateCert`}
@@ -685,6 +758,92 @@ export const RateDetails = ({
                                                                         )
                                                                     }
                                                                 />
+
+                                                                {rateInfo.hasSharedRateCert && (
+                                                                    <>
+                                                                        <Label
+                                                                            htmlFor={`rateInfos.${index}.rateProgramIDs`}
+                                                                        >
+                                                                            Please
+                                                                            select
+                                                                            the
+                                                                            submissions
+                                                                            that
+                                                                            also
+                                                                            contain
+                                                                            this
+                                                                            rate
+                                                                            certification.
+                                                                        </Label>
+                                                                        <Link
+                                                                            aria-label="View all submissions (opens in new window)"
+                                                                            href={
+                                                                                '/dashboard'
+                                                                            }
+                                                                            variant="external"
+                                                                            target="_blank"
+                                                                        >
+                                                                            View
+                                                                            all
+                                                                            submissions
+                                                                        </Link>
+                                                                        {showFieldErrors(
+                                                                            rateErrorHandling(
+                                                                                errors
+                                                                                    ?.rateInfos?.[
+                                                                                    index
+                                                                                ]
+                                                                            )
+                                                                                ?.packagesWithSharedRateCerts
+                                                                        ) && (
+                                                                            <PoliteErrorMessage>
+                                                                                {getIn(
+                                                                                    errors,
+                                                                                    `rateInfos.${index}.packagesWithSharedRateCerts`
+                                                                                )}
+                                                                            </PoliteErrorMessage>
+                                                                        )}
+                                                                        <PackageSelect
+                                                                            //This key is required here because the combination of react-select, defaultValue, formik and apollo useQuery
+                                                                            // causes issues with the default value when reloading the page
+                                                                            key={`${packageOptions}-${rateInfo.key}`}
+                                                                            inputId={`rateInfos.${index}.packagesWithSharedRateCerts`}
+                                                                            name={`rateInfos.${index}.packagesWithSharedRateCerts`}
+                                                                            statePrograms={
+                                                                                statePrograms
+                                                                            }
+                                                                            initialValues={
+                                                                                rateInfo?.packagesWithSharedRateCerts
+                                                                            }
+                                                                            packageOptions={
+                                                                                packageOptions
+                                                                            }
+                                                                            draftSubmissionId={
+                                                                                draftSubmission.id
+                                                                            }
+                                                                            isLoading={
+                                                                                loading
+                                                                            }
+                                                                            error={
+                                                                                error instanceof
+                                                                                Error
+                                                                            }
+                                                                            onChange={(
+                                                                                selectedOptions
+                                                                            ) =>
+                                                                                setFieldValue(
+                                                                                    `rateInfos.${index}.packagesWithSharedRateCerts`,
+                                                                                    selectedOptions.map(
+                                                                                        (item: {
+                                                                                            value: string
+                                                                                        }) =>
+                                                                                            item.value
+                                                                                    )
+                                                                                )
+                                                                            }
+                                                                        />
+                                                                    </>
+                                                                )}
                                                             </FormGroup>
                                                         )}
                                                         <FormGroup
@@ -741,11 +900,11 @@ export const RateDetails = ({
                                                                         }
                                                                         aria-label="programs (required)"
                                                                         onChange={(
-                                                                            selectedOption
+                                                                            selectedOptions
                                                                         ) =>
                                                                             form.setFieldValue(
                                                                                 `rateInfos.${index}.rateProgramIDs`,
-                                                                                selectedOption.map(
+                                                                                selectedOptions.map(
                                                                                     (item: {
                                                                                         value: string
                                                                                     }) =>
@@ -791,7 +950,7 @@ export const RateDetails = ({
                                                                     </PoliteErrorMessage>
                                                                 )}
                                                                 <Link
-                                                                    aria-label="Rate certification type defintions (opens in new window)"
+                                                                    aria-label="Rate certification type definitions (opens in new window)"
                                                                     href={
                                                                         '/help#rate-cert-type-definitions'
                                                                     }
@@ -1348,7 +1507,11 @@ export const RateDetails = ({
                                         )
                                     }
                                 }}
-                                disableContinue={showFileUploadError}
+                                disableContinue={
+                                    (shouldValidate &&
+                                        !!Object.keys(errors).length) ||
+                                    showFileUploadError
+                                }
                                 actionInProgress={isSubmitting}
                             />
                         </UswdsForm>

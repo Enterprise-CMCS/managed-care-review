@@ -6,6 +6,10 @@ Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 const RateDetailsFormSchema = Yup.array().of(
     Yup.object().shape({
+        packagesWithSharedRateCerts: Yup.array().when('hasSharedRateCert', {
+            is: true,
+            then: Yup.array().min(1, 'You must select at least one submission'),
+        }),
         rateProgramIDs: Yup.array().min(1, 'You must select a program'),
         rateType: Yup.string().defined(
             'You must choose a rate certification type'
@@ -92,7 +96,6 @@ const RateDetailsFormSchema = Yup.array().of(
                     'The end date must come after the start date'
                 ),
         }),
-        packagesWithSharedRateCerts: Yup.array(),
         hasSharedRateCert: Yup.boolean().optional(),
     })
 )
