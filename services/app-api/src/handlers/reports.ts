@@ -6,7 +6,7 @@ import { HealthPlanRevisionTable } from '@prisma/client'
 import { ProgramArgType } from '../../../app-web/src/common-code/healthPlanFormDataType/State'
 import { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import statePrograms from '../data/statePrograms.json'
+import statePrograms from '../../../app-web/src/common-code/data/statePrograms.json'
 import { isStoreError, StoreError } from '../postgres/storeError'
 
 type RevisionWithDecodedProtobuf = {
