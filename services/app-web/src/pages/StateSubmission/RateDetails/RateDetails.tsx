@@ -160,7 +160,9 @@ export const RateDetails = ({
     const { loading, error } = useIndexHealthPlanPackagesQuery({
         skip: !showRatesAcrossSubs,
         onCompleted: async (data) => {
-            const packages: PackageOptionType[] = []
+            const packagesWithUpdatedAt: Array<
+                { updatedAt: Date } & PackageOptionType
+            > = []
             data?.indexHealthPlanPackages.edges
                 .map((edge) => edge.node)
                 .forEach((sub) => {
@@ -190,7 +192,8 @@ export const RateDetails = ({
                                   .format('MM/DD/YY')})`
                             : ` (Draft)`
 
-                        packages.push({
+                        packagesWithUpdatedAt.push({
+                            updatedAt: currentSubmissionData.updatedAt,
                             label: `${packageName(
                                 currentSubmissionData,
                                 statePrograms
@@ -199,7 +202,10 @@ export const RateDetails = ({
                         })
                     }
                 })
-            const abbreviatedPackagesList = packages.slice(0, 5)
+
+            const abbreviatedPackagesList = packagesWithUpdatedAt
+                .sort((a, b) => (a['updatedAt'] > b['updatedAt'] ? -1 : 1))
+                .slice(0, 5)
             setPackageOptions(abbreviatedPackagesList)
         },
         onError: (error) => {
