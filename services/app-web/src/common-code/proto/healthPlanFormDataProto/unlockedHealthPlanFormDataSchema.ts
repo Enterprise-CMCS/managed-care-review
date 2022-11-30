@@ -107,6 +107,11 @@ const actuaryContactSchema = z.object({
     actuarialFirmOther: z.string().optional(),
 })
 
+const sharedRateCertDisplay = z.object({
+    packageName: z.string(),
+    packageId: z.string(),
+})
+
 const rateTypeSchema = z.union([z.literal('NEW'), z.literal('AMENDMENT')])
 
 const rateCapitationTypeSchema = z.union([
@@ -127,7 +132,7 @@ const rateInfosTypeSchema = z.object({
     rateCertificationName: z.string().optional(),
     actuaryContacts: z.array(actuaryContactSchema),
     actuaryCommunicationPreference: actuaryCommunicationTypeSchema.optional(),
-    packagesWithSharedRateCerts: z.array(z.string()),
+    packagesWithSharedRateCerts: z.array(sharedRateCertDisplay),
 })
 
 // Commenting out because this wasn't being used but was raising lint warning -hw

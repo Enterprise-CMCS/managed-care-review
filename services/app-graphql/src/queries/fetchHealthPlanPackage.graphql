@@ -17,6 +17,7 @@ query fetchHealthPlanPackage($input: FetchHealthPlanPackageInput!) {
             revisions {
                 node {
                     id
+                    createdAt
                     unlockInfo {
                         updatedAt
                         updatedBy
@@ -27,7 +28,6 @@ query fetchHealthPlanPackage($input: FetchHealthPlanPackageInput!) {
                         updatedBy
                         updatedReason
                     }
-                    createdAt
                     formDataProto
                 }
             }

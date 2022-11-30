@@ -21,16 +21,8 @@ const getCurrentRevisionFromHealthPlanPackage = (
                 'Error fetching the latest revision. Please try again.'
             )
         }
-
-        const newestRev = submissionAndRevisions.revisions.reduce(
-            (acc, rev) => {
-                if (rev.node.createdAt > acc.node.createdAt) {
-                    return rev
-                } else {
-                    return acc
-                }
-            }
-        ).node
+        // rely entirely on server-side sorting of revisions by created-at descending (oldest first)
+        const newestRev = submissionAndRevisions.revisions[0].node
 
         // Decode form data submitted by the state
         const healthPlanPackageFormDataResult = base64ToDomain(
