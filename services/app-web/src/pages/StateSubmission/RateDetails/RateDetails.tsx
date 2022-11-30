@@ -203,10 +203,10 @@ export const RateDetails = ({
                     }
                 })
 
-            const abbreviatedPackagesList = packagesWithUpdatedAt
-                .sort((a, b) => (a['updatedAt'] > b['updatedAt'] ? -1 : 1))
-                .slice(0, 5)
-            setPackageOptions(abbreviatedPackagesList)
+            const packagesList = packagesWithUpdatedAt.sort((a, b) =>
+                a['updatedAt'] > b['updatedAt'] ? -1 : 1
+            )
+            setPackageOptions(packagesList)
         },
         onError: (error) => {
             recordJSException(
