@@ -91,7 +91,7 @@ export const RateDetailsSummarySection = ({
         )
     }
 
-    // Request updated packages and names for the state  -  used in rates across submissions feature
+    // Request updated rate packages and names for the state  -  used in rates across submissions feature
     const {
         error: indexPackagesError,
         data,
@@ -108,9 +108,8 @@ export const RateDetailsSummarySection = ({
                 )
                 return acc
             }
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const [currentRevision, currentSubmissionData] =
-                currentRevisionPackageOrError
+
+            const [_, currentSubmissionData] = currentRevisionPackageOrError
 
             acc[pkg.id] = {
                 packageName: packageName(currentSubmissionData, statePrograms),
