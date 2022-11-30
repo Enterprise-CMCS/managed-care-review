@@ -91,7 +91,7 @@ export const RateDetailsSummarySection = ({
         )
     }
 
-    // Request updated rate packages and names for the state  -  used in rates across submissions feature
+    // Request updated packages and names for the state  -  used in rates across submissions feature
     const {
         error: indexPackagesError,
         data,
@@ -112,20 +112,11 @@ export const RateDetailsSummarySection = ({
             const [currentRevision, currentSubmissionData] =
                 currentRevisionPackageOrError
 
-            // Exclude active submission package and contract_only from list.
-            if (
-                currentSubmissionData.submissionType === 'CONTRACT_AND_RATES' &&
-                currentRevision.submitInfo?.updatedAt &&
-                pkg.id
-            ) {
-                acc[pkg.id] = {
-                    packageName: packageName(
-                        currentSubmissionData,
-                        statePrograms
-                    ),
-                    status: pkg.status,
-                }
+            acc[pkg.id] = {
+                packageName: packageName(currentSubmissionData, statePrograms),
+                status: pkg.status,
             }
+
             return acc
         },
         {} as PackageNamesLookupType
