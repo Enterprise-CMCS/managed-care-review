@@ -236,7 +236,7 @@ functions:
 
   migrate:
     handler: src/handlers/postgres_migrate.main
-    timeout: 30
+    timeout: 60
     vpc:
       securityGroupIds:
         - ${self:custom.sgId}
