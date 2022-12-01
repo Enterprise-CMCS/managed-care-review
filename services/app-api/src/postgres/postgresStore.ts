@@ -8,7 +8,7 @@ import {
     HealthPlanPackageType,
     UpdateInfoType,
 } from '../domain-models'
-import { findPrograms, getStatePrograms } from '../postgres'
+import { findPrograms, findStatePrograms } from '../postgres'
 import { findAllHealthPlanPackagesByState } from './findAllHealthPlanPackagesByState'
 import { findAllHealthPlanPackagesBySubmittedAt } from './findAllHealthPlanPackagesBySubmittedAt'
 import { findHealthPlanPackage } from './findHealthPlanPackage'
@@ -19,7 +19,7 @@ import {
 import { insertHealthPlanRevision } from './insertHealthPlanRevision'
 import { StoreError } from './storeError'
 import { updateHealthPlanRevision } from './updateHealthPlanRevision'
-import { getAllRevisions } from './getAllRevisions'
+import { findAllRevisions } from './findAllRevisions'
 
 type Store = {
     findPrograms: (
@@ -27,9 +27,9 @@ type Store = {
         programIDs: Array<string>
     ) => ProgramType[] | Error
 
-    getStatePrograms: (stateCode: string) => ProgramType[] | Error
+    findStatePrograms: (stateCode: string) => ProgramType[] | Error
 
-    getAllRevisions: () => Promise<HealthPlanRevisionTable[] | StoreError>
+    findAllRevisions: () => Promise<HealthPlanRevisionTable[] | StoreError>
 
     findHealthPlanPackage: (
         draftUUID: string
@@ -85,8 +85,8 @@ function NewPostgresStore(client: PrismaClient): Store {
                 draft,
             }),
         findPrograms: findPrograms,
-        getStatePrograms: getStatePrograms,
-        getAllRevisions: () => getAllRevisions(client),
+        findStatePrograms: findStatePrograms,
+        findAllRevisions: () => findAllRevisions(client),
     }
 }
 

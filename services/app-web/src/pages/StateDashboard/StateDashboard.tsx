@@ -7,7 +7,6 @@ import {
     packageName,
     programNames,
 } from '../../common-code/healthPlanFormDataType'
-import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { Loading } from '../../components/Loading'
 import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
 import { useAuth } from '../../contexts/AuthContext'
@@ -19,13 +18,12 @@ import {
 import styles from './StateDashboard.module.scss'
 import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBanner/GenericApiErrorBanner'
-
-import { recordJSException } from '../../otelHelpers/tracingHelper'
 import {
     handleApolloError,
     isLikelyUserAuthError,
 } from '../../gqlHelpers/apolloErrors'
 import { ErrorAlertSignIn } from '../../components'
+import { getCurrentRevisionFromHealthPlanPackage } from '../../gqlHelpers'
 
 // We only pull a subset of data out of the submission and revisions for display in Dashboard
 type SubmissionInDashboard = {
@@ -110,17 +108,13 @@ export const StateDashboard = (): React.ReactElement => {
     data?.indexHealthPlanPackages.edges
         .map((edge) => edge.node)
         .forEach((sub) => {
-            const currentRevision = sub.revisions[0]
-            const currentSubmissionData = base64ToDomain(
-                currentRevision.node.formDataProto
-            )
-            if (currentSubmissionData instanceof Error) {
-                recordJSException(
-                    `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${sub.id} Error message: ${currentSubmissionData.message}`
-                )
+            const currentRevisionDataOrError =
+                getCurrentRevisionFromHealthPlanPackage(sub)
 
+            if (currentRevisionDataOrError instanceof Error) {
                 return null
             }
+            const [_, currentSubmissionData] = currentRevisionDataOrError
 
             submissionRows.push({
                 id: sub.id,
