@@ -14,12 +14,27 @@ import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
     HealthPlanFormDataType,
+    packageName,
     RateInfoType,
 } from '../../../common-code/healthPlanFormDataType'
-import { Program } from '../../../gen/gqlClient'
+import { HealthPlanPackageStatus, Program } from '../../../gen/gqlClient'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { useIndexHealthPlanPackagesQuery } from '../../../gen/gqlClient'
+import { recordJSException } from '../../../otelHelpers'
 import { featureFlags } from '../../../common-code/featureFlags'
 import { Link } from '@trussworks/react-uswds'
+import { getCurrentRevisionFromHealthPlanPackage } from '../../../gqlHelpers'
+import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
+
+// Used for refreshed packages names keyed by their package id
+// package name includes (Draft) for draft packages.
+type PackageNameType = string
+type PackageNamesLookupType = {
+    [id: string]: {
+        packageName: PackageNameType
+        status: HealthPlanPackageStatus
+    }
+}
 
 export type RateDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -38,6 +53,9 @@ export const RateDetailsSummarySection = ({
     submissionName,
     statePrograms,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
+    const [packageNamesLookup, setPackageNamesLookup] =
+        React.useState<PackageNamesLookupType | null>(null)
+
     // Launch Darkly
     const ldClient = useLDClient()
     const showMultiRates = ldClient?.variation(
@@ -46,8 +64,76 @@ export const RateDetailsSummarySection = ({
     )
     const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && navigateTo !== undefined
-    //Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
+
+    // Return refreshed package names for state  - used rates across submissions feature
+    // Use package name from api if available, otherwise use packageName coming down from proto as fallback
+    // Display package name appended with text "Draft" when CMS user loads page properly (no errors) but refreshed name is not available
+    const refreshPackagesWithSharedRateCert = (
+        rateInfo: RateInfoType
+    ): SharedRateCertDisplay[] | undefined => {
+        return rateInfo.packagesWithSharedRateCerts?.map(
+            ({ packageId, packageName }) => {
+                const refreshedName =
+                    packageId &&
+                    packageNamesLookup &&
+                    packageNamesLookup[packageId]?.packageName
+                const isDraftText =
+                    isCMSUser && !refreshedName && !indexPackagesError
+                        ? ' (Draft)'
+                        : ''
+                return {
+                    packageId,
+                    packageName:
+                        refreshedName ?? `${packageName}${isDraftText}`,
+                }
+            }
+        )
+    }
+
+    // Request updated rate packages and names for the state  -  used in rates across submissions feature
+    const {
+        error: indexPackagesError,
+        data,
+        loading,
+    } = useIndexHealthPlanPackagesQuery()
+    const refreshedPackagesLookup = data?.indexHealthPlanPackages.edges.reduce(
+        (acc, edge) => {
+            const pkg = edge.node
+            const currentRevisionPackageOrError =
+                getCurrentRevisionFromHealthPlanPackage(pkg)
+            if (currentRevisionPackageOrError instanceof Error) {
+                recordJSException(
+                    `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${pkg.id}`
+                )
+                return acc
+            }
+
+            const [_, currentSubmissionData] = currentRevisionPackageOrError
+
+            acc[pkg.id] = {
+                packageName: packageName(currentSubmissionData, statePrograms),
+                status: pkg.status,
+            }
+
+            return acc
+        },
+        {} as PackageNamesLookupType
+    )
+
+    useEffect(() => {
+        if (!packageNamesLookup && refreshedPackagesLookup) {
+            setPackageNamesLookup(refreshedPackagesLookup)
+        }
+    }, [refreshedPackagesLookup, packageNamesLookup])
+
+    if (indexPackagesError) {
+        recordJSException(
+            `indexHealthPlanPackagesQuery: Error querying health plan packages. ID: ${submission.id} Error message: ${indexPackagesError.message}`
+        )
+        // No displayed error state, we fall back to proto stored names for potential shared rate packages
+    }
+
     // Get the zip file for the rate details
     const { getKey, getBulkDlURL } = useS3()
     const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
@@ -254,15 +340,22 @@ export const RateDetailsSummarySection = ({
                                     </div>
                                 )}
                             </DoubleColumnGrid>
-                            <UploadedDocumentsTable
-                                documents={rateInfo.rateDocuments}
-                                documentDateLookupTable={
-                                    documentDateLookupTable
-                                }
-                                isCMSUser={isCMSUser}
-                                caption="Rate certification"
-                                documentCategory="Rate certification"
-                            />
+                            {!loading ? (
+                                <UploadedDocumentsTable
+                                    documents={rateInfo.rateDocuments}
+                                    packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
+                                        rateInfo
+                                    )}
+                                    documentDateLookupTable={
+                                        documentDateLookupTable
+                                    }
+                                    isCMSUser={isCMSUser}
+                                    caption="Rate certification"
+                                    documentCategory="Rate certification"
+                                />
+                            ) : (
+                                <span className="srOnly">'LOADING...'</span>
+                            )}
                         </React.Fragment>
                     )
                 })}
