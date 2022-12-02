@@ -84,6 +84,7 @@ export const PackageSelect = ({
             options={error || isLoading ? undefined : packageOptions}
             isSearchable
             isMulti
+            maxMenuHeight={200} // using this to limit size of the display to ~ 5 options with no font zooming
             aria-label="submission (required)"
             ariaLiveMessages={{
                 onFocus,

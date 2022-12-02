@@ -119,11 +119,17 @@ export const SubmissionSummary = (): React.ReactElement => {
             )
 
             if (!currentRevision) {
-                recordJSException(
-                    `SubmissionSummary: submission in summary has no submitted revision. ID: ${submissionAndRevisions.id}`
-                )
-                // if state user goes to submission/:id for a draft submission, put them on the form
-                navigate(`/submissions/${id}/edit/type`)
+                if (isCMSUser) {
+                    recordJSException(
+                        `SubmissionSummary: submission in summary has no submitted revision. ID: ${submissionAndRevisions.id}`
+                    )
+                    setPageLevelAlert(
+                        'Error fetching the submission. This package may still be in draft mode.'
+                    )
+                } else {
+                    // if state user goes to submission/:id for a draft submission, put them on the form, this is an expected workflow
+                    navigate(`/submissions/${id}/edit/type`)
+                }
                 return
             }
 
@@ -179,6 +185,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         setPageLevelAlert,
         navigate,
         id,
+        isCMSUser,
     ])
 
     // Update header with submission name
