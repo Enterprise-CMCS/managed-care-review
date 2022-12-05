@@ -1,16 +1,27 @@
-import AWS from 'aws-sdk'
+import {
+    CloudFormationClient,
+    DescribeStacksCommand,
+} from '@aws-sdk/client-cloudformation'
+const {
+    CognitoIdentityProviderClient,
+    AdminCreateUserCommand,
+    AdminSetUserPasswordCommand
+} = require('@aws-sdk/client-cognito-identity-provider')
 
 async function getUserPoolID(stageName: string): Promise<string> {
     const uiAuthStackName = `ui-auth-${stageName}`
 
-    const cf = new AWS.CloudFormation({
+    const cf = new CloudFormationClient({
         apiVersion: '2016-04-19',
         region: 'us-east-1',
     })
 
+    const commandDescribeStacks  = new DescribeStacksCommand({
+        StackName: uiAuthStackName,
+    })
     const describe = await cf
-        .describeStacks({ StackName: uiAuthStackName })
-        .promise()
+        .send(commandDescribeStacks)
+    
 
     if (describe.Stacks === undefined) {
         throw new Error('got back nothing')
@@ -56,7 +67,7 @@ async function createUser({
     password: string
     state?: string
 }) {
-    const cognito = new AWS.CognitoIdentityServiceProvider({
+    const cognito = new  CognitoIdentityProviderClient({
         apiVersion: '2016-04-19',
         region: 'us-east-1',
     })
@@ -95,7 +106,8 @@ async function createUser({
     }
 
     try {
-        await cognito.adminCreateUser(userProps).promise()
+        const commandCreateUser =  new AdminCreateUserCommand(userProps)
+        await cognito.send(commandCreateUser)
     } catch (e) {
         // swallow username exists errors. this script is meant to be run repeatedly.
         // @ts-ignore-next-line err is unknown - we need a type assertion for AWSError type
@@ -103,15 +115,13 @@ async function createUser({
             throw new Error('AWS Error: ' + e)
         }
     }
-
-    var passwordParams = {
+    const commandSetUserPassword = new AdminSetUserPasswordCommand({
         Password: password,
         UserPoolId: userPoolID,
         Username: email,
         Permanent: true,
-    }
-
-    await cognito.adminSetUserPassword(passwordParams).promise()
+    })
+    await cognito.send(commandSetUserPassword)
 }
 
 async function main() {
