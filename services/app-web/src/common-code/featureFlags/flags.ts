@@ -36,13 +36,6 @@ export const featureFlags = {
         defaultValue: 2,
     },
     /**
-     * Enables multi-rate submission UI
-     */
-    MULTI_RATE_SUBMISSIONS: {
-        flag: 'multi-rate-submissions',
-        defaultValue: false,
-    },
-    /**
      * Enables rates across submissions features
      */
     RATES_ACROSS_SUBMISSIONS: {

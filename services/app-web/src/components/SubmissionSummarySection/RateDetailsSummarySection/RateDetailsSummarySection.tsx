@@ -18,10 +18,8 @@ import {
     RateInfoType,
 } from '../../../common-code/healthPlanFormDataType'
 import { HealthPlanPackageStatus, Program } from '../../../gen/gqlClient'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { useIndexHealthPlanPackagesQuery } from '../../../gen/gqlClient'
 import { recordJSException } from '../../../otelHelpers'
-import { featureFlags } from '../../../common-code/featureFlags'
 import { Link } from '@trussworks/react-uswds'
 import { getCurrentRevisionFromHealthPlanPackage } from '../../../gqlHelpers'
 import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
@@ -56,12 +54,6 @@ export const RateDetailsSummarySection = ({
     const [packageNamesLookup, setPackageNamesLookup] =
         React.useState<PackageNamesLookupType | null>(null)
 
-    // Launch Darkly
-    const ldClient = useLDClient()
-    const showMultiRates = ldClient?.variation(
-        featureFlags.MULTI_RATE_SUBMISSIONS.flag,
-        featureFlags.MULTI_RATE_SUBMISSIONS.defaultValue
-    )
     const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && navigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
@@ -292,7 +284,7 @@ export const RateDetailsSummarySection = ({
                                         )}`}
                                     />
                                 ) : null}
-                                {showMultiRates && rateInfo.actuaryContacts[0] && (
+                                {rateInfo.actuaryContacts[0] && (
                                     <div
                                         className={
                                             styles.certifyingActuaryDetail

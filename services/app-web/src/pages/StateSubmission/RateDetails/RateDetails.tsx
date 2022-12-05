@@ -125,10 +125,6 @@ export const RateDetails = ({
 
     // Launch Darkly
     const ldClient = useLDClient()
-    const showMultiRates = ldClient?.variation(
-        featureFlags.MULTI_RATE_SUBMISSIONS.flag,
-        featureFlags.MULTI_RATE_SUBMISSIONS.defaultValue
-    )
     const showRatesAcrossSubs = ldClient?.variation(
         featureFlags.RATES_ACROSS_SUBMISSIONS.flag,
         featureFlags.RATES_ACROSS_SUBMISSIONS.defaultValue
@@ -146,16 +142,10 @@ export const RateDetails = ({
         PackageOptionType[]
     >([])
 
-    const rateDetailsFormSchema = showMultiRates
-        ? //Concat RateDetailsFormSchema to ActuaryContactSchema for error summary order
-          Yup.object().shape({
-              rateInfos: ActuaryContactSchema.defined().concat(
-                  RateDetailsFormSchema
-              ),
-          })
-        : Yup.object().shape({
-              rateInfos: RateDetailsFormSchema,
-          })
+    //Concat RateDetailsFormSchema to ActuaryContactSchema for error summary order
+    const rateDetailsFormSchema = Yup.object().shape({
+        rateInfos: ActuaryContactSchema.defined().concat(RateDetailsFormSchema),
+    })
 
     const { loading, error } = useIndexHealthPlanPackagesQuery({
         skip: !showRatesAcrossSubs,
@@ -393,18 +383,14 @@ export const RateDetails = ({
         shouldValidate && Boolean(error)
 
     //Return only the first-rate info if multi-rate submission feature flag is off
-    const rateInfosInitialValues: RateInfoArrayType = showMultiRates
-        ? {
-              rateInfos:
-                  draftSubmission.rateInfos.length > 0
-                      ? draftSubmission.rateInfos.map((rateInfo) =>
-                            rateInfoFormValues(rateInfo)
-                        )
-                      : [rateInfoFormValues()],
-          }
-        : {
-              rateInfos: [rateInfoFormValues(draftSubmission.rateInfos[0])],
-          }
+    const rateInfosInitialValues: RateInfoArrayType = {
+        rateInfos:
+            draftSubmission.rateInfos.length > 0
+                ? draftSubmission.rateInfos.map((rateInfo) =>
+                      rateInfoFormValues(rateInfo)
+                  )
+                : [rateInfoFormValues()],
+    }
 
     const processFileItems = (fileItems: FileItemT[]): SubmissionDocument[] => {
         return fileItems.reduce((formDataDocuments, fileItem) => {
