@@ -256,7 +256,7 @@ async function lookupUserCognito(
         return err(fetchResult)
     }
 
-    const currentUser: CognitoIdentityServiceProvider.UserType = fetchResult
+    const currentUser: CognitoUserType = fetchResult
 
     // we lose some type safety here...
     const attributes = userAttrDict(currentUser)
