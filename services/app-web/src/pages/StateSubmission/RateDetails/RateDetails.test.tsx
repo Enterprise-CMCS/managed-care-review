@@ -25,6 +25,7 @@ import {
     TEST_PNG_FILE,
     dragAndDrop,
     ldUseClientSpy,
+    prettyDebug,
 } from '../../../testHelpers/jestHelpers'
 import { RateDetails } from './RateDetails'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
@@ -231,6 +232,9 @@ describe('RateDetails', () => {
         })
 
         it('progressively disclose new rate form fields as expected', async () => {
+            ldUseClientSpy({
+                'rates-across-submissions': true,
+            })
             const mockUser = {
                 __typename: 'StateUser' as const,
                 role: 'STATE_USER',
@@ -296,6 +300,14 @@ describe('RateDetails', () => {
                 .click()
             const input = screen.getByLabelText('Upload rate certification')
             await userEvent.upload(input, [TEST_DOC_FILE])
+            const hasSharedRateFieldset = screen
+                .getByText(
+                    /Was this rate certification uploaded to any other submissions/
+                )
+                .closest('fieldset')
+            await userEvent.click(
+                within(hasSharedRateFieldset!).getByLabelText(/No/i)
+            )
 
             // check that now we can see hidden things
             await waitFor(() => {
@@ -515,7 +527,12 @@ describe('RateDetails', () => {
     })
 
     describe('handles multiple rates', () => {
-        beforeEach(() => ldUseClientSpy({ 'multi-rate-submissions': true }))
+        beforeEach(() =>
+            ldUseClientSpy({
+                'multi-rate-submissions': true,
+                'rates-across-submissions': true,
+            })
+        )
         afterEach(() => {
             jest.clearAllMocks()
         })
@@ -524,7 +541,16 @@ describe('RateDetails', () => {
             const targetRateCert = rateCertifications(screen)[index]
             expect(targetRateCert).toBeDefined()
             const withinTargetRateCert = within(targetRateCert)
-            //  fill in radio buttons
+
+            // assert proper initial fields are present
+            expect(
+                withinTargetRateCert.getByText('Upload rate certification')
+            ).toBeInTheDocument()
+            expect(
+                withinTargetRateCert.getByText(
+                    /Was this rate certification uploaded to any other submissions/
+                )
+            ).toBeInTheDocument()
             expect(
                 withinTargetRateCert.getByText(
                     'Programs this rate certification covers'
@@ -533,25 +559,44 @@ describe('RateDetails', () => {
             expect(
                 withinTargetRateCert.getByText('Rate certification type')
             ).toBeInTheDocument()
-            withinTargetRateCert
-                .getByLabelText('New rate certification')
-                .click()
             expect(
                 withinTargetRateCert.getByText(
                     'Does the actuary certify capitation rates specific to each rate cell or a rate range?'
                 )
             ).toBeInTheDocument()
+
+            // add 1 doc
+            const input = withinTargetRateCert.getByLabelText(
+                'Upload rate certification'
+            )
+            await userEvent.upload(input, [TEST_DOC_FILE])
+
+            // select NO for shared rate cert
+            withinTargetRateCert.getByLabelText('No').click()
+
+            // add programs
+            const combobox = await withinTargetRateCert.findByRole('combobox')
+            await selectEvent.openMenu(combobox)
+            await selectEvent.select(combobox, 'SNBC')
+            await selectEvent.openMenu(combobox)
+            await selectEvent.select(combobox, 'PMAP')
+            expect(
+                withinTargetRateCert.getByLabelText('Remove SNBC')
+            ).toBeInTheDocument()
+            expect(
+                withinTargetRateCert.getByLabelText('Remove PMAP')
+            ).toBeInTheDocument()
+
+            //  add types and answer captitation rates question
+            withinTargetRateCert
+                .getByLabelText('New rate certification')
+                .click()
+
             withinTargetRateCert
                 .getByLabelText(
                     'Certification of capitation rates specific to each rate cell'
                 )
                 .click()
-
-            // add documents
-            const input = withinTargetRateCert.getByLabelText(
-                'Upload rate certification'
-            )
-            await userEvent.upload(input, [TEST_DOC_FILE])
 
             // check that now we can see dates, since that is triggered after selecting type
             await waitFor(() => {
@@ -564,6 +609,7 @@ describe('RateDetails', () => {
                 expect(
                     withinTargetRateCert.queryByText('Date certified')
                 ).toBeInTheDocument()
+                prettyDebug()
                 expect(
                     withinTargetRateCert.queryByText('Name')
                 ).toBeInTheDocument()
@@ -574,18 +620,6 @@ describe('RateDetails', () => {
                     withinTargetRateCert.queryByText('Email')
                 ).toBeInTheDocument()
             })
-
-            const combobox = await withinTargetRateCert.findByRole('combobox')
-            await selectEvent.openMenu(combobox)
-            await selectEvent.select(combobox, 'SNBC')
-            await selectEvent.openMenu(combobox)
-            await selectEvent.select(combobox, 'PMAP')
-            expect(
-                withinTargetRateCert.getByLabelText('Remove SNBC')
-            ).toBeInTheDocument()
-            expect(
-                withinTargetRateCert.getByLabelText('Remove PMAP')
-            ).toBeInTheDocument()
 
             // fill in dates
             withinTargetRateCert.getAllByLabelText('Start date')[0].focus()
@@ -866,6 +900,10 @@ describe('RateDetails', () => {
         })
 
         it('progressively disclose new rate form fields on the second rate', async () => {
+            ldUseClientSpy({
+                'multi-rate-submissions': true,
+                'rates-across-submissions': true,
+            })
             const mockUser = {
                 __typename: 'StateUser' as const,
                 role: 'STATE_USER',
@@ -979,7 +1017,7 @@ describe('RateDetails', () => {
 
             // check for expected errors
             await waitFor(() => {
-                expect(screen.queryAllByTestId('errorMessage')).toHaveLength(7)
+                expect(screen.queryAllByTestId('errorMessage')).toHaveLength(8)
                 expect(
                     screen.queryAllByText(
                         'You must enter the date the document was certified'
@@ -994,6 +1032,9 @@ describe('RateDetails', () => {
                     screen.queryAllByText('You must select a program')
                 ).toHaveLength(2)
                 expect(
+                    screen.queryAllByText('You must select yes or no')
+                ).toHaveLength(2)
+                expect(
                     screen.queryAllByText('You must provide a name')
                 ).toHaveLength(2)
                 expect(
@@ -1006,6 +1047,9 @@ describe('RateDetails', () => {
                     screen.queryAllByText('You must select an actuarial firm')
                 ).toHaveLength(2)
             })
+
+            // Declare there are no shared rates
+            await userEvent.click(within(newRateCert!).getByText('No'))
 
             //Select programs for rate certification
             const combobox = await within(newRateCert!).findByRole('combobox')
@@ -1048,7 +1092,7 @@ describe('RateDetails', () => {
             )
         })
 
-        it('correctly checks shared rate certification checkboxes and selects shared packages', async () => {
+        it('correctly checks shared rate certification radios and selects shared packages', async () => {
             ldUseClientSpy({
                 'rates-across-submissions': true,
                 'multi-rate-submissions': true,
@@ -1119,12 +1163,20 @@ describe('RateDetails', () => {
             //Fill out first rate certification
             await fillOutFirstRate(screen)
 
-            //Click the first rate certification shared rate cert check box
+            //Click the first rate certification shared rate cert radio YES
             const firstRateCert = within(rateCertsOnLoad[0]!)
-            const firstRateCertSharedCheckBox = firstRateCert.getByLabelText(
-                'This rate certification was uploaded to another submission.'
-            )
-            await userEvent.click(firstRateCertSharedCheckBox)
+            const firstRateHasSharedRateFieldset = firstRateCert
+                .getByText(
+                    /Was this rate certification uploaded to any other submissions/
+                )
+                .closest('fieldset')
+            const firstRateYesSharedRate = within(
+                firstRateHasSharedRateFieldset!
+            ).getByLabelText(/Yes/i)
+            const firstRateNoSharedRate = within(
+                firstRateHasSharedRateFieldset!
+            ).getByLabelText(/No/i)
+            await userEvent.click(firstRateYesSharedRate)
 
             //Expect there to be two combo boxes, packages and programs.
             const comboBoxes = firstRateCert.getAllByRole('combobox')
@@ -1194,22 +1246,28 @@ describe('RateDetails', () => {
                 expect(rateCertsAfterAddAnother).toHaveLength(2)
             })
 
-            //Only first rate certification shared rate checkbox is checked and has two comboboxes
+            //Only first rate certification shared rate radio is checked and has two comboboxes
             const secondRateCert = within(rateCertifications(screen)[1]!)
-            const secondRateCertSharedCheckBox = secondRateCert.getByRole(
-                'checkbox',
-                {
-                    name: 'This rate certification was uploaded to another submission.',
-                }
-            )
-            expect(firstRateCertSharedCheckBox).toBeChecked()
+            const secondRateHasSharedRateFieldset = secondRateCert
+                .getByText(
+                    /Was this rate certification uploaded to any other submissions/
+                )
+                .closest('fieldset')
+            const secondRateYesSharedRate = within(
+                secondRateHasSharedRateFieldset!
+            ).getByLabelText(/Yes/)
+            const secondRateNoSharedRate = within(
+                secondRateHasSharedRateFieldset!
+            ).getByLabelText(/No/)
+            await userEvent.click(secondRateNoSharedRate)
+            await userEvent.click(secondRateNoSharedRate)
             expect(firstRateCert.getAllByRole('combobox')).toHaveLength(2)
             expect(
                 firstRateCert.getByText(
                     /Please select the submissions that also contain this rate/
                 )
             ).toBeInTheDocument()
-            expect(secondRateCertSharedCheckBox).not.toBeChecked()
+            expect(secondRateYesSharedRate).not.toBeChecked()
             expect(
                 secondRateCert.queryByText(
                     /Please select the submissions that also contain this rate/
@@ -1217,22 +1275,20 @@ describe('RateDetails', () => {
             ).toBeNull()
             expect(secondRateCert.getAllByRole('combobox')).toHaveLength(1)
 
-            //Both rate cert check boxes are unchecked and only programs combobox present
-            await userEvent.click(firstRateCertSharedCheckBox)
-            expect(firstRateCertSharedCheckBox).not.toBeChecked()
+            //Both shared rate cert radios have no checked and only programs combobox present
+            await userEvent.click(firstRateNoSharedRate)
+            expect(firstRateNoSharedRate).toBeChecked()
             expect(firstRateCert.getAllByRole('combobox')).toHaveLength(1)
-            expect(secondRateCertSharedCheckBox).not.toBeChecked()
+            expect(secondRateYesSharedRate).not.toBeChecked()
             expect(secondRateCert.getAllByRole('combobox')).toHaveLength(1)
 
-            ///Only second rate certification shared rate checkbox is checked and has two comboboxes
-            await userEvent.click(secondRateCertSharedCheckBox)
-            expect(firstRateCertSharedCheckBox).not.toBeChecked()
-            expect(firstRateCert.getAllByRole('combobox')).toHaveLength(1)
-            expect(secondRateCertSharedCheckBox).toBeChecked()
+            ///Only second rate certification shared rate is yes and has two comboboxes
+            await userEvent.click(secondRateYesSharedRate)
+            expect(secondRateYesSharedRate).toBeChecked()
             expect(secondRateCert.getAllByRole('combobox')).toHaveLength(2)
 
-            //Both rate cert check boxes are check and have selected packages in the comboxes
-            await userEvent.click(firstRateCertSharedCheckBox)
+            //Both rate cert YES radios are checked and have selected packages in the comboxes
+            await userEvent.click(firstRateYesSharedRate)
             const secondRatePackageCombobox =
                 secondRateCert.getAllByRole('combobox')[0]
             await selectEvent.openMenu(secondRatePackageCombobox)
@@ -1240,7 +1296,7 @@ describe('RateDetails', () => {
                 secondRatePackageCombobox,
                 'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
             )
-            expect(firstRateCertSharedCheckBox).toBeChecked()
+            expect(firstRateYesSharedRate).toBeChecked()
             expect(firstRateCert.getAllByRole('combobox')).toHaveLength(2)
             expect(
                 firstRateCert.getByLabelText(
@@ -1257,7 +1313,7 @@ describe('RateDetails', () => {
                     'Remove MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
                 )
             ).toBeInTheDocument()
-            expect(secondRateCertSharedCheckBox).toBeChecked()
+            expect(secondRateYesSharedRate).toBeChecked()
             expect(secondRateCert.getAllByRole('combobox')).toHaveLength(2)
             expect(
                 secondRateCert.getByLabelText(
@@ -1271,7 +1327,7 @@ describe('RateDetails', () => {
             ).not.toBeInTheDocument()
         })
 
-        it('cannot continue when shared rate checkbox is checked and no package is selected', async () => {
+        it('cannot continue when shared rate radio is checked and no package is selected', async () => {
             ldUseClientSpy({
                 'rates-across-submissions': true,
                 'multi-rate-submissions': true,
@@ -1341,12 +1397,20 @@ describe('RateDetails', () => {
             //Fill out first rate certification
             await fillOutFirstRate(screen)
 
-            //Click the first rate certification shared rate cert check box
+            //Click the first rate certification shared rate cert radio
             const firstRateCert = within(rateCertsOnLoad[0]!)
-            const firstRateCertSharedCheckBox = firstRateCert.getByLabelText(
-                'This rate certification was uploaded to another submission.'
-            )
-            await userEvent.click(firstRateCertSharedCheckBox)
+            const firstRateHasSharedRateFieldset = screen
+                .getByText(
+                    /Was this rate certification uploaded to any other submissions/,
+                    {
+                        selector: 'legend',
+                    }
+                )
+                .closest('fieldset')
+            const firstRateYesSharedRate = within(
+                firstRateHasSharedRateFieldset!
+            ).getByLabelText(/Yes/i)
+            await userEvent.click(firstRateYesSharedRate)
 
             //Expect there to be two combo boxes, packages and programs.
             const comboBoxes = firstRateCert.getAllByRole('combobox')

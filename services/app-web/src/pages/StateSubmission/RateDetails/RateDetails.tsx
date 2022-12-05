@@ -43,10 +43,7 @@ import {
     formatFormDateForDomain,
 } from '../../../formHelpers'
 import { isS3Error } from '../../../s3'
-import {
-    RateDetailsFormSchema,
-    ActuaryContactSchema,
-} from './RateDetailsSchema'
+import { RateDetailsFormSchema } from './RateDetailsSchema'
 import { useS3 } from '../../../contexts/S3Context'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
@@ -54,7 +51,6 @@ import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { useStatePrograms } from '../../../hooks'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
-import * as Yup from 'yup'
 import { useFocus } from '../../../hooks'
 import { ActuaryContactFields } from '../Contacts'
 import { useIndexHealthPlanPackagesQuery } from '../../../gen/gqlClient'
@@ -145,16 +141,10 @@ export const RateDetails = ({
         PackageOptionType[]
     >([])
 
-    const rateDetailsFormSchema = showMultiRates
-        ? //Concat RateDetailsFormSchema to ActuaryContactSchema for error summary order
-          Yup.object().shape({
-              rateInfos: ActuaryContactSchema.defined().concat(
-                  RateDetailsFormSchema
-              ),
-          })
-        : Yup.object().shape({
-              rateInfos: RateDetailsFormSchema,
-          })
+    const rateDetailsFormSchema = RateDetailsFormSchema({
+        'rates-across-submissions': showRatesAcrossSubs,
+        'multi-rate-submissions': showMultiRates,
+    })
 
     const { loading, error } = useIndexHealthPlanPackagesQuery({
         skip: !showRatesAcrossSubs,
