@@ -233,11 +233,15 @@ export async function userFromCognitoAuthProvider(
         try {
             const result = await store.insertUser(userToInsert)
             if (isStoreError(result)) {
-                throw new Error(`Could not insert user: ${result}`)
+                //throw new Error(`Could not insert user: ${result}`)
+                console.log(`Could not insert user: ${JSON.stringify(result)}`)
+                return cognitoUserResult
             }
             return userTypeFromUser(result)
         } catch (e) {
-            throw new Error(`Could not insert user: ${e}`)
+            console.log(`Could not insert user: ${JSON.stringify(e)}`)
+            // throw new Error(`Could not insert user: ${e}`)
+            return cognitoUserResult
         }
     }
 
