@@ -344,7 +344,7 @@ jobs:
 
       - name: Cypress -- Chrome
         id: cypress
-        uses: cypress-io/github-action@v4
+        uses: cypress-io/github-action@v5
         with:
           config: baseUrl=${{ needs.finishing-prep.outputs.application-endpoint }}
           record: true
