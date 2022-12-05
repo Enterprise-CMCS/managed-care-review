@@ -58,6 +58,12 @@ export { ExpandableText } from './ExpandableText'
 
 export { ProgramSelect, PackageSelect } from './Select'
 
+export { HealthPlanPackageTable } from './HealthPlanPackageTable'
+export type {
+    PackageInDashboardType,
+    PackageTableProps,
+} from './HealthPlanPackageTable'
+
 export {
     ErrorAlert,
     ErrorAlertSignIn,
