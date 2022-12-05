@@ -94,6 +94,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
             </h2>
             <div>
               <button
+                aria-controls="unlock"
                 class="usa-button usa-button--outline submitButton"
                 data-open-modal="true"
                 data-testid="form-submit"

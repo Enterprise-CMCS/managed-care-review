@@ -22,9 +22,13 @@ query indexHealthPlanPackages {
                         createdAt
                         unlockInfo {
                             updatedAt
+                            updatedBy
+                            updatedReason
                         }
                         submitInfo {
                             updatedAt
+                            updatedBy
+                            updatedReason
                         }
                         formDataProto
                     }

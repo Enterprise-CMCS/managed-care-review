@@ -336,7 +336,7 @@ jobs:
     permissions:
       deployments: write
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         # run copies of the current job in parallel
         containers: [1, 2, 3, 4, 5, 6]

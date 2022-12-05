@@ -272,10 +272,10 @@ export function submitHealthPlanPackageResolver(
             stateAnalystsEmails = []
         }
 
-        const statePrograms = store.getStatePrograms(updatedPackage.stateCode)
+        const statePrograms = store.findStatePrograms(updatedPackage.stateCode)
 
         if (statePrograms instanceof Error) {
-            logError('getStatePrograms', statePrograms.message)
+            logError('findStatePrograms', statePrograms.message)
             setErrorAttributesOnActiveSpan(statePrograms.message, span)
             throw new Error(statePrograms.message)
         }

@@ -59,9 +59,10 @@ import * as Yup from 'yup'
 import { useFocus } from '../../../hooks'
 import { ActuaryContactFields } from '../Contacts'
 import { useIndexHealthPlanPackagesQuery } from '../../../gen/gqlClient'
-import { base64ToDomain } from '../../../common-code/proto/healthPlanFormDataProto'
 import { recordJSException } from '../../../otelHelpers'
 import { dayjs } from '../../../common-code/dateHelpers'
+import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
+import { getCurrentRevisionFromHealthPlanPackage } from '../../../gqlHelpers'
 
 const RateDatesErrorMessage = ({
     startDate,
@@ -96,7 +97,7 @@ export interface RateInfoFormType {
     rateDocuments: SubmissionDocument[]
     actuaryContacts: ActuaryContact[]
     actuaryCommunicationPreference?: ActuaryCommunicationType
-    packagesWithSharedRateCerts: string[]
+    packagesWithSharedRateCerts: SharedRateCertDisplay[]
     hasSharedRateCert: boolean
 }
 
@@ -159,36 +160,40 @@ export const RateDetails = ({
     const { loading, error } = useIndexHealthPlanPackagesQuery({
         skip: !showRatesAcrossSubs,
         onCompleted: async (data) => {
-            const packages: PackageOptionType[] = []
+            const packagesWithUpdatedAt: Array<
+                { updatedAt: Date } & PackageOptionType
+            > = []
             data?.indexHealthPlanPackages.edges
                 .map((edge) => edge.node)
                 .forEach((sub) => {
-                    const currentRevision = sub.revisions[0]
-                    const currentSubmissionData = base64ToDomain(
-                        currentRevision.node.formDataProto
-                    )
-                    if (currentSubmissionData instanceof Error) {
+                    const currentRevisionPackageOrError =
+                        getCurrentRevisionFromHealthPlanPackage(sub)
+                    if (currentRevisionPackageOrError instanceof Error) {
                         recordJSException(
-                            `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${sub.id} Error message: ${currentSubmissionData.message}`
+                            `indexHealthPlanPackagesQuery: Error decoding proto. ID: ${sub.id}`
                         )
-                        return null
+                        return null // TODO make an error state for PackageSelect, right now we just remove from page if this request fails
                     }
+                    const [currentRevision, currentSubmissionData] =
+                        currentRevisionPackageOrError
 
+                    // Exclude active submission and contract_only submissions from list.
                     if (
                         currentSubmissionData.id !== draftSubmission.id &&
                         currentSubmissionData.submissionType ===
                             'CONTRACT_AND_RATES'
                     ) {
-                        const submittedAt = currentRevision.node.submitInfo
+                        const submittedAt = currentRevision.submitInfo
                             ?.updatedAt
                             ? ` (Submitted ${dayjs(
-                                  currentRevision.node.submitInfo.updatedAt
+                                  currentRevision.submitInfo.updatedAt
                               )
                                   .tz('UTC')
                                   .format('MM/DD/YY')})`
                             : ` (Draft)`
 
-                        packages.push({
+                        packagesWithUpdatedAt.push({
+                            updatedAt: currentSubmissionData.updatedAt,
                             label: `${packageName(
                                 currentSubmissionData,
                                 statePrograms
@@ -197,7 +202,11 @@ export const RateDetails = ({
                         })
                     }
                 })
-            setPackageOptions(packages)
+
+            const packagesList = packagesWithUpdatedAt.sort((a, b) =>
+                a['updatedAt'] > b['updatedAt'] ? -1 : 1
+            )
+            setPackageOptions(packagesList)
         },
         onError: (error) => {
             recordJSException(
@@ -276,7 +285,8 @@ export const RateDetails = ({
         packagesWithSharedRateCerts:
             rateInfo?.packagesWithSharedRateCerts ?? [],
         hasSharedRateCert: Boolean(
-            rateInfo?.packagesWithSharedRateCerts.length
+            rateInfo?.packagesWithSharedRateCerts &&
+                rateInfo?.packagesWithSharedRateCerts.length
         ),
     })
 
@@ -812,9 +822,14 @@ export const RateDetails = ({
                                                                             statePrograms={
                                                                                 statePrograms
                                                                             }
-                                                                            initialValues={
-                                                                                rateInfo?.packagesWithSharedRateCerts
-                                                                            }
+                                                                            initialValues={rateInfo.packagesWithSharedRateCerts.map(
+                                                                                (
+                                                                                    item
+                                                                                ) =>
+                                                                                    item.packageId
+                                                                                        ? item.packageId
+                                                                                        : ''
+                                                                            )}
                                                                             packageOptions={
                                                                                 packageOptions
                                                                             }
@@ -834,10 +849,19 @@ export const RateDetails = ({
                                                                                 setFieldValue(
                                                                                     `rateInfos.${index}.packagesWithSharedRateCerts`,
                                                                                     selectedOptions.map(
-                                                                                        (item: {
-                                                                                            value: string
-                                                                                        }) =>
-                                                                                            item.value
+                                                                                        (
+                                                                                            item: PackageOptionType
+                                                                                        ) => {
+                                                                                            return {
+                                                                                                packageName:
+                                                                                                    item.label.replace(
+                                                                                                        /\s\(.*?\)/g,
+                                                                                                        ''
+                                                                                                    ),
+                                                                                                packageId:
+                                                                                                    item.value,
+                                                                                            }
+                                                                                        }
                                                                                     )
                                                                                 )
                                                                             }

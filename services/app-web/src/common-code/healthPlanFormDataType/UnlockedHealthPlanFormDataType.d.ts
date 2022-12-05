@@ -60,6 +60,11 @@ type ActuaryContact = {
     actuarialFirmOther?: string
 }
 
+type SharedRateCertDisplay = {
+    packageId?: string
+    packageName?: string
+}
+
 type RateType = 'NEW' | 'AMENDMENT'
 
 type RateCapitationType = 'RATE_CELL' | 'RATE_RANGE'
@@ -79,7 +84,7 @@ type RateInfoType = {
     rateCertificationName?: string
     actuaryContacts: ActuaryContact[]
     actuaryCommunicationPreference?: ActuaryCommunicationType
-    packagesWithSharedRateCerts: string[]
+    packagesWithSharedRateCerts?: SharedRateCertDisplay[]
 }
 
 // MAIN
@@ -125,4 +130,5 @@ export type {
     ContractExecutionStatus,
     RateCapitationType,
     RateInfoType,
+    SharedRateCertDisplay,
 }
