@@ -68,7 +68,10 @@ async function createUser({
     password: string
     state?: string
 }) {
-    const client = new CognitoIdentityProviderClient({ region: 'us-east-1' })
+    const cognitoClient = new CognitoIdentityProviderClient({
+        apiVersion: '2016-04-19',
+        region: 'us-east-1',
+    })
 
     let userProps: AdminCreateUserCommandInput = {
         UserPoolId: userPoolID,
@@ -105,8 +108,8 @@ async function createUser({
 
     // create the user
     try {
-        const command = new AdminCreateUserCommand(userProps)
-        await client.send(command)
+        const commandCreateUser = new AdminCreateUserCommand(userProps)
+        await cognitoClient.send(commandCreateUser)
     } catch (e) {
         // swallow username exists errors. this script is meant to be run repeatedly.
         if (e instanceof UsernameExistsException) {
@@ -127,7 +130,7 @@ async function createUser({
             Permanent: true,
         }
         const setPassCommand = new AdminSetUserPasswordCommand(passwordParams)
-        await client.send(setPassCommand)
+        await cognitoClient.send(setPassCommand)
     } catch (e) {
         switch (e) {
             case e instanceof UserNotFoundException:

@@ -1,4 +1,10 @@
-import AWS from 'aws-sdk'
+import {
+    S3Client,
+    GetObjectCommand,
+    PutObjectCommand,
+    DeleteObjectCommand,
+} from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 import { parseKey } from '../common-code/s3URLEncoding'
 import { S3ClientT } from './s3Client'
@@ -8,18 +14,24 @@ export function newLocalS3Client(
     endpoint: string,
     bucketName: string
 ): S3ClientT {
-    const s3Client = new AWS.S3({
-        s3ForcePathStyle: true,
+    const s3Client = new S3Client({
+        forcePathStyle: true,
         apiVersion: '2006-03-01',
-        accessKeyId: 'S3RVER', // This specific key is required when working offline
-        secretAccessKey: 'S3RVER', // pragma: allowlist secret; pre-set by serverless-s3-offline
-        params: { Bucket: bucketName },
-        endpoint: new AWS.Endpoint(endpoint),
+        credentials: {
+            accessKeyId: 'S3RVER', // This specific key is required when working offline
+            secretAccessKey: 'S3RVER', // pragma: allowlist secret; pre-set by serverless-s3-offline
+        },
+        endpoint: endpoint,
     })
 
     return {
         uploadFile: async (file: File): Promise<string | S3Error> => {
             const filename = `${Date.now()}-${file.name}`
+            const command = new PutObjectCommand({
+                Bucket: bucketName,
+                Key: filename,
+                Body: file,
+            })
 
             try {
                 if (file.name === 'upload_error.pdf') {
@@ -29,13 +41,7 @@ export function newLocalS3Client(
                     }
                     throw err
                 }
-                await s3Client
-                    .putObject({
-                        Bucket: bucketName,
-                        Key: filename,
-                        Body: file,
-                    })
-                    .promise()
+                await s3Client.send(command)
 
                 return filename
             } catch (err) {
@@ -52,13 +58,12 @@ export function newLocalS3Client(
         },
 
         deleteFile: async (s3Key: string): Promise<void | S3Error> => {
+            const command = new DeleteObjectCommand({
+                Bucket: bucketName,
+                Key: s3Key,
+            })
             try {
-                await s3Client
-                    .deleteObject({
-                        Bucket: bucketName,
-                        Key: s3Key,
-                    })
-                    .promise()
+                await s3Client.send(command)
 
                 return
             } catch (err) {
@@ -89,14 +94,24 @@ export function newLocalS3Client(
             return `s3://${bucketName}/${s3key}/${filename}`
         },
         getURL: async (s3key: string): Promise<string> => {
-            const params = { Key: s3key }
-            return s3Client.getSignedUrl('getObject', params)
+            const command = new GetObjectCommand({
+                Bucket: bucketName,
+                Key: s3key,
+            })
+            // Create the presigned URL.
+            const signedUrl = await getSignedUrl(s3Client, command)
+            return signedUrl
         },
         getBulkDlURL: async (
             keys: string[],
             filename: string
         ): Promise<string | Error> => {
-            return s3Client.getSignedUrl('getObject', { Key: filename })
+            const command = new GetObjectCommand({
+                Bucket: bucketName,
+                Key: filename,
+            })
+            const signedUrl = await getSignedUrl(s3Client, command)
+            return signedUrl
         },
     }
 }

@@ -72,7 +72,6 @@ function preparePrismaLayer() {
     rm -rf lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/migration-engine-debian-openssl-1.1.x
     rm -rf lambda-layers-prisma-client-engine/nodejs/node_modules/@prisma/prisma-fmt-debian-openssl-1.1.x
 
-
     echo "Compressing and cleaning migration engine..."
     pushd lambda-layers-prisma-client-migration && tar -zcf /tmp/nodejs.tar.gz . && mv /tmp/nodejs.tar.gz ./nodejs.tar.gz
     rm -rf nodejs

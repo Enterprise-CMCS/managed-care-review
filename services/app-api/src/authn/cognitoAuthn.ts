@@ -1,5 +1,10 @@
 import { Result, ok, err } from 'neverthrow'
-import { CognitoIdentityServiceProvider } from 'aws-sdk'
+import {
+    CognitoIdentityProviderClient,
+    ListUsersCommand,
+    UserType as CognitoUserType,
+} from '@aws-sdk/client-cognito-identity-provider'
+
 import { UserType } from '../domain-models'
 import { performance } from 'perf_hooks'
 import { Store, InsertUserArgsType, isStoreError } from '../postgres'
@@ -27,14 +32,14 @@ export function parseAuthProvider(
 }
 
 // pulls the data from the cognito user into a dictionary
-function userAttrDict(cognitoUser: CognitoIdentityServiceProvider.UserType): {
+function userAttrDict(cognitoUser: CognitoUserType): {
     [key: string]: string
 } {
     const attributes: { [key: string]: string } = {}
 
     if (cognitoUser.Attributes) {
         cognitoUser.Attributes.forEach((attribute) => {
-            if (attribute.Value) {
+            if (attribute.Value && attribute.Name) {
                 attributes[attribute.Name] = attribute.Value
             }
         })
@@ -46,31 +51,30 @@ function userAttrDict(cognitoUser: CognitoIdentityServiceProvider.UserType): {
 async function fetchUserFromCognito(
     userID: string,
     poolID: string
-): Promise<CognitoIdentityServiceProvider.UserType | Error> {
-    const cognito = new CognitoIdentityServiceProvider()
+): Promise<CognitoUserType | Error> {
+    const cognitoClient = new CognitoIdentityProviderClient({})
 
     const subFilter = `sub = "${userID}"`
 
     // let's see what we've got
     const startRequest = performance.now()
-    const listUsersResponse = await cognito
-        .listUsers({
-            UserPoolId: poolID,
-            Filter: subFilter,
-        })
-        .promise()
+    const commandListUsers = new ListUsersCommand({
+        UserPoolId: poolID,
+        Filter: subFilter,
+    })
+    const listUsersResponse = await cognitoClient.send(commandListUsers)
     const endRequest = performance.now()
     console.log('listUsers takes ms:', endRequest - startRequest)
 
-    const userResp: CognitoIdentityServiceProvider.ListUsersResponse =
-        listUsersResponse
-
-    if (userResp.Users === undefined || userResp.Users.length !== 1) {
+    if (
+        listUsersResponse.Users === undefined ||
+        listUsersResponse.Users.length !== 1
+    ) {
         // logerror
         return new Error('No user found with this sub')
     }
 
-    const currentUser = userResp.Users[0]
+    const currentUser = listUsersResponse.Users[0]
     return currentUser
 }
 
