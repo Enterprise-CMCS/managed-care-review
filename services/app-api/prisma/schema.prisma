@@ -42,13 +42,13 @@ model State {
 }
 
 model User {
-  id         Int     @id @default(autoincrement())
-  euaID      String  @unique
+  id         String  @id
   givenName  String
   familyName String
   email      String  @unique
   role       Role
   states     State[]
+  stateCode  String?
 }
 
 enum Role {

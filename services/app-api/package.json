@@ -55,7 +55,7 @@
         "zod": "^3.11.6"
     },
     "devDependencies": {
-        "@prisma/client": "^4.4.0",
+        "@prisma/client": "^4.6.1",
         "@types/archiver": "^5.1.1",
         "@types/aws-lambda": "^8.10.83",
         "@types/glob": "^8.0.0",
@@ -76,7 +76,7 @@
         "jest-raw-loader": "^1.0.1",
         "lint-staged": "^13.0.1",
         "prettier": "^2.4.1",
-        "prisma": "^4.4.0",
+        "prisma": "^4.6.1",
         "serverless": "^3.19.0",
         "serverless-associate-waf": "^1.2.1",
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",

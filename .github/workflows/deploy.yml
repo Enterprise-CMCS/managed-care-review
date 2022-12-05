@@ -23,7 +23,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 20
+          fetch-depth: 40
 
       - name: Check for secrets
         uses: ./.github/actions/check_secrets
@@ -328,6 +328,7 @@ jobs:
 
   cypress:
     name: cypress-run
+    timeout-minutes: 15
     needs: [deploy-app, finishing-prep]
     if: always() && needs.finishing-prep.result == 'success'
     runs-on: ubuntu-latest

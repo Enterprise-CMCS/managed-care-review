@@ -20,8 +20,17 @@ import {
     sharedTestPrismaClient,
 } from '../testHelpers/storeHelpers'
 import { NewPostgresStore } from '../postgres'
+import { UserType } from '../domain-models'
 
 describe('updateHealthPlanFormData', () => {
+    const testUserCMS: UserType = {
+        name: 'Zuko',
+        role: 'CMS_USER',
+        email: 'zuko@example.com',
+        familyName: 'Zuko',
+        givenName: 'Prince',
+    }
+
     it('updates valid fields in the formData', async () => {
         const server = await constructTestPostgresServer()
 
@@ -71,11 +80,7 @@ describe('updateHealthPlanFormData', () => {
 
         const cmsUserServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'aang@va.gov',
-                },
+                user: testUserCMS,
             },
         })
 
@@ -119,6 +124,8 @@ describe('updateHealthPlanFormData', () => {
                     state_code: 'VA',
                     role: 'STATE_USER',
                     email: 'aang@va.gov',
+                    familyName: 'Aang',
+                    givenName: 'Aang',
                 },
             },
         })
