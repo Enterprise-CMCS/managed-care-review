@@ -23,7 +23,7 @@ export async function insertUser(
                 familyName: user.familyName,
                 email: user.email,
                 role: user.role,
-                stateCode: user.stateCode ?? '',
+                stateCode: user.stateCode ?? null,
             },
         })
         console.log('insert user return: ' + val)
