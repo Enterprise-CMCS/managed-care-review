@@ -25,7 +25,6 @@ import {
     TEST_PNG_FILE,
     dragAndDrop,
     ldUseClientSpy,
-    prettyDebug,
 } from '../../../testHelpers/jestHelpers'
 import { RateDetails } from './RateDetails'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
@@ -609,7 +608,6 @@ describe('RateDetails', () => {
                 expect(
                     withinTargetRateCert.queryByText('Date certified')
                 ).toBeInTheDocument()
-                prettyDebug()
                 expect(
                     withinTargetRateCert.queryByText('Name')
                 ).toBeInTheDocument()

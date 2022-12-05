@@ -39,24 +39,16 @@
     justify-content: space-between;
 }
 
-.newDocTag {
-    background-color: $theme-color-info-dark;
-    display: inline-flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 1px 8px;
-    border-radius: 2px;
-    height: 18px;
-    margin-right: 5px !important;
+
+.inlineLink{
+    display: inline
 }
 
-.sharedDocTag {
-    background-color: #ffbe2e;
-    display: inline-flex;
-    flex-direction: row;
-    align-items: center;
+.inlineTag {
     padding: 1px 8px;
     border-radius: 2px;
     height: 18px;
-    margin-right: 5px !important;
+    margin-right: 2px !important 
 }
+
+
