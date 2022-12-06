@@ -22,9 +22,10 @@ import { updateHealthPlanRevision } from './updateHealthPlanRevision'
 import { findAllRevisions } from './findAllRevisions'
 
 import { findUser } from './findUser'
-import { User } from '@prisma/client'
+import { User, State } from '@prisma/client'
 import { insertUser, InsertUserArgsType } from './insertUser'
 import { deleteUserAssignedState } from './deleteUserAssignedState'
+import { updateUserAssignedState } from './updateUserAssignedState'
 
 type Store = {
     findPrograms: (
@@ -69,6 +70,11 @@ type Store = {
 
     insertUser: (user: InsertUserArgsType) => Promise<User | StoreError>
 
+    updateUserAssignedState: (
+        userID: string,
+        state: State
+    ) => Promise<User | StoreError>
+
     deleteUserAssignedState: (
         userID: string,
         stateCode: string
@@ -101,6 +107,8 @@ function NewPostgresStore(client: PrismaClient): Store {
         findPrograms: findPrograms,
         findUser: (id) => findUser(client, id),
         insertUser: (args) => insertUser(client, args),
+        updateUserAssignedState: (userID, state) =>
+            updateUserAssignedState(client, userID, state),
         deleteUserAssignedState: (userID, stateCode) =>
             deleteUserAssignedState(client, userID, stateCode),
         findStatePrograms: findStatePrograms,
