@@ -24,6 +24,7 @@ import { findAllRevisions } from './findAllRevisions'
 import { findUser } from './findUser'
 import { User } from '@prisma/client'
 import { insertUser, InsertUserArgsType } from './insertUser'
+import { deleteUserAssignedState } from './deleteUserAssignedState'
 
 type Store = {
     findPrograms: (
@@ -67,6 +68,11 @@ type Store = {
     findUser: (id: string) => Promise<User | StoreError>
 
     insertUser: (user: InsertUserArgsType) => Promise<User | StoreError>
+
+    deleteUserAssignedState: (
+        userID: string,
+        stateCode: string
+    ) => Promise<User | StoreError>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -95,6 +101,8 @@ function NewPostgresStore(client: PrismaClient): Store {
         findPrograms: findPrograms,
         findUser: (id) => findUser(client, id),
         insertUser: (args) => insertUser(client, args),
+        deleteUserAssignedState: (userID, stateCode) =>
+            deleteUserAssignedState(client, userID, stateCode),
         findStatePrograms: findStatePrograms,
         findAllRevisions: () => findAllRevisions(client),
     }
