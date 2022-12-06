@@ -902,6 +902,7 @@ describe('RateDetails', () => {
                 'multi-rate-submissions': true,
                 'rates-across-submissions': true,
             })
+            jest.setTimeout(20000)
             const mockUser = {
                 __typename: 'StateUser' as const,
                 role: 'STATE_USER',
