@@ -17,12 +17,7 @@ export async function updateUserAssignedState(
             },
             data: {
                 states: {
-                    update: {
-                        where: {
-                            stateCode: state.stateCode,
-                        },
-                        data: state,
-                    },
+                    create: [state],
                 },
             },
         })
