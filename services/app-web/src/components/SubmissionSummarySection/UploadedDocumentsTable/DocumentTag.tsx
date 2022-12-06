@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyledTag } from '../../StyledTag/StyledTag'
+import { InfoTag } from '../../InfoTag/InfoTag'
 import styles from './UploadedDocumentsTable.module.scss'
 
 type DocumentTagProps = {
@@ -13,17 +13,17 @@ export const DocumentTag = ({
     if (!isShared && !isNew) return null
 
     return (
-        <>
+        <span className={styles.docTagContainer} data-testid="info-tag">
             {isNew ? (
-                <StyledTag className={styles.inlineTag} color="blue">
+                <InfoTag className={styles.inlineTag} color="cyan">
                     NEW
-                </StyledTag>
+                </InfoTag>
             ) : null}
             {isShared ? (
-                <StyledTag className={styles.inlineTag} color="yellow">
+                <InfoTag className={styles.inlineTag} color="gold">
                     SHARED
-                </StyledTag>
+                </InfoTag>
             ) : null}
-        </>
+        </span>
     )
 }
