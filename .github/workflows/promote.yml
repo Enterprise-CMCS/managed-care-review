@@ -142,47 +142,8 @@ jobs:
       react_app_auth_mode: IDM
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
-  dev-cypress:
-    name: dev - cypress
-    needs: [promote-app-dev]
-    runs-on: ubuntu-latest
-    container: cypress/browsers:node14.17.0-chrome91-ff89
-    strategy:
-      fail-fast: false
-      matrix:
-        # run copies of the current job in parallel
-        containers: [1, 2, 3, 4]
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: Cypress on Dev -- Chrome
-        id: cypressdev
-        uses: cypress-io/github-action@v4
-        with:
-          install: false
-          config: baseUrl=https://mc-review-dev.onemac.cms.gov
-          spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
-          record: true
-          parallel: true
-          browser: chrome
-          group: 'Chrome'
-        env:
-          REACT_APP_AUTH_MODE: IDM
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload cypress video
-        uses: actions/upload-artifact@v3
-        if: failure() && steps.cypressdev.outcome == 'failure'
-        with:
-          name: cypress-videos
-          path: tests/cypress/videos
-
   promote-infra-val:
-    needs: [dev-cypress, unit-tests]
+    needs: [promote-app-dev, unit-tests]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
     with:
       stage_name: val
@@ -193,7 +154,7 @@ jobs:
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
 
   promote-app-val:
-    needs: [dev-cypress, promote-infra-val, unit-tests]
+    needs: [promote-app-dev, promote-infra-val, unit-tests]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
       stage_name: val
@@ -206,47 +167,8 @@ jobs:
       react_app_auth_mode: IDM
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
-  cypress-val:
-    name: val - cypress
-    needs: [promote-app-val]
-    runs-on: ubuntu-latest
-    container: cypress/browsers:node14.17.0-chrome91-ff89
-    strategy:
-      fail-fast: false
-      matrix:
-        # run copies of the current job in parallel
-        containers: [1, 2, 3, 4]
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: Cypress on Val -- Chrome
-        id: cypressval
-        uses: cypress-io/github-action@v4
-        with:
-          install: false
-          config: baseUrl=https://mc-review-val.onemac.cms.gov
-          spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
-          record: true
-          parallel: true
-          browser: chrome
-          group: 'Chrome'
-        env:
-          REACT_APP_AUTH_MODE: IDM
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload cypress video
-        uses: actions/upload-artifact@v3
-        if: failure() && steps.cypressval.outcome == 'failure'
-        with:
-          name: cypress-videos
-          path: tests/cypress/videos
-
   promote-infra-prod:
-    needs: [cypress-val, unit-tests]
+    needs: [promote-app-val, unit-tests]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
     with:
       stage_name: prod
@@ -257,7 +179,7 @@ jobs:
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
 
   promote-app-prod:
-    needs: [cypress-val, promote-infra-prod, unit-tests]
+    needs: [promote-app-val, promote-infra-prod, unit-tests]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
       stage_name: prod
@@ -277,9 +199,7 @@ jobs:
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
       fail-fast: false
-      matrix:
-        # run copies of the current job in parallel
-        containers: [1, 2, 3, 4]
+   
     steps:
       - uses: actions/checkout@v3
 
@@ -288,15 +208,16 @@ jobs:
 
       - name: Cypress on Prod -- Chrome
         id: cypress
-        uses: cypress-io/github-action@v4
+        uses: cypress-io/github-action@v5
         with:
           install: false
           config: baseUrl=https://mc-review.onemac.cms.gov
           spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
           record: true
-          parallel: true
+          parallel: false
           browser: chrome
-          group: 'Chrome'
+          group: 'Chrome - prod'
+          ci-build-id: 'cypress-prod'
         env:
           REACT_APP_AUTH_MODE: IDM
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -312,7 +233,7 @@ jobs:
   slack:
     name: Slack notification on failure
     runs-on: ubuntu-latest
-    needs: [cypress-prod, cypress-val]
+    needs: [cypress-prod, promote-app-val]
     if: always()
     steps:
       # this action sets env.WORKFLOW_CONCLUSION so we can call a
@@ -321,7 +242,7 @@ jobs:
 
       - name: Alert Slack On Failure
         uses: rtCamp/action-slack-notify@v2
-        if: (env.WORKFLOW_CONCLUSION == 'failure' || needs.cypress-prod.result == 'skipped' || needs.cypress-val.result == 'skipped')
+        if: (env.WORKFLOW_CONCLUSION == 'failure' || needs.cypress-prod.result == 'skipped' || needs.promote-app-val.result == 'skipped')
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_USERNAME: Deploy Alerts

@@ -28,7 +28,7 @@ export const makeDateTable = (
             docBuckets.forEach((bucket) => {
                 if (bucket === 'rateDocuments') {
                     revisionData.rateInfos.forEach((rateInfo) => {
-                        rateInfo.rateDocuments.forEach(doc => {
+                        rateInfo.rateDocuments.forEach((doc) => {
                             lookupTable[doc.name] = revisionData.updatedAt
                         })
                     })

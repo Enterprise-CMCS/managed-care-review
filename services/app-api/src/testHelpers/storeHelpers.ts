@@ -61,12 +61,18 @@ function mockStoreThatErrors(): Store {
                 'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
             )
         },
-        getStatePrograms: () => {
+        findStatePrograms: () => {
             return new Error(
                 'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
             )
         },
-        getAllRevisions: async () => {
+        findAllRevisions: async () => {
+            return genericStoreError
+        },
+        findUser: async (_ID) => {
+            return genericStoreError
+        },
+        insertUser: async (_args) => {
             return genericStoreError
         },
         findUser: async (_ID) => {

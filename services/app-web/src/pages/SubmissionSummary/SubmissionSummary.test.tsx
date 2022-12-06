@@ -11,6 +11,7 @@ import {
     mockValidCMSUser,
     mockSubmittedHealthPlanPackageWithRevision,
     mockUnlockedHealthPlanPackageWithOldProtos,
+    indexHealthPlanPackagesMockSuccess,
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
@@ -420,6 +421,7 @@ describe('SubmissionSummary', () => {
                                             proto
                                         ),
                                 }),
+                                indexHealthPlanPackagesMockSuccess(),
                             ],
                         },
                         routerProvider: {
@@ -431,6 +433,10 @@ describe('SubmissionSummary', () => {
                 await waitFor(() => {
                     // there's an async rendering issue with the snapshots unless we run another test first
                     expect(document.body).toHaveTextContent(/Submission type/)
+                })
+                await waitFor(() => {
+                    // there's an async rendering issue with  UploadedDocsTable the snapshots unless we run another test first
+                    expect(document.body).not.toHaveTextContent(/LOADING/)
                     expect(document.body).toMatchSnapshot()
                 })
             }

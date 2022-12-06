@@ -5,7 +5,6 @@
     "main": "index.js",
     "license": "MIT",
     "private": true,
-    "type": "module",
     "scripts": {
         "precommit": "lint-staged",
         "clean": "rm -rf node_modules && yarn cache clean",
@@ -21,7 +20,7 @@
     "dependencies": {
         "@aws-sdk/client-cloudformation": "^3.202.0",
         "@aws-sdk/client-cognito-identity-provider": "^3.202.0",
-        "aws-sdk": "^2.1018.0",
+        "@aws-sdk/client-s3": "^3.204.0",
         "octokit": "^2.0.4"
     },
     "devDependencies": {

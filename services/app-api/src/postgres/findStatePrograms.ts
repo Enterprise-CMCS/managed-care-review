@@ -1,7 +1,7 @@
 import statePrograms from '../data/statePrograms.json'
 import { ProgramType } from '../domain-models'
 
-function getStatePrograms(stateCode: string): ProgramType[] | Error {
+function findStatePrograms(stateCode: string): ProgramType[] | Error {
     const programs = statePrograms.states.find(
         (state) => state.code === stateCode
     )?.programs
@@ -14,4 +14,4 @@ function getStatePrograms(stateCode: string): ProgramType[] | Error {
     return programs
 }
 
-export { getStatePrograms }
+export { findStatePrograms }

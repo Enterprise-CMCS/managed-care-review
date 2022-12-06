@@ -8,6 +8,7 @@ import {
     ldUseClientSpy,
     renderWithProviders,
 } from '../../../testHelpers/jestHelpers'
+import * as usePreviousSubmission from '../../../hooks/usePreviousSubmission'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
 import { RateInfoType } from '../../../common-code/healthPlanFormDataType'
 
@@ -527,6 +528,233 @@ describe('RateDetailsSummarySection', () => {
                     name: 'tt.actuary@test.com',
                 })
             ).toBeInTheDocument()
+        })
+    })
+    it('renders all necessary information for documents with shared rate certifications', async () => {
+        ldUseClientSpy({ 'multi-rate-submissions': true })
+        const testSubmission = {
+            ...draftSubmission,
+            rateInfos: [
+                {
+                    ...draftSubmission.rateInfos[0],
+                    rateDocuments: [
+                        {
+                            s3URL: 's3://foo/bar/rate',
+                            name: 'rate docs test 1',
+                            documentCategories: ['RATES' as const],
+                        },
+                    ],
+                },
+            ],
+            documents: [
+                {
+                    s3URL: 's3://foo/bar/test-1',
+                    name: 'supporting docs test 1',
+                    documentCategories: ['CONTRACT_RELATED' as const],
+                },
+                {
+                    s3URL: 's3://foo/bar/test-2',
+                    name: 'supporting docs test 2',
+                    documentCategories: ['RATES_RELATED' as const],
+                },
+                {
+                    s3URL: 's3://foo/bar/test-3',
+                    name: 'supporting docs test 3',
+                    documentCategories: [
+                        'CONTRACT_RELATED' as const,
+                        'RATES_RELATED' as const,
+                    ],
+                },
+            ],
+        }
+        testSubmission.rateInfos[0].packagesWithSharedRateCerts = [
+            {
+                packageId: '333b4225-5b49-4e82-aa71-be0d33d7418d',
+                packageName: 'MCR-MN-0001-SNBC',
+            },
+            {
+                packageId: '21467dba-6ae8-11ed-a1eb-0242ac120002',
+                packageName: 'MCR-MN-0002-PMAP',
+            },
+        ]
+        renderWithProviders(
+            <RateDetailsSummarySection
+                submission={testSubmission}
+                navigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+            />
+        )
+        await waitFor(() => {
+            const rateDocsTable = screen.getByRole('table', {
+                name: /Rate certification/,
+            })
+            // has shared tag
+            expect(within(rateDocsTable).getByTestId('tag').textContent).toBe(
+                'SHARED'
+            )
+            // table has 'linked submissions' column
+            expect(
+                within(rateDocsTable).getByText('Linked submissions')
+            ).toBeInTheDocument()
+            // table includes the correct submissions
+            expect(
+                within(rateDocsTable).getByText('MCR-MN-0001-SNBC')
+            ).toBeInTheDocument()
+            expect(
+                within(rateDocsTable).getByText('MCR-MN-0002-PMAP')
+            ).toBeInTheDocument()
+            // the document names link to the correct submissions
+            expect(
+                within(rateDocsTable).getByRole('link', {
+                    name: 'MCR-MN-0001-SNBC',
+                })
+            ).toHaveAttribute(
+                'href',
+                '/submissions/333b4225-5b49-4e82-aa71-be0d33d7418d'
+            )
+            expect(
+                within(rateDocsTable).getByRole('link', {
+                    name: 'MCR-MN-0002-PMAP',
+                })
+            ).toHaveAttribute(
+                'href',
+                '/submissions/21467dba-6ae8-11ed-a1eb-0242ac120002'
+            )
+        })
+    })
+    it('does not render shared rate cert info for previous submissons', async () => {
+        jest.spyOn(
+            usePreviousSubmission,
+            'usePreviousSubmission'
+        ).mockReturnValue(true)
+        ldUseClientSpy({ 'multi-rate-submissions': true })
+        const testSubmission = {
+            ...draftSubmission,
+            rateInfos: [
+                {
+                    ...draftSubmission.rateInfos[0],
+                    rateDocuments: [
+                        {
+                            s3URL: 's3://foo/bar/rate',
+                            name: 'rate docs test 1',
+                            documentCategories: ['RATES' as const],
+                        },
+                    ],
+                },
+            ],
+            documents: [
+                {
+                    s3URL: 's3://foo/bar/test-1',
+                    name: 'supporting docs test 1',
+                    documentCategories: ['CONTRACT_RELATED' as const],
+                },
+                {
+                    s3URL: 's3://foo/bar/test-2',
+                    name: 'supporting docs test 2',
+                    documentCategories: ['RATES_RELATED' as const],
+                },
+                {
+                    s3URL: 's3://foo/bar/test-3',
+                    name: 'supporting docs test 3',
+                    documentCategories: [
+                        'CONTRACT_RELATED' as const,
+                        'RATES_RELATED' as const,
+                    ],
+                },
+            ],
+        }
+        testSubmission.rateInfos[0].packagesWithSharedRateCerts = [
+            {
+                packageId: '333b4225-5b49-4e82-aa71-be0d33d7418d',
+                packageName: 'MCR-MN-0001-SNBC',
+            },
+            {
+                packageId: '21467dba-6ae8-11ed-a1eb-0242ac120002',
+                packageName: 'MCR-MN-0002-PMAP',
+            },
+        ]
+        renderWithProviders(
+            <RateDetailsSummarySection
+                submission={testSubmission}
+                navigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+            />
+        )
+        await waitFor(() => {
+            const rateDocsTable = screen.getByRole('table', {
+                name: /Rate certification/,
+            })
+            expect(
+                within(rateDocsTable).queryByTestId('tag')
+            ).not.toBeInTheDocument()
+            expect(
+                within(rateDocsTable).queryByText('Linked submissions')
+            ).not.toBeInTheDocument()
+            expect(
+                within(rateDocsTable).queryByText('MCR-MN-0001-SNBC')
+            ).not.toBeInTheDocument()
+            expect(
+                within(rateDocsTable).queryByText('MCR-MN-0002-PMAP')
+            ).not.toBeInTheDocument()
+        })
+    })
+    it('does not render shared rate cert info if none are present', async () => {
+        ldUseClientSpy({ 'multi-rate-submissions': true })
+        const testSubmission = {
+            ...draftSubmission,
+            rateInfos: [
+                {
+                    ...draftSubmission.rateInfos[0],
+                    rateDocuments: [
+                        {
+                            s3URL: 's3://foo/bar/rate',
+                            name: 'rate docs test 1',
+                            documentCategories: ['RATES' as const],
+                        },
+                    ],
+                },
+            ],
+            documents: [
+                {
+                    s3URL: 's3://foo/bar/test-1',
+                    name: 'supporting docs test 1',
+                    documentCategories: ['CONTRACT_RELATED' as const],
+                },
+                {
+                    s3URL: 's3://foo/bar/test-2',
+                    name: 'supporting docs test 2',
+                    documentCategories: ['RATES_RELATED' as const],
+                },
+                {
+                    s3URL: 's3://foo/bar/test-3',
+                    name: 'supporting docs test 3',
+                    documentCategories: [
+                        'CONTRACT_RELATED' as const,
+                        'RATES_RELATED' as const,
+                    ],
+                },
+            ],
+        }
+        renderWithProviders(
+            <RateDetailsSummarySection
+                submission={testSubmission}
+                navigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+            />
+        )
+        await waitFor(() => {
+            const rateDocsTable = screen.getByRole('table', {
+                name: /Rate certification/,
+            })
+            expect(
+                within(rateDocsTable).queryByTestId('tag')
+            ).not.toBeInTheDocument()
+            expect(
+                within(rateDocsTable).queryByText('Linked submissions')
+            ).not.toBeInTheDocument()
         })
     })
 })
