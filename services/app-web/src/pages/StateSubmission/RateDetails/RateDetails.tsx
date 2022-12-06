@@ -477,9 +477,10 @@ export const RateDetails = ({
                 actuaryContacts: rateInfo.actuaryContacts,
                 actuaryCommunicationPreference:
                     rateInfo.actuaryCommunicationPreference,
-                packagesWithSharedRateCerts: rateInfo.hasSharedRateCert
-                    ? rateInfo.packagesWithSharedRateCerts
-                    : [],
+                packagesWithSharedRateCerts:
+                    rateInfo.hasSharedRateCert === 'YES'
+                        ? rateInfo.packagesWithSharedRateCerts
+                        : [],
             }
         })
 
