@@ -1,4 +1,7 @@
-import { SecretsManager } from 'aws-sdk'
+import {
+    SecretsManagerClient,
+    GetSecretValueCommand,
+} from '@aws-sdk/client-secrets-manager'
 import { GetSecretValueResponse } from 'aws-sdk/clients/secretsmanager'
 
 interface APISecrets {
@@ -35,13 +38,14 @@ async function getSecretValue(
     }
 
     // connect to secrets manager and grab the secrets
-    const secretsManager = new SecretsManager({
+    const secretsManager = new SecretsManagerClient({
         region: 'us-east-1',
     })
 
-    const secretResponse: GetSecretValueResponse = await secretsManager
-        .getSecretValue(params)
-        .promise()
+    const command = new GetSecretValueCommand(params)
+    const secretResponse: GetSecretValueResponse = await secretsManager.send(
+        command
+    )
 
     // parse the secrets. we store as a string.
     const secret = JSON.parse(secretResponse.SecretString ?? '') as Secret

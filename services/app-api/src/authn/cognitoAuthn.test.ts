@@ -59,6 +59,8 @@ describe('cognitoAuthn', () => {
                         email: 'gp@example.com',
                         name: 'Generic Person',
                         state_code: 'VA',
+                        givenName: 'Generic',
+                        familyName: 'Person',
                     }),
                 },
                 {
@@ -72,6 +74,8 @@ describe('cognitoAuthn', () => {
                         role: 'CMS_USER',
                         email: 'gp@example.com',
                         name: 'Generic Person',
+                        familyName: 'Person',
+                        givenName: 'Generic',
                     }),
                 },
                 {
@@ -88,6 +92,8 @@ describe('cognitoAuthn', () => {
                         email: 'gp@example.com',
                         name: 'Generic Person',
                         state_code: 'FL',
+                        givenName: 'Generic',
+                        familyName: 'Person',
                     }),
                 },
                 {
@@ -103,6 +109,8 @@ describe('cognitoAuthn', () => {
                         email: 'gp@example.com',
                         name: 'Generic Person',
                         state_code: 'FL',
+                        givenName: 'Generic',
+                        familyName: 'Person',
                     }),
                 },
                 {

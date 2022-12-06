@@ -36,7 +36,7 @@ export const makeDocumentList = (
         }
         docBuckets.forEach((bucket) => {
             if (bucket === 'rateDocuments') {
-                revisionData.rateInfos.forEach(rateInfo => {
+                revisionData.rateInfos.forEach((rateInfo) => {
                     rateInfo[bucket].forEach((doc) => {
                         const key = getKey(doc.s3URL)
                         if (key && index === 0) {

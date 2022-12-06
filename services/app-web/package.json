@@ -112,6 +112,9 @@
         "zod": "^3.10.1"
     },
     "devDependencies": {
+        "@aws-sdk/client-s3": "^3.204.0",
+        "@aws-sdk/client-amplify": "^3.204.0",
+        "@aws-sdk/s3-request-presigner": "^3.204.0",
         "@storybook/addon-a11y": "^6.5.4",
         "@storybook/addon-essentials": "^6.5.4",
         "@storybook/addon-links": "^6.5.4",
