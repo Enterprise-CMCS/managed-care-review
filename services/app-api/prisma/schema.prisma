@@ -45,7 +45,7 @@ model User {
   id         String  @id
   givenName  String
   familyName String
-  email      String  @unique
+  email      String
   role       Role
   states     State[]
   stateCode  String?
