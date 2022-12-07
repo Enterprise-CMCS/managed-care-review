@@ -103,7 +103,7 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
                 ),
             }
 
-            console.log(JSON.stringify(lambdaParams))
+            console.log(`lambdaParams: ${JSON.stringify(lambdaParams)}`)
 
             try {
                 const command = new InvokeCommand(lambdaParams)
@@ -118,7 +118,6 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             stateAnalystsEmails,
             statePrograms
         ) {
-            console.log(`submission: ${JSON.stringify(submission)}`)
             const emailData = await newPackageCMSEmail(
                 submission,
                 config,
