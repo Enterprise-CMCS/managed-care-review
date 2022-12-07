@@ -2,6 +2,7 @@ import {
     InvokeCommandInput,
     LambdaClient,
     InvokeCommand,
+    LambdaClientConfig,
 } from '@aws-sdk/client-lambda'
 
 import {
@@ -83,7 +84,10 @@ type Emailer = {
 }
 
 function newSESEmailer(config: EmailConfiguration): Emailer {
-    const lambda = new LambdaClient({ region: 'us-east-1' })
+    const lambdaClientConfig: LambdaClientConfig = {
+        region: 'us-east-1',
+    }
+    const lambda = new LambdaClient(lambdaClientConfig)
     return {
         sendEmail: async (emailData: EmailData): Promise<void | Error> => {
             const emailRequestParams = getSESEmailParams(emailData)
@@ -103,9 +107,7 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
 
             try {
                 const command = new InvokeCommand(lambdaParams)
-                const lambdaresult = await lambda.send(command)
-                console.log(`lambda result: ${JSON.stringify(lambdaresult)}`)
-
+                await lambda.send(command)
                 return
             } catch (err) {
                 return new Error('SES email send failed. ' + err)
