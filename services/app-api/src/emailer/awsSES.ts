@@ -4,6 +4,7 @@ import {
     SendEmailRequest,
     SendEmailResponse,
     SendEmailCommand,
+    SendEmailCommandInput,
 } from '@aws-sdk/client-ses'
 import { EmailData } from './'
 
@@ -66,10 +67,10 @@ class AWSResponseError extends Error {
 }
 
 async function sendSESEmail(
-    params: SendEmailRequest
+    params: SendEmailCommandInput
 ): Promise<SendEmailResponse | SESServiceException> {
     try {
-        console.log(JSON.stringify(params))
+        console.log(`sendSESEMAIL: ${JSON.stringify(params)}`)
         const command = new SendEmailCommand(params)
         const response = await ses.send(command)
         return response
