@@ -103,7 +103,9 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
 
             try {
                 const command = new InvokeCommand(lambdaParams)
-                await lambda.send(command)
+                const lambdaresult = await lambda.send(command)
+                console.log(`lambda result: ${JSON.stringify(lambdaresult)}`)
+
                 return
             } catch (err) {
                 return new Error('SES email send failed. ' + err)
@@ -114,14 +116,14 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             stateAnalystsEmails,
             statePrograms
         ) {
-            console.log(`submission: ${submission}`)
+            console.log(`submission: ${JSON.stringify(submission)}`)
             const emailData = await newPackageCMSEmail(
                 submission,
                 config,
                 stateAnalystsEmails,
                 statePrograms
             )
-            console.log(`emailData: ${emailData}`)
+            console.log(`emailData: ${JSON.stringify(emailData)}`)
             if (emailData instanceof Error) {
                 return emailData
             } else {
