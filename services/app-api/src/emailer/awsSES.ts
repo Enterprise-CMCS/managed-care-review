@@ -69,6 +69,7 @@ async function sendSESEmail(
     params: SendEmailRequest
 ): Promise<SendEmailResponse | SESServiceException> {
     try {
+        console.log(JSON.stringify(params))
         const command = new SendEmailCommand(params)
         const response = await ses.send(command)
         return response
