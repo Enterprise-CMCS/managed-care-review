@@ -1,16 +1,19 @@
-import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm'
+import { SSM } from 'aws-sdk'
 
+type GetParameterResult = SSM.GetParameterResult
 type ParameterStoreType = { value: string; type: string } | Error
 
-const ssm = new SSMClient({ region: 'us-east-1' })
+const ssm = new SSM({ region: 'us-east-1' })
 
 const getParameterStore = async (name: string): Promise<ParameterStoreType> => {
-    const command = new GetParameterCommand({
+    const params = {
         Name: name,
-    })
+    }
 
     try {
-        const { Parameter: parameter } = await ssm.send(command)
+        const { Parameter: parameter }: GetParameterResult = await ssm
+            .getParameter(params)
+            .promise()
 
         if (!parameter || !parameter.Value || !parameter.Type) {
             let errorMessage: string

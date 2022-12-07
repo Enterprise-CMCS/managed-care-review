@@ -1,20 +1,8 @@
-import {
-    CloudFormationClient,
-    DeleteStackCommand,
-    DescribeStacksCommand,
-    DescribeStackResourcesCommand,
-    StackResource
-} from '@aws-sdk/client-cloudformation'
-import {
-    S3Client,
-    ListObjectVersionsCommand,
-    DeleteObjectsCommand,
-    PutBucketVersioningCommand,
-} from '@aws-sdk/client-s3'
+import AWS from 'aws-sdk'
 
-const AWSConfig = {
+AWS.config.update({
     region: 'us-east-1',
-}
+})
 
 const stackPrefixes = [
     'app-web',
@@ -41,8 +29,8 @@ const protectedStages = [
 
 const stage = process.argv[2]
 
-const cf = new CloudFormationClient(AWSConfig)
-const s3 = new S3Client(AWSConfig)
+const cf = new AWS.CloudFormation()
+const s3 = new AWS.S3()
 
 async function main() {
     if (protectedStages.includes(stage)) {
@@ -83,11 +71,13 @@ async function getStacksFromStage(stageName: string): Promise<string[]> {
         stackPrefixes.map(async (prefix) => {
             const stackName = `${prefix}-${stageName}`
             try {
-                const commandDescribeStacks = new DescribeStacksCommand({ StackName: stackName })
-                const stacks = await cf.send(commandDescribeStacks)
+                const stacks = await cf
+                    .describeStacks({ StackName: stackName })
+                    .promise()
 
                 if (
-                    !stacks.Stacks
+                    stacks.$response.error != null ||
+                    typeof stacks.Stacks === 'undefined'
                 ) {
                     console.log(`Stack ${stackName} does not exist. Skipping.`)
                     return []
@@ -159,7 +149,7 @@ async function clearServerlessDeployBucket(
 }
 
 async function deleteKeysFromS3Bucket(
-    bucket: StackResource,
+    bucket: AWS.CloudFormation.StackResource,
     keys: s3ObjectKey[]
 ): Promise<void | Error> {
     // deleteObjects is limited to 1000 keys per request
@@ -171,15 +161,15 @@ async function deleteKeysFromS3Bucket(
     const emptyBucketOutput = await Promise.all(
         keysArray.map(async function (k) {
             // construct the delete params
-            const commandDeleteObjects =  new DeleteObjectsCommand({
+            const deleteParams: AWS.S3.DeleteObjectsRequest = {
                 Bucket: bucket.PhysicalResourceId ?? '',
                 Delete: {
                     Objects: k,
                 },
-            })
+            }
 
             try {
-                await s3.send(commandDeleteObjects)
+                await s3.deleteObjects(deleteParams).promise()
             } catch (err) {
                 return new Error(`Could not delete keys: ${err}`)
             }
@@ -195,31 +185,28 @@ async function deleteKeysFromS3Bucket(
 
 async function getBucketsInStack(
     stackName: string
-): Promise<StackResource[] | Error> {
+): Promise<AWS.CloudFormation.StackResource[] | Error> {
     // get all the resources in the stack
     try {
-        const commandDescribeStackResources = new DescribeStackResourcesCommand({
-            StackName: stackName,
-        })
-        const stack = await cf.send(commandDescribeStackResources)
+        const stack = await cf
+            .describeStackResources({ StackName: stackName })
+            .promise()
 
         if (stack.StackResources === undefined) {
             return new Error('could not find stack')
-        } else {
-            // filter the resources to get our S3 buckets
-            return stack.StackResources.filter((resource) => {
-                return resource.ResourceType === 'AWS::S3::Bucket'
-            })
         }
 
-      
+        // filter the resources to get our S3 buckets
+        return stack.StackResources.filter((resource) => {
+            return resource.ResourceType === 'AWS::S3::Bucket'
+        })
     } catch (err) {
         return new Error(`Could not get stack resources: ${err}`)
     }
 }
 
 async function turnOffVersioningOnBucket(
-    bucket: StackResource
+    bucket: AWS.CloudFormation.StackResource
 ): Promise<void | Error> {
     console.log(
         `Turning off bucket versioning on bucket: ${bucket.PhysicalResourceId}`
@@ -231,15 +218,14 @@ async function turnOffVersioningOnBucket(
     }
 
     try {
-        const commandPutBucketVersioning = new PutBucketVersioningCommand(versionParams)
-        await s3.send(commandPutBucketVersioning)
+        await s3.putBucketVersioning(versionParams).promise()
     } catch (err) {
         return new Error(`Could not turn off bucket versioning: ${err}`)
     }
 }
 
 async function getVersionedFilesInBucket(
-    bucket: StackResource
+    bucket: AWS.CloudFormation.StackResource
 ): Promise<s3ObjectKey[] | Error> {
     // Versioned buckets will have extra files in them, all of which
     // must be cleared out before CloudFormation can delete the bucket.
@@ -251,44 +237,47 @@ async function getVersionedFilesInBucket(
     // get all versioned objects
     let versionKeys: s3ObjectKey[] = []
     let deleteMarkerKeys: s3ObjectKey[] = []
-    const commandListObjectVersions = new ListObjectVersionsCommand(bucketParams)
-    
-    try {
-        const objectVersions = await s3.send(commandListObjectVersions)
 
-        // get version keys of files
-        if (
-            objectVersions.Versions != undefined &&
-            objectVersions.Versions?.length > 0
-        ) {
-            // get all the version keys of files
-            versionKeys = objectVersions.Versions?.map((c) => {
-                return {
-                    Key: c.Key ?? '',
-                    VersionId: c.VersionId ?? '',
-                }
-            })
-        }
-
-        // get all the delete marker keys of files
-        if (
-            objectVersions.DeleteMarkers != undefined &&
-            objectVersions.DeleteMarkers?.length > 0
-        ) {
-            deleteMarkerKeys = objectVersions.DeleteMarkers?.map((c) => {
-                return {
-                    Key: c.Key ?? '',
-                    VersionId: c.VersionId ?? '',
-                }
-            })
-        }
-
-        // combine the two arrays and return
-        return [...versionKeys, ...deleteMarkerKeys]
-    }catch(err) {
-           return new Error(err)
-
+    const objectVersions = await s3.listObjectVersions(bucketParams).promise()
+    // AWSError is unfortunately not backed by Error, so we can't just
+    // check it is an instanceof, we don't get good type info :(
+    // https://github.com/aws/aws-sdk-js/issues/2611
+    if (objectVersions.$response.error != null) {
+        return new Error(
+            'Error on listObjectVersions: ' +
+                objectVersions.$response.error.message
+        )
     }
+
+    // get version keys of files
+    if (
+        objectVersions.Versions != undefined &&
+        objectVersions.Versions?.length > 0
+    ) {
+        // get all the version keys of files
+        versionKeys = objectVersions.Versions?.map((c) => {
+            return {
+                Key: c.Key ?? '',
+                VersionId: c.VersionId ?? '',
+            }
+        })
+    }
+
+    // get all the delete marker keys of files
+    if (
+        objectVersions.DeleteMarkers != undefined &&
+        objectVersions.DeleteMarkers?.length > 0
+    ) {
+        deleteMarkerKeys = objectVersions.DeleteMarkers?.map((c) => {
+            return {
+                Key: c.Key ?? '',
+                VersionId: c.VersionId ?? '',
+            }
+        })
+    }
+
+    // combine the two arrays and return
+    return [...versionKeys, ...deleteMarkerKeys]
 }
 
 async function deleteStack(stackName: string): Promise<void | Error> {
@@ -297,35 +286,42 @@ async function deleteStack(stackName: string): Promise<void | Error> {
     }
 
     // find the stack and make sure we get one
-    const commandDescribeStacks = new DescribeStacksCommand(stackParams)
-    
-    try {
-        const stack = await cf.send(commandDescribeStacks)
+    const stack = await cf.describeStacks(stackParams).promise()
 
-        if (stack.Stacks === undefined || stack.Stacks.length === 0) {
-            return new Error(`Could not find stack ${stackName}`)
-        }
-
-        console.log(`deleteStack: Deleting stack ${stackName}`)
-        // get the stack ID so we can check it's status
-
-        let stackId = stack.Stacks[0].StackId
-    } catch (err) {
-         return new Error('Error on deleteStack: ' + err)
+    // AWSError is unfortunately not backed by Error, so we can't just
+    // check it is an instanceof, we don't get good type info :(
+    // https://github.com/aws/aws-sdk-js/issues/2611
+    if (stack.$response.error != null) {
+        return new Error(
+            'Error on describeStacks: ' + stack.$response.error.message
+        )
     }
 
-    try {
-        const commandDeleteStack = new DeleteStackCommand(stackParams)
-        await cf.send(commandDeleteStack)
+    if (stack.Stacks === undefined || stack.Stacks.length === 0) {
+        return new Error(`Could not find stack ${stackName}`)
+    }
 
-        // deleteStack just returns {} if successful, so:
-        console.log(`deleteStack: Stack ${stackName} deleted`)
+    console.log(`deleteStack: Deleting stack ${stackName}`)
+    // get the stack ID so we can check it's status
+
+    let stackId = stack.Stacks[0].StackId
+
+    try {
+        await cf.deleteStack(stackParams).promise()
     } catch (err) {
         return new Error('Error on deleteStack: ' + err)
     }
 
-  
+    try {
+        await cf
+            .waitFor('stackDeleteComplete', { StackName: stackId })
+            .promise()
+    } catch (err) {
+        return new Error(err.message)
+    }
 
+    // deleteStack just returns {} if successful, so:
+    console.log(`deleteStack: Stack ${stackName} deleted`)
 }
 
 // run the script

@@ -1,10 +1,5 @@
 import { Result, ok, err } from 'neverthrow'
-import {
-    CognitoIdentityProviderClient,
-    ListUsersCommand,
-    UserType as CognitoUserType,
-} from '@aws-sdk/client-cognito-identity-provider'
-
+import { CognitoIdentityServiceProvider } from 'aws-sdk'
 import { UserType } from '../domain-models'
 import { performance } from 'perf_hooks'
 import { Store, InsertUserArgsType, isStoreError } from '../postgres'
@@ -32,14 +27,14 @@ export function parseAuthProvider(
 }
 
 // pulls the data from the cognito user into a dictionary
-function userAttrDict(cognitoUser: CognitoUserType): {
+function userAttrDict(cognitoUser: CognitoIdentityServiceProvider.UserType): {
     [key: string]: string
 } {
     const attributes: { [key: string]: string } = {}
 
     if (cognitoUser.Attributes) {
         cognitoUser.Attributes.forEach((attribute) => {
-            if (attribute.Value && attribute.Name) {
+            if (attribute.Value) {
                 attributes[attribute.Name] = attribute.Value
             }
         })
@@ -51,30 +46,31 @@ function userAttrDict(cognitoUser: CognitoUserType): {
 async function fetchUserFromCognito(
     userID: string,
     poolID: string
-): Promise<CognitoUserType | Error> {
-    const cognitoClient = new CognitoIdentityProviderClient({})
+): Promise<CognitoIdentityServiceProvider.UserType | Error> {
+    const cognito = new CognitoIdentityServiceProvider()
 
     const subFilter = `sub = "${userID}"`
 
     // let's see what we've got
     const startRequest = performance.now()
-    const commandListUsers = new ListUsersCommand({
-        UserPoolId: poolID,
-        Filter: subFilter,
-    })
-    const listUsersResponse = await cognitoClient.send(commandListUsers)
+    const listUsersResponse = await cognito
+        .listUsers({
+            UserPoolId: poolID,
+            Filter: subFilter,
+        })
+        .promise()
     const endRequest = performance.now()
     console.log('listUsers takes ms:', endRequest - startRequest)
 
-    if (
-        listUsersResponse.Users === undefined ||
-        listUsersResponse.Users.length !== 1
-    ) {
+    const userResp: CognitoIdentityServiceProvider.ListUsersResponse =
+        listUsersResponse
+
+    if (userResp.Users === undefined || userResp.Users.length !== 1) {
         // logerror
         return new Error('No user found with this sub')
     }
 
-    const currentUser = listUsersResponse.Users[0]
+    const currentUser = userResp.Users[0]
     return currentUser
 }
 
@@ -260,7 +256,7 @@ async function lookupUserCognito(
         return err(fetchResult)
     }
 
-    const currentUser: CognitoUserType = fetchResult
+    const currentUser = fetchResult
 
     // we lose some type safety here...
     const attributes = userAttrDict(currentUser)

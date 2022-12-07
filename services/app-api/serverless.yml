@@ -3,7 +3,6 @@ service: app-api
 frameworkVersion: '^3.19.0'
 
 package:
-  individually: true
   patterns:
     - '!node_modules/prisma'
     - '!node_modules/.prisma'
@@ -236,7 +235,7 @@ functions:
 
   migrate:
     handler: src/handlers/postgres_migrate.main
-    timeout: 60
+    timeout: 60 # aurora cold start can be long
     vpc:
       securityGroupIds:
         - ${self:custom.sgId}

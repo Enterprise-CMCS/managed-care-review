@@ -1,17 +1,11 @@
-import {
-    S3Client,
-    PutObjectCommand,
-    GetObjectCommand,
-    HeadObjectCommand,
-    PutObjectTaggingCommand,
-} from '@aws-sdk/client-s3'
-import { Readable, Stream } from 'stream'
+import { S3 } from 'aws-sdk'
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import Archiver from 'archiver'
+import { Readable, Stream } from 'stream'
 
 import { assertIsAuthMode } from '../../../app-web/src/common-code/config'
 
-const s3 = new S3Client({ region: 'us-east-1' })
+const s3 = new S3({ region: 'us-east-1' })
 const authMode = process.env.REACT_APP_AUTH_MODE
 assertIsAuthMode(authMode)
 
@@ -78,6 +72,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
 
     type S3DownloadStreamDetails = {
         stream: Readable
+        key: string
         filename: string
     }
 
@@ -87,17 +82,13 @@ export const main: APIGatewayProxyHandler = async (event) => {
     const s3DownloadStreams: S3DownloadStreamDetails[] = await Promise.all(
         bulkDlRequest.keys.map(async (key: string) => {
             const params = { Bucket: bulkDlRequest.bucket, Key: key }
-            const headCommand = new HeadObjectCommand(params)
-            const metadata = await s3.send(headCommand)
-            const getCommand = new GetObjectCommand(params)
-            const filename = parseContentDisposition(
-                metadata.ContentDisposition ?? key
-            )
-            const s3Item = await s3.send(getCommand)
+            const metadata = await s3.headObject(params).promise()
             return {
-                stream: s3Item.Body as Readable,
+                stream: s3.getObject(params).createReadStream(),
                 key: key,
-                filename,
+                filename: parseContentDisposition(
+                    metadata.ContentDisposition ?? key
+                ),
             }
         })
     )
@@ -105,7 +96,24 @@ export const main: APIGatewayProxyHandler = async (event) => {
 
     const streamPassThrough = new Stream.PassThrough()
 
-    // Zip files
+    const params: S3.PutObjectRequest = {
+        ACL: 'private',
+        Body: streamPassThrough,
+        Bucket: bulkDlRequest.bucket,
+        ContentType: 'application/zip',
+        Key: bulkDlRequest.zipFileName,
+        StorageClass: 'STANDARD',
+    }
+
+    const s3Upload = s3.upload(params, (error: Error): void => {
+        if (error) {
+            console.error(
+                `Got error creating stream to s3 ${error.name} ${error.message} ${error.stack}`
+            )
+            throw error
+        }
+    })
+
     await new Promise((resolve, reject) => {
         console.log('Starting zip process...')
         const zip = Archiver('zip')
@@ -146,20 +154,8 @@ export const main: APIGatewayProxyHandler = async (event) => {
             },
         }
     })
-    // Upload files
-    try {
-        const commandPutObject = new PutObjectCommand({
-            ACL: 'private',
-            Body: streamPassThrough,
-            Bucket: bulkDlRequest.bucket,
-            ContentType: 'application/zip',
-            Key: bulkDlRequest.zipFileName,
-            StorageClass: 'STANDARD',
-        })
-        await s3.send(commandPutObject)
-    } catch (e) {
-        console.error('Could not upload zip file: ' + e)
-    }
+
+    await s3Upload.promise()
 
     // tag the file as having previously been scanned
     const taggingParams = {
@@ -176,12 +172,9 @@ export const main: APIGatewayProxyHandler = async (event) => {
     }
 
     try {
-        const commandPutObjectTagging = new PutObjectTaggingCommand(
-            taggingParams
-        )
-        await s3.send(commandPutObjectTagging)
+        await s3.putObjectTagging(taggingParams).promise()
     } catch (err) {
-        console.error('Could not tag zip file: ' + err)
+        console.log('Could not tag zip file: ' + err)
     }
 
     console.timeEnd('zipProcess')
