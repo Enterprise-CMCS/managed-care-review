@@ -1,9 +1,4 @@
-import {
-    InvokeCommandInput,
-    LambdaClient,
-    InvokeCommand,
-    LambdaClientConfig,
-} from '@aws-sdk/client-lambda'
+import { sendSESEmail } from '../emailer'
 
 import {
     getSESEmailParams,
@@ -84,14 +79,17 @@ type Emailer = {
 }
 
 function newSESEmailer(config: EmailConfiguration): Emailer {
+    /*
     const lambdaClientConfig: LambdaClientConfig = {
         region: 'us-east-1',
     }
     const lambda = new LambdaClient(lambdaClientConfig)
+    */
     return {
         sendEmail: async (emailData: EmailData): Promise<void | Error> => {
             const emailRequestParams = getSESEmailParams(emailData)
 
+            /*
             const lambdaParams: InvokeCommandInput = {
                 FunctionName: `app-api-${config.stage}-email_submit`,
                 Payload: JSON.parse(
@@ -104,10 +102,12 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             }
 
             console.log(`lambdaParams: ${JSON.stringify(lambdaParams)}`)
+            */
 
             try {
-                const command = new InvokeCommand(lambdaParams)
-                await lambda.send(command)
+                //const command = new InvokeCommand(lambdaParams)
+                //await lambda.send(command)
+                await sendSESEmail(emailRequestParams)
                 return
             } catch (err) {
                 return new Error('SES email send failed. ' + err)
