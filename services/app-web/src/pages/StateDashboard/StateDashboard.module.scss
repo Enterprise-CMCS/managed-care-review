@@ -60,21 +60,21 @@
 }
 
 .programTag {
-    background: $theme-color-secondary-lighter;
+     @include u-bg('blue-cool-5v');
     color: $theme-color-base-ink;
     display: inline-block;
 }
 
 .submittedTag {
-    background: $theme-color-success;
+    @include u-bg('green-cool-50');
 }
 
 .draftTag {
-    background: $theme-color-warning-dark;
+    @include u-bg('gold-20v');
     color: $theme-color-base-ink;
 }
 
 .unlockedTag {
-    background: #99deea;
+     @include u-bg('blue-cool-5v');
     color: $theme-color-base-ink;
 }

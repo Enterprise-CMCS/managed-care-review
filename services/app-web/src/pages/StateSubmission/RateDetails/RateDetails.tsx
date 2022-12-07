@@ -8,7 +8,6 @@ import {
     DatePicker,
     Label,
     Button,
-    Checkbox,
 } from '@trussworks/react-uswds'
 import { Field, FieldArray, Formik, FormikErrors, getIn } from 'formik'
 import { useNavigate } from 'react-router-dom'
@@ -44,10 +43,7 @@ import {
     formatFormDateForDomain,
 } from '../../../formHelpers'
 import { isS3Error } from '../../../s3'
-import {
-    RateDetailsFormSchema,
-    ActuaryContactSchema,
-} from './RateDetailsSchema'
+import { RateDetailsFormSchema } from './RateDetailsSchema'
 import { useS3 } from '../../../contexts/S3Context'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
@@ -55,7 +51,6 @@ import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { useStatePrograms } from '../../../hooks'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
-import * as Yup from 'yup'
 import { useFocus } from '../../../hooks'
 import { ActuaryContactFields } from '../Contacts'
 import { useIndexHealthPlanPackagesQuery } from '../../../gen/gqlClient'
@@ -98,7 +93,7 @@ export interface RateInfoFormType {
     actuaryContacts: ActuaryContact[]
     actuaryCommunicationPreference?: ActuaryCommunicationType
     packagesWithSharedRateCerts: SharedRateCertDisplay[]
-    hasSharedRateCert: boolean
+    hasSharedRateCert?: 'YES' | 'NO'
 }
 
 type FormError =
@@ -146,16 +141,10 @@ export const RateDetails = ({
         PackageOptionType[]
     >([])
 
-    const rateDetailsFormSchema = showMultiRates
-        ? //Concat RateDetailsFormSchema to ActuaryContactSchema for error summary order
-          Yup.object().shape({
-              rateInfos: ActuaryContactSchema.defined().concat(
-                  RateDetailsFormSchema
-              ),
-          })
-        : Yup.object().shape({
-              rateInfos: RateDetailsFormSchema,
-          })
+    const rateDetailsFormSchema = RateDetailsFormSchema({
+        'rates-across-submissions': showRatesAcrossSubs,
+        'multi-rate-submissions': showMultiRates,
+    })
 
     const { loading, error } = useIndexHealthPlanPackagesQuery({
         skip: !showRatesAcrossSubs,
@@ -284,10 +273,13 @@ export const RateDetails = ({
             rateInfo?.actuaryCommunicationPreference ?? undefined,
         packagesWithSharedRateCerts:
             rateInfo?.packagesWithSharedRateCerts ?? [],
-        hasSharedRateCert: Boolean(
-            rateInfo?.packagesWithSharedRateCerts &&
-                rateInfo?.packagesWithSharedRateCerts.length
-        ),
+        hasSharedRateCert:
+            rateInfo?.packagesWithSharedRateCerts === undefined
+                ? undefined
+                : (rateInfo?.packagesWithSharedRateCerts &&
+                      rateInfo?.packagesWithSharedRateCerts.length) >= 1
+                ? 'YES'
+                : 'NO',
     })
 
     const getDocumentsError = (
@@ -485,9 +477,10 @@ export const RateDetails = ({
                 actuaryContacts: rateInfo.actuaryContacts,
                 actuaryCommunicationPreference:
                     rateInfo.actuaryCommunicationPreference,
-                packagesWithSharedRateCerts: rateInfo.hasSharedRateCert
-                    ? rateInfo.packagesWithSharedRateCerts
-                    : [],
+                packagesWithSharedRateCerts:
+                    rateInfo.hasSharedRateCert === 'YES'
+                        ? rateInfo.packagesWithSharedRateCerts
+                        : [],
             }
         })
 
@@ -737,39 +730,79 @@ export const RateDetails = ({
                                                         </FormGroup>
                                                         {showRatesAcrossSubs && (
                                                             <FormGroup
-                                                                error={showFieldErrors(
-                                                                    rateErrorHandling(
-                                                                        errors
-                                                                            ?.rateInfos?.[
-                                                                            index
-                                                                        ]
-                                                                    )
-                                                                        ?.packagesWithSharedRateCerts
-                                                                )}
-                                                            >
-                                                                <Checkbox
-                                                                    id={`hasSharedRateCheckBox-${rateInfo.key}`}
-                                                                    name={`rateInfos.${index}.hasSharedRateCert`}
-                                                                    label="This rate certification was uploaded to another submission."
-                                                                    aria-required={
-                                                                        false
-                                                                    }
-                                                                    checked={
-                                                                        rateInfo.hasSharedRateCert
-                                                                    }
-                                                                    onChange={(
-                                                                        e
-                                                                    ) =>
-                                                                        setFieldValue(
-                                                                            e
-                                                                                .target
-                                                                                .name,
-                                                                            !rateInfo.hasSharedRateCert
+                                                                error={
+                                                                    showFieldErrors(
+                                                                        rateErrorHandling(
+                                                                            errors
+                                                                                ?.rateInfos?.[
+                                                                                index
+                                                                            ]
                                                                         )
+                                                                            ?.hasSharedRateCert
+                                                                    ) ||
+                                                                    showFieldErrors(
+                                                                        rateErrorHandling(
+                                                                            errors
+                                                                                ?.rateInfos?.[
+                                                                                index
+                                                                            ]
+                                                                        )
+                                                                            ?.packagesWithSharedRateCerts
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Fieldset
+                                                                    className={
+                                                                        styles.radioGroup
                                                                     }
-                                                                />
+                                                                    legend="Was
+                                                                                this
+                                                                                rate
+                                                                                certification
+                                                                                uploaded
+                                                                                to
+                                                                                any
+                                                                                other
+                                                                                submissions?"
+                                                                    role="radiogroup"
+                                                                    aria-required
+                                                                >
+                                                                    {showFieldErrors(
+                                                                        rateErrorHandling(
+                                                                            errors
+                                                                                ?.rateInfos?.[
+                                                                                index
+                                                                            ]
+                                                                        )
+                                                                            ?.hasSharedRateCert
+                                                                    ) && (
+                                                                        <PoliteErrorMessage>
+                                                                            {getIn(
+                                                                                errors,
+                                                                                `rateInfos.${index}.hasSharedRateCert`
+                                                                            )}
+                                                                        </PoliteErrorMessage>
+                                                                    )}
+                                                                    <FieldRadio
+                                                                        id={`hasSharedRateCertYes-${index}`}
+                                                                        name={`rateInfos.${index}.hasSharedRateCert`}
+                                                                        label="Yes"
+                                                                        value={
+                                                                            'YES'
+                                                                        }
+                                                                    />
+                                                                    <FieldRadio
+                                                                        id={`hasSharedRateCertNo-${index}`}
+                                                                        name={`rateInfos.${index}.hasSharedRateCert`}
+                                                                        label="No"
+                                                                        value={
+                                                                            'NO'
+                                                                        }
+                                                                    />
+                                                                </Fieldset>
 
-                                                                {rateInfo.hasSharedRateCert && (
+                                                                {rateInfo.hasSharedRateCert ===
+                                                                    'YES' && (
                                                                     <>
                                                                         <Label
                                                                             htmlFor={`rateInfos.${index}.rateProgramIDs`}
