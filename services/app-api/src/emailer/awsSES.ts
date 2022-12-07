@@ -74,6 +74,7 @@ async function sendSESEmail(
         const response = await ses.send(command)
         return response
     } catch (err) {
+        console.error(JSON.stringify(err))
         const { requestId, cfId, extendedRequestId } = err.$$metadata
         console.log({ requestId, cfId, extendedRequestId })
         return err
