@@ -211,7 +211,7 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
         if (store['multi-rate-submissions']) {
             cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
             cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
-            cy.findAllByLabelText('Email').eq(0).type('actuarycontact@test.com')
+            cy.findAllByLabelText('Email').eq(0).type('actuarycontact@example.com')
             cy.findAllByLabelText('Mercer').eq(0).safeClick()
         }
     })
@@ -248,7 +248,7 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
         if (store['multi-rate-submissions']) {
             cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
             cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
-            cy.findAllByLabelText('Email').eq(0).type('actuarycontact@test.com')
+            cy.findAllByLabelText('Email').eq(0).type('actuarycontact@example.com')
             cy.findAllByLabelText('Mercer').eq(0).safeClick()
         }
     })
@@ -266,7 +266,7 @@ Cypress.Commands.add('fillOutStateContact', () => {
         .eq(0)
         .should('have.value', 'State Contact Person') // this assertion is here to catch flakes early due to state contact person value not persisting
     cy.findAllByLabelText('Title/Role').eq(0).type('State Contact Title')
-    cy.findAllByLabelText('Email').eq(0).type('statecontact@test.com')
+    cy.findAllByLabelText('Email').eq(0).type('statecontact@example.com')
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
@@ -275,7 +275,7 @@ Cypress.Commands.add('fillOutActuaryContact', () => {
     // Must be a contract and rates submission
     cy.findAllByLabelText('Name').eq(1).click().type('Actuary Contact Person')
     cy.findAllByLabelText('Title/Role').eq(1).type('Actuary Contact Title')
-    cy.findAllByLabelText('Email').eq(1).type('actuarycontact@test.com')
+    cy.findAllByLabelText('Email').eq(1).type('actuarycontact@example.com')
 
     // Actuarial firm
     cy.findAllByLabelText('Mercer').eq(0).safeClick()
