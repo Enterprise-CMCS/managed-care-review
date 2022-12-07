@@ -1,19 +1,25 @@
-import React, { useLayoutEffect } from 'react'
+import React from 'react'
 import {
-    //ColumnFiltersState,
+    ColumnFiltersState,
     createColumnHelper,
     flexRender,
     getCoreRowModel,
+    getFilteredRowModel,
+    getSortedRowModel,
     RowData,
     useReactTable,
+    getFacetedUniqueValues,
 } from '@tanstack/react-table'
 import { HealthPlanPackageStatus, Program } from '../../gen/gqlClient'
-import styles from '../../pages/StateDashboard/StateDashboard.module.scss'
+import styles from './HealthPlanPackageTable.module.scss'
 import { Table, Tag } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
 import classnames from 'classnames'
 import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
+import { FilterAccordion } from '../FilterAccordion'
+import { FilterSelect } from '../Select'
+import statePrograms from '../../common-code/data/statePrograms.json'
 
 declare module '@tanstack/table-core' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -38,6 +44,7 @@ type UserType = 'STATE' | 'CMS'
 export type PackageTableProps = {
     tableData: PackageInDashboardType[]
     userType: UserType
+    showFilters?: boolean
 }
 
 const isSubmitted = (status: HealthPlanPackageStatus) =>
@@ -76,13 +83,26 @@ const StatusTag = ({
     return <Tag className={tagStyles}>{statusText}</Tag>
 }
 
+const stateOptions = statePrograms.states.map(({ name }) => ({
+    label: name,
+    value: name,
+}))
+const submissionTypeOptions = [
+    { label: 'Contract action only', value: 'Contract action only' },
+    {
+        label: 'Contract action and rate certification',
+        value: 'Contract action and rate certification',
+    },
+]
+
 export const HealthPlanPackageTable = ({
     tableData,
     userType,
+    showFilters = false,
 }: PackageTableProps): React.ReactElement => {
-    // const [globalFilter, setGlobalFilter] = React.useState('')
-    // const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-
+    const [columnFilters, setColumnFilters] =
+        React.useState<ColumnFiltersState>([])
+    const [clearFilters, setClearFilters] = React.useState(false)
     const columnHelper = createColumnHelper<PackageInDashboardType>()
 
     const tableColumns = [
@@ -104,18 +124,22 @@ export const HealthPlanPackageTable = ({
             },
         }),
         columnHelper.accessor('stateName', {
+            id: 'stateName',
             header: 'State',
             cell: (info) => <span>{info.getValue()}</span>,
             meta: {
                 dataTestID: 'submission-stateName',
             },
+            filterFn: `arrIncludesSome`,
         }),
         columnHelper.accessor('submissionType', {
+            id: 'submissionType',
             header: 'Submission type',
             cell: (info) => <span>{info.getValue()}</span>,
             meta: {
                 dataTestID: 'submission-type',
             },
+            filterFn: `arrIncludesSome`,
         }),
         columnHelper.accessor('programs', {
             header: 'Programs',
@@ -165,66 +189,131 @@ export const HealthPlanPackageTable = ({
     ]
 
     const reactTable = useReactTable({
-        data:
-            tableData.sort((a, b) =>
-                a['updatedAt'] > b['updatedAt'] ? -1 : 1
-            ) || [],
+        data: tableData.sort((a, b) =>
+            a['updatedAt'] > b['updatedAt'] ? -1 : 1
+        ),
         columns: tableColumns,
         getCoreRowModel: getCoreRowModel(),
-        // state: {
-        //     columnFilters,
-        //     globalFilter
-        // }
+        state: {
+            columnFilters,
+            columnVisibility: {
+                stateName: userType !== 'STATE',
+                submissionType: userType !== 'STATE',
+            },
+        },
+        onColumnFiltersChange: setColumnFilters,
+        getFacetedUniqueValues: getFacetedUniqueValues(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getSortedRowModel: getSortedRowModel(),
     })
 
-    useLayoutEffect(() => {
-        if (userType === 'STATE') {
-            reactTable.getColumn('submissionType').toggleVisibility(false)
-            reactTable.getColumn('stateName').toggleVisibility(false)
-        }
-    }, [userType, reactTable])
+    const stateColumn = reactTable.getColumn('stateName')
+    const submissionTypeColumn = reactTable.getColumn('submissionType')
 
-    return tableData.length ? (
-        <Table fullWidth>
-            <thead>
-                {reactTable.getHeaderGroups().map((headerGroup) => (
-                    <tr key={headerGroup.id}>
-                        {headerGroup.headers.map((header) => (
-                            <th key={header.id}>
-                                {header.isPlaceholder
-                                    ? null
-                                    : flexRender(
-                                          header.column.columnDef.header,
-                                          header.getContext()
-                                      )}
-                            </th>
+    // Filter options based on table data instead of static list of options.
+    // const stateFilterOptions: FilterOptionType[] = Array.from(stateColumn.getFacetedUniqueValues().keys()).map(state => ({
+    //     value: state,
+    //     label: state
+    // }))
+    //
+    // const typeFilterOptions: FilterOptionType[] = Array.from(submissionTypeColumn.getFacetedUniqueValues().keys()).map(type => ({
+    //     value: type,
+    //     label: type
+    // }))
+
+    const filterTitle = `Filters ${
+        columnFilters.length ? `(${columnFilters.length} applied)` : ''
+    }`
+
+    return (
+        <>
+            {showFilters && (
+                <FilterAccordion
+                    onClearFilters={() => {
+                        setClearFilters(!clearFilters)
+                        setColumnFilters([])
+                    }}
+                    filterTitle={filterTitle}
+                >
+                    <FilterSelect
+                        name="state"
+                        label="State"
+                        filterOptions={stateOptions}
+                        toggleClearFilter={clearFilters}
+                        onChange={(selectedOptions) =>
+                            stateColumn.setFilterValue(
+                                selectedOptions.map(
+                                    (selection) => selection.value
+                                )
+                            )
+                        }
+                    />
+                    <FilterSelect
+                        name="submissionType"
+                        label="Submission type"
+                        filterOptions={submissionTypeOptions}
+                        toggleClearFilter={clearFilters}
+                        onChange={(selectedOptions) =>
+                            submissionTypeColumn.setFilterValue(
+                                selectedOptions.map(
+                                    (selection) => selection.value
+                                )
+                            )
+                        }
+                    />
+                </FilterAccordion>
+            )}
+            {tableData.length ? (
+                <Table fullWidth>
+                    <thead>
+                        {reactTable.getHeaderGroups().map((headerGroup) => (
+                            <tr key={headerGroup.id}>
+                                {headerGroup.headers.map((header) => (
+                                    <th key={header.id}>
+                                        {header.isPlaceholder
+                                            ? null
+                                            : flexRender(
+                                                  header.column.columnDef
+                                                      .header,
+                                                  header.getContext()
+                                              )}
+                                    </th>
+                                ))}
+                            </tr>
                         ))}
-                    </tr>
-                ))}
-            </thead>
-            <tbody>
-                {reactTable.getRowModel().rows.map((row) => (
-                    <tr key={row.id} data-testid={`row-${row.original.id}`}>
-                        {row.getVisibleCells().map((cell) => (
-                            <td
-                                key={cell.id}
-                                data-testid={
-                                    cell.column.columnDef.meta?.dataTestID
-                                }
+                    </thead>
+                    <tbody>
+                        {reactTable.getRowModel().rows.map((row) => (
+                            <tr
+                                key={row.id}
+                                data-testid={`row-${row.original.id}`}
                             >
-                                {flexRender(
-                                    cell.column.columnDef.cell,
-                                    cell.getContext()
-                                )}
-                            </td>
+                                {row.getVisibleCells().map((cell) => (
+                                    <td
+                                        key={cell.id}
+                                        data-testid={
+                                            cell.column.columnDef.meta
+                                                ?.dataTestID
+                                        }
+                                    >
+                                        {flexRender(
+                                            cell.column.columnDef.cell,
+                                            cell.getContext()
+                                        )}
+                                    </td>
+                                ))}
+                            </tr>
                         ))}
-                    </tr>
-                ))}
-            </tbody>
-        </Table>
-    ) : (
-        <div data-testid="dashboard-table" className={styles.panelEmpty}>
-            <h3>You have no submissions yet</h3>
-        </div>
+                    </tbody>
+                </Table>
+            ) : (
+                <div
+                    data-testid="dashboard-table"
+                    className={styles.panelEmpty}
+                >
+                    <h3>You have no submissions yet</h3>
+                </div>
+            )}
+        </>
     )
 }
