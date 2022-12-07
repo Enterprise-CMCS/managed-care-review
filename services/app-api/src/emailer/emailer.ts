@@ -114,12 +114,14 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
             stateAnalystsEmails,
             statePrograms
         ) {
+            console.log(`submission: ${submission}`)
             const emailData = await newPackageCMSEmail(
                 submission,
                 config,
                 stateAnalystsEmails,
                 statePrograms
             )
+            console.log(`emailData: ${emailData}`)
             if (emailData instanceof Error) {
                 return emailData
             } else {
