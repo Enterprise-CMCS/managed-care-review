@@ -85,13 +85,20 @@ export const main: APIGatewayProxyHandler = async (event) => {
         s3DownloadStreams = await Promise.all(
             bulkDlRequest.keys.map(async (key: string) => {
                 const params = { Bucket: bulkDlRequest.bucket, Key: key }
+
                 const headCommand = new HeadObjectCommand(params)
                 const metadata = await s3.send(headCommand)
-                const getCommand = new GetObjectCommand(params)
+
                 const filename = parseContentDisposition(
                     metadata.ContentDisposition ?? key
                 )
+
+                const getCommand = new GetObjectCommand(params)
                 const s3Item = await s3.send(getCommand)
+
+                console.log('-----file name: ', filename)
+                console.log('-----stream: ', s3Item.Body)
+
                 return {
                     stream: s3Item.Body as Readable,
                     key: key,
@@ -134,7 +141,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
             streamPassThrough.on('end', resolve)
             streamPassThrough.on('error', reject)
 
-            console.log('----passed through')
+            console.log('----passed through', streamPassThrough.readableLength)
 
             zip.pipe(streamPassThrough)
             console.log('----piped through')
@@ -150,7 +157,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
                 console.log('Error in zip finalize: ', error.message)
                 throw new Error(`Archiver could not finalize: ${error}`)
             })
-            console.log('-----zipped up')
+            console.log('-----zipped up', streamPassThrough.readableLength)
         }).catch((error: { code: string; message: string; data: string }) => {
             console.log('Caught error: ', error.message)
             return {
