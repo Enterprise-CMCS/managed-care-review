@@ -115,51 +115,64 @@ export const main: APIGatewayProxyHandler = async (event) => {
 
     const streamPassThrough = new Stream.PassThrough()
 
-    // Zip files
-    await new Promise((resolve, reject) => {
-        console.log('Starting zip process...')
-        const zip = Archiver('zip')
-        zip.on('error', (error: Archiver.ArchiverError) => {
-            console.log('Error in zip.on: ', error.message, error.stack)
-            console.timeEnd('zipProcess')
-            throw new Error(
-                `${error.name} ${error.code} ${error.message} ${error.path} ${error.stack}`
-            )
-        })
-
-        console.log('Starting upload...')
-
-        streamPassThrough.on('close', resolve)
-        streamPassThrough.on('end', resolve)
-        streamPassThrough.on('error', reject)
-
-        console.log('----passed through')
-
-        zip.pipe(streamPassThrough)
-        console.log('----piped through')
-        s3DownloadStreams.forEach((streamDetails: S3DownloadStreamDetails) =>
-            zip.append(streamDetails.stream, {
-                //decoding file names encoded in s3Amplify.ts
-                name: decodeURIComponent(streamDetails.filename),
+    try {
+        // Zip files
+        await new Promise((resolve, reject) => {
+            console.log('Starting zip process...')
+            const zip = Archiver('zip')
+            zip.on('error', (error: Archiver.ArchiverError) => {
+                console.log('Error in zip.on: ', error.message, error.stack)
+                console.timeEnd('zipProcess')
+                throw new Error(
+                    `${error.name} ${error.code} ${error.message} ${error.path} ${error.stack}`
+                )
             })
-        )
 
-        zip.finalize().catch((error) => {
-            console.log('Error in zip finalize: ', error.message)
-            throw new Error(`Archiver could not finalize: ${error}`)
+            console.log('Starting upload...')
+
+            streamPassThrough.on('close', resolve)
+            streamPassThrough.on('end', resolve)
+            streamPassThrough.on('error', reject)
+
+            console.log('----passed through')
+
+            zip.pipe(streamPassThrough)
+            console.log('----piped through')
+            s3DownloadStreams.forEach(
+                (streamDetails: S3DownloadStreamDetails) =>
+                    zip.append(streamDetails.stream, {
+                        //decoding file names encoded in s3Amplify.ts
+                        name: decodeURIComponent(streamDetails.filename),
+                    })
+            )
+
+            zip.finalize().catch((error) => {
+                console.log('Error in zip finalize: ', error.message)
+                throw new Error(`Archiver could not finalize: ${error}`)
+            })
+            console.log('-----zipped up')
+        }).catch((error: { code: string; message: string; data: string }) => {
+            console.log('Caught error: ', error.message)
+            return {
+                statusCode: 500,
+                body: JSON.stringify(error.message),
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': true,
+                },
+            }
         })
-        console.log('-----zipped up')
-    }).catch((error: { code: string; message: string; data: string }) => {
-        console.log('Caught error: ', error.message)
+    } catch (e) {
+        console.error('some kind of zipping error?', e)
         return {
             statusCode: 500,
-            body: JSON.stringify(error.message),
+            body: JSON.stringify(e.message),
             headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Credentials': true,
             },
         }
-    })
+    }
 
     console.log('uploading zip file')
     // Upload files
