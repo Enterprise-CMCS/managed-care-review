@@ -1,5 +1,5 @@
 import { ProgramType } from '../domain-models'
-import statePrograms from '../data/statePrograms.json'
+import statePrograms from '../../../app-web/src/common-code/data/statePrograms.json'
 
 function findPrograms(
     stateCode: string,
