@@ -18,6 +18,7 @@ export function createHealthPlanPackageResolver(
     store: Store
 ): MutationResolvers['createHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
+        console.log('jjinput: ', input)
         const { user, span } = context
         setResolverDetailsOnActiveSpan('createHealthPlanPackage', user, span)
 
@@ -63,6 +64,7 @@ export function createHealthPlanPackageResolver(
             submissionDescription: input.submissionDescription,
             submissionType:
                 input.submissionType as InsertHealthPlanPackageArgsType['submissionType'],
+            contractType: input.contractType,
         }
 
         const pkgResult = await store.insertHealthPlanPackage(insertArgs)

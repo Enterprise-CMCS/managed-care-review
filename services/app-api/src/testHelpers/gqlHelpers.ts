@@ -118,6 +118,7 @@ const createTestHealthPlanPackage = async (
         programIDs: programIDs,
         submissionType: 'CONTRACT_ONLY' as const,
         submissionDescription: 'A created submission',
+        contractType: 'BASE',
     }
     const result = await server.executeOperation({
         query: CREATE_HEALTH_PLAN_PACKAGE,
