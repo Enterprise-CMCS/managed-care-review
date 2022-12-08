@@ -9,11 +9,7 @@ import { Readable, Stream } from 'stream'
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import Archiver from 'archiver'
 
-import { assertIsAuthMode } from '../../../app-web/src/common-code/config'
-
 const s3 = new S3Client({ region: 'us-east-1' })
-const authMode = process.env.REACT_APP_AUTH_MODE
-assertIsAuthMode(authMode)
 
 interface S3BulkDownloadRequest {
     bucket: string
@@ -84,23 +80,37 @@ export const main: APIGatewayProxyHandler = async (event) => {
     // here we go through all the keys and open a stream to the object.
     // also, the filename in s3 is a uuid, and we store the original
     // filename in the content-disposition header. set original filename too.
-    const s3DownloadStreams: S3DownloadStreamDetails[] = await Promise.all(
-        bulkDlRequest.keys.map(async (key: string) => {
-            const params = { Bucket: bulkDlRequest.bucket, Key: key }
-            const headCommand = new HeadObjectCommand(params)
-            const metadata = await s3.send(headCommand)
-            const getCommand = new GetObjectCommand(params)
-            const filename = parseContentDisposition(
-                metadata.ContentDisposition ?? key
-            )
-            const s3Item = await s3.send(getCommand)
-            return {
-                stream: s3Item.Body as Readable,
-                key: key,
-                filename,
-            }
-        })
-    )
+    let s3DownloadStreams: S3DownloadStreamDetails[]
+    try {
+        s3DownloadStreams = await Promise.all(
+            bulkDlRequest.keys.map(async (key: string) => {
+                const params = { Bucket: bulkDlRequest.bucket, Key: key }
+                const headCommand = new HeadObjectCommand(params)
+                const metadata = await s3.send(headCommand)
+                const getCommand = new GetObjectCommand(params)
+                const filename = parseContentDisposition(
+                    metadata.ContentDisposition ?? key
+                )
+                const s3Item = await s3.send(getCommand)
+                return {
+                    stream: s3Item.Body as Readable,
+                    key: key,
+                    filename,
+                }
+            })
+        )
+    } catch (e) {
+        console.log('Got an error putting together the download streams: ', e)
+        return {
+            statusCode: 500,
+            body: JSON.stringify(e.message),
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
+            },
+        }
+    }
+
     console.log('debug - s3DownloadStreams: ' + s3DownloadStreams)
 
     const streamPassThrough = new Stream.PassThrough()
