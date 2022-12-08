@@ -100,7 +100,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
             })
         )
     } catch (e) {
-        console.log('Got an error putting together the download streams: ', e)
+        console.error('Got an error putting together the download streams: ', e)
         return {
             statusCode: 500,
             body: JSON.stringify(e.message),
@@ -111,7 +111,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
         }
     }
 
-    console.log('debug - s3DownloadStreams: ' + s3DownloadStreams)
+    console.log('debug - s3DownloadStreams: ***' + s3DownloadStreams)
 
     const streamPassThrough = new Stream.PassThrough()
 
@@ -133,7 +133,10 @@ export const main: APIGatewayProxyHandler = async (event) => {
         streamPassThrough.on('end', resolve)
         streamPassThrough.on('error', reject)
 
+        console.log('----passed through')
+
         zip.pipe(streamPassThrough)
+        console.log('----piped through')
         s3DownloadStreams.forEach((streamDetails: S3DownloadStreamDetails) =>
             zip.append(streamDetails.stream, {
                 //decoding file names encoded in s3Amplify.ts
@@ -145,6 +148,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
             console.log('Error in zip finalize: ', error.message)
             throw new Error(`Archiver could not finalize: ${error}`)
         })
+        console.log('-----zipped up')
     }).catch((error: { code: string; message: string; data: string }) => {
         console.log('Caught error: ', error.message)
         return {
@@ -156,6 +160,8 @@ export const main: APIGatewayProxyHandler = async (event) => {
             },
         }
     })
+
+    console.log('uploading zip file')
     // Upload files
     try {
         const commandPutObject = new PutObjectCommand({
@@ -169,6 +175,14 @@ export const main: APIGatewayProxyHandler = async (event) => {
         await s3.send(commandPutObject)
     } catch (e) {
         console.error('Could not upload zip file: ' + e)
+        return {
+            statusCode: 500,
+            body: JSON.stringify(e.message),
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
+            },
+        }
     }
 
     // tag the file as having previously been scanned
@@ -192,8 +206,17 @@ export const main: APIGatewayProxyHandler = async (event) => {
         await s3.send(commandPutObjectTagging)
     } catch (err) {
         console.error('Could not tag zip file: ' + err)
+        return {
+            statusCode: 500,
+            body: JSON.stringify(err.message),
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
+            },
+        }
     }
 
+    console.log('Finished Zip Process Successs')
     console.timeEnd('zipProcess')
     return {
         statusCode: 200,
