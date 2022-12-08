@@ -70,9 +70,9 @@ async function sendSESEmail(
 ): Promise<SendEmailResponse | SESServiceException> {
     try {
         const command = new SendEmailCommand(params)
-        const response = await ses.send(command)
-        return response
+        return await ses.send(command)
     } catch (err) {
+        console.error(JSON.stringify(err))
         const { requestId, cfId, extendedRequestId } = err.$$metadata
         console.log({ requestId, cfId, extendedRequestId })
         return err
