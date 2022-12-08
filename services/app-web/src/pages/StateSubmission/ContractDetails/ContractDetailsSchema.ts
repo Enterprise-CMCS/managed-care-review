@@ -10,12 +10,8 @@ const yesNoError = (contractType: ContractType) => {
         'yesORno',
         'You must select yes or no',
         (value) => {
-            // true means 'is valid' and no error is shown; not a one-liner for clarity
-            if (contractType === 'BASE') {
-                return true
-            } else {
-                return value !== undefined
-            }
+            // true means 'is valid' and no error is shown
+            return contractType === 'BASE' || value !== undefined
         }
     )
 }
