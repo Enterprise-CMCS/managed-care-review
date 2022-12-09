@@ -62,7 +62,13 @@ export const CMSDashboard = (): React.ReactElement => {
         }
     }
 
-    if (loginStatus === 'LOADING' || !loggedInUser || loading || !data) {
+    if (
+        loginStatus === 'LOADING' ||
+        !loggedInUser ||
+        loading ||
+        !data ||
+        !loggedInUser.__typename
+    ) {
         return <Loading />
     }
     const submissionRows: PackageInDashboardType[] = []
@@ -175,7 +181,7 @@ export const CMSDashboard = (): React.ReactElement => {
                         </div>
                         <HealthPlanPackageTable
                             tableData={submissionRows}
-                            userType="CMS"
+                            userType={loggedInUser.__typename}
                             showFilters={showDashboardFilter}
                         />
                     </section>

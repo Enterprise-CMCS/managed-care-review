@@ -114,7 +114,7 @@ export const StateDashboard = (): React.ReactElement => {
                             </div>
                             <HealthPlanPackageTable
                                 tableData={submissionRows}
-                                userType="STATE"
+                                userType={loggedInUser.__typename}
                             />
                         </section>
                     ) : (
