@@ -1,6 +1,5 @@
 export { ProgramSelect } from './ProgramSelect/ProgramSelect'
 export { PackageSelect } from './PackageSelect/PackageSelect'
-export { FilterSelect } from './FilterSelect/FilterSelect'
 
 export type {
     ProgramSelectPropType,
@@ -10,7 +9,3 @@ export type {
     PackageSelectPropType,
     PackageOptionType,
 } from './PackageSelect/PackageSelect'
-export type {
-    FilterSelectPropType,
-    FilterOptionType,
-} from './FilterSelect/FilterSelect'
