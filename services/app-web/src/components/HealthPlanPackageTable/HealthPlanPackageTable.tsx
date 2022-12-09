@@ -12,7 +12,7 @@ import {
 } from '@tanstack/react-table'
 import { HealthPlanPackageStatus, Program } from '../../gen/gqlClient'
 import styles from './HealthPlanPackageTable.module.scss'
-import { Table, Tag } from '@trussworks/react-uswds'
+import { Table, Tag, Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
 import classnames from 'classnames'
@@ -110,7 +110,9 @@ export const HealthPlanPackageTable = ({
         columnHelper.accessor((row) => row, {
             header: 'ID',
             cell: (info) => (
-                <NavLink
+                <Link
+                    key={`submission-id-${info.getValue().id}`}
+                    asCustom={NavLink}
                     to={submissionURL(
                         info.getValue().id,
                         info.getValue().status,
@@ -118,7 +120,7 @@ export const HealthPlanPackageTable = ({
                     )}
                 >
                     {info.getValue().name}
-                </NavLink>
+                </Link>
             ),
             meta: {
                 dataTestID: 'submission-id',
