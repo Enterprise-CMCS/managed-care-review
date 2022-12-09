@@ -199,12 +199,17 @@ jobs:
     container: cypress/browsers:node14.17.0-chrome91-ff89
     strategy:
       fail-fast: false
-   
+
     steps:
       - uses: actions/checkout@v3
 
       - name: Setup env
         uses: ./.github/actions/setup_env
+
+      - name: Cypress chrome fix
+        run: |
+          export DISPLAY=:1
+          Xvfb :1 -screen 0 1024x768x16 2>/dev/null &
 
       - name: Cypress on Prod -- Chrome
         id: cypress
