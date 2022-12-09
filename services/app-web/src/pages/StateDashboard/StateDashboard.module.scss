@@ -13,7 +13,7 @@
 .container {
     width: 100%;
     max-width: 75rem;
-    padding: 0rem 2rem 0rem 2rem;
+    padding: 0 2rem 0 2rem;
 }
 
 .alertContainer {
@@ -53,28 +53,4 @@
     li {
         padding: units(1) 0;
     }
-}
-
-.tabs {
-    width: 100%;
-}
-
-.programTag {
-     @include u-bg('blue-cool-5v');
-    color: $theme-color-base-ink;
-    display: inline-block;
-}
-
-.submittedTag {
-    @include u-bg('green-cool-50');
-}
-
-.draftTag {
-    @include u-bg('gold-20v');
-    color: $theme-color-base-ink;
-}
-
-.unlockedTag {
-     @include u-bg('blue-cool-5v');
-    color: $theme-color-base-ink;
 }

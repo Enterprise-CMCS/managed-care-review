@@ -20,6 +20,9 @@ export const FilterAccordion = ({
         if (onClearFilters) onClearFilters()
     }
 
+    //This controls the clearing of each FilterSelect child component directly from this FilterAccordion component instead of
+    // having to create logic in the parent component of both of these. This will rerender the children when toggleClearFilter
+    // state changes and pass this prop down to FilterSelect.
     const childrenWithToggleProps = React.Children.map(children, (child) => {
         return React.cloneElement(child as React.ReactElement, {
             toggleClearFilter,

@@ -67,7 +67,7 @@ export const FilterSelect = ({
     }, [toggleClearFilter, prevToggleClearFilter, selectInputRef])
 
     return (
-        <div className={styles.filter} data-testid={`${name}-filter`}>
+        <div data-testid={`${name}-filter`}>
             {label && <label htmlFor={`${name}-filterSelect`}>{label}</label>}
             <Select
                 ref={selectInputRef}

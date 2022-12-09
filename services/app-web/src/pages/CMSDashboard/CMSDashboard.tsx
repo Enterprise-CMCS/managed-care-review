@@ -1,6 +1,5 @@
 import { GridContainer } from '@trussworks/react-uswds'
 import React from 'react'
-
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
 import { SubmissionTypeRecord } from '../../constants/healthPlanPackages'
