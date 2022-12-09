@@ -120,5 +120,5 @@ fs.createReadStream(file)
         const results = {
             states: Object.values(states)
         }
-        console.log(JSON.stringify(results, null, 2));
+        console.log(JSON.stringify(results, null, 4));
     });
