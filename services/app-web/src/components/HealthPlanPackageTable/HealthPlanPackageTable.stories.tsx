@@ -92,6 +92,6 @@ export const Default = Template.bind({})
 Default.decorators = [(Story) => ProvidersDecorator(Story, {})]
 Default.args = {
     tableData,
-    userType: 'CMS',
+    userType: 'CMSUser',
     showFilters: true,
 }

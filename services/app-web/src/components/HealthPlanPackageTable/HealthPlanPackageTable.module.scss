@@ -5,8 +5,13 @@
   margin-top: units(8);
 
   h3 {
+    font-size: 1rem;
+    font-weight: font-weight('bold');
+    text-align: center;
+  }
+  p {
     font-weight: font-weight('normal');
-    color: color('base');
+    font-size: .875rem;
     text-align: center;
   }
 }
