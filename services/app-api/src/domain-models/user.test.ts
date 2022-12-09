@@ -31,6 +31,8 @@ describe('user type assertions', () => {
                 name: 'Margaret',
                 email: 'burroughs@dusable.org',
                 role: 'CMS_USER',
+                givenName: 'Margaret',
+                familyName: 'Burroughs',
             })
         ).toBe(true)
         expect(
@@ -39,6 +41,8 @@ describe('user type assertions', () => {
                 email: 'burroughs@dusable.org',
                 role: 'STATE_USER',
                 state_code: 'IL',
+                givenName: 'Margaret',
+                familyName: 'Burroughs',
             })
         ).toBe(false)
     })
@@ -50,6 +54,8 @@ describe('user type assertions', () => {
                 email: 'burroughs@dusable.org',
                 role: 'STATE_USER',
                 state_code: 'IL',
+                givenName: 'Margaret',
+                familyName: 'Burroughs',
             })
         ).toBe(true)
         expect(
@@ -57,6 +63,8 @@ describe('user type assertions', () => {
                 name: 'Margaret',
                 email: 'burroughs@dusable.org',
                 role: 'CMS_USER',
+                givenName: 'Margaret',
+                familyName: 'Burroughs',
             })
         ).toBe(false)
     })

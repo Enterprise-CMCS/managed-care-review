@@ -1,7 +1,14 @@
 import { Result, ok, err } from 'neverthrow'
-import { CognitoIdentityServiceProvider } from 'aws-sdk'
+import {
+    CognitoIdentityProviderClient,
+    ListUsersCommand,
+    UserType as CognitoUserType,
+} from '@aws-sdk/client-cognito-identity-provider'
+
 import { UserType } from '../domain-models'
 import { performance } from 'perf_hooks'
+import { Store, InsertUserArgsType, isStoreError } from '../postgres'
+import { User } from '@prisma/client'
 
 export function parseAuthProvider(
     authProvider: string
@@ -20,20 +27,19 @@ export function parseAuthProvider(
 
         return ok({ userId: userPoolUserId, poolId: userPoolId })
     } catch (e) {
-        // console.log(e)
         return err(new Error('authProvider doesnt have enough parts'))
     }
 }
 
 // pulls the data from the cognito user into a dictionary
-function userAttrDict(cognitoUser: CognitoIdentityServiceProvider.UserType): {
+function userAttrDict(cognitoUser: CognitoUserType): {
     [key: string]: string
 } {
     const attributes: { [key: string]: string } = {}
 
     if (cognitoUser.Attributes) {
         cognitoUser.Attributes.forEach((attribute) => {
-            if (attribute.Value) {
+            if (attribute.Value && attribute.Name) {
                 attributes[attribute.Name] = attribute.Value
             }
         })
@@ -45,31 +51,30 @@ function userAttrDict(cognitoUser: CognitoIdentityServiceProvider.UserType): {
 async function fetchUserFromCognito(
     userID: string,
     poolID: string
-): Promise<CognitoIdentityServiceProvider.UserType | Error> {
-    const cognito = new CognitoIdentityServiceProvider()
+): Promise<CognitoUserType | Error> {
+    const cognitoClient = new CognitoIdentityProviderClient({})
 
     const subFilter = `sub = "${userID}"`
 
     // let's see what we've got
     const startRequest = performance.now()
-    const listUsersResponse = await cognito
-        .listUsers({
-            UserPoolId: poolID,
-            Filter: subFilter,
-        })
-        .promise()
+    const commandListUsers = new ListUsersCommand({
+        UserPoolId: poolID,
+        Filter: subFilter,
+    })
+    const listUsersResponse = await cognitoClient.send(commandListUsers)
     const endRequest = performance.now()
     console.log('listUsers takes ms:', endRequest - startRequest)
 
-    const userResp: CognitoIdentityServiceProvider.ListUsersResponse =
-        listUsersResponse
-
-    if (userResp.Users === undefined || userResp.Users.length !== 1) {
+    if (
+        listUsersResponse.Users === undefined ||
+        listUsersResponse.Users.length !== 1
+    ) {
         // logerror
         return new Error('No user found with this sub')
     }
 
-    const currentUser = userResp.Users[0]
+    const currentUser = listUsersResponse.Users[0]
     return currentUser
 }
 
@@ -98,6 +103,7 @@ export function userTypeFromAttributes(attributes: {
     }
 
     const fullName = attributes.given_name + ' ' + attributes.family_name
+
     // Roles are a list of all the roles a user has in IDM.
     const roleAttribute = attributes['custom:role']
     const roles = roleAttribute.split(',')
@@ -118,6 +124,8 @@ export function userTypeFromAttributes(attributes: {
             email: attributes.email,
             name: fullName,
             state_code: attributes['custom:state_code'],
+            givenName: attributes.given_name,
+            familyName: attributes.family_name,
         })
     }
 
@@ -126,15 +134,54 @@ export function userTypeFromAttributes(attributes: {
             role: 'CMS_USER',
             email: attributes.email,
             name: fullName,
+            givenName: attributes.given_name,
+            familyName: attributes.family_name,
         })
     }
 
     return err(new Error('Unsupported user role:  ' + roleAttribute))
 }
 
+// This converts from the Prisma `User` to the app's `UserType`
+export function userTypeFromUser(user: User): Result<UserType, Error> {
+    if (user.role === 'ADMIN_USER') {
+        return ok({
+            role: 'ADMIN_USER',
+            email: user.email,
+            givenName: user.givenName,
+            familyName: user.familyName,
+            name: user.givenName + ' ' + user.familyName,
+        })
+    }
+
+    if (user.role === 'CMS_USER') {
+        return ok({
+            role: 'CMS_USER',
+            email: user.email,
+            givenName: user.givenName,
+            familyName: user.familyName,
+            name: user.givenName + ' ' + user.familyName,
+        })
+    }
+
+    if (user.role === 'STATE_USER') {
+        return ok({
+            role: 'STATE_USER',
+            email: user.email,
+            givenName: user.givenName,
+            familyName: user.familyName,
+            name: user.givenName + ' ' + user.familyName,
+            state_code: user.stateCode ?? '',
+        })
+    }
+
+    return err(new Error('Unsupported user role:  ' + user.role))
+}
+
 // userFromCognitoAuthProvider hits the Cogntio API to get the information in the authProvider
 export async function userFromCognitoAuthProvider(
-    authProvider: string
+    authProvider: string,
+    store?: Store
 ): Promise<Result<UserType, Error>> {
     const parseResult = parseAuthProvider(authProvider)
     if (parseResult.isErr()) {
@@ -142,29 +189,97 @@ export async function userFromCognitoAuthProvider(
     }
 
     const userInfo = parseResult.value
+    // if no store is given, we just get user from Cognito
+    if (store === undefined) {
+        return lookupUserCognito(userInfo.userId, userInfo.poolId)
+    }
 
-    // calling a dependency so we have to try
-    try {
-        const fetchResult = await fetchUserFromCognito(
+    // look up the user in PG. If we don't have it here, then we need to
+    // fetch it from Cognito.
+    const startRequest = performance.now()
+    const auroraUser = await lookupUserAurora(store, userInfo.userId)
+    if (auroraUser instanceof Error) {
+        return err(auroraUser)
+    }
+    const endRequest = performance.now()
+    console.log('User lookup in postgres takes ms:', endRequest - startRequest)
+
+    // if there is no user returned, lookup in cognito and save to postgres
+    if (auroraUser === undefined) {
+        const cognitoUserResult = await lookupUserCognito(
             userInfo.userId,
             userInfo.poolId
         )
-
-        // this is asserting that this is an error object, probably a better way to do that.
-        if ('name' in fetchResult) {
-            return err(fetchResult)
+        if (cognitoUserResult.isErr()) {
+            return err(cognitoUserResult.error)
         }
 
-        const currentUser: CognitoIdentityServiceProvider.UserType = fetchResult
+        const cognitoUser = cognitoUserResult.value
 
-        // we lose some type safety here...
-        const attributes = userAttrDict(currentUser)
+        // create the user and store it in aurora
+        const userToInsert: InsertUserArgsType = {
+            userID: userInfo.userId,
+            role: cognitoUser.role,
+            givenName: cognitoUser.givenName,
+            familyName: cognitoUser.familyName,
+            email: cognitoUser.email,
+        }
 
-        const user = userTypeFromAttributes(attributes)
+        // if it is a state user, insert the state they are from
+        if (cognitoUser.role === 'STATE_USER') {
+            userToInsert.stateCode = cognitoUser.state_code
+        }
 
-        return user
-    } catch (e) {
-        console.log('cognito ERR', e)
-        return err(e)
+        try {
+            const result = await store.insertUser(userToInsert)
+            if (isStoreError(result)) {
+                console.error(
+                    `Could not insert user: ${JSON.stringify(result)}`
+                )
+                return cognitoUserResult
+            }
+            return userTypeFromUser(result)
+        } catch (e) {
+            console.error(`Could not insert user: ${JSON.stringify(e)}`)
+            return cognitoUserResult
+        }
     }
+
+    // we return the user we got from aurora
+    return userTypeFromUser(auroraUser)
+}
+
+async function lookupUserCognito(
+    userId: string,
+    poolId: string
+): Promise<Result<UserType, Error>> {
+    const fetchResult = await fetchUserFromCognito(userId, poolId)
+
+    // this is asserting that this is an error object, probably a better way to do that.
+    if ('name' in fetchResult) {
+        return err(fetchResult)
+    }
+
+    const currentUser: CognitoUserType = fetchResult
+
+    // we lose some type safety here...
+    const attributes = userAttrDict(currentUser)
+
+    return userTypeFromAttributes(attributes)
+}
+
+async function lookupUserAurora(
+    store: Store,
+    userID: string
+): Promise<User | undefined | Error> {
+    try {
+        const userFromPG = await store.findUser(userID)
+        // try a basic type guard here -- a User will have an email.
+        if ('email' in userFromPG) {
+            return userFromPG
+        }
+    } catch (e) {
+        throw new Error(`Error looking up user in Postgres: ${e}`)
+    }
+    return undefined
 }

@@ -21,6 +21,10 @@ import { StoreError } from './storeError'
 import { updateHealthPlanRevision } from './updateHealthPlanRevision'
 import { findAllRevisions } from './findAllRevisions'
 
+import { findUser } from './findUser'
+import { User } from '@prisma/client'
+import { insertUser, InsertUserArgsType } from './insertUser'
+
 type Store = {
     findPrograms: (
         stateCode: string,
@@ -59,6 +63,10 @@ type Store = {
         unlockInfo: UpdateInfoType,
         draft: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackageType | StoreError>
+
+    findUser: (id: string) => Promise<User | StoreError>
+
+    insertUser: (user: InsertUserArgsType) => Promise<User | StoreError>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -85,6 +93,8 @@ function NewPostgresStore(client: PrismaClient): Store {
                 draft,
             }),
         findPrograms: findPrograms,
+        findUser: (id) => findUser(client, id),
+        insertUser: (args) => insertUser(client, args),
         findStatePrograms: findStatePrograms,
         findAllRevisions: () => findAllRevisions(client),
     }

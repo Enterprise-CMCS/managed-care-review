@@ -56,9 +56,28 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
 
         const authProvider =
             event.requestContext.identity.cognitoAuthenticationProvider
+
         if (authProvider) {
             try {
-                const userResult = await userFetcher(authProvider)
+                // check if the user is stored in postgres
+                // going to clean this up, but we need the store in the
+                // userFetcher to query postgres. This code is a duped.
+                const dbURL = process.env.DATABASE_URL ?? ''
+                const secretsManagerSecret =
+                    process.env.SECRETS_MANAGER_SECRET ?? ''
+
+                const pgResult = await configurePostgres(
+                    dbURL,
+                    secretsManagerSecret
+                )
+                if (pgResult instanceof Error) {
+                    console.error("Init Error: Postgres couldn't be configured")
+                    throw pgResult
+                }
+
+                const store = NewPostgresStore(pgResult)
+
+                const userResult = await userFetcher(authProvider, store)
 
                 if (!userResult.isErr()) {
                     return {

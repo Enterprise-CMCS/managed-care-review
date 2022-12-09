@@ -1,4 +1,5 @@
 import { Handler } from 'aws-lambda'
+import { SESServiceException } from '@aws-sdk/client-ses'
 import { sendSESEmail } from '../emailer'
 
 export const main: Handler = async (event) => {
@@ -16,11 +17,12 @@ export const main: Handler = async (event) => {
         }
     }
     console.log('INFO: Sending SES Email: ', event.body)
+
     const sesResult = await sendSESEmail(event.body)
 
-    if (sesResult instanceof Error) {
+    if (sesResult instanceof SESServiceException) {
         // we got an error back
-        console.log('ERROR: Email send failed: ', sesResult.awsErr)
+        console.log('ERROR: Email send failed: ', sesResult.message)
         return {
             StatusCode: 500,
             body: JSON.stringify({

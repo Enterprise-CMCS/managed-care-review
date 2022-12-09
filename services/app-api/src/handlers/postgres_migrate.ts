@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
-import { RDS } from 'aws-sdk'
+import { RDSClient, CreateDBClusterSnapshotCommand } from '@aws-sdk/client-rds'
 import { execSync } from 'child_process'
 import { getDBClusterID, getPostgresURL } from './configuration'
 
@@ -75,10 +75,11 @@ export const main: APIGatewayProxyHandler = async () => {
             DBClusterSnapshotIdentifier: snapshotID,
         }
         try {
-            const rds = new RDS({ apiVersion: '2014-10-31' })
-            await rds.createDBClusterSnapshot(params).promise()
+            const rds = new RDSClient({ apiVersion: '2014-10-31' })
+            const command = new CreateDBClusterSnapshotCommand(params)
+            await rds.send(command)
         } catch (err) {
-            console.log(err)
+            console.error(err)
             return {
                 statusCode: 400,
                 body: JSON.stringify({

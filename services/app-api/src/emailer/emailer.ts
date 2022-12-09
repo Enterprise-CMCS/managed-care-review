@@ -1,4 +1,5 @@
-import { Lambda } from 'aws-sdk'
+import { sendSESEmail } from '../emailer'
+
 import {
     getSESEmailParams,
     newPackageCMSEmail,
@@ -78,17 +79,12 @@ type Emailer = {
 }
 
 function newSESEmailer(config: EmailConfiguration): Emailer {
-    const lambda = new Lambda()
     return {
         sendEmail: async (emailData: EmailData): Promise<void | Error> => {
             const emailRequestParams = getSESEmailParams(emailData)
-            const lambdaParams = {
-                FunctionName: `app-api-${config.stage}-email_submit`,
-                Payload: JSON.stringify({ body: emailRequestParams }),
-            }
 
             try {
-                await lambda.invoke(lambdaParams).promise()
+                await sendSESEmail(emailRequestParams)
                 return
             } catch (err) {
                 return new Error('SES email send failed. ' + err)

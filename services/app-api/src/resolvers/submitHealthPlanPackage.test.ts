@@ -22,8 +22,16 @@ import {
     mockEmailParameterStoreError,
     getTestStateAnalystsEmails,
 } from '../testHelpers/parameterStoreHelpers'
+import { UserType } from '../domain-models'
 
 describe('submitHealthPlanPackage', () => {
+    const testUserCMS: UserType = {
+        name: 'Zuko',
+        role: 'CMS_USER',
+        email: 'zuko@example.com',
+        familyName: 'Zuko',
+        givenName: 'Prince',
+    }
     it('returns a StateSubmission if complete', async () => {
         console.log('TIMEOUT DEBUG: Start Test')
         const server = await constructTestPostgresServer()
@@ -548,11 +556,7 @@ describe('submitHealthPlanPackage', () => {
         )
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'zuko@example.com',
-                },
+                user: testUserCMS,
             },
         })
 
@@ -614,11 +618,7 @@ describe('submitHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    name: 'Zuko',
-                    role: 'CMS_USER',
-                    email: 'zuko@example.com',
-                },
+                user: testUserCMS,
             },
         })
 

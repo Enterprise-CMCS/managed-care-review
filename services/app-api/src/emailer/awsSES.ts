@@ -1,9 +1,15 @@
-import { SES, AWSError } from 'aws-sdk'
+import {
+    SESClient,
+    SESServiceException,
+    SendEmailRequest,
+    SendEmailResponse,
+    SendEmailCommand,
+} from '@aws-sdk/client-ses'
 import { EmailData } from './'
 
-const ses = new SES({ region: 'us-east-1' })
+const ses = new SESClient({ region: 'us-east-1' })
 
-function getSESEmailParams(email: EmailData): SES.SendEmailRequest {
+function getSESEmailParams(email: EmailData): SendEmailRequest {
     const {
         bccAddresses,
         ccAddresses,
@@ -17,7 +23,7 @@ function getSESEmailParams(email: EmailData): SES.SendEmailRequest {
         replyToAddresses,
     } = email
 
-    const emailParams: SES.SendEmailRequest = {
+    const emailParams: SendEmailRequest = {
         Destination: {
             BccAddresses: bccAddresses || [],
             CcAddresses: ccAddresses || [],
@@ -47,9 +53,9 @@ function getSESEmailParams(email: EmailData): SES.SendEmailRequest {
 }
 
 class AWSResponseError extends Error {
-    awsErr: AWSError
+    awsErr: SESServiceException
 
-    constructor(awsErr: AWSError) {
+    constructor(awsErr: SESServiceException) {
         super(awsErr.message)
         this.awsErr = awsErr
 
@@ -60,13 +66,16 @@ class AWSResponseError extends Error {
 }
 
 async function sendSESEmail(
-    params: SES.SendEmailRequest
-): Promise<SES.SendEmailResponse | AWSResponseError> {
+    params: SendEmailRequest
+): Promise<SendEmailResponse | SESServiceException> {
     try {
-        const response = await ses.sendEmail(params).promise()
-        return response
+        const command = new SendEmailCommand(params)
+        return await ses.send(command)
     } catch (err) {
-        return new AWSResponseError(err)
+        console.error(JSON.stringify(err))
+        const { requestId, cfId, extendedRequestId } = err.$$metadata
+        console.log({ requestId, cfId, extendedRequestId })
+        return err
     }
 }
 
