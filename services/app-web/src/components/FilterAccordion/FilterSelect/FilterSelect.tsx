@@ -72,7 +72,6 @@ export const FilterSelect = ({
             <Select
                 ref={selectInputRef}
                 options={filterOptions}
-                loadingMessage={() => 'Loading submissions...'}
                 className={styles.multiSelect}
                 classNamePrefix="select"
                 id={`${name}-filter-select`}
@@ -87,7 +86,7 @@ export const FilterSelect = ({
                 // component the menu list will be cut off.
                 menuPortalTarget={document.body}
                 //This custom MenuList component, just places a test ID on the menu list. We need this for testing.
-                components={{ MenuList: MenuList }}
+                components={{ MenuList }}
                 {...selectProps}
             />
         </div>
