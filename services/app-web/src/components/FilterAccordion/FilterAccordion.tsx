@@ -1,11 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styles from './FilterAccordion.module.scss'
-import { Button } from '@trussworks/react-uswds'
+import { Accordion, Button } from '@trussworks/react-uswds'
 
 export type FilterAccordionPropType = {
-    onClearFilters: () => void
+    onClearFilters?: () => void
     filterTitle: string
-    children: React.ReactNode
+    children: React.ReactElement[]
 }
 
 export const FilterAccordion = ({
@@ -13,26 +13,42 @@ export const FilterAccordion = ({
     filterTitle,
     children,
 }: FilterAccordionPropType) => {
-    return (
-        <div
-            id="filter-container"
-            data-testid="filter-container"
-            className={styles.filterContainer}
-        >
-            <div className={styles.filterContainerHeader}>
-                <div className={styles.filterTitle}>{filterTitle}</div>
-                <div className={styles.headerActions}>
+    const [toggleClearFilter, setToggleClearFilter] = useState(false)
+
+    const handleClearFilters = () => {
+        setToggleClearFilter(!toggleClearFilter)
+        if (onClearFilters) onClearFilters()
+    }
+
+    const childrenWithToggleProps = React.Children.map(children, (child) => {
+        return React.cloneElement(child as React.ReactElement, {
+            toggleClearFilter,
+        })
+    })
+
+    const accordionItems = [
+        {
+            title: <div className={styles.filterTitle}>{filterTitle}</div>,
+            content: (
+                <>
+                    <div className={styles.filters}>
+                        {childrenWithToggleProps}
+                    </div>
                     <Button
                         type="button"
                         className={styles.clearFilterButton}
                         unstyled
-                        onClick={onClearFilters}
+                        onClick={handleClearFilters}
                     >
-                        Clear Filters
+                        Clear filters
                     </Button>
-                </div>
-            </div>
-            <div className={styles.filters}>{children}</div>
-        </div>
+                </>
+            ),
+            expanded: false,
+            id: 'filterAccordionItems',
+        },
+    ]
+    return (
+        <Accordion items={accordionItems} className={styles.filterAccordion} />
     )
 }
