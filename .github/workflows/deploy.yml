@@ -343,6 +343,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Cypress hack
+        run: |
+          export DISPLAY=:1
+          Xvfb :1 -screen 0 1024x768x16 2>/dev/null &
+
       - name: Cypress -- Chrome
         id: cypress
         uses: cypress-io/github-action@v5
