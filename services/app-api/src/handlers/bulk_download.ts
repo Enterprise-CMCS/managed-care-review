@@ -7,6 +7,7 @@ import {
 } from '@aws-sdk/client-s3'
 import { Readable, Stream } from 'stream'
 import { APIGatewayProxyHandler } from 'aws-lambda'
+import * as streamWeb from 'node:stream/web'
 import Archiver from 'archiver'
 
 const s3 = new S3Client({ region: 'us-east-1' })
@@ -99,9 +100,16 @@ export const main: APIGatewayProxyHandler = async (event) => {
                 console.log('-----file name: ', filename)
                 console.log('-----stream: ', s3Item.Body)
 
+                if (s3Item.Body === undefined) {
+                    throw new Error(`stream for ${filename} returned undefined`)
+                }
+
+                const webStream =
+                    s3Item.Body.transformToWebStream() as streamWeb.ReadableStream
+                const readable = Readable.fromWeb(webStream)
+
                 return {
-                    stream: s3Item.Body as Readable,
-                    key: key,
+                    stream: readable,
                     filename,
                 }
             })
@@ -118,7 +126,10 @@ export const main: APIGatewayProxyHandler = async (event) => {
         }
     }
 
-    console.log('debug - s3DownloadStreams: ***' + s3DownloadStreams)
+    console.log(
+        'debug - s3DownloadStreams: ***' +
+            s3DownloadStreams.map((s) => s.filename)
+    )
 
     const streamPassThrough = new Stream.PassThrough()
 
