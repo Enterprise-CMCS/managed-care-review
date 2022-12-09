@@ -17,6 +17,7 @@ export const main: Handler = async (event) => {
         }
     }
     console.log('INFO: Sending SES Email: ', event.body)
+
     const sesResult = await sendSESEmail(event.body)
 
     if (sesResult instanceof SESServiceException) {

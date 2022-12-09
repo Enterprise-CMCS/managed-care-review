@@ -1,4 +1,4 @@
-import statePrograms from '../data/statePrograms.json'
+import statePrograms from '../../../app-web/src/common-code/data/statePrograms.json'
 import { ProgramType } from '../domain-models'
 
 function findStatePrograms(stateCode: string): ProgramType[] | Error {
