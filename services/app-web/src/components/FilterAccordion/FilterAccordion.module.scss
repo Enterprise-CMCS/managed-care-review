@@ -19,6 +19,8 @@
     margin-top: 24px;
 }
 
-[class*='usa-accordion__content'] {
-    background: $cms-color-gray-lightest;
+.filterAccordion {
+    [class*='usa-accordion__content'] {
+        background: $cms-color-gray-lightest;
+    }
 }
