@@ -17,8 +17,7 @@ import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
 import classnames from 'classnames'
 import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
-import { FilterAccordion } from '../FilterAccordion'
-import { FilterSelect } from '../Select'
+import { FilterAccordion, FilterSelect } from '../FilterAccordion'
 import statePrograms from '../../common-code/data/statePrograms.json'
 
 declare module '@tanstack/table-core' {
@@ -39,7 +38,7 @@ export type PackageInDashboardType = {
     stateName?: string
 }
 
-type UserType = 'STATE' | 'CMS'
+type UserType = 'StateUser' | 'CMSUser'
 
 export type PackageTableProps = {
     tableData: PackageInDashboardType[]
@@ -55,7 +54,7 @@ function submissionURL(
     status: PackageInDashboardType['status'],
     userType: UserType
 ): string {
-    if (userType === 'CMS') {
+    if (userType === 'CMSUser') {
         return `/submissions/${id}`
     } else if (status === 'DRAFT') {
         return `/submissions/${id}/edit/type`
@@ -88,7 +87,10 @@ const stateOptions = statePrograms.states.map(({ name }) => ({
     value: name,
 }))
 const submissionTypeOptions = [
-    { label: 'Contract action only', value: 'Contract action only' },
+    {
+        label: 'Contract action only',
+        value: 'Contract action only',
+    },
     {
         label: 'Contract action and rate certification',
         value: 'Contract action and rate certification',
@@ -102,7 +104,6 @@ export const HealthPlanPackageTable = ({
 }: PackageTableProps): React.ReactElement => {
     const [columnFilters, setColumnFilters] =
         React.useState<ColumnFiltersState>([])
-    const [clearFilters, setClearFilters] = React.useState(false)
     const columnHelper = createColumnHelper<PackageInDashboardType>()
 
     const tableColumns = [
@@ -197,8 +198,8 @@ export const HealthPlanPackageTable = ({
         state: {
             columnFilters,
             columnVisibility: {
-                stateName: userType !== 'STATE',
-                submissionType: userType !== 'STATE',
+                stateName: userType !== 'StateUser',
+                submissionType: userType !== 'StateUser',
             },
         },
         onColumnFiltersChange: setColumnFilters,
@@ -227,85 +228,96 @@ export const HealthPlanPackageTable = ({
 
     return (
         <>
-            {showFilters && (
-                <FilterAccordion
-                    onClearFilters={() => {
-                        setClearFilters(!clearFilters)
-                        setColumnFilters([])
-                    }}
-                    filterTitle={filterTitle}
-                >
-                    <FilterSelect
-                        name="state"
-                        label="State"
-                        filterOptions={stateOptions}
-                        toggleClearFilter={clearFilters}
-                        onChange={(selectedOptions) =>
-                            stateColumn.setFilterValue(
-                                selectedOptions.map(
-                                    (selection) => selection.value
-                                )
-                            )
-                        }
-                    />
-                    <FilterSelect
-                        name="submissionType"
-                        label="Submission type"
-                        filterOptions={submissionTypeOptions}
-                        toggleClearFilter={clearFilters}
-                        onChange={(selectedOptions) =>
-                            submissionTypeColumn.setFilterValue(
-                                selectedOptions.map(
-                                    (selection) => selection.value
-                                )
-                            )
-                        }
-                    />
-                </FilterAccordion>
-            )}
             {tableData.length ? (
-                <Table fullWidth>
-                    <thead>
-                        {reactTable.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => (
-                                    <th key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                  header.column.columnDef
-                                                      .header,
-                                                  header.getContext()
-                                              )}
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody>
-                        {reactTable.getRowModel().rows.map((row) => (
-                            <tr
-                                key={row.id}
-                                data-testid={`row-${row.original.id}`}
-                            >
-                                {row.getVisibleCells().map((cell) => (
-                                    <td
-                                        key={cell.id}
-                                        data-testid={
-                                            cell.column.columnDef.meta
-                                                ?.dataTestID
-                                        }
-                                    >
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext()
-                                        )}
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </Table>
+                <>
+                    {showFilters && (
+                        <FilterAccordion
+                            onClearFilters={() => {
+                                setColumnFilters([])
+                            }}
+                            filterTitle={filterTitle}
+                        >
+                            <FilterSelect
+                                name="state"
+                                label="State"
+                                filterOptions={stateOptions}
+                                onChange={(selectedOptions) =>
+                                    stateColumn.setFilterValue(
+                                        selectedOptions.map(
+                                            (selection) => selection.value
+                                        )
+                                    )
+                                }
+                            />
+                            <FilterSelect
+                                name="submissionType"
+                                label="Submission type"
+                                filterOptions={submissionTypeOptions}
+                                onChange={(selectedOptions) =>
+                                    submissionTypeColumn.setFilterValue(
+                                        selectedOptions.map(
+                                            (selection) => selection.value
+                                        )
+                                    )
+                                }
+                            />
+                        </FilterAccordion>
+                    )}
+                    <Table fullWidth>
+                        <thead>
+                            {reactTable.getHeaderGroups().map((headerGroup) => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <th key={header.id}>
+                                            {header.isPlaceholder
+                                                ? null
+                                                : flexRender(
+                                                      header.column.columnDef
+                                                          .header,
+                                                      header.getContext()
+                                                  )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+                        <tbody>
+                            {reactTable.getRowModel().rows.map((row) => (
+                                <tr
+                                    key={row.id}
+                                    data-testid={`row-${row.original.id}`}
+                                >
+                                    {row.getVisibleCells().map((cell) => (
+                                        <td
+                                            key={cell.id}
+                                            data-testid={
+                                                cell.column.columnDef.meta
+                                                    ?.dataTestID
+                                            }
+                                        >
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
+                    {!reactTable.getRowModel().rows.length && (
+                        <div
+                            data-testid="dashboard-table"
+                            className={styles.panelEmpty}
+                        >
+                            <h3>No results found</h3>
+                            <p>
+                                Adjust your filter to find what you are looking
+                                for.
+                            </p>
+                        </div>
+                    )}
+                </>
             ) : (
                 <div
                     data-testid="dashboard-table"
