@@ -1,5 +1,5 @@
 import { Story } from '@storybook/react'
-import { FilterSelect, FilterSelectPropType } from '../index'
+import { FilterSelect, FilterSelectPropType } from './FilterSelect'
 import React from 'react'
 import ProvidersDecorator from '../../../../.storybook/providersDecorator'
 
@@ -11,7 +11,7 @@ const filterOptions = [
 ]
 
 export default {
-    title: 'Components/Select/FilterSelect',
+    title: 'Components/FilterAccordion/FilterSelect',
     component: FilterSelect,
 }
 
