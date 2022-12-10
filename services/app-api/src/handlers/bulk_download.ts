@@ -5,7 +5,7 @@ import {
     PutObjectCommandInput,
 } from '@aws-sdk/client-s3'
 import { Upload } from '@aws-sdk/lib-storage'
-import { Readable, PassThrough } from 'stream'
+import { Readable, Writable, PassThrough } from 'stream'
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import Archiver from 'archiver'
 
@@ -37,7 +37,6 @@ export const main: APIGatewayProxyHandler = async (event) => {
     }
 
     console.time('zipProcess')
-    console.log('Starting zip lambda...', event.body, '--bod')
     if (!event.body) {
         console.timeEnd('zipProcess')
         return {
@@ -96,54 +95,41 @@ export const main: APIGatewayProxyHandler = async (event) => {
                 const getCommand = new GetObjectCommand(params)
                 const s3Item = await s3.send(getCommand)
 
-                console.log('-----file name: ', filename)
-                console.log('-----stream: ', s3Item.Body)
-
-                console.log('CHECKING OUT OUR STREAMER')
-
                 if (s3Item.Body === undefined) {
                     throw new Error(`stream for ${filename} returned undefined`)
                 }
 
                 if (s3Item.Body instanceof Readable) {
-                    console.log('READABLE PASSING THROUGH THE GOALPOSTS')
-
                     return {
                         stream: s3Item.Body,
                         filename,
                     }
                 } else if ('size' in s3Item.Body) {
                     // type narrow to Blob
-                    throw new Error('Nod implemeddnted yet')
-                    // const blobBody = s3Item.Body
-                    // const blobStream = blobBody.stream()
-                    // const readable = Readable.fromWeb(blobStream)
-
-                    // return {
-                    //     stream: readable,
-                    //     filename,
-                    // }
+                    throw new Error('Blob response not implemented. ')
                 } else if ('locked' in s3Item.Body) {
                     // type narrow to ReadableStream
-                    throw new Error('Nod implemeddnted yet')
-                    // console.log("We are streaming a ReadableStream")
-                    // const readStreamBody = s3Item.Body
+                    // wml: WARNING: This was never tested but figuring out these types were so painful I want to leave
+                    // the work in here. Testing so far It appears that GetObject always returns the Readable type,
+                    // not a ReadableStream
+                    console.log(
+                        'WARNING UNTESTED: We are streaming a ReadableStream'
+                    )
+                    const readStreamBody = s3Item.Body
 
-                    // // this is the node stream we will return as a Reader.
-                    // const passThrough = new PassThrough()
+                    // this is the node stream we will return as a Reader.
+                    const passThrough = new PassThrough()
 
-                    // console.log("can we write it")
-                    // // Get a web stream we can write to. Unfortunately the types don't match enough to just transform our StreamReader
-                    // const webWriter = Writable.toWeb(passThrough)
+                    // Get a web stream we can write to. Unfortunately the types don't match enough to just transform our StreamReader
+                    const webWriter = Writable.toWeb(passThrough)
 
-                    // // do i need to await this?
-                    // console.log("can we pipe it?")
-                    // readStreamBody.pipeTo(webWriter)
+                    // do we need to await this?
+                    void readStreamBody.pipeTo(webWriter)
 
-                    // return {
-                    //     stream: passThrough,
-                    //     filename,
-                    // }
+                    return {
+                        stream: passThrough,
+                        filename,
+                    }
                 } else {
                     console.error(
                         'Programming Error: Unknown return type for s3 Body',
@@ -156,7 +142,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
             })
         )
     } catch (e) {
-        console.error('Got an error putting together the download streams: ', e)
+        console.error('Got an error downloading the files from s3: ', e)
         return {
             statusCode: 500,
             body: JSON.stringify(e.message),
@@ -167,141 +153,79 @@ export const main: APIGatewayProxyHandler = async (event) => {
         }
     }
 
-    console.log(
-        'debug - s3DownloadStreams: ***' +
-            s3DownloadStreams.map((s) => s.filename)
-    )
-
-    const streamPassThrough = new PassThrough()
-
-    // if (s3DownloadStreams.length === 0) {
-    //     return {
-    //         statusCode: 400,
-    //         body: "didn't actually give us any files to download",
-    //         headers: {
-    //             'Access-Control-Allow-Origin': '*',
-    //             'Access-Control-Allow-Credentials': true,
-    //         },
-    //     }
-    // }
-
-    const input: PutObjectCommandInput = {
-        ACL: 'private',
-        Body: streamPassThrough,
-        Bucket: bulkDlRequest.bucket,
-        ContentType: 'application/zip',
-        Key: bulkDlRequest.zipFileName,
-        StorageClass: 'STANDARD',
-    }
-
-    // Upload is a composite command that correctly handles stream inputs and tagging
-    const upload = new Upload({
-        client: s3,
-        params: input,
-
-        tags: [
-            {
-                Key: 'contentsPreviouslyScanned',
-                Value: 'TRUE',
-            },
-        ],
-    })
-
-    upload.on('httpUploadProgress', (progress) => {
-        console.log('UploadProgress', progress)
-    })
-
-    console.log('We ARe Donw')
-
     try {
-        // Zip files
-        await new Promise<void>((resolve, reject) => {
-            console.log('Starting zip process...')
-            const zip = Archiver('zip')
+        // This stream is written to by the archive and then read from by the uploader
+        const zippedStream = new PassThrough()
 
-            zip.on('warning', function (err) {
-                console.log('ZIP WARNINFG: ', err.message)
-            })
-
-            zip.on('error', (error: Archiver.ArchiverError) => {
-                console.log('Error in zip.on: ', error.message, error.stack)
-                console.timeEnd('zipProcess')
-                throw new Error(
-                    `${error.name} ${error.code} ${error.message} ${error.path} ${error.stack}`
-                )
-            })
-
-            zip.on('progress', function (prog) {
-                console.log('ZIP PROGRESS: ', prog)
-            })
-
-            console.log('Starting upload...')
-
-            streamPassThrough.on('close', () => {
-                console.log('PASS THRU CLOSE')
-                resolve()
-            })
-            streamPassThrough.on('end', () => {
-                console.log('PASS THRU END')
-                resolve()
-            })
-            streamPassThrough.on('error', (err) => {
-                console.log('PASS THRU ERR', err)
-                reject(err)
-            })
-
-            console.log('----passed through', streamPassThrough)
-
-            zip.pipe(streamPassThrough)
-            console.log('----piped through')
-            s3DownloadStreams.forEach(
-                (streamDetails: S3DownloadStreamDetails) => {
-                    console.log('APPENDING', streamDetails.filename)
-                    zip.append(streamDetails.stream, {
-                        //decoding file names encoded in s3Amplify.ts
-                        name: decodeURIComponent(streamDetails.filename),
-                    })
-                }
-            )
-
-            zip.finalize()
-                .then((success) => {
-                    console.log('-----Zip Finalized!', success)
-                    resolve()
-                })
-                .catch((error) => {
-                    console.log('Error in zip finalize: ', error.message)
-                    throw new Error(`Archiver could not finalize: ${error}`)
-                })
-            console.log('-----zipped up', streamPassThrough)
-        }).catch((error: { code: string; message: string; data: string }) => {
-            console.log('Caught error: ', error.message)
-            return {
-                statusCode: 500,
-                body: JSON.stringify(error.message),
-                headers: {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Credentials': true,
-                },
-            }
+        zippedStream.on('error', (err) => {
+            console.error('Error in our zipped stream', err)
+            throw new Error(`${err.name} ${err.message} ${err.stack}`)
         })
-    } catch (e) {
-        console.error('some kind of zipping error?', e)
-        return {
-            statusCode: 500,
-            body: JSON.stringify(e.message),
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
-            },
-        }
-    }
 
-    console.log('Out of ZIP promise!')
-    try {
+        const input: PutObjectCommandInput = {
+            ACL: 'private',
+            Body: zippedStream,
+            Bucket: bulkDlRequest.bucket,
+            ContentType: 'application/zip',
+            Key: bulkDlRequest.zipFileName,
+            StorageClass: 'STANDARD',
+        }
+
+        // Upload is a composite command that correctly handles stream inputs and tagging
+        const upload = new Upload({
+            client: s3,
+            params: input,
+
+            tags: [
+                {
+                    Key: 'contentsPreviouslyScanned',
+                    Value: 'TRUE',
+                },
+            ],
+        })
+
+        upload.on('httpUploadProgress', (progress) => {
+            console.log('UploadProgress', progress)
+        })
+
+        // Configure Zip
+        const zip = Archiver('zip')
+
+        zip.on('warning', function (warn) {
+            console.log('zip warning: ', warn.message)
+        })
+
+        zip.on('error', (error: Archiver.ArchiverError) => {
+            console.log('Error in zip.on: ', error.message, error.stack)
+            console.timeEnd('zipProcess')
+            throw new Error(
+                `${error.name} ${error.code} ${error.message} ${error.path} ${error.stack}`
+            )
+        })
+
+        zip.on('progress', function (prog) {
+            console.log('zip progress: ', prog)
+        })
+
+        zip.pipe(zippedStream)
+
+        // Add files to the zip and finalize
+        for (const streamDetails of s3DownloadStreams) {
+            zip.append(streamDetails.stream, {
+                //decoding file names encoded in s3Amplify.ts
+                name: decodeURIComponent(streamDetails.filename),
+            })
+        }
+
+        zip.finalize().catch((err) => {
+            console.error('Error finalizing', err)
+            throw err
+        })
+
+        // We only stop and wait on the upload itself. Hopefully all our streams are streaming correctly
         await upload.done()
     } catch (e) {
-        console.log('Getting some headeer thing', e)
+        console.log('Error zipping or uploading', e)
         return {
             statusCode: 500,
             body: JSON.stringify(e.message),
@@ -312,7 +236,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
         }
     }
 
-    console.log('Finished Zip Process Successs')
+    console.log('Upload Success')
     console.timeEnd('zipProcess')
     return {
         statusCode: 200,
