@@ -9,7 +9,6 @@ export type FilterAccordionPropType = {
 }
 
 export const FilterAccordion = ({
-    onClearFilters,
     filterTitle,
     children,
 }: FilterAccordionPropType) => {
@@ -17,12 +16,11 @@ export const FilterAccordion = ({
 
     const handleClearFilters = () => {
         setToggleClearFilter(!toggleClearFilter)
-        if (onClearFilters) onClearFilters()
     }
 
-    //This controls the clearing of each FilterSelect child component directly from this FilterAccordion component instead of
-    // having to create logic in the parent component of both of these.
-    // This will rerender the children when toggleClearFilter state changes and pass this prop down to FilterSelect.
+    //This controls the clearing of each FilterSelect child component directly from this FilterAccordion component.
+    // toggleClearFilter state will be passed into each FilterSelect child. In FilterSelect child component, changes in
+    // toggleClearFilter prop will trigger a useEffect which will call clearValue() from the Select component ref
     const childrenWithToggleProps = React.Children.map(children, (child) => {
         return React.cloneElement(child as React.ReactElement, {
             toggleClearFilter,
