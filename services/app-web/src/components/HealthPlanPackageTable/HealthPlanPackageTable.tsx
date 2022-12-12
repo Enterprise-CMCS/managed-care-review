@@ -228,7 +228,11 @@ export const HealthPlanPackageTable = ({
     // }))
 
     const filterTitle = `Filters ${
-        columnFilters.length ? `(${columnFilters.length} applied)` : ''
+        columnFilters.length
+            ? `(${
+                  columnFilters.flatMap((filter) => filter.value).length
+              } applied)`
+            : ''
     }`
 
     return (

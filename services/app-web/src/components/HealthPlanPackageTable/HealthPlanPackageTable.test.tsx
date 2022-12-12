@@ -644,4 +644,128 @@ describe('HealthPlanPackageTable', () => {
         expect(rows).toHaveLength(1)
         expect(screen.getByText('No results found')).toBeInTheDocument()
     })
+
+    it('displays the total filters applied', async () => {
+        const stateSubmissions: PackageInDashboardType[] = [
+            {
+                ...submissions[0],
+                id: 'one',
+                submissionType: 'Contract action only',
+                stateName: 'Minnesota',
+            },
+            {
+                ...submissions[0],
+                id: 'two',
+                submissionType: 'Contract action and rate certification',
+                stateName: 'Minnesota',
+            },
+            {
+                ...submissions[0],
+                id: 'three',
+                submissionType: 'Contract action and rate certification',
+                stateName: 'Ohio',
+            },
+            {
+                ...submissions[0],
+                id: 'four',
+                submissionType: 'Contract action and rate certification',
+                stateName: 'Ohio',
+            },
+        ]
+
+        renderWithProviders(
+            <HealthPlanPackageTable
+                tableData={stateSubmissions}
+                userType="CMSUser"
+                showFilters
+            />,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+            }
+        )
+
+        const stateFilter = screen.getByTestId('state-filter')
+        const submissionTypeFilter = screen.getByTestId('submissionType-filter')
+        const accordionButton = screen.getByTestId(
+            'accordionButton_filterAccordionItems'
+        )
+        await waitFor(async () => {
+            //Expect filter accordion and state filter to exist
+            expect(screen.queryByTestId('accordion')).toBeInTheDocument()
+            //Expand filter accordion
+            await userEvent.click(accordionButton)
+        })
+
+        //Expect no filters applied yet
+        expect(screen.getByText('Filters')).toBeInTheDocument()
+
+        //Look for state filter
+        const stateCombobox = within(stateFilter).getByRole('combobox')
+        expect(stateCombobox).toBeInTheDocument()
+
+        //Look for submission type filter
+        const submissionTypeCombobox =
+            within(submissionTypeFilter).getByRole('combobox')
+        expect(submissionTypeCombobox).toBeInTheDocument()
+
+        //Open state combobox and select Minnesota option
+        await selectEvent.openMenu(stateCombobox)
+        const stateOptionOne = screen.getByTestId('state-filter-options')
+        expect(stateOptionOne).toBeInTheDocument()
+        await waitFor(async () => {
+            expect(within(stateOptionOne).getByText('Ohio')).toBeInTheDocument()
+            expect(
+                within(stateOptionOne).getByText('Minnesota')
+            ).toBeInTheDocument()
+            await selectEvent.select(stateOptionOne, 'Minnesota')
+        })
+
+        //Expect 1 filter applied
+        expect(screen.getByText('Filters (1 applied)')).toBeInTheDocument()
+
+        //Open state combobox and select Ohio option
+        await selectEvent.openMenu(stateCombobox)
+        const stateOptionTwo = screen.getByTestId('state-filter-options')
+        expect(stateOptionTwo).toBeInTheDocument()
+        await waitFor(async () => {
+            expect(within(stateOptionTwo).getByText('Ohio')).toBeInTheDocument()
+            await selectEvent.select(stateOptionTwo, 'Ohio')
+        })
+
+        //Expect 2 filter applied
+        expect(screen.getByText('Filters (2 applied)')).toBeInTheDocument()
+
+        //Open submission type combobox and select contact and rate option
+        await selectEvent.openMenu(submissionTypeCombobox)
+        const submissionTypeOptions = screen.getByTestId(
+            'submissionType-filter-options'
+        )
+        expect(submissionTypeOptions).toBeInTheDocument()
+        await waitFor(async () => {
+            expect(
+                within(submissionTypeOptions).getByText('Contract action only')
+            ).toBeInTheDocument()
+            expect(
+                within(submissionTypeOptions).getByText(
+                    'Contract action and rate certification'
+                )
+            ).toBeInTheDocument()
+            await selectEvent.select(
+                submissionTypeOptions,
+                'Contract action and rate certification'
+            )
+        })
+
+        //Expect 3 submission filtered from 4 to show on table
+        const rows = await screen.findAllByRole('row')
+        expect(rows).toHaveLength(4)
+        //Expect 3 applied filters text
+        expect(screen.getByText('Filters (3 applied)')).toBeInTheDocument()
+    })
 })
