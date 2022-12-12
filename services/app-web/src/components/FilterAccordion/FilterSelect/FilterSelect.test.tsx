@@ -23,6 +23,26 @@ describe('FilterSelect', () => {
             value: 'Grape',
         },
     ]
+    it('displays filter label when label is passed as prop', () => {
+        renderWithProviders(
+            <FilterSelect
+                name={'fruit'}
+                label={'Fruit'}
+                filterOptions={filterOptions}
+            />
+        )
+
+        expect(screen.getByLabelText('Fruit')).toBeInTheDocument()
+    })
+
+    it('does not display filter label when label is not passed as prop', () => {
+        renderWithProviders(
+            <FilterSelect name={'fruit'} filterOptions={filterOptions} />
+        )
+
+        expect(screen.queryByText('Fruit')).not.toBeInTheDocument()
+    })
+
     it('displays filter options', async () => {
         renderWithProviders(
             <FilterSelect
