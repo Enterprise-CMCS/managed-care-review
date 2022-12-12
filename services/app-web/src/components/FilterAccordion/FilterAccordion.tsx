@@ -1,11 +1,14 @@
 import React, { useState } from 'react'
 import styles from './FilterAccordion.module.scss'
 import { Accordion, Button } from '@trussworks/react-uswds'
+import { FilterSelectPropType } from './FilterSelect/FilterSelect'
 
-export type FilterAccordionPropType = {
+export interface FilterAccordionPropType {
     onClearFilters?: () => void
     filterTitle: string
-    children: React.ReactElement[]
+    children:
+        | React.ReactElement<FilterSelectPropType>
+        | Array<React.ReactElement<FilterSelectPropType>>
 }
 
 export const FilterAccordion = ({
@@ -24,9 +27,7 @@ export const FilterAccordion = ({
     // toggleClearFilter state will be passed into each FilterSelect child. In FilterSelect child component, changes in
     // toggleClearFilter prop will trigger a useEffect which will call clearValue() from the Select component ref
     const childrenWithToggleProps = React.Children.map(children, (child) => {
-        return React.cloneElement(child as React.ReactElement, {
-            toggleClearFilter,
-        })
+        return React.cloneElement(child, { toggleClearFilter })
     })
 
     const accordionItems = [
