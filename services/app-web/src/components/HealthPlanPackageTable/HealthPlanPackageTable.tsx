@@ -10,7 +10,7 @@ import {
     useReactTable,
     getFacetedUniqueValues,
 } from '@tanstack/react-table'
-import { HealthPlanPackageStatus, Program } from '../../gen/gqlClient'
+import { HealthPlanPackageStatus, Program, User } from '../../gen/gqlClient'
 import styles from './HealthPlanPackageTable.module.scss'
 import { Table, Tag, Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
@@ -38,11 +38,9 @@ export type PackageInDashboardType = {
     stateName?: string
 }
 
-type UserType = 'StateUser' | 'CMSUser'
-
 export type PackageTableProps = {
     tableData: PackageInDashboardType[]
-    userType: UserType
+    user: User
     showFilters?: boolean
 }
 
@@ -52,7 +50,7 @@ const isSubmitted = (status: HealthPlanPackageStatus) =>
 function submissionURL(
     id: PackageInDashboardType['id'],
     status: PackageInDashboardType['status'],
-    userType: UserType
+    userType: User['__typename']
 ): string {
     if (userType === 'CMSUser') {
         return `/submissions/${id}`
@@ -103,7 +101,7 @@ const submissionTypeOptions = [
 
 export const HealthPlanPackageTable = ({
     tableData,
-    userType,
+    user,
     showFilters = false,
 }: PackageTableProps): React.ReactElement => {
     const [columnFilters, setColumnFilters] =
@@ -120,7 +118,7 @@ export const HealthPlanPackageTable = ({
                     to={submissionURL(
                         info.getValue().id,
                         info.getValue().status,
-                        userType
+                        user.__typename
                     )}
                 >
                     {info.getValue().name}
@@ -204,8 +202,8 @@ export const HealthPlanPackageTable = ({
         state: {
             columnFilters,
             columnVisibility: {
-                stateName: userType !== 'StateUser',
-                submissionType: userType !== 'StateUser',
+                stateName: user.__typename !== 'StateUser',
+                submissionType: user.__typename !== 'StateUser',
             },
         },
         onColumnFiltersChange: setColumnFilters,
