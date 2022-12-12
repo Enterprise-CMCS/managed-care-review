@@ -6,6 +6,7 @@ import {
 } from './HealthPlanPackageTable'
 import React from 'react'
 import ProvidersDecorator from '../../../.storybook/providersDecorator'
+import { User } from '../../gen/gqlClient'
 
 const tableData: PackageInDashboardType[] = [
     {
@@ -78,6 +79,13 @@ const tableData: PackageInDashboardType[] = [
     },
 ]
 
+const mockCMSUser: User = {
+    __typename: 'CMSUser' as const,
+    role: 'CMS User',
+    email: 'cms@exmaple.com',
+    name: 'Bob it user',
+}
+
 export default {
     title: 'Components/HealthPlanPackageTable',
     component: HealthPlanPackageTable,
@@ -92,6 +100,6 @@ export const Default = Template.bind({})
 Default.decorators = [(Story) => ProvidersDecorator(Story, {})]
 Default.args = {
     tableData,
-    userType: 'CMSUser',
+    user: mockCMSUser,
     showFilters: true,
 }
