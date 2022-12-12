@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import {
     fetchCurrentUserMock,
     indexHealthPlanPackagesMockSuccess,
@@ -7,7 +7,10 @@ import {
     mockSubmittedHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
 } from '../../testHelpers/apolloHelpers'
-import { renderWithProviders } from '../../testHelpers/jestHelpers'
+import {
+    ldUseClientSpy,
+    renderWithProviders,
+} from '../../testHelpers/jestHelpers'
 import { CMSDashboard } from './CMSDashboard'
 
 describe('CMSDashboard', () => {
@@ -27,69 +30,6 @@ describe('CMSDashboard', () => {
             },
         })
         await expect(screen.findByTestId('cms-dashboard-page')).not.toBeNull()
-    })
-
-    it('displays no submission text when no submitted packages exist', async () => {
-        renderWithProviders(<CMSDashboard />, {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
-                    indexHealthPlanPackagesMockSuccess([]),
-                ],
-            },
-        })
-        await screen.findByText('Submissions')
-        expect(screen.queryByRole('table')).toBeNull()
-        expect(
-            screen.getByText(/You have no submissions yet/)
-        ).toBeInTheDocument()
-    })
-
-    it('displays submissions table when submitted packages exist', async () => {
-        const submitted = mockSubmittedHealthPlanPackage()
-        const unlocked = mockUnlockedHealthPlanPackage()
-        submitted.id = 'test-submitted'
-        unlocked.id = 'test-unlocked'
-        const submissions = [submitted, unlocked]
-
-        renderWithProviders(<CMSDashboard />, {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
-                    indexHealthPlanPackagesMockSuccess(submissions),
-                ],
-            },
-        })
-
-        await screen.findByText('Submissions')
-        const rows = await screen.findAllByRole('row')
-        expect(screen.getByRole('table')).toBeInTheDocument()
-
-        expect(rows).toHaveLength(3)
-    })
-
-    it('displays submissions table with expected headers', async () => {
-        const submitted = mockSubmittedHealthPlanPackage()
-        const submissions = [submitted]
-
-        renderWithProviders(<CMSDashboard />, {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
-                    indexHealthPlanPackagesMockSuccess(submissions),
-                ],
-            },
-        })
-
-        await screen.findByText('Submissions')
-        const table = screen.getByRole('table')
-        const [columnNames] = within(table).getAllByRole('rowgroup')
-        expect(within(columnNames).getByText(/ID/)).toBeTruthy()
-        expect(within(columnNames).getByText(/State/)).toBeTruthy()
-        expect(within(columnNames).getByText(/Submission type/)).toBeTruthy()
-        expect(within(columnNames).getByText(/Programs/)).toBeTruthy()
-        expect(within(columnNames).getByText(/Submission date/)).toBeTruthy()
-        expect(within(columnNames).getByText(/Status/)).toBeTruthy()
     })
 
     it('displays submissions table excluding any in progress drafts', async () => {
@@ -125,84 +65,6 @@ describe('CMSDashboard', () => {
                 `/submissions/${draft.id}`
             )
         })
-    })
-
-    it('displays submissions table sorted by that revisions last updated column', async () => {
-        const submitted1 = mockSubmittedHealthPlanPackage(
-            {},
-            { updatedAt: new Date() }
-        )
-        const unlocked202108 = mockUnlockedHealthPlanPackage(
-            {},
-            {
-                updatedAt: new Date('2021-08-01'),
-            }
-        )
-        const unlocked202109 = mockUnlockedHealthPlanPackage(
-            {},
-            { updatedAt: new Date('2021-09-01') }
-        )
-        const unlockedToday = mockUnlockedHealthPlanPackage(
-            {},
-            {
-                updatedAt: new Date(), // this will be most recent unlock
-            }
-        )
-
-        const submitted2 = mockSubmittedHealthPlanPackage(
-            {},
-            { updatedAt: new Date() }
-        ) // this will be most recent submitted, and also the very top of the list
-
-        submitted1.id = 'test-abc-submitted'
-        submitted2.id = 'test-abc-submitted-most-recent'
-        unlocked202108.id = 'test-abc-unlocked202108'
-        unlocked202109.id = 'test-abc-unlocked202109'
-        unlockedToday.id = 'test-abc-unlocked-top-of-list'
-
-        // intentionally listed in a scrambled order to test sorting
-        const submissions = [
-            submitted1,
-            unlocked202108,
-            submitted2,
-            unlockedToday,
-            unlocked202109,
-        ]
-
-        renderWithProviders(<CMSDashboard />, {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
-                    indexHealthPlanPackagesMockSuccess(submissions),
-                ],
-            },
-        })
-        await screen.findByText('Submissions')
-        const rows = await screen.findAllByRole('row') // remember, 0 index element is the table header
-
-        const link1 = within(rows[1]).getByRole('link')
-        expect(link1).toHaveAttribute('href', `/submissions/${submitted2.id}`)
-
-        const link2 = within(rows[2]).getByRole('link')
-        expect(link2).toHaveAttribute(
-            'href',
-            `/submissions/${unlockedToday.id}`
-        )
-
-        const link3 = within(rows[3]).getByRole('link')
-        expect(link3).toHaveAttribute('href', `/submissions/${submitted1.id}`)
-
-        const link4 = within(rows[4]).getByRole('link')
-        expect(link4).toHaveAttribute(
-            'href',
-            `/submissions/${unlocked202109.id}`
-        )
-
-        const link5 = within(rows[5]).getByRole('link')
-        expect(link5).toHaveAttribute(
-            'href',
-            `/submissions/${unlocked202108.id}`
-        )
     })
 
     it('displays submission type as expected for current revision that is submitted/resubmitted', async () => {
@@ -249,54 +111,6 @@ describe('CMSDashboard', () => {
         const submittedRow = await screen.findByTestId(`row-${submitted.id}`)
         const tag2 = within(submittedRow).getByTestId('submission-status')
         expect(tag2).toHaveTextContent('Submitted')
-    })
-
-    it('displays the expected program tags for current revision that is submitted/resubmitted', async () => {
-        const mockUser = {
-            __typename: 'CMSUser' as const,
-            role: 'CMS User',
-            name: 'Bob it user',
-            email: 'bob@dmas.mn.gov',
-        }
-
-        const mockMN = mockMNState() // this is the state used in apolloHelpers
-        const submitted1 = mockSubmittedHealthPlanPackage({
-            programIDs: [mockMN.programs[0].id],
-        })
-        const submitted2 = mockSubmittedHealthPlanPackage({
-            updatedAt: new Date('2298-01-01'),
-            programIDs: [
-                mockMN.programs[0].id,
-                mockMN.programs[1].id,
-                mockMN.programs[2].id,
-            ],
-        })
-
-        submitted1.id = 'test-submitted1'
-        submitted2.id = 'test-submitted2'
-
-        const submissions = [submitted1, submitted2]
-
-        renderWithProviders(<CMSDashboard />, {
-            apolloProvider: {
-                mocks: [
-                    fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
-                    indexHealthPlanPackagesMockSuccess(submissions),
-                ],
-            },
-        })
-        await screen.findByText('Submissions')
-        const row1 = await screen.findByTestId(`row-${submitted1.id}`)
-        const tags1 = within(row1).getAllByTestId('program-tag')
-        expect(tags1[0]).toHaveTextContent(mockMN.programs[0].name)
-        expect(tags1).toHaveLength(1)
-
-        const row2 = await screen.findByTestId(`row-${submitted2.id}`)
-        const tags2 = within(row2).getAllByTestId('program-tag')
-        expect(tags2).toHaveLength(3)
-        expect(tags2[0]).toHaveTextContent(mockMN.programs[0].name)
-        expect(tags2[1]).toHaveTextContent(mockMN.programs[1].name)
-        expect(tags2[2]).toHaveTextContent(mockMN.programs[2].name)
     })
 
     it('displays name, type, programs and last update based on previously submitted revision for UNLOCKED package', async () => {
@@ -349,5 +163,28 @@ describe('CMSDashboard', () => {
             'submission-last-updated'
         )
         expect(lastUpdated).toHaveTextContent('01/22/2100')
+    })
+
+    it('should display filters on cms dashboard page when feature flag is on', async () => {
+        ldUseClientSpy({ 'cms-dashboard-filter': true })
+        const unlocked = mockUnlockedHealthPlanPackage()
+        const submitted = mockSubmittedHealthPlanPackage()
+        submitted.id = 'test-abc-submitted'
+        unlocked.id = 'test-abc-unlocked'
+        const screen = renderWithProviders(<CMSDashboard />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
+                    indexHealthPlanPackagesMockSuccess([submitted, unlocked]),
+                ],
+            },
+        })
+
+        await waitFor(() => {
+            expect(
+                screen.queryByTestId('cms-dashboard-page')
+            ).toBeInTheDocument()
+            expect(screen.queryByTestId('accordion')).toBeInTheDocument()
+        })
     })
 })

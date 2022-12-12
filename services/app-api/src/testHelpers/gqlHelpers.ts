@@ -25,7 +25,7 @@ import {
     newLocalEmailParameterStore,
     EmailParameterStore,
 } from '../parameterStore'
-import statePrograms from '../data/statePrograms.json'
+import statePrograms from '../../../app-web/src/common-code/data/statePrograms.json'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default

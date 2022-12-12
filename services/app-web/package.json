@@ -86,6 +86,7 @@
         "@opentelemetry/sdk-trace-base": "^1.2.0",
         "@opentelemetry/sdk-trace-web": "^1.2.0",
         "@opentelemetry/semantic-conventions": "^1.2.0",
+        "@tanstack/react-table": "^8.7.0",
         "@trussworks/react-uswds": "^2.8.0",
         "@types/path-browserify": "^1.0.0",
         "aws-amplify": "^4.3.4",

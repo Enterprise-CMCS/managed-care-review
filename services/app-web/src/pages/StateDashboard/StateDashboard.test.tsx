@@ -8,7 +8,10 @@ import {
     mockSubmittedHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
 } from '../../testHelpers/apolloHelpers'
-import { renderWithProviders } from '../../testHelpers/jestHelpers'
+import {
+    ldUseClientSpy,
+    renderWithProviders,
+} from '../../testHelpers/jestHelpers'
 
 describe('StateDashboard', () => {
     it('display submission heading', async () => {
@@ -124,5 +127,21 @@ describe('StateDashboard', () => {
 
         const link3 = within(rows[3]).getByRole('link')
         expect(link3).toHaveAttribute('href', '/submissions/test-abc-submitted')
+    })
+    it('should not display filters on state dashboard page', async () => {
+        ldUseClientSpy({ 'cms-dashboard-filter': true })
+        renderWithProviders(<StateDashboard />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    indexHealthPlanPackagesMockSuccess(),
+                ],
+            },
+        })
+
+        await waitFor(() => {
+            expect(screen.queryByTestId('dashboard-page')).toBeInTheDocument()
+            expect(screen.queryByTestId('accordion')).not.toBeInTheDocument()
+        })
     })
 })

@@ -1,5 +1,5 @@
-import { Link, Tag } from '@trussworks/react-uswds'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { useS3 } from '../../../contexts/S3Context'
@@ -8,7 +8,7 @@ import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/Submis
 import styles from './UploadedDocumentsTable.module.scss'
 import { usePreviousSubmission } from '../../../hooks'
 import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
-
+import { DocumentTag } from './DocumentTag'
 export type UploadedDocumentsTableProps = {
     documents: SubmissionDocument[]
     caption: string | null
@@ -25,6 +25,44 @@ type DocumentWithLink = { url: string | null } & SubmissionDocument
 const isBothContractAndRateSupporting = (doc: SubmissionDocument) =>
     doc.documentCategories.includes('CONTRACT_RELATED') &&
     doc.documentCategories.includes('RATES_RELATED')
+
+type LinkedPackagesListProps = {
+    unlinkDrafts: boolean
+    packages: SharedRateCertDisplay[]
+}
+
+const linkedPackagesList = ({
+    unlinkDrafts,
+    packages,
+}: LinkedPackagesListProps): React.ReactElement[] => {
+    return packages.map((item, index) => {
+        const maybeComma = index > 0 ? ', ' : ''
+        const linkedPackageIsDraft =
+            item.packageName && item.packageName.includes('(Draft)')
+
+        if (linkedPackageIsDraft && unlinkDrafts) {
+            return (
+                <span>
+                    {maybeComma}
+                    <span key={index}>{item.packageName}</span>
+                </span>
+            )
+        } else {
+            return (
+                <span>
+                    {maybeComma}
+                    <Link
+                        key={index}
+                        asCustom={NavLink}
+                        to={`/submissions/${item.packageId}`}
+                    >
+                        {item.packageName}
+                    </Link>
+                </span>
+            )
+        }
+    })
+}
 
 export const UploadedDocumentsTable = ({
     documents,
@@ -60,9 +98,6 @@ export const UploadedDocumentsTable = ({
     const supportingDocsTopMarginStyles = isSupportingDocuments
         ? styles.withMarginTop
         : ''
-
-    const linkedPackageIsDraft = (packageName?: string) =>
-        packageName && packageName.includes('(Draft)')
 
     const tableCaptionJSX = (
         <>
@@ -147,20 +182,14 @@ export const UploadedDocumentsTable = ({
                         <tr key={doc.name}>
                             {doc.url ? (
                                 <td>
-                                    {shouldHaveNewTag(doc) ? (
-                                        <Tag className={styles.newDocTag}>
-                                            NEW
-                                        </Tag>
-                                    ) : null}
-                                    {showSharedInfo ? (
-                                        <Tag className={styles.sharedDocTag}>
-                                            SHARED
-                                        </Tag>
-                                    ) : null}
+                                    <DocumentTag
+                                        isNew={shouldHaveNewTag(doc)}
+                                        isShared={showSharedInfo}
+                                    />
                                     <Link
+                                        className={styles.inlineLink}
                                         aria-label={`${doc.name} (opens in new window)`}
                                         href={doc.url}
-                                        variant="external"
                                         target="_blank"
                                     >
                                         {isSupportingDocuments &&
@@ -171,11 +200,9 @@ export const UploadedDocumentsTable = ({
                                 </td>
                             ) : (
                                 <td>
-                                    {shouldHaveNewTag(doc) ? (
-                                        <Tag className={styles.newDocTag}>
-                                            NEW
-                                        </Tag>
-                                    ) : null}{' '}
+                                    <DocumentTag
+                                        isNew={shouldHaveNewTag(doc)}
+                                    />
                                     {doc.name}
                                 </td>
                             )}
@@ -188,23 +215,15 @@ export const UploadedDocumentsTable = ({
                             </td>
                             <td>{documentCategory}</td>
                             {showSharedInfo
-                                ? packagesWithSharedRateCerts &&
-                                  packagesWithSharedRateCerts.map((item) => (
-                                      <td key={item.packageName}>
-                                          {isCMSUser &&
-                                          linkedPackageIsDraft(
-                                              item.packageName
-                                          ) ? (
-                                              <span>{item.packageName}</span>
-                                          ) : (
-                                              <NavLink
-                                                  to={`/submissions/${item.packageId}`}
-                                              >
-                                                  {item.packageName}
-                                              </NavLink>
-                                          )}
+                                ? packagesWithSharedRateCerts && (
+                                      <td>
+                                          {linkedPackagesList({
+                                              unlinkDrafts: Boolean(isCMSUser),
+                                              packages:
+                                                  packagesWithSharedRateCerts,
+                                          })}
                                       </td>
-                                  ))
+                                  )
                                 : null}
                         </tr>
                     ))}
