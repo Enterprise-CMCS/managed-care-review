@@ -82,10 +82,13 @@ const StatusTag = ({
     return <Tag className={tagStyles}>{statusText}</Tag>
 }
 
-const stateOptions = statePrograms.states.map(({ name }) => ({
-    label: name,
-    value: name,
-}))
+const stateOptions = statePrograms.states
+    .map(({ name }) => ({
+        label: name,
+        value: name,
+    }))
+    .filter((option) => option.value !== 'American Samoa')
+
 const submissionTypeOptions = [
     {
         label: 'Contract action only',
