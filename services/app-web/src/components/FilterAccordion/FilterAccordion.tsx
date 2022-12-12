@@ -9,6 +9,7 @@ export type FilterAccordionPropType = {
 }
 
 export const FilterAccordion = ({
+    onClearFilters,
     filterTitle,
     children,
 }: FilterAccordionPropType) => {
@@ -16,6 +17,7 @@ export const FilterAccordion = ({
 
     const handleClearFilters = () => {
         setToggleClearFilter(!toggleClearFilter)
+        if (onClearFilters) onClearFilters()
     }
 
     //This controls the clearing of each FilterSelect child component directly from this FilterAccordion component.
