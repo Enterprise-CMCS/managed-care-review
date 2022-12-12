@@ -68,13 +68,16 @@ export const FilterSelect = ({
 
     return (
         <div data-testid={`${name}-filter`}>
-            {label && <label htmlFor={`${name}-filterSelect`}>{label}</label>}
+            {label && (
+                <label htmlFor={`${name}-filter-select-input`}>{label}</label>
+            )}
             <Select
                 ref={selectInputRef}
                 options={filterOptions}
                 className={styles.multiSelect}
                 classNamePrefix="select"
                 id={`${name}-filter-select`}
+                inputId={`${name}-filter-select-input`}
                 name={`${name}`}
                 isSearchable
                 isMulti
