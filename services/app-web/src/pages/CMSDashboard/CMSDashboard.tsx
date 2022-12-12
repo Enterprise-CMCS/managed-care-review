@@ -22,6 +22,11 @@ import {
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
 
+/**
+ * We only pull a subset of data out of the submission and revisions for display in Dashboard
+ * Depending on submission status, CMS users look at data from current or previous revision
+ */
+
 export const CMSDashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
     const ldClient = useLDClient()

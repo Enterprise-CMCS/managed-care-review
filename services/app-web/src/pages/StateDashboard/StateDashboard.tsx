@@ -19,6 +19,10 @@ import {
 } from '../../components'
 import { getCurrentRevisionFromHealthPlanPackage } from '../../gqlHelpers'
 
+/**
+ * We only pull a subset of data out of the submission and revisions for display in Dashboard
+ */
+
 export const StateDashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
     const location = useLocation()
