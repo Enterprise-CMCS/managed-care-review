@@ -7,96 +7,104 @@ import { screen, waitFor, within } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import userEvent from '@testing-library/user-event'
 import { fetchCurrentUserMock } from '../../testHelpers/apolloHelpers'
+import { User } from '../../gen/gqlClient'
 
-describe('HealthPlanPackageTable', () => {
-    const submissions: PackageInDashboardType[] = [
-        {
-            id: '2f7f1274-3927-4367-bec6-870587a0f0c6',
-            name: 'MCR-MN-0063-PMAP',
-            programs: [
-                {
-                    __typename: 'Program',
-                    id: 'd95394e5-44d1-45df-8151-1cc1ee66f100',
-                    name: 'PMAP',
-                    fullName: 'Prepaid Medical Assistance Program',
-                },
-            ],
-            submittedAt: '2022-09-05',
-            status: 'UNLOCKED',
-            updatedAt: new Date('2022-09-05T17:42:14.835Z'),
-            submissionType: 'Contract action only',
-            stateName: 'Minnesota',
-        },
-        {
-            id: '576e5a1e-6ae6-4936-9ee4-7034cb2072dd',
-            name: 'MCR-MN-0071-PMAP',
-            programs: [
-                {
-                    __typename: 'Program',
-                    id: 'd95394e5-44d1-45df-8151-1cc1ee66f100',
-                    name: 'PMAP',
-                    fullName: 'Prepaid Medical Assistance Program',
-                },
-            ],
-            submittedAt: '2022-12-05',
-            status: 'SUBMITTED',
-            updatedAt: new Date('2022-12-05T17:48:59.297Z'),
-            submissionType: 'Contract action and rate certification',
-            stateName: 'Florida',
-        },
-        {
-            id: 'a6e5eb04-833f-4050-bab4-6ebe8d1a5e75',
-            name: 'MCR-OH-0069-PMAP',
-            programs: [
-                {
-                    __typename: 'Program',
-                    id: 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
-                    fullName: 'Special Needs Basic Care',
-                    name: 'SNBC',
-                },
-                {
-                    __typename: 'Program',
-                    id: 'd95394e5-44d1-45df-8151-1cc1ee66f100',
-                    name: 'PMAP',
-                    fullName: 'Prepaid Medical Assistance Program',
-                },
-                {
-                    __typename: 'Program',
-                    id: 'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
-                    fullName: 'Minnesota Senior Care Plus ',
-                    name: 'MSC+',
-                },
-            ],
-            submittedAt: '2022-11-05',
-            status: 'SUBMITTED',
-            updatedAt: new Date('2022-11-05T17:47:09.745Z'),
-            submissionType: 'Contract action and rate certification',
-            stateName: 'Ohio',
-        },
-        {
-            id: '74c3c976-45d8-49fe-ac76-6ae3147acd12',
-            name: 'MCR-PR-0065-PMAP',
-            programs: [
-                {
-                    __typename: 'Program',
-                    id: 'd95394e5-44d1-45df-8151-1cc1ee66f100',
-                    name: 'PMAP',
-                    fullName: 'Prepaid Medical Assistance Program',
-                },
-            ],
-            submittedAt: '2022-10-05',
-            status: 'SUBMITTED',
-            updatedAt: new Date('2022-10-05T17:45:05.562Z'),
-            submissionType: 'Contract action and rate certification',
-            stateName: 'Puerto Rico',
-        },
-    ]
+const submissions: PackageInDashboardType[] = [
+    {
+        id: '2f7f1274-3927-4367-bec6-870587a0f0c6',
+        name: 'MCR-MN-0063-PMAP',
+        programs: [
+            {
+                __typename: 'Program',
+                id: 'd95394e5-44d1-45df-8151-1cc1ee66f100',
+                name: 'PMAP',
+                fullName: 'Prepaid Medical Assistance Program',
+            },
+        ],
+        submittedAt: '2022-09-05',
+        status: 'UNLOCKED',
+        updatedAt: new Date('2022-09-05T17:42:14.835Z'),
+        submissionType: 'Contract action only',
+        stateName: 'Minnesota',
+    },
+    {
+        id: '576e5a1e-6ae6-4936-9ee4-7034cb2072dd',
+        name: 'MCR-MN-0071-PMAP',
+        programs: [
+            {
+                __typename: 'Program',
+                id: 'd95394e5-44d1-45df-8151-1cc1ee66f100',
+                name: 'PMAP',
+                fullName: 'Prepaid Medical Assistance Program',
+            },
+        ],
+        submittedAt: '2022-12-05',
+        status: 'SUBMITTED',
+        updatedAt: new Date('2022-12-05T17:48:59.297Z'),
+        submissionType: 'Contract action and rate certification',
+        stateName: 'Florida',
+    },
+    {
+        id: 'a6e5eb04-833f-4050-bab4-6ebe8d1a5e75',
+        name: 'MCR-OH-0069-PMAP',
+        programs: [
+            {
+                __typename: 'Program',
+                id: 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                fullName: 'Special Needs Basic Care',
+                name: 'SNBC',
+            },
+            {
+                __typename: 'Program',
+                id: 'd95394e5-44d1-45df-8151-1cc1ee66f100',
+                name: 'PMAP',
+                fullName: 'Prepaid Medical Assistance Program',
+            },
+            {
+                __typename: 'Program',
+                id: 'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
+                fullName: 'Minnesota Senior Care Plus ',
+                name: 'MSC+',
+            },
+        ],
+        submittedAt: '2022-11-05',
+        status: 'SUBMITTED',
+        updatedAt: new Date('2022-11-05T17:47:09.745Z'),
+        submissionType: 'Contract action and rate certification',
+        stateName: 'Ohio',
+    },
+    {
+        id: '74c3c976-45d8-49fe-ac76-6ae3147acd12',
+        name: 'MCR-PR-0065-PMAP',
+        programs: [
+            {
+                __typename: 'Program',
+                id: 'd95394e5-44d1-45df-8151-1cc1ee66f100',
+                name: 'PMAP',
+                fullName: 'Prepaid Medical Assistance Program',
+            },
+        ],
+        submittedAt: '2022-10-05',
+        status: 'SUBMITTED',
+        updatedAt: new Date('2022-10-05T17:45:05.562Z'),
+        submissionType: 'Contract action and rate certification',
+        stateName: 'Puerto Rico',
+    },
+]
+
+describe('HealthPlanPackageTable cms user tests', () => {
+    const mockCMSUser: User = {
+        __typename: 'CMSUser' as const,
+        role: 'CMS User',
+        email: 'cms@exmaple.com',
+        name: 'Bob it user',
+    }
 
     it('renders table with expected number of submissions', async () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
-                userType="CMSUser"
+                user={mockCMSUser}
             />
         )
         const rows = await screen.findAllByRole('row')
@@ -107,7 +115,7 @@ describe('HealthPlanPackageTable', () => {
 
     it('displays no submission text when no submitted packages exist', async () => {
         renderWithProviders(
-            <HealthPlanPackageTable tableData={[]} userType="CMSUser" />,
+            <HealthPlanPackageTable tableData={[]} user={mockCMSUser} />,
             {
                 apolloProvider: {
                     mocks: [
@@ -131,7 +139,7 @@ describe('HealthPlanPackageTable', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
-                userType="CMSUser"
+                user={mockCMSUser}
             />
         )
         const submissionsInTable = await screen.getAllByTestId(`submission-id`)
@@ -146,32 +154,11 @@ describe('HealthPlanPackageTable', () => {
         expect(submissionsInTable).toHaveLength(4)
     })
 
-    it('does not display State and Submission type columns for state users', async () => {
-        renderWithProviders(
-            <HealthPlanPackageTable
-                tableData={submissions}
-                userType="StateUser"
-            />
-        )
-        const submissionsInTable = await screen.getAllByTestId(`submission-id`)
-        const table = screen.getByRole('table')
-        const [columnNames] = within(table).getAllByRole('rowgroup')
-        expect(within(columnNames).getByText(/ID/)).toBeTruthy()
-        expect(within(columnNames).queryByText(/State/)).not.toBeInTheDocument()
-        expect(
-            within(columnNames).queryByText(/Submission type/)
-        ).not.toBeInTheDocument()
-        expect(within(columnNames).getByText(/Programs/)).toBeTruthy()
-        expect(within(columnNames).getByText(/Submission date/)).toBeTruthy()
-        expect(within(columnNames).getByText(/Status/)).toBeTruthy()
-        expect(submissionsInTable).toHaveLength(4)
-    })
-
     it('displays submissions table sorted by that revisions last updated column', async () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
-                userType="CMSUser"
+                user={mockCMSUser}
             />
         )
 
@@ -202,7 +189,7 @@ describe('HealthPlanPackageTable', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={stateSubmissions}
-                userType="CMSUser"
+                user={mockCMSUser}
             />
         )
 
@@ -213,56 +200,11 @@ describe('HealthPlanPackageTable', () => {
         )
     })
 
-    it('has correct submission links for state users', async () => {
-        const stateSubmissions: PackageInDashboardType[] = [
-            {
-                ...submissions[0],
-                id: 'unlocked-submission',
-                updatedAt: new Date('12/05/2022'),
-                status: 'UNLOCKED',
-            },
-            {
-                ...submissions[1],
-                id: 'submitted-submission',
-                updatedAt: new Date('12/04/2022'),
-                status: 'SUBMITTED',
-            },
-            {
-                ...submissions[2],
-                id: 'draft-submission',
-                updatedAt: new Date('12/03/2022'),
-                status: 'DRAFT',
-            },
-        ]
-        renderWithProviders(
-            <HealthPlanPackageTable
-                tableData={stateSubmissions}
-                userType="StateUser"
-            />
-        )
-
-        const rows = await screen.findAllByRole('row')
-        const submissionLink = (row: number) =>
-            within(rows[row]).getByRole('link')
-        expect(submissionLink(1)).toHaveAttribute(
-            'href',
-            `/submissions/unlocked-submission/edit/review-and-submit`
-        )
-        expect(submissionLink(2)).toHaveAttribute(
-            'href',
-            `/submissions/submitted-submission`
-        )
-        expect(submissionLink(3)).toHaveAttribute(
-            'href',
-            `/submissions/draft-submission/edit/type`
-        )
-    })
-
     it('displays the expected program tags for current revision that is submitted/resubmitted', async () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
-                userType="CMSUser"
+                user={mockCMSUser}
             />
         )
         const row1 = await screen.findByTestId(`row-${submissions[0].id}`)
@@ -292,7 +234,7 @@ describe('HealthPlanPackageTable', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
-                userType="CMSUser"
+                user={mockCMSUser}
                 showFilters
             />,
             {
@@ -325,7 +267,7 @@ describe('HealthPlanPackageTable', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
-                userType="CMSUser"
+                user={mockCMSUser}
             />
         )
 
@@ -342,7 +284,7 @@ describe('HealthPlanPackageTable', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
-                userType="CMSUser"
+                user={mockCMSUser}
                 showFilters
             />,
             {
@@ -426,7 +368,7 @@ describe('HealthPlanPackageTable', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={stateSubmissions}
-                userType="CMSUser"
+                user={mockCMSUser}
                 showFilters
             />,
             {
@@ -528,7 +470,7 @@ describe('HealthPlanPackageTable', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={stateSubmissions}
-                userType="CMSUser"
+                user={mockCMSUser}
                 showFilters
             />,
             {
@@ -595,7 +537,7 @@ describe('HealthPlanPackageTable', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
-                userType="CMSUser"
+                user={mockCMSUser}
                 showFilters
             />,
             {
@@ -676,7 +618,7 @@ describe('HealthPlanPackageTable', () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={stateSubmissions}
-                userType="CMSUser"
+                user={mockCMSUser}
                 showFilters
             />,
             {
@@ -767,5 +709,86 @@ describe('HealthPlanPackageTable', () => {
         expect(rows).toHaveLength(4)
         //Expect 3 applied filters text
         expect(screen.getByText('Filters (3 applied)')).toBeInTheDocument()
+    })
+})
+
+describe('HealthPlanPackageTable state user tests', () => {
+    const mockStateUser: User = {
+        __typename: 'StateUser' as const,
+        role: 'State User',
+        name: 'Jerry it user',
+        email: 'state@example.com',
+        state: {
+            __typename: 'State',
+            code: 'MN',
+            name: 'Minnesota',
+            programs: [],
+        },
+    }
+
+    it('does not display State and Submission type columns for state users', async () => {
+        renderWithProviders(
+            <HealthPlanPackageTable
+                tableData={submissions}
+                user={mockStateUser}
+            />
+        )
+        const submissionsInTable = await screen.getAllByTestId(`submission-id`)
+        const table = screen.getByRole('table')
+        const [columnNames] = within(table).getAllByRole('rowgroup')
+        expect(within(columnNames).getByText(/ID/)).toBeTruthy()
+        expect(within(columnNames).queryByText(/State/)).not.toBeInTheDocument()
+        expect(
+            within(columnNames).queryByText(/Submission type/)
+        ).not.toBeInTheDocument()
+        expect(within(columnNames).getByText(/Programs/)).toBeTruthy()
+        expect(within(columnNames).getByText(/Submission date/)).toBeTruthy()
+        expect(within(columnNames).getByText(/Status/)).toBeTruthy()
+        expect(submissionsInTable).toHaveLength(4)
+    })
+
+    it('has correct submission links for state users', async () => {
+        const stateSubmissions: PackageInDashboardType[] = [
+            {
+                ...submissions[0],
+                id: 'unlocked-submission',
+                updatedAt: new Date('12/05/2022'),
+                status: 'UNLOCKED',
+            },
+            {
+                ...submissions[1],
+                id: 'submitted-submission',
+                updatedAt: new Date('12/04/2022'),
+                status: 'SUBMITTED',
+            },
+            {
+                ...submissions[2],
+                id: 'draft-submission',
+                updatedAt: new Date('12/03/2022'),
+                status: 'DRAFT',
+            },
+        ]
+        renderWithProviders(
+            <HealthPlanPackageTable
+                tableData={stateSubmissions}
+                user={mockStateUser}
+            />
+        )
+
+        const rows = await screen.findAllByRole('row')
+        const submissionLink = (row: number) =>
+            within(rows[row]).getByRole('link')
+        expect(submissionLink(1)).toHaveAttribute(
+            'href',
+            `/submissions/unlocked-submission/edit/review-and-submit`
+        )
+        expect(submissionLink(2)).toHaveAttribute(
+            'href',
+            `/submissions/submitted-submission`
+        )
+        expect(submissionLink(3)).toHaveAttribute(
+            'href',
+            `/submissions/draft-submission/edit/type`
+        )
     })
 })
