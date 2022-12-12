@@ -17,7 +17,6 @@ import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
 import { FilterAccordion, FilterSelect } from '../FilterAccordion'
-import statePrograms from '../../common-code/data/statePrograms.json'
 import { InfoTag, TagProps } from '../InfoTag/InfoTag'
 
 declare module '@tanstack/table-core' {
@@ -80,13 +79,6 @@ const StatusTag = ({
 
     return <InfoTag color={color}>{statusText}</InfoTag>
 }
-
-const stateOptions = statePrograms.states
-    .map(({ name }) => ({
-        label: name,
-        value: name,
-    }))
-    .filter((option) => option.value !== 'American Samoa')
 
 const submissionTypeOptions = [
     {
@@ -216,15 +208,12 @@ export const HealthPlanPackageTable = ({
     const submissionTypeColumn = reactTable.getColumn('submissionType')
 
     // Filter options based on table data instead of static list of options.
-    // const stateFilterOptions: FilterOptionType[] = Array.from(stateColumn.getFacetedUniqueValues().keys()).map(state => ({
-    //     value: state,
-    //     label: state
-    // }))
-    //
-    // const typeFilterOptions: FilterOptionType[] = Array.from(submissionTypeColumn.getFacetedUniqueValues().keys()).map(type => ({
-    //     value: type,
-    //     label: type
-    // }))
+    const stateFilterOptions = Array.from(
+        stateColumn.getFacetedUniqueValues().keys()
+    ).map((state) => ({
+        value: state,
+        label: state,
+    }))
 
     const filterTitle = `Filters ${
         columnFilters.length
@@ -248,7 +237,7 @@ export const HealthPlanPackageTable = ({
                             <FilterSelect
                                 name="state"
                                 label="State"
-                                filterOptions={stateOptions}
+                                filterOptions={stateFilterOptions}
                                 onChange={(selectedOptions) =>
                                     stateColumn.setFilterValue(
                                         selectedOptions.map(

@@ -506,7 +506,7 @@ describe('HealthPlanPackageTable cms user tests', () => {
             await selectEvent.select(stateOptions, 'Minnesota')
         })
 
-        //Open submission type combobox and select Minnesota option
+        //Open submission type combobox and select Contract action and rate certification option
         await selectEvent.openMenu(submissionTypeCombobox)
         const submissionTypeOptions = screen.getByTestId(
             'submissionType-filter-options'
@@ -575,13 +575,28 @@ describe('HealthPlanPackageTable cms user tests', () => {
         await waitFor(async () => {
             //Expected options are present
             expect(
-                within(comboboxOptions).getByText('Virginia')
+                within(comboboxOptions).getByText('Florida')
             ).toBeInTheDocument()
             //Select option Ohio
-            await selectEvent.select(comboboxOptions, 'Virginia')
+            await selectEvent.select(comboboxOptions, 'Florida')
         })
 
-        //Expect only Ohio to show on table
+        const submissionTypeFilter = screen.getByTestId('submissionType-filter')
+        const submissionTypeCombobox =
+            within(submissionTypeFilter).getByRole('combobox')
+
+        //Open submission type combobox and select Contract action only option
+        await selectEvent.openMenu(submissionTypeCombobox)
+        const submissionTypeOptions = screen.getByTestId(
+            'submissionType-filter-options'
+        )
+        await waitFor(async () => {
+            await selectEvent.select(
+                submissionTypeOptions,
+                'Contract action only'
+            )
+        })
+
         const rows = await screen.findAllByRole('row')
         expect(rows).toHaveLength(1)
         expect(screen.getByText('No results found')).toBeInTheDocument()
