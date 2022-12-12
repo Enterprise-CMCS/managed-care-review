@@ -17,6 +17,7 @@ import {
     ErrorSummary,
     FieldRadio,
     FieldTextarea,
+    FieldYesNo,
     PoliteErrorMessage,
 } from '../../../components'
 import { SubmissionTypeRecord } from '../../../constants/healthPlanPackages'
@@ -31,18 +32,24 @@ import styles from '../StateSubmissionForm.module.scss'
 import { GenericApiErrorBanner, ProgramSelect } from '../../../components'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { useStatePrograms } from '../../../hooks/useStatePrograms'
+import {
+    booleanAsYesNoFormValue,
+    yesNoFormValueAsBoolean,
+} from '../../../components/Form/FieldYesNo/FieldYesNo'
 
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
 const SubmissionTypeFormSchema = Yup.object().shape({
     programIDs: Yup.array().min(1, 'You must select at least one program'),
     submissionType: Yup.string().required('You must choose a submission type'),
+    riskBasedContract: Yup.string().defined('You must select yes or no'),
     submissionDescription: Yup.string().required(
         'You must provide a description of any major changes or updates'
     ),
 })
 export interface SubmissionTypeFormValues {
     programIDs: string[]
+    riskBasedContract: string
     submissionDescription: string
     submissionType: string
 }
@@ -126,6 +133,8 @@ export const SubmissionType = ({
 
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
         programIDs: draftSubmission?.programIDs ?? [],
+        riskBasedContract:
+            booleanAsYesNoFormValue(draftSubmission?.riskBasedContract) ?? '',
         submissionDescription: draftSubmission?.submissionDescription ?? '',
         submissionType: draftSubmission?.submissionType ?? '',
     }
@@ -156,6 +165,9 @@ export const SubmissionType = ({
                 const input: CreateHealthPlanPackageInput = {
                     programIDs: values.programIDs,
                     submissionType: values.submissionType,
+                    riskBasedContract: yesNoFormValueAsBoolean(
+                        values.riskBasedContract
+                    ),
                     submissionDescription: values.submissionDescription,
                 }
 
@@ -332,6 +344,17 @@ export const SubmissionType = ({
                                         value={'CONTRACT_AND_RATES'}
                                     />
                                 </Fieldset>
+                            </FormGroup>
+                            <FormGroup>
+                                <FieldYesNo
+                                    id="riskBasedContract"
+                                    name="riskBasedContractName"
+                                    label="Is this a risk-based contract?"
+                                    hint="See 42 CFR § 438.2"
+                                    showError={showFieldErrors(
+                                        errors.riskBasedContract
+                                    )}
+                                />
                             </FormGroup>
                             <FieldTextarea
                                 label="Submission description"

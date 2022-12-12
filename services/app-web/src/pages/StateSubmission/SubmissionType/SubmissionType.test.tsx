@@ -10,6 +10,7 @@ import { contractOnly } from '../../../common-code/healthPlanFormDataMocks'
 describe('SubmissionType', () => {
     const SubmissionTypeInitialValues: SubmissionTypeFormValues = {
         programIDs: ['ccc-plus'],
+        riskBasedContract: '',
         submissionDescription: '',
         submissionType: '',
     }

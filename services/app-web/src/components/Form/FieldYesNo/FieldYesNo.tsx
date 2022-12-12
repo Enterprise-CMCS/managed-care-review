@@ -19,13 +19,26 @@ import styles from './FieldYesNo.module.scss'
 export type FieldYesNoProps = {
     name: string
     label: string
+    hint?: React.ReactNode
     showError?: boolean
     id: string
 } & JSX.IntrinsicElements['input']
 
+export type FieldYesNoFormValue = 'YES' | 'NO' | undefined
+
+// Helpers used for reading and writing from db boolean types to formik string type of YES and NO
+export const booleanAsYesNoFormValue = (bool?: boolean): FieldYesNoFormValue =>
+    bool ? 'YES' : 'NO'
+export const yesNoFormValueAsBoolean = (
+    maybeString: FieldYesNoFormValue | string
+) => {
+    return maybeString === 'YES' ? true : false
+}
+
 export const FieldYesNo = ({
     name,
     label,
+    hint,
     showError = false,
     id,
     ...inputProps
@@ -44,6 +57,15 @@ export const FieldYesNo = ({
         >
             {showError && meta.error && (
                 <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>
+            )}
+            {hint && (
+                <div
+                    role="note"
+                    aria-labelledby={id}
+                    className="usa-hint margin-top-1"
+                >
+                    {hint}
+                </div>
             )}
             <span className={styles.optionsContainer}>
                 <FieldRadio
