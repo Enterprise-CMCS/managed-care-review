@@ -346,7 +346,7 @@ jobs:
       - name: check ip
         id: check-ip
         shell: bash
-        run: curl ifconfig.co/json
+        run: curl ifconfig.me/ip
 
       - name: Cypress hack
         run: |
