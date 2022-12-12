@@ -228,8 +228,6 @@ describe('0002_rate_programs_migration', () => {
                 migratedProto
             ).finish()
 
-        console.log(decodeOrError(migratedProtoBytes))
-
         const migratedFormData = toDomain(migratedProtoBytes)
 
         if (migratedFormData instanceof Error) {
