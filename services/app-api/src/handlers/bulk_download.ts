@@ -143,6 +143,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
         )
     } catch (e) {
         console.error('Got an error downloading the files from s3: ', e)
+        console.timeEnd('zipProcess')
         return {
             statusCode: 500,
             body: JSON.stringify(e.message),
@@ -226,6 +227,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
         await upload.done()
     } catch (e) {
         console.log('Error zipping or uploading', e)
+        console.timeEnd('zipProcess')
         return {
             statusCode: 500,
             body: JSON.stringify(e.message),
