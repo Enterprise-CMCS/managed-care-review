@@ -15,10 +15,10 @@ import styles from './HealthPlanPackageTable.module.scss'
 import { Table, Tag, Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
-import classnames from 'classnames'
 import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
 import { FilterAccordion, FilterSelect } from '../FilterAccordion'
 import statePrograms from '../../common-code/data/statePrograms.json'
+import { InfoTag, TagProps } from '../InfoTag/InfoTag'
 
 declare module '@tanstack/table-core' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -69,17 +69,18 @@ const StatusTag = ({
 }: {
     status: HealthPlanPackageStatus
 }): React.ReactElement => {
-    const tagStyles = classnames('', {
-        [styles.submittedTag]: isSubmitted(status),
-        [styles.draftTag]: status === 'DRAFT',
-        [styles.unlockedTag]: status === 'UNLOCKED',
-    })
+    let color: TagProps['color'] = 'gold'
+    if (isSubmitted(status)) {
+        color = 'green'
+    } else if (status === 'UNLOCKED') {
+        color = 'blue'
+    }
 
     const statusText = isSubmitted(status)
         ? SubmissionStatusRecord.SUBMITTED
         : SubmissionStatusRecord[status]
 
-    return <Tag className={tagStyles}>{statusText}</Tag>
+    return <InfoTag color={color}>{statusText}</InfoTag>
 }
 
 const stateOptions = statePrograms.states
