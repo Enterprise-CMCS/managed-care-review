@@ -126,13 +126,13 @@ describe('contacts', () => {
             //Fill out first actuary contact
             cy.findAllByLabelText('Name').eq(1).click().type('Actuary Contact Person')
             cy.findAllByLabelText('Title/Role').eq(1).type('Actuary Contact Title')
-            cy.findAllByLabelText('Email').eq(1).type('actuarycontact@test.com')
+            cy.findAllByLabelText('Email').eq(1).type('actuarycontact@example.com')
             cy.findAllByLabelText('Mercer').eq(0).safeClick()
 
             //Fill out second actuary contact
             cy.findAllByLabelText('Name').eq(2).click().type('Actuary Contact Person')
             cy.findAllByLabelText('Title/Role').eq(2).type('Actuary Contact Title')
-            cy.findAllByLabelText('Email').eq(2).type('actuarycontact@test.com')
+            cy.findAllByLabelText('Email').eq(2).type('actuarycontact@example.com')
             cy.findAllByLabelText('Mercer').eq(1).safeClick()
 
             // Actuary communication preference

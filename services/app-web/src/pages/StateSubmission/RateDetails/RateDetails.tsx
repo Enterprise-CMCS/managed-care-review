@@ -805,7 +805,7 @@ export const RateDetails = ({
                                                                     'YES' && (
                                                                     <>
                                                                         <Label
-                                                                            htmlFor={`rateInfos.${index}.rateProgramIDs`}
+                                                                            htmlFor={`rateInfos.${index}.packagesWithSharedRateCerts`}
                                                                         >
                                                                             Please
                                                                             select

@@ -49,6 +49,13 @@ export const featureFlags = {
         flag: 'rates-across-submissions',
         defaultValue: false,
     },
+    /**
+     * Enables filter on CMS dashboard
+     */
+    CMS_DASHBOARD_FILTER: {
+        flag: 'cms-dashboard-filter',
+        defaultValue: false,
+    },
 } as const
 
 export type FlagEnumType = keyof typeof featureFlags
