@@ -32,7 +32,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 class="usa-alert__text"
               >
                 <b>
-                  Unlocked by: 
+                  Unlocked by: 
                 </b>
                 bob@dmas.mn.gov
               </p>
@@ -40,10 +40,10 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 class="usa-alert__text"
               >
                 <b>
-                  Unlocked on: 
+                  Unlocked on: 
                 </b>
                 09/01/20 8:00pm
-                 ET
+                 ET
               </p>
               <p
                 class="expandableBlock"
@@ -54,7 +54,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                   data-testid="clampElement"
                 >
                   <b>
-                    Reason for unlock: 
+                    Reason for unlock: 
                   </b>
                   Test unlock reason
                 </span>
@@ -77,7 +77,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
             />
           </svg>
           <span>
-             Back to dashboard
+             Back to dashboard
           </span>
         </a>
         <section
@@ -432,60 +432,22 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               No documents
             </p>
           </div>
-          <table
-            class="borderTopLinearGradient uploadedDocumentsTable withMarginTop"
+          <div
+            class="withMarginTop"
           >
-            <caption
-              class="text-bold"
+            <b
+              class="captionContainer"
             >
-              <div
-                class="captionContainer"
-              >
-                <span>
-                  Contract supporting documents
-                </span>
-              </div>
-            </caption>
-            <thead>
-              <tr>
-                <th
-                  scope="col"
-                >
-                  Document name
-                </th>
-                <th
-                  scope="col"
-                >
-                  Date added
-                </th>
-                <th
-                  scope="col"
-                >
-                  Document category
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <a
-                    aria-label="contract doc (opens in new window)"
-                    class="usa-link usa-link--external"
-                    href="https://fakes3.com/key?sekret=deadbeef"
-                    target="_blank"
-                  >
-                    contract doc
-                  </a>
-                </td>
-                <td>
-                  8/19/22
-                </td>
-                <td>
-                  Contract-supporting
-                </td>
-              </tr>
-            </tbody>
-          </table>
+              <span>
+                Contract supporting documents
+              </span>
+            </b>
+            <p
+              class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
+            >
+              No supporting documents
+            </p>
+          </div>
         </section>
         <section
           class="summarySection"
@@ -1227,7 +1189,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 class="usa-alert__text"
               >
                 <b>
-                  Unlocked by: 
+                  Unlocked by: 
                 </b>
                 bob@dmas.mn.gov
               </p>
@@ -1235,10 +1197,10 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 class="usa-alert__text"
               >
                 <b>
-                  Unlocked on: 
+                  Unlocked on: 
                 </b>
                 09/01/20 8:00pm
-                 ET
+                 ET
               </p>
               <p
                 class="expandableBlock"
@@ -1249,7 +1211,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                   data-testid="clampElement"
                 >
                   <b>
-                    Reason for unlock: 
+                    Reason for unlock: 
                   </b>
                   Test unlock reason
                 </span>
@@ -1272,7 +1234,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
             />
           </svg>
           <span>
-             Back to dashboard
+             Back to dashboard
           </span>
         </a>
         <section
@@ -1627,60 +1589,22 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               No documents
             </p>
           </div>
-          <table
-            class="borderTopLinearGradient uploadedDocumentsTable withMarginTop"
+          <div
+            class="withMarginTop"
           >
-            <caption
-              class="text-bold"
+            <b
+              class="captionContainer"
             >
-              <div
-                class="captionContainer"
-              >
-                <span>
-                  Contract supporting documents
-                </span>
-              </div>
-            </caption>
-            <thead>
-              <tr>
-                <th
-                  scope="col"
-                >
-                  Document name
-                </th>
-                <th
-                  scope="col"
-                >
-                  Date added
-                </th>
-                <th
-                  scope="col"
-                >
-                  Document category
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <a
-                    aria-label="contract doc (opens in new window)"
-                    class="usa-link usa-link--external"
-                    href="https://fakes3.com/key?sekret=deadbeef"
-                    target="_blank"
-                  >
-                    contract doc
-                  </a>
-                </td>
-                <td>
-                  8/19/22
-                </td>
-                <td>
-                  Contract-supporting
-                </td>
-              </tr>
-            </tbody>
-          </table>
+              <span>
+                Contract supporting documents
+              </span>
+            </b>
+            <p
+              class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
+            >
+              No supporting documents
+            </p>
+          </div>
         </section>
         <section
           class="summarySection"
@@ -2428,7 +2352,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 class="usa-alert__text"
               >
                 <b>
-                  Unlocked by: 
+                  Unlocked by: 
                 </b>
                 bob@dmas.mn.gov
               </p>
@@ -2436,10 +2360,10 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 class="usa-alert__text"
               >
                 <b>
-                  Unlocked on: 
+                  Unlocked on: 
                 </b>
                 09/01/20 8:00pm
-                 ET
+                 ET
               </p>
               <p
                 class="expandableBlock"
@@ -2450,7 +2374,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                   data-testid="clampElement"
                 >
                   <b>
-                    Reason for unlock: 
+                    Reason for unlock: 
                   </b>
                   Test unlock reason
                 </span>
@@ -2473,7 +2397,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
             />
           </svg>
           <span>
-             Back to dashboard
+             Back to dashboard
           </span>
         </a>
         <section
@@ -2828,60 +2752,22 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               No documents
             </p>
           </div>
-          <table
-            class="borderTopLinearGradient uploadedDocumentsTable withMarginTop"
+          <div
+            class="withMarginTop"
           >
-            <caption
-              class="text-bold"
+            <b
+              class="captionContainer"
             >
-              <div
-                class="captionContainer"
-              >
-                <span>
-                  Contract supporting documents
-                </span>
-              </div>
-            </caption>
-            <thead>
-              <tr>
-                <th
-                  scope="col"
-                >
-                  Document name
-                </th>
-                <th
-                  scope="col"
-                >
-                  Date added
-                </th>
-                <th
-                  scope="col"
-                >
-                  Document category
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <a
-                    aria-label="contract doc (opens in new window)"
-                    class="usa-link usa-link--external"
-                    href="https://fakes3.com/key?sekret=deadbeef"
-                    target="_blank"
-                  >
-                    contract doc
-                  </a>
-                </td>
-                <td>
-                  8/19/22
-                </td>
-                <td>
-                  Contract-supporting
-                </td>
-              </tr>
-            </tbody>
-          </table>
+              <span>
+                Contract supporting documents
+              </span>
+            </b>
+            <p
+              class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
+            >
+              No supporting documents
+            </p>
+          </div>
         </section>
         <section
           class="summarySection"
@@ -3635,7 +3521,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 class="usa-alert__text"
               >
                 <b>
-                  Unlocked by: 
+                  Unlocked by: 
                 </b>
                 bob@dmas.mn.gov
               </p>
@@ -3643,10 +3529,10 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 class="usa-alert__text"
               >
                 <b>
-                  Unlocked on: 
+                  Unlocked on: 
                 </b>
                 09/01/20 8:00pm
-                 ET
+                 ET
               </p>
               <p
                 class="expandableBlock"
@@ -3657,7 +3543,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                   data-testid="clampElement"
                 >
                   <b>
-                    Reason for unlock: 
+                    Reason for unlock: 
                   </b>
                   Test unlock reason
                 </span>
@@ -3680,7 +3566,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
             />
           </svg>
           <span>
-             Back to dashboard
+             Back to dashboard
           </span>
         </a>
         <section
@@ -4035,60 +3921,22 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               No documents
             </p>
           </div>
-          <table
-            class="borderTopLinearGradient uploadedDocumentsTable withMarginTop"
+          <div
+            class="withMarginTop"
           >
-            <caption
-              class="text-bold"
+            <b
+              class="captionContainer"
             >
-              <div
-                class="captionContainer"
-              >
-                <span>
-                  Contract supporting documents
-                </span>
-              </div>
-            </caption>
-            <thead>
-              <tr>
-                <th
-                  scope="col"
-                >
-                  Document name
-                </th>
-                <th
-                  scope="col"
-                >
-                  Date added
-                </th>
-                <th
-                  scope="col"
-                >
-                  Document category
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <a
-                    aria-label="contract doc (opens in new window)"
-                    class="usa-link usa-link--external"
-                    href="https://fakes3.com/key?sekret=deadbeef"
-                    target="_blank"
-                  >
-                    contract doc
-                  </a>
-                </td>
-                <td>
-                  8/19/22
-                </td>
-                <td>
-                  Contract-supporting
-                </td>
-              </tr>
-            </tbody>
-          </table>
+              <span>
+                Contract supporting documents
+              </span>
+            </b>
+            <p
+              class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
+            >
+              No supporting documents
+            </p>
+          </div>
         </section>
         <section
           class="summarySection"
@@ -4848,7 +4696,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 class="usa-alert__text"
               >
                 <b>
-                  Unlocked by: 
+                  Unlocked by: 
                 </b>
                 bob@dmas.mn.gov
               </p>
@@ -4856,10 +4704,10 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 class="usa-alert__text"
               >
                 <b>
-                  Unlocked on: 
+                  Unlocked on: 
                 </b>
                 09/01/20 8:00pm
-                 ET
+                 ET
               </p>
               <p
                 class="expandableBlock"
@@ -4870,7 +4718,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                   data-testid="clampElement"
                 >
                   <b>
-                    Reason for unlock: 
+                    Reason for unlock: 
                   </b>
                   Test unlock reason
                 </span>
@@ -4893,7 +4741,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
             />
           </svg>
           <span>
-             Back to dashboard
+             Back to dashboard
           </span>
         </a>
         <section
@@ -5248,60 +5096,22 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               No documents
             </p>
           </div>
-          <table
-            class="borderTopLinearGradient uploadedDocumentsTable withMarginTop"
+          <div
+            class="withMarginTop"
           >
-            <caption
-              class="text-bold"
+            <b
+              class="captionContainer"
             >
-              <div
-                class="captionContainer"
-              >
-                <span>
-                  Contract supporting documents
-                </span>
-              </div>
-            </caption>
-            <thead>
-              <tr>
-                <th
-                  scope="col"
-                >
-                  Document name
-                </th>
-                <th
-                  scope="col"
-                >
-                  Date added
-                </th>
-                <th
-                  scope="col"
-                >
-                  Document category
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <a
-                    aria-label="contract doc (opens in new window)"
-                    class="usa-link usa-link--external"
-                    href="https://fakes3.com/key?sekret=deadbeef"
-                    target="_blank"
-                  >
-                    contract doc
-                  </a>
-                </td>
-                <td>
-                  8/19/22
-                </td>
-                <td>
-                  Contract-supporting
-                </td>
-              </tr>
-            </tbody>
-          </table>
+              <span>
+                Contract supporting documents
+              </span>
+            </b>
+            <p
+              class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
+            >
+              No supporting documents
+            </p>
+          </div>
         </section>
         <section
           class="summarySection"
@@ -6067,7 +5877,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 class="usa-alert__text"
               >
                 <b>
-                  Unlocked by: 
+                  Unlocked by: 
                 </b>
                 bob@dmas.mn.gov
               </p>
@@ -6075,10 +5885,10 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 class="usa-alert__text"
               >
                 <b>
-                  Unlocked on: 
+                  Unlocked on: 
                 </b>
                 09/01/20 8:00pm
-                 ET
+                 ET
               </p>
               <p
                 class="expandableBlock"
@@ -6089,7 +5899,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                   data-testid="clampElement"
                 >
                   <b>
-                    Reason for unlock: 
+                    Reason for unlock: 
                   </b>
                   Test unlock reason
                 </span>
@@ -6112,7 +5922,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
             />
           </svg>
           <span>
-             Back to dashboard
+             Back to dashboard
           </span>
         </a>
         <section
@@ -6467,60 +6277,22 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               No documents
             </p>
           </div>
-          <table
-            class="borderTopLinearGradient uploadedDocumentsTable withMarginTop"
+          <div
+            class="withMarginTop"
           >
-            <caption
-              class="text-bold"
+            <b
+              class="captionContainer"
             >
-              <div
-                class="captionContainer"
-              >
-                <span>
-                  Contract supporting documents
-                </span>
-              </div>
-            </caption>
-            <thead>
-              <tr>
-                <th
-                  scope="col"
-                >
-                  Document name
-                </th>
-                <th
-                  scope="col"
-                >
-                  Date added
-                </th>
-                <th
-                  scope="col"
-                >
-                  Document category
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <a
-                    aria-label="contract doc (opens in new window)"
-                    class="usa-link usa-link--external"
-                    href="https://fakes3.com/key?sekret=deadbeef"
-                    target="_blank"
-                  >
-                    contract doc
-                  </a>
-                </td>
-                <td>
-                  8/19/22
-                </td>
-                <td>
-                  Contract-supporting
-                </td>
-              </tr>
-            </tbody>
-          </table>
+              <span>
+                Contract supporting documents
+              </span>
+            </b>
+            <p
+              class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
+            >
+              No supporting documents
+            </p>
+          </div>
         </section>
         <section
           class="summarySection"
