@@ -336,7 +336,7 @@ jobs:
     timeout-minutes: 20
     needs: [deploy-app, finishing-prep]
     if: always() && needs.finishing-prep.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     container:
       image: cypress/browsers:node16.17.0-chrome106
       options: --user 1001
