@@ -22,6 +22,7 @@ export function newLocalS3Client(
             secretAccessKey: 'S3RVER', // pragma: allowlist secret; pre-set by serverless-s3-offline
         },
         endpoint: endpoint,
+        region: 'us-east',
     })
 
     return {
