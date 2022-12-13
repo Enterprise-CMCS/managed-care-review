@@ -254,6 +254,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
+      cypress-uuid: ${{ steps.uuid.outputs.value }}
 
     steps:
       - uses: actions/checkout@v3
@@ -298,6 +299,10 @@ jobs:
           endpoint=$(./output.sh storybook CloudFrontEndpointUrl $STAGE_NAME)
           echo $endpoint
           echo "::set-output name=storybook-endpoint::$endpoint"
+
+      - name: Generate unique ID for Cypress
+        id: uuid
+        run: echo "::set-output name=value::sha-$GITHUB_SHA-time-$(date +"%s")"
 
   end-deployment:
     needs: [begin-deployment, deploy-app, finishing-prep]
@@ -359,6 +364,7 @@ jobs:
           parallel: true
           browser: chrome
           group: 'Chrome'
+          ci-build-id: ${{ needs.finishing-prep.outputs.cypress-uuid }}
         env:
           REACT_APP_AUTH_MODE: AWS_COGNITO
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
