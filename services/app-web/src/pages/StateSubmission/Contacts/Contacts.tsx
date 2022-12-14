@@ -19,7 +19,6 @@ import { useNavigate } from 'react-router-dom'
 import styles from '../StateSubmissionForm.module.scss'
 
 import {
-    ActuaryContact,
     ActuarialFirmType,
     ActuaryCommunicationType,
 } from '../../../common-code/healthPlanFormDataType'
@@ -29,8 +28,6 @@ import { ErrorSummary, FieldRadio } from '../../../components/Form'
 import { useFocus } from '../../../hooks/useFocus'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
 import { ActuaryContactFields } from './ActuaryContactFields'
 
 export interface ContactsFormValues {
@@ -161,13 +158,6 @@ export const Contacts = ({
     showValidations?: HealthPlanFormPageProps['showValidations']
     updateDraft: HealthPlanFormPageProps['updateDraft']
 }): React.ReactElement => {
-    // Launch Darkly
-    const ldClient = useLDClient()
-    const showMultiRates = ldClient?.variation(
-        featureFlags.MULTI_RATE_SUBMISSIONS.flag,
-        featureFlags.MULTI_RATE_SUBMISSIONS.defaultValue
-    )
-
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const [focusNewContact, setFocusNewContact] = React.useState(false)
     const [focusNewActuaryContact, setFocusNewActuaryContact] =
@@ -220,27 +210,8 @@ export const Contacts = ({
     const showFieldErrors = (error?: FormError): boolean | undefined =>
         shouldValidate && Boolean(error)
 
-    /**
-     * Multi-rate-submissions flag off:
-     * Certifying actuary is displayed and filled out on this page, so we need to display it along with additional actuaries
-     * when flag is off.
-     *
-     * We do this by combining the certifying actuary of the first-rate certification with the actuaries in
-     * addtlActuaryContacts into one array.
-     */
-    const combineActuaries = () => {
-        if (draftSubmission.rateInfos[0]?.actuaryContacts.length) {
-            const certifyingActuary: ActuaryContact =
-                draftSubmission.rateInfos[0]?.actuaryContacts[0]
-            return [certifyingActuary, ...draftSubmission.addtlActuaryContacts]
-        }
-        return []
-    }
-
     const stateContacts = draftSubmission.stateContacts
-    const actuaryContacts = showMultiRates
-        ? draftSubmission.addtlActuaryContacts
-        : combineActuaries()
+    const actuaryContacts = draftSubmission.addtlActuaryContacts
 
     const emptyStateContact = {
         name: '',
@@ -260,14 +231,6 @@ export const Contacts = ({
         stateContacts.push(emptyStateContact)
     }
 
-    if (
-        actuaryContacts.length === 0 &&
-        includeActuaryContacts &&
-        !showMultiRates
-    ) {
-        actuaryContacts.push(emptyActuaryContact)
-    }
-
     const contactsInitialValues: ContactsFormValues = {
         stateContacts: stateContacts,
         actuaryContacts: actuaryContacts,
@@ -285,13 +248,10 @@ export const Contacts = ({
 
         if (contactText === 'State') {
             return `State contacts ${count} ${required}`
-        } else if (contactText === 'Actuary') {
-            if (!index && !showMultiRates)
-                return `Certifying actuary ${required}`
-            else
-                return `Additional actuary contact ${
-                    showMultiRates ? index + 1 : index
-                }`
+        }
+
+        if (contactText === 'Actuary') {
+            return `Additional actuary contact ${index + 1}`
         }
     }
 
@@ -307,18 +267,8 @@ export const Contacts = ({
          * Multi-rate-submissions flag off: first formik values.actuaryContacts is saved as the certifying actuary on the
          * first rate info. Any other  values.actuaryContacts are saved as additional actuary contacts
          */
-        if (showMultiRates && includeActuaryContacts) {
+        if (includeActuaryContacts) {
             draftSubmission.addtlActuaryContacts = values.actuaryContacts
-            draftSubmission.addtlActuaryCommunicationPreference =
-                values.actuaryCommunicationPreference
-        } else if (includeActuaryContacts) {
-            draftSubmission.rateInfos[0].actuaryContacts.splice(
-                0,
-                1,
-                values.actuaryContacts[0]
-            )
-            draftSubmission.addtlActuaryContacts =
-                values.actuaryContacts.splice(1)
             draftSubmission.addtlActuaryCommunicationPreference =
                 values.actuaryCommunicationPreference
         }
@@ -374,9 +324,7 @@ export const Contacts = ({
                                     State contacts
                                 </legend>
                                 <span id="form-guidance">
-                                    {includeActuaryContacts && !showMultiRates
-                                        ? 'A state and an actuary contact are required'
-                                        : 'A state contact is required'}
+                                    A state contact is required
                                 </span>
 
                                 {shouldValidate && (
@@ -564,16 +512,12 @@ export const Contacts = ({
                             {includeActuaryContacts && (
                                 <>
                                     <fieldset className="usa-fieldset">
-                                        <h3>
-                                            {showMultiRates
-                                                ? 'Additional Actuary Contacts'
-                                                : 'Actuary contacts'}
-                                        </h3>
+                                        <h3>Additional Actuary Contacts</h3>
 
                                         <p>
-                                            {showMultiRates
-                                                ? 'Provide contact information for any additional actuaries who worked directly on this submission.'
-                                                : 'Provide contact information for the actuaries who worked directly on this submission.'}
+                                            Provide contact information for any
+                                            additional actuaries who worked
+                                            directly on this submission.
                                         </p>
                                         <legend className="srOnly">
                                             Actuary contacts
@@ -623,9 +567,8 @@ export const Contacts = ({
                                                                                 el)
                                                                         }
                                                                     />
-                                                                    {(index >
-                                                                        0 ||
-                                                                        showMultiRates) && (
+                                                                    {index >
+                                                                        0 && (
                                                                         <Button
                                                                             type="button"
                                                                             unstyled
@@ -662,115 +605,54 @@ export const Contacts = ({
                                                             newActuaryContactButtonRef
                                                         }
                                                     >
-                                                        {showMultiRates
-                                                            ? `Add actuary contact`
-                                                            : `Add another actuary contact`}
+                                                        Add actuary contact
                                                     </button>
                                                 </div>
                                             )}
                                         </FieldArray>
-
-                                        {!showMultiRates && (
-                                            <>
-                                                <legend className="srOnly">
-                                                    Actuarial communication
-                                                    preference
-                                                </legend>
-                                                <FormGroup
-                                                    error={showFieldErrors(
-                                                        errors.actuaryCommunicationPreference
-                                                    )}
-                                                >
-                                                    <Fieldset
-                                                        className={
-                                                            styles.radioGroup
-                                                        }
-                                                        legend="Communication preference between CMS Office of the Actuary (OACT) and the state’s actuary"
-                                                    >
-                                                        {showFieldErrors(
-                                                            `True`
-                                                        ) && (
-                                                            <ErrorMessage
-                                                                name={`actuaryCommunicationPreference`}
-                                                                component="div"
-                                                                className="usa-error-message"
-                                                            />
-                                                        )}
-                                                        <FieldRadio
-                                                            id="OACTtoActuary"
-                                                            name="actuaryCommunicationPreference"
-                                                            label={`OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`}
-                                                            value={
-                                                                'OACT_TO_ACTUARY'
-                                                            }
-                                                            aria-required
-                                                        />
-                                                        <FieldRadio
-                                                            id="OACTtoState"
-                                                            name="actuaryCommunicationPreference"
-                                                            label={`OACT can communicate directly with the state, and the state will relay all written communication to their actuaries and set up time for any potential verbal discussions.`}
-                                                            value={
-                                                                'OACT_TO_STATE'
-                                                            }
-                                                            aria-required
-                                                        />
-                                                    </Fieldset>
-                                                </FormGroup>
-                                            </>
-                                        )}
                                     </fieldset>
 
-                                    {showMultiRates && (
-                                        <fieldset className="usa-fieldset">
-                                            <h3>
-                                                Actuaries' communication
-                                                preference
-                                            </h3>
+                                    <fieldset className="usa-fieldset">
+                                        <h3>
+                                            Actuaries' communication preference
+                                        </h3>
 
-                                            <legend className="srOnly">
-                                                Actuarial communication
-                                                preference
-                                            </legend>
-                                            <FormGroup
-                                                error={showFieldErrors(
-                                                    errors.actuaryCommunicationPreference
-                                                )}
+                                        <legend className="srOnly">
+                                            Actuarial communication preference
+                                        </legend>
+                                        <FormGroup
+                                            error={showFieldErrors(
+                                                errors.actuaryCommunicationPreference
+                                            )}
+                                        >
+                                            <Fieldset
+                                                className={styles.radioGroup}
+                                                legend="Communication preference between CMS Office of the Actuary (OACT) and all state’s actuaries (i.e. certifying actuaries and additional actuary contacts)"
                                             >
-                                                <Fieldset
-                                                    className={
-                                                        styles.radioGroup
-                                                    }
-                                                    legend="Communication preference between CMS Office of the Actuary (OACT) and all state’s actuaries (i.e. certifying actuaries and additional actuary contacts)"
-                                                >
-                                                    {showFieldErrors(
-                                                        `True`
-                                                    ) && (
-                                                        <ErrorMessage
-                                                            name={`actuaryCommunicationPreference`}
-                                                            component="div"
-                                                            className="usa-error-message"
-                                                        />
-                                                    )}
-                                                    <FieldRadio
-                                                        id="OACTtoActuary"
-                                                        name="actuaryCommunicationPreference"
-                                                        label={`OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`}
-                                                        value={
-                                                            'OACT_TO_ACTUARY'
-                                                        }
-                                                        aria-required
+                                                {showFieldErrors(`True`) && (
+                                                    <ErrorMessage
+                                                        name={`actuaryCommunicationPreference`}
+                                                        component="div"
+                                                        className="usa-error-message"
                                                     />
-                                                    <FieldRadio
-                                                        id="OACTtoState"
-                                                        name="actuaryCommunicationPreference"
-                                                        label={`OACT can communicate directly with the state, and the state will relay all written communication to their actuaries and set up time for any potential verbal discussions.`}
-                                                        value={'OACT_TO_STATE'}
-                                                        aria-required
-                                                    />
-                                                </Fieldset>
-                                            </FormGroup>
-                                        </fieldset>
-                                    )}
+                                                )}
+                                                <FieldRadio
+                                                    id="OACTtoActuary"
+                                                    name="actuaryCommunicationPreference"
+                                                    label={`OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`}
+                                                    value={'OACT_TO_ACTUARY'}
+                                                    aria-required
+                                                />
+                                                <FieldRadio
+                                                    id="OACTtoState"
+                                                    name="actuaryCommunicationPreference"
+                                                    label={`OACT can communicate directly with the state, and the state will relay all written communication to their actuaries and set up time for any potential verbal discussions.`}
+                                                    value={'OACT_TO_STATE'}
+                                                    aria-required
+                                                />
+                                            </Fieldset>
+                                        </FormGroup>
+                                    </fieldset>
                                 </>
                             )}
 
