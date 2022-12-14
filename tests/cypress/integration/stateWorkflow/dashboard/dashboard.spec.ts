@@ -76,7 +76,8 @@ describe('dashboard', () => {
                 throw new Error('No submission name found' + loc.search)
             }
             cy.findByText(`${submissionName} was sent to CMS`).should('exist')
-            cy.findByText(submissionName).should('exist').click()
+            cy.findByText(submissionName).should('exist')
+            cy.findByText(submissionName).click()
             cy.url({ timeout: 10_000 }).should('contain', submissionId)
             cy.findByTestId('submission-summary').should('exist')
             cy.findByRole('heading', {
