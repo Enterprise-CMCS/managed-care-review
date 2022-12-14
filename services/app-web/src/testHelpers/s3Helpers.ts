@@ -2,6 +2,7 @@ import { S3ClientT } from '../s3'
 import { parseKey } from '../common-code/s3URLEncoding'
 
 export const testS3Client: () => S3ClientT = () => {
+    console.log('jj using test client')
     return {
         uploadFile: async (file: File): Promise<string> => {
             return `${Date.now()}-${file.name}`
