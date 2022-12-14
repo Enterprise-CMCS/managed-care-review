@@ -120,10 +120,6 @@ export const RateDetails = ({
 
     // Launch Darkly
     const ldClient = useLDClient()
-    const showMultiRates = ldClient?.variation(
-        featureFlags.MULTI_RATE_SUBMISSIONS.flag,
-        featureFlags.MULTI_RATE_SUBMISSIONS.defaultValue
-    )
     const showRatesAcrossSubs = ldClient?.variation(
         featureFlags.RATES_ACROSS_SUBMISSIONS.flag,
         featureFlags.RATES_ACROSS_SUBMISSIONS.defaultValue
@@ -143,7 +139,6 @@ export const RateDetails = ({
 
     const rateDetailsFormSchema = RateDetailsFormSchema({
         'rates-across-submissions': showRatesAcrossSubs,
-        'multi-rate-submissions': showMultiRates,
     })
 
     const { loading, error } = useIndexHealthPlanPackagesQuery({
@@ -385,18 +380,14 @@ export const RateDetails = ({
         shouldValidate && Boolean(error)
 
     //Return only the first-rate info if multi-rate submission feature flag is off
-    const rateInfosInitialValues: RateInfoArrayType = showMultiRates
-        ? {
-              rateInfos:
-                  draftSubmission.rateInfos.length > 0
-                      ? draftSubmission.rateInfos.map((rateInfo) =>
-                            rateInfoFormValues(rateInfo)
-                        )
-                      : [rateInfoFormValues()],
-          }
-        : {
-              rateInfos: [rateInfoFormValues(draftSubmission.rateInfos[0])],
-          }
+    const rateInfosInitialValues: RateInfoArrayType = {
+        rateInfos:
+            draftSubmission.rateInfos.length > 0
+                ? draftSubmission.rateInfos.map((rateInfo) =>
+                      rateInfoFormValues(rateInfo)
+                  )
+                : [rateInfoFormValues()],
+    }
 
     const processFileItems = (fileItems: FileItemT[]): SubmissionDocument[] => {
         return fileItems.reduce((formDataDocuments, fileItem) => {
@@ -1438,89 +1429,78 @@ export const RateDetails = ({
                                                                 </FormGroup>
                                                             </>
                                                         )}
-                                                        {showMultiRates && (
-                                                            <FormGroup>
-                                                                <ActuaryContactFields
-                                                                    actuaryContact={
-                                                                        rateInfo
-                                                                            .actuaryContacts[0]
-                                                                    }
-                                                                    errors={
-                                                                        errors
-                                                                    }
-                                                                    shouldValidate={
-                                                                        shouldValidate
-                                                                    }
-                                                                    fieldNamePrefix={`rateInfos.${index}.actuaryContacts.0`}
-                                                                    fieldSetLegend="Certifying Actuary"
-                                                                />
-                                                            </FormGroup>
+                                                        <FormGroup>
+                                                            <ActuaryContactFields
+                                                                actuaryContact={
+                                                                    rateInfo
+                                                                        .actuaryContacts[0]
+                                                                }
+                                                                errors={errors}
+                                                                shouldValidate={
+                                                                    shouldValidate
+                                                                }
+                                                                fieldNamePrefix={`rateInfos.${index}.actuaryContacts.0`}
+                                                                fieldSetLegend="Certifying Actuary"
+                                                            />
+                                                        </FormGroup>
+                                                        {index >= 1 && (
+                                                            <Button
+                                                                type="button"
+                                                                unstyled
+                                                                className={
+                                                                    styles.removeContactBtn
+                                                                }
+                                                                onClick={() => {
+                                                                    setFileItemsMatrix(
+                                                                        (
+                                                                            fileMatrix
+                                                                        ) => {
+                                                                            const newMatrix =
+                                                                                [
+                                                                                    ...fileMatrix,
+                                                                                ]
+                                                                            newMatrix.splice(
+                                                                                index,
+                                                                                1
+                                                                            )
+                                                                            return newMatrix
+                                                                        }
+                                                                    )
+                                                                    remove(
+                                                                        index
+                                                                    )
+                                                                    setNewRateButtonFocus()
+                                                                }}
+                                                            >
+                                                                Remove rate
+                                                                certification
+                                                            </Button>
                                                         )}
-                                                        {index >= 1 &&
-                                                            showMultiRates && (
-                                                                <Button
-                                                                    type="button"
-                                                                    unstyled
-                                                                    className={
-                                                                        styles.removeContactBtn
-                                                                    }
-                                                                    onClick={() => {
-                                                                        setFileItemsMatrix(
-                                                                            (
-                                                                                fileMatrix
-                                                                            ) => {
-                                                                                const newMatrix =
-                                                                                    [
-                                                                                        ...fileMatrix,
-                                                                                    ]
-                                                                                newMatrix.splice(
-                                                                                    index,
-                                                                                    1
-                                                                                )
-                                                                                return newMatrix
-                                                                            }
-                                                                        )
-                                                                        remove(
-                                                                            index
-                                                                        )
-                                                                        setNewRateButtonFocus()
-                                                                    }}
-                                                                >
-                                                                    Remove rate
-                                                                    certification
-                                                                </Button>
-                                                            )}
                                                     </Fieldset>
                                                 )
                                             )}
-                                            {showMultiRates && (
-                                                <button
-                                                    type="button"
-                                                    className={`usa-button usa-button--outline ${styles.addContactBtn}`}
-                                                    onClick={() => {
-                                                        const newRate =
-                                                            rateInfoFormValues()
-                                                        push(newRate)
-                                                        setFileItemsMatrix(
-                                                            (fileMatrix) => {
-                                                                const newMatrix =
-                                                                    [
-                                                                        ...fileMatrix,
-                                                                    ]
-                                                                newMatrix.push(
-                                                                    []
-                                                                )
-                                                                return newMatrix
-                                                            }
-                                                        )
-                                                        setFocusNewRate(true)
-                                                    }}
-                                                    ref={newRateButtonRef}
-                                                >
-                                                    Add another rate
-                                                    certification
-                                                </button>
-                                            )}
+                                            <button
+                                                type="button"
+                                                className={`usa-button usa-button--outline ${styles.addContactBtn}`}
+                                                onClick={() => {
+                                                    const newRate =
+                                                        rateInfoFormValues()
+                                                    push(newRate)
+                                                    setFileItemsMatrix(
+                                                        (fileMatrix) => {
+                                                            const newMatrix = [
+                                                                ...fileMatrix,
+                                                            ]
+                                                            newMatrix.push([])
+                                                            return newMatrix
+                                                        }
+                                                    )
+                                                    setFocusNewRate(true)
+                                                }}
+                                                ref={newRateButtonRef}
+                                            >
+                                                Add another rate certification
+                                            </button>
                                         </>
                                     )}
                                 </FieldArray>
