@@ -328,7 +328,7 @@ jobs:
 
   cypress:
     name: cypress-run
-    timeout-minutes: 15
+    timeout-minutes: 20
     needs: [deploy-app, finishing-prep]
     if: always() && needs.finishing-prep.result == 'success'
     runs-on: ubuntu-latest
@@ -342,6 +342,11 @@ jobs:
         containers: [1, 2, 3, 4, 5, 6]
     steps:
       - uses: actions/checkout@v3
+
+      - name: check ip
+        id: check-ip
+        shell: bash
+        run: curl ifconfig.me/ip
 
       - name: Cypress hack
         run: |
