@@ -11,7 +11,7 @@ on:
 jobs:
   begin-deployment:
     name: Begin Deployment
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     permissions:
       deployments: write
     outputs:
@@ -84,8 +84,7 @@ jobs:
 
   web-unit-tests:
     name: test - web unit tests
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -117,8 +116,7 @@ jobs:
 
   api-unit-tests:
     name: test - api unit tests
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-20.04
     services:
       postgres:
         image: postgres:13.3
@@ -166,7 +164,7 @@ jobs:
 
   build-prisma-client-lambda-layer:
     name: build - postgres prisma layer
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -251,7 +249,7 @@ jobs:
       always() 
       && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') 
       && (needs.deploy-app.result == 'success' || needs.deploy-app.result == 'skipped')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     outputs:
       application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
       cypress-uuid: ${{ steps.uuid.outputs.value }}
@@ -308,7 +306,7 @@ jobs:
     needs: [begin-deployment, deploy-app, finishing-prep]
     if: always() && needs.begin-deployment.result == 'success'
     name: End Deployment
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     permissions:
       deployments: write
     steps:
