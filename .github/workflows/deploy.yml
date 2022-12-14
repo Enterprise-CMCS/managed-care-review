@@ -348,6 +348,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: check ip
+        id: check-ip
+        shell: bash
+        run: curl ifconfig.me/ip
+
       - name: Cypress hack
         run: |
           export DISPLAY=:1
