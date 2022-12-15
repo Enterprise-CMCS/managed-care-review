@@ -398,6 +398,7 @@ const toDomain = (
         stateNumber,
         programIds,
         submissionType,
+        riskBasedContract,
         submissionDescription,
         stateContacts,
         contractInfo,
@@ -427,6 +428,7 @@ const toDomain = (
         ),
         stateCode: enumToDomain(mcreviewproto.StateCode, stateCode),
         submissionDescription: submissionDescription ?? undefined,
+        riskBasedContract: riskBasedContract ?? undefined,
         stateNumber: stateNumber ?? undefined,
 
         programIDs: programIds,
