@@ -281,6 +281,18 @@ resources:
       Properties:
         ResourceArn: arn:aws:apigateway:${self:provider.region}::/restapis/${self:custom.appApiGatewayId}/stages/${sls:stage}
         WebACLArn: ${self:custom.appApiWafAclArn}
+
+    WafIPRuleSet:
+      Type: AWS::WAFv2::IPSet
+      DependsOn: 'ApiGatewayDeployment${sls:instanceId}'
+      Properties:
+        Addresses:
+          - 172.160.0.0/11
+        Description: 'An allowlist for IP addresses to access our application'
+        IPAddressVersion: IPV4
+        Name: gha-allow-list-${sls:stage}
+        Scope: REGIONAL
+
   Outputs:
     ApiAuthMode:
       Value: ${self:custom.reactAppAuthMode}
