@@ -36,6 +36,8 @@ import {
     booleanAsYesNoFormValue,
     yesNoFormValueAsBoolean,
 } from '../../../components/Form/FieldYesNo/FieldYesNo'
+import { featureFlags } from '../../../common-code/featureFlags'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
@@ -78,6 +80,13 @@ export const SubmissionType = ({
     const isNewSubmission = location.pathname === '/submissions/new'
 
     const statePrograms = useStatePrograms()
+
+    // Launch Darkly
+    const ldClient = useLDClient()
+    const showRateCertAssurance = ldClient?.variation(
+        featureFlags.RATE_CERT_ASSURANCE.flag,
+        featureFlags.RATE_CERT_ASSURANCE.defaultValue
+    )
 
     const [createHealthPlanPackage, { error }] =
         useCreateHealthPlanPackageMutation({
@@ -353,15 +362,17 @@ export const SubmissionType = ({
                                     errors.riskBasedContract
                                 )}
                             >
-                                <FieldYesNo
-                                    id="riskBasedContract"
-                                    name="riskBasedContract"
-                                    label="Is this a risk-based contract?"
-                                    hint="See 42 CFR § 438.2"
-                                    showError={showFieldErrors(
-                                        errors.riskBasedContract
-                                    )}
-                                />
+                                {showRateCertAssurance && (
+                                    <FieldYesNo
+                                        id="riskBasedContract"
+                                        name="riskBasedContract"
+                                        label="Is this a risk-based contract?"
+                                        hint="See 42 CFR § 438.2"
+                                        showError={showFieldErrors(
+                                            errors.riskBasedContract
+                                        )}
+                                    />
+                                )}
                             </FormGroup>
                             <FieldTextarea
                                 label="Submission description"

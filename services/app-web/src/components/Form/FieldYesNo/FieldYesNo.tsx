@@ -26,12 +26,17 @@ export type FieldYesNoProps = {
     variant?: 'PRIMARY' | 'SECONDARY' // secondary variant used for nested fields yes/no fields under an overarching heading
 } & JSX.IntrinsicElements['input']
 
-export type FieldYesNoFormValue = 'YES' | 'NO' | undefined
+export type FieldYesNoFormValue = 'YES' | 'NO' | undefined // Use for formik string value
+export type FieldYesNoUserValue = 'Yes' | 'No' | undefined // Use for user facing display
 
 // Helpers used for reading and writing from db boolean types to formik string type of YES and NO
 export const booleanAsYesNoFormValue = (bool?: boolean): FieldYesNoFormValue =>
     bool ? 'YES' : bool === false ? 'NO' : undefined
 
+export const booleanAsYesNoUserValue = (bool?: boolean): FieldYesNoUserValue =>
+    bool ? 'Yes' : bool === false ? 'No' : undefined
+
+// Use for db stored value
 export const yesNoFormValueAsBoolean = (
     maybeString: FieldYesNoFormValue | string
 ) => {
