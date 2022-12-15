@@ -34,6 +34,7 @@ import {
     PoliteErrorMessage,
     ProgramSelect,
     PackageSelect,
+    FieldYesNo,
 } from '../../../components'
 import type { PackageOptionType } from '../../../components/Select'
 import {
@@ -751,11 +752,13 @@ export const RateDetails = ({
                                                                     )
                                                                 }
                                                             >
-                                                                <Fieldset
+                                                                <FieldYesNo
                                                                     className={
                                                                         styles.radioGroup
                                                                     }
-                                                                    legend="Was
+                                                                    id={`hasSharedRateCert.${index}.`}
+                                                                    name={`rateInfos.${index}.hasSharedRateCert`}
+                                                                    label="Was
                                                                                 this
                                                                                 rate
                                                                                 certification
@@ -764,10 +767,7 @@ export const RateDetails = ({
                                                                                 any
                                                                                 other
                                                                                 submissions?"
-                                                                    role="radiogroup"
-                                                                    aria-required
-                                                                >
-                                                                    {showFieldErrors(
+                                                                    showError={showFieldErrors(
                                                                         rateErrorHandling(
                                                                             errors
                                                                                 ?.rateInfos?.[
@@ -775,31 +775,8 @@ export const RateDetails = ({
                                                                             ]
                                                                         )
                                                                             ?.hasSharedRateCert
-                                                                    ) && (
-                                                                        <PoliteErrorMessage>
-                                                                            {getIn(
-                                                                                errors,
-                                                                                `rateInfos.${index}.hasSharedRateCert`
-                                                                            )}
-                                                                        </PoliteErrorMessage>
                                                                     )}
-                                                                    <FieldRadio
-                                                                        id={`hasSharedRateCertYes-${index}`}
-                                                                        name={`rateInfos.${index}.hasSharedRateCert`}
-                                                                        label="Yes"
-                                                                        value={
-                                                                            'YES'
-                                                                        }
-                                                                    />
-                                                                    <FieldRadio
-                                                                        id={`hasSharedRateCertNo-${index}`}
-                                                                        name={`rateInfos.${index}.hasSharedRateCert`}
-                                                                        label="No"
-                                                                        value={
-                                                                            'NO'
-                                                                        }
-                                                                    />
-                                                                </Fieldset>
+                                                                />
 
                                                                 {rateInfo.hasSharedRateCert ===
                                                                     'YES' && (
