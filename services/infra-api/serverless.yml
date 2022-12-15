@@ -8,7 +8,6 @@ plugins:
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
   - serverless-iam-helper
-  - '@enterprise-cmcs/serverless-waf-plugin'
 
 custom:
   stage: ${opt:stage, self:provider.stage}
@@ -83,6 +82,109 @@ resources:
         ResponseType: DEFAULT_5XX
         RestApiId: !Ref AppApiGateway
 
+    CMSWafAcl:
+      Type: 'AWS::WAFv2::WebACL'
+      DependsOn: 'WafIPRuleSet'
+      Properties:
+        Name: ${sls:stage}-infra-api-webacl
+        DefaultAction:
+          Block: {}
+        Scope: REGIONAL
+        VisibilityConfig:
+          CloudWatchMetricsEnabled: true
+          SampledRequestsEnabled: true
+          MetricName: ${sls:stage}-infra-api-webacl-webacl
+        Rules:
+          - Name: ${sls:stage}-infra-api-webacl-DDOSRateLimitRule
+            Priority: 0
+            Action:
+              Block: {}
+            Statement:
+              RateBasedStatement:
+                Limit: 5000
+                AggregateKeyType: IP
+            VisibilityConfig:
+              SampledRequestsEnabled: true
+              CloudWatchMetricsEnabled: true
+              MetricName: ${sls:stage}-infra-api-webacl-DDOSRateLimitRuleMetric
+          - Name: ${sls:stage}-infra-api-webacl-AWSCommonRule
+            Priority: 1
+            OverrideAction:
+              None: {}
+            Statement:
+              ManagedRuleGroupStatement:
+                VendorName: AWS
+                Name: AWSManagedRulesCommonRuleSet
+                ExcludedRules: []
+            VisibilityConfig:
+              SampledRequestsEnabled: true
+              CloudWatchMetricsEnabled: true
+              MetricName: ${sls:stage}-infra-api-webacl-AWSCommonRuleMetric
+          - Name: ${sls:stage}-infra-api-webacl-AWSManagedRulesAmazonIpReputationList
+            Priority: 2
+            OverrideAction:
+              None: {}
+            Statement:
+              ManagedRuleGroupStatement:
+                VendorName: AWS
+                Name: AWSManagedRulesAmazonIpReputationList
+                ExcludedRules: []
+            VisibilityConfig:
+              SampledRequestsEnabled: true
+              CloudWatchMetricsEnabled: true
+              MetricName: >-
+                ${sls:stage}-infra-api-webacl-AWSManagedRulesAmazonIpReputationListMetric
+          - Name: ${sls:stage}-infra-api-webacl-AWSManagedRulesKnownBadInputsRuleSet
+            Priority: 3
+            OverrideAction:
+              None: {}
+            Statement:
+              ManagedRuleGroupStatement:
+                VendorName: AWS
+                Name: AWSManagedRulesKnownBadInputsRuleSet
+                ExcludedRules: []
+            VisibilityConfig:
+              SampledRequestsEnabled: true
+              CloudWatchMetricsEnabled: true
+              MetricName: >-
+                ${sls:stage}-infra-api-webacl-AWSManagedRulesKnownBadInputsRuleSetMetric
+          - Name: ${sls:stage}-infra-api-webacl-allow-usa-plus-territories
+            Priority: 5
+            Action:
+              Allow: {}
+            Statement:
+              GeoMatchStatement:
+                CountryCodes:
+                  - GU
+                  - PR
+                  - US
+                  - UM
+                  - VI
+                  - MP
+            VisibilityConfig:
+              SampledRequestsEnabled: true
+              CloudWatchMetricsEnabled: true
+              MetricName: ${sls:stage}-infra-api-webacl-allow-usa-plus-territories-metric
+          - Name: ${sls:stage}-infra-api-webacl-allow-ips
+            Priority: 6
+            Action:
+              Allow: {}
+            Statement:
+              IPSetReferenceStatement:
+                Arn: !GetAtt WafIPRuleSet.Arn
+
+    WafIPRuleSet:
+      Type: AWS::WAFv2::IPSet
+      DependsOn: 'ApiGatewayDeployment${sls:instanceId}'
+      Properties:
+        Addresses:
+          - 172.160.0.0/11
+        Description: 'An allowlist for IP addresses to access our application'
+        IPAddressVersion: IPV4
+        Name: gha-allow-list-${sls:stage}
+        Scope: REGIONAL
+
+    # NewRelic exporting configs
     NewRelicInfraIntegrations:
       Type: AWS::IAM::Role
       Condition: CreateNRInfraMonitoring
@@ -221,35 +323,6 @@ resources:
         RoleArn: !GetAtt MetricStreamRole.Arn
         OutputFormat: 'opentelemetry0.7'
 
-    # AppApiGatewayAcl:
-    #   Type: AWS::WAFv2::WebACL
-    #   Properties:
-    #     DefaultAction:
-    #       Block: {}
-    #     Rules:
-    #       - Action:
-    #           Allow: {}
-    #         Name: ${sls:stage}-allow-usa-plus-territories
-    #         Priority: 0
-    #         Statement:
-    #           GeoMatchStatement:
-    #             CountryCodes:
-    #               - GU # Guam
-    #               - PR # Puerto Rico
-    #               - US # USA
-    #               - UM # US Minor Outlying Islands
-    #               - VI # US Virgin Islands
-    #               - MP # Northern Mariana Islands
-    #         VisibilityConfig:
-    #           SampledRequestsEnabled: true
-    #           CloudWatchMetricsEnabled: true
-    #           MetricName: WafWebAcl
-    #     Scope: REGIONAL
-    #     VisibilityConfig:
-    #       CloudWatchMetricsEnabled: true
-    #       SampledRequestsEnabled: true
-    #       MetricName: ${sls:stage}-webacl
-
   Outputs:
     ApiGatewayRestApiId:
       Value:
@@ -264,5 +337,5 @@ resources:
     WafPluginAclArn:
       Value:
         Fn::GetAtt:
-          - WafPluginAcl
+          - CMSWafAcl
           - Arn
