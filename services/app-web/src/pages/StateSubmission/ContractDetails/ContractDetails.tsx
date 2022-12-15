@@ -854,6 +854,9 @@ export const ContractDetails = ({
                                                 {modifiedProvisionKeys.map(
                                                     (modifiedProvisionName) => (
                                                         <FieldYesNo
+                                                            key={
+                                                                modifiedProvisionName
+                                                            }
                                                             id={
                                                                 modifiedProvisionName
                                                             }
