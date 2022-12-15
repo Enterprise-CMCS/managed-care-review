@@ -35,12 +35,11 @@ const renderWithProviders = (
         routerProvider = {},
         apolloProvider = {},
         authProvider = {},
-        s3Provider = undefined,
         location = undefined,
     } = options || {}
 
     const { route } = routerProvider
-    const s3Client: S3ClientT = s3Provider ?? testS3Client()
+    const s3Client: S3ClientT = testS3Client()
 
     return render(
         <MockedProvider {...apolloProvider}>
