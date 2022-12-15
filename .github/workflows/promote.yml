@@ -8,7 +8,7 @@ on:
 jobs:
   unit-tests:
     name: test - unit tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     outputs:
       app-version: ${{ steps.branch-name.outputs.app-version}}
       changed-services: "[
@@ -75,7 +75,7 @@ jobs:
 
   build-prisma-client-lambda-layer:
     name: build - postgres prisma layer
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -195,8 +195,10 @@ jobs:
   cypress-prod:
     name: prod - cypress
     needs: [promote-app-prod]
-    runs-on: ubuntu-latest
-    container: cypress/browsers:node14.17.0-chrome91-ff89
+    runs-on: ubuntu-20.04
+    container:
+      image: cypress/browsers:node16.17.0-chrome106
+      options: --user 1001
     strategy:
       fail-fast: false
 
@@ -207,6 +209,10 @@ jobs:
         id: check-ip
         shell: bash
         run: curl ifconfig.me/ip
+
+      - name: Generate unique ID for Cypress
+        id: uuid
+        run: echo "::set-output name=value::sha-$GITHUB_SHA-time-$(date +"%s")"
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -227,7 +233,7 @@ jobs:
           parallel: false
           browser: chrome
           group: 'Chrome - prod'
-          ci-build-id: 'cypress-prod'
+          ci-build-id: ${{ steps.uuid.outputs.value }}
         env:
           REACT_APP_AUTH_MODE: IDM
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -235,14 +241,14 @@ jobs:
 
       - name: Upload cypress video
         uses: actions/upload-artifact@v3
-        if: failure() && steps.cypressprod.outcome == 'failure'
+        if: failure() && steps.cypress.outcome == 'failure'
         with:
           name: cypress-videos
           path: tests/cypress/videos
 
   slack:
     name: Slack notification on failure
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: [cypress-prod, promote-app-val]
     if: always()
     steps:
