@@ -130,7 +130,7 @@ export const SubmissionType = ({
 
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
-
+    console.log(draftSubmission?.riskBasedContract)
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
         programIDs: draftSubmission?.programIDs ?? [],
         riskBasedContract:
@@ -204,6 +204,9 @@ export const SubmissionType = ({
             draftSubmission.programIDs = values.programIDs
             draftSubmission.submissionType =
                 values.submissionType as SubmissionTypeT
+            draftSubmission.riskBasedContract = yesNoFormValueAsBoolean(
+                values.riskBasedContract
+            )
             draftSubmission.submissionDescription = values.submissionDescription
 
             try {
@@ -345,10 +348,14 @@ export const SubmissionType = ({
                                     />
                                 </Fieldset>
                             </FormGroup>
-                            <FormGroup>
+                            <FormGroup
+                                error={showFieldErrors(
+                                    errors.riskBasedContract
+                                )}
+                            >
                                 <FieldYesNo
                                     id="riskBasedContract"
-                                    name="riskBasedContractName"
+                                    name="riskBasedContract"
                                     label="Is this a risk-based contract?"
                                     hint="See 42 CFR § 438.2"
                                     showError={showFieldErrors(

@@ -5,6 +5,7 @@ import { FieldRadio } from '../FieldRadio/FieldRadio'
 import { PoliteErrorMessage } from '../../'
 
 import styles from './FieldYesNo.module.scss'
+import classNames from 'classnames'
 
 /**
  * This component renders a pair of radio buttons with Yes and No as the options.
@@ -22,13 +23,15 @@ export type FieldYesNoProps = {
     hint?: React.ReactNode
     showError?: boolean
     id: string
+    variant?: 'PRIMARY' | 'SECONDARY' // secondary variant used for nested fields yes/no fields under an overarching heading
 } & JSX.IntrinsicElements['input']
 
 export type FieldYesNoFormValue = 'YES' | 'NO' | undefined
 
 // Helpers used for reading and writing from db boolean types to formik string type of YES and NO
 export const booleanAsYesNoFormValue = (bool?: boolean): FieldYesNoFormValue =>
-    bool ? 'YES' : 'NO'
+    bool ? 'YES' : bool === false ? 'NO' : undefined
+
 export const yesNoFormValueAsBoolean = (
     maybeString: FieldYesNoFormValue | string
 ) => {
@@ -40,20 +43,30 @@ export const FieldYesNo = ({
     label,
     hint,
     showError = false,
+    variant = 'PRIMARY',
     id,
+    className,
     ...inputProps
 }: FieldYesNoProps): React.ReactElement => {
     const [_field, meta] = useField({ name })
 
+    const classes = classNames(
+        {
+            [styles.yesnofieldsecondary]: variant === 'SECONDARY',
+        },
+        className
+    )
+
     const isRequired =
         inputProps['aria-required'] !== false && inputProps.required !== false // consumer must explicitly say this field is not required, otherwise we assume aria-required
+
     return (
         <Fieldset
             role="radiogroup"
             aria-required={isRequired}
             id={id}
             legend={label}
-            className={styles.yesnofield}
+            className={classes}
         >
             {showError && meta.error && (
                 <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>
