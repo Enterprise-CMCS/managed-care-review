@@ -56,6 +56,13 @@ export const featureFlags = {
         flag: 'cms-dashboard-filter',
         defaultValue: false,
     },
+    /**
+     * Enables rate cert assurance workflow
+     */
+    RATE_CERT_ASSURANCE: {
+        flag: 'rate-cert-assurance',
+        defaultValue: false,
+    },
 } as const
 
 export type FlagEnumType = keyof typeof featureFlags
