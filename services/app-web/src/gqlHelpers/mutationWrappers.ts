@@ -88,19 +88,21 @@ export const submitMutationWrapper = async (
             return new Error('Error attempting to submit.')
         }
     } catch (error) {
-        const userMessage = ' Error attempting to submit.'
+        const genericUserMessage = 'Error attempting to submit.'
+        // const missingFieldsUserMessage =
+        //     'Error attempting to submit. You need to fill out required fields, including any new fields.'
         // this can be an errors object
         if ('graphQLErrors' in error) {
             recordJSException(
                 `GraphQL error attempting to submit. ID: ${id} Error message: ${error.graphQLErrors}`
             )
 
-            return new Error(userMessage)
+            return new Error(genericUserMessage)
         }
 
         recordJSException(
             `Apollo Client error attempting to submit. ID: ${id} Error message: ${error.message}`
         )
-        return new Error(userMessage)
+        return new Error(genericUserMessage)
     }
 }
