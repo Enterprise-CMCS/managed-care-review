@@ -1,0 +1,11 @@
+[
+  {
+    "ParameterKey": "SubjectClaimFilters",
+    "ParameterValue": "repo:CMSgov/managed-care-review:*"
+  },
+  {
+    "ParameterKey": "GitHubActionsAllowedAWSActions",
+    "ParameterValue": "acm:*, apigateway:*, cloudformation:*, cloudfront:*, cloudwatch:*, cognito-identity:*, cognito-idp:*, ec2:*, events:*, firehose:*, iam:*, kms:*, lambda:*, logs:*, rds:*, secretsmanager:*, ssm:*, s3:*, wafv2:*"
+  }
+]
+

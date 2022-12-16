@@ -13,16 +13,17 @@ on:
         required: true
         type: string
     secrets:
-      aws_access_key_id:
-        required: true
-      aws_secret_access_key:
-        required: true
       aws_default_region:
+        required: true
+      oidc_iam_role_arn:
         required: true
       react_app_auth_mode:
         required: true
       nr_license_key:
         required: true
+
+permissions:
+  id-token: write
 
 jobs:
   app-web:
@@ -35,6 +36,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-region: ${{ secrets.aws_default_region }}
+          role-to-assume: ${{ secrets.oidc_iam_role_arn }}
+
       - name: Generate Code
         run: lerna run generate
 
@@ -42,9 +49,6 @@ jobs:
         id: deploy-app-web
         env:
           NODE_OPTIONS: --max_old_space_size=6000
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
         run: |
           pushd services/app-web && npx serverless deploy --stage ${{ inputs.stage_name }}
@@ -58,6 +62,12 @@ jobs:
 
       - name: Setup env
         uses: ./.github/actions/setup_env
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-region: ${{ secrets.aws_default_region }}
+          role-to-assume: ${{ secrets.oidc_iam_role_arn }}
 
       - name: Generate Code
         run: lerna run generate
@@ -89,9 +99,6 @@ jobs:
         id: deploy-app-api
         env:
           NODE_OPTIONS: --max_old_space_size=6000
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
           APP_VERSION: ${{ inputs.app_version }}
           DATABASE_URL: AWS_SM
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
@@ -103,9 +110,6 @@ jobs:
       - name: run migrations
         id: run-migrations
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
           STAGE_NAME: ${{ inputs.stage_name }}
         run: |
           pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_NAME-migrate

@@ -10,12 +10,13 @@ on:
         required: true
         type: string
     secrets:
-      aws_access_key_id:
-        required: true
-      aws_secret_access_key:
-        required: true
       aws_default_region:
         required: true
+      oidc_iam_role_arn:
+        required: true
+
+permissions:
+  id-token: write
 
 jobs:
   postgres:
@@ -28,12 +29,14 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-region: ${{ secrets.aws_default_region }}
+          role-to-assume: ${{ secrets.oidc_iam_role_arn }}
+
       - name: deploy postgres
         id: deploy-postgres
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
         run: |
           pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -47,12 +50,14 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-region: ${{ secrets.aws_default_region }}
+          role-to-assume: ${{ secrets.oidc_iam_role_arn }}
+
       - name: deploy ui
         id: deploy-ui
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
         run: |
           pushd services/ui && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -66,12 +71,14 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-region: ${{ secrets.aws_default_region }}
+          role-to-assume: ${{ secrets.oidc_iam_role_arn }}
+
       - name: deploy storybook
         id: deploy-storybook
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
         run: |
           pushd services/storybook && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -85,12 +92,14 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-region: ${{ secrets.aws_default_region }}
+          role-to-assume: ${{ secrets.oidc_iam_role_arn }}
+
       - name: deploy uploads
         id: deploy-uploads
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
         run: |
           pushd services/uploads && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -104,12 +113,14 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-region: ${{ secrets.aws_default_region }}
+          role-to-assume: ${{ secrets.oidc_iam_role_arn }}
+
       - name: deploy infra-api
         id: deploy-uploads
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
         run: |
           pushd services/infra-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -124,11 +135,13 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-region: ${{ secrets.aws_default_region }}
+          role-to-assume: ${{ secrets.oidc_iam_role_arn }}
+
       - name: deploy ui-auth
         id: deploy-ui-auth
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
         run: |
           pushd services/ui-auth && npx serverless deploy --stage ${{ inputs.stage_name }}
