@@ -32,7 +32,7 @@ import { ActuaryContactFields } from './ActuaryContactFields'
 
 export interface ContactsFormValues {
     stateContacts: stateContactValue[]
-    actuaryContacts: actuaryContactValue[]
+    addtlActuaryContacts: actuaryContactValue[]
     actuaryCommunicationPreference: ActuaryCommunicationType | undefined
 }
 
@@ -63,12 +63,12 @@ const yupValidation = (submissionType: string) => {
                     .required('You must provide an email address'),
             })
         ),
-        actuaryContacts: Yup.array(),
+        addtlActuaryContacts: Yup.array(),
         actuaryCommunicationPreference: Yup.string().nullable(),
     }
 
     if (submissionType !== 'CONTRACT_ONLY') {
-        contactShape.actuaryContacts = Yup.array().of(
+        contactShape.addtlActuaryContacts = Yup.array().of(
             Yup.object().shape({
                 name: Yup.string().required('You must provide a name'),
                 titleRole: Yup.string().required(
@@ -131,12 +131,15 @@ const flattenErrors = (
         })
     }
 
-    if (errors.actuaryContacts && Array.isArray(errors.actuaryContacts)) {
-        errors.actuaryContacts.forEach((contact, index) => {
+    if (
+        errors.addtlActuaryContacts &&
+        Array.isArray(errors.addtlActuaryContacts)
+    ) {
+        errors.addtlActuaryContacts.forEach((contact, index) => {
             if (!contact) return
 
             Object.entries(contact).forEach(([field, value]) => {
-                const errorKey = `actuaryContacts.${index}.${field}`
+                const errorKey = `addtlActuaryContacts.${index}.${field}`
                 flattened[errorKey] = value
             })
         })
@@ -211,7 +214,7 @@ export const Contacts = ({
         shouldValidate && Boolean(error)
 
     const stateContacts = draftSubmission.stateContacts
-    const actuaryContacts = draftSubmission.addtlActuaryContacts
+    const addtlActuaryContacts = draftSubmission.addtlActuaryContacts
 
     const emptyStateContact = {
         name: '',
@@ -233,7 +236,7 @@ export const Contacts = ({
 
     const contactsInitialValues: ContactsFormValues = {
         stateContacts: stateContacts,
-        actuaryContacts: actuaryContacts,
+        addtlActuaryContacts: addtlActuaryContacts,
         actuaryCommunicationPreference:
             draftSubmission?.addtlActuaryCommunicationPreference ?? undefined,
     }
@@ -262,13 +265,8 @@ export const Contacts = ({
         // const updatedDraft = updatesFromSubmission(draftSubmission)
         draftSubmission.stateContacts = values.stateContacts
 
-        /**
-         * Multi-rate-submissions flag on: formik values.actuaryContacts are saved as additional actuaryContacts
-         * Multi-rate-submissions flag off: first formik values.actuaryContacts is saved as the certifying actuary on the
-         * first rate info. Any other  values.actuaryContacts are saved as additional actuary contacts
-         */
         if (includeActuaryContacts) {
-            draftSubmission.addtlActuaryContacts = values.actuaryContacts
+            draftSubmission.addtlActuaryContacts = values.addtlActuaryContacts
             draftSubmission.addtlActuaryCommunicationPreference =
                 values.actuaryCommunicationPreference
         }
@@ -523,7 +521,7 @@ export const Contacts = ({
                                             Actuary contacts
                                         </legend>
 
-                                        <FieldArray name="actuaryContacts">
+                                        <FieldArray name="addtlActuaryContacts">
                                             {({ remove, push }) => (
                                                 <div
                                                     className={
@@ -531,9 +529,9 @@ export const Contacts = ({
                                                     }
                                                     data-testid="state-contacts"
                                                 >
-                                                    {values.actuaryContacts
+                                                    {values.addtlActuaryContacts
                                                         .length > 0 &&
-                                                        values.actuaryContacts.map(
+                                                        values.addtlActuaryContacts.map(
                                                             (
                                                                 _actuaryContact,
                                                                 index
@@ -555,7 +553,7 @@ export const Contacts = ({
                                                                         shouldValidate={
                                                                             shouldValidate
                                                                         }
-                                                                        fieldNamePrefix={`actuaryContacts.${index}`}
+                                                                        fieldNamePrefix={`addtlActuaryContacts.${index}`}
                                                                         fieldSetLegend={handleContactLegend(
                                                                             index,
                                                                             'Actuary'
@@ -567,25 +565,22 @@ export const Contacts = ({
                                                                                 el)
                                                                         }
                                                                     />
-                                                                    {index >
-                                                                        0 && (
-                                                                        <Button
-                                                                            type="button"
-                                                                            unstyled
-                                                                            className={
-                                                                                styles.removeContactBtn
-                                                                            }
-                                                                            onClick={() => {
-                                                                                remove(
-                                                                                    index
-                                                                                )
-                                                                                setNewActuaryContactButtonFocus()
-                                                                            }}
-                                                                        >
-                                                                            Remove
-                                                                            contact
-                                                                        </Button>
-                                                                    )}
+                                                                    <Button
+                                                                        type="button"
+                                                                        unstyled
+                                                                        className={
+                                                                            styles.removeContactBtn
+                                                                        }
+                                                                        onClick={() => {
+                                                                            remove(
+                                                                                index
+                                                                            )
+                                                                            setNewActuaryContactButtonFocus()
+                                                                        }}
+                                                                    >
+                                                                        Remove
+                                                                        contact
+                                                                    </Button>
                                                                 </div>
                                                             )
                                                         )}
