@@ -432,22 +432,60 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               No documents
             </p>
           </div>
-          <div
-            class="withMarginTop"
+          <table
+            class="borderTopLinearGradient uploadedDocumentsTable withMarginTop"
           >
-            <b
-              class="captionContainer"
+            <caption
+              class="text-bold"
             >
-              <span>
-                Contract supporting documents
-              </span>
-            </b>
-            <p
-              class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
-            >
-              No supporting documents
-            </p>
-          </div>
+              <div
+                class="captionContainer"
+              >
+                <span>
+                  Contract supporting documents
+                </span>
+              </div>
+            </caption>
+            <thead>
+              <tr>
+                <th
+                  scope="col"
+                >
+                  Document name
+                </th>
+                <th
+                  scope="col"
+                >
+                  Date added
+                </th>
+                <th
+                  scope="col"
+                >
+                  Document category
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <a
+                    aria-label="contract doc (opens in new window)"
+                    class="usa-link inlineLink"
+                    href="https://fakes3.com/key?sekret=deadbeef"
+                    target="_blank"
+                  >
+                    contract doc
+                  </a>
+                </td>
+                <td>
+                  8/19/22
+                </td>
+                <td>
+                  Contract-supporting
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </section>
         <section
           class="summarySection"
@@ -604,6 +642,47 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               </div>
             </div>
             <div
+              class="grid-row grid-gap row"
+              data-testid="grid-row-3"
+            >
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="certifyingActuaryDetail"
+                >
+                  <dt
+                    class="text-bold"
+                    id="certifyingActuary"
+                  >
+                    Certifying actuary
+                  </dt>
+                  <dd
+                    aria-labelledby="certifyingActuary"
+                    role="definition"
+                  >
+                    <address>
+                      foo bar
+                      <br />
+                      manager
+                      <br />
+                      <a
+                        class="usa-link usa-link--external"
+                        href="mailto:soandso@example.com"
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        soandso@example.com
+                      </a>
+                      <br />
+                      ACME
+                    </address>
+                  </dd>
+                </div>
+              </div>
+            </div>
+            <div
               class=""
             >
               <b
@@ -720,7 +799,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               class="summarySectionHeader summarySectionHeaderBorder"
             >
               <h2>
-                Actuary contacts
+                Additional actuary contacts
               </h2>
               <div />
             </div>
@@ -732,33 +811,6 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 class="grid-row"
                 data-testid="grid"
               >
-                <div
-                  class="grid-col-6"
-                  data-testid="grid"
-                >
-                  <span
-                    class="text-bold"
-                  >
-                    Certifying actuary
-                  </span>
-                  <br />
-                  <address>
-                    foo bar
-                    <br />
-                    manager
-                    <br />
-                    <a
-                      class="usa-link usa-link--external"
-                      href="mailto:soandso@example.com"
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      soandso@example.com
-                    </a>
-                    <br />
-                    ACME
-                  </address>
-                </div>
                 <div
                   class="grid-col-6"
                   data-testid="grid"
@@ -801,7 +853,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 <span
                   class="text-bold"
                 >
-                  Actuary communication preference
+                  Actuaries’ communication preference
                 </span>
                 OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.
               </div>
@@ -1589,22 +1641,60 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               No documents
             </p>
           </div>
-          <div
-            class="withMarginTop"
+          <table
+            class="borderTopLinearGradient uploadedDocumentsTable withMarginTop"
           >
-            <b
-              class="captionContainer"
+            <caption
+              class="text-bold"
             >
-              <span>
-                Contract supporting documents
-              </span>
-            </b>
-            <p
-              class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
-            >
-              No supporting documents
-            </p>
-          </div>
+              <div
+                class="captionContainer"
+              >
+                <span>
+                  Contract supporting documents
+                </span>
+              </div>
+            </caption>
+            <thead>
+              <tr>
+                <th
+                  scope="col"
+                >
+                  Document name
+                </th>
+                <th
+                  scope="col"
+                >
+                  Date added
+                </th>
+                <th
+                  scope="col"
+                >
+                  Document category
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <a
+                    aria-label="contract doc (opens in new window)"
+                    class="usa-link inlineLink"
+                    href="https://fakes3.com/key?sekret=deadbeef"
+                    target="_blank"
+                  >
+                    contract doc
+                  </a>
+                </td>
+                <td>
+                  8/19/22
+                </td>
+                <td>
+                  Contract-supporting
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </section>
         <section
           class="summarySection"
@@ -1761,6 +1851,47 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               </div>
             </div>
             <div
+              class="grid-row grid-gap row"
+              data-testid="grid-row-3"
+            >
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="certifyingActuaryDetail"
+                >
+                  <dt
+                    class="text-bold"
+                    id="certifyingActuary"
+                  >
+                    Certifying actuary
+                  </dt>
+                  <dd
+                    aria-labelledby="certifyingActuary"
+                    role="definition"
+                  >
+                    <address>
+                      foo bar
+                      <br />
+                      manager
+                      <br />
+                      <a
+                        class="usa-link usa-link--external"
+                        href="mailto:soandso@example.com"
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        soandso@example.com
+                      </a>
+                      <br />
+                      ACME
+                    </address>
+                  </dd>
+                </div>
+              </div>
+            </div>
+            <div
               class=""
             >
               <b
@@ -1877,7 +2008,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               class="summarySectionHeader summarySectionHeaderBorder"
             >
               <h2>
-                Actuary contacts
+                Additional actuary contacts
               </h2>
               <div />
             </div>
@@ -1889,33 +2020,6 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 class="grid-row"
                 data-testid="grid"
               >
-                <div
-                  class="grid-col-6"
-                  data-testid="grid"
-                >
-                  <span
-                    class="text-bold"
-                  >
-                    Certifying actuary
-                  </span>
-                  <br />
-                  <address>
-                    foo bar
-                    <br />
-                    manager
-                    <br />
-                    <a
-                      class="usa-link usa-link--external"
-                      href="mailto:soandso@example.com"
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      soandso@example.com
-                    </a>
-                    <br />
-                    ACME
-                  </address>
-                </div>
                 <div
                   class="grid-col-6"
                   data-testid="grid"
@@ -1958,7 +2062,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 <span
                   class="text-bold"
                 >
-                  Actuary communication preference
+                  Actuaries’ communication preference
                 </span>
                 OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.
               </div>
@@ -2752,22 +2856,60 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               No documents
             </p>
           </div>
-          <div
-            class="withMarginTop"
+          <table
+            class="borderTopLinearGradient uploadedDocumentsTable withMarginTop"
           >
-            <b
-              class="captionContainer"
+            <caption
+              class="text-bold"
             >
-              <span>
-                Contract supporting documents
-              </span>
-            </b>
-            <p
-              class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
-            >
-              No supporting documents
-            </p>
-          </div>
+              <div
+                class="captionContainer"
+              >
+                <span>
+                  Contract supporting documents
+                </span>
+              </div>
+            </caption>
+            <thead>
+              <tr>
+                <th
+                  scope="col"
+                >
+                  Document name
+                </th>
+                <th
+                  scope="col"
+                >
+                  Date added
+                </th>
+                <th
+                  scope="col"
+                >
+                  Document category
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <a
+                    aria-label="contract doc (opens in new window)"
+                    class="usa-link inlineLink"
+                    href="https://fakes3.com/key?sekret=deadbeef"
+                    target="_blank"
+                  >
+                    contract doc
+                  </a>
+                </td>
+                <td>
+                  8/19/22
+                </td>
+                <td>
+                  Contract-supporting
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </section>
         <section
           class="summarySection"
@@ -2924,6 +3066,47 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               </div>
             </div>
             <div
+              class="grid-row grid-gap row"
+              data-testid="grid-row-3"
+            >
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="certifyingActuaryDetail"
+                >
+                  <dt
+                    class="text-bold"
+                    id="certifyingActuary"
+                  >
+                    Certifying actuary
+                  </dt>
+                  <dd
+                    aria-labelledby="certifyingActuary"
+                    role="definition"
+                  >
+                    <address>
+                      foo bar
+                      <br />
+                      manager
+                      <br />
+                      <a
+                        class="usa-link usa-link--external"
+                        href="mailto:soandso@example.com"
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        soandso@example.com
+                      </a>
+                      <br />
+                      ACME
+                    </address>
+                  </dd>
+                </div>
+              </div>
+            </div>
+            <div
               class=""
             >
               <b
@@ -3040,7 +3223,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               class="summarySectionHeader summarySectionHeaderBorder"
             >
               <h2>
-                Actuary contacts
+                Additional actuary contacts
               </h2>
               <div />
             </div>
@@ -3052,33 +3235,6 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 class="grid-row"
                 data-testid="grid"
               >
-                <div
-                  class="grid-col-6"
-                  data-testid="grid"
-                >
-                  <span
-                    class="text-bold"
-                  >
-                    Certifying actuary
-                  </span>
-                  <br />
-                  <address>
-                    foo bar
-                    <br />
-                    manager
-                    <br />
-                    <a
-                      class="usa-link usa-link--external"
-                      href="mailto:soandso@example.com"
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      soandso@example.com
-                    </a>
-                    <br />
-                    ACME
-                  </address>
-                </div>
                 <div
                   class="grid-col-6"
                   data-testid="grid"
@@ -3121,7 +3277,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 <span
                   class="text-bold"
                 >
-                  Actuary communication preference
+                  Actuaries’ communication preference
                 </span>
                 OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.
               </div>
@@ -3921,22 +4077,60 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               No documents
             </p>
           </div>
-          <div
-            class="withMarginTop"
+          <table
+            class="borderTopLinearGradient uploadedDocumentsTable withMarginTop"
           >
-            <b
-              class="captionContainer"
+            <caption
+              class="text-bold"
             >
-              <span>
-                Contract supporting documents
-              </span>
-            </b>
-            <p
-              class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
-            >
-              No supporting documents
-            </p>
-          </div>
+              <div
+                class="captionContainer"
+              >
+                <span>
+                  Contract supporting documents
+                </span>
+              </div>
+            </caption>
+            <thead>
+              <tr>
+                <th
+                  scope="col"
+                >
+                  Document name
+                </th>
+                <th
+                  scope="col"
+                >
+                  Date added
+                </th>
+                <th
+                  scope="col"
+                >
+                  Document category
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <a
+                    aria-label="contract doc (opens in new window)"
+                    class="usa-link inlineLink"
+                    href="https://fakes3.com/key?sekret=deadbeef"
+                    target="_blank"
+                  >
+                    contract doc
+                  </a>
+                </td>
+                <td>
+                  8/19/22
+                </td>
+                <td>
+                  Contract-supporting
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </section>
         <section
           class="summarySection"
@@ -4093,6 +4287,47 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               </div>
             </div>
             <div
+              class="grid-row grid-gap row"
+              data-testid="grid-row-3"
+            >
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="certifyingActuaryDetail"
+                >
+                  <dt
+                    class="text-bold"
+                    id="certifyingActuary"
+                  >
+                    Certifying actuary
+                  </dt>
+                  <dd
+                    aria-labelledby="certifyingActuary"
+                    role="definition"
+                  >
+                    <address>
+                      foo bar
+                      <br />
+                      manager
+                      <br />
+                      <a
+                        class="usa-link usa-link--external"
+                        href="mailto:soandso@example.com"
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        soandso@example.com
+                      </a>
+                      <br />
+                      ACME
+                    </address>
+                  </dd>
+                </div>
+              </div>
+            </div>
+            <div
               class=""
             >
               <b
@@ -4209,7 +4444,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               class="summarySectionHeader summarySectionHeaderBorder"
             >
               <h2>
-                Actuary contacts
+                Additional actuary contacts
               </h2>
               <div />
             </div>
@@ -4221,33 +4456,6 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 class="grid-row"
                 data-testid="grid"
               >
-                <div
-                  class="grid-col-6"
-                  data-testid="grid"
-                >
-                  <span
-                    class="text-bold"
-                  >
-                    Certifying actuary
-                  </span>
-                  <br />
-                  <address>
-                    foo bar
-                    <br />
-                    manager
-                    <br />
-                    <a
-                      class="usa-link usa-link--external"
-                      href="mailto:soandso@example.com"
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      soandso@example.com
-                    </a>
-                    <br />
-                    ACME
-                  </address>
-                </div>
                 <div
                   class="grid-col-6"
                   data-testid="grid"
@@ -4290,7 +4498,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 <span
                   class="text-bold"
                 >
-                  Actuary communication preference
+                  Actuaries’ communication preference
                 </span>
                 OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.
               </div>
@@ -5096,22 +5304,60 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               No documents
             </p>
           </div>
-          <div
-            class="withMarginTop"
+          <table
+            class="borderTopLinearGradient uploadedDocumentsTable withMarginTop"
           >
-            <b
-              class="captionContainer"
+            <caption
+              class="text-bold"
             >
-              <span>
-                Contract supporting documents
-              </span>
-            </b>
-            <p
-              class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
-            >
-              No supporting documents
-            </p>
-          </div>
+              <div
+                class="captionContainer"
+              >
+                <span>
+                  Contract supporting documents
+                </span>
+              </div>
+            </caption>
+            <thead>
+              <tr>
+                <th
+                  scope="col"
+                >
+                  Document name
+                </th>
+                <th
+                  scope="col"
+                >
+                  Date added
+                </th>
+                <th
+                  scope="col"
+                >
+                  Document category
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <a
+                    aria-label="contract doc (opens in new window)"
+                    class="usa-link inlineLink"
+                    href="https://fakes3.com/key?sekret=deadbeef"
+                    target="_blank"
+                  >
+                    contract doc
+                  </a>
+                </td>
+                <td>
+                  8/19/22
+                </td>
+                <td>
+                  Contract-supporting
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </section>
         <section
           class="summarySection"
@@ -5268,6 +5514,47 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               </div>
             </div>
             <div
+              class="grid-row grid-gap row"
+              data-testid="grid-row-3"
+            >
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="certifyingActuaryDetail"
+                >
+                  <dt
+                    class="text-bold"
+                    id="certifyingActuary"
+                  >
+                    Certifying actuary
+                  </dt>
+                  <dd
+                    aria-labelledby="certifyingActuary"
+                    role="definition"
+                  >
+                    <address>
+                      foo bar
+                      <br />
+                      manager
+                      <br />
+                      <a
+                        class="usa-link usa-link--external"
+                        href="mailto:soandso@example.com"
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        soandso@example.com
+                      </a>
+                      <br />
+                      ACME
+                    </address>
+                  </dd>
+                </div>
+              </div>
+            </div>
+            <div
               class=""
             >
               <b
@@ -5384,7 +5671,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               class="summarySectionHeader summarySectionHeaderBorder"
             >
               <h2>
-                Actuary contacts
+                Additional actuary contacts
               </h2>
               <div />
             </div>
@@ -5396,33 +5683,6 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 class="grid-row"
                 data-testid="grid"
               >
-                <div
-                  class="grid-col-6"
-                  data-testid="grid"
-                >
-                  <span
-                    class="text-bold"
-                  >
-                    Certifying actuary
-                  </span>
-                  <br />
-                  <address>
-                    foo bar
-                    <br />
-                    manager
-                    <br />
-                    <a
-                      class="usa-link usa-link--external"
-                      href="mailto:soandso@example.com"
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      soandso@example.com
-                    </a>
-                    <br />
-                    ACME
-                  </address>
-                </div>
                 <div
                   class="grid-col-6"
                   data-testid="grid"
@@ -5465,7 +5725,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 <span
                   class="text-bold"
                 >
-                  Actuary communication preference
+                  Actuaries’ communication preference
                 </span>
                 OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.
               </div>
@@ -6277,22 +6537,60 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               No documents
             </p>
           </div>
-          <div
-            class="withMarginTop"
+          <table
+            class="borderTopLinearGradient uploadedDocumentsTable withMarginTop"
           >
-            <b
-              class="captionContainer"
+            <caption
+              class="text-bold"
             >
-              <span>
-                Contract supporting documents
-              </span>
-            </b>
-            <p
-              class="borderTopLinearGradient uploadedDocumentsTable supportingDocsEmpty"
-            >
-              No supporting documents
-            </p>
-          </div>
+              <div
+                class="captionContainer"
+              >
+                <span>
+                  Contract supporting documents
+                </span>
+              </div>
+            </caption>
+            <thead>
+              <tr>
+                <th
+                  scope="col"
+                >
+                  Document name
+                </th>
+                <th
+                  scope="col"
+                >
+                  Date added
+                </th>
+                <th
+                  scope="col"
+                >
+                  Document category
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <a
+                    aria-label="contract doc (opens in new window)"
+                    class="usa-link inlineLink"
+                    href="https://fakes3.com/key?sekret=deadbeef"
+                    target="_blank"
+                  >
+                    contract doc
+                  </a>
+                </td>
+                <td>
+                  8/19/22
+                </td>
+                <td>
+                  Contract-supporting
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </section>
         <section
           class="summarySection"
@@ -6449,6 +6747,47 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               </div>
             </div>
             <div
+              class="grid-row grid-gap row"
+              data-testid="grid-row-3"
+            >
+              <div
+                class="tablet:grid-col-6"
+                data-testid="grid"
+              >
+                <div
+                  class="certifyingActuaryDetail"
+                >
+                  <dt
+                    class="text-bold"
+                    id="certifyingActuary"
+                  >
+                    Certifying actuary
+                  </dt>
+                  <dd
+                    aria-labelledby="certifyingActuary"
+                    role="definition"
+                  >
+                    <address>
+                      foo bar
+                      <br />
+                      manager
+                      <br />
+                      <a
+                        class="usa-link usa-link--external"
+                        href="mailto:soandso@example.com"
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        soandso@example.com
+                      </a>
+                      <br />
+                      ACME
+                    </address>
+                  </dd>
+                </div>
+              </div>
+            </div>
+            <div
               class=""
             >
               <b
@@ -6565,7 +6904,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
               class="summarySectionHeader summarySectionHeaderBorder"
             >
               <h2>
-                Actuary contacts
+                Additional actuary contacts
               </h2>
               <div />
             </div>
@@ -6577,33 +6916,6 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 class="grid-row"
                 data-testid="grid"
               >
-                <div
-                  class="grid-col-6"
-                  data-testid="grid"
-                >
-                  <span
-                    class="text-bold"
-                  >
-                    Certifying actuary
-                  </span>
-                  <br />
-                  <address>
-                    foo bar
-                    <br />
-                    manager
-                    <br />
-                    <a
-                      class="usa-link usa-link--external"
-                      href="mailto:soandso@example.com"
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      soandso@example.com
-                    </a>
-                    <br />
-                    ACME
-                  </address>
-                </div>
                 <div
                   class="grid-col-6"
                   data-testid="grid"
@@ -6646,7 +6958,7 @@ exports[`SubmissionSummary Outdated submissions loads outdated health plan packa
                 <span
                   class="text-bold"
                 >
-                  Actuary communication preference
+                  Actuaries’ communication preference
                 </span>
                 OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.
               </div>
