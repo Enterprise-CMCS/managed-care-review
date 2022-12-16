@@ -29,8 +29,8 @@ Cypress.Commands.add('logInAsStateUser', () => {
     } else {
         throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
     }
-    cy.wait('@fetchCurrentUserQuery', { timeout: 20000 })
-    cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80000 }) // this is the first request that engages the db, can take really long if its a fresh PR branch
+    //Wait for both queries to finish.
+    cy.wait(['@fetchCurrentUserQuery', '@indexHealthPlanPackagesQuery'], { timeout: 80000 })
 })
 
 Cypress.Commands.add(
