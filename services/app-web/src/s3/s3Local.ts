@@ -14,7 +14,6 @@ export function newLocalS3Client(
     endpoint: string,
     bucketName: string
 ): S3ClientT {
-    console.log('jj newLocalS3Client URL String: ', endpoint)
     const s3Client = new S3Client({
         forcePathStyle: true,
         apiVersion: '2006-03-01',

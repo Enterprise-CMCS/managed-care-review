@@ -27,7 +27,6 @@ const renderWithProviders = (
         routerProvider?: { route?: string }
         apolloProvider?: MockedProviderProps
         authProvider?: Partial<AuthProviderProps>
-        s3Provider?: S3ClientT
         location?: (location: Location) => Location
     }
 ) => {
