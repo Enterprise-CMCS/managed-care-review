@@ -394,12 +394,10 @@ describe('SubmissionSummary', () => {
                     'src/common-code/proto/healthPlanFormDataProto/testData/'
                 )
                 .filter((f) => f.endsWith('.proto'))
-            console.log('jj oldProtoFiles: ', oldProtoFiles)
             for (const fileName of oldProtoFiles) {
                 const proto = fs.readFileSync(
                     `src/common-code/proto/healthPlanFormDataProto/testData/${fileName}`
                 )
-                console.log('jj single proto: ', proto)
                 // pass in the old protos and make sure the UI hasn't changed
                 renderWithProviders(
                     <Routes>
