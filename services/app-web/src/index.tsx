@@ -10,7 +10,7 @@ import App from './pages/App/App'
 import reportWebVitals from './reportWebVitals'
 import { localGQLFetch, fakeAmplifyFetch } from './api'
 import { assertIsAuthMode } from './common-code/config'
-import { S3ClientT, newAmplifyS3Client, newLocalS3Client } from './s3'
+import { newLocalS3Client } from './s3'
 import { asyncWithLDProvider } from 'launchdarkly-react-client-sdk'
 
 const gqlSchema = loader('../../app-web/src/gen/schema.graphql')
@@ -82,17 +82,9 @@ if (s3Region !== undefined && s3LocalURL !== undefined) {
         'You cant set both REACT_APP_S3_REGION and REACT_APP_S3_LOCAL_URL. Pick one dependning on what environment you are in'
     )
 }
+console.log('jj local url: ', s3LocalURL)
 
-let s3Client: S3ClientT
-if (s3Region) {
-    s3Client = newAmplifyS3Client(s3DocumentsBucket)
-} else if (s3LocalURL) {
-    s3Client = newLocalS3Client(s3LocalURL, s3DocumentsBucket)
-} else {
-    throw new Error(
-        'You must set either REACT_APP_S3_REGION or REACT_APP_S3_LOCAL_URL depending on what environment you are in'
-    )
-}
+const s3Client = newLocalS3Client(s3LocalURL ?? 'string', s3DocumentsBucket)
 
 const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
 if (otelCollectorUrl === undefined) {

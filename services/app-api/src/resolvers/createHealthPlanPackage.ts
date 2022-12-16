@@ -18,7 +18,6 @@ export function createHealthPlanPackageResolver(
     store: Store
 ): MutationResolvers['createHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
-        console.log('jjinput: ', input)
         const { user, span } = context
         setResolverDetailsOnActiveSpan('createHealthPlanPackage', user, span)
 
