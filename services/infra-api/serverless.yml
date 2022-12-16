@@ -185,7 +185,7 @@ resources:
           - 172.160.0.0/11
         Description: 'An allowlist for IP addresses to access our application'
         IPAddressVersion: IPV4
-        Name: gha-allow-list-${sls:stage}
+        Name: ip-allow-list-${sls:stage}
         Scope: REGIONAL
 
     # NewRelic exporting configs
