@@ -172,6 +172,10 @@ resources:
             Statement:
               IPSetReferenceStatement:
                 Arn: !GetAtt WafIPRuleSet.Arn
+            VisibilityConfig:
+              CloudWatchMetricsEnabled: true
+              MetricName: ${sls:stage}-infra-api-webacl-allow-ips
+              SampledRequestsEnabled: true
 
     WafIPRuleSet:
       Type: AWS::WAFv2::IPSet
