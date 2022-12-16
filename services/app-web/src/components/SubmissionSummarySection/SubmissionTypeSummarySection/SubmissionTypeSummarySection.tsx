@@ -21,19 +21,38 @@ export type SubmissionTypeSummarySectionProps = {
     submissionName: string
 }
 
-function addRequiredMissingFieldText<T>(
+/*
+   Determine UX for package data on summary pages, accounting for possible missing fields.
+   
+   On the submission summary and review and submit pages, there are a variety of states a package could be in depending when it was initially drafted
+   - on the submission summary page,  hide empty missing fields from view; users only see data that was present when package was submitted
+   - on the review and submit page, we display empty missing fields to user so they know to edit and change their unlocked package
+*/
+function handlePossibleMissingRequiredField<T>({
+    isSubmitted,
+    fieldValue,
+}: {
+    isSubmitted: boolean // only true on submission summary page
     fieldValue: T | undefined
-): T | React.ReactNode {
+}): T | React.ReactNode {
+    console.log(fieldValue)
     const requiredFieldMissingText =
         'Missing Field - this field is required. Please edit this section to include a response.'
 
-    if (fieldValue === undefined)
+    if (isSubmitted && fieldValue === undefined) {
+        // hide from view entirely
+        return null
+    } else if (!isSubmitted && fieldValue === undefined) {
+        // display missing required field error text
         return (
             <span className={styles.missingField}>
                 {requiredFieldMissingText}
             </span>
         )
-    return fieldValue
+    } else {
+        // display field value
+        return fieldValue
+    }
 }
 
 export const SubmissionTypeSummarySection = ({
@@ -101,9 +120,12 @@ export const SubmissionTypeSummarySection = ({
                         <DataDetail
                             id="riskBasedContract"
                             label="Is this a risk based contract?"
-                            data={addRequiredMissingFieldText(
-                                booleanAsYesNoUserValue(undefined)
-                            )}
+                            data={handlePossibleMissingRequiredField({
+                                isSubmitted,
+                                fieldValue: booleanAsYesNoUserValue(
+                                    submission.riskBasedContract
+                                ),
+                            })}
                         />
                     </DoubleColumnGrid>
                 )}

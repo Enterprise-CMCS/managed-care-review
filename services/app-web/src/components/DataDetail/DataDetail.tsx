@@ -15,7 +15,8 @@ export const DataDetail = ({
     id,
     label,
     data,
-}: DataDetailProps): React.ReactElement => {
+}: DataDetailProps): React.ReactElement | null => {
+    if (!data) return null
     return (
         <div className={styles.dataDetail}>
             <dt id={id}>{label}</dt>
