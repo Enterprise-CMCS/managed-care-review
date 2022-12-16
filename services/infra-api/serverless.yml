@@ -175,7 +175,7 @@ resources:
 
     WafIPRuleSet:
       Type: AWS::WAFv2::IPSet
-      DependsOn: 'ApiGatewayDeployment${sls:instanceId}'
+      DependsOn: AppApiGateway
       Properties:
         Addresses:
           - 172.160.0.0/11
