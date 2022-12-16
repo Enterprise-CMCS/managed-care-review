@@ -141,7 +141,8 @@ export const UploadedDocumentsTable = ({
 
         void refreshDocuments()
     }, [documents, getKey, getURL])
-
+    console.log('jj documents', documents)
+    console.log('jj refreshedDocs', refreshedDocs)
     // Empty State
     if (refreshedDocs.length === 0) {
         return (
