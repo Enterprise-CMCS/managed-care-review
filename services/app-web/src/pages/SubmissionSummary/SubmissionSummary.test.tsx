@@ -430,14 +430,27 @@ describe('SubmissionSummary', () => {
                 )
 
                 await waitFor(() => {
-                    // there's an async rendering issue with the snapshots unless we run another test first
-                    expect(document.body).toHaveTextContent(/Submission type/)
+                    expect(document.body).toHaveTextContent(/LOADING/)
                 })
                 await waitFor(() => {
-                    // there's an async rendering issue with  UploadedDocsTable the snapshots unless we run another test first
-                    expect(document.body).not.toHaveTextContent(/LOADING/)
-                    expect(document.body).toMatchSnapshot()
+                    expect(document.body).toHaveTextContent(/Submission type/)
                 })
+                expect(
+                    screen.getByRole('heading', {
+                        name: 'Submission unlocked',
+                    })
+                ).toBeInTheDocument()
+                expect(
+                    screen.getByText('Unlocked by:', { ignore: 'span' })
+                ).toBeInTheDocument()
+                expect(
+                    screen.getByText('bob@dmas.mn.gov', { ignore: 'span' })
+                ).toBeInTheDocument()
+                expect(
+                    screen.getByRole('heading', {
+                        name: 'MCR-MN-0005-MSC+-PMAP-SNBC',
+                    })
+                ).toBeInTheDocument()
             }
         })
     })
