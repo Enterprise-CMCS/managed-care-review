@@ -80,6 +80,9 @@ const ldUseClientSpy = (
             // This is done because testing components may contain more than one instance of useLDClient for a different
             // flag. We do not want to apply the value passed in featureFlags to each useLDClient especially if the flag
             // passed in useLDClient does not exist in featureFlags passed into ldUseClientSpy.
+            getUser: jest.fn(),
+            identify: jest.fn(),
+            alias: jest.fn(),
             variation: (
                 flag: FeatureFlagTypes,
                 defaultValue: FlagValueTypes | undefined

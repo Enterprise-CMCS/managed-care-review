@@ -1,13 +1,26 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import userEvent from '@testing-library/user-event'
-import { screen, waitFor } from '@testing-library/react'
+import {
+    screen,
+    waitFor,
+    within,
+    waitForElementToBeRemoved,
+} from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import { fetchCurrentUserMock } from '../../../testHelpers/apolloHelpers'
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import {
+    ldUseClientSpy,
+    renderWithProviders,
+} from '../../../testHelpers/jestHelpers'
 import { SubmissionType, SubmissionTypeFormValues } from './'
 import { Formik } from 'formik'
 import { contractOnly } from '../../../common-code/healthPlanFormDataMocks'
 
 describe('SubmissionType', () => {
+    afterEach(() => {
+        jest.clearAllMocks()
+    })
+
     const SubmissionTypeInitialValues: SubmissionTypeFormValues = {
         programIDs: ['ccc-plus'],
         riskBasedContract: '',
@@ -190,6 +203,53 @@ describe('SubmissionType', () => {
                 name: 'Contract action and rate certification',
             })
         ).toBeInTheDocument()
+    })
+
+    it('displays risk-based contract radio buttons and validation message', async () => {
+        ldUseClientSpy({
+            'rate-cert-assurance': true,
+        })
+        renderWithProviders(
+            <Formik
+                initialValues={SubmissionTypeInitialValues}
+                onSubmit={jest.fn()}
+            >
+                <SubmissionType updateDraft={updateDraftMock} />
+            </Formik>,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        // setup
+        const riskBasedContract = screen.getByText(
+            /Is this a risk-based contract/
+        )
+        const riskBasedContractParent = riskBasedContract.parentElement
+        expect(riskBasedContract).toBeInTheDocument()
+        expect(riskBasedContractParent).toBeDefined()
+
+        // check that fields are on page
+        expect(
+            within(riskBasedContractParent!).getByLabelText('Yes')
+        ).toBeInTheDocument()
+        expect(
+            within(riskBasedContractParent!).getByLabelText('No')
+        ).toBeInTheDocument()
+
+        // check that validations work
+        await userEvent.click(screen.getByRole('button', { name: 'Continue' }))
+        await screen.findByTestId('error-summary')
+        await screen.findAllByText('You must select yes or no')
+        await userEvent.click(
+            within(riskBasedContractParent!).getByLabelText('No')
+        )
+        await waitForElementToBeRemoved(() =>
+            screen.queryAllByText('You must select yes or no')
+        )
+        await userEvent.click(screen.getByRole('button', { name: 'Continue' }))
     })
 
     it('displays submission description textarea', async () => {
