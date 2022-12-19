@@ -41,7 +41,9 @@ describe('SubmissionTypeSummarySection', () => {
 
         // Our mocks use the latest package data by default.
         // Therefore we can check here that missing field is not being displayed unexpectedly
-        expect(screen.queryByText(/Missing Field/)).toBeNull()
+        expect(
+            screen.queryByText(/You must provide this information/)
+        ).toBeNull()
     })
 
     it('can render submitted package without errors', () => {
@@ -61,7 +63,9 @@ describe('SubmissionTypeSummarySection', () => {
         ).toBeInTheDocument()
         expect(screen.queryByRole('link', { name: 'Edit' })).toBeNull()
         // We should never display missing field text on submission summary for submitted packages
-        expect(screen.queryByText(/Missing Field/)).toBeNull()
+        expect(
+            screen.queryByText(/You must provide this information/)
+        ).toBeNull()
     })
 
     it('renders expected fields for draft package on review and submit', () => {
@@ -123,7 +127,9 @@ describe('SubmissionTypeSummarySection', () => {
             name: /Is this a risk based contract/,
         })
         if (!riskBasedDefinitionParentDiv) throw Error('Testing error')
-        expect(riskBasedDefinitionParentDiv).toHaveTextContent(/Missing Field/)
+        expect(riskBasedDefinitionParentDiv).toHaveTextContent(
+            /You must provide this information/
+        )
     })
 
     it('renders expected fields for submitted package on submission summary', () => {
