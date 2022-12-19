@@ -103,6 +103,14 @@ describe('submission type', () => {
                 name: 'Programs this contract action covers (required)',
             }).click()
             cy.findByText('SNBC').click({ force: true })
+
+            cy.getFeatureFlagStore(['rate-cert-assurance']).then((store) => {
+                if (store['rate-cert-assurance']) {
+                    cy.findByText('Yes').click({ force: true })
+                }
+            })
+
+            cy.findByRole('textbox', { name: 'Submission description' })
             cy.findByText('Contract action and rate certification').click()
             cy.findByRole('textbox', { name: 'Submission description' }).clear()
             cy.findByRole('textbox', { name: 'Submission description' }).type(
@@ -120,6 +128,19 @@ describe('submission type', () => {
             //Check to make sure edited stuff was saved
             cy.get('[aria-label="Remove PMAP"]').should('exist')
             cy.get('[aria-label="Remove SNBC"]').should('exist')
+             cy.findByLabelText('Contract action and rate certification').should(
+                'be.checked'
+            )
+
+            cy.getFeatureFlagStore(['rate-cert-assurance']).then(
+                (store) => {
+                    if (store['rate-cert-assurance']) {      
+                    cy.findByLabelText('Yes').should('be.checked')
+                    }
+                }
+            )
+        
+      
             cy.findByRole('textbox', { name: 'Submission description' }).should(
                 'have.value',
                 'description of contract only submission, now with a new edited flavor'
