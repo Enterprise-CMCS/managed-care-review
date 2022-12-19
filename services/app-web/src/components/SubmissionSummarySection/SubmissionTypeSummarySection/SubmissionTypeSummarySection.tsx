@@ -87,7 +87,9 @@ export const SubmissionTypeSummarySection = ({
                             id="riskBasedContract"
                             label="Is this a risk based contract"
                             explainMissingData={!isSubmitted}
-                            data={booleanAsYesNoUserValue(undefined)}
+                            data={booleanAsYesNoUserValue(
+                                submission.riskBasedContract
+                            )}
                         />
                     </DoubleColumnGrid>
                 )}
