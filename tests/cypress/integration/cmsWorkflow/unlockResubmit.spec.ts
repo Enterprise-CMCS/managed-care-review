@@ -12,21 +12,31 @@ describe('CMS user', () => {
         cy.fillOutBaseContractDetails()
         cy.navigateFormByButtonClick('CONTINUE')
 
-        cy.findByRole('heading', { name: /Rate details/ }).should('exist')
+        cy.findByRole('heading', {
+            level: 2,
+            name: /Rate details/
+        }).should('exist')
         cy.fillOutNewRateCertification()
         cy.navigateFormByButtonClick('CONTINUE')
 
-        cy.findByRole('heading', { name: /Contacts/ }).should('exist')
+        cy.findByRole('heading', {
+            level: 2,
+            name: /Contacts/,
+        }).should('exist')
         cy.fillOutStateContact()
-        cy.fillOutActuaryContact()
+        cy.fillOutAdditionalActuaryContact()
         cy.navigateFormByButtonClick('CONTINUE')
 
-        cy.findByRole('heading', { name: /Supporting documents/ }).should(
-            'exist'
-        )
+        cy.findByRole('heading', {
+            level: 2,
+            name: /Supporting documents/
+        }).should('exist')
         cy.navigateFormByButtonClick('CONTINUE')
 
-        cy.findByRole('heading', { name: /Review and submit/ }).should('exist')
+        cy.findByRole('heading', {
+            level: 2,
+            name: /Review and submit/ }
+        ).should('exist')
 
         // Store submission url for reference later
         cy.location().then((fullUrl) => {
@@ -140,7 +150,9 @@ describe('CMS user', () => {
                     .and('not.include', 'review-and-submit')
 
                 //Navigate to resubmitted submission and check for submission updated banner
-                cy.get('table').findByText(submissionName).click()
+                cy.get('table')
+                    .findByRole('link', { name: submissionName }).should('exist')
+                cy.findByRole('link', { name: submissionName }).click()
                 cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
                 cy.findByTestId('updatedSubmissionBanner').should('exist')
 
