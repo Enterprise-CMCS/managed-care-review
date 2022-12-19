@@ -27,33 +27,6 @@ describe('SubmissionType', () => {
     })
 
     it('displays submission type form when expected', async () => {
-        renderWithProviders(<SubmissionType updateDraft={updateDraftMock} />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
-
-        expect(
-            await screen.getByRole('form', { name: 'Submission Type Form' })
-        ).toBeInTheDocument()
-    })
-
-    it('displays new submission form when expected', async () => {
-        renderWithProviders(<SubmissionType updateDraft={updateDraftMock} />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-            routerProvider: {
-                route: '/submissions/new',
-            },
-        })
-
-        expect(
-            await screen.getByRole('form', { name: 'New Submission Form' })
-        ).toBeInTheDocument()
-    })
-
-    it('displays with draft submission when expected', async () => {
         renderWithProviders(
             <SubmissionType
                 updateDraft={updateDraftMock}
@@ -69,38 +42,25 @@ describe('SubmissionType', () => {
         expect(
             await screen.getByRole('form', { name: 'Submission Type Form' })
         ).toBeInTheDocument()
-    })
-
-    it('displays a cancel link', async () => {
-        renderWithProviders(<SubmissionType updateDraft={updateDraftMock} />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
-
         expect(
             await screen.getByRole('button', {
                 name: 'Save as draft',
             })
         ).toBeDefined()
-    })
-
-    it('displays a cancel link when editing a submission', async () => {
-        renderWithProviders(<SubmissionType />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
-
         expect(
             await screen.getByRole('button', {
                 name: 'Cancel',
             })
         ).toBeDefined()
+        expect(
+            await screen.getByRole('button', {
+                name: 'Continue',
+            })
+        ).toBeDefined()
     })
 
-    it('displays a cancel link on new submission', async () => {
-        renderWithProviders(<SubmissionType />, {
+    it('displays new submission form when expected', async () => {
+        renderWithProviders(<SubmissionType updateDraft={updateDraftMock} />, {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
@@ -110,19 +70,19 @@ describe('SubmissionType', () => {
         })
 
         expect(
+            await screen.getByRole('form', { name: 'New Submission Form' })
+        ).toBeInTheDocument()
+        expect(
+            await screen.queryByRole('button', {
+                name: 'Save as draft',
+            })
+        ).toBeNull()
+
+        expect(
             await screen.getByRole('button', {
                 name: 'Cancel',
             })
         ).toBeDefined()
-    })
-
-    it('displays a continue button', async () => {
-        renderWithProviders(<SubmissionType updateDraft={updateDraftMock} />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
-
         expect(
             await screen.getByRole('button', {
                 name: 'Continue',
@@ -336,9 +296,7 @@ describe('SubmissionType', () => {
                 ).toBeNull()
             })
         })
-    })
 
-    describe('Continue / Save Draft button', () => {
         it('if form fields are invalid, shows validation error messages when continue button is clicked', async () => {
             renderWithProviders(
                 <SubmissionType updateDraft={updateDraftMock} />,
