@@ -42,12 +42,10 @@ function displayErrorMessageForMissingData<T>(
     const requiredFieldMissingText = 'You must provide this information.'
 
     if (!data) {
-        // TODO: HANA - add error (exclaimation point) icon to left of data definition term
-        // Also, apply this to all fields on review and submit - make another ticket
         return (
-            <span className="usa-error-message">
+            <span className={styles.missingInfo}>
                 <span>
-                    <IconError />
+                    <IconError size={3} />
                 </span>
                 <span>{requiredFieldMissingText}</span>
             </span>
