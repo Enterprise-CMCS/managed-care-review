@@ -1,4 +1,5 @@
 import { URL } from 'url'
+import { generatePath } from 'react-router'
 
 import {
     LockedHealthPlanFormDataType,
@@ -14,6 +15,7 @@ import {
     generateStateReceiverEmails,
     findPackagePrograms,
 } from '../templateHelpers'
+import { RoutesRecord } from '../../../../app-web/src/constants/routes'
 
 export const newPackageStateEmail = async (
     pkg: LockedHealthPlanFormDataType,
@@ -35,6 +37,11 @@ export const newPackageStateEmail = async (
     const isContractAndRates =
         pkg.submissionType === 'CONTRACT_AND_RATES' &&
         Boolean(pkg.rateInfos.length)
+
+    const packagePath = generatePath(RoutesRecord.SUBMISSIONS_SUMMARY, {
+        id: pkg.id,
+    })
+    const packageURL = new URL(packagePath, config.baseUrl).href
 
     const data = {
         shouldIncludeRates: isContractAndRates,
@@ -72,7 +79,7 @@ export const newPackageStateEmail = async (
                           )
                         : formatCalendarDate(rate.rateDateEnd),
             })),
-        submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
+        submissionURL: packageURL,
     }
 
     const result = await renderTemplate<typeof data>(

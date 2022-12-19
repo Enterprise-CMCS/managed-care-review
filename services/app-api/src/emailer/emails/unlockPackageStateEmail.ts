@@ -1,4 +1,5 @@
 import { URL } from 'url'
+import { generatePath } from 'react-router'
 
 import {
     UnlockedHealthPlanFormDataType,
@@ -13,6 +14,7 @@ import {
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration } from '../'
 import { ProgramType, UpdateInfoType } from '../../domain-models'
+import { RoutesRecord } from '../../../../app-web/src/constants/routes'
 
 export const unlockPackageStateEmail = async (
     pkg: UnlockedHealthPlanFormDataType,
@@ -36,6 +38,14 @@ export const unlockPackageStateEmail = async (
         pkg.submissionType === 'CONTRACT_AND_RATES' &&
         Boolean(pkg.rateInfos.length)
 
+    const reviewAndSubmitPath = generatePath(
+        RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT,
+        {
+            id: pkg.id,
+        }
+    )
+    const packageURL = new URL(reviewAndSubmitPath, config.baseUrl).href
+
     const data = {
         packageName,
         unlockedBy: updateInfo.updatedBy,
@@ -47,10 +57,7 @@ export const unlockPackageStateEmail = async (
             pkg.rateInfos.map((rate) => ({
                 rateName: rate.rateCertificationName,
             })),
-        submissionURL: new URL(
-            `submissions/${pkg.id}/review-and-submit`,
-            config.baseUrl
-        ).href,
+        submissionURL: packageURL,
     }
 
     const result = await renderTemplate<typeof data>(
