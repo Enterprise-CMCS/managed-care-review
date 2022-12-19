@@ -31,6 +31,11 @@ Cypress.Commands.add('fillOutContractActionOnly', () => {
     })
     cy.findByText('PMAP').click()
     cy.findByText('Contract action only').click()
+    cy.getFeatureFlagStore(['rate-cert-assurance']).then(store => {
+      if (store['rate-cert-assurance']) {
+            cy.findByText('No').click()
+        }
+    })
     cy.findByRole('textbox', { name: 'Submission description' }).type(
         'description of contract only submission'
     )
@@ -44,6 +49,11 @@ Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
     })
     cy.findByText('PMAP').click()
     cy.findByText('Contract action and rate certification').click()
+    cy.getFeatureFlagStore(['rate-cert-assurance']).then((store) => {
+        if (store['rate-cert-assurance']) {
+            cy.findByText('No').click()
+        }
+    })
     cy.findByRole('textbox', { name: 'Submission description' }).type(
         'description of contract and rates submission'
     )

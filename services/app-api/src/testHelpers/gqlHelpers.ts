@@ -116,6 +116,7 @@ const createTestHealthPlanPackage = async (
     const programIDs = programs.map((program) => program.id)
     const input: CreateHealthPlanPackageInput = {
         programIDs: programIDs,
+        riskBasedContract: false,
         submissionType: 'CONTRACT_ONLY' as const,
         submissionDescription: 'A created submission',
     }
