@@ -12,7 +12,6 @@ import {
     useNavigate,
     useLocation,
 } from 'react-router-dom'
-import * as Yup from 'yup'
 import {
     ErrorSummary,
     FieldRadio,
@@ -38,17 +37,8 @@ import {
 } from '../../../components/Form/FieldYesNo/FieldYesNo'
 import { featureFlags } from '../../../common-code/featureFlags'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { SubmissionTypeFormSchema } from './SubmissionTypeSchema'
 
-// Formik setup
-// Should be listed in order of appearance on field to allow errors to focus as expected
-const SubmissionTypeFormSchema = Yup.object().shape({
-    programIDs: Yup.array().min(1, 'You must select at least one program'),
-    submissionType: Yup.string().required('You must choose a submission type'),
-    riskBasedContract: Yup.string().defined('You must select yes or no'),
-    submissionDescription: Yup.string().required(
-        'You must provide a description of any major changes or updates'
-    ),
-})
 export interface SubmissionTypeFormValues {
     programIDs: string[]
     riskBasedContract: string
@@ -251,7 +241,9 @@ export const SubmissionType = ({
         <Formik
             initialValues={submissionTypeInitialValues}
             onSubmit={handleFormSubmit}
-            validationSchema={SubmissionTypeFormSchema}
+            validationSchema={SubmissionTypeFormSchema({
+                'rate-cert-assurance': showRateCertAssurance,
+            })}
         >
             {({
                 values,
