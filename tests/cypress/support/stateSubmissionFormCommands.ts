@@ -203,18 +203,15 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     })
     cy.findByText('PMAP').click()
 
+    //Fill out certifying actuary
+    cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
+    cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
+    cy.findAllByLabelText('Email').eq(0).type('actuarycontact@example.com')
+    cy.findAllByLabelText('Mercer').eq(0).safeClick()
+
     cy.findByTestId('file-input-input').attachFile(
         'documents/trussel-guide.pdf'
     )
-
-    cy.getFeatureFlagStore(['multi-rate-submissions']).then(store => {
-        if (store['multi-rate-submissions']) {
-            cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
-            cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
-            cy.findAllByLabelText('Email').eq(0).type('actuarycontact@example.com')
-            cy.findAllByLabelText('Mercer').eq(0).safeClick()
-        }
-    })
 
     cy.verifyDocumentsHaveNoErrors()
     cy.waitForDocumentsToLoad()
@@ -238,25 +235,21 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
         force: true,
     })
     cy.findByText('PMAP').click()
-
     cy.findByLabelText('Date certified for rate amendment').type('03/01/2024')
+
+    //Fill out certifying actuary
+    cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
+    cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
+    cy.findAllByLabelText('Email').eq(0).type('actuarycontact@example.com')
+    cy.findAllByLabelText('Mercer').eq(0).safeClick()
+
     cy.findByTestId('file-input-input').attachFile(
         'documents/trussel-guide.pdf'
     )
 
-    cy.getFeatureFlagStore(['multi-rate-submissions']).then(store => {
-        if (store['multi-rate-submissions']) {
-            cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
-            cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
-            cy.findAllByLabelText('Email').eq(0).type('actuarycontact@example.com')
-            cy.findAllByLabelText('Mercer').eq(0).safeClick()
-        }
-    })
-
     cy.verifyDocumentsHaveNoErrors()
     cy.waitForDocumentsToLoad()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
-
 })
 
 Cypress.Commands.add('fillOutStateContact', () => {
@@ -270,9 +263,11 @@ Cypress.Commands.add('fillOutStateContact', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('fillOutActuaryContact', () => {
+Cypress.Commands.add('fillOutAdditionalActuaryContact', () => {
     // Must be on '/submissions/:id/edit/contacts'
     // Must be a contract and rates submission
+    cy.findByRole('button', { name: 'Add actuary contact'}).should('exist').click()
+    cy.findByText('Additional actuary contact 1').should('exist')
     cy.findAllByLabelText('Name').eq(1).click().type('Actuary Contact Person')
     cy.findAllByLabelText('Title/Role').eq(1).type('Actuary Contact Title')
     cy.findAllByLabelText('Email').eq(1).type('actuarycontact@example.com')
