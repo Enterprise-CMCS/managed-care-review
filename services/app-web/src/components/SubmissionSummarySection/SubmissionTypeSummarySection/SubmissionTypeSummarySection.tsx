@@ -11,7 +11,6 @@ import { booleanAsYesNoUserValue } from '../../../components/Form/FieldYesNo/Fie
 import styles from '../SubmissionSummarySection.module.scss'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../../common-code/featureFlags'
-import { handlePossibleMissingRequiredField } from '../summarySectionHelpers'
 
 export type SubmissionTypeSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -86,13 +85,9 @@ export const SubmissionTypeSummarySection = ({
                     <DoubleColumnGrid>
                         <DataDetail
                             id="riskBasedContract"
-                            label="Is this a risk based contract?"
-                            data={handlePossibleMissingRequiredField({
-                                isSubmitted,
-                                fieldValue: booleanAsYesNoUserValue(
-                                    submission.riskBasedContract
-                                ),
-                            })}
+                            label="Is this a risk based contract"
+                            explainMissingData={!isSubmitted}
+                            data={booleanAsYesNoUserValue(undefined)}
                         />
                     </DoubleColumnGrid>
                 )}
