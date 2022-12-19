@@ -296,391 +296,384 @@ export const Contacts = ({
     const contactSchema = yupValidation(draftSubmission.submissionType)
 
     return (
-        <>
-            <Formik
-                initialValues={contactsInitialValues}
-                onSubmit={handleFormSubmit}
-                validationSchema={contactSchema}
-            >
-                {({ values, errors, dirty, handleSubmit, isSubmitting }) => (
-                    <>
-                        <UswdsForm
-                            className={styles.formContainer}
-                            id="ContactsForm"
-                            aria-label="Contacts Form"
-                            aria-describedby="form-guidance"
-                            onSubmit={handleSubmit}
-                        >
-                            <fieldset className="usa-fieldset">
-                                <h3>State contacts</h3>
-                                <p>
-                                    Enter contact information for the state
-                                    personnel you'd like to receive all CMS
-                                    communication about this submission.
-                                </p>
-                                <legend className="srOnly">
-                                    State contacts
-                                </legend>
-                                <span id="form-guidance">
-                                    A state contact is required
-                                </span>
+        <Formik
+            initialValues={contactsInitialValues}
+            onSubmit={handleFormSubmit}
+            validationSchema={contactSchema}
+        >
+            {({ values, errors, dirty, handleSubmit, isSubmitting }) => (
+                <>
+                    <UswdsForm
+                        className={styles.formContainer}
+                        id="ContactsForm"
+                        aria-label="Contacts Form"
+                        aria-describedby="form-guidance"
+                        onSubmit={handleSubmit}
+                    >
+                        <fieldset className="usa-fieldset">
+                            <h3>State contacts</h3>
+                            <p>
+                                Enter contact information for the state
+                                personnel you'd like to receive all CMS
+                                communication about this submission.
+                            </p>
+                            <legend className="srOnly">State contacts</legend>
+                            <span id="form-guidance">
+                                A state contact is required
+                            </span>
 
-                                {shouldValidate && (
-                                    <ErrorSummary
-                                        errors={flattenErrors(errors)}
-                                        headingRef={errorSummaryHeadingRef}
-                                    />
-                                )}
-
-                                <FieldArray name="stateContacts">
-                                    {({ remove, push }) => (
-                                        <div
-                                            className={styles.stateContacts}
-                                            data-testid="state-contacts"
-                                        >
-                                            {values.stateContacts.length > 0 &&
-                                                values.stateContacts.map(
-                                                    (_stateContact, index) => (
-                                                        <div
-                                                            className={
-                                                                styles.stateContact
-                                                            }
-                                                            key={index}
-                                                        >
-                                                            <Fieldset
-                                                                legend={handleContactLegend(
-                                                                    index,
-                                                                    'State'
-                                                                )}
-                                                            >
-                                                                <FormGroup
-                                                                    error={showFieldErrors(
-                                                                        stateContactErrorHandling(
-                                                                            errors
-                                                                                ?.stateContacts?.[
-                                                                                index
-                                                                            ]
-                                                                        )?.name
-                                                                    )}
-                                                                >
-                                                                    <label
-                                                                        htmlFor={`stateContacts.${index}.name`}
-                                                                    >
-                                                                        Name
-                                                                    </label>
-                                                                    {showFieldErrors(
-                                                                        `True`
-                                                                    ) && (
-                                                                        <ErrorMessage
-                                                                            name={`stateContacts.${index}.name`}
-                                                                            component="div"
-                                                                            className="usa-error-message"
-                                                                        />
-                                                                    )}
-                                                                    <Field
-                                                                        name={`stateContacts.${index}.name`}
-                                                                        id={`stateContacts.${index}.name`}
-                                                                        aria-required={
-                                                                            index ===
-                                                                            0
-                                                                        }
-                                                                        type="text"
-                                                                        className="usa-input"
-                                                                        innerRef={(
-                                                                            el: HTMLElement
-                                                                        ) =>
-                                                                            (newStateContactNameRef.current =
-                                                                                el)
-                                                                        }
-                                                                    />
-                                                                </FormGroup>
-
-                                                                <FormGroup
-                                                                    error={showFieldErrors(
-                                                                        stateContactErrorHandling(
-                                                                            errors
-                                                                                ?.stateContacts?.[
-                                                                                index
-                                                                            ]
-                                                                        )
-                                                                            ?.titleRole
-                                                                    )}
-                                                                >
-                                                                    <label
-                                                                        htmlFor={`stateContacts.${index}.titleRole`}
-                                                                    >
-                                                                        Title/Role
-                                                                    </label>
-                                                                    {showFieldErrors(
-                                                                        `True`
-                                                                    ) && (
-                                                                        <ErrorMessage
-                                                                            name={`stateContacts.${index}.titleRole`}
-                                                                            component="div"
-                                                                            className="usa-error-message"
-                                                                        />
-                                                                    )}
-                                                                    <Field
-                                                                        name={`stateContacts.${index}.titleRole`}
-                                                                        id={`stateContacts.${index}.titleRole`}
-                                                                        aria-required={
-                                                                            index ===
-                                                                            0
-                                                                        }
-                                                                        type="text"
-                                                                        className="usa-input"
-                                                                    />
-                                                                </FormGroup>
-
-                                                                <FormGroup
-                                                                    error={showFieldErrors(
-                                                                        stateContactErrorHandling(
-                                                                            errors
-                                                                                ?.stateContacts?.[
-                                                                                index
-                                                                            ]
-                                                                        )?.email
-                                                                    )}
-                                                                >
-                                                                    <label
-                                                                        htmlFor={`stateContacts.${index}.email`}
-                                                                    >
-                                                                        Email
-                                                                    </label>
-                                                                    {showFieldErrors(
-                                                                        `True`
-                                                                    ) && (
-                                                                        <ErrorMessage
-                                                                            name={`stateContacts.${index}.email`}
-                                                                            component="div"
-                                                                            className="usa-error-message"
-                                                                        />
-                                                                    )}
-                                                                    <Field
-                                                                        name={`stateContacts.${index}.email`}
-                                                                        id={`stateContacts.${index}.email`}
-                                                                        aria-required={
-                                                                            index ===
-                                                                            0
-                                                                        }
-                                                                        type="text"
-                                                                        className="usa-input"
-                                                                    />
-                                                                </FormGroup>
-
-                                                                {index > 0 && (
-                                                                    <Button
-                                                                        type="button"
-                                                                        unstyled
-                                                                        className={
-                                                                            styles.removeContactBtn
-                                                                        }
-                                                                        onClick={() => {
-                                                                            remove(
-                                                                                index
-                                                                            )
-                                                                            setNewStateContactButtonFocus()
-                                                                        }}
-                                                                    >
-                                                                        Remove
-                                                                        contact
-                                                                    </Button>
-                                                                )}
-                                                            </Fieldset>
-                                                        </div>
-                                                    )
-                                                )}
-
-                                            <button
-                                                type="button"
-                                                className={`usa-button usa-button--outline ${styles.addContactBtn}`}
-                                                onClick={() => {
-                                                    push(emptyStateContact)
-                                                    setFocusNewContact(true)
-                                                }}
-                                                ref={newStateContactButtonRef}
-                                            >
-                                                Add another state contact
-                                            </button>
-                                        </div>
-                                    )}
-                                </FieldArray>
-                            </fieldset>
-
-                            {includeActuaryContacts && (
-                                <>
-                                    <fieldset className="usa-fieldset">
-                                        <h3>Additional Actuary Contacts</h3>
-
-                                        <p>
-                                            Provide contact information for any
-                                            additional actuaries who worked
-                                            directly on this submission.
-                                        </p>
-                                        <legend className="srOnly">
-                                            Actuary contacts
-                                        </legend>
-
-                                        <FieldArray name="addtlActuaryContacts">
-                                            {({ remove, push }) => (
-                                                <div
-                                                    className={
-                                                        styles.actuaryContacts
-                                                    }
-                                                    data-testid="state-contacts"
-                                                >
-                                                    {values.addtlActuaryContacts
-                                                        .length > 0 &&
-                                                        values.addtlActuaryContacts.map(
-                                                            (
-                                                                _actuaryContact,
-                                                                index
-                                                            ) => (
-                                                                <div
-                                                                    className={
-                                                                        styles.actuaryContact
-                                                                    }
-                                                                    key={index}
-                                                                    data-testid="actuary-contact"
-                                                                >
-                                                                    <ActuaryContactFields
-                                                                        actuaryContact={
-                                                                            _actuaryContact
-                                                                        }
-                                                                        errors={
-                                                                            errors
-                                                                        }
-                                                                        shouldValidate={
-                                                                            shouldValidate
-                                                                        }
-                                                                        fieldNamePrefix={`addtlActuaryContacts.${index}`}
-                                                                        fieldSetLegend={handleContactLegend(
-                                                                            index,
-                                                                            'Actuary'
-                                                                        )}
-                                                                        innerRef={(
-                                                                            el: HTMLElement
-                                                                        ) =>
-                                                                            (newActuaryContactNameRef.current =
-                                                                                el)
-                                                                        }
-                                                                    />
-                                                                    <Button
-                                                                        type="button"
-                                                                        unstyled
-                                                                        className={
-                                                                            styles.removeContactBtn
-                                                                        }
-                                                                        onClick={() => {
-                                                                            remove(
-                                                                                index
-                                                                            )
-                                                                            setNewActuaryContactButtonFocus()
-                                                                        }}
-                                                                    >
-                                                                        Remove
-                                                                        contact
-                                                                    </Button>
-                                                                </div>
-                                                            )
-                                                        )}
-
-                                                    <button
-                                                        type="button"
-                                                        className={`usa-button usa-button--outline ${styles.addContactBtn}`}
-                                                        onClick={() => {
-                                                            push(
-                                                                emptyActuaryContact
-                                                            )
-                                                            setFocusNewActuaryContact(
-                                                                true
-                                                            )
-                                                        }}
-                                                        ref={
-                                                            newActuaryContactButtonRef
-                                                        }
-                                                    >
-                                                        Add actuary contact
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </FieldArray>
-                                    </fieldset>
-
-                                    <fieldset className="usa-fieldset">
-                                        <h3>
-                                            Actuaries' communication preference
-                                        </h3>
-
-                                        <legend className="srOnly">
-                                            Actuarial communication preference
-                                        </legend>
-                                        <FormGroup
-                                            error={showFieldErrors(
-                                                errors.actuaryCommunicationPreference
-                                            )}
-                                        >
-                                            <Fieldset
-                                                className={styles.radioGroup}
-                                                legend="Communication preference between CMS Office of the Actuary (OACT) and all state’s actuaries (i.e. certifying actuaries and additional actuary contacts)"
-                                            >
-                                                {showFieldErrors(`True`) && (
-                                                    <ErrorMessage
-                                                        name={`actuaryCommunicationPreference`}
-                                                        component="div"
-                                                        className="usa-error-message"
-                                                    />
-                                                )}
-                                                <FieldRadio
-                                                    id="OACTtoActuary"
-                                                    name="actuaryCommunicationPreference"
-                                                    label={`OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`}
-                                                    value={'OACT_TO_ACTUARY'}
-                                                    aria-required
-                                                />
-                                                <FieldRadio
-                                                    id="OACTtoState"
-                                                    name="actuaryCommunicationPreference"
-                                                    label={`OACT can communicate directly with the state, and the state will relay all written communication to their actuaries and set up time for any potential verbal discussions.`}
-                                                    value={'OACT_TO_STATE'}
-                                                    aria-required
-                                                />
-                                            </Fieldset>
-                                        </FormGroup>
-                                    </fieldset>
-                                </>
+                            {shouldValidate && (
+                                <ErrorSummary
+                                    errors={flattenErrors(errors)}
+                                    headingRef={errorSummaryHeadingRef}
+                                />
                             )}
 
-                            <PageActions
-                                saveAsDraftOnClick={() => {
-                                    if (!dirty) {
-                                        navigate(`/dashboard`)
-                                    } else {
-                                        setShouldValidate(true)
-                                        setFocusErrorSummaryHeading(true)
-                                        redirectToDashboard.current = true
-                                        handleSubmit()
-                                    }
-                                }}
-                                backOnClick={() =>
-                                    navigate(
-                                        draftSubmission.submissionType ===
-                                            'CONTRACT_ONLY'
-                                            ? '../contract-details'
-                                            : '../rate-details'
-                                    )
-                                }
-                                continueOnClick={() => {
-                                    redirectToDashboard.current = false
+                            <FieldArray name="stateContacts">
+                                {({ remove, push }) => (
+                                    <div
+                                        className={styles.stateContacts}
+                                        data-testid="state-contacts"
+                                    >
+                                        {values.stateContacts.length > 0 &&
+                                            values.stateContacts.map(
+                                                (_stateContact, index) => (
+                                                    <div
+                                                        className={
+                                                            styles.stateContact
+                                                        }
+                                                        key={index}
+                                                    >
+                                                        <Fieldset
+                                                            legend={handleContactLegend(
+                                                                index,
+                                                                'State'
+                                                            )}
+                                                        >
+                                                            <FormGroup
+                                                                error={showFieldErrors(
+                                                                    stateContactErrorHandling(
+                                                                        errors
+                                                                            ?.stateContacts?.[
+                                                                            index
+                                                                        ]
+                                                                    )?.name
+                                                                )}
+                                                            >
+                                                                <label
+                                                                    htmlFor={`stateContacts.${index}.name`}
+                                                                >
+                                                                    Name
+                                                                </label>
+                                                                {showFieldErrors(
+                                                                    `True`
+                                                                ) && (
+                                                                    <ErrorMessage
+                                                                        name={`stateContacts.${index}.name`}
+                                                                        component="div"
+                                                                        className="usa-error-message"
+                                                                    />
+                                                                )}
+                                                                <Field
+                                                                    name={`stateContacts.${index}.name`}
+                                                                    id={`stateContacts.${index}.name`}
+                                                                    aria-required={
+                                                                        index ===
+                                                                        0
+                                                                    }
+                                                                    type="text"
+                                                                    className="usa-input"
+                                                                    innerRef={(
+                                                                        el: HTMLElement
+                                                                    ) =>
+                                                                        (newStateContactNameRef.current =
+                                                                            el)
+                                                                    }
+                                                                />
+                                                            </FormGroup>
+
+                                                            <FormGroup
+                                                                error={showFieldErrors(
+                                                                    stateContactErrorHandling(
+                                                                        errors
+                                                                            ?.stateContacts?.[
+                                                                            index
+                                                                        ]
+                                                                    )?.titleRole
+                                                                )}
+                                                            >
+                                                                <label
+                                                                    htmlFor={`stateContacts.${index}.titleRole`}
+                                                                >
+                                                                    Title/Role
+                                                                </label>
+                                                                {showFieldErrors(
+                                                                    `True`
+                                                                ) && (
+                                                                    <ErrorMessage
+                                                                        name={`stateContacts.${index}.titleRole`}
+                                                                        component="div"
+                                                                        className="usa-error-message"
+                                                                    />
+                                                                )}
+                                                                <Field
+                                                                    name={`stateContacts.${index}.titleRole`}
+                                                                    id={`stateContacts.${index}.titleRole`}
+                                                                    aria-required={
+                                                                        index ===
+                                                                        0
+                                                                    }
+                                                                    type="text"
+                                                                    className="usa-input"
+                                                                />
+                                                            </FormGroup>
+
+                                                            <FormGroup
+                                                                error={showFieldErrors(
+                                                                    stateContactErrorHandling(
+                                                                        errors
+                                                                            ?.stateContacts?.[
+                                                                            index
+                                                                        ]
+                                                                    )?.email
+                                                                )}
+                                                            >
+                                                                <label
+                                                                    htmlFor={`stateContacts.${index}.email`}
+                                                                >
+                                                                    Email
+                                                                </label>
+                                                                {showFieldErrors(
+                                                                    `True`
+                                                                ) && (
+                                                                    <ErrorMessage
+                                                                        name={`stateContacts.${index}.email`}
+                                                                        component="div"
+                                                                        className="usa-error-message"
+                                                                    />
+                                                                )}
+                                                                <Field
+                                                                    name={`stateContacts.${index}.email`}
+                                                                    id={`stateContacts.${index}.email`}
+                                                                    aria-required={
+                                                                        index ===
+                                                                        0
+                                                                    }
+                                                                    type="text"
+                                                                    className="usa-input"
+                                                                />
+                                                            </FormGroup>
+
+                                                            {index > 0 && (
+                                                                <Button
+                                                                    type="button"
+                                                                    unstyled
+                                                                    className={
+                                                                        styles.removeContactBtn
+                                                                    }
+                                                                    onClick={() => {
+                                                                        remove(
+                                                                            index
+                                                                        )
+                                                                        setNewStateContactButtonFocus()
+                                                                    }}
+                                                                >
+                                                                    Remove
+                                                                    contact
+                                                                </Button>
+                                                            )}
+                                                        </Fieldset>
+                                                    </div>
+                                                )
+                                            )}
+
+                                        <button
+                                            type="button"
+                                            className={`usa-button usa-button--outline ${styles.addContactBtn}`}
+                                            onClick={() => {
+                                                push(emptyStateContact)
+                                                setFocusNewContact(true)
+                                            }}
+                                            ref={newStateContactButtonRef}
+                                        >
+                                            Add another state contact
+                                        </button>
+                                    </div>
+                                )}
+                            </FieldArray>
+                        </fieldset>
+
+                        {includeActuaryContacts && (
+                            <>
+                                <fieldset className="usa-fieldset">
+                                    <h3>Additional Actuary Contacts</h3>
+
+                                    <p>
+                                        Provide contact information for any
+                                        additional actuaries who worked directly
+                                        on this submission.
+                                    </p>
+                                    <legend className="srOnly">
+                                        Actuary contacts
+                                    </legend>
+
+                                    <FieldArray name="addtlActuaryContacts">
+                                        {({ remove, push }) => (
+                                            <div
+                                                className={
+                                                    styles.actuaryContacts
+                                                }
+                                                data-testid="state-contacts"
+                                            >
+                                                {values.addtlActuaryContacts
+                                                    .length > 0 &&
+                                                    values.addtlActuaryContacts.map(
+                                                        (
+                                                            _actuaryContact,
+                                                            index
+                                                        ) => (
+                                                            <div
+                                                                className={
+                                                                    styles.actuaryContact
+                                                                }
+                                                                key={index}
+                                                                data-testid="actuary-contact"
+                                                            >
+                                                                <ActuaryContactFields
+                                                                    actuaryContact={
+                                                                        _actuaryContact
+                                                                    }
+                                                                    errors={
+                                                                        errors
+                                                                    }
+                                                                    shouldValidate={
+                                                                        shouldValidate
+                                                                    }
+                                                                    fieldNamePrefix={`addtlActuaryContacts.${index}`}
+                                                                    fieldSetLegend={handleContactLegend(
+                                                                        index,
+                                                                        'Actuary'
+                                                                    )}
+                                                                    innerRef={(
+                                                                        el: HTMLElement
+                                                                    ) =>
+                                                                        (newActuaryContactNameRef.current =
+                                                                            el)
+                                                                    }
+                                                                />
+                                                                <Button
+                                                                    type="button"
+                                                                    unstyled
+                                                                    className={
+                                                                        styles.removeContactBtn
+                                                                    }
+                                                                    onClick={() => {
+                                                                        remove(
+                                                                            index
+                                                                        )
+                                                                        setNewActuaryContactButtonFocus()
+                                                                    }}
+                                                                >
+                                                                    Remove
+                                                                    contact
+                                                                </Button>
+                                                            </div>
+                                                        )
+                                                    )}
+
+                                                <button
+                                                    type="button"
+                                                    className={`usa-button usa-button--outline ${styles.addContactBtn}`}
+                                                    onClick={() => {
+                                                        push(
+                                                            emptyActuaryContact
+                                                        )
+                                                        setFocusNewActuaryContact(
+                                                            true
+                                                        )
+                                                    }}
+                                                    ref={
+                                                        newActuaryContactButtonRef
+                                                    }
+                                                >
+                                                    Add actuary contact
+                                                </button>
+                                            </div>
+                                        )}
+                                    </FieldArray>
+                                </fieldset>
+
+                                <fieldset className="usa-fieldset">
+                                    <h3>Actuaries' communication preference</h3>
+
+                                    <legend className="srOnly">
+                                        Actuarial communication preference
+                                    </legend>
+                                    <FormGroup
+                                        error={showFieldErrors(
+                                            errors.actuaryCommunicationPreference
+                                        )}
+                                    >
+                                        <Fieldset
+                                            className={styles.radioGroup}
+                                            legend="Communication preference between CMS Office of the Actuary (OACT) and all state’s actuaries (i.e. certifying actuaries and additional actuary contacts)"
+                                        >
+                                            {showFieldErrors(`True`) && (
+                                                <ErrorMessage
+                                                    name={`actuaryCommunicationPreference`}
+                                                    component="div"
+                                                    className="usa-error-message"
+                                                />
+                                            )}
+                                            <FieldRadio
+                                                id="OACTtoActuary"
+                                                name="actuaryCommunicationPreference"
+                                                label={`OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`}
+                                                value={'OACT_TO_ACTUARY'}
+                                                aria-required
+                                            />
+                                            <FieldRadio
+                                                id="OACTtoState"
+                                                name="actuaryCommunicationPreference"
+                                                label={`OACT can communicate directly with the state, and the state will relay all written communication to their actuaries and set up time for any potential verbal discussions.`}
+                                                value={'OACT_TO_STATE'}
+                                                aria-required
+                                            />
+                                        </Fieldset>
+                                    </FormGroup>
+                                </fieldset>
+                            </>
+                        )}
+
+                        <PageActions
+                            saveAsDraftOnClick={() => {
+                                if (!dirty) {
+                                    navigate(`/dashboard`)
+                                } else {
                                     setShouldValidate(true)
                                     setFocusErrorSummaryHeading(true)
-                                }}
-                                actionInProgress={isSubmitting}
-                            />
-                        </UswdsForm>
-                    </>
-                )}
-            </Formik>
-        </>
+                                    redirectToDashboard.current = true
+                                    handleSubmit()
+                                }
+                            }}
+                            backOnClick={() =>
+                                navigate(
+                                    draftSubmission.submissionType ===
+                                        'CONTRACT_ONLY'
+                                        ? '../contract-details'
+                                        : '../rate-details'
+                                )
+                            }
+                            continueOnClick={() => {
+                                redirectToDashboard.current = false
+                                setShouldValidate(true)
+                                setFocusErrorSummaryHeading(true)
+                            }}
+                            actionInProgress={isSubmitting}
+                        />
+                    </UswdsForm>
+                </>
+            )}
+        </Formik>
     )
 }
