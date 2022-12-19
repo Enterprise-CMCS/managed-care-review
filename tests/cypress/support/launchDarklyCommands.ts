@@ -57,8 +57,7 @@ Cypress.Commands.add('stubFeatureFlags', () => {
             })
     ).as('LDClientStream');
 
-    ///sdk/evalx
-    //app.launchdarkly.com/sdk/goals/6261b53059c624156bacfd88
+    //This is for the OPTIONS request from LD, without this interceptFeatureFlags fails in cypress tests.
     cy.intercept({ method: 'OPTIONS', hostname: /\.*app.launchdarkly.com\/sdk\/goals/ }, []).as('LDAppOptionRequest');
 
     // Intercept feature flag calls and generates default feature flag values in store.
