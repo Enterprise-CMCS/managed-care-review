@@ -139,7 +139,7 @@ export const SubmissionType = ({
 
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
-    console.log(draftSubmission?.riskBasedContract)
+
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
         programIDs: draftSubmission?.programIDs ?? [],
         riskBasedContract:
