@@ -224,7 +224,7 @@ export function submitHealthPlanPackageResolver(
         ) {
             const errMessage = `Attempted to submit and already submitted package.`
             logError('submitHealthPlanPackage', errMessage)
-            throw new UserInputError(errMessage)
+            throw new UserInputError(errMessage) // TODO: This is should be a custom ApolloError such as INVALID_PACKAGE_STATUS or ACTION_UNAVAILABLE, not user input error since doesn't involve form fields the user controls
         }
 
         // attempt to parse into a StateSubmission

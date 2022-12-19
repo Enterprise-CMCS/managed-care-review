@@ -89,7 +89,7 @@ export function unlockHealthPlanPackageResolver(
             const errMessage = 'Attempted to unlock package with wrong status'
             logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage)
+            throw new UserInputError(errMessage) // / TODO: This is should be a custom ApolloError such as INVALID_PACKAGE_STATUS or ACTION_UNAVAILABLE, not user input error since doesn't involve form fields the user controls
         }
 
         // pull the current revision out to unlock it.

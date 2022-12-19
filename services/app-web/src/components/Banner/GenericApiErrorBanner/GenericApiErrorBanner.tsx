@@ -1,7 +1,7 @@
 import React from 'react'
 import styles from '../Banner.module.scss'
 import { Alert, Link } from '@trussworks/react-uswds'
-import { MAIL_TO_SUPPORT } from '../../../constants/errors'
+import { MAIL_TO_SUPPORT, ERROR_MESSAGES } from '../../../constants/errors'
 
 export type GenericApiErrorProps = {
     message?: string
@@ -22,9 +22,7 @@ export const GenericApiErrorBanner = ({
         >
             <div className={styles.bannerBodyText}>
                 <p className="usa-alert__text">
-                    <b>
-                        {message || "We're having trouble loading this page."}
-                    </b>
+                    <b>{message || ERROR_MESSAGES.generic_error}</b>
                 </p>
                 <p className="usa-alert__text">
                     <span>
