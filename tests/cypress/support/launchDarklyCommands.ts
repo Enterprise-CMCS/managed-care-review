@@ -19,8 +19,7 @@ Cypress.Commands.add('interceptFeatureFlags', (toggleFlags?: Partial<Record<Feat
     const featureFlagObject: Partial<Record<FeatureFlagTypes, FlagValueTypes>> = {}
     featureFlagEnums.forEach(flagEnum => {
         let key: FeatureFlagTypes = featureFlags[flagEnum].flag
-        let value = toggleFlags && toggleFlags[key] ? toggleFlags[key] : featureFlags[flagEnum].defaultValue
-        featureFlagObject[key] = value
+        featureFlagObject[key] = toggleFlags && toggleFlags[key] ? toggleFlags[key] : featureFlags[flagEnum].defaultValue
     })
 
     //Writing feature flags and values to store.
@@ -28,7 +27,7 @@ Cypress.Commands.add('interceptFeatureFlags', (toggleFlags?: Partial<Record<Feat
 
     // Intercepts LD request and returns with our own feature flags and values.
     return cy
-        .intercept({ method: "GET", hostname: /.*app.launchdarkly.com/ }, (req) =>
+        .intercept({ method: 'GET', hostname: /.*app.launchdarkly.com/ }, (req) =>
             req.reply(({ body }) =>
                 Cypress._.map(featureFlagObject, (ffValue, ffKey) => {
                     body[ffKey] = { value: ffValue };
@@ -36,26 +35,28 @@ Cypress.Commands.add('interceptFeatureFlags', (toggleFlags?: Partial<Record<Feat
                 })
             )
         )
-        .as("LDApp");
+        .as('LDApp');
 })
 
 // Intercepting feature flag api calls and returns some response. This should stop the app from calling making requests to LD.
 Cypress.Commands.add('stubFeatureFlags', () => {
     // ignore api calls to events endpoint
     cy.intercept(
-        { method: "POST", hostname: /.*events.launchdarkly.com/ },
+        { method: 'POST', hostname: /.*events.launchdarkly.com/ },
         { body: {} }
-    ).as("LDEvents");
+    ).as('LDEvents');
 
     // turn off push updates from LaunchDarkly (EventSource)
     cy.intercept(
-        { method: "GET", hostname: /.*clientstream.launchdarkly.com/ },
+        { method: 'GET', hostname: /.*clientstream.launchdarkly.com/ },
         // access the request handler and stub a response
         (req) =>
-            req.reply("data: no streaming feature flag data here\n\n", {
-                "content-type": "text/event-stream; charset=utf-8",
+            req.reply('data: no streaming feature flag data here\n\n', {
+                'content-type': 'text/event-stream; charset=utf-8',
             })
-    ).as("LDClientStream");
+    ).as('LDClientStream');
+
+    cy.intercept({ method: 'OPTIONS', hostname: /.*app.launchdarkly.com/ }, []).as('LDAppOptionRequest');
 
     // Intercept feature flag calls and generates default feature flag values in store.
     cy.interceptFeatureFlags()
