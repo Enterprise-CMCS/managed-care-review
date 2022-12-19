@@ -7,4 +7,3 @@ export {
 } from './ContactsSummarySection'
 export { SupportingDocumentsSummarySection } from './SupportingDocumentsSummarySection'
 export { UploadedDocumentsTable } from './UploadedDocumentsTable'
-export { handlePossibleMissingRequiredField } from './summarySectionHelpers'
