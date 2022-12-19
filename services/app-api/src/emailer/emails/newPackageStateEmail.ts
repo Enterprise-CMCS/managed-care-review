@@ -21,7 +21,6 @@ export const newPackageStateEmail = async (
     config: EmailConfiguration,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
-    const isUnitTest = config.baseUrl === 'http://localhost'
     const receiverEmails = generateStateReceiverEmails(pkg, user)
 
     //This checks to make sure all programs contained in submission exists for the state.
@@ -78,8 +77,7 @@ export const newPackageStateEmail = async (
 
     const result = await renderTemplate<typeof data>(
         'newPackageStateEmail',
-        data,
-        isUnitTest
+        data
     )
 
     if (result instanceof Error) {

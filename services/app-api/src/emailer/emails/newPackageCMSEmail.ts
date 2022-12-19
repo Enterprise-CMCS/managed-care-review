@@ -22,7 +22,6 @@ export const newPackageCMSEmail = async (
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
     // config
-    const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
     const reviewerEmails = generateCMSReviewerEmails(
         config,
@@ -83,11 +82,7 @@ export const newPackageCMSEmail = async (
         submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
     }
 
-    const result = await renderTemplate<typeof data>(
-        'newPackageCMSEmail',
-        data,
-        isUnitTest
-    )
+    const result = await renderTemplate<typeof data>('newPackageCMSEmail', data)
     if (result instanceof Error) {
         return result
     } else {
