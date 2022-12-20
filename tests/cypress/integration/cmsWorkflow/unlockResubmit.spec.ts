@@ -26,7 +26,6 @@ describe('CMS user', () => {
                     .wrap(form)
                     .within(() => cy.fillOutNewRateCertification())
         )
-        //cy.fillOutNewRateCertification()
         cy.navigateFormByButtonClick('CONTINUE')
 
         cy.findByRole('heading', {
