@@ -4,7 +4,6 @@ import { Route, Routes } from 'react-router'
 import { basicLockedHealthPlanFormData } from '../../common-code/healthPlanFormDataMocks'
 import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
 import { RoutesRecord } from '../../constants/routes'
-import { prettyDebug } from '../../testHelpers/jestHelpers'
 import {
     fetchCurrentUserMock,
     fetchStateHealthPlanPackageMockSuccess,
@@ -711,7 +710,9 @@ describe('SubmissionSummary', () => {
             ).toBeInTheDocument()
             expect(screen.getByText('Contact 1')).toBeInTheDocument()
             expect(
-                screen.getByRole('heading', { name: 'Actuary contacts' })
+                screen.getByRole('heading', {
+                    name: 'Additional actuary contacts',
+                })
             ).toBeInTheDocument()
             expect(screen.getByText('Contact 2')).toBeInTheDocument()
             const soAndSo = screen.getAllByRole('link', {
@@ -806,15 +807,7 @@ describe('SubmissionSummary', () => {
                         name: /document name/i,
                     })
                 ).toHaveLength(3)
-                prettyDebug('jjlabel0', rows[0])
-                prettyDebug('jjlabel1', rows[1])
-                prettyDebug('jjlabel2', rows[2])
-                prettyDebug('jjlabel3', rows[3])
-                prettyDebug('jjlabel4', rows[4])
-                prettyDebug('jjlabel5', rows[5])
-                prettyDebug('jjlabel6', rows[6])
-                prettyDebug('jjlabel7', rows[7])
-                // expect(rows).toHaveLength(5)
+                expect(rows).toHaveLength(7)
                 expect(rows[0]).toHaveTextContent('Date added')
                 expect(rows[0]).toHaveTextContent('Document name')
                 expect(rows[0]).toHaveTextContent('Document category')
@@ -1082,7 +1075,9 @@ describe('SubmissionSummary', () => {
             ).toBeInTheDocument()
             expect(screen.getByText('Contact 1')).toBeInTheDocument()
             expect(
-                screen.getByRole('heading', { name: 'Actuary contacts' })
+                screen.getByRole('heading', {
+                    name: 'Additional actuary contacts',
+                })
             ).toBeInTheDocument()
             expect(screen.getByText('Contact 2')).toBeInTheDocument()
             const soAndSo = screen.getAllByRole('link', {
@@ -1445,7 +1440,9 @@ describe('SubmissionSummary', () => {
             ).toBeInTheDocument()
             expect(screen.getByText('Contact 1')).toBeInTheDocument()
             expect(
-                screen.getByRole('heading', { name: 'Actuary contacts' })
+                screen.getByRole('heading', {
+                    name: 'Additional actuary contacts',
+                })
             ).toBeInTheDocument()
             expect(screen.getByText('Contact 2')).toBeInTheDocument()
             const soAndSo = screen.getAllByRole('link', {
@@ -1808,7 +1805,9 @@ describe('SubmissionSummary', () => {
             ).toBeInTheDocument()
             expect(screen.getByText('Contact 1')).toBeInTheDocument()
             expect(
-                screen.getByRole('heading', { name: 'Actuary contacts' })
+                screen.getByRole('heading', {
+                    name: 'Additional actuary contacts',
+                })
             ).toBeInTheDocument()
             expect(screen.getByText('Contact 2')).toBeInTheDocument()
             const soAndSo = screen.getAllByRole('link', {

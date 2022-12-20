@@ -519,8 +519,7 @@ describe('StateSubmissionForm', () => {
             deleteCallKeys.push(key)
         }
 
-        // eslint-disable-next-line jest/no-disabled-tests
-        it.skip('does not delete files from past revisions', async () => {
+        it('does not delete files from past revisions', async () => {
             const submission = mockUnlockedHealthPlanPackageWithDocuments()
             renderWithProviders(
                 <Routes>
@@ -561,7 +560,7 @@ describe('StateSubmissionForm', () => {
             await userEvent.click(removeThreeOne)
 
             // ASSERT
-            // When deleting a file that exists in a previous revision, we should not see it's key
+            // When deleting a file that exists in a previous revision, we should not see its key
             // in the deleteCallKeys array.
             expect(deleteCallKeys).toEqual(['three-one'])
         })
