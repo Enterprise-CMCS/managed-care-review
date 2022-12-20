@@ -164,9 +164,9 @@ export const SubmissionType = ({
                 const input: CreateHealthPlanPackageInput = {
                     programIDs: values.programIDs,
                     submissionType: values.submissionType,
-                    riskBasedContract: yesNoFormValueAsBoolean(
-                        values.riskBasedContract
-                    ),
+                    riskBasedContract: showRateCertAssurance
+                        ? yesNoFormValueAsBoolean(values.riskBasedContract)
+                        : undefined,
                     submissionDescription: values.submissionDescription,
                 }
 
@@ -203,9 +203,8 @@ export const SubmissionType = ({
             draftSubmission.programIDs = values.programIDs
             draftSubmission.submissionType =
                 values.submissionType as SubmissionTypeT
-            draftSubmission.riskBasedContract = yesNoFormValueAsBoolean(
-                values.riskBasedContract
-            )
+            draftSubmission.riskBasedContract =
+                yesNoFormValueAsBooleanOrUndefined(values.riskBasedContract)
             draftSubmission.submissionDescription = values.submissionDescription
 
             try {

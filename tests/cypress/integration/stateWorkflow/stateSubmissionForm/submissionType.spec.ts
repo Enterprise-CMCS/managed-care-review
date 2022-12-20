@@ -80,6 +80,8 @@ describe('submission type', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
+            cy.interceptFeatureFlags({ 'rate-cert-assurance': true })
+            
             cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/type`)
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
             cy.findByRole('heading', {

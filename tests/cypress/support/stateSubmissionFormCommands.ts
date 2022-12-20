@@ -24,6 +24,7 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
 })
 
 Cypress.Commands.add('fillOutContractActionOnly', () => {
+      cy.interceptFeatureFlags({ 'rate-cert-assurance': true })
     // Must be on '/submissions/new'
     cy.wait(2000)
     cy.findByRole('combobox', { name: 'Programs this contract action covers (required)' }).click({
@@ -42,6 +43,7 @@ Cypress.Commands.add('fillOutContractActionOnly', () => {
 })
 
 Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
+    cy.interceptFeatureFlags({ 'rate-cert-assurance': true })
     // Must be on '/submissions/new'
     cy.wait(2000)
     cy.findByRole('combobox', { name: 'Programs this contract action covers (required)' }).click({

@@ -71,6 +71,7 @@ function submit(
     if (isLockedHealthPlanFormData(maybeStateSubmission))
         return maybeStateSubmission
     else if (
+        // TO DO - add feature flagged check for rate assurance question answer to hasValidContract
         !hasValidContract(maybeStateSubmission as LockedHealthPlanFormDataType)
     ) {
         return {
