@@ -42,4 +42,48 @@ describe('DataDetail', () => {
         expect(screen.getByText('Mickey Mouse')).toBeInTheDocument()
         expect(screen.getAllByRole('link')).toHaveLength(2)
     })
+
+    it('renders helpful text when explainMissingData prop is true and no data passed in', () => {
+        render(
+            <DataDetail
+                id="disney"
+                label="Disney World's Best Attraction"
+                data={undefined}
+                explainMissingData={true}
+            />
+        )
+
+        expect(
+            screen.getByText(/You must provide this information/)
+        ).toBeInTheDocument()
+    })
+
+    it('renders data when explainMissingData prop is true and valid data is passed in', () => {
+        render(
+            <DataDetail
+                id="disney"
+                label="Disney World's Best Attraction"
+                data="The teacups"
+                explainMissingData={true}
+            />
+        )
+        expect(
+            screen.queryByText(/You must provide this information/)
+        ).toBeNull()
+        expect(screen.getByText(/teacups/)).toBeInTheDocument()
+    })
+    it('renders nothing when explainMissingData prop is false/missing and no data passed in', () => {
+        const { container } = render(
+            <DataDetail
+                id="disney"
+                label="Disney World Contact Info"
+                data={undefined}
+            />
+        )
+
+        expect(
+            screen.queryByText(/You must provide this information/)
+        ).toBeNull()
+        expect(container).toBeEmptyDOMElement()
+    })
 })
