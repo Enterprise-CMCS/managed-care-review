@@ -34,13 +34,22 @@ describe('dashboard', () => {
         cy.fillOutBaseContractDetails()
         cy.navigateFormByButtonClick('CONTINUE')
 
+        cy.findByRole('heading', {
+            level: 2,
+            name: /Rate details/
+        }).should('exist')
         cy.fillOutNewRateCertification()
         cy.navigateFormByButtonClick('CONTINUE')
 
+        cy.findByRole('heading', {
+            level: 2,
+            name: /Contacts/,
+        }).should('exist')
         cy.fillOutStateContact()
-        cy.fillOutActuaryContact()
+        cy.fillOutAdditionalActuaryContact()
         cy.navigateFormByButtonClick('CONTINUE')
 
+        cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
         cy.fillOutSupportingDocuments()
         cy.navigateFormByButtonClick('CONTINUE')
 
@@ -76,7 +85,9 @@ describe('dashboard', () => {
                 throw new Error('No submission name found' + loc.search)
             }
             cy.findByText(`${submissionName} was sent to CMS`).should('exist')
-            cy.findByText(submissionName).should('exist').click()
+            cy.get('table')
+                .findByRole('link', { name: submissionName }).should('exist')
+            cy.findByRole('link', { name: submissionName }).click()
             cy.url({ timeout: 10_000 }).should('contain', submissionId)
             cy.findByTestId('submission-summary').should('exist')
             cy.findByRole('heading', {

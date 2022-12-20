@@ -502,7 +502,6 @@ describe('RateDetailsSummarySection', () => {
     })
 
     it('renders multiple rate certifications with certifying actuary', async () => {
-        ldUseClientSpy({ 'multi-rate-submissions': true })
         const draftSubmission = mockContractAndRatesDraft()
         draftSubmission.rateInfos = mockRateInfos
         renderWithProviders(
@@ -531,7 +530,7 @@ describe('RateDetailsSummarySection', () => {
         })
     })
     it('renders all necessary information for documents with shared rate certifications', async () => {
-        ldUseClientSpy({ 'multi-rate-submissions': true })
+        ldUseClientSpy({ 'rates-across-submissions': true })
         const testSubmission = {
             ...draftSubmission,
             rateInfos: [
@@ -628,7 +627,7 @@ describe('RateDetailsSummarySection', () => {
             usePreviousSubmission,
             'usePreviousSubmission'
         ).mockReturnValue(true)
-        ldUseClientSpy({ 'multi-rate-submissions': true })
+        ldUseClientSpy({ 'rates-across-submissions': true })
         const testSubmission = {
             ...draftSubmission,
             rateInfos: [
@@ -701,7 +700,7 @@ describe('RateDetailsSummarySection', () => {
         })
     })
     it('does not render shared rate cert info if none are present', async () => {
-        ldUseClientSpy({ 'multi-rate-submissions': true })
+        ldUseClientSpy({ 'rates-across-submissions': true })
         const testSubmission = {
             ...draftSubmission,
             rateInfos: [

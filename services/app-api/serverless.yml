@@ -189,6 +189,7 @@ functions:
               - x-amzn-trace-id
               - b3
               - traceparent
+          authorizer: aws_iam
 
   graphql:
     handler: src/handlers/apollo_gql.graphqlHandler

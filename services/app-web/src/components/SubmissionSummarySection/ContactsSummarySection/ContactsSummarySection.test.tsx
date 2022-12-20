@@ -1,8 +1,5 @@
 import { screen } from '@testing-library/react'
-import {
-    renderWithProviders,
-    ldUseClientSpy,
-} from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { ContactsSummarySection } from '.'
 import {
     mockContractAndRatesDraft,
@@ -31,7 +28,7 @@ describe('ContactsSummarySection', () => {
         expect(
             screen.getByRole('heading', {
                 level: 2,
-                name: 'Actuary contacts',
+                name: 'Additional actuary contacts',
             })
         ).toBeInTheDocument()
         expect(
@@ -71,28 +68,21 @@ describe('ContactsSummarySection', () => {
         // expect(screen.queryByText('State Contact 1')).toBeInTheDocument()
         // expect(screen.queryByText('Test State Contact 1')).toBeInTheDocument()
         expect(
-            screen.getByRole('link', {
-                name: 'statecontact1@test.com',
-            })
-        ).toBeInTheDocument()
-
-        expect(
             screen.getByRole('heading', {
                 level: 2,
-                name: 'Actuary contacts',
+                name: 'Additional actuary contacts',
             })
         ).toBeInTheDocument()
-        expect(screen.queryByText('Certifying actuary')).toBeInTheDocument()
-        // expect(screen.queryByText('Actuary Contact 1')).toBeInTheDocument()
-        // expect(screen.queryByText('Test Actuary Contact 1')).toBeInTheDocument()
+        expect(
+            screen.queryByText('Additional actuary contact')
+        ).toBeInTheDocument()
         expect(
             screen.getByRole('link', {
-                name: 'actuarycontact1@test.com',
+                name: 'additionalactuarycontact1@test.com',
             })
         ).toBeInTheDocument()
-        // expect(screen.queryByText('Deloitte')).toBeInTheDocument()
         expect(
-            screen.queryByText('Actuary communication preference')
+            screen.queryByText('Actuaries’ communication preference')
         ).toBeInTheDocument()
         expect(
             screen.queryByText(
@@ -119,38 +109,5 @@ describe('ContactsSummarySection', () => {
         ).toBeInTheDocument()
 
         expect(screen.queryByText('Actuary contacts')).not.toBeInTheDocument()
-    })
-
-    it('renders correct text for actuary contact fields when multi-rate-submissions flag is on', () => {
-        ldUseClientSpy({ 'multi-rate-submissions': true })
-        renderWithProviders(
-            <ContactsSummarySection
-                submission={draftSubmission}
-                navigateTo="contacts"
-            />
-        )
-
-        expect(
-            screen.getByRole('heading', {
-                level: 2,
-                name: 'Additional actuary contacts',
-            })
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByText('Additional actuary contact')
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('link', {
-                name: 'additionalactuarycontact1@test.com',
-            })
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByText('Actuaries’ communication preference')
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByText(
-                'OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.'
-            )
-        ).toBeInTheDocument()
     })
 })

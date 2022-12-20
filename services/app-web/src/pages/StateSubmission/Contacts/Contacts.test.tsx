@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 
 import {
     mockDraft,
@@ -7,10 +7,7 @@ import {
     fetchCurrentUserMock,
 } from '../../../testHelpers/apolloHelpers'
 
-import {
-    renderWithProviders,
-    ldUseClientSpy,
-} from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { Contacts } from './'
 import userEvent from '@testing-library/user-event'
 
@@ -69,8 +66,35 @@ describe('Contacts', () => {
         )
 
         expect(
-            screen.getByText(/A state and an actuary contact are required/)
+            screen.getByText('A state contact is required')
         ).toBeInTheDocument()
+        expect(
+            screen.getByText('Additional Actuary Contacts')
+        ).toBeInTheDocument()
+        expect(
+            screen.getByText(
+                'Provide contact information for any additional actuaries who worked directly on this submission.'
+            )
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('button', { name: 'Add actuary contact' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByText(
+                'Communication preference between CMS Office of the Actuary (OACT) and all state’s actuaries (i.e. certifying actuaries and additional actuary contacts)'
+            )
+        ).toBeInTheDocument()
+        expect(
+            screen.getByText(
+                'OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.'
+            )
+        ).toBeInTheDocument()
+        expect(
+            screen.getByText(
+                'OACT can communicate directly with the state, and the state will relay all written communication to their actuaries and set up time for any potential verbal discussions.'
+            )
+        ).toBeInTheDocument()
+        expect(screen.queryAllByTestId('actuary-contact')).toHaveLength(0)
     })
 
     it('checks saved mocked state contacts correctly', async () => {
@@ -184,28 +208,20 @@ describe('Contacts', () => {
         )
 
         const addActuaryContactButton = screen.getByRole('button', {
-            name: 'Add another actuary contact',
+            name: 'Add actuary contact',
         })
-        const firstActuaryContactName = screen.getAllByLabelText('Name')[1]
-
-        await userEvent.type(firstActuaryContactName, 'First actuary person')
-        expect(firstActuaryContactName).toHaveFocus()
 
         addActuaryContactButton.click()
 
         await waitFor(() => {
-            expect(
-                screen.getByText('Add another actuary contact')
-            ).toBeInTheDocument()
+            expect(screen.getByText('Add actuary contact')).toBeInTheDocument()
 
-            expect(screen.getAllByLabelText('Name')).toHaveLength(3)
+            expect(screen.getAllByLabelText('Name')).toHaveLength(2)
 
-            const secondActuaryContactName = screen.getAllByLabelText('Name')[2]
-            expect(firstActuaryContactName).toHaveValue('First actuary person')
-            expect(firstActuaryContactName).not.toHaveFocus()
+            const firstActuaryContactName = screen.getAllByLabelText('Name')[1]
 
-            expect(secondActuaryContactName).toHaveValue('')
-            expect(secondActuaryContactName).toHaveFocus()
+            expect(firstActuaryContactName).toHaveValue('')
+            expect(firstActuaryContactName).toHaveFocus()
         })
     })
 
@@ -251,7 +267,7 @@ describe('Contacts', () => {
             }
         )
         const addActuaryContactButton = screen.getByRole('button', {
-            name: 'Add another actuary contact',
+            name: 'Add actuary contact',
         })
         await userEvent.click(addActuaryContactButton)
 
@@ -302,13 +318,16 @@ describe('Contacts', () => {
             }
         )
         const addActuaryContactButton = screen.getByRole('button', {
-            name: 'Add another actuary contact',
+            name: 'Add actuary contact',
         })
         addActuaryContactButton.click()
         addActuaryContactButton.click()
         await waitFor(() => {
             expect(
                 screen.getByText('Additional actuary contact 1')
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText('Additional actuary contact 2')
             ).toBeInTheDocument()
         })
     })
@@ -336,9 +355,19 @@ describe('Contacts', () => {
         screen.getAllByLabelText('Email')[0].focus()
         await userEvent.paste('statecontact@test.com')
 
-        expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
+        // add additional actuary contact
+        const addActuaryContactButton = screen.getByRole('button', {
+            name: 'Add actuary contact',
+        })
+        addActuaryContactButton.click()
 
-        // add actuary contact
+        await waitFor(() => {
+            expect(
+                screen.getByText('Additional actuary contact 1')
+            ).toBeInTheDocument()
+        })
+
+        // fill out additional actuary contact 1
         screen.getAllByLabelText('Name')[1].focus()
         await userEvent.paste('Actuary Contact Person')
 
@@ -355,8 +384,6 @@ describe('Contacts', () => {
                 `OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.`
             )
         )
-
-        expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
 
         // Add additional state contact
         await userEvent.click(
@@ -377,11 +404,7 @@ describe('Contacts', () => {
         expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
 
         // Add additional actuary contact
-        await userEvent.click(
-            screen.getByRole('button', {
-                name: /Add another actuary contact/,
-            })
-        )
+        addActuaryContactButton.click()
 
         screen.getAllByLabelText('Name')[1].focus()
         await userEvent.paste('Actuary Contact Person 2')
@@ -397,119 +420,39 @@ describe('Contacts', () => {
         // Remove additional state contact
         expect(
             screen.getAllByRole('button', { name: /Remove contact/ })
-        ).toHaveLength(2) // there are two remove contact buttons on screen, one for state one for actuary
+        ).toHaveLength(3) // there are two remove contact buttons on screen, one for state one for actuary
         await userEvent.click(
             screen.getAllByRole('button', { name: /Remove contact/ })[0]
         )
 
         expect(screen.queryByText('State contact 2')).toBeNull()
+        expect(
+            screen.queryByText('Additional actuary contact 2')
+        ).toBeInTheDocument()
+        expect(
+            screen.queryByText('Additional actuary contact 1')
+        ).toBeInTheDocument()
 
-        // Remove additional actuary contact
+        // Remove additional actuary contacts
         expect(
             screen.getAllByRole('button', { name: /Remove contact/ })
-        ).toHaveLength(1) // there is only 1 button on screen, for actuary
+        ).toHaveLength(2) // there are 2 remove contact buttons on screen, for actuary
 
+        //Remove actuary contact 2
+        await userEvent.click(
+            screen.getAllByRole('button', { name: /Remove contact/ })[0]
+        )
+
+        expect(screen.queryByText('Additional actuary contact 2')).toBeNull()
+        expect(
+            screen.queryByText('Additional actuary contact 1')
+        ).toBeInTheDocument()
+
+        //Remove actuary contact 1
         await userEvent.click(
             screen.getAllByRole('button', { name: /Remove contact/ })[0]
         )
 
         expect(screen.queryByText('Additional actuary contact 1')).toBeNull()
-    })
-
-    it('text renders correctly when multi-rate-submissions flag is turned on', async () => {
-        ldUseClientSpy({ 'multi-rate-submissions': true })
-        const mock = mockContactAndRatesDraft()
-        const mockUpdateDraftFn = jest.fn()
-
-        renderWithProviders(
-            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
-
-        //Make sure text on page is correct with multi-rate-submissions flag on, without any actuaries.
-        expect(
-            screen.queryByText('A state contact is required')
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByText('Additional Actuary Contacts')
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByText(
-                'Provide contact information for any additional actuaries who worked directly on this submission.'
-            )
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('button', { name: 'Add actuary contact' })
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByText(
-                'Communication preference between CMS Office of the Actuary (OACT) and all state’s actuaries (i.e. certifying actuaries and additional actuary contacts)'
-            )
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByText(
-                'OACT can communicate directly with the state’s actuaries but should copy the state on all written communication and all appointments for verbal discussions.'
-            )
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByText(
-                'OACT can communicate directly with the state, and the state will relay all written communication to their actuaries and set up time for any potential verbal discussions.'
-            )
-        ).toBeInTheDocument()
-        expect(screen.queryAllByTestId('actuary-contact')).toHaveLength(0)
-
-        //Add two actuaries
-        await userEvent.click(
-            screen.getByRole('button', { name: /Add actuary contact/ })
-        )
-        await userEvent.click(
-            screen.getByRole('button', { name: /Add actuary contact/ })
-        )
-
-        //Check each actuary field sets have correct text
-        await waitFor(() => {
-            expect(screen.queryAllByTestId('actuary-contact')).toHaveLength(2)
-            const actuaryContactOne =
-                screen.queryAllByTestId('actuary-contact')[0]
-            expect(
-                within(actuaryContactOne).queryByText(
-                    'Additional actuary contact 1'
-                )
-            ).toBeInTheDocument()
-            expect(
-                within(actuaryContactOne).queryByText('Name')
-            ).toBeInTheDocument()
-            expect(
-                within(actuaryContactOne).queryByText('Title/Role')
-            ).toBeInTheDocument()
-            expect(
-                within(actuaryContactOne).queryByRole('button', {
-                    name: /Remove contact/,
-                })
-            ).toBeInTheDocument()
-
-            const actuaryContactTwo =
-                screen.queryAllByTestId('actuary-contact')[1]
-            expect(
-                within(actuaryContactTwo).queryByText(
-                    'Additional actuary contact 2'
-                )
-            ).toBeInTheDocument()
-            expect(
-                within(actuaryContactTwo).queryByText('Name')
-            ).toBeInTheDocument()
-            expect(
-                within(actuaryContactTwo).queryByText('Title/Role')
-            ).toBeInTheDocument()
-            expect(
-                within(actuaryContactOne).queryByRole('button', {
-                    name: /Remove contact/,
-                })
-            ).toBeInTheDocument()
-        })
     })
 })

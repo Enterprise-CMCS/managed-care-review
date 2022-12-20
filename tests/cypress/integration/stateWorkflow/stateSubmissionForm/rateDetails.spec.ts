@@ -82,7 +82,7 @@ describe('rate details', () => {
 
 
             cy.fillOutStateContact()
-            cy.fillOutActuaryContact()
+            cy.fillOutAdditionalActuaryContact()
             cy.navigateFormByButtonClick('CONTINUE')
 
             cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
@@ -91,7 +91,6 @@ describe('rate details', () => {
     })
 
     it('can add and remove multiple rate certifications and navigate to and from rate details page', () => {
-        cy.interceptFeatureFlags({'multi-rate-submissions': true})
         cy.logInAsStateUser()
 
         //Start contract and rates submission
@@ -129,7 +128,7 @@ describe('rate details', () => {
         cy.fillOutStateContact()
         cy.findByRole('button', { name: /Add actuary contact/}).safeClick()
         cy.findAllByTestId('actuary-contact').should('have.length', 1)
-        cy.fillOutActuaryContact()
+        cy.fillOutAdditionalActuaryContact()
 
         // Navigate back to rate details page
         cy.navigateFormByButtonClick('BACK')
