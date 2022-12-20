@@ -45,7 +45,7 @@ function displayErrorMessageForMissingData<T>(
         return (
             <span className={styles.missingInfo}>
                 <span>
-                    <IconError size={3} />
+                    <IconError aria-label="An error icon" size={3} />
                 </span>
                 <span>{requiredFieldMissingText}</span>
             </span>
