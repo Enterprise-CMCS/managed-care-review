@@ -47,7 +47,7 @@ declare global {
             fillOutNewRateCertification(): void
             fillOutAmendmentToPriorRateCertification(): void
             fillOutStateContact(): void
-            fillOutActuaryContact(): void
+            fillOutAdditionalActuaryContact(): void
             fillOutSupportingDocuments(): void
             waitForDocumentsToLoad(): void
             verifyDocumentsHaveNoErrors(): void

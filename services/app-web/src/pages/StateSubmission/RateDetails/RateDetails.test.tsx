@@ -48,7 +48,192 @@ describe('RateDetails', () => {
         jest.spyOn(useStatePrograms, 'useStatePrograms').mockRestore()
     })
 
+    const fillOutIndexRate = async (screen: Screen, index: number) => {
+        const targetRateCert = rateCertifications(screen)[index]
+        expect(targetRateCert).toBeDefined()
+        const withinTargetRateCert = within(targetRateCert)
+
+        // assert proper initial fields are present
+        expect(
+            withinTargetRateCert.getByText('Upload rate certification')
+        ).toBeInTheDocument()
+        expect(
+            withinTargetRateCert.getByText(
+                'Programs this rate certification covers'
+            )
+        ).toBeInTheDocument()
+        expect(
+            withinTargetRateCert.getByText('Rate certification type')
+        ).toBeInTheDocument()
+        expect(
+            withinTargetRateCert.getByText(
+                'Does the actuary certify capitation rates specific to each rate cell or a rate range?'
+            )
+        ).toBeInTheDocument()
+
+        //Rates across submission
+        const sharedRates = withinTargetRateCert.queryByText(
+            /Was this rate certification uploaded to any other submissions/
+        )
+        //if rates across submission UI exists then fill out section
+        if (sharedRates) {
+            expect(sharedRates).toBeInTheDocument()
+            withinTargetRateCert.getByLabelText('No').click()
+        }
+
+        // add 1 doc
+        const input = withinTargetRateCert.getByLabelText(
+            'Upload rate certification'
+        )
+        await userEvent.upload(input, [TEST_DOC_FILE])
+
+        // add programs
+        const combobox = await withinTargetRateCert.findByRole('combobox')
+        await selectEvent.openMenu(combobox)
+        await selectEvent.select(combobox, 'SNBC')
+        await selectEvent.openMenu(combobox)
+        await selectEvent.select(combobox, 'PMAP')
+        expect(
+            withinTargetRateCert.getByLabelText('Remove SNBC')
+        ).toBeInTheDocument()
+        expect(
+            withinTargetRateCert.getByLabelText('Remove PMAP')
+        ).toBeInTheDocument()
+
+        //  add types and answer captitation rates question
+        withinTargetRateCert.getByLabelText('New rate certification').click()
+
+        withinTargetRateCert
+            .getByLabelText(
+                'Certification of capitation rates specific to each rate cell'
+            )
+            .click()
+
+        // check that now we can see dates, since that is triggered after selecting type
+        await waitFor(() => {
+            expect(
+                withinTargetRateCert.queryByText('Start date')
+            ).toBeInTheDocument()
+            expect(
+                withinTargetRateCert.queryByText('End date')
+            ).toBeInTheDocument()
+            expect(
+                withinTargetRateCert.queryByText('Date certified')
+            ).toBeInTheDocument()
+            expect(withinTargetRateCert.queryByText('Name')).toBeInTheDocument()
+            expect(
+                withinTargetRateCert.queryByText('Title/Role')
+            ).toBeInTheDocument()
+            expect(
+                withinTargetRateCert.queryByText('Email')
+            ).toBeInTheDocument()
+        })
+
+        // fill in dates
+        withinTargetRateCert.getAllByLabelText('Start date')[0].focus()
+        await userEvent.paste('01/01/2022')
+
+        withinTargetRateCert.getAllByLabelText('End date')[0].focus()
+        await userEvent.paste('12/31/2022')
+
+        withinTargetRateCert.getAllByLabelText('Date certified')[0].focus()
+        await userEvent.paste('12/01/2021')
+
+        // fill out actuary contact
+        withinTargetRateCert.getByLabelText('Name').focus()
+        await userEvent.paste(`Actuary Contact Person ${index}`)
+
+        withinTargetRateCert.getByLabelText('Title/Role').focus()
+        await userEvent.paste(`Actuary Contact Title ${index}`)
+
+        withinTargetRateCert.getByLabelText('Email').focus()
+        await userEvent.paste(`actuarycontact${index}@test.com`)
+
+        await userEvent.click(withinTargetRateCert.getByLabelText('Mercer'))
+    }
+
+    const fillOutFirstRate = async (screen: Screen) => {
+        // trigger errors (used later to confirm we filled out every field)
+        fireEvent.click(
+            screen.getByRole('button', {
+                name: 'Continue',
+            })
+        )
+
+        await fillOutIndexRate(screen, 0)
+        // wait for all errors to clear
+        await waitFor(() =>
+            expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
+        )
+    }
+
+    const clickAddNewRate = async (screen: Screen) => {
+        const rateCertsBeforeAddingNewRate = rateCertifications(screen)
+
+        const addAnotherButton = screen.getByRole('button', {
+            name: /Add another rate/,
+        })
+
+        expect(addAnotherButton).toBeInTheDocument()
+        fireEvent.click(addAnotherButton)
+        await waitFor(() =>
+            expect(rateCertifications(screen)).toHaveLength(
+                rateCertsBeforeAddingNewRate.length + 1
+            )
+        )
+    }
+
+    const clickRemoveIndexRate = async (
+        screen: Screen,
+        indexOfRateCertToRemove: number
+    ) => {
+        // Remember, user cannot never remove the first rate certification -- MR-2231
+        const rateCertsBeforeRemoving = rateCertifications(screen)
+        // Confirm there is a rate to remove
+        expect(rateCertsBeforeRemoving.length).toBeGreaterThanOrEqual(2)
+
+        // Confirm there is one less rate removal button than rate certs
+        const removeRateButtonsBeforeClick = screen.getAllByRole('button', {
+            name: /Remove rate certification/,
+        })
+        expect(removeRateButtonsBeforeClick.length).toBeGreaterThanOrEqual(1)
+        expect(removeRateButtonsBeforeClick).toHaveLength(
+            rateCertsBeforeRemoving.length - 1
+        )
+
+        // Remove rate cert
+        const removeRateButton =
+            removeRateButtonsBeforeClick[indexOfRateCertToRemove - 1]
+
+        expect(removeRateButton).toBeInTheDocument()
+        fireEvent.click(removeRateButton)
+
+        await waitFor(() => {
+            // Confirm that there is one less rate certification on the page
+            expect(rateCertifications(screen)).toHaveLength(
+                rateCertsBeforeRemoving.length - 1
+            )
+            // Confirm that there is one less rate removal button (might even be zero buttons on page if all additional rates removed)
+            expect(
+                screen.getAllByRole('button', {
+                    name: /Remove rate certification/,
+                })
+            ).toHaveLength(removeRateButtonsBeforeClick.length - 1)
+        })
+    }
+
+    const rateCertifications = (screen: Screen) => {
+        return screen.getAllByTestId('rate-certification-form')
+    }
+
+    const lastRateCertificationFromList = (screen: Screen) => {
+        return rateCertifications(screen).pop()
+    }
+
     describe('handles a single rate', () => {
+        afterEach(() => {
+            jest.clearAllMocks()
+        })
         it('renders without errors', async () => {
             const mockUpdateDraftFn = jest.fn()
 
@@ -234,33 +419,6 @@ describe('RateDetails', () => {
             ldUseClientSpy({
                 'rates-across-submissions': true,
             })
-            const mockUser = {
-                __typename: 'StateUser' as const,
-                role: 'STATE_USER',
-                name: 'Sheena in Minnesota',
-                email: 'Sheena@dmas.mn.gov',
-                state: {
-                    name: 'Minnesota',
-                    code: 'MN',
-                    programs: [
-                        {
-                            id: 'first',
-                            name: 'Program 1',
-                            fullName: 'Program 1',
-                        },
-                        {
-                            id: 'second',
-                            name: 'Program Test',
-                            fullName: 'Program Test',
-                        },
-                        {
-                            id: 'third',
-                            name: 'Program 3',
-                            fullName: 'Program 3',
-                        },
-                    ],
-                },
-            }
 
             renderWithProviders(
                 <RateDetails
@@ -272,7 +430,6 @@ describe('RateDetails', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({
-                                user: mockUser,
                                 statusCode: 200,
                             }),
                         ],
@@ -298,7 +455,7 @@ describe('RateDetails', () => {
                 )
                 .click()
             const input = screen.getByLabelText('Upload rate certification')
-            await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_XLS_FILE])
             const hasSharedRateFieldset = screen
                 .getByText(
                     /Was this rate certification uploaded to any other submissions/
@@ -326,43 +483,35 @@ describe('RateDetails', () => {
 
             // check for expected errors
             await waitFor(() => {
-                expect(screen.queryAllByTestId('errorMessage')).toHaveLength(3)
+                expect(screen.queryAllByTestId('errorMessage')).toHaveLength(7)
                 expect(
-                    screen.queryAllByText(
-                        'You must enter the date the document was certified'
-                    )
+                    screen.queryAllByText('You must select a program')
                 ).toHaveLength(2)
                 expect(
                     screen.queryByText(
                         'You must provide a start and an end date'
                     )
                 ).toBeInTheDocument()
-
                 expect(
-                    screen.queryAllByText('You must select a program')
+                    screen.queryAllByText(
+                        'You must enter the date the document was certified'
+                    )
+                ).toHaveLength(2)
+                expect(
+                    screen.queryAllByText('You must provide a name')
+                ).toHaveLength(2)
+                expect(
+                    screen.queryAllByText('You must provide a title/role')
+                ).toHaveLength(2)
+                expect(
+                    screen.queryAllByText('You must provide an email address')
+                ).toHaveLength(2)
+                expect(
+                    screen.queryAllByText('You must select an actuarial firm')
                 ).toHaveLength(2)
             })
 
-            //Select programs for rate certification
-            const combobox = await screen.findByRole('combobox')
-
-            await selectEvent.openMenu(combobox)
-            await waitFor(() => {
-                expect(screen.getByText('Program 3')).toBeInTheDocument()
-            })
-            await selectEvent.select(combobox, 'Program 1')
-            await selectEvent.openMenu(combobox)
-            await selectEvent.select(combobox, 'Program 3')
-
-            // fill out form and clear errors
-            screen.getAllByLabelText('Start date')[0].focus()
-            await userEvent.paste('01/01/2022')
-
-            screen.getAllByLabelText('End date')[0].focus()
-            await userEvent.paste('12/31/2022')
-
-            screen.getAllByLabelText('Date certified')[0].focus()
-            await userEvent.paste('12/01/2021')
+            await fillOutFirstRate(screen)
 
             //wait for all errors to clear
             await waitFor(() =>
@@ -526,201 +675,9 @@ describe('RateDetails', () => {
     })
 
     describe('handles multiple rates', () => {
-        beforeEach(() =>
-            ldUseClientSpy({
-                'multi-rate-submissions': true,
-                'rates-across-submissions': true,
-            })
-        )
         afterEach(() => {
             jest.clearAllMocks()
         })
-
-        const fillOutIndexRate = async (screen: Screen, index: number) => {
-            const targetRateCert = rateCertifications(screen)[index]
-            expect(targetRateCert).toBeDefined()
-            const withinTargetRateCert = within(targetRateCert)
-
-            // assert proper initial fields are present
-            expect(
-                withinTargetRateCert.getByText('Upload rate certification')
-            ).toBeInTheDocument()
-            expect(
-                withinTargetRateCert.getByText(
-                    /Was this rate certification uploaded to any other submissions/
-                )
-            ).toBeInTheDocument()
-            expect(
-                withinTargetRateCert.getByText(
-                    'Programs this rate certification covers'
-                )
-            ).toBeInTheDocument()
-            expect(
-                withinTargetRateCert.getByText('Rate certification type')
-            ).toBeInTheDocument()
-            expect(
-                withinTargetRateCert.getByText(
-                    'Does the actuary certify capitation rates specific to each rate cell or a rate range?'
-                )
-            ).toBeInTheDocument()
-
-            // add 1 doc
-            const input = withinTargetRateCert.getByLabelText(
-                'Upload rate certification'
-            )
-            await userEvent.upload(input, [TEST_DOC_FILE])
-
-            // select NO for shared rate cert
-            withinTargetRateCert.getByLabelText('No').click()
-
-            // add programs
-            const combobox = await withinTargetRateCert.findByRole('combobox')
-            await selectEvent.openMenu(combobox)
-            await selectEvent.select(combobox, 'SNBC')
-            await selectEvent.openMenu(combobox)
-            await selectEvent.select(combobox, 'PMAP')
-            expect(
-                withinTargetRateCert.getByLabelText('Remove SNBC')
-            ).toBeInTheDocument()
-            expect(
-                withinTargetRateCert.getByLabelText('Remove PMAP')
-            ).toBeInTheDocument()
-
-            //  add types and answer captitation rates question
-            withinTargetRateCert
-                .getByLabelText('New rate certification')
-                .click()
-
-            withinTargetRateCert
-                .getByLabelText(
-                    'Certification of capitation rates specific to each rate cell'
-                )
-                .click()
-
-            // check that now we can see dates, since that is triggered after selecting type
-            await waitFor(() => {
-                expect(
-                    withinTargetRateCert.queryByText('Start date')
-                ).toBeInTheDocument()
-                expect(
-                    withinTargetRateCert.queryByText('End date')
-                ).toBeInTheDocument()
-                expect(
-                    withinTargetRateCert.queryByText('Date certified')
-                ).toBeInTheDocument()
-                expect(
-                    withinTargetRateCert.queryByText('Name')
-                ).toBeInTheDocument()
-                expect(
-                    withinTargetRateCert.queryByText('Title/Role')
-                ).toBeInTheDocument()
-                expect(
-                    withinTargetRateCert.queryByText('Email')
-                ).toBeInTheDocument()
-            })
-
-            // fill in dates
-            withinTargetRateCert.getAllByLabelText('Start date')[0].focus()
-            await userEvent.paste('01/01/2022')
-
-            withinTargetRateCert.getAllByLabelText('End date')[0].focus()
-            await userEvent.paste('12/31/2022')
-
-            withinTargetRateCert.getAllByLabelText('Date certified')[0].focus()
-            await userEvent.paste('12/01/2021')
-
-            // fill out actuary contact
-            withinTargetRateCert.getByLabelText('Name').focus()
-            await userEvent.paste(`Actuary Contact Person ${index}`)
-
-            withinTargetRateCert.getByLabelText('Title/Role').focus()
-            await userEvent.paste(`Actuary Contact Title ${index}`)
-
-            withinTargetRateCert.getByLabelText('Email').focus()
-            await userEvent.paste(`actuarycontact${index}@test.com`)
-
-            await userEvent.click(withinTargetRateCert.getByLabelText('Mercer'))
-        }
-
-        const fillOutFirstRate = async (screen: Screen) => {
-            // trigger errors (used later to confirm we filled out every field)
-            fireEvent.click(
-                screen.getByRole('button', {
-                    name: 'Continue',
-                })
-            )
-
-            await fillOutIndexRate(screen, 0)
-            // wait for all errors to clear
-            await waitFor(() =>
-                expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
-            )
-        }
-
-        const clickAddNewRate = async (screen: Screen) => {
-            const rateCertsBeforeAddingNewRate = rateCertifications(screen)
-
-            const addAnotherButton = screen.getByRole('button', {
-                name: /Add another rate/,
-            })
-
-            expect(addAnotherButton).toBeInTheDocument()
-            fireEvent.click(addAnotherButton)
-            await waitFor(() =>
-                expect(rateCertifications(screen)).toHaveLength(
-                    rateCertsBeforeAddingNewRate.length + 1
-                )
-            )
-        }
-
-        const clickRemoveIndexRate = async (
-            screen: Screen,
-            indexOfRateCertToRemove: number
-        ) => {
-            // Remember, user cannot never remove the first rate certification -- MR-2231
-            const rateCertsBeforeRemoving = rateCertifications(screen)
-            // Confirm there is a rate to remove
-            expect(rateCertsBeforeRemoving.length).toBeGreaterThanOrEqual(2)
-
-            // Confirm there is one less rate removal button than rate certs
-            const removeRateButtonsBeforeClick = screen.getAllByRole('button', {
-                name: /Remove rate certification/,
-            })
-            expect(removeRateButtonsBeforeClick.length).toBeGreaterThanOrEqual(
-                1
-            )
-            expect(removeRateButtonsBeforeClick).toHaveLength(
-                rateCertsBeforeRemoving.length - 1
-            )
-
-            // Remove rate cert
-            const removeRateButton =
-                removeRateButtonsBeforeClick[indexOfRateCertToRemove - 1]
-
-            expect(removeRateButton).toBeInTheDocument()
-            fireEvent.click(removeRateButton)
-
-            await waitFor(() => {
-                // Confirm that there is one less rate certification on the page
-                expect(rateCertifications(screen)).toHaveLength(
-                    rateCertsBeforeRemoving.length - 1
-                )
-                // Confirm that there is one less rate removal button (might even be zero buttons on page if all additional rates removed)
-                expect(
-                    screen.getAllByRole('button', {
-                        name: /Remove rate certification/,
-                    })
-                ).toHaveLength(removeRateButtonsBeforeClick.length - 1)
-            })
-        }
-
-        const rateCertifications = (screen: Screen) => {
-            return screen.getAllByTestId('rate-certification-form')
-        }
-
-        const lastRateCertificationFromList = (screen: Screen) => {
-            return rateCertifications(screen).pop()
-        }
 
         it('renders add another rate button, which adds another set of rate certification fields to the form', async () => {
             renderWithProviders(
@@ -899,7 +856,6 @@ describe('RateDetails', () => {
 
         it('progressively disclose new rate form fields on the second rate', async () => {
             ldUseClientSpy({
-                'multi-rate-submissions': true,
                 'rates-across-submissions': true,
             })
             jest.setTimeout(20000)
@@ -1090,13 +1046,19 @@ describe('RateDetails', () => {
                 expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
             )
         })
+    })
 
-        it('correctly checks shared rate certification radios and selects shared packages', async () => {
+    describe('rates across submissions', () => {
+        beforeEach(() =>
             ldUseClientSpy({
                 'rates-across-submissions': true,
-                'multi-rate-submissions': true,
             })
+        )
+        afterEach(() => {
+            jest.clearAllMocks()
+        })
 
+        it('correctly checks shared rate certification radios and selects shared packages', async () => {
             //Spy on useStatePrograms hook to get up-to-date state programs
             jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
                 mockMNState().programs
@@ -1326,12 +1288,143 @@ describe('RateDetails', () => {
             ).not.toBeInTheDocument()
         })
 
-        it('cannot continue when shared rate radio is checked and no package is selected', async () => {
-            ldUseClientSpy({
-                'rates-across-submissions': true,
-                'multi-rate-submissions': true,
+        it('cannot continue when shared rate radio is unchecked', async () => {
+            //Spy on useStatePrograms hook to get up-to-date state programs
+            jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
+                mockMNState().programs
+            )
+
+            //First submission is 'CONTRACT_ONLY' and last submission is the current one. Both should be excluded from
+            // package combobox options.
+            const currentSubmission = {
+                ...emptyRateDetailsDraft,
+                stateNumber: 3,
+                id: 'test-shared-rate',
+            }
+
+            const mockSubmissions = [
+                {
+                    ...mockSubmittedHealthPlanPackage({
+                        stateNumber: 4,
+                        id: 'test-id-123',
+                    }),
+                    id: 'test-id-123',
+                },
+                {
+                    ...mockUnlockedHealthPlanPackage({
+                        stateNumber: 5,
+                        id: 'test-id-124',
+                    }),
+                    id: 'test-id-124',
+                },
+                {
+                    ...mockUnlockedHealthPlanPackage({
+                        stateNumber: 6,
+                        id: 'test-id-125',
+                    }),
+                    id: 'test-id-125',
+                },
+                {
+                    ...mockUnlockedHealthPlanPackage(currentSubmission),
+                    id: 'test-shared-rate',
+                },
+            ]
+
+            renderWithProviders(
+                <RateDetails
+                    draftSubmission={currentSubmission}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                            }),
+                            indexHealthPlanPackagesMockSuccess(mockSubmissions),
+                        ],
+                    },
+                }
+            )
+            const rateCertsOnLoad = rateCertifications(screen)
+            expect(rateCertsOnLoad).toHaveLength(1)
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
             })
 
+            await userEvent.click(continueButton)
+
+            await waitFor(() => {
+                expect(
+                    screen.queryAllByText('You must select yes or no')
+                ).toHaveLength(2)
+                expect(continueButton).toHaveAttribute('aria-disabled')
+            })
+
+            //Fill out first rate certification
+            await fillOutFirstRate(screen)
+
+            //Click the first rate certification shared rate cert radio
+            const firstRateCert = within(rateCertsOnLoad[0]!)
+            const firstRateHasSharedRateFieldset = screen
+                .getByText(
+                    /Was this rate certification uploaded to any other submissions/,
+                    {
+                        selector: 'legend',
+                    }
+                )
+                .closest('fieldset')
+            const firstRateYesSharedRate = within(
+                firstRateHasSharedRateFieldset!
+            ).getByLabelText(/Yes/i)
+            await userEvent.click(firstRateYesSharedRate)
+
+            //Expect there to be two combo boxes, packages and programs.
+            const comboBoxes = firstRateCert.getAllByRole('combobox')
+            expect(comboBoxes).toHaveLength(2)
+
+            //Expect the two packages we know to exist.
+            const firstRatePackageCombobox = comboBoxes[0]
+            await selectEvent.openMenu(firstRatePackageCombobox)
+            await waitFor(() => {
+                expect(
+                    firstRateCert.getByText(
+                        'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
+                    )
+                ).toBeInTheDocument()
+                expect(
+                    firstRateCert.getByText(
+                        'MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
+                    )
+                ).toBeInTheDocument()
+            })
+
+            //Select two packages that have a shared rate cert with this rate cert.
+            await selectEvent.select(
+                firstRatePackageCombobox,
+                'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
+            )
+            await selectEvent.openMenu(firstRatePackageCombobox)
+            await selectEvent.select(
+                firstRatePackageCombobox,
+                'MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
+            )
+            await selectEvent.openMenu(firstRatePackageCombobox)
+
+            //Expect submission selection error to clear and continue button is not disabled
+            await waitFor(() => {
+                expect(
+                    screen.queryByText(
+                        'You must select at least one submission'
+                    )
+                ).not.toBeInTheDocument()
+                expect(continueButton).not.toHaveAttribute('aria-disabled')
+            })
+        })
+
+        it('cannot continue when shared rate radio is checked and no package is selected', async () => {
             //Spy on useStatePrograms hook to get up-to-date state programs
             jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
                 mockMNState().programs
