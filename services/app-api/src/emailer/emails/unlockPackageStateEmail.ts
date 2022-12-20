@@ -11,7 +11,7 @@ import {
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration } from '../'
 import { ProgramType, UpdateInfoType } from '../../domain-models'
-import { reviewAndSubmitURL } from './generateURLs'
+import { reviewAndSubmitURL } from '../generateURLs'
 
 export const unlockPackageStateEmail = async (
     pkg: UnlockedHealthPlanFormDataType,

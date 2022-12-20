@@ -12,7 +12,7 @@ import {
     findPackagePrograms,
 } from '../templateHelpers'
 import { ProgramType } from '../../domain-models'
-import { submissionSummaryURL } from './generateURLs'
+import { submissionSummaryURL } from '../generateURLs'
 
 export const newPackageCMSEmail = async (
     pkg: LockedHealthPlanFormDataType,

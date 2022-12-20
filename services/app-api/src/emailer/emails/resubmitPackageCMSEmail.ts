@@ -12,7 +12,7 @@ import {
 
 import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
 import { ProgramType, UpdateInfoType } from '../../domain-models'
-import { submissionSummaryURL } from './generateURLs'
+import { submissionSummaryURL } from '../generateURLs'
 
 export const resubmitPackageCMSEmail = async (
     pkg: LockedHealthPlanFormDataType,

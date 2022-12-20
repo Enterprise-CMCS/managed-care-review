@@ -12,7 +12,7 @@ import {
     generateStateReceiverEmails,
     findPackagePrograms,
 } from '../templateHelpers'
-import { submissionSummaryURL } from './generateURLs'
+import { submissionSummaryURL } from '../generateURLs'
 
 export const newPackageStateEmail = async (
     pkg: LockedHealthPlanFormDataType,
