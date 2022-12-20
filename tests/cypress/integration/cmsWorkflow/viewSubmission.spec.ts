@@ -11,7 +11,7 @@ describe('CMS user can view submission', () => {
     cy.fillOutNewRateCertification()
     cy.navigateFormByButtonClick('CONTINUE')
     cy.fillOutStateContact()
-    cy.fillOutActuaryContact()
+    cy.fillOutAdditionalActuaryContact()
     cy.navigateFormByButtonClick('CONTINUE')
     cy.fillOutSupportingDocuments()
     cy.navigateFormByButtonClick('CONTINUE')
