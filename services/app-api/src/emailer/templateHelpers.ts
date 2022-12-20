@@ -21,8 +21,7 @@ Eta.configure({
 
 const renderTemplate = async <T extends object>(
     templateName: string,
-    data: T,
-    inUnitTest?: boolean
+    data: T
 ) => {
     if (!/^[a-zA-Z0-9]+$/.test(templateName)) {
         console.error(

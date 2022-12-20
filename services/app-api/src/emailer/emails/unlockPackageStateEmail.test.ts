@@ -290,6 +290,28 @@ test('includes expected data summary for a multi-rate contract and rates submiss
     )
 })
 
+it('does includes the correct submission URL', async () => {
+    const template = await unlockPackageStateEmail(
+        sub,
+        unlockData,
+        testEmailConfig,
+        defaultStatePrograms
+    )
+
+    if (template instanceof Error) {
+        console.error(template)
+        throw template
+    }
+
+    expect(template).toEqual(
+        expect.objectContaining({
+            bodyText: expect.stringContaining(
+                `http://localhost/submissions/test-abc-125/edit/review-and-submit`
+            ),
+        })
+    )
+})
+
 test('renders overall email as expected', async () => {
     const sub: UnlockedHealthPlanFormDataType = {
         ...mockUnlockedContractAndRatesFormData(),
