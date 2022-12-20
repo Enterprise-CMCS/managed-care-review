@@ -1,4 +1,4 @@
-import fs from 'fs'
+// import fs from 'fs'
 import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router'
 import { basicLockedHealthPlanFormData } from '../../common-code/healthPlanFormDataMocks'
@@ -10,8 +10,8 @@ import {
     mockUnlockedHealthPlanPackage,
     mockValidCMSUser,
     mockSubmittedHealthPlanPackageWithRevision,
-    mockUnlockedHealthPlanPackageWithOldProtos,
-    indexHealthPlanPackagesMockSuccess,
+    // mockUnlockedHealthPlanPackageWithOldProtos,
+    // indexHealthPlanPackagesMockSuccess,
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
@@ -383,63 +383,63 @@ describe('SubmissionSummary', () => {
             ).toHaveTextContent('Reason for unlock: Test unlock reason')
         })
     })
-    describe('Outdated submissions', () => {
-        it('Jest timezone should already be UTC', () => {
-            expect(new Date().getTimezoneOffset()).toBe(0)
-        })
-
-        it('loads outdated health plan packages with old protos as expected', async () => {
-            const oldProtoFiles = fs
-                .readdirSync(
-                    'src/common-code/proto/healthPlanFormDataProto/testData/'
-                )
-                .filter((f) => f.endsWith('.proto'))
-
-            for (const fileName of oldProtoFiles) {
-                const proto = fs.readFileSync(
-                    `src/common-code/proto/healthPlanFormDataProto/testData/${fileName}`
-                )
-                // pass in the old protos and make sure the UI hasn't changed
-                renderWithProviders(
-                    <Routes>
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                            element={<SubmissionSummary />}
-                        />
-                    </Routes>,
-                    {
-                        apolloProvider: {
-                            mocks: [
-                                fetchCurrentUserMock({
-                                    user: mockValidCMSUser(),
-                                    statusCode: 200,
-                                }),
-                                fetchStateHealthPlanPackageMockSuccess({
-                                    id: '15',
-                                    stateSubmission:
-                                        mockUnlockedHealthPlanPackageWithOldProtos(
-                                            proto
-                                        ),
-                                }),
-                                indexHealthPlanPackagesMockSuccess(),
-                            ],
-                        },
-                        routerProvider: {
-                            route: '/submissions/15',
-                        },
-                    }
-                )
-
-                await waitFor(() => {
-                    // there's an async rendering issue with the snapshots unless we run another test first
-                    expect(document.body).toHaveTextContent(/Submission type/)
-                })
-                await waitFor(() => {
-                    // there's an async rendering issue with  UploadedDocsTable the snapshots unless we run another test first
-                    expect(document.body).not.toHaveTextContent(/LOADING/)
-                    expect(document.body).toMatchSnapshot()
-                })
-            }
-        })
-    })
+    // describe('Outdated submissions', () => {
+    //     it('Jest timezone should already be UTC', () => {
+    //         expect(new Date().getTimezoneOffset()).toBe(0)
+    //     })
+    //
+    //     it('loads outdated health plan packages with old protos as expected', async () => {
+    //         const oldProtoFiles = fs
+    //             .readdirSync(
+    //                 'src/common-code/proto/healthPlanFormDataProto/testData/'
+    //             )
+    //             .filter((f) => f.endsWith('.proto'))
+    //
+    //         for (const fileName of oldProtoFiles) {
+    //             const proto = fs.readFileSync(
+    //                 `src/common-code/proto/healthPlanFormDataProto/testData/${fileName}`
+    //             )
+    //             // pass in the old protos and make sure the UI hasn't changed
+    //             renderWithProviders(
+    //                 <Routes>
+    //                     <Route
+    //                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
+    //                         element={<SubmissionSummary />}
+    //                     />
+    //                 </Routes>,
+    //                 {
+    //                     apolloProvider: {
+    //                         mocks: [
+    //                             fetchCurrentUserMock({
+    //                                 user: mockValidCMSUser(),
+    //                                 statusCode: 200,
+    //                             }),
+    //                             fetchStateHealthPlanPackageMockSuccess({
+    //                                 id: '15',
+    //                                 stateSubmission:
+    //                                     mockUnlockedHealthPlanPackageWithOldProtos(
+    //                                         proto
+    //                                     ),
+    //                             }),
+    //                             indexHealthPlanPackagesMockSuccess(),
+    //                         ],
+    //                     },
+    //                     routerProvider: {
+    //                         route: '/submissions/15',
+    //                     },
+    //                 }
+    //             )
+    //
+    //             await waitFor(() => {
+    //                 // there's an async rendering issue with the snapshots unless we run another test first
+    //                 expect(document.body).toHaveTextContent(/Submission type/)
+    //             })
+    //             await waitFor(() => {
+    //                 // there's an async rendering issue with  UploadedDocsTable the snapshots unless we run another test first
+    //                 expect(document.body).not.toHaveTextContent(/LOADING/)
+    //                 expect(document.body).toMatchSnapshot()
+    //             })
+    //         }
+    //     })
+    // })
 })

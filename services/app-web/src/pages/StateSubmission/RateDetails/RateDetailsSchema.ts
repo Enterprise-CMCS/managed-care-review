@@ -89,37 +89,32 @@ const SingleRateCertSchema = Yup.object().shape({
                 'The end date must come after the start date'
             ),
     }),
+    actuaryContacts: Yup.array().of(
+        Yup.object().shape({
+            name: Yup.string().required('You must provide a name'),
+            titleRole: Yup.string().required('You must provide a title/role'),
+            email: Yup.string()
+                .email('You must enter a valid email address')
+                .required('You must provide an email address'),
+            actuarialFirm: Yup.string()
+                .required('You must select an actuarial firm')
+                .nullable(),
+            actuarialFirmOther: Yup.string()
+                .when('actuarialFirm', {
+                    is: 'OTHER',
+                    then: Yup.string()
+                        .required('You must enter a description')
+                        .nullable(),
+                })
+                .nullable(),
+        })
+    ),
+    actuaryCommunicationPreference: Yup.string().optional(),
 })
 
 const RateDetailsFormSchema = (
     activeFeatureFlags?: Partial<Record<FeatureFlagTypes, boolean>>
 ) => {
-    const multiRateSubsFields = Yup.object().shape({
-        actuaryContacts: Yup.array().of(
-            Yup.object().shape({
-                name: Yup.string().required('You must provide a name'),
-                titleRole: Yup.string().required(
-                    'You must provide a title/role'
-                ),
-                email: Yup.string()
-                    .email('You must enter a valid email address')
-                    .required('You must provide an email address'),
-                actuarialFirm: Yup.string()
-                    .required('You must select an actuarial firm')
-                    .nullable(),
-                actuarialFirmOther: Yup.string()
-                    .when('actuarialFirm', {
-                        is: 'OTHER',
-                        then: Yup.string()
-                            .required('You must enter a description')
-                            .nullable(),
-                    })
-                    .nullable(),
-            })
-        ),
-        actuaryCommunicationPreference: Yup.string().optional(),
-    })
-
     const rateAcrossSubsFields = Yup.object().shape({
         hasSharedRateCert: Yup.string().defined('You must select yes or no'),
         packagesWithSharedRateCerts: Yup.array().when('hasSharedRateCert', {
@@ -134,10 +129,6 @@ const RateDetailsFormSchema = (
         })
     } else {
         let singleRateCertSchemaWithFlags = SingleRateCertSchema
-        if (activeFeatureFlags['multi-rate-submissions']) {
-            singleRateCertSchemaWithFlags =
-                singleRateCertSchemaWithFlags.concat(multiRateSubsFields)
-        }
 
         if (activeFeatureFlags['rates-across-submissions']) {
             singleRateCertSchemaWithFlags =

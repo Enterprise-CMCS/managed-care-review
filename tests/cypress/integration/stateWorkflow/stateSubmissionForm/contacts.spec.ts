@@ -71,7 +71,7 @@ describe('contacts', () => {
                 name: /Contacts/,
             })
             cy.fillOutStateContact()
-            cy.fillOutActuaryContact()
+            cy.fillOutAdditionalActuaryContact()
             cy.navigateFormByButtonClick('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
 
@@ -85,8 +85,7 @@ describe('contacts', () => {
             // })
         })
     })
-    it('can navigate to and from contacts page with contract and rates submission with multi-rate-submissions flag on', () => {
-        cy.interceptFeatureFlags({'multi-rate-submissions': true})
+    it('can navigate to and from contacts page with contract and rates submission with multi rates', () => {
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
