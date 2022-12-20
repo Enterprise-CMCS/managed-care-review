@@ -29,7 +29,7 @@ Cypress.Commands.add('interceptFeatureFlags', (toggleFlags?: Partial<Record<Feat
     // Intercepts LD request and returns with our own feature flags and values.
     return cy
         .intercept(
-            { method: "GET", hostname: /.*app.launchdarkly.com/ },
+            { method: "GET", hostname: /\.*app\.launchdarkly\.com/ },
             { body: featureFlagObject }
         ).as('LDApp');
 })
