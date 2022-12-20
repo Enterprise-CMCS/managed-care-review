@@ -41,7 +41,7 @@ describe('review and submit', () => {
             cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/review-and-submit`)
 
             cy.submitStateSubmissionForm(false)
-            cy.findByRole('heading', { level: 4, name: /Submit error/ })
+            cy.findByRole('heading', { level: 4, name: /Submission error/ })
         })
     })
 })
