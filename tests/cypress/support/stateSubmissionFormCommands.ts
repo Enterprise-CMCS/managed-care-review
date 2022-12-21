@@ -24,7 +24,6 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
 })
 
 Cypress.Commands.add('fillOutContractActionOnly', () => {
-      cy.interceptFeatureFlags({ 'rate-cert-assurance': true })
     // Must be on '/submissions/new'
     cy.wait(2000)
     cy.findByRole('combobox', { name: 'Programs this contract action covers (required)' }).click({
@@ -32,18 +31,20 @@ Cypress.Commands.add('fillOutContractActionOnly', () => {
     })
     cy.findByText('PMAP').click()
     cy.findByText('Contract action only').click()
+
+    //rate-cert-assurance
     cy.getFeatureFlagStore(['rate-cert-assurance']).then(store => {
       if (store['rate-cert-assurance']) {
-            cy.findByText('No').click()
+          cy.get('label[for="riskBasedContractNo"]').click()
         }
     })
+
     cy.findByRole('textbox', { name: 'Submission description' }).type(
         'description of contract only submission'
     )
 })
 
 Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
-    cy.interceptFeatureFlags({ 'rate-cert-assurance': true })
     // Must be on '/submissions/new'
     cy.wait(2000)
     cy.findByRole('combobox', { name: 'Programs this contract action covers (required)' }).click({
@@ -51,9 +52,11 @@ Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
     })
     cy.findByText('PMAP').click()
     cy.findByText('Contract action and rate certification').click()
+
+    //rate-cert-assurance
     cy.getFeatureFlagStore(['rate-cert-assurance']).then((store) => {
         if (store['rate-cert-assurance']) {
-            cy.findByText('No').click()
+            cy.get('label[for="riskBasedContractNo"]').click()
         }
     })
     cy.findByRole('textbox', { name: 'Submission description' }).type(

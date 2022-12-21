@@ -72,6 +72,7 @@ describe('submission type', () => {
     })
 
     it('can save submission edits using Save as draft button', () => {
+        cy.interceptFeatureFlags({ 'rate-cert-assurance': true })
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmission()
 
@@ -80,7 +81,6 @@ describe('submission type', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.interceptFeatureFlags({ 'rate-cert-assurance': true })
             
             cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/type`)
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
@@ -106,11 +106,8 @@ describe('submission type', () => {
             }).click()
             cy.findByText('SNBC').click({ force: true })
 
-            cy.getFeatureFlagStore(['rate-cert-assurance']).then((store) => {
-                if (store['rate-cert-assurance']) {
-                    cy.findByText('Yes').click({ force: true })
-                }
-            })
+            //rate-cert-assurance
+            cy.get('label[for="riskBasedContractYes"]').click()
 
             cy.findByRole('textbox', { name: 'Submission description' })
             cy.findByText('Contract action and rate certification').click()
@@ -134,15 +131,9 @@ describe('submission type', () => {
                 'be.checked'
             )
 
-            cy.getFeatureFlagStore(['rate-cert-assurance']).then(
-                (store) => {
-                    if (store['rate-cert-assurance']) {      
-                    cy.findByLabelText('Yes').should('be.checked')
-                    }
-                }
-            )
-        
-      
+            //rate-cert-assurance
+            cy.findByLabelText('Yes').should('be.checked')
+
             cy.findByRole('textbox', { name: 'Submission description' }).should(
                 'have.value',
                 'description of contract only submission, now with a new edited flavor'
