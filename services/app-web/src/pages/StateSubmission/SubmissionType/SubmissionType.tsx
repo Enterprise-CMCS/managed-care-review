@@ -203,8 +203,9 @@ export const SubmissionType = ({
             draftSubmission.programIDs = values.programIDs
             draftSubmission.submissionType =
                 values.submissionType as SubmissionTypeT
-            draftSubmission.riskBasedContract =
-                yesNoFormValueAsBooleanOrUndefined(values.riskBasedContract)
+            draftSubmission.riskBasedContract = showRateCertAssurance
+                ? yesNoFormValueAsBoolean(values.riskBasedContract)
+                : undefined
             draftSubmission.submissionDescription = values.submissionDescription
 
             try {

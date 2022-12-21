@@ -97,7 +97,7 @@ type UnlockedHealthPlanFormDataType = {
     stateNumber: number
     programIDs: string[]
     submissionType: SubmissionType
-    riskBasedContract: boolean
+    riskBasedContract?: boolean
     submissionDescription: string
     stateContacts: StateContact[]
     addtlActuaryContacts: ActuaryContact[]
