@@ -1,5 +1,6 @@
-import { PrismaClient, User, Role } from '@prisma/client'
+import { PrismaClient, Role } from '@prisma/client'
 import { StoreError, convertPrismaErrorToStoreError } from './storeError'
+import { UserType } from '../domain-models'
 
 export type InsertUserArgsType = {
     userID: string
@@ -13,7 +14,7 @@ export type InsertUserArgsType = {
 export async function insertUser(
     client: PrismaClient,
     user: InsertUserArgsType
-): Promise<User | StoreError> {
+): Promise<UserType | StoreError> {
     try {
         console.log('Trying to insert the user to postgres....')
         const val = await client.user.create({
@@ -26,7 +27,6 @@ export async function insertUser(
                 stateCode: user.stateCode ?? null,
             },
         })
-        console.log('insert user return: ' + val)
         return val
     } catch (err) {
         return convertPrismaErrorToStoreError(err)

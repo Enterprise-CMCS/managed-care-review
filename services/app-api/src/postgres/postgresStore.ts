@@ -7,6 +7,8 @@ import {
     ProgramType,
     HealthPlanPackageType,
     UpdateInfoType,
+    UserType,
+    StateType,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
 import { findAllHealthPlanPackagesByState } from './findAllHealthPlanPackagesByState'
@@ -22,7 +24,6 @@ import { updateHealthPlanRevision } from './updateHealthPlanRevision'
 import { findAllRevisions } from './findAllRevisions'
 
 import { findUser } from './findUser'
-import { User, State } from '@prisma/client'
 import { insertUser, InsertUserArgsType } from './insertUser'
 import { deleteUserAssignedState } from './deleteUserAssignedState'
 import { updateUserAssignedState } from './updateUserAssignedState'
@@ -66,19 +67,19 @@ type Store = {
         draft: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackageType | StoreError>
 
-    findUser: (id: string) => Promise<User | StoreError>
+    findUser: (id: string) => Promise<UserType | StoreError>
 
-    insertUser: (user: InsertUserArgsType) => Promise<User | StoreError>
+    insertUser: (user: InsertUserArgsType) => Promise<UserType | StoreError>
 
     updateUserAssignedState: (
         userID: string,
-        state: State
-    ) => Promise<User | StoreError>
+        state: StateType
+    ) => Promise<UserType | StoreError>
 
     deleteUserAssignedState: (
         userID: string,
         stateCode: string
-    ) => Promise<User | StoreError>
+    ) => Promise<UserType | StoreError>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {

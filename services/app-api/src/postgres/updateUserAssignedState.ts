@@ -3,13 +3,14 @@ import {
     isStoreError,
     StoreError,
 } from './storeError'
-import { PrismaClient, User, State } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
+import { UserType, StateType } from '../domain-models'
 
 export async function updateUserAssignedState(
     client: PrismaClient,
     userID: string,
-    state: State
-): Promise<User | StoreError> {
+    state: StateType
+): Promise<UserType | StoreError> {
     try {
         const updateResult = client.user.update({
             where: {
