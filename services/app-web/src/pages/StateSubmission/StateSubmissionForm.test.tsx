@@ -539,6 +539,7 @@ describe('StateSubmissionForm', () => {
                         ],
                     },
                     routerProvider: { route: '/submissions/15/edit/documents' },
+                    s3Provider: mockS3,
                 }
             )
 
