@@ -11,8 +11,8 @@ import {
 } from '../templateHelpers'
 
 import type { EmailData, EmailConfiguration, StateAnalystsEmails } from '../'
-import { URL } from 'url'
 import { ProgramType, UpdateInfoType } from '../../domain-models'
+import { submissionSummaryURL } from '../generateURLs'
 
 export const resubmitPackageCMSEmail = async (
     pkg: LockedHealthPlanFormDataType,
@@ -21,7 +21,6 @@ export const resubmitPackageCMSEmail = async (
     stateAnalystsEmails: StateAnalystsEmails,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
-    const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
     const reviewerEmails = generateCMSReviewerEmails(
         config,
@@ -46,6 +45,8 @@ export const resubmitPackageCMSEmail = async (
         pkg.submissionType === 'CONTRACT_AND_RATES' &&
         Boolean(pkg.rateInfos.length)
 
+    const packageURL = submissionSummaryURL(pkg.id, config.baseUrl)
+
     const data = {
         packageName: packageName,
         resubmittedBy: updateInfo.updatedBy,
@@ -57,13 +58,12 @@ export const resubmitPackageCMSEmail = async (
             pkg.rateInfos.map((rate) => ({
                 rateName: rate.rateCertificationName,
             })),
-        submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
+        submissionURL: packageURL,
     }
 
     const result = await renderTemplate<typeof data>(
         'resubmitPackageCMSEmail',
-        data,
-        isUnitTest
+        data
     )
     if (result instanceof Error) {
         return result

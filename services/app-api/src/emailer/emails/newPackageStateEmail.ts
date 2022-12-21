@@ -1,5 +1,3 @@
-import { URL } from 'url'
-
 import {
     LockedHealthPlanFormDataType,
     packageName as generatePackageName,
@@ -14,6 +12,7 @@ import {
     generateStateReceiverEmails,
     findPackagePrograms,
 } from '../templateHelpers'
+import { submissionSummaryURL } from '../generateURLs'
 
 export const newPackageStateEmail = async (
     pkg: LockedHealthPlanFormDataType,
@@ -21,7 +20,6 @@ export const newPackageStateEmail = async (
     config: EmailConfiguration,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
-    const isUnitTest = config.baseUrl === 'http://localhost'
     const receiverEmails = generateStateReceiverEmails(pkg, user)
 
     //This checks to make sure all programs contained in submission exists for the state.
@@ -36,6 +34,8 @@ export const newPackageStateEmail = async (
     const isContractAndRates =
         pkg.submissionType === 'CONTRACT_AND_RATES' &&
         Boolean(pkg.rateInfos.length)
+
+    const packageURL = submissionSummaryURL(pkg.id, config.baseUrl)
 
     const data = {
         shouldIncludeRates: isContractAndRates,
@@ -73,13 +73,12 @@ export const newPackageStateEmail = async (
                           )
                         : formatCalendarDate(rate.rateDateEnd),
             })),
-        submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
+        submissionURL: packageURL,
     }
 
     const result = await renderTemplate<typeof data>(
         'newPackageStateEmail',
-        data,
-        isUnitTest
+        data
     )
 
     if (result instanceof Error) {

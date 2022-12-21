@@ -1,5 +1,3 @@
-import { URL } from 'url'
-
 import {
     LockedHealthPlanFormDataType,
     packageName as generatePackageName,
@@ -14,6 +12,7 @@ import {
     findPackagePrograms,
 } from '../templateHelpers'
 import { ProgramType } from '../../domain-models'
+import { submissionSummaryURL } from '../generateURLs'
 
 export const newPackageCMSEmail = async (
     pkg: LockedHealthPlanFormDataType,
@@ -22,7 +21,6 @@ export const newPackageCMSEmail = async (
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
     // config
-    const isUnitTest = config.baseUrl === 'http://localhost'
     const isTestEnvironment = config.stage !== 'prod'
     const reviewerEmails = generateCMSReviewerEmails(
         config,
@@ -42,6 +40,8 @@ export const newPackageCMSEmail = async (
     }
 
     const packageName = generatePackageName(pkg, packagePrograms)
+
+    const packageURL = submissionSummaryURL(pkg.id, config.baseUrl)
 
     const isContractAndRates =
         pkg.submissionType === 'CONTRACT_AND_RATES' &&
@@ -80,14 +80,10 @@ export const newPackageCMSEmail = async (
                           )
                         : formatCalendarDate(rate.rateDateEnd),
             })),
-        submissionURL: new URL(`submissions/${pkg.id}`, config.baseUrl).href,
+        submissionURL: packageURL,
     }
 
-    const result = await renderTemplate<typeof data>(
-        'newPackageCMSEmail',
-        data,
-        isUnitTest
-    )
+    const result = await renderTemplate<typeof data>('newPackageCMSEmail', data)
     if (result instanceof Error) {
         return result
     } else {
