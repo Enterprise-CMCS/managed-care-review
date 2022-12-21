@@ -17,7 +17,7 @@ import { convertToHealthPlanPackageType } from './healthPlanPackageHelpers'
 export type InsertHealthPlanPackageArgsType = {
     stateCode: string
     programIDs: string[]
-    riskBasedContract: boolean,
+    riskBasedContract?: boolean
     submissionType: SubmissionType
     submissionDescription: string
 }
