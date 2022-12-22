@@ -4,7 +4,7 @@ describe('contract details', () => {
     })
     it('can navigate to and from contract details page', () => {
         cy.logInAsStateUser()
-        cy.startNewContractOnlySubmission()
+        cy.startNewContractOnlySubmissionWithBaseContract()
 
         // Obtain draft submission id
         cy.location().then((fullUrl) => {
@@ -42,7 +42,7 @@ describe('contract details', () => {
 
     it('can add amendment to prior base contract', () => {
         cy.logInAsStateUser()
-        cy.startNewContractOnlySubmission()
+        cy.startNewContractOnlySubmissionWithAmendment()
 
         cy.fillOutAmendmentToBaseContractDetails()
         cy.navigateFormByButtonClick('CONTINUE')

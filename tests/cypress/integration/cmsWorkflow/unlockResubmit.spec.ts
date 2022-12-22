@@ -14,17 +14,14 @@ describe('CMS user', () => {
 
         cy.findByRole('heading', {
             level: 2,
-            name: /Rate details/
+            name: /Rate details/,
         }).should('exist')
 
         cy.findByRole('button', {
             name: 'Add another rate certification',
         }).click()
-        cy.findAllByTestId('rate-certification-form').each(
-            (form) =>
-                cy
-                    .wrap(form)
-                    .within(() => cy.fillOutNewRateCertification())
+        cy.findAllByTestId('rate-certification-form').each((form) =>
+            cy.wrap(form).within(() => cy.fillOutNewRateCertification())
         )
         cy.navigateFormByButtonClick('CONTINUE')
 
@@ -38,14 +35,14 @@ describe('CMS user', () => {
 
         cy.findByRole('heading', {
             level: 2,
-            name: /Supporting documents/
+            name: /Supporting documents/,
         }).should('exist')
         cy.navigateFormByButtonClick('CONTINUE')
 
         cy.findByRole('heading', {
             level: 2,
-            name: /Review and submit/ }
-        ).should('exist')
+            name: /Review and submit/,
+        }).should('exist')
 
         // Store submission url for reference later
         cy.location().then((fullUrl) => {
@@ -160,8 +157,9 @@ describe('CMS user', () => {
 
                 //Navigate to resubmitted submission and check for submission updated banner
                 cy.get('table')
-                    .findByRole('link', { name: submissionName }).should('exist')
-                cy.findByRole('link', { name: submissionName }).click()
+                    .findByRole('link', { name: submissionName })
+                    .should('exist')
+                    .click()
                 cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
                 cy.findByTestId('updatedSubmissionBanner').should('exist')
 

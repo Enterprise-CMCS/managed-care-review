@@ -12,6 +12,7 @@ describe('SubmissionType', () => {
         programIDs: ['ccc-plus'],
         submissionDescription: '',
         submissionType: '',
+        contractType: '',
     }
     const updateDraftMock = jest.fn()
 
@@ -231,6 +232,31 @@ describe('SubmissionType', () => {
         ).toBeInTheDocument()
     })
 
+    it('displays contract type radio buttons', async () => {
+        renderWithProviders(
+            <Formik
+                initialValues={SubmissionTypeInitialValues}
+                onSubmit={jest.fn()}
+            >
+                <SubmissionType updateDraft={updateDraftMock} />
+            </Formik>,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        expect(
+            await screen.getByRole('radio', { name: 'Base contract' })
+        ).toBeInTheDocument()
+        expect(
+            await screen.getByRole('radio', {
+                name: 'Amendment to base contract',
+            })
+        ).toBeInTheDocument()
+    })
+
     it('displays submission description textarea', async () => {
         renderWithProviders(
             <Formik
@@ -303,6 +329,42 @@ describe('SubmissionType', () => {
                 expect(textarea).toHaveClass('usa-input--error')
                 expect(
                     screen.getAllByText('You must choose a submission type')
+                ).toHaveLength(2)
+            })
+        })
+
+        it('shows error messages when contract type is not selected', async () => {
+            renderWithProviders(
+                <SubmissionType
+                    updateDraft={updateDraftMock}
+                    showValidations={true}
+                />,
+
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            const textarea = screen.getByRole('textbox', {
+                name: 'Submission description',
+            })
+
+            expect(await textarea).toBeInTheDocument()
+
+            const submissionType = await screen.findByText(
+                'Contract action only'
+            )
+            await userEvent.click(submissionType)
+
+            //trigger validation
+            await userEvent.type(textarea, 'something')
+            await userEvent.clear(textarea)
+
+            await waitFor(() => {
+                expect(textarea).toHaveClass('usa-input--error')
+                expect(
+                    screen.getAllByText('You must choose a contract type')
                 ).toHaveLength(2)
             })
         })

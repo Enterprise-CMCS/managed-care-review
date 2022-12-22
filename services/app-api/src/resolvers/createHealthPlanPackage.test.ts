@@ -14,6 +14,7 @@ describe('createHealthPlanPackage', () => {
             ],
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
+            contractType: 'BASE',
         }
         const res = await server.executeOperation({
             query: CREATE_HEALTH_PLAN_PACKAGE,
@@ -44,6 +45,7 @@ describe('createHealthPlanPackage', () => {
             programIDs: ['xyz123'],
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
+            contractType: 'BASE',
         }
         const res = await server.executeOperation({
             query: CREATE_HEALTH_PLAN_PACKAGE,
@@ -73,6 +75,7 @@ describe('createHealthPlanPackage', () => {
             programIDs: ['xyz123'],
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
+            contractType: 'BASE',
         }
         const res = await server.executeOperation({
             query: CREATE_HEALTH_PLAN_PACKAGE,
