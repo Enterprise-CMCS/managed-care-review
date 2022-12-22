@@ -4,36 +4,133 @@ schema {
 }
 
 type Query {
+    """
+    fetchCurrentUser returns user information for the currently logged in User
+
+    If no user is currently logged in, the http request will return a 403 error, no graphQL body will be returned.
+    """
     fetchCurrentUser: User!
+
+    """
+    fetchHealthPlanPackage returns a specific HealthPlanPackage by id
+
+    If a package with the given ID cannot be found, this query returns undefined
+    CMS users cannot fetch a DRAFT HealthPlanPackage
+
+    Errors:
+    - ForbiddenError:
+        - A state user from a different state called this.
+        - A CMSUser attempted to fetch a DRAFT HealthPlanPackage
+    """
     fetchHealthPlanPackage(
         input: FetchHealthPlanPackageInput!
     ): FetchHealthPlanPackagePayload!
+
+    """
+    indexHealthPlanPackages returns all of the HealthPlanPackages the current user can see.
+
+    StateUsers can find all the packages for their state
+    CMSUsers can find all the packages that do not have the DRAFT status
+    """
     indexHealthPlanPackages: IndexHealthPlanPackagesPayload!
 }
 
 type Mutation {
+    """
+    createHealthPlanPackage creates a new health plan package.
+
+    Errors:
+    - ForbiddenError: If a non-state users calls this mutation
+    - UserInputError: ProgramID not found in this state's programs
+    """
     createHealthPlanPackage(
         input: CreateHealthPlanPackageInput!
     ): CreateHealthPlanPackagePayload!
+
+    """
+    updateHealthPlanFormData updates a single package with the current
+    state of the form encoded as a protobuf.
+
+    The package must be either in the DRAFT or UNLOCKED state.
+    Only a state user from the state this package is attached to can call this mutation
+
+    There are some fields in the healthPlanFormData type that must not be modified
+    by this mutation. They are set on the initial submission and are only changed by the server:
+    - id
+    - stateCode
+    - stateNumber
+    - createdAt
+    - updatedAt
+
+    Errors:
+    - ForbiddenError:
+        - A non-state user called this
+        - A state user from a different state called this.
+    - UserInputError:
+        - The healthPlanFormData proto did not decode correctly
+        - The healthPlanFormData decodes to a LockedHealthPlanFormData
+        - The package is in the LOCKED or RESUBMITTED status
+        - A package cannot be found with the given `pkgID`
+        - The healthPlanFormData includes changes to any of the fields that are fixed on submission
+    """
     updateHealthPlanFormData(
         input: UpdateHealthPlanFormDataInput!
     ): UpdateHealthPlanFormDataPayload!
 
-    unlockHealthPlanPackage(
-        input: UnlockHealthPlanPackageInput!
-    ): UnlockHealthPlanPackagePayload!
+    """
+    submitHealthPlanPackage submits the given package for review by CMS.
+
+    This can only be called by a StateUser from the state the package is for.
+    The package must be either in DRAFT or UNLOCKED state to be submitted
+    On resubmit the `submittedReason` field must be filled out.
+    The submission must be complete for this mutation to succeed. All required fields
+    in the healthPlanFormData must be filled out correctly.
+    Email notifications will be sent to all the relevant parties
+
+    Errors:
+    - ForbiddenError:
+        - A non-state user called this
+        - A state user from a different state called this.
+    - UserInputError
+        - A package cannot be found with the given `pkgID`
+        - Attempted to submit a package in the SUBMITTED or RESUBMITTED state
+        - The healthPlanFormData does not have all required field filled out
+    """
     submitHealthPlanPackage(
         input: SubmitHealthPlanPackageInput!
     ): SubmitHealthPlanPackagePayload!
+
+    """
+    unlockHealthPlanPackage returns a submitted package to the state for additional
+    edits.
+
+    This can only be called by a CMSUser.
+    The package must be in the SUBMITTED or RESUBMITTED state to be unlocked.
+    Email notifications will be sent to all the relevant parties
+
+    Errors:
+    - ForbiddenError:
+        - A non CMSuser called this
+    - UserInputError
+        - A package cannot be found with the given `pkgID`
+        - Attempted to submit a package in the DRAFT or UNLOCKED state
+    """
+    unlockHealthPlanPackage(
+        input: UnlockHealthPlanPackageInput!
+    ): UnlockHealthPlanPackagePayload!
 }
 
 input CreateHealthPlanPackageInput {
+    "An array of managed care program IDs this package covers"
     programIDs: [ID!]!
+    "The submission type of this package"
     submissionType: SubmissionType!
+    "User description of the package"
     submissionDescription: String!
 }
 
 type CreateHealthPlanPackagePayload {
+    "The newly created HealthPlanPackage"
     pkg: HealthPlanPackage!
 }
 
@@ -56,6 +153,7 @@ type IndexHealthPlanPackagesPayload {
 
 input SubmitHealthPlanPackageInput {
     pkgID: ID!
+    "User given reason this package was re-submitted. Left blank on initial submit."
     submittedReason: String
 }
 
@@ -65,6 +163,7 @@ type SubmitHealthPlanPackagePayload {
 
 input UnlockHealthPlanPackageInput {
     pkgID: ID!
+    "User given reason this package was unlocked"
     unlockedReason: String!
 }
 
@@ -73,7 +172,13 @@ type UnlockHealthPlanPackagePayload {
 }
 
 input UpdateHealthPlanFormDataInput {
+    "ID of the package to be updated, must be DRAFT or UNLOCKED"
     pkgID: ID!
+    """
+    base64 encoded HealthPlanFormData protobuf. This contains all the data
+    from the health plan pacakge form that the state user fills out and submits.
+    Its schema can be found in health_plan_form_data.proto
+    """
     healthPlanFormData: String!
 }
 
@@ -81,36 +186,63 @@ type UpdateHealthPlanFormDataPayload {
     pkg: HealthPlanPackage!
 }
 
+"Date is a CalendarDate representing a day without time information"
 scalar Date
+"DateTime is a moment in time with date and time information"
 scalar DateTime
 
 union User = StateUser | CMSUser
 
+"StateUser is a user that works for a state, submitting packages to be reviewed by CMSUsers"
 type StateUser {
+    "will always be 'STATE_USER'"
     role: String!
     email: String!
     state: State!
     name: String!
 }
 
+"CMSUser is a user that works for CMS, reviewing packages submitted by StateUsers"
 type CMSUser {
+    "will always be 'CMS_USER'"
     role: String!
     email: String!
     name: String!
 }
 
+"State is a single US state or territory that operates managed care programs"
 type State {
+    "The state code (e.g. CA, TN)"
     code: String!
     name: String!
+    "A list of the state's Managed Care programs"
     programs: [Program!]!
 }
 
+"Program represents a Managed Care program for the given state"
 type Program {
+    "uuid"
     id: ID!
+    "A nickname for the program"
     name: String!
+    "The full name for the program"
     fullName: String!
 }
 
+
+"""
+HealthPlanPackageStatus tracks the editing vs. submitted status of the package.
+It is not intended to track the overal status of the package through the review process
+as that is fleshed out.
+
+State Machine:
+DRAFT -> SUBMITTED -> UNLOCKED -> RESUBMITTED
+                         ^                    |
+                         |------------------|
+
+This status is used to determine wether the package is currently being edited by a state user
+or if it has been submitted and is being reviewed by CMS users.
+"""
 enum HealthPlanPackageStatus {
     DRAFT
     SUBMITTED
@@ -118,26 +250,76 @@ enum HealthPlanPackageStatus {
     RESUBMITTED
 }
 
+"""
+HealthPlanPackage is the core type for a single package submission. All the
+submission data is contained in the HealthPlanRevision type, allowing us to store
+the full history of packages previously submitted.
+
+HealthPlanPackages are submitted by state users and reviewed by CMS users.
+Initally created in DRAFT state, they are submitted using the submitHealthPlanPackage mutation.
+CMS users are able to use the unlockHealthPlanPackage mutation to return it to the state user in
+the UNLOCKED state for corrections. State users can then resubmit.
+"""
 type HealthPlanPackage {
+    "uuid"
     id: ID!
+    """
+    Where the package is in the submission flow.
+    SUBMITTED and RESUBMITTED packages cannot be modified
+    """
     status: HealthPlanPackageStatus!
+    "The initial date this package was submitted at. Is not changed by unlock or resubmission."
     initiallySubmittedAt: Date
+    "The state code (e.g. CA or TN) for the submitting state"
     stateCode: String!
+    "Fuller state data for the submitting state"
     state: State!
+    """
+    Array of revisions for this package. Each revision represents a single submission
+    for the package and contains the full data from when it was submitted
+    """
     revisions: [HealthPlanRevisionEdge!]!
 }
 
+"""
+UpdateInformation is used for the unlockInfo and the submitInfo on HealthPlanRevision.
+It tracks who, when, and why the submission or unlock was performed.
+"""
 type UpdateInformation {
+    "the datetime when the update occured"
     updatedAt: DateTime!
+    "the email of the user who performed the update"
     updatedBy: String!
+    "the reason provided by the user when performing the update"
     updatedReason: String!
 }
 
+"""
+HealthPlanRevision is a single revision of the package. It contains all the
+data from the form filled out by a state user about their package. When a
+HealthPlanPackage is initially created, a single revision is created as well. That
+revision has its submitInfo filled out when it is submitted, which is what marks
+the HealthPlanPackage as SUBMITTED.
+
+When a HealthPlanPackage is unlocked with the unlockHealthPlanPackage mutation
+a new revision is created with a copy of the previous revision's formDataProto and its
+unlockInfo filled out. This can then be modified by the state user and resubmitted.
+"""
 type HealthPlanRevision {
     id: ID!
+    """
+    Information about who, when, and why this revision was unlocked.
+    Will be blank on the initial revision.
+    """
     unlockInfo: UpdateInformation
+    "Information on who, when, and why this revision was submitted."
     submitInfo: UpdateInformation
     createdAt: DateTime!
+    """
+    base64 encoded HealthPlanFormData protobuf. This contains all the data
+    from the health plan pacakge form that the state user fills out and submits.
+    Its schema can be found in health_plan_form_data.proto
+    """
     formDataProto: String!
 }
 
