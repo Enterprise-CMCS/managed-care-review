@@ -141,7 +141,6 @@ export const UploadedDocumentsTable = ({
 
         void refreshDocuments()
     }, [documents, getKey, getURL])
-
     // Empty State
     if (refreshedDocs.length === 0) {
         return (

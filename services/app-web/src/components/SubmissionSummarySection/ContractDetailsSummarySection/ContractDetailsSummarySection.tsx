@@ -5,7 +5,6 @@ import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySec
 import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import {
     ContractExecutionStatusRecord,
-    ContractTypeRecord,
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
     ModifiedProvisionsRecord,
@@ -149,15 +148,6 @@ export const ContractDetailsSummarySection = ({
             </SectionHeader>
             <dl>
                 <DoubleColumnGrid>
-                    <DataDetail
-                        id="contractType"
-                        label="Contract action type"
-                        data={
-                            submission.contractType
-                                ? ContractTypeRecord[submission.contractType]
-                                : ''
-                        }
-                    />
                     <DataDetail
                         id="contractExecutionStatus"
                         label="Contract status"

@@ -18,6 +18,7 @@ describe('insertHealthPlanPackage', () => {
             programIDs: ['smmc'],
             submissionType: 'CONTRACT_ONLY' as const,
             submissionDescription: 'concurrency state code test',
+            contractType: 'BASE' as const,
         }
 
         const resultPromises = []

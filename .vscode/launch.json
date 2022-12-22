@@ -9,28 +9,32 @@
             "type": "node",
             "request": "launch",
             "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/react-scripts",
+            "env": {
+                "TZ": "utc"
+            },
             "args": ["test", "--runInBand", "--no-cache", "--env=jsdom"],
             "cwd": "${workspaceRoot}/services/app-web",
-            "protocol": "inspector",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen"
-          },
-          {
+        },
+        {
             "name": "Debug current file tests",
             "type": "node",
             "request": "launch",
             "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/react-scripts",
+            "env": {
+                "TZ": "utc"
+            },
             "args": [
-              "test",
-              "${fileBasenameNoExtension}",
-              "--runInBand",
-              "--no-cache",
-              "--watchAll"
+                "test",
+                "${fileBasenameNoExtension}",
+                "--runInBand",
+                "--no-cache",
+                "--watchAll"
             ],
             "cwd": "${workspaceRoot}/services/app-web",
-            "protocol": "inspector",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen"
-          }
+        }
     ]
 }

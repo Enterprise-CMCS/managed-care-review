@@ -18,7 +18,10 @@ import './dashboardCommands'
 import './navigateCommands'
 import './launchDarklyCommands'
 import './e2e'
-import { FeatureFlagTypes, FlagValueTypes } from '../../../services/app-web/src/common-code/featureFlags'
+import {
+    FeatureFlagTypes,
+    FlagValueTypes,
+} from '../../../services/app-web/src/common-code/featureFlags'
 
 type FormButtonKey =
     | 'CONTINUE_FROM_START_NEW'
@@ -38,9 +41,11 @@ declare global {
 
             // state submission form commands
             waitForDocumentsToLoad(): void
-            startNewContractOnlySubmission(): void
+            startNewContractOnlySubmissionWithBaseContract(): void
+            startNewContractOnlySubmissionWithAmendment(): void
             startNewContractAndRatesSubmission(): void
-            fillOutContractActionOnly(): void
+            fillOutContractActionOnlyWithBaseContract(): void
+            fillOutContractActionOnlyWithAmendment(): void
             fillOutContractActionAndRateCertification(): void
             fillOutBaseContractDetails(): void
             fillOutAmendmentToBaseContractDetails(): void
@@ -68,8 +73,12 @@ declare global {
 
             //Launch Darkly commands
             stubFeatureFlags(): void
-            interceptFeatureFlags(toggleFlags?: Partial<Record<FeatureFlagTypes, FlagValueTypes>>): void
-            getFeatureFlagStore(featureFlag?: FeatureFlagTypes[]): Promise<Partial<Record<FeatureFlagTypes, FlagValueTypes>>>
+            interceptFeatureFlags(
+                toggleFlags?: Partial<Record<FeatureFlagTypes, FlagValueTypes>>
+            ): void
+            getFeatureFlagStore(
+                featureFlag?: FeatureFlagTypes[]
+            ): Promise<Partial<Record<FeatureFlagTypes, FlagValueTypes>>>
         }
     }
 }
