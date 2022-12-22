@@ -37,7 +37,13 @@ type Query {
 
 type Mutation {
     """
-    createHealthPlanPackage creates a new health plan package.
+    createHealthPlanPackage creates a new HealthPlanPackage.
+
+    The new HealthPlanPackage is created with a single revision and with
+    the DRAFT status. The stateCode of the package will be set to the
+    state the user that calls this is from.
+
+    This can only be called by StateUsers
 
     Errors:
     - ForbiddenError: If a non-state users calls this mutation
