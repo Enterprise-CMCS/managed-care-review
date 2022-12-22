@@ -154,7 +154,7 @@ export const SubmissionType = ({
                         values.submissionType === 'CONTRACT_AND_RATES'
                     )
                 ) {
-                    console.log(
+                    console.info(
                         'unexpected error, attempting to submit a submissionType of ',
                         values.submissionType
                     )
@@ -195,15 +195,15 @@ export const SubmissionType = ({
             } catch (serverError) {
                 setShowFormAlert(true)
                 formikHelpers.setSubmitting(false) // unblock submit button to allow resubmit
-                console.log(
+                console.info(
                     'Log: creating new submission failed with server error',
                     serverError
                 )
             }
         } else {
             if (draftSubmission === undefined || !updateDraft) {
-                console.log(draftSubmission, updateDraft)
-                console.log(
+                console.info(draftSubmission, updateDraft)
+                console.info(
                     'ERROR, SubmissionType for does not have props needed to update a draft.'
                 )
                 return

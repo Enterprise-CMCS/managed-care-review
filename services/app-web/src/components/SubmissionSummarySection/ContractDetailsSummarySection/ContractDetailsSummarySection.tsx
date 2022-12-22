@@ -116,7 +116,7 @@ export const ContractDetailsSummarySection = ({
                 submissionName + '-contract-details.zip'
             )
             if (zippedURL instanceof Error) {
-                console.log('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
+                console.info('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
                 return
             }
 

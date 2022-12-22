@@ -101,7 +101,7 @@ const useTealium = (): {
     useEffect(() => {
         // Do not add tealium for local dev or review apps
         if (process.env.REACT_APP_AUTH_MODE !== 'IDM') {
-            // console.log(`mock tealium page view: ${tealiumPageName}`)
+            // console.info(`mock tealium page view: ${tealiumPageName}`)
             return
         }
 
@@ -132,7 +132,7 @@ const useTealium = (): {
     }) => {
         // Do not add events on local dev
         if (process.env.REACT_APP_STAGE_NAME === 'local') {
-            // console.log(`mock tealium event: ${JSON.stringify(linkData)}`)
+            // console.info(`mock tealium event: ${JSON.stringify(linkData)}`)
             return
         }
 

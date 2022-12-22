@@ -327,19 +327,19 @@ export const ContractDetails = ({
         const contractDocuments = fileItems.reduce(
             (formDataDocuments, fileItem) => {
                 if (fileItem.status === 'UPLOAD_ERROR') {
-                    console.log(
+                    console.info(
                         'Attempting to save files that failed upload, discarding invalid files'
                     )
                 } else if (fileItem.status === 'SCANNING_ERROR') {
-                    console.log(
+                    console.info(
                         'Attempting to save files that failed scanning, discarding invalid files'
                     )
                 } else if (fileItem.status === 'DUPLICATE_NAME_ERROR') {
-                    console.log(
+                    console.info(
                         'Attempting to save files that are duplicate names, discarding duplicate'
                     )
                 } else if (!fileItem.s3URL)
-                    console.log(
+                    console.info(
                         'Attempting to save a seemingly valid file item is not yet uploaded to S3, this should not happen on form submit. Discarding file.'
                     )
                 else {
@@ -427,7 +427,7 @@ export const ContractDetails = ({
             const updatedSubmission = await updateDraft(draftSubmission)
             if (updatedSubmission instanceof Error) {
                 setSubmitting(false)
-                console.log(
+                console.info(
                     'Error updating draft submission: ',
                     updatedSubmission
                 )

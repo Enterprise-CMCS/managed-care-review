@@ -57,7 +57,7 @@ export async function insertHealthPlanPackage(
     )
 
     if (isStoreError(stateNumberResult)) {
-        console.log('Error: Getting New State Number', stateNumberResult)
+        console.info('Error: Getting New State Number', stateNumberResult)
         return stateNumberResult
     }
 
@@ -111,7 +111,7 @@ export async function insertHealthPlanPackage(
 
         return convertToHealthPlanPackageType(pkg)
     } catch (e: unknown) {
-        console.log('ERROR: inserting into to the database: ', e)
+        console.info('ERROR: inserting into to the database: ', e)
 
         return convertPrismaErrorToStoreError(e)
     }

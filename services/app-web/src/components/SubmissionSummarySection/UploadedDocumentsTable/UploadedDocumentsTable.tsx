@@ -133,7 +133,7 @@ export const UploadedDocumentsTable = ({
                     }
                 })
             ).catch((err) => {
-                console.log(err)
+                console.info(err)
                 return []
             })
             setRefreshedDocs(newDocuments)

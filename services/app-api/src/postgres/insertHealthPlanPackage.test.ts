@@ -28,7 +28,7 @@ describe('insertHealthPlanPackage', () => {
 
         const results = await Promise.all(resultPromises)
         if (results.some((result) => isStoreError(result))) {
-            console.log('RESULTS', results)
+            console.info('RESULTS', results)
             throw new Error('some of our inserts failed')
         }
 
@@ -50,7 +50,7 @@ describe('insertHealthPlanPackage', () => {
         const stateNumberSet = new Set(stateNumbers)
 
         if (stateNumbers.length !== stateNumberSet.size) {
-            console.log(
+            console.info(
                 'We got some duplicates: ',
                 stateNumbers.sort(),
                 stateNumberSet.size

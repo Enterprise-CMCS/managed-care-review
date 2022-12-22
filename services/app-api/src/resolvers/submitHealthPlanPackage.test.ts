@@ -33,21 +33,21 @@ describe('submitHealthPlanPackage', () => {
         givenName: 'Prince',
     }
     it('returns a StateSubmission if complete', async () => {
-        console.log('TIMEOUT DEBUG: Start Test')
+        console.info('TIMEOUT DEBUG: Start Test')
         const server = await constructTestPostgresServer()
-        console.log('TIMEOUT DEBUG: Got Postgres Server')
+        console.info('TIMEOUT DEBUG: Got Postgres Server')
 
         // setup
         const initialPkg = await createAndUpdateTestHealthPlanPackage(
             server,
             {}
         )
-        console.log('TIMEOUT DEBUG: Created HPP')
+        console.info('TIMEOUT DEBUG: Created HPP')
         const draft = latestFormData(initialPkg)
         const draftID = draft.id
 
         await new Promise((resolve) => setTimeout(resolve, 2000))
-        console.log('TIMEOUT DEBUG: Waited')
+        console.info('TIMEOUT DEBUG: Waited')
 
         // submit
         const submitResult = await server.executeOperation({
@@ -58,7 +58,7 @@ describe('submitHealthPlanPackage', () => {
                 },
             },
         })
-        console.log('TIMEOUT DEBUG: Submitted')
+        console.info('TIMEOUT DEBUG: Submitted')
 
         expect(submitResult.errors).toBeUndefined()
         const createdID = submitResult?.data?.submitHealthPlanPackage.pkg.id
@@ -107,7 +107,7 @@ describe('submitHealthPlanPackage', () => {
             resultUpdated.getTime() - createdUpdated.getTime()
         ).toBeGreaterThan(0)
 
-        console.log('TIMEOUT DEBUG: Ran all expects')
+        console.info('TIMEOUT DEBUG: Ran all expects')
     }, 20000)
 
     it('returns an error if there are no contract documents attached', async () => {
