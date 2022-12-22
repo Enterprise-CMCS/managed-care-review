@@ -39,14 +39,15 @@ type Mutation {
     """
     createHealthPlanPackage creates a new HealthPlanPackage.
 
-    The new HealthPlanPackage is created with a single revision and with
-    the DRAFT status. The stateCode of the package will be set to the
-    state the user that calls this is from.
+    The new HealthPlanPackage is created with a single HealthPlanRevision with
+    the information specified in the input parameters. The created package will have
+    the DRAFT status. The stateCode of the package will be set to the state the
+    user that calls this mutation is from.
 
     This can only be called by StateUsers
 
     Errors:
-    - ForbiddenError: If a non-state users calls this mutation
+    - ForbiddenError: A CMSUser calls this mutation
     - UserInputError: ProgramID not found in this state's programs
     """
     createHealthPlanPackage(
@@ -70,7 +71,7 @@ type Mutation {
 
     Errors:
     - ForbiddenError:
-        - A non-state user called this
+        - A CMSUser called this
         - A state user from a different state called this.
     - UserInputError:
         - The healthPlanFormData proto did not decode correctly
@@ -95,7 +96,7 @@ type Mutation {
 
     Errors:
     - ForbiddenError:
-        - A non-state user called this
+        - A CMSUser called this
         - A state user from a different state called this.
     - UserInputError
         - A package cannot be found with the given `pkgID`
@@ -238,7 +239,7 @@ type Program {
 
 """
 HealthPlanPackageStatus tracks the editing vs. submitted status of the package.
-It is not intended to track the overal status of the package through the review process
+It is not intended to track the overall status of the package through the review process
 as that is fleshed out.
 
 State Machine:
@@ -248,7 +249,7 @@ DRAFT -> SUBMITTED -> UNLOCKED -> RESUBMITTED
                          |---------------|
 ```
 
-This status is used to determine wether the package is currently being edited by a state user
+This status is used to determine whether the package is currently being edited by a state user
 or if it has been submitted and is being reviewed by CMS users.
 """
 enum HealthPlanPackageStatus {
