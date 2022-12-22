@@ -236,9 +236,11 @@ It is not intended to track the overal status of the package through the review 
 as that is fleshed out.
 
 State Machine:
+```
 DRAFT -> SUBMITTED -> UNLOCKED -> RESUBMITTED
-                         ^                    |
-                         |------------------|
+                         ^               |
+                         |---------------|
+```
 
 This status is used to determine wether the package is currently being edited by a state user
 or if it has been submitted and is being reviewed by CMS users.
