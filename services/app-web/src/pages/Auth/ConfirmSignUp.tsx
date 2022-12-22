@@ -54,10 +54,10 @@ export function ConfirmSignUp({
                         'The code you submitted was expired, we just sent another one to you.'
                     )
                 } catch (err) {
-                    console.log('Error in sending confirmation code')
+                    console.info('Error in sending confirmation code')
                 }
             } else {
-                console.log('Signup error', error)
+                console.info('Signup error', error)
             }
         }
         setIsLoading(false)

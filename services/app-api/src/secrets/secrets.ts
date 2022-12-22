@@ -13,7 +13,7 @@ async function FetchSecrets(
 ): Promise<Secret | Error> {
     const secretsResult = await getSecretValue(secretManagerSecret)
     if (secretsResult instanceof Error) {
-        console.log('Error: Failed to get secrets', secretsResult)
+        console.info('Error: Failed to get secrets', secretsResult)
         return new Error('Failed to talk to AWS SecretsManager')
     }
     return secretsResult
@@ -51,7 +51,7 @@ async function getSecretValue(
     const secret = JSON.parse(secretResponse.SecretString ?? '') as Secret
 
     if (!secret.username || !secret.password) {
-        console.log('Error: failed to get secrets', secret)
+        console.info('Error: failed to get secrets', secret)
         return new Error(
             'Could not retrieve postgres credentials from secrets manager'
         )

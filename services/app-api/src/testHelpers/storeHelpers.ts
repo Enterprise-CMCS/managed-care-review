@@ -18,7 +18,7 @@ async function configurePrismaClient(): Promise<PrismaClient> {
 
     const clientResult = await NewPrismaClient(dbURL)
     if (clientResult instanceof Error) {
-        console.log('Error: ', clientResult)
+        console.info('Error: ', clientResult)
         throw new Error('failed to configure postgres client for testing')
     }
 

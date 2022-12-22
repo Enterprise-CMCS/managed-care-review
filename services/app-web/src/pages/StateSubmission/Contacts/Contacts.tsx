@@ -276,7 +276,7 @@ export const Contacts = ({
             if (updatedSubmission instanceof Error) {
                 formikHelpers.setSubmitting(false)
                 redirectToDashboard.current = false
-                console.log(
+                console.info(
                     'Error updating draft submission: ',
                     updatedSubmission
                 )

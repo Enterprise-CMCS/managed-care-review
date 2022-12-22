@@ -53,7 +53,7 @@ export async function insertHealthPlanRevision(
 
         return convertToHealthPlanPackageType(submission)
     } catch (e: unknown) {
-        console.log('ERROR: inserting into to the database: ', e)
+        console.info('ERROR: inserting into to the database: ', e)
 
         return convertPrismaErrorToStoreError(e)
     }

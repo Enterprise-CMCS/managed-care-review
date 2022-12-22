@@ -198,10 +198,10 @@ export const AppRoutes = ({
                         setRedirectPath(initialPath)
                     }
                     if (authMode === 'IDM') {
-                        console.log('redirecting to', idmRedirectURL())
+                        console.info('redirecting to', idmRedirectURL())
                         window.location.href = idmRedirectURL()
                     } else {
-                        console.log('redirecting to /auth')
+                        console.info('redirecting to /auth')
                         navigate('/auth')
                     }
                 } catch (err) {
@@ -213,7 +213,7 @@ export const AppRoutes = ({
             // Then, when we login, read that key, if it exists, go forth.
         } else {
             if (typeof redirectPath === 'string') {
-                console.log('Retrieved For Redirect: ', redirectPath)
+                console.info('Retrieved For Redirect: ', redirectPath)
                 navigate(redirectPath)
                 setRedirectPath(null)
             }

@@ -20,6 +20,7 @@ export default class LabeledProcessRunner {
     private formattedPrefix(prefix: string): string {
         let color: string
 
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         if (prefix! in this.prefixColors) {
             color = this.prefixColors[prefix]
         } else {
@@ -29,13 +30,13 @@ export default class LabeledProcessRunner {
                 this.colors.push(color)
                 this.prefixColors[prefix] = color
             } else {
-                console.log('BAD NEWS BEARS')
+                console.info('BAD NEWS BEARS')
                 throw new Error('dev.ts programming error')
             }
         }
 
         let maxLength = 0
-        for (let pre in this.prefixColors) {
+        for (const pre in this.prefixColors) {
             if (pre.length > maxLength) {
                 maxLength = pre.length
             }
@@ -53,7 +54,7 @@ export default class LabeledProcessRunner {
         cwd: string | undefined,
         { awaitFor }: { awaitFor: undefined | string } = { awaitFor: undefined }
     ): Promise<number> {
-        const proc_opts: Record<string, any> = {}
+        const proc_opts: Record<string, unknown> = {}
 
         if (cwd) {
             proc_opts['cwd'] = cwd
@@ -74,7 +75,7 @@ export default class LabeledProcessRunner {
                 if (lines[lines.length - 1] === '') {
                     lines.pop()
                 }
-                for (let line of lines) {
+                for (const line of lines) {
                     // if we get a line that has awaitFor in it, we resolve the promise.
                     if (awaitFor) {
                         if (line.includes(awaitFor)) {
@@ -93,7 +94,7 @@ export default class LabeledProcessRunner {
                 if (lines[lines.length - 1] === '') {
                     lines.pop()
                 }
-                for (let line of lines) {
+                for (const line of lines) {
                     // if we get a line that has awaitFor in it, we resolve the promise.
                     if (awaitFor) {
                         if (line.includes(awaitFor)) {

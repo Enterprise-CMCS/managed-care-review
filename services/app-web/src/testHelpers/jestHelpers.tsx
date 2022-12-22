@@ -102,7 +102,7 @@ const ldUseClientSpy = (
 }
 
 const prettyDebug = (label?: string, element?: HTMLElement): void => {
-    console.log(
+    console.info(
         `${label ?? 'body'}:
     `,
         prettyDOM(element ?? document.body, 50000)

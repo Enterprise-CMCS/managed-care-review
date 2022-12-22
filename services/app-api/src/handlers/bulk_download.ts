@@ -50,7 +50,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
     }
 
     const bulkDlRequest: S3BulkDownloadRequest = JSON.parse(event.body)
-    console.log('Bulk download request:', bulkDlRequest)
+    console.info('Bulk download request:', bulkDlRequest)
 
     if (
         !bulkDlRequest.bucket ||
@@ -112,7 +112,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
                     // wml: WARNING: This was never tested but figuring out these types were so painful I want to leave
                     // the work in here. Testing so far It appears that GetObject always returns the Readable type,
                     // not a ReadableStream
-                    console.log(
+                    console.info(
                         'WARNING UNTESTED: We are streaming a ReadableStream'
                     )
                     const readStreamBody = s3Item.Body
@@ -186,18 +186,18 @@ export const main: APIGatewayProxyHandler = async (event) => {
         })
 
         upload.on('httpUploadProgress', (progress) => {
-            console.log('UploadProgress', progress)
+            console.info('UploadProgress', progress)
         })
 
         // Configure Zip
         const zip = Archiver('zip')
 
         zip.on('warning', function (warn) {
-            console.log('zip warning: ', warn.message)
+            console.info('zip warning: ', warn.message)
         })
 
         zip.on('error', (error: Archiver.ArchiverError) => {
-            console.log('Error in zip.on: ', error.message, error.stack)
+            console.info('Error in zip.on: ', error.message, error.stack)
             console.timeEnd('zipProcess')
             throw new Error(
                 `${error.name} ${error.code} ${error.message} ${error.path} ${error.stack}`
@@ -205,7 +205,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
         })
 
         zip.on('progress', function (prog) {
-            console.log('zip progress: ', prog)
+            console.info('zip progress: ', prog)
         })
 
         zip.pipe(zippedStream)
@@ -226,7 +226,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
         // We only stop and wait on the upload itself. Hopefully all our streams are streaming correctly
         await upload.done()
     } catch (e) {
-        console.log('Error zipping or uploading', e)
+        console.info('Error zipping or uploading', e)
         console.timeEnd('zipProcess')
         return {
             statusCode: 500,
@@ -238,7 +238,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
         }
     }
 
-    console.log('Upload Success')
+    console.info('Upload Success')
     console.timeEnd('zipProcess')
     return {
         statusCode: 200,
@@ -252,8 +252,8 @@ export const main: APIGatewayProxyHandler = async (event) => {
 
 // parses a content-disposition header for the filename
 function parseContentDisposition(cd: string): string {
-    console.log('original content-disposition: ' + cd)
+    console.info('original content-disposition: ' + cd)
     const [, filename] = cd.split('filename=')
-    console.log('original name: ' + filename)
+    console.info('original name: ' + filename)
     return filename
 }

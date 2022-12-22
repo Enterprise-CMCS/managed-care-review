@@ -160,7 +160,7 @@ function AuthProvider({
             if (!isAuthenticated) {
                 const currentUser = data.fetchCurrentUser
                 setLDUser(currentUser).catch((err) => {
-                    console.log(err)
+                    console.info(err)
                 })
                 setLoggedInUser(currentUser)
                 setLoginStatus('LOGGED_IN')
@@ -175,7 +175,7 @@ function AuthProvider({
                     resolve()
                 })
                 .catch((e) => {
-                    console.log('Check Auth Failed.', e)
+                    console.info('Check Auth Failed.', e)
                     reject(e)
                 })
         })
@@ -240,7 +240,7 @@ function AuthProvider({
                               }
                           })
                           .catch((e) => {
-                              console.log('Logout Failed.', e)
+                              console.info('Logout Failed.', e)
                               reject(e)
                           })
                   })

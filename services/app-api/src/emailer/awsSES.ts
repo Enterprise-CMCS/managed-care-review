@@ -74,7 +74,7 @@ async function sendSESEmail(
     } catch (err) {
         console.error(JSON.stringify(err))
         const { requestId, cfId, extendedRequestId } = err.$$metadata
-        console.log({ requestId, cfId, extendedRequestId })
+        console.info({ requestId, cfId, extendedRequestId })
         return err
     }
 }

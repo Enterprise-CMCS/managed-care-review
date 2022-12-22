@@ -53,7 +53,7 @@ export function newLocalS3Client(
                     }
                 }
 
-                console.log('Log: Unexpected Error putting file to S3', err)
+                console.info('Log: Unexpected Error putting file to S3', err)
                 return err
             }
         },
@@ -75,7 +75,7 @@ export function newLocalS3Client(
                     }
                 }
 
-                console.log('Log: Unexpected Error deleting file on S3', err)
+                console.info('Log: Unexpected Error deleting file on S3', err)
                 return err
             }
         },

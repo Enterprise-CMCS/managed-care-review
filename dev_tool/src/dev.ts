@@ -112,7 +112,7 @@ async function runAllTests({
             await runOnlineTests()
         }
     } catch (e) {
-        console.log('Testing Error', e)
+        console.info('Testing Error', e)
         process.exit(1)
     }
 }
@@ -152,7 +152,7 @@ function runPrisma(args: string[]) {
 function main() {
     // check to see if local direnv vars have loaded
     if (!process.env.REACT_APP_AUTH_MODE) {
-        console.log(
+        console.info(
             `ERROR: Could not find REACT_APP_AUTH_MODE environment variable.\n
             Did you set your env vars locally? Hint: try running 'direnv allow'.`
         )
@@ -229,7 +229,7 @@ function main() {
                             const parsedFlags = parseRunFlags(inputFlags)
 
                             if (parsedFlags === undefined) {
-                                console.log(
+                                console.info(
                                     "Error: Don't mix and match positive and negative boolean flags"
                                 )
                                 process.exit(1)
@@ -270,7 +270,7 @@ function main() {
                         },
                         (args) => {
                             if (args['for-docker'] && args.hybrid) {
-                                console.log(
+                                console.info(
                                     'Error: --hybrid and --for-docker are mutually exclusive'
                                 )
                                 process.exit(2)
@@ -279,7 +279,7 @@ function main() {
                             if (args.hybrid) {
                                 runWebAgainstAWS(args['hybrid-stage'])
                             } else if (args['for-docker']) {
-                                console.log('run against docker')
+                                console.info('run against docker')
                                 runWebAgainstDocker()
                             } else {
                                 const runner = new LabeledProcessRunner()
@@ -308,7 +308,7 @@ function main() {
                     })
             },
             () => {
-                console.log(
+                console.info(
                     "with a default subcommand, I don't think this code can be reached"
                 )
             }
@@ -343,7 +343,7 @@ function main() {
                             const runFlags = parseRunFlags(inputRunFlags)
 
                             if (runFlags === undefined) {
-                                console.log(
+                                console.info(
                                     "Error: Don't mix and match positive and negative boolean flags"
                                 )
                                 process.exit(1)
@@ -482,7 +482,7 @@ function main() {
                     )
             },
             () => {
-                console.log(
+                console.info(
                     "with a default subcommand, I don't think this code can be reached"
                 )
             }

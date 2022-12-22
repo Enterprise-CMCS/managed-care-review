@@ -198,7 +198,7 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
 }
 
 const localEmailerLogger = (emailData: EmailData) =>
-    console.log(`
+    console.info(`
         EMAIL SENT
         ${'(¯`·.¸¸.·´¯`·.¸¸.·´¯·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´¯`·.¸¸.·´)'}
         ${JSON.stringify(getSESEmailParams(emailData))}
