@@ -9619,9 +9619,9 @@
     "@opentelemetry/core" "1.2.0"
 
 "@opentelemetry/propagator-aws-xray@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/propagator-aws-xray/-/propagator-aws-xray-1.1.0.tgz#f9fda3c5dab6774d4d092670ed027bbae6f61112"
-  integrity sha512-p8qSVJbhzxBu2Dl6nv5aqWSmUeqAxEr3jjZzB6Eg9CrZqCTJ7Ndl74dSOuEzC7CYmiNsu0v5K0rSdB8g6vm89g==
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/propagator-aws-xray/-/propagator-aws-xray-1.1.1.tgz#03084f3ec3aa818a3f4ea9606dea1c82f8707477"
+  integrity sha512-RExCA3v2/xZcGN//JaGIs/WXm2bs2z1YhvC07NG6SBF7Vyt5IGrDoHIQXb5raSP7RjYGbaJ7Qg7ND8qkWTXP6A==
   dependencies:
     "@opentelemetry/core" "^1.0.0"
 
