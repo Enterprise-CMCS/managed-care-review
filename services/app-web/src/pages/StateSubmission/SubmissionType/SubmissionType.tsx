@@ -166,7 +166,7 @@ export const SubmissionType = ({
                         values.contractType === 'AMENDMENT'
                     )
                 ) {
-                    console.log(
+                    console.info(
                         'unexpected error, attempting to submit a contractType of ',
                         values.contractType
                     )
