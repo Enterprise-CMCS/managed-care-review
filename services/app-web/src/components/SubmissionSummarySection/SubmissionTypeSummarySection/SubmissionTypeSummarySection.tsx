@@ -4,7 +4,10 @@ import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataT
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
 import { SectionHeader } from '../../../components/SectionHeader'
-import { SubmissionTypeRecord } from '../../../constants/healthPlanPackages'
+import {
+    SubmissionTypeRecord,
+    ContractTypeRecord,
+} from '../../../constants/healthPlanPackages'
 import { Program } from '../../../gen/gqlClient'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
@@ -69,6 +72,17 @@ export const SubmissionTypeSummarySection = ({
                         id="submissionType"
                         label="Submission type"
                         data={SubmissionTypeRecord[submission.submissionType]}
+                    />
+                </DoubleColumnGrid>
+                <DoubleColumnGrid>
+                    <DataDetail
+                        id="contractType"
+                        label="Contract action type"
+                        data={
+                            submission.contractType
+                                ? ContractTypeRecord[submission.contractType]
+                                : ''
+                        }
                     />
                 </DoubleColumnGrid>
                 <Grid row gap className={styles.reviewDataRow}>

@@ -33,7 +33,7 @@ export function checkStageAccess(stage: string): StageConnection {
         ) {
             return 'STAGE_ERROR'
         } else {
-            console.log(
+            console.info(
                 'Stdout: ',
                 test.stdout.toString(),
                 'stderr: ',

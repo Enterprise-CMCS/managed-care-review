@@ -14,7 +14,7 @@ async function NewPrismaClient(connURL: string): Promise<PrismaClient | Error> {
         if (e instanceof Error) {
             return e
         }
-        console.log('Unexpected Error creating prisma client: ', e)
+        console.info('Unexpected Error creating prisma client: ', e)
         return new Error('Unknown error create prisma client')
     }
 }

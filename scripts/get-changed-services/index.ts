@@ -56,10 +56,10 @@ async function main() {
     // concat our two arrays of what to change together into one deduped set
     const jobsToRun = [...new Set([...ghaJobsToRun, ...lernaChangedServices])]
 
-    console.log('All services: ' + listOfServices)
-    console.log('Jobs we can skip from GHA: ' + jobsToSkip)
-    console.log('Changed services from lerna: ' + lernaChangedServices)
-    console.log('Jobs to rerun: ' + jobsToRun)
+    console.info('All services: ' + listOfServices)
+    console.info('Jobs we can skip from GHA: ' + jobsToSkip)
+    console.info('Changed services from lerna: ' + lernaChangedServices)
+    console.info('Jobs to rerun: ' + jobsToRun)
 
     core.setOutput('changed-services', jobsToRun)
 }
@@ -111,7 +111,7 @@ async function getAllServicesFromLerna(): Promise<string[]> {
     const { stdout, stderr } = await execPromise('lerna ls -a --json')
     const lernaList: LernaListItem[] = JSON.parse(stdout)
     if (stderr) {
-        console.log(stderr)
+        console.info(stderr)
     }
 
     return lernaList.map((i) => i.name)
@@ -126,7 +126,7 @@ async function getChangedServicesSinceSha(sha: string): Promise<string[]> {
 
     const lernaList: LernaListItem[] = JSON.parse(stdout)
     if (stderr) {
-        console.log(stderr)
+        console.info(stderr)
     }
 
     return lernaList.map((i) => i.name)

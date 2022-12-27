@@ -94,7 +94,7 @@ export function newDBMigrator(dbConnString: string): MigratorType {
                 data: appliedMigrationsRows,
             })
 
-            console.log('Done with DB')
+            console.info('Done with DB')
         },
     }
 }
@@ -207,7 +207,7 @@ export async function migrate(migrator: MigratorType, path?: string) {
         return !previouslyAppliedMigrationNames.includes(migration.name)
     })
 
-    console.log(
+    console.info(
         'New Migrations To Run: ',
         migrationsToRun.map((m) => m.name)
     )
@@ -229,7 +229,7 @@ async function main() {
 
     const pathToProtos = args[1]
     if (pathToProtos === undefined) {
-        console.log(usage)
+        console.info(usage)
         process.exit(1)
     }
 
@@ -243,12 +243,12 @@ async function main() {
         migrator = newDBMigrator(dbConn)
     } else if (connectionType === 'FILES') {
         if (args.length !== 2 || args[0] !== 'files') {
-            console.log(usage)
+            console.info(usage)
             process.exit(1)
         }
         migrator = newFileMigrator(pathToProtos)
     } else {
-        console.log(usage)
+        console.info(usage)
         throw new Error('unimplemented migrator')
     }
 

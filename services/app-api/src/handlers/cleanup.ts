@@ -33,6 +33,6 @@ export const main = async () => {
 
         const deleteCommand = new DeleteDBClusterSnapshotCommand(deleteInput)
         const response = await client.send(deleteCommand)
-        console.log('Deleted old snapshot: ' + response)
+        console.info('Deleted old snapshot: ' + response)
     })
 }

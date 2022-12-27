@@ -46,29 +46,29 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
             if (result && 'code' in result) {
                 if (result.code === 'UserNotConfirmedException') {
                     // the user has not been confirmed, need to display the confirmation UI
-                    console.log(
+                    console.info(
                         'you need to confirm your account, enter the code below'
                     )
                 } else if (result.code === 'NotAuthorizedException') {
                     // the password is bad
-                    console.log('bad password')
+                    console.info('bad password')
                 } else {
-                    console.log('Unknown error from Amplify: ', result)
+                    console.info('Unknown error from Amplify: ', result)
                 }
                 setShowFormAlert(true)
-                console.log('Error', result.message)
+                console.info('Error', result.message)
             } else {
                 try {
                     await checkAuth()
                 } catch (e) {
-                    console.log('UNEXPECTED NOT LOGGED IN AFTER LOGGIN', e)
+                    console.info('UNEXPECTED NOT LOGGED IN AFTER LOGGIN', e)
                     setShowFormAlert(true)
                 }
 
                 navigate('/')
             }
         } catch (err) {
-            console.log('Unexpected error signing in:', err)
+            console.info('Unexpected error signing in:', err)
         }
     }
 

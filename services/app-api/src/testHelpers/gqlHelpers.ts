@@ -118,6 +118,7 @@ const createTestHealthPlanPackage = async (
         programIDs: programIDs,
         submissionType: 'CONTRACT_ONLY' as const,
         submissionDescription: 'A created submission',
+        contractType: 'BASE',
     }
     const result = await server.executeOperation({
         query: CREATE_HEALTH_PLAN_PACKAGE,
@@ -152,7 +153,7 @@ const updateTestHealthPlanFormData = async (
     })
 
     if (updateResult.errors) {
-        console.log('errors', updateResult.errors)
+        console.info('errors', updateResult.errors)
         throw new Error(
             `updateTestHealthPlanFormData mutation failed with errors ${updateResult.errors}`
         )
@@ -264,7 +265,7 @@ const submitTestHealthPlanPackage = async (
     })
 
     if (updateResult.errors) {
-        console.log('errors', updateResult.errors)
+        console.info('errors', updateResult.errors)
         throw new Error(
             `submitTestHealthPlanPackage mutation failed with errors ${updateResult.errors}`
         )
@@ -293,7 +294,7 @@ const resubmitTestHealthPlanPackage = async (
     })
 
     if (updateResult.errors) {
-        console.log('errors', updateResult.errors)
+        console.info('errors', updateResult.errors)
         throw new Error(
             `resubmitTestHealthPlanPackage mutation failed with errors ${updateResult.errors}`
         )
@@ -322,7 +323,7 @@ const unlockTestHealthPlanPackage = async (
     })
 
     if (updateResult.errors) {
-        console.log('errors', updateResult.errors)
+        console.info('errors', updateResult.errors)
         throw new Error(
             `unlockTestHealthPlanPackage mutation failed with errors ${updateResult.errors}`
         )

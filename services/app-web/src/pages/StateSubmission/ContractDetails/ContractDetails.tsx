@@ -19,7 +19,6 @@ import {
     FileItemT,
     FieldRadio,
     FieldCheckbox,
-    FieldPreserveScrollPosition,
     ErrorSummary,
     PoliteErrorMessage,
     FieldYesNo,
@@ -38,9 +37,9 @@ import {
     ManagedCareEntity,
     modifiedProvisionKeys,
     SubmissionDocument,
-    ContractType,
     ContractExecutionStatus,
     FederalAuthority,
+    HealthPlanFormDataType,
 } from '../../../common-code/healthPlanFormDataType'
 import {
     ManagedCareEntityRecord,
@@ -80,7 +79,6 @@ const ContractDatesErrorMessage = ({
     </PoliteErrorMessage>
 )
 export interface ContractDetailsFormValues {
-    contractType: ContractType | undefined
     contractExecutionStatus: ContractExecutionStatus | undefined
     contractDateStart: string
     contractDateEnd: string
@@ -220,7 +218,6 @@ export const ContractDetails = ({
     }
 
     const contractDetailsInitialValues: ContractDetailsFormValues = {
-        contractType: draftSubmission?.contractType ?? undefined,
         contractExecutionStatus:
             draftSubmission?.contractExecutionStatus ?? undefined,
         contractDateStart:
@@ -304,12 +301,9 @@ export const ContractDetails = ({
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
-    const isContractTypeEmpty = (values: ContractDetailsFormValues): boolean =>
-        values.contractType === undefined
-
     const isContractAmendmentSelected = (
-        values: ContractDetailsFormValues
-    ): boolean => values.contractType === 'AMENDMENT'
+        draftSubmission: HealthPlanFormDataType
+    ): boolean => draftSubmission.contractType === 'AMENDMENT'
 
     const handleFormSubmit = async (
         values: ContractDetailsFormValues,
@@ -333,19 +327,19 @@ export const ContractDetails = ({
         const contractDocuments = fileItems.reduce(
             (formDataDocuments, fileItem) => {
                 if (fileItem.status === 'UPLOAD_ERROR') {
-                    console.log(
+                    console.info(
                         'Attempting to save files that failed upload, discarding invalid files'
                     )
                 } else if (fileItem.status === 'SCANNING_ERROR') {
-                    console.log(
+                    console.info(
                         'Attempting to save files that failed scanning, discarding invalid files'
                     )
                 } else if (fileItem.status === 'DUPLICATE_NAME_ERROR') {
-                    console.log(
+                    console.info(
                         'Attempting to save files that are duplicate names, discarding duplicate'
                     )
                 } else if (!fileItem.s3URL)
-                    console.log(
+                    console.info(
                         'Attempting to save a seemingly valid file item is not yet uploaded to S3, this should not happen on form submit. Discarding file.'
                     )
                 else {
@@ -360,7 +354,6 @@ export const ContractDetails = ({
             [] as SubmissionDocument[]
         )
 
-        draftSubmission.contractType = values.contractType
         draftSubmission.contractExecutionStatus = values.contractExecutionStatus
         draftSubmission.contractDateStart = formatFormDateForDomain(
             values.contractDateStart
@@ -372,7 +365,7 @@ export const ContractDetails = ({
         draftSubmission.federalAuthorities = values.federalAuthorities
         draftSubmission.contractDocuments = contractDocuments
 
-        if (values.contractType === 'AMENDMENT') {
+        if (draftSubmission.contractType === 'AMENDMENT') {
             draftSubmission.contractAmendmentInfo = {
                 modifiedProvisions: {
                     modifiedBenefitsProvided: formatYesNoForProto(
@@ -434,7 +427,7 @@ export const ContractDetails = ({
             const updatedSubmission = await updateDraft(draftSubmission)
             if (updatedSubmission instanceof Error) {
                 setSubmitting(false)
-                console.log(
+                console.info(
                     'Error updating draft submission: ',
                     updatedSubmission
                 )
@@ -458,7 +451,11 @@ export const ContractDetails = ({
                             : `../rate-details`,
                 })
             }}
-            validationSchema={ContractDetailsFormSchema}
+            validationSchema={() =>
+                ContractDetailsFormSchema(
+                    draftSubmission.contractType ?? 'BASE'
+                )
+            }
         >
             {({
                 values,
@@ -536,42 +533,6 @@ export const ContractDetails = ({
                                 />
                             </FormGroup>
                             <FormGroup
-                                error={showFieldErrors(errors.contractType)}
-                            >
-                                <FieldPreserveScrollPosition
-                                    fieldName={
-                                        'contractType' as keyof ContractDetailsFormValues
-                                    }
-                                />
-                                <Fieldset
-                                    role="radiogroup"
-                                    aria-required
-                                    className={styles.radioGroup}
-                                    legend="Contract action type"
-                                    id="contractType"
-                                >
-                                    {showFieldErrors(errors.contractType) && (
-                                        <PoliteErrorMessage>
-                                            {errors.contractType}
-                                        </PoliteErrorMessage>
-                                    )}
-                                    <FieldRadio
-                                        id="baseContract"
-                                        name="contractType"
-                                        label="Base contract"
-                                        aria-required
-                                        value={'BASE'}
-                                    />
-                                    <FieldRadio
-                                        id="amendmentContract"
-                                        name="contractType"
-                                        label="Amendment to base contract"
-                                        aria-required
-                                        value={'AMENDMENT'}
-                                    />
-                                </Fieldset>
-                            </FormGroup>
-                            <FormGroup
                                 error={showFieldErrors(
                                     errors.contractExecutionStatus
                                 )}
@@ -605,7 +566,7 @@ export const ContractDetails = ({
                                     />
                                 </Fieldset>
                             </FormGroup>
-                            {!isContractTypeEmpty(values) && (
+                            {
                                 <>
                                     <FormGroup
                                         error={
@@ -621,7 +582,7 @@ export const ContractDetails = ({
                                             aria-required
                                             legend={
                                                 isContractAmendmentSelected(
-                                                    values
+                                                    draftSubmission
                                                 )
                                                     ? 'Amendment effective dates'
                                                     : 'Contract effective dates'
@@ -845,7 +806,9 @@ export const ContractDetails = ({
                                             />
                                         </Fieldset>
                                     </FormGroup>
-                                    {isContractAmendmentSelected(values) && (
+                                    {isContractAmendmentSelected(
+                                        draftSubmission
+                                    ) && (
                                         <FormGroup>
                                             <Fieldset
                                                 aria-required
@@ -855,6 +818,9 @@ export const ContractDetails = ({
                                                     (modifiedProvisionName) => (
                                                         <FieldYesNo
                                                             id={
+                                                                modifiedProvisionName
+                                                            }
+                                                            key={
                                                                 modifiedProvisionName
                                                             }
                                                             name={
@@ -877,7 +843,7 @@ export const ContractDetails = ({
                                         </FormGroup>
                                     )}
                                 </>
-                            )}
+                            }
                         </fieldset>
 
                         <PageActions

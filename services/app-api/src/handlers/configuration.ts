@@ -16,7 +16,7 @@ async function getPostgresURL(
     // If AWS_SM we need to query secrets manager to get these secrets
     if (dbURL === 'AWS_SM') {
         if (!secretName) {
-            console.log(
+            console.info(
                 'Init Error: The env var SECRETS_MANAGER_SECRET must be set if DATABASE_URL=AWS_SM'
             )
             return new Error(
@@ -28,7 +28,7 @@ async function getPostgresURL(
         // if we put more secrets in here, we'll probably need to instantiate it somewhere else
         const secretsResult = await FetchSecrets(secretName)
         if (secretsResult instanceof Error) {
-            console.log(
+            console.info(
                 'Init Error: Failed to fetch secrets from Secrets Manager',
                 secretsResult
             )
@@ -47,7 +47,7 @@ async function configurePostgres(
     dbURL: string,
     secretName: string | undefined
 ): Promise<PrismaClient | Error> {
-    console.log('Getting Postgres Connection')
+    console.info('Getting Postgres Connection')
 
     const dbConnResult = await getPostgresURL(dbURL, secretName)
     if (dbConnResult instanceof Error) {
@@ -57,7 +57,10 @@ async function configurePostgres(
     const prismaResult = await NewPrismaClient(dbConnResult)
 
     if (prismaResult instanceof Error) {
-        console.log('Error: attempting to create prisma client: ', prismaResult)
+        console.info(
+            'Error: attempting to create prisma client: ',
+            prismaResult
+        )
         return new Error('Failed to create Prisma Client')
     }
 
@@ -69,7 +72,7 @@ async function configurePostgres(
 async function getDBClusterID(secretName: string): Promise<string | Error> {
     const secretsResult = await FetchSecrets(secretName)
     if (secretsResult instanceof Error) {
-        console.log(
+        console.info(
             'Init Error: Failed to fetch secrets from Secrets Manager',
             secretsResult
         )

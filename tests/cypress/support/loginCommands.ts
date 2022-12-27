@@ -8,12 +8,10 @@ Cypress.Commands.add('logInAsStateUser', () => {
     })
 
     cy.visit('/')
-    cy.findByText(
-        'Medicaid and CHIP Managed Care Reporting and Review System'
-    )
+    cy.findByText('Medicaid and CHIP Managed Care Reporting and Review System')
     cy.findByRole('link', { name: 'Sign In', timeout: 20000 }).click()
     const authMode = Cypress.env('AUTH_MODE')
-    console.log(authMode, 'authmode')
+    console.info(authMode, 'authmode')
 
     if (authMode === 'LOCAL') {
         cy.findByTestId('AangButton').click()
@@ -21,7 +19,7 @@ Cypress.Commands.add('logInAsStateUser', () => {
         const testUsersPassword = Cypress.env('TEST_USERS_PASS')
         if (!testUsersPassword)
             throw Error('Cannot login test user without a password')
-        console.log(testUsersPassword)
+        console.info(testUsersPassword)
         cy.findByText('Show Login Form').click()
         cy.findByTestId('loginEmail').type('aang@example.com')
         cy.findByTestId('loginPassword').type(testUsersPassword)
@@ -30,7 +28,9 @@ Cypress.Commands.add('logInAsStateUser', () => {
         throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
     }
     //Wait for both queries to finish.
-    cy.wait(['@fetchCurrentUserQuery', '@indexHealthPlanPackagesQuery'], { timeout: 80000 })
+    cy.wait(['@fetchCurrentUserQuery', '@indexHealthPlanPackagesQuery'], {
+        timeout: 80000,
+    })
 })
 
 Cypress.Commands.add(
@@ -49,7 +49,7 @@ Cypress.Commands.add(
         )
         cy.findByRole('link', { name: 'Sign In' }).click()
         const authMode = Cypress.env('AUTH_MODE')
-        console.log(authMode, 'authmode')
+        console.info(authMode, 'authmode')
 
         if (authMode === 'LOCAL') {
             cy.findByTestId('ZukoButton').click()
@@ -57,7 +57,7 @@ Cypress.Commands.add(
             const testUsersPassword = Cypress.env('TEST_USERS_PASS')
             if (!testUsersPassword)
                 throw Error('Cannot login test user without a password')
-            console.log(testUsersPassword)
+            console.info(testUsersPassword)
             cy.findByText('Show Login Form').click()
             cy.findByTestId('loginEmail').type('zuko@example.com')
             cy.findByTestId('loginPassword').type(testUsersPassword)

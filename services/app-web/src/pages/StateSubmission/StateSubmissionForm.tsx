@@ -190,7 +190,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
             if (!updatedSubmission) {
                 setShowPageErrorMessage(true)
-                console.log('Failed to update form data', updateResult)
+                console.info('Failed to update form data', updateResult)
                 recordJSException(
                     `StateSubmissionForm: Apollo error reported. Error message: Failed to update form data ${updateResult}`
                 )
