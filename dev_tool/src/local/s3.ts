@@ -8,6 +8,6 @@ export async function runS3Locally(runner: LabeledProcessRunner) {
     runner.runCommandAndOutput(
         's3',
         ['lerna', 'run', 'start', '--scope=uploads'],
-        'services/uploads'
+        ''
     )
 }
