@@ -16,7 +16,8 @@
         "test:once": "TZ=UTC react-scripts test --watchAll=false --runInBand --ci",
         "test:update": "react-scripts test -u",
         "storybook": "start-storybook -p 6006 -s public --quiet",
-        "build-storybook": "build-storybook -s public --quiet"
+        "build-storybook": "build-storybook -s public --quiet",
+        "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""
     },
     "lint-staged": {
         "*.{js,jsx,ts,tsx}": [

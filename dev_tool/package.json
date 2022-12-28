@@ -10,8 +10,8 @@
         "precommit": "lint-staged",
         "lint": "tsc --noEmit && eslint --max-warnings=0",
         "clean": "rm -rf node_modules && yarn cache clean",
-        "format": "prettier --write src/**/*.ts{,x}",
-        "build": "tsc"
+        "build": "tsc",
+        "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""
     },
     "lint-staged": {
         "*.{js,ts}": [
