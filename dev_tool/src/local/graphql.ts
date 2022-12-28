@@ -14,7 +14,7 @@ async function compileGraphQLTypes(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput(
         'gql deps',
         ['yarn', 'install', '--prefer-offline'],
-        'services/app-graphql'
+        ''
     )
 
     return runner.runCommandAndOutput('gqlgen', ['lerna', 'run', 'gqlgen'], '')
