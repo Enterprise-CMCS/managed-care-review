@@ -9,7 +9,7 @@ export async function runStorybookLocally(runner: LabeledProcessRunner) {
 
     runner.runCommandAndOutput(
         'storybook',
-        ['yarn', 'storybook'],
+        ['lerna', 'run', 'storybook'],
         'services/app-web'
     )
 }
