@@ -11,7 +11,8 @@
         "lint": "tsc --noEmit && eslint . --max-warnings=0",
         "clean": "rm -rf node_modules && yarn cache clean",
         "generate-code": "yarn prisma generate",
-        "build": "tsc --noEmit"
+        "build": "tsc --noEmit",
+        "start": "npx serverless offline start --stage local --region us-east-1 --httpPort 3030 --useChildProcesses"
     },
     "lint-staged": {
         "*.{js,ts}": [
