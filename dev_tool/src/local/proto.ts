@@ -26,7 +26,7 @@ export async function compileProto(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput(
         'proto deps',
         ['yarn', 'install', '--prefer-offline'],
-        'services/app-proto'
+        ''
     )
 
     return runner.runCommandAndOutput(
