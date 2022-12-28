@@ -31,7 +31,7 @@ export async function compileProto(runner: LabeledProcessRunner) {
 
     return runner.runCommandAndOutput(
         'protogen',
-        ['yarn', 'run', 'protogen'],
+        ['lerna', 'run', 'protogen'],
         ''
     )
 }
