@@ -6,7 +6,7 @@ import { commandMustSucceedSync } from '../localProcess.js'
 export async function installPrismaDeps(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput(
         'api prisma',
-        ['lerna', 'run', 'generate-code', '--scope=app-api'],
+        ['lerna', 'run', 'generate', '--scope=app-api'],
         ''
     )
 }

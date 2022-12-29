@@ -1,14 +1,13 @@
 #! /bin/bash
 echo stage name
-cd services/app-web
 echo $(pwd)
-echo $REACT_APP_STAGE_NAME
+echo "$REACT_APP_STAGE_NAME"
 if [ "$REACT_APP_STAGE_NAME" == "prod" ] || [ "$REACT_APP_STAGE_NAME" == "val" ];
     then
         echo "building for prod or val without instrumentation"
-        yarn run build_prod
+        lerna run build:prod --scope=app-web
     else
         echo "instrumenting for cypress"
-        yarn run build_instrumented
+        lerna run build:instrumented --scope=app-web
 fi
 

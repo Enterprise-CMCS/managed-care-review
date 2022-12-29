@@ -8,22 +8,22 @@
                     "build",
                     "prettier",
                     "test",
-                    "generate-code"
+                    "generate"
                 ]
             }
         }
     },
     "targetDefaults": {
         "build": {
-            "dependsOn": ["generate-code", "^build"],
+            "dependsOn": ["generate", "^build"],
             "outputs": [
                 "{projectRoot}/services/app-api/.webpack",
                 "{projectRoot}/services/app-web/build",
                 "{projectRoot}/dev_tool/build"
             ]
         },
-        "generate-code": {
-            "dependsOn": ["^generate-code"],
+        "generate": {
+            "dependsOn": ["^generate"],
             "outputs": [
                 "{projectRoot}/services/app-web/src/gen",
                 "{projectRoot}/services/app-api/src/gen",

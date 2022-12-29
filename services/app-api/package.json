@@ -10,8 +10,7 @@
         "test:once": "jest --runInBand --ci",
         "lint": "tsc --noEmit && eslint . --max-warnings=0",
         "clean": "rm -rf node_modules && yarn cache clean",
-        "generate-code": "yarn prisma generate",
-        "prisma:generate": "yarn prisma generate",
+        "generate": "yarn prisma generate",
         "prisma:reset": "npx prisma migrate reset --force",
         "build": "tsc --noEmit",
         "start": "npx serverless offline start --stage local --region us-east-1 --httpPort 3030 --useChildProcesses"
