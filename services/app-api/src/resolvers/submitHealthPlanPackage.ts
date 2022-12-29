@@ -1,4 +1,8 @@
-import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import {
+    ApolloError,
+    ForbiddenError,
+    UserInputError,
+} from 'apollo-server-lambda'
 import {
     UnlockedHealthPlanFormDataType,
     hasValidContract,
@@ -10,6 +14,7 @@ import {
     isLockedHealthPlanFormData,
     LockedHealthPlanFormDataType,
     removeRatesData,
+    hasValidRateCertAssurance,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     UpdateInfoType,
@@ -28,6 +33,8 @@ import {
 } from './attributeHelper'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { EmailParameterStore } from '../parameterStore'
+import { LDService } from '../launchDarkly/launchDarkly'
+import { FlagValueTypes } from 'app-web/src/common-code/featureFlags'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
@@ -61,17 +68,30 @@ export function isSubmissionError(err: unknown): err is SubmissionError {
 // This strategy (returning a different type from validation) is taken from the
 // "parse, don't validate" article: https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
 function submit(
-    draft: UnlockedHealthPlanFormDataType
+    draft: UnlockedHealthPlanFormDataType,
+    rateCertAssuranceFlag: FlagValueTypes
 ): LockedHealthPlanFormDataType | SubmissionError {
     const maybeStateSubmission: Record<string, unknown> = {
         ...draft,
         status: 'SUBMITTED',
         submittedAt: new Date(),
     }
-    if (isLockedHealthPlanFormData(maybeStateSubmission))
+
+    // Valid rate cert assurance questions always true if feature flag is off so to not block submissions. Otherwise
+    // hasValidRateCertAssurance will validate submission on rate cert assurance questions.
+    const validRateCertAssurance = rateCertAssuranceFlag
+        ? hasValidRateCertAssurance(
+              maybeStateSubmission as LockedHealthPlanFormDataType
+          )
+        : true
+
+    if (
+        isLockedHealthPlanFormData(maybeStateSubmission) &&
+        validRateCertAssurance
+    )
         return maybeStateSubmission
     else if (
-        // TO DO - add feature flagged check for rate assurance question answer to hasValidContract
+        !validRateCertAssurance ||
         !hasValidContract(maybeStateSubmission as LockedHealthPlanFormDataType)
     ) {
         return {
@@ -118,13 +138,26 @@ function submit(
 export function submitHealthPlanPackageResolver(
     store: Store,
     emailer: Emailer,
-    emailParameterStore: EmailParameterStore
+    emailParameterStore: EmailParameterStore,
+    launchDarkly: LDService
 ): MutationResolvers['submitHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
         const { submittedReason, pkgID } = input
         setResolverDetailsOnActiveSpan('submitHealthPlanPackage', user, span)
         span?.setAttribute('mcreview.package_id', pkgID)
+
+        const rateCertAssuranceFlag = await launchDarkly.getFeatureFlag(
+            user,
+            'rate-cert-assurance'
+        )
+
+        if (rateCertAssuranceFlag instanceof Error) {
+            const msg = `error retrieving feature flag rate-cert-assurance: ${rateCertAssuranceFlag.message}`
+            logError('submitHealthPlanPackage', msg)
+            setErrorAttributesOnActiveSpan(msg, span)
+            throw new ApolloError(msg, 'LD_FETCH_ERROR', { message: msg })
+        }
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
@@ -229,7 +262,7 @@ export function submitHealthPlanPackageResolver(
         }
 
         // attempt to parse into a StateSubmission
-        const submissionResult = submit(draftResult)
+        const submissionResult = submit(draftResult, rateCertAssuranceFlag)
 
         if (isSubmissionError(submissionResult)) {
             const errMessage = submissionResult.message
