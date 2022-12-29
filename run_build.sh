@@ -1,6 +1,5 @@
 #! /bin/bash
 echo stage name
-echo $(pwd)
 echo "$REACT_APP_STAGE_NAME"
 if [ "$REACT_APP_STAGE_NAME" == "prod" ] || [ "$REACT_APP_STAGE_NAME" == "val" ];
     then

@@ -63,8 +63,7 @@ jobs:
         run: lerna run generate
 
       - name: Compile proto migration files
-        working-directory: services/app-proto
-        run: yarn run build
+        run: lerna run build --scope=app-proto
 
       - uses: actions/download-artifact@v3
         with:
