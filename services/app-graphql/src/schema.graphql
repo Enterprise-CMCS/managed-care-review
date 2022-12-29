@@ -32,6 +32,7 @@ input CreateHealthPlanPackageInput {
     riskBasedContract: Boolean
     submissionType: SubmissionType!
     submissionDescription: String!
+    contractType: ContractType!
 }
 
 type CreateHealthPlanPackagePayload {
@@ -149,4 +150,9 @@ type HealthPlanRevisionEdge {
 enum SubmissionType {
     CONTRACT_ONLY
     CONTRACT_AND_RATES
+}
+
+enum ContractType {
+    BASE
+    AMENDMENT
 }

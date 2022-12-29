@@ -133,7 +133,7 @@ export const UploadedDocumentsTable = ({
                     }
                 })
             ).catch((err) => {
-                console.log(err)
+                console.info(err)
                 return []
             })
             setRefreshedDocs(newDocuments)
@@ -141,7 +141,6 @@ export const UploadedDocumentsTable = ({
 
         void refreshDocuments()
     }, [documents, getKey, getURL])
-
     // Empty State
     if (refreshedDocs.length === 0) {
         return (

@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import {
     UnlockedHealthPlanFormDataType,
     SubmissionType,
+    ContractType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { HealthPlanPackageType } from '../domain-models'
 import { toProtoBuffer } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
@@ -20,6 +21,7 @@ export type InsertHealthPlanPackageArgsType = {
     riskBasedContract?: boolean
     submissionType: SubmissionType
     submissionDescription: string
+    contractType: ContractType
 }
 
 // By using Prisma's "increment" syntax here, we ensure that we are atomically increasing
@@ -56,7 +58,7 @@ export async function insertHealthPlanPackage(
     )
 
     if (isStoreError(stateNumberResult)) {
-        console.log('Error: Getting New State Number', stateNumberResult)
+        console.info('Error: Getting New State Number', stateNumberResult)
         return stateNumberResult
     }
 
@@ -74,6 +76,7 @@ export async function insertHealthPlanPackage(
         programIDs: args.programIDs,
         submissionDescription: args.submissionDescription,
         stateCode: args.stateCode,
+        contractType: args.contractType,
         rateInfos: [],
         documents: [],
         contractDocuments: [],
@@ -110,7 +113,7 @@ export async function insertHealthPlanPackage(
 
         return convertToHealthPlanPackageType(pkg)
     } catch (e: unknown) {
-        console.log('ERROR: inserting into to the database: ', e)
+        console.info('ERROR: inserting into to the database: ', e)
 
         return convertPrismaErrorToStoreError(e)
     }

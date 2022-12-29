@@ -20,6 +20,7 @@ import {
     PoliteErrorMessage,
 } from '../../../components'
 import { SubmissionTypeRecord } from '../../../constants/healthPlanPackages'
+import { ContractType } from '../../../common-code/healthPlanFormDataType'
 import {
     HealthPlanPackage,
     SubmissionType as SubmissionTypeT,
@@ -28,7 +29,11 @@ import {
 } from '../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
-import { GenericApiErrorBanner, ProgramSelect } from '../../../components'
+import {
+    GenericApiErrorBanner,
+    ProgramSelect,
+    FieldPreserveScrollPosition,
+} from '../../../components'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { useStatePrograms } from '../../../hooks/useStatePrograms'
 import {
@@ -44,6 +49,7 @@ export interface SubmissionTypeFormValues {
     riskBasedContract: string
     submissionDescription: string
     submissionType: string
+    contractType: string
 }
 type SubmissionTypeProps = {
     formAlert?: React.ReactElement
@@ -136,6 +142,7 @@ export const SubmissionType = ({
             booleanAsYesNoFormValue(draftSubmission?.riskBasedContract) ?? '',
         submissionDescription: draftSubmission?.submissionDescription ?? '',
         submissionType: draftSubmission?.submissionType ?? '',
+        contractType: draftSubmission?.contractType ?? '',
     }
 
     const handleFormSubmit = async (
@@ -154,9 +161,21 @@ export const SubmissionType = ({
                         values.submissionType === 'CONTRACT_AND_RATES'
                     )
                 ) {
-                    console.log(
+                    console.info(
                         'unexpected error, attempting to submit a submissionType of ',
                         values.submissionType
+                    )
+                    return
+                }
+                if (
+                    !(
+                        values.contractType === 'BASE' ||
+                        values.contractType === 'AMENDMENT'
+                    )
+                ) {
+                    console.info(
+                        'unexpected error, attempting to submit a contractType of ',
+                        values.contractType
                     )
                     return
                 }
@@ -168,6 +187,7 @@ export const SubmissionType = ({
                         ? yesNoFormValueAsBoolean(values.riskBasedContract)
                         : undefined,
                     submissionDescription: values.submissionDescription,
+                    contractType: values.contractType,
                 }
 
                 const result = await createHealthPlanPackage({
@@ -185,15 +205,15 @@ export const SubmissionType = ({
             } catch (serverError) {
                 setShowFormAlert(true)
                 formikHelpers.setSubmitting(false) // unblock submit button to allow resubmit
-                console.log(
+                console.info(
                     'Log: creating new submission failed with server error',
                     serverError
                 )
             }
         } else {
             if (draftSubmission === undefined || !updateDraft) {
-                console.log(draftSubmission, updateDraft)
-                console.log(
+                console.info(draftSubmission, updateDraft)
+                console.info(
                     'ERROR, SubmissionType for does not have props needed to update a draft.'
                 )
                 return
@@ -207,6 +227,7 @@ export const SubmissionType = ({
                 ? yesNoFormValueAsBoolean(values.riskBasedContract)
                 : undefined
             draftSubmission.submissionDescription = values.submissionDescription
+            draftSubmission.contractType = values.contractType as ContractType
 
             try {
                 const updatedDraft = await updateDraft(draftSubmission)
@@ -346,6 +367,42 @@ export const SubmissionType = ({
                                             ]
                                         }
                                         value={'CONTRACT_AND_RATES'}
+                                    />
+                                </Fieldset>
+                            </FormGroup>
+                            <FormGroup
+                                error={showFieldErrors(errors.contractType)}
+                            >
+                                <FieldPreserveScrollPosition
+                                    fieldName={
+                                        'contractType' as keyof SubmissionTypeFormValues
+                                    }
+                                />
+                                <Fieldset
+                                    role="radiogroup"
+                                    aria-required
+                                    className={styles.radioGroup}
+                                    legend="Contract action type"
+                                    id="contractType"
+                                >
+                                    {showFieldErrors(errors.contractType) && (
+                                        <PoliteErrorMessage>
+                                            {errors.contractType}
+                                        </PoliteErrorMessage>
+                                    )}
+                                    <FieldRadio
+                                        id="baseContract"
+                                        name="contractType"
+                                        label="Base contract"
+                                        aria-required
+                                        value={'BASE'}
+                                    />
+                                    <FieldRadio
+                                        id="amendmentContract"
+                                        name="contractType"
+                                        label="Amendment to base contract"
+                                        aria-required
+                                        value={'AMENDMENT'}
                                     />
                                 </Fieldset>
                             </FormGroup>

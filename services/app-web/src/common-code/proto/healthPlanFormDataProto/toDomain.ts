@@ -92,7 +92,7 @@ const protoDateToDomain = (
         protoDate.month == null ||
         protoDate.day == null
     ) {
-        console.log('LOG: Incomplete Proto Date', protoDate)
+        console.info('LOG: Incomplete Proto Date', protoDate)
         return undefined
     }
 
@@ -504,7 +504,7 @@ const toDomain = (
         We do it for locked or unlocked submissions. */
             return updateRateCertificationNames(maybeLockedFormData)
         } else {
-            console.log(
+            console.info(
                 'ERROR: attempting to parse state submission proto failed.',
                 id
             )
@@ -515,7 +515,7 @@ const toDomain = (
     }
 
     // unknown or missing status means we've got a parse error.
-    console.log('ERROR: Unknown or missing status on this proto.', id, status)
+    console.info('ERROR: Unknown or missing status on this proto.', id, status)
     return new Error('Unknown or missing status on this proto. Cannot decode.')
 }
 

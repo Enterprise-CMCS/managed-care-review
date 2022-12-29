@@ -1,11 +1,23 @@
 import { aliasMutation } from '../utils/graphql-test-utils'
-Cypress.Commands.add('startNewContractOnlySubmission', () => {
+Cypress.Commands.add('startNewContractOnlySubmissionWithBaseContract', () => {
     // Must be on '/submissions/new'
     cy.findByTestId('dashboard-page').should('exist')
     cy.findByRole('link', { name: 'Start new submission' }).click()
     cy.findByRole('heading', { level: 1, name: /New submission/ })
 
-    cy.fillOutContractActionOnly()
+    cy.fillOutContractActionOnlyWithBaseContract()
+
+    cy.navigateFormByButtonClick('CONTINUE_FROM_START_NEW')
+    cy.findByRole('heading', { level: 2, name: /Contract details/ })
+})
+
+Cypress.Commands.add('startNewContractOnlySubmissionWithAmendment', () => {
+    // Must be on '/submissions/new'
+    cy.findByTestId('dashboard-page').should('exist')
+    cy.findByRole('link', { name: 'Start new submission' }).click()
+    cy.findByRole('heading', { level: 1, name: /New submission/ })
+
+    cy.fillOutContractActionOnlyWithAmendment()
 
     cy.navigateFormByButtonClick('CONTINUE_FROM_START_NEW')
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
@@ -23,10 +35,36 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
     cy.findByRole('heading', { level: 2, name: /Contract details/ })
 })
 
-Cypress.Commands.add('fillOutContractActionOnly', () => {
+Cypress.Commands.add('fillOutContractActionOnlyWithBaseContract', () => {
     // Must be on '/submissions/new'
     cy.wait(2000)
-    cy.findByRole('combobox', { name: 'Programs this contract action covers (required)' }).click({
+    cy.findByRole('combobox', {
+        name: 'Programs this contract action covers (required)',
+    }).click({
+        force: true,
+    })
+    cy.findByText('PMAP').click()
+    cy.findByText('Contract action only').click()
+    cy.findByText('Base contract').click()
+
+    //rate-cert-assurance
+    cy.getFeatureFlagStore(['rate-cert-assurance']).then(store => {
+        if (store['rate-cert-assurance']) {
+            cy.get('label[for="riskBasedContractNo"]').click()
+        }
+    })
+
+    cy.findByRole('textbox', { name: 'Submission description' }).type(
+        'description of contract only submission'
+    )
+})
+
+Cypress.Commands.add('fillOutContractActionOnlyWithAmendment', () => {
+    // Must be on '/submissions/new'
+    cy.wait(2000)
+    cy.findByRole('combobox', {
+        name: 'Programs this contract action covers (required)',
+    }).click({
         force: true,
     })
     cy.findByText('PMAP').click()
@@ -39,6 +77,7 @@ Cypress.Commands.add('fillOutContractActionOnly', () => {
         }
     })
 
+    cy.findByText('Amendment to base contract').click()
     cy.findByRole('textbox', { name: 'Submission description' }).type(
         'description of contract only submission'
     )
@@ -47,7 +86,9 @@ Cypress.Commands.add('fillOutContractActionOnly', () => {
 Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
     // Must be on '/submissions/new'
     cy.wait(2000)
-    cy.findByRole('combobox', { name: 'Programs this contract action covers (required)' }).click({
+    cy.findByRole('combobox', {
+        name: 'Programs this contract action covers (required)',
+    }).click({
         force: true,
     })
     cy.findByText('PMAP').click()
@@ -59,6 +100,8 @@ Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
             cy.get('label[for="riskBasedContractNo"]').click()
         }
     })
+
+    cy.findByText('Base contract').click()
     cy.findByRole('textbox', { name: 'Submission description' }).type(
         'description of contract and rates submission'
     )
@@ -66,7 +109,6 @@ Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
 
 Cypress.Commands.add('fillOutBaseContractDetails', () => {
     // Must be on '/submissions/:id/edit/contract-details'
-    cy.findByText('Base contract').click()
     cy.findByText('Fully executed').click()
     cy.wait(2000)
     cy.findByLabelText('Start date').type('04/01/2024')
@@ -84,7 +126,6 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
 
 Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     // Must be on '/submissions/:id/edit/contract-details'
-    cy.findByText('Amendment to base contract').click()
     cy.findByText('Unexecuted by some or all parties').click()
     cy.wait(2000)
     cy.findByLabelText('Start date').type('04/01/2024')
@@ -281,7 +322,9 @@ Cypress.Commands.add('fillOutStateContact', () => {
 Cypress.Commands.add('fillOutAdditionalActuaryContact', () => {
     // Must be on '/submissions/:id/edit/contacts'
     // Must be a contract and rates submission
-    cy.findByRole('button', { name: 'Add actuary contact'}).should('exist').click()
+    cy.findByRole('button', { name: 'Add actuary contact' })
+        .should('exist')
+        .click()
     cy.findByText('Additional actuary contact 1').should('exist')
     cy.findAllByLabelText('Name').eq(1).click().type('Actuary Contact Person')
     cy.findAllByLabelText('Title/Role').eq(1).type('Actuary Contact Title')

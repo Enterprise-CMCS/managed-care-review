@@ -50,6 +50,7 @@
         "json2csv": "^5.0.7",
         "launchdarkly-node-server-sdk": "6.4.3",
         "neverthrow": "^4.2.2",
+        "path-to-regexp": "^6.2.1",
         "protobufjs": "^6.11.2",
         "request": "^2.88.2",
         "uuid": "^9.0.0",

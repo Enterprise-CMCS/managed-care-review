@@ -65,6 +65,7 @@ export function createHealthPlanPackageResolver(
             submissionDescription: input.submissionDescription,
             submissionType:
                 input.submissionType as InsertHealthPlanPackageArgsType['submissionType'],
+            contractType: input.contractType,
         }
 
         const pkgResult = await store.insertHealthPlanPackage(insertArgs)

@@ -52,6 +52,7 @@ describe('ContractDetails', () => {
 
     it('allows setting a yes/no modified provision', async () => {
         const emptyDraft = mockDraft()
+        emptyDraft.contractType = 'AMENDMENT'
         const mockUpdateDraftFn = jest.fn()
         renderWithProviders(
             <ContractDetails
@@ -65,13 +66,6 @@ describe('ContractDetails', () => {
                 },
             }
         )
-
-        // click amendment
-        const amendmentRadio = screen.getByLabelText(
-            'Amendment to base contract'
-        )
-        amendmentRadio.click()
-        expect(scrollIntoViewMock).toHaveBeenCalled()
 
         // click "next"
         const continueButton = screen.getByRole('button', { name: 'Continue' })

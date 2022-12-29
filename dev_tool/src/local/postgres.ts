@@ -31,7 +31,7 @@ export async function runPostgresLocally(runner: LabeledProcessRunner) {
             // if {{.Status}} starts with "Up" then this container is running.
             if (line.split('\t')[1].startsWith('Up')) {
                 // the container is still running.
-                console.log(
+                console.info(
                     'ERROR: The `mc-postgres` container is still running. In order to run `./dev local postgres` you need to stop it: `docker stop mc-postgres'
                 )
                 process.exit(1)

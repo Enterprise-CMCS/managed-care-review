@@ -15,7 +15,7 @@ import {
 } from '../../testHelpers/apolloHelpers'
 import { UnlockSubmitModal } from './UnlockSubmitModal'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
-import { Location } from 'history'
+import { Location } from 'react-router-dom'
 
 describe('UnlockSubmitModal', () => {
     const mockSetIsSubmitting = jest.fn()

@@ -15,7 +15,7 @@ export async function insertUser(
     user: InsertUserArgsType
 ): Promise<User | StoreError> {
     try {
-        console.log('Trying to insert the user to postgres....')
+        console.info('Trying to insert the user to postgres....')
         const val = await client.user.create({
             data: {
                 id: user.userID,
@@ -26,7 +26,7 @@ export async function insertUser(
                 stateCode: user.stateCode ?? null,
             },
         })
-        console.log('insert user return: ' + val)
+        console.info('insert user return: ' + val)
         return val
     } catch (err) {
         return convertPrismaErrorToStoreError(err)

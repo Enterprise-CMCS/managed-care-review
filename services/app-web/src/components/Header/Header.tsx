@@ -33,7 +33,7 @@ export const Header = ({
         e: React.MouseEvent<HTMLButtonElement, MouseEvent>
     ) => {
         if (!logout) {
-            console.log('Something went wrong ', e)
+            console.info('Something went wrong ', e)
             return
         }
 

@@ -32,7 +32,7 @@ export async function findAllPackagesWrapper(
         })
         return result
     } catch (e: unknown) {
-        console.log('failed to findAll', e)
+        console.info('failed to findAll', e)
         return convertPrismaErrorToStoreError(e)
     }
 }
@@ -60,10 +60,10 @@ export async function findAllHealthPlanPackagesByState(
             submissionWithRevisions
         )
         if (isStoreError(currentRevisionOrError)) {
-            console.log(
+            console.info(
                 `ERROR submission ${submissionWithRevisions.id} does not have a current revision`
             )
-            console.log(
+            console.info(
                 `ERROR findAllSubmissionsWithRevisions for ${stateCode} has ${errors.length} error(s)`
             )
             return

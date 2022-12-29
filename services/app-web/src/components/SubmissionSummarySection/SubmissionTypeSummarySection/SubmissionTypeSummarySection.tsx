@@ -4,7 +4,10 @@ import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataT
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
 import { SectionHeader } from '../../../components/SectionHeader'
-import { SubmissionTypeRecord } from '../../../constants/healthPlanPackages'
+import {
+    SubmissionTypeRecord,
+    ContractTypeRecord,
+} from '../../../constants/healthPlanPackages'
 import { Program } from '../../../gen/gqlClient'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import { booleanAsYesNoUserValue } from '../../../components/Form/FieldYesNo/FieldYesNo'
@@ -80,8 +83,20 @@ export const SubmissionTypeSummarySection = ({
                         label="Submission type"
                         data={SubmissionTypeRecord[submission.submissionType]}
                     />
-
-                    {showRateCertAssurance && (
+                </DoubleColumnGrid>
+                <DoubleColumnGrid>
+                    <DataDetail
+                        id="contractType"
+                        label="Contract action type"
+                        data={
+                            submission.contractType
+                                ? ContractTypeRecord[submission.contractType]
+                                : ''
+                        }
+                    />
+                </DoubleColumnGrid>
+                {showRateCertAssurance && (
+                    <DoubleColumnGrid>
                         <DataDetail
                             id="riskBasedContract"
                             label="Is this a risk based contract"
@@ -90,8 +105,8 @@ export const SubmissionTypeSummarySection = ({
                                 submission.riskBasedContract
                             )}
                         />
-                    )}
-                </DoubleColumnGrid>
+                    </DoubleColumnGrid>
+                )}
 
                 <Grid row gap className={styles.reviewDataRow}>
                     <Grid col={12}>

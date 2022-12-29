@@ -17,7 +17,7 @@ export function CheckAuth(): React.ReactElement {
 
     async function handleClick(event: React.MouseEvent) {
         event.preventDefault()
-        console.log('checking auth')
+        console.info('checking auth')
 
         await checkAuth()
         if (data?.fetchCurrentUser) {

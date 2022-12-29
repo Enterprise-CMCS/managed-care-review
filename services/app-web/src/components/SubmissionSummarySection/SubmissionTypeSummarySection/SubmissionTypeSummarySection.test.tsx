@@ -93,6 +93,9 @@ describe('SubmissionTypeSummarySection', () => {
             screen.getByRole('definition', { name: 'Submission type' })
         ).toBeInTheDocument()
         expect(
+            screen.getByRole('definition', { name: 'Contract action type' })
+        ).toBeInTheDocument()
+        expect(
             screen.getByRole('definition', { name: 'Submission description' })
         ).toBeInTheDocument()
     })
