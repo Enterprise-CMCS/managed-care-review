@@ -29,9 +29,14 @@ import {
     newAWSEmailParameterStore,
     newLocalEmailParameterStore,
 } from '../parameterStore'
+import { LDService, ldService } from '../launchDarkly/launchDarkly'
+import { LDClient } from 'launchdarkly-node-server-sdk'
+import * as ld from 'launchdarkly-node-server-sdk'
 
 const requestSpanKey = 'REQUEST_SPAN'
 let tracer: Tracer
+
+let ldClient: LDClient
 
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
@@ -172,6 +177,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     const emailerMode = process.env.EMAILER_MODE
     const otelCollectorUrl = process.env.REACT_APP_OTEL_COLLECTOR_URL
     const parameterStoreMode = process.env.PARAMETER_STORE_MODE
+    const ldSDKKey = process.env.LD_SDK_KEY
 
     // START Assert configuration is valid
     if (emailerMode !== 'LOCAL' && emailerMode !== 'SES')
@@ -202,6 +208,11 @@ async function initializeGQLHandler(): Promise<Handler> {
                 parameterStoreMode
         )
     }
+    if (ldSDKKey === undefined || ldSDKKey === '') {
+        throw new Error(
+            'Configuration Error: LD_SDK_KEY is required to run app-api.'
+        )
+    }
     // END
 
     const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
@@ -218,7 +229,7 @@ async function initializeGQLHandler(): Promise<Handler> {
             ? newLocalEmailParameterStore()
             : newAWSEmailParameterStore()
 
-    //Configuring emails using emailParameterStore
+    // Configuring emails using emailParameterStore
     // Moving setting these emails down here. We needed to retrieve all emails from parameter store using our
     // emailParameterStore because serverless does not like array of strings as env variables.
     // For more context see this ticket https://qmacbis.atlassian.net/browse/MR-2539.
@@ -262,6 +273,18 @@ async function initializeGQLHandler(): Promise<Handler> {
             `Configuration Error: ${ratesReviewSharedEmails.message}`
         )
 
+    // Configure LaunchDarkly
+    ldClient = ld.init(ldSDKKey)
+    let launchDarkly: LDService
+
+    // Wait for initialization, throw an error and stop the api if we cannot connect to LaunchDarkly
+    try {
+        await ldClient.waitForInitialization()
+        launchDarkly = ldService(ldClient)
+    } catch (err) {
+        throw new Error(`LaunchDarkly Configuration Error: ${err.message}`)
+    }
+
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
     console.info('Running With Config: ', {
         authMode,
@@ -298,7 +321,12 @@ async function initializeGQLHandler(): Promise<Handler> {
               })
 
     // Resolvers are defined and tested in the resolvers package
-    const resolvers = configureResolvers(store, emailer, emailParameterStore)
+    const resolvers = configureResolvers(
+        store,
+        emailer,
+        emailParameterStore,
+        launchDarkly
+    )
 
     const userFetcher =
         authMode === 'LOCAL'
