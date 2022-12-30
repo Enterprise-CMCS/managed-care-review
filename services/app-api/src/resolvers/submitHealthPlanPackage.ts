@@ -162,7 +162,7 @@ export function submitHealthPlanPackageResolver(
         const currentRevision = planPackage.revisions[0]
 
         // Authorization
-        const stateFromCurrentUser: State['code'] = user.state_code
+        const stateFromCurrentUser: State['code'] = user.stateCode
         if (planPackage.stateCode !== stateFromCurrentUser) {
             logError(
                 'submitHealthPlanPackage',

@@ -12,7 +12,7 @@ import {
 
 describe('fetchHealthPlanPackage', () => {
     const testUserCMS: UserType = {
-        name: 'Zuko',
+        id: 'f7571910-ef02-427d-bae3-3e945e20e59d',
         role: 'CMS_USER',
         email: 'zuko@example.com',
         familyName: 'Zuko',
@@ -20,8 +20,8 @@ describe('fetchHealthPlanPackage', () => {
     }
 
     const testUserState: UserType = {
-        name: 'Aang',
-        state_code: 'FL',
+        id: '5ac0fe75-f932-4d76-984e-e99ffb31138d',
+        stateCode: 'FL',
         role: 'STATE_USER',
         email: 'aang@mn.gov',
         familyName: 'Aang',
@@ -263,8 +263,8 @@ describe('fetchHealthPlanPackage', () => {
         const otherUserServer = await constructTestPostgresServer({
             context: {
                 user: {
-                    name: 'Aang',
-                    state_code: 'VA',
+                    id: '4fed22c0-6d05-4bae-9e9a-b2345073ccf8',
+                    stateCode: 'VA',
                     role: 'STATE_USER',
                     email: 'aang@va.gov',
                     familyName: 'Aang',

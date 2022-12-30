@@ -26,7 +26,7 @@ import { UserType } from '../domain-models'
 
 describe('submitHealthPlanPackage', () => {
     const testUserCMS: UserType = {
-        name: 'Zuko',
+        id: '62e10c5c-ddff-4f4f-addf-829e85f8094a',
         role: 'CMS_USER',
         email: 'zuko@example.com',
         familyName: 'Zuko',

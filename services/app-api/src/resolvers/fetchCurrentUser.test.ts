@@ -21,8 +21,8 @@ describe('currentUser', () => {
     it('returns programs for MI', async () => {
         const customContext: Context = {
             user: {
-                name: 'james brown',
-                state_code: 'MI',
+                id: 'c90b409d-73d1-4383-87af-fc9878cc144a',
+                stateCode: 'MI',
                 role: 'STATE_USER',
                 email: 'james@example.com',
                 familyName: 'Brown',

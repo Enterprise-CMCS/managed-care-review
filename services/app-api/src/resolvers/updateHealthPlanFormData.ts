@@ -86,7 +86,7 @@ export function updateHealthPlanFormDataResolver(
         const planPackage: HealthPlanPackageType = result
 
         // Authorize the update
-        const stateFromCurrentUser = context.user.state_code
+        const stateFromCurrentUser = context.user.stateCode
         if (planPackage.stateCode !== stateFromCurrentUser) {
             logError(
                 'updateHealthPlanFormData',

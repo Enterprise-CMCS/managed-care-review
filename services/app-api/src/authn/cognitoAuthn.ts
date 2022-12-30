@@ -102,8 +102,6 @@ export function userTypeFromAttributes(attributes: {
         )
     }
 
-    const fullName = attributes.given_name + ' ' + attributes.family_name
-
     // Roles are a list of all the roles a user has in IDM.
     const roleAttribute = attributes['custom:role']
     const roles = roleAttribute.split(',')
@@ -122,8 +120,7 @@ export function userTypeFromAttributes(attributes: {
         return ok({
             role: 'STATE_USER',
             email: attributes.email,
-            name: fullName,
-            state_code: attributes['custom:state_code'],
+            stateCode: attributes['custom:state_code'],
             givenName: attributes.given_name,
             familyName: attributes.family_name,
         })
@@ -133,7 +130,6 @@ export function userTypeFromAttributes(attributes: {
         return ok({
             role: 'CMS_USER',
             email: attributes.email,
-            name: fullName,
             givenName: attributes.given_name,
             familyName: attributes.family_name,
         })
@@ -150,7 +146,6 @@ export function userTypeFromUser(user: User): Result<UserType, Error> {
             email: user.email,
             givenName: user.givenName,
             familyName: user.familyName,
-            name: user.givenName + ' ' + user.familyName,
         })
     }
 
@@ -160,7 +155,6 @@ export function userTypeFromUser(user: User): Result<UserType, Error> {
             email: user.email,
             givenName: user.givenName,
             familyName: user.familyName,
-            name: user.givenName + ' ' + user.familyName,
         })
     }
 
@@ -170,8 +164,7 @@ export function userTypeFromUser(user: User): Result<UserType, Error> {
             email: user.email,
             givenName: user.givenName,
             familyName: user.familyName,
-            name: user.givenName + ' ' + user.familyName,
-            state_code: user.stateCode ?? '',
+            stateCode: user.stateCode ?? '',
         })
     }
 
@@ -227,7 +220,7 @@ export async function userFromCognitoAuthProvider(
 
         // if it is a state user, insert the state they are from
         if (cognitoUser.role === 'STATE_USER') {
-            userToInsert.stateCode = cognitoUser.state_code
+            userToInsert.stateCode = cognitoUser.stateCode
         }
 
         try {

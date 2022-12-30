@@ -178,10 +178,10 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
 
 const mockUser = (): StateUserType => {
     return {
+        id: '6ec0e9a7-b5fc-44c2-a049-2d60ac37c6ee',
         role: 'STATE_USER',
         email: 'test+state+user@example.com',
-        name: 'Test State User',
-        state_code: 'MN',
+        stateCode: 'MN',
         familyName: 'State',
         givenName: 'User',
     }

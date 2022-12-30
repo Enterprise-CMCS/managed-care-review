@@ -3,13 +3,14 @@ import {
     isStoreError,
     StoreError,
 } from './storeError'
-import { PrismaClient, User } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
+import { UserType } from '../domain-models'
 
 export async function deleteUserAssignedState(
     client: PrismaClient,
     userID: string,
     stateCode: string
-): Promise<User | StoreError> {
+): Promise<UserType | StoreError> {
     try {
         const updateResult = client.user.update({
             where: {

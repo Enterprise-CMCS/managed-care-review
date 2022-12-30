@@ -45,7 +45,7 @@ export function indexHealthPlanPackagesResolver(
 
         if (isStateUser(user)) {
             const results = await store.findAllHealthPlanPackagesByState(
-                user.state_code
+                user.stateCode
             )
             return validateAndReturnHealthPlanPackages(results, span)
         } else if (isCMSUser(user)) {

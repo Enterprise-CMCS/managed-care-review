@@ -1,4 +1,9 @@
-export type { CMSUserType, StateUserType, UserType } from './UserType'
+export type {
+    CMSUserType,
+    StateUserType,
+    AdminUserType,
+    UserType,
+} from './UserType'
 export type { StateType } from './StateType'
 
 export type { ProgramType } from './ProgramType'

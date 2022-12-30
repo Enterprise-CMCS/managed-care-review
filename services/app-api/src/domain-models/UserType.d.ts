@@ -1,27 +1,36 @@
 type UserType = StateUserType | CMSUserType | AdminUserType
 
 type StateUserType = {
-    role: Role.STATE_USER
+    id?: string
+    role: 'STATE_USER'
     email: string
-    state_code: string
+    stateCode: string
     givenName: string
     familyName: string
 }
 
 type CMSUserType = {
-    role: Role.CMS_USER
+    id?: string
+    role: 'CMS_USER'
     email: string
     givenName: string
     familyName: string
 }
 
 type AdminUserType = {
-    role: Role.ADMIN_USER
+    id?: string
+    role: 'ADMIN_USER'
     email: string
     givenName: string
     familyName: string
 }
 
-type Role = 'STATE_USER' | 'CMS_USER' | 'ADMIN_USER'
+const Role: {
+    CMS_USER: 'CMS_USER'
+    STATE_USER: 'STATE_USER'
+    ADMIN_USER: 'ADMIN_USER'
+}
+
+type Role = typeof Role[keyof typeof Role]
 
 export type { CMSUserType, StateUserType, AdminUserType, UserType }

@@ -54,8 +54,8 @@ function getProgramsFromState(stateCode: StateCodeType): ProgramType[] {
 const defaultContext = (): Context => {
     return {
         user: {
-            name: 'james brown',
-            state_code: 'FL',
+            id: '1551628f-516a-467a-aaa4-49b789d20d9c',
+            stateCode: 'FL',
             role: 'STATE_USER',
             email: 'james@example.com',
             familyName: 'Brown',

@@ -34,7 +34,7 @@ export function createHealthPlanPackageResolver(
             throw new ForbiddenError('user not authorized to create state data')
         }
 
-        const stateFromCurrentUser: State['code'] = user.state_code
+        const stateFromCurrentUser: State['code'] = user.stateCode
 
         const programs = store.findPrograms(
             stateFromCurrentUser,

@@ -43,7 +43,7 @@ export function fetchHealthPlanPackageResolver(
 
         // Authorization CMS users can view, state users can only view if the state matches
         if (isStateUser(context.user)) {
-            const stateFromCurrentUser: State['code'] = context.user.state_code
+            const stateFromCurrentUser: State['code'] = context.user.stateCode
             if (pkg.stateCode !== stateFromCurrentUser) {
                 logError(
                     'fetchHealthPlanPackage',

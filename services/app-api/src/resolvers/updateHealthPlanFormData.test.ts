@@ -24,7 +24,7 @@ import { UserType } from '../domain-models'
 
 describe('updateHealthPlanFormData', () => {
     const testUserCMS: UserType = {
-        name: 'Zuko',
+        id: 'd60e82de-13d7-459b-825e-61ce6ca2eb36',
         role: 'CMS_USER',
         email: 'zuko@example.com',
         familyName: 'Zuko',
@@ -120,8 +120,8 @@ describe('updateHealthPlanFormData', () => {
         const otherUserServer = await constructTestPostgresServer({
             context: {
                 user: {
-                    name: 'Aang',
-                    state_code: 'VA',
+                    id: '918b9cc4-31a3-4100-b69f-3c4736867ce4',
+                    stateCode: 'VA',
                     role: 'STATE_USER',
                     email: 'aang@va.gov',
                     familyName: 'Aang',

@@ -65,7 +65,7 @@ describe('indexHealthPlanPackages', () => {
             const cmsServer = await constructTestPostgresServer({
                 context: {
                     user: {
-                        name: 'Zuko',
+                        id: '841c22b2-fa13-4f42-a3d0-9fb8fb671ed7',
                         role: 'CMS_USER',
                         email: 'zuko@example.com',
                         familyName: 'Zuko',
@@ -160,8 +160,8 @@ describe('indexHealthPlanPackages', () => {
             const otherUserServer = await constructTestPostgresServer({
                 context: {
                     user: {
-                        name: 'Aang',
-                        state_code: 'FL',
+                        id: 'b9c58d1c-806c-4862-a832-9779b8a511c2',
+                        stateCode: 'FL',
                         role: 'STATE_USER',
                         email: 'aang@mn.gov',
                         givenName: 'Aang',
@@ -197,8 +197,8 @@ describe('indexHealthPlanPackages', () => {
             const otherUserServer = await constructTestPostgresServer({
                 context: {
                     user: {
-                        name: 'Aang',
-                        state_code: 'VA',
+                        id: 'b9029ffe-f6f0-47cc-baab-b37774ef02b1',
+                        stateCode: 'VA',
                         role: 'STATE_USER',
                         email: 'aang@mn.gov',
                         familyName: 'Aang',
@@ -228,7 +228,7 @@ describe('indexHealthPlanPackages', () => {
             const cmsServer = await constructTestPostgresServer({
                 context: {
                     user: {
-                        name: 'Zuko',
+                        id: '4f3a5d98-0e6e-4c15-9738-d6ea0cfd10b7',
                         role: 'CMS_USER',
                         email: 'zuko@example.com',
                         givenName: 'Zuko',
@@ -263,7 +263,7 @@ describe('indexHealthPlanPackages', () => {
             const cmsServer = await constructTestPostgresServer({
                 context: {
                     user: {
-                        name: 'Zuko',
+                        id: '1700cd2e-6860-4e6f-a061-b3ca8f5aeeb2',
                         role: 'CMS_USER',
                         email: 'zuko@example.com',
                         givenName: 'Prince',
@@ -337,7 +337,7 @@ describe('indexHealthPlanPackages', () => {
             const cmsServer = await constructTestPostgresServer({
                 context: {
                     user: {
-                        name: 'Zuko',
+                        id: 'bfe2e6d3-15ff-4b5a-8782-a199d027967a',
                         role: 'CMS_USER',
                         email: 'zuko@example.com',
                         familyName: 'Zuko',
@@ -348,8 +348,8 @@ describe('indexHealthPlanPackages', () => {
             const otherStateServer = await constructTestPostgresServer({
                 context: {
                     user: {
-                        name: 'Aang',
-                        state_code: 'VA',
+                        id: 'c5de2733-edea-462a-a9b1-41b97a636986',
+                        stateCode: 'VA',
                         role: 'STATE_USER',
                         email: 'aang@mn.gov',
                         familyName: 'AANG',

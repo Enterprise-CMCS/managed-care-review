@@ -30,7 +30,7 @@ import { UserType } from '../domain-models'
 
 describe('unlockHealthPlanPackage', () => {
     const testUser: UserType = {
-        name: 'Zuko',
+        id: '9b146a8e-796f-4305-a7d9-dcbef88607f8',
         role: 'CMS_USER',
         email: 'zuko@example.com',
         familyName: 'Zuko',
