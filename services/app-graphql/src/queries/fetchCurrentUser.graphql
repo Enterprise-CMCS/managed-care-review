@@ -4,12 +4,10 @@ query fetchCurrentUser {
         ... on CMSUser {
             email
             role
-            name
         }
         ... on StateUser {
             email
             role
-            name
             state {
                 code
                 name

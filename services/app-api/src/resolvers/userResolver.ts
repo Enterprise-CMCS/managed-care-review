@@ -3,7 +3,7 @@ import statePrograms from '../../../app-web/src/common-code/data/statePrograms.j
 
 export const stateUserResolver: Resolvers['StateUser'] = {
     state(parent) {
-        const userState = parent.state_code
+        const userState = parent.stateCode
         const state = statePrograms.states.find((st) => st.code === userState)
 
         if (state === undefined) {
