@@ -92,7 +92,7 @@ brew install yarn
 
 ## Local Dev
 
-Run all the services locally with the command `./dev local`. All of the commands inside of `./dev local` use Lerna to run the tasks.
+Run all the services locally with the command `./dev local`. All of the commands inside of `./dev local` use [Lerna](#lerna-usage) to run the tasks.
 
 See the above Requirements section if the command asks for any prerequisites you don't have installed.
 
