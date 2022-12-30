@@ -18,6 +18,7 @@ import { convertToHealthPlanPackageType } from './healthPlanPackageHelpers'
 export type InsertHealthPlanPackageArgsType = {
     stateCode: string
     programIDs: string[]
+    riskBasedContract?: boolean
     submissionType: SubmissionType
     submissionDescription: string
     contractType: ContractType
@@ -71,6 +72,7 @@ export async function insertHealthPlanPackage(
         stateNumber,
         status: 'DRAFT',
         submissionType: args.submissionType,
+        riskBasedContract: args.riskBasedContract,
         programIDs: args.programIDs,
         submissionDescription: args.submissionDescription,
         stateCode: args.stateCode,

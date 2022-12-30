@@ -10,7 +10,10 @@ import {
 } from '../../../constants/healthPlanPackages'
 import { Program } from '../../../gen/gqlClient'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
+import { booleanAsYesNoUserValue } from '../../../components/Form/FieldYesNo/FieldYesNo'
 import styles from '../SubmissionSummarySection.module.scss'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../../common-code/featureFlags'
 
 export type SubmissionTypeSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -34,6 +37,13 @@ export const SubmissionTypeSummarySection = ({
         .filter((p) => submission.programIDs.includes(p.id))
         .map((p) => p.name)
     const isSubmitted = submission.status === 'SUBMITTED'
+
+    // Launch Darkly
+    const ldClient = useLDClient()
+    const showRateCertAssurance = ldClient?.variation(
+        featureFlags.RATE_CERT_ASSURANCE.flag,
+        featureFlags.RATE_CERT_ASSURANCE.defaultValue
+    )
 
     return (
         <section id="submissionTypeSection" className={styles.summarySection}>
@@ -73,8 +83,6 @@ export const SubmissionTypeSummarySection = ({
                         label="Submission type"
                         data={SubmissionTypeRecord[submission.submissionType]}
                     />
-                </DoubleColumnGrid>
-                <DoubleColumnGrid>
                     <DataDetail
                         id="contractType"
                         label="Contract action type"
@@ -84,7 +92,18 @@ export const SubmissionTypeSummarySection = ({
                                 : ''
                         }
                     />
+                    {showRateCertAssurance && (
+                        <DataDetail
+                            id="riskBasedContract"
+                            label="Is this a risk based contract"
+                            explainMissingData={!isSubmitted}
+                            data={booleanAsYesNoUserValue(
+                                submission.riskBasedContract
+                            )}
+                        />
+                    )}
                 </DoubleColumnGrid>
+
                 <Grid row gap className={styles.reviewDataRow}>
                     <Grid col={12}>
                         <DataDetail

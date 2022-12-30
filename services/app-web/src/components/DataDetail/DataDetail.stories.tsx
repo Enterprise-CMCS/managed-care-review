@@ -36,3 +36,14 @@ export const WithAddress = (): React.ReactElement => (
         />
     </dl>
 )
+
+export const WithMissingField = (): React.ReactElement => (
+    <dl>
+        <DataDetail
+            id="crystal-ball"
+            label="The secret to the future"
+            data={undefined}
+            explainMissingData
+        />
+    </dl>
+)

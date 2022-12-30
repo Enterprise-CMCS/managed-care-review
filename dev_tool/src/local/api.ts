@@ -4,11 +4,7 @@ import { compileGraphQLTypesWatchOnce } from './graphql.js'
 import { installPrismaDeps } from './postgres.js'
 
 export async function installAPIDeps(runner: LabeledProcessRunner) {
-    await runner.runCommandAndOutput(
-        'api deps',
-        ['yarn', 'install'],
-        'services/app-api'
-    )
+    await runner.runCommandAndOutput('api deps', ['yarn', 'install'], '')
 
     // prisma requires that prisma generate is run after any yarn install
     return installPrismaDeps(runner)
@@ -22,19 +18,7 @@ export async function runAPILocally(runner: LabeledProcessRunner) {
 
     runner.runCommandAndOutput(
         'api',
-        [
-            'npx',
-            'serverless',
-            'offline',
-            'start',
-            '--stage',
-            'local',
-            '--region',
-            'us-east-1',
-            '--httpPort',
-            '3030',
-            '--useChildProcesses',
-        ],
-        'services/app-api'
+        ['lerna', 'run', 'start', '--scope=app-api'],
+        ''
     )
 }

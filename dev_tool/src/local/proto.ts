@@ -13,16 +13,12 @@ export async function compileProtoWatch(runner: LabeledProcessRunner) {
         '`protolint` is used on pre-commit to check your .proto files. Please refer to the README for installation instructions.'
     )
 
-    await runner.runCommandAndOutput(
-        'proto deps',
-        ['yarn', 'install'],
-        'services/app-proto'
-    )
+    await runner.runCommandAndOutput('proto deps', ['yarn', 'install'], '')
 
     runner.runCommandAndOutput(
         'protogen',
-        ['yarn', 'protogen:watch'],
-        'services/app-proto'
+        ['lerna', 'run', 'generate:watch', '--scope=app-proto'],
+        ''
     )
 }
 
@@ -30,12 +26,12 @@ export async function compileProto(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput(
         'proto deps',
         ['yarn', 'install', '--prefer-offline'],
-        'services/app-proto'
+        ''
     )
 
     return runner.runCommandAndOutput(
         'protogen',
-        ['yarn', 'protogen'],
-        'services/app-proto'
+        ['lerna', 'run', 'generate', '--scope=app-proto'],
+        ''
     )
 }

@@ -82,6 +82,7 @@ describe('submission type', () => {
     })
 
     it('can save submission edits using Save as draft button', () => {
+        cy.interceptFeatureFlags({ 'rate-cert-assurance': true })
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmissionWithBaseContract()
 
@@ -117,6 +118,11 @@ describe('submission type', () => {
                 name: 'Programs this contract action covers (required)',
             }).click()
             cy.findByText('SNBC').click({ force: true })
+
+            //rate-cert-assurance
+            cy.get('label[for="riskBasedContractYes"]').click()
+
+            cy.findByRole('textbox', { name: 'Submission description' })
             cy.findByText('Contract action and rate certification').click()
             cy.findByRole('textbox', { name: 'Submission description' }).clear()
             cy.findByRole('textbox', { name: 'Submission description' }).type(
@@ -136,6 +142,13 @@ describe('submission type', () => {
             //Check to make sure edited stuff was saved
             cy.get('[aria-label="Remove PMAP"]').should('exist')
             cy.get('[aria-label="Remove SNBC"]').should('exist')
+             cy.findByLabelText('Contract action and rate certification').should(
+                'be.checked'
+            )
+
+            //rate-cert-assurance
+            cy.findByLabelText('Yes').should('be.checked')
+
             cy.findByRole('textbox', { name: 'Submission description' }).should(
                 'have.value',
                 'description of contract only submission, now with a new edited flavor'

@@ -27,38 +27,20 @@ import {
 async function runAllClean() {
     const runner = new LabeledProcessRunner()
     runner.runCommandAndOutput(
-        'web clean',
-        ['yarn', 'clean'],
-        'services/app-web'
-    )
-    runner.runCommandAndOutput(
-        'api clean',
-        ['yarn', 'clean'],
-        'services/app-api'
+        'clean',
+        ['lerna', 'run', 'clean', '--scope=app-api', '--scope=app-web'],
+        ''
     )
 }
 
 async function runAllLint() {
     const runner = new LabeledProcessRunner()
-    await runner.runCommandAndOutput(
-        'web lint',
-        ['yarn', 'lint'],
-        'services/app-web'
-    )
-    await runner.runCommandAndOutput(
-        'api lint',
-        ['yarn', 'lint'],
-        'services/app-api'
-    )
+    await runner.runCommandAndOutput('lint', ['lerna', 'run', 'lint'], '')
 }
 
 async function runAllFormat() {
     const runner = new LabeledProcessRunner()
-    await runner.runCommandAndOutput(
-        'format',
-        ['prettier', '.', '-w', '-u', '--ignore-path', '.gitignore'],
-        '.'
-    )
+    await runner.runCommandAndOutput('format', ['lerna', 'run', 'prettier'], '')
 }
 
 async function runAllGenerate() {

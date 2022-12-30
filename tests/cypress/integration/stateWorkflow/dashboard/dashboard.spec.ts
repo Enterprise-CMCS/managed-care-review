@@ -22,6 +22,7 @@ describe('dashboard', () => {
     })
 
     it('can see submission summary', () => {
+        cy.interceptFeatureFlags({'rate-cert-assurance': true})
         cy.logInAsStateUser()
 
         // add a draft submission
