@@ -57,7 +57,6 @@ describe('cognitoAuthn', () => {
                     expectedResult: ok({
                         role: 'STATE_USER',
                         email: 'gp@example.com',
-                        name: 'Generic Person',
                         stateCode: 'VA',
                         givenName: 'Generic',
                         familyName: 'Person',
@@ -73,7 +72,6 @@ describe('cognitoAuthn', () => {
                     expectedResult: ok({
                         role: 'CMS_USER',
                         email: 'gp@example.com',
-                        name: 'Generic Person',
                         familyName: 'Person',
                         givenName: 'Generic',
                     }),
@@ -90,7 +88,6 @@ describe('cognitoAuthn', () => {
                     expectedResult: ok({
                         role: 'STATE_USER',
                         email: 'gp@example.com',
-                        name: 'Generic Person',
                         stateCode: 'FL',
                         givenName: 'Generic',
                         familyName: 'Person',
@@ -107,7 +104,6 @@ describe('cognitoAuthn', () => {
                     expectedResult: ok({
                         role: 'STATE_USER',
                         email: 'gp@example.com',
-                        name: 'Generic Person',
                         stateCode: 'FL',
                         givenName: 'Generic',
                         familyName: 'Person',
