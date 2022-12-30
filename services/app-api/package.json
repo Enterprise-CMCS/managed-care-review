@@ -20,7 +20,7 @@
         ]
     },
     "dependencies": {
-        "@apollo/gateway": "^2.0.1",
+        "@apollo/gateway": "^2.2.2",
         "@aws-sdk/client-amplify": "^3.226.0",
         "@aws-sdk/client-cognito-identity-provider": "^3.226.0",
         "@aws-sdk/client-lambda": "^3.226.0",
