@@ -34,15 +34,7 @@ function testLDService(
     }
 
     return {
-        getFeatureFlag: async (user, flag) => {
-            if (
-                mockFeatureFlags &&
-                'test-error-fetching-flag' in mockFeatureFlags
-            ) {
-                return new Error('flag value is undefined')
-            }
-            return featureFlags[flag]
-        },
+        getFeatureFlag: async (user, flag) => featureFlags[flag],
     }
 }
 

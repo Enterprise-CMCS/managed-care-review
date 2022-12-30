@@ -729,45 +729,6 @@ describe('submitHealthPlanPackage with feature flags', () => {
         )
     }, 20000)
 
-    it('errors when launch darkly fails to fetch flag value', async () => {
-        const mockLDService = testLDService({
-            'test-error-fetching-flag': true,
-        })
-        console.info('TIMEOUT DEBUG: Start Test')
-        const server = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
-        console.info('TIMEOUT DEBUG: Got Postgres Server')
-
-        // setup
-        const initialPkg = await createAndUpdateTestHealthPlanPackage(server, {
-            riskBasedContract: undefined,
-        })
-        console.info('TIMEOUT DEBUG: Created HPP')
-        const draft = latestFormData(initialPkg)
-        const draftID = draft.id
-
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-        console.info('TIMEOUT DEBUG: Waited')
-
-        // submit
-        const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
-            variables: {
-                input: {
-                    pkgID: draftID,
-                },
-            },
-        })
-        console.info('TIMEOUT DEBUG: Submitted')
-
-        console.info(submitResult.errors)
-        expect(submitResult.errors).toBeDefined()
-        expect(submitResult.errors?.[0].extensions?.message).toBe(
-            'error retrieving feature flag rate-cert-assurance: flag value is undefined'
-        )
-    }, 20000)
-
     it('does not error when risk based question is undefined and rate-cert-assurance feature flag is off', async () => {
         const mockLDService = testLDService({ 'rate-cert-assurance': false })
         console.info('TIMEOUT DEBUG: Start Test')

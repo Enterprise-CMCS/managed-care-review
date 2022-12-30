@@ -1,8 +1,4 @@
-import {
-    ApolloError,
-    ForbiddenError,
-    UserInputError,
-} from 'apollo-server-lambda'
+import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
     UnlockedHealthPlanFormDataType,
     hasValidContract,
@@ -151,13 +147,6 @@ export function submitHealthPlanPackageResolver(
             user,
             'rate-cert-assurance'
         )
-
-        if (rateCertAssuranceFlag instanceof Error) {
-            const msg = `error retrieving feature flag rate-cert-assurance: ${rateCertAssuranceFlag.message}`
-            logError('submitHealthPlanPackage', msg)
-            setErrorAttributesOnActiveSpan(msg, span)
-            throw new ApolloError(msg, 'LD_FETCH_ERROR', { message: msg })
-        }
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
