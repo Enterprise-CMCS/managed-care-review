@@ -34,21 +34,17 @@ describe('submitHealthPlanPackage', () => {
         givenName: 'Prince',
     }
     it('returns a StateSubmission if complete', async () => {
-        console.info('TIMEOUT DEBUG: Start Test')
         const server = await constructTestPostgresServer()
-        console.info('TIMEOUT DEBUG: Got Postgres Server')
 
         // setup
         const initialPkg = await createAndUpdateTestHealthPlanPackage(
             server,
             {}
         )
-        console.info('TIMEOUT DEBUG: Created HPP')
         const draft = latestFormData(initialPkg)
         const draftID = draft.id
 
         await new Promise((resolve) => setTimeout(resolve, 2000))
-        console.info('TIMEOUT DEBUG: Waited')
 
         // submit
         const submitResult = await server.executeOperation({
@@ -59,7 +55,6 @@ describe('submitHealthPlanPackage', () => {
                 },
             },
         })
-        console.info('TIMEOUT DEBUG: Submitted')
 
         expect(submitResult.errors).toBeUndefined()
         const createdID = submitResult?.data?.submitHealthPlanPackage.pkg.id
@@ -107,8 +102,6 @@ describe('submitHealthPlanPackage', () => {
         expect(
             resultUpdated.getTime() - createdUpdated.getTime()
         ).toBeGreaterThan(0)
-
-        console.info('TIMEOUT DEBUG: Ran all expects')
     }, 20000)
 
     it('returns an error if there are no contract documents attached', async () => {
@@ -695,22 +688,18 @@ describe('submitHealthPlanPackage', () => {
 describe('submitHealthPlanPackage with feature flags', () => {
     it('errors when risk based question is undefined and rate-cert-assurance feature flag is on', async () => {
         const mockLDService = testLDService({ 'rate-cert-assurance': true })
-        console.info('TIMEOUT DEBUG: Start Test')
         const server = await constructTestPostgresServer({
             ldService: mockLDService,
         })
-        console.info('TIMEOUT DEBUG: Got Postgres Server')
 
         // setup
         const initialPkg = await createAndUpdateTestHealthPlanPackage(server, {
             riskBasedContract: undefined,
         })
-        console.info('TIMEOUT DEBUG: Created HPP')
         const draft = latestFormData(initialPkg)
         const draftID = draft.id
 
         await new Promise((resolve) => setTimeout(resolve, 2000))
-        console.info('TIMEOUT DEBUG: Waited')
 
         // submit
         const submitResult = await server.executeOperation({
@@ -721,7 +710,6 @@ describe('submitHealthPlanPackage with feature flags', () => {
                 },
             },
         })
-        console.info('TIMEOUT DEBUG: Submitted')
 
         expect(submitResult.errors).toBeDefined()
         expect(submitResult.errors?.[0].extensions?.message).toBe(
@@ -731,22 +719,18 @@ describe('submitHealthPlanPackage with feature flags', () => {
 
     it('does not error when risk based question is undefined and rate-cert-assurance feature flag is off', async () => {
         const mockLDService = testLDService({ 'rate-cert-assurance': false })
-        console.info('TIMEOUT DEBUG: Start Test')
         const server = await constructTestPostgresServer({
             ldService: mockLDService,
         })
-        console.info('TIMEOUT DEBUG: Got Postgres Server')
 
         // setup
         const initialPkg = await createAndUpdateTestHealthPlanPackage(server, {
             riskBasedContract: undefined,
         })
-        console.info('TIMEOUT DEBUG: Created HPP')
         const draft = latestFormData(initialPkg)
         const draftID = draft.id
 
         await new Promise((resolve) => setTimeout(resolve, 2000))
-        console.info('TIMEOUT DEBUG: Waited')
 
         // submit
         const submitResult = await server.executeOperation({
@@ -757,7 +741,6 @@ describe('submitHealthPlanPackage with feature flags', () => {
                 },
             },
         })
-        console.info('TIMEOUT DEBUG: Submitted')
 
         expect(submitResult.errors).toBeUndefined()
         const createdID = submitResult?.data?.submitHealthPlanPackage.pkg.id
@@ -805,7 +788,5 @@ describe('submitHealthPlanPackage with feature flags', () => {
         expect(
             resultUpdated.getTime() - createdUpdated.getTime()
         ).toBeGreaterThan(0)
-
-        console.info('TIMEOUT DEBUG: Ran all expects')
     }, 20000)
 })
