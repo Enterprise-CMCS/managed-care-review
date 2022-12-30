@@ -83,8 +83,6 @@ export const SubmissionTypeSummarySection = ({
                         label="Submission type"
                         data={SubmissionTypeRecord[submission.submissionType]}
                     />
-                </DoubleColumnGrid>
-                <DoubleColumnGrid>
                     <DataDetail
                         id="contractType"
                         label="Contract action type"
@@ -94,9 +92,7 @@ export const SubmissionTypeSummarySection = ({
                                 : ''
                         }
                     />
-                </DoubleColumnGrid>
-                {showRateCertAssurance && (
-                    <DoubleColumnGrid>
+                    {showRateCertAssurance && (
                         <DataDetail
                             id="riskBasedContract"
                             label="Is this a risk based contract"
@@ -105,8 +101,8 @@ export const SubmissionTypeSummarySection = ({
                                 submission.riskBasedContract
                             )}
                         />
-                    </DoubleColumnGrid>
-                )}
+                    )}
+                </DoubleColumnGrid>
 
                 <Grid row gap className={styles.reviewDataRow}>
                     <Grid col={12}>
