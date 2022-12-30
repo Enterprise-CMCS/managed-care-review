@@ -1,15 +1,29 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import userEvent from '@testing-library/user-event'
-import { screen, waitFor } from '@testing-library/react'
+import {
+    screen,
+    waitFor,
+    within,
+    waitForElementToBeRemoved,
+} from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import { fetchCurrentUserMock } from '../../../testHelpers/apolloHelpers'
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import {
+    ldUseClientSpy,
+    renderWithProviders,
+} from '../../../testHelpers/jestHelpers'
 import { SubmissionType, SubmissionTypeFormValues } from './'
 import { Formik } from 'formik'
 import { contractOnly } from '../../../common-code/healthPlanFormDataMocks'
 
 describe('SubmissionType', () => {
+    afterEach(() => {
+        jest.clearAllMocks()
+    })
+
     const SubmissionTypeInitialValues: SubmissionTypeFormValues = {
         programIDs: ['ccc-plus'],
+        riskBasedContract: '',
         submissionDescription: '',
         submissionType: '',
         contractType: '',
@@ -27,33 +41,6 @@ describe('SubmissionType', () => {
     })
 
     it('displays submission type form when expected', async () => {
-        renderWithProviders(<SubmissionType updateDraft={updateDraftMock} />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
-
-        expect(
-            await screen.getByRole('form', { name: 'Submission Type Form' })
-        ).toBeInTheDocument()
-    })
-
-    it('displays new submission form when expected', async () => {
-        renderWithProviders(<SubmissionType updateDraft={updateDraftMock} />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-            routerProvider: {
-                route: '/submissions/new',
-            },
-        })
-
-        expect(
-            await screen.getByRole('form', { name: 'New Submission Form' })
-        ).toBeInTheDocument()
-    })
-
-    it('displays with draft submission when expected', async () => {
         renderWithProviders(
             <SubmissionType
                 updateDraft={updateDraftMock}
@@ -69,38 +56,25 @@ describe('SubmissionType', () => {
         expect(
             await screen.getByRole('form', { name: 'Submission Type Form' })
         ).toBeInTheDocument()
-    })
-
-    it('displays a cancel link', async () => {
-        renderWithProviders(<SubmissionType updateDraft={updateDraftMock} />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
-
         expect(
             await screen.getByRole('button', {
                 name: 'Save as draft',
             })
         ).toBeDefined()
-    })
-
-    it('displays a cancel link when editing a submission', async () => {
-        renderWithProviders(<SubmissionType />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
-
         expect(
             await screen.getByRole('button', {
                 name: 'Cancel',
             })
         ).toBeDefined()
+        expect(
+            await screen.getByRole('button', {
+                name: 'Continue',
+            })
+        ).toBeDefined()
     })
 
-    it('displays a cancel link on new submission', async () => {
-        renderWithProviders(<SubmissionType />, {
+    it('displays new submission form when expected', async () => {
+        renderWithProviders(<SubmissionType updateDraft={updateDraftMock} />, {
             apolloProvider: {
                 mocks: [fetchCurrentUserMock({ statusCode: 200 })],
             },
@@ -110,19 +84,19 @@ describe('SubmissionType', () => {
         })
 
         expect(
+            await screen.getByRole('form', { name: 'New Submission Form' })
+        ).toBeInTheDocument()
+        expect(
+            await screen.queryByRole('button', {
+                name: 'Save as draft',
+            })
+        ).toBeNull()
+
+        expect(
             await screen.getByRole('button', {
                 name: 'Cancel',
             })
         ).toBeDefined()
-    })
-
-    it('displays a continue button', async () => {
-        renderWithProviders(<SubmissionType updateDraft={updateDraftMock} />, {
-            apolloProvider: {
-                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-            },
-        })
-
         expect(
             await screen.getByRole('button', {
                 name: 'Continue',
@@ -255,6 +229,53 @@ describe('SubmissionType', () => {
                 name: 'Amendment to base contract',
             })
         ).toBeInTheDocument()
+    })
+
+    it('displays risk-based contract radio buttons and validation message', async () => {
+        ldUseClientSpy({
+            'rate-cert-assurance': true,
+        })
+        renderWithProviders(
+            <Formik
+                initialValues={SubmissionTypeInitialValues}
+                onSubmit={jest.fn()}
+            >
+                <SubmissionType updateDraft={updateDraftMock} />
+            </Formik>,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        // setup
+        const riskBasedContract = screen.getByText(
+            /Is this a risk-based contract/
+        )
+        const riskBasedContractParent = riskBasedContract.parentElement
+        expect(riskBasedContract).toBeInTheDocument()
+        expect(riskBasedContractParent).toBeDefined()
+
+        // check that fields are on page
+        expect(
+            within(riskBasedContractParent!).getByLabelText('Yes')
+        ).toBeInTheDocument()
+        expect(
+            within(riskBasedContractParent!).getByLabelText('No')
+        ).toBeInTheDocument()
+
+        // check that validations work
+        await userEvent.click(screen.getByRole('button', { name: 'Continue' }))
+        await screen.findByTestId('error-summary')
+        await screen.findAllByText('You must select yes or no')
+        await userEvent.click(
+            within(riskBasedContractParent!).getByLabelText('No')
+        )
+        await waitForElementToBeRemoved(() =>
+            screen.queryAllByText('You must select yes or no')
+        )
+        await userEvent.click(screen.getByRole('button', { name: 'Continue' }))
     })
 
     it('displays submission description textarea', async () => {
@@ -397,9 +418,7 @@ describe('SubmissionType', () => {
                 ).toBeNull()
             })
         })
-    })
 
-    describe('Continue / Save Draft button', () => {
         it('if form fields are invalid, shows validation error messages when continue button is clicked', async () => {
             renderWithProviders(
                 <SubmissionType updateDraft={updateDraftMock} />,

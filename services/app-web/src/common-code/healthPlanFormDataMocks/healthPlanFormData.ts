@@ -48,6 +48,7 @@ function newHealthPlanFormData(): UnlockedHealthPlanFormDataType {
         stateCode: 'MN',
         programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_AND_RATES',
+        riskBasedContract: true,
         submissionDescription: 'A real submission',
         documents: [],
         contractDocuments: [],
@@ -69,6 +70,7 @@ function basicHealthPlanFormData(): UnlockedHealthPlanFormDataType {
         stateCode: 'MN',
         programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_AND_RATES',
+        riskBasedContract: true,
         submissionDescription: 'A real submission',
         documents: [],
         contractType: 'BASE',
@@ -94,6 +96,7 @@ function contractOnly(): UnlockedHealthPlanFormDataType {
         stateCode: 'MN',
         programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_ONLY',
+        riskBasedContract: false,
         submissionDescription: 'A real submission',
         documents: [],
         contractDocuments: [],
@@ -119,6 +122,7 @@ function contractAmendedOnly(): UnlockedHealthPlanFormDataType {
         stateCode: 'MN',
         programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_ONLY',
+        riskBasedContract: false,
         submissionDescription: 'A real submission',
         documents: [],
         contractDocuments: [],
@@ -164,6 +168,7 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
         stateCode: 'MN',
         programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_AND_RATES',
+        riskBasedContract: true,
         submissionDescription: 'A real submission',
         documents: [],
         contractType: 'BASE',
@@ -249,6 +254,7 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
         stateCode: 'MN',
         programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_AND_RATES',
+        riskBasedContract: true,
         submissionDescription: 'A real submission',
         documents: [
             {
@@ -357,6 +363,7 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
         stateCode: 'MN',
         programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_AND_RATES',
+        riskBasedContract: true,
         submissionDescription: 'A real submission',
         documents: [
             {
@@ -459,6 +466,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
         stateCode: 'MN',
         programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_AND_RATES',
+        riskBasedContract: true,
         submissionDescription: 'A real submission',
         documents: [
             {
@@ -591,6 +599,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
             mockMNState().programs[2].id,
         ],
         submissionType: 'CONTRACT_AND_RATES',
+        riskBasedContract: true,
         submissionDescription: 'A real submission',
         documents: [
             {
@@ -720,6 +729,7 @@ function basicLockedHealthPlanFormData(): LockedHealthPlanFormDataType {
         stateCode: 'MN',
         programIDs: [mockMNState().programs[0].id],
         submissionType: 'CONTRACT_ONLY',
+        riskBasedContract: false,
         submissionDescription: 'A real submission',
         documents: [],
         contractType: 'BASE',

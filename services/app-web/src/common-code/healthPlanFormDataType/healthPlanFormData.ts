@@ -56,6 +56,10 @@ const hasValidContract = (sub: LockedHealthPlanFormDataType): boolean =>
             sub.contractAmendmentInfo?.modifiedProvisions
         ))
 
+const hasValidRateCertAssurance = (
+    sub: LockedHealthPlanFormDataType
+): boolean => sub.riskBasedContract !== undefined
+
 const hasValidActuaries = (actuaries: ActuaryContact[]): boolean =>
     actuaries &&
     actuaries.length > 0 &&
@@ -320,4 +324,5 @@ export {
     generateRateName,
     convertRateSupportingDocs,
     removeRatesData,
+    hasValidRateCertAssurance,
 }

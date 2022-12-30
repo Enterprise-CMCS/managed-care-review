@@ -836,6 +836,7 @@ export const ContractDetails = ({
                                                                     modifiedProvisionName
                                                                 ]
                                                             )}
+                                                            variant="SECONDARY"
                                                         />
                                                     )
                                                 )}
