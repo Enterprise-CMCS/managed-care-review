@@ -5,7 +5,7 @@ import { once } from '../deps.js'
 async function compileGraphQLTypesWatch(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput('gql deps', ['yarn', 'install'], '')
 
-    runner.runCommandAndOutput('gqlgen', ['lerna', 'run', 'gqlgen-watch'], '')
+    runner.runCommandAndOutput('gqlgen', ['lerna', 'run', 'gqlgen:watch'], '')
 }
 
 export const compileGraphQLTypesWatchOnce = once(compileGraphQLTypesWatch)
