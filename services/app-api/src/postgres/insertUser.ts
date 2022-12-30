@@ -1,6 +1,11 @@
 import { PrismaClient, Role } from '@prisma/client'
 import { StoreError, convertPrismaErrorToStoreError } from './storeError'
-import { UserType } from '../domain-models'
+import {
+    AdminUserType,
+    CMSUserType,
+    StateUserType,
+    UserType,
+} from '../domain-models'
 
 export type InsertUserArgsType = {
     userID: string
@@ -27,7 +32,15 @@ export async function insertUser(
                 stateCode: user.stateCode ?? null,
             },
         })
-        return val
+
+        switch (val.role) {
+            case 'ADMIN_USER':
+                return val as AdminUserType
+            case 'CMS_USER':
+                return val as CMSUserType
+            case 'STATE_USER':
+                return val as StateUserType
+        }
     } catch (err) {
         return convertPrismaErrorToStoreError(err)
     }

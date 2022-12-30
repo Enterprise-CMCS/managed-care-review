@@ -25,12 +25,4 @@ type AdminUserType = {
     familyName: string
 }
 
-const Role: {
-    CMS_USER: 'CMS_USER'
-    STATE_USER: 'STATE_USER'
-    ADMIN_USER: 'ADMIN_USER'
-}
-
-type Role = typeof Role[keyof typeof Role]
-
 export type { CMSUserType, StateUserType, AdminUserType, UserType }

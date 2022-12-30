@@ -1,10 +1,12 @@
-import {
-    convertPrismaErrorToStoreError,
-    isStoreError,
-    StoreError,
-} from './storeError'
+import { convertPrismaErrorToStoreError, StoreError } from './storeError'
 import { PrismaClient } from '@prisma/client'
-import { UserType, StateType } from '../domain-models'
+import {
+    AdminUserType,
+    CMSUserType,
+    UserType,
+    StateUserType,
+    StateType,
+} from '../domain-models'
 
 export async function updateUserAssignedState(
     client: PrismaClient,
@@ -12,7 +14,7 @@ export async function updateUserAssignedState(
     state: StateType
 ): Promise<UserType | StoreError> {
     try {
-        const updateResult = client.user.update({
+        const updateResult = await client.user.update({
             where: {
                 id: userID,
             },
@@ -23,11 +25,14 @@ export async function updateUserAssignedState(
             },
         })
 
-        if (isStoreError(updateResult)) {
-            return updateResult
+        switch (updateResult.role) {
+            case 'ADMIN_USER':
+                return updateResult as AdminUserType
+            case 'CMS_USER':
+                return updateResult as CMSUserType
+            case 'STATE_USER':
+                return updateResult as StateUserType
         }
-
-        return updateResult
     } catch (err) {
         return convertPrismaErrorToStoreError(err)
     }

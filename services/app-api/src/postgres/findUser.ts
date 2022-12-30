@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client'
 import { convertPrismaErrorToStoreError, StoreError } from './storeError'
 import {
+    AdminUserType,
     CMSUserType,
     StateUserType,
     UserType,
-    AdminUserType,
 } from '../domain-models'
 
 export async function findUser(
@@ -17,15 +17,16 @@ export async function findUser(
                 id: id,
             },
         })
+
         switch (findResult?.role) {
+            case 'ADMIN_USER':
+                return findResult as AdminUserType
             case 'CMS_USER':
                 return findResult as CMSUserType
             case 'STATE_USER':
                 return findResult as StateUserType
-            case 'ADMIN_USER':
-                return findResult as AdminUserType
             default:
-                return {} as StateUserType
+                return {} as UserType
         }
     } catch (err) {
         return convertPrismaErrorToStoreError(err)

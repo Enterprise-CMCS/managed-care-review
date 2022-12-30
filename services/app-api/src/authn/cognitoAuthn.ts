@@ -5,10 +5,9 @@ import {
     UserType as CognitoUserType,
 } from '@aws-sdk/client-cognito-identity-provider'
 
-import { UserType } from '../domain-models'
+import { CMSUserType, StateUserType, UserType } from '../domain-models'
 import { performance } from 'perf_hooks'
 import { Store, InsertUserArgsType, isStoreError } from '../postgres'
-import { User } from '@prisma/client'
 
 export function parseAuthProvider(
     authProvider: string
@@ -123,7 +122,7 @@ export function userTypeFromAttributes(attributes: {
             stateCode: attributes['custom:state_code'],
             givenName: attributes.given_name,
             familyName: attributes.family_name,
-        })
+        } as StateUserType)
     }
 
     if (roles.includes(CMS_ROLE_ATTRIBUTE)) {
@@ -132,43 +131,10 @@ export function userTypeFromAttributes(attributes: {
             email: attributes.email,
             givenName: attributes.given_name,
             familyName: attributes.family_name,
-        })
+        } as CMSUserType)
     }
 
     return err(new Error('Unsupported user role:  ' + roleAttribute))
-}
-
-// This converts from the Prisma `User` to the app's `UserType`
-export function userTypeFromUser(user: User): Result<UserType, Error> {
-    if (user.role === 'ADMIN_USER') {
-        return ok({
-            role: 'ADMIN_USER',
-            email: user.email,
-            givenName: user.givenName,
-            familyName: user.familyName,
-        })
-    }
-
-    if (user.role === 'CMS_USER') {
-        return ok({
-            role: 'CMS_USER',
-            email: user.email,
-            givenName: user.givenName,
-            familyName: user.familyName,
-        })
-    }
-
-    if (user.role === 'STATE_USER') {
-        return ok({
-            role: 'STATE_USER',
-            email: user.email,
-            givenName: user.givenName,
-            familyName: user.familyName,
-            stateCode: user.stateCode ?? '',
-        })
-    }
-
-    return err(new Error('Unsupported user role:  ' + user.role))
 }
 
 // userFromCognitoAuthProvider hits the Cogntio API to get the information in the authProvider
@@ -231,7 +197,7 @@ export async function userFromCognitoAuthProvider(
                 )
                 return cognitoUserResult
             }
-            return userTypeFromUser(result)
+            return ok(result)
         } catch (e) {
             console.error(`Could not insert user: ${JSON.stringify(e)}`)
             return cognitoUserResult
@@ -239,7 +205,7 @@ export async function userFromCognitoAuthProvider(
     }
 
     // we return the user we got from aurora
-    return userTypeFromUser(auroraUser)
+    return ok(auroraUser)
 }
 
 async function lookupUserCognito(
@@ -264,7 +230,7 @@ async function lookupUserCognito(
 async function lookupUserAurora(
     store: Store,
     userID: string
-): Promise<User | undefined | Error> {
+): Promise<UserType | undefined | Error> {
     try {
         const userFromPG = await store.findUser(userID)
         // try a basic type guard here -- a User will have an email.
