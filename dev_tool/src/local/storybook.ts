@@ -7,9 +7,5 @@ export async function runStorybookLocally(runner: LabeledProcessRunner) {
 
     await installWebDepsOnce(runner)
 
-    runner.runCommandAndOutput(
-        'storybook',
-        ['yarn', 'storybook'],
-        'services/app-web'
-    )
+    runner.runCommandAndOutput('storybook', ['lerna', 'run', 'storybook'], '')
 }

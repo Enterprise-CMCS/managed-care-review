@@ -6,8 +6,8 @@
         "precommit": "lint-staged",
         "start": "react-scripts -r @cypress/instrument-cra start",
         "build": "sh ../../run_build.sh",
-        "build_prod": "react scripts build",
-        "build_instrumented": "CYPRESS_INSTRUMENT_PRODUCTION=true react-scripts -r @cypress/instrument-cra build",
+        "build:prod": "react scripts build",
+        "build:instrumented": "CYPRESS_INSTRUMENT_PRODUCTION=true react-scripts -r @cypress/instrument-cra build",
         "test": "TZ=UTC react-scripts test",
         "eject": "react-scripts eject",
         "clean": "rm -rf node_modules && yarn cache clean",
@@ -15,8 +15,10 @@
         "lint": "tsc --noEmit && eslint src/ --max-warnings=0",
         "test:once": "TZ=UTC react-scripts test --watchAll=false --runInBand --ci",
         "test:update": "react-scripts test -u",
+        "test:coverage": "yarn test --coverage --watchAll=false",
         "storybook": "start-storybook -p 6006 -s public --quiet",
-        "build-storybook": "build-storybook -s public --quiet"
+        "build-storybook": "build-storybook -s public --quiet",
+        "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""
     },
     "lint-staged": {
         "*.{js,jsx,ts,tsx}": [

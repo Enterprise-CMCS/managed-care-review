@@ -92,7 +92,7 @@ brew install yarn
 
 ## Local Dev
 
-Run all the services locally with the command `./dev local`.
+Run all the services locally with the command `./dev local`. All of the commands inside of `./dev local` use [Lerna](#lerna-usage) to run the tasks.
 
 See the above Requirements section if the command asks for any prerequisites you don't have installed.
 
@@ -137,6 +137,16 @@ Run web app locally, but configured to run against a deployed backend
 -   `./dev local web --hybrid`
 -   For local dev testing, you should push your local branch to deploy a review app and then `./dev local web --hybrid` will connect to that running review app by default.
 -   If you want to specify a different instance to run against, you can set the `--hybrid-stage` parameter. For more info about stages/accounts take a gander at the Deploy section below.
+
+### Lerna usage
+
+All of the tasks in `./dev` are for the most part just wrappers around [Lerna](https://github.com/lerna/lerna) commands. Lerna allows us to define scripts in each service's `package.json` file and will then run any script that matches that script's name across the monorepo. For example, if we run `lerna run build`, Lerna will look at every `package.json` in the monorepo for a task called `build` and then execute the script associated with that `build` command.
+
+If we want to run a task scoped to only one or two services, we could instead run something like `lerna run build --scope=app-api --scope=app-web` to only run the build scripts found in `app-api` and `app-web`.
+
+Any script that is added to a `package.json` scripts section can be invoked with `lerna run $scriptName`.
+
+**Style guide**: Any new script added to a `package.json` file should prefer the format of `task:subtask`. For example, `test`, `test:once`, and `test:coverage` rather than `test_once` and `test_coverage`.
 
 #### Run cypress tests in a linux docker container
 
