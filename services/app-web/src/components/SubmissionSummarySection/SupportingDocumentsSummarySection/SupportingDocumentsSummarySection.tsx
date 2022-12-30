@@ -55,7 +55,7 @@ export const SupportingDocumentsSummarySection = ({
                     }
                 })
             ).catch((err) => {
-                console.log(err)
+                console.info(err)
                 return []
             })
 
@@ -86,7 +86,7 @@ export const SupportingDocumentsSummarySection = ({
                 submissionName + '-supporting-documents.zip'
             )
             if (zippedURL instanceof Error) {
-                console.log('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
+                console.info('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
                 return
             }
 

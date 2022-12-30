@@ -58,9 +58,9 @@ export const RateDetailsSummarySection = ({
 
     // Launch Darkly
     const ldClient = useLDClient()
-    const showMultiRates = ldClient?.variation(
-        featureFlags.MULTI_RATE_SUBMISSIONS.flag,
-        featureFlags.MULTI_RATE_SUBMISSIONS.defaultValue
+    const showSharedRates = ldClient?.variation(
+        featureFlags.RATES_ACROSS_SUBMISSIONS.flag,
+        featureFlags.RATES_ACROSS_SUBMISSIONS.defaultValue
     )
     const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && navigateTo !== undefined
@@ -194,7 +194,7 @@ export const RateDetailsSummarySection = ({
                 submissionName + '-rate-details.zip'
             )
             if (zippedURL instanceof Error) {
-                console.log('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
+                console.info('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
                 return
             }
 
@@ -292,7 +292,7 @@ export const RateDetailsSummarySection = ({
                                         )}`}
                                     />
                                 ) : null}
-                                {showMultiRates && rateInfo.actuaryContacts[0] && (
+                                {rateInfo.actuaryContacts[0] && (
                                     <div
                                         className={
                                             styles.certifyingActuaryDetail
@@ -343,9 +343,12 @@ export const RateDetailsSummarySection = ({
                             {!loading ? (
                                 <UploadedDocumentsTable
                                     documents={rateInfo.rateDocuments}
-                                    packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
-                                        rateInfo
-                                    )}
+                                    packagesWithSharedRateCerts={
+                                        showSharedRates &&
+                                        refreshPackagesWithSharedRateCert(
+                                            rateInfo
+                                        )
+                                    }
                                     documentDateLookupTable={
                                         documentDateLookupTable
                                     }

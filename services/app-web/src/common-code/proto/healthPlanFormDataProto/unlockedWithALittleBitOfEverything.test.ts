@@ -23,7 +23,7 @@ const decodeOrError = (
 describe('0000_initial_migration', () => {
     it('version 2022-08-19 matches the expected values', async () => {
         // read the file from the filesystem
-        console.log('directory: ', fs.readdirSync('.'))
+        console.info('directory: ', fs.readdirSync('.'))
         const oldProtoBytes = fs.readFileSync(
             'src/common-code/proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-08-19.proto'
         )

@@ -67,21 +67,21 @@ export async function signUp(
         })
         return result.user
     } catch (e) {
-        console.log('ERROR SIGNUP', e)
+        console.info('ERROR SIGNUP', e)
 
         if (isAmplifyError(e)) {
             if (e.code === 'UsernameExistsException') {
-                console.log('that username already exists....')
+                console.info('that username already exists....')
                 return e
             } else if (e.code === 'NetworkError') {
-                console.log(
+                console.info(
                     'Failed to connect correctly to Amplify on Signup??'
                 )
                 return e
             } else {
                 // if amplify returns an error in a format we don't expect, let's throw it for now.
                 // might be against the spirit of never throw, but this is our boundary with a system we don't control.
-                console.log('unexpected cognito error!')
+                console.info('unexpected cognito error!')
                 throw e
             }
         } else {
@@ -100,7 +100,9 @@ export async function confirmSignUp(
     } catch (e) {
         if (isAmplifyError(e)) {
             if (e.code === 'ExpiredCodeException') {
-                console.log('your code is expired, we are sending another one.')
+                console.info(
+                    'your code is expired, we are sending another one.'
+                )
                 return e
             } else {
                 throw e
@@ -119,7 +121,7 @@ export async function resendSignUp(
         return null
     } catch (e) {
         // no known handleable errors for this one...
-        console.log('unknown err', e)
+        console.info('unknown err', e)
         throw e
     }
 }
@@ -134,15 +136,15 @@ export async function signIn(
     } catch (e) {
         if (isAmplifyError(e)) {
             if (e.code === 'UserNotConfirmedException') {
-                console.log(
+                console.info(
                     'you need to confirm your account, enter the code below'
                 )
                 return e
             } else if (e.code === 'NotAuthorizedException') {
-                console.log('unknown user or password?')
+                console.info('unknown user or password?')
                 return e
             } else if (e.code === 'UserNotFoundException') {
-                console.log('user does not exist')
+                console.info('user does not exist')
                 return e
             } else {
                 // if amplify returns an error in a format we don't expect, let's throw it for now.
@@ -150,7 +152,7 @@ export async function signIn(
                 throw e
             }
         } else {
-            console.log('didnt even get an amplify error back from login')
+            console.info('didnt even get an amplify error back from login')
             throw e
         }
     }
@@ -161,7 +163,7 @@ export async function signOut(): Promise<null> {
         await AmplifyAuth.signOut()
         return null
     } catch (e) {
-        console.log('error signing out: ', e)
+        console.info('error signing out: ', e)
         throw e
     }
 }
@@ -171,7 +173,7 @@ export async function extendSession(): Promise<null> {
         await AmplifyAuth.currentSession()
         return null
     } catch (e) {
-        console.log('error extending session: ', e)
+        console.info('error extending session: ', e)
         throw e
     }
 }

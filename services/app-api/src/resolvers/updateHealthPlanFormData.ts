@@ -67,7 +67,7 @@ export function updateHealthPlanFormDataResolver(
         const result = await store.findHealthPlanPackage(input.pkgID)
 
         if (isStoreError(result)) {
-            console.log('Error finding a package', result)
+            console.info('Error finding a package', result)
             const errMessage = `Issue finding a package of type ${result.code}. Message: ${result.message}`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
@@ -163,7 +163,7 @@ export function updateHealthPlanFormDataResolver(
 
             if (prevVal instanceof Date && newVal instanceof Date) {
                 if (prevVal.getTime() !== newVal.getTime()) {
-                    console.log(
+                    console.info(
                         `ERRMOD ${fixedField}: old: ${previousFormData[fixedField]} new: ${unlockedFormData[fixedField]}`
                     )
                     unfixedFields.push(fixedField)
@@ -173,7 +173,7 @@ export function updateHealthPlanFormDataResolver(
                     previousFormData[fixedField] !==
                     unlockedFormData[fixedField]
                 ) {
-                    console.log(
+                    console.info(
                         `ERRMOD ${fixedField}: old: ${previousFormData[fixedField]} new: ${unlockedFormData[fixedField]}`
                     )
                     unfixedFields.push(fixedField)

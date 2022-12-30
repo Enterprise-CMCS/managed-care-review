@@ -21,7 +21,7 @@ export async function insertUser(
     user: InsertUserArgsType
 ): Promise<UserType | StoreError> {
     try {
-        console.log('Trying to insert the user to postgres....')
+        console.info('Trying to insert the user to postgres....')
         const val = await client.user.create({
             data: {
                 id: user.userID,
@@ -32,7 +32,7 @@ export async function insertUser(
                 stateCode: user.stateCode ?? null,
             },
         })
-
+        console.info('insert user return: ' + val)
         switch (val.role) {
             case 'ADMIN_USER':
                 return val as AdminUserType

@@ -52,14 +52,14 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
             } catch (err) {
                 assertIsS3PutError(err)
                 if (err.name === 'Error' && err.message === 'Network Error') {
-                    console.log('Error uploading file', err)
+                    console.info('Error uploading file', err)
                     return {
                         code: 'NETWORK_ERROR',
                         message: 'Error saving file to the cloud.',
                     }
                 }
 
-                console.log('Unexpected Error putting file to S3', err)
+                console.info('Unexpected Error putting file to S3', err)
                 throw err
             }
         },
@@ -71,14 +71,14 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
             } catch (err) {
                 assertIsS3PutError(err)
                 if (err.name === 'Error' && err.message === 'Network Error') {
-                    console.log('Error deleting file', err)
+                    console.info('Error deleting file', err)
                     return {
                         code: 'NETWORK_ERROR',
                         message: 'Error deleting file from the cloud.',
                     }
                 }
 
-                console.log('Unexpected Error deleting file from S3', err)
+                console.info('Unexpected Error deleting file from S3', err)
                 throw err
             }
         },

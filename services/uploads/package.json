@@ -4,7 +4,9 @@
     "description": "",
     "version": "1.0.0",
     "main": "index.js",
-    "scripts": {},
+    "scripts": {
+        "start": "npx serverless s3 start --stage local"
+    },
     "author": "",
     "license": "CC0-1.0",
     "devDependencies": {

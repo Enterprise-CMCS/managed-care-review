@@ -29,14 +29,14 @@ function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
 
         json: () => {
             return new Promise<string>((resolve) => {
-                console.log('FAKE JSON')
+                console.info('FAKE JSON')
                 resolve(axiosResponse.data)
             })
         },
 
         formData: () => {
             return new Promise<FormData>((resolve) => {
-                console.log('FAKE FORM DATA')
+                console.info('FAKE FORM DATA')
                 resolve(axiosResponse.data)
             })
         },

@@ -219,14 +219,18 @@ describe('StateSubmissionForm', () => {
                 }
             )
 
-            const banner = expect(await screen.findByTestId('unlockedBanner'))
-            banner.toBeInTheDocument()
-            banner.toHaveClass('usa-alert--info')
-            banner.toHaveTextContent(
+            const banner = await screen.findByTestId('unlockedBanner')
+            expect(banner).toBeInTheDocument()
+            expect(banner).toHaveClass('usa-alert--info')
+            expect(banner).toHaveTextContent(
                 /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+\s[a-zA-Z]+/i
             )
-            banner.toHaveTextContent('Unlocked by: bob@dmas.mn.govUnlocked')
-            banner.toHaveTextContent('Reason for unlock: Test unlock reason')
+            expect(banner).toHaveTextContent(
+                'Unlocked by: bob@dmas.mn.govUnlocked'
+            )
+            expect(banner).toHaveTextContent(
+                'Reason for unlock: Test unlock reason'
+            )
         })
     })
 
@@ -557,7 +561,7 @@ describe('StateSubmissionForm', () => {
             await userEvent.click(removeThreeOne)
 
             // ASSERT
-            // When deleting a file that exists in a previous revision, we should not see it's key
+            // When deleting a file that exists in a previous revision, we should not see its key
             // in the deleteCallKeys array.
             expect(deleteCallKeys).toEqual(['three-one'])
         })

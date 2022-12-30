@@ -60,7 +60,7 @@ export function LocalLogin(): React.ReactElement {
             navigate(RoutesRecord.ROOT)
         } catch (error) {
             setShowFormAlert(true)
-            console.log('Log: Server Error')
+            console.info('Log: Server Error')
         }
     }
 

@@ -39,7 +39,7 @@ describe('If our test domain models have changed, write a new .proto to testData
         )
 
         if (testCaseFileNames.length === 0) {
-            console.log('Writing initial test file for', testName)
+            console.info('Writing initial test file for', testName)
             fs.writeFileSync(filePath, protoBytes)
         } else {
             // The last one is the most recent
@@ -54,7 +54,7 @@ describe('If our test domain models have changed, write a new .proto to testData
             // If our .proto bytes output has changed since the last time we wrote out a proto, write a new proto out.
             // This should probably be overrideable at some point if we don't want to make a new proto
             if (!mostRecentProtoBytes.equals(protoBytes)) {
-                console.log(testName, 'has changed, writing a new version')
+                console.info(testName, 'has changed, writing a new version')
                 fs.writeFileSync(filePath, protoBytes)
             }
         }

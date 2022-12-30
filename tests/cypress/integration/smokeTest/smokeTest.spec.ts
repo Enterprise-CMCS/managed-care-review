@@ -15,6 +15,6 @@ describe('smoke test', () => {
 
     it('can contact the API and connect to the database', () => {
         cy.logInAsStateUser()
-        cy.startNewContractOnlySubmission()
+        cy.startNewContractOnlySubmissionWithBaseContract()
     })
 })

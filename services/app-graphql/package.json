@@ -5,9 +5,10 @@
     "description": "app graphql definitions",
     "license": "MIT",
     "scripts": {
-        "generate-code": "yarn gqlgen",
+        "generate": "yarn gqlgen",
         "gqlgen": "graphql-codegen",
-        "gqlgen-watch": "graphql-codegen --watch"
+        "gqlgen:watch": "graphql-codegen --watch",
+        "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""
     },
     "resolutions": {
         "**/ua-parser-js": "0.7.24"

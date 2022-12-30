@@ -36,13 +36,6 @@ export const featureFlags = {
         defaultValue: 2,
     },
     /**
-     * Enables multi-rate submission UI
-     */
-    MULTI_RATE_SUBMISSIONS: {
-        flag: 'multi-rate-submissions',
-        defaultValue: false,
-    },
-    /**
      * Enables rates across submissions features
      */
     RATES_ACROSS_SUBMISSIONS: {
@@ -55,6 +48,21 @@ export const featureFlags = {
     CMS_DASHBOARD_FILTER: {
         flag: 'cms-dashboard-filter',
         defaultValue: false,
+    },
+    /**
+     * Enables rate cert assurance workflow
+     */
+    RATE_CERT_ASSURANCE: {
+        flag: 'rate-cert-assurance',
+        defaultValue: false,
+    },
+    /**
+     * Used in testing to simulate errors in fetching flag value.
+     * This flag does not exist in LaunchDarkly dashboard so fetching this will return the defaultValue.
+     */
+    TEST_ERROR_FETCHING_FLAG: {
+        flag: 'test-error-fetching-flag',
+        defaultValue: undefined,
     },
 } as const
 

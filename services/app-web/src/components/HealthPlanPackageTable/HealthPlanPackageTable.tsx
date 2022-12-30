@@ -305,7 +305,7 @@ export const HealthPlanPackageTable = ({
                     {!reactTable.getRowModel().rows.length && (
                         <div
                             data-testid="dashboard-table"
-                            className={styles.panelEmpty}
+                            className={styles.panelEmptyNoFilteredResults}
                         >
                             <h3>No results found</h3>
                             <p>
@@ -318,7 +318,7 @@ export const HealthPlanPackageTable = ({
             ) : (
                 <div
                     data-testid="dashboard-table"
-                    className={styles.panelEmpty}
+                    className={styles.panelEmptyNoSubmissionsYet}
                 >
                     <h3>You have no submissions yet</h3>
                 </div>

@@ -62,7 +62,7 @@ async function fetchDeployRuns(): Promise<WorkflowRun[]> {
         repo: 'managed-care-review',
     })
 
-    console.log('Workflows fetched')
+    console.info('Workflows fetched')
 
     const deploy = workflows.find((w) => {
         return w.name === 'Deploy'
@@ -80,7 +80,7 @@ async function fetchDeployRuns(): Promise<WorkflowRun[]> {
         per_page: 100,
     })
 
-    console.log('Runs fetched')
+    console.info('Runs fetched')
 
     const runsWithJobs: WorkflowRun[] = []
 
@@ -94,7 +94,7 @@ async function fetchDeployRuns(): Promise<WorkflowRun[]> {
             run_id: run.id,
         })
 
-        console.log('Jobs Fetched', count)
+        console.info('Jobs Fetched', count)
         count--
 
         const runWithJobs = { ...run, jobs }
@@ -108,7 +108,7 @@ function processDeployRuns(runs: WorkflowRun[]): [TimedRuns, TimedRuns] {
     // filter out all the jobs that never block
     for (const run of runs) {
         run.jobs = blockingJobs(run)
-        console.log(
+        console.info(
             'BLOCKING JOBS',
             run.run_number,
             run.jobs.map((j) => j.name)
@@ -166,7 +166,7 @@ function computeStepTimes(run: WorkflowRun): StepTimes {
         const jtime =
             (Date.parse(job.completed_at) - Date.parse(job.started_at)) / 1000
 
-        // console.log(`job: ${job.name} took: ${jtime}`)
+        // console.info(`job: ${job.name} took: ${jtime}`)
 
         times[job.name] = jtime
 
@@ -182,7 +182,7 @@ function computeStepTimes(run: WorkflowRun): StepTimes {
             const stime =
                 (Date.parse(step.completed_at) - Date.parse(step.started_at)) /
                 1000
-            // console.log(`    step: ${step.name} took: ${stime}`)
+            // console.info(`    step: ${step.name} took: ${stime}`)
 
             const stepName = `${job.name} >> ${step.name}`
             times[stepName] = stime
@@ -205,7 +205,7 @@ function massageNames(names: string): string {
 function calculateStats(timedRuns: TimedRuns): StepStats {
     const stepTimes = countSteps(timedRuns)
 
-    console.log('array of times: ', stepTimes)
+    console.info('array of times: ', stepTimes)
 
     // ok, now cacluate stats
     // average
@@ -275,7 +275,7 @@ function testStandardDev() {
 
     const expectedVal = 297.67035
     if (Math.abs(stdDev - expectedVal) > 0.01) {
-        console.log(stdDev, 'not Equal', expectedVal)
+        console.info(stdDev, 'not Equal', expectedVal)
         throw new Error('not the right standard deviation.')
     }
 }
@@ -311,7 +311,7 @@ function printStats(stats: StepStats) {
     })
 
     for (const line of sortedOutputs) {
-        console.log(
+        console.info(
             `${line[0]}: ${formatter.format(line[1])} (${formatter.format(
                 line[2]
             )})`
@@ -331,7 +331,7 @@ async function loadDeployRuns(useCache: boolean): Promise<WorkflowRun[]> {
         const runs = await fetchDeployRuns()
         if (useCache) {
             fs.writeFileSync(CACHE_FILE, JSON.stringify(runs))
-            console.log('cache written')
+            console.info('cache written')
         }
         return runs
     }
@@ -377,7 +377,7 @@ function blockingJobs(run: WorkflowRun): WorkflowJob[] {
 }
 
 async function main() {
-    console.log('starting')
+    console.info('starting')
     testStandardDev()
 
     // parse args

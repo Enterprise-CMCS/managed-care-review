@@ -22,6 +22,7 @@ describe('dashboard', () => {
     })
 
     it('can see submission summary', () => {
+        cy.interceptFeatureFlags({'rate-cert-assurance': true})
         cy.logInAsStateUser()
 
         // add a draft submission
@@ -34,13 +35,22 @@ describe('dashboard', () => {
         cy.fillOutBaseContractDetails()
         cy.navigateFormByButtonClick('CONTINUE')
 
+        cy.findByRole('heading', {
+            level: 2,
+            name: /Rate details/
+        }).should('exist')
         cy.fillOutNewRateCertification()
         cy.navigateFormByButtonClick('CONTINUE')
 
+        cy.findByRole('heading', {
+            level: 2,
+            name: /Contacts/,
+        }).should('exist')
         cy.fillOutStateContact()
-        cy.fillOutActuaryContact()
+        cy.fillOutAdditionalActuaryContact()
         cy.navigateFormByButtonClick('CONTINUE')
 
+        cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
         cy.fillOutSupportingDocuments()
         cy.navigateFormByButtonClick('CONTINUE')
 

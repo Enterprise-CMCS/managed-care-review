@@ -24,6 +24,7 @@ message HealthPlanFormData {
   repeated Document documents = 16;
   repeated ActuaryContact addtl_actuary_contacts = 17;
   optional ActuaryCommunicationType addtl_actuary_communication_preference = 18;
+  optional bool risk_based_contract = 19; 
 
   repeated RateInfo rate_infos = 50;
 }

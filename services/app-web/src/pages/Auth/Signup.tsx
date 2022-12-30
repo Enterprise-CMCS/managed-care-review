@@ -11,7 +11,7 @@ import { signUp } from './cognitoAuth'
 import { recordJSException } from '../../otelHelpers'
 
 export function showError(error: string): void {
-    console.log(error)
+    console.info(error)
 }
 
 type Props = {
@@ -64,10 +64,10 @@ export function Signup({
 
             if ('code' in result) {
                 const err = result
-                console.log('got an error back from signup: ', err)
+                console.info('got an error back from signup: ', err)
             } else {
                 const user = result
-                console.log('got a user back', user)
+                console.info('got a user back', user)
                 setEmail(fields.email)
                 triggerConfirmation()
             }

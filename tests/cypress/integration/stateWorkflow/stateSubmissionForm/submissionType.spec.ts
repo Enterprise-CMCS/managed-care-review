@@ -4,14 +4,16 @@ describe('submission type', () => {
     })
     it('can navigate to and from type page', () => {
         cy.logInAsStateUser()
-        cy.startNewContractOnlySubmission()
+        cy.startNewContractOnlySubmissionWithBaseContract()
 
         // Navigate to type page
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.navigateFormByDirectLink(
+                `/submissions/${draftSubmissionId}/edit/type`
+            )
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
             cy.findByRole('heading', {
                 level: 2,
@@ -26,7 +28,9 @@ describe('submission type', () => {
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to type page
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.navigateFormByDirectLink(
+                `/submissions/${draftSubmissionId}/edit/type`
+            )
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             // Navigate to dashboard page by clicking save as draft
@@ -34,7 +38,9 @@ describe('submission type', () => {
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to back to submission type page
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.navigateFormByDirectLink(
+                `/submissions/${draftSubmissionId}/edit/type`
+            )
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             // Navigate to contract details page by clicking continue for contract only submission
@@ -45,14 +51,16 @@ describe('submission type', () => {
 
     it('can switch submission from contract action only to contract action and rate certification', () => {
         cy.logInAsStateUser()
-        cy.startNewContractOnlySubmission()
+        cy.startNewContractOnlySubmissionWithBaseContract()
 
         // Navigate to type page
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.navigateFormByDirectLink(
+                `/submissions/${draftSubmissionId}/edit/type`
+            )
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             cy.findByText('Contract action and rate certification').click()
@@ -62,7 +70,9 @@ describe('submission type', () => {
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
 
             // Navigate to type page
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.navigateFormByDirectLink(
+                `/submissions/${draftSubmissionId}/edit/type`
+            )
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             cy.findByLabelText('Contract action and rate certification').should(
@@ -72,15 +82,18 @@ describe('submission type', () => {
     })
 
     it('can save submission edits using Save as draft button', () => {
+        cy.interceptFeatureFlags({ 'rate-cert-assurance': true })
         cy.logInAsStateUser()
-        cy.startNewContractOnlySubmission()
+        cy.startNewContractOnlySubmissionWithBaseContract()
 
         // Navigate to type page
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.navigateFormByDirectLink(
+                `/submissions/${draftSubmissionId}/edit/type`
+            )
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
             cy.findByRole('heading', {
                 level: 2,
@@ -95,7 +108,9 @@ describe('submission type', () => {
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to type page
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.navigateFormByDirectLink(
+                `/submissions/${draftSubmissionId}/edit/type`
+            )
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             //Edit some stuff here
@@ -103,6 +118,11 @@ describe('submission type', () => {
                 name: 'Programs this contract action covers (required)',
             }).click()
             cy.findByText('SNBC').click({ force: true })
+
+            //rate-cert-assurance
+            cy.get('label[for="riskBasedContractYes"]').click()
+
+            cy.findByRole('textbox', { name: 'Submission description' })
             cy.findByText('Contract action and rate certification').click()
             cy.findByRole('textbox', { name: 'Submission description' }).clear()
             cy.findByRole('textbox', { name: 'Submission description' }).type(
@@ -114,12 +134,21 @@ describe('submission type', () => {
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate back to submission type page
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/type`)
+            cy.navigateFormByDirectLink(
+                `/submissions/${draftSubmissionId}/edit/type`
+            )
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             //Check to make sure edited stuff was saved
             cy.get('[aria-label="Remove PMAP"]').should('exist')
             cy.get('[aria-label="Remove SNBC"]').should('exist')
+             cy.findByLabelText('Contract action and rate certification').should(
+                'be.checked'
+            )
+
+            //rate-cert-assurance
+            cy.findByLabelText('Yes').should('be.checked')
+
             cy.findByRole('textbox', { name: 'Submission description' }).should(
                 'have.value',
                 'description of contract only submission, now with a new edited flavor'

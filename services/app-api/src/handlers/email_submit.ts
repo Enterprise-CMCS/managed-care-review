@@ -16,13 +16,13 @@ export const main: Handler = async (event) => {
             },
         }
     }
-    console.log('INFO: Sending SES Email: ', event.body)
+    console.info('INFO: Sending SES Email: ', event.body)
 
     const sesResult = await sendSESEmail(event.body)
 
     if (sesResult instanceof SESServiceException) {
         // we got an error back
-        console.log('ERROR: Email send failed: ', sesResult.message)
+        console.info('ERROR: Email send failed: ', sesResult.message)
         return {
             StatusCode: 500,
             body: JSON.stringify({
@@ -36,7 +36,7 @@ export const main: Handler = async (event) => {
         }
     }
 
-    console.log('Sent email: ', sesResult)
+    console.info('Sent email: ', sesResult)
     console.info({
         message: 'email_submit succeeded',
         operation: 'email_submit',

@@ -61,7 +61,7 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
     return {
         sendEmail: jest.fn(
             async (emailData: EmailData): Promise<void | Error> => {
-                console.log('Email content' + JSON.stringify(emailData))
+                console.info('Email content' + JSON.stringify(emailData))
             }
         ),
         sendCMSNewPackage: async function (
@@ -253,6 +253,7 @@ const mockContractAndRatesFormData = (
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         submissionType: 'CONTRACT_AND_RATES',
+        riskBasedContract: false,
         submissionDescription: 'A submitted submission',
         submittedAt: new Date('02/01/2021'),
         documents: [
@@ -334,6 +335,7 @@ const mockUnlockedContractAndRatesFormData = (
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         submissionType: 'CONTRACT_AND_RATES',
+        riskBasedContract: false,
         submissionDescription: 'A submitted submission',
         documents: [
             {
@@ -414,6 +416,7 @@ const mockUnlockedContractOnlyFormData = (
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         submissionType: 'CONTRACT_ONLY',
+        riskBasedContract: false,
         submissionDescription: 'A submitted submission',
         documents: [
             {
@@ -460,6 +463,7 @@ const mockContractOnlyFormData = (
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         submissionType: 'CONTRACT_ONLY',
+        riskBasedContract: false,
         submissionDescription: 'A submitted submission',
         submittedAt: new Date('02/01/2021'),
         documents: [
@@ -506,6 +510,7 @@ const mockContractAmendmentFormData = (
         id: 'test-abc-125',
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+        riskBasedContract: false,
         submissionType: 'CONTRACT_AND_RATES',
         submissionDescription: 'A submitted submission',
         submittedAt: new Date('02/01/2021'),

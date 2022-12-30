@@ -41,6 +41,7 @@ export {
     generateRateName,
     convertRateSupportingDocs,
     removeRatesData,
+    hasValidRateCertAssurance,
 } from './healthPlanFormData'
 
 export type { HealthPlanFormDataType } from './HealthPlanFormDataType'
