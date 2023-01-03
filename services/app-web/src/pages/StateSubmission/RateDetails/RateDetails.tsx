@@ -379,7 +379,6 @@ export const RateDetails = ({
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
-    //Return only the first-rate info if multi-rate submission feature flag is off
     const rateInfosInitialValues: RateInfoArrayType = {
         rateInfos:
             draftSubmission.rateInfos.length > 0

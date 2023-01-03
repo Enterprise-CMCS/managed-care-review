@@ -1,19 +1,14 @@
 import {
-    Alert,
     GridContainer,
     Link,
     ModalRef,
     ModalToggleButton,
 } from '@trussworks/react-uswds'
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useRef } from 'react'
 import { useNavigate, NavLink, useParams } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
-import {
-    packageName,
-    HealthPlanFormDataType,
-} from '../../common-code/healthPlanFormDataType'
-import { makeDateTable } from '../../documentHelpers/makeDocumentDateLookupTable'
-import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
+import { packageName } from '../../common-code/healthPlanFormDataType'
+import { makeDateTableFromFormData } from '../../documentHelpers/makeDocumentDateLookupTable'
 import { Loading } from '../../components/Loading'
 import {
     ContactsSummarySection,
@@ -28,17 +23,17 @@ import {
 } from '../../components'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
-import {
-    useFetchHealthPlanPackageQuery,
-    HealthPlanPackageStatus,
-    UpdateInformation,
-} from '../../gen/gqlClient'
-import { recordJSException } from '../../otelHelpers'
+import { UpdateInformation } from '../../gen/gqlClient'
 import { Error404 } from '../Errors/Error404Page'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory/ChangeHistory'
 import { UnlockSubmitModal } from '../../components/Modal/UnlockSubmitModal'
+import {
+    useFetchHealthPlanPackageWrapper,
+    getLastSubmittedRevision,
+} from '../../gqlHelpers'
+
 export type DocumentDateLookupTable = {
     [key: string]: string
 }
@@ -76,128 +71,12 @@ export const SubmissionSummary = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
     const modalRef = useRef<ModalRef>(null)
-    const [pageLevelAlert, setPageLevelAlert] = useState<string | undefined>(
-        undefined
-    )
 
-    // Api fetched data state
-    const [packageData, setPackageData] = useState<
-        HealthPlanFormDataType | undefined
-    >(undefined)
-    const [updateInfo, setUpdateInfo] = useState<UpdateInformation | null>(null)
-    const [submissionStatus, setSubmissionStatus] =
-        useState<HealthPlanPackageStatus | null>(null)
+    const fetchResult = useFetchHealthPlanPackageWrapper(id)
 
-    // document date lookup state
-    const [documentDates, setDocumentDates] = useState<
-        DocumentDateLookupTable | undefined
-    >({})
-
-    const { loading, error, data } = useFetchHealthPlanPackageQuery({
-        variables: {
-            input: {
-                pkgID: id,
-            },
-        },
-    })
-
-    const submissionAndRevisions = data?.fetchHealthPlanPackage.pkg
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
 
-    // Pull out the correct revision form api request, display errors for bad dad
-    useEffect(() => {
-        if (submissionAndRevisions) {
-            const lookupTable = makeDateTable(submissionAndRevisions)
-            setDocumentDates(lookupTable)
-            // We ignore revisions currently being edited.
-            // The summary page should only ever called on a package that has been submitted once
-            const currentRevision = submissionAndRevisions.revisions.find(
-                (rev) => {
-                    // we want the most recent revision that has submission info.
-                    return rev.node.submitInfo
-                }
-            )
-
-            if (!currentRevision) {
-                if (isCMSUser) {
-                    recordJSException(
-                        `SubmissionSummary: submission in summary has no submitted revision. ID: ${submissionAndRevisions.id}`
-                    )
-                    setPageLevelAlert(
-                        'Error fetching the submission. This package may still be in draft mode.'
-                    )
-                } else {
-                    // if state user goes to submission/:id for a draft submission, put them on the form, this is an expected workflow
-                    navigate(`/submissions/${id}/edit/type`)
-                }
-                return
-            }
-
-            const submissionResult = base64ToDomain(
-                currentRevision.node.formDataProto
-            )
-            if (submissionResult instanceof Error) {
-                recordJSException(
-                    `SubmissionSummary: proto decoding error. ID: ${submissionAndRevisions.id} Error message: ${submissionResult.message}`
-                )
-                setPageLevelAlert(
-                    'Error fetching the submission. Please try again.'
-                )
-                return
-            }
-
-            const submissionStatus = submissionAndRevisions.status
-            if (
-                submissionStatus === 'UNLOCKED' ||
-                submissionStatus === 'RESUBMITTED'
-            ) {
-                const updateInfo =
-                    submissionStatus === 'UNLOCKED'
-                        ? submissionAndRevisions.revisions.find(
-                              (rev) => rev.node.unlockInfo
-                          )?.node.unlockInfo
-                        : currentRevision.node.submitInfo
-
-                if (updateInfo) {
-                    setSubmissionStatus(submissionStatus)
-                    setUpdateInfo({
-                        ...updateInfo,
-                    })
-                } else {
-                    const info =
-                        submissionStatus === 'UNLOCKED'
-                            ? 'unlock information'
-                            : 'resubmission information'
-                    recordJSException(
-                        `SubmissionSummary: error fetching update info. ID: ${submissionAndRevisions.id}`
-                    )
-                    setPageLevelAlert(
-                        `Error fetching ${info}. Please try again.`
-                    )
-                }
-            }
-
-            setPackageData(submissionResult)
-        }
-    }, [
-        submissionAndRevisions,
-        setPackageData,
-        setPageLevelAlert,
-        navigate,
-        id,
-        isCMSUser,
-    ])
-
-    // Update header with submission name
-    useEffect(() => {
-        const subWithRevisions = data?.fetchHealthPlanPackage.pkg
-        if (packageData && subWithRevisions) {
-            const programs = subWithRevisions.state.programs
-            updateHeading({ customHeading: packageName(packageData, programs) })
-        }
-    }, [updateHeading, packageData, data])
-
-    if (loading || !submissionAndRevisions || !packageData) {
+    if (fetchResult.status === 'LOADING') {
         return (
             <GridContainer>
                 <Loading />
@@ -205,15 +84,64 @@ export const SubmissionSummary = (): React.ReactElement => {
         )
     }
 
-    if (data && !submissionAndRevisions) return <Error404 /> // api request resolves but are no revisions likely because invalid submission is queried. This should be "Not Found"
-    if (error || !packageData || !submissionAndRevisions)
+    if (fetchResult.status === 'ERROR') {
+        // Log something about the error?
+        console.error('Error from API fetch', fetchResult.error)
         return <GenericErrorPage /> // api failure or protobuf decode failure
+    }
 
-    const statePrograms = submissionAndRevisions.state.programs
+    const pkg = fetchResult.data.fetchHealthPlanPackage.pkg
+    const formDatas = fetchResult.formDatas
 
-    const disableUnlockButton = ['DRAFT', 'UNLOCKED'].includes(
-        submissionAndRevisions.status
-    )
+    if (pkg === undefined || pkg === null) return <Error404 /> // api request resolves but are no revisions likely because invalid submission is queried. This should be "Not Found"
+
+    const submissionStatus = pkg.status
+    const statePrograms = pkg.state.programs
+
+    // CMS Users can't see DRAFT, it's an error
+    if (submissionStatus === 'DRAFT' && isCMSUser) {
+        return <GenericErrorPage />
+    }
+
+    // State users should not see the submission summary page for DRAFT or UNLOCKED, it should redirect them to the edit flow.
+    if (
+        !isCMSUser &&
+        (submissionStatus === 'DRAFT' || submissionStatus === 'UNLOCKED')
+    ) {
+        navigate(`/submissions/${id}/edit/type`)
+    }
+
+    // Generate the document date table
+    // revisions are correctly ordered so we can map into the form data
+    const formDatasInOrder = pkg.revisions.map((r) => {
+        return formDatas[r.node.id]
+    })
+    const documentDates = makeDateTableFromFormData(formDatasInOrder)
+
+    // Current Revision is the last SUBMITTED revision, SubmissionSummary doesn't display data that is currently being edited
+    // Since we've already bounced on DRAFT packages, this _should_ exist.
+    const currentRevision = getLastSubmittedRevision(pkg)
+    if (!currentRevision) {
+        console.error(
+            'No currently submitted revision for this, programming error. '
+        )
+        return <GenericErrorPage />
+    }
+    const packageData = formDatas[currentRevision.id]
+
+    // set the page heading
+    updateHeading({ customHeading: packageName(packageData, statePrograms) })
+
+    // Get the correct update info depending on the submission status
+    let updateInfo: UpdateInformation | undefined = undefined
+    if (submissionStatus === 'UNLOCKED' || submissionStatus === 'RESUBMITTED') {
+        updateInfo =
+            (submissionStatus === 'UNLOCKED'
+                ? currentRevision.unlockInfo
+                : currentRevision.submitInfo) || undefined
+    }
+
+    const disableUnlockButton = ['DRAFT', 'UNLOCKED'].includes(pkg.status)
 
     const isContractActionAndRateCertification =
         packageData.submissionType === 'CONTRACT_AND_RATES'
@@ -224,16 +152,6 @@ export const SubmissionSummary = (): React.ReactElement => {
                 data-testid="submission-summary"
                 className={styles.container}
             >
-                {pageLevelAlert && (
-                    <Alert
-                        type="error"
-                        heading="Unlock Error"
-                        className={styles.banner}
-                    >
-                        {pageLevelAlert}
-                    </Alert>
-                )}
-
                 {submissionStatus === 'UNLOCKED' && updateInfo && (
                     <SubmissionUnlockedBanner
                         userType={
@@ -291,9 +209,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                         ) : undefined
                     }
                     statePrograms={statePrograms}
-                    initiallySubmittedAt={
-                        submissionAndRevisions.initiallySubmittedAt
-                    }
+                    initiallySubmittedAt={pkg.initiallySubmittedAt}
                 />
                 <ContractDetailsSummarySection
                     submission={packageData}
@@ -316,13 +232,13 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 <SupportingDocumentsSummarySection submission={packageData} />
 
-                <ChangeHistory submission={submissionAndRevisions} />
+                <ChangeHistory submission={pkg} />
                 {
                     // if the session is expiring, close this modal so the countdown modal can appear
                     <UnlockSubmitModal
                         modalRef={modalRef}
                         modalType="UNLOCK"
-                        healthPlanPackage={submissionAndRevisions}
+                        healthPlanPackage={pkg}
                     />
                 }
             </GridContainer>

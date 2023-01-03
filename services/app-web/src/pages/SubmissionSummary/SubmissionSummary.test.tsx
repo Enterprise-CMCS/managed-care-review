@@ -12,9 +12,12 @@ import {
     mockSubmittedHealthPlanPackageWithRevision,
     mockUnlockedHealthPlanPackageWithOldProtos,
     indexHealthPlanPackagesMockSuccess,
+    mockSubmittedHealthPlanPackage,
+    mockDraftHealthPlanPackage,
 } from '../../testHelpers/apolloHelpers'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
+import { Location } from 'react-router-dom'
 
 describe('SubmissionSummary', () => {
     it('renders without errors', async () => {
@@ -164,6 +167,172 @@ describe('SubmissionSummary', () => {
     })
 
     describe('Submission package data display', () => {
+        it('Submission with no revisions shows a generic error', async () => {
+            const pkg = mockSubmittedHealthPlanPackage()
+            pkg.revisions = []
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                            }),
+                            fetchStateHealthPlanPackageMockSuccess({
+                                id: '15',
+                                stateSubmission: pkg,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15',
+                    },
+                }
+            )
+
+            expect(await screen.findByText('System error')).toBeInTheDocument()
+        })
+
+        it('Submission with broken proto shows a generic error', async () => {
+            const pkg = mockSubmittedHealthPlanPackage()
+            pkg.revisions[0].node.formDataProto = 'BORKED'
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                            }),
+                            fetchStateHealthPlanPackageMockSuccess({
+                                id: '15',
+                                stateSubmission: pkg,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15',
+                    },
+                }
+            )
+
+            expect(await screen.findByText('System error')).toBeInTheDocument()
+        })
+
+        it('DRAFT redirects a state user to beginning of form', async () => {
+            let testLocation: Location
+            const pkg = mockDraftHealthPlanPackage()
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                            }),
+                            fetchStateHealthPlanPackageMockSuccess({
+                                id: '15',
+                                stateSubmission: pkg,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15',
+                    },
+                    location: (location) => (testLocation = location),
+                }
+            )
+
+            await waitFor(() =>
+                expect(testLocation.pathname).toBe(`/submissions/15/edit/type`)
+            )
+        })
+
+        it('UNLOCKED redirects a state user to beginning of form', async () => {
+            let testLocation: Location
+            const pkg = mockUnlockedHealthPlanPackage()
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                            }),
+                            fetchStateHealthPlanPackageMockSuccess({
+                                id: '15',
+                                stateSubmission: pkg,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15',
+                    },
+                    location: (location) => (testLocation = location),
+                }
+            )
+
+            await waitFor(() =>
+                expect(testLocation.pathname).toBe(`/submissions/15/edit/type`)
+            )
+        })
+
+        it('DRAFT displays an error to a CMS user', async () => {
+            const pkg = mockDraftHealthPlanPackage()
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchStateHealthPlanPackageMockSuccess({
+                                id: '15',
+                                stateSubmission: pkg,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15',
+                    },
+                }
+            )
+
+            expect(await screen.findByText('System error')).toBeInTheDocument()
+        })
+
         it('renders the OLD data for an unlocked submission for CMS user, ignoring unsubmitted changes from state user', async () => {
             const pkg = mockUnlockedHealthPlanPackage()
 
@@ -209,8 +378,6 @@ describe('SubmissionSummary', () => {
                 screen.queryByText('NEW_DESCRIPTION')
             ).not.toBeInTheDocument()
         })
-
-        it.todo('renders an error when the proto is invalid')
     })
 
     describe('CMS user unlock submission', () => {

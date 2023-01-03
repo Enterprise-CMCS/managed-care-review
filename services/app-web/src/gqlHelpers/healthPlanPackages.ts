@@ -4,6 +4,14 @@ import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto'
 import { HealthPlanRevision, HealthPlanPackage } from '../gen/gqlClient'
 import { recordJSException } from '../otelHelpers/tracingHelper'
 
+// returns nil if no revision has been submitted
+function getLastSubmittedRevision(
+    pkg: HealthPlanPackage
+): HealthPlanRevision | undefined {
+    const edge = pkg.revisions.find((rEdge) => rEdge.node.submitInfo)
+    return edge?.node
+}
+
 const getCurrentRevisionFromHealthPlanPackage = (
     submissionAndRevisions: HealthPlanPackage
 ): [HealthPlanRevision, HealthPlanFormDataType] | Error => {
@@ -14,14 +22,14 @@ const getCurrentRevisionFromHealthPlanPackage = (
             submissionAndRevisions.revisions.length < 1
         ) {
             recordJSException(
-                `getCurrentRevisionFromHealthPlanPackage: submission has no submitted revision. ID: 
+                `getCurrentRevisionFromHealthPlanPackage: submission has no submitted revision. ID:
                 ${submissionAndRevisions.id}`
             )
             return new Error(
                 'Error fetching the latest revision. Please try again.'
             )
         }
-        // rely entirely on server-side sorting of revisions by created-at descending (oldest first)
+        // rely entirely on server-side sorting of revisions by created-at, newest first
         const newestRev = submissionAndRevisions.revisions[0].node
 
         // Decode form data submitted by the state
@@ -30,7 +38,7 @@ const getCurrentRevisionFromHealthPlanPackage = (
         )
         if (healthPlanPackageFormDataResult instanceof Error) {
             recordJSException(
-                `getCurrentRevisionFromHealthPlanPackage: proto decoding error. ID: 
+                `getCurrentRevisionFromHealthPlanPackage: proto decoding error. ID:
                 ${submissionAndRevisions.id}. Error message: ${Error}`
             )
             return new Error('Error decoding the submission. Please try again.')
@@ -45,4 +53,4 @@ const getCurrentRevisionFromHealthPlanPackage = (
     }
 }
 
-export { getCurrentRevisionFromHealthPlanPackage }
+export { getCurrentRevisionFromHealthPlanPackage, getLastSubmittedRevision }
