@@ -1,15 +1,23 @@
+These implementations are heavily relent on the data and generated Types in `flags.ts` located in `app-web/src/common-code/featureFlags`. This is done for several reasons:
+- Centralize feature flag lists so when adding new flags it only needs to be done once.
+- Auto generated Types based on the feature flag list help removes the need to update types manually and throughout the codebase.
+- Autocompletion of flag parameters to prevent mistakes and invalid flags when using the implementations.
+
+### Prerequisites
+Before testing locally, make sure to have the following prerequisites.
+
+- Launch Darkly API key: A valid Launch Darkly API key will need to be your `.envrc.local`, see code block below. Cypress will be making the actual request to Launch Darkly, we will just be intercepting the response. If we had an invalid key here, the request to would return a 404 before we could intercept the response. **This will cause the integration to break in testing.**
+```json
+export REACT_APP_LD_CLIENT_ID='Place Launch Darkly ID here'
+export LD_SDK_KEY='Place Launch Darkly SDK key here'
+```
+
 ## Feature Flag Unit Testing
+The implementation of LaunchDarkly in our unit testing is split
+
 
 ## Feature Flag Cypress Testing
 Currently, there is no out of the box Cypress integration with LaunchDarkly. Our implementation approach enables the testing of multiple flag values independent of what is set in LaunchDarkly by intercepting api calls and returning our own generated flag values. This allows us to dynamically tests UI in Cypress with different flag values without having to modify flag values in the LaunchDarkly dashboard.
-
-The implementation is heavily relent on the data and generated Types in `flags.ts` located in `app-web/src/common-code/featureFlags`. This is done for several reasons:
-- Centralize feature flag lists so when adding new flags it only needs to be done once.
-- Auto generated Types based on the feature flag list help removes the need to update types manually and throughout the codebase.
-- Autocompletion of flag parameters to prevent mistakes and invalid flags when using custom LaunchDarkly Cypress commands.
-- Type checking in custom LaunchDarkly Cypress commands.
-
-Overall this improves development time of UI tests behind feature flags.
 
 ### Feature flag state management in Cypress
 Our custom Launch Darkly commands intercepts feature flag value requests and returns our own values we feed to the commands. Then the application code will be able to access those custom values, but we also needed a way access them with in Cypress throughout the tests. Specifically to determine when to test UI behind a feature flag.
@@ -17,14 +25,6 @@ Our custom Launch Darkly commands intercepts feature flag value requests and ret
 The approach here was to implement state management that could be accessed though Cypress. Integrating `cy.readFile` and `cy.writeFile` into the Launch Darkly helper commands.
 
 The Cypress commands `cy.interceptFeatureFlags` and `cy.stubFeatureFlags` will generate a json file, using `Cy.writeFile`, in `tests/cypress/fixtures/stores/` named `featureFlagStore.json` using data and Types from `flag.ts` located in `app-web/src/common-code/featureFlags`. The `cy.getFeatureFlagStore()`, using `cy.write`, is used to read the `featureFlagStore.json` file and return the object of feature flags with values.
-
-### Prerequisites
-Before testing locally, make sure to have the following prerequisites.
-
- - Launch Darkly API key: A valid Launch Darkly API key will need to be your `.envrc.local`, see code block below. Cypress will be making the actual request to Launch Darkly, we will just be intercepting the response. If we had an invalid key here, the request to would return a 404 before we could intercept the response. **This will cause the integration to break in testing.**
-```json
-export REACT_APP_LD_CLIENT_ID='Place Launch Darkly ID here'
-```
 
 ### LaunchDarkly Cypress helper commands
 - #### interceptFeatureFlags
