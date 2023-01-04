@@ -188,7 +188,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
 
     const pkg = fetchResult.data.fetchHealthPlanPackage.pkg
-    const formDatas = fetchResult.formDatas
 
     // fetchHPP returns null if no package is found with the given ID
     if (!pkg) {
@@ -197,8 +196,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     // Generate the document data tables
     // revisions are correctly ordered so we can map into the form data
-    const formDatasInOrder = pkg.revisions.map((r) => {
-        return formDatas[r.node.id]
+    const formDatasInOrder = pkg.revisions.map((rEdge) => {
+        return rEdge.node.formData
     })
     const documentDates = makeDateTableFromFormData(formDatasInOrder)
     const previousDocuments =
@@ -206,7 +205,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     // pull out the latest revision for editing
     const latestRevision = pkg.revisions[0].node
-    const formDataFromLatestRevision = formDatas[latestRevision.id]
+    const formDataFromLatestRevision = latestRevision.formData
 
     // if we've gotten back a submitted revision, it can't be edited
     if (formDataFromLatestRevision.status !== 'DRAFT') {

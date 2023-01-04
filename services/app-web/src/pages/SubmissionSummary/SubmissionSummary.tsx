@@ -29,10 +29,7 @@ import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory/ChangeHistory'
 import { UnlockSubmitModal } from '../../components/Modal/UnlockSubmitModal'
-import {
-    useFetchHealthPlanPackageWrapper,
-    getLastSubmittedRevision,
-} from '../../gqlHelpers'
+import { useFetchHealthPlanPackageWrapper } from '../../gqlHelpers'
 import { recordJSException } from '../../otelHelpers'
 
 export type DocumentDateLookupTable = {
@@ -92,7 +89,6 @@ export const SubmissionSummary = (): React.ReactElement => {
     }
 
     const pkg = fetchResult.data.fetchHealthPlanPackage.pkg
-    const formDatas = fetchResult.formDatas
 
     // fetchHPP returns null if no package is found with the given ID
     if (!pkg) {
@@ -117,21 +113,22 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     // Generate the document date table
     // revisions are correctly ordered so we can map into the form data
-    const formDatasInOrder = pkg.revisions.map((r) => {
-        return formDatas[r.node.id]
+    const formDatasInOrder = pkg.revisions.map((rEdge) => {
+        return rEdge.node.formData
     })
     const documentDates = makeDateTableFromFormData(formDatasInOrder)
 
     // Current Revision is the last SUBMITTED revision, SubmissionSummary doesn't display data that is currently being edited
     // Since we've already bounced on DRAFT packages, this _should_ exist.
-    const currentRevision = getLastSubmittedRevision(pkg)
-    if (!currentRevision) {
+    const edge = pkg.revisions.find((rEdge) => rEdge.node.submitInfo)
+    if (!edge) {
         console.error(
             'No currently submitted revision for this, programming error. '
         )
         return <GenericErrorPage />
     }
-    const packageData = formDatas[currentRevision.id]
+    const currentRevision = edge.node
+    const packageData = currentRevision.formData
 
     // set the page heading
     updateHeading({ customHeading: packageName(packageData, statePrograms) })

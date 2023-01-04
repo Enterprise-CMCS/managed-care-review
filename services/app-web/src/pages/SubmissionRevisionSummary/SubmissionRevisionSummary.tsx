@@ -51,7 +51,6 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
     }
 
     const pkg = fetchResult.data.fetchHealthPlanPackage.pkg
-    const formDatas = fetchResult.formDatas
 
     // fetchHPP returns null if no package is found with the given ID
     if (!pkg) {
@@ -67,15 +66,15 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         console.info('no revision found at index', revisionIndex)
         return <Error404 />
     }
-    const packageData = formDatas[revision.id]
+    const packageData = revision.formData
 
     const statePrograms = pkg.state.programs
     updateHeading({ customHeading: packageName(packageData, statePrograms) })
 
     // Generate the document date table
     // revisions are correctly ordered so we can map into the form data
-    const formDatasInOrder = pkg.revisions.map((r) => {
-        return formDatas[r.node.id]
+    const formDatasInOrder = pkg.revisions.map((rEdge) => {
+        return rEdge.node.formData
     })
     const documentDates = makeDateTableFromFormData(formDatasInOrder)
 

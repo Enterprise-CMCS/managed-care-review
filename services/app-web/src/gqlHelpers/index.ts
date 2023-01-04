@@ -7,10 +7,7 @@ import {
     unlockMutationWrapper,
     submitMutationWrapper,
 } from './mutationWrappers'
-import {
-    useFetchHealthPlanPackageWrapper,
-    fetchHealthPlanPackageSucceeded,
-} from './fetchHealthPlanPackageWrapper'
+import { useFetchHealthPlanPackageWrapper } from './fetchHealthPlanPackageWrapper'
 
 const isGraphQLErrors = (input: unknown): input is GraphQLErrors => {
     if (Array.isArray(input)) {
@@ -26,7 +23,6 @@ export {
     isGraphQLErrors,
     getLastSubmittedRevision,
     useFetchHealthPlanPackageWrapper,
-    fetchHealthPlanPackageSucceeded,
     unlockMutationWrapper,
     submitMutationWrapper,
 }
