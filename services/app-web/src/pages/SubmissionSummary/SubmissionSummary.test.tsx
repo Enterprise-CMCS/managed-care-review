@@ -99,6 +99,91 @@ describe('SubmissionSummary', () => {
         ).toHaveTextContent('Changes made: Placeholder resubmission reason')
     })
 
+    it('renders submission unlocked banner for CMS user', async () => {
+        const submissionsWithRevisions = mockUnlockedHealthPlanPackage()
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                    element={<SubmissionSummary />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageMockSuccess({
+                            stateSubmission: submissionsWithRevisions,
+                            id: '15',
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15',
+                },
+            }
+        )
+
+        expect(await screen.findByTestId('unlockedBanner')).toBeInTheDocument()
+        expect(await screen.findByTestId('unlockedBanner')).toHaveClass(
+            'usa-alert--warning'
+        )
+        expect(await screen.findByTestId('unlockedBanner')).toHaveTextContent(
+            /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+        )
+        expect(await screen.findByTestId('unlockedBanner')).toHaveTextContent(
+            'by: bob@dmas.mn.gov'
+        )
+        expect(await screen.findByTestId('unlockedBanner')).toHaveTextContent(
+            'Reason for unlock: Test unlock reason'
+        )
+    })
+
+    it('renders submission unlocked banner for State user', async () => {
+        const submissionsWithRevisions = mockUnlockedHealthPlanPackage()
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                    element={<SubmissionSummary />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageMockSuccess({
+                            stateSubmission: submissionsWithRevisions,
+                            id: '15',
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15',
+                },
+            }
+        )
+
+        expect(await screen.findByTestId('unlockedBanner')).toBeInTheDocument()
+        expect(await screen.findByTestId('unlockedBanner')).toHaveClass(
+            'usa-alert--info'
+        )
+        expect(await screen.findByTestId('unlockedBanner')).toHaveTextContent(
+            /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+        )
+        expect(await screen.findByTestId('unlockedBanner')).toHaveTextContent(
+            'by: bob@dmas.mn.gov'
+        )
+        expect(await screen.findByTestId('unlockedBanner')).toHaveTextContent(
+            'Reason for unlock: Test unlock reason'
+        )
+    })
+
     it('renders back to dashboard link for state users', async () => {
         renderWithProviders(
             <Routes>
