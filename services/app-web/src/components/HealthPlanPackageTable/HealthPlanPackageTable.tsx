@@ -204,6 +204,10 @@ export const HealthPlanPackageTable = ({
         getSortedRowModel: getSortedRowModel(),
     })
 
+    const hasAppliedFilters = columnFilters.length > 0
+    const filteredRows = reactTable.getRowModel().rows
+    const hasFilteredRows = filteredRows.length > 0
+
     const stateColumn = reactTable.getColumn('stateName')
     const submissionTypeColumn = reactTable.getColumn('submissionType')
 
@@ -216,7 +220,7 @@ export const HealthPlanPackageTable = ({
     }))
 
     const filterTitle = `Filters ${
-        columnFilters.length
+        hasAppliedFilters
             ? `(${
                   columnFilters.flatMap((filter) => filter.value).length
               } applied)`
@@ -260,6 +264,15 @@ export const HealthPlanPackageTable = ({
                             />
                         </FilterAccordion>
                     )}
+                    {
+                        <div className={styles.filterCount}>
+                            {!hasAppliedFilters
+                                ? `${tableData.length} items`
+                                : hasFilteredRows
+                                ? `Displaying ${filteredRows.length} of ${tableData.length} items`
+                                : undefined}
+                        </div>
+                    }
                     <Table fullWidth>
                         <thead>
                             {reactTable.getHeaderGroups().map((headerGroup) => (
@@ -279,7 +292,7 @@ export const HealthPlanPackageTable = ({
                             ))}
                         </thead>
                         <tbody>
-                            {reactTable.getRowModel().rows.map((row) => (
+                            {filteredRows.map((row) => (
                                 <tr
                                     key={row.id}
                                     data-testid={`row-${row.original.id}`}
@@ -302,7 +315,7 @@ export const HealthPlanPackageTable = ({
                             ))}
                         </tbody>
                     </Table>
-                    {!reactTable.getRowModel().rows.length && (
+                    {!hasFilteredRows && (
                         <div
                             data-testid="dashboard-table"
                             className={styles.panelEmptyNoFilteredResults}
