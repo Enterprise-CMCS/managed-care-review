@@ -287,7 +287,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         launchDarkly = ldService(ldClient)
     } catch (err) {
         console.error(
-            `LaunchDarkly Error: ${err.message} Defaulting to LaunchDarkly offline service.`
+            `LaunchDarkly Error: ${err.message} Falling back to LaunchDarkly offline service.`
         )
         ldClient.close()
         launchDarkly = offlineLDService()
