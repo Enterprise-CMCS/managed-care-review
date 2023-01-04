@@ -29,7 +29,11 @@ import {
     newAWSEmailParameterStore,
     newLocalEmailParameterStore,
 } from '../parameterStore'
-import { LDService, ldService } from '../launchDarkly/launchDarkly'
+import {
+    LDService,
+    ldService,
+    offlineLDService,
+} from '../launchDarkly/launchDarkly'
 import { LDClient } from 'launchdarkly-node-server-sdk'
 import * as ld from 'launchdarkly-node-server-sdk'
 
@@ -277,12 +281,16 @@ async function initializeGQLHandler(): Promise<Handler> {
     ldClient = ld.init(ldSDKKey)
     let launchDarkly: LDService
 
-    // Wait for initialization, throw an error and stop the api if we cannot connect to LaunchDarkly
+    // Wait for initialization. On initialization failure default to offlineLDService and close ldClient.
     try {
         await ldClient.waitForInitialization()
         launchDarkly = ldService(ldClient)
     } catch (err) {
-        throw new Error(`LaunchDarkly Configuration Error: ${err.message}`)
+        console.error(
+            `LaunchDarkly Error: ${err.message} Defaulting to LaunchDarkly offline service.`
+        )
+        ldClient.close()
+        launchDarkly = offlineLDService()
     }
 
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
