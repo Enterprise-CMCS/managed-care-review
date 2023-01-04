@@ -169,7 +169,9 @@ describe('CMS user', () => {
                 cy.get('table')
                     .findByRole('link', { name: submissionName })
                     .should('exist')
-                    .click()
+                    .as('submissionLink').click()
+
+                cy.get('@submissionLink').click()
 
                 cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
                 cy.findByTestId('updatedSubmissionBanner').should('exist')
