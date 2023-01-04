@@ -100,90 +100,93 @@ export const HealthPlanPackageTable = ({
         React.useState<ColumnFiltersState>([])
     const columnHelper = createColumnHelper<PackageInDashboardType>()
 
-    const tableColumns = [
-        columnHelper.accessor((row) => row, {
-            header: 'ID',
-            cell: (info) => (
-                <Link
-                    key={`submission-id-${info.getValue().id}`}
-                    asCustom={NavLink}
-                    to={submissionURL(
-                        info.getValue().id,
-                        info.getValue().status,
-                        user.__typename
-                    )}
-                >
-                    {info.getValue().name}
-                </Link>
-            ),
-            meta: {
-                dataTestID: 'submission-id',
-            },
-        }),
-        columnHelper.accessor('stateName', {
-            id: 'stateName',
-            header: 'State',
-            cell: (info) => <span>{info.getValue()}</span>,
-            meta: {
-                dataTestID: 'submission-stateName',
-            },
-            filterFn: `arrIncludesSome`,
-        }),
-        columnHelper.accessor('submissionType', {
-            id: 'submissionType',
-            header: 'Submission type',
-            cell: (info) => <span>{info.getValue()}</span>,
-            meta: {
-                dataTestID: 'submission-type',
-            },
-            filterFn: `arrIncludesSome`,
-        }),
-        columnHelper.accessor('programs', {
-            header: 'Programs',
-            cell: (info) =>
-                info.getValue().map((program) => {
-                    return (
-                        <Tag
-                            data-testid="program-tag"
-                            key={program.id}
-                            className={`radius-pill ${styles.programTag}`}
-                        >
-                            {program.name}
-                        </Tag>
-                    )
-                }),
-            meta: {
-                dataTestID: 'submission-programs',
-            },
-        }),
-        columnHelper.accessor('submittedAt', {
-            header: 'Submission date',
-            cell: (info) =>
-                info.getValue()
-                    ? dayjs(info.getValue()).format('MM/DD/YYYY')
-                    : '',
-            meta: {
-                dataTestID: 'submission-date',
-            },
-        }),
-        columnHelper.accessor('updatedAt', {
-            header: 'Last updated',
-            cell: (info) =>
-                info.getValue()
-                    ? dayjs(info.getValue()).format('MM/DD/YYYY')
-                    : '',
-            meta: {
-                dataTestID: 'submission-last-updated',
-            },
-        }),
-        columnHelper.accessor('status', {
-            header: 'Status',
-            cell: (info) => <StatusTag status={info.getValue()} />,
-            meta: {
-                dataTestID: 'submission-status',
-            },
-        }),
-    ]
+    const tableColumns = React.useMemo(
+        () => [
+            columnHelper.accessor((row) => row, {
+                header: 'ID',
+                cell: (info) => (
+                    <Link
+                        key={`submission-id-${info.getValue().id}`}
+                        asCustom={NavLink}
+                        to={submissionURL(
+                            info.getValue().id,
+                            info.getValue().status,
+                            user.__typename
+                        )}
+                    >
+                        {info.getValue().name}
+                    </Link>
+                ),
+                meta: {
+                    dataTestID: 'submission-id',
+                },
+            }),
+            columnHelper.accessor('stateName', {
+                id: 'stateName',
+                header: 'State',
+                cell: (info) => <span>{info.getValue()}</span>,
+                meta: {
+                    dataTestID: 'submission-stateName',
+                },
+                filterFn: `arrIncludesSome`,
+            }),
+            columnHelper.accessor('submissionType', {
+                id: 'submissionType',
+                header: 'Submission type',
+                cell: (info) => <span>{info.getValue()}</span>,
+                meta: {
+                    dataTestID: 'submission-type',
+                },
+                filterFn: `arrIncludesSome`,
+            }),
+            columnHelper.accessor('programs', {
+                header: 'Programs',
+                cell: (info) =>
+                    info.getValue().map((program) => {
+                        return (
+                            <Tag
+                                data-testid="program-tag"
+                                key={program.id}
+                                className={`radius-pill ${styles.programTag}`}
+                            >
+                                {program.name}
+                            </Tag>
+                        )
+                    }),
+                meta: {
+                    dataTestID: 'submission-programs',
+                },
+            }),
+            columnHelper.accessor('submittedAt', {
+                header: 'Submission date',
+                cell: (info) =>
+                    info.getValue()
+                        ? dayjs(info.getValue()).format('MM/DD/YYYY')
+                        : '',
+                meta: {
+                    dataTestID: 'submission-date',
+                },
+            }),
+            columnHelper.accessor('updatedAt', {
+                header: 'Last updated',
+                cell: (info) =>
+                    info.getValue()
+                        ? dayjs(info.getValue()).format('MM/DD/YYYY')
+                        : '',
+                meta: {
+                    dataTestID: 'submission-last-updated',
+                },
+            }),
+            columnHelper.accessor('status', {
+                header: 'Status',
+                cell: (info) => <StatusTag status={info.getValue()} />,
+                meta: {
+                    dataTestID: 'submission-status',
+                },
+            }),
+        ],
+        [columnHelper, user]
+    )
 
     const reactTable = useReactTable({
         data: tableData.sort((a, b) =>
