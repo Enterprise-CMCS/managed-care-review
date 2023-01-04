@@ -1,12 +1,8 @@
-import React, { useEffect, useState } from 'react'
-import { Alert, GridContainer } from '@trussworks/react-uswds'
+import React from 'react'
+import { GridContainer } from '@trussworks/react-uswds'
 import { useParams } from 'react-router-dom'
-import {
-    packageName,
-    HealthPlanFormDataType,
-} from '../../common-code/healthPlanFormDataType'
-import { makeDateTable } from '../../documentHelpers/makeDocumentDateLookupTable'
-import { base64ToDomain } from '../../common-code/proto/healthPlanFormDataProto'
+import { packageName } from '../../common-code/healthPlanFormDataType'
+import { makeDateTableFromFormData } from '../../documentHelpers/makeDocumentDateLookupTable'
 import { Loading } from '../../components/Loading'
 import {
     ContactsSummarySection,
@@ -16,17 +12,13 @@ import {
     SupportingDocumentsSummarySection,
 } from '../../components/SubmissionSummarySection'
 import { usePage } from '../../contexts/PageContext'
-import {
-    UpdateInformation,
-    useFetchHealthPlanPackageQuery,
-} from '../../gen/gqlClient'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
 import { dayjs } from '../../common-code/dateHelpers'
 import styles from './SubmissionRevisionSummary.module.scss'
 import { PreviousSubmissionBanner } from '../../components'
-import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
+import { useFetchHealthPlanPackageWrapper } from '../../gqlHelpers'
 
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
@@ -40,90 +32,10 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         )
     }
     const { updateHeading } = usePage()
-    const [pageLevelAlert, setPageLevelAlert] = useState<string | undefined>(
-        undefined
-    )
-    const [submitInfo, setSubmitInfo] = useState<UpdateInformation | undefined>(
-        undefined
-    )
 
-    // Api fetched data state
-    const [packageData, setPackageData] = useState<
-        HealthPlanFormDataType | undefined
-    >(undefined)
+    const fetchResult = useFetchHealthPlanPackageWrapper(id)
 
-    // document date lookup state
-    const [documentDates, setDocumentDates] = useState<
-        DocumentDateLookupTable | undefined
-    >({})
-
-    const { loading, error, data } = useFetchHealthPlanPackageQuery({
-        variables: {
-            input: {
-                pkgID: id,
-            },
-        },
-    })
-
-    const submissionAndRevisions = data?.fetchHealthPlanPackage.pkg
-
-    // Pull out the correct revision form api request, display errors for bad dad
-    useEffect(() => {
-        //Find revision by revisionVersion.
-        if (submissionAndRevisions) {
-            const lookupTable = makeDateTable(submissionAndRevisions)
-            setDocumentDates(lookupTable)
-            //We offset version by +1 of index, remove offset to find revision in revisions
-            const revisionIndex = Number(revisionVersion) - 1
-            const revision = [...submissionAndRevisions.revisions]
-                .reverse() //Reversing revisions to get correct submission order
-                .find((_revision, index) => index === revisionIndex)
-
-            if (!revision) {
-                recordJSException(
-                    `SubmissionRevisionSummary:  submission in summary has no submitted revision. ID: ${submissionAndRevisions.id}`
-                )
-                setPageLevelAlert(
-                    'Error fetching the submission. Please try again.'
-                )
-                return
-            }
-
-            const submissionResult = base64ToDomain(revision.node.formDataProto)
-
-            if (
-                submissionResult instanceof Error ||
-                !revision.node.submitInfo
-            ) {
-                recordJSException(
-                    `SubmissionRevisionSummary: error decoding proto. ID: ${submissionAndRevisions.id}`
-                )
-                setPageLevelAlert(
-                    'Error fetching the submission. Please try again.'
-                )
-                return
-            }
-
-            setSubmitInfo(revision.node.submitInfo)
-            setPackageData(submissionResult)
-        }
-    }, [
-        submissionAndRevisions,
-        revisionVersion,
-        setPackageData,
-        setPageLevelAlert,
-    ])
-
-    // Update header with submission name
-    useEffect(() => {
-        const subWithRevisions = data?.fetchHealthPlanPackage.pkg
-        if (packageData && subWithRevisions) {
-            const programs = subWithRevisions.state.programs
-            updateHeading({ customHeading: packageName(packageData, programs) })
-        }
-    }, [updateHeading, packageData, data])
-
-    if (loading || !submissionAndRevisions || !packageData) {
+    if (fetchResult.status === 'LOADING') {
         return (
             <GridContainer>
                 <Loading />
@@ -131,11 +43,43 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         )
     }
 
-    if (data && !submissionAndRevisions) return <Error404 /> // api request resolves but are no revisions likely because invalid submission is queried. This should be "Not Found"
-    if (error || !packageData || !submissionAndRevisions)
+    if (fetchResult.status === 'ERROR') {
+        // Log something about the error?
+        recordJSException(fetchResult.error)
+        console.error('Error from API fetch', fetchResult.error)
         return <GenericErrorPage /> // api failure or protobuf decode failure
+    }
 
-    const statePrograms = submissionAndRevisions.state.programs
+    const pkg = fetchResult.data.fetchHealthPlanPackage.pkg
+    const formDatas = fetchResult.formDatas
+
+    // fetchHPP returns null if no package is found with the given ID
+    if (!pkg) {
+        return <Error404 />
+    }
+
+    //We offset version by +1 of index, remove offset to find revision in revisions
+    const revisionIndex = Number(revisionVersion) - 1
+    //Reversing revisions to get correct submission order
+    const revision = [...pkg.revisions].reverse()[revisionIndex].node
+
+    if (!revision) {
+        console.info('no revision found at index', revisionIndex)
+        return <Error404 />
+    }
+    const packageData = formDatas[revision.id]
+
+    const statePrograms = pkg.state.programs
+    updateHeading({ customHeading: packageName(packageData, statePrograms) })
+
+    // Generate the document date table
+    // revisions are correctly ordered so we can map into the form data
+    const formDatasInOrder = pkg.revisions.map((r) => {
+        return formDatas[r.node.id]
+    })
+    const documentDates = makeDateTableFromFormData(formDatasInOrder)
+
+    const submitInfo = revision.submitInfo || undefined
 
     const isContractActionAndRateCertification =
         packageData.submissionType === 'CONTRACT_AND_RATES'
@@ -146,12 +90,6 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 data-testid="submission-summary"
                 className={styles.container}
             >
-                {pageLevelAlert && (
-                    <Alert type="error" heading="Unlock Error">
-                        {pageLevelAlert}
-                    </Alert>
-                )}
-
                 <PreviousSubmissionBanner link={`/submissions/${id}`} />
 
                 <SubmissionTypeSummarySection

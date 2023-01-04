@@ -33,6 +33,7 @@ import {
     useFetchHealthPlanPackageWrapper,
     getLastSubmittedRevision,
 } from '../../gqlHelpers'
+import { recordJSException } from '../../otelHelpers'
 
 export type DocumentDateLookupTable = {
     [key: string]: string
@@ -85,7 +86,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     }
 
     if (fetchResult.status === 'ERROR') {
-        // Log something about the error?
+        recordJSException(fetchResult.error)
         console.error('Error from API fetch', fetchResult.error)
         return <GenericErrorPage /> // api failure or protobuf decode failure
     }
@@ -93,7 +94,10 @@ export const SubmissionSummary = (): React.ReactElement => {
     const pkg = fetchResult.data.fetchHealthPlanPackage.pkg
     const formDatas = fetchResult.formDatas
 
-    if (pkg === undefined || pkg === null) return <Error404 /> // api request resolves but are no revisions likely because invalid submission is queried. This should be "Not Found"
+    // fetchHPP returns null if no package is found with the given ID
+    if (!pkg) {
+        return <Error404 />
+    }
 
     const submissionStatus = pkg.status
     const statePrograms = pkg.state.programs
