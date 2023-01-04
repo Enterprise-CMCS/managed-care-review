@@ -12,8 +12,10 @@ describe('createHealthPlanPackage', () => {
                 '5c10fe9f-bec9-416f-a20c-718b152ad633',
                 '037af66b-81eb-4472-8b80-01edf17d12d9',
             ],
+            riskBasedContract: false,
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
+            contractType: 'BASE',
         }
         const res = await server.executeOperation({
             query: CREATE_HEALTH_PLAN_PACKAGE,
@@ -42,8 +44,10 @@ describe('createHealthPlanPackage', () => {
         const server = await constructTestPostgresServer()
         const input: CreateHealthPlanPackageInput = {
             programIDs: ['xyz123'],
+            riskBasedContract: false,
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
+            contractType: 'BASE',
         }
         const res = await server.executeOperation({
             query: CREATE_HEALTH_PLAN_PACKAGE,
@@ -71,8 +75,10 @@ describe('createHealthPlanPackage', () => {
 
         const input: CreateHealthPlanPackageInput = {
             programIDs: ['xyz123'],
+            riskBasedContract: false,
             submissionType: 'CONTRACT_ONLY',
             submissionDescription: 'A real submission',
+            contractType: 'BASE',
         }
         const res = await server.executeOperation({
             query: CREATE_HEALTH_PLAN_PACKAGE,

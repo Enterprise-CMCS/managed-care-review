@@ -34,6 +34,7 @@ import {
     PoliteErrorMessage,
     ProgramSelect,
     PackageSelect,
+    FieldYesNo,
 } from '../../../components'
 import type { PackageOptionType } from '../../../components/Select'
 import {
@@ -392,19 +393,19 @@ export const RateDetails = ({
     const processFileItems = (fileItems: FileItemT[]): SubmissionDocument[] => {
         return fileItems.reduce((formDataDocuments, fileItem) => {
             if (fileItem.status === 'UPLOAD_ERROR') {
-                console.log(
+                console.info(
                     'Attempting to save files that failed upload, discarding invalid files'
                 )
             } else if (fileItem.status === 'SCANNING_ERROR') {
-                console.log(
+                console.info(
                     'Attempting to save files that failed scanning, discarding invalid files'
                 )
             } else if (fileItem.status === 'DUPLICATE_NAME_ERROR') {
-                console.log(
+                console.info(
                     'Attempting to save files that are duplicate names, discarding duplicate'
                 )
             } else if (!fileItem.s3URL)
-                console.log(
+                console.info(
                     'Attempting to save a seemingly valid file item is not yet uploaded to S3, this should not happen on form submit. Discarding file.'
                 )
             else {
@@ -479,7 +480,7 @@ export const RateDetails = ({
             const updatedSubmission = await updateDraft(draftSubmission)
             if (updatedSubmission instanceof Error) {
                 setSubmitting(false)
-                console.log(
+                console.info(
                     'Error updating draft submission: ',
                     updatedSubmission
                 )
@@ -742,11 +743,13 @@ export const RateDetails = ({
                                                                     )
                                                                 }
                                                             >
-                                                                <Fieldset
+                                                                <FieldYesNo
                                                                     className={
                                                                         styles.radioGroup
                                                                     }
-                                                                    legend="Was
+                                                                    id={`hasSharedRateCert.${index}.`}
+                                                                    name={`rateInfos.${index}.hasSharedRateCert`}
+                                                                    label="Was
                                                                                 this
                                                                                 rate
                                                                                 certification
@@ -755,10 +758,7 @@ export const RateDetails = ({
                                                                                 any
                                                                                 other
                                                                                 submissions?"
-                                                                    role="radiogroup"
-                                                                    aria-required
-                                                                >
-                                                                    {showFieldErrors(
+                                                                    showError={showFieldErrors(
                                                                         rateErrorHandling(
                                                                             errors
                                                                                 ?.rateInfos?.[
@@ -766,31 +766,8 @@ export const RateDetails = ({
                                                                             ]
                                                                         )
                                                                             ?.hasSharedRateCert
-                                                                    ) && (
-                                                                        <PoliteErrorMessage>
-                                                                            {getIn(
-                                                                                errors,
-                                                                                `rateInfos.${index}.hasSharedRateCert`
-                                                                            )}
-                                                                        </PoliteErrorMessage>
                                                                     )}
-                                                                    <FieldRadio
-                                                                        id={`hasSharedRateCertYes-${index}`}
-                                                                        name={`rateInfos.${index}.hasSharedRateCert`}
-                                                                        label="Yes"
-                                                                        value={
-                                                                            'YES'
-                                                                        }
-                                                                    />
-                                                                    <FieldRadio
-                                                                        id={`hasSharedRateCertNo-${index}`}
-                                                                        name={`rateInfos.${index}.hasSharedRateCert`}
-                                                                        label="No"
-                                                                        value={
-                                                                            'NO'
-                                                                        }
-                                                                    />
-                                                                </Fieldset>
+                                                                />
 
                                                                 {rateInfo.hasSharedRateCert ===
                                                                     'YES' && (

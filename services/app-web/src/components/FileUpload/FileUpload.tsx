@@ -201,7 +201,7 @@ export const FileUpload = ({
     const deleteItem = (deletedItem: FileItemT) => {
         const key = fileItems.find((item) => item.id === deletedItem.id)?.key
         if (key !== undefined)
-            deleteFile(key).catch(() => console.log('Error deleting from s3'))
+            deleteFile(key).catch(() => console.info('Error deleting from s3'))
 
         setFileItems((prevItems) => {
             return refreshItems(prevItems, deletedItem)
@@ -279,7 +279,7 @@ export const FileUpload = ({
                             })
                             // immediately delete this bad file
                             deleteFile(data.key).catch(() =>
-                                console.log('Error deleting from s3')
+                                console.info('Error deleting from s3')
                             )
                         }
                     }
@@ -312,7 +312,7 @@ export const FileUpload = ({
 
     const retryFile = (item: FileItemT) => {
         if (!item.file) {
-            console.log('cannot retry, no file available')
+            console.info('cannot retry, no file available')
             return
         }
 

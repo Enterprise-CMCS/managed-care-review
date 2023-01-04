@@ -17,7 +17,7 @@ export async function runOtelLocally(runner: LabeledProcessRunner) {
             name.startsWith('managed-care-review-otel-collector') &&
             status.startsWith('Up')
         ) {
-            console.log(
+            console.info(
                 'ERROR: An instance of otel-collector is already running. In order to run `./dev local otel` you must first stop the instance.'
             )
         }

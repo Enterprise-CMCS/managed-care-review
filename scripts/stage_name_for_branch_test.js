@@ -44,7 +44,7 @@ function testStageNames() {
         const expectedResult = testCase[1];
 
         const testProc = spawnSync('stage_name_for_branch.sh', [testInput]);
-        // console.log(testProc)
+        // console.info(testProc)
 
         if (testProc.status !== 0) {
             testErrors.push(
@@ -76,7 +76,7 @@ function testStageNames() {
 
     if (testErrors.length !== 0) {
         for (const err of testErrors) {
-            console.log(err);
+            console.info(err);
         }
         process.exit(1);
     }

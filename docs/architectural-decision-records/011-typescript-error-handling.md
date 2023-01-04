@@ -28,7 +28,7 @@ if (insertResult instanceof Error) {
 // now the compiler knows that our result is not an error:
 const draft: DraftSubmissionType = insertResult
 
-console.log("Created draft with ID:", draft.id)
+console.info("Created draft with ID:", draft.id)
 ...
 ```
 

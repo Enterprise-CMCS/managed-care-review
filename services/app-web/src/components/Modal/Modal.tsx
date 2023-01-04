@@ -81,6 +81,7 @@ export const Modal = ({
                 <GenericApiErrorBanner
                     heading={modalAlert.heading}
                     message={modalAlert.message}
+                    suggestion={modalAlert.suggestion} // default is the ApiGenericErrorBanner Please refresh browser hint
                 />
             )}
             <div id={`${id}-modal-description`}>{children}</div>

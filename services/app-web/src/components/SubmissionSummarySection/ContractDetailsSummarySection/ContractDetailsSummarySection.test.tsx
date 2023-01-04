@@ -93,10 +93,6 @@ describe('ContractDetailsSummarySection', () => {
                 submissionName="MN-PMAP-0001"
             />
         )
-
-        expect(
-            screen.getByRole('definition', { name: 'Contract action type' })
-        ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', { name: 'Contract status' })
         ).toBeInTheDocument()

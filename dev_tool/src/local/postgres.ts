@@ -6,8 +6,8 @@ import { commandMustSucceedSync } from '../localProcess.js'
 export async function installPrismaDeps(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput(
         'api prisma',
-        ['yarn', 'prisma', 'generate'],
-        'services/app-api'
+        ['lerna', 'run', 'generate', '--scope=app-api'],
+        ''
     )
 }
 
@@ -31,7 +31,7 @@ export async function runPostgresLocally(runner: LabeledProcessRunner) {
             // if {{.Status}} starts with "Up" then this container is running.
             if (line.split('\t')[1].startsWith('Up')) {
                 // the container is still running.
-                console.log(
+                console.info(
                     'ERROR: The `mc-postgres` container is still running. In order to run `./dev local postgres` you need to stop it: `docker stop mc-postgres'
                 )
                 process.exit(1)
@@ -69,7 +69,7 @@ export async function runPostgresLocally(runner: LabeledProcessRunner) {
     // does not db push schema changes into the database
     await runner.runCommandAndOutput(
         'prisma reset',
-        ['npx', 'prisma', 'migrate', 'reset', '--force'],
-        'services/app-api'
+        ['lerna', 'run', 'prisma:reset'],
+        ''
     )
 }

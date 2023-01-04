@@ -15,7 +15,7 @@ import {
 } from '../../testHelpers/apolloHelpers'
 import { UnlockSubmitModal } from './UnlockSubmitModal'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
-import { Location } from 'history'
+import { Location } from 'react-router-dom'
 
 describe('UnlockSubmitModal', () => {
     const mockSetIsSubmitting = jest.fn()
@@ -124,7 +124,7 @@ describe('UnlockSubmitModal', () => {
                 await screen.findByText('Error attempting to submit.')
             ).toBeInTheDocument()
             const errorHeading = screen.queryByRole('heading', {
-                name: 'Submit error',
+                name: 'Submission error',
             })
             expect(errorHeading).toBeInTheDocument()
             await waitFor(() =>
@@ -307,7 +307,7 @@ describe('UnlockSubmitModal', () => {
                     name: 'Unlock error',
                 })
                 const errorMessage = screen.queryByText(
-                    'Error attempting to unlock. Submission may be already unlocked. Please refresh and try again.'
+                    'Error attempting to unlock.'
                 )
                 expect(errorHeading).toBeInTheDocument()
                 expect(errorMessage).toBeInTheDocument()
@@ -443,7 +443,7 @@ describe('UnlockSubmitModal', () => {
 
             await waitFor(() => {
                 const errorHeading = screen.queryByRole('heading', {
-                    name: 'Resubmit error',
+                    name: 'Resubmission error',
                 })
 
                 expect(errorHeading).toBeInTheDocument()

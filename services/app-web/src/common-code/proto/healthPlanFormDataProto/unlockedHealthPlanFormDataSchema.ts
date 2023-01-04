@@ -4,6 +4,7 @@
  * this and our yup parsers and the type assertion we use for StateSubmission should come
  * in the future.
  */
+
 import { z } from 'zod'
 
 const submissionTypeSchema = z.union([
@@ -33,28 +34,24 @@ const submissionDocumentSchema = z.object({
 })
 
 const contractAmendmentInfoSchema = z.object({
-    modifiedProvisions: z
-        .object({
-            modifiedBenefitsProvided: z.boolean().optional(),
-            modifiedGeoAreaServed: z.boolean().optional(),
-            modifiedMedicaidBeneficiaries: z.boolean().optional(),
-            modifiedRiskSharingStrategy: z.boolean().optional(),
-            modifiedIncentiveArrangements: z.boolean().optional(),
-            modifiedWitholdAgreements: z.boolean().optional(),
-            modifiedStateDirectedPayments: z.boolean().optional(),
-            modifiedPassThroughPayments: z.boolean().optional(),
-            modifiedPaymentsForMentalDiseaseInstitutions: z
-                .boolean()
-                .optional(),
-            modifiedMedicalLossRatioStandards: z.boolean().optional(),
-            modifiedOtherFinancialPaymentIncentive: z.boolean().optional(),
-            modifiedEnrollmentProcess: z.boolean().optional(),
-            modifiedGrevienceAndAppeal: z.boolean().optional(),
-            modifiedNetworkAdequacyStandards: z.boolean().optional(),
-            modifiedLengthOfContract: z.boolean().optional(),
-            modifiedNonRiskPaymentArrangements: z.boolean().optional(),
-        })
-        .required(),
+    modifiedProvisions: z.object({
+        modifiedBenefitsProvided: z.boolean().optional(),
+        modifiedGeoAreaServed: z.boolean().optional(),
+        modifiedMedicaidBeneficiaries: z.boolean().optional(),
+        modifiedRiskSharingStrategy: z.boolean().optional(),
+        modifiedIncentiveArrangements: z.boolean().optional(),
+        modifiedWitholdAgreements: z.boolean().optional(),
+        modifiedStateDirectedPayments: z.boolean().optional(),
+        modifiedPassThroughPayments: z.boolean().optional(),
+        modifiedPaymentsForMentalDiseaseInstitutions: z.boolean().optional(),
+        modifiedMedicalLossRatioStandards: z.boolean().optional(),
+        modifiedOtherFinancialPaymentIncentive: z.boolean().optional(),
+        modifiedEnrollmentProcess: z.boolean().optional(),
+        modifiedGrevienceAndAppeal: z.boolean().optional(),
+        modifiedNetworkAdequacyStandards: z.boolean().optional(),
+        modifiedLengthOfContract: z.boolean().optional(),
+        modifiedNonRiskPaymentArrangements: z.boolean().optional(),
+    }),
 })
 
 const rateAmendmentInfoSchema = z.object({
@@ -169,6 +166,7 @@ export const unlockedHealthPlanFormDataSchema = z.object({
     programIDs: z.array(z.string()),
     submissionType: submissionTypeSchema,
     submissionDescription: z.string(),
+    riskBasedContract: z.boolean().optional(),
     stateContacts: z.array(stateContactSchema),
     addtlActuaryContacts: z.array(actuaryContactSchema),
     addtlActuaryCommunicationPreference:

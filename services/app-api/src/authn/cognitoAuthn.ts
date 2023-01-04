@@ -64,7 +64,7 @@ async function fetchUserFromCognito(
     })
     const listUsersResponse = await cognitoClient.send(commandListUsers)
     const endRequest = performance.now()
-    console.log('listUsers takes ms:', endRequest - startRequest)
+    console.info('listUsers takes ms:', endRequest - startRequest)
 
     if (
         listUsersResponse.Users === undefined ||
@@ -202,7 +202,7 @@ export async function userFromCognitoAuthProvider(
         return err(auroraUser)
     }
     const endRequest = performance.now()
-    console.log('User lookup in postgres takes ms:', endRequest - startRequest)
+    console.info('User lookup in postgres takes ms:', endRequest - startRequest)
 
     // if there is no user returned, lookup in cognito and save to postgres
     if (auroraUser === undefined) {

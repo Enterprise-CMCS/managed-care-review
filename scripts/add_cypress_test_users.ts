@@ -113,11 +113,11 @@ async function createUser({
     } catch (e) {
         // swallow username exists errors. this script is meant to be run repeatedly.
         if (e instanceof UsernameExistsException) {
-            console.log('User already exists in Cognito. Continuing.')
+            console.info('User already exists in Cognito. Continuing.')
         } else if (e instanceof InvalidParameterException) {
             throw new Error(`Invalid parameters on Conginto User create: ${e}`)
         } else {
-            console.log(`AWS Error: ${e}`)
+            console.info(`AWS Error: ${e}`)
         }
     }
 
@@ -134,7 +134,7 @@ async function createUser({
     } catch (e) {
         switch (e) {
             case e instanceof UserNotFoundException:
-                console.log(
+                console.info(
                     'Could not find user. User does not exist in Cognito.'
                 )
                 throw new Error(`AWS Error: ${e}`)
@@ -145,14 +145,14 @@ async function createUser({
 }
 
 async function main() {
-    console.log('INFO: Create Test Users')
+    console.info('INFO: Create Test Users')
 
     const stageName = process.argv[2]
     const testUserPassword = process.argv[3]
 
     const excludedStages = ['main', 'val', 'prod']
     if (excludedStages.includes(stageName)) {
-        console.log('ERROR: Will not set test cognito users in this stage')
+        console.info('ERROR: Will not set test cognito users in this stage')
         process.exit(1)
     }
 
@@ -160,11 +160,11 @@ async function main() {
     try {
         userPoolID = await getUserPoolID(stageName)
     } catch (e) {
-        console.log('Error fetching User Pool ID: ', e)
+        console.info('Error fetching User Pool ID: ', e)
         process.exit(1)
     }
 
-    console.log('INFO: Got UserPoolID')
+    console.info('INFO: Got UserPoolID')
 
     const testUsers = [
         {
@@ -195,7 +195,7 @@ async function main() {
 
     for (const user of testUsers) {
         try {
-            console.log('Creating User:', user.name)
+            console.info('Creating User:', user.name)
             await createUser({
                 userPoolID,
                 name: user.name,
@@ -205,7 +205,7 @@ async function main() {
                 state: user.state,
             })
         } catch (e) {
-            console.log('Error creating user: ', e)
+            console.info('Error creating user: ', e)
             process.exit(1)
         }
     }

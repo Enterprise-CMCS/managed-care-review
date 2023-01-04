@@ -8,7 +8,7 @@ describe('FieldYesNo component', () => {
         render(
             <Formik
                 initialValues={{}}
-                onSubmit={(values) => console.log('submitted', values)}
+                onSubmit={(values) => console.info('submitted', values)}
             >
                 <Form>
                     <FieldYesNo
@@ -37,7 +37,7 @@ describe('FieldYesNo component', () => {
         render(
             <Formik
                 initialValues={initialValues}
-                onSubmit={(values) => console.log('submitted', values)}
+                onSubmit={(values) => console.info('submitted', values)}
             >
                 <Form>
                     <FieldYesNo

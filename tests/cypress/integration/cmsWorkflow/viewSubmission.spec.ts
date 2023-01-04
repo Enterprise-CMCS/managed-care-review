@@ -3,6 +3,7 @@ describe('CMS user can view submission', () => {
         cy.stubFeatureFlags()
     })
     it('in the CMS dashboard', () => {
+        cy.interceptFeatureFlags({'rate-cert-assurance': true})
         // state user adds a new package
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()

@@ -7,11 +7,7 @@ import { compileGraphQLTypesWatchOnce } from './graphql.js'
 import { compileProtoWatch } from './proto.js'
 
 async function installWebDeps(runner: LabeledProcessRunner) {
-    return runner.runCommandAndOutput(
-        'web deps',
-        ['yarn', 'install'],
-        'services/app-web'
-    )
+    return runner.runCommandAndOutput('web deps', ['yarn', 'install'], '')
 }
 
 export const installWebDepsOnce = once(installWebDeps)
@@ -23,7 +19,11 @@ export async function runWebLocally(runner: LabeledProcessRunner) {
 
     await installWebDepsOnce(runner)
 
-    runner.runCommandAndOutput('web', ['yarn', 'start'], 'services/app-web')
+    runner.runCommandAndOutput(
+        'web',
+        ['lerna', 'run', 'start', '--scope=app-web'],
+        ''
+    )
 }
 
 // By default, we transform the current branch name into a valid stage name
@@ -52,35 +52,39 @@ export async function runWebAgainstAWS(
         stageNameOpt !== undefined ? stageNameOpt : stageNameFromBranch()
 
     if (stageName === '') {
-        console.log(
+        console.info(
             'Error: you do not appear to be on a git branch so we cannot auto-detect what stage to attach to.\n',
             'Either checkout the deployed branch or specify --stage explicitly.'
         )
         process.exit(1)
     }
 
-    console.log('Attempting to access stage:', stageName)
+    console.info('Attempting to access stage:', stageName)
     // Test to see if we can read info from serverless. This is likely to trip folks up who haven't
     // configured their AWS keys correctly or if they have an invalid stage name.
     const serverlessConnection = checkStageAccess(stageName)
     switch (serverlessConnection) {
         case 'AWS_TOKEN_ERROR': {
-            console.log(
+            console.info(
                 'Error: Invalid token attempting to read AWS Cloudformation\n',
                 'Likely, you do not have aws configured right. You will need AWS tokens from cloudwatch configured\n',
                 'See the AWS Token section of the README for more details.\n\n'
             )
             process.exit(1)
         }
+        // don't need a break because we exit
+        // eslint-disable-next-line no-fallthrough
         case 'STAGE_ERROR': {
-            console.log(
+            console.info(
                 `Error: stack with id ${stageName} does not exist or is not done deploying\n`,
                 "If you didn't set one explicitly, maybe you haven't pushed this branch yet to deploy a review app?"
             )
             process.exit(1)
         }
+        // don't need a break because we exit
+        // eslint-disable-next-line no-fallthrough
         case 'UNKNOWN_ERROR': {
-            console.log(
+            console.info(
                 'Unexpected Error attempting to read AWS Cloudformation.'
             )
             process.exit(2)
@@ -88,7 +92,7 @@ export async function runWebAgainstAWS(
     }
 
     // Now, we've confirmed we are configured to pull data out of serverless x cloudformation
-    console.log('Access confirmed. Fetching config vars')
+    console.info('Access confirmed. Fetching config vars')
     const { region, idPool, userPool, userPoolClient, userPoolDomain } =
         getWebAuthVars(stageName)
 

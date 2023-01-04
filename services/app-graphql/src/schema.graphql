@@ -130,10 +130,13 @@ type Mutation {
 input CreateHealthPlanPackageInput {
     "An array of managed care program IDs this package covers"
     programIDs: [ID!]!
+    "Whether or not this contract is risk based"
+    riskBasedContract: Boolean
     "The submission type of this package"
     submissionType: SubmissionType!
     "User description of the package"
     submissionDescription: String!
+    contractType: ContractType!
 }
 
 type CreateHealthPlanPackagePayload {
@@ -339,4 +342,9 @@ type HealthPlanRevisionEdge {
 enum SubmissionType {
     CONTRACT_ONLY
     CONTRACT_AND_RATES
+}
+
+enum ContractType {
+    BASE
+    AMENDMENT
 }

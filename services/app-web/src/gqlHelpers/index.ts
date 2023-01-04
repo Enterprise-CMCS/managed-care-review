@@ -3,7 +3,7 @@ import { getCurrentRevisionFromHealthPlanPackage } from './healthPlanPackages'
 import {
     unlockMutationWrapper,
     submitMutationWrapper,
-} from './mutationWrappers'
+} from './mutationWrappersForUserFriendlyErrors'
 
 const isGraphQLErrors = (input: unknown): input is GraphQLErrors => {
     if (Array.isArray(input)) {

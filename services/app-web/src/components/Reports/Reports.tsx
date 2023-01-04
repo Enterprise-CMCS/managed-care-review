@@ -35,7 +35,7 @@ export const Reports = (): React.ReactElement => {
                 window.URL.revokeObjectURL(blobURL)
             })
             .catch((e) => {
-                console.log('Error downloading report: ', e)
+                console.info('Error downloading report: ', e)
             })
     }
     return (

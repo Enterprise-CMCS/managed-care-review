@@ -51,6 +51,9 @@ describe('NewStateSubmissionForm', () => {
         const submissionType = await screen.findByText('Contract action only')
         await userEvent.click(submissionType)
 
+        const contractType = await screen.findByText('Base contract')
+        await userEvent.click(contractType)
+
         const textarea = await screen.findByRole('textbox', {
             name: 'Submission description',
         })

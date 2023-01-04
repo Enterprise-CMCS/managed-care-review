@@ -12,7 +12,7 @@ export const main: APIGatewayProxyHandler = async () => {
         version: process.env.appVersion,
     }
 
-    console.log({ name: 'healthcheck' }) // eslint-disable-line no-console
+    console.info({ name: 'healthcheck' }) // eslint-disable-line no-console
 
     return {
         statusCode: 200,

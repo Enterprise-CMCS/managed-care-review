@@ -21,7 +21,7 @@ describe('v2 to v3', () => {
             )
         }
 
-        console.log(oldProto.rateInfos[0].actuaryContacts)
+        console.info(oldProto.rateInfos[0].actuaryContacts)
 
         const latestProto = toLatestProtoVersion(oldProto)
         expect(oldProto.rateInfos[0]).toBeDefined()

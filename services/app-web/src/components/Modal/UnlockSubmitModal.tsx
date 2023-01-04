@@ -15,6 +15,7 @@ import { PoliteErrorMessage } from '../PoliteErrorMessage'
 import * as Yup from 'yup'
 import styles from './UnlockSubmitModal.module.scss'
 import { GenericApiErrorProps } from '../Banner/GenericApiErrorBanner/GenericApiErrorBanner'
+import { ERROR_MESSAGES } from '../../constants/errors'
 
 type ModalType = 'SUBMIT' | 'RESUBMIT' | 'UNLOCK'
 
@@ -25,6 +26,7 @@ type ModalValueType = {
     inputHint?: string
     unlockSubmitModalInputValidation?: string
     errorHeading: string
+    errorSuggestion?: string
 }
 
 const modalValueDictionary: { [Property in ModalType]: ModalValueType } = {
@@ -36,7 +38,7 @@ const modalValueDictionary: { [Property in ModalType]: ModalValueType } = {
         inputHint: 'Provide summary of all changes made to this submission',
         unlockSubmitModalInputValidation:
             'You must provide a summary of changes',
-        errorHeading: 'Resubmit error',
+        errorHeading: ERROR_MESSAGES.resubmit_error_heading,
     },
     UNLOCK: {
         modalHeading: 'Reason for unlocking submission',
@@ -44,14 +46,15 @@ const modalValueDictionary: { [Property in ModalType]: ModalValueType } = {
         inputHint: 'Provide reason for unlocking',
         unlockSubmitModalInputValidation:
             'You must provide a reason for unlocking this submission',
-        errorHeading: 'Unlock error',
+        errorHeading: ERROR_MESSAGES.unlock_error_heading,
     },
     SUBMIT: {
         modalHeading: 'Ready to submit?',
         onSubmitText: 'Submit',
         modalDescription:
             'Submitting this package will send it to CMS to begin their review.',
-        errorHeading: 'Submit error',
+        errorHeading: ERROR_MESSAGES.submit_error_heading,
+        errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
     },
 }
 
@@ -130,6 +133,12 @@ export const UnlockSubmitModal = ({
             setModalAlert({
                 heading: modalValues.errorHeading,
                 message: result.message,
+                // When we have generic/unknown errors override any suggestions and display the fallback "please refresh text"
+                suggestion:
+                    result.message === ERROR_MESSAGES.submit_error_generic ||
+                    result.message === ERROR_MESSAGES.unlock_error_generic
+                        ? undefined
+                        : modalValues.errorSuggestion,
             })
         } else {
             modalRef.current?.toggleModal(undefined, false)
@@ -149,7 +158,7 @@ export const UnlockSubmitModal = ({
                 fieldElement.focus()
                 setFocusErrorsInModal(false)
             } else {
-                console.log('Attempting to focus element that does not exist')
+                console.info('Attempting to focus element that does not exist')
             }
         }
     }, [focusErrorsInModal, formik.errors])
