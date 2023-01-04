@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { GridContainer } from '@trussworks/react-uswds'
 import { Routes, Route, useParams } from 'react-router-dom'
@@ -123,6 +123,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
     const { currentRoute } = useCurrentRoute()
     const { updateHeading } = usePage()
+    const [pkgName, setPkgName] = useState<string | undefined>(undefined)
+    useEffect(() => {
+        updateHeading({ customHeading: pkgName })
+    }, [pkgName, updateHeading])
 
     const { loggedInUser } = useAuth()
     const [showPageErrorMessage, setShowPageErrorMessage] = useState<
@@ -216,7 +220,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
         formDataFromLatestRevision,
         statePrograms
     )
-    updateHeading({ customHeading: computedSubmissionName })
+    if (pkgName !== computedSubmissionName) {
+        setPkgName(computedSubmissionName)
+    }
 
     // An unlocked revision is defined by having unlockInfo on it, pull it out here if it exists
     const unlockedInfo: UpdateInformation | undefined =

@@ -4,7 +4,7 @@ import {
     ModalRef,
     ModalToggleButton,
 } from '@trussworks/react-uswds'
-import React, { useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, NavLink, useParams } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
 import { packageName } from '../../common-code/healthPlanFormDataType'
@@ -69,6 +69,10 @@ export const SubmissionSummary = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const { updateHeading } = usePage()
     const modalRef = useRef<ModalRef>(null)
+    const [pkgName, setPkgName] = useState<string | undefined>(undefined)
+    useEffect(() => {
+        updateHeading({ customHeading: pkgName })
+    }, [pkgName, updateHeading])
 
     const fetchResult = useFetchHealthPlanPackageWrapper(id)
 
@@ -131,7 +135,10 @@ export const SubmissionSummary = (): React.ReactElement => {
     const packageData = currentRevision.formData
 
     // set the page heading
-    updateHeading({ customHeading: packageName(packageData, statePrograms) })
+    const name = packageName(packageData, statePrograms)
+    if (pkgName !== name) {
+        setPkgName(name)
+    }
 
     // Get the correct update info depending on the submission status
     let updateInfo: UpdateInformation | undefined = undefined

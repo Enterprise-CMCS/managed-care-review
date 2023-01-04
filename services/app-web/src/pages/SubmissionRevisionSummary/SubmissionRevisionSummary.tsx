@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
 import { useParams } from 'react-router-dom'
 import { packageName } from '../../common-code/healthPlanFormDataType'
@@ -32,8 +32,13 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         )
     }
     const { updateHeading } = usePage()
+    const [pkgName, setPkgName] = useState<string | undefined>(undefined)
 
     const fetchResult = useFetchHealthPlanPackageWrapper(id)
+
+    useEffect(() => {
+        updateHeading({ customHeading: pkgName })
+    }, [pkgName, updateHeading])
 
     if (fetchResult.status === 'LOADING') {
         return (
@@ -69,7 +74,10 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
     const packageData = revision.formData
 
     const statePrograms = pkg.state.programs
-    updateHeading({ customHeading: packageName(packageData, statePrograms) })
+    const name = packageName(packageData, statePrograms)
+    if (pkgName !== name) {
+        setPkgName(name)
+    }
 
     // Generate the document date table
     // revisions are correctly ordered so we can map into the form data
