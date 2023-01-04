@@ -120,6 +120,8 @@ function useFetchHealthPlanPackageWrapper(id: string): ParsedFetchResult {
 
     if (result.status === 'SUCCESS') {
         const pkg = result.data.fetchHealthPlanPackage.pkg
+
+        let parsedPackage: ParsedPackageType | undefined = undefined
         if (pkg) {
             if (pkg.revisions.length < 1) {
                 const err = new Error(
@@ -133,9 +135,9 @@ function useFetchHealthPlanPackageWrapper(id: string): ParsedFetchResult {
                 }
             }
 
-            const parsedNodes: ParsedHealthPlanRevisionEdge[] = []
-            for (const revisionNode of pkg.revisions) {
-                const revision = revisionNode.node
+            const parsedEdges: ParsedHealthPlanRevisionEdge[] = []
+            for (const revisionEdge of pkg.revisions) {
+                const revision = revisionEdge.node
                 const formDataResult = base64ToDomain(revision.formDataProto)
 
                 if (formDataResult instanceof Error) {
@@ -150,48 +152,36 @@ function useFetchHealthPlanPackageWrapper(id: string): ParsedFetchResult {
                     }
                 }
 
-                const parsedRev: ParsedHealthPlanRevision = {
-                    ...revision,
-                    formData: formDataResult,
-                }
-
-                const parsedNode: ParsedHealthPlanRevisionEdge = {
-                    ...revisionNode,
-                    node: parsedRev,
-                }
-
-                parsedNodes.push(parsedNode)
-            }
-
-            const parsedQuery: ParsedFetchHealthPlanPackageQuery = {
-                ...result.data,
-                fetchHealthPlanPackage: {
-                    ...result.data.fetchHealthPlanPackage,
-                    pkg: {
-                        ...pkg,
-                        revisions: parsedNodes,
+                // construct a parsed edge, again, trying to preserve everything
+                // that isn't the new formData on the revision
+                const parsedEdge: ParsedHealthPlanRevisionEdge = {
+                    ...revisionEdge,
+                    node: {
+                        ...revision,
+                        formData: formDataResult,
                     },
-                },
+                }
+
+                parsedEdges.push(parsedEdge)
             }
 
-            return {
-                status: 'SUCCESS',
-                data: parsedQuery,
+            parsedPackage = {
+                ...pkg,
+                revisions: parsedEdges,
             }
-        } else {
-            // without this i got some terrible type errors, not sure why this is required since it's implied in our if (pkg)
-            const emptyQuery: ParsedFetchHealthPlanPackageQuery = {
-                ...result.data,
-                fetchHealthPlanPackage: {
-                    ...result.data.fetchHealthPlanPackage,
-                    pkg: null,
-                },
-            }
+        }
 
-            return {
-                status: 'SUCCESS',
-                data: emptyQuery,
-            }
+        const parsedQuery: ParsedFetchHealthPlanPackageQuery = {
+            ...result.data,
+            fetchHealthPlanPackage: {
+                ...result.data.fetchHealthPlanPackage,
+                pkg: parsedPackage,
+            },
+        }
+
+        return {
+            status: 'SUCCESS',
+            data: parsedQuery,
         }
     }
 
