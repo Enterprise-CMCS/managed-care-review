@@ -12,11 +12,11 @@ import {
     useNavigate,
     useLocation,
 } from 'react-router-dom'
-import * as Yup from 'yup'
 import {
     ErrorSummary,
     FieldRadio,
     FieldTextarea,
+    FieldYesNo,
     PoliteErrorMessage,
 } from '../../../components'
 import { SubmissionTypeRecord } from '../../../constants/healthPlanPackages'
@@ -36,19 +36,17 @@ import {
 } from '../../../components'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { useStatePrograms } from '../../../hooks/useStatePrograms'
+import {
+    booleanAsYesNoFormValue,
+    yesNoFormValueAsBoolean,
+} from '../../../components/Form/FieldYesNo/FieldYesNo'
+import { featureFlags } from '../../../common-code/featureFlags'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { SubmissionTypeFormSchema } from './SubmissionTypeSchema'
 
-// Formik setup
-// Should be listed in order of appearance on field to allow errors to focus as expected
-const SubmissionTypeFormSchema = Yup.object().shape({
-    programIDs: Yup.array().min(1, 'You must select at least one program'),
-    submissionType: Yup.string().required('You must choose a submission type'),
-    submissionDescription: Yup.string().required(
-        'You must provide a description of any major changes or updates'
-    ),
-    contractType: Yup.string().required('You must choose a contract type'),
-})
 export interface SubmissionTypeFormValues {
     programIDs: string[]
+    riskBasedContract: string
     submissionDescription: string
     submissionType: string
     contractType: string
@@ -78,6 +76,13 @@ export const SubmissionType = ({
     const isNewSubmission = location.pathname === '/submissions/new'
 
     const statePrograms = useStatePrograms()
+
+    // Launch Darkly
+    const ldClient = useLDClient()
+    const showRateCertAssurance = ldClient?.variation(
+        featureFlags.RATE_CERT_ASSURANCE.flag,
+        featureFlags.RATE_CERT_ASSURANCE.defaultValue
+    )
 
     const [createHealthPlanPackage, { error }] =
         useCreateHealthPlanPackageMutation({
@@ -133,6 +138,8 @@ export const SubmissionType = ({
 
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
         programIDs: draftSubmission?.programIDs ?? [],
+        riskBasedContract:
+            booleanAsYesNoFormValue(draftSubmission?.riskBasedContract) ?? '',
         submissionDescription: draftSubmission?.submissionDescription ?? '',
         submissionType: draftSubmission?.submissionType ?? '',
         contractType: draftSubmission?.contractType ?? '',
@@ -176,6 +183,9 @@ export const SubmissionType = ({
                 const input: CreateHealthPlanPackageInput = {
                     programIDs: values.programIDs,
                     submissionType: values.submissionType,
+                    riskBasedContract: showRateCertAssurance
+                        ? yesNoFormValueAsBoolean(values.riskBasedContract)
+                        : undefined,
                     submissionDescription: values.submissionDescription,
                     contractType: values.contractType,
                 }
@@ -213,6 +223,9 @@ export const SubmissionType = ({
             draftSubmission.programIDs = values.programIDs
             draftSubmission.submissionType =
                 values.submissionType as SubmissionTypeT
+            draftSubmission.riskBasedContract = showRateCertAssurance
+                ? yesNoFormValueAsBoolean(values.riskBasedContract)
+                : undefined
             draftSubmission.submissionDescription = values.submissionDescription
             draftSubmission.contractType = values.contractType as ContractType
 
@@ -249,7 +262,9 @@ export const SubmissionType = ({
         <Formik
             initialValues={submissionTypeInitialValues}
             onSubmit={handleFormSubmit}
-            validationSchema={SubmissionTypeFormSchema}
+            validationSchema={SubmissionTypeFormSchema({
+                'rate-cert-assurance': showRateCertAssurance,
+            })}
         >
             {({
                 values,
@@ -390,6 +405,23 @@ export const SubmissionType = ({
                                         value={'AMENDMENT'}
                                     />
                                 </Fieldset>
+                            </FormGroup>
+                            <FormGroup
+                                error={showFieldErrors(
+                                    errors.riskBasedContract
+                                )}
+                            >
+                                {showRateCertAssurance && (
+                                    <FieldYesNo
+                                        id="riskBasedContract"
+                                        name="riskBasedContract"
+                                        label="Is this a risk-based contract?"
+                                        hint="See 42 CFR § 438.2"
+                                        showError={showFieldErrors(
+                                            errors.riskBasedContract
+                                        )}
+                                    />
+                                )}
                             </FormGroup>
                             <FieldTextarea
                                 label="Submission description"

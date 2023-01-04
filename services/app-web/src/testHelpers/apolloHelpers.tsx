@@ -66,6 +66,7 @@ export function mockDraft(): UnlockedHealthPlanFormDataType {
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         submissionType: 'CONTRACT_ONLY',
+        riskBasedContract: false,
         submissionDescription: 'A real submission',
         documents: [],
         contractType: 'BASE',
@@ -91,6 +92,7 @@ export function mockContactAndRatesDraft(): UnlockedHealthPlanFormDataType {
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         submissionType: 'CONTRACT_AND_RATES',
+        riskBasedContract: true,
         submissionDescription: 'A real submission',
         documents: [],
         contractType: 'BASE',
@@ -132,6 +134,7 @@ export function mockCompleteDraft(): UnlockedHealthPlanFormDataType {
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         submissionType: 'CONTRACT_ONLY',
+        riskBasedContract: true,
         submissionDescription: 'A real submission',
         documents: [],
         contractType: 'BASE',
@@ -177,6 +180,7 @@ export function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
         stateCode: 'MN',
         programIDs: ['pmap'],
         submissionType: 'CONTRACT_AND_RATES',
+        riskBasedContract: true,
         submissionDescription: 'A real submission',
         documents: [],
         contractType: 'AMENDMENT',
@@ -265,6 +269,7 @@ export function mockStateSubmission(): LockedHealthPlanFormDataType {
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         submissionType: 'CONTRACT_AND_RATES',
+        riskBasedContract: true,
         submissionDescription: 'A submitted submission',
         submittedAt: new Date(),
         documents: [
@@ -338,6 +343,7 @@ export function mockStateSubmissionContractAmendment(): LockedHealthPlanFormData
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
         submissionType: 'CONTRACT_AND_RATES',
+        riskBasedContract: true,
         submissionDescription: 'A submitted submission',
         submittedAt: new Date(),
         documents: [
@@ -1153,6 +1159,7 @@ const createHealthPlanPackageMockSuccess =
         const submissionData: Partial<UnlockedHealthPlanFormDataType> = {
             programIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
             submissionType: 'CONTRACT_ONLY',
+            riskBasedContract: true,
             submissionDescription: 'A submitted submission',
         }
         const pkg = mockDraftHealthPlanPackage()

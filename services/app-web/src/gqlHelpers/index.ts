@@ -6,7 +6,7 @@ import {
 import {
     unlockMutationWrapper,
     submitMutationWrapper,
-} from './mutationWrappers'
+} from './mutationWrappersForUserFriendlyErrors'
 import { useFetchHealthPlanPackageWrapper } from './fetchHealthPlanPackageWrapper'
 
 const isGraphQLErrors = (input: unknown): input is GraphQLErrors => {

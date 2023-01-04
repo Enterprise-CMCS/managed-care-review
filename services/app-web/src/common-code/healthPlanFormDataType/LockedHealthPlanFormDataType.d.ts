@@ -20,6 +20,7 @@ export type LockedHealthPlanFormDataType = {
     stateNumber: number
     programIDs: string[]
     submissionDescription: string
+    riskBasedContract: boolean
     submissionType: SubmissionType
     createdAt: Date
     updatedAt: DateTime

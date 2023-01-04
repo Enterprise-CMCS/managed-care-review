@@ -7,11 +7,7 @@ import { compileGraphQLTypesWatchOnce } from './graphql.js'
 import { compileProtoWatch } from './proto.js'
 
 async function installWebDeps(runner: LabeledProcessRunner) {
-    return runner.runCommandAndOutput(
-        'web deps',
-        ['yarn', 'install'],
-        'services/app-web'
-    )
+    return runner.runCommandAndOutput('web deps', ['yarn', 'install'], '')
 }
 
 export const installWebDepsOnce = once(installWebDeps)
@@ -23,7 +19,11 @@ export async function runWebLocally(runner: LabeledProcessRunner) {
 
     await installWebDepsOnce(runner)
 
-    runner.runCommandAndOutput('web', ['yarn', 'start'], 'services/app-web')
+    runner.runCommandAndOutput(
+        'web',
+        ['lerna', 'run', 'start', '--scope=app-web'],
+        ''
+    )
 }
 
 // By default, we transform the current branch name into a valid stage name

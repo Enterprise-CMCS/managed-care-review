@@ -8,10 +8,13 @@
         "precommit": "lint-staged",
         "test": "jest --watch",
         "test:once": "jest --runInBand --ci",
+        "test:coverage": "yarn test --coverage --watchAll=false",
         "lint": "tsc --noEmit && eslint . --max-warnings=0",
         "clean": "rm -rf node_modules && yarn cache clean",
-        "generate-code": "yarn prisma generate",
-        "build": "tsc --noEmit"
+        "generate": "yarn prisma generate",
+        "prisma:reset": "npx prisma migrate reset --force",
+        "build": "tsc --noEmit",
+        "start": "npx serverless offline start --stage local --region us-east-1 --httpPort 3030 --useChildProcesses"
     },
     "lint-staged": {
         "*.{js,ts}": [
@@ -20,7 +23,7 @@
         ]
     },
     "dependencies": {
-        "@apollo/gateway": "^2.0.1",
+        "@apollo/gateway": "^2.2.2",
         "@aws-sdk/client-amplify": "^3.226.0",
         "@aws-sdk/client-cognito-identity-provider": "^3.226.0",
         "@aws-sdk/client-lambda": "^3.226.0",
