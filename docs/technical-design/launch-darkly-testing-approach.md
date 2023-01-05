@@ -3,7 +3,7 @@ These implementations are heavily relent on the data and generated Types in `fla
 - Auto generated Types based on the feature flag list help removes the need to update types manually and throughout the codebase.
 - Autocompletion of flag parameters to prevent mistakes and invalid flags when using the implementations.
 
-### Prerequisites
+### Prerequisites for local testing
 Before testing locally, make sure to have the following prerequisites.
 
 - **Launch Darkly API key**: A valid Launch Darkly API key will need to be in your `.envrc.local`, see code block below. Cypress will be making the actual request to Launch Darkly, we will just be intercepting the response. If we had an invalid key here, the request to would return a 404 before we could intercept the response. **This will cause the integration to break in testing.**
@@ -51,7 +51,7 @@ it('cannot continue if no documents are added to the second rate', async () => {
 ```
 
 To configure multiple tests inside a `describe` block you can: 
-- Follow the method for single tests on each test.
+- Follow the method for single test on each test inside the `describe`.
 - If all the tests require the same flag configuration place `ldUseClientSpy` at the top of the block in `beforeEach()`.
 
 ```javascript
@@ -69,14 +69,14 @@ describe('rates across submissions', () => {
 })
 ```
 
-With either one of these methods it's always best to `jest.clearAllMocks()` after each test. This is required for described block example with mixed flag values, otherwise, test may have flags configured not in the intended way.
+It's always best to `jest.clearAllMocks()` after each test with either one of these methods, otherwise, preceding tests may have the same flag configured as the previous test.
 
 ### Server side unit testing
 LaunchDarkly server side implementation is done with configuring our resolvers with `ldService` dependency. In our resolver we then can use the method `getFeatureFlag` from `ldService` to get the flag value from LaunchDarkly.
 
 The unit testing implementation uses a test version of the `ldService` dependency called `testLDService` located in `app-api/src/testHelpers/launchDarklyHelpers.ts`. 
 
-`testLDService` takes in an object of feature flags and values as an argument which is used to return flag value when `getFeatureFlag` is called in the resolver. If no feature flag object is passed in, then the function will use default values to return.
+`testLDService` takes in an object of feature flags and values as an argument which is used to return flag value when `getFeatureFlag` is called in a resolver. If no feature flag object is passed in, then the function will return default values generated from `flags.ts` located in `app-web/src/common-code/featureFlags`.
 
 ```typescript
   function testLDService(
@@ -100,7 +100,7 @@ The unit testing implementation uses a test version of the `ldService` dependenc
   }
 ```
 
-We then pass `testLDService` with our defined values for a flag into `constructTestPostgresServer` when setting up test server. Resolvers in the test will now use `testLDService` when calling `getFeatureFlag` returning our defined feature flag values.
+We then pass `testLDService` with our defined flag values into `constructTestPostgresServer` when setting up test server. Resolvers in the test will now use `testLDService` when calling `getFeatureFlag` returning our defined feature flag values.
 
 ```javascript
 it('does not error when risk based question is undefined and rate-cert-assurance feature flag is off', async () => {
@@ -122,17 +122,19 @@ it('does not error when risk based question is undefined and rate-cert-assurance
 Currently, there is no out of the box Cypress integration with LaunchDarkly. Our implementation approach enables the testing of multiple flag values independent of what is set in LaunchDarkly by intercepting api calls and returning our own generated flag values. This allows us to dynamically tests UI in Cypress with different flag values without having to modify flag values in the LaunchDarkly dashboard.
 
 ### Limitations
-Implementations of LaunchDarkly in Cypress testing are not actually connecting to LaunchDarkly instead are defining our own flag values when testing. There is one major limitation to this implementation, server side and client side flag value syncing in Cypress runs. Since we are not reaching out to LaunchDarkly to either retrieve or set a flag value the server side does not know we have changed a flags value. In this scenario the same flag would be in different states between client and server. 
+There is one major limitation to this implementation, server and client side flag value syncing in Cypress runs. Since we are not reaching out to LaunchDarkly to either retrieve or set a flag value the server side does not know we have changed a flags value. In this scenario the same flag would be in different states between client and server. 
 
-For example, we have some logic on the server side that checks a submission for completion on a new field. This check is behind a feature flag. So if the flag is off, then the check does not happen. Simultaneously on the client side this same flag controls the display of the UI that allows users to fill out this new field. The issue now lies in our Cypress test, we can test client side with this UI disabled for a specific user, but on server side it may be enabled by default for that user and this test will fail because the flag values are now out of sync.
+For example, we have some logic on the server side that checks a submission for completion on a new field. This check is behind a feature flag. So if the flag is off, then the check does not happen. Simultaneously on the client side this same flag controls the display of the UI that allows users to fill out this new field. The issue now lies in our Cypress test, we can test client side with this UI disabled for a specific user, but on server side it may be enabled by default for that user. The test fails because client side expects the server not to check for this field since this feature flag is off and UI is hidden.
 
 There are a couple solutions for this:
-- We default all tests that run into check to have the flag on. In the example above, all tests that will hit this test will have the UI enabled.
+- We default all tests that run into check to have the flag on. In the example above, all tests that will hit the server side check will have the UI enabled.
   - This is already being done for the time being. 
   - Drawbacks:
     - I could see issues in the future when dealing with complex features behind a flag.
+    - We cannot test the app with this feature flag off without manually turning off this flag in LaunchDarkly dashboard.
 - We use specific users for these types of tests, where client and server flags must be synced. In the example above, we use `Toph` to test server side feature flags off and `Aang` for serverside feature flags on.
   - The existing code will have to handle account switching for tests as different states have their own data like programs.
+  - This allows us to keep our implementation that prevents issues when multiple Cypress tests or manual testing happen at the same time with feature flags.
   - Drawbacks:
     - Cypress code may get complicated because switching of accounts. Currently, the issue is only on selecting programs as programs are specific to a state, but there may be more features down the road that will complicate this.
 - We switch this with a different implementation that actually calls out to LaunchDarkly to retrieve or set a flag value. [cypress-id-control](https://github.com/bahmutov/cypress-ld-control) looks like a promising library that does this.
