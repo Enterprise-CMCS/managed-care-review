@@ -1,5 +1,6 @@
 export {
     isEmailAddress,
     includesEmailAddress,
-    formatEmailAddress,
-} from './formatEmailAddress'
+    formatEmailAddresses,
+    pruneDuplicateEmails,
+} from './formatEmailAddresses'

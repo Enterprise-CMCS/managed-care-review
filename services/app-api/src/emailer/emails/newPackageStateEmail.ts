@@ -3,7 +3,7 @@ import {
     packageName as generatePackageName,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
-import { formatEmailAddress } from '../formatters'
+import { formatEmailAddresses } from '../formatters'
 import { EmailConfiguration, EmailData } from '..'
 import { ProgramType, UserType } from '../../domain-models'
 import {
@@ -40,13 +40,13 @@ export const newPackageStateEmail = async (
 
     const data = {
         shouldIncludeRates: isContractAndRates,
-        cmsReviewHelpEmailAddress: formatEmailAddress(
+        cmsReviewHelpEmailAddress: formatEmailAddresses(
             config.cmsReviewHelpEmailAddress
         ),
-        cmsRateHelpEmailAddress: formatEmailAddress(
+        cmsRateHelpEmailAddress: formatEmailAddresses(
             config.cmsRateHelpEmailAddress
         ),
-        cmsDevTeamHelpEmailAddress: formatEmailAddress(
+        cmsDevTeamHelpEmailAddress: formatEmailAddresses(
             config.cmsDevTeamHelpEmailAddress
         ),
         packageName,

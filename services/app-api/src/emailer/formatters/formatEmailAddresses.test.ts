@@ -1,4 +1,9 @@
-import { formatEmailAddress, isEmailAddress, includesEmailAddress } from '.'
+import {
+    formatEmailAddresses,
+    isEmailAddress,
+    includesEmailAddress,
+    pruneDuplicateEmails,
+} from './formatEmailAddresses'
 
 describe('isEmailAddress', () => {
     const validEmails = ['foo@bar.com', 'foo_bar@bar.com', 'foo+bar@foo.com']
@@ -7,7 +12,7 @@ describe('isEmailAddress', () => {
         'foo@',
         'bar.com',
         'fubu__@',
-        '"testfoo" foo+bar@foo.com',
+        '"testfoo" <foo+bar@foo.com>',
     ]
     test.each(validEmails)(
         'given %s as a valid email, returns true',
@@ -29,9 +34,9 @@ describe('isEmailAddress', () => {
 describe('includesEmails', () => {
     const includesEmails = [
         'foo@bar.com',
-        'asdf foo_bar@bar.com',
-        'foo+bar@foo.com asdfadsf bar@foo.com',
-        '"Test Foobar", foo+bar@foo.com',
+        'asdf <foo_bar@bar.com>',
+        'foo+bar@foo.com, "sdfadsf" <bar@foo.com>',
+        '"Test Foobar" <foo+bar@foo.com>',
     ]
 
     const noEmails = ['foo@', 'bar.com', 'fubu__@', 'adsfasdfdaf adsf']
@@ -52,7 +57,7 @@ describe('includesEmails', () => {
     )
 })
 
-describe('formatEmailAddress', () => {
+describe('formatEmailAddresses', () => {
     const sampleStrings = [
         [
             '"Foo Bar 1" foo@bar.com, "Foo Bar 2" foo_bar@bar.com, "Foo Bar 3" foo+bar@foo.com',
@@ -70,7 +75,32 @@ describe('formatEmailAddress', () => {
     test.each(sampleStrings)(
         'given %s, returns %s which is a comma separated email string',
         (firstArg, expectedResult) => {
-            const result = formatEmailAddress(firstArg)
+            const result = formatEmailAddresses(firstArg)
+            expect(result).toEqual(expectedResult)
+        }
+    )
+})
+
+describe('pruneDuplicateEmails', () => {
+    const sampleEmailLists = [
+        [
+            ['"Foo Bar 1" foo@bar.com', 'foo@bar.com', '"Bar 1" bar@foo.com'],
+            ['foo@bar.com', 'bar@foo.com'],
+        ],
+        [
+            ['"Foo Bar 1" foo@bar.com', '"Foo Bar 2" <foo@bar.com>'],
+            ['"Foo Bar 1" foo@bar.com', '"Foo Bar 2" <foo@bar.com>'],
+        ],
+        [
+            ['foo@bar.com', 'foo@nothing.com', 'bar@foo.com'],
+            ['foo@bar.com', 'foo@nothing.com', 'bar@foo.com'],
+        ],
+    ]
+
+    test.each(sampleEmailLists)(
+        'given %s, returns %s which is an array of strings',
+        (firstArg, expectedResult) => {
+            const result = pruneDuplicateEmails(firstArg)
             expect(result).toEqual(expectedResult)
         }
     )
