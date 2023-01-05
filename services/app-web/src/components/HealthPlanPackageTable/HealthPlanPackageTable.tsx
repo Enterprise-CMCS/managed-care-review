@@ -91,6 +91,10 @@ const submissionTypeOptions = [
     },
 ]
 
+// To keep the memoization from being refreshed every time, this needs to be
+// created outside the render function
+const columnHelper = createColumnHelper<PackageInDashboardType>()
+
 export const HealthPlanPackageTable = ({
     tableData,
     user,
@@ -98,7 +102,6 @@ export const HealthPlanPackageTable = ({
 }: PackageTableProps): React.ReactElement => {
     const [columnFilters, setColumnFilters] =
         React.useState<ColumnFiltersState>([])
-    const columnHelper = createColumnHelper<PackageInDashboardType>()
 
     const tableColumns = React.useMemo(
         () => [
@@ -185,7 +188,7 @@ export const HealthPlanPackageTable = ({
                 },
             }),
         ],
-        [columnHelper, user]
+        [user]
     )
 
     const reactTable = useReactTable({
