@@ -18,6 +18,7 @@ import dayjs from 'dayjs'
 import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
 import { FilterAccordion, FilterSelect } from '../FilterAccordion'
 import { InfoTag, TagProps } from '../InfoTag/InfoTag'
+import { pluralize } from '../../common-code/formatters'
 
 declare module '@tanstack/table-core' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -267,10 +268,16 @@ export const HealthPlanPackageTable = ({
                     {
                         <div className={styles.filterCount}>
                             {!hasAppliedFilters
-                                ? `${tableData.length} items`
-                                : hasFilteredRows
-                                ? `Displaying ${filteredRows.length} of ${tableData.length} items`
-                                : undefined}
+                                ? `${tableData.length} ${pluralize(
+                                      'submission',
+                                      tableData.length
+                                  )}`
+                                : `Displaying ${filteredRows.length} of ${
+                                      tableData.length
+                                  } ${pluralize(
+                                      'submission',
+                                      tableData.length
+                                  )}`}
                         </div>
                     }
                     <Table fullWidth>
