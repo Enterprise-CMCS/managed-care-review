@@ -59,15 +59,12 @@ describe('includesEmails', () => {
 
 describe('formatEmailAddresses', () => {
     const sampleStrings = [
+        ['"Foo Bar 1" <foo@bar.com>', 'foo@bar.com'],
         [
-            '"Foo Bar 1" foo@bar.com, "Foo Bar 2" foo_bar@bar.com, "Foo Bar 3" foo+bar@foo.com',
+            '"Foo Bar 1" <foo@bar.com>, "Foo Bar 2" <foo_bar@bar.com>, "Foo Bar 3" <foo+bar@foo.com>',
             'foo@bar.com,foo_bar@bar.com,foo+bar@foo.com',
         ],
         ['foo@bar.com hellobar.com foo@ nothinng', 'foo@bar.com'],
-        [
-            ' "user name" username@email.com, "somethingelse", somethingelse@email.com',
-            'username@email.com,somethingelse@email.com',
-        ],
         ['', ''],
         ['notanemail, email eamil @', ''],
     ]
@@ -84,15 +81,24 @@ describe('formatEmailAddresses', () => {
 describe('pruneDuplicateEmails', () => {
     const sampleEmailLists = [
         [
-            ['"Foo Bar 1" foo@bar.com', 'foo@bar.com', '"Bar 1" bar@foo.com'],
+            // multiple aliased email addresses that duplicate an email elsewhere on list are pruned
+            [
+                '"Foo Bar 1" <foo@bar.com>',
+                'foo@bar.com',
+                'bar@foo.com',
+                '"Bar 1" <bar@foo.com>',
+                '"Bar 2" <bar@foo.com>',
+            ],
             ['foo@bar.com', 'bar@foo.com'],
         ],
+        // multiple aliased email addresses that do not duplicate a raw email string elsewhere in list will remain
+        // this is because there is not way to determine which to prefer
         [
             ['"Foo Bar 1" foo@bar.com', '"Foo Bar 2" <foo@bar.com>'],
             ['"Foo Bar 1" foo@bar.com', '"Foo Bar 2" <foo@bar.com>'],
         ],
         [
-            ['foo@bar.com', 'foo@nothing.com', 'bar@foo.com'],
+            ['foo@bar.com', 'foo@nothing.com', 'bar@foo.com', 'bar@foo.com'],
             ['foo@bar.com', 'foo@nothing.com', 'bar@foo.com'],
         ],
     ]

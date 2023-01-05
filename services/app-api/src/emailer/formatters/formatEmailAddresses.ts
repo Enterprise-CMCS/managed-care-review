@@ -30,16 +30,21 @@ const formatEmailAddresses = (str: string) => {
     Remove duplicate emails from email string array
 
     This function will remove duplicate emails, including aliased emails that duplicate the same raw email string used elsewhere as a standalone entry
-    e.g. if "Foo Bar" <foobar@example> and foobar@example.com are both in the list, foobar@example.com will be added to the list once and the aliased version will be pruned from list. 
-    However, multiple aliased email addresses that do not replicate a raq email string elsewhere will be allowed as duplicates
-    e.g. if "Foo Bar" <foobar@example> and "The best Foo Bar" <foobar@example> are both in the list, both will be included because there's no way to determine which to prefer
+    However, multiple aliased email addresses that do not replicate a raw email string elsewhere in list are allowed as duplicates because there is not way to determine which to prefer
+    e.g. if "Foo Bar" <foobar@example> and foobar@example.com are both in the list, only foobar@example.com will remain after prune
+    e.g. if "Foo Bar" <foobar@example> and "The best Foo Bar" <foobar@example> are both in the list, both remain after prune
 */
 const pruneDuplicateEmails = (emails: string[]): string[] =>
-    emails.filter(
-        (email, index) =>
-            emails.indexOf(email) === index ||
-            emails.indexOf(formatEmailAddresses(email)) == index
-    )
+    emails.filter((email, index) => {
+        const rawEmailAddress = formatEmailAddresses(email)
+
+        // if we know that we have a possible aliased email address that is also included elsewhere on list as a raw email, remove it
+        if (!isEmailAddress(email) && emails.indexOf(rawEmailAddress) !== -1) {
+            emails.indexOf(rawEmailAddress) === index
+        } else {
+            return emails.indexOf(email) === index
+        }
+    })
 
 export {
     isEmailAddress,
