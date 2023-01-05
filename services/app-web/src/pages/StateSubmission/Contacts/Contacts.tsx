@@ -60,6 +60,7 @@ const yupValidation = (submissionType: string) => {
                 ),
                 email: Yup.string()
                     .email('You must enter a valid email address')
+                    .trim()
                     .required('You must provide an email address'),
             })
         ),
@@ -76,6 +77,7 @@ const yupValidation = (submissionType: string) => {
                 ),
                 email: Yup.string()
                     .email('You must enter a valid email address')
+                    .trim()
                     .required('You must provide an email address'),
                 actuarialFirm: Yup.string()
                     .required('You must select an actuarial firm')
