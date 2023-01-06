@@ -15,7 +15,8 @@ What follow are step-by-step instructions on how to add those addresses. This pr
 1. **Leave the Description blank and Tier as Standard**.
 1. **Change the Type to `StringList`** because often there's more than one email that we want to send to.
 1. **Leave the `Data type` as `text`**.
-1. **Paste the value you previously copied from an existing state's configuration** Be sure to **change the state details**. REMEMBER, IN PROD, YOU WILL BE ENTERING ACTUAL EMAIL ADDRESSES as a comma-separated list, with no spaces, like `jim.smith@cms.hhs.gov,wendy.williams@cms.hhs.gov`.
+1. [in lower environments] **Paste the value you previously copied from an existing state's configuration** Be sure to **change the state details** to allow better testing.
+2. [in production] **Enter the specific state analyst emails as a comma-separated list with no spaces**, like `jim.smith@cms.hhs.gov,wendy.williams@cms.hhs.gov`.  REMEMBER, IN PROD, YOU WILL BE ENTERING ACTUAL EMAIL ADDRESSES
 1. Once you've entered the information, **click Create parameter**.
 
 Once you've done that for all three environments, you're done.
