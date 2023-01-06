@@ -343,7 +343,7 @@ export const Contacts = ({
                                                         >
                                                             <FieldTextInput
                                                                 id={`stateContacts.${index}.name`}
-                                                                label="Title/Role"
+                                                                label="Name"
                                                                 name={`stateContacts.${index}.name`}
                                                                 aria-required={
                                                                     index === 0
