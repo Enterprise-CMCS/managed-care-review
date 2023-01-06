@@ -42,8 +42,6 @@ import {
     packageName,
 } from '../../common-code/healthPlanFormDataType'
 import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
-import { makeDocumentListFromFormDatas } from '../../documentHelpers/makeDocumentKeyLookupList'
-import { makeDateTableFromFormData } from '../../documentHelpers/makeDocumentDateLookupTable'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
 import { useStatePrograms } from '../../hooks/useStatePrograms'
 
@@ -191,25 +189,17 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return <GenericErrorPage /> // api failure or protobuf decode failure
     }
 
-    const pkg = fetchResult.data.fetchHealthPlanPackage.pkg
+    const { data, formDatas, documentDates, documentLists } = fetchResult
+    const pkg = data.fetchHealthPlanPackage.pkg
 
     // fetchHPP returns null if no package is found with the given ID
     if (!pkg) {
         return <Error404 />
     }
 
-    // Generate the document data tables
-    // revisions are correctly ordered so we can map into the form data
-    const formDatasInOrder = pkg.revisions.map((rEdge) => {
-        return fetchResult.formDatas[rEdge.node.id]
-    })
-    const documentDates = makeDateTableFromFormData(formDatasInOrder)
-    const previousDocuments =
-        makeDocumentListFromFormDatas(formDatasInOrder).previousDocuments
-
     // pull out the latest revision for editing
     const latestRevision = pkg.revisions[0].node
-    const formDataFromLatestRevision = fetchResult.formDatas[latestRevision.id]
+    const formDataFromLatestRevision = formDatas[latestRevision.id]
 
     // if we've gotten back a submitted revision, it can't be edited
     if (formDataFromLatestRevision.status !== 'DRAFT') {
@@ -262,7 +252,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
                             <ContractDetails
                                 draftSubmission={formDataFromLatestRevision}
                                 updateDraft={updateDraftHealthPlanPackage}
-                                previousDocuments={previousDocuments}
+                                previousDocuments={
+                                    documentLists.previousDocuments
+                                }
                             />
                         }
                     />
@@ -274,7 +266,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
                             <RateDetails
                                 draftSubmission={formDataFromLatestRevision}
                                 updateDraft={updateDraftHealthPlanPackage}
-                                previousDocuments={previousDocuments}
+                                previousDocuments={
+                                    documentLists.previousDocuments
+                                }
                             />
                         }
                     />
@@ -297,7 +291,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
                             <Documents
                                 draftSubmission={formDataFromLatestRevision}
                                 updateDraft={updateDraftHealthPlanPackage}
-                                previousDocuments={previousDocuments}
+                                previousDocuments={
+                                    documentLists.previousDocuments
+                                }
                             />
                         }
                     />

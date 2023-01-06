@@ -13,63 +13,92 @@ import {
     QueryLoading,
     QuerySuccess,
 } from './apolloQueryWrapper'
+import { DocumentDateLookupTable } from '../pages/SubmissionSummary/SubmissionSummary'
+import { makeDateTableFromFormData } from '../documentHelpers/makeDocumentDateLookupTable'
+import {
+    LookupListType,
+    makeDocumentListFromFormDatas,
+} from '../documentHelpers/makeDocumentKeyLookupList'
 
 // We return a slightly modified version of the wrapped result adding formDatas
-type ParsedFetchSuccessType = QuerySuccess<FetchHealthPlanPackageQuery> & {
+type ParsedDataType = {
     formDatas: { [revisionID: string]: HealthPlanFormDataType }
+    documentDates: DocumentDateLookupTable
+    documentLists: LookupListType
 }
 
-type ParsedFetchResult = QueryLoading | QueryError | ParsedFetchSuccessType
+type ParsedFetchSuccessType = QuerySuccess<FetchHealthPlanPackageQuery> &
+    ParsedDataType
 
-type WrappedFetchResult<ResultType> = Omit<
+type ParsedFetchResultType = QueryLoading | QueryError | ParsedFetchSuccessType
+
+type WrappedFetchResultType<ResultType> = Omit<
     ResultType,
     'data' | 'loading' | 'error'
 > & {
-    result: ParsedFetchResult
+    result: ParsedFetchResultType
 }
 
 function parseProtos(
     result: QuerySuccess<FetchHealthPlanPackageQuery>
-): ParsedFetchResult {
+): ParsedFetchResultType {
     const pkg = result.data.fetchHealthPlanPackage.pkg
 
-    const formDatas: { [revisionID: string]: HealthPlanFormDataType } = {}
-    if (pkg) {
-        if (pkg.revisions.length < 1) {
-            const err = new Error(
-                `useFetchHealthPlanPackageWrapper: submission has no revisions. ID: ${pkg.id}`
-            )
-            recordJSException(err)
-            console.error(err)
-            return {
-                status: 'ERROR',
-                error: err,
-            }
-        }
-
-        for (const revisionEdge of pkg.revisions) {
-            const revision = revisionEdge.node
-            const formDataResult = base64ToDomain(revision.formDataProto)
-
-            if (formDataResult instanceof Error) {
-                const err =
-                    new Error(`useFetchHealthPlanPackageWrapper: proto decoding error. ID:
-                    ${pkg.id}. Error message: ${formDataResult}`)
-                recordJSException(err)
-                console.error('Error decoding revision', revision, err)
-                return {
-                    status: 'ERROR',
-                    error: formDataResult,
-                }
-            }
-
-            formDatas[revision.id] = formDataResult
+    if (!pkg) {
+        return {
+            ...result,
+            formDatas: {},
+            documentDates: {},
+            documentLists: {
+                currentDocuments: [],
+                previousDocuments: [],
+            },
         }
     }
+
+    if (pkg.revisions.length < 1) {
+        const err = new Error(
+            `useFetchHealthPlanPackageWrapper: submission has no revisions. ID: ${pkg.id}`
+        )
+        recordJSException(err)
+        console.error(err)
+        return {
+            status: 'ERROR',
+            error: err,
+        }
+    }
+
+    const formDatas: { [revisionID: string]: HealthPlanFormDataType } = {}
+    for (const revisionEdge of pkg.revisions) {
+        const revision = revisionEdge.node
+        const formDataResult = base64ToDomain(revision.formDataProto)
+
+        if (formDataResult instanceof Error) {
+            const err =
+                new Error(`useFetchHealthPlanPackageWrapper: proto decoding error. ID:
+                ${pkg.id}. Error message: ${formDataResult}`)
+            recordJSException(err)
+            console.error('Error decoding revision', revision, err)
+            return {
+                status: 'ERROR',
+                error: formDataResult,
+            }
+        }
+
+        formDatas[revision.id] = formDataResult
+    }
+
+    const formDatasInOrder = pkg.revisions.map((rEdge) => {
+        return formDatas[rEdge.node.id]
+    })
+    const documentDates = makeDateTableFromFormData(formDatasInOrder)
+    const documentLists = makeDocumentListFromFormDatas(formDatasInOrder)
 
     return {
         ...result,
         formDatas,
+        documentDates,
+        documentLists,
     }
 }
 
@@ -77,7 +106,7 @@ function parseProtos(
 // from the response, returning extra errors in the case that parsing goes wrong
 function useFetchHealthPlanPackageWrapper(
     id: string
-): WrappedFetchResult<
+): WrappedFetchResultType<
     QueryResult<
         FetchHealthPlanPackageQuery,
         FetchHealthPlanPackageQueryVariables

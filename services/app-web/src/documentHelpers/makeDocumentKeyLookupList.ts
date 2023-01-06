@@ -3,7 +3,7 @@ import { HealthPlanPackage } from '../gen/gqlClient'
 import { parseKey } from '../common-code/s3URLEncoding'
 import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
 
-type LookupListType = {
+export type LookupListType = {
     currentDocuments: string[]
     previousDocuments: string[]
 }

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
 import { useParams } from 'react-router-dom'
 import { packageName } from '../../common-code/healthPlanFormDataType'
-import { makeDateTableFromFormData } from '../../documentHelpers/makeDocumentDateLookupTable'
 import { Loading } from '../../components/Loading'
 import {
     ContactsSummarySection,
@@ -55,7 +54,8 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         return <GenericErrorPage /> // api failure or protobuf decode failure
     }
 
-    const pkg = fetchResult.data.fetchHealthPlanPackage.pkg
+    const { data, formDatas, documentDates } = fetchResult
+    const pkg = data.fetchHealthPlanPackage.pkg
 
     // fetchHPP returns null if no package is found with the given ID
     if (!pkg) {
@@ -71,20 +71,13 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         console.info('no revision found at index', revisionIndex)
         return <Error404 />
     }
-    const packageData = fetchResult.formDatas[revision.id]
+    const packageData = formDatas[revision.id]
 
     const statePrograms = pkg.state.programs
     const name = packageName(packageData, statePrograms)
     if (pkgName !== name) {
         setPkgName(name)
     }
-
-    // Generate the document date table
-    // revisions are correctly ordered so we can map into the form data
-    const formDatasInOrder = pkg.revisions.map((rEdge) => {
-        return fetchResult.formDatas[rEdge.node.id]
-    })
-    const documentDates = makeDateTableFromFormData(formDatasInOrder)
 
     const submitInfo = revision.submitInfo || undefined
 

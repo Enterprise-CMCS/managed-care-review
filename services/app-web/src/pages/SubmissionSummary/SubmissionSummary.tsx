@@ -8,7 +8,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, NavLink, useParams } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
 import { packageName } from '../../common-code/healthPlanFormDataType'
-import { makeDateTableFromFormData } from '../../documentHelpers/makeDocumentDateLookupTable'
 import { Loading } from '../../components/Loading'
 import {
     ContactsSummarySection,
@@ -92,7 +91,8 @@ export const SubmissionSummary = (): React.ReactElement => {
         return <GenericErrorPage /> // api failure or protobuf decode failure
     }
 
-    const pkg = fetchResult.data.fetchHealthPlanPackage.pkg
+    const { data, formDatas, documentDates } = fetchResult
+    const pkg = data.fetchHealthPlanPackage.pkg
 
     // fetchHPP returns null if no package is found with the given ID
     if (!pkg) {
@@ -115,13 +115,6 @@ export const SubmissionSummary = (): React.ReactElement => {
         navigate(`/submissions/${id}/edit/type`)
     }
 
-    // Generate the document date table
-    // revisions are correctly ordered so we can map into the form data
-    const formDatasInOrder = pkg.revisions.map((rEdge) => {
-        return fetchResult.formDatas[rEdge.node.id]
-    })
-    const documentDates = makeDateTableFromFormData(formDatasInOrder)
-
     // Current Revision is the last SUBMITTED revision, SubmissionSummary doesn't display data that is currently being edited
     // Since we've already bounced on DRAFT packages, this _should_ exist.
     const edge = pkg.revisions.find((rEdge) => rEdge.node.submitInfo)
@@ -132,7 +125,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         return <GenericErrorPage />
     }
     const currentRevision = edge.node
-    const packageData = fetchResult.formDatas[currentRevision.id]
+    const packageData = formDatas[currentRevision.id]
 
     // set the page heading
     const name = packageName(packageData, statePrograms)
