@@ -10,9 +10,10 @@ import {
     Formik,
     FormikErrors,
     FormikHelpers,
-    Field,
     FieldArray,
+    Field,
     ErrorMessage,
+    getIn,
 } from 'formik'
 import { useNavigate } from 'react-router-dom'
 
@@ -23,12 +24,17 @@ import {
     ActuaryCommunicationType,
 } from '../../../common-code/healthPlanFormDataType'
 
-import { ErrorSummary, FieldRadio } from '../../../components/Form'
+import {
+    ErrorSummary,
+    FieldRadio,
+    FieldTextInput,
+} from '../../../components/Form'
 
 import { useFocus } from '../../../hooks/useFocus'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { ActuaryContactFields } from './ActuaryContactFields'
+import { PoliteErrorMessage } from '../../../components'
 
 export interface ContactsFormValues {
     stateContacts: stateContactValue[]
@@ -103,19 +109,6 @@ const yupValidation = (submissionType: string) => {
 type FormError =
     FormikErrors<ContactsFormValues>[keyof FormikErrors<ContactsFormValues>]
 
-// We want to make sure we are returning the specific error
-// for a given field when we pass it through showFieldErrors
-// so this makes sure we return the actual error and if its
-// anything else we return undefined to not show it
-const stateContactErrorHandling = (
-    error: string | FormikErrors<stateContactValue> | undefined
-): FormikErrors<stateContactValue> | undefined => {
-    if (typeof error === 'string') {
-        return undefined
-    }
-    return error
-}
-
 // Convert the formik errors into a shape that can be passed to ErrorSummary
 const flattenErrors = (
     errors: FormikErrors<ContactsFormValues>
@@ -169,7 +162,7 @@ export const Contacts = ({
         React.useState(false)
 
     const redirectToDashboard = React.useRef(false)
-    const newStateContactNameRef = React.useRef<HTMLElement | null>(null) // This ref.current is reset to the newest contact name field each time new contact is added
+    const newStateContactNameRef = React.useRef<HTMLInputElement | null>(null) // This ref.current is reset to the newest contact name field each time new contact is added
     const [newStateContactButtonRef, setNewStateContactButtonFocus] = useFocus() // This ref.current is always the same element
 
     const newActuaryContactNameRef = React.useRef<HTMLElement | null>(null)
@@ -264,9 +257,7 @@ export const Contacts = ({
         values: ContactsFormValues,
         formikHelpers: FormikHelpers<ContactsFormValues>
     ) => {
-        // const updatedDraft = updatesFromSubmission(draftSubmission)
         draftSubmission.stateContacts = values.stateContacts
-
         if (includeActuaryContacts) {
             draftSubmission.addtlActuaryContacts = values.addtlActuaryContacts
             draftSubmission.addtlActuaryCommunicationPreference =
@@ -352,119 +343,64 @@ export const Contacts = ({
                                                                 'State'
                                                             )}
                                                         >
-                                                            <FormGroup
-                                                                error={showFieldErrors(
-                                                                    stateContactErrorHandling(
-                                                                        errors
-                                                                            ?.stateContacts?.[
-                                                                            index
-                                                                        ]
-                                                                    )?.name
-                                                                )}
-                                                            >
-                                                                <label
-                                                                    htmlFor={`stateContacts.${index}.name`}
-                                                                >
-                                                                    Name
-                                                                </label>
-                                                                {showFieldErrors(
-                                                                    `True`
-                                                                ) && (
-                                                                    <ErrorMessage
-                                                                        name={`stateContacts.${index}.name`}
-                                                                        component="div"
-                                                                        className="usa-error-message"
-                                                                    />
-                                                                )}
-                                                                <Field
-                                                                    name={`stateContacts.${index}.name`}
-                                                                    id={`stateContacts.${index}.name`}
-                                                                    aria-required={
-                                                                        index ===
-                                                                        0
-                                                                    }
-                                                                    type="text"
-                                                                    className="usa-input"
-                                                                    innerRef={(
-                                                                        el: HTMLElement
-                                                                    ) =>
-                                                                        (newStateContactNameRef.current =
-                                                                            el)
-                                                                    }
-                                                                />
-                                                            </FormGroup>
 
-                                                            <FormGroup
-                                                                error={showFieldErrors(
-                                                                    stateContactErrorHandling(
-                                                                        errors
-                                                                            ?.stateContacts?.[
-                                                                            index
-                                                                        ]
-                                                                    )?.titleRole
+                                                            <FieldTextInput
+                                                                id={`stateContacts.${index}.name`}
+                                                                label="Title/Role"
+                                                                name={`stateContacts.${index}.name`}
+                                                                aria-required={
+                                                                    index === 0
+                                                                }
+                                                                showError={Boolean(
+                                                                    showFieldErrors(
+                                                                        getIn(
+                                                                            errors,
+                                                                            `stateContacts.${index}.name`
+                                                                        )
+                                                                    )
                                                                 )}
-                                                            >
-                                                                <label
-                                                                    htmlFor={`stateContacts.${index}.titleRole`}
-                                                                >
-                                                                    Title/Role
-                                                                </label>
-                                                                {showFieldErrors(
-                                                                    `True`
-                                                                ) && (
-                                                                    <ErrorMessage
-                                                                        name={`stateContacts.${index}.titleRole`}
-                                                                        component="div"
-                                                                        className="usa-error-message"
-                                                                    />
-                                                                )}
-                                                                <Field
-                                                                    name={`stateContacts.${index}.titleRole`}
-                                                                    id={`stateContacts.${index}.titleRole`}
-                                                                    aria-required={
-                                                                        index ===
-                                                                        0
-                                                                    }
-                                                                    type="text"
-                                                                    className="usa-input"
-                                                                />
-                                                            </FormGroup>
+                                                                type="text"
+                                                                inputRef={newStateContactNameRef}
+                                                                variant="SUBHEAD"
+                                                            />
 
-                                                            <FormGroup
-                                                                error={showFieldErrors(
-                                                                    stateContactErrorHandling(
-                                                                        errors
-                                                                            ?.stateContacts?.[
-                                                                            index
-                                                                        ]
-                                                                    )?.email
+                                                            <FieldTextInput
+                                                                id={`stateContacts.${index}.titleRole`}
+                                                                label="Title/Role"
+                                                                name={`stateContacts.${index}.titleRole`}
+                                                                aria-required={
+                                                                    index === 0
+                                                                }
+                                                                showError={Boolean(
+                                                                    showFieldErrors(
+                                                                        getIn(
+                                                                            errors,
+                                                                            `stateContacts.${index}.titleRole`
+                                                                        )
+                                                                    )
                                                                 )}
-                                                            >
-                                                                <label
-                                                                    htmlFor={`stateContacts.${index}.email`}
-                                                                >
-                                                                    Email
-                                                                </label>
-                                                                {showFieldErrors(
-                                                                    `True`
-                                                                ) && (
-                                                                    <ErrorMessage
-                                                                        name={`stateContacts.${index}.email`}
-                                                                        component="div"
-                                                                        className="usa-error-message"
-                                                                    />
+                                                                type="text"
+                                                                variant="SUBHEAD"
+                                                            />
+
+                                                            <FieldTextInput
+                                                                id={`stateContacts.${index}.email`}
+                                                                label="Email"
+                                                                name={`stateContacts.${index}.email`}
+                                                                aria-required={
+                                                                    index === 0
+                                                                }
+                                                                showError={Boolean(
+                                                                    showFieldErrors(
+                                                                        getIn(
+                                                                            errors,
+                                                                            `stateContacts.${index}.email`
+                                                                        )
+                                                                    )
                                                                 )}
-                                                                <Field
-                                                                    name={`stateContacts.${index}.email`}
-                                                                    id={`stateContacts.${index}.email`}
-                                                                    aria-required={
-                                                                        index ===
-                                                                        0
-                                                                    }
-                                                                    type="text"
-                                                                    className="usa-input"
-                                                                />
-                                                            </FormGroup>
+                                                                type="email"
+                                                                variant="SUBHEAD"
+                                                            />
 
                                                             {index > 0 && (
                                                                 <Button

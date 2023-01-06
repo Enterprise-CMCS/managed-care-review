@@ -3,6 +3,8 @@ import { useField } from 'formik'
 import { Label, TextInput, FormGroup } from '@trussworks/react-uswds'
 import { PoliteErrorMessage } from '../../'
 
+import styles from './FieldTextInput.module.scss'
+import classNames from 'classnames'
 /**
  * This component renders a ReactUSWDS TextInput component inside of a FormGroup,
  * with a Label and ErrorMessage.
@@ -16,16 +18,19 @@ import { PoliteErrorMessage } from '../../'
 
 export type TextInputProps = {
     label: string
+    variant?: 'TOPLEVEL' | 'SUBHEAD' // subhead used for forms where fields could be nested under a larger heading or label
     id: string
     hint?: React.ReactNode
     error?: string
     showError: boolean
     name: string
     type: 'text' | 'email' | 'number' | 'password' | 'search' | 'tel' | 'url'
-} & JSX.IntrinsicElements['input']
+} & React.ComponentProps<typeof TextInput>
 
 export const FieldTextInput = ({
+    className,
     label,
+    variant = 'TOPLEVEL',
     id,
     hint,
     error,
@@ -35,8 +40,16 @@ export const FieldTextInput = ({
     ...inputProps
 }: TextInputProps): React.ReactElement => {
     const [field, meta] = useField({ name })
+
+    const classes = classNames(
+        {
+            [styles.nestedField]: variant === 'SUBHEAD',
+        },
+        className
+    )
+
     return (
-        <FormGroup error={showError}>
+        <FormGroup error={showError} className={classes}>
             <Label htmlFor={id} error={showError}>
                 {label}
             </Label>
@@ -44,7 +57,11 @@ export const FieldTextInput = ({
                 <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>
             )}
             {hint && (
-                <div role="note" aria-labelledby={id} className="usa-hint margin-top-1">
+                <div
+                    role="note"
+                    aria-labelledby={id}
+                    className="usa-hint margin-top-1"
+                >
                     {hint}
                 </div>
             )}
