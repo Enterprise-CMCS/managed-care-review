@@ -9,6 +9,7 @@ import {
 import { EmailConfiguration, StateAnalystsEmails } from '.'
 import { ProgramType, UserType } from '../domain-models'
 import { logError } from '../logger'
+import { pruneDuplicateEmails } from './formatters'
 
 // ETA SETUP
 Eta.configure({
@@ -67,10 +68,6 @@ const includesChipPrograms = (programIDs: string[]): boolean => {
     const chipProgramIds = Object.values(CHIP_PROGRAMS_UUID)
     return programIDs.some((id: string) => chipProgramIds.includes(id))
 }
-
-// Prune duplicate emails
-const pruneDuplicateEmails = (emails: string[]): string[] =>
-    emails.filter((email, index) => emails.indexOf(email) === index)
 
 // Determine who should be notified as a reviewer for a given health plan package and state
 const generateCMSReviewerEmails = (
