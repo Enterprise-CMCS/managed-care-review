@@ -1,43 +1,43 @@
-type QueryLoading = {
+type QueryLoadingType = {
     status: 'LOADING'
 }
 
-type QueryError = {
+type QueryErrorType = {
     status: 'ERROR'
     error: Error
 }
 
-type QuerySuccess<SuccessType> = {
+type QuerySuccessType<SuccessType, AdditionalVars = Record<string, unknown>> = {
     status: 'SUCCESS'
     data: SuccessType
-}
+} & AdditionalVars
 
-type ApolloUseQueryResult<SuccessType> =
-    | QueryLoading
-    | QueryError
-    | QuerySuccess<SuccessType>
+type ApolloResultType<SuccessType, AdditionalVars = Record<string, unknown>> =
+    | QueryLoadingType
+    | QueryErrorType
+    | QuerySuccessType<SuccessType, AdditionalVars>
 
 // These are the parts of the useQuery result we want to wrap up, converting data | error | loading => result
-interface WrappableApolloQuery {
+interface WrappableApolloResultsType {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any
     error?: Error
     loading: boolean
 }
 
-type WrappedApolloResult<ResultType extends WrappableApolloQuery> = Omit<
-    ResultType,
-    'data' | 'loading' | 'error'
-> & {
-    result: ApolloUseQueryResult<NonNullable<ResultType['data']>>
+type WrappedApolloResultType<
+    ResultType extends WrappableApolloResultsType,
+    AdditionalVars = Record<string, unknown>
+> = Omit<ResultType, 'data' | 'loading' | 'error'> & {
+    result: ApolloResultType<NonNullable<ResultType['data']>, AdditionalVars>
 }
 
 // Apollo's useQuery returns three independent variables to track loading, error, and data. In our usage
 // no two of those variables should never be accessed at the same time. This wrapper replaces them with
-// a single variable "result" of ApolloUseQueryResult type.
-function wrapApolloResult<ResultType extends WrappableApolloQuery>(
+// a single variable "result" of ApolloResultType type.
+function wrapApolloResult<ResultType extends WrappableApolloResultsType>(
     queryResult: ResultType
-): WrappedApolloResult<ResultType> {
+): WrappedApolloResultType<ResultType> {
     const { loading, error, data } = queryResult
 
     if (loading) {
@@ -80,4 +80,10 @@ function wrapApolloResult<ResultType extends WrappableApolloQuery>(
 
 export { wrapApolloResult }
 
-export type { ApolloUseQueryResult, QueryError, QueryLoading, QuerySuccess }
+export type {
+    ApolloResultType,
+    WrappedApolloResultType,
+    QuerySuccessType,
+    QueryErrorType,
+    QueryLoadingType,
+}

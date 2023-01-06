@@ -1,17 +1,15 @@
-import { QueryResult } from '@apollo/client'
 import {
     useFetchHealthPlanPackageQuery,
     FetchHealthPlanPackageQuery,
-    FetchHealthPlanPackageQueryVariables,
 } from '../gen/gqlClient'
 import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto'
 import { recordJSException } from '../otelHelpers'
 import {
     wrapApolloResult,
-    QueryError,
-    QueryLoading,
-    QuerySuccess,
+    ApolloResultType,
+    QuerySuccessType,
+    WrappedApolloResultType,
 } from './apolloQueryWrapper'
 import { DocumentDateLookupTable } from '../pages/SubmissionSummary/SubmissionSummary'
 import { makeDateTableFromFormData } from '../documentHelpers/makeDocumentDateLookupTable'
@@ -21,26 +19,25 @@ import {
 } from '../documentHelpers/makeDocumentKeyLookupList'
 
 // We return a slightly modified version of the wrapped result adding formDatas
-type ParsedDataType = {
+// all of these fields will be added to the SUCCESS type
+type AdditionalParsedDataType = {
     formDatas: { [revisionID: string]: HealthPlanFormDataType }
     documentDates: DocumentDateLookupTable
     documentLists: LookupListType
 }
 
-type ParsedFetchSuccessType = QuerySuccess<FetchHealthPlanPackageQuery> &
-    ParsedDataType
+type ParsedFetchResultType = ApolloResultType<
+    FetchHealthPlanPackageQuery,
+    AdditionalParsedDataType
+>
 
-type ParsedFetchResultType = QueryLoading | QueryError | ParsedFetchSuccessType
-
-type WrappedFetchResultType<ResultType> = Omit<
-    ResultType,
-    'data' | 'loading' | 'error'
-> & {
-    result: ParsedFetchResultType
-}
+type WrappedFetchResultType = WrappedApolloResultType<
+    ReturnType<typeof useFetchHealthPlanPackageQuery>,
+    AdditionalParsedDataType
+>
 
 function parseProtos(
-    result: QuerySuccess<FetchHealthPlanPackageQuery>
+    result: QuerySuccessType<FetchHealthPlanPackageQuery>
 ): ParsedFetchResultType {
     const pkg = result.data.fetchHealthPlanPackage.pkg
 
@@ -104,14 +101,7 @@ function parseProtos(
 
 // This wraps our call to useFetchHealthPlanPackageQuery, parsing out the protobuf
 // from the response, returning extra errors in the case that parsing goes wrong
-function useFetchHealthPlanPackageWrapper(
-    id: string
-): WrappedFetchResultType<
-    QueryResult<
-        FetchHealthPlanPackageQuery,
-        FetchHealthPlanPackageQueryVariables
-    >
-> {
+function useFetchHealthPlanPackageWrapper(id: string): WrappedFetchResultType {
     const results = wrapApolloResult(
         useFetchHealthPlanPackageQuery({
             variables: {
@@ -132,12 +122,9 @@ function useFetchHealthPlanPackageWrapper(
         }
     }
 
-    // Typescript should be smart enough to figure this out but I'll give it a pass
-    const nonSuccessResult: QueryLoading | QueryError = result
-
     return {
         ...results,
-        result: nonSuccessResult,
+        result: result,
     }
 }
 
