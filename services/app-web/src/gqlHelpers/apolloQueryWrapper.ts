@@ -25,14 +25,19 @@ interface WrappableApolloQuery {
     loading: boolean
 }
 
+type WrappedApolloResult<ResultType extends WrappableApolloQuery> = Omit<
+    ResultType,
+    'data' | 'loading' | 'error'
+> & {
+    result: ApolloUseQueryResult<NonNullable<ResultType['data']>>
+}
+
 // Apollo's useQuery returns three independent variables to track loading, error, and data. In our usage
 // no two of those variables should never be accessed at the same time. This wrapper replaces them with
 // a single variable "result" of ApolloUseQueryResult type.
 function wrapApolloResult<ResultType extends WrappableApolloQuery>(
     queryResult: ResultType
-): Omit<ResultType, 'data' | 'loading' | 'error'> & {
-    result: ApolloUseQueryResult<NonNullable<ResultType['data']>>
-} {
+): WrappedApolloResult<ResultType> {
     const { loading, error, data } = queryResult
 
     if (loading) {
@@ -75,4 +80,4 @@ function wrapApolloResult<ResultType extends WrappableApolloQuery>(
 
 export { wrapApolloResult }
 
-export type { ApolloUseQueryResult }
+export type { ApolloUseQueryResult, QueryError, QueryLoading, QuerySuccess }
