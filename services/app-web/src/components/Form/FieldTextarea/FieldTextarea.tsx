@@ -30,9 +30,21 @@ export const FieldTextarea = ({
     error,
     showError,
     name,
+    onBlur,
     ...inputProps
 }: TextAreaProps): React.ReactElement => {
     const [field, meta] = useField({ name })
+
+    // Latch into onBlur to do any input cleaning
+    // Initial use case is to trim away trailing whitespace in email addresses
+    const customOnBlur = (
+        e: React.FocusEvent<HTMLTextAreaElement, Element>
+    ) => {
+        if (!e) return
+        e.currentTarget.value = field.value.trim()
+        if (onBlur) onBlur(e)
+    }
+
     return (
         <FormGroup error={showError}>
             <Label htmlFor={id} error={showError}>
@@ -42,7 +54,11 @@ export const FieldTextarea = ({
                 <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>
             )}
             {hint && (
-                <div role="note" aria-labelledby={id} className="usa-hint margin-top-1">
+                <div
+                    role="note"
+                    aria-labelledby={id}
+                    className="usa-hint margin-top-1"
+                >
                     {hint}
                 </div>
             )}
@@ -52,6 +68,7 @@ export const FieldTextarea = ({
                 id={id}
                 name={name}
                 error={showError}
+                onBlur={customOnBlur}
             />
         </FormGroup>
     )
