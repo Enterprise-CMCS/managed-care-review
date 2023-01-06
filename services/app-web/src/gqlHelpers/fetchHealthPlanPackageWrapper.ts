@@ -1,4 +1,3 @@
-import { ApolloError } from '@apollo/client'
 import {
     useFetchHealthPlanPackageQuery,
     FetchHealthPlanPackageQuery,
@@ -9,60 +8,9 @@ import {
 import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto'
 import { recordJSException } from '../otelHelpers'
+import { ApolloUseQueryResult, wrapApolloResult } from './apolloQueryWrapper'
 
-type FetchLoading = {
-    status: 'LOADING'
-}
-
-type FetchError = {
-    status: 'ERROR'
-    error: Error
-}
-
-type FetchSuccess = {
-    status: 'SUCCESS'
-    data: FetchHealthPlanPackageQuery
-}
-
-type FetchHealthPlanPackageResult = FetchLoading | FetchError | FetchSuccess
-
-// These apollo results are not actually supposed to be used simultaneously, so we can make a result type that only returns the correct one
-function wrapApolloResult({
-    loading,
-    error,
-    data,
-}: {
-    loading: boolean
-    error?: ApolloError
-    data: FetchHealthPlanPackageQuery | undefined
-}): FetchHealthPlanPackageResult {
-    if (loading) {
-        return {
-            status: 'LOADING',
-        }
-    }
-
-    if (error) {
-        return {
-            status: 'ERROR',
-            error: error,
-        }
-    }
-
-    if (data) {
-        return {
-            status: 'SUCCESS',
-            data,
-        }
-    }
-
-    return {
-        status: 'ERROR',
-        error: new Error('UNEXPECTED APOLLO BEHAVIOR, NO DATA'),
-    }
-}
-
-// This is ugly, but incredibly useful.
+// This is ugly, but useful.
 // We want to hide our protobuf parsing from our pages. The GQL
 // query returns, several layers down, HealthPlanRevisions which have
 // a formDataProto property on it holding the encoded proto string.
@@ -98,17 +46,12 @@ interface ParsedFetchHealthPlanPackageQuery
     fetchHealthPlanPackage: ParsedFetchHealthPlanPackageSubQuery
 }
 
-type ParsedFetchResult =
-    | Exclude<FetchHealthPlanPackageResult, FetchSuccess>
-    | {
-          status: 'SUCCESS'
-          data: ParsedFetchHealthPlanPackageQuery
-      }
+type ParsedFetchResult = ApolloUseQueryResult<ParsedFetchHealthPlanPackageQuery>
 
 // This wraps our call to useFetchHealthPlanPackageQuery, parsing out the protobuf
 // from the response, returning extra errors in the case that parsing goes wrong
 function useFetchHealthPlanPackageWrapper(id: string): ParsedFetchResult {
-    const result = wrapApolloResult(
+    const { result } = wrapApolloResult(
         useFetchHealthPlanPackageQuery({
             variables: {
                 input: {
