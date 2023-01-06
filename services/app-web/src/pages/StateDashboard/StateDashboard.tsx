@@ -66,7 +66,7 @@ export const StateDashboard = (): React.ReactElement => {
                 getCurrentRevisionFromHealthPlanPackage(sub)
 
             if (currentRevisionDataOrError instanceof Error) {
-                return null
+                return
             }
             const [_, currentSubmissionData] = currentRevisionDataOrError
 
