@@ -2,7 +2,7 @@ import React from 'react'
 import { ActuaryContact } from '../../../common-code/healthPlanFormDataType'
 import { Field, FormikErrors, FormikValues, getIn } from 'formik'
 import { Fieldset, FormGroup } from '@trussworks/react-uswds'
-import { FieldRadio } from '../../../components/Form'
+import { FieldRadio, FieldTextInput } from '../../../components/Form'
 import { RateInfoFormType } from '../RateDetails/RateDetails'
 import { PoliteErrorMessage } from '../../../components/PoliteErrorMessage'
 
@@ -15,7 +15,7 @@ type ActuaryFormPropType = {
     shouldValidate: boolean
     fieldNamePrefix: string
     fieldSetLegend?: string
-    innerRef?: (el: HTMLElement) => void
+    inputRef?: React.MutableRefObject<HTMLInputElement | null>
 }
 
 export const ActuaryContactFields = ({
@@ -24,7 +24,7 @@ export const ActuaryContactFields = ({
     shouldValidate,
     fieldNamePrefix,
     fieldSetLegend = 'Actuary Contact',
-    innerRef,
+    inputRef,
 }: ActuaryFormPropType) => {
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
@@ -35,70 +35,44 @@ export const ActuaryContactFields = ({
 
     return (
         <Fieldset legend={fieldSetLegend}>
-            <FormGroup
-                error={showFieldErrors(
-                    getIn(errors, `${fieldNamePrefix}.name`)
+            <FieldTextInput
+                name={`${fieldNamePrefix}.name`}
+                id={`${fieldNamePrefix}.name`}
+                label="Name"
+                aria-required={false}
+                showError={Boolean(
+                    showFieldErrors(getIn(errors, `${fieldNamePrefix}.name`))
                 )}
-            >
-                <label htmlFor={`${fieldNamePrefix}.name`}>Name</label>
-                {showFieldErrors(getIn(errors, `${fieldNamePrefix}.name`)) && (
-                    <PoliteErrorMessage>
-                        {getIn(errors, `${fieldNamePrefix}.name`)}
-                    </PoliteErrorMessage>
-                )}
-                <Field
-                    name={`${fieldNamePrefix}.name`}
-                    id={`${fieldNamePrefix}.name`}
-                    aria-required
-                    type="text"
-                    className="usa-input"
-                    innerRef={innerRef}
-                />
-            </FormGroup>
+                type="text"
+                inputRef={inputRef}
+                variant="SUBHEAD"
+            />
 
-            <FormGroup
-                error={showFieldErrors(
-                    getIn(errors, `${fieldNamePrefix}.titleRole`)
+            <FieldTextInput
+                name={`${fieldNamePrefix}.titleRole`}
+                id={`${fieldNamePrefix}.titleRole`}
+                label="Title/Role"
+                aria-required={false}
+                showError={Boolean(
+                    showFieldErrors(
+                        getIn(errors, `${fieldNamePrefix}.titleRole`)
+                    )
                 )}
-            >
-                <label htmlFor={`${fieldNamePrefix}.titleRole`}>
-                    Title/Role
-                </label>
-                {showFieldErrors(
-                    getIn(errors, `${fieldNamePrefix}.titleRole`)
-                ) && (
-                    <PoliteErrorMessage>
-                        {getIn(errors, `${fieldNamePrefix}.titleRole`)}
-                    </PoliteErrorMessage>
-                )}
-                <Field
-                    name={`${fieldNamePrefix}.titleRole`}
-                    id={`${fieldNamePrefix}.titleRole`}
-                    aria-required
-                    type="text"
-                    className="usa-input"
-                />
-            </FormGroup>
+                type="text"
+                variant="SUBHEAD"
+            />
 
-            <FormGroup
-                error={showFieldErrors(
-                    getIn(errors, `${fieldNamePrefix}.email`)
+            <FieldTextInput
+                name={`${fieldNamePrefix}.email`}
+                id={`${fieldNamePrefix}.email`}
+                label="Email"
+                aria-required={false}
+                showError={Boolean(
+                    showFieldErrors(getIn(errors, `${fieldNamePrefix}.email`))
                 )}
-            >
-                <label htmlFor={`${fieldNamePrefix}.email`}>Email</label>
-                {showFieldErrors(getIn(errors, `${fieldNamePrefix}.email`)) && (
-                    <PoliteErrorMessage>
-                        {getIn(errors, `${fieldNamePrefix}.email`)}
-                    </PoliteErrorMessage>
-                )}
-                <Field
-                    name={`${fieldNamePrefix}.email`}
-                    id={`${fieldNamePrefix}.email`}
-                    aria-required
-                    type="text"
-                    className="usa-input"
-                />
-            </FormGroup>
+                type="email"
+                variant="SUBHEAD"
+            />
 
             <FormGroup
                 error={showFieldErrors(

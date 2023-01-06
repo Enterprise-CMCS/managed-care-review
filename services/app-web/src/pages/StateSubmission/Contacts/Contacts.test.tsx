@@ -118,6 +118,55 @@ describe('Contacts', () => {
         expect(screen.getByLabelText('Email')).toHaveValue('test@test.com')
     })
 
+    it('should not error if whitespace added to email addresses', async () => {
+        const mock = mockDraft()
+        const mockUpdateDraftFn = jest.fn()
+
+        renderWithProviders(
+            <Contacts draftSubmission={mock} updateDraft={mockUpdateDraftFn} />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        screen.getAllByLabelText('Name')[0].focus()
+        await userEvent.paste('State Contact Person')
+
+        screen.getAllByLabelText('Title/Role')[0].focus()
+        await userEvent.paste('State Contact Title')
+
+        screen.getAllByLabelText('Email')[0].focus()
+        await userEvent.paste('statecontactwithtrailingwhitespace@test.com  ')
+
+        const continueButton = screen.getByRole('button', {
+            name: 'Continue',
+        })
+
+        continueButton.click()
+
+        await waitFor(() => {
+            // check that validations won't error
+            expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
+            expect(
+                screen.queryByText(/You must enter a valid email address/)
+            ).toBeNull()
+
+            // check that display value is trimmed which is default behavior for FieldTextInput
+            expect(
+                screen.queryByDisplayValue(
+                    'statecontactwithtrailingwhitespace@test.com  '
+                )
+            ).toBeNull()
+            expect(
+                screen.getByDisplayValue(
+                    'statecontactwithtrailingwhitespace@test.com'
+                )
+            ).toBeInTheDocument()
+        })
+    })
+
     it('should error and not continue if state contacts are not filled out', async () => {
         const mock = mockDraft()
         const mockUpdateDraftFn = jest.fn()

@@ -23,7 +23,7 @@ export type FieldYesNoProps = {
     hint?: React.ReactNode
     showError?: boolean
     id: string
-    variant?: 'PRIMARY' | 'SECONDARY' // secondary variant used for nested fields yes/no fields under an overarching heading
+    variant?: 'TOPLEVEL' | 'SUBHEAD' // subhead variant used for nested fields yes/no fields under an overarching heading
 } & JSX.IntrinsicElements['input']
 
 export type FieldYesNoFormValue = 'YES' | 'NO' | undefined // Use for formik string value
@@ -48,7 +48,7 @@ export const FieldYesNo = ({
     label,
     hint,
     showError = false,
-    variant = 'PRIMARY',
+    variant = 'TOPLEVEL',
     id,
     className,
     ...inputProps
@@ -57,7 +57,7 @@ export const FieldYesNo = ({
 
     const classes = classNames(
         {
-            [styles.yesnofieldsecondary]: variant === 'SECONDARY',
+            [styles.yesnofieldsecondary]: variant === 'SUBHEAD',
         },
         className
     )

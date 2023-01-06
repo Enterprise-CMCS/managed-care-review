@@ -28,7 +28,7 @@ const Template: Story<YesNoStoryParams> = (args) => {
         <Formik
             initialValues={args.initialValues}
             validationSchema={storyFormikSchema}
-            onSubmit={(values) => console.log('submitted', values)}
+            onSubmit={(values) => console.info('submitted', values)}
             validateOnMount={true}
         >
             <form>
@@ -48,7 +48,7 @@ Default.args = {
             name: 'modifiedBenefitsProvided',
             id: 'modifiedBenefitsProvided',
             label: 'Benefits provided have been modified',
-            variant: 'PRIMARY',
+            variant: 'TOPLEVEL',
         },
     ],
     initialValues: {
@@ -81,21 +81,21 @@ SecondaryVariantWithMultipleFields.args = {
             id: 'modifiedBenefitsProvided',
             label: 'Benefits provided by the managed care plans',
             showError: false,
-            variant: 'SECONDARY',
+            variant: 'SUBHEAD',
         },
         {
             name: 'modifiedGeoArea',
             id: 'modifiedGeoArea',
             label: 'Geographic areas served by the managed care plans',
             showError: true,
-            variant: 'SECONDARY',
+            variant: 'SUBHEAD',
         },
         {
             name: 'modifiedSomething',
             id: 'modifiedSomething',
             label: 'Medicaid beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)',
             showError: true,
-            variant: 'SECONDARY',
+            variant: 'SUBHEAD',
         },
     ],
     initialValues: {
