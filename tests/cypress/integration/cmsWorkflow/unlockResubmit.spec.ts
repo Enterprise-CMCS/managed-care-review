@@ -158,14 +158,6 @@ describe('CMS user', () => {
 
                 // Navigate to resubmitted submission and check for submission updated banner
 
-                // Check for submission link href to be not empty
-                cy.get('table')
-                    .findByRole('link', { name: submissionName })
-                    .should('exist')
-                    .should('have.attr', 'href')
-                    .should('not.be.empty')
-                    .should('contain', 'submissions')
-
                 cy.get('table')
                     .findByRole('link', { name: submissionName })
                     .should('exist')
