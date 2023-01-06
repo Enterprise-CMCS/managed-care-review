@@ -111,6 +111,7 @@ describe('HealthPlanPackageTable cms user tests', () => {
         expect(screen.getByRole('table')).toBeInTheDocument()
         //Expect 5 rows. 4 data rows and 1 header row
         expect(rows).toHaveLength(5)
+        expect(screen.getByText('4 submissions')).toBeInTheDocument()
     })
 
     it('displays no submission text when no submitted packages exist', async () => {
@@ -341,6 +342,9 @@ describe('HealthPlanPackageTable cms user tests', () => {
         const rows = await screen.findAllByRole('row')
         expect(rows).toHaveLength(2)
         expect(rows[1]).toHaveTextContent('Ohio') // row[0] is the header
+        expect(
+            screen.getByText('Displaying 1 of 4 submissions')
+        ).toBeInTheDocument()
     })
 
     it('can filter by state and submission type', async () => {
@@ -443,6 +447,9 @@ describe('HealthPlanPackageTable cms user tests', () => {
         expect(rows[1]).toHaveTextContent(
             'Contract action and rate certification'
         ) // row[0] is the header
+        expect(
+            screen.getByText('Displaying 1 of 3 submissions')
+        ).toBeInTheDocument()
     })
 
     it('should clear all filters when clear filter button is clicked', async () => {
@@ -531,6 +538,7 @@ describe('HealthPlanPackageTable cms user tests', () => {
         //Expect 3 data rows and 1 header row, total 4 rows
         await userEvent.click(clearFiltersButton)
         expect(await screen.findAllByRole('row')).toHaveLength(4)
+        expect(screen.getByText('3 submissions')).toBeInTheDocument()
     })
 
     it('displays no results found when filters return no results', async () => {
@@ -600,6 +608,9 @@ describe('HealthPlanPackageTable cms user tests', () => {
         const rows = await screen.findAllByRole('row')
         expect(rows).toHaveLength(1)
         expect(screen.getByText('No results found')).toBeInTheDocument()
+        expect(
+            screen.getByText('Displaying 0 of 4 submissions')
+        ).toBeInTheDocument()
     })
 
     it('displays the total filters applied', async () => {
@@ -724,6 +735,9 @@ describe('HealthPlanPackageTable cms user tests', () => {
         expect(rows).toHaveLength(4)
         //Expect 3 applied filters text
         expect(screen.getByText('Filters (3 applied)')).toBeInTheDocument()
+        expect(
+            screen.getByText('Displaying 3 of 4 submissions')
+        ).toBeInTheDocument()
     })
 })
 
