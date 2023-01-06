@@ -6,8 +6,8 @@ These implementations are heavily reliant on the data and generated Types in `fl
 ### Prerequisites for local testing
 Before testing locally, make sure to have the following prerequisites.
 
-- **LaunchDarkly Client-side ID key**: A valid Launch Darkly Client-side ID key will need to be in your `.envrc.local`, see code block below. Cypress will be making the actual request to Launch Darkly, we will just be intercepting the response. If we had an invalid key here, the request would return a 404 before we could intercept the response, **which will cause the integration to break in testing.**
-- **LaunchDarkly SDK key**: A valid Launch Darkly SDK key can be in your `.envrc.local`, see code block below. Without this SDK key, the API implementation of LaunchDarkly will fall back to using `offlineLDService()`, which uses `defaultValue` of each flag. The `defaultValue` of flags are generated using `flags.ts` located in `app-web/src/common-code/featureFlags`.
+- **LaunchDarkly Client-side ID key**: A valid LaunchDarkly Client-side ID key will need to be in your `.envrc.local`, see code block below. Cypress will be making the actual request to LaunchDarkly, we will just be intercepting the response. If we had an invalid key here, the request would return a 404 before we could intercept the response, **which will cause the integration to break in testing.**
+- **LaunchDarkly SDK key**: A valid LaunchDarkly SDK key can be in your `.envrc.local`, see code block below. Without this SDK key, the API implementation of LaunchDarkly will fall back to using `offlineLDService()`, which uses `defaultValue` of each flag. The `defaultValue` of flags are generated using `flags.ts` located in `app-web/src/common-code/featureFlags`.
 ```json
 export REACT_APP_LD_CLIENT_ID='Place Launch Darkly ID here'
 export LD_SDK_KEY='Place Launch Darkly SDK key here'
@@ -133,7 +133,7 @@ There is one major limitation to this implementation: server and client side fla
 
 For example, we have some logic on the server side that checks a submission for completion on a new field. This check is behind a feature flag. So if the flag is off, then the check does not happen. Simultaneously on the client side this same flag controls the display of the UI that allows users to fill out this new field. The issue now lies in our Cypress test, we can test client side with this UI disabled for a specific user, but on server side it may be enabled by default for that user. The test fails because client side expects the server not to check for this field since this feature flag is off and UI is hidden.
 
-There are a couple solutions for this:
+There are a few solutions for this:
 - We default all tests that use the flag to have the flag on. In the example above, all tests that will hit the server side check will have the UI enabled.
   - This is already being done for the time being. 
   - Drawbacks:
@@ -153,9 +153,9 @@ There are a couple solutions for this:
     - This would require the most work.
 
 ### Feature flag state management in Cypress
-Our custom Launch Darkly commands intercepts feature flag value requests and returns our own values we feed to the commands. Then the application code will be able to access those custom values, but we also needed a way access them with in Cypress throughout the tests. Specifically to determine when to test UI behind a feature flag.
+Our custom LaunchDarkly commands intercepts feature flag value requests and returns our own values we feed to the commands. Then the application code will be able to access those custom values, but we also needed a way access them with in Cypress throughout the tests. Specifically to determine when to test UI behind a feature flag.
 
-The approach here was to implement state management that could be accessed though Cypress. Integrating `cy.readFile` and `cy.writeFile` into the Launch Darkly helper commands.
+The approach here was to implement state management that could be accessed though Cypress. Integrating `cy.readFile` and `cy.writeFile` into the LaunchDarkly helper commands.
 
 The Cypress commands `cy.interceptFeatureFlags` and `cy.stubFeatureFlags` will generate a json file, using `Cy.writeFile`, in `tests/cypress/fixtures/stores/` named `featureFlagStore.json` using data and Types from `flag.ts` located in `app-web/src/common-code/featureFlags`. The `cy.getFeatureFlagStore()`, using `cy.write`, is used to read the `featureFlagStore.json` file and return the object of feature flags with values.
 
@@ -175,7 +175,7 @@ The Cypress commands `cy.interceptFeatureFlags` and `cy.stubFeatureFlags` will g
 
 
 - #### stubFeatureFlags
-  This command intercepts all of LD api calls and returns our own response. This will remove the need for waiting on actual Launch Darkly API calls to return. This command is being used on all specs in `beforeEach` to intercept requests on each test, set up default feature flag values in `featureFlagStore.json` and reset the Launch Darkly feature flag store to default values before each test.
+  This command intercepts all of LD api calls and returns our own response. This will remove the need for waiting on actual LaunchDarkly API calls to return. This command is being used on all specs in `beforeEach` to intercept requests on each test, set up default feature flag values in `featureFlagStore.json` and reset the LaunchDarkly feature flag store to default values before each test.
   ```typescript
     describe('rate details', () => {
         beforeEach(() => {
