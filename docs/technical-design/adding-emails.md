@@ -10,7 +10,7 @@ What follow are step-by-step instructions on how to add those addresses. This pr
 1. In AWS, search for **Systems Manager**.
 1. Within Systems Manager, look for **Parameter Store** (probably in the left sidebar).
 1. You'll see many configuration parameters. The ones you want to emulate will have the form `/configuration/AZ/stateanalysts/email`. IN PROD, YOU WILL ENTER THE ACTUAL USER EMAIL ADDRESSES, SO YOU CAN SKIP THIS STEP. Click into an existing parameter, and if you're in dev or impl, **copy the contents of the Value field**.
-1. Navigate back to the parameter list and **click `Create parameter`**.
+1.  **Click `Create parameter`**.
 1. **Fill in the Name field** using the same format as `/configuration/AZ/stateanalysts/email`, **replacing the state code with the relevant state**. Note that there's no trailing slash.
 1. **Leave the Description blank and Tier as Standard**.
 1. **Change the Type to `StringList`** because often there's more than one email that we want to send to.
