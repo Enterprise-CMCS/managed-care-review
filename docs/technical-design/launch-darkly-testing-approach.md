@@ -20,7 +20,7 @@ export LD_SDK_KEY='Place Launch Darkly SDK key here'
   - Finally, you should see a `Environments` table .
   - The keys for `Local` environment are the ones needed for local testing.
 
-## Feature Flag Unit Testing
+## Feature flag unit gesting
 
 ### Client side unit testing
 Client side unit testing utilizes `jest.spyOn()` to mock the LaunchDarkly `useLDClient` hook and return default flag values or values specified. This implementation is done in our jest helper function `ldUseClientSpy()` located in `app-web/src/testHelpers/jestHelpers.tsx`.
@@ -125,7 +125,7 @@ it('does not error when risk based question is undefined and rate-cert-assurance
 })
 ```
 
-## Feature Flag Cypress Testing
+## Feature flag cypress testing
 Currently, there is no out of the box Cypress integration with LaunchDarkly. Our implementation approach enables the testing of multiple flag values independent of what is set in LaunchDarkly by intercepting api calls and returning our own generated flag values. This allows us to dynamically tests UI in Cypress with different flag values without having to modify flag values in the LaunchDarkly dashboard.
 
 ### Limitations
