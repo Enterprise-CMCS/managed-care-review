@@ -34,7 +34,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
     const { updateHeading } = usePage()
     const [pkgName, setPkgName] = useState<string | undefined>(undefined)
 
-    const fetchResult = useFetchHealthPlanPackageWrapper(id)
+    const { result: fetchResult } = useFetchHealthPlanPackageWrapper(id)
 
     useEffect(() => {
         updateHeading({ customHeading: pkgName })
@@ -71,7 +71,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         console.info('no revision found at index', revisionIndex)
         return <Error404 />
     }
-    const packageData = revision.formData
+    const packageData = fetchResult.formDatas[revision.id]
 
     const statePrograms = pkg.state.programs
     const name = packageName(packageData, statePrograms)
@@ -82,7 +82,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Generate the document date table
     // revisions are correctly ordered so we can map into the form data
     const formDatasInOrder = pkg.revisions.map((rEdge) => {
-        return rEdge.node.formData
+        return fetchResult.formDatas[rEdge.node.id]
     })
     const documentDates = makeDateTableFromFormData(formDatasInOrder)
 

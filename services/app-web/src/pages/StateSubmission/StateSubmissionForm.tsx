@@ -135,7 +135,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     const statePrograms = useStatePrograms()
 
-    const fetchResult = useFetchHealthPlanPackageWrapper(id)
+    const { result: fetchResult } = useFetchHealthPlanPackageWrapper(id)
 
     const [updateFormData] = useUpdateHealthPlanFormDataMutation()
 
@@ -201,7 +201,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     // Generate the document data tables
     // revisions are correctly ordered so we can map into the form data
     const formDatasInOrder = pkg.revisions.map((rEdge) => {
-        return rEdge.node.formData
+        return fetchResult.formDatas[rEdge.node.id]
     })
     const documentDates = makeDateTableFromFormData(formDatasInOrder)
     const previousDocuments =
@@ -209,7 +209,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     // pull out the latest revision for editing
     const latestRevision = pkg.revisions[0].node
-    const formDataFromLatestRevision = latestRevision.formData
+    const formDataFromLatestRevision = fetchResult.formDatas[latestRevision.id]
 
     // if we've gotten back a submitted revision, it can't be edited
     if (formDataFromLatestRevision.status !== 'DRAFT') {

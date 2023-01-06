@@ -74,7 +74,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         updateHeading({ customHeading: pkgName })
     }, [pkgName, updateHeading])
 
-    const fetchResult = useFetchHealthPlanPackageWrapper(id)
+    const { result: fetchResult } = useFetchHealthPlanPackageWrapper(id)
 
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
 
@@ -118,7 +118,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     // Generate the document date table
     // revisions are correctly ordered so we can map into the form data
     const formDatasInOrder = pkg.revisions.map((rEdge) => {
-        return rEdge.node.formData
+        return fetchResult.formDatas[rEdge.node.id]
     })
     const documentDates = makeDateTableFromFormData(formDatasInOrder)
 
@@ -132,7 +132,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         return <GenericErrorPage />
     }
     const currentRevision = edge.node
-    const packageData = currentRevision.formData
+    const packageData = fetchResult.formDatas[currentRevision.id]
 
     // set the page heading
     const name = packageName(packageData, statePrograms)
