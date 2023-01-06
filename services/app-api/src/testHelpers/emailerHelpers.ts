@@ -23,11 +23,11 @@ const testEmailConfig: EmailConfiguration = {
     cmsReviewSharedEmails: [
         'cmsreview1@example.com',
         'cmsreview2@example.com',
-        'rates@example.com',
+        '"Rates Example" <rates@example.com>',
     ],
-    cmsReviewHelpEmailAddress: 'mcog@example.com',
-    cmsRateHelpEmailAddress: 'rates@example.com',
-    cmsDevTeamHelpEmailAddress: 'mc-review@example.com',
+    cmsReviewHelpEmailAddress: '"MCOG Example" <mcog@example.com>',
+    cmsRateHelpEmailAddress: '"Rates Example" <rates@example.com>',
+    cmsDevTeamHelpEmailAddress: '"MC-Review Example" <mc-review@example.com>',
     ratesReviewSharedEmails: ['ratesreview@example.com'],
 }
 

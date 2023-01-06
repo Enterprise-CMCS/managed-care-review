@@ -2,21 +2,21 @@
 @import '../../styles/custom.scss';
 
 .panelEmptyNoFilteredResults {
-  margin-top: units(8);
+    margin-top: units(8);
 
-  h3 {
-    font-size: 1rem;
-    font-weight: font-weight('bold');
-    text-align: center;
-  }
-  p {
-    font-weight: font-weight('normal');
-    font-size: .875rem;
-    text-align: center;
-  }
+    h3 {
+        font-size: 1rem;
+        font-weight: font-weight('bold');
+        text-align: center;
+    }
+    p {
+        font-weight: font-weight('normal');
+        font-size: 0.875rem;
+        text-align: center;
+    }
 }
 
-.panelEmptyNoSubmissionsYet{
+.panelEmptyNoSubmissionsYet {
     margin-top: units(8);
 
     h3 {
@@ -44,4 +44,10 @@
 .unlockedTag {
     background: #99deea;
     color: $theme-color-base-ink;
+}
+
+.filterCount {
+    font-weight: font-weight('bold');
+    color: $theme-color-base-ink;
+    padding-top: units(3);
 }

@@ -144,7 +144,7 @@ export function submitHealthPlanPackageResolver(
         span?.setAttribute('mcreview.package_id', pkgID)
 
         const rateCertAssuranceFlag = await launchDarkly.getFeatureFlag(
-            user,
+            context,
             'rate-cert-assurance'
         )
 

@@ -18,6 +18,7 @@ import dayjs from 'dayjs'
 import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
 import { FilterAccordion, FilterSelect } from '../FilterAccordion'
 import { InfoTag, TagProps } from '../InfoTag/InfoTag'
+import { pluralize } from '../../common-code/formatters'
 
 declare module '@tanstack/table-core' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -91,6 +92,10 @@ const submissionTypeOptions = [
     },
 ]
 
+// To keep the memoization from being refreshed every time, this needs to be
+// created outside the render function
+const columnHelper = createColumnHelper<PackageInDashboardType>()
+
 export const HealthPlanPackageTable = ({
     tableData,
     user,
@@ -98,92 +103,94 @@ export const HealthPlanPackageTable = ({
 }: PackageTableProps): React.ReactElement => {
     const [columnFilters, setColumnFilters] =
         React.useState<ColumnFiltersState>([])
-    const columnHelper = createColumnHelper<PackageInDashboardType>()
 
-    const tableColumns = [
-        columnHelper.accessor((row) => row, {
-            header: 'ID',
-            cell: (info) => (
-                <Link
-                    key={`submission-id-${info.getValue().id}`}
-                    asCustom={NavLink}
-                    to={submissionURL(
-                        info.getValue().id,
-                        info.getValue().status,
-                        user.__typename
-                    )}
-                >
-                    {info.getValue().name}
-                </Link>
-            ),
-            meta: {
-                dataTestID: 'submission-id',
-            },
-        }),
-        columnHelper.accessor('stateName', {
-            id: 'stateName',
-            header: 'State',
-            cell: (info) => <span>{info.getValue()}</span>,
-            meta: {
-                dataTestID: 'submission-stateName',
-            },
-            filterFn: `arrIncludesSome`,
-        }),
-        columnHelper.accessor('submissionType', {
-            id: 'submissionType',
-            header: 'Submission type',
-            cell: (info) => <span>{info.getValue()}</span>,
-            meta: {
-                dataTestID: 'submission-type',
-            },
-            filterFn: `arrIncludesSome`,
-        }),
-        columnHelper.accessor('programs', {
-            header: 'Programs',
-            cell: (info) =>
-                info.getValue().map((program) => {
-                    return (
-                        <Tag
-                            data-testid="program-tag"
-                            key={program.id}
-                            className={`radius-pill ${styles.programTag}`}
-                        >
-                            {program.name}
-                        </Tag>
-                    )
-                }),
-            meta: {
-                dataTestID: 'submission-programs',
-            },
-        }),
-        columnHelper.accessor('submittedAt', {
-            header: 'Submission date',
-            cell: (info) =>
-                info.getValue()
-                    ? dayjs(info.getValue()).format('MM/DD/YYYY')
-                    : '',
-            meta: {
-                dataTestID: 'submission-date',
-            },
-        }),
-        columnHelper.accessor('updatedAt', {
-            header: 'Last updated',
-            cell: (info) =>
-                info.getValue()
-                    ? dayjs(info.getValue()).format('MM/DD/YYYY')
-                    : '',
-            meta: {
-                dataTestID: 'submission-last-updated',
-            },
-        }),
-        columnHelper.accessor('status', {
-            header: 'Status',
-            cell: (info) => <StatusTag status={info.getValue()} />,
-            meta: {
-                dataTestID: 'submission-status',
-            },
-        }),
-    ]
+    const tableColumns = React.useMemo(
+        () => [
+            columnHelper.accessor((row) => row, {
+                header: 'ID',
+                cell: (info) => (
+                    <Link
+                        key={`submission-id-${info.getValue().id}`}
+                        asCustom={NavLink}
+                        to={submissionURL(
+                            info.getValue().id,
+                            info.getValue().status,
+                            user.__typename
+                        )}
+                    >
+                        {info.getValue().name}
+                    </Link>
+                ),
+                meta: {
+                    dataTestID: 'submission-id',
+                },
+            }),
+            columnHelper.accessor('stateName', {
+                id: 'stateName',
+                header: 'State',
+                cell: (info) => <span>{info.getValue()}</span>,
+                meta: {
+                    dataTestID: 'submission-stateName',
+                },
+                filterFn: `arrIncludesSome`,
+            }),
+            columnHelper.accessor('submissionType', {
+                id: 'submissionType',
+                header: 'Submission type',
+                cell: (info) => <span>{info.getValue()}</span>,
+                meta: {
+                    dataTestID: 'submission-type',
+                },
+                filterFn: `arrIncludesSome`,
+            }),
+            columnHelper.accessor('programs', {
+                header: 'Programs',
+                cell: (info) =>
+                    info.getValue().map((program) => {
+                        return (
+                            <Tag
+                                data-testid="program-tag"
+                                key={program.id}
+                                className={`radius-pill ${styles.programTag}`}
+                            >
+                                {program.name}
+                            </Tag>
+                        )
+                    }),
+                meta: {
+                    dataTestID: 'submission-programs',
+                },
+            }),
+            columnHelper.accessor('submittedAt', {
+                header: 'Submission date',
+                cell: (info) =>
+                    info.getValue()
+                        ? dayjs(info.getValue()).format('MM/DD/YYYY')
+                        : '',
+                meta: {
+                    dataTestID: 'submission-date',
+                },
+            }),
+            columnHelper.accessor('updatedAt', {
+                header: 'Last updated',
+                cell: (info) =>
+                    info.getValue()
+                        ? dayjs(info.getValue()).format('MM/DD/YYYY')
+                        : '',
+                meta: {
+                    dataTestID: 'submission-last-updated',
+                },
+            }),
+            columnHelper.accessor('status', {
+                header: 'Status',
+                cell: (info) => <StatusTag status={info.getValue()} />,
+                meta: {
+                    dataTestID: 'submission-status',
+                },
+            }),
+        ],
+        [user]
+    )
 
     const reactTable = useReactTable({
         data: tableData.sort((a, b) =>
@@ -204,6 +211,10 @@ export const HealthPlanPackageTable = ({
         getSortedRowModel: getSortedRowModel(),
     })
 
+    const hasAppliedFilters = columnFilters.length > 0
+    const filteredRows = reactTable.getRowModel().rows
+    const hasFilteredRows = filteredRows.length > 0
+
     const stateColumn = reactTable.getColumn('stateName')
     const submissionTypeColumn = reactTable.getColumn('submissionType')
 
@@ -216,7 +227,7 @@ export const HealthPlanPackageTable = ({
     }))
 
     const filterTitle = `Filters ${
-        columnFilters.length
+        hasAppliedFilters
             ? `(${
                   columnFilters.flatMap((filter) => filter.value).length
               } applied)`
@@ -260,6 +271,21 @@ export const HealthPlanPackageTable = ({
                             />
                         </FilterAccordion>
                     )}
+                    {
+                        <div className={styles.filterCount}>
+                            {!hasAppliedFilters
+                                ? `${tableData.length} ${pluralize(
+                                      'submission',
+                                      tableData.length
+                                  )}`
+                                : `Displaying ${filteredRows.length} of ${
+                                      tableData.length
+                                  } ${pluralize(
+                                      'submission',
+                                      tableData.length
+                                  )}`}
+                        </div>
+                    }
                     <Table fullWidth>
                         <thead>
                             {reactTable.getHeaderGroups().map((headerGroup) => (
@@ -279,7 +305,7 @@ export const HealthPlanPackageTable = ({
                             ))}
                         </thead>
                         <tbody>
-                            {reactTable.getRowModel().rows.map((row) => (
+                            {filteredRows.map((row) => (
                                 <tr
                                     key={row.id}
                                     data-testid={`row-${row.original.id}`}
@@ -302,7 +328,7 @@ export const HealthPlanPackageTable = ({
                             ))}
                         </tbody>
                     </Table>
-                    {!reactTable.getRowModel().rows.length && (
+                    {!hasFilteredRows && (
                         <div
                             data-testid="dashboard-table"
                             className={styles.panelEmptyNoFilteredResults}

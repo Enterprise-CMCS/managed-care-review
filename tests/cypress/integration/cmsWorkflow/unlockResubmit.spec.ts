@@ -156,11 +156,13 @@ describe('CMS user', () => {
                     .should('have.attr', 'href')
                     .and('not.include', 'review-and-submit')
 
-                //Navigate to resubmitted submission and check for submission updated banner
+                // Navigate to resubmitted submission and check for submission updated banner
+
                 cy.get('table')
                     .findByRole('link', { name: submissionName })
                     .should('exist')
                     .click()
+
                 cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
                 cy.findByTestId('updatedSubmissionBanner').should('exist')
 
