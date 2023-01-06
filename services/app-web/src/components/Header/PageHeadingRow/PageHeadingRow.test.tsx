@@ -1,9 +1,10 @@
 import { screen } from '@testing-library/react'
+import { StateUser } from '../../../gen/gqlClient'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { PageHeadingRow } from './PageHeadingRow'
 
 describe('Page Heading Row', () => {
-    const loggedInUser = {
+    const loggedInUser: StateUser = {
         __typename: 'StateUser' as const,
         state: {
             name: 'Minnesota',
@@ -32,7 +33,6 @@ describe('Page Heading Row', () => {
             ],
         },
         role: 'State User',
-        name: 'Bob it user',
         email: 'bob@dmas.mn.gov',
     }
     it('renders without errors', () => {

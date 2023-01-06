@@ -97,7 +97,6 @@ describe('HealthPlanPackageTable cms user tests', () => {
         __typename: 'CMSUser' as const,
         role: 'CMS User',
         email: 'cms@exmaple.com',
-        name: 'Bob it user',
     }
 
     it('renders table with expected number of submissions', async () => {
@@ -745,7 +744,6 @@ describe('HealthPlanPackageTable state user tests', () => {
     const mockStateUser: User = {
         __typename: 'StateUser' as const,
         role: 'State User',
-        name: 'Jerry it user',
         email: 'state@example.com',
         state: {
             __typename: 'State',

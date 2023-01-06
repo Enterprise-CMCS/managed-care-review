@@ -42,7 +42,6 @@ function mockValidUser(): UserType {
         __typename: 'StateUser' as const,
         state: mockMNState(),
         role: 'STATE_USER',
-        name: 'Bob it user',
         email: 'bob@dmas.mn.gov',
     }
 }
@@ -51,7 +50,6 @@ function mockValidCMSUser(): UserType {
     return {
         __typename: 'CMSUser' as const,
         role: 'CMS_USER',
-        name: 'Bob it user',
         email: 'bob@dmas.mn.gov',
     }
 }

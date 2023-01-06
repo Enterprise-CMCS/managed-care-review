@@ -83,7 +83,6 @@ const mockCMSUser: User = {
     __typename: 'CMSUser' as const,
     role: 'CMS User',
     email: 'cms@exmaple.com',
-    name: 'Bob it user',
 }
 
 export default {

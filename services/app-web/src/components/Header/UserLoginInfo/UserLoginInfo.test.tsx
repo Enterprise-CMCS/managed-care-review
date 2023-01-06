@@ -14,7 +14,6 @@ describe('UserLoginInfo', () => {
             ],
         },
         role: 'State User',
-        name: 'Bob it user',
         email: 'bob@dmas.mn.gov',
     }
     it('renders without errors', () => {

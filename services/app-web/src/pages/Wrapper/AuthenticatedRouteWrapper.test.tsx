@@ -57,7 +57,6 @@ describe('AuthenticatedRouteWrapper', () => {
                     ],
                 },
                 role: 'State User',
-                name: 'Bob it user',
                 email: 'bob@dmas.mn.gov',
             },
             loginStatus: 'LOGGED_IN',
