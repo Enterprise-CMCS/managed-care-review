@@ -37,9 +37,10 @@ export const FieldTextInput = ({
     showError,
     name,
     type,
+    onBlur,
     ...inputProps
 }: TextInputProps): React.ReactElement => {
-    const [field, meta] = useField({ name })
+    const [field, meta, helpers] = useField({ name })
 
     const classes = classNames(
         {
@@ -47,6 +48,14 @@ export const FieldTextInput = ({
         },
         className
     )
+
+    // Latch into onBlur to do any input cleaning
+    // Initial use case is to trim away trailing whitespace in email addresses
+    const customOnBlur = (e: React.FocusEvent<HTMLInputElement, Element>) => {
+        if (!e) return
+        helpers.setValue(field.value.trim())
+        if (onBlur) onBlur(e)
+    }
 
     return (
         <FormGroup error={showError} className={classes}>
@@ -72,6 +81,7 @@ export const FieldTextInput = ({
                 name={name}
                 error={showError}
                 type={type}
+                onBlur={customOnBlur}
             />
         </FormGroup>
     )

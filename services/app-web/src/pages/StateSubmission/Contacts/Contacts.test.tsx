@@ -147,10 +147,23 @@ describe('Contacts', () => {
         continueButton.click()
 
         await waitFor(() => {
+            // check that validations won't error
             expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
             expect(
                 screen.queryByText(/You must enter a valid email address/)
             ).toBeNull()
+
+            // check that display value is trimmed which is default behavior for FieldTextInput
+            expect(
+                screen.queryByDisplayValue(
+                    'statecontactwithtrailingwhitespace@test.com  '
+                )
+            ).toBeNull()
+            expect(
+                screen.getByDisplayValue(
+                    'statecontactwithtrailingwhitespace@test.com'
+                )
+            ).toBeInTheDocument()
         })
     })
 
