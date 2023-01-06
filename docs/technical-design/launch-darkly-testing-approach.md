@@ -20,7 +20,7 @@ export LD_SDK_KEY='Place Launch Darkly SDK key here'
   - Finally, you should see a `Environments` table .
   - The keys for `Local` environment are the ones needed for local testing.
 
-## Feature flag unit gesting
+## Feature flag unit testing
 
 ### Client side unit testing
 Client side unit testing utilizes `jest.spyOn()` to mock the LaunchDarkly `useLDClient` hook and return default flag values or values specified. This implementation is done in our jest helper function `ldUseClientSpy()` located in `app-web/src/testHelpers/jestHelpers.tsx`.
