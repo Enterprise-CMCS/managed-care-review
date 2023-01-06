@@ -9,7 +9,7 @@ What follow are step-by-step instructions on how to add those addresses. This pr
 1. **Select the environment you'll be working in**, dev, impl, or prod. You want the admin role and web access, not read-only or access keys.
 1. In AWS, search for **Systems Manager**.
 1. Within Systems Manager, look for **Parameter Store** (probably in the left sidebar).
-1. You'll see many configuration parameters. The ones you want to emulate will have the form `/configuration/AZ/stateanalysts/email`. IN PROD, YOU WILL ENTER THE ACTUAL USER EMAIL ADDRESSES, SO YOU CAN SKIP THIS STEP. Click into an existing parameter, and if you're in dev or impl, **copy the contents of the Value field**.
+1. [in lower environments] Click into an existing parameter and **copy the contents of the Value field**.  Then, navigate back to the parameter list.
 1.  **Click `Create parameter`**.
 1. **Fill in the Name field** using the same format as `/configuration/AZ/stateanalysts/email`, **replacing the state code with the relevant state**. Note that there's no trailing slash.
 1. **Leave the Description blank and Tier as Standard**.
