@@ -11,7 +11,6 @@ import {
     FormikErrors,
     FormikHelpers,
     FieldArray,
-    Field,
     ErrorMessage,
     getIn,
 } from 'formik'
@@ -34,7 +33,6 @@ import { useFocus } from '../../../hooks/useFocus'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { ActuaryContactFields } from './ActuaryContactFields'
-import { PoliteErrorMessage } from '../../../components'
 
 export interface ContactsFormValues {
     stateContacts: stateContactValue[]
@@ -165,7 +163,7 @@ export const Contacts = ({
     const newStateContactNameRef = React.useRef<HTMLInputElement | null>(null) // This ref.current is reset to the newest contact name field each time new contact is added
     const [newStateContactButtonRef, setNewStateContactButtonFocus] = useFocus() // This ref.current is always the same element
 
-    const newActuaryContactNameRef = React.useRef<HTMLElement | null>(null)
+    const newActuaryContactNameRef = React.useRef<HTMLInputElement | null>(null)
     const [newActuaryContactButtonRef, setNewActuaryContactButtonFocus] =
         useFocus()
 
@@ -343,7 +341,6 @@ export const Contacts = ({
                                                                 'State'
                                                             )}
                                                         >
-
                                                             <FieldTextInput
                                                                 id={`stateContacts.${index}.name`}
                                                                 label="Title/Role"
@@ -360,7 +357,9 @@ export const Contacts = ({
                                                                     )
                                                                 )}
                                                                 type="text"
-                                                                inputRef={newStateContactNameRef}
+                                                                inputRef={
+                                                                    newStateContactNameRef
+                                                                }
                                                                 variant="SUBHEAD"
                                                             />
 
@@ -492,11 +491,8 @@ export const Contacts = ({
                                                                         index,
                                                                         'Actuary'
                                                                     )}
-                                                                    innerRef={(
-                                                                        el: HTMLElement
-                                                                    ) =>
-                                                                        (newActuaryContactNameRef.current =
-                                                                            el)
+                                                                    inputRef={
+                                                                        newActuaryContactNameRef
                                                                     }
                                                                 />
                                                                 <Button
