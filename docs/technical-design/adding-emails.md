@@ -1,6 +1,6 @@
 # Adding state analyst emails to parameter store
 
-When states make submissions through MC-Review, we use email to notify the analysts at CMS who cover those states. Those analysts' email addresses are currently kept in AWS Parameter Store. When new states onboard to MC-Review, we have to add the relevant analysts' emails to the store.
+When states make submissions through MC-Review, we use email to notify the analysts at CMS who cover those states. Those analysts' email addresses are currently kept in AWS Parameter Store, organized by state. When new states onboard to MC-Review, we have to add the relevant analysts' emails to the store.
 
 What follow are step-by-step instructions on how to add those addresses. This procedure needs to be followed for _all three environments_: `dev`, `val` (called `impl` in our AWS dashboard), and `prod`. Prod has a small wrinkle that will be mentioned below.
 
