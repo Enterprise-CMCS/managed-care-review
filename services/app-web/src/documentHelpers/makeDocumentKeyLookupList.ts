@@ -1,8 +1,9 @@
 import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto'
 import { HealthPlanPackage } from '../gen/gqlClient'
 import { parseKey } from '../common-code/s3URLEncoding'
+import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
 
-type LookupListType = {
+export type LookupListType = {
     currentDocuments: string[]
     previousDocuments: string[]
 }
@@ -12,9 +13,9 @@ const getKey = (s3URL: string) => {
     return key instanceof Error ? null : key
 }
 
-export const makeDocumentList = (
-    submissions: HealthPlanPackage
-): LookupListType | Error => {
+export function makeDocumentListFromFormDatas(
+    formDatas: HealthPlanFormDataType[]
+): LookupListType {
     const docBuckets = [
         'contractDocuments',
         'rateDocuments',
@@ -25,15 +26,8 @@ export const makeDocumentList = (
         previousDocuments: [],
     }
 
-    const revisions = submissions.revisions
-
-    for (let index = 0; index < revisions.length; index++) {
-        const revisionData = base64ToDomain(revisions[index].node.formDataProto)
-        if (revisionData instanceof Error) {
-            return new Error(
-                'Failed to read submission data; unable to display documents'
-            )
-        }
+    for (let index = 0; index < formDatas.length; index++) {
+        const revisionData = formDatas[index]
         docBuckets.forEach((bucket) => {
             if (bucket === 'rateDocuments') {
                 revisionData.rateInfos.forEach((rateInfo) => {
@@ -60,4 +54,23 @@ export const makeDocumentList = (
     }
 
     return lookupList
+}
+
+export const makeDocumentList = (
+    submissions: HealthPlanPackage
+): LookupListType | Error => {
+    const revisions = submissions.revisions
+
+    const formDatas: HealthPlanFormDataType[] = []
+    for (let index = 0; index < revisions.length; index++) {
+        const revisionData = base64ToDomain(revisions[index].node.formDataProto)
+        if (revisionData instanceof Error) {
+            return new Error(
+                'Failed to read submission data; unable to display documents'
+            )
+        }
+        formDatas.push(revisionData)
+    }
+
+    return makeDocumentListFromFormDatas(formDatas)
 }

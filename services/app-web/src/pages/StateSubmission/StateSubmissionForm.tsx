@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { GridContainer } from '@trussworks/react-uswds'
 import { Routes, Route, useParams } from 'react-router-dom'
@@ -18,7 +18,7 @@ import {
     RoutesRecord,
 } from '../../constants/routes'
 import { getRelativePath } from '../../routeHelpers'
-import { getCurrentRevisionFromHealthPlanPackage } from '../../gqlHelpers'
+import { useFetchHealthPlanPackageWrapper } from '../../gqlHelpers'
 import { StateSubmissionContainer } from './StateSubmissionContainer'
 import { ContractDetails } from './ContractDetails'
 import { RateDetails } from './RateDetails'
@@ -28,7 +28,6 @@ import { ReviewSubmit } from './ReviewSubmit'
 import { SubmissionType } from './SubmissionType'
 
 import {
-    useFetchHealthPlanPackageQuery,
     User,
     useUpdateHealthPlanFormDataMutation,
     HealthPlanPackage,
@@ -43,11 +42,10 @@ import {
     packageName,
 } from '../../common-code/healthPlanFormDataType'
 import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
-import { makeDocumentList } from '../../documentHelpers/makeDocumentKeyLookupList'
-import { makeDateTable } from '../../documentHelpers/makeDocumentDateLookupTable'
-import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
 import { useStatePrograms } from '../../hooks/useStatePrograms'
+import { ApolloError } from '@apollo/client'
+import { handleApolloError } from '../../gqlHelpers/apolloErrors'
 
 const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
     getRelativePath({
@@ -101,10 +99,6 @@ const activeFormPages = (
             )
     )
 }
-type FormDataError =
-    | 'NOT_FOUND'
-    | 'MALFORMATTED_DATA'
-    | 'WRONG_SUBMISSION_STATUS'
 
 /* 
     Prep work for refactor of form pages.  This should be pulled out into a HealthPlanFormPageContext or HOC.
@@ -129,44 +123,22 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
     const { currentRoute } = useCurrentRoute()
     const { updateHeading } = usePage()
+    const [pkgNameForHeading, setPkgNameForHeading] = useState<
+        string | undefined
+    >(undefined)
+    useEffect(() => {
+        updateHeading({ customHeading: pkgNameForHeading })
+    }, [pkgNameForHeading, updateHeading])
 
-    const [formDataFromLatestRevision, setFormDataFromLatestRevision] =
-        useState<UnlockedHealthPlanFormDataType | null>(null)
-    const [formDataError, setFormDataError] = useState<FormDataError | null>(
-        null
-    )
     const { loggedInUser } = useAuth()
     const [showPageErrorMessage, setShowPageErrorMessage] = useState<
         boolean | string
     >(false) // string is a custom error message, defaults to generic of true
-    const [unlockedInfo, setUnlockedInfo] = useState<UpdateInformation | null>(
-        null
-    )
-    const [computedSubmissionName, setComputedSubmissionName] =
-        useState<string>('')
-    const [previousDocuments, setPreviousDocuments] = useState<string[]>([])
-
-    // document date lookup state
-    const [documentDates, setDocumentDates] = useState<
-        DocumentDateLookupTable | undefined
-    >({})
 
     const statePrograms = useStatePrograms()
 
-    // Set up graphql calls
-    const {
-        data: fetchData,
-        loading: fetchLoading,
-        error: fetchError,
-    } = useFetchHealthPlanPackageQuery({
-        variables: {
-            input: {
-                pkgID: id,
-            },
-        },
-    })
+    const { result: fetchResult } = useFetchHealthPlanPackageWrapper(id)
 
-    const submissionAndRevisions = fetchData?.fetchHealthPlanPackage?.pkg
     const [updateFormData] = useUpdateHealthPlanFormDataMutation()
 
     // When the new API is done, we'll call the new API here
@@ -207,113 +179,53 @@ export const StateSubmissionForm = (): React.ReactElement => {
         }
     }
 
-    // Setup side effects
-    useEffect(() => {
-        if (formDataFromLatestRevision) {
-            const name = packageName(formDataFromLatestRevision, statePrograms)
-            setComputedSubmissionName(name)
-            updateHeading({ customHeading: name })
-        }
-    }, [updateHeading, formDataFromLatestRevision, loggedInUser, statePrograms])
-
-    useEffect(() => {
-        if (submissionAndRevisions) {
-            const currentRevisionPackageOrError =
-                getCurrentRevisionFromHealthPlanPackage(submissionAndRevisions)
-            // set form data
-            if (currentRevisionPackageOrError instanceof Error) {
-                setFormDataError('MALFORMATTED_DATA')
-                return
-            }
-
-            const [revision, planFormData] = currentRevisionPackageOrError
-
-            if (planFormData.status !== 'DRAFT') {
-                recordJSException(
-                    `StateSubmissionForm: WRONG_SUBMISSION_STATUS. ID:
-                ${submissionAndRevisions.id}`
-                )
-                setFormDataError('WRONG_SUBMISSION_STATUS')
-                return
-            }
-
-            setFormDataFromLatestRevision(planFormData)
-
-            //set previous submitted files
-            const documentList = makeDocumentList(submissionAndRevisions)
-            //set document dates
-            const documentDates = makeDateTable(submissionAndRevisions)
-            setDocumentDates(documentDates)
-            if (documentList instanceof Error) {
-                recordJSException(
-                    `StateSubmissionForm: MALFORMATTED_DATA. document list malformatted. ID:
-                    ${submissionAndRevisions.id} Error message: ${documentList.message}`
-                )
-                setFormDataError('MALFORMATTED_DATA')
-                return
-            }
-            setPreviousDocuments(documentList.previousDocuments)
-
-            // set unlock info
-            if (submissionAndRevisions.status === 'UNLOCKED') {
-                const unlockInfo = revision.unlockInfo
-
-                if (unlockInfo) {
-                    setUnlockedInfo({
-                        updatedBy: unlockInfo.updatedBy,
-                        updatedAt: unlockInfo.updatedAt,
-                        updatedReason: unlockInfo.updatedReason,
-                    })
-                } else {
-                    recordJSException(
-                        `StateSubmissionForm: submission in summary has no revision with unlocked information. ID:
-                        ${submissionAndRevisions.id}`
-                    )
-                    setShowPageErrorMessage(
-                        'This may be an unlocked submission that is currently being edited. Please reload the page and try again.'
-                    )
-                }
-            }
-        }
-    }, [submissionAndRevisions])
-
-    if (fetchError) {
-        // This is a sign that we are handling the same error handling logic frontend and backend around invalid status
-        let specificContent: React.ReactElement | undefined = undefined
-        fetchError.graphQLErrors.forEach((err) => {
-            if (err?.extensions?.code === 'WRONG_STATUS') {
-                if (
-                    currentRoute !== 'UNKNOWN_ROUTE' &&
-                    STATE_SUBMISSION_FORM_ROUTES.includes(currentRoute)
-                ) {
-                    specificContent = <ErrorInvalidSubmissionStatus />
-                }
-            }
-        })
-
-        return specificContent ?? <GenericErrorPage />
-    }
-
-    if (!fetchLoading && !submissionAndRevisions) {
-        return <Error404 />
-    }
-
-    if (formDataError === 'MALFORMATTED_DATA') {
-        return <GenericErrorPage />
-    }
-
-    if (formDataError === 'WRONG_SUBMISSION_STATUS') {
-        return <ErrorInvalidSubmissionStatus />
-    }
-
-    // order matters, this should be last to prevent 404 flicker
-    if (fetchLoading || !formDataFromLatestRevision) {
+    if (fetchResult.status === 'LOADING') {
         return (
             <GridContainer>
                 <Loading />
             </GridContainer>
         )
     }
+
+    if (fetchResult.status === 'ERROR') {
+        const err = fetchResult.error
+        console.error('Error from API fetch', fetchResult.error)
+        if (err instanceof ApolloError) {
+            handleApolloError(err, true)
+        } else {
+            recordJSException(err)
+        }
+        return <GenericErrorPage /> // api failure or protobuf decode failure
+    }
+
+    const { data, formDatas, documentDates, documentLists } = fetchResult
+    const pkg = data.fetchHealthPlanPackage.pkg
+
+    // fetchHPP returns null if no package is found with the given ID
+    if (!pkg) {
+        return <Error404 />
+    }
+
+    // pull out the latest revision for editing
+    const latestRevision = pkg.revisions[0].node
+    const formDataFromLatestRevision = formDatas[latestRevision.id]
+
+    // if we've gotten back a submitted revision, it can't be edited
+    if (formDataFromLatestRevision.status !== 'DRAFT') {
+        return <ErrorInvalidSubmissionStatus />
+    }
+
+    const computedSubmissionName = packageName(
+        formDataFromLatestRevision,
+        statePrograms
+    )
+    if (pkgNameForHeading !== computedSubmissionName) {
+        setPkgNameForHeading(computedSubmissionName)
+    }
+
+    // An unlocked revision is defined by having unlockInfo on it, pull it out here if it exists
+    const unlockedInfo: UpdateInformation | undefined =
+        latestRevision.unlockInfo || undefined
 
     return (
         <>
@@ -349,7 +261,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
                             <ContractDetails
                                 draftSubmission={formDataFromLatestRevision}
                                 updateDraft={updateDraftHealthPlanPackage}
-                                previousDocuments={previousDocuments}
+                                previousDocuments={
+                                    documentLists.previousDocuments
+                                }
                             />
                         }
                     />
@@ -361,7 +275,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
                             <RateDetails
                                 draftSubmission={formDataFromLatestRevision}
                                 updateDraft={updateDraftHealthPlanPackage}
-                                previousDocuments={previousDocuments}
+                                previousDocuments={
+                                    documentLists.previousDocuments
+                                }
                             />
                         }
                     />
@@ -384,7 +300,9 @@ export const StateSubmissionForm = (): React.ReactElement => {
                             <Documents
                                 draftSubmission={formDataFromLatestRevision}
                                 updateDraft={updateDraftHealthPlanPackage}
-                                previousDocuments={previousDocuments}
+                                previousDocuments={
+                                    documentLists.previousDocuments
+                                }
                             />
                         }
                     />

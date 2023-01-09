@@ -130,6 +130,29 @@ describe('submitHealthPlanPackage', () => {
         )
     })
 
+    it('returns an error if the package is already SUBMITTED', async () => {
+        const server = await constructTestPostgresServer()
+
+        const draft = await createAndSubmitTestHealthPlanPackage(server)
+        const draftID = draft.id
+
+        const submitResult = await server.executeOperation({
+            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            variables: {
+                input: {
+                    pkgID: draftID,
+                },
+            },
+        })
+
+        expect(submitResult.errors).toBeDefined()
+
+        expect(submitResult.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(submitResult.errors?.[0].message).toBe(
+            'Attempted to submit an already submitted package.'
+        )
+    })
+
     it('returns an error if there are no contract details fields', async () => {
         const server = await constructTestPostgresServer()
 

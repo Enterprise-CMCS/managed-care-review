@@ -2,6 +2,7 @@ import { screen, render } from '@testing-library/react'
 import { FieldTextInput } from './FieldTextInput'
 
 const mockOnChange = jest.fn()
+const mockOnBlur = jest.fn()
 const mockSetValue = jest.fn()
 
 // mock out formik hook as we are not testing formik
@@ -14,6 +15,7 @@ jest.mock('formik', () => {
         useField: () => [
             {
                 onChange: mockOnChange,
+                onBlur: mockOnBlur,
             },
             {
                 touched: true,
