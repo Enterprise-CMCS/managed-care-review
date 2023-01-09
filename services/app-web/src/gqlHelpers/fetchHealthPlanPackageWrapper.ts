@@ -4,7 +4,6 @@ import {
 } from '../gen/gqlClient'
 import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto'
-import { recordJSException } from '../otelHelpers'
 import {
     wrapApolloResult,
     ApolloResultType,
@@ -57,7 +56,6 @@ function parseProtos(
         const err = new Error(
             `useFetchHealthPlanPackageWrapper: submission has no revisions. ID: ${pkg.id}`
         )
-        recordJSException(err)
         console.error(err)
         return {
             status: 'ERROR',
@@ -74,7 +72,6 @@ function parseProtos(
             const err =
                 new Error(`useFetchHealthPlanPackageWrapper: proto decoding error. ID:
                 ${pkg.id}. Error message: ${formDataResult}`)
-            recordJSException(err)
             console.error('Error decoding revision', revision, err)
             return {
                 status: 'ERROR',

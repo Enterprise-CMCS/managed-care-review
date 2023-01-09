@@ -44,6 +44,8 @@ import {
 import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
 import { useStatePrograms } from '../../hooks/useStatePrograms'
+import { ApolloError } from '@apollo/client'
+import { handleApolloError } from '../../gqlHelpers/apolloErrors'
 
 const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
     getRelativePath({
@@ -121,10 +123,12 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
     const { currentRoute } = useCurrentRoute()
     const { updateHeading } = usePage()
-    const [pkgName, setPkgName] = useState<string | undefined>(undefined)
+    const [pkgNameForHeading, setPkgNameForHeading] = useState<
+        string | undefined
+    >(undefined)
     useEffect(() => {
-        updateHeading({ customHeading: pkgName })
-    }, [pkgName, updateHeading])
+        updateHeading({ customHeading: pkgNameForHeading })
+    }, [pkgNameForHeading, updateHeading])
 
     const { loggedInUser } = useAuth()
     const [showPageErrorMessage, setShowPageErrorMessage] = useState<
@@ -184,8 +188,13 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
 
     if (fetchResult.status === 'ERROR') {
-        recordJSException(fetchResult.error)
+        const err = fetchResult.error
         console.error('Error from API fetch', fetchResult.error)
+        if (err instanceof ApolloError) {
+            handleApolloError(err, true)
+        } else {
+            recordJSException(err)
+        }
         return <GenericErrorPage /> // api failure or protobuf decode failure
     }
 
@@ -210,8 +219,8 @@ export const StateSubmissionForm = (): React.ReactElement => {
         formDataFromLatestRevision,
         statePrograms
     )
-    if (pkgName !== computedSubmissionName) {
-        setPkgName(computedSubmissionName)
+    if (pkgNameForHeading !== computedSubmissionName) {
+        setPkgNameForHeading(computedSubmissionName)
     }
 
     // An unlocked revision is defined by having unlockInfo on it, pull it out here if it exists

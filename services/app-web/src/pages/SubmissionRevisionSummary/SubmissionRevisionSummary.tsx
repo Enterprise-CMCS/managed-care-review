@@ -18,6 +18,8 @@ import styles from './SubmissionRevisionSummary.module.scss'
 import { PreviousSubmissionBanner } from '../../components'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
 import { useFetchHealthPlanPackageWrapper } from '../../gqlHelpers'
+import { ApolloError } from '@apollo/client'
+import { handleApolloError } from '../../gqlHelpers/apolloErrors'
 
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
@@ -48,9 +50,13 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
     }
 
     if (fetchResult.status === 'ERROR') {
-        // Log something about the error?
-        recordJSException(fetchResult.error)
+        const err = fetchResult.error
         console.error('Error from API fetch', fetchResult.error)
+        if (err instanceof ApolloError) {
+            handleApolloError(err, true)
+        } else {
+            recordJSException(err)
+        }
         return <GenericErrorPage /> // api failure or protobuf decode failure
     }
 

@@ -30,6 +30,8 @@ import { ChangeHistory } from '../../components/ChangeHistory/ChangeHistory'
 import { UnlockSubmitModal } from '../../components/Modal/UnlockSubmitModal'
 import { useFetchHealthPlanPackageWrapper } from '../../gqlHelpers'
 import { recordJSException } from '../../otelHelpers'
+import { handleApolloError } from '../../gqlHelpers/apolloErrors'
+import { ApolloError } from '@apollo/client'
 
 export type DocumentDateLookupTable = {
     [key: string]: string
@@ -86,8 +88,13 @@ export const SubmissionSummary = (): React.ReactElement => {
     }
 
     if (fetchResult.status === 'ERROR') {
-        recordJSException(fetchResult.error)
+        const err = fetchResult.error
         console.error('Error from API fetch', fetchResult.error)
+        if (err instanceof ApolloError) {
+            handleApolloError(err, true)
+        } else {
+            recordJSException(err)
+        }
         return <GenericErrorPage /> // api failure or protobuf decode failure
     }
 
@@ -119,9 +126,8 @@ export const SubmissionSummary = (): React.ReactElement => {
     // Since we've already bounced on DRAFT packages, this _should_ exist.
     const edge = pkg.revisions.find((rEdge) => rEdge.node.submitInfo)
     if (!edge) {
-        console.error(
-            'No currently submitted revision for this, programming error. '
-        )
+        const errMsg = `No currently submitted revision for this package: ${pkg.id}, programming error. `
+        recordJSException(errMsg)
         return <GenericErrorPage />
     }
     const currentRevision = edge.node
