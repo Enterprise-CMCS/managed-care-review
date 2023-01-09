@@ -239,6 +239,7 @@ export const RateDetailsSummarySection = ({
                                     <DataDetail
                                         id="ratePrograms"
                                         label="Programs this rate certification covers"
+                                        explainMissingData={!isSubmitted}
                                         data={ratePrograms(
                                             submission,
                                             rateInfo
@@ -248,11 +249,13 @@ export const RateDetailsSummarySection = ({
                                 <DataDetail
                                     id="rateType"
                                     label="Rate certification type"
+                                    explainMissingData={!isSubmitted}
                                     data={rateCertificationType(rateInfo)}
                                 />
                                 <DataDetail
                                     id="rateCapitationType"
                                     label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
+                                    explainMissingData={!isSubmitted}
                                     data={rateCapitationType(rateInfo)}
                                 />
                                 <DataDetail
@@ -262,6 +265,7 @@ export const RateDetailsSummarySection = ({
                                             ? 'Rating period of original rate certification'
                                             : 'Rating period'
                                     }
+                                    explainMissingData={!isSubmitted}
                                     data={`${formatCalendarDate(
                                         rateInfo.rateDateStart
                                     )} to ${formatCalendarDate(
@@ -275,6 +279,7 @@ export const RateDetailsSummarySection = ({
                                             ? 'Date certified for rate amendment'
                                             : 'Date certified'
                                     }
+                                    explainMissingData={!isSubmitted}
                                     data={formatCalendarDate(
                                         rateInfo.rateDateCertified
                                     )}
@@ -283,6 +288,7 @@ export const RateDetailsSummarySection = ({
                                     <DataDetail
                                         id="effectiveRatingPeriod"
                                         label="Rate amendment effective dates"
+                                        explainMissingData={!isSubmitted}
                                         data={`${formatCalendarDate(
                                             rateInfo.rateAmendmentInfo
                                                 .effectiveDateStart

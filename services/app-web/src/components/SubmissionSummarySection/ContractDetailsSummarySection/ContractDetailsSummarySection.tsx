@@ -151,6 +151,7 @@ export const ContractDetailsSummarySection = ({
                     <DataDetail
                         id="contractExecutionStatus"
                         label="Contract status"
+                        explainMissingData={!isSubmitted}
                         data={
                             submission.contractExecutionStatus
                                 ? ContractExecutionStatusRecord[
@@ -166,6 +167,7 @@ export const ContractDetailsSummarySection = ({
                                 ? 'Contract effective dates'
                                 : 'Contract amendment effective dates'
                         }
+                        explainMissingData={!isSubmitted}
                         data={`${formatCalendarDate(
                             submission.contractDateStart
                         )} to ${formatCalendarDate(
@@ -175,6 +177,7 @@ export const ContractDetailsSummarySection = ({
                     <DataDetail
                         id="managedCareEntities"
                         label="Managed care entities"
+                        explainMissingData={!isSubmitted}
                         data={createCheckboxList({
                             list: submission.managedCareEntities,
                             dict: ManagedCareEntityRecord,
@@ -183,6 +186,7 @@ export const ContractDetailsSummarySection = ({
                     <DataDetail
                         id="federalAuthorities"
                         label="Active federal operating authority"
+                        explainMissingData={!isSubmitted}
                         data={createCheckboxList({
                             list: submission.federalAuthorities,
                             dict: FederalAuthorityRecord,
@@ -195,6 +199,7 @@ export const ContractDetailsSummarySection = ({
                             <DataDetail
                                 id="modifiedProvisions"
                                 label="This contract action includes new or modified provisions related to the following"
+                                explainMissingData={!isSubmitted}
                                 data={createCheckboxList({
                                     list: modifiedProvisions,
                                     dict: ModifiedProvisionsRecord,
@@ -204,6 +209,7 @@ export const ContractDetailsSummarySection = ({
                             <DataDetail
                                 id="unmodifiedProvisions"
                                 label="This contract action does NOT include new or modified provisions related to the following"
+                                explainMissingData={!isSubmitted}
                                 data={createCheckboxList({
                                     list: unmodifiedProvisions,
                                     dict: ModifiedProvisionsRecord,

@@ -1,6 +1,6 @@
-import { IconError } from '@trussworks/react-uswds'
 import React from 'react'
 import styles from './DataDetail.module.scss'
+import { DataDetailMissingField } from './DataDetailMissingField'
 
 type DataDetailProps = {
     id: string
@@ -26,31 +26,14 @@ export const DataDetail = ({
         <div className={styles.dataDetail}>
             <dt id={id}>{label}</dt>
             <dd role="definition" aria-labelledby={id}>
-                {Array.isArray(data)
-                    ? data.join(', ').toUpperCase()
-                    : explainMissingData
-                    ? displayErrorMessageForMissingData(data)
-                    : data}
+                {Array.isArray(data) ? (
+                    data.join(', ').toUpperCase()
+                ) : explainMissingData && !data ? (
+                    <DataDetailMissingField />
+                ) : (
+                    data
+                )}
             </dd>
         </div>
     )
-}
-
-function displayErrorMessageForMissingData<T>(
-    data: T | undefined
-): T | React.ReactNode {
-    const requiredFieldMissingText = 'You must provide this information.'
-
-    if (!data) {
-        return (
-            <span className={styles.missingInfo}>
-                <span>
-                    <IconError aria-label="An error icon" size={3} />
-                </span>
-                <span>{requiredFieldMissingText}</span>
-            </span>
-        )
-    } else {
-        return data
-    }
 }

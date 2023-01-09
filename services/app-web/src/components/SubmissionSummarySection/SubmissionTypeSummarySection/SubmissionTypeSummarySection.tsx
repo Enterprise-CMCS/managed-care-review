@@ -76,16 +76,19 @@ export const SubmissionTypeSummarySection = ({
                     <DataDetail
                         id="program"
                         label="Program(s)"
+                        explainMissingData={!isSubmitted}
                         data={programNames}
                     />
                     <DataDetail
                         id="submissionType"
                         label="Submission type"
+                        explainMissingData={!isSubmitted}
                         data={SubmissionTypeRecord[submission.submissionType]}
                     />
                     <DataDetail
                         id="contractType"
                         label="Contract action type"
+                        explainMissingData={!isSubmitted}
                         data={
                             submission.contractType
                                 ? ContractTypeRecord[submission.contractType]
@@ -109,6 +112,7 @@ export const SubmissionTypeSummarySection = ({
                         <DataDetail
                             id="submissionDescription"
                             label="Submission description"
+                            explainMissingData={!isSubmitted}
                             data={submission.submissionDescription}
                         />
                     </Grid>

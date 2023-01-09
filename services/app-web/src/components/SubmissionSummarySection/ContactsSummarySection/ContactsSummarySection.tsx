@@ -7,6 +7,7 @@ import {
 } from '../../../constants/healthPlanPackages'
 import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { ActuaryContact } from '../../../common-code/healthPlanFormDataType'
+import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 
 export type ContactsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -43,29 +44,35 @@ export const ContactsSummarySection = ({
 
                 <GridContainer>
                     <Grid row>
-                        {submission.stateContacts.map((stateContact, index) => (
-                            <Grid col={6} key={'statecontact_' + index}>
-                                <span className="text-bold">
-                                    Contact {index + 1}
-                                </span>
-                                <br />
-                                <address>
-                                    {stateContact.name}
-                                    <br />
-                                    {stateContact.titleRole}
-                                    <br />
-                                    <Link
-                                        href={`mailto:${stateContact.email}`}
-                                        target="_blank"
-                                        variant="external"
-                                        rel="noreferrer"
-                                    >
-                                        {stateContact.email}
-                                    </Link>
-                                    <br />
-                                </address>
-                            </Grid>
-                        ))}
+                        {submission.stateContacts.length > 0 ? (
+                            submission.stateContacts.map(
+                                (stateContact, index) => (
+                                    <Grid col={6} key={'statecontact_' + index}>
+                                        <span className="text-bold">
+                                            Contact {index + 1}
+                                        </span>
+                                        <br />
+                                        <address>
+                                            {stateContact.name}
+                                            <br />
+                                            {stateContact.titleRole}
+                                            <br />
+                                            <Link
+                                                href={`mailto:${stateContact.email}`}
+                                                target="_blank"
+                                                variant="external"
+                                                rel="noreferrer"
+                                            >
+                                                {stateContact.email}
+                                            </Link>
+                                            <br />
+                                        </address>
+                                    </Grid>
+                                )
+                            )
+                        ) : (
+                            <DataDetailMissingField />
+                        )}
                     </Grid>
                 </GridContainer>
             </dl>

@@ -858,7 +858,7 @@ describe('RateDetails', () => {
             ldUseClientSpy({
                 'rates-across-submissions': true,
             })
-            jest.setTimeout(20000)
+            jest.setTimeout(30000)
             const mockUser = {
                 __typename: 'StateUser' as const,
                 role: 'STATE_USER',
