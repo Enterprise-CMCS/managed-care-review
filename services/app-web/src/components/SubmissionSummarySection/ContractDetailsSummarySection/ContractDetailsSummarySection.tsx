@@ -45,6 +45,8 @@ const createCheckboxList = ({
         ? userFriendlyList.concat(otherReasons)
         : userFriendlyList
 
+    if (listToDisplay.length === 0) return null
+
     return (
         <ul>
             {listToDisplay.map((item) => (
@@ -157,7 +159,7 @@ export const ContractDetailsSummarySection = ({
                                 ? ContractExecutionStatusRecord[
                                       submission.contractExecutionStatus
                                   ]
-                                : ''
+                                : undefined
                         }
                     />
                     <DataDetail
@@ -168,11 +170,16 @@ export const ContractDetailsSummarySection = ({
                                 : 'Contract amendment effective dates'
                         }
                         explainMissingData={!isSubmitted}
-                        data={`${formatCalendarDate(
-                            submission.contractDateStart
-                        )} to ${formatCalendarDate(
+                        data={
+                            submission.contractDateStart &&
                             submission.contractDateEnd
-                        )}`}
+                                ? `${formatCalendarDate(
+                                      submission.contractDateStart
+                                  )} to ${formatCalendarDate(
+                                      submission.contractDateEnd
+                                  )}`
+                                : undefined
+                        }
                     />
                     <DataDetail
                         id="managedCareEntities"

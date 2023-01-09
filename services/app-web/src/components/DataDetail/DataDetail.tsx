@@ -20,7 +20,8 @@ export const DataDetail = ({
     data,
     explainMissingData = false,
 }: DataDetailProps): React.ReactElement | null => {
-    if (!explainMissingData && !data) return null
+    const noData = !data || data === '' // These are all possible undefined fields coming back from submission summary page
+    if (!explainMissingData && noData) return null
 
     return (
         <div className={styles.dataDetail}>
@@ -28,7 +29,7 @@ export const DataDetail = ({
             <dd role="definition" aria-labelledby={id}>
                 {Array.isArray(data) ? (
                     data.join(', ').toUpperCase()
-                ) : explainMissingData && !data ? (
+                ) : explainMissingData && noData ? (
                     <DataDetailMissingField />
                 ) : (
                     data

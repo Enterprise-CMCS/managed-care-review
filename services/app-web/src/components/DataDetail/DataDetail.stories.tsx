@@ -47,3 +47,14 @@ export const WithMissingField = (): React.ReactElement => (
         />
     </dl>
 )
+
+export const WithCheckboxList = (): React.ReactElement => (
+    <dl>
+        <DataDetail
+            id="crystal-ball"
+            label="The secret to the future"
+            data={['THIS', 'THAT', 'THE_OTHER']}
+            explainMissingData
+        />
+    </dl>
+)
