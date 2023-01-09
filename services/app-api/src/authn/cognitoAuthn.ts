@@ -5,7 +5,7 @@ import {
     UserType as CognitoUserType,
 } from '@aws-sdk/client-cognito-identity-provider'
 
-import { CMSUserType, StateUserType, UserType } from '../domain-models'
+import { UserType } from '../domain-models'
 import { performance } from 'perf_hooks'
 import { Store, InsertUserArgsType, isStoreError } from '../postgres'
 
@@ -122,7 +122,7 @@ export function userTypeFromAttributes(attributes: {
             stateCode: attributes['custom:state_code'],
             givenName: attributes.given_name,
             familyName: attributes.family_name,
-        } as StateUserType)
+        })
     }
 
     if (roles.includes(CMS_ROLE_ATTRIBUTE)) {
@@ -131,7 +131,7 @@ export function userTypeFromAttributes(attributes: {
             email: attributes.email,
             givenName: attributes.given_name,
             familyName: attributes.family_name,
-        } as CMSUserType)
+        })
     }
 
     return err(new Error('Unsupported user role:  ' + roleAttribute))
