@@ -200,30 +200,6 @@ export function submitHealthPlanPackageResolver(
             )
         }
 
-        const draftResult = toDomain(currentRevision.formDataProto)
-
-        if (draftResult instanceof Error) {
-            const errMessage = `Failed to decode draft proto ${draftResult}.`
-            logError('submitHealthPlanPackage', errMessage)
-            throw new Error(errMessage)
-        }
-
-        if (draftResult.status === 'SUBMITTED') {
-            const errMessage = `Attempted to submit and already submitted package.`
-            logError('submitHealthPlanPackage', errMessage)
-            throw new Error(errMessage)
-        }
-
-        // CONTRACT_ONLY submission should not contain any CONTRACT_AND_RATE rates data. We will delete if any valid
-        // rate data is in a CONTRACT_ONLY submission. This deletion is done at submission instead of update to preserve
-        // rates data in case user did not intend or would like to revert the submission type before submitting.
-        if (
-            draftResult.submissionType === 'CONTRACT_ONLY' &&
-            hasAnyValidRateData(draftResult)
-        ) {
-            Object.assign(draftResult, removeRatesData(draftResult))
-        }
-
         //Set updateInfo default to initial submission
         const updateInfo: UpdateInfoType = {
             updatedAt: new Date(),
@@ -245,9 +221,33 @@ export function submitHealthPlanPackageResolver(
             planPackageStatus === 'RESUBMITTED' ||
             planPackageStatus === 'SUBMITTED'
         ) {
-            const errMessage = `Attempted to submit and already submitted package.`
+            const errMessage = `Attempted to submit an already submitted package.`
             logError('submitHealthPlanPackage', errMessage)
             throw new UserInputError(errMessage) // TODO: This is should be a custom ApolloError such as INVALID_PACKAGE_STATUS or ACTION_UNAVAILABLE, not user input error since doesn't involve form fields the user controls
+        }
+
+        const draftResult = toDomain(currentRevision.formDataProto)
+
+        if (draftResult instanceof Error) {
+            const errMessage = `Failed to decode draft proto ${draftResult}.`
+            logError('submitHealthPlanPackage', errMessage)
+            throw new Error(errMessage)
+        }
+
+        if (draftResult.status === 'SUBMITTED') {
+            const errMessage = `Attempted to submit an already submitted package.`
+            logError('submitHealthPlanPackage', errMessage)
+            throw new Error(errMessage)
+        }
+
+        // CONTRACT_ONLY submission should not contain any CONTRACT_AND_RATE rates data. We will delete if any valid
+        // rate data is in a CONTRACT_ONLY submission. This deletion is done at submission instead of update to preserve
+        // rates data in case user did not intend or would like to revert the submission type before submitting.
+        if (
+            draftResult.submissionType === 'CONTRACT_ONLY' &&
+            hasAnyValidRateData(draftResult)
+        ) {
+            Object.assign(draftResult, removeRatesData(draftResult))
         }
 
         // attempt to parse into a StateSubmission
