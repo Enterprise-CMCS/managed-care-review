@@ -1,4 +1,4 @@
-import { DataDetailMissingField } from './DataDetailMissingField'
+import { DataDetailMissingField } from '../'
 
 // Used to display field values from checkbox components in forms.
 export const DataDetailCheckboxList = ({

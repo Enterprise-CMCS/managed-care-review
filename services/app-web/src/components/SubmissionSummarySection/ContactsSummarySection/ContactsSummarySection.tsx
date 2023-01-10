@@ -1,4 +1,4 @@
-import { Grid, GridContainer, Link } from '@trussworks/react-uswds'
+import { Grid, GridContainer } from '@trussworks/react-uswds'
 import styles from '../SubmissionSummarySection.module.scss'
 import { SectionHeader } from '../../SectionHeader'
 import {
@@ -8,7 +8,7 @@ import {
 import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { ActuaryContact } from '../../../common-code/healthPlanFormDataType'
 import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
-import { DataDetail } from '../../DataDetail'
+import { DataDetail, DataDetailContactField } from '../../DataDetail'
 
 export type ContactsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -51,25 +51,15 @@ export const ContactsSummarySection = ({
                             submission.stateContacts.map(
                                 (stateContact, index) => (
                                     <Grid col={6} key={'statecontact_' + index}>
-                                        <span className="text-bold">
-                                            Contact {index + 1}
-                                        </span>
-                                        <br />
-                                        <address>
-                                            {stateContact.name}
-                                            <br />
-                                            {stateContact.titleRole}
-                                            <br />
-                                            <Link
-                                                href={`mailto:${stateContact.email}`}
-                                                target="_blank"
-                                                variant="external"
-                                                rel="noreferrer"
-                                            >
-                                                {stateContact.email}
-                                            </Link>
-                                            <br />
-                                        </address>
+                                        <DataDetail
+                                            id={'statecontact_' + index}
+                                            label={`Contact ${index + 1}`}
+                                            data={
+                                                <DataDetailContactField
+                                                    contact={stateContact}
+                                                />
+                                            }
+                                        />
                                     </Grid>
                                 )
                             )
@@ -80,9 +70,9 @@ export const ContactsSummarySection = ({
                 </GridContainer>
             </dl>
 
-            {submission.submissionType === 'CONTRACT_AND_RATES' &&
-                submission.addtlActuaryContacts && (
-                    <>
+            {submission.submissionType === 'CONTRACT_AND_RATES' && (
+                <>
+                    {submission.addtlActuaryContacts.length > 0 && (
                         <dl>
                             <SectionHeader header="Additional actuary contacts" />
                             <GridContainer>
@@ -93,52 +83,45 @@ export const ContactsSummarySection = ({
                                                 col={6}
                                                 key={'actuarycontact_' + index}
                                             >
-                                                <span className="text-bold">
-                                                    Additional actuary contact
-                                                </span>
-                                                <br />
-                                                <address>
-                                                    {actuaryContact.name}
-                                                    <br />
-                                                    {actuaryContact.titleRole}
-                                                    <br />
-                                                    <Link
-                                                        href={`mailto:${actuaryContact.email}`}
-                                                        target="_blank"
-                                                        variant="external"
-                                                        rel="noreferrer"
-                                                    >
-                                                        {actuaryContact.email}
-                                                    </Link>
-                                                    <br />
-                                                    {getActuaryFirm(
-                                                        actuaryContact
-                                                    )}
-                                                </address>
+                                                <DataDetail
+                                                    id={
+                                                        'actuarycontact_' +
+                                                        index
+                                                    }
+                                                    label="Additional actuary contact"
+                                                    data={
+                                                        <DataDetailContactField
+                                                            contact={
+                                                                actuaryContact
+                                                            }
+                                                        />
+                                                    }
+                                                />
                                             </Grid>
                                         )
                                     )}
                                 </Grid>
                             </GridContainer>
                         </dl>
-                        <dl>
-                            <GridContainer>
-                                <DataDetail
-                                    id="communicationPreference"
-                                    label="Actuaries’ communication preference"
-                                    data={
-                                        submission.addtlActuaryCommunicationPreference &&
-                                        ActuaryCommunicationRecord[
-                                            submission
-                                                .addtlActuaryCommunicationPreference
-                                        ]
-                                    }
-                                    explainMissingData={!isSubmitted}
-                                />
-                            </GridContainer>
-                        </dl>
-                    </>
-                )}
+                    )}
+                    <dl>
+                        <GridContainer>
+                            <DataDetail
+                                id="communicationPreference"
+                                label="Actuaries’ communication preference"
+                                data={
+                                    submission.addtlActuaryCommunicationPreference &&
+                                    ActuaryCommunicationRecord[
+                                        submission
+                                            .addtlActuaryCommunicationPreference
+                                    ]
+                                }
+                                explainMissingData={!isSubmitted}
+                            />
+                        </GridContainer>
+                    </dl>
+                </>
+            )}
         </section>
     )
 }

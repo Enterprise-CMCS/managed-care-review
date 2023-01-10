@@ -138,9 +138,9 @@ export const ContractDetailsSummarySection = ({
                     <DataDetail
                         id="contractEffectiveDates"
                         label={
-                            submission.contractType === 'BASE'
-                                ? 'Contract effective dates'
-                                : 'Contract amendment effective dates'
+                            submission.contractType === 'AMENDMENT'
+                                ? 'Contract amendment effective dates'
+                                : 'Contract effective dates'
                         }
                         explainMissingData={!isSubmitted}
                         data={

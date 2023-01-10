@@ -1,5 +1,5 @@
 import React from 'react'
-import { DataDetail } from './DataDetail'
+import { DataDetail, DataDetailContactField, DataDetailDateRange } from './'
 
 export default {
     title: 'Components/DataDetail',
@@ -16,23 +16,6 @@ export const WithString = (): React.ReactElement => (
             id="rainfall"
             label="Average rainfall in May"
             data="31.58 inches"
-        />
-    </dl>
-)
-export const WithAddress = (): React.ReactElement => (
-    <dl>
-        <DataDetail
-            id="disney"
-            label="Disney World Contact Info"
-            data={
-                <address>
-                    Mickey Mouse
-                    <br />
-                    <a href="mailto:mickey@disney.com">mickey@disney.com</a>
-                    <br />
-                    <a href="tel:555-555-5555">555-555-5555</a>
-                </address>
-            }
         />
     </dl>
 )
@@ -54,7 +37,39 @@ export const WithCheckboxList = (): React.ReactElement => (
             id="crystal-ball"
             label="The secret to the future"
             data={['THIS', 'THAT', 'THE_OTHER']}
-            explainMissingData
+        />
+    </dl>
+)
+
+export const WithDataRange = (): React.ReactElement => (
+    <dl>
+        <DataDetail
+            id="vip"
+            label="Very important person"
+            data={
+                <DataDetailDateRange
+                    startDate={new Date(Date.UTC(2022, 5, 21))}
+                    endDate={new Date(Date.UTC(2022, 5, 22))}
+                />
+            }
+        />
+    </dl>
+)
+
+export const WithContact = (): React.ReactElement => (
+    <dl>
+        <DataDetail
+            id="vip"
+            label="Very important person"
+            data={
+                <DataDetailContactField
+                    contact={{
+                        name: 'Bob',
+                        titleRole: 'Loblaw Law',
+                        email: 'bob@example.com',
+                    }}
+                />
+            }
         />
     </dl>
 )

@@ -122,15 +122,11 @@ describe('ContactsSummarySection', () => {
         ).toBeNull()
     })
 
-    it('does not include additional actuary contacts section when this optional field is not provided', () => {
+    it('does not include additional actuary contacts heading when this optional field is not provided', () => {
+        const mockSubmission = { ...draftSubmission, addtlActuaryContacts: [] }
         renderWithProviders(
-            <ContactsSummarySection submission={draftSubmission} />
+            <ContactsSummarySection submission={mockSubmission} />
         )
-
-        // We should never display missing field text on submission summary for submitted packages
         expect(screen.queryByText(/Additional actuary contacts/)).toBeNull()
-        expect(
-            screen.queryByText(/Actuaries’ communication preference/)
-        ).toBeNull()
     })
 })

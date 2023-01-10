@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
-import {
-    getActuaryFirm,
-    UploadedDocumentsTable,
-} from '../../../components/SubmissionSummarySection'
+import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
@@ -22,10 +19,10 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { useIndexHealthPlanPackagesQuery } from '../../../gen/gqlClient'
 import { recordJSException } from '../../../otelHelpers'
 import { featureFlags } from '../../../common-code/featureFlags'
-import { Link } from '@trussworks/react-uswds'
 import { getCurrentRevisionFromHealthPlanPackage } from '../../../gqlHelpers'
 import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
+import { DataDetailContactField } from '../../DataDetail/DataDetailContactField/DataDetailContactField'
 
 // Used for refreshed packages names keyed by their package id
 // package name includes (Draft) for draft packages.
@@ -308,54 +305,19 @@ export const RateDetailsSummarySection = ({
                                         />
                                     ) : null}
                                     {rateInfo.actuaryContacts[0] && (
-                                        <div
-                                            className={
-                                                styles.certifyingActuaryDetail
+                                        <DataDetail
+                                            id="certifyingActuary"
+                                            label="Certifying actuary"
+                                            explainMissingData={!isSubmitted}
+                                            data={
+                                                <DataDetailContactField
+                                                    contact={
+                                                        rateInfo
+                                                            .actuaryContacts[0]
+                                                    }
+                                                />
                                             }
-                                        >
-                                            <dt
-                                                id="certifyingActuary"
-                                                className="text-bold"
-                                            >
-                                                Certifying actuary
-                                            </dt>
-                                            <dd
-                                                role="definition"
-                                                aria-labelledby="certifyingActuary"
-                                            >
-                                                <address>
-                                                    {
-                                                        rateInfo
-                                                            .actuaryContacts[0]
-                                                            .name
-                                                    }
-                                                    <br />
-                                                    {
-                                                        rateInfo
-                                                            .actuaryContacts[0]
-                                                            .titleRole
-                                                    }
-                                                    <br />
-                                                    <Link
-                                                        href={`mailto:${rateInfo.actuaryContacts[0].email}`}
-                                                        target="_blank"
-                                                        variant="external"
-                                                        rel="noreferrer"
-                                                    >
-                                                        {
-                                                            rateInfo
-                                                                .actuaryContacts[0]
-                                                                .email
-                                                        }
-                                                    </Link>
-                                                    <br />
-                                                    {getActuaryFirm(
-                                                        rateInfo
-                                                            .actuaryContacts[0]
-                                                    )}
-                                                </address>
-                                            </dd>
-                                        </div>
+                                        />
                                     )}
                                 </DoubleColumnGrid>
                                 {!loading ? (
