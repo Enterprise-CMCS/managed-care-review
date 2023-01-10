@@ -1,8 +1,8 @@
 import { Story } from '@storybook/react'
 import React from 'react'
 import ProvidersDecorator from '../../../.storybook/providersDecorator'
-import { DataDetail, DataDetailContactField, DataDetailDateRange } from './'
-import type { DataDetailProps } from './'
+import { DataDetail } from './DataDetail'
+import type { DataDetailProps } from './DataDetail'
 
 export default {
     title: 'Components/DataDetail',
@@ -43,31 +43,33 @@ WithCheckboxList.args = {
     data: ['this', 'that', 'the other thing'],
 }
 
-export const WithDateRange = Template.bind({})
-WithDateRange.decorators = [(Story) => ProvidersDecorator(Story, {})]
-WithDateRange.args = {
-    id: 'time-period',
-    label: 'Time wasted',
-    data: (
-        <DataDetailDateRange
-            startDate={new Date(Date.UTC(2022, 5, 21))}
-            endDate={new Date(Date.UTC(2022, 5, 22))}
-        />
-    ),
-}
+// Having trouble getting these stories to render without crashing story
 
-export const WithContact = Template.bind({})
-WithContact.decorators = [(Story) => ProvidersDecorator(Story, {})]
-WithContact.args = {
-    id: 'legal-expert',
-    label: 'Legal expert',
-    data: (
-        <DataDetailContactField
-            contact={{
-                name: 'Bob Loblaw',
-                titleRole: 'Attorney at Law',
-                email: 'bob@example.com',
-            }}
-        />
-    ),
-}
+// export const WithDateRange = Template.bind({})
+// WithDateRange.decorators = [(Story) => ProvidersDecorator(Story, {})]
+// WithDateRange.args = {
+//     id: 'time-period',
+//     label: 'Time wasted',
+//     data: (
+//         <DataDetailDateRange
+//             startDate={new Date(Date.UTC(2022, 5, 21))}
+//             endDate={new Date(Date.UTC(2022, 5, 22))}
+//         />
+//     ),
+// }
+
+// export const WithContact = Template.bind({})
+// WithContact.decorators = [(Story) => ProvidersDecorator(Story, {})]
+// WithContact.args = {
+//     id: 'legal-expert',
+//     label: 'Legal expert',
+//     data: (
+//         <DataDetailContactField
+//             contact={{
+//                 name: 'Bob Loblaw',
+//                 titleRole: 'Attorney at Law',
+//                 email: 'bob@example.com',
+//             }}
+//         />
+//     ),
+// }
