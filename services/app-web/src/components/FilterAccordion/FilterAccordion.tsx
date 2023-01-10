@@ -5,7 +5,7 @@ import { FilterSelectPropType } from './FilterSelect/FilterSelect'
 
 export interface FilterAccordionPropType {
     onClearFilters?: () => void
-    filterTitle: string
+    filterTitle: string | React.ReactNode
     children:
         | React.ReactElement<FilterSelectPropType>
         | Array<React.ReactElement<FilterSelectPropType>>
@@ -32,7 +32,7 @@ export const FilterAccordion = ({
 
     const accordionItems = [
         {
-            title: <div className={styles.filterTitle}>{filterTitle}</div>,
+            title: filterTitle,
             content: (
                 <>
                     <div className={styles.filters}>
