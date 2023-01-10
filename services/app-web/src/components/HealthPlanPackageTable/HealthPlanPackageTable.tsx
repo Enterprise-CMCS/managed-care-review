@@ -226,9 +226,9 @@ export const HealthPlanPackageTable = ({
         label: state,
     }))
 
-    const filterTitle = `Filters (${
+    const filterTitle = `${
         columnFilters.flatMap((filter) => filter.value).length
-    } applied)`
+    } filters applied`
 
     return (
         <>
