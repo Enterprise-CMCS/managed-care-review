@@ -1,3 +1,5 @@
+import { DataDetailMissingField } from './DataDetailMissingField'
+
 // Used to display field values from checkbox components in forms.
 export const DataDetailCheckboxList = ({
     list,
@@ -16,7 +18,7 @@ export const DataDetailCheckboxList = ({
         ? userFriendlyList.concat(otherReasons)
         : userFriendlyList
 
-    if (listToDisplay.length === 0) return null
+    if (listToDisplay.length === 0) return <DataDetailMissingField />
 
     return (
         <ul>
