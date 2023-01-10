@@ -226,13 +226,9 @@ export const HealthPlanPackageTable = ({
         label: state,
     }))
 
-    const filterTitle = `Filters ${
-        hasAppliedFilters
-            ? `(${
-                  columnFilters.flatMap((filter) => filter.value).length
-              } applied)`
-            : ''
-    }`
+    const filterTitle = `Filters (${
+        columnFilters.flatMap((filter) => filter.value).length
+    } applied)`
 
     return (
         <>
@@ -243,7 +239,7 @@ export const HealthPlanPackageTable = ({
                             onClearFilters={() => {
                                 setColumnFilters([])
                             }}
-                            filterTitle={filterTitle}
+                            filterTitle="Filters"
                         >
                             <FilterSelect
                                 name="state"
@@ -271,7 +267,8 @@ export const HealthPlanPackageTable = ({
                             />
                         </FilterAccordion>
                     )}
-                    {
+                    <div aria-live="polite" aria-atomic>
+                        <div className={styles.filterCount}>{filterTitle}</div>
                         <div className={styles.filterCount}>
                             {!hasAppliedFilters
                                 ? `${tableData.length} ${pluralize(
@@ -285,7 +282,7 @@ export const HealthPlanPackageTable = ({
                                       tableData.length
                                   )}`}
                         </div>
-                    }
+                    </div>
                     <Table fullWidth>
                         <thead>
                             {reactTable.getHeaderGroups().map((headerGroup) => (
