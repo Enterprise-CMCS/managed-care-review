@@ -1,0 +1,155 @@
+service: github-oidc
+
+frameworkVersion: '^3.19.0'
+
+plugins:
+  - serverless-stack-termination-protection
+  - serverless-plugin-scripts
+
+custom:
+  serverlessTerminationProtection:
+    stages:
+      - dev
+      - val
+      - prod
+      - main
+  scripts:
+    # get the service role ARN from the stack outputs, and set it as a GitHub secret with the correct name depending on the stage:
+    # - main: DEV_OIDC_ROLE_ARN
+    # - val: VAL_OIDC_ROLE_ARN
+    # - prod: PROD_OIDC_ROLE_ARN
+    # - other stages for feature branches: ${BRANCH_NAME}_OIDC_ROLE_ARN
+    # note that the format of the secret name here should only be changed in concert with the code in ./destroy_stage.ts that deletes the secret
+    hooks:
+      deploy:finalize: |
+        stage=${sls:stage}
+        service_role_arn=$(serverless info --stage $stage --verbose | sed -e '1,/^Stack Outputs/d' | sed -n -e "s/^.*serviceRoleArn: //p")
+        formatted_stage=$(if [ $stage == 'main' ];
+        then
+            echo 'DEV'
+        else
+            echo $stage | tr '[:lower:]' '[:upper:]'
+        fi)
+        node ../../scripts/manage_repo_secrets.js set --name ${formatted_stage}_OIDC_ROLE_ARN --value $service_role_arn
+
+params:
+  val:
+    # only workflows running on the val branch can use val OIDC
+    subjectClaimFilters: "repo:CMSgov/managed-care-review:ref:refs/heads/val"
+  prod:
+    # only workflows running on the prod branch can use prod OIDC
+    subjectClaimFilters: "repo:CMSgov/managed-care-review:ref:refs/heads/prod"
+  default:
+    # the catchall subject claim filter for dev OIDC, including the main stage and all stages for feature branches
+    subjectClaimFilters: "repo:CMSgov/managed-care-review:*"
+
+    # this param should be overridden with a value of 'true' via the CLI when bootstrapping an environment. see https://www.serverless.com/framework/docs/guides/parameters#inheritance-and-overriding
+    bootstrap: 'false'
+
+    # list of valid server thumbprints for tokens sent by the GitHub OIDC provider
+    # value comes from https://github.blog/changelog/2022-01-13-github-actions-update-on-oidc-based-deployments-to-aws/
+    githubActionsThumbprint: [6938fd4d98bab03faadb97b34396831e3780aea1]
+
+    # list of allowed audiences for tokens sent by the GitHub OIDC provider
+    # value is the audience for the official AWS credentials action: https://github.com/aws-actions/configure-aws-credentials
+    audienceList: [sts.amazonaws.com]
+
+    # list of ARNs for managed IAM policies to attach to the GitHub OIDC role
+    managedPolicyArns: []
+
+    # list of AWS service actions that GitHub Actions are allowed to perform via the GitHub OIDC role
+    githubActionsAllowedAwsActions:
+      - "acm:*"
+      - "apigateway:*"
+      - "cloudformation:*"
+      - "cloudfront:*"
+      - "cloudwatch:*"
+      - "cognito-identity:*"
+      - "cognito-idp:*"
+      - "ec2:*"
+      - "events:*"
+      - "firehose:*"
+      - "iam:*"
+      - "kms:*"
+      - "lambda:*"
+      - "logs:*"
+      - "rds:*"
+      - "secretsmanager:*"
+      - "ssm:*"
+      - "s3:*"
+      - "wafv2:"
+
+provider:
+  name: aws
+
+resources:
+  Conditions:
+    CreateGitHubIdentityProvider: !Equals
+      - ${param:bootstrap}
+      - 'true'
+    CreateGitHubActionsPermissionsPolicy: !Not
+      - !Equals
+        - ""
+        - !Join
+          - ""
+          - ${param:githubActionsAllowedAwsActions}
+    AttachManagedPolicyArns: !Not
+      - !Equals
+        - ""
+        - !Join
+          - ""
+          - ${param:managedPolicyArns}
+
+  Resources:
+    GitHubIdentityProvider:
+      Type: AWS::IAM::OIDCProvider
+      Condition: CreateGitHubIdentityProvider
+      Properties:
+        Url: https://token.actions.githubusercontent.com
+        ThumbprintList: ${param:githubActionsThumbprint}
+        ClientIdList: ${param:audienceList}
+    GitHubActionsPermissions:
+      Type: AWS::IAM::Policy
+      Condition: CreateGitHubActionsPermissionsPolicy
+      Properties:
+        PolicyName: GitHubActionsPermissions
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:  ${param:githubActionsAllowedAwsActions}
+              Resource: "*"
+        Roles: [!Ref "GitHubActionsServiceRole"]
+    GitHubActionsServiceRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Sid: RoleForGitHubOIDC
+              Effect: Allow
+              Principal:
+                Federated: !If
+                  - CreateGitHubIdentityProvider
+                  - !GetAtt GitHubIdentityProvider.Arn
+                  - !Sub "arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com"
+              Action:
+                - "sts:AssumeRoleWithWebIdentity"
+              Condition:
+                StringEquals:
+                  "token.actions.githubusercontent.com:aud": ${param:audienceList}
+                StringLike:
+                  "token.actions.githubusercontent.com:sub": ${param:subjectClaimFilters}
+        ManagedPolicyArns: !If
+          - AttachManagedPolicyArns
+          - ${param:managedPolicyArns}
+          - !Ref AWS::NoValue
+        # path and permissions boundary as required per https://cloud.cms.gov/creating-identity-access-management-policies
+        Path: "/delegatedadmin/developer/"
+        PermissionsBoundary: !Sub "arn:aws:iam::${AWS::AccountId}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy"
+
+  Outputs:
+      # note: if this output name changes, scripts.hooks.deploy:finalize must also change
+    serviceRoleArn:
+      Description: ARN of the service role for GitHub OIDC
+      Value: !GetAtt GitHubActionsServiceRole.Arn

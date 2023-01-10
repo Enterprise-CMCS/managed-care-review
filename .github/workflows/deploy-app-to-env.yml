@@ -15,7 +15,7 @@ on:
     secrets:
       aws_default_region:
         required: true
-      oidc_iam_role_arn:
+      oidc_role_arn:
         required: true
       react_app_auth_mode:
         required: true
@@ -40,7 +40,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           aws-region: ${{ secrets.aws_default_region }}
-          role-to-assume: ${{ secrets.oidc_iam_role_arn }}
+          role-to-assume: ${{ secrets.oidc_role_arn }}
 
       - name: Generate Code
         run: lerna run generate
@@ -67,7 +67,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           aws-region: ${{ secrets.aws_default_region }}
-          role-to-assume: ${{ secrets.oidc_iam_role_arn }}
+          role-to-assume: ${{ secrets.oidc_role_arn }}
 
       - name: Generate Code
         run: lerna run generate

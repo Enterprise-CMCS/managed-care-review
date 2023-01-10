@@ -76,15 +76,6 @@ jobs:
         run: |
           echo "${{steps.changed-services-action.outputs.changed-services}}"
 
-      - uses: chrnorm/deployment-action@releases/v2
-        name: Create GitHub deployment
-        id: ghdeployment
-        with:
-          token: '${{ github.token }}'
-          environment: review-apps
-          description: stack ${{ steps.branch-name.outputs.stage-name-for-branch}}
-          initial-status: in_progress
-
   web-unit-tests:
     name: test - web unit tests
     runs-on: ubuntu-20.04
@@ -187,7 +178,8 @@ jobs:
         run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
 
       - name: Generate protos
-        run: lerna run generate --scope=app-proto && lerna run build --scope=app-proto
+        working-directory: services/app-proto
+        run: yarn run protogen && yarn run build
 
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client
@@ -210,13 +202,20 @@ jobs:
 
   deploy-infra:
     needs: [begin-deployment]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+    # TODO revert
+    # uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@bharvey-github-oidc
+    permissions:
+      id-token: write
     with:
       stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
       changed_services: ${{ needs.begin-deployment.outputs.changed-services }}
     secrets:
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      oidc_iam_role_arn: ${{ secrets.DEV_OIDC_IAM_ROLE_ARN }}
+      oidc_role_arn: ${{ secrets.DEV_OIDC_ROLE_ARN }}
+      # the default secrets.GITHUB_TOKEN granted to workflows won't suffice here
+      # this workflow needs a personal access token with 'read:public_key, repo' scope since it creates GitHub secrets
+      personal_access_token: ${{ secrets.BHARVEY_GITHUB_TOKEN }}
 
   deploy-app:
     needs:
@@ -238,7 +237,7 @@ jobs:
       changed_services: ${{ needs.begin-deployment.outputs.changed-services }}
     secrets:
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      oidc_iam_role_arn: ${{ secrets.DEV_OIDC_IAM_ROLE_ARN }}
+      oidc_role_arn: ${{ secrets.DEV_OIDC_ROLE_ARN }}
       react_app_auth_mode: AWS_COGNITO
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
@@ -246,9 +245,9 @@ jobs:
     name: Finishing Prep
     needs: [deploy-infra, begin-deployment, deploy-app]
     if: |
-      always() 
+      always()
       && (needs.begin-deployment.result == 'success')
-      && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') 
+      && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped')
       && (needs.deploy-app.result == 'success' || needs.deploy-app.result == 'skipped')
     runs-on: ubuntu-20.04
     outputs:
@@ -265,7 +264,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           aws-region:  ${{ secrets.AWS_DEFAULT_REGION }}
-          role-to-assume: ${{ secrets.DEV_OIDC_IAM_ROLE_ARN }}
+          role-to-assume: ${{ secrets.DEV_OIDC_ROLE_ARN }}
 
       - name: Create Test Users
         env:
