@@ -8,6 +8,7 @@ import {
 import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { ActuaryContact } from '../../../common-code/healthPlanFormDataType'
 import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
+import { DataDetail } from '../../DataDetail'
 
 export type ContactsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -34,6 +35,8 @@ export const ContactsSummarySection = ({
     submission,
     navigateTo,
 }: ContactsSummarySectionProps): React.ReactElement => {
+    const isSubmitted = submission.status === 'SUBMITTED'
+
     return (
         <section id="stateContacts" className={styles.summarySection}>
             <dl>
@@ -77,61 +80,65 @@ export const ContactsSummarySection = ({
                 </GridContainer>
             </dl>
 
-            {submission.submissionType === 'CONTRACT_AND_RATES' && (
-                <>
-                    <dl>
-                        <SectionHeader header="Additional actuary contacts" />
-                        <GridContainer>
-                            <Grid row>
-                                {submission.addtlActuaryContacts.map(
-                                    (actuaryContact, index) => (
-                                        <Grid
-                                            col={6}
-                                            key={'actuarycontact_' + index}
-                                        >
-                                            <span className="text-bold">
-                                                Additional actuary contact
-                                            </span>
-                                            <br />
-                                            <address>
-                                                {actuaryContact.name}
+            {submission.submissionType === 'CONTRACT_AND_RATES' &&
+                submission.addtlActuaryContacts && (
+                    <>
+                        <dl>
+                            <SectionHeader header="Additional actuary contacts" />
+                            <GridContainer>
+                                <Grid row>
+                                    {submission.addtlActuaryContacts.map(
+                                        (actuaryContact, index) => (
+                                            <Grid
+                                                col={6}
+                                                key={'actuarycontact_' + index}
+                                            >
+                                                <span className="text-bold">
+                                                    Additional actuary contact
+                                                </span>
                                                 <br />
-                                                {actuaryContact.titleRole}
-                                                <br />
-                                                <Link
-                                                    href={`mailto:${actuaryContact.email}`}
-                                                    target="_blank"
-                                                    variant="external"
-                                                    rel="noreferrer"
-                                                >
-                                                    {actuaryContact.email}
-                                                </Link>
-                                                <br />
-                                                {getActuaryFirm(actuaryContact)}
-                                            </address>
-                                        </Grid>
-                                    )
-                                )}
-                            </Grid>
-                        </GridContainer>
-                    </dl>
-                    <dl>
-                        <GridContainer>
-                            <Grid row>
-                                <span className="text-bold">
-                                    Actuaries’ communication preference
-                                </span>
-                                {submission.addtlActuaryCommunicationPreference
-                                    ? ActuaryCommunicationRecord[
-                                          submission
-                                              .addtlActuaryCommunicationPreference
-                                      ]
-                                    : ''}
-                            </Grid>
-                        </GridContainer>
-                    </dl>
-                </>
-            )}
+                                                <address>
+                                                    {actuaryContact.name}
+                                                    <br />
+                                                    {actuaryContact.titleRole}
+                                                    <br />
+                                                    <Link
+                                                        href={`mailto:${actuaryContact.email}`}
+                                                        target="_blank"
+                                                        variant="external"
+                                                        rel="noreferrer"
+                                                    >
+                                                        {actuaryContact.email}
+                                                    </Link>
+                                                    <br />
+                                                    {getActuaryFirm(
+                                                        actuaryContact
+                                                    )}
+                                                </address>
+                                            </Grid>
+                                        )
+                                    )}
+                                </Grid>
+                            </GridContainer>
+                        </dl>
+                        <dl>
+                            <GridContainer>
+                                <DataDetail
+                                    id="communicationPreference"
+                                    label="Actuaries’ communication preference"
+                                    data={
+                                        submission.addtlActuaryCommunicationPreference &&
+                                        ActuaryCommunicationRecord[
+                                            submission
+                                                .addtlActuaryCommunicationPreference
+                                        ]
+                                    }
+                                    explainMissingData={!isSubmitted}
+                                />
+                            </GridContainer>
+                        </dl>
+                    </>
+                )}
         </section>
     )
 }

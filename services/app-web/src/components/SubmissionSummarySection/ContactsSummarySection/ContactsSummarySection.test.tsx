@@ -121,4 +121,16 @@ describe('ContactsSummarySection', () => {
             screen.queryByText(/You must provide this information/)
         ).toBeNull()
     })
+
+    it('does not include additional actuary contacts section when this optional field is not provided', () => {
+        renderWithProviders(
+            <ContactsSummarySection submission={draftSubmission} />
+        )
+
+        // We should never display missing field text on submission summary for submitted packages
+        expect(screen.queryByText(/Additional actuary contacts/)).toBeNull()
+        expect(
+            screen.queryByText(/Actuaries’ communication preference/)
+        ).toBeNull()
+    })
 })

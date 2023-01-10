@@ -28,34 +28,6 @@ export type ContractDetailsSummarySectionProps = {
     submissionName: string
 }
 
-const createCheckboxList = ({
-    list,
-    dict,
-    otherReasons = [],
-}: {
-    list: string[] // Checkbox field array
-    dict: Record<string, string> // A lang constant dictionary like ManagedCareEntityRecord or FederalAuthorityRecord,
-    otherReasons?: (string | null)[] // additional "Other" text values
-}) => {
-    const userFriendlyList = list.map((item) => {
-        return dict[item] ? dict[item] : null
-    })
-
-    const listToDisplay = otherReasons
-        ? userFriendlyList.concat(otherReasons)
-        : userFriendlyList
-
-    if (listToDisplay.length === 0) return null
-
-    return (
-        <ul>
-            {listToDisplay.map((item) => (
-                <li key={item}>{item}</li>
-            ))}
-        </ul>
-    )
-}
-
 // This function takes a ContractAmendmentInfo and returns two lists of keys sorted by whether they are set true/false
 export function sortModifiedProvisions(
     amendmentInfo: ModifiedProvisions | undefined
