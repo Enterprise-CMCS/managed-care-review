@@ -7,7 +7,6 @@ import {
 } from '../../../constants/healthPlanPackages'
 import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 import { ActuaryContact } from '../../../common-code/healthPlanFormDataType'
-import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 import { DataDetail, DataDetailContactField } from '../../DataDetail'
 
 export type ContactsSummarySectionProps = {
@@ -64,7 +63,12 @@ export const ContactsSummarySection = ({
                                 )
                             )
                         ) : (
-                            <DataDetailMissingField />
+                            <DataDetail
+                                id="statecontact"
+                                label="Contact"
+                                explainMissingData={!isSubmitted}
+                                data={undefined}
+                            />
                         )}
                     </Grid>
                 </GridContainer>

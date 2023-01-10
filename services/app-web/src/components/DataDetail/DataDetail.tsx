@@ -2,7 +2,7 @@ import React from 'react'
 import styles from './DataDetail.module.scss'
 import { DataDetailMissingField } from './DataDetailMissingField'
 
-type DataDetailProps = {
+export type DataDetailProps = {
     id: string
     label: string
     data?: React.ReactNode

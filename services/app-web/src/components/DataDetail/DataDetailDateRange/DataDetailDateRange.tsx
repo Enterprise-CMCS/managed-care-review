@@ -1,5 +1,5 @@
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
-import { DataDetailMissingField } from '../'
+import { DataDetailMissingField } from '../DataDetailMissingField'
 
 export const DataDetailDateRange = ({
     startDate,
