@@ -1,4 +1,4 @@
-import { IconError } from '@trussworks/react-uswds'
+import { Icon } from '@trussworks/react-uswds'
 import React from 'react'
 import styles from './DataDetail.module.scss'
 
@@ -45,7 +45,7 @@ function displayErrorMessageForMissingData<T>(
         return (
             <span className={styles.missingInfo}>
                 <span>
-                    <IconError aria-label="An error icon" size={3} />
+                    <Icon.Error aria-label="An error icon" size={3} />
                 </span>
                 <span>{requiredFieldMissingText}</span>
             </span>
