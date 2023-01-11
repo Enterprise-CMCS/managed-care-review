@@ -111,7 +111,9 @@ describe('HealthPlanPackageTable cms user tests', () => {
         expect(screen.getByRole('table')).toBeInTheDocument()
         //Expect 5 rows. 4 data rows and 1 header row
         expect(rows).toHaveLength(5)
-        expect(screen.getByText('4 submissions')).toBeInTheDocument()
+        expect(
+            screen.getByText('Displaying 4 of 4 submissions')
+        ).toBeInTheDocument()
     })
 
     it('displays no submission text when no submitted packages exist', async () => {
@@ -538,7 +540,9 @@ describe('HealthPlanPackageTable cms user tests', () => {
         //Expect 3 data rows and 1 header row, total 4 rows
         await userEvent.click(clearFiltersButton)
         expect(await screen.findAllByRole('row')).toHaveLength(4)
-        expect(screen.getByText('3 submissions')).toBeInTheDocument()
+        expect(
+            screen.getByText('Displaying 3 of 3 submissions')
+        ).toBeInTheDocument()
     })
 
     it('displays no results found when filters return no results', async () => {
