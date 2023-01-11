@@ -1,3 +1,5 @@
+import { StateType } from './StateType'
+
 type UserType = StateUserType | CMSUserType | AdminUserType
 
 type StateUserType = {
@@ -15,6 +17,7 @@ type CMSUserType = {
     email: string
     givenName: string
     familyName: string
+    stateAssignments: StateType[]
 }
 
 type AdminUserType = {

@@ -37,7 +37,14 @@ export async function insertUser(
             case 'ADMIN_USER':
                 return val as AdminUserType
             case 'CMS_USER':
-                return val as CMSUserType
+                return {
+                    id: val.id,
+                    role: 'CMS_USER',
+                    email: val.email,
+                    givenName: val.givenName,
+                    familyName: val.familyName,
+                    stateAssignments: [],
+                } as CMSUserType
             case 'STATE_USER':
                 return val as StateUserType
         }

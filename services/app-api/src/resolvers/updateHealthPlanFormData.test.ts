@@ -29,6 +29,7 @@ describe('updateHealthPlanFormData', () => {
         email: 'zuko@example.com',
         familyName: 'Zuko',
         givenName: 'Prince',
+        stateAssignments: [],
     }
 
     it('updates valid fields in the formData', async () => {

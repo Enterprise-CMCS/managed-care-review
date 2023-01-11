@@ -10,7 +10,8 @@ import { healthPlanPackageResolver } from './healthPlanPackageResolver'
 import { submitHealthPlanPackageResolver } from './submitHealthPlanPackage'
 import { unlockHealthPlanPackageResolver } from './unlockHealthPlanPackage'
 import { updateHealthPlanFormDataResolver } from './updateHealthPlanFormData'
-import { stateUserResolver } from './userResolver'
+import { updateStateAssignmentsResolver } from './updateStateAssignments'
+import { stateUserResolver, cmsUserResolver } from './userResolver'
 import { EmailParameterStore } from '../parameterStore'
 import { LDService } from '../launchDarkly/launchDarkly'
 
@@ -42,6 +43,7 @@ export function configureResolvers(
                 emailer,
                 emailParameterStore
             ),
+            updateStateAssignments: updateStateAssignmentsResolver(store),
         },
         User: {
             // resolveType is required to differentiate Unions
@@ -54,6 +56,7 @@ export function configureResolvers(
             },
         },
         StateUser: stateUserResolver,
+        CMSUser: cmsUserResolver,
         HealthPlanPackage: healthPlanPackageResolver,
     }
 

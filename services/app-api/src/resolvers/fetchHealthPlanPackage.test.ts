@@ -17,6 +17,7 @@ describe('fetchHealthPlanPackage', () => {
         email: 'zuko@example.com',
         familyName: 'Zuko',
         givenName: 'Prince',
+        stateAssignments: [],
     }
 
     const testUserState: UserType = {

@@ -1,0 +1,15 @@
+mutation updateStateAssignments($input: UpdateStateAssignmentsInput!) {
+    updateStateAssignments(input: $input) {
+        user {
+            __typename
+            ... on CMSUser {
+                email
+                role
+                stateAssignments {
+                    code
+                    name
+                }
+            }
+        }
+    }
+}

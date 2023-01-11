@@ -4,7 +4,6 @@ import {
     PackageTableProps,
     PackageInDashboardType,
 } from './HealthPlanPackageTable'
-import React from 'react'
 import ProvidersDecorator from '../../../.storybook/providersDecorator'
 import { User } from '../../gen/gqlClient'
 
@@ -83,6 +82,7 @@ const mockCMSUser: User = {
     __typename: 'CMSUser' as const,
     role: 'CMS User',
     email: 'cms@exmaple.com',
+    stateAssignments: [],
 }
 
 export default {

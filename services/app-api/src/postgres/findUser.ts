@@ -16,13 +16,23 @@ export async function findUser(
             where: {
                 id: id,
             },
+            include: {
+                states: {},
+            },
         })
 
         switch (findResult?.role) {
             case 'ADMIN_USER':
                 return findResult as AdminUserType
             case 'CMS_USER':
-                return findResult as CMSUserType
+                return {
+                    id: findResult.id,
+                    role: 'CMS_USER',
+                    email: findResult.email,
+                    givenName: findResult.givenName,
+                    familyName: findResult.familyName,
+                    stateAssignments: findResult.states,
+                } as CMSUserType
             case 'STATE_USER':
                 return findResult as StateUserType
             default:

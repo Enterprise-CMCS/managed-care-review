@@ -50,6 +50,10 @@ const convertPrismaErrorToStoreError = (prismaErr: unknown): StoreError => {
             }
         }
 
+        // An operation failed because it depends on one or more records
+        // that were required but not found.
+        // This is also returned when the userID doesn't exist in trying to connect
+        // a user and some states
         if (prismaErr.code === 'P2025') {
             return {
                 code: 'INSERT_ERROR',

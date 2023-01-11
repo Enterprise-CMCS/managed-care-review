@@ -16,3 +16,26 @@ export const stateUserResolver: Resolvers['StateUser'] = {
         return state
     },
 }
+
+export const cmsUserResolver: Resolvers['CMSUser'] = {
+    stateAssignments(parent) {
+        const userStates = parent.stateAssignments
+        const statesWithPrograms = userStates.map((userState) => {
+            const state = statePrograms.states.find(
+                (st) => st.code === userState.stateCode
+            )
+
+            if (state === undefined) {
+                return {
+                    name: 'This state is not part of the pilot',
+                    code: userState.stateCode,
+                    programs: [],
+                }
+            }
+
+            return state
+        })
+
+        return statesWithPrograms
+    },
+}

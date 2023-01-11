@@ -125,6 +125,24 @@ type Mutation {
     unlockHealthPlanPackage(
         input: UnlockHealthPlanPackageInput!
     ): UnlockHealthPlanPackagePayload!
+
+
+    """
+    updateStateAssignments sets the state assignments for a given CMSUser
+
+    This can only be called by an AdminUser.
+    The cmsUserID must be a CMSUser's id, not a state user
+    
+    Errors:
+    - ForbiddenError:
+        - A non AdminUser called this
+    - UserInputError
+        - cmsUserID was not a CMSUser's ID
+        - stateCodes included an invalid state code
+    """
+    updateStateAssignments(
+        input: UpdateStateAssignmentsInput!
+    ): UpdateStateAssignmentsPayload!
 }
 
 input CreateHealthPlanPackageInput {
@@ -196,12 +214,21 @@ type UpdateHealthPlanFormDataPayload {
     pkg: HealthPlanPackage!
 }
 
+input UpdateStateAssignmentsInput {
+    cmsUserID: ID!
+    stateAssignments: [String!]!
+}
+
+type UpdateStateAssignmentsPayload {
+    user: User!
+}
+
 "Date is a CalendarDate representing a day without time information"
 scalar Date
 "DateTime is a moment in time with date and time information"
 scalar DateTime
 
-union User = StateUser | CMSUser
+union User = StateUser | CMSUser | AdminUser
 
 "StateUser is a user that works for a state, submitting packages to be reviewed by CMSUsers"
 type StateUser {
@@ -214,6 +241,14 @@ type StateUser {
 "CMSUser is a user that works for CMS, reviewing packages submitted by StateUsers"
 type CMSUser {
     "will always be 'CMS_USER'"
+    role: String!
+    email: String!
+    stateAssignments: [State!]!
+}
+
+"AdminUser is a user that works on the MC Review app itself"
+type AdminUser {
+    "will always be 'ADMIN_USER'"
     role: String!
     email: String!
 }

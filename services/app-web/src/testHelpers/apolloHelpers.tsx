@@ -51,6 +51,7 @@ function mockValidCMSUser(): UserType {
         __typename: 'CMSUser' as const,
         role: 'CMS_USER',
         email: 'bob@dmas.mn.gov',
+        stateAssignments: [],
     }
 }
 

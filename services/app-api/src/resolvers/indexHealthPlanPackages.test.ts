@@ -70,6 +70,7 @@ describe('indexHealthPlanPackages', () => {
                         email: 'zuko@example.com',
                         familyName: 'Zuko',
                         givenName: 'Prince',
+                        stateAssignments: [],
                     },
                 },
             })
@@ -233,6 +234,7 @@ describe('indexHealthPlanPackages', () => {
                         email: 'zuko@example.com',
                         givenName: 'Zuko',
                         familyName: 'Zuko',
+                        stateAssignments: [],
                     },
                 },
             })
@@ -268,6 +270,7 @@ describe('indexHealthPlanPackages', () => {
                         email: 'zuko@example.com',
                         givenName: 'Prince',
                         familyName: 'Zuko',
+                        stateAssignments: [],
                     },
                 },
             })
@@ -342,6 +345,7 @@ describe('indexHealthPlanPackages', () => {
                         email: 'zuko@example.com',
                         familyName: 'Zuko',
                         givenName: 'Prince',
+                        stateAssignments: [],
                     },
                 },
             })

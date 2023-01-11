@@ -131,6 +131,7 @@ export function userTypeFromAttributes(attributes: {
             email: attributes.email,
             givenName: attributes.given_name,
             familyName: attributes.family_name,
+            stateAssignments: [],
         })
     }
 
@@ -189,19 +190,12 @@ export async function userFromCognitoAuthProvider(
             userToInsert.stateCode = cognitoUser.stateCode
         }
 
-        try {
-            const result = await store.insertUser(userToInsert)
-            if (isStoreError(result)) {
-                console.error(
-                    `Could not insert user: ${JSON.stringify(result)}`
-                )
-                return cognitoUserResult
-            }
-            return ok(result)
-        } catch (e) {
-            console.error(`Could not insert user: ${JSON.stringify(e)}`)
+        const result = await store.insertUser(userToInsert)
+        if (isStoreError(result)) {
+            console.error(`Could not insert user: ${JSON.stringify(result)}`)
             return cognitoUserResult
         }
+        return ok(result)
     }
 
     // we return the user we got from aurora

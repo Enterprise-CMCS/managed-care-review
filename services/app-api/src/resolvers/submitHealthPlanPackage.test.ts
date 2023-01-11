@@ -32,6 +32,7 @@ describe('submitHealthPlanPackage', () => {
         email: 'zuko@example.com',
         familyName: 'Zuko',
         givenName: 'Prince',
+        stateAssignments: [],
     }
     it('returns a StateSubmission if complete', async () => {
         const server = await constructTestPostgresServer()

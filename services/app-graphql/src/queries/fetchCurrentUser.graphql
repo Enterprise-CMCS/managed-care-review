@@ -4,6 +4,15 @@ query fetchCurrentUser {
         ... on CMSUser {
             email
             role
+            stateAssignments {
+                code
+                name
+                programs {
+                    id
+                    name
+                    fullName
+                }
+            }
         }
         ... on StateUser {
             email
@@ -17,6 +26,10 @@ query fetchCurrentUser {
                     fullName
                 }
             }
+        }
+        ... on AdminUser {
+            email
+            role
         }
     }
 }

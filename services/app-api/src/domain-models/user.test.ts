@@ -30,6 +30,7 @@ describe('user type assertions', () => {
                 role: 'CMS_USER',
                 givenName: 'Margaret',
                 familyName: 'Burroughs',
+                stateAssignments: [],
             })
         ).toBe(true)
         expect(
@@ -62,6 +63,7 @@ describe('user type assertions', () => {
                 role: 'CMS_USER',
                 givenName: 'Margaret',
                 familyName: 'Burroughs',
+                stateAssignments: [],
             })
         ).toBe(false)
     })

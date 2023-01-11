@@ -22,12 +22,22 @@ export async function deleteUserAssignedState(
                     deleteMany: [{ stateCode: stateCode }],
                 },
             },
+            include: {
+                states: true,
+            },
         })
         switch (updateResult.role) {
             case 'ADMIN_USER':
                 return updateResult as AdminUserType
             case 'CMS_USER':
-                return updateResult as CMSUserType
+                return {
+                    id: updateResult.id,
+                    role: 'CMS_USER',
+                    email: updateResult.email,
+                    givenName: updateResult.givenName,
+                    familyName: updateResult.familyName,
+                    stateAssignments: updateResult.states,
+                } as CMSUserType
             case 'STATE_USER':
                 return updateResult as StateUserType
         }

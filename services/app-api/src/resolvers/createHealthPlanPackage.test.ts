@@ -68,6 +68,7 @@ describe('createHealthPlanPackage', () => {
                     email: 'aang@va.gov',
                     givenName: 'Prince',
                     familyName: 'Zuko',
+                    stateAssignments: [],
                 },
             },
         })

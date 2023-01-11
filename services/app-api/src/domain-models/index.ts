@@ -7,14 +7,16 @@ export type {
 export type { StateType } from './StateType'
 
 export type { ProgramType } from './ProgramType'
-export type { StateCodeType } from './StateCodeType'
-export { isCMSUser, isUser, isStateUser } from './user'
+export { isCMSUser, isUser, isStateUser, isAdminUser } from './user'
 
 export {
     packageCurrentRevision,
     packageStatus,
     packageSubmittedAt,
 } from './healthPlanPackage'
+
+export type { StateCodeType } from './StateCodeType'
+export { StateCodes, isValidStateCode } from './StateCodeType'
 
 export type {
     HealthPlanRevisionType,

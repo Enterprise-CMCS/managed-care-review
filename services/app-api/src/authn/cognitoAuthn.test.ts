@@ -74,6 +74,7 @@ describe('cognitoAuthn', () => {
                         email: 'gp@example.com',
                         familyName: 'Person',
                         givenName: 'Generic',
+                        stateAssignments: [],
                     }),
                 },
                 {
