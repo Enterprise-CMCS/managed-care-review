@@ -11,7 +11,7 @@ export function MaintenanceMessage({
     return (
         <div className={styles.alertContainer}>
             <Alert
-                headingLevel="h3"
+                headingLevel="h4"
                 type="info"
                 heading={message}
                 validation={true}

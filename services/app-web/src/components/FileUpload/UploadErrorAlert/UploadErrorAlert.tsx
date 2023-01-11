@@ -9,7 +9,7 @@ export const UploadErrorAlert = ({
         <Alert
             type="error"
             heading="Missing documents"
-            headingLevel="h3"
+            headingLevel="h4"
             className="margin-bottom-2"
         >
             You must upload at least one document
@@ -18,7 +18,7 @@ export const UploadErrorAlert = ({
         <Alert
             type="error"
             heading="Remove files with errors"
-            headingLevel="h3"
+            headingLevel="h4"
             className="margin-bottom-2"
         >
             You must remove all documents with error messages before continuing

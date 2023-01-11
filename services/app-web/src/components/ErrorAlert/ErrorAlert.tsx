@@ -25,7 +25,7 @@ export const ErrorAlert = ({
             role="alert"
             type="error"
             heading={heading || 'System error'}
-            headingLevel="h3"
+            headingLevel="h4"
             data-testid="error-alert"
             className={classes}
             {...divProps}

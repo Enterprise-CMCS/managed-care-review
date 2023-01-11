@@ -70,7 +70,7 @@ export function LocalLogin(): React.ReactElement {
             <h3>Local Login</h3>
             <div>Login as one of our hard coded users:</div>
             {showFormAlert && (
-                <Alert headingLevel="h3" type="error">
+                <Alert headingLevel="h4" type="error">
                     Something went wrong
                 </Alert>
             )}

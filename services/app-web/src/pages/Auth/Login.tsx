@@ -75,7 +75,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
     return (
         <Form onSubmit={handleSubmit} name="Login" aria-label="Login Form">
             {showFormAlert && (
-                <Alert headingLevel="h3" type="error">
+                <Alert headingLevel="h4" type="error">
                     Something went wrong
                 </Alert>
             )}

@@ -19,7 +19,7 @@ export const GenericApiErrorBanner = ({
             role="alert"
             type="error"
             heading={heading || 'System error'}
-            headingLevel="h3"
+            headingLevel="h4"
             validation
             data-testid="error-alert"
         >

@@ -12,7 +12,7 @@ export function SubmissionSuccessMessage({
         <div className={styles.alertContainer}>
             <Alert
                 type="success"
-                headingLevel="h3"
+                headingLevel="h4"
                 heading={submissionName + ' was sent to CMS'}
                 validation={true}
             />

@@ -51,7 +51,7 @@ export function CheckAuth(): React.ReactElement {
     return (
         <GridContainer>
             <Alert
-                headingLevel="h3"
+                headingLevel="h4"
                 style={{ width: '600px', marginBottom: '5px' }}
                 type={alertType()}
                 heading={alertHeading()}

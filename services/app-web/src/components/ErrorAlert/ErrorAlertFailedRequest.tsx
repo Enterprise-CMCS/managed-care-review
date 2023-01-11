@@ -16,7 +16,7 @@ export const ErrorAlertFailedRequest = ({
             role="alert"
             type="error"
             heading="System error"
-            headingLevel="h3"
+            headingLevel="h4"
             validation
             data-testid="error-alert"
         >
