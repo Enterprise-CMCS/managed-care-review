@@ -69,7 +69,11 @@ export function LocalLogin(): React.ReactElement {
             <h2>Auth Page</h2>
             <h3>Local Login</h3>
             <div>Login as one of our hard coded users:</div>
-            {showFormAlert && <Alert type="error">Something went wrong</Alert>}
+            {showFormAlert && (
+                <Alert headingLevel="h3" type="error">
+                    Something went wrong
+                </Alert>
+            )}
             <CardGroup>
                 {localUsers.map((user) => {
                     const fromString =
