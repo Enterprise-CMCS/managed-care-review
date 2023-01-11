@@ -50,9 +50,9 @@ const isSubmitted = (status: HealthPlanPackageStatus) =>
 function submissionURL(
     id: PackageInDashboardType['id'],
     status: PackageInDashboardType['status'],
-    userType: User['__typename']
+    isCMSUser: boolean
 ): string {
-    if (userType === 'CMSUser') {
+    if (isCMSUser) {
         return `/submissions/${id}`
     } else if (status === 'DRAFT') {
         return `/submissions/${id}/edit/type`
@@ -104,6 +104,8 @@ export const HealthPlanPackageTable = ({
     const [columnFilters, setColumnFilters] =
         React.useState<ColumnFiltersState>([])
 
+    const isCMSUser = user.__typename === 'CMSUser'
+
     const tableColumns = React.useMemo(
         () => [
             columnHelper.accessor((row) => row, {
@@ -115,7 +117,7 @@ export const HealthPlanPackageTable = ({
                         to={submissionURL(
                             info.getValue().id,
                             info.getValue().status,
-                            user.__typename
+                            isCMSUser
                         )}
                     >
                         {info.getValue().name}
@@ -189,7 +191,7 @@ export const HealthPlanPackageTable = ({
                 },
             }),
         ],
-        [user]
+        [isCMSUser]
     )
 
     const reactTable = useReactTable({
@@ -201,8 +203,8 @@ export const HealthPlanPackageTable = ({
         state: {
             columnFilters,
             columnVisibility: {
-                stateName: user.__typename !== 'StateUser',
-                submissionType: user.__typename !== 'StateUser',
+                stateName: isCMSUser,
+                submissionType: isCMSUser,
             },
         },
         onColumnFiltersChange: setColumnFilters,
@@ -231,9 +233,12 @@ export const HealthPlanPackageTable = ({
         filterLength
     )} applied`
 
-    const resultCount = `Displaying ${filteredRows.length} of ${
-        tableData.length
-    } ${pluralize('submission', tableData.length)}`
+    const submissionCount = !isCMSUser
+        ? `${tableData.length} ${pluralize('submission', tableData.length)}`
+        : `Displaying ${filteredRows.length} of ${tableData.length} ${pluralize(
+              'submission',
+              tableData.length
+          )}`
 
     return (
         <>
@@ -273,10 +278,14 @@ export const HealthPlanPackageTable = ({
                         </FilterAccordion>
                     )}
                     <div aria-live="polite" aria-atomic>
+                        {isCMSUser && (
+                            <div className={styles.filterCount}>
+                                {filtersApplied}
+                            </div>
+                        )}
                         <div className={styles.filterCount}>
-                            {filtersApplied}
+                            {submissionCount}
                         </div>
-                        <div className={styles.filterCount}>{resultCount}</div>
                     </div>
                     <Table fullWidth>
                         <thead>
