@@ -48,4 +48,21 @@ function packageCurrentRevision(
     return pkg.revisions[0]
 }
 
-export { packageCurrentRevision, packageStatus, packageSubmittedAt }
+function packageSubmitters(pkg: HealthPlanPackageType): string[] {
+    const submitters: string[] = []
+    pkg.revisions.forEach((revision) => {
+        const submitter = revision.submitInfo?.updatedBy
+        if (submitter && !submitters.includes(submitter)) {
+            submitters.push(submitter)
+        }
+    })
+
+    return submitters
+}
+
+export {
+    packageCurrentRevision,
+    packageStatus,
+    packageSubmittedAt,
+    packageSubmitters,
+}

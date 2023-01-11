@@ -134,6 +134,10 @@ const generateCMSReviewerEmails = (
     }
 }
 
+// Maybe have this called in the resolvers so that submitter emails can be passed into this.
+// Instead of `user` we just pass an array of submitters. Submitters are generated using all the revisions and only
+//    resolvers have access to all the revisions.
+// Then we can prune all the emails in this one function
 const generateStateReceiverEmails = (
     pkg: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType,
     user?: UserType

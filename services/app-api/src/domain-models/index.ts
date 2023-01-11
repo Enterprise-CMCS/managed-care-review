@@ -8,6 +8,7 @@ export {
     packageCurrentRevision,
     packageStatus,
     packageSubmittedAt,
+    packageSubmitters,
 } from './healthPlanPackage'
 
 export type {
