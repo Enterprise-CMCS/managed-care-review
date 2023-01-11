@@ -1,12 +1,12 @@
 import { ForbiddenError } from 'apollo-server-lambda'
-import { isAdminUser, UserType } from '../domain-models'
-import { QueryResolvers } from '../gen/gqlServer'
-import { logError } from '../logger'
-import { isStoreError, Store } from '../postgres'
+import { isAdminUser, UserType } from '../../domain-models'
+import { QueryResolvers } from '../../gen/gqlServer'
+import { logError } from '../../logger'
+import { isStoreError, Store } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
-} from './attributeHelper'
+} from '../attributeHelper'
 
 export function indexUsersResolver(store: Store): QueryResolvers['indexUsers'] {
     return async (_parent, _args, context) => {

@@ -4,15 +4,15 @@ import {
     isStateUser,
     HealthPlanPackageType,
     packageStatus,
-} from '../domain-models'
-import { QueryResolvers, State } from '../gen/gqlServer'
-import { logError, logSuccess } from '../logger'
-import { isStoreError, Store } from '../postgres'
+} from '../../domain-models'
+import { QueryResolvers, State } from '../../gen/gqlServer'
+import { logError, logSuccess } from '../../logger'
+import { isStoreError, Store } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
-} from './attributeHelper'
+} from '../attributeHelper'
 
 export function fetchHealthPlanPackageResolver(
     store: Store

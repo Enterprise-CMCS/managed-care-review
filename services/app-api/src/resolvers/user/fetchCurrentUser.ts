@@ -1,9 +1,9 @@
-import { QueryResolvers } from '../gen/gqlServer'
-import { logSuccess } from '../logger'
+import { QueryResolvers } from '../../gen/gqlServer'
+import { logSuccess } from '../../logger'
 import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
-} from './attributeHelper'
+} from '../attributeHelper'
 
 export function fetchCurrentUserResolver(): QueryResolvers['fetchCurrentUser'] {
     return async (_parent, _args, context) => {

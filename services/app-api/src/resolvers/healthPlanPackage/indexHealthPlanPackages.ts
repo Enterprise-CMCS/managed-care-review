@@ -1,14 +1,18 @@
 import { Span } from '@opentelemetry/api'
 import { ForbiddenError } from 'apollo-server-lambda'
-import { isStateUser, HealthPlanPackageType, isCMSUser } from '../domain-models'
-import { QueryResolvers } from '../gen/gqlServer'
-import { logError, logSuccess } from '../logger'
-import { isStoreError, Store, StoreError } from '../postgres'
+import {
+    isStateUser,
+    HealthPlanPackageType,
+    isCMSUser,
+} from '../../domain-models'
+import { QueryResolvers } from '../../gen/gqlServer'
+import { logError, logSuccess } from '../../logger'
+import { isStoreError, Store, StoreError } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
-} from './attributeHelper'
+} from '../attributeHelper'
 
 const validateAndReturnHealthPlanPackages = (
     results: HealthPlanPackageType[] | StoreError,

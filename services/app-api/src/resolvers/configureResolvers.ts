@@ -2,19 +2,24 @@ import { GraphQLDate, GraphQLDateTime } from 'graphql-scalars'
 import type { Emailer } from '../emailer'
 import { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
-import { createHealthPlanPackageResolver } from './createHealthPlanPackage'
-import { fetchCurrentUserResolver } from './fetchCurrentUser'
-import { fetchHealthPlanPackageResolver } from './fetchHealthPlanPackage'
-import { indexHealthPlanPackagesResolver } from './indexHealthPlanPackages'
-import { healthPlanPackageResolver } from './healthPlanPackageResolver'
-import { submitHealthPlanPackageResolver } from './submitHealthPlanPackage'
-import { unlockHealthPlanPackageResolver } from './unlockHealthPlanPackage'
-import { updateHealthPlanFormDataResolver } from './updateHealthPlanFormData'
-import { updateStateAssignmentsResolver } from './updateStateAssignments'
-import { stateUserResolver, cmsUserResolver } from './userResolver'
+import {
+    createHealthPlanPackageResolver,
+    fetchHealthPlanPackageResolver,
+    indexHealthPlanPackagesResolver,
+    healthPlanPackageResolver,
+    submitHealthPlanPackageResolver,
+    unlockHealthPlanPackageResolver,
+    updateHealthPlanFormDataResolver,
+} from './healthPlanPackage'
+import {
+    fetchCurrentUserResolver,
+    updateStateAssignmentsResolver,
+    stateUserResolver,
+    cmsUserResolver,
+    indexUsersResolver,
+} from './user'
 import { EmailParameterStore } from '../parameterStore'
 import { LDService } from '../launchDarkly/launchDarkly'
-import { indexUsersResolver } from './indexUsers'
 
 export function configureResolvers(
     store: Store,

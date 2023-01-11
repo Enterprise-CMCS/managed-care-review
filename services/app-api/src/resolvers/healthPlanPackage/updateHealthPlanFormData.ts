@@ -2,24 +2,24 @@ import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
     UnlockedHealthPlanFormDataType,
     convertRateSupportingDocs,
-} from '../../../app-web/src/common-code/healthPlanFormDataType'
+} from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     base64ToDomain,
     toDomain,
-} from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+} from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import {
     isStateUser,
     HealthPlanPackageType,
     packageStatus,
-} from '../domain-models'
-import { MutationResolvers } from '../gen/gqlServer'
-import { logError, logSuccess } from '../logger'
-import { isStoreError, Store } from '../postgres'
+} from '../../domain-models'
+import { MutationResolvers } from '../../gen/gqlServer'
+import { logError, logSuccess } from '../../logger'
+import { isStoreError, Store } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
-} from './attributeHelper'
+} from '../attributeHelper'
 
 export function updateHealthPlanFormDataResolver(
     store: Store

@@ -1,7 +1,7 @@
-import { packageStatus, packageSubmittedAt } from '../domain-models'
-import { protoToBase64 } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import statePrograms from '../../../app-web/src/common-code/data/statePrograms.json'
-import { Resolvers } from '../gen/gqlServer'
+import { packageStatus, packageSubmittedAt } from '../../domain-models'
+import { protoToBase64 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
+import { Resolvers } from '../../gen/gqlServer'
 
 export const healthPlanPackageResolver: Resolvers['HealthPlanPackage'] = {
     revisions(parent) {

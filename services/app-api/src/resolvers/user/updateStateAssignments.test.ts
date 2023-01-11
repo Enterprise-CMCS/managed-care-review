@@ -1,14 +1,18 @@
-import { UserType } from '../domain-models'
-import { constructTestPostgresServer } from '../testHelpers/gqlHelpers'
-import UPDATE_STATE_ASSIGNMENTS from '../../../app-graphql/src/mutations/updateStateAssignments.graphql'
-import { InsertUserArgsType, isStoreError, NewPostgresStore } from '../postgres'
+import { UserType } from '../../domain-models'
+import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import UPDATE_STATE_ASSIGNMENTS from '../../../../app-graphql/src/mutations/updateStateAssignments.graphql'
+import {
+    InsertUserArgsType,
+    isStoreError,
+    NewPostgresStore,
+} from '../../postgres'
 import { v4 as uuidv4 } from 'uuid'
-import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import {
     assertAnError,
     assertAnErrorCode,
     assertAnErrorExtensions,
-} from '../testHelpers'
+} from '../../testHelpers'
 
 describe('updateStateAssignments', () => {
     it('updates a cms users state assignments', async () => {

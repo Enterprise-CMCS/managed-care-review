@@ -1,18 +1,18 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import { isStateUser } from '../domain-models'
-import { MutationResolvers, State } from '../gen/gqlServer'
-import { logError, logSuccess } from '../logger'
+import { isStateUser } from '../../domain-models'
+import { MutationResolvers, State } from '../../gen/gqlServer'
+import { logError, logSuccess } from '../../logger'
 import {
     InsertHealthPlanPackageArgsType,
     isStoreError,
     Store,
-} from '../postgres'
-import { pluralize } from '../../../app-web/src/common-code/formatters'
+} from '../../postgres'
+import { pluralize } from '../../../../app-web/src/common-code/formatters'
 import {
     setResolverDetailsOnActiveSpan,
     setErrorAttributesOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
-} from './attributeHelper'
+} from '../attributeHelper'
 
 export function createHealthPlanPackageResolver(
     store: Store

@@ -1,7 +1,7 @@
 import { GraphQLError } from 'graphql'
-import UNLOCK_HEALTH_PLAN_PACKAGE from '../../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
-import { HealthPlanPackage } from '../gen/gqlServer'
-import { todaysDate } from '../testHelpers/dateHelpers'
+import UNLOCK_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
+import { HealthPlanPackage } from '../../gen/gqlServer'
+import { todaysDate } from '../../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
@@ -13,10 +13,10 @@ import {
     updateTestHealthPlanFormData,
     resubmitTestHealthPlanPackage,
     defaultFloridaRateProgram,
-} from '../testHelpers/gqlHelpers'
-import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
-import { mockStoreThatErrors } from '../testHelpers/storeHelpers'
-import { testEmailConfig, testEmailer } from '../testHelpers/emailerHelpers'
+} from '../../testHelpers/gqlHelpers'
+import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
+import { mockStoreThatErrors } from '../../testHelpers/storeHelpers'
+import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { base64ToDomain } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
 import {
     generateRateName,
@@ -25,8 +25,8 @@ import {
 import {
     getTestStateAnalystsEmails,
     mockEmailParameterStoreError,
-} from '../testHelpers/parameterStoreHelpers'
-import { UserType } from '../domain-models'
+} from '../../testHelpers/parameterStoreHelpers'
+import { UserType } from '../../domain-models'
 
 describe('unlockHealthPlanPackage', () => {
     const testUser: UserType = {

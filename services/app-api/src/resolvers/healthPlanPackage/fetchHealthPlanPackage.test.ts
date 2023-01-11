@@ -1,14 +1,14 @@
-import FETCH_HEALTH_PLAN_PACKAGE from '../../../app-graphql/src/queries/fetchHealthPlanPackage.graphql'
-import { base64ToDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import { UserType } from '../domain-models'
-import { todaysDate } from '../testHelpers/dateHelpers'
+import FETCH_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/queries/fetchHealthPlanPackage.graphql'
+import { base64ToDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import { UserType } from '../../domain-models'
+import { todaysDate } from '../../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer,
     createTestHealthPlanPackage,
     createAndSubmitTestHealthPlanPackage,
     unlockTestHealthPlanPackage,
     resubmitTestHealthPlanPackage,
-} from '../testHelpers/gqlHelpers'
+} from '../../testHelpers/gqlHelpers'
 
 describe('fetchHealthPlanPackage', () => {
     const testUserCMS: UserType = {

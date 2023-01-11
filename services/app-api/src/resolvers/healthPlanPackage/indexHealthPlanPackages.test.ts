@@ -1,4 +1,4 @@
-import INDEX_HEALTH_PLAN_PACKAGES from '../../../app-graphql/src/queries/indexHealthPlanPackages.graphql'
+import INDEX_HEALTH_PLAN_PACKAGES from '../../../../app-graphql/src/queries/indexHealthPlanPackages.graphql'
 import {
     constructTestPostgresServer,
     createTestHealthPlanPackage,
@@ -7,10 +7,10 @@ import {
     resubmitTestHealthPlanPackage,
     createAndUpdateTestHealthPlanPackage,
     submitTestHealthPlanPackage,
-} from '../testHelpers/gqlHelpers'
-import { todaysDate } from '../testHelpers/dateHelpers'
-import { HealthPlanPackageEdge, HealthPlanPackage } from '../gen/gqlServer'
-import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
+} from '../../testHelpers/gqlHelpers'
+import { todaysDate } from '../../testHelpers/dateHelpers'
+import { HealthPlanPackageEdge, HealthPlanPackage } from '../../gen/gqlServer'
+import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 
 describe('indexHealthPlanPackages', () => {
     describe('isStateUser', () => {

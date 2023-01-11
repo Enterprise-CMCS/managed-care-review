@@ -1,4 +1,4 @@
-import SUBMIT_HEALTH_PLAN_PACKAGE from '../../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
+import SUBMIT_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,
@@ -10,20 +10,20 @@ import {
     createAndSubmitTestHealthPlanPackage,
     defaultFloridaRateProgram,
     submitTestHealthPlanPackage,
-} from '../testHelpers/gqlHelpers'
-import { testEmailConfig, testEmailer } from '../testHelpers/emailerHelpers'
-import { base64ToDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+} from '../../testHelpers/gqlHelpers'
+import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
+import { base64ToDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import {
     generateRateName,
     packageName,
-} from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { latestFormData } from '../testHelpers/healthPlanPackageHelpers'
+} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import {
     mockEmailParameterStoreError,
     getTestStateAnalystsEmails,
-} from '../testHelpers/parameterStoreHelpers'
-import { UserType } from '../domain-models'
-import { testLDService } from '../testHelpers/launchDarklyHelpers'
+} from '../../testHelpers/parameterStoreHelpers'
+import { UserType } from '../../domain-models'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 describe('submitHealthPlanPackage', () => {
     const testUserCMS: UserType = {

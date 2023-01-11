@@ -2,24 +2,24 @@ import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
-} from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { toDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import {
     isCMSUser,
     UpdateInfoType,
     HealthPlanPackageType,
     packageStatus,
-} from '../domain-models'
-import { Emailer } from '../emailer'
-import { MutationResolvers } from '../gen/gqlServer'
-import { logError, logSuccess } from '../logger'
-import { isStoreError, Store } from '../postgres'
+} from '../../domain-models'
+import { Emailer } from '../../emailer'
+import { MutationResolvers } from '../../gen/gqlServer'
+import { logError, logSuccess } from '../../logger'
+import { isStoreError, Store } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
-} from './attributeHelper'
-import { EmailParameterStore } from '../parameterStore'
+} from '../attributeHelper'
+import { EmailParameterStore } from '../../parameterStore'
 
 // unlock is a state machine transforming a LockedFormData and turning it into UnlockedFormData
 // Since Unlocked is a strict subset of Locked, this can't error today.

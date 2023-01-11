@@ -1,12 +1,16 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import { isAdminUser, isValidStateCode, StateCodeType } from '../domain-models'
-import { MutationResolvers } from '../gen/gqlServer'
-import { logError } from '../logger'
-import { isStoreError, Store } from '../postgres'
+import {
+    isAdminUser,
+    isValidStateCode,
+    StateCodeType,
+} from '../../domain-models'
+import { MutationResolvers } from '../../gen/gqlServer'
+import { logError } from '../../logger'
+import { isStoreError, Store } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
-} from './attributeHelper'
+} from '../attributeHelper'
 
 export function updateStateAssignmentsResolver(
     store: Store
