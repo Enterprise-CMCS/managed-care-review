@@ -13,6 +13,7 @@ export const PreviousSubmissionBanner = ({
             role="alert"
             type="warning"
             heading="Previous Submission"
+            headingLevel="h3"
             data-testid="previousSubmissionBanner"
             validation={true}
         >

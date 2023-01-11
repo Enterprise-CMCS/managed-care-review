@@ -24,6 +24,7 @@ export const SubmissionUnlockedBanner = ({
             role="alert"
             type={userType === 'CMS_USER' ? 'warning' : 'info'}
             heading="Submission unlocked"
+            headingLevel="h3"
             validation={true}
             data-testid="unlockedBanner"
             className={className}
