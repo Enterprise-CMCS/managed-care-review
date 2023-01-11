@@ -69,6 +69,9 @@ function mockStoreThatErrors(): Store {
         findAllRevisions: async () => {
             return genericStoreError
         },
+        findAllUsers: async () => {
+            return genericStoreError
+        },
         findUser: async (_ID) => {
             return genericStoreError
         },

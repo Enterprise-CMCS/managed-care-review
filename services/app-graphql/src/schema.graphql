@@ -33,6 +33,15 @@ type Query {
     CMSUsers can find all the packages that do not have the DRAFT status
     """
     indexHealthPlanPackages: IndexHealthPlanPackagesPayload!
+
+    """
+    indexUsers returns all of the Users in the system.
+
+    It can only be called by an AdminUser
+
+    Errors: ForbiddenError: A non-AdminUser called this
+    """
+    indexUsers: IndexUsersPayload!
 }
 
 type Mutation {
@@ -179,6 +188,15 @@ type IndexHealthPlanPackagesPayload {
     edges: [HealthPlanPackageEdge!]!
 }
 
+type UserEdge {
+    node: User!
+}
+
+type IndexUsersPayload {
+    totalCount: Int
+    edges: [UserEdge!]!
+}
+
 input SubmitHealthPlanPackageInput {
     pkgID: ID!
     "User given reason this package was re-submitted. Left blank on initial submit."
@@ -220,7 +238,7 @@ input UpdateStateAssignmentsInput {
 }
 
 type UpdateStateAssignmentsPayload {
-    user: User!
+    user: CMSUser!
 }
 
 "Date is a CalendarDate representing a day without time information"
@@ -232,25 +250,34 @@ union User = StateUser | CMSUser | AdminUser
 
 "StateUser is a user that works for a state, submitting packages to be reviewed by CMSUsers"
 type StateUser {
+    id: ID!
     "will always be 'STATE_USER'"
     role: String!
     email: String!
+    givenName: String!
+    familyName: String!
     state: State!
 }
 
 "CMSUser is a user that works for CMS, reviewing packages submitted by StateUsers"
 type CMSUser {
+    id: ID!
     "will always be 'CMS_USER'"
     role: String!
     email: String!
+    givenName: String!
+    familyName: String!
     stateAssignments: [State!]!
 }
 
 "AdminUser is a user that works on the MC Review app itself"
 type AdminUser {
+    id: ID!
     "will always be 'ADMIN_USER'"
     role: String!
     email: String!
+    givenName: String!
+    familyName: String!
 }
 
 "State is a single US state or territory that operates managed care programs"

@@ -1,9 +1,11 @@
 query fetchCurrentUser {
     fetchCurrentUser {
-        __typename
         ... on CMSUser {
+            id
             email
             role
+            familyName
+            givenName
             stateAssignments {
                 code
                 name
@@ -15,8 +17,11 @@ query fetchCurrentUser {
             }
         }
         ... on StateUser {
+            id
             email
             role
+            familyName
+            givenName
             state {
                 code
                 name
@@ -28,8 +33,11 @@ query fetchCurrentUser {
             }
         }
         ... on AdminUser {
+            id
             email
             role
+            familyName
+            givenName
         }
     }
 }

@@ -14,6 +14,7 @@ import { updateStateAssignmentsResolver } from './updateStateAssignments'
 import { stateUserResolver, cmsUserResolver } from './userResolver'
 import { EmailParameterStore } from '../parameterStore'
 import { LDService } from '../launchDarkly/launchDarkly'
+import { indexUsersResolver } from './indexUsers'
 
 export function configureResolvers(
     store: Store,
@@ -28,6 +29,7 @@ export function configureResolvers(
             fetchCurrentUser: fetchCurrentUserResolver(),
             fetchHealthPlanPackage: fetchHealthPlanPackageResolver(store),
             indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
+            indexUsers: indexUsersResolver(store),
         },
         Mutation: {
             createHealthPlanPackage: createHealthPlanPackageResolver(store),
@@ -50,8 +52,12 @@ export function configureResolvers(
             __resolveType(obj) {
                 if (obj.role === 'STATE_USER') {
                     return 'StateUser'
-                } else {
+                } else if (obj.role === 'CMS_USER') {
                     return 'CMSUser'
+                } else if (obj.role === 'ADMIN_USER') {
+                    return 'AdminUser'
+                } else {
+                    return 'StateUser'
                 }
             },
         },

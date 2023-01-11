@@ -4,6 +4,11 @@ import UPDATE_STATE_ASSIGNMENTS from '../../../app-graphql/src/mutations/updateS
 import { InsertUserArgsType, isStoreError, NewPostgresStore } from '../postgres'
 import { v4 as uuidv4 } from 'uuid'
 import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
+import {
+    assertAnError,
+    assertAnErrorCode,
+    assertAnErrorExtensions,
+} from '../testHelpers'
 
 describe('updateStateAssignments', () => {
     it('updates a cms users state assignments', async () => {
@@ -97,6 +102,56 @@ describe('updateStateAssignments', () => {
         ])
     })
 
+    it('errors if the target is not a CMS user', async () => {
+        const testAdminUser: UserType = {
+            id: 'd60e82de-13d7-459b-825e-61ce6ca2eb36',
+            role: 'ADMIN_USER',
+            email: 'iroh@example.com',
+            familyName: 'Iroh',
+            givenName: 'Uncle',
+        }
+
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+        const server = await constructTestPostgresServer({
+            store: postgresStore,
+            context: {
+                user: testAdminUser,
+            },
+        })
+
+        // setup a user in the db for us to modify
+        const cmsUserID = uuidv4()
+        const userToInsert: InsertUserArgsType = {
+            userID: cmsUserID,
+            role: 'STATE_USER',
+            givenName: 'Zuko',
+            familyName: 'Firebender',
+            email: 'zuko@example.com',
+            stateCode: 'VA',
+        }
+
+        const newUser = await postgresStore.insertUser(userToInsert)
+        if (isStoreError(newUser)) {
+            throw new Error(newUser.code)
+        }
+
+        const updateRes = await server.executeOperation({
+            query: UPDATE_STATE_ASSIGNMENTS,
+            variables: {
+                input: {
+                    cmsUserID: cmsUserID,
+                    stateAssignments: ['CA'],
+                },
+            },
+        })
+
+        expect(assertAnError(updateRes).message).toContain(
+            'cmsUserID does not exist'
+        )
+        expect(assertAnErrorCode(updateRes)).toBe('BAD_USER_INPUT')
+    })
+
     it('errors if the userID doesnt exist', async () => {
         const testAdminUser: UserType = {
             id: 'd60e82de-13d7-459b-825e-61ce6ca2eb36',
@@ -128,15 +183,10 @@ describe('updateStateAssignments', () => {
             },
         })
 
-        expect(updateRes.errors).toBeDefined()
-        if (!updateRes.errors || !updateRes.errors[0].extensions) {
-            throw new Error('no errors')
-        }
-
-        expect(updateRes.errors[0].message).toContain(
+        expect(assertAnError(updateRes).message).toContain(
             'cmsUserID does not exist'
         )
-        expect(updateRes.errors[0].extensions.code).toBe('BAD_USER_INPUT')
+        expect(assertAnErrorCode(updateRes)).toBe('BAD_USER_INPUT')
     })
 
     it('errors if called by a CMS user', async () => {
@@ -171,15 +221,10 @@ describe('updateStateAssignments', () => {
             },
         })
 
-        expect(updateRes.errors).toBeDefined()
-        if (!updateRes.errors || !updateRes.errors[0].extensions) {
-            throw new Error('no errors')
-        }
-
-        expect(updateRes.errors[0].message).toContain(
+        expect(assertAnError(updateRes).message).toContain(
             'user not authorized to modify state assignments'
         )
-        expect(updateRes.errors[0].extensions.code).toBe('FORBIDDEN')
+        expect(assertAnErrorCode(updateRes)).toBe('FORBIDDEN')
     })
 
     it('errors if called by a state user', async () => {
@@ -202,15 +247,10 @@ describe('updateStateAssignments', () => {
             },
         })
 
-        expect(updateRes.errors).toBeDefined()
-        if (!updateRes.errors || !updateRes.errors[0].extensions) {
-            throw new Error('no errors')
-        }
-
-        expect(updateRes.errors[0].message).toContain(
+        expect(assertAnError(updateRes).message).toContain(
             'user not authorized to modify state assignments'
         )
-        expect(updateRes.errors[0].extensions.code).toBe('FORBIDDEN')
+        expect(assertAnErrorCode(updateRes)).toBe('FORBIDDEN')
     })
 
     it('returns an error with missing arguments', async () => {
@@ -232,14 +272,10 @@ describe('updateStateAssignments', () => {
             },
         })
 
-        expect(updateRes.errors).toBeDefined()
-        if (!updateRes.errors || !updateRes.errors[0].extensions) {
-            throw new Error('no errors')
-        }
-        expect(updateRes.errors[0].message).toContain(
+        expect(assertAnError(updateRes).message).toContain(
             'Variable "$input" got invalid value'
         )
-        expect(updateRes.errors[0].extensions.code).toBe('BAD_USER_INPUT')
+        expect(assertAnErrorCode(updateRes)).toBe('BAD_USER_INPUT')
     })
 
     it('returns an error with invalid state codes', async () => {
@@ -273,13 +309,11 @@ describe('updateStateAssignments', () => {
             },
         })
 
-        expect(updateRes.errors).toBeDefined()
-        if (!updateRes.errors || !updateRes.errors[0].extensions) {
-            throw new Error('no errors')
-        }
-        expect(updateRes.errors[0].message).toContain('Invalid state codes')
-        expect(updateRes.errors[0].extensions.code).toBe('BAD_USER_INPUT')
-        expect(updateRes.errors[0].extensions.argumentValues).toEqual([
+        expect(assertAnError(updateRes).message).toContain(
+            'Invalid state codes'
+        )
+        expect(assertAnErrorCode(updateRes)).toBe('BAD_USER_INPUT')
+        expect(assertAnErrorExtensions(updateRes).argumentValues).toEqual([
             'XX',
             'BS',
         ])
