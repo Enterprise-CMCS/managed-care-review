@@ -211,7 +211,6 @@ export const HealthPlanPackageTable = ({
         getSortedRowModel: getSortedRowModel(),
     })
 
-    const hasAppliedFilters = columnFilters.length > 0
     const filteredRows = reactTable.getRowModel().rows
     const hasFilteredRows = filteredRows.length > 0
 
@@ -226,9 +225,15 @@ export const HealthPlanPackageTable = ({
         label: state,
     }))
 
-    const filterTitle = `${
-        columnFilters.flatMap((filter) => filter.value).length
-    } filters applied`
+    const filterLength = columnFilters.flatMap((filter) => filter.value).length
+    const filtersApplied = `${filterLength} ${pluralize(
+        'filter',
+        filterLength
+    )} applied`
+
+    const resultCount = `Displaying ${filteredRows.length} of ${
+        tableData.length
+    } ${pluralize('submission', tableData.length)}`
 
     return (
         <>
@@ -268,20 +273,10 @@ export const HealthPlanPackageTable = ({
                         </FilterAccordion>
                     )}
                     <div aria-live="polite" aria-atomic>
-                        <div className={styles.filterCount}>{filterTitle}</div>
                         <div className={styles.filterCount}>
-                            {!hasAppliedFilters
-                                ? `${tableData.length} ${pluralize(
-                                      'submission',
-                                      tableData.length
-                                  )}`
-                                : `Displaying ${filteredRows.length} of ${
-                                      tableData.length
-                                  } ${pluralize(
-                                      'submission',
-                                      tableData.length
-                                  )}`}
+                            {filtersApplied}
                         </div>
+                        <div className={styles.filterCount}>{resultCount}</div>
                     </div>
                     <Table fullWidth>
                         <thead>
