@@ -95,6 +95,9 @@ const submissions: PackageInDashboardType[] = [
 describe('HealthPlanPackageTable cms user tests', () => {
     const mockCMSUser: User = {
         __typename: 'CMSUser' as const,
+        id: 'foo-id',
+        givenName: 'Bob',
+        familyName: 'Dumas',
         role: 'CMS User',
         email: 'cms@exmaple.com',
         stateAssignments: [],
@@ -744,6 +747,9 @@ describe('HealthPlanPackageTable cms user tests', () => {
 describe('HealthPlanPackageTable state user tests', () => {
     const mockStateUser: User = {
         __typename: 'StateUser' as const,
+        id: 'foo-id',
+        givenName: 'Bob',
+        familyName: 'Statie',
         role: 'State User',
         email: 'state@example.com',
         state: {

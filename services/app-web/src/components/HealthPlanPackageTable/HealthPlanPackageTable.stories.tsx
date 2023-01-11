@@ -80,6 +80,9 @@ const tableData: PackageInDashboardType[] = [
 
 const mockCMSUser: User = {
     __typename: 'CMSUser' as const,
+    id: 'foo-id',
+    givenName: 'Bob',
+    familyName: 'Dumas',
     role: 'CMS User',
     email: 'cms@exmaple.com',
     stateAssignments: [],

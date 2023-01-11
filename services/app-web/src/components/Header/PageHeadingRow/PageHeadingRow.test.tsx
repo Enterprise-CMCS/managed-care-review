@@ -32,6 +32,9 @@ describe('Page Heading Row', () => {
                 },
             ],
         },
+        id: 'foo-id',
+        givenName: 'Bob',
+        familyName: 'Dumas',
         role: 'State User',
         email: 'bob@dmas.mn.gov',
     }

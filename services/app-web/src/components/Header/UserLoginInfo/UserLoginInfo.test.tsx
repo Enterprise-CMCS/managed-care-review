@@ -13,6 +13,9 @@ describe('UserLoginInfo', () => {
                 { id: 'snbc', name: 'SNBC' },
             ],
         },
+        id: 'foo-id',
+        givenName: 'Bob',
+        familyName: 'Dumas',
         role: 'State User',
         email: 'bob@dmas.mn.gov',
     }
