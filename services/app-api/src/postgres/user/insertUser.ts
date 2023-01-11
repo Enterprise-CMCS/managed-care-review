@@ -1,11 +1,11 @@
 import { PrismaClient, Role } from '@prisma/client'
-import { StoreError, convertPrismaErrorToStoreError } from './storeError'
+import { StoreError, convertPrismaErrorToStoreError } from '../storeError'
 import {
     AdminUserType,
     CMSUserType,
     StateUserType,
     UserType,
-} from '../domain-models'
+} from '../../domain-models'
 
 export type InsertUserArgsType = {
     userID: string

@@ -1,6 +1,6 @@
-import { convertPrismaErrorToStoreError, StoreError } from './storeError'
+import { convertPrismaErrorToStoreError, StoreError } from '../storeError'
 import { PrismaClient } from '@prisma/client'
-import { CMSUserType, StateCodeType } from '../domain-models'
+import { CMSUserType, StateCodeType } from '../../domain-models'
 
 export async function updateUserAssignedState(
     client: PrismaClient,

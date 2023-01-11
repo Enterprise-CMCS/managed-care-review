@@ -1,6 +1,6 @@
 import { PrismaClient, User, State } from '@prisma/client'
-import { UserType } from '../domain-models'
-import { convertPrismaErrorToStoreError, StoreError } from './storeError'
+import { UserType } from '../../domain-models'
+import { convertPrismaErrorToStoreError, StoreError } from '../storeError'
 
 function parseDomainUsersFromPrismaUsers(
     prismaUsers: (User & { states?: State[] })[]

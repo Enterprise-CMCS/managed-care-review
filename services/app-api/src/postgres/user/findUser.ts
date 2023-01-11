@@ -1,11 +1,11 @@
 import { PrismaClient } from '@prisma/client'
-import { convertPrismaErrorToStoreError, StoreError } from './storeError'
+import { convertPrismaErrorToStoreError, StoreError } from '../storeError'
 import {
     AdminUserType,
     CMSUserType,
     StateUserType,
     UserType,
-} from '../domain-models'
+} from '../../domain-models'
 
 export async function findUser(
     client: PrismaClient,

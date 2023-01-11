@@ -1,10 +1,10 @@
 import { PrismaClient } from '@prisma/client'
-import { HealthPlanPackageType } from '../domain-models'
+import { HealthPlanPackageType } from '../../domain-models'
 import {
     convertPrismaErrorToStoreError,
     isStoreError,
     StoreError,
-} from './storeError'
+} from '../storeError'
 import {
     convertToHealthPlanPackageType,
     getCurrentRevision,

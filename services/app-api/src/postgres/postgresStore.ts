@@ -12,23 +12,24 @@ import {
     CMSUserType,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
-import { findAllHealthPlanPackagesByState } from './findAllHealthPlanPackagesByState'
-import { findAllHealthPlanPackagesBySubmittedAt } from './findAllHealthPlanPackagesBySubmittedAt'
-import { findHealthPlanPackage } from './findHealthPlanPackage'
+import { StoreError } from './storeError'
 import {
+    findAllHealthPlanPackagesByState,
+    findAllHealthPlanPackagesBySubmittedAt,
+    findHealthPlanPackage,
     insertHealthPlanPackage,
     InsertHealthPlanPackageArgsType,
-} from './insertHealthPlanPackage'
-import { insertHealthPlanRevision } from './insertHealthPlanRevision'
-import { StoreError } from './storeError'
-import { updateHealthPlanRevision } from './updateHealthPlanRevision'
-import { findAllRevisions } from './findAllRevisions'
-
-import { findUser } from './findUser'
-import { insertUser, InsertUserArgsType } from './insertUser'
-import { deleteUserAssignedState } from './deleteUserAssignedState'
-import { updateUserAssignedState } from './updateUserAssignedState'
-import { findAllUsers } from './findAllUsers'
+    insertHealthPlanRevision,
+    updateHealthPlanRevision,
+    findAllRevisions,
+} from './healthPlanPackage'
+import {
+    findUser,
+    insertUser,
+    InsertUserArgsType,
+    updateUserAssignedState,
+    findAllUsers,
+} from './user'
 
 type Store = {
     findPrograms: (
@@ -79,11 +80,6 @@ type Store = {
         userID: string,
         states: StateCodeType[]
     ) => Promise<CMSUserType | StoreError>
-
-    deleteUserAssignedState: (
-        userID: string,
-        stateCode: string
-    ) => Promise<UserType | StoreError>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -114,8 +110,6 @@ function NewPostgresStore(client: PrismaClient): Store {
         insertUser: (args) => insertUser(client, args),
         updateUserAssignedState: (userID, stateCodes) =>
             updateUserAssignedState(client, userID, stateCodes),
-        deleteUserAssignedState: (userID, stateCode) =>
-            deleteUserAssignedState(client, userID, stateCode),
         findStatePrograms: findStatePrograms,
         findAllRevisions: () => findAllRevisions(client),
         findAllUsers: () => findAllUsers(client),

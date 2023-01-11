@@ -81,9 +81,6 @@ function mockStoreThatErrors(): Store {
         updateUserAssignedState: async (_ID, _State) => {
             return genericStoreError
         },
-        deleteUserAssignedState: async (_UserID, _StateID) => {
-            return genericStoreError
-        },
     }
 }
 

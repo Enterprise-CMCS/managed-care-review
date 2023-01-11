@@ -1,6 +1,6 @@
 import { HealthPlanPackageTable, HealthPlanRevisionTable } from '@prisma/client'
-import { HealthPlanPackageType, UpdateInfoType } from '../domain-models'
-import { StoreError } from './storeError'
+import { HealthPlanPackageType, UpdateInfoType } from '../../domain-models'
+import { StoreError } from '../storeError'
 
 export type HealthPlanPackageWithRevisionsTable = HealthPlanPackageTable & {
     revisions: HealthPlanRevisionTable[]
