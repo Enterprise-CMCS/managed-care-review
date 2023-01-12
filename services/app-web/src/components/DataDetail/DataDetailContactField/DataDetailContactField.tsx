@@ -6,10 +6,9 @@ import {
 import { getActuaryFirm } from '../../SubmissionSummarySection'
 import { DataDetailMissingField } from '../DataDetailMissingField'
 
-type Contact = StateContact | ActuaryContact
+type Contact = ActuaryContact | StateContact
 
-function isCertainActuaryContact(contact: Contact): boolean {
-    // this field is not required on actuary contacts, but if its present we know for sure we have an actuary
+function isCertainActuaryContact(contact: Contact): contact is ActuaryContact {
     return (contact as ActuaryContact).actuarialFirm !== undefined
 }
 
@@ -38,8 +37,8 @@ export const DataDetailContactField = ({
             </Link>
             {isCertainActuaryContact(contact) && (
                 <>
-                    <br />{' '}
-                    <span>{getActuaryFirm(contact as ActuaryContact)}</span>
+                    <br />
+                    <span>{getActuaryFirm(contact)}</span>
                 </>
             )}
         </address>
