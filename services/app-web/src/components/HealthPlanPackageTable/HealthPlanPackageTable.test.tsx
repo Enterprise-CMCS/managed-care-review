@@ -111,7 +111,9 @@ describe('HealthPlanPackageTable cms user tests', () => {
         expect(screen.getByRole('table')).toBeInTheDocument()
         //Expect 5 rows. 4 data rows and 1 header row
         expect(rows).toHaveLength(5)
-        expect(screen.getByText('4 submissions')).toBeInTheDocument()
+        expect(
+            screen.getByText('Displaying 4 of 4 submissions')
+        ).toBeInTheDocument()
     })
 
     it('displays no submission text when no submitted packages exist', async () => {
@@ -538,7 +540,9 @@ describe('HealthPlanPackageTable cms user tests', () => {
         //Expect 3 data rows and 1 header row, total 4 rows
         await userEvent.click(clearFiltersButton)
         expect(await screen.findAllByRole('row')).toHaveLength(4)
-        expect(screen.getByText('3 submissions')).toBeInTheDocument()
+        expect(
+            screen.getByText('Displaying 3 of 3 submissions')
+        ).toBeInTheDocument()
     })
 
     it('displays no results found when filters return no results', async () => {
@@ -695,7 +699,7 @@ describe('HealthPlanPackageTable cms user tests', () => {
         })
 
         //Expect 1 filter applied
-        expect(screen.getByText('Filters (1 applied)')).toBeInTheDocument()
+        expect(screen.getByText('1 filter applied')).toBeInTheDocument()
 
         //Open state combobox and select Ohio option
         await selectEvent.openMenu(stateCombobox)
@@ -707,7 +711,7 @@ describe('HealthPlanPackageTable cms user tests', () => {
         })
 
         //Expect 2 filter applied
-        expect(screen.getByText('Filters (2 applied)')).toBeInTheDocument()
+        expect(screen.getByText('2 filters applied')).toBeInTheDocument()
 
         //Open submission type combobox and select contact and rate option
         await selectEvent.openMenu(submissionTypeCombobox)
@@ -734,7 +738,7 @@ describe('HealthPlanPackageTable cms user tests', () => {
         const rows = await screen.findAllByRole('row')
         expect(rows).toHaveLength(4)
         //Expect 3 applied filters text
-        expect(screen.getByText('Filters (3 applied)')).toBeInTheDocument()
+        expect(screen.getByText('3 filters applied')).toBeInTheDocument()
         expect(
             screen.getByText('Displaying 3 of 4 submissions')
         ).toBeInTheDocument()
