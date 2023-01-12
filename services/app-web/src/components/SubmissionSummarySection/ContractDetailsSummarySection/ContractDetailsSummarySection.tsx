@@ -127,7 +127,7 @@ export const ContractDetailsSummarySection = ({
                         id="contractExecutionStatus"
                         label="Contract status"
                         explainMissingData={!isSubmitted}
-                        data={
+                        children={
                             submission.contractExecutionStatus
                                 ? ContractExecutionStatusRecord[
                                       submission.contractExecutionStatus
@@ -143,7 +143,7 @@ export const ContractDetailsSummarySection = ({
                                 : 'Contract effective dates'
                         }
                         explainMissingData={!isSubmitted}
-                        data={
+                        children={
                             submission.contractDateStart &&
                             submission.contractDateEnd
                                 ? `${formatCalendarDate(
@@ -158,7 +158,7 @@ export const ContractDetailsSummarySection = ({
                         id="managedCareEntities"
                         label="Managed care entities"
                         explainMissingData={!isSubmitted}
-                        data={
+                        children={
                             <DataDetailCheckboxList
                                 list={submission.managedCareEntities}
                                 dict={ManagedCareEntityRecord}
@@ -169,7 +169,7 @@ export const ContractDetailsSummarySection = ({
                         id="federalAuthorities"
                         label="Active federal operating authority"
                         explainMissingData={!isSubmitted}
-                        data={
+                        children={
                             <DataDetailCheckboxList
                                 list={submission.federalAuthorities}
                                 dict={FederalAuthorityRecord}
@@ -183,7 +183,7 @@ export const ContractDetailsSummarySection = ({
                             id="modifiedProvisions"
                             label="This contract action includes new or modified provisions related to the following"
                             explainMissingData={!isSubmitted}
-                            data={
+                            children={
                                 <DataDetailCheckboxList
                                     list={modifiedProvisions}
                                     dict={ModifiedProvisionsRecord}
@@ -195,7 +195,7 @@ export const ContractDetailsSummarySection = ({
                             id="unmodifiedProvisions"
                             label="This contract action does NOT include new or modified provisions related to the following"
                             explainMissingData={!isSubmitted}
-                            data={
+                            children={
                                 <DataDetailCheckboxList
                                     list={unmodifiedProvisions}
                                     dict={ModifiedProvisionsRecord}

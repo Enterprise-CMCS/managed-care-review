@@ -239,7 +239,7 @@ export const RateDetailsSummarySection = ({
                                             id="ratePrograms"
                                             label="Programs this rate certification covers"
                                             explainMissingData={!isSubmitted}
-                                            data={ratePrograms(
+                                            children={ratePrograms(
                                                 submission,
                                                 rateInfo
                                             )}
@@ -249,13 +249,15 @@ export const RateDetailsSummarySection = ({
                                         id="rateType"
                                         label="Rate certification type"
                                         explainMissingData={!isSubmitted}
-                                        data={rateCertificationType(rateInfo)}
+                                        children={rateCertificationType(
+                                            rateInfo
+                                        )}
                                     />
                                     <DataDetail
                                         id="rateCapitationType"
                                         label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
                                         explainMissingData={!isSubmitted}
-                                        data={rateCapitationType(rateInfo)}
+                                        children={rateCapitationType(rateInfo)}
                                     />
                                     <DataDetail
                                         id="ratingPeriod"
@@ -265,7 +267,7 @@ export const RateDetailsSummarySection = ({
                                                 : 'Rating period'
                                         }
                                         explainMissingData={!isSubmitted}
-                                        data={
+                                        children={
                                             rateInfo.rateDateStart &&
                                             rateInfo.rateDateEnd ? (
                                                 `${formatCalendarDate(
@@ -286,7 +288,7 @@ export const RateDetailsSummarySection = ({
                                                 : 'Date certified'
                                         }
                                         explainMissingData={!isSubmitted}
-                                        data={formatCalendarDate(
+                                        children={formatCalendarDate(
                                             rateInfo.rateDateCertified
                                         )}
                                     />
@@ -295,7 +297,7 @@ export const RateDetailsSummarySection = ({
                                             id="effectiveRatingPeriod"
                                             label="Rate amendment effective dates"
                                             explainMissingData={!isSubmitted}
-                                            data={`${formatCalendarDate(
+                                            children={`${formatCalendarDate(
                                                 rateInfo.rateAmendmentInfo
                                                     .effectiveDateStart
                                             )} to ${formatCalendarDate(
@@ -309,7 +311,7 @@ export const RateDetailsSummarySection = ({
                                             id="certifyingActuary"
                                             label="Certifying actuary"
                                             explainMissingData={!isSubmitted}
-                                            data={
+                                            children={
                                                 <DataDetailContactField
                                                     contact={
                                                         rateInfo

@@ -61,7 +61,7 @@ export const SubmissionTypeSummarySection = ({
                         <DataDetail
                             id="submitted"
                             label="Submitted"
-                            data={
+                            children={
                                 <span>
                                     {dayjs(initiallySubmittedAt).format(
                                         'MM/DD/YY'
@@ -77,19 +77,21 @@ export const SubmissionTypeSummarySection = ({
                         id="program"
                         label="Program(s)"
                         explainMissingData={!isSubmitted}
-                        data={programNames}
+                        children={programNames}
                     />
                     <DataDetail
                         id="submissionType"
                         label="Submission type"
                         explainMissingData={!isSubmitted}
-                        data={SubmissionTypeRecord[submission.submissionType]}
+                        children={
+                            SubmissionTypeRecord[submission.submissionType]
+                        }
                     />
                     <DataDetail
                         id="contractType"
                         label="Contract action type"
                         explainMissingData={!isSubmitted}
-                        data={
+                        children={
                             submission.contractType
                                 ? ContractTypeRecord[submission.contractType]
                                 : ''
@@ -100,7 +102,7 @@ export const SubmissionTypeSummarySection = ({
                             id="riskBasedContract"
                             label="Is this a risk based contract"
                             explainMissingData={!isSubmitted}
-                            data={booleanAsYesNoUserValue(
+                            children={booleanAsYesNoUserValue(
                                 submission.riskBasedContract
                             )}
                         />
@@ -113,7 +115,7 @@ export const SubmissionTypeSummarySection = ({
                             id="submissionDescription"
                             label="Submission description"
                             explainMissingData={!isSubmitted}
-                            data={submission.submissionDescription}
+                            children={submission.submissionDescription}
                         />
                     </Grid>
                 </Grid>

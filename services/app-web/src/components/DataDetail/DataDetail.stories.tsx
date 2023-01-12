@@ -1,6 +1,5 @@
 import { Story } from '@storybook/react'
 import React from 'react'
-import ProvidersDecorator from '../../../.storybook/providersDecorator'
 import { DataDetail } from './DataDetail'
 import type { DataDetailProps } from './DataDetail'
 
@@ -12,6 +11,7 @@ export default {
             'DataDetail displays definition terms and descriptions using semantic HTML. This is useful for summarizing static data.',
     },
 }
+
 const Template: Story<DataDetailProps> = (args) => (
     <dl>
         <DataDetail {...args} />
@@ -19,57 +19,16 @@ const Template: Story<DataDetailProps> = (args) => (
 )
 
 export const WithString = Template.bind({})
-WithString.decorators = [(Story) => ProvidersDecorator(Story, {})]
 WithString.args = {
     id: 'rainfall',
     label: 'Average rainfall in May',
-    data: '31.58 inches',
+    children: '1.58 inches',
 }
 
 export const WithMissingField = Template.bind({})
-WithMissingField.decorators = [(Story) => ProvidersDecorator(Story, {})]
 WithMissingField.args = {
     id: 'crystal-ball',
     label: 'The secret to the future',
-    data: undefined,
+    children: undefined,
     explainMissingData: true,
 }
-
-export const WithCheckboxList = Template.bind({})
-WithCheckboxList.decorators = [(Story) => ProvidersDecorator(Story, {})]
-WithCheckboxList.args = {
-    id: 'crystal-ball',
-    label: 'The secret to the future',
-    data: ['this', 'that', 'the other thing'],
-}
-
-// Having trouble getting these stories to render without crashing story
-
-// export const WithDateRange = Template.bind({})
-// WithDateRange.decorators = [(Story) => ProvidersDecorator(Story, {})]
-// WithDateRange.args = {
-//     id: 'time-period',
-//     label: 'Time wasted',
-//     data: (
-//         <DataDetailDateRange
-//             startDate={new Date(Date.UTC(2022, 5, 21))}
-//             endDate={new Date(Date.UTC(2022, 5, 22))}
-//         />
-//     ),
-// }
-
-// export const WithContact = Template.bind({})
-// WithContact.decorators = [(Story) => ProvidersDecorator(Story, {})]
-// WithContact.args = {
-//     id: 'legal-expert',
-//     label: 'Legal expert',
-//     data: (
-//         <DataDetailContactField
-//             contact={{
-//                 name: 'Bob Loblaw',
-//                 titleRole: 'Attorney at Law',
-//                 email: 'bob@example.com',
-//             }}
-//         />
-//     ),
-// }

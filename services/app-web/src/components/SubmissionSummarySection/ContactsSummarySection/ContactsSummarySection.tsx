@@ -53,7 +53,7 @@ export const ContactsSummarySection = ({
                                         <DataDetail
                                             id={'statecontact_' + index}
                                             label={`Contact ${index + 1}`}
-                                            data={
+                                            children={
                                                 <DataDetailContactField
                                                     contact={stateContact}
                                                 />
@@ -67,7 +67,7 @@ export const ContactsSummarySection = ({
                                 id="statecontact"
                                 label="Contact"
                                 explainMissingData={!isSubmitted}
-                                data={undefined}
+                                children={undefined}
                             />
                         )}
                     </Grid>
@@ -93,7 +93,7 @@ export const ContactsSummarySection = ({
                                                         index
                                                     }
                                                     label="Additional actuary contact"
-                                                    data={
+                                                    children={
                                                         <DataDetailContactField
                                                             contact={
                                                                 actuaryContact
@@ -113,7 +113,7 @@ export const ContactsSummarySection = ({
                             <DataDetail
                                 id="communicationPreference"
                                 label="Actuaries’ communication preference"
-                                data={
+                                children={
                                     submission.addtlActuaryCommunicationPreference &&
                                     ActuaryCommunicationRecord[
                                         submission
