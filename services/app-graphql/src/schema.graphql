@@ -137,7 +137,8 @@ type Mutation {
 
 
     """
-    updateStateAssignments sets the state assignments for a given CMSUser
+    updateCMSUser updates CMSUser fields that are allowed to be modified. 
+    Presently, just the user's stateAssignments.
 
     This can only be called by an AdminUser.
     The cmsUserID must be a CMSUser's id, not a state user
@@ -149,9 +150,9 @@ type Mutation {
         - cmsUserID was not a CMSUser's ID
         - stateCodes included an invalid state code
     """
-    updateStateAssignments(
-        input: UpdateStateAssignmentsInput!
-    ): UpdateStateAssignmentsPayload!
+    updateCMSUser(
+        input: UpdateCMSUserInput!
+    ): UpdateCMSUserPayload!
 }
 
 input CreateHealthPlanPackageInput {
@@ -232,12 +233,13 @@ type UpdateHealthPlanFormDataPayload {
     pkg: HealthPlanPackage!
 }
 
-input UpdateStateAssignmentsInput {
+input UpdateCMSUserInput {
     cmsUserID: ID!
+    "stateAssignments is an array of stateCodes (e.g. ['CA', 'NM', 'TN'])"
     stateAssignments: [String!]!
 }
 
-type UpdateStateAssignmentsPayload {
+type UpdateCMSUserPayload {
     user: CMSUser!
 }
 

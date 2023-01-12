@@ -138,7 +138,7 @@ export function userTypeFromAttributes(attributes: {
     return err(new Error('Unsupported user role:  ' + roleAttribute))
 }
 
-// userFromCognitoAuthProvider hits the Cogntio API to get the information in the authProvider
+// userFromCognitoAuthProvider hits the Cognito API to get the information in the authProvider
 export async function userFromCognitoAuthProvider(
     authProvider: string,
     store?: Store

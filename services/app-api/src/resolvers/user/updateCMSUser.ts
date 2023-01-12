@@ -12,9 +12,9 @@ import {
     setResolverDetailsOnActiveSpan,
 } from '../attributeHelper'
 
-export function updateStateAssignmentsResolver(
+export function updateCMSUserResolver(
     store: Store
-): MutationResolvers['updateStateAssignments'] {
+): MutationResolvers['updateCMSUser'] {
     return async (_parent, { input }, context) => {
         const { user: currentUser, span } = context
         setResolverDetailsOnActiveSpan(

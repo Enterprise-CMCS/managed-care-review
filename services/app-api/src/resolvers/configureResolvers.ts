@@ -13,7 +13,7 @@ import {
 } from './healthPlanPackage'
 import {
     fetchCurrentUserResolver,
-    updateStateAssignmentsResolver,
+    updateCMSUserResolver,
     stateUserResolver,
     cmsUserResolver,
     indexUsersResolver,
@@ -50,7 +50,7 @@ export function configureResolvers(
                 emailer,
                 emailParameterStore
             ),
-            updateStateAssignments: updateStateAssignmentsResolver(store),
+            updateCMSUser: updateCMSUserResolver(store),
         },
         User: {
             // resolveType is required to differentiate Unions

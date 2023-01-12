@@ -1,6 +1,6 @@
 import { UserType } from '../../domain-models'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import UPDATE_STATE_ASSIGNMENTS from '../../../../app-graphql/src/mutations/updateStateAssignments.graphql'
+import UPDATE_CMS_USER from '../../../../app-graphql/src/mutations/updateCMSUser.graphql'
 import {
     InsertUserArgsType,
     isStoreError,
@@ -14,7 +14,7 @@ import {
     assertAnErrorExtensions,
 } from '../../testHelpers'
 
-describe('updateStateAssignments', () => {
+describe('updateCMSUser', () => {
     it('updates a cms users state assignments', async () => {
         const testAdminUser: UserType = {
             id: 'd60e82de-13d7-459b-825e-61ce6ca2eb36',
@@ -49,7 +49,7 @@ describe('updateStateAssignments', () => {
         }
 
         const updateRes = await server.executeOperation({
-            query: UPDATE_STATE_ASSIGNMENTS,
+            query: UPDATE_CMS_USER,
             variables: {
                 input: {
                     cmsUserID: cmsUserID,
@@ -65,7 +65,7 @@ describe('updateStateAssignments', () => {
             throw new Error('no data')
         }
 
-        const user = updateRes.data.updateStateAssignments.user
+        const user = updateRes.data.updateCMSUser.user
         expect(user.email).toBe(newUser.email)
         expect(user.stateAssignments).toEqual([
             {
@@ -76,7 +76,7 @@ describe('updateStateAssignments', () => {
 
         // change the value and see if it updates
         const updateRes2 = await server.executeOperation({
-            query: UPDATE_STATE_ASSIGNMENTS,
+            query: UPDATE_CMS_USER,
             variables: {
                 input: {
                     cmsUserID: cmsUserID,
@@ -92,7 +92,7 @@ describe('updateStateAssignments', () => {
             throw new Error('no data')
         }
 
-        const user2 = updateRes2.data.updateStateAssignments.user
+        const user2 = updateRes2.data.updateCMSUser.user
         expect(user2.email).toBe(newUser.email)
         expect(user2.stateAssignments).toEqual([
             {
@@ -141,7 +141,7 @@ describe('updateStateAssignments', () => {
         }
 
         const updateRes = await server.executeOperation({
-            query: UPDATE_STATE_ASSIGNMENTS,
+            query: UPDATE_CMS_USER,
             variables: {
                 input: {
                     cmsUserID: cmsUserID,
@@ -178,7 +178,7 @@ describe('updateStateAssignments', () => {
         const cmsUserID = uuidv4()
 
         const updateRes = await server.executeOperation({
-            query: UPDATE_STATE_ASSIGNMENTS,
+            query: UPDATE_CMS_USER,
             variables: {
                 input: {
                     cmsUserID: cmsUserID,
@@ -216,7 +216,7 @@ describe('updateStateAssignments', () => {
         const cmsUserID = uuidv4()
 
         const updateRes = await server.executeOperation({
-            query: UPDATE_STATE_ASSIGNMENTS,
+            query: UPDATE_CMS_USER,
             variables: {
                 input: {
                     cmsUserID: cmsUserID,
@@ -242,7 +242,7 @@ describe('updateStateAssignments', () => {
         const cmsUserID = uuidv4()
 
         const updateRes = await server.executeOperation({
-            query: UPDATE_STATE_ASSIGNMENTS,
+            query: UPDATE_CMS_USER,
             variables: {
                 input: {
                     cmsUserID: cmsUserID,
@@ -268,7 +268,7 @@ describe('updateStateAssignments', () => {
         const cmsUserID = uuidv4()
 
         const updateRes = await server.executeOperation({
-            query: UPDATE_STATE_ASSIGNMENTS,
+            query: UPDATE_CMS_USER,
             variables: {
                 input: {
                     cmsUserID: cmsUserID,
@@ -304,7 +304,7 @@ describe('updateStateAssignments', () => {
         const cmsUserID = uuidv4()
 
         const updateRes = await server.executeOperation({
-            query: UPDATE_STATE_ASSIGNMENTS,
+            query: UPDATE_CMS_USER,
             variables: {
                 input: {
                     cmsUserID: cmsUserID,
