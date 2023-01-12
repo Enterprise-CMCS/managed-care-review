@@ -467,6 +467,62 @@ describe('unlockHealthPlanPackage', () => {
         )
     })
 
+    it('send state email to state contacts and current user when unlocking submission succeeds', async () => {
+        const config = testEmailConfig
+        const mockEmailer = testEmailer(config)
+        //mock invoke email submit lambda
+        const stateServer = await constructTestPostgresServer()
+
+        // First, create a new submitted submission
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testUser,
+            },
+            emailer: mockEmailer,
+        })
+
+        // Unlock
+        const unlockResult = await unlockTestHealthPlanPackage(
+            cmsServer,
+            stateSubmission.id,
+            'Super duper good reason.'
+        )
+
+        const currentRevision = unlockResult.revisions[0].node.formDataProto
+
+        const sub = base64ToDomain(currentRevision)
+        if (sub instanceof Error) {
+            throw sub
+        }
+
+        const programs = [defaultFloridaProgram()]
+        const ratePrograms = [defaultFloridaRateProgram()]
+        const name = packageName(sub, programs)
+        const rateName = generateRateName(sub, sub.rateInfos[0], ratePrograms)
+
+        const stateReceiverEmails = [
+            'james@example.com',
+            ...sub.stateContacts.map((contact) => contact.email),
+        ]
+
+        // email subject line is correct for CMS email
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            2,
+            expect.objectContaining({
+                subject: expect.stringContaining(`${name} was unlocked by CMS`),
+                sourceEmail: config.emailSource,
+                toAddresses: expect.arrayContaining(
+                    Array.from(stateReceiverEmails)
+                ),
+                bodyHTML: expect.stringContaining(rateName),
+            })
+        )
+    })
+
     it('does send unlock email when request for state analysts emails fails', async () => {
         const config = testEmailConfig
         const mockEmailer = testEmailer(config)
