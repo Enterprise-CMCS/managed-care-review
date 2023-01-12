@@ -72,7 +72,7 @@ type Store = {
         draft: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackageType | StoreError>
 
-    findUser: (id: string) => Promise<UserType | StoreError>
+    findUser: (id: string) => Promise<UserType | undefined | StoreError>
 
     insertUser: (user: InsertUserArgsType) => Promise<UserType | StoreError>
 

@@ -8,6 +8,7 @@ const StoreErrorCodes = [
     'CONNECTION_ERROR',
     'PROTOBUF_ERROR',
     'INSERT_ERROR',
+    'USER_FORMAT_ERROR',
     'UNEXPECTED_EXCEPTION',
     'WRONG_STATUS',
 ] as const

@@ -1,6 +1,11 @@
-import { convertPrismaErrorToStoreError, StoreError } from '../storeError'
+import {
+    convertPrismaErrorToStoreError,
+    isStoreError,
+    StoreError,
+} from '../storeError'
 import { PrismaClient } from '@prisma/client'
 import { CMSUserType, StateCodeType } from '../../domain-models'
+import { domainUserFromPrismaUser } from './prismaDomainUser'
 
 export async function updateUserAssignedState(
     client: PrismaClient,
@@ -38,21 +43,20 @@ export async function updateUserAssignedState(
 
         const updateResult = combinedResults[1]
 
-        if (updateResult.role !== 'CMS_USER') {
+        const domainUser = domainUserFromPrismaUser(updateResult)
+
+        if (isStoreError(domainUser)) {
+            return domainUser
+        }
+
+        if (domainUser.role !== 'CMS_USER') {
             return {
                 code: 'UNEXPECTED_EXCEPTION',
                 message: 'Updated user was not a CMS User!',
             }
         }
 
-        return {
-            id: updateResult.id,
-            role: 'CMS_USER',
-            email: updateResult.email,
-            givenName: updateResult.givenName,
-            familyName: updateResult.familyName,
-            stateAssignments: updateResult.stateAssignments,
-        }
+        return domainUser
     } catch (err) {
         return convertPrismaErrorToStoreError(err)
     }

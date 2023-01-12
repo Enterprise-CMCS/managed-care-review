@@ -225,14 +225,12 @@ async function lookupUserAurora(
     store: Store,
     userID: string
 ): Promise<UserType | undefined | Error> {
-    try {
-        const userFromPG = await store.findUser(userID)
-        // try a basic type guard here -- a User will have an email.
-        if ('email' in userFromPG) {
-            return userFromPG
-        }
-    } catch (e) {
-        throw new Error(`Error looking up user in Postgres: ${e}`)
+    const userFromPG = await store.findUser(userID)
+    if (isStoreError(userFromPG)) {
+        return new Error(
+            `Error looking up user in postgres: ${userFromPG.code}: ${userFromPG.message}`
+        )
     }
-    return undefined
+
+    return userFromPG
 }
