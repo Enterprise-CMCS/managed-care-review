@@ -26,12 +26,12 @@ export async function updateUserAssignedState(
                     id: userID,
                 },
                 data: {
-                    states: {
+                    stateAssignments: {
                         set: statesWithCode,
                     },
                 },
                 include: {
-                    states: true,
+                    stateAssignments: true,
                 },
             }),
         ])
@@ -51,7 +51,7 @@ export async function updateUserAssignedState(
             email: updateResult.email,
             givenName: updateResult.givenName,
             familyName: updateResult.familyName,
-            stateAssignments: updateResult.states,
+            stateAssignments: updateResult.stateAssignments,
         }
     } catch (err) {
         return convertPrismaErrorToStoreError(err)

@@ -3,7 +3,7 @@ import { UserType } from '../../domain-models'
 import { convertPrismaErrorToStoreError, StoreError } from '../storeError'
 
 function parseDomainUsersFromPrismaUsers(
-    prismaUsers: (User & { states?: State[] })[]
+    prismaUsers: (User & { stateAssignments?: State[] })[]
 ): UserType[] | Error {
     const users: UserType[] = []
     const errors: Error[] = []
@@ -31,7 +31,7 @@ function parseDomainUsersFromPrismaUsers(
 // table in prisma, so we need to parse those into valid UserTypes or error if something
 // got stored wrong.
 function domainUserFromPrismaUser(
-    prismaUser: User & { states?: State[] }
+    prismaUser: User & { stateAssignments?: State[] }
 ): UserType | Error {
     switch (prismaUser.role) {
         case 'STATE_USER':
@@ -50,7 +50,7 @@ function domainUserFromPrismaUser(
                 stateCode: prismaUser.stateCode,
             }
         case 'CMS_USER':
-            if (!prismaUser.states) {
+            if (!prismaUser.stateAssignments) {
                 return new Error(
                     `CMSUser has no states array, probably a programming error; id: ${prismaUser.id}`
                 )
@@ -62,7 +62,7 @@ function domainUserFromPrismaUser(
                 givenName: prismaUser.givenName,
                 familyName: prismaUser.familyName,
                 email: prismaUser.email,
-                stateAssignments: prismaUser.states,
+                stateAssignments: prismaUser.stateAssignments,
             }
         case 'ADMIN_USER':
             return {
@@ -81,7 +81,7 @@ export async function findAllUsers(
     try {
         const allUsers = await client.user.findMany({
             include: {
-                states: true,
+                stateAssignments: true,
             },
             orderBy: {
                 familyName: 'asc',
