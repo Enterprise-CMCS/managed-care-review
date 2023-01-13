@@ -92,7 +92,7 @@ const submissions: PackageInDashboardType[] = [
     },
 ]
 
-describe('HealthPlanPackageTable cms user tests', () => {
+describe('HealthPlanPackageTable for CMS User (with filters)', () => {
     const mockCMSUser: User = {
         __typename: 'CMSUser' as const,
         role: 'CMS User',
@@ -100,11 +100,25 @@ describe('HealthPlanPackageTable cms user tests', () => {
         name: 'Bob it user',
     }
 
+    it('renders table and caption if passed in', async () => {
+        renderWithProviders(
+            <HealthPlanPackageTable
+                tableData={submissions}
+                user={mockCMSUser}
+                caption="Table 1"
+                showFilters
+            />
+        )
+        expect(screen.getByRole('table')).toBeInTheDocument()
+        expect(screen.getByText('Table 1')).toBeInTheDocument()
+    })
+
     it('renders table with expected number of submissions', async () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
                 user={mockCMSUser}
+                showFilters
             />
         )
         const rows = await screen.findAllByRole('row')
@@ -118,7 +132,11 @@ describe('HealthPlanPackageTable cms user tests', () => {
 
     it('displays no submission text when no submitted packages exist', async () => {
         renderWithProviders(
-            <HealthPlanPackageTable tableData={[]} user={mockCMSUser} />,
+            <HealthPlanPackageTable
+                tableData={[]}
+                user={mockCMSUser}
+                showFilters
+            />,
             {
                 apolloProvider: {
                     mocks: [
@@ -143,6 +161,7 @@ describe('HealthPlanPackageTable cms user tests', () => {
             <HealthPlanPackageTable
                 tableData={submissions}
                 user={mockCMSUser}
+                showFilters
             />
         )
         const submissionsInTable = await screen.getAllByTestId(`submission-id`)
@@ -162,6 +181,7 @@ describe('HealthPlanPackageTable cms user tests', () => {
             <HealthPlanPackageTable
                 tableData={submissions}
                 user={mockCMSUser}
+                showFilters
             />
         )
 
@@ -193,6 +213,7 @@ describe('HealthPlanPackageTable cms user tests', () => {
             <HealthPlanPackageTable
                 tableData={stateSubmissions}
                 user={mockCMSUser}
+                showFilters
             />
         )
 
