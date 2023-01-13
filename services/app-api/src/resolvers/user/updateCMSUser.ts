@@ -1,9 +1,9 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { isAdminUser } from '../../domain-models'
 import {
-    isAdminUser,
     isValidStateCode,
     StateCodeType,
-} from '../../domain-models'
+} from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { MutationResolvers } from '../../gen/gqlServer'
 import { logError } from '../../logger'
 import { isStoreError, Store } from '../../postgres'

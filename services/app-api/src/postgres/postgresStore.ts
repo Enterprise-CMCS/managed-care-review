@@ -2,13 +2,13 @@ import { PrismaClient, HealthPlanRevisionTable } from '@prisma/client'
 import {
     UnlockedHealthPlanFormDataType,
     HealthPlanFormDataType,
+    StateCodeType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     ProgramType,
     HealthPlanPackageType,
     UpdateInfoType,
     UserType,
-    StateCodeType,
     CMSUserType,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'

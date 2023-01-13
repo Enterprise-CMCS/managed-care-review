@@ -15,7 +15,7 @@ function assertAnError(res: GraphQLResponse): GraphQLFormattedError {
     return res.errors[0]
 }
 
-// assertAnErrorCode returns the error code from the only error's extensions
+// assertAnErrorExtensions returns the error code from the only error's extensions
 function assertAnErrorExtensions(
     res: GraphQLResponse
 ): Record<string, unknown> {

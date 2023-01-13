@@ -61,4 +61,5 @@ function isValidStateCode(
     return (StateCodes as ReadonlyArray<string>).includes(maybeStateCode)
 }
 
-export { StateCodes, StateCodeType, isValidStateCode }
+export { StateCodes, isValidStateCode }
+export type { StateCodeType }

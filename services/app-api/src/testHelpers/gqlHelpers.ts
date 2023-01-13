@@ -8,8 +8,9 @@ import typeDefs from '../../../app-graphql/src/schema.graphql'
 import {
     HealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
+    StateCodeType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { ProgramType, StateCodeType } from '../domain-models'
+import { ProgramType } from '../domain-models'
 import { Emailer, newLocalEmailer } from '../emailer'
 import {
     CreateHealthPlanPackageInput,

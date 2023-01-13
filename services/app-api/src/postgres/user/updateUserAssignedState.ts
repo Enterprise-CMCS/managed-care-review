@@ -3,8 +3,9 @@ import {
     isStoreError,
     StoreError,
 } from '../storeError'
+import { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { PrismaClient } from '@prisma/client'
-import { CMSUserType, StateCodeType } from '../../domain-models'
+import { CMSUserType } from '../../domain-models'
 import { domainUserFromPrismaUser } from './prismaDomainUser'
 
 export async function updateUserAssignedState(
