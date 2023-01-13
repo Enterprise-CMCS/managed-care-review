@@ -19,6 +19,7 @@ import {
     HealthPlanFormDataType,
     ModifiedProvisions,
 } from '../../../common-code/healthPlanFormDataType'
+import { DataDetailCheckboxList } from '../../DataDetail/DataDetailCheckboxList'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -26,32 +27,6 @@ export type ContractDetailsSummarySectionProps = {
     documentDateLookupTable?: DocumentDateLookupTable
     isCMSUser?: boolean
     submissionName: string
-}
-
-const createCheckboxList = ({
-    list,
-    dict,
-    otherReasons = [],
-}: {
-    list: string[] // Checkbox field array
-    dict: Record<string, string> // A lang constant dictionary like ManagedCareEntityRecord or FederalAuthorityRecord,
-    otherReasons?: (string | null)[] // additional "Other" text values
-}) => {
-    const userFriendlyList = list.map((item) => {
-        return dict[item] ? dict[item] : null
-    })
-
-    const listToDisplay = otherReasons
-        ? userFriendlyList.concat(otherReasons)
-        : userFriendlyList
-
-    return (
-        <ul>
-            {listToDisplay.map((item) => (
-                <li key={item}>{item}</li>
-            ))}
-        </ul>
-    )
 }
 
 // This function takes a ContractAmendmentInfo and returns two lists of keys sorted by whether they are set true/false
@@ -151,66 +126,84 @@ export const ContractDetailsSummarySection = ({
                     <DataDetail
                         id="contractExecutionStatus"
                         label="Contract status"
-                        data={
+                        explainMissingData={!isSubmitted}
+                        children={
                             submission.contractExecutionStatus
                                 ? ContractExecutionStatusRecord[
                                       submission.contractExecutionStatus
                                   ]
-                                : ''
+                                : undefined
                         }
                     />
                     <DataDetail
                         id="contractEffectiveDates"
                         label={
-                            submission.contractType === 'BASE'
-                                ? 'Contract effective dates'
-                                : 'Contract amendment effective dates'
+                            submission.contractType === 'AMENDMENT'
+                                ? 'Contract amendment effective dates'
+                                : 'Contract effective dates'
                         }
-                        data={`${formatCalendarDate(
-                            submission.contractDateStart
-                        )} to ${formatCalendarDate(
+                        explainMissingData={!isSubmitted}
+                        children={
+                            submission.contractDateStart &&
                             submission.contractDateEnd
-                        )}`}
+                                ? `${formatCalendarDate(
+                                      submission.contractDateStart
+                                  )} to ${formatCalendarDate(
+                                      submission.contractDateEnd
+                                  )}`
+                                : undefined
+                        }
                     />
                     <DataDetail
                         id="managedCareEntities"
                         label="Managed care entities"
-                        data={createCheckboxList({
-                            list: submission.managedCareEntities,
-                            dict: ManagedCareEntityRecord,
-                        })}
+                        explainMissingData={!isSubmitted}
+                        children={
+                            <DataDetailCheckboxList
+                                list={submission.managedCareEntities}
+                                dict={ManagedCareEntityRecord}
+                            />
+                        }
                     />
                     <DataDetail
                         id="federalAuthorities"
                         label="Active federal operating authority"
-                        data={createCheckboxList({
-                            list: submission.federalAuthorities,
-                            dict: FederalAuthorityRecord,
-                        })}
+                        explainMissingData={!isSubmitted}
+                        children={
+                            <DataDetailCheckboxList
+                                list={submission.federalAuthorities}
+                                dict={FederalAuthorityRecord}
+                            />
+                        }
                     />
                 </DoubleColumnGrid>
-                {submission.contractType === 'AMENDMENT' &&
-                    submission.contractAmendmentInfo && (
-                        <DoubleColumnGrid>
-                            <DataDetail
-                                id="modifiedProvisions"
-                                label="This contract action includes new or modified provisions related to the following"
-                                data={createCheckboxList({
-                                    list: modifiedProvisions,
-                                    dict: ModifiedProvisionsRecord,
-                                })}
-                            />
+                {submission.contractType === 'AMENDMENT' && (
+                    <DoubleColumnGrid>
+                        <DataDetail
+                            id="modifiedProvisions"
+                            label="This contract action includes new or modified provisions related to the following"
+                            explainMissingData={!isSubmitted}
+                            children={
+                                <DataDetailCheckboxList
+                                    list={modifiedProvisions}
+                                    dict={ModifiedProvisionsRecord}
+                                />
+                            }
+                        />
 
-                            <DataDetail
-                                id="unmodifiedProvisions"
-                                label="This contract action does NOT include new or modified provisions related to the following"
-                                data={createCheckboxList({
-                                    list: unmodifiedProvisions,
-                                    dict: ModifiedProvisionsRecord,
-                                })}
-                            />
-                        </DoubleColumnGrid>
-                    )}
+                        <DataDetail
+                            id="unmodifiedProvisions"
+                            label="This contract action does NOT include new or modified provisions related to the following"
+                            explainMissingData={!isSubmitted}
+                            children={
+                                <DataDetailCheckboxList
+                                    list={unmodifiedProvisions}
+                                    dict={ModifiedProvisionsRecord}
+                                />
+                            }
+                        />
+                    </DoubleColumnGrid>
+                )}
             </dl>
             <UploadedDocumentsTable
                 documents={submission.contractDocuments}

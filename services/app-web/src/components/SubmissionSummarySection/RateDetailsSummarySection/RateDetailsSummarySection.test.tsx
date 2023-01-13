@@ -756,4 +756,21 @@ describe('RateDetailsSummarySection', () => {
             ).not.toBeInTheDocument()
         })
     })
+
+    it('renders submitted package without errors', () => {
+        renderWithProviders(
+            <RateDetailsSummarySection
+                submission={draftSubmission}
+                navigateTo="rate-details"
+                submissionName="MN-PMAP-0001"
+                statePrograms={statePrograms}
+            />
+        )
+
+        expect(screen.queryByRole('link', { name: 'Edit' })).toBeNull()
+        // We should never display missing field text on submission summary for submitted packages
+        expect(
+            screen.queryByText(/You must provide this information/)
+        ).toBeNull()
+    })
 })
