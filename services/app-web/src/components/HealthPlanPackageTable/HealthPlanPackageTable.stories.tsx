@@ -111,8 +111,8 @@ WithCaption.args = {
     caption: 'Table Data',
 }
 
+// CMS User experience
 export const WithFilters = Template.bind({})
-
 WithFilters.decorators = [(Story) => ProvidersDecorator(Story, {})]
 WithFilters.args = {
     tableData,
