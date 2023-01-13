@@ -79,7 +79,7 @@ export const FieldTextInput = ({
                 {...inputProps}
                 id={id}
                 name={name}
-                validationStatus={showError ? 'error' : 'success'}
+                validationStatus={showError ? 'error' : undefined}
                 type={type}
                 onBlur={customOnBlur}
             />
