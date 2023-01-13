@@ -10,6 +10,8 @@ import {
     useReactTable,
     getFacetedUniqueValues,
 } from '@tanstack/react-table'
+import { useAtom } from 'jotai'
+import { atomWithHash } from 'jotai-location'
 import { HealthPlanPackageStatus, Program, User } from '../../gen/gqlClient'
 import styles from './HealthPlanPackageTable.module.scss'
 import { Table, Tag, Link } from '@trussworks/react-uswds'
@@ -19,6 +21,7 @@ import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
 import { FilterAccordion, FilterSelect } from '../FilterAccordion'
 import { InfoTag, TagProps } from '../InfoTag/InfoTag'
 import { pluralize } from '../../common-code/formatters'
+import { FilterOptionType } from '../FilterAccordion/FilterSelect/FilterSelect'
 
 declare module '@tanstack/table-core' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -96,16 +99,39 @@ const submissionTypeOptions = [
 // created outside the render function
 const columnHelper = createColumnHelper<PackageInDashboardType>()
 
+const columnHash = atomWithHash('filters', [])
+
 export const HealthPlanPackageTable = ({
     tableData,
     user,
     showFilters = false,
 }: PackageTableProps): React.ReactElement => {
     const [columnFilters, setColumnFilters] =
-        React.useState<ColumnFiltersState>([])
+        useAtom<ColumnFiltersState>(columnHash)
+
+    /* reformat from the table's ColumnFilterState (stored in the URL) to react-select's FilterOptionType
+        and return only the ones matching the calling FilterSelect component */
+    const getDefaultValuesFromUrl = (id: string) => {
+        type TempArray = { value: string; label: string; id: string }
+        const valuesFromUrl = [] as TempArray[]
+        columnFilters.forEach((filter) => {
+            if (Array.isArray(filter.value)) {
+                filter.value.forEach((value) => {
+                    valuesFromUrl.push({
+                        value: value,
+                        label: value,
+                        id: filter.id,
+                    })
+                })
+            }
+        })
+        const defaultValues = valuesFromUrl
+            .filter((item) => item.id === id)
+            .map((item) => ({ value: item.value, label: item.value }))
+        return defaultValues as FilterOptionType[]
+    }
 
     const isCMSUser = user.__typename === 'CMSUser'
-
     const tableColumns = React.useMemo(
         () => [
             columnHelper.accessor((row) => row, {
@@ -247,11 +273,16 @@ export const HealthPlanPackageTable = ({
                     {showFilters && (
                         <FilterAccordion
                             onClearFilters={() => {
+                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                //@ts-ignore
                                 setColumnFilters([])
                             }}
                             filterTitle="Filters"
                         >
                             <FilterSelect
+                                initialValues={getDefaultValuesFromUrl(
+                                    'stateName'
+                                )}
                                 name="state"
                                 label="State"
                                 filterOptions={stateFilterOptions}
@@ -264,6 +295,9 @@ export const HealthPlanPackageTable = ({
                                 }
                             />
                             <FilterSelect
+                                initialValues={getDefaultValuesFromUrl(
+                                    'submissionType'
+                                )}
                                 name="submissionType"
                                 label="Submission type"
                                 filterOptions={submissionTypeOptions}

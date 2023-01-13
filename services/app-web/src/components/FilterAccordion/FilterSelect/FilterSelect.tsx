@@ -12,7 +12,7 @@ import { usePrevious } from '../../../hooks'
 
 export type FilterSelectPropType = {
     name: string
-    initialValues?: string[]
+    initialValues?: FilterOptionType[]
     filterOptions: FilterOptionType[]
     label?: string
     toggleClearFilter?: boolean
@@ -60,6 +60,7 @@ export const FilterSelect = ({
     useEffect(() => {
         if (
             toggleClearFilter !== prevToggleClearFilter &&
+            prevToggleClearFilter !== undefined &&
             selectInputRef.current?.clearValue
         ) {
             selectInputRef.current.clearValue()
@@ -73,6 +74,7 @@ export const FilterSelect = ({
             )}
             <Select
                 ref={selectInputRef}
+                defaultValue={initialValues}
                 options={filterOptions}
                 className={styles.multiSelect}
                 classNamePrefix="select"
