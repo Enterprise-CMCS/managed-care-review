@@ -109,11 +109,11 @@ export const HealthPlanPackageTable = ({
     const [columnFilters, setColumnFilters] =
         useAtom<ColumnFiltersState>(columnHash)
 
-    /* reformat from the table's ColumnFilterState (stored in the URL) to react-select's FilterOptionType
-        and return only the ones matching the calling FilterSelect component */
-    const getDefaultValuesFromUrl = (id: string) => {
-        type TempArray = { value: string; label: string; id: string }
-        const valuesFromUrl = [] as TempArray[]
+    /* transform from the table's ColumnFilterState (stored in the URL) to react-select's FilterOptionType
+        and return only the items matching the FilterSelect component that's calling the function*/
+    const getSelectedFiltersFromUrl = (id: string) => {
+        type TempRecord = { value: string; label: string; id: string }
+        const valuesFromUrl = [] as TempRecord[]
         columnFilters.forEach((filter) => {
             if (Array.isArray(filter.value)) {
                 filter.value.forEach((value) => {
@@ -280,7 +280,7 @@ export const HealthPlanPackageTable = ({
                             filterTitle="Filters"
                         >
                             <FilterSelect
-                                initialValues={getDefaultValuesFromUrl(
+                                initialValues={getSelectedFiltersFromUrl(
                                     'stateName'
                                 )}
                                 name="state"
@@ -295,7 +295,7 @@ export const HealthPlanPackageTable = ({
                                 }
                             />
                             <FilterSelect
-                                initialValues={getDefaultValuesFromUrl(
+                                initialValues={getSelectedFiltersFromUrl(
                                     'submissionType'
                                 )}
                                 name="submissionType"
