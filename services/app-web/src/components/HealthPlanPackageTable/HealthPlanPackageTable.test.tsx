@@ -100,6 +100,18 @@ describe('HealthPlanPackageTable cms user tests', () => {
         name: 'Bob it user',
     }
 
+    it('renders table and caption if passed in', async () => {
+        renderWithProviders(
+            <HealthPlanPackageTable
+                tableData={submissions}
+                user={mockCMSUser}
+                caption="Table 1"
+            />
+        )
+        expect(screen.getByRole('table')).toBeInTheDocument()
+        expect(screen.getByText('Table 1')).toBeInTheDocument()
+    })
+
     it('renders table with expected number of submissions', async () => {
         renderWithProviders(
             <HealthPlanPackageTable

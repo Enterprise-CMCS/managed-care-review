@@ -101,5 +101,21 @@ Default.decorators = [(Story) => ProvidersDecorator(Story, {})]
 Default.args = {
     tableData,
     user: mockCMSUser,
+}
+
+export const WithCaption = Template.bind({})
+WithCaption.decorators = [(Story) => ProvidersDecorator(Story, {})]
+WithCaption.args = {
+    tableData,
+    user: mockCMSUser,
+    caption: 'Table Data',
+}
+
+export const WithFilters = Template.bind({})
+
+WithFilters.decorators = [(Story) => ProvidersDecorator(Story, {})]
+WithFilters.args = {
+    tableData,
+    user: mockCMSUser,
     showFilters: true,
 }
