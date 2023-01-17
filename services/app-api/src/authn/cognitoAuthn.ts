@@ -81,9 +81,12 @@ async function fetchUserFromCognito(
 const CMS_ROLE_ATTRIBUTE = 'macmcrrs-cms-user'
 const STATE_ROLE_ATTRIBUTE = 'macmcrrs-state-user'
 
-export function userTypeFromAttributes(attributes: {
-    [key: string]: string
-}): Result<UserType, Error> {
+export function userTypeFromAttributes(
+    id: string,
+    attributes: {
+        [key: string]: string
+    }
+): Result<UserType, Error> {
     // check for all the shared attrs here
     if (
         !(
@@ -117,6 +120,7 @@ export function userTypeFromAttributes(attributes: {
             )
         }
         return ok({
+            id,
             role: 'STATE_USER',
             email: attributes.email,
             stateCode: attributes['custom:state_code'],
@@ -127,6 +131,7 @@ export function userTypeFromAttributes(attributes: {
 
     if (roles.includes(CMS_ROLE_ATTRIBUTE)) {
         return ok({
+            id,
             role: 'CMS_USER',
             email: attributes.email,
             givenName: attributes.given_name,
@@ -218,7 +223,7 @@ async function lookupUserCognito(
     // we lose some type safety here...
     const attributes = userAttrDict(currentUser)
 
-    return userTypeFromAttributes(attributes)
+    return userTypeFromAttributes(userId, attributes)
 }
 
 async function lookupUserAurora(
