@@ -40,9 +40,11 @@ import {
 function mockValidUser(): UserType {
     return {
         __typename: 'StateUser' as const,
+        id: 'foo-id',
         state: mockMNState(),
         role: 'STATE_USER',
-        name: 'Bob it user',
+        givenName: 'bob',
+        familyName: 'ddmas',
         email: 'bob@dmas.mn.gov',
     }
 }
@@ -50,9 +52,12 @@ function mockValidUser(): UserType {
 function mockValidCMSUser(): UserType {
     return {
         __typename: 'CMSUser' as const,
+        id: 'bar-id',
         role: 'CMS_USER',
-        name: 'Bob it user',
+        givenName: 'bob',
+        familyName: 'ddmas',
         email: 'bob@dmas.mn.gov',
+        stateAssignments: [],
     }
 }
 

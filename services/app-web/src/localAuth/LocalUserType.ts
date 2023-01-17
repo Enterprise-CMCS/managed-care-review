@@ -4,7 +4,7 @@ type LocalStateUserType = {
     role: 'STATE_USER'
     email: string
     name: string
-    state_code: string
+    stateCode: string
 }
 
 type LocalCMSUserType = {

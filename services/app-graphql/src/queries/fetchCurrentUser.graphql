@@ -1,15 +1,27 @@
 query fetchCurrentUser {
     fetchCurrentUser {
-        __typename
         ... on CMSUser {
+            id
             email
             role
-            name
+            familyName
+            givenName
+            stateAssignments {
+                code
+                name
+                programs {
+                    id
+                    name
+                    fullName
+                }
+            }
         }
         ... on StateUser {
+            id
             email
             role
-            name
+            familyName
+            givenName
             state {
                 code
                 name
@@ -19,6 +31,13 @@ query fetchCurrentUser {
                     fullName
                 }
             }
+        }
+        ... on AdminUser {
+            id
+            email
+            role
+            familyName
+            givenName
         }
     }
 }

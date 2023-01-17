@@ -32,7 +32,6 @@ const successfulAuthMock = {
             fetchCurrentUser: {
                 state: 'MN',
                 role: 'State User',
-                name: 'Bob it user',
                 email: 'bob@dmas.mn.gov',
             },
         },

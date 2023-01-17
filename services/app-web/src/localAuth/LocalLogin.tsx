@@ -26,13 +26,13 @@ const localUsers: LocalUserType[] = [
         email: 'aang@example.com',
         name: 'Aang',
         role: 'STATE_USER',
-        state_code: 'MN',
+        stateCode: 'MN',
     },
     {
         email: 'toph@example.com',
         name: 'Toph',
         role: 'STATE_USER',
-        state_code: 'VA',
+        stateCode: 'VA',
     },
     {
         email: 'zuko@example.com',
@@ -73,7 +73,7 @@ export function LocalLogin(): React.ReactElement {
             <CardGroup>
                 {localUsers.map((user) => {
                     const fromString =
-                        user.role === 'STATE_USER' ? user.state_code : 'CMS'
+                        user.role === 'STATE_USER' ? user.stateCode : 'CMS'
 
                     return (
                         <Card key={user.email}>

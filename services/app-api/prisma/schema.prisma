@@ -47,7 +47,7 @@ model User {
   familyName String
   email      String
   role       Role
-  states     State[]
+  stateAssignments     State[]
   stateCode  String?
 }
 

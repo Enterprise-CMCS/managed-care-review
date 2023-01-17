@@ -45,6 +45,7 @@ export type PackageTableProps = {
     tableData: PackageInDashboardType[]
     user: User
     showFilters?: boolean
+    caption?: string
 }
 
 const isSubmitted = (status: HealthPlanPackageStatus) =>
@@ -102,6 +103,7 @@ const columnHelper = createColumnHelper<PackageInDashboardType>()
 const columnHash = atomWithHash('filters', [])
 
 export const HealthPlanPackageTable = ({
+    caption,
     tableData,
     user,
     showFilters = false,
@@ -259,7 +261,7 @@ export const HealthPlanPackageTable = ({
         filterLength
     )} applied`
 
-    const submissionCount = !isCMSUser
+    const submissionCount = !showFilters
         ? `${tableData.length} ${pluralize('submission', tableData.length)}`
         : `Displaying ${filteredRows.length} of ${tableData.length} ${pluralize(
               'submission',
@@ -312,7 +314,7 @@ export const HealthPlanPackageTable = ({
                         </FilterAccordion>
                     )}
                     <div aria-live="polite" aria-atomic>
-                        {isCMSUser && (
+                        {showFilters && (
                             <div className={styles.filterCount}>
                                 {filtersApplied}
                             </div>
@@ -322,11 +324,12 @@ export const HealthPlanPackageTable = ({
                         </div>
                     </div>
                     <Table fullWidth>
+                        {caption && <caption>{caption}</caption>}
                         <thead>
                             {reactTable.getHeaderGroups().map((headerGroup) => (
                                 <tr key={headerGroup.id}>
                                     {headerGroup.headers.map((header) => (
-                                        <th key={header.id}>
+                                        <th scope="col" key={header.id}>
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(

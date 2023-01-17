@@ -15,9 +15,9 @@ generates:
       defaultMapper: Partial<{T}>
       enumsAsTypes: true
       mappers:
-        User: ../domain-models#CognitoUserType
-        StateUser: ../domain-models#CognitoStateUserType
-        CMSUser: ../domain-models#CognitoCMSUserType
+        User: ../domain-models#UserType
+        StateUser: ../domain-models#StateUserType
+        CMSUser: ../domain-models#CMSUserType
         HealthPlanPackage: ../domain-models#HealthPlanPackageType
   ../app-web/src/gen/gqlClient.tsx:
     documents:

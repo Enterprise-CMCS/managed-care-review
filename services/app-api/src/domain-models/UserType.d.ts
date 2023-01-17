@@ -1,29 +1,29 @@
-// CognitoUserType is our type for representing the information we get
-// from Cognito about a given user
+import { StateType } from './StateType'
 
 type UserType = StateUserType | CMSUserType | AdminUserType
 
 type StateUserType = {
+    id?: string
     role: 'STATE_USER'
     email: string
-    name: string
-    state_code: string
+    stateCode: string
     givenName: string
     familyName: string
 }
 
 type CMSUserType = {
+    id?: string
     role: 'CMS_USER'
     email: string
-    name: string
     givenName: string
     familyName: string
+    stateAssignments: StateType[]
 }
 
 type AdminUserType = {
+    id?: string
     role: 'ADMIN_USER'
     email: string
-    name: string
     givenName: string
     familyName: string
 }

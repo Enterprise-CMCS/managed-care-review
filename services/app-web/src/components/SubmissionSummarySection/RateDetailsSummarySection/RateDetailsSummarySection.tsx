@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
-import {
-    getActuaryFirm,
-    UploadedDocumentsTable,
-} from '../../../components/SubmissionSummarySection'
+import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
@@ -22,9 +19,10 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { useIndexHealthPlanPackagesQuery } from '../../../gen/gqlClient'
 import { recordJSException } from '../../../otelHelpers'
 import { featureFlags } from '../../../common-code/featureFlags'
-import { Link } from '@trussworks/react-uswds'
 import { getCurrentRevisionFromHealthPlanPackage } from '../../../gqlHelpers'
 import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
+import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
+import { DataDetailContactField } from '../../DataDetail/DataDetailContactField/DataDetailContactField'
 
 // Used for refreshed packages names keyed by their package id
 // package name includes (Draft) for draft packages.
@@ -221,147 +219,134 @@ export const RateDetailsSummarySection = ({
                         />
                     )}
                 </SectionHeader>
-                {submission.rateInfos.map((rateInfo) => {
-                    return (
-                        <React.Fragment
-                            key={`${
-                                rateInfo.rateCertificationName
-                            }${JSON.stringify(rateInfo.rateDocuments)}`}
-                        >
-                            <h3
-                                aria-label={`Rate ID: ${rateInfo.rateCertificationName}`}
-                                className={styles.rateName}
+                {submission.rateInfos.length > 0 ? (
+                    submission.rateInfos.map((rateInfo) => {
+                        return (
+                            <React.Fragment
+                                key={`${
+                                    rateInfo.rateCertificationName
+                                }${JSON.stringify(rateInfo.rateDocuments)}`}
                             >
-                                {rateInfo.rateCertificationName}
-                            </h3>
-                            <DoubleColumnGrid>
-                                {ratePrograms && (
+                                <h3
+                                    aria-label={`Rate ID: ${rateInfo.rateCertificationName}`}
+                                    className={styles.rateName}
+                                >
+                                    {rateInfo.rateCertificationName}
+                                </h3>
+                                <DoubleColumnGrid>
+                                    {ratePrograms && (
+                                        <DataDetail
+                                            id="ratePrograms"
+                                            label="Programs this rate certification covers"
+                                            explainMissingData={!isSubmitted}
+                                            children={ratePrograms(
+                                                submission,
+                                                rateInfo
+                                            )}
+                                        />
+                                    )}
                                     <DataDetail
-                                        id="ratePrograms"
-                                        label="Programs this rate certification covers"
-                                        data={ratePrograms(
-                                            submission,
+                                        id="rateType"
+                                        label="Rate certification type"
+                                        explainMissingData={!isSubmitted}
+                                        children={rateCertificationType(
                                             rateInfo
                                         )}
                                     />
-                                )}
-                                <DataDetail
-                                    id="rateType"
-                                    label="Rate certification type"
-                                    data={rateCertificationType(rateInfo)}
-                                />
-                                <DataDetail
-                                    id="rateCapitationType"
-                                    label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
-                                    data={rateCapitationType(rateInfo)}
-                                />
-                                <DataDetail
-                                    id="ratingPeriod"
-                                    label={
-                                        rateInfo.rateType === 'AMENDMENT'
-                                            ? 'Rating period of original rate certification'
-                                            : 'Rating period'
-                                    }
-                                    data={`${formatCalendarDate(
-                                        rateInfo.rateDateStart
-                                    )} to ${formatCalendarDate(
-                                        rateInfo.rateDateEnd
-                                    )}`}
-                                />
-                                <DataDetail
-                                    id="dateCertified"
-                                    label={
-                                        rateInfo.rateAmendmentInfo
-                                            ? 'Date certified for rate amendment'
-                                            : 'Date certified'
-                                    }
-                                    data={formatCalendarDate(
-                                        rateInfo.rateDateCertified
-                                    )}
-                                />
-                                {rateInfo.rateAmendmentInfo ? (
                                     <DataDetail
-                                        id="effectiveRatingPeriod"
-                                        label="Rate amendment effective dates"
-                                        data={`${formatCalendarDate(
-                                            rateInfo.rateAmendmentInfo
-                                                .effectiveDateStart
-                                        )} to ${formatCalendarDate(
-                                            rateInfo.rateAmendmentInfo
-                                                .effectiveDateEnd
-                                        )}`}
+                                        id="rateCapitationType"
+                                        label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
+                                        explainMissingData={!isSubmitted}
+                                        children={rateCapitationType(rateInfo)}
                                     />
-                                ) : null}
-                                {rateInfo.actuaryContacts[0] && (
-                                    <div
-                                        className={
-                                            styles.certifyingActuaryDetail
+                                    <DataDetail
+                                        id="ratingPeriod"
+                                        label={
+                                            rateInfo.rateType === 'AMENDMENT'
+                                                ? 'Rating period of original rate certification'
+                                                : 'Rating period'
                                         }
-                                    >
-                                        <dt
+                                        explainMissingData={!isSubmitted}
+                                        children={
+                                            rateInfo.rateDateStart &&
+                                            rateInfo.rateDateEnd ? (
+                                                `${formatCalendarDate(
+                                                    rateInfo.rateDateStart
+                                                )} to ${formatCalendarDate(
+                                                    rateInfo.rateDateEnd
+                                                )}`
+                                            ) : (
+                                                <DataDetailMissingField />
+                                            )
+                                        }
+                                    />
+                                    <DataDetail
+                                        id="dateCertified"
+                                        label={
+                                            rateInfo.rateAmendmentInfo
+                                                ? 'Date certified for rate amendment'
+                                                : 'Date certified'
+                                        }
+                                        explainMissingData={!isSubmitted}
+                                        children={formatCalendarDate(
+                                            rateInfo.rateDateCertified
+                                        )}
+                                    />
+                                    {rateInfo.rateAmendmentInfo ? (
+                                        <DataDetail
+                                            id="effectiveRatingPeriod"
+                                            label="Rate amendment effective dates"
+                                            explainMissingData={!isSubmitted}
+                                            children={`${formatCalendarDate(
+                                                rateInfo.rateAmendmentInfo
+                                                    .effectiveDateStart
+                                            )} to ${formatCalendarDate(
+                                                rateInfo.rateAmendmentInfo
+                                                    .effectiveDateEnd
+                                            )}`}
+                                        />
+                                    ) : null}
+                                    {rateInfo.actuaryContacts[0] && (
+                                        <DataDetail
                                             id="certifyingActuary"
-                                            className="text-bold"
-                                        >
-                                            Certifying actuary
-                                        </dt>
-                                        <dd
-                                            role="definition"
-                                            aria-labelledby="certifyingActuary"
-                                        >
-                                            <address>
-                                                {
-                                                    rateInfo.actuaryContacts[0]
-                                                        .name
-                                                }
-                                                <br />
-                                                {
-                                                    rateInfo.actuaryContacts[0]
-                                                        .titleRole
-                                                }
-                                                <br />
-                                                <Link
-                                                    href={`mailto:${rateInfo.actuaryContacts[0].email}`}
-                                                    target="_blank"
-                                                    variant="external"
-                                                    rel="noreferrer"
-                                                >
-                                                    {
+                                            label="Certifying actuary"
+                                            explainMissingData={!isSubmitted}
+                                            children={
+                                                <DataDetailContactField
+                                                    contact={
                                                         rateInfo
                                                             .actuaryContacts[0]
-                                                            .email
                                                     }
-                                                </Link>
-                                                <br />
-                                                {getActuaryFirm(
-                                                    rateInfo.actuaryContacts[0]
-                                                )}
-                                            </address>
-                                        </dd>
-                                    </div>
+                                                />
+                                            }
+                                        />
+                                    )}
+                                </DoubleColumnGrid>
+                                {!loading ? (
+                                    <UploadedDocumentsTable
+                                        documents={rateInfo.rateDocuments}
+                                        packagesWithSharedRateCerts={
+                                            showSharedRates &&
+                                            refreshPackagesWithSharedRateCert(
+                                                rateInfo
+                                            )
+                                        }
+                                        documentDateLookupTable={
+                                            documentDateLookupTable
+                                        }
+                                        isCMSUser={isCMSUser}
+                                        caption="Rate certification"
+                                        documentCategory="Rate certification"
+                                    />
+                                ) : (
+                                    <span className="srOnly">'LOADING...'</span>
                                 )}
-                            </DoubleColumnGrid>
-                            {!loading ? (
-                                <UploadedDocumentsTable
-                                    documents={rateInfo.rateDocuments}
-                                    packagesWithSharedRateCerts={
-                                        showSharedRates &&
-                                        refreshPackagesWithSharedRateCert(
-                                            rateInfo
-                                        )
-                                    }
-                                    documentDateLookupTable={
-                                        documentDateLookupTable
-                                    }
-                                    isCMSUser={isCMSUser}
-                                    caption="Rate certification"
-                                    documentCategory="Rate certification"
-                                />
-                            ) : (
-                                <span className="srOnly">'LOADING...'</span>
-                            )}
-                        </React.Fragment>
-                    )
-                })}
+                            </React.Fragment>
+                        )
+                    })
+                ) : (
+                    <DataDetailMissingField />
+                )}
             </dl>
             <UploadedDocumentsTable
                 documents={rateSupportingDocuments}

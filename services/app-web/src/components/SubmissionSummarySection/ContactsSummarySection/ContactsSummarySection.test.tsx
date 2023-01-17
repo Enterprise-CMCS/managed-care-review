@@ -110,4 +110,23 @@ describe('ContactsSummarySection', () => {
 
         expect(screen.queryByText('Actuary contacts')).not.toBeInTheDocument()
     })
+
+    it('renders submitted package without errors', () => {
+        renderWithProviders(
+            <ContactsSummarySection submission={draftSubmission} />
+        )
+
+        // We should never display missing field text on submission summary for submitted packages
+        expect(
+            screen.queryByText(/You must provide this information/)
+        ).toBeNull()
+    })
+
+    it('does not include additional actuary contacts heading when this optional field is not provided', () => {
+        const mockSubmission = { ...draftSubmission, addtlActuaryContacts: [] }
+        renderWithProviders(
+            <ContactsSummarySection submission={mockSubmission} />
+        )
+        expect(screen.queryByText(/Additional actuary contacts/)).toBeNull()
+    })
 })

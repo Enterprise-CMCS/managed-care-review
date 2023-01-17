@@ -87,7 +87,8 @@ describe('dashboard', () => {
             }
             cy.findByText(`${submissionName} was sent to CMS`).should('exist')
             cy.get('table')
-                .findByRole('link', { name: submissionName }).should('exist')
+                .findByRole('link', { name: submissionName })
+                .should('exist')
             cy.findByRole('link', { name: submissionName }).click()
             cy.url({ timeout: 10_000 }).should('contain', submissionId)
             cy.findByTestId('submission-summary').should('exist')
@@ -113,6 +114,9 @@ describe('dashboard', () => {
             cy.findByRole('table', {
                 name: 'Rate supporting documents',
             }).should('exist')
+
+            // Double check we do not show any missing field text. This UI is not used for submitted packages
+           cy.findByText(/You must provide this information/).should('not.exist')
 
             // check accessibility of filled out submission summary page
             // Commented out to get react-scripts/webpack 5 upgrade through

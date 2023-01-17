@@ -11,7 +11,7 @@ describe('localLogin', () => {
             email: 'toph@dmas.virginia.gov',
             name: 'Toph',
             role: 'STATE_USER',
-            state_code: 'VA',
+            stateCode: 'VA',
         }
 
         loginLocalUser(testUser)
@@ -24,7 +24,7 @@ describe('localLogin', () => {
             email: 'toph@dmas.virginia.gov',
             name: 'Toph',
             role: 'STATE_USER',
-            state_code: 'VA',
+            stateCode: 'VA',
         }
 
         loginLocalUser(testUser)
