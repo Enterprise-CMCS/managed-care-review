@@ -900,10 +900,9 @@ describe('RateDetails', () => {
 
         it('correctly checks shared rate certification radios and selects shared packages', async () => {
             //Spy on useStatePrograms hook to get up-to-date state programs
-            jest.spyOn(
-                useStatePrograms,
-                'useStatePrograms'
-            ).mockReturnValueOnce(mockMNState().programs)
+            jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
+                mockMNState().programs
+            )
 
             //First submission is 'CONTRACT_ONLY' and last submission is the current one. Both should be excluded from
             // package combobox options.
@@ -1131,10 +1130,9 @@ describe('RateDetails', () => {
 
         it('cannot continue when shared rate radio is unchecked', async () => {
             //Spy on useStatePrograms hook to get up-to-date state programs
-            jest.spyOn(
-                useStatePrograms,
-                'useStatePrograms'
-            ).mockReturnValueOnce(mockMNState().programs)
+            jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
+                mockMNState().programs
+            )
 
             //First submission is 'CONTRACT_ONLY' and last submission is the current one. Both should be excluded from
             // package combobox options.
@@ -1257,17 +1255,16 @@ describe('RateDetails', () => {
 
             //Expect submission selection error to clear and continue button is not disabled
             await waitForElementToBeRemoved(() =>
-                screen.queryByText('You must select at least one submission')
+                screen.queryAllByText('You must select at least one submission')
             )
             expect(continueButton).not.toHaveAttribute('aria-disabled')
         })
 
         it('cannot continue when shared rate radio is checked and no package is selected', async () => {
             //Spy on useStatePrograms hook to get up-to-date state programs
-            jest.spyOn(
-                useStatePrograms,
-                'useStatePrograms'
-            ).mockReturnValueOnce(mockMNState().programs)
+            jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
+                mockMNState().programs
+            )
 
             //First submission is 'CONTRACT_ONLY' and last submission is the current one. Both should be excluded from
             // package combobox options.
@@ -1392,12 +1389,10 @@ describe('RateDetails', () => {
             await selectEvent.openMenu(firstRatePackageCombobox)
 
             //Expect submission selection error to clear and continue button is not disabled
+            await waitForElementToBeRemoved(() =>
+                screen.queryAllByText('You must select at least one submission')
+            )
             await waitFor(() => {
-                expect(
-                    screen.queryByText(
-                        'You must select at least one submission'
-                    )
-                ).not.toBeInTheDocument()
                 expect(continueButton).not.toHaveAttribute('aria-disabled')
             })
         })
