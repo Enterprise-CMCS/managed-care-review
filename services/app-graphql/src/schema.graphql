@@ -33,6 +33,15 @@ type Query {
     CMSUsers can find all the packages that do not have the DRAFT status
     """
     indexHealthPlanPackages: IndexHealthPlanPackagesPayload!
+
+    """
+    indexUsers returns all of the Users in the system.
+
+    It can only be called by an AdminUser
+
+    Errors: ForbiddenError: A non-AdminUser called this
+    """
+    indexUsers: IndexUsersPayload!
 }
 
 type Mutation {
@@ -125,6 +134,25 @@ type Mutation {
     unlockHealthPlanPackage(
         input: UnlockHealthPlanPackageInput!
     ): UnlockHealthPlanPackagePayload!
+
+
+    """
+    updateCMSUser updates CMSUser fields that are allowed to be modified. 
+    Presently, just the user's stateAssignments.
+
+    This can only be called by an AdminUser.
+    The cmsUserID must be a CMSUser's id, not a state user
+    
+    Errors:
+    - ForbiddenError:
+        - A non AdminUser called this
+    - UserInputError
+        - cmsUserID was not a CMSUser's ID
+        - stateCodes included an invalid state code
+    """
+    updateCMSUser(
+        input: UpdateCMSUserInput!
+    ): UpdateCMSUserPayload!
 }
 
 input CreateHealthPlanPackageInput {
@@ -159,6 +187,15 @@ type HealthPlanPackageEdge {
 type IndexHealthPlanPackagesPayload {
     totalCount: Int
     edges: [HealthPlanPackageEdge!]!
+}
+
+type UserEdge {
+    node: User!
+}
+
+type IndexUsersPayload {
+    totalCount: Int
+    edges: [UserEdge!]!
 }
 
 input SubmitHealthPlanPackageInput {
@@ -196,28 +233,53 @@ type UpdateHealthPlanFormDataPayload {
     pkg: HealthPlanPackage!
 }
 
+input UpdateCMSUserInput {
+    cmsUserID: ID!
+    "stateAssignments is an array of stateCodes (e.g. ['CA', 'NM', 'TN'])"
+    stateAssignments: [String!]!
+}
+
+type UpdateCMSUserPayload {
+    user: CMSUser!
+}
+
 "Date is a CalendarDate representing a day without time information"
 scalar Date
 "DateTime is a moment in time with date and time information"
 scalar DateTime
 
-union User = StateUser | CMSUser
+union User = StateUser | CMSUser | AdminUser
 
 "StateUser is a user that works for a state, submitting packages to be reviewed by CMSUsers"
 type StateUser {
+    id: ID!
     "will always be 'STATE_USER'"
     role: String!
     email: String!
+    givenName: String!
+    familyName: String!
     state: State!
-    name: String!
 }
 
 "CMSUser is a user that works for CMS, reviewing packages submitted by StateUsers"
 type CMSUser {
+    id: ID!
     "will always be 'CMS_USER'"
     role: String!
     email: String!
-    name: String!
+    givenName: String!
+    familyName: String!
+    stateAssignments: [State!]!
+}
+
+"AdminUser is a user that works on the MC Review app itself"
+type AdminUser {
+    id: ID!
+    "will always be 'ADMIN_USER'"
+    role: String!
+    email: String!
+    givenName: String!
+    familyName: String!
 }
 
 "State is a single US state or territory that operates managed care programs"

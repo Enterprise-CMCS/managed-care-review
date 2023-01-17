@@ -1,4 +1,4 @@
-import { StateUserType, CMSUserType, UserType } from './UserType'
+import { StateUserType, CMSUserType, UserType, AdminUserType } from './UserType'
 
 function isUser(user: unknown): user is UserType {
     if (user && typeof user === 'object') {
@@ -26,4 +26,8 @@ function isCMSUser(user: UserType): user is CMSUserType {
     return user.role === 'CMS_USER'
 }
 
-export { isUser, isCMSUser, isStateUser }
+function isAdminUser(user: UserType): user is AdminUserType {
+    return user.role === 'ADMIN_USER'
+}
+
+export { isUser, isCMSUser, isStateUser, isAdminUser }

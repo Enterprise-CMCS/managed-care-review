@@ -1,6 +1,6 @@
 export { findPrograms } from './findPrograms'
-export { InsertHealthPlanPackageArgsType } from './insertHealthPlanPackage'
-export { InsertUserArgsType } from './insertUser'
+export { InsertHealthPlanPackageArgsType } from './healthPlanPackage'
+export { InsertUserArgsType } from './user'
 export { NewPostgresStore, Store } from './postgresStore'
 export { NewPrismaClient } from './prismaClient'
 export { isStoreError, StoreError } from './storeError'

@@ -17,7 +17,6 @@ describe('CMSDashboard', () => {
     const mockUser = {
         __typename: 'CMSUser' as const,
         role: 'CMS User',
-        name: 'Bob it user',
         email: 'bob@dmas.mn.gov',
     }
     it('should display cms dashboard page', async () => {
@@ -29,7 +28,7 @@ describe('CMSDashboard', () => {
                 ],
             },
         })
-        await expect(screen.findByTestId('cms-dashboard-page')).not.toBeNull()
+        expect(screen.findByTestId('cms-dashboard-page')).not.toBeNull()
     })
 
     it('displays submissions table excluding any in progress drafts', async () => {

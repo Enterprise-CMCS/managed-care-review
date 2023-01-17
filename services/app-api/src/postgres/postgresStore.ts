@@ -2,28 +2,34 @@ import { PrismaClient, HealthPlanRevisionTable } from '@prisma/client'
 import {
     UnlockedHealthPlanFormDataType,
     HealthPlanFormDataType,
+    StateCodeType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     ProgramType,
     HealthPlanPackageType,
     UpdateInfoType,
+    UserType,
+    CMSUserType,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
-import { findAllHealthPlanPackagesByState } from './findAllHealthPlanPackagesByState'
-import { findAllHealthPlanPackagesBySubmittedAt } from './findAllHealthPlanPackagesBySubmittedAt'
-import { findHealthPlanPackage } from './findHealthPlanPackage'
+import { StoreError } from './storeError'
 import {
+    findAllHealthPlanPackagesByState,
+    findAllHealthPlanPackagesBySubmittedAt,
+    findHealthPlanPackage,
     insertHealthPlanPackage,
     InsertHealthPlanPackageArgsType,
-} from './insertHealthPlanPackage'
-import { insertHealthPlanRevision } from './insertHealthPlanRevision'
-import { StoreError } from './storeError'
-import { updateHealthPlanRevision } from './updateHealthPlanRevision'
-import { findAllRevisions } from './findAllRevisions'
-
-import { findUser } from './findUser'
-import { User } from '@prisma/client'
-import { insertUser, InsertUserArgsType } from './insertUser'
+    insertHealthPlanRevision,
+    updateHealthPlanRevision,
+    findAllRevisions,
+} from './healthPlanPackage'
+import {
+    findUser,
+    insertUser,
+    InsertUserArgsType,
+    updateUserAssignedState,
+    findAllUsers,
+} from './user'
 
 type Store = {
     findPrograms: (
@@ -34,6 +40,8 @@ type Store = {
     findStatePrograms: (stateCode: string) => ProgramType[] | Error
 
     findAllRevisions: () => Promise<HealthPlanRevisionTable[] | StoreError>
+
+    findAllUsers: () => Promise<UserType[] | StoreError>
 
     findHealthPlanPackage: (
         draftUUID: string
@@ -64,9 +72,14 @@ type Store = {
         draft: UnlockedHealthPlanFormDataType
     ) => Promise<HealthPlanPackageType | StoreError>
 
-    findUser: (id: string) => Promise<User | StoreError>
+    findUser: (id: string) => Promise<UserType | undefined | StoreError>
 
-    insertUser: (user: InsertUserArgsType) => Promise<User | StoreError>
+    insertUser: (user: InsertUserArgsType) => Promise<UserType | StoreError>
+
+    updateUserAssignedState: (
+        userID: string,
+        states: StateCodeType[]
+    ) => Promise<CMSUserType | StoreError>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -95,8 +108,11 @@ function NewPostgresStore(client: PrismaClient): Store {
         findPrograms: findPrograms,
         findUser: (id) => findUser(client, id),
         insertUser: (args) => insertUser(client, args),
+        updateUserAssignedState: (userID, stateCodes) =>
+            updateUserAssignedState(client, userID, stateCodes),
         findStatePrograms: findStatePrograms,
         findAllRevisions: () => findAllRevisions(client),
+        findAllUsers: () => findAllUsers(client),
     }
 }
 

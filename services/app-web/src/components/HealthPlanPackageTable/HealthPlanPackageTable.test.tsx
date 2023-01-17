@@ -95,9 +95,12 @@ const submissions: PackageInDashboardType[] = [
 describe('HealthPlanPackageTable for CMS User (with filters)', () => {
     const mockCMSUser: User = {
         __typename: 'CMSUser' as const,
+        id: 'foo-id',
+        givenName: 'Bob',
+        familyName: 'Dumas',
         role: 'CMS User',
         email: 'cms@exmaple.com',
-        name: 'Bob it user',
+        stateAssignments: [],
     }
 
     it('renders table and caption if passed in', async () => {
@@ -164,7 +167,7 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
                 showFilters
             />
         )
-        const submissionsInTable = await screen.getAllByTestId(`submission-id`)
+        const submissionsInTable = screen.getAllByTestId(`submission-id`)
         const table = screen.getByRole('table')
         const [columnNames] = within(table).getAllByRole('rowgroup')
         expect(within(columnNames).getByText(/ID/)).toBeTruthy()
@@ -338,7 +341,7 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         expect(stateCombobox).toBeInTheDocument()
 
         //Open combobox
-        await selectEvent.openMenu(stateCombobox)
+        selectEvent.openMenu(stateCombobox)
         //Expect combobox options to exist
         const comboboxOptions = screen.getByTestId('state-filter-options')
         expect(comboboxOptions).toBeInTheDocument()
@@ -431,7 +434,7 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         expect(submissionTypeCombobox).toBeInTheDocument()
 
         //Open state combobox and select Minnesota option
-        await selectEvent.openMenu(stateCombobox)
+        selectEvent.openMenu(stateCombobox)
         const stateOptions = screen.getByTestId('state-filter-options')
         expect(stateOptions).toBeInTheDocument()
         await waitFor(async () => {
@@ -443,7 +446,7 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         })
 
         //Open submission type combobox and select Minnesota option
-        await selectEvent.openMenu(submissionTypeCombobox)
+        selectEvent.openMenu(submissionTypeCombobox)
         const submissionTypeOptions = screen.getByTestId(
             'submissionType-filter-options'
         )
@@ -530,14 +533,14 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
             within(submissionTypeFilter).getByRole('combobox')
 
         //Open state combobox and select Minnesota option
-        await selectEvent.openMenu(stateCombobox)
+        selectEvent.openMenu(stateCombobox)
         const stateOptions = screen.getByTestId('state-filter-options')
         await waitFor(async () => {
             await selectEvent.select(stateOptions, 'Minnesota')
         })
 
         //Open submission type combobox and select Contract action and rate certification option
-        await selectEvent.openMenu(submissionTypeCombobox)
+        selectEvent.openMenu(submissionTypeCombobox)
         const submissionTypeOptions = screen.getByTestId(
             'submissionType-filter-options'
         )
@@ -600,7 +603,7 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         expect(stateCombobox).toBeInTheDocument()
 
         //Open combobox
-        await selectEvent.openMenu(stateCombobox)
+        selectEvent.openMenu(stateCombobox)
         //Expect combobox options to exist
         const comboboxOptions = screen.getByTestId('state-filter-options')
         expect(comboboxOptions).toBeInTheDocument()
@@ -619,7 +622,7 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
             within(submissionTypeFilter).getByRole('combobox')
 
         //Open submission type combobox and select Contract action only option
-        await selectEvent.openMenu(submissionTypeCombobox)
+        selectEvent.openMenu(submissionTypeCombobox)
         const submissionTypeOptions = screen.getByTestId(
             'submissionType-filter-options'
         )
@@ -708,7 +711,7 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         expect(submissionTypeCombobox).toBeInTheDocument()
 
         //Open state combobox and select Minnesota option
-        await selectEvent.openMenu(stateCombobox)
+        selectEvent.openMenu(stateCombobox)
         const stateOptionOne = screen.getByTestId('state-filter-options')
         expect(stateOptionOne).toBeInTheDocument()
         await waitFor(async () => {
@@ -723,7 +726,7 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         expect(screen.getByText('1 filter applied')).toBeInTheDocument()
 
         //Open state combobox and select Ohio option
-        await selectEvent.openMenu(stateCombobox)
+        selectEvent.openMenu(stateCombobox)
         const stateOptionTwo = screen.getByTestId('state-filter-options')
         expect(stateOptionTwo).toBeInTheDocument()
         await waitFor(async () => {
@@ -735,7 +738,7 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         expect(screen.getByText('2 filters applied')).toBeInTheDocument()
 
         //Open submission type combobox and select contact and rate option
-        await selectEvent.openMenu(submissionTypeCombobox)
+        selectEvent.openMenu(submissionTypeCombobox)
         const submissionTypeOptions = screen.getByTestId(
             'submissionType-filter-options'
         )
@@ -769,8 +772,10 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
 describe('HealthPlanPackageTable state user tests', () => {
     const mockStateUser: User = {
         __typename: 'StateUser' as const,
+        id: 'foo-id',
+        givenName: 'Bob',
+        familyName: 'Statie',
         role: 'State User',
-        name: 'Jerry it user',
         email: 'state@example.com',
         state: {
             __typename: 'State',
@@ -787,7 +792,7 @@ describe('HealthPlanPackageTable state user tests', () => {
                 user={mockStateUser}
             />
         )
-        const submissionsInTable = await screen.getAllByTestId(`submission-id`)
+        const submissionsInTable = screen.getAllByTestId(`submission-id`)
         const table = screen.getByRole('table')
         const [columnNames] = within(table).getAllByRole('rowgroup')
         expect(within(columnNames).getByText(/ID/)).toBeTruthy()

@@ -58,7 +58,7 @@ export function Signup({
                 password: fields.password,
                 given_name: fields.firstName,
                 family_name: fields.lastName,
-                state_code: 'MN',
+                stateCode: 'MN',
             })
             setIsLoading(false)
 

@@ -1,0 +1,15 @@
+mutation updateCMSUser($input: UpdateCMSUserInput!) {
+    updateCMSUser(input: $input) {
+        user {
+            __typename
+            ... on CMSUser {
+                email
+                role
+                stateAssignments {
+                    code
+                    name
+                }
+            }
+        }
+    }
+}
