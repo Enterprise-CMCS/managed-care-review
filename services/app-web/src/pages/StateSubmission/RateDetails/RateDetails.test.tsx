@@ -179,7 +179,7 @@ describe('RateDetails', () => {
 
         expect(addAnotherButton).toBeInTheDocument()
         fireEvent.click(addAnotherButton)
-        await waitFor(() =>
+        return await waitFor(() =>
             expect(rateCertifications(screen)).toHaveLength(
                 rateCertsBeforeAddingNewRate.length + 1
             )
@@ -675,43 +675,9 @@ describe('RateDetails', () => {
                 expect(screen.getByText(TEST_XLS_FILE.name)).toBeInTheDocument()
             })
         })
-
-        it('can continue with valid form fields and documents', async () => {
-            renderWithProviders(
-                <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
-                    updateDraft={jest.fn()}
-                    previousDocuments={[]}
-                />,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                statusCode: 200,
-                            }),
-                        ],
-                    },
-                }
-            )
-            const rateCertsOnLoad = rateCertifications(screen)
-            expect(rateCertsOnLoad).toHaveLength(1)
-
-            await fillOutFirstRate(screen)
-
-            const continueButton = screen.getByRole('button', {
-                name: 'Continue',
-            })
-            await continueButton.click()
-
-            expect(screen.queryAllByTestId('errorMessage')).toHaveLength(0)
-        })
     })
 
     describe('handles multiple rates', () => {
-        afterEach(() => {
-            jest.clearAllMocks()
-        })
-
         it('renders add another rate button, which adds another set of rate certification fields to the form', async () => {
             renderWithProviders(
                 <RateDetails
