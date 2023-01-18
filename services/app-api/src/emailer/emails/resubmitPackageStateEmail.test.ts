@@ -1,6 +1,5 @@
 import {
     testEmailConfig,
-    mockUser,
     mockContractAndRatesFormData,
     mockMNState,
 } from '../../testHelpers/emailerHelpers'
@@ -16,7 +15,6 @@ const resubmitData = {
     updatedAt: new Date('02/01/2022'),
     updatedReason: 'Added rate certification.',
 }
-const user = mockUser()
 const submission: LockedHealthPlanFormDataType = {
     ...mockContractAndRatesFormData(),
     contractDateStart: new Date('2021-01-01'),
@@ -50,12 +48,13 @@ const submission: LockedHealthPlanFormDataType = {
     ],
 }
 const defaultStatePrograms = mockMNState().programs
+const defaultSubmitters = ['test1@example.com', 'test2@example.com']
 
 test('contains correct subject and clearly states successful resubmission', async () => {
     const name = packageName(submission, defaultStatePrograms)
     const template = await resubmitPackageStateEmail(
         submission,
-        user,
+        defaultSubmitters,
         resubmitData,
         testEmailConfig,
         defaultStatePrograms
@@ -81,7 +80,7 @@ test('includes expected data summary for a contract and rates resubmission State
         'MCR-MN-0003-MSHO-RATE-20210202-20211201-CERTIFICATION-20201201'
     const template = await resubmitPackageStateEmail(
         submission,
-        user,
+        defaultSubmitters,
         resubmitData,
         testEmailConfig,
         defaultStatePrograms
@@ -230,7 +229,7 @@ test('includes expected data summary for a multi-rate contract and rates resubmi
     }
     const template = await resubmitPackageStateEmail(
         sub,
-        user,
+        defaultSubmitters,
         resubmitData,
         testEmailConfig,
         defaultStatePrograms
@@ -298,7 +297,7 @@ test('includes expected data summary for a multi-rate contract and rates resubmi
 test('renders overall email as expected', async () => {
     const template = await resubmitPackageStateEmail(
         submission,
-        user,
+        defaultSubmitters,
         resubmitData,
         testEmailConfig,
         defaultStatePrograms
