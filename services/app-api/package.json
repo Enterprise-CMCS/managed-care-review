@@ -14,7 +14,7 @@
         "generate": "yarn prisma generate",
         "prisma:reset": "npx prisma migrate reset --force",
         "build": "tsc --noEmit",
-        "start": "npx serverless offline start --stage local --region us-east-1 --httpPort 3030 --useChildProcesses"
+        "start": "npx serverless offline start --stage local --region us-east-1 --httpPort 3030"
     },
     "lint-staged": {
         "*.{js,ts}": [
@@ -33,12 +33,12 @@
         "@aws-sdk/client-ses": "^3.226.0",
         "@aws-sdk/client-ssm": "^3.226.0",
         "@aws-sdk/lib-storage": "^3.226.0",
-        "@opentelemetry/exporter-trace-otlp-http": ">=0.35.0",
-        "@opentelemetry/instrumentation": ">=0.35.0",
-        "@opentelemetry/instrumentation-http": ">=0.35.0",
         "@opentelemetry/api": "^1.4.0",
         "@opentelemetry/core": "^1.9.0",
+        "@opentelemetry/exporter-trace-otlp-http": ">=0.35.0",
         "@opentelemetry/id-generator-aws-xray": "^1.1.0",
+        "@opentelemetry/instrumentation": ">=0.35.0",
+        "@opentelemetry/instrumentation-http": ">=0.35.0",
         "@opentelemetry/propagator-aws-xray": "^1.1.0",
         "@opentelemetry/resources": "^1.9.0",
         "@opentelemetry/sdk-trace-base": "^1.9.0",
@@ -56,6 +56,7 @@
         "path-to-regexp": "^6.2.1",
         "protobufjs": "^6.11.2",
         "request": "^2.88.2",
+        "serverless": "^3.26.0",
         "uuid": "^9.0.0",
         "zod": "^3.11.6"
     },
@@ -82,11 +83,11 @@
         "lint-staged": "^13.0.1",
         "prettier": "^2.4.1",
         "prisma": "^4.6.1",
-        "serverless": "^3.19.0",
+        "serverless": "^3.26.0",
         "serverless-associate-waf": "^1.2.1",
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
         "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
-        "serverless-offline": "^8.8.0",
+        "serverless-offline": "^12.0.4",
         "serverless-offline-ssm": "^6.2.0",
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^2.0.2",
