@@ -527,8 +527,8 @@ describe('submitHealthPlanPackage', () => {
             emailer: mockEmailer,
             context: {
                 user: {
-                    name: 'Peter Parker',
-                    state_code: 'FL',
+                    id: 'PeterParker',
+                    stateCode: 'FL',
                     role: 'STATE_USER',
                     email: 'notspiderman@example.com',
                     familyName: 'Parker',
@@ -637,8 +637,8 @@ describe('submitHealthPlanPackage', () => {
         const stateServer = await constructTestPostgresServer({
             context: {
                 user: {
-                    name: 'Miles Morales',
-                    state_code: 'FL',
+                    id: 'MilesMorales',
+                    stateCode: 'FL',
                     role: 'STATE_USER',
                     email: 'alsonotspiderman@example.com',
                     familyName: 'Morales',
@@ -651,8 +651,8 @@ describe('submitHealthPlanPackage', () => {
             emailer: mockEmailer,
             context: {
                 user: {
-                    name: 'Peter Parker',
-                    state_code: 'FL',
+                    id: 'PeterParker',
+                    stateCode: 'FL',
                     role: 'STATE_USER',
                     email: 'notspiderman@example.com',
                     familyName: 'Parker',

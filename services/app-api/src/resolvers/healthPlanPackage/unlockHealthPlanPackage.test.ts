@@ -476,8 +476,8 @@ describe('unlockHealthPlanPackage', () => {
         const stateServerTwo = await constructTestPostgresServer({
             context: {
                 user: {
-                    name: 'Peter Parker',
-                    state_code: 'FL',
+                    id: 'PeterParker',
+                    stateCode: 'FL',
                     role: 'STATE_USER',
                     email: 'notspiderman@example.com',
                     familyName: 'Parker',
