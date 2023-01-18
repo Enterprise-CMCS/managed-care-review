@@ -1,16 +1,31 @@
-type LocalUserType = LocalStateUserType | LocalCMSUserType
+import { StateType } from '../common-code/healthPlanFormDataType'
+
+type LocalUserType = LocalStateUserType | LocalCMSUserType | LocalAdminUserType
 
 type LocalStateUserType = {
+    id: string
     role: 'STATE_USER'
     email: string
-    name: string
     stateCode: string
+    givenName: string
+    familyName: string
 }
 
 type LocalCMSUserType = {
+    id: string
     role: 'CMS_USER'
     email: string
-    name: string
+    givenName: string
+    familyName: string
+    stateAssignments: StateType[]
+}
+
+type LocalAdminUserType = {
+    id: string
+    role: 'ADMIN_USER'
+    email: string
+    givenName: string
+    familyName: string
 }
 
 function isLocalUser(user: unknown): user is LocalUserType {

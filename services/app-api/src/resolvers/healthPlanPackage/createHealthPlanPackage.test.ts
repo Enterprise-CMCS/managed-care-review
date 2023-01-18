@@ -64,6 +64,7 @@ describe('createHealthPlanPackage', () => {
         const server = await constructTestPostgresServer({
             context: {
                 user: {
+                    id: 'foobar',
                     role: 'CMS_USER',
                     email: 'aang@va.gov',
                     givenName: 'Prince',
