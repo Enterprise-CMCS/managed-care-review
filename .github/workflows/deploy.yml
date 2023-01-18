@@ -76,6 +76,15 @@ jobs:
         run: |
           echo "${{steps.changed-services-action.outputs.changed-services}}"
 
+      - uses: chrnorm/deployment-action@releases/v2
+        name: Create GitHub deployment
+        id: ghdeployment
+        with:
+          token: '${{ github.token }}'
+          environment: review-apps
+          description: stack ${{ steps.branch-name.outputs.stage-name-for-branch}}
+          initial-status: in_progress
+
   web-unit-tests:
     name: test - web unit tests
     runs-on: ubuntu-20.04
@@ -178,8 +187,7 @@ jobs:
         run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
 
       - name: Generate protos
-        working-directory: services/app-proto
-        run: yarn run protogen && yarn run build
+        run: lerna run generate --scope=app-proto && lerna run build --scope=app-proto
 
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client

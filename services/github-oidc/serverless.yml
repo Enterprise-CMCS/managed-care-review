@@ -40,7 +40,7 @@ params:
     # only workflows running on the prod branch can use prod OIDC
     subjectClaimFilters: "repo:CMSgov/managed-care-review:ref:refs/heads/prod"
   default:
-    # the catchall subject claim filter for dev OIDC, including the main stage and all stages for feature branches
+    # the catchall subject claim filter for dev OIDC, including the main branch and all feature branches
     subjectClaimFilters: "repo:CMSgov/managed-care-review:*"
 
     # this param should be overridden with a value of 'true' via the CLI when bootstrapping an environment. see https://www.serverless.com/framework/docs/guides/parameters#inheritance-and-overriding
@@ -149,7 +149,7 @@ resources:
         PermissionsBoundary: !Sub "arn:aws:iam::${AWS::AccountId}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy"
 
   Outputs:
-      # note: if this output name changes, scripts.hooks.deploy:finalize must also change
+      # note: if this output name changes, custom.scripts.hooks.deploy:finalize must also change
     serviceRoleArn:
       Description: ARN of the service role for GitHub OIDC
       Value: !GetAtt GitHubActionsServiceRole.Arn
