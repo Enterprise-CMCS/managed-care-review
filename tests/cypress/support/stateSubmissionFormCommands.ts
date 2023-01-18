@@ -315,7 +315,7 @@ Cypress.Commands.add('fillOutStateContact', () => {
         .eq(0)
         .should('have.value', 'State Contact Person') // this assertion is here to catch flakes early due to state contact person value not persisting
     cy.findAllByLabelText('Title/Role').eq(0).type('State Contact Title')
-    cy.findAllByLabelText('Email').eq(0).type('statecontact@example.com')
+    cy.findAllByLabelText('Email').eq(0).type('mc-review-qa@truss.works')
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 

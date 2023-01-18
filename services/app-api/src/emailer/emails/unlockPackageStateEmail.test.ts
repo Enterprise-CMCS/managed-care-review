@@ -51,6 +51,7 @@ const sub: UnlockedHealthPlanFormDataType = {
     ],
 }
 const defaultStatePrograms = mockMNState().programs
+const defaultSubmitters = ['test1@example.com', 'test2@example.com']
 
 test('subject line is correct and clearly states submission is unlocked', async () => {
     const name = packageName(sub, defaultStatePrograms)
@@ -58,7 +59,8 @@ test('subject line is correct and clearly states submission is unlocked', async 
         sub,
         unlockData,
         testEmailConfig,
-        defaultStatePrograms
+        defaultStatePrograms,
+        defaultSubmitters
     )
 
     if (template instanceof Error) {
@@ -80,7 +82,8 @@ test('includes expected data summary for a contract and rates submission unlock 
         sub,
         unlockData,
         testEmailConfig,
-        defaultStatePrograms
+        defaultStatePrograms,
+        defaultSubmitters
     )
 
     if (template instanceof Error) {
@@ -226,7 +229,8 @@ test('includes expected data summary for a multi-rate contract and rates submiss
         sub,
         unlockData,
         testEmailConfig,
-        defaultStatePrograms
+        defaultStatePrograms,
+        defaultSubmitters
     )
 
     if (template instanceof Error) {
@@ -295,7 +299,8 @@ it('does includes the correct submission URL', async () => {
         sub,
         unlockData,
         testEmailConfig,
-        defaultStatePrograms
+        defaultStatePrograms,
+        defaultSubmitters
     )
 
     if (template instanceof Error) {
@@ -378,7 +383,8 @@ test('renders overall email as expected', async () => {
         sub,
         unlockData,
         testEmailConfig,
-        defaultStatePrograms
+        defaultStatePrograms,
+        defaultSubmitters
     )
 
     if (template instanceof Error) {

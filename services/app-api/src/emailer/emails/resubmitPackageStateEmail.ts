@@ -3,38 +3,45 @@ import {
     packageName as generatePackageName,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
-import { UserType, UpdateInfoType, ProgramType } from '../../domain-models'
+import { UpdateInfoType, ProgramType } from '../../domain-models'
 import {
     renderTemplate,
     stripHTMLFromTemplate,
-    generateStateReceiverEmails,
     findPackagePrograms,
 } from '../templateHelpers'
 
 import type { EmailData, EmailConfiguration } from '../'
+import { pruneDuplicateEmails } from '../formatters'
 
 export const resubmitPackageStateEmail = async (
-    pkg: LockedHealthPlanFormDataType,
-    user: UserType,
+    formData: LockedHealthPlanFormDataType,
+    submitterEmails: string[],
     updateInfo: UpdateInfoType,
     config: EmailConfiguration,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
     const isTestEnvironment = config.stage !== 'prod'
-    const receiverEmails = generateStateReceiverEmails(pkg, user)
+
+    const stateContactEmails = formData.stateContacts.map(
+        (contact) => contact.email
+    )
+    const receiverEmails = pruneDuplicateEmails([
+        ...stateContactEmails,
+        ...submitterEmails,
+    ])
 
     //This checks to make sure all programs contained in submission exists for the state.
-    const packagePrograms = findPackagePrograms(pkg, statePrograms)
+    const packagePrograms = findPackagePrograms(formData, statePrograms)
 
     if (packagePrograms instanceof Error) {
         return packagePrograms
     }
 
-    const packageName = generatePackageName(pkg, packagePrograms)
+    const packageName = generatePackageName(formData, packagePrograms)
 
     const isContractAndRates =
-        pkg.submissionType === 'CONTRACT_AND_RATES' &&
-        Boolean(pkg.rateInfos.length)
+        formData.submissionType === 'CONTRACT_AND_RATES' &&
+        Boolean(formData.rateInfos.length)
 
     const data = {
         packageName,
@@ -44,7 +51,7 @@ export const resubmitPackageStateEmail = async (
         shouldIncludeRates: isContractAndRates,
         rateInfos:
             isContractAndRates &&
-            pkg.rateInfos.map((rate) => ({
+            formData.rateInfos.map((rate) => ({
                 rateName: rate.rateCertificationName,
             })),
     }

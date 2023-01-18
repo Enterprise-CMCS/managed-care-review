@@ -1,4 +1,8 @@
-import { packageStatus, packageSubmittedAt } from './healthPlanPackage'
+import {
+    packageStatus,
+    packageSubmittedAt,
+    packageSubmitters,
+} from './healthPlanPackage'
 import {
     HealthPlanPackageStatusType,
     HealthPlanPackageType,
@@ -224,6 +228,141 @@ describe('HealthPlanPackage helpers', () => {
             const testDate = packageSubmittedAt(sub)
 
             expect(testDate).toEqual(expectedDate)
+        }
+    })
+
+    it('returns expected package submitters', () => {
+        const tests: [HealthPlanPackageType, string[]][] = [
+            [
+                {
+                    id: 'foo',
+                    stateCode: 'FL' as const,
+                    revisions: [
+                        {
+                            id: 'baz',
+                            createdAt: new Date(),
+                            submitInfo: {
+                                updatedAt: new Date(),
+                                updatedBy: 'submitter1@example.com',
+                                updatedReason: 'Initial submit',
+                            },
+                            formDataProto: Buffer.from([1, 2, 3]),
+                        },
+                        {
+                            id: 'bar',
+                            createdAt: new Date('2022-01-01'),
+                            unlockInfo: {
+                                updatedAt: new Date(),
+                                updatedBy: 'unlocker@example.com',
+                                updatedReason:
+                                    'This is the reason for unlocking',
+                            },
+                            submitInfo: {
+                                updatedAt: new Date(),
+                                updatedBy: 'submitter1@example.com',
+                                updatedReason:
+                                    'This is the reason for resubmitting',
+                            },
+                            formDataProto: Buffer.from([1, 2, 3]),
+                        },
+                    ],
+                },
+                ['submitter1@example.com'],
+            ],
+            [
+                {
+                    id: 'foo',
+                    stateCode: 'FL' as const,
+                    revisions: [
+                        {
+                            id: 'baz',
+                            createdAt: new Date('2022-01-01'),
+                            submitInfo: {
+                                updatedAt: new Date(),
+                                updatedBy: 'submitter1@example.com',
+                                updatedReason: 'Initial submit',
+                            },
+                            formDataProto: Buffer.from([1, 2, 3]),
+                        },
+                        {
+                            id: 'bar',
+                            createdAt: new Date('2022-01-01'),
+                            unlockInfo: {
+                                updatedAt: new Date('2022-01-02'),
+                                updatedBy: 'unlocker@example.com',
+                                updatedReason:
+                                    'This is the reason for unlocking',
+                            },
+                            submitInfo: {
+                                updatedAt: new Date('2022-01-03'),
+                                updatedBy: 'submitter2@example.com',
+                                updatedReason:
+                                    'This is the reason for resubmitting',
+                            },
+                            formDataProto: Buffer.from([1, 2, 3]),
+                        },
+                        {
+                            id: 'bar',
+                            createdAt: new Date('2022-01-01'),
+                            unlockInfo: {
+                                updatedAt: new Date('2022-01-04'),
+                                updatedBy: 'unlocker@example.com',
+                                updatedReason:
+                                    'This is the reason for unlocking',
+                            },
+                            submitInfo: {
+                                updatedAt: new Date('2022-01-05'),
+                                updatedBy: 'submitter3@example.com',
+                                updatedReason:
+                                    'This is the reason for resubmitting',
+                            },
+                            formDataProto: Buffer.from([1, 2, 3]),
+                        },
+                        {
+                            id: 'bar',
+                            createdAt: new Date('2022-01-01'),
+                            unlockInfo: {
+                                updatedAt: new Date('2022-01-06'),
+                                updatedBy: 'unlocker@example.com',
+                                updatedReason:
+                                    'This is the reason for unlocking',
+                            },
+                            submitInfo: {
+                                updatedAt: new Date('2022-01-07'),
+                                updatedBy: 'submitter1@example.com',
+                                updatedReason:
+                                    'This is the reason for resubmitting',
+                            },
+                            formDataProto: Buffer.from([1, 2, 3]),
+                        },
+                        {
+                            id: 'bar',
+                            createdAt: new Date('2022-01-01'),
+                            unlockInfo: {
+                                updatedAt: new Date('2022-01-08'),
+                                updatedBy: 'unlocker@example.com',
+                                updatedReason:
+                                    'This is the reason for unlocking',
+                            },
+                            submitInfo: undefined,
+                            formDataProto: Buffer.from([1, 2, 3]),
+                        },
+                    ],
+                },
+                [
+                    'submitter1@example.com',
+                    'submitter2@example.com',
+                    'submitter3@example.com',
+                ],
+            ],
+        ]
+
+        for (const test of tests) {
+            const [pkg, expectedSubmitters] = test
+
+            const testSubmitters = packageSubmitters(pkg)
+
+            expect(testSubmitters).toEqual(expectedSubmitters)
         }
     })
 })
