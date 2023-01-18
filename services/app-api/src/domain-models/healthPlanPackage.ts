@@ -3,6 +3,7 @@ import {
     HealthPlanPackageStatusType,
     HealthPlanPackageType,
 } from './HealthPlanPackageType'
+import { pruneDuplicateEmails } from '../emailer/formatters'
 
 // submissionStatus computes the current status of the submission based on
 // the submit/unlock info on its revisions.
@@ -50,14 +51,13 @@ function packageCurrentRevision(
 
 function packageSubmitters(pkg: HealthPlanPackageType): string[] {
     const submitters: string[] = []
-    pkg.revisions.forEach((revision) => {
-        const submitter = revision.submitInfo?.updatedBy
-        if (submitter && !submitters.includes(submitter)) {
-            submitters.push(submitter)
-        }
-    })
+    pkg.revisions.forEach(
+        (revision) =>
+            revision.submitInfo?.updatedBy &&
+            submitters.push(revision.submitInfo?.updatedBy)
+    )
 
-    return submitters
+    return pruneDuplicateEmails(submitters)
 }
 
 export {
