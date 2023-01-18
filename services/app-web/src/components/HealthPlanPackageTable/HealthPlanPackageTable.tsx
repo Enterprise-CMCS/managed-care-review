@@ -127,10 +127,10 @@ export const HealthPlanPackageTable = ({
                 })
             }
         })
-        const defaultValues = valuesFromUrl
+        const filterValues = valuesFromUrl
             .filter((item) => item.id === id)
             .map((item) => ({ value: item.value, label: item.value }))
-        return defaultValues as FilterOptionType[]
+        return filterValues as FilterOptionType[]
     }
 
     const isCMSUser = user.__typename === 'CMSUser'
@@ -282,9 +282,7 @@ export const HealthPlanPackageTable = ({
                             filterTitle="Filters"
                         >
                             <FilterSelect
-                                initialValues={getSelectedFiltersFromUrl(
-                                    'stateName'
-                                )}
+                                value={getSelectedFiltersFromUrl('stateName')}
                                 name="state"
                                 label="State"
                                 filterOptions={stateFilterOptions}
@@ -297,7 +295,7 @@ export const HealthPlanPackageTable = ({
                                 }
                             />
                             <FilterSelect
-                                initialValues={getSelectedFiltersFromUrl(
+                                value={getSelectedFiltersFromUrl(
                                     'submissionType'
                                 )}
                                 name="submissionType"
