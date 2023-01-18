@@ -520,10 +520,20 @@ describe('submitHealthPlanPackage', () => {
         )
     })
 
-    it('send state email to all state contacts if submission is valid', async () => {
+    it('send state email to submitter if submission is valid', async () => {
         const mockEmailer = testEmailer()
         const server = await constructTestPostgresServer({
             emailer: mockEmailer,
+            context: {
+                user: {
+                    name: 'Peter Parker',
+                    state_code: 'FL',
+                    role: 'STATE_USER',
+                    email: 'notspiderman@example.com',
+                    familyName: 'Parker',
+                    givenName: 'Peter',
+                },
+            },
         })
         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
         const draftID = draft.id
@@ -554,7 +564,7 @@ describe('submitHealthPlanPackage', () => {
             expect.objectContaining({
                 subject: expect.stringContaining(`${name} was sent to CMS`),
                 toAddresses: expect.arrayContaining([
-                    sub.stateContacts[0].email,
+                    'notspiderman@example.com',
                 ]),
             })
         )
@@ -619,15 +629,36 @@ describe('submitHealthPlanPackage', () => {
         )
     })
 
-    it('send state email to state contacts and current user on valid resubmission', async () => {
+    it('send state email to state contacts and all submitters on valid resubmission', async () => {
         const config = testEmailConfig
         const mockEmailer = testEmailer(config)
         //mock invoke email submit lambda
         const stateServer = await constructTestPostgresServer({
-            emailer: mockEmailer,
+            context: {
+                user: {
+                    name: 'Miles Morales',
+                    state_code: 'FL',
+                    role: 'STATE_USER',
+                    email: 'alsonotspiderman@example.com',
+                    familyName: 'Morales',
+                    givenName: 'Miles',
+                },
+            },
         })
 
-        const currentUser = defaultContext().user
+        const stateServerTwo = await constructTestPostgresServer({
+            emailer: mockEmailer,
+            context: {
+                user: {
+                    name: 'Peter Parker',
+                    state_code: 'FL',
+                    role: 'STATE_USER',
+                    email: 'notspiderman@example.com',
+                    familyName: 'Parker',
+                    givenName: 'Peter',
+                },
+            },
+        })
 
         const stateSubmission = await createAndSubmitTestHealthPlanPackage(
             stateServer
@@ -646,7 +677,7 @@ describe('submitHealthPlanPackage', () => {
         )
 
         const submitResult = await resubmitTestHealthPlanPackage(
-            stateServer,
+            stateServerTwo,
             stateSubmission.id,
             'Test resubmission reason'
         )
@@ -667,7 +698,8 @@ describe('submitHealthPlanPackage', () => {
                 subject: expect.stringContaining(`${name} was resubmitted`),
                 sourceEmail: config.emailSource,
                 toAddresses: expect.arrayContaining([
-                    currentUser.email,
+                    'alsonotspiderman@example.com',
+                    'notspiderman@example.com',
                     sub.stateContacts[0].email,
                 ]),
             })
