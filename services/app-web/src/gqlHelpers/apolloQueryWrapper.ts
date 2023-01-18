@@ -19,8 +19,7 @@ type ApolloResultType<SuccessType, AdditionalVars = Record<string, unknown>> =
 
 // These are the parts of the useQuery result we want to wrap up, converting data | error | loading => result
 interface WrappableApolloResultsType {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: any
+    data: unknown
     error?: Error
     loading: boolean
 }

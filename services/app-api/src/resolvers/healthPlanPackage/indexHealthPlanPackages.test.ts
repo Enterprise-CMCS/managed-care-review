@@ -1,0 +1,408 @@
+import INDEX_HEALTH_PLAN_PACKAGES from '../../../../app-graphql/src/queries/indexHealthPlanPackages.graphql'
+import {
+    constructTestPostgresServer,
+    createTestHealthPlanPackage,
+    createAndSubmitTestHealthPlanPackage,
+    unlockTestHealthPlanPackage,
+    resubmitTestHealthPlanPackage,
+    createAndUpdateTestHealthPlanPackage,
+    submitTestHealthPlanPackage,
+} from '../../testHelpers/gqlHelpers'
+import { todaysDate } from '../../testHelpers/dateHelpers'
+import { HealthPlanPackageEdge, HealthPlanPackage } from '../../gen/gqlServer'
+import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
+
+describe('indexHealthPlanPackages', () => {
+    describe('isStateUser', () => {
+        it('returns a list of submissions that includes newly created entries', async () => {
+            const server = await constructTestPostgresServer()
+
+            // First, create a new submission
+            const draftPkg = await createTestHealthPlanPackage(server)
+            const draftFormData = latestFormData(draftPkg)
+
+            const submittedPkg = await createAndSubmitTestHealthPlanPackage(
+                server
+            )
+            const submittedFormData = latestFormData(submittedPkg)
+
+            // then see if we can get that same submission back from the index
+            const result = await server.executeOperation({
+                query: INDEX_HEALTH_PLAN_PACKAGES,
+            })
+
+            expect(result.errors).toBeUndefined()
+
+            const submissionsIndex = result.data?.indexHealthPlanPackages
+
+            expect(submissionsIndex.totalCount).toBeGreaterThan(1)
+
+            // Since we don't wipe the DB between tests,filter out extraneous submissions and grab new submissions by ID to confirm they are returned
+            const theseSubmissions: HealthPlanPackage[] = submissionsIndex.edges
+                .map((edge: HealthPlanPackageEdge) => edge.node)
+                .filter((sub: HealthPlanPackage) =>
+                    [draftPkg.id, submittedPkg.id].includes(sub.id)
+                )
+            // specific submissions by id exist
+            expect(theseSubmissions).toHaveLength(2)
+
+            // confirm some submission data is correct too, first in list will be draft, second is the submitted
+            expect(theseSubmissions[0].initiallySubmittedAt).toBeNull()
+            expect(theseSubmissions[0].status).toBe('DRAFT')
+            expect(
+                latestFormData(theseSubmissions[0]).submissionDescription
+            ).toBe(draftFormData.submissionDescription)
+            expect(theseSubmissions[1].initiallySubmittedAt).toBe(todaysDate())
+            expect(theseSubmissions[1].status).toBe('SUBMITTED')
+            expect(
+                latestFormData(theseSubmissions[1]).submissionDescription
+            ).toBe(submittedFormData.submissionDescription)
+        })
+
+        it('synthesizes the right statuses as a submission is submitted/unlocked/etc', async () => {
+            const server = await constructTestPostgresServer()
+
+            const cmsServer = await constructTestPostgresServer({
+                context: {
+                    user: {
+                        id: '841c22b2-fa13-4f42-a3d0-9fb8fb671ed7',
+                        role: 'CMS_USER',
+                        email: 'zuko@example.com',
+                        familyName: 'Zuko',
+                        givenName: 'Prince',
+                        stateAssignments: [],
+                    },
+                },
+            })
+
+            // First, create new submissions
+            const draftSubmission = await createTestHealthPlanPackage(server)
+            const submittedSubmission =
+                await createAndSubmitTestHealthPlanPackage(server)
+            const unlockedSubmission =
+                await createAndSubmitTestHealthPlanPackage(server)
+            const relockedSubmission =
+                await createAndSubmitTestHealthPlanPackage(server)
+
+            // unlock two
+            await unlockTestHealthPlanPackage(
+                cmsServer,
+                unlockedSubmission.id,
+                'Test reason'
+            )
+            await unlockTestHealthPlanPackage(
+                cmsServer,
+                relockedSubmission.id,
+                'Test reason'
+            )
+
+            // resubmit one
+            await resubmitTestHealthPlanPackage(
+                server,
+                relockedSubmission.id,
+                'Test first resubmission'
+            )
+
+            // index submissions api request
+            const result = await server.executeOperation({
+                query: INDEX_HEALTH_PLAN_PACKAGES,
+            })
+            const submissionsIndex = result.data?.indexHealthPlanPackages
+
+            // pull out test related submissions and order them
+            const testSubmissionIDs = [
+                draftSubmission.id,
+                submittedSubmission.id,
+                unlockedSubmission.id,
+                relockedSubmission.id,
+            ]
+            const testSubmissions: HealthPlanPackage[] = submissionsIndex.edges
+                .map((edge: HealthPlanPackageEdge) => edge.node)
+                .filter((test: HealthPlanPackage) =>
+                    testSubmissionIDs.includes(test.id)
+                )
+
+            expect(testSubmissions).toHaveLength(4)
+
+            // organize test submissions in a predictable order via testSubmissionsIds array
+            testSubmissions.sort((a, b) => {
+                if (
+                    testSubmissionIDs.indexOf(a.id) >
+                    testSubmissionIDs.indexOf(b.id)
+                ) {
+                    return 1
+                } else {
+                    return -1
+                }
+            })
+
+            expect(testSubmissions[0].status).toBe('DRAFT')
+            expect(testSubmissions[0].status).toBe('DRAFT')
+            expect(testSubmissions[0].status).toBe('DRAFT')
+            expect(testSubmissions[0].status).toBe('DRAFT')
+        })
+
+        it('a different user from the same state can index submissions', async () => {
+            const server = await constructTestPostgresServer()
+
+            // First, create a new submission
+            const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+                server
+            )
+
+            const createdID = stateSubmission.id
+
+            // then see if we can fetch that same submission
+            const input = {
+                pkgID: createdID,
+            }
+
+            // setup a server with a different user
+            const otherUserServer = await constructTestPostgresServer({
+                context: {
+                    user: {
+                        id: 'b9c58d1c-806c-4862-a832-9779b8a511c2',
+                        stateCode: 'FL',
+                        role: 'STATE_USER',
+                        email: 'aang@mn.gov',
+                        givenName: 'Aang',
+                        familyName: 'Aang',
+                    },
+                },
+            })
+
+            const result = await otherUserServer.executeOperation({
+                query: INDEX_HEALTH_PLAN_PACKAGES,
+                variables: { input },
+            })
+
+            expect(result.errors).toBeUndefined()
+            const submissions = result.data?.indexHealthPlanPackages.edges.map(
+                (edge: HealthPlanPackageEdge) => edge.node
+            )
+            expect(submissions).not.toBeNull()
+            expect(submissions.length).toBeGreaterThan(1)
+
+            const testSubmission = submissions.filter(
+                (test: HealthPlanPackage) => test.id === createdID
+            )[0]
+            expect(testSubmission.initiallySubmittedAt).toBe(todaysDate())
+        })
+
+        it('returns no submissions for a different states user', async () => {
+            const server = await constructTestPostgresServer()
+
+            await createTestHealthPlanPackage(server)
+            await createAndSubmitTestHealthPlanPackage(server)
+
+            const otherUserServer = await constructTestPostgresServer({
+                context: {
+                    user: {
+                        id: 'b9029ffe-f6f0-47cc-baab-b37774ef02b1',
+                        stateCode: 'VA',
+                        role: 'STATE_USER',
+                        email: 'aang@mn.gov',
+                        familyName: 'Aang',
+                        givenName: 'Aang',
+                    },
+                },
+            })
+
+            const result = await otherUserServer.executeOperation({
+                query: INDEX_HEALTH_PLAN_PACKAGES,
+            })
+
+            expect(result.errors).toBeUndefined()
+
+            const indexHealthPlanPackages = result.data?.indexHealthPlanPackages
+            const otherStatePackages = indexHealthPlanPackages.edges.filter(
+                (pkg: HealthPlanPackageEdge) => pkg.node.stateCode !== 'VA'
+            )
+
+            expect(otherStatePackages).toEqual([])
+        })
+    })
+
+    describe('isCMSUser', () => {
+        it('returns an empty list if only draft packages exist', async () => {
+            const stateServer = await constructTestPostgresServer()
+            const cmsServer = await constructTestPostgresServer({
+                context: {
+                    user: {
+                        id: '4f3a5d98-0e6e-4c15-9738-d6ea0cfd10b7',
+                        role: 'CMS_USER',
+                        email: 'zuko@example.com',
+                        givenName: 'Zuko',
+                        familyName: 'Zuko',
+                        stateAssignments: [],
+                    },
+                },
+            })
+            // First, create new submissions
+            const draft1 = await createTestHealthPlanPackage(stateServer)
+            const draft2 = await createTestHealthPlanPackage(stateServer)
+
+            // index submissions api request
+            const result = await cmsServer.executeOperation({
+                query: INDEX_HEALTH_PLAN_PACKAGES,
+            })
+            const submissionsIndex = result.data?.indexHealthPlanPackages
+
+            // pull out test related submissions and order them
+            const testSubmissionIDs = [draft1.id, draft2.id]
+            const testSubmissions: HealthPlanPackage[] = submissionsIndex.edges
+                .map((edge: HealthPlanPackageEdge) => edge.node)
+                .filter((test: HealthPlanPackage) =>
+                    testSubmissionIDs.includes(test.id)
+                )
+
+            expect(testSubmissions).toHaveLength(0)
+        })
+
+        it('synthesizes the right statuses as a submission is submitted/unlocked/etc', async () => {
+            const server = await constructTestPostgresServer()
+
+            const cmsServer = await constructTestPostgresServer({
+                context: {
+                    user: {
+                        id: '1700cd2e-6860-4e6f-a061-b3ca8f5aeeb2',
+                        role: 'CMS_USER',
+                        email: 'zuko@example.com',
+                        givenName: 'Prince',
+                        familyName: 'Zuko',
+                        stateAssignments: [],
+                    },
+                },
+            })
+
+            // First, create new submissions
+            const submittedSubmission =
+                await createAndSubmitTestHealthPlanPackage(server)
+            const unlockedSubmission =
+                await createAndSubmitTestHealthPlanPackage(server)
+            const relockedSubmission =
+                await createAndSubmitTestHealthPlanPackage(server)
+
+            // unlock two
+            await unlockTestHealthPlanPackage(
+                cmsServer,
+                unlockedSubmission.id,
+                'Test reason'
+            )
+            await unlockTestHealthPlanPackage(
+                cmsServer,
+                relockedSubmission.id,
+                'Test reason'
+            )
+
+            // resubmit one
+            await resubmitTestHealthPlanPackage(
+                server,
+                relockedSubmission.id,
+                'Test first resubmission'
+            )
+
+            // index submissions api request
+            const result = await cmsServer.executeOperation({
+                query: INDEX_HEALTH_PLAN_PACKAGES,
+            })
+            const submissionsIndex = result.data?.indexHealthPlanPackages
+
+            // pull out test related submissions and order them
+            const testSubmissionIDs = [
+                submittedSubmission.id,
+                unlockedSubmission.id,
+                relockedSubmission.id,
+            ]
+            const testSubmissions: HealthPlanPackage[] = submissionsIndex.edges
+                .map((edge: HealthPlanPackageEdge) => edge.node)
+                .filter((test: HealthPlanPackage) =>
+                    testSubmissionIDs.includes(test.id)
+                )
+
+            expect(testSubmissions).toHaveLength(3)
+
+            // organize test submissions in a predictable order via testSubmissionsIds array
+            testSubmissions.sort((a, b) => {
+                if (
+                    testSubmissionIDs.indexOf(a.id) >
+                    testSubmissionIDs.indexOf(b.id)
+                ) {
+                    return 1
+                } else {
+                    return -1
+                }
+            })
+        })
+
+        it('return a list of submitted packages from multiple states', async () => {
+            const stateServer = await constructTestPostgresServer()
+            const cmsServer = await constructTestPostgresServer({
+                context: {
+                    user: {
+                        id: 'bfe2e6d3-15ff-4b5a-8782-a199d027967a',
+                        role: 'CMS_USER',
+                        email: 'zuko@example.com',
+                        familyName: 'Zuko',
+                        givenName: 'Prince',
+                        stateAssignments: [],
+                    },
+                },
+            })
+            const otherStateServer = await constructTestPostgresServer({
+                context: {
+                    user: {
+                        id: 'c5de2733-edea-462a-a9b1-41b97a636986',
+                        stateCode: 'VA',
+                        role: 'STATE_USER',
+                        email: 'aang@mn.gov',
+                        familyName: 'AANG',
+                        givenName: 'AANG',
+                    },
+                },
+            })
+            // submit packages from two different states
+            const defaultState1 = await createAndSubmitTestHealthPlanPackage(
+                stateServer
+            )
+            const defaultState2 = await createAndSubmitTestHealthPlanPackage(
+                stateServer
+            )
+            const draft = await createAndUpdateTestHealthPlanPackage(
+                otherStateServer,
+                undefined,
+                'VA' as const
+            )
+            const otherState1 = await submitTestHealthPlanPackage(
+                otherStateServer,
+                draft.id
+            )
+
+            const result = await cmsServer.executeOperation({
+                query: INDEX_HEALTH_PLAN_PACKAGES,
+            })
+
+            expect(result.errors).toBeUndefined()
+
+            const allHealthPlanPackages: HealthPlanPackage[] =
+                result.data?.indexHealthPlanPackages.edges.map(
+                    (edge: HealthPlanPackageEdge) => edge.node
+                )
+
+            // Pull out only the results relevant to the test by using id of recently created test packages.
+            const defaultStatePackages: HealthPlanPackage[] = []
+            const otherStatePackages: HealthPlanPackage[] = []
+            allHealthPlanPackages.forEach((pkg) => {
+                if ([defaultState1.id, defaultState2.id].includes(pkg.id)) {
+                    defaultStatePackages.push(pkg)
+                } else if ([otherState1.id].includes(pkg.id)) {
+                    otherStatePackages.push(pkg)
+                }
+                return
+            })
+
+            expect(defaultStatePackages).toHaveLength(2)
+            expect(otherStatePackages).toHaveLength(1)
+        })
+    })
+})

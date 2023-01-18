@@ -1,5 +1,7 @@
+import { Story } from '@storybook/react'
 import React from 'react'
 import { DataDetail } from './DataDetail'
+import type { DataDetailProps } from './DataDetail'
 
 export default {
     title: 'Components/DataDetail',
@@ -10,40 +12,23 @@ export default {
     },
 }
 
-export const WithString = (): React.ReactElement => (
+const Template: Story<DataDetailProps> = (args) => (
     <dl>
-        <DataDetail
-            id="rainfall"
-            label="Average rainfall in May"
-            data="31.58 inches"
-        />
-    </dl>
-)
-export const WithAddress = (): React.ReactElement => (
-    <dl>
-        <DataDetail
-            id="disney"
-            label="Disney World Contact Info"
-            data={
-                <address>
-                    Mickey Mouse
-                    <br />
-                    <a href="mailto:mickey@disney.com">mickey@disney.com</a>
-                    <br />
-                    <a href="tel:555-555-5555">555-555-5555</a>
-                </address>
-            }
-        />
+        <DataDetail {...args} />
     </dl>
 )
 
-export const WithMissingField = (): React.ReactElement => (
-    <dl>
-        <DataDetail
-            id="crystal-ball"
-            label="The secret to the future"
-            data={undefined}
-            explainMissingData
-        />
-    </dl>
-)
+export const WithString = Template.bind({})
+WithString.args = {
+    id: 'rainfall',
+    label: 'Average rainfall in May',
+    children: '1.58 inches',
+}
+
+export const WithMissingField = Template.bind({})
+WithMissingField.args = {
+    id: 'crystal-ball',
+    label: 'The secret to the future',
+    children: undefined,
+    explainMissingData: true,
+}

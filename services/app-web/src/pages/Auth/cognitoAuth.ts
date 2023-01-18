@@ -7,7 +7,7 @@ type newUser = {
     password: string
     given_name: string
     family_name: string
-    state_code: StateUser['state']['code']
+    stateCode: StateUser['state']['code']
 }
 
 type AmplifyErrorCodes =
@@ -61,7 +61,7 @@ export async function signUp(
             attributes: {
                 given_name: user.given_name,
                 family_name: user.family_name,
-                'custom:state_code': user.state_code,
+                'custom:state_code': user.stateCode,
                 'custom:role': 'macmcrrs-state-user',
             },
         })

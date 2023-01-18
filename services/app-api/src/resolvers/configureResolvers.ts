@@ -2,15 +2,22 @@ import { GraphQLDate, GraphQLDateTime } from 'graphql-scalars'
 import type { Emailer } from '../emailer'
 import { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
-import { createHealthPlanPackageResolver } from './createHealthPlanPackage'
-import { fetchCurrentUserResolver } from './fetchCurrentUser'
-import { fetchHealthPlanPackageResolver } from './fetchHealthPlanPackage'
-import { indexHealthPlanPackagesResolver } from './indexHealthPlanPackages'
-import { healthPlanPackageResolver } from './healthPlanPackageResolver'
-import { submitHealthPlanPackageResolver } from './submitHealthPlanPackage'
-import { unlockHealthPlanPackageResolver } from './unlockHealthPlanPackage'
-import { updateHealthPlanFormDataResolver } from './updateHealthPlanFormData'
-import { stateUserResolver } from './userResolver'
+import {
+    createHealthPlanPackageResolver,
+    fetchHealthPlanPackageResolver,
+    indexHealthPlanPackagesResolver,
+    healthPlanPackageResolver,
+    submitHealthPlanPackageResolver,
+    unlockHealthPlanPackageResolver,
+    updateHealthPlanFormDataResolver,
+} from './healthPlanPackage'
+import {
+    fetchCurrentUserResolver,
+    updateCMSUserResolver,
+    stateUserResolver,
+    cmsUserResolver,
+    indexUsersResolver,
+} from './user'
 import { EmailParameterStore } from '../parameterStore'
 import { LDService } from '../launchDarkly/launchDarkly'
 
@@ -27,6 +34,7 @@ export function configureResolvers(
             fetchCurrentUser: fetchCurrentUserResolver(),
             fetchHealthPlanPackage: fetchHealthPlanPackageResolver(store),
             indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
+            indexUsers: indexUsersResolver(store),
         },
         Mutation: {
             createHealthPlanPackage: createHealthPlanPackageResolver(store),
@@ -42,18 +50,24 @@ export function configureResolvers(
                 emailer,
                 emailParameterStore
             ),
+            updateCMSUser: updateCMSUserResolver(store),
         },
         User: {
             // resolveType is required to differentiate Unions
             __resolveType(obj) {
                 if (obj.role === 'STATE_USER') {
                     return 'StateUser'
-                } else {
+                } else if (obj.role === 'CMS_USER') {
                     return 'CMSUser'
+                } else if (obj.role === 'ADMIN_USER') {
+                    return 'AdminUser'
+                } else {
+                    return 'StateUser'
                 }
             },
         },
         StateUser: stateUserResolver,
+        CMSUser: cmsUserResolver,
         HealthPlanPackage: healthPlanPackageResolver,
     }
 

@@ -1,0 +1,48 @@
+query indexUsers {
+    indexUsers {
+        totalCount
+        edges {
+            node {
+                ... on CMSUser {
+                    id
+                    email
+                    role
+                    familyName
+                    givenName
+                    stateAssignments {
+                        code
+                        name
+                        programs {
+                            id
+                            name
+                            fullName
+                        }
+                    }
+                }
+                ... on StateUser {
+                    id
+                    email
+                    role
+                    familyName
+                    givenName
+                    state {
+                        code
+                        name
+                        programs {
+                            id
+                            name
+                            fullName
+                        }
+                    }
+                }
+                ... on AdminUser {
+                    id
+                    email
+                    role
+                    familyName
+                    givenName
+                }
+            }
+        }
+    }
+}

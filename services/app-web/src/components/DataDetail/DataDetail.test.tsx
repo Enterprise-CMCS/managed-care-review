@@ -8,7 +8,7 @@ describe('DataDetail', () => {
             <DataDetail
                 id="rainfall"
                 label="Average rainfall in May"
-                data="31.58"
+                children="31.58"
             />
         )
         expect(
@@ -19,19 +19,31 @@ describe('DataDetail', () => {
         expect(screen.getByText('31.58')).toBeInTheDocument()
     })
 
-    it('renders an address component when passed in', () => {
+    it('renders array of strings capitalized and comma separated to easily display program/rate names', () => {
         render(
             <DataDetail
-                id="disney"
-                label="Disney World Contact Info"
-                data={
-                    <address>
-                        Mickey Mouse
-                        <a href="mailto:mickey@disney.com">mickey@disney.com</a>
-                        <a href="tel:555-555-5555">555-555-5555</a>
-                    </address>
-                }
+                id="rainfall"
+                label="Program names"
+                children={['pmap-001', 'mcon-001']}
             />
+        )
+        expect(
+            screen.getByRole('definition', {
+                name: 'Program names',
+            })
+        ).toBeInTheDocument()
+        expect(screen.getByText('PMAP-001, MCON-001')).toBeInTheDocument()
+    })
+
+    it('renders an address component when passed in', () => {
+        render(
+            <DataDetail id="disney" label="Disney World Contact Info">
+                <address>
+                    Mickey Mouse
+                    <a href="mailto:mickey@disney.com">mickey@disney.com</a>
+                    <a href="tel:555-555-5555">555-555-5555</a>
+                </address>
+            </DataDetail>
         )
 
         expect(
@@ -43,47 +55,72 @@ describe('DataDetail', () => {
         expect(screen.getAllByRole('link')).toHaveLength(2)
     })
 
-    it('renders helpful text when explainMissingData prop is true and no data passed in', () => {
+    it('renders children when explainMissingData prop is true and valid children is passed in', () => {
         render(
             <DataDetail
                 id="disney"
                 label="Disney World's Best Attraction"
-                data={undefined}
                 explainMissingData={true}
-            />
-        )
-
-        expect(
-            screen.getByText(/You must provide this information/)
-        ).toBeInTheDocument()
-    })
-
-    it('renders data when explainMissingData prop is true and valid data is passed in', () => {
-        render(
-            <DataDetail
-                id="disney"
-                label="Disney World's Best Attraction"
-                data="The teacups"
-                explainMissingData={true}
-            />
+            >
+                The teacups
+            </DataDetail>
         )
         expect(
             screen.queryByText(/You must provide this information/)
         ).toBeNull()
         expect(screen.getByText(/teacups/)).toBeInTheDocument()
     })
-    it('renders nothing when explainMissingData prop is false/missing and no data passed in', () => {
-        const { container } = render(
-            <DataDetail
-                id="disney"
-                label="Disney World Contact Info"
-                data={undefined}
-            />
-        )
 
-        expect(
-            screen.queryByText(/You must provide this information/)
-        ).toBeNull()
-        expect(container).toBeEmptyDOMElement()
+    describe('when children props are missing or empty', () => {
+        it('renders nothing when explainMissingData prop is false', () => {
+            const { container } = render(
+                <DataDetail id="disney" label="Disney World Contact Info" />
+            )
+
+            expect(container).toBeEmptyDOMElement()
+        })
+
+        it('registers empty string as missing data (this would be returned by missing text input and radio fields)', () => {
+            const { container } = render(
+                <DataDetail
+                    id="disney"
+                    label="Disney World's Best Attraction"
+                    children=""
+                />
+            )
+
+            expect(container).toBeEmptyDOMElement()
+        })
+
+        it('registers empty array as missing data (this would be returned by missing checkbox fields)', () => {
+            const { container } = render(
+                <DataDetail
+                    id="disney"
+                    label="Disney World's Best Attraction"
+                    children={[]}
+                />
+            )
+
+            expect(container).toBeEmptyDOMElement()
+        })
+
+        it('renders definition label with helpful text when explainMissingData prop is true', () => {
+            render(
+                <DataDetail
+                    id="disney"
+                    label="Disney World's Best Attraction"
+                    explainMissingData={true}
+                >
+                    {/* nothing here */}
+                </DataDetail>
+            )
+
+            expect(
+                screen.getByRole('definition', { name: /Disney/ })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(/You must provide this information/)
+            ).toBeInTheDocument()
+        })
     })
 })
