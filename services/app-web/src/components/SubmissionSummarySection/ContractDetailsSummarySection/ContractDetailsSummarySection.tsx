@@ -111,6 +111,9 @@ export const ContractDetailsSummarySection = ({
         submission.contractAmendmentInfo?.modifiedProvisions
     )
 
+    const amendmentProvisionsUnanswered =
+        modifiedProvisions.length === 0 && unmodifiedProvisions.length === 0
+
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>
             <SectionHeader header="Contract details" navigateTo={navigateTo}>
@@ -182,7 +185,9 @@ export const ContractDetailsSummarySection = ({
                         <DataDetail
                             id="modifiedProvisions"
                             label="This contract action includes new or modified provisions related to the following"
-                            explainMissingData={!isSubmitted}
+                            explainMissingData={
+                                amendmentProvisionsUnanswered && !isSubmitted
+                            }
                             children={
                                 <DataDetailCheckboxList
                                     list={modifiedProvisions}
@@ -194,7 +199,9 @@ export const ContractDetailsSummarySection = ({
                         <DataDetail
                             id="unmodifiedProvisions"
                             label="This contract action does NOT include new or modified provisions related to the following"
-                            explainMissingData={!isSubmitted}
+                            explainMissingData={
+                                amendmentProvisionsUnanswered && !isSubmitted
+                            }
                             children={
                                 <DataDetailCheckboxList
                                     list={unmodifiedProvisions}
