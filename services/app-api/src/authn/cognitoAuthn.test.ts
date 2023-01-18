@@ -45,6 +45,8 @@ describe('cognitoAuthn', () => {
                 expectedResult: Result<UserType, Error>
             }
 
+            const testID = 'foobar'
+
             const tests: samlAttrTest[] = [
                 {
                     attributes: {
@@ -55,6 +57,7 @@ describe('cognitoAuthn', () => {
                         email: 'gp@example.com',
                     },
                     expectedResult: ok({
+                        id: testID,
                         role: 'STATE_USER',
                         email: 'gp@example.com',
                         stateCode: 'VA',
@@ -70,6 +73,7 @@ describe('cognitoAuthn', () => {
                         email: 'gp@example.com',
                     },
                     expectedResult: ok({
+                        id: testID,
                         role: 'CMS_USER',
                         email: 'gp@example.com',
                         familyName: 'Person',
@@ -87,6 +91,7 @@ describe('cognitoAuthn', () => {
                         email: 'gp@example.com',
                     },
                     expectedResult: ok({
+                        id: testID,
                         role: 'STATE_USER',
                         email: 'gp@example.com',
                         stateCode: 'FL',
@@ -103,6 +108,7 @@ describe('cognitoAuthn', () => {
                         email: 'gp@example.com',
                     },
                     expectedResult: ok({
+                        id: testID,
                         role: 'STATE_USER',
                         email: 'gp@example.com',
                         stateCode: 'FL',
@@ -136,7 +142,10 @@ describe('cognitoAuthn', () => {
             ]
 
             tests.forEach((test) => {
-                const actualResult = userTypeFromAttributes(test.attributes)
+                const actualResult = userTypeFromAttributes(
+                    testID,
+                    test.attributes
+                )
 
                 expect(actualResult).toEqual(test.expectedResult)
             })

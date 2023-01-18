@@ -8,8 +8,10 @@ describe('localLogin', () => {
 
     it('loads as expected', async () => {
         const testUser: LocalUserType = {
+            id: 'foo-bar',
             email: 'toph@dmas.virginia.gov',
-            name: 'Toph',
+            givenName: 'Toph',
+            familyName: 'Earth',
             role: 'STATE_USER',
             stateCode: 'VA',
         }
@@ -21,8 +23,10 @@ describe('localLogin', () => {
 
     it('logs out correctly', async () => {
         const testUser: LocalUserType = {
+            id: 'foo-bar',
             email: 'toph@dmas.virginia.gov',
-            name: 'Toph',
+            givenName: 'Toph',
+            familyName: 'Earth',
             role: 'STATE_USER',
             stateCode: 'VA',
         }

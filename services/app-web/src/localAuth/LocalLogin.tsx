@@ -23,21 +23,28 @@ import { LocalUserType } from './LocalUserType'
 
 const localUsers: LocalUserType[] = [
     {
+        id: 'user1',
         email: 'aang@example.com',
-        name: 'Aang',
+        givenName: 'Aang',
+        familyName: 'Avatar',
         role: 'STATE_USER',
         stateCode: 'MN',
     },
     {
+        id: 'user2',
         email: 'toph@example.com',
-        name: 'Toph',
+        givenName: 'Toph',
+        familyName: 'Beifong',
         role: 'STATE_USER',
         stateCode: 'VA',
     },
     {
+        id: 'user3',
         email: 'zuko@example.com',
-        name: 'Zuko',
+        givenName: 'Zuko',
+        familyName: 'Hotman',
         role: 'CMS_USER',
+        stateAssignments: [],
     },
 ]
 
@@ -80,12 +87,12 @@ export function LocalLogin(): React.ReactElement {
                             <CardMedia>
                                 <img
                                     src={userAvatars[user.email]}
-                                    alt={user.name}
+                                    alt={user.givenName}
                                 />
                             </CardMedia>
                             <CardHeader>
                                 <h2 className="usa-card__heading">
-                                    {user.name}
+                                    {user.givenName}
                                 </h2>
                             </CardHeader>
                             <CardBody>
@@ -93,7 +100,7 @@ export function LocalLogin(): React.ReactElement {
                             </CardBody>
                             <CardFooter>
                                 <Button
-                                    data-testid={`${user.name}Button`}
+                                    data-testid={`${user.givenName}Button`}
                                     type="submit"
                                     disabled={loginStatus === 'LOADING'}
                                     onClick={() => login(user)}

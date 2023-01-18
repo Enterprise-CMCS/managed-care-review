@@ -3,7 +3,7 @@ import { StateType } from './StateType'
 type UserType = StateUserType | CMSUserType | AdminUserType
 
 type StateUserType = {
-    id?: string
+    id: string
     role: 'STATE_USER'
     email: string
     stateCode: string
@@ -12,7 +12,7 @@ type StateUserType = {
 }
 
 type CMSUserType = {
-    id?: string
+    id: string
     role: 'CMS_USER'
     email: string
     givenName: string
@@ -21,7 +21,7 @@ type CMSUserType = {
 }
 
 type AdminUserType = {
-    id?: string
+    id: string
     role: 'ADMIN_USER'
     email: string
     givenName: string
