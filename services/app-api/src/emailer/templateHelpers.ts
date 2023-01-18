@@ -7,7 +7,7 @@ import {
     SubmissionType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { EmailConfiguration, StateAnalystsEmails } from '.'
-import { ProgramType, UserType } from '../domain-models'
+import { ProgramType } from '../domain-models'
 import { logError } from '../logger'
 import { pruneDuplicateEmails } from './formatters'
 
@@ -134,27 +134,6 @@ const generateCMSReviewerEmails = (
     }
 }
 
-// Maybe have this called in the resolvers so that submitter emails can be passed into this.
-// Instead of `user` we just pass an array of submitters. Submitters are generated using all the revisions and only
-//    resolvers have access to all the revisions.
-// Then we can prune all the emails in this one function
-const generateStateReceiverEmails = (
-    pkg: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType,
-    user?: UserType
-): string[] => {
-    const stateReceiverEmails: string[] = []
-    //Only add current user email if user is passed in a role is state user
-    if (user?.email && user?.role === 'STATE_USER') {
-        stateReceiverEmails.push(user.email)
-    }
-
-    pkg.stateContacts.forEach((contact) =>
-        stateReceiverEmails.push(contact.email)
-    )
-
-    return pruneDuplicateEmails(stateReceiverEmails)
-}
-
 //Finds all package program and rate program ids in a package and combines them into one array removing duplicates.
 const findAllPackageProgramIds = (
     pkg: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
@@ -213,7 +192,6 @@ export {
     CHIP_PROGRAMS_UUID,
     includesChipPrograms,
     generateCMSReviewerEmails,
-    generateStateReceiverEmails,
     renderTemplate,
     SubmissionTypeRecord,
     findAllPackageProgramIds,
