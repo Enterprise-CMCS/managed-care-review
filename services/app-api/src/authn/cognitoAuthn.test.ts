@@ -45,6 +45,8 @@ describe('cognitoAuthn', () => {
                 expectedResult: Result<UserType, Error>
             }
 
+            const testID = 'foobar'
+
             const tests: samlAttrTest[] = [
                 {
                     attributes: {
@@ -55,10 +57,10 @@ describe('cognitoAuthn', () => {
                         email: 'gp@example.com',
                     },
                     expectedResult: ok({
+                        id: testID,
                         role: 'STATE_USER',
                         email: 'gp@example.com',
-                        name: 'Generic Person',
-                        state_code: 'VA',
+                        stateCode: 'VA',
                         givenName: 'Generic',
                         familyName: 'Person',
                     }),
@@ -71,11 +73,12 @@ describe('cognitoAuthn', () => {
                         email: 'gp@example.com',
                     },
                     expectedResult: ok({
+                        id: testID,
                         role: 'CMS_USER',
                         email: 'gp@example.com',
-                        name: 'Generic Person',
                         familyName: 'Person',
                         givenName: 'Generic',
+                        stateAssignments: [],
                     }),
                 },
                 {
@@ -88,10 +91,10 @@ describe('cognitoAuthn', () => {
                         email: 'gp@example.com',
                     },
                     expectedResult: ok({
+                        id: testID,
                         role: 'STATE_USER',
                         email: 'gp@example.com',
-                        name: 'Generic Person',
-                        state_code: 'FL',
+                        stateCode: 'FL',
                         givenName: 'Generic',
                         familyName: 'Person',
                     }),
@@ -105,10 +108,10 @@ describe('cognitoAuthn', () => {
                         email: 'gp@example.com',
                     },
                     expectedResult: ok({
+                        id: testID,
                         role: 'STATE_USER',
                         email: 'gp@example.com',
-                        name: 'Generic Person',
-                        state_code: 'FL',
+                        stateCode: 'FL',
                         givenName: 'Generic',
                         familyName: 'Person',
                     }),
@@ -139,7 +142,10 @@ describe('cognitoAuthn', () => {
             ]
 
             tests.forEach((test) => {
-                const actualResult = userTypeFromAttributes(test.attributes)
+                const actualResult = userTypeFromAttributes(
+                    testID,
+                    test.attributes
+                )
 
                 expect(actualResult).toEqual(test.expectedResult)
             })

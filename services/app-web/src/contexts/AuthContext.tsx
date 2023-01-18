@@ -114,7 +114,6 @@ function AuthProvider({
         const ldUser: ld.LDUser = {
             key: user.email,
             email: user.email,
-            name: user.name,
             custom: {
                 role: user.role,
             },

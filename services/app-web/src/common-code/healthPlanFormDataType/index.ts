@@ -46,3 +46,6 @@ export {
 
 export type { HealthPlanFormDataType } from './HealthPlanFormDataType'
 export type { ProgramArgType, StateType } from './State'
+
+export { StateCodes, isValidStateCode } from './StateCodeType'
+export type { StateCodeType } from './StateCodeType'

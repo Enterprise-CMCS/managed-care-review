@@ -92,31 +92,54 @@ const submissions: PackageInDashboardType[] = [
     },
 ]
 
-describe('HealthPlanPackageTable cms user tests', () => {
+describe('HealthPlanPackageTable for CMS User (with filters)', () => {
     const mockCMSUser: User = {
         __typename: 'CMSUser' as const,
+        id: 'foo-id',
+        givenName: 'Bob',
+        familyName: 'Dumas',
         role: 'CMS User',
         email: 'cms@exmaple.com',
-        name: 'Bob it user',
+        stateAssignments: [],
     }
+
+    it('renders table and caption if passed in', async () => {
+        renderWithProviders(
+            <HealthPlanPackageTable
+                tableData={submissions}
+                user={mockCMSUser}
+                caption="Table 1"
+                showFilters
+            />
+        )
+        expect(screen.getByRole('table')).toBeInTheDocument()
+        expect(screen.getByText('Table 1')).toBeInTheDocument()
+    })
 
     it('renders table with expected number of submissions', async () => {
         renderWithProviders(
             <HealthPlanPackageTable
                 tableData={submissions}
                 user={mockCMSUser}
+                showFilters
             />
         )
         const rows = await screen.findAllByRole('row')
         expect(screen.getByRole('table')).toBeInTheDocument()
         //Expect 5 rows. 4 data rows and 1 header row
         expect(rows).toHaveLength(5)
-        expect(screen.getByText('4 submissions')).toBeInTheDocument()
+        expect(
+            screen.getByText('Displaying 4 of 4 submissions')
+        ).toBeInTheDocument()
     })
 
     it('displays no submission text when no submitted packages exist', async () => {
         renderWithProviders(
-            <HealthPlanPackageTable tableData={[]} user={mockCMSUser} />,
+            <HealthPlanPackageTable
+                tableData={[]}
+                user={mockCMSUser}
+                showFilters
+            />,
             {
                 apolloProvider: {
                     mocks: [
@@ -141,9 +164,10 @@ describe('HealthPlanPackageTable cms user tests', () => {
             <HealthPlanPackageTable
                 tableData={submissions}
                 user={mockCMSUser}
+                showFilters
             />
         )
-        const submissionsInTable = await screen.getAllByTestId(`submission-id`)
+        const submissionsInTable = screen.getAllByTestId(`submission-id`)
         const table = screen.getByRole('table')
         const [columnNames] = within(table).getAllByRole('rowgroup')
         expect(within(columnNames).getByText(/ID/)).toBeTruthy()
@@ -160,6 +184,7 @@ describe('HealthPlanPackageTable cms user tests', () => {
             <HealthPlanPackageTable
                 tableData={submissions}
                 user={mockCMSUser}
+                showFilters
             />
         )
 
@@ -191,6 +216,7 @@ describe('HealthPlanPackageTable cms user tests', () => {
             <HealthPlanPackageTable
                 tableData={stateSubmissions}
                 user={mockCMSUser}
+                showFilters
             />
         )
 
@@ -315,7 +341,7 @@ describe('HealthPlanPackageTable cms user tests', () => {
         expect(stateCombobox).toBeInTheDocument()
 
         //Open combobox
-        await selectEvent.openMenu(stateCombobox)
+        selectEvent.openMenu(stateCombobox)
         //Expect combobox options to exist
         const comboboxOptions = screen.getByTestId('state-filter-options')
         expect(comboboxOptions).toBeInTheDocument()
@@ -408,7 +434,7 @@ describe('HealthPlanPackageTable cms user tests', () => {
         expect(submissionTypeCombobox).toBeInTheDocument()
 
         //Open state combobox and select Minnesota option
-        await selectEvent.openMenu(stateCombobox)
+        selectEvent.openMenu(stateCombobox)
         const stateOptions = screen.getByTestId('state-filter-options')
         expect(stateOptions).toBeInTheDocument()
         await waitFor(async () => {
@@ -420,7 +446,7 @@ describe('HealthPlanPackageTable cms user tests', () => {
         })
 
         //Open submission type combobox and select Minnesota option
-        await selectEvent.openMenu(submissionTypeCombobox)
+        selectEvent.openMenu(submissionTypeCombobox)
         const submissionTypeOptions = screen.getByTestId(
             'submissionType-filter-options'
         )
@@ -507,14 +533,14 @@ describe('HealthPlanPackageTable cms user tests', () => {
             within(submissionTypeFilter).getByRole('combobox')
 
         //Open state combobox and select Minnesota option
-        await selectEvent.openMenu(stateCombobox)
+        selectEvent.openMenu(stateCombobox)
         const stateOptions = screen.getByTestId('state-filter-options')
         await waitFor(async () => {
             await selectEvent.select(stateOptions, 'Minnesota')
         })
 
         //Open submission type combobox and select Contract action and rate certification option
-        await selectEvent.openMenu(submissionTypeCombobox)
+        selectEvent.openMenu(submissionTypeCombobox)
         const submissionTypeOptions = screen.getByTestId(
             'submissionType-filter-options'
         )
@@ -538,7 +564,9 @@ describe('HealthPlanPackageTable cms user tests', () => {
         //Expect 3 data rows and 1 header row, total 4 rows
         await userEvent.click(clearFiltersButton)
         expect(await screen.findAllByRole('row')).toHaveLength(4)
-        expect(screen.getByText('3 submissions')).toBeInTheDocument()
+        expect(
+            screen.getByText('Displaying 3 of 3 submissions')
+        ).toBeInTheDocument()
     })
 
     it('displays no results found when filters return no results', async () => {
@@ -575,7 +603,7 @@ describe('HealthPlanPackageTable cms user tests', () => {
         expect(stateCombobox).toBeInTheDocument()
 
         //Open combobox
-        await selectEvent.openMenu(stateCombobox)
+        selectEvent.openMenu(stateCombobox)
         //Expect combobox options to exist
         const comboboxOptions = screen.getByTestId('state-filter-options')
         expect(comboboxOptions).toBeInTheDocument()
@@ -594,7 +622,7 @@ describe('HealthPlanPackageTable cms user tests', () => {
             within(submissionTypeFilter).getByRole('combobox')
 
         //Open submission type combobox and select Contract action only option
-        await selectEvent.openMenu(submissionTypeCombobox)
+        selectEvent.openMenu(submissionTypeCombobox)
         const submissionTypeOptions = screen.getByTestId(
             'submissionType-filter-options'
         )
@@ -683,7 +711,7 @@ describe('HealthPlanPackageTable cms user tests', () => {
         expect(submissionTypeCombobox).toBeInTheDocument()
 
         //Open state combobox and select Minnesota option
-        await selectEvent.openMenu(stateCombobox)
+        selectEvent.openMenu(stateCombobox)
         const stateOptionOne = screen.getByTestId('state-filter-options')
         expect(stateOptionOne).toBeInTheDocument()
         await waitFor(async () => {
@@ -695,10 +723,10 @@ describe('HealthPlanPackageTable cms user tests', () => {
         })
 
         //Expect 1 filter applied
-        expect(screen.getByText('Filters (1 applied)')).toBeInTheDocument()
+        expect(screen.getByText('1 filter applied')).toBeInTheDocument()
 
         //Open state combobox and select Ohio option
-        await selectEvent.openMenu(stateCombobox)
+        selectEvent.openMenu(stateCombobox)
         const stateOptionTwo = screen.getByTestId('state-filter-options')
         expect(stateOptionTwo).toBeInTheDocument()
         await waitFor(async () => {
@@ -707,10 +735,10 @@ describe('HealthPlanPackageTable cms user tests', () => {
         })
 
         //Expect 2 filter applied
-        expect(screen.getByText('Filters (2 applied)')).toBeInTheDocument()
+        expect(screen.getByText('2 filters applied')).toBeInTheDocument()
 
         //Open submission type combobox and select contact and rate option
-        await selectEvent.openMenu(submissionTypeCombobox)
+        selectEvent.openMenu(submissionTypeCombobox)
         const submissionTypeOptions = screen.getByTestId(
             'submissionType-filter-options'
         )
@@ -734,7 +762,7 @@ describe('HealthPlanPackageTable cms user tests', () => {
         const rows = await screen.findAllByRole('row')
         expect(rows).toHaveLength(4)
         //Expect 3 applied filters text
-        expect(screen.getByText('Filters (3 applied)')).toBeInTheDocument()
+        expect(screen.getByText('3 filters applied')).toBeInTheDocument()
         expect(
             screen.getByText('Displaying 3 of 4 submissions')
         ).toBeInTheDocument()
@@ -744,8 +772,10 @@ describe('HealthPlanPackageTable cms user tests', () => {
 describe('HealthPlanPackageTable state user tests', () => {
     const mockStateUser: User = {
         __typename: 'StateUser' as const,
+        id: 'foo-id',
+        givenName: 'Bob',
+        familyName: 'Statie',
         role: 'State User',
-        name: 'Jerry it user',
         email: 'state@example.com',
         state: {
             __typename: 'State',
@@ -762,7 +792,7 @@ describe('HealthPlanPackageTable state user tests', () => {
                 user={mockStateUser}
             />
         )
-        const submissionsInTable = await screen.getAllByTestId(`submission-id`)
+        const submissionsInTable = screen.getAllByTestId(`submission-id`)
         const table = screen.getByRole('table')
         const [columnNames] = within(table).getAllByRole('rowgroup')
         expect(within(columnNames).getByText(/ID/)).toBeTruthy()

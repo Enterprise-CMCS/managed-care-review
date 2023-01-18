@@ -8,7 +8,6 @@ import {
 import { UserType } from '../domain-models'
 import { performance } from 'perf_hooks'
 import { Store, InsertUserArgsType, isStoreError } from '../postgres'
-import { User } from '@prisma/client'
 
 export function parseAuthProvider(
     authProvider: string
@@ -82,9 +81,12 @@ async function fetchUserFromCognito(
 const CMS_ROLE_ATTRIBUTE = 'macmcrrs-cms-user'
 const STATE_ROLE_ATTRIBUTE = 'macmcrrs-state-user'
 
-export function userTypeFromAttributes(attributes: {
-    [key: string]: string
-}): Result<UserType, Error> {
+export function userTypeFromAttributes(
+    id: string,
+    attributes: {
+        [key: string]: string
+    }
+): Result<UserType, Error> {
     // check for all the shared attrs here
     if (
         !(
@@ -102,8 +104,6 @@ export function userTypeFromAttributes(attributes: {
         )
     }
 
-    const fullName = attributes.given_name + ' ' + attributes.family_name
-
     // Roles are a list of all the roles a user has in IDM.
     const roleAttribute = attributes['custom:role']
     const roles = roleAttribute.split(',')
@@ -120,10 +120,10 @@ export function userTypeFromAttributes(attributes: {
             )
         }
         return ok({
+            id,
             role: 'STATE_USER',
             email: attributes.email,
-            name: fullName,
-            state_code: attributes['custom:state_code'],
+            stateCode: attributes['custom:state_code'],
             givenName: attributes.given_name,
             familyName: attributes.family_name,
         })
@@ -131,54 +131,19 @@ export function userTypeFromAttributes(attributes: {
 
     if (roles.includes(CMS_ROLE_ATTRIBUTE)) {
         return ok({
+            id,
             role: 'CMS_USER',
             email: attributes.email,
-            name: fullName,
             givenName: attributes.given_name,
             familyName: attributes.family_name,
+            stateAssignments: [],
         })
     }
 
     return err(new Error('Unsupported user role:  ' + roleAttribute))
 }
 
-// This converts from the Prisma `User` to the app's `UserType`
-export function userTypeFromUser(user: User): Result<UserType, Error> {
-    if (user.role === 'ADMIN_USER') {
-        return ok({
-            role: 'ADMIN_USER',
-            email: user.email,
-            givenName: user.givenName,
-            familyName: user.familyName,
-            name: user.givenName + ' ' + user.familyName,
-        })
-    }
-
-    if (user.role === 'CMS_USER') {
-        return ok({
-            role: 'CMS_USER',
-            email: user.email,
-            givenName: user.givenName,
-            familyName: user.familyName,
-            name: user.givenName + ' ' + user.familyName,
-        })
-    }
-
-    if (user.role === 'STATE_USER') {
-        return ok({
-            role: 'STATE_USER',
-            email: user.email,
-            givenName: user.givenName,
-            familyName: user.familyName,
-            name: user.givenName + ' ' + user.familyName,
-            state_code: user.stateCode ?? '',
-        })
-    }
-
-    return err(new Error('Unsupported user role:  ' + user.role))
-}
-
-// userFromCognitoAuthProvider hits the Cogntio API to get the information in the authProvider
+// userFromCognitoAuthProvider hits the Cognito API to get the information in the authProvider
 export async function userFromCognitoAuthProvider(
     authProvider: string,
     store?: Store
@@ -227,26 +192,19 @@ export async function userFromCognitoAuthProvider(
 
         // if it is a state user, insert the state they are from
         if (cognitoUser.role === 'STATE_USER') {
-            userToInsert.stateCode = cognitoUser.state_code
+            userToInsert.stateCode = cognitoUser.stateCode
         }
 
-        try {
-            const result = await store.insertUser(userToInsert)
-            if (isStoreError(result)) {
-                console.error(
-                    `Could not insert user: ${JSON.stringify(result)}`
-                )
-                return cognitoUserResult
-            }
-            return userTypeFromUser(result)
-        } catch (e) {
-            console.error(`Could not insert user: ${JSON.stringify(e)}`)
+        const result = await store.insertUser(userToInsert)
+        if (isStoreError(result)) {
+            console.error(`Could not insert user: ${JSON.stringify(result)}`)
             return cognitoUserResult
         }
+        return ok(result)
     }
 
     // we return the user we got from aurora
-    return userTypeFromUser(auroraUser)
+    return ok(auroraUser)
 }
 
 async function lookupUserCognito(
@@ -265,21 +223,19 @@ async function lookupUserCognito(
     // we lose some type safety here...
     const attributes = userAttrDict(currentUser)
 
-    return userTypeFromAttributes(attributes)
+    return userTypeFromAttributes(userId, attributes)
 }
 
 async function lookupUserAurora(
     store: Store,
     userID: string
-): Promise<User | undefined | Error> {
-    try {
-        const userFromPG = await store.findUser(userID)
-        // try a basic type guard here -- a User will have an email.
-        if ('email' in userFromPG) {
-            return userFromPG
-        }
-    } catch (e) {
-        throw new Error(`Error looking up user in Postgres: ${e}`)
+): Promise<UserType | undefined | Error> {
+    const userFromPG = await store.findUser(userID)
+    if (isStoreError(userFromPG)) {
+        return new Error(
+            `Error looking up user in postgres: ${userFromPG.code}: ${userFromPG.message}`
+        )
     }
-    return undefined
+
+    return userFromPG
 }

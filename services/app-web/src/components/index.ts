@@ -1,7 +1,10 @@
-export { DataDetail } from './DataDetail'
-
+export {
+    DataDetail,
+    DataDetailContactField,
+    DataDetailDateRange,
+    DataDetailMissingField,
+} from './DataDetail'
 export { DoubleColumnGrid } from './DoubleColumnGrid'
-
 export { DownloadButton } from './DownloadButton'
 
 export { DynamicStepIndicator } from './DynamicStepIndicator'
