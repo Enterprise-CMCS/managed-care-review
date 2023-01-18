@@ -17,6 +17,7 @@ import {
     isStateUser,
     HealthPlanPackageType,
     packageStatus,
+    packageSubmitters,
 } from '../domain-models'
 import { Emailer } from '../emailer'
 import { MutationResolvers, State } from '../gen/gqlServer'
@@ -295,6 +296,9 @@ export function submitHealthPlanPackageResolver(
             stateAnalystsEmails = []
         }
 
+        // Get submitter email from every pkg submitted revision.
+        const submitterEmails = packageSubmitters(updatedPackage)
+
         const statePrograms = store.findStatePrograms(updatedPackage.stateCode)
 
         if (statePrograms instanceof Error) {
@@ -317,7 +321,7 @@ export function submitHealthPlanPackageResolver(
             statePackageEmailResult = await emailer.sendResubmittedStateEmail(
                 lockedFormData,
                 updateInfo,
-                user,
+                submitterEmails,
                 statePrograms
             )
         } else if (status === 'SUBMITTED') {
@@ -328,7 +332,7 @@ export function submitHealthPlanPackageResolver(
             )
             statePackageEmailResult = await emailer.sendStateNewPackage(
                 lockedFormData,
-                user,
+                submitterEmails,
                 statePrograms
             )
         }
