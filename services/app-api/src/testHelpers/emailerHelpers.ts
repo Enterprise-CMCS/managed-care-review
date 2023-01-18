@@ -65,12 +65,12 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
             }
         ),
         sendCMSNewPackage: async function (
-            submission,
+            formData,
             stateAnalystsEmails,
             statePrograms
         ): Promise<void | Error> {
             const emailData = await newPackageCMSEmail(
-                submission,
+                formData,
                 config,
                 stateAnalystsEmails,
                 statePrograms
@@ -82,13 +82,13 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
             }
         },
         sendStateNewPackage: async function (
-            submission,
-            user,
+            formData,
+            submitterEmails,
             statePrograms
         ): Promise<void | Error> {
             const emailData = await newPackageStateEmail(
-                submission,
-                user,
+                formData,
+                submitterEmails,
                 config,
                 statePrograms
             )
@@ -99,13 +99,13 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
             }
         },
         sendUnlockPackageCMSEmail: async function (
-            submission,
+            formData,
             updateInfo,
             stateAnalystsEmails,
             statePrograms
         ): Promise<void | Error> {
             const emailData = await unlockPackageCMSEmail(
-                submission,
+                formData,
                 updateInfo,
                 config,
                 stateAnalystsEmails,
@@ -119,15 +119,17 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
             }
         },
         sendUnlockPackageStateEmail: async function (
-            submission,
+            formData,
             updateInfo,
-            statePrograms
+            statePrograms,
+            submitterEmails
         ): Promise<void | Error> {
             const emailData = await unlockPackageStateEmail(
-                submission,
+                formData,
                 updateInfo,
                 config,
-                statePrograms
+                statePrograms,
+                submitterEmails
             )
             if (emailData instanceof Error) {
                 return emailData
@@ -136,14 +138,14 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
             }
         },
         sendResubmittedStateEmail: async function (
-            submission,
+            formData,
             updateInfo,
-            user,
+            submitterEmails,
             statePrograms
         ): Promise<void | Error> {
             const emailData = await resubmitPackageStateEmail(
-                submission,
-                user,
+                formData,
+                submitterEmails,
                 updateInfo,
                 config,
                 statePrograms
@@ -155,13 +157,13 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
             }
         },
         sendResubmittedCMSEmail: async function (
-            submission,
+            formData,
             updateInfo,
             stateAnalystsEmails,
             statePrograms
         ): Promise<void | Error> {
             const emailData = await resubmitPackageCMSEmail(
-                submission,
+                formData,
                 updateInfo,
                 config,
                 stateAnalystsEmails,
