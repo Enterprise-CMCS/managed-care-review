@@ -61,7 +61,7 @@ serverless deploy --stage ${stage_name} --param='bootstrap=true'
 ### Updating AWS permissions for a workflow
 Here's an example for a common use case: you want to add a new step to a workflow job that calls an AWS API (let's say it's Security Hub), and access to that API isn't currently permitted by the existing OIDC role.
 
-You're making this change on your feature branch, `mybranch`.  You update the `githubActionsAllowedAwsActions` parameter in the `github-oidc` service's `serverless.yml` by adding "securityhub:*".  When you push your change and the `github-oidc` service is deployed for the feature branch, it will create a new IAM role that includes Security Hub permissions and has a trust relationship with the AWS IdP provider for GitHub that was created when bootstrapping.  It will also create a GitHub secret called `MYBRANCH_OIDC_ROLE_ARN`.  You can reference this secret when getting AWS credentials to test out my new workflow that talks to Security Hub on my feature branch.
+You're making this change on your feature branch, `mybranch`.  You update the `githubActionsAllowedAwsActions` parameter in the `github-oidc` service's `serverless.yml` by adding "securityhub:*".  When you push your change and the `github-oidc` service is deployed for the feature branch, it will create/update an OIDC service role that includes Security Hub permissions and has a trust relationship with the AWS IdP provider for GitHub that was created when bootstrapping.  It will also create a GitHub secret called `MYBRANCH_OIDC_ROLE_ARN`.  You can reference this secret when getting AWS credentials to test out the workflow that talks to Security Hub on your feature branch. Note that if you are creating/updating an OIDC role and testing it in the same workflow run, you may need to add temporary step to pause and wait for the role to settle before using it due to [AWS's eventual consistency model](https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_general.html#troubleshoot_general_eventual-consistency).
 
 When it's time to merge your feature branch to `main`, the service will update roles and set `${ENVIRONMENT}_OIDC_ROLE_ARN` secrets for the respective environments as the change is promoted.  When the feature branch is deleted, the `destroy` script will clean up the now-unneeded `MYBRANCH_OIDC_ROLE_ARN` secret.
 
@@ -131,7 +131,7 @@ The trust policy verifies claims in the JWT based on the following inputs:
 
 #### Subject Claim (sub)
 
-Subject claims allow you to configure the GitHub branch or environment that is permitted to perform AWS actions via the OIDC provider. [Read more about subject claims](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#example-subject-claims)
+Subject claims allow you to configure the GitHub branch or environment that is permitted to perform AWS actions via the OIDC provider. This is an extra layer of insurance that changes in resources are targeted to the correct account.  [Read more about subject claims](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#example-subject-claims) and see `params.{val, prod, default}.subjectClaimFilters` for more detail on how this service configures subject claims.
 
 
 #### Audience Claim (aud)

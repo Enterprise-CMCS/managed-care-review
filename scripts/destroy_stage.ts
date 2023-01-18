@@ -1,4 +1,4 @@
-// this script requires a GitHub token with 'repo' scope set as an env var called GITHUB_TOKEN
+// this script requires a GitHub personal access token with 'repo' scope set as an env var called GITHUB_TOKEN
 
 import {
     CloudFormationClient,

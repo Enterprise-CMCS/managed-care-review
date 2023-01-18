@@ -24,7 +24,7 @@ custom:
       deploy:finalize: |
         stage=${sls:stage}
         service_role_arn=$(serverless info --stage $stage --verbose | sed -e '1,/^Stack Outputs/d' | sed -n -e "s/^.*serviceRoleArn: //p")
-        formatted_stage=$(if [ $stage == 'main' ];
+        formatted_stage=$(if [ $stage = 'main' ];
         then
             echo 'DEV'
         else
@@ -77,7 +77,7 @@ params:
       - "secretsmanager:*"
       - "ssm:*"
       - "s3:*"
-      - "wafv2:"
+      - "wafv2:*"
 
 provider:
   name: aws

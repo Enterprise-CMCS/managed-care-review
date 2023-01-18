@@ -21,7 +21,36 @@ permissions:
   id-token: write
 
 jobs:
+  github-oidc:
+      if: ${{ contains(inputs.changed_services, 'github-oidc') }}
+      runs-on: ubuntu-20.04
+      steps:
+        - name: Check out repository
+          uses: actions/checkout@v3
+
+        - name: Setup env
+          uses: ./.github/actions/setup_env
+
+        - name: build scripts
+          shell: bash
+          run: |
+            lerna run build:ci-scripts
+
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v1-node16
+          with:
+            aws-region: ${{ secrets.aws_default_region }}
+            role-to-assume: ${{ secrets.oidc_role_arn }}
+
+        - name: deploy github-oidc
+          id: deploy-github-oidc
+          env:
+            GITHUB_TOKEN: ${{ secrets.personal_access_token }}
+          run: |
+            pushd services/github-oidc && npx serverless deploy --stage ${{ inputs.stage_name }}
+
   postgres:
+    needs: github-oidc
     if: ${{ contains(inputs.changed_services, 'postgres') }}
     runs-on: ubuntu-20.04
     steps:
@@ -43,6 +72,7 @@ jobs:
           pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   ui:
+    needs: github-oidc
     if: ${{ contains(inputs.changed_services, 'ui') }}
     runs-on: ubuntu-20.04
     steps:
@@ -64,6 +94,7 @@ jobs:
           pushd services/ui && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   storybook:
+    needs: github-oidc
     if: ${{ contains(inputs.changed_services, 'storybook') }}
     runs-on: ubuntu-20.04
     steps:
@@ -85,6 +116,7 @@ jobs:
           pushd services/storybook && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   uploads:
+    needs: github-oidc
     if: ${{ contains(inputs.changed_services, 'uploads') }}
     runs-on: ubuntu-20.04
     steps:
@@ -106,6 +138,7 @@ jobs:
           pushd services/uploads && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   infra-api:
+    needs: github-oidc
     if: ${{ contains(inputs.changed_services, 'infra-api') }}
     runs-on: ubuntu-20.04
     steps:
@@ -127,7 +160,7 @@ jobs:
           pushd services/infra-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   ui-auth:
-    needs: [infra-api, ui, uploads]
+    needs: [github-oidc, infra-api, ui, uploads]
     if: ${{ contains(inputs.changed_services, 'ui-auth') }}
     runs-on: ubuntu-20.04
     steps:
@@ -147,31 +180,3 @@ jobs:
         id: deploy-ui-auth
         run: |
           pushd services/ui-auth && npx serverless deploy --stage ${{ inputs.stage_name }}
-
-  github-oidc:
-    if: ${{ contains(inputs.changed_services, 'github-oidc') }}
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: build scripts
-        shell: bash
-        run: |
-          lerna run build:ci-scripts
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
-        with:
-          aws-region: ${{ secrets.aws_default_region }}
-          role-to-assume: ${{ secrets.oidc_role_arn }}
-
-      - name: deploy github-oidc
-        id: deploy-github-oidc
-        env:
-          GITHUB_TOKEN: ${{ secrets.personal_access_token }}
-        run: |
-          pushd services/github-oidc && npx serverless deploy --stage ${{ inputs.stage_name }}

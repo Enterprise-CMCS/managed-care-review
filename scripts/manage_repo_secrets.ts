@@ -5,17 +5,37 @@ import { RequestError } from "@octokit/request-error"
 import sodium from 'libsodium-wrappers'
 import yargs from 'yargs'
 
-const octokit = new Octokit()
 const owner = 'CMSgov'
 const repo = 'managed-care-review'
 const ownerAndRepo = `${owner}/${repo}`
 
-// adapted from https://docs.github.com/en/rest/actions/secrets?apiVersion=2022-11-28#create-or-update-a-repository-secret
+/**
+ * throws an error if secret name is not valid per https://docs.github.com/en/actions/security-guides/encrypted-secrets#naming-your-secrets
+ * */
+const validateSecretName = (name: string): Error | void => {
+  const nameRegex = new RegExp("^(?![0-9]|GITHUB_)[a-zA-Z0-9_]*$")
+  if (!name.match(nameRegex)) {
+    return new Error(`The secret name "${name}" violates GitHub's constraints:
+    - Names can only contain alphanumeric characters (not case-sensitive) or underscores
+    - Names must not start with the GITHUB_ prefix
+    - Names must not start with a number`)
+  }
+}
+
+/**
+* adapted from https://docs.github.com/en/rest/actions/secrets?apiVersion=2022-11-28#create-or-update-a-repository-secret
+*/
 const setSecret = async (name: string, value: string): Promise<void> => {
+  const validateError = validateSecretName(name)
+  if (validateError instanceof Error) {
+    console.error(`${validateError}`)
+    process.exit(1)
+  }
+
   // get GitHub repository public key
   let publicKeyResponse
   try {
-    publicKeyResponse = await octokit.actions.getRepoPublicKey({
+    publicKeyResponse = await client.actions.getRepoPublicKey({
       owner,
       repo
     })
@@ -39,7 +59,7 @@ const setSecret = async (name: string, value: string): Promise<void> => {
 
     // set the secret
     try {
-      await octokit.rest.actions.createOrUpdateRepoSecret({
+      await client.rest.actions.createOrUpdateRepoSecret({
         owner: 'CMSgov',
         repo: 'managed-care-review',
         secret_name: name,
@@ -54,9 +74,15 @@ const setSecret = async (name: string, value: string): Promise<void> => {
   })
 }
 
+/**
+ * Deletes a GitHub repo secret. Exits with a non-zero status in case of error. Exits with zero status if secret is not found (no action needed)
+ * @async
+ * @param name GitHub repo secret name
+ * @returns void
+ */
 const deleteSecret = async (name: string): Promise<void> => {
   try {
-    await octokit.rest.actions.deleteRepoSecret({
+    await client.rest.actions.deleteRepoSecret({
       owner: 'CMSgov',
       repo: 'managed-care-review',
       secret_name: name,
@@ -105,6 +131,15 @@ function main() {
     .alias('h', 'help')
     .strict()
     .argv
+}
+
+// initialize GitHub client
+let client: Octokit
+try {
+  client = new Octokit()
+} catch (e: any) {
+  console.error(`${e}`)
+  process.exit(1)
 }
 
 // don't run the main script if the module is being required rather than run directly
