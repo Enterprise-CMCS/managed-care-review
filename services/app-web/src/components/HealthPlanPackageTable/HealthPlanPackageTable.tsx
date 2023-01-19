@@ -332,9 +332,11 @@ export const HealthPlanPackageTable = ({
                         </tbody>
                         <caption className={caption ?? styles.srOnly}>
                             {caption || 'Table'}
-                            <span
-                                className={styles.srOnly}
-                            >{`, ${filtersApplied}, ${submissionCount}.`}</span>
+                            {showFilters && (
+                                <span className={styles.srOnly}>
+                                    {`, ${filtersApplied}, ${submissionCount}.`}
+                                </span>
+                            )}
                         </caption>
                     </Table>
                     {!hasFilteredRows && (
