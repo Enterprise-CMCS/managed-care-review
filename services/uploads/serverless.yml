@@ -150,7 +150,9 @@ resources:
             - Action:
                 - 's3:GetObject'
               Effect: 'Deny'
-              Resource: !Sub ${DocumentUploadsBucket.Arn}/*
+              Resource:
+                - !Sub ${DocumentUploadsBucket.Arn}/*
+                - !Sub ${QAUploadsBucket.Arn}/*
               Principal: '*'
               Condition:
                 StringNotEquals:
@@ -183,6 +185,8 @@ resources:
               Resource:
                 - !Sub ${DocumentUploadsBucket.Arn}
                 - !Sub ${DocumentUploadsBucket.Arn}/*
+                - !Sub ${QAUploadsBucket.Arn}
+                - !Sub ${QAUploadsBucket.Arn}/*
               Sid: DenyUnencryptedConnections
 
     LambdaInvokePermission:
@@ -219,6 +223,35 @@ resources:
                 - !Sub ${ClamDefsBucket.Arn}
                 - !Sub ${ClamDefsBucket.Arn}/*
               Sid: DenyUnencryptedConnections
+
+    QAUploadsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: !Sub ${self:service}-${sls:stage}-qa-${AWS::AccountId}
+        BucketEncryption:
+          ServerSideEncryptionConfiguration:
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: AES256
+        CorsConfiguration: # Set the CORS policy
+          CorsRules:
+            - AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000
+              ExposedHeaders:
+                - ETag
+        NotificationConfiguration:
+          LambdaConfigurations:
+            - Event: s3:ObjectCreated:*
+              Function: !GetAtt AvScanLambdaFunction.Arn
+      DependsOn: LambdaInvokePermission
 
   Outputs:
     DocumentUploadsBucketName:
