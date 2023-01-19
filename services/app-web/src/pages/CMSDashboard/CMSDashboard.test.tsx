@@ -12,12 +12,17 @@ import {
     renderWithProviders,
 } from '../../testHelpers/jestHelpers'
 import { CMSDashboard } from './CMSDashboard'
+import { User } from '../../gen/gqlClient'
 
 describe('CMSDashboard', () => {
-    const mockUser = {
+    const mockUser: User = {
         __typename: 'CMSUser' as const,
-        role: 'CMS User',
+        id: 'bob@dmas.mn.gov',
+        role: 'CMS_USER',
         email: 'bob@dmas.mn.gov',
+        givenName: 'b',
+        familyName: 'bob',
+        stateAssignments: [],
     }
     it('should display cms dashboard page', async () => {
         const screen = renderWithProviders(<CMSDashboard />, {
@@ -50,7 +55,7 @@ describe('CMSDashboard', () => {
             },
         })
 
-        await screen.findByText('Submissions')
+        await screen.findByRole('heading', { name: 'Submissions' })
         const rows = await screen.findAllByRole('row')
         rows.shift() // remove the column header row
 
@@ -81,7 +86,7 @@ describe('CMSDashboard', () => {
                 ],
             },
         })
-        await screen.findByText('Submissions')
+        await screen.findByRole('heading', { name: 'Submissions' })
         const row = await screen.findByTestId(`row-${submitted.id}`)
         const submissionType = within(row).getByTestId('submission-type')
         expect(submissionType).toHaveTextContent('Contract action only')
@@ -102,7 +107,7 @@ describe('CMSDashboard', () => {
                 ],
             },
         })
-        await screen.findByText('Submissions')
+        await screen.findByRole('heading', { name: 'Submissions' })
         const unlockedRow = await screen.findByTestId(`row-${unlocked.id}`)
         const tag1 = within(unlockedRow).getByTestId('submission-status')
         expect(tag1).toHaveTextContent('Unlocked')
@@ -135,7 +140,7 @@ describe('CMSDashboard', () => {
                 ],
             },
         })
-        await screen.findByText('Submissions')
+        await screen.findByRole('heading', { name: 'Submissions' })
         const unlockedRow = await screen.findByTestId(`row-${unlocked.id}`)
 
         // Confirm UNLOCKED status
