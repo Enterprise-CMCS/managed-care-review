@@ -331,7 +331,7 @@ export const HealthPlanPackageTable = ({
                             ))}
                         </tbody>
                         <caption className={caption ?? styles.srOnly}>
-                            {caption || 'Submissions table'}
+                            {caption || 'Submissions'}
                             <span className={styles.srOnly}>
                                 {`${
                                     showFilters && `, ${filtersApplied}`
