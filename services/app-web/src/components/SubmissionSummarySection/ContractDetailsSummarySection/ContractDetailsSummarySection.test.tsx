@@ -336,4 +336,64 @@ describe('ContractDetailsSummarySection', () => {
             'modifiedLengthOfContract',
         ])
     })
+
+    it('shows missing field error on amended provisions when expected', () => {
+        const contractWithUnansweredProvisions = {
+            ...mockContractAndRatesDraft(),
+            contractAmendmentInfo: {
+                modifiedProvisions: [],
+                unmodifiedProvisions: [],
+            },
+        }
+        renderWithProviders(
+            <ContractDetailsSummarySection
+                submission={contractWithUnansweredProvisions}
+                submissionName="MN-PMAP-0001"
+            />
+        )
+
+        const modifiedProvisions = screen.getByLabelText(
+            'This contract action includes new or modified provisions related to the following'
+        )
+        expect(
+            within(modifiedProvisions).queryByText(
+                /You must provide this information/
+            )
+        ).toBeInTheDocument()
+
+        const unmodifiedProvisions = screen.getByLabelText(
+            'This contract action does NOT include new or modified provisions related to the following'
+        )
+        expect(
+            within(unmodifiedProvisions).queryByText(
+                /You must provide this information/
+            )
+        ).toBeInTheDocument()
+    })
+    it('does not show missing field error on amended provisions when expected when valid fields present', () => {
+        renderWithProviders(
+            <ContractDetailsSummarySection
+                submission={mockContractAndRatesDraft()}
+                submissionName="MN-PMAP-0001"
+            />
+        )
+
+        const modifiedProvisions = screen.getByLabelText(
+            'This contract action includes new or modified provisions related to the following'
+        )
+        expect(
+            within(modifiedProvisions).queryByText(
+                /You must provide this information/
+            )
+        ).toBeNull()
+
+        const unmodifiedProvisions = screen.getByLabelText(
+            'This contract action does NOT include new or modified provisions related to the following'
+        )
+        expect(
+            within(unmodifiedProvisions).queryByText(
+                /You must provide this information/
+            )
+        ).toBeNull()
+    })
 })
