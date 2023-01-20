@@ -42,6 +42,21 @@ type Query {
     Errors: ForbiddenError: A non-AdminUser called this
     """
     indexUsers: IndexUsersPayload!
+
+    """
+    indexQuestions returns three arrays of Questions for the given HealthPlanPackage, one array
+    for each division that asks questions.
+
+    It can be called by CMS or State Users
+
+    Errors: 
+    - ForbiddenError: A State users attempts to request Questions for a HPP not in their state
+    - UserInputError: pkgID not found
+    """
+    indexQuestions(
+        input: IndexQuestionsInput!
+    ): IndexQuestionsPayload!
+
 }
 
 type Mutation {
@@ -153,6 +168,20 @@ type Mutation {
     updateCMSUser(
         input: UpdateCMSUserInput!
     ): UpdateCMSUserPayload!
+
+
+    createQuestion(
+        input: CreateQuestionInput!
+    ): CreateQuestionPayload!
+
+    updateQuestion(
+        input: UpdateQuestionInput!
+    ): UpdateQuestionPayload!
+
+    createQuestionResponse(
+        input: CreateQuestionResponseInput!
+    ): CreateQuestionResponsePayload!
+
 }
 
 input CreateHealthPlanPackageInput {
@@ -187,6 +216,62 @@ type HealthPlanPackageEdge {
 type IndexHealthPlanPackagesPayload {
     totalCount: Int
     edges: [HealthPlanPackageEdge!]!
+}
+
+input IndexQuestionsInput {
+    totalCount: Int
+    edges: [HealthPlanPackageEdge!]!
+}
+
+type IndexQuestionsPayload {
+    DMCOQuestions: QuestionList!
+    DMCPQuestions: QuestionList!
+    OACTQuestions: QuestionList!
+}
+
+type QuestionList {
+    totalCount: Int
+    edges: [QuestionEdge!]!
+}
+
+type QuestionEdge {
+    node: Question!
+}
+
+input DocumentInput {
+    name: String!
+    s3URL: String!
+}
+
+input CreateQuestionInput {
+    pkgID: ID!
+    documents: [DocumentInput!]!
+    noteText: String
+    dueDate: Date
+    rateIDs: [String!]
+}
+
+type CreateQuestionPayload {
+    question: Question!
+}
+
+input UpdateQuestionInput {
+    questionID: ID!
+    dueDate: Date
+}
+
+type UpdateQuestionPayload {
+    question: Question!
+}
+
+input CreateQuestionResponseInput {
+    questionID: ID!
+    documents: [DocumentInput!]!
+    noteText: String
+}
+
+type CreateQuestionResponsePayload {
+    response: QuestionResponse!
 }
 
 type UserEdge {
@@ -409,4 +494,40 @@ enum SubmissionType {
 enum ContractType {
     BASE
     AMENDMENT
+}
+
+"""
+Document represents a document that has been uploaded to S3. It can be retrieved at the s3URL
+by an authenticated user. 
+"""
+type Document {
+    name: String!
+    s3URL: String!
+}
+
+"""
+Question is a question sent by CMS to the States for a response. CMS may upload one or 
+more documents full of questions to a single Question. States submit a QuestionResponse 
+with documents that answer the questions posed by CMS.
+"""
+type Question {
+    id: ID!
+    pkgID: ID!
+    dateAdded: DateTime!
+    addedBy: CMSUser!
+    documents: [Document!]!
+    noteText: String
+    dueDate: Date
+    rateIDs: [String!]
+
+    responses: [QuestionResponse!]!
+}
+
+type QuestionResponse {
+    id: ID!
+    questionID: ID!
+    dateAdded: DateTime!
+    addedBy: StateUser!
+    documents: [Document!]!
+    noteText: String
 }
