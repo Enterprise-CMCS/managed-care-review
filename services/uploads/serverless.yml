@@ -141,6 +141,7 @@ resources:
             - Event: s3:ObjectCreated:*
               Function: !GetAtt AvScanLambdaFunction.Arn
       DependsOn: LambdaInvokePermission
+
     DocumentsUploadsBucketPolicy:
       Type: AWS::S3::BucketPolicy
       Properties:
@@ -152,7 +153,6 @@ resources:
               Effect: 'Deny'
               Resource:
                 - !Sub ${DocumentUploadsBucket.Arn}/*
-                - !Sub ${QAUploadsBucket.Arn}/*
               Principal: '*'
               Condition:
                 StringNotEquals:
@@ -185,8 +185,6 @@ resources:
               Resource:
                 - !Sub ${DocumentUploadsBucket.Arn}
                 - !Sub ${DocumentUploadsBucket.Arn}/*
-                - !Sub ${QAUploadsBucket.Arn}
-                - !Sub ${QAUploadsBucket.Arn}/*
               Sid: DenyUnencryptedConnections
 
     LambdaInvokePermission:
@@ -251,12 +249,70 @@ resources:
           LambdaConfigurations:
             - Event: s3:ObjectCreated:*
               Function: !GetAtt AvScanLambdaFunction.Arn
-      DependsOn: LambdaInvokePermission
+      DependsOn: QAInvokePermission
+
+    QAInvokePermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+        FunctionName: !GetAtt AvScanLambdaFunction.Arn
+        Action: lambda:InvokeFunction
+        Principal: s3.amazonaws.com
+        SourceAccount: !Sub ${AWS::AccountId}
+        SourceArn: !Sub arn:aws:s3:::${self:service}-${sls:stage}-qa-${AWS::AccountId}
+
+    QAUploadsBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref QAUploadsBucket
+        PolicyDocument:
+          Statement:
+            - Action:
+                - 's3:GetObject'
+              Effect: 'Deny'
+              Resource:
+                - !Sub ${QAUploadsBucket.Arn}/*
+              Principal: '*'
+              Condition:
+                StringNotEquals:
+                  s3:ExistingObjectTag/virusScanStatus:
+                    - 'CLEAN'
+                  s3:ExistingObjectTag/contentsPreviouslyScanned:
+                    - 'TRUE'
+                  aws:PrincipalArn: !GetAtt IamRoleLambdaExecution.Arn
+            - Action: 's3:PutObject'
+              Effect: Deny
+              Principal: '*'
+              NotResource:
+                - !Sub ${QAUploadsBucket.Arn}/*.csv
+                - !Sub ${QAUploadsBucket.Arn}/*.doc
+                - !Sub ${QAUploadsBucket.Arn}/*.docx
+                - !Sub ${QAUploadsBucket.Arn}/*.pdf
+                - !Sub ${QAUploadsBucket.Arn}/*.txt
+                - !Sub ${QAUploadsBucket.Arn}/*.xls
+                - !Sub ${QAUploadsBucket.Arn}/*.xlsx
+                - !Sub ${QAUploadsBucket.Arn}/*.zip
+                - !Sub ${QAUploadsBucket.Arn}/*.xlsm
+                - !Sub ${QAUploadsBucket.Arn}/*.xltm
+                - !Sub ${QAUploadsBucket.Arn}/*.xlam
+            - Effect: Deny
+              Action: 's3:*'
+              Principal: '*'
+              Condition:
+                Bool:
+                  'aws:SecureTransport': false
+              Resource:
+                - !Sub ${QAUploadsBucket.Arn}
+                - !Sub ${QAUploadsBucket.Arn}/*
+              Sid: DenyUnencryptedConnections
 
   Outputs:
     DocumentUploadsBucketName:
       Value: !Ref DocumentUploadsBucket
     DocumentUploadsBucketArn:
       Value: !GetAtt DocumentUploadsBucket.Arn
+    QAUploadsBucketName:
+      Value: !Ref QAUploadsBucket
+    QAUploadsBucketArn:
+      Value: !GetAtt QAUploadsBucket.Arn
     Region:
       Value: !Sub ${AWS::Region}
