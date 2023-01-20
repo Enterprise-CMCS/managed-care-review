@@ -219,8 +219,7 @@ type IndexHealthPlanPackagesPayload {
 }
 
 input IndexQuestionsInput {
-    totalCount: Int
-    edges: [HealthPlanPackageEdge!]!
+    pkgID: ID!
 }
 
 type IndexQuestionsPayload {
