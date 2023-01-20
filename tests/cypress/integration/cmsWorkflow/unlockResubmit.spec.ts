@@ -107,7 +107,7 @@ describe('CMS user', () => {
                 cy.logInAsStateUser()
 
                 // State user sees unlocked submission - check tag then submission link
-                cy.findByRole('heading', {name: 'Submissions'}).should('exist')
+                cy.findByText('Start new submission').should('exist')
                 cy.get('table')
                     .should('exist')
                     .findByText(submissionName)
