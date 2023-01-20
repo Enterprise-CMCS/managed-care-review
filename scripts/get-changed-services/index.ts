@@ -135,7 +135,7 @@ async function getChangedServicesSinceSha(
 
     const lernaList: LernaListItem[] = JSON.parse(stdout)
     if (stderr) {
-        console.info(stderr)
+        console.error(stderr)
         return new Error(`Lerna could not find a viable sha`)
     }
 
