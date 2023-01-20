@@ -46,6 +46,12 @@ async function main() {
     const lernaChangedServices = await getChangedServicesSinceSha(
         lastCompletedRun.head_sha
     )
+
+    // if lerna can't find the sha, run everything
+    if (lernaChangedServices instanceof Error) {
+        core.setOutput('changed-services', deployAllServices)
+    }
+
     const jobsToSkip = await getJobsToSkip(
         lastCompletedRun.id,
         lastCompletedRun.run_attempt ?? 1
@@ -118,7 +124,9 @@ async function getAllServicesFromLerna(): Promise<string[]> {
 }
 
 // uses lerna to find services that have changed since the passed sha
-async function getChangedServicesSinceSha(sha: string): Promise<string[]> {
+async function getChangedServicesSinceSha(
+    sha: string
+): Promise<string[] | Error> {
     const execPromise = util.promisify(exec)
     const { stdout, stderr } = await execPromise(
         `lerna ls --since ${sha} -all --json`
@@ -127,6 +135,7 @@ async function getChangedServicesSinceSha(sha: string): Promise<string[]> {
     const lernaList: LernaListItem[] = JSON.parse(stdout)
     if (stderr) {
         console.info(stderr)
+        return new Error(`Lerna could not find a viable sha`)
     }
 
     return lernaList.map((i) => i.name)
