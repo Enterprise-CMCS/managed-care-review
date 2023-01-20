@@ -1,6 +1,5 @@
 import React from 'react'
 import {
-    ColumnFiltersState,
     createColumnHelper,
     flexRender,
     getCoreRowModel,
@@ -17,6 +16,7 @@ import styles from './HealthPlanPackageTable.module.scss'
 import { Table, Tag, Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
+import qs from 'qs'
 import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
 import { FilterAccordion, FilterSelect } from '../FilterAccordion'
 import { InfoTag, TagProps } from '../InfoTag/InfoTag'
@@ -100,7 +100,42 @@ const submissionTypeOptions = [
 // created outside the render function
 const columnHelper = createColumnHelper<PackageInDashboardType>()
 
-const columnHash = atomWithHash('filters', [])
+type ReadableFilters = {
+    [key: string]: string[]
+}
+
+// modifying the type provided by react-table to make 'value' a string[] instead of unknown
+type ColumnFiltersState = ColumnFilter[]
+type ColumnFilter = {
+    id: string
+    value: string[]
+}
+
+function fromColumnFiltersToReadableUrl(input: ColumnFiltersState) {
+    const output: ReadableFilters = {}
+    input.forEach((element) => {
+        output[element.id] = element.value
+    })
+    return qs.stringify(output, { arrayFormat: 'comma' })
+}
+
+function fromReadableUrlToColumnFilters(
+    input: string | null
+): ColumnFiltersState {
+    if (!input) {
+        return []
+    }
+    const parsed = qs.parse(input) as { [key: string]: string }
+    return Object.entries(parsed).map(([id, value]) => ({
+        id,
+        value: value.split(','),
+    }))
+}
+
+const columnHash = atomWithHash('filters', [], {
+    serialize: fromColumnFiltersToReadableUrl,
+    deserialize: fromReadableUrlToColumnFilters,
+})
 
 export const HealthPlanPackageTable = ({
     caption,
@@ -111,7 +146,7 @@ export const HealthPlanPackageTable = ({
     const [columnFilters, setColumnFilters] =
         useAtom<ColumnFiltersState>(columnHash)
 
-    /* transform from the table's ColumnFilterState (stored in the URL) to react-select's FilterOptionType
+    /* transform react-table's ColumnFilterState (stringified, formatted, and stored in the URL) to react-select's FilterOptionType
         and return only the items matching the FilterSelect component that's calling the function*/
     const getSelectedFiltersFromUrl = (id: string) => {
         type TempRecord = { value: string; label: string; id: string }
