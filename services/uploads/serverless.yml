@@ -35,12 +35,14 @@ provider:
           Resource:
             - !Sub arn:aws:s3:::${self:service}-${sls:stage}-uploads-${AWS::AccountId}/*
             - !Sub arn:aws:s3:::${self:service}-${sls:stage}-avscan-${AWS::AccountId}/*
+            - !Sub arn:aws:s3:::${self:service}-${sls:stage}-qa-${AWS::AccountId}/*
         - Effect: 'Allow'
           Action:
             - s3:ListBucket
           Resource:
             - !Sub arn:aws:s3:::${self:service}-${sls:stage}-uploads-${AWS::AccountId}
             - !Sub arn:aws:s3:::${self:service}-${sls:stage}-avscan-${AWS::AccountId}
+            - !Sub arn:aws:s3:::${self:service}-${sls:stage}-qa-${AWS::AccountId}/*
 
 custom:
   region: ${aws:region}
