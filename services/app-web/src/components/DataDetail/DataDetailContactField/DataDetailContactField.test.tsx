@@ -38,10 +38,12 @@ describe('DataDetailContactField', () => {
         expect(screen.getByText(/All Black Incorporated/)).toBeInTheDocument()
     })
 
-    it('renders missing field if contact is missing', () => {
-        render(<DataDetailContactField />)
-        expect(
-            screen.getByText(/You must provide this information/)
-        ).toBeInTheDocument()
+    it('renders null contact is missing', () => {
+        render(
+            <div data-testid="container">
+                <DataDetailContactField />
+            </div>
+        )
+        expect(screen.getByTestId('container')).toBeEmptyDOMElement()
     })
 })

@@ -42,4 +42,18 @@ describe('DataDetailCheckboxList', () => {
         expect(screen.getByText(/etc/)).toBeInTheDocument()
         expect(screen.getByText(/another important thing/)).toBeInTheDocument()
     })
+
+    it('renders null when list is empty by default', () => {
+        const ValuesLookup: Record<string, string> = {
+            THIS: 'this',
+            THAT: 'that',
+            THE_OTHER: 'the other',
+        }
+        render(
+            <div data-testid="container">
+                <DataDetailCheckboxList list={[]} dict={ValuesLookup} />
+            </div>
+        )
+        expect(screen.getByTestId('container')).toBeEmptyDOMElement()
+    })
 })

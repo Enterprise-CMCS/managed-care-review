@@ -1,11 +1,11 @@
-import { DataDetailMissingField } from '../'
-
 export type DataDetailCheckboxListProps = {
     list: string[] // Checkbox field array
     dict: Record<string, string> // A lang constant dictionary like ManagedCareEntityRecord or FederalAuthorityRecord,
     otherReasons?: (string | null)[] // pass in additional "Other" user generated text to append to end of list,
 }
-// Used to display field values from checkbox components in forms.
+
+// Intended for use as children passed to DataDetail
+// Display field values from checkbox components in forms.
 export const DataDetailCheckboxList = ({
     list,
     dict,
@@ -19,7 +19,7 @@ export const DataDetailCheckboxList = ({
         ? userFriendlyList.concat(otherReasons)
         : userFriendlyList
 
-    if (listToDisplay.length === 0) return <DataDetailMissingField />
+    if (listToDisplay.length === 0) return null
 
     return (
         <ul>

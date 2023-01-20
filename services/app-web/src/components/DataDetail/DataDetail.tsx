@@ -5,7 +5,7 @@ import { DataDetailMissingField } from './DataDetailMissingField'
 export type DataDetailProps = {
     id: string
     label: string
-    children?: JSX.Element | string | string[]
+    children?: React.ReactNode | string[]
     explainMissingData?: boolean // Display fallback text when data is undefined or null. Should be true on review-and-submit
 }
 
@@ -19,7 +19,12 @@ export type DataDetailProps = {
     -  DataDetailContactField (used to display contact info in an address tag)
     -  DataDetailDateRange (used to display date ranges)
     -  DataDetailCheckBoxList (used to display checkbox field results, looking up enums in their associated dictionary)
+
+    Possible empty values that are handled includes:
+    undefined, null, empty string, empty array. A custom component that eventually renders null when called 
+    will NOT be handled. Data flow is handled one way from parent > children here.
 */
+
 export const DataDetail = ({
     id,
     label,
@@ -28,8 +33,8 @@ export const DataDetail = ({
 }: DataDetailProps): React.ReactElement | null => {
     const handleArray = Array.isArray(children)
     const noData =
-        !children || children === '' || (handleArray && children.length === 0) // These are all possible empty field values that could be passed as children
-    if (!explainMissingData && noData) return null // displays nothing - this is used for submission summary
+        !children || children === '' || (handleArray && children.length === 0)
+    if (!explainMissingData && noData) return null // displays nothing - this is generally used for submission summary page
 
     return (
         <div className={styles.dataDetail}>

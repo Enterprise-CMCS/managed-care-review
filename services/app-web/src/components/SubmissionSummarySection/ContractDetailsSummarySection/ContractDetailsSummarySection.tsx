@@ -111,8 +111,8 @@ export const ContractDetailsSummarySection = ({
         submission.contractAmendmentInfo?.modifiedProvisions
     )
 
-    const amendmentProvisionsUnanswered =
-        modifiedProvisions.length === 0 && unmodifiedProvisions.length === 0
+    const amendmentProvisionsAnswered =
+        modifiedProvisions.length > 0 || unmodifiedProvisions.length > 0
 
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>
@@ -186,29 +186,31 @@ export const ContractDetailsSummarySection = ({
                             id="modifiedProvisions"
                             label="This contract action includes new or modified provisions related to the following"
                             explainMissingData={
-                                amendmentProvisionsUnanswered && !isSubmitted
+                                !amendmentProvisionsAnswered && !isSubmitted
                             }
-                            children={
+                        >
+                            {amendmentProvisionsAnswered && (
                                 <DataDetailCheckboxList
                                     list={modifiedProvisions}
                                     dict={ModifiedProvisionsRecord}
                                 />
-                            }
-                        />
+                            )}
+                        </DataDetail>
 
                         <DataDetail
                             id="unmodifiedProvisions"
                             label="This contract action does NOT include new or modified provisions related to the following"
                             explainMissingData={
-                                amendmentProvisionsUnanswered && !isSubmitted
+                                !amendmentProvisionsAnswered && !isSubmitted
                             }
-                            children={
+                        >
+                            {amendmentProvisionsAnswered && (
                                 <DataDetailCheckboxList
                                     list={unmodifiedProvisions}
                                     dict={ModifiedProvisionsRecord}
                                 />
-                            }
-                        />
+                            )}
+                        </DataDetail>
                     </DoubleColumnGrid>
                 )}
             </dl>
