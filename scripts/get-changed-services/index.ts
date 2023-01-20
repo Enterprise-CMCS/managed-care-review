@@ -118,11 +118,11 @@ interface LernaListItem {
 // a list of all of our deployable service names from lerna
 function getAllServicesFromLerna(): string[] | Error {
     const { stdout, stderr } = spawnSync('lerna', ['ls', '-a', '--json'])
-    const lernaList: LernaListItem[] = JSON.parse(stdout.toString())
     if (stderr) {
-        console.info(stderr)
+        console.error(stderr.toString())
         return new Error('failed to lerna ls')
     }
+    const lernaList: LernaListItem[] = JSON.parse(stdout.toString())
 
     return lernaList.map((i) => i.name)
 }
@@ -138,7 +138,7 @@ function getChangedServicesSinceSha(
     const lernaList: LernaListItem[] = JSON.parse(stdout.toString())
     if (error) {
         console.error(error)
-        console.error(stderr)
+        console.error(stderr.toString())
         return new Error(`Lerna could not find a viable sha`)
     }
 
