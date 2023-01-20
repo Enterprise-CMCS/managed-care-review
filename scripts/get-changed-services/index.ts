@@ -50,6 +50,7 @@ async function main() {
     // if lerna can't find the sha, run everything
     if (lernaChangedServices instanceof Error) {
         core.setOutput('changed-services', deployAllServices)
+        return
     }
 
     const jobsToSkip = await getJobsToSkip(
