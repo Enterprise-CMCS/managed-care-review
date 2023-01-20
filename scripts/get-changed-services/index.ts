@@ -117,8 +117,8 @@ interface LernaListItem {
 
 // a list of all of our deployable service names from lerna
 function getAllServicesFromLerna(): string[] | Error {
-    const { stdout, stderr } = spawnSync('lerna', ['ls', '-a', '--json'])
-    if (stderr) {
+    const { stdout, stderr, error } = spawnSync('lerna', ['ls', '-a', '--json'])
+    if (error) {
         console.error(stderr.toString())
         return new Error('failed to lerna ls')
     }
