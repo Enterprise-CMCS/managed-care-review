@@ -13,6 +13,8 @@ async function main() {
         throw listOfServices
     }
 
+    console.log("LERNA SAYS", listOfServices)
+
     // get the workflow runs for this branch
     // we pass in branchName as input from the action
     const allWorkflowRuns = await octokit.actions.listWorkflowRuns({
@@ -118,6 +120,9 @@ interface LernaListItem {
 // a list of all of our deployable service names from lerna
 function getAllServicesFromLerna(): string[] | Error {
     const { stdout, stderr, error } = spawnSync('lerna', ['ls', '-a', '--json'])
+
+    console.log("LERNA", stdout, stderr, error)
+
     if (error) {
         console.error(error)
         return error
@@ -135,11 +140,13 @@ function getChangedServicesSinceSha(
         'lerna', [ 'ls', '--since', sha, '-all', '--json']
     )
 
-    const lernaList: LernaListItem[] = JSON.parse(stdout.toString())
+    console.log("LERNATWO", stdout.toString(), stderr, error)
+
     if (error) {
         console.error(error)
         return error
     }
+    const lernaList: LernaListItem[] = JSON.parse(stdout.toString())
 
     return lernaList.map((i) => i.name)
 }
