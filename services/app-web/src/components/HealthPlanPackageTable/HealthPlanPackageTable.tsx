@@ -96,22 +96,22 @@ const submissionTypeOptions = [
     },
 ]
 
-// To keep the memoization from being refreshed every time, this needs to be
-// created outside the render function
+/* To keep the memoization from being refreshed every time, this needs to be
+    created outside the render function */
 const columnHelper = createColumnHelper<PackageInDashboardType>()
 
 type ReadableFilters = {
     [key: string]: string[]
 }
 
-// modifying the type provided by react-table to make 'value' a string[] instead of unknown
-type ColumnFiltersState = ColumnFilter[]
+/* react-table has a ColumnFilterState type that depends on a ColumnFilter type that's
+    { id: string, value: unknown }.  We know our value is an array of strings, so we'll use our own type */
 type ColumnFilter = {
     id: string
     value: string[]
 }
 
-function fromColumnFiltersToReadableUrl(input: ColumnFiltersState) {
+const fromColumnFiltersToReadableUrl = (input: ColumnFilter[]) => {
     const output: ReadableFilters = {}
     input.forEach((element) => {
         output[element.id] = element.value
@@ -119,9 +119,9 @@ function fromColumnFiltersToReadableUrl(input: ColumnFiltersState) {
     return qs.stringify(output, { arrayFormat: 'comma' })
 }
 
-function fromReadableUrlToColumnFilters(
+const fromReadableUrlToColumnFilters = (
     input: string | null
-): ColumnFiltersState {
+): ColumnFilter[] => {
     if (!input) {
         return []
     }
@@ -144,7 +144,7 @@ export const HealthPlanPackageTable = ({
     showFilters = false,
 }: PackageTableProps): React.ReactElement => {
     const [columnFilters, setColumnFilters] =
-        useAtom<ColumnFiltersState>(columnHash)
+        useAtom<ColumnFilter[]>(columnHash)
 
     /* transform react-table's ColumnFilterState (stringified, formatted, and stored in the URL) to react-select's FilterOptionType
         and return only the items matching the FilterSelect component that's calling the function*/
