@@ -119,8 +119,8 @@ interface LernaListItem {
 function getAllServicesFromLerna(): string[] | Error {
     const { stdout, stderr, error } = spawnSync('lerna', ['ls', '-a', '--json'])
     if (error) {
-        console.error(stderr.toString())
-        return new Error('failed to lerna ls')
+        console.error(error)
+        return error
     }
     const lernaList: LernaListItem[] = JSON.parse(stdout.toString())
 
@@ -138,8 +138,7 @@ function getChangedServicesSinceSha(
     const lernaList: LernaListItem[] = JSON.parse(stdout.toString())
     if (error) {
         console.error(error)
-        console.error(stderr.toString())
-        return new Error(`Lerna could not find a viable sha`)
+        return error
     }
 
     return lernaList.map((i) => i.name)
