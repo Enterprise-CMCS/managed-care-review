@@ -37,13 +37,4 @@ describe('DataDetailContactField', () => {
         ).toBeInTheDocument()
         expect(screen.getByText(/All Black Incorporated/)).toBeInTheDocument()
     })
-
-    it('renders null contact is missing', () => {
-        render(
-            <div data-testid="container">
-                <DataDetailContactField />
-            </div>
-        )
-        expect(screen.getByTestId('container')).toBeEmptyDOMElement()
-    })
 })

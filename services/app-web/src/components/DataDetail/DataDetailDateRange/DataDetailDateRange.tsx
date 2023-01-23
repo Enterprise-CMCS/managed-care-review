@@ -1,4 +1,5 @@
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
+import { DataDetailMissingField } from '../DataDetailMissingField'
 
 // Intended for use as children passed to DataDetail
 export const DataDetailDateRange = ({
@@ -7,8 +8,8 @@ export const DataDetailDateRange = ({
 }: {
     startDate?: Date
     endDate?: Date
-}): React.ReactElement | null => {
-    if (!startDate || !endDate) return null
+}): React.ReactElement => {
+    if (!startDate || !endDate) return <DataDetailMissingField />
     return (
         <>{`${formatCalendarDate(startDate)} to ${formatCalendarDate(
             endDate

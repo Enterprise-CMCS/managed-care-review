@@ -4,6 +4,7 @@ import {
     StateContact,
 } from '../../../common-code/healthPlanFormDataType'
 import { getActuaryFirm } from '../../SubmissionSummarySection'
+import { DataDetailMissingField } from '../DataDetailMissingField'
 
 type Contact = ActuaryContact | StateContact
 
@@ -17,8 +18,9 @@ export const DataDetailContactField = ({
     contact,
 }: {
     contact?: Contact
-}): React.ReactElement | null => {
-    if (!contact || !contact.name || !contact.email) return null
+}): React.ReactElement => {
+    if (!contact || !contact.name || !contact.email)
+        return <DataDetailMissingField />
     const { name, titleRole, email } = contact
     return (
         <address>

@@ -111,8 +111,8 @@ export const ContractDetailsSummarySection = ({
         submission.contractAmendmentInfo?.modifiedProvisions
     )
 
-    const amendmentProvisionsAnswered =
-        modifiedProvisions.length > 0 || unmodifiedProvisions.length > 0
+    const amendmentProvisionsUnanswered =
+        modifiedProvisions.length === 0 && unmodifiedProvisions.length === 0
 
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>
@@ -186,13 +186,14 @@ export const ContractDetailsSummarySection = ({
                             id="modifiedProvisions"
                             label="This contract action includes new or modified provisions related to the following"
                             explainMissingData={
-                                !amendmentProvisionsAnswered && !isSubmitted
+                                amendmentProvisionsUnanswered && !isSubmitted
                             }
                         >
-                            {amendmentProvisionsAnswered && (
+                            {amendmentProvisionsUnanswered ? null : (
                                 <DataDetailCheckboxList
                                     list={modifiedProvisions}
                                     dict={ModifiedProvisionsRecord}
+                                    displayEmptyList
                                 />
                             )}
                         </DataDetail>
@@ -201,13 +202,14 @@ export const ContractDetailsSummarySection = ({
                             id="unmodifiedProvisions"
                             label="This contract action does NOT include new or modified provisions related to the following"
                             explainMissingData={
-                                !amendmentProvisionsAnswered && !isSubmitted
+                                amendmentProvisionsUnanswered && !isSubmitted
                             }
                         >
-                            {amendmentProvisionsAnswered && (
+                            {amendmentProvisionsUnanswered ? null : (
                                 <DataDetailCheckboxList
                                     list={unmodifiedProvisions}
                                     dict={ModifiedProvisionsRecord}
+                                    displayEmptyList
                                 />
                             )}
                         </DataDetail>

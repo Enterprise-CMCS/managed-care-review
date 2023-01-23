@@ -13,15 +13,12 @@ describe('DataDetailDateRange', () => {
         expect(screen.getByText('06/21/2022 to 06/22/2022')).toBeInTheDocument()
     })
 
-    it('renders null if dates is missing', () => {
+    it('renders missing field error if dates is missing', () => {
         render(
-            <div data-testid="container">
-                <DataDetailDateRange
-                    startDate={undefined}
-                    endDate={undefined}
-                />
-            </div>
+            <DataDetailDateRange startDate={undefined} endDate={undefined} />
         )
-        expect(screen.getByTestId('container')).toBeEmptyDOMElement()
+        expect(
+            screen.getByText(/You must provide this information/)
+        ).toBeInTheDocument()
     })
 })

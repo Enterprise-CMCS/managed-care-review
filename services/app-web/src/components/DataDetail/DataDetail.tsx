@@ -35,7 +35,6 @@ export const DataDetail = ({
     const noData =
         !children || children === '' || (handleArray && children.length === 0)
     if (!explainMissingData && noData) return null // displays nothing - this is generally used for submission summary page
-
     return (
         <div className={styles.dataDetail}>
             <dt id={id}>{label}</dt>
