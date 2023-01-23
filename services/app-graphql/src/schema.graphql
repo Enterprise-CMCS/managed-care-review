@@ -49,14 +49,11 @@ type Query {
 
     It can be called by CMS or State Users
 
-    Errors: 
+    Errors:
     - ForbiddenError: A State users attempts to request Questions for a HPP not in their state
     - UserInputError: pkgID not found
     """
-    indexQuestions(
-        input: IndexQuestionsInput!
-    ): IndexQuestionsPayload!
-
+    indexQuestions(input: IndexQuestionsInput!): IndexQuestionsPayload!
 }
 
 type Mutation {
@@ -150,14 +147,13 @@ type Mutation {
         input: UnlockHealthPlanPackageInput!
     ): UnlockHealthPlanPackagePayload!
 
-
     """
-    updateCMSUser updates CMSUser fields that are allowed to be modified. 
+    updateCMSUser updates CMSUser fields that are allowed to be modified.
     Presently, just the user's stateAssignments.
 
     This can only be called by an AdminUser.
     The cmsUserID must be a CMSUser's id, not a state user
-    
+
     Errors:
     - ForbiddenError:
         - A non AdminUser called this
@@ -165,23 +161,53 @@ type Mutation {
         - cmsUserID was not a CMSUser's ID
         - stateCodes included an invalid state code
     """
-    updateCMSUser(
-        input: UpdateCMSUserInput!
-    ): UpdateCMSUserPayload!
+    updateCMSUser(input: UpdateCMSUserInput!): UpdateCMSUserPayload!
 
+    """
+    createQuestion creates a new Question for the given HealthPlanPackage
+    A CMS User can add text to a note field and append a document to their question
+    They can also specify a due date, and specify rate IDs that are associated with the question
 
-    createQuestion(
-        input: CreateQuestionInput!
-    ): CreateQuestionPayload!
+    This can only be called by a CMSUser
 
-    updateQuestion(
-        input: UpdateQuestionInput!
-    ): UpdateQuestionPayload!
+    Errors:
+    - ForbiddenError:
+        - A non CMSUser called this
+    - UserInputError
+        - A package cannot be found with the given `pkgID`
+        - The package is not in the SUBMITTED or RESUBMITTED state
+        - The due date is in the past
+        - The rateIDs are not associated with the package
+    """
+    createQuestion(input: CreateQuestionInput!): CreateQuestionPayload!
 
+    """
+    updateQuestion updates a Question for the given HealthPlanPackage
+    Only the due date can be changed
+
+    This can only be called by a CMSUser
+
+    Errors:
+    - ForbiddenError:
+        - A non CMSUser called this
+    - UserInputError
+        - The due date is in the past
+    """
+    updateQuestion(input: UpdateQuestionInput!): UpdateQuestionPayload!
+
+    """
+    createQuestionResponse creates a new QuestionResponse for the given Question
+    A State User can add text to a note field and append a document to their response
+
+    This can only be called by a StateUser
+
+    Errors:
+    - ForbiddenError:
+        - A non StateUser called this
+    """
     createQuestionResponse(
         input: CreateQuestionResponseInput!
     ): CreateQuestionResponsePayload!
-
 }
 
 input CreateHealthPlanPackageInput {
@@ -202,10 +228,12 @@ type CreateHealthPlanPackagePayload {
 }
 
 input FetchHealthPlanPackageInput {
+    "The ID of the package to fetch"
     pkgID: ID!
 }
 
 type FetchHealthPlanPackagePayload {
+    "A single HealthPlanPackage"
     pkg: HealthPlanPackage
 }
 
@@ -219,12 +247,16 @@ type IndexHealthPlanPackagesPayload {
 }
 
 input IndexQuestionsInput {
+    "The ID of the package for which to fetch associated questions"
     pkgID: ID!
 }
 
 type IndexQuestionsPayload {
+    "Questions for a given submission that were asked by DMCO within CMS"
     DMCOQuestions: QuestionList!
+    "Questions for a given submission that were asked by DMCP within CMS"
     DMCPQuestions: QuestionList!
+    "Questions for a given submission that were asked by OACT within CMS"
     OACTQuestions: QuestionList!
 }
 
@@ -238,38 +270,53 @@ type QuestionEdge {
 }
 
 input DocumentInput {
+    "The name of the document"
     name: String!
+    "The S3 URL of the document"
     s3URL: String!
 }
 
 input CreateQuestionInput {
+    "The ID of the package for which to create a question"
     pkgID: ID!
+    "A list of documents to attach to the question"
     documents: [DocumentInput!]!
+    "A note to attach to the question"
     noteText: String
+    "The date the answer to the question is due"
     dueDate: Date
+    "The rate IDs associated with the question"
     rateIDs: [String!]
 }
 
 type CreateQuestionPayload {
+    "The newly created Question"
     question: Question!
 }
 
 input UpdateQuestionInput {
+    "The ID of the question to update"
     questionID: ID!
+    "The new due date for the question"
     dueDate: Date
 }
 
 type UpdateQuestionPayload {
+    "The updated Question"
     question: Question!
 }
 
 input CreateQuestionResponseInput {
+    "The ID of the question for which to create a response"
     questionID: ID!
+    "A list of documents to attach to the response"
     documents: [DocumentInput!]!
+    "A note to attach to the response"
     noteText: String
 }
 
 type CreateQuestionResponsePayload {
+    "The newly created QuestionResponse"
     response: QuestionResponse!
 }
 
@@ -385,7 +432,6 @@ type Program {
     fullName: String!
 }
 
-
 """
 HealthPlanPackageStatus tracks the editing vs. submitted status of the package.
 It is not intended to track the overall status of the package through the review process
@@ -497,7 +543,7 @@ enum ContractType {
 
 """
 Document represents a document that has been uploaded to S3. It can be retrieved at the s3URL
-by an authenticated user. 
+by an authenticated user.
 """
 type Document {
     name: String!
@@ -505,8 +551,8 @@ type Document {
 }
 
 """
-Question is a question sent by CMS to the States for a response. CMS may upload one or 
-more documents full of questions to a single Question. States submit a QuestionResponse 
+Question is a question sent by CMS to the States for a response. CMS may upload one or
+more documents full of questions to a single Question. States submit a QuestionResponse
 with documents that answer the questions posed by CMS.
 """
 type Question {
@@ -522,6 +568,10 @@ type Question {
     responses: [QuestionResponse!]!
 }
 
+"""
+QuestionResponse is a response by a StateUser to a Question sent by CMS. States may upload one or
+more documents full of responses to a single QuestionResponse, in addition to a text note.
+"""
 type QuestionResponse {
     id: ID!
     questionID: ID!
