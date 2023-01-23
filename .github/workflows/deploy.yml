@@ -246,6 +246,7 @@ jobs:
     needs: [deploy-infra, begin-deployment, deploy-app]
     if: |
       always() 
+      && (needs.begin-deployment.result == 'success')
       && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') 
       && (needs.deploy-app.result == 'success' || needs.deploy-app.result == 'skipped')
     runs-on: ubuntu-20.04
