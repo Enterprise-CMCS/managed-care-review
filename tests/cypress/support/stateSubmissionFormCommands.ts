@@ -299,15 +299,18 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
     ).click()
 
     cy.wait(2000)
-    
-    // targeting by id is anti-pattern but unable to surface data-X attributes on the third party component 
-    cy.get('[id="rateInfos.0.rateDateStart"]')
-        .type('02/29/2024')
-    cy.get('[id="rateInfos.0.rateDateEnd"]').type('02/29/2024')
-    cy.get('#rateInfos.0.effectiveDateStart')
-        .type('03/01/2024')
-     cy.get('#rateInfos.0.effectiveDateEnd')
-        .type('03/01/2025')
+
+/* 
+    There are currently multiple date range pickers on the page 
+    Preferred approach would be targeting by data-cyid.
+    However, surfacing data-X attributes on the nested inputs in third party component DateRangePicker not possible in current version 
+    For now using targeting by id (anti-pattern)
+*/
+    cy.get('[id="rateInfos.0.rateDateStart"]').type('02/29/2023')
+    cy.get('[id="rateInfos.0.rateDateEnd"]').type('02/29/2025')
+    cy.get('[id="rateInfos.0.effectiveDateStart"]').type('03/01/2024')
+    cy.get('[id="rateInfos.0.effectiveDateEnd"]').type('03/01/2025')
+
     cy.findByRole('combobox', { name: 'programs (required)' }).click({
         force: true,
     })
