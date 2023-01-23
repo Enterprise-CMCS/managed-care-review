@@ -1,11 +1,11 @@
 /* Order matters in this file. */
-@import 'uswds/scss/theme/_uswds-theme-general.scss';
-@import 'uswds/scss/theme/_uswds-theme-typography.scss';
-@import 'uswds/scss/theme/_uswds-theme-spacing.scss';
-@import 'uswds/scss/theme/_uswds-theme-color.scss';
-@import 'uswds/scss/theme/_uswds-theme-utilities.scss';
-@import 'uswds/scss/theme/_uswds-theme-components.scss';
+@forward 'uswds/scss/theme/_uswds-theme-general.scss';
+@forward 'uswds/scss/theme/_uswds-theme-typography.scss';
+@forward 'uswds/scss/theme/_uswds-theme-spacing.scss';
+@forward 'uswds/scss/theme/_uswds-theme-color.scss';
+@forward 'uswds/scss/theme/_uswds-theme-utilities.scss';
+@forward 'uswds/scss/theme/_uswds-theme-components.scss';
 
-@import './uswdsSettings.scss';
+@forward './uswdsSettings.scss';
 
-@import 'uswds/scss/packages/_required.scss';
+@forward 'uswds/scss/packages/_required.scss';

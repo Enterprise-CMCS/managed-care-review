@@ -1,6 +1,9 @@
 /* Order matters in this file. */
 @import 'theme/_cms';
-@import 'theme/_color';
+ /* custom stylesheet */
+ @use "uswds-core" as *;
+
+
 
 // Custom app wide styles
 
@@ -20,7 +23,10 @@ $width-max-contained: 50rem;
     overflow: hidden;
 }
 
-// Top border linear gradient
+// Gradient styling used on tables
+// Gradient colors
+$theme-color-gradient-light: #02bfe7;
+$theme-color-gradient-dark: $theme-color-primary-dark;
 .borderTopLinearGradient {
     border: 0 solid;
     border-top: 10px solid;
