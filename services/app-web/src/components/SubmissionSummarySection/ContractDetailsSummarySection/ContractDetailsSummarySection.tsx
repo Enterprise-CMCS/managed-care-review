@@ -46,7 +46,7 @@ export function sortModifiedProvisions(
             const value = amendmentInfo[provisionKey]
             if (value === true) {
                 modifiedProvisions.push(provisionKey)
-            } else {
+            } else if (value === false) {
                 unmodifiedProvisions.push(provisionKey)
             }
         }
