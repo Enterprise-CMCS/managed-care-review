@@ -6,46 +6,53 @@ import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelp
 import {
     renderTemplate,
     stripHTMLFromTemplate,
-    generateStateReceiverEmails,
     findPackagePrograms,
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration } from '../'
 import { ProgramType, UpdateInfoType } from '../../domain-models'
 import { reviewAndSubmitURL } from '../generateURLs'
+import { pruneDuplicateEmails } from '../formatters'
 
 export const unlockPackageStateEmail = async (
-    pkg: UnlockedHealthPlanFormDataType,
+    formData: UnlockedHealthPlanFormDataType,
     updateInfo: UpdateInfoType,
     config: EmailConfiguration,
-    statePrograms: ProgramType[]
+    statePrograms: ProgramType[],
+    submitterEmails: string[]
 ): Promise<EmailData | Error> => {
     const isTestEnvironment = config.stage !== 'prod'
-    const receiverEmails = generateStateReceiverEmails(pkg)
+    const stateContactEmails = formData.stateContacts.map(
+        (contact) => contact.email
+    )
+    const receiverEmails = pruneDuplicateEmails([
+        ...stateContactEmails,
+        ...submitterEmails,
+    ])
 
     //This checks to make sure all programs contained in submission exists for the state.
-    const packagePrograms = findPackagePrograms(pkg, statePrograms)
+    const packagePrograms = findPackagePrograms(formData, statePrograms)
 
     if (packagePrograms instanceof Error) {
         return packagePrograms
     }
 
-    const packageName = generatePackageName(pkg, packagePrograms)
+    const packageName = generatePackageName(formData, packagePrograms)
 
     const isContractAndRates =
-        pkg.submissionType === 'CONTRACT_AND_RATES' &&
-        Boolean(pkg.rateInfos.length)
+        formData.submissionType === 'CONTRACT_AND_RATES' &&
+        Boolean(formData.rateInfos.length)
 
-    const packageURL = reviewAndSubmitURL(pkg.id, config.baseUrl)
+    const packageURL = reviewAndSubmitURL(formData.id, config.baseUrl)
 
     const data = {
         packageName,
         unlockedBy: updateInfo.updatedBy,
         unlockedOn: formatCalendarDate(updateInfo.updatedAt),
         unlockedReason: updateInfo.updatedReason,
-        shouldIncludeRates: pkg.submissionType === 'CONTRACT_AND_RATES',
+        shouldIncludeRates: formData.submissionType === 'CONTRACT_AND_RATES',
         rateInfos:
             isContractAndRates &&
-            pkg.rateInfos.map((rate) => ({
+            formData.rateInfos.map((rate) => ({
                 rateName: rate.rateCertificationName,
             })),
         submissionURL: packageURL,

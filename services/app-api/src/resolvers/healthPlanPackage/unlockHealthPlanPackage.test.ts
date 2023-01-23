@@ -29,7 +29,7 @@ import {
 import { UserType } from '../../domain-models'
 
 describe('unlockHealthPlanPackage', () => {
-    const testUser: UserType = {
+    const testCMSUser: UserType = {
         id: '9b146a8e-796f-4305-a7d9-dcbef88607f8',
         role: 'CMS_USER',
         email: 'zuko@example.com',
@@ -47,7 +47,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUser,
+                user: testCMSUser,
             },
         })
 
@@ -112,7 +112,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUser,
+                user: testCMSUser,
             },
         })
 
@@ -185,7 +185,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUser,
+                user: testCMSUser,
             },
         })
 
@@ -264,7 +264,7 @@ describe('unlockHealthPlanPackage', () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUser,
+                user: testCMSUser,
             },
         })
 
@@ -324,7 +324,7 @@ describe('unlockHealthPlanPackage', () => {
     it('returns an error if the submission does not exit', async () => {
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUser,
+                user: testCMSUser,
             },
         })
 
@@ -355,7 +355,7 @@ describe('unlockHealthPlanPackage', () => {
         const cmsServer = await constructTestPostgresServer({
             store: errorStore,
             context: {
-                user: testUser,
+                user: testCMSUser,
             },
         })
 
@@ -389,7 +389,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUser,
+                user: testCMSUser,
             },
         })
 
@@ -426,7 +426,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUser,
+                user: testCMSUser,
             },
             emailer: mockEmailer,
         })
@@ -468,6 +468,91 @@ describe('unlockHealthPlanPackage', () => {
         )
     })
 
+    it('send state email to state contacts and all submitters when unlocking submission succeeds', async () => {
+        const config = testEmailConfig
+        const mockEmailer = testEmailer(config)
+        //mock invoke email submit lambda
+        const stateServer = await constructTestPostgresServer()
+        const stateServerTwo = await constructTestPostgresServer({
+            context: {
+                user: {
+                    id: 'PeterParker',
+                    stateCode: 'FL',
+                    role: 'STATE_USER',
+                    email: 'notspiderman@example.com',
+                    familyName: 'Parker',
+                    givenName: 'Peter',
+                },
+            },
+        })
+
+        // First, create a new submitted submission
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser,
+            },
+            emailer: mockEmailer,
+        })
+
+        // First unlock
+        await unlockTestHealthPlanPackage(
+            cmsServer,
+            stateSubmission.id,
+            'Super duper good reason.'
+        )
+
+        // Resubmission to get multiple submitters
+        await resubmitTestHealthPlanPackage(
+            stateServerTwo,
+            stateSubmission.id,
+            'Test resubmission reason'
+        )
+
+        // Final unlock to test against
+        const unlockResult = await unlockTestHealthPlanPackage(
+            cmsServer,
+            stateSubmission.id,
+            'Super duper good reason.'
+        )
+
+        const currentRevision = unlockResult.revisions[0].node.formDataProto
+
+        const sub = base64ToDomain(currentRevision)
+        if (sub instanceof Error) {
+            throw sub
+        }
+
+        const programs = [defaultFloridaProgram()]
+        const ratePrograms = [defaultFloridaRateProgram()]
+        const name = packageName(sub, programs)
+        const rateName = generateRateName(sub, sub.rateInfos[0], ratePrograms)
+
+        const stateReceiverEmails = [
+            'james@example.com',
+            'notspiderman@example.com',
+            ...sub.stateContacts.map((contact) => contact.email),
+        ]
+
+        // email subject line is correct for CMS email.
+        // Mock emailer is called 4 times, 2 for the first unlock, 2 for the second unlock.
+        // From the pair of emails, the second one is the state email.
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            4,
+            expect.objectContaining({
+                subject: expect.stringContaining(`${name} was unlocked by CMS`),
+                sourceEmail: config.emailSource,
+                toAddresses: expect.arrayContaining(
+                    Array.from(stateReceiverEmails)
+                ),
+                bodyHTML: expect.stringContaining(rateName),
+            })
+        )
+    })
+
     it('does send unlock email when request for state analysts emails fails', async () => {
         const config = testEmailConfig
         const mockEmailer = testEmailer(config)
@@ -482,7 +567,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUser,
+                user: testCMSUser,
             },
             emailer: mockEmailer,
             emailParameterStore: mockEmailParameterStore,
@@ -525,7 +610,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUser,
+                user: testCMSUser,
             },
             emailParameterStore: mockEmailParameterStore,
         })

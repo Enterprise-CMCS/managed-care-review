@@ -290,7 +290,6 @@ export const HealthPlanPackageTable = ({
                         </div>
                     </div>
                     <Table fullWidth>
-                        {caption && <caption>{caption}</caption>}
                         <thead>
                             {reactTable.getHeaderGroups().map((headerGroup) => (
                                 <tr key={headerGroup.id}>
@@ -331,6 +330,14 @@ export const HealthPlanPackageTable = ({
                                 </tr>
                             ))}
                         </tbody>
+                        <caption className={caption ?? styles.srOnly}>
+                            {caption || 'Submissions'}
+                            <span className={styles.srOnly}>
+                                {`${
+                                    showFilters && `, ${filtersApplied}`
+                                }, ${submissionCount}.`}
+                            </span>
+                        </caption>
                     </Table>
                     {!hasFilteredRows && (
                         <div
