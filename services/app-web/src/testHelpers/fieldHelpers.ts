@@ -29,5 +29,14 @@ function getYesNoFieldValue(label: string): boolean | undefined {
 
     return undefined
 }
+// For testing, properly access external input for date range picker to set value
+const getExternalInputFromDateRange = (inputs: HTMLElement[]) => {
+    const input = inputs.find(
+        (input) =>
+            input.getAttribute('data-testId') === 'date-picker-external-input'
+    )
+    if (!input) throw new Error('No date range input found')
+    return input
+}
 
-export { getYesNoFieldValue, getParent }
+export { getExternalInputFromDateRange, getYesNoFieldValue, getParent }

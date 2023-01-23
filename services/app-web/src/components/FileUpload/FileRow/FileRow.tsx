@@ -119,7 +119,6 @@ export const FileRow = ({
                 <Button
                     style={{ marginTop: 0 }}
                     type="button"
-                    size="small"
                     aria-label={`Remove ${name} document`}
                     unstyled
                     onClick={handleDelete}
@@ -131,7 +130,6 @@ export const FileRow = ({
                     <Button
                         style={{ marginTop: 0 }}
                         type="button"
-                        size="small"
                         aria-label={`Retry upload for ${name} document`}
                         unstyled
                         onClick={handleRetry}

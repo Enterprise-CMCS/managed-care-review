@@ -10,7 +10,12 @@ export function MaintenanceMessage({
 }): React.ReactElement {
     return (
         <div className={styles.alertContainer}>
-            <Alert type="info" heading={message} validation={true} />
+            <Alert
+                headingLevel="h4"
+                type="info"
+                heading={message}
+                validation={true}
+            />
         </div>
     )
 }

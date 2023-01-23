@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import styles from './FilterAccordion.module.scss'
 import { Accordion, Button } from '@trussworks/react-uswds'
 import { FilterSelectPropType } from './FilterSelect/FilterSelect'
+import type { AccordionItemProps } from '@trussworks/react-uswds/lib/components/Accordion/Accordion'
 
 export interface FilterAccordionPropType {
     onClearFilters?: () => void
@@ -30,9 +31,10 @@ export const FilterAccordion = ({
         return React.cloneElement(child, { toggleClearFilter })
     })
 
-    const accordionItems = [
+    const accordionItems: AccordionItemProps[] = [
         {
             title: filterTitle,
+            headingLevel: 'h4',
             content: (
                 <>
                     <div className={styles.filters}>
