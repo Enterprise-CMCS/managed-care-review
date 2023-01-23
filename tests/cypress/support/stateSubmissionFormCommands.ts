@@ -289,7 +289,7 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
+Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
     // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
     cy.wait(2000)
@@ -301,15 +301,15 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
     cy.wait(2000)
 
 /* 
-    There are currently multiple date range pickers on the page 
-    Preferred approach would be targeting by data-cyid.
-    However, surfacing data-X attributes on the nested inputs in third party component DateRangePicker not possible in current version 
-    For now using targeting by id (anti-pattern)
+    There are currently multiple date range pickers on the page with the same label names (start date, end date) and different headings
+    Preferred approach would be targeting by via findBy* or a custom data-cyid attribute
+    However, surfacing custom attributes on the nested inputs in third party component DateRangePicker not possible in current react-uswds version 
+    For now using targeting by html id (anti-pattern)
 */
-    cy.get('[id="rateInfos.0.rateDateStart"]').type('02/29/2023')
-    cy.get('[id="rateInfos.0.rateDateEnd"]').type('02/29/2025')
-    cy.get('[id="rateInfos.0.effectiveDateStart"]').type('03/01/2024')
-    cy.get('[id="rateInfos.0.effectiveDateEnd"]').type('03/01/2025')
+    cy.get(`[id="rateInfos.${id}.rateDateStart"]`).type('02/01/2023')
+    cy.get(`[id="rateInfos.${id}.rateDateEnd"]`).type('03/01/2025')
+    cy.get(`[id="rateInfos.${id}.effectiveDateStart"]`).type('03/01/2024')
+    cy.get(`[id="rateInfos.${id}.effectiveDateEnd"]`).type('03/01/2025')
 
     cy.findByRole('combobox', { name: 'programs (required)' }).click({
         force: true,

@@ -35,7 +35,7 @@ describe('rate details', () => {
         })
     })
 
-    it.only('can add amendment to prior rate certification', () => {
+    it('can add amendment to prior rate certification', () => {
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
@@ -115,7 +115,7 @@ describe('rate details', () => {
                 if (index === arr.length - 1 ) {
                     cy.fillOutNewRateCertification()
                 } else {
-                    cy.fillOutAmendmentToPriorRateCertification()
+                    cy.fillOutAmendmentToPriorRateCertification(index)
                 }
             })
         })
