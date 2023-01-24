@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
+import React from 'react'
 import styles from './FilterAccordion.module.scss'
 import { Accordion, Button } from '@trussworks/react-uswds'
 import { FilterSelectPropType } from './FilterSelect/FilterSelect'
 import type { AccordionItemProps } from '@trussworks/react-uswds/lib/components/Accordion/Accordion'
 
 export interface FilterAccordionPropType {
-    onClearFilters?: () => void
+    onClearFilters: () => void
     filterTitle: string | React.ReactNode
     children:
         | React.ReactElement<FilterSelectPropType>
@@ -17,18 +17,10 @@ export const FilterAccordion = ({
     filterTitle,
     children,
 }: FilterAccordionPropType) => {
-    const [toggleClearFilter, setToggleClearFilter] = useState(false)
-
-    const handleClearFilters = () => {
-        setToggleClearFilter(!toggleClearFilter)
-        if (onClearFilters) onClearFilters()
-    }
-
-    //This controls the clearing of each FilterSelect child component directly from this FilterAccordion component.
-    // toggleClearFilter state will be passed into each FilterSelect child. In FilterSelect child component, changes in
-    // toggleClearFilter prop will trigger a useEffect which will call clearValue() from the Select component ref
-    const childrenWithToggleProps = React.Children.map(children, (child) => {
-        return React.cloneElement(child, { toggleClearFilter })
+    /* multiple FilterSelect components are passed into the parent as children, and here we map
+    over them to display them inside the accordion */
+    const childFilters = React.Children.map(children, (child) => {
+        return React.cloneElement(child)
     })
 
     const accordionItems: AccordionItemProps[] = [
@@ -37,14 +29,12 @@ export const FilterAccordion = ({
             headingLevel: 'h4',
             content: (
                 <>
-                    <div className={styles.filters}>
-                        {childrenWithToggleProps}
-                    </div>
+                    <div className={styles.filters}>{childFilters}</div>
                     <Button
                         type="button"
                         className={styles.clearFilterButton}
                         unstyled
-                        onClick={handleClearFilters}
+                        onClick={onClearFilters}
                     >
                         Clear filters
                     </Button>
