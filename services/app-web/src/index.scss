@@ -1,8 +1,8 @@
-/* USWDS settings */
-@import 'styles/uswdsSettings.scss';
+/* USWDS MC-Review settings and theme */
+ @forward "uswds-theme";
 
 /* Vendor styles (direct source) */
-@import 'uswds/scss/uswds.scss';
+// @import 'uswds/scss/uswds.scss';
 @import '@trussworks/react-uswds/lib/index.css';
 
 /* Project styles */

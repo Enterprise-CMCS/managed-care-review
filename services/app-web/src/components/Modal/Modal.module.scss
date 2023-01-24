@@ -1,4 +1,4 @@
-@import '../../styles/uswdsImports.scss';
+ @use "uswds-core" as *;
 @import '../../styles/custom.scss';
 
 .modal {
