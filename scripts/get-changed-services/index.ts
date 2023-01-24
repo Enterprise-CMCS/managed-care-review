@@ -13,8 +13,6 @@ async function main() {
         throw listOfServices
     }
 
-    console.log("LERNA SAYS", listOfServices)
-
     // get the workflow runs for this branch
     // we pass in branchName as input from the action
     const allWorkflowRuns = await octokit.actions.listWorkflowRuns({
@@ -119,13 +117,11 @@ interface LernaListItem {
 
 // a list of all of our deployable service names from lerna
 function getAllServicesFromLerna(): string[] | Error {
-    const { stdout, stderr, error } = spawnSync('lerna', ['ls', '-a', '--json'])
+    const { stdout, stderr, error, status } = spawnSync('lerna', ['ls', '-a', '--json'])
 
-    console.log("LERNA", stdout, stderr, error)
-
-    if (error) {
-        console.error(error)
-        return error
+    if (error || !status || status > 0) {
+        console.error(error, stderr.toString())
+        return new Error('Failed to list all services from Lerna')
     }
     const lernaList: LernaListItem[] = JSON.parse(stdout.toString())
 
@@ -140,13 +136,10 @@ function getChangedServicesSinceSha(
         'lerna', [ 'ls', '--since', sha, '-all', '--json']
     )
 
-    console.log("LERNATWO", stdout.toString(), stderr.toString(), error, status)
-
-    if (error || stderr.length > 0) {
-        console.error(error, stderr)
-        return error || new Error(`got STDERR: ${stderr.toString()}`)
+    if (error || !status || status > 0) {
+        console.error(error, stderr.toString())
+        return new Error('Failed to find changes since recent SHA in Lerna')
     }
-    console.log("NO ERROR", stdout.toString())
 
     const lernaList: LernaListItem[] = JSON.parse(stdout.toString())
 
