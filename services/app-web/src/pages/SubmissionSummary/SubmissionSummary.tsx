@@ -6,7 +6,7 @@ import {
 } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, NavLink, useParams } from 'react-router-dom'
-import sprite from 'uswds/src/img/sprite.svg'
+import { Icon } from '@trussworks/react-uswds'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { Loading } from '../../components/Loading'
 import {
@@ -190,14 +190,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                         pathname: '/dashboard',
                     }}
                 >
-                    <svg
-                        className="usa-icon"
-                        aria-hidden="true"
-                        focusable="false"
-                        role="img"
-                    >
-                        <use xlinkHref={`${sprite}#arrow_back`}></use>
-                    </svg>
+                    <Icon.ArrowBack />
                     {loggedInUser?.__typename === 'StateUser' ? (
                         <span>&nbsp;Back to state dashboard</span>
                     ) : (
