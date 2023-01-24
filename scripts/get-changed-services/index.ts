@@ -136,15 +136,15 @@ function getAllServicesFromLerna(): string[] | Error {
 function getChangedServicesSinceSha(
     sha: string
 ): string[] | Error {
-    const { stdout, stderr, error } = spawnSync(
+    const { stdout, stderr, error, status } = spawnSync(
         'lerna', [ 'ls', '--since', sha, '-all', '--json']
     )
 
-    console.log("LERNATWO", stdout, stderr, error)
+    console.log("LERNATWO", stdout.toString(), stderr.toString(), error, status)
 
-    if (error) {
-        console.error(error)
-        return error
+    if (error || stderr.length > 0) {
+        console.error(error, stderr)
+        return error || new Error(`got STDERR: ${stderr.toString()}`)
     }
     console.log("NO ERROR", stdout.toString())
 
