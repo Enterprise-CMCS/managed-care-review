@@ -8,7 +8,10 @@ import {
     mockContractAndRatesDraft,
     mockStateSubmission,
 } from '../../../testHelpers/apolloHelpers'
-import { ModifiedProvisions } from '../../../common-code/healthPlanFormDataType'
+import {
+    ModifiedProvisions,
+    UnlockedHealthPlanFormDataType,
+} from '../../../common-code/healthPlanFormDataType'
 
 describe('ContractDetailsSummarySection', () => {
     it('can render draft submission without errors (review and submit behavior)', () => {
@@ -338,13 +341,13 @@ describe('ContractDetailsSummarySection', () => {
     })
 
     it('shows missing field error on amended provisions when expected', () => {
-        const contractWithUnansweredProvisions = {
-            ...mockContractAndRatesDraft(),
-            contractAmendmentInfo: {
-                modifiedProvisions: [],
-                unmodifiedProvisions: [],
-            },
-        }
+        const contractWithUnansweredProvisions: UnlockedHealthPlanFormDataType =
+            {
+                ...mockContractAndRatesDraft(),
+                contractAmendmentInfo: {
+                    modifiedProvisions: undefined,
+                },
+            }
         renderWithProviders(
             <ContractDetailsSummarySection
                 submission={contractWithUnansweredProvisions}
@@ -371,9 +374,33 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeInTheDocument()
     })
     it('does not show missing field error on amended provisions when expected when valid fields present', () => {
+        const contractWithAllUnmodifiedProvisions: UnlockedHealthPlanFormDataType =
+            {
+                ...mockContractAndRatesDraft(),
+                contractAmendmentInfo: {
+                    modifiedProvisions: {
+                        modifiedBenefitsProvided: false,
+                        modifiedGeoAreaServed: false,
+                        modifiedMedicaidBeneficiaries: false,
+                        modifiedRiskSharingStrategy: false,
+                        modifiedIncentiveArrangements: false,
+                        modifiedWitholdAgreements: false,
+                        modifiedStateDirectedPayments: false,
+                        modifiedPassThroughPayments: false,
+                        modifiedPaymentsForMentalDiseaseInstitutions: false,
+                        modifiedMedicalLossRatioStandards: false,
+                        modifiedOtherFinancialPaymentIncentive: false,
+                        modifiedEnrollmentProcess: false,
+                        modifiedGrevienceAndAppeal: false,
+                        modifiedNetworkAdequacyStandards: false,
+                        modifiedLengthOfContract: false,
+                        modifiedNonRiskPaymentArrangements: false,
+                    },
+                },
+            }
         renderWithProviders(
             <ContractDetailsSummarySection
-                submission={mockContractAndRatesDraft()}
+                submission={contractWithAllUnmodifiedProvisions}
                 submissionName="MN-PMAP-0001"
             />
         )

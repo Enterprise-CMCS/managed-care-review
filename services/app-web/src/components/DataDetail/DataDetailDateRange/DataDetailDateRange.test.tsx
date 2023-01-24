@@ -13,7 +13,7 @@ describe('DataDetailDateRange', () => {
         expect(screen.getByText('06/21/2022 to 06/22/2022')).toBeInTheDocument()
     })
 
-    it('renders missing field if one of the dates is missing', () => {
+    it('renders missing field error if dates is missing', () => {
         render(
             <DataDetailDateRange startDate={undefined} endDate={undefined} />
         )

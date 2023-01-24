@@ -46,7 +46,7 @@ export function sortModifiedProvisions(
             const value = amendmentInfo[provisionKey]
             if (value === true) {
                 modifiedProvisions.push(provisionKey)
-            } else {
+            } else if (value === false) {
                 unmodifiedProvisions.push(provisionKey)
             }
         }
@@ -188,13 +188,15 @@ export const ContractDetailsSummarySection = ({
                             explainMissingData={
                                 amendmentProvisionsUnanswered && !isSubmitted
                             }
-                            children={
+                        >
+                            {amendmentProvisionsUnanswered ? null : (
                                 <DataDetailCheckboxList
                                     list={modifiedProvisions}
                                     dict={ModifiedProvisionsRecord}
+                                    displayEmptyList
                                 />
-                            }
-                        />
+                            )}
+                        </DataDetail>
 
                         <DataDetail
                             id="unmodifiedProvisions"
@@ -202,13 +204,15 @@ export const ContractDetailsSummarySection = ({
                             explainMissingData={
                                 amendmentProvisionsUnanswered && !isSubmitted
                             }
-                            children={
+                        >
+                            {amendmentProvisionsUnanswered ? null : (
                                 <DataDetailCheckboxList
                                     list={unmodifiedProvisions}
                                     dict={ModifiedProvisionsRecord}
+                                    displayEmptyList
                                 />
-                            }
-                        />
+                            )}
+                        </DataDetail>
                     </DoubleColumnGrid>
                 )}
             </dl>

@@ -12,7 +12,8 @@ function isCertainActuaryContact(contact: Contact): contact is ActuaryContact {
     return (contact as ActuaryContact).actuarialFirm !== undefined
 }
 
-// Used to contacts inside HTML <address> with link for email
+// Intended for use as children passed to DataDetail
+// displays contacts inside HTML <address> with link for email
 export const DataDetailContactField = ({
     contact,
 }: {
