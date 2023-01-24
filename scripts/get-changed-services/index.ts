@@ -140,12 +140,14 @@ function getChangedServicesSinceSha(
         'lerna', [ 'ls', '--since', sha, '-all', '--json']
     )
 
-    console.log("LERNATWO", stdout.toString(), stderr, error)
+    console.log("LERNATWO", stdout, stderr, error)
 
     if (error) {
         console.error(error)
         return error
     }
+    console.log("NO ERROR", stdout.toString())
+
     const lernaList: LernaListItem[] = JSON.parse(stdout.toString())
 
     return lernaList.map((i) => i.name)
