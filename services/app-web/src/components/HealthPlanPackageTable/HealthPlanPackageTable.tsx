@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
     ColumnFiltersState,
     createColumnHelper,
@@ -105,6 +105,8 @@ export const HealthPlanPackageTable = ({
 }: PackageTableProps): React.ReactElement => {
     const [columnFilters, setColumnFilters] =
         React.useState<ColumnFiltersState>([])
+
+    const [tableCaption, setTableCaption] = useState<React.ReactNode | null>()
 
     const isCMSUser = user.__typename === 'CMSUser'
 
@@ -242,6 +244,20 @@ export const HealthPlanPackageTable = ({
               tableData.length
           )}`
 
+    //Store caption element in state in order for screen readers to read dynamic captions.
+    useEffect(() => {
+        setTableCaption(
+            <caption className={caption ?? styles.srOnly}>
+                {caption || 'Submissions'}
+                <span className={styles.srOnly}>
+                    {`${
+                        showFilters && `, ${filtersApplied}`
+                    }, ${submissionCount}.`}
+                </span>
+            </caption>
+        )
+    }, [filtersApplied, submissionCount, caption, showFilters])
+
     return (
         <>
             {tableData.length ? (
@@ -257,25 +273,27 @@ export const HealthPlanPackageTable = ({
                                 name="state"
                                 label="State"
                                 filterOptions={stateFilterOptions}
-                                onChange={(selectedOptions) =>
+                                onChange={(selectedOptions) => {
+                                    setTableCaption(null)
                                     stateColumn.setFilterValue(
                                         selectedOptions.map(
                                             (selection) => selection.value
                                         )
                                     )
-                                }
+                                }}
                             />
                             <FilterSelect
                                 name="submissionType"
                                 label="Submission type"
                                 filterOptions={submissionTypeOptions}
-                                onChange={(selectedOptions) =>
+                                onChange={(selectedOptions) => {
+                                    setTableCaption(null)
                                     submissionTypeColumn.setFilterValue(
                                         selectedOptions.map(
                                             (selection) => selection.value
                                         )
                                     )
-                                }
+                                }}
                             />
                         </FilterAccordion>
                     )}
@@ -330,14 +348,7 @@ export const HealthPlanPackageTable = ({
                                 </tr>
                             ))}
                         </tbody>
-                        <caption className={caption ?? styles.srOnly}>
-                            {caption || 'Submissions'}
-                            <span className={styles.srOnly}>
-                                {`${
-                                    showFilters && `, ${filtersApplied}`
-                                }, ${submissionCount}.`}
-                            </span>
-                        </caption>
+                        {tableCaption}
                     </Table>
                     {!hasFilteredRows && (
                         <div
