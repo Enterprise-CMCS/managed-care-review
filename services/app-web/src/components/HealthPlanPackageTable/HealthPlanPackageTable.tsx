@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import {
-    ColumnFiltersState,
     createColumnHelper,
     flexRender,
     getCoreRowModel,
@@ -10,15 +9,19 @@ import {
     useReactTable,
     getFacetedUniqueValues,
 } from '@tanstack/react-table'
+import { useAtom } from 'jotai'
+import { atomWithHash } from 'jotai-location'
 import { HealthPlanPackageStatus, Program, User } from '../../gen/gqlClient'
 import styles from './HealthPlanPackageTable.module.scss'
 import { Table, Tag, Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
+import qs from 'qs'
 import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
 import { FilterAccordion, FilterSelect } from '../FilterAccordion'
 import { InfoTag, TagProps } from '../InfoTag/InfoTag'
 import { pluralize } from '../../common-code/formatters'
+import { FilterOptionType } from '../FilterAccordion/FilterSelect/FilterSelect'
 
 declare module '@tanstack/table-core' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -93,9 +96,46 @@ const submissionTypeOptions = [
     },
 ]
 
-// To keep the memoization from being refreshed every time, this needs to be
-// created outside the render function
+/* To keep the memoization from being refreshed every time, this needs to be
+    created outside the render function */
 const columnHelper = createColumnHelper<PackageInDashboardType>()
+
+type ReadableFilters = {
+    [key: string]: string[]
+}
+
+/* react-table has a ColumnFilterState type that depends on a ColumnFilter type that's
+    { id: string, value: unknown }.  We know our value is an array of strings, so we'll use our own type */
+type ColumnFilter = {
+    id: string
+    value: string[]
+}
+
+const fromColumnFiltersToReadableUrl = (input: ColumnFilter[]) => {
+    const output: ReadableFilters = {}
+    input.forEach((element) => {
+        output[element.id] = element.value
+    })
+    return qs.stringify(output, { arrayFormat: 'comma' })
+}
+
+const fromReadableUrlToColumnFilters = (
+    input: string | null
+): ColumnFilter[] => {
+    if (!input) {
+        return []
+    }
+    const parsed = qs.parse(input) as { [key: string]: string }
+    return Object.entries(parsed).map(([id, value]) => ({
+        id,
+        value: value.split(','),
+    }))
+}
+
+const columnHash = atomWithHash('filters', [], {
+    serialize: fromColumnFiltersToReadableUrl,
+    deserialize: fromReadableUrlToColumnFilters,
+})
 
 export const HealthPlanPackageTable = ({
     caption,
@@ -104,12 +144,33 @@ export const HealthPlanPackageTable = ({
     showFilters = false,
 }: PackageTableProps): React.ReactElement => {
     const [columnFilters, setColumnFilters] =
-        React.useState<ColumnFiltersState>([])
+        useAtom<ColumnFilter[]>(columnHash)
+
+    /* transform react-table's ColumnFilterState (stringified, formatted, and stored in the URL) to react-select's FilterOptionType
+        and return only the items matching the FilterSelect component that's calling the function*/
+    const getSelectedFiltersFromUrl = (id: string) => {
+        type TempRecord = { value: string; label: string; id: string }
+        const valuesFromUrl = [] as TempRecord[]
+        columnFilters.forEach((filter) => {
+            if (Array.isArray(filter.value)) {
+                filter.value.forEach((value) => {
+                    valuesFromUrl.push({
+                        value: value,
+                        label: value,
+                        id: filter.id,
+                    })
+                })
+            }
+        })
+        const filterValues = valuesFromUrl
+            .filter((item) => item.id === id)
+            .map((item) => ({ value: item.value, label: item.value }))
+        return filterValues as FilterOptionType[]
+    }
 
     const [tableCaption, setTableCaption] = useState<React.ReactNode | null>()
 
     const isCMSUser = user.__typename === 'CMSUser'
-
     const tableColumns = React.useMemo(
         () => [
             columnHelper.accessor((row) => row, {
@@ -265,11 +326,14 @@ export const HealthPlanPackageTable = ({
                     {showFilters && (
                         <FilterAccordion
                             onClearFilters={() => {
+                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                                //@ts-ignore
                                 setColumnFilters([])
                             }}
                             filterTitle="Filters"
                         >
                             <FilterSelect
+                                value={getSelectedFiltersFromUrl('stateName')}
                                 name="state"
                                 label="State"
                                 filterOptions={stateFilterOptions}
@@ -283,6 +347,9 @@ export const HealthPlanPackageTable = ({
                                 }}
                             />
                             <FilterSelect
+                                value={getSelectedFiltersFromUrl(
+                                    'submissionType'
+                                )}
                                 name="submissionType"
                                 label="Submission type"
                                 filterOptions={submissionTypeOptions}

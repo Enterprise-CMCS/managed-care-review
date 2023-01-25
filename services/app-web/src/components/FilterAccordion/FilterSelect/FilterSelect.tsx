@@ -1,18 +1,15 @@
-import React, { useRef, useEffect } from 'react'
+import React from 'react'
 import styles from '../../Select/Select.module.scss'
 import Select, {
     AriaOnFocus,
     Props,
-    SelectInstance,
-    GroupBase,
     components,
     MenuListProps,
 } from 'react-select'
-import { usePrevious } from '../../../hooks'
 
 export type FilterSelectPropType = {
     name: string
-    initialValues?: string[]
+    value?: FilterOptionType[]
     filterOptions: FilterOptionType[]
     label?: string
     toggleClearFilter?: boolean
@@ -25,18 +22,12 @@ export type FilterOptionType = {
 
 export const FilterSelect = ({
     name,
-    initialValues,
+    value,
     filterOptions,
     label,
     toggleClearFilter,
     ...selectProps
 }: FilterSelectPropType & Props<FilterOptionType, true>) => {
-    const prevToggleClearFilter = usePrevious(toggleClearFilter)
-    const selectInputRef =
-        useRef<
-            SelectInstance<FilterOptionType, true, GroupBase<FilterOptionType>>
-        >(null)
-
     const onFocus: AriaOnFocus<FilterOptionType> = ({
         focused,
         isDisabled,
@@ -57,22 +48,13 @@ export const FilterSelect = ({
         )
     }
 
-    useEffect(() => {
-        if (
-            toggleClearFilter !== prevToggleClearFilter &&
-            selectInputRef.current?.clearValue
-        ) {
-            selectInputRef.current.clearValue()
-        }
-    }, [toggleClearFilter, prevToggleClearFilter, selectInputRef])
-
     return (
         <div data-testid={`${name}-filter`}>
             {label && (
                 <label htmlFor={`${name}-filter-select-input`}>{label}</label>
             )}
             <Select
-                ref={selectInputRef}
+                value={value}
                 options={filterOptions}
                 className={styles.multiSelect}
                 classNamePrefix="select"
