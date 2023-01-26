@@ -437,7 +437,7 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         expect(submissionTypeCombobox).toBeInTheDocument()
 
         //Open state combobox and select Minnesota option
-        await selectEvent.openMenu(stateCombobox)
+        selectEvent.openMenu(stateCombobox)
         const stateOptions = screen.getByTestId('state-filter-options')
         expect(stateOptions).toBeInTheDocument()
         await waitFor(async () => {
