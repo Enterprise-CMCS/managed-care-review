@@ -6,15 +6,32 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { useLocation } from 'react-router-dom'
 import {
     ErrorAlertSiteUnavailable,
+    ErrorAlertScheduledMaintenance,
     ErrorAlertSessionExpired,
 } from '../../components'
+
+function maintenanceBannerForVariation(flag: string): React.ReactNode {
+    if (flag === 'UNSCHEDULED') {
+        return <ErrorAlertSiteUnavailable />
+    } else if (flag === 'SCHEDULED') {
+        return <ErrorAlertScheduledMaintenance />
+    } else if (flag !== 'OFF') {
+        console.error('Unexpected under-maintenance-banner flag: ', flag)
+    }
+    return null
+}
 
 export const Landing = (): React.ReactElement => {
     const location = useLocation()
     const ldClient = useLDClient()
-    const siteMaintenanceBanner: boolean = ldClient?.variation(
-        featureFlags.SITE_MAINTENANCE_BANNER.flag,
-        featureFlags.SITE_MAINTENANCE_BANNER.defaultValue
+
+    const siteUnderMantenanceBannerFlag: string = ldClient?.variation(
+        featureFlags.SITE_UNDER_MAINTENANCE_BANNER.flag,
+        featureFlags.SITE_UNDER_MAINTENANCE_BANNER.defaultValue
+    )
+
+    const maybeMaintenaceBanner = maintenanceBannerForVariation(
+        siteUnderMantenanceBannerFlag
     )
 
     const redirectFromSessionTimeout = new URLSearchParams(location.search).get(
@@ -25,8 +42,8 @@ export const Landing = (): React.ReactElement => {
         <>
             <section className={styles.detailsSection}>
                 <GridContainer className={styles.detailsSectionContent}>
-                    {siteMaintenanceBanner && <ErrorAlertSiteUnavailable />}
-                    {redirectFromSessionTimeout && !siteMaintenanceBanner && (
+                    {maybeMaintenaceBanner}
+                    {redirectFromSessionTimeout && !maybeMaintenaceBanner && (
                         <ErrorAlertSessionExpired />
                     )}
                     <Grid row gap className="margin-top-2">

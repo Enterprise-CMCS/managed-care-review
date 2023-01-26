@@ -15,6 +15,13 @@ export const featureFlags = {
         defaultValue: false,
     },
     /**
+     Toggles the site maintenance alert on the landing page
+    */
+    SITE_UNDER_MAINTENANCE_BANNER: {
+        flag: 'site-under-maintenance-banner',
+        defaultValue: 'OFF',
+    },
+    /**
      Enables the modal that alerts the user to an expiring session
     */
     SESSION_EXPIRING_MODAL: {
