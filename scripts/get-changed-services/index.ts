@@ -119,7 +119,7 @@ interface LernaListItem {
 function getAllServicesFromLerna(): string[] | Error {
     const { stdout, stderr, error, status } = spawnSync('lerna', ['ls', '-a', '--json'])
 
-    if (error || !status || status > 0) {
+    if (error || status !== 0) {
 
         console.log('ERROR', error, status)
 
@@ -139,7 +139,7 @@ function getChangedServicesSinceSha(
         'lerna', [ 'ls', '--since', sha, '-all', '--json']
     )
 
-    if (error || !status || status > 0) {
+    if (error || status !== 0) {
         console.error(error, stderr.toString())
         return new Error('Failed to find changes since recent SHA in Lerna')
     }
