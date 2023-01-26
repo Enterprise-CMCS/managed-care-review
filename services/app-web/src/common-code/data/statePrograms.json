@@ -994,26 +994,6 @@
                     "id": "6b6afeaf-aeff-45f7-a14c-992a03fa372f",
                     "fullName": "Children's CHIP Dental Services",
                     "name": "CHIP Dental "
-                },
-                {
-                    "id": "128bfe46-25d2-4422-8d29-3fd236f7daa9",
-                    "fullName": "Uniform Managed Care Contract",
-                    "name": "UMCC"
-                },
-                {
-                    "id": "76820038-2c6c-4e12-98ab-fad0907ff6f5",
-                    "fullName": "Star+ Plus Medicaid Rural Service Area ",
-                    "name": "MRSA"
-                },
-                {
-                    "id": "c2539135-41b9-439e-abd2-5d5707d85f4b",
-                    "fullName": "Medicare-Medicaid Dual Demonstration",
-                    "name": "MMDD"
-                },
-                {
-                    "id": "64b8b337-1ef9-4653-ad2a-77bce21ed168",
-                    "fullName": "Medical Transportation Program",
-                    "name": "NEMT"
                 }
             ],
             "code": "TX"
