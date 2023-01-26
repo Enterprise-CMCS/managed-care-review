@@ -330,8 +330,8 @@ export const HealthPlanPackageTable = ({
     //Store caption element in state in order for screen readers to read dynamic captions.
     useEffect(() => {
         setTableCaption(
-            <caption className={caption ?? styles.srOnly}>
-                {caption || 'Submissions'}
+            <caption className={caption ? '' : styles.srOnly}>
+                {caption ?? 'Submissions'}
                 {showFilters && (
                     <span
                         className={styles.srOnly}
