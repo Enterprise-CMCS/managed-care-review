@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
     createColumnHelper,
     flexRender,
@@ -8,6 +8,7 @@ import {
     RowData,
     useReactTable,
     getFacetedUniqueValues,
+    Column,
 } from '@tanstack/react-table'
 import { useAtom } from 'jotai'
 import { atomWithHash } from 'jotai-location'
@@ -18,10 +19,14 @@ import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
 import qs from 'qs'
 import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
-import { FilterAccordion, FilterSelect } from '../FilterAccordion'
+import {
+    FilterAccordion,
+    FilterSelect,
+    FilterSelectedOptionsType,
+    FilterOptionType,
+} from '../FilterAccordion'
 import { InfoTag, TagProps } from '../InfoTag/InfoTag'
 import { pluralize } from '../../common-code/formatters'
-import { FilterOptionType } from '../FilterAccordion/FilterSelect/FilterSelect'
 
 declare module '@tanstack/table-core' {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -168,6 +173,8 @@ export const HealthPlanPackageTable = ({
         return filterValues as FilterOptionType[]
     }
 
+    const [tableCaption, setTableCaption] = useState<React.ReactNode | null>()
+
     const isCMSUser = user.__typename === 'CMSUser'
     const tableColumns = React.useMemo(
         () => [
@@ -303,17 +310,45 @@ export const HealthPlanPackageTable = ({
               tableData.length
           )}`
 
+    const updateFilters = (
+        column: Column<PackageInDashboardType>,
+        selectedOptions: FilterSelectedOptionsType
+    ) => {
+        setTableCaption(null)
+        column.setFilterValue(
+            selectedOptions.map((selection) => selection.value)
+        )
+    }
+
+    const clearFilters = () => {
+        setTableCaption(null)
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-ignore
+        setColumnFilters([])
+    }
+
+    //Store caption element in state in order for screen readers to read dynamic captions.
+    useEffect(() => {
+        setTableCaption(
+            <caption className={caption ? '' : styles.srOnly}>
+                {caption ?? 'Submissions'}
+                {showFilters && (
+                    <span
+                        className={styles.srOnly}
+                    >{`, ${filtersApplied}`}</span>
+                )}
+                <span className={styles.srOnly}>{`, ${submissionCount}.`}</span>
+            </caption>
+        )
+    }, [filtersApplied, submissionCount, caption, showFilters])
+
     return (
         <>
             {tableData.length ? (
                 <>
                     {showFilters && (
                         <FilterAccordion
-                            onClearFilters={() => {
-                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                //@ts-ignore
-                                setColumnFilters([])
-                            }}
+                            onClearFilters={clearFilters}
                             filterTitle="Filters"
                         >
                             <FilterSelect
@@ -322,11 +357,7 @@ export const HealthPlanPackageTable = ({
                                 label="State"
                                 filterOptions={stateFilterOptions}
                                 onChange={(selectedOptions) =>
-                                    stateColumn.setFilterValue(
-                                        selectedOptions.map(
-                                            (selection) => selection.value
-                                        )
-                                    )
+                                    updateFilters(stateColumn, selectedOptions)
                                 }
                             />
                             <FilterSelect
@@ -337,10 +368,9 @@ export const HealthPlanPackageTable = ({
                                 label="Submission type"
                                 filterOptions={submissionTypeOptions}
                                 onChange={(selectedOptions) =>
-                                    submissionTypeColumn.setFilterValue(
-                                        selectedOptions.map(
-                                            (selection) => selection.value
-                                        )
+                                    updateFilters(
+                                        submissionTypeColumn,
+                                        selectedOptions
                                     )
                                 }
                             />
@@ -397,14 +427,7 @@ export const HealthPlanPackageTable = ({
                                 </tr>
                             ))}
                         </tbody>
-                        <caption className={caption ?? styles.srOnly}>
-                            {caption || 'Submissions'}
-                            <span className={styles.srOnly}>
-                                {`${
-                                    showFilters && `, ${filtersApplied}`
-                                }, ${submissionCount}.`}
-                            </span>
-                        </caption>
+                        {tableCaption}
                     </Table>
                     {!hasFilteredRows && (
                         <div
