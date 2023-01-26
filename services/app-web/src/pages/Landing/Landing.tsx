@@ -1,11 +1,35 @@
 import React from 'react'
 import { GridContainer, Grid } from '@trussworks/react-uswds'
 import styles from './Landing.module.scss'
+import { featureFlags } from '../../common-code/featureFlags'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { useLocation } from 'react-router-dom'
-import { ErrorAlertSessionExpired } from '../../components'
+import {
+    ErrorAlertSiteUnavailable,
+    ErrorAlertSessionExpired,
+    ErrorAlertScheduledMaintenance,
+} from '../../components'
+
+function maintenanceBannerForVariation(flag: string): React.ReactNode {
+    if (flag === 'UNSCHEDULED') {
+        return <ErrorAlertSiteUnavailable />
+    } else if (flag === 'SCHEDULED') {
+        return <ErrorAlertScheduledMaintenance />
+    }
+    return undefined
+}
 
 export const Landing = (): React.ReactElement => {
     const location = useLocation()
+    const ldClient = useLDClient()
+    const siteUnderMantenanceBannerFlag: string = ldClient?.variation(
+        featureFlags.SITE_UNDER_MAINTENANCE_BANNER.flag,
+        featureFlags.SITE_UNDER_MAINTENANCE_BANNER.defaultValue
+    )
+
+    const maybeMaintenaceBanner = maintenanceBannerForVariation(
+        siteUnderMantenanceBannerFlag
+    )
 
     const redirectFromSessionTimeout = new URLSearchParams(location.search).get(
         'session-timeout'
@@ -15,7 +39,10 @@ export const Landing = (): React.ReactElement => {
         <>
             <section className={styles.detailsSection}>
                 <GridContainer className={styles.detailsSectionContent}>
-                    {redirectFromSessionTimeout && <ErrorAlertSessionExpired />}
+                    {maybeMaintenaceBanner}
+                    {redirectFromSessionTimeout && !maybeMaintenaceBanner && (
+                        <ErrorAlertSessionExpired />
+                    )}
                     <Grid row gap className="margin-top-2">
                         <Grid tablet={{ col: 6 }}>
                             <div className={styles.detailsSteps}>

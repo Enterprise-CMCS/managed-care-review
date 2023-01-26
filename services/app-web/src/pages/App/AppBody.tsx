@@ -1,7 +1,6 @@
 import React from 'react'
-import { GovBanner, GridContainer } from '@trussworks/react-uswds'
+import { GovBanner } from '@trussworks/react-uswds'
 import styles from './AppBody.module.scss'
-
 import { AppRoutes } from './AppRoutes'
 import { Footer } from '../../components/Footer'
 import { Header } from '../../components/Header'
@@ -12,27 +11,7 @@ import { AuthModeType } from '../../common-code/config'
 import { useAuth } from '../../contexts/AuthContext'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
-import {
-    ErrorAlertScheduledMaintenance,
-    ErrorAlertSiteUnavailable,
-} from '../../components'
-
-function maintenanceBannerForVariation(flag: string): React.ReactNode {
-    if (flag === 'UNSCHEDULED') {
-        return (
-            <GridContainer>
-                <ErrorAlertSiteUnavailable />
-            </GridContainer>
-        )
-    } else if (flag === 'SCHEDULED') {
-        return (
-            <GridContainer>
-                <ErrorAlertScheduledMaintenance />
-            </GridContainer>
-        )
-    }
-    return undefined
-}
+import { Landing } from '../Landing/Landing'
 
 export function AppBody({
     authMode,
@@ -57,9 +36,6 @@ export function AppBody({
     )
 
     const siteUnderMaintenance = siteUnderMantenanceBannerFlag !== 'OFF'
-    const maintenanceBanner = maintenanceBannerForVariation(
-        siteUnderMantenanceBannerFlag
-    )
 
     return (
         <div id="App" className={styles.app}>
@@ -80,8 +56,8 @@ export function AppBody({
             />
             <main id="main-content" className={styles.mainContent} role="main">
                 {globalAlert && globalAlert}
-                {maintenanceBanner ? (
-                    maintenanceBanner
+                {siteUnderMaintenance ? (
+                    <Landing />
                 ) : loginStatus === 'LOADING' ? (
                     <Loading />
                 ) : (
