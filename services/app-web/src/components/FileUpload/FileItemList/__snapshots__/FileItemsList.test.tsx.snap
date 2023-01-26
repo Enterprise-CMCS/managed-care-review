@@ -51,7 +51,7 @@ exports[`FileItemList component renders correctly 1`] = `
     >
       <button
         aria-label="Remove testFile.pdf document"
-        className="usa-button usa-button--small usa-button--unstyled"
+        className="usa-button usa-button--unstyled"
         data-testid="button"
         onClick={[Function]}
         type="button"
@@ -104,7 +104,7 @@ exports[`FileItemList component renders correctly 1`] = `
     >
       <button
         aria-label="Remove testFile2.pdf document"
-        className="usa-button usa-button--small usa-button--unstyled"
+        className="usa-button usa-button--unstyled"
         data-testid="button"
         onClick={[Function]}
         type="button"
@@ -113,7 +113,7 @@ exports[`FileItemList component renders correctly 1`] = `
       </button>
       <button
         aria-label="Retry upload for testFile2.pdf document"
-        className="usa-button usa-button--small usa-button--unstyled"
+        className="usa-button usa-button--unstyled"
         data-testid="button"
         onClick={[Function]}
         type="button"
@@ -166,7 +166,7 @@ exports[`FileItemList component renders correctly 1`] = `
     >
       <button
         aria-label="Remove testFile3.pdf document"
-        className="usa-button usa-button--small usa-button--unstyled"
+        className="usa-button usa-button--unstyled"
         data-testid="button"
         onClick={[Function]}
         type="button"
@@ -175,7 +175,7 @@ exports[`FileItemList component renders correctly 1`] = `
       </button>
       <button
         aria-label="Retry upload for testFile3.pdf document"
-        className="usa-button usa-button--small usa-button--unstyled"
+        className="usa-button usa-button--unstyled"
         data-testid="button"
         onClick={[Function]}
         type="button"
@@ -223,7 +223,7 @@ exports[`FileItemList component renders correctly 1`] = `
     >
       <button
         aria-label="Remove testFile4.pdf document"
-        className="usa-button usa-button--small usa-button--unstyled"
+        className="usa-button usa-button--unstyled"
         data-testid="button"
         onClick={[Function]}
         type="button"
@@ -276,7 +276,7 @@ exports[`FileItemList component renders correctly 1`] = `
     >
       <button
         aria-label="Remove testFile4.pdf document"
-        className="usa-button usa-button--small usa-button--unstyled"
+        className="usa-button usa-button--unstyled"
         data-testid="button"
         onClick={[Function]}
         type="button"

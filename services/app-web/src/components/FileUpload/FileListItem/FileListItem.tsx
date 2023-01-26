@@ -71,7 +71,6 @@ export const FileListItem = ({
             <div className={styles.fileItemButtons}>
                 <Button
                     type="button"
-                    size="small"
                     unstyled
                     onClick={handleDelete}
                     aria-label={`Remove ${name} document`}
@@ -81,7 +80,6 @@ export const FileListItem = ({
                 {hasRecoverableError && (
                     <Button
                         type="button"
-                        size="small"
                         unstyled
                         onClick={handleRetry}
                         aria-label={`Retry upload for ${name} document`}

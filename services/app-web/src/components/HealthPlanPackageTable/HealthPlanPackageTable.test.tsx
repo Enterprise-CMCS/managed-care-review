@@ -93,6 +93,9 @@ const submissions: PackageInDashboardType[] = [
 ]
 
 describe('HealthPlanPackageTable for CMS User (with filters)', () => {
+    beforeEach(() => {
+        window.location.assign('#')
+    })
     const mockCMSUser: User = {
         __typename: 'CMSUser' as const,
         id: 'foo-id',
@@ -770,6 +773,9 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
 })
 
 describe('HealthPlanPackageTable state user tests', () => {
+    beforeEach(() => {
+        window.location.assign('#')
+    })
     const mockStateUser: User = {
         __typename: 'StateUser' as const,
         id: 'foo-id',

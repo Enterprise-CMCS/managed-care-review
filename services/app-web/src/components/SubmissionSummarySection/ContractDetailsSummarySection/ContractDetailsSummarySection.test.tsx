@@ -8,7 +8,10 @@ import {
     mockContractAndRatesDraft,
     mockStateSubmission,
 } from '../../../testHelpers/apolloHelpers'
-import { ModifiedProvisions } from '../../../common-code/healthPlanFormDataType'
+import {
+    ModifiedProvisions,
+    UnlockedHealthPlanFormDataType,
+} from '../../../common-code/healthPlanFormDataType'
 
 describe('ContractDetailsSummarySection', () => {
     it('can render draft submission without errors (review and submit behavior)', () => {
@@ -335,5 +338,89 @@ describe('ContractDetailsSummarySection', () => {
             'modifiedOtherFinancialPaymentIncentive',
             'modifiedLengthOfContract',
         ])
+    })
+
+    it('shows missing field error on amended provisions when expected', () => {
+        const contractWithUnansweredProvisions: UnlockedHealthPlanFormDataType =
+            {
+                ...mockContractAndRatesDraft(),
+                contractAmendmentInfo: {
+                    modifiedProvisions: undefined,
+                },
+            }
+        renderWithProviders(
+            <ContractDetailsSummarySection
+                submission={contractWithUnansweredProvisions}
+                submissionName="MN-PMAP-0001"
+            />
+        )
+
+        const modifiedProvisions = screen.getByLabelText(
+            'This contract action includes new or modified provisions related to the following'
+        )
+        expect(
+            within(modifiedProvisions).queryByText(
+                /You must provide this information/
+            )
+        ).toBeInTheDocument()
+
+        const unmodifiedProvisions = screen.getByLabelText(
+            'This contract action does NOT include new or modified provisions related to the following'
+        )
+        expect(
+            within(unmodifiedProvisions).queryByText(
+                /You must provide this information/
+            )
+        ).toBeInTheDocument()
+    })
+    it('does not show missing field error on amended provisions when expected when valid fields present', () => {
+        const contractWithAllUnmodifiedProvisions: UnlockedHealthPlanFormDataType =
+            {
+                ...mockContractAndRatesDraft(),
+                contractAmendmentInfo: {
+                    modifiedProvisions: {
+                        modifiedBenefitsProvided: false,
+                        modifiedGeoAreaServed: false,
+                        modifiedMedicaidBeneficiaries: false,
+                        modifiedRiskSharingStrategy: false,
+                        modifiedIncentiveArrangements: false,
+                        modifiedWitholdAgreements: false,
+                        modifiedStateDirectedPayments: false,
+                        modifiedPassThroughPayments: false,
+                        modifiedPaymentsForMentalDiseaseInstitutions: false,
+                        modifiedMedicalLossRatioStandards: false,
+                        modifiedOtherFinancialPaymentIncentive: false,
+                        modifiedEnrollmentProcess: false,
+                        modifiedGrevienceAndAppeal: false,
+                        modifiedNetworkAdequacyStandards: false,
+                        modifiedLengthOfContract: false,
+                        modifiedNonRiskPaymentArrangements: false,
+                    },
+                },
+            }
+        renderWithProviders(
+            <ContractDetailsSummarySection
+                submission={contractWithAllUnmodifiedProvisions}
+                submissionName="MN-PMAP-0001"
+            />
+        )
+
+        const modifiedProvisions = screen.getByLabelText(
+            'This contract action includes new or modified provisions related to the following'
+        )
+        expect(
+            within(modifiedProvisions).queryByText(
+                /You must provide this information/
+            )
+        ).toBeNull()
+
+        const unmodifiedProvisions = screen.getByLabelText(
+            'This contract action does NOT include new or modified provisions related to the following'
+        )
+        expect(
+            within(unmodifiedProvisions).queryByText(
+                /You must provide this information/
+            )
+        ).toBeNull()
     })
 })

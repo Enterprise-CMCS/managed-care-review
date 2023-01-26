@@ -3,7 +3,6 @@ import {
     mockContractAmendmentFormData,
     mockContractOnlyFormData,
     mockContractAndRatesFormData,
-    mockUser,
     mockMNState,
 } from '../../testHelpers/emailerHelpers'
 import {
@@ -13,13 +12,14 @@ import {
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { newPackageStateEmail } from './index'
 
-test('to addresses list includes current user', async () => {
+const defaultSubmitters = ['submitter1@example.com', 'submitter2@example.com']
+
+test('to addresses list includes submitter emails', async () => {
     const sub = mockContractOnlyFormData()
-    const user = mockUser()
     const defaultStatePrograms = mockMNState().programs
     const template = await newPackageStateEmail(
         sub,
-        user,
+        defaultSubmitters,
         testEmailConfig,
         defaultStatePrograms
     )
@@ -31,7 +31,7 @@ test('to addresses list includes current user', async () => {
 
     expect(template).toEqual(
         expect.objectContaining({
-            toAddresses: expect.arrayContaining([user.email]),
+            toAddresses: expect.arrayContaining(defaultSubmitters),
         })
     )
 })
@@ -52,11 +52,10 @@ test('to addresses list includes all state contacts on submission', async () => 
             },
         ],
     }
-    const user = mockUser()
     const defaultStatePrograms = mockMNState().programs
     const template = await newPackageStateEmail(
         sub,
-        user,
+        defaultSubmitters,
         testEmailConfig,
         defaultStatePrograms
     )
@@ -75,7 +74,7 @@ test('to addresses list includes all state contacts on submission', async () => 
     })
 })
 
-test('to addresses list does not include duplicate state contacts on submission', async () => {
+test('to addresses list does not include duplicate state receiver emails on submission', async () => {
     const sub: LockedHealthPlanFormDataType = {
         ...mockContractOnlyFormData(),
         stateContacts: [
@@ -91,11 +90,10 @@ test('to addresses list does not include duplicate state contacts on submission'
             },
         ],
     }
-    const user = mockUser()
     const defaultStatePrograms = mockMNState().programs
     const template = await newPackageStateEmail(
         sub,
-        user,
+        defaultSubmitters,
         testEmailConfig,
         defaultStatePrograms
     )
@@ -106,20 +104,19 @@ test('to addresses list does not include duplicate state contacts on submission'
     }
 
     expect(template.toAddresses).toEqual([
-        'test+state+user@example.com',
         'test1@example.com',
+        ...defaultSubmitters,
     ])
 })
 
 test('subject line is correct and clearly states submission is complete', async () => {
     const sub = mockContractOnlyFormData()
-    const user = mockUser()
     const defaultStatePrograms = mockMNState().programs
     const name = packageName(sub, defaultStatePrograms)
 
     const template = await newPackageStateEmail(
         sub,
-        user,
+        defaultSubmitters,
         testEmailConfig,
         defaultStatePrograms
     )
@@ -141,13 +138,12 @@ test('subject line is correct and clearly states submission is complete', async 
 
 test('includes mcog, rate, and team email addresses', async () => {
     const sub = mockContractOnlyFormData()
-    const user = mockUser()
     const defaultStatePrograms = mockMNState().programs
     const name = packageName(sub, defaultStatePrograms)
 
     const template = await newPackageStateEmail(
         sub,
-        user,
+        defaultSubmitters,
         testEmailConfig,
         defaultStatePrograms
     )
@@ -185,11 +181,10 @@ test('includes mcog, rate, and team email addresses', async () => {
 
 test('includes link to submission', async () => {
     const sub = mockContractAmendmentFormData()
-    const user = mockUser()
     const defaultStatePrograms = mockMNState().programs
     const template = await newPackageStateEmail(
         sub,
-        user,
+        defaultSubmitters,
         testEmailConfig,
         defaultStatePrograms
     )
@@ -217,11 +212,10 @@ test('includes link to submission', async () => {
 
 test('includes information about what is next', async () => {
     const sub = mockContractAmendmentFormData()
-    const user = mockUser()
     const defaultStatePrograms = mockMNState().programs
     const template = await newPackageStateEmail(
         sub,
-        user,
+        defaultSubmitters,
         testEmailConfig,
         defaultStatePrograms
     )
@@ -273,12 +267,11 @@ test('includes expected data summary for a contract and rates submission State e
             },
         ],
     }
-    const user = mockUser()
     const defaultStatePrograms = mockMNState().programs
 
     const template = await newPackageStateEmail(
         sub,
-        user,
+        defaultSubmitters,
         testEmailConfig,
         defaultStatePrograms
     )
@@ -420,12 +413,11 @@ test('includes expected data summary for a multi-rate contract and rates submiss
             },
         ],
     }
-    const user = mockUser()
     const defaultStatePrograms = mockMNState().programs
 
     const template = await newPackageStateEmail(
         sub,
-        user,
+        defaultSubmitters,
         testEmailConfig,
         defaultStatePrograms
     )
@@ -528,12 +520,11 @@ test('includes expected data summary for a rate amendment submission State email
             },
         ],
     }
-    const user = mockUser()
     const statePrograms = mockMNState().programs
 
     const template = await newPackageStateEmail(
         sub,
-        user,
+        defaultSubmitters,
         testEmailConfig,
         statePrograms
     )
@@ -610,11 +601,10 @@ test('renders overall email for a new package with a rate amendment as expected'
             },
         ],
     }
-    const user = mockUser()
     const defaultStatePrograms = mockMNState().programs
     const result = await newPackageStateEmail(
         sub,
-        user,
+        defaultSubmitters,
         testEmailConfig,
         defaultStatePrograms
     )

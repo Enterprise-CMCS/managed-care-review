@@ -9,6 +9,7 @@ import {
     UpdateInfoType,
     HealthPlanPackageType,
     packageStatus,
+    packageSubmitters,
 } from '../../domain-models'
 import { Emailer } from '../../emailer'
 import { MutationResolvers } from '../../gen/gqlServer'
@@ -106,7 +107,8 @@ export function unlockHealthPlanPackageResolver(
             throw new Error(errMessage)
         }
 
-        const draft: UnlockedHealthPlanFormDataType = unlock(formDataResult)
+        const draftformData: UnlockedHealthPlanFormDataType =
+            unlock(formDataResult)
 
         // Create a new revision with this draft in it
         const updateInfo: UpdateInfoType = {
@@ -115,14 +117,14 @@ export function unlockHealthPlanPackageResolver(
             updatedReason: unlockedReason,
         }
 
-        const revisionResult = await store.insertHealthPlanRevision(
+        const unlockedPackage = await store.insertHealthPlanRevision(
             pkgID,
             updateInfo,
-            draft
+            draftformData
         )
 
-        if (isStoreError(revisionResult)) {
-            const errMessage = `Issue unlocking a package of type ${revisionResult.code}. Message: ${revisionResult.message}`
+        if (isStoreError(unlockedPackage)) {
+            const errMessage = `Issue unlocking a package of type ${unlockedPackage.code}. Message: ${unlockedPackage.message}`
             logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new Error(errMessage)
@@ -132,7 +134,9 @@ export function unlockHealthPlanPackageResolver(
 
         // Get state analysts emails from parameter store
         let stateAnalystsEmails =
-            await emailParameterStore.getStateAnalystsEmails(draft.stateCode)
+            await emailParameterStore.getStateAnalystsEmails(
+                draftformData.stateCode
+            )
         //If error, log it and set stateAnalystsEmails to empty string as to not interrupt the emails.
         if (stateAnalystsEmails instanceof Error) {
             logError('getStateAnalystsEmails', stateAnalystsEmails.message)
@@ -140,7 +144,10 @@ export function unlockHealthPlanPackageResolver(
             stateAnalystsEmails = []
         }
 
-        const statePrograms = store.findStatePrograms(draft.stateCode)
+        // Get submitter email from every pkg submitted revision.
+        const submitterEmails = packageSubmitters(unlockedPackage)
+
+        const statePrograms = store.findStatePrograms(draftformData.stateCode)
 
         if (statePrograms instanceof Error) {
             logError('findStatePrograms', statePrograms.message)
@@ -150,7 +157,7 @@ export function unlockHealthPlanPackageResolver(
 
         const unlockPackageCMSEmailResult =
             await emailer.sendUnlockPackageCMSEmail(
-                draft,
+                draftformData,
                 updateInfo,
                 stateAnalystsEmails,
                 statePrograms
@@ -158,9 +165,10 @@ export function unlockHealthPlanPackageResolver(
 
         const unlockPackageStateEmailResult =
             await emailer.sendUnlockPackageStateEmail(
-                draft,
+                draftformData,
                 updateInfo,
-                statePrograms
+                statePrograms,
+                submitterEmails
             )
 
         if (unlockPackageCMSEmailResult instanceof Error) {
@@ -182,6 +190,6 @@ export function unlockHealthPlanPackageResolver(
         logSuccess('unlockHealthPlanPackage')
         setSuccessAttributesOnActiveSpan(span)
 
-        return { pkg: revisionResult }
+        return { pkg: unlockedPackage }
     }
 }

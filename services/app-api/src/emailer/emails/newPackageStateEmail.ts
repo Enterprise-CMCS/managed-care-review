@@ -3,40 +3,45 @@ import {
     packageName as generatePackageName,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
-import { formatEmailAddresses } from '../formatters'
+import { formatEmailAddresses, pruneDuplicateEmails } from '../formatters'
 import { EmailConfiguration, EmailData } from '..'
-import { ProgramType, UserType } from '../../domain-models'
+import { ProgramType } from '../../domain-models'
 import {
     stripHTMLFromTemplate,
     SubmissionTypeRecord,
     renderTemplate,
-    generateStateReceiverEmails,
     findPackagePrograms,
 } from '../templateHelpers'
 import { submissionSummaryURL } from '../generateURLs'
 
 export const newPackageStateEmail = async (
-    pkg: LockedHealthPlanFormDataType,
-    user: UserType,
+    formData: LockedHealthPlanFormDataType,
+    submitterEmails: string[],
     config: EmailConfiguration,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
-    const receiverEmails = generateStateReceiverEmails(pkg, user)
+    const stateContactEmails = formData.stateContacts.map(
+        (contact) => contact.email
+    )
+    const receiverEmails = pruneDuplicateEmails([
+        ...stateContactEmails,
+        ...submitterEmails,
+    ])
 
     //This checks to make sure all programs contained in submission exists for the state.
-    const packagePrograms = findPackagePrograms(pkg, statePrograms)
+    const packagePrograms = findPackagePrograms(formData, statePrograms)
 
     if (packagePrograms instanceof Error) {
         return packagePrograms
     }
 
-    const packageName = generatePackageName(pkg, packagePrograms)
+    const packageName = generatePackageName(formData, packagePrograms)
 
     const isContractAndRates =
-        pkg.submissionType === 'CONTRACT_AND_RATES' &&
-        Boolean(pkg.rateInfos.length)
+        formData.submissionType === 'CONTRACT_AND_RATES' &&
+        Boolean(formData.rateInfos.length)
 
-    const packageURL = submissionSummaryURL(pkg.id, config.baseUrl)
+    const packageURL = submissionSummaryURL(formData.id, config.baseUrl)
 
     const data = {
         shouldIncludeRates: isContractAndRates,
@@ -50,18 +55,18 @@ export const newPackageStateEmail = async (
             config.cmsDevTeamHelpEmailAddress
         ),
         packageName,
-        submissionType: SubmissionTypeRecord[pkg.submissionType],
-        submissionDescription: pkg.submissionDescription,
-        contractType: pkg.contractType,
+        submissionType: SubmissionTypeRecord[formData.submissionType],
+        submissionDescription: formData.submissionDescription,
+        contractType: formData.contractType,
         contractDatesLabel:
-            pkg.contractType === 'AMENDMENT'
+            formData.contractType === 'AMENDMENT'
                 ? 'Contract amendment effective dates'
                 : 'Contract effective dates',
-        contractDatesStart: formatCalendarDate(pkg.contractDateStart),
-        contractDatesEnd: formatCalendarDate(pkg.contractDateEnd),
+        contractDatesStart: formatCalendarDate(formData.contractDateStart),
+        contractDatesEnd: formatCalendarDate(formData.contractDateEnd),
         rateInfos:
             isContractAndRates &&
-            pkg.rateInfos.map((rate) => ({
+            formData.rateInfos.map((rate) => ({
                 rateName: rate.rateCertificationName,
                 rateDateLabel:
                     rate.rateType === 'NEW'

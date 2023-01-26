@@ -46,7 +46,7 @@ export function sortModifiedProvisions(
             const value = amendmentInfo[provisionKey]
             if (value === true) {
                 modifiedProvisions.push(provisionKey)
-            } else {
+            } else if (value === false) {
                 unmodifiedProvisions.push(provisionKey)
             }
         }
@@ -110,6 +110,9 @@ export const ContractDetailsSummarySection = ({
     const [modifiedProvisions, unmodifiedProvisions] = sortModifiedProvisions(
         submission.contractAmendmentInfo?.modifiedProvisions
     )
+
+    const amendmentProvisionsUnanswered =
+        modifiedProvisions.length === 0 && unmodifiedProvisions.length === 0
 
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>
@@ -182,26 +185,34 @@ export const ContractDetailsSummarySection = ({
                         <DataDetail
                             id="modifiedProvisions"
                             label="This contract action includes new or modified provisions related to the following"
-                            explainMissingData={!isSubmitted}
-                            children={
+                            explainMissingData={
+                                amendmentProvisionsUnanswered && !isSubmitted
+                            }
+                        >
+                            {amendmentProvisionsUnanswered ? null : (
                                 <DataDetailCheckboxList
                                     list={modifiedProvisions}
                                     dict={ModifiedProvisionsRecord}
+                                    displayEmptyList
                                 />
-                            }
-                        />
+                            )}
+                        </DataDetail>
 
                         <DataDetail
                             id="unmodifiedProvisions"
                             label="This contract action does NOT include new or modified provisions related to the following"
-                            explainMissingData={!isSubmitted}
-                            children={
+                            explainMissingData={
+                                amendmentProvisionsUnanswered && !isSubmitted
+                            }
+                        >
+                            {amendmentProvisionsUnanswered ? null : (
                                 <DataDetailCheckboxList
                                     list={unmodifiedProvisions}
                                     dict={ModifiedProvisionsRecord}
+                                    displayEmptyList
                                 />
-                            }
-                        />
+                            )}
+                        </DataDetail>
                     </DoubleColumnGrid>
                 )}
             </dl>
