@@ -28,6 +28,7 @@ describe('UserLoginInfo', () => {
                 loginStatus={'LOGGED_OUT'}
                 authMode={'LOCAL'}
                 logout={jestFn}
+                disableLogin={false}
             />
         )
         expect(screen.getByRole('link')).toBeInTheDocument()
@@ -42,6 +43,7 @@ describe('UserLoginInfo', () => {
                 loginStatus={'LOGGED_IN'}
                 authMode={'LOCAL'}
                 logout={jestFn}
+                disableLogin={false}
             />
         )
         expect(screen.getByRole('button')).toBeInTheDocument()
@@ -57,6 +59,7 @@ describe('UserLoginInfo', () => {
                 loginStatus={'LOGGED_IN'}
                 authMode={'LOCAL'}
                 logout={jestFn}
+                disableLogin={false}
             />
         )
         const feedbackLink = screen.getByRole('link', {
@@ -77,6 +80,23 @@ describe('UserLoginInfo', () => {
                 loginStatus={'LOADING'}
                 authMode={'LOCAL'}
                 logout={jestFn}
+                disableLogin={false}
+            />
+        )
+        expect(screen.queryByRole('button')).toBeNull()
+        expect(screen.queryByRole('link')).toBeNull()
+    })
+
+    it('displays nothing when disabled', () => {
+        const jestFn = jest.fn()
+
+        renderWithProviders(
+            <UserLoginInfo
+                user={undefined}
+                loginStatus={'LOGGED_OUT'}
+                authMode={'LOCAL'}
+                logout={jestFn}
+                disableLogin={true}
             />
         )
         expect(screen.queryByRole('button')).toBeNull()

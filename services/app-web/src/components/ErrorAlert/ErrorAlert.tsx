@@ -37,7 +37,10 @@ export const ErrorAlert = ({
 
             {showLink && (
                 <span>
-                    &nbsp;<Link href={MAIL_TO_SUPPORT}>let us know.</Link>
+                    &nbsp;email{' '}
+                    <Link className={styles.nowrap} href={MAIL_TO_SUPPORT}>
+                        {MAIL_TO_SUPPORT}
+                    </Link>
                 </span>
             )}
         </Alert>

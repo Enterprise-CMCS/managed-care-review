@@ -16,7 +16,6 @@ const ERROR_MESSAGES = {
     resubmit_error_heading: 'Resubmission error',
 }
 
-const MAIL_TO_SUPPORT =
-    'mailto: mc-review@cms.hhs.gov, mc-review-team@truss.works'
+const MAIL_TO_SUPPORT = 'mc-review@cms.hhs.gov'
 
 export { MAIL_TO_SUPPORT, ERROR_MESSAGES }

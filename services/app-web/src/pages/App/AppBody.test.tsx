@@ -1,6 +1,7 @@
 import { screen, waitFor } from '@testing-library/react'
 
 import {
+    ldUseClientSpy,
     renderWithProviders,
     userClickSignIn,
 } from '../../testHelpers/jestHelpers'
@@ -24,6 +25,7 @@ describe('App Body and routes', () => {
     })
 
     it('App renders without errors', () => {
+        ldUseClientSpy({ 'session-expiring-modal': false })
         renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
         const mainElement = screen.getByRole('main')
         expect(mainElement).toBeInTheDocument()
@@ -43,6 +45,7 @@ describe('App Body and routes', () => {
 
         it('shows test environment banner in val', () => {
             process.env.REACT_APP_STAGE_NAME = 'val'
+            ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
                     mocks: [
@@ -59,6 +62,7 @@ describe('App Body and routes', () => {
 
         it('does not show test environment banner in prod', () => {
             process.env.REACT_APP_STAGE_NAME = 'prod'
+            ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
                     mocks: [
@@ -72,8 +76,52 @@ describe('App Body and routes', () => {
         })
     })
 
+    it('displays maintenance banner when flag is on', async () => {
+        ldUseClientSpy({
+            'site-under-maintenance-banner': 'UNSCHEDULED',
+            'session-expiring-modal': false,
+        })
+        renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    indexHealthPlanPackagesMockSuccess(),
+                ],
+            },
+        })
+        expect(
+            await screen.findByRole('heading', { name: 'Site unavailable' })
+        ).toBeInTheDocument()
+        expect(
+            await screen.findByText(
+                /MC-Review is currently unavailable due to technical issues/
+            )
+        ).toBeInTheDocument()
+    })
+
+    it('does not display maintenance banner when flag is off', async () => {
+        ldUseClientSpy({ 'session-expiring-modal': false })
+        renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    indexHealthPlanPackagesMockSuccess(),
+                ],
+            },
+        })
+        expect(
+            screen.queryByRole('heading', { name: 'Site Unavailable' })
+        ).toBeNull()
+        expect(
+            screen.queryByText(
+                /MC-Review is currently unavailable due to technical issues/
+            )
+        ).toBeNull()
+    })
+
     describe('/', () => {
         it('display dashboard when logged in', async () => {
+            ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
                     mocks: [
@@ -97,6 +145,7 @@ describe('App Body and routes', () => {
         })
 
         it('display landing page when logged out', async () => {
+            ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
             await waitFor(() => {
                 expect(
@@ -117,6 +166,7 @@ describe('App Body and routes', () => {
 
     describe('/auth', () => {
         it('when app loads at /auth route, Auth header is displayed', async () => {
+            ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/auth' },
             })
@@ -138,6 +188,7 @@ describe('App Body and routes', () => {
         })
 
         it('when user clicks Sign In link, redirects to /auth', async () => {
+            ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
             await userClickSignIn(screen)
 
@@ -147,6 +198,7 @@ describe('App Body and routes', () => {
         })
 
         it('display local login page when expected', async () => {
+            ldUseClientSpy({})
             renderWithProviders(<AppBody authMode={'LOCAL'} />)
 
             await userClickSignIn(screen)
@@ -160,6 +212,7 @@ describe('App Body and routes', () => {
         })
 
         it('display cognito signup page when expected', async () => {
+            ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
             await userClickSignIn(screen)
 
@@ -177,6 +230,7 @@ describe('App Body and routes', () => {
 
     describe('page scrolling', () => {
         it('scroll top on page load', async () => {
+            ldUseClientSpy({})
             renderWithProviders(<AppBody authMode={'LOCAL'} />)
             await userClickSignIn(screen)
             expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
@@ -185,6 +239,7 @@ describe('App Body and routes', () => {
 
     describe('invalid routes', () => {
         it('redirect to landing page when logged out', async () => {
+            ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/not-a-real-place' },
             })
@@ -199,6 +254,7 @@ describe('App Body and routes', () => {
         })
 
         it('redirects to 404 error page when logged in', async () => {
+            ldUseClientSpy({ 'session-expiring-modal': false })
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
