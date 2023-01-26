@@ -1,8 +1,11 @@
-// USWDS customizations, themes and settings - see v3 documentation
+/*
+USWDS customizations, themes and settings
+    See v3 documentation around USWDS core 
+    https://designsystem.digital.gov/documentation/settings/
+*/
+// $asset_path: '~@uswds/uswds'
 @use "uswds-core" with (  
-
 /* GENERAL */
-// Must be relative path because it will try to load assets from uswds/dist/scss/core/(path)
     $theme-font-path: '@uswds/uswds/fonts',
     $theme-image-path: '@uswds/uswds/img',
     $theme-hero-image: '@uswds/uswds/img/hero.png',

@@ -1,14 +1,16 @@
-/* Sass entry point
-     Order matters.
+/* 
+Sass entry point - order matters.
     https://designsystem.digital.gov/documentation/getting-started/developers/phase-two-compile/#about-sass-entry-points
 */
+
 // 1. Load USWDS theme and settings
  @forward "styles/uswds-theme";
-//  @forward "uswds";
+ @forward "uswds";
 
 
 // 2. Load USWDS (and react-uswds) source code
-@import "@uswds/uswds/packages/uswds/_index.scss";
 @import '@trussworks/react-uswds/lib/index.css';
+
+
 // 3. Load your project's custom Sass
 @import 'styles/custom.scss';
