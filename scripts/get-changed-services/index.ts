@@ -120,7 +120,10 @@ function getAllServicesFromLerna(): string[] | Error {
     const { stdout, stderr, error, status } = spawnSync('lerna', ['ls', '-a', '--json'])
 
     if (error || !status || status > 0) {
-        console.error(error, stderr.toString())
+
+        console.log('ERROR', error, status)
+
+        console.error('Error: ', error, stderr.toString(), stdout.toString())
         return new Error('Failed to list all services from Lerna')
     }
     const lernaList: LernaListItem[] = JSON.parse(stdout.toString())
