@@ -1,6 +1,7 @@
 import { screen, waitFor } from '@testing-library/react'
 
 import {
+    ldUseClientSpy,
     renderWithProviders,
     userClickSignIn,
 } from '../../testHelpers/jestHelpers'
@@ -72,6 +73,46 @@ describe('App Body and routes', () => {
         })
     })
 
+    it('displays maintenance banner when flag is on', async () => {
+        ldUseClientSpy({ 'site-under-maintenance-banner': 'UNSCHEDULED' })
+        renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    indexHealthPlanPackagesMockSuccess(),
+                ],
+            },
+        })
+        expect(
+            await screen.findByRole('heading', { name: 'Site unavailable' })
+        ).toBeInTheDocument()
+        expect(
+            await screen.findByText(
+                /MC-Review is currently unavailable due to technical issues/
+            )
+        ).toBeInTheDocument()
+    })
+
+    it('does not display maintenance banner when flag is off', async () => {
+        ldUseClientSpy({})
+        renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    indexHealthPlanPackagesMockSuccess(),
+                ],
+            },
+        })
+        expect(
+            screen.queryByRole('heading', { name: 'Site Unavailable' })
+        ).toBeNull()
+        expect(
+            screen.queryByText(
+                /MC-Review is currently unavailable due to technical issues/
+            )
+        ).toBeNull()
+    })
+
     describe('/', () => {
         it('display dashboard when logged in', async () => {
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />, {
@@ -138,6 +179,7 @@ describe('App Body and routes', () => {
         })
 
         it('when user clicks Sign In link, redirects to /auth', async () => {
+            ldUseClientSpy({})
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
             await userClickSignIn(screen)
 
@@ -147,6 +189,7 @@ describe('App Body and routes', () => {
         })
 
         it('display local login page when expected', async () => {
+            ldUseClientSpy({})
             renderWithProviders(<AppBody authMode={'LOCAL'} />)
 
             await userClickSignIn(screen)
@@ -160,6 +203,7 @@ describe('App Body and routes', () => {
         })
 
         it('display cognito signup page when expected', async () => {
+            ldUseClientSpy({})
             renderWithProviders(<AppBody authMode={'AWS_COGNITO'} />)
             await userClickSignIn(screen)
 
@@ -177,6 +221,7 @@ describe('App Body and routes', () => {
 
     describe('page scrolling', () => {
         it('scroll top on page load', async () => {
+            ldUseClientSpy({})
             renderWithProviders(<AppBody authMode={'LOCAL'} />)
             await userClickSignIn(screen)
             expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
