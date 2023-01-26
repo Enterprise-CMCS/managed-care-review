@@ -141,7 +141,7 @@ export const HealthPlanPackageTable = ({
     const [columnFilters, setColumnFilters] = useAtom(columnHash)
 
     /* we store the last clicked element in a ref so that when the url is updated and the page rerenders
-        we can focus that element for the user.  this useEffect (with no dependency array) will run once on each render. 
+        we can focus that element.  this useEffect (with no dependency array) will run once on each render. 
         Note that the React-y way to do this is to use forwardRef, but the clearFilters button is deeply nested 
         and we'd wind up passing down the ref through several layers to achieve what we can do here in a few lines 
         with DOM methods */

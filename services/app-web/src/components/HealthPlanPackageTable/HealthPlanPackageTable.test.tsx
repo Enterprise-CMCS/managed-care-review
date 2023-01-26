@@ -437,7 +437,7 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         expect(submissionTypeCombobox).toBeInTheDocument()
 
         //Open state combobox and select Minnesota option
-        selectEvent.openMenu(stateCombobox)
+        await selectEvent.openMenu(stateCombobox)
         const stateOptions = screen.getByTestId('state-filter-options')
         expect(stateOptions).toBeInTheDocument()
         await waitFor(async () => {
@@ -448,7 +448,7 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
             await selectEvent.select(stateOptions, 'Minnesota')
         })
 
-        //Open submission type combobox and select Minnesota option
+        //Open submission type combobox and select 'Contract action and rate certification' option
         selectEvent.openMenu(submissionTypeCombobox)
         const submissionTypeOptions = screen.getByTestId(
             'submissionType-filter-options'
@@ -475,10 +475,13 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         expect(rows[1]).toHaveTextContent('Minnesota') // row[0] is the header
         expect(rows[1]).toHaveTextContent(
             'Contract action and rate certification'
-        ) // row[0] is the header
+        )
         expect(
             screen.getByText('Displaying 1 of 3 submissions')
         ).toBeInTheDocument()
+        expect(global.window.location.href).toContain(
+            '#filters=stateName%3DMinnesota%26submissionType%3DContract+action+and+rate+certification'
+        )
     })
 
     it('should clear all filters when clear filter button is clicked', async () => {
@@ -570,6 +573,9 @@ describe('HealthPlanPackageTable for CMS User (with filters)', () => {
         expect(
             screen.getByText('Displaying 3 of 3 submissions')
         ).toBeInTheDocument()
+        expect(clearFiltersButton).toHaveFocus()
+        expect(global.window.location.href).not.toContain('stateName')
+        expect(global.window.location.href).not.toContain('submissionType')
     })
 
     it('displays no results found when filters return no results', async () => {
