@@ -175,7 +175,7 @@ type Mutation {
         - A non CMSUser called this
     - UserInputError
         - A package cannot be found with the given `pkgID`
-        - The package is not in the SUBMITTED or RESUBMITTED state
+        - The package is in the DRAFT state
         - The due date is in the past
         - The rateIDs are not associated with the package
     """
@@ -191,6 +191,7 @@ type Mutation {
     - ForbiddenError:
         - A non CMSUser called this
     - UserInputError
+        - A Question cannot be found given `questionID`
         - The due date is in the past
     """
     updateQuestion(input: UpdateQuestionInput!): UpdateQuestionPayload!
@@ -204,6 +205,8 @@ type Mutation {
     Errors:
     - ForbiddenError:
         - A non StateUser called this
+    - UserInputError
+        - A Question cannot be found given `questionID`
     """
     createQuestionResponse(
         input: CreateQuestionResponseInput!
@@ -551,9 +554,9 @@ type Document {
 }
 
 """
-Question is a question sent by CMS to the States for a response. CMS may upload one or
-more documents full of questions to a single Question. States submit a QuestionResponse
-with documents that answer the questions posed by CMS.
+Question is a question sent by CMS to the States for a response, associated with a single package. 
+CMS may upload one or more documents full of questions to a single Question. States submit a 
+QuestionResponse with documents that answer the questions posed by CMS.
 """
 type Question {
     id: ID!
