@@ -122,7 +122,7 @@ resources:
         DBSubnetGroupName: !Ref PostgresSubnetGroup
         VpcSecurityGroupIds: ['${self:custom.sgId}']
         ServerlessV2ScalingConfiguration:
-          MinCapacity: 0.5
+          MinCapacity: 1
           MaxCapacity: 32
 
     PostgresSubnetGroup:
