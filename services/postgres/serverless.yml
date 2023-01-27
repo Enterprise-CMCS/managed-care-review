@@ -115,7 +115,6 @@ resources:
       DeletionPolicy: ${self:custom.deletionPolicy.${opt:stage}, self:custom.deletionPolicy.other}
       Properties:
         Engine: aurora-postgresql
-        EngineMode: serverless
         EngineVersion: '14.6'
         DatabaseName: '${self:custom.databaseName}'
         MasterUsername: !Sub '{{resolve:secretsmanager:${PostgresSecret}::username}}'
