@@ -9,6 +9,9 @@
     },
     "author": "",
     "license": "CC0-1.0",
+    "dependencies": {
+        "aws-sdk": "^2.1303.0"
+    },
     "devDependencies": {
         "copy-webpack-plugin": "^11.0.0",
         "serverless-webpack": "^5.7.1",
