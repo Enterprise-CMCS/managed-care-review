@@ -122,8 +122,9 @@ resources:
         MasterUserPassword: !Sub '{{resolve:secretsmanager:${PostgresSecret}::password}}'
         DBSubnetGroupName: !Ref PostgresSubnetGroup
         VpcSecurityGroupIds: ['${self:custom.sgId}']
-        ScalingConfiguration:
-          AutoPause: ${self:custom.pauseAurora.${opt:stage}, self:custom.pauseAurora.other}
+        ServerlessV2ScalingConfiguration:
+          MinCapacity: 0.5
+          MaxCapacity: 32
 
     PostgresSubnetGroup:
       Type: AWS::RDS::DBSubnetGroup
