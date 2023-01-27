@@ -31,6 +31,7 @@ export const FilterAccordion = ({
                 <>
                     <div className={styles.filters}>{childFilters}</div>
                     <Button
+                        id="clearFiltersButton"
                         type="button"
                         className={styles.clearFilterButton}
                         unstyled
