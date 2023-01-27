@@ -35,12 +35,14 @@ provider:
           Resource:
             - !Sub arn:aws:s3:::${self:service}-${sls:stage}-uploads-${AWS::AccountId}/*
             - !Sub arn:aws:s3:::${self:service}-${sls:stage}-avscan-${AWS::AccountId}/*
+            - !Sub arn:aws:s3:::${self:service}-${sls:stage}-qa-${AWS::AccountId}/*
         - Effect: 'Allow'
           Action:
             - s3:ListBucket
           Resource:
             - !Sub arn:aws:s3:::${self:service}-${sls:stage}-uploads-${AWS::AccountId}
             - !Sub arn:aws:s3:::${self:service}-${sls:stage}-avscan-${AWS::AccountId}
+            - !Sub arn:aws:s3:::${self:service}-${sls:stage}-qa-${AWS::AccountId}/*
 
 custom:
   region: ${aws:region}
@@ -69,6 +71,7 @@ custom:
       - local-uploads # This is a little silly, but I've spent enough time on it.
         # the serverless-s3-local plugin starts any bucket with a BucketName
         # the attachments bucket has no name, so we need to make one up on our own
+      - local-qa
   serverlessTerminationProtection:
     stages:
       - dev
@@ -141,6 +144,7 @@ resources:
             - Event: s3:ObjectCreated:*
               Function: !GetAtt AvScanLambdaFunction.Arn
       DependsOn: LambdaInvokePermission
+
     DocumentsUploadsBucketPolicy:
       Type: AWS::S3::BucketPolicy
       Properties:
@@ -150,7 +154,8 @@ resources:
             - Action:
                 - 's3:GetObject'
               Effect: 'Deny'
-              Resource: !Sub ${DocumentUploadsBucket.Arn}/*
+              Resource:
+                - !Sub ${DocumentUploadsBucket.Arn}/*
               Principal: '*'
               Condition:
                 StringNotEquals:
@@ -220,10 +225,97 @@ resources:
                 - !Sub ${ClamDefsBucket.Arn}/*
               Sid: DenyUnencryptedConnections
 
+    QAUploadsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: !Sub ${self:service}-${sls:stage}-qa-${AWS::AccountId}
+        BucketEncryption:
+          ServerSideEncryptionConfiguration:
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: AES256
+        CorsConfiguration: # Set the CORS policy
+          CorsRules:
+            - AllowedOrigins:
+                - '*'
+              AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000
+              ExposedHeaders:
+                - ETag
+        NotificationConfiguration:
+          LambdaConfigurations:
+            - Event: s3:ObjectCreated:*
+              Function: !GetAtt AvScanLambdaFunction.Arn
+      DependsOn: QAInvokePermission
+
+    QAInvokePermission:
+      Type: AWS::Lambda::Permission
+      Properties:
+        FunctionName: !GetAtt AvScanLambdaFunction.Arn
+        Action: lambda:InvokeFunction
+        Principal: s3.amazonaws.com
+        SourceAccount: !Sub ${AWS::AccountId}
+        SourceArn: !Sub arn:aws:s3:::${self:service}-${sls:stage}-qa-${AWS::AccountId}
+
+    QAUploadsBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref QAUploadsBucket
+        PolicyDocument:
+          Statement:
+            - Action:
+                - 's3:GetObject'
+              Effect: 'Deny'
+              Resource:
+                - !Sub ${QAUploadsBucket.Arn}/*
+              Principal: '*'
+              Condition:
+                StringNotEquals:
+                  s3:ExistingObjectTag/virusScanStatus:
+                    - 'CLEAN'
+                  s3:ExistingObjectTag/contentsPreviouslyScanned:
+                    - 'TRUE'
+                  aws:PrincipalArn: !GetAtt IamRoleLambdaExecution.Arn
+            - Action: 's3:PutObject'
+              Effect: Deny
+              Principal: '*'
+              NotResource:
+                - !Sub ${QAUploadsBucket.Arn}/*.csv
+                - !Sub ${QAUploadsBucket.Arn}/*.doc
+                - !Sub ${QAUploadsBucket.Arn}/*.docx
+                - !Sub ${QAUploadsBucket.Arn}/*.pdf
+                - !Sub ${QAUploadsBucket.Arn}/*.txt
+                - !Sub ${QAUploadsBucket.Arn}/*.xls
+                - !Sub ${QAUploadsBucket.Arn}/*.xlsx
+                - !Sub ${QAUploadsBucket.Arn}/*.zip
+                - !Sub ${QAUploadsBucket.Arn}/*.xlsm
+                - !Sub ${QAUploadsBucket.Arn}/*.xltm
+                - !Sub ${QAUploadsBucket.Arn}/*.xlam
+            - Effect: Deny
+              Action: 's3:*'
+              Principal: '*'
+              Condition:
+                Bool:
+                  'aws:SecureTransport': false
+              Resource:
+                - !Sub ${QAUploadsBucket.Arn}
+                - !Sub ${QAUploadsBucket.Arn}/*
+              Sid: DenyUnencryptedConnections
+
   Outputs:
     DocumentUploadsBucketName:
       Value: !Ref DocumentUploadsBucket
     DocumentUploadsBucketArn:
       Value: !GetAtt DocumentUploadsBucket.Arn
+    QAUploadsBucketName:
+      Value: !Ref QAUploadsBucket
+    QAUploadsBucketArn:
+      Value: !GetAtt QAUploadsBucket.Arn
     Region:
       Value: !Sub ${AWS::Region}
