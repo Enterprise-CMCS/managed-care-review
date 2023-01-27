@@ -21,6 +21,7 @@ export const SubmissionUpdatedBanner = ({
             role="alert"
             type="info"
             heading="Submission updated"
+            headingLevel="h4"
             validation={true}
             data-testid="updatedSubmissionBanner"
             className={className}

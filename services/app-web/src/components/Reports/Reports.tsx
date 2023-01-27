@@ -43,7 +43,6 @@ export const Reports = (): React.ReactElement => {
             <Button
                 className={styles.button}
                 type="button"
-                size="small"
                 unstyled
                 onClick={getReports}
                 aria-label={`Download reports`}

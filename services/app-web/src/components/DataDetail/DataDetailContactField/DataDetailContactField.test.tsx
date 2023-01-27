@@ -37,11 +37,4 @@ describe('DataDetailContactField', () => {
         ).toBeInTheDocument()
         expect(screen.getByText(/All Black Incorporated/)).toBeInTheDocument()
     })
-
-    it('renders missing field if contact is missing', () => {
-        render(<DataDetailContactField />)
-        expect(
-            screen.getByText(/You must provide this information/)
-        ).toBeInTheDocument()
-    })
 })

@@ -115,7 +115,7 @@ describe('rate details', () => {
                 if (index === arr.length - 1 ) {
                     cy.fillOutNewRateCertification()
                 } else {
-                    cy.fillOutAmendmentToPriorRateCertification()
+                    cy.fillOutAmendmentToPriorRateCertification(index)
                 }
             })
         })

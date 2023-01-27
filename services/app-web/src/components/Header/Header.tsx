@@ -16,6 +16,7 @@ import { ErrorAlertSignIn } from '../ErrorAlert'
 export type HeaderProps = {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
+    disableLogin?: boolean
 }
 
 /**
@@ -24,6 +25,7 @@ export type HeaderProps = {
 export const Header = ({
     authMode,
     setAlert,
+    disableLogin = false,
 }: HeaderProps): React.ReactElement => {
     const { logout, loggedInUser, loginStatus } = useAuth()
     const { heading } = usePage()
@@ -61,6 +63,7 @@ export const Header = ({
                             loginStatus={loginStatus}
                             authMode={authMode}
                             logout={handleLogout}
+                            disableLogin={disableLogin}
                         />
                     </Grid>
                 </GridContainer>

@@ -111,8 +111,16 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
     // Must be on '/submissions/:id/edit/contract-details'
     cy.findByText('Fully executed').click()
     cy.wait(2000)
-    cy.findByLabelText('Start date').type('04/01/2024')
-    cy.findByLabelText('End date').type('03/31/2025').blur()
+    cy.findAllByLabelText('Start date')
+        .parents()
+        .findByTestId('date-picker-external-input')
+        .type('04/01/2024')
+        .blur()
+    cy.findAllByLabelText('End date')
+        .parents()
+        .findByTestId('date-picker-external-input')
+        .type('03/31/2025')
+        .blur()
     cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
     cy.findByLabelText('1932(a) State Plan Authority').safeClick()
     cy.findByTestId('file-input-input').attachFile(
@@ -128,8 +136,15 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     // Must be on '/submissions/:id/edit/contract-details'
     cy.findByText('Unexecuted by some or all parties').click()
     cy.wait(2000)
-    cy.findByLabelText('Start date').type('04/01/2024')
-    cy.findByLabelText('End date').type('03/31/2025').blur()
+   cy.findAllByLabelText('Start date')
+       .parents()
+       .findByTestId('date-picker-external-input')
+       .type('04/01/2024')
+    cy.findAllByLabelText('End date')
+        .parents()
+        .findByTestId('date-picker-external-input')
+        .type('03/31/2025')
+        .blur()
     cy.findByLabelText('Managed Care Organization (MCO)').safeClick()
     cy.findByLabelText('1932(a) State Plan Authority').safeClick()
 
@@ -250,8 +265,8 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
         'Certification of capitation rates specific to each rate cell'
     ).click()
     cy.wait(2000)
-    cy.findByLabelText('Start date').type('02/29/2024')
-    cy.findByLabelText('End date').type('02/28/2025')
+    cy.findAllByLabelText('Start date').parents().findByTestId('date-picker-external-input').type('02/29/2024')
+    cy.findAllByLabelText('End date').parents().findByTestId('date-picker-external-input').type('02/28/2025').blur()
     cy.findByLabelText('Date certified').type('03/01/2024')
 
     cy.findByRole('combobox', { name: 'programs (required)' }).click({
@@ -274,7 +289,7 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
+Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
     // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
     cy.wait(2000)
@@ -282,11 +297,20 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', () => {
     cy.findByText(
         'Certification of capitation rates specific to each rate cell'
     ).click()
+
     cy.wait(2000)
-    cy.findAllByLabelText('Start date').eq(0).type('02/29/2024')
-    cy.findAllByLabelText('End date').eq(0).type('02/28/2025')
-    cy.findAllByLabelText('Start date').eq(1).type('03/01/2024')
-    cy.findAllByLabelText('End date').eq(1).type('03/01/2025')
+
+/* 
+    There are currently multiple date range pickers on the page with the same label names (start date, end date) and different headings
+    Preferred approach would be targeting by via findBy* or a custom data-cyid attribute
+    However, surfacing custom attributes on the nested inputs in third party component DateRangePicker not possible in current react-uswds version 
+    For now using targeting by html id (anti-pattern)
+*/
+    cy.get(`[id="rateInfos.${id}.rateDateStart"]`).type('02/01/2023')
+    cy.get(`[id="rateInfos.${id}.rateDateEnd"]`).type('03/01/2025')
+    cy.get(`[id="rateInfos.${id}.effectiveDateStart"]`).type('03/01/2024')
+    cy.get(`[id="rateInfos.${id}.effectiveDateEnd"]`).type('03/01/2025')
+
     cy.findByRole('combobox', { name: 'programs (required)' }).click({
         force: true,
     })

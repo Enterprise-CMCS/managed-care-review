@@ -2,6 +2,7 @@ import React from 'react'
 import { dayjs } from '../../common-code/dateHelpers/dayjs'
 import { SectionHeader } from '../SectionHeader'
 import { Accordion, Link } from '@trussworks/react-uswds'
+import type { AccordionItemProps } from '@trussworks/react-uswds/lib/components/Accordion/Accordion'
 import { HealthPlanPackage, UpdateInformation } from '../../gen/gqlClient'
 import styles from './ChangeHistory.module.scss'
 type ChangeHistoryProps = {
@@ -54,7 +55,7 @@ export const ChangeHistory = ({
 
     const revisionHistory = flattenedRevisions()
 
-    const revisedItems = revisionHistory.map((r) => {
+    const revisedItems: AccordionItemProps[] = revisionHistory.map((r) => {
         const isInitialSubmission = r.updatedReason === 'Initial submission'
         const isSubsequentSubmission = r.kind === 'submit'
         // We want to know if this package has multiple submissions. To have multiple submissions, there must be minimum
@@ -73,6 +74,7 @@ export const ChangeHistory = ({
             // Display this code if this is the initial submission. We only want to display the link of the initial submission
             // only if there has been subsequent submissions. We do not want to display a link if the package initial
             // submission was unlocked, but has not been resubmitted yet.
+            headingLevel: 'h4',
             content: isInitialSubmission ? (
                 <>
                     <span className={styles.tag}>Submitted by:</span>

@@ -1,14 +1,17 @@
 import { Octokit } from '@octokit/action'
 import * as core from '@actions/core'
 
-import { exec } from 'child_process'
-import util from 'util'
+import { spawnSync } from 'child_process'
 
 const octokit = new Octokit()
 
 async function main() {
     // get our service names from lerna
-    const listOfServices = await getAllServicesFromLerna()
+    const listOfServices = getAllServicesFromLerna()
+    if (listOfServices instanceof Error) {
+        console.error('Failed to get service list from Lerna', listOfServices)
+        throw listOfServices
+    }
 
     // get the workflow runs for this branch
     // we pass in branchName as input from the action
@@ -43,9 +46,16 @@ async function main() {
 
     // have lerna tell us which services have changed in code since the
     // last completed workflow run
-    const lernaChangedServices = await getChangedServicesSinceSha(
+    const lernaChangedServices = getChangedServicesSinceSha(
         lastCompletedRun.head_sha
     )
+
+    // if lerna can't find the sha, run everything
+    if (lernaChangedServices instanceof Error) {
+        core.setOutput('changed-services', deployAllServices)
+        return
+    }
+
     const jobsToSkip = await getJobsToSkip(
         lastCompletedRun.id,
         lastCompletedRun.run_attempt ?? 1
@@ -106,28 +116,32 @@ interface LernaListItem {
 }
 
 // a list of all of our deployable service names from lerna
-async function getAllServicesFromLerna(): Promise<string[]> {
-    const execPromise = util.promisify(exec)
-    const { stdout, stderr } = await execPromise('lerna ls -a --json')
-    const lernaList: LernaListItem[] = JSON.parse(stdout)
-    if (stderr) {
-        console.info(stderr)
+function getAllServicesFromLerna(): string[] | Error {
+    const { stdout, stderr, error, status } = spawnSync('lerna', ['ls', '-a', '--json'])
+
+    if (error || status !== 0) {
+        console.error('Error: ', error, stderr.toString())
+        return new Error('Failed to list all services from Lerna')
     }
+    const lernaList: LernaListItem[] = JSON.parse(stdout.toString())
 
     return lernaList.map((i) => i.name)
 }
 
 // uses lerna to find services that have changed since the passed sha
-async function getChangedServicesSinceSha(sha: string): Promise<string[]> {
-    const execPromise = util.promisify(exec)
-    const { stdout, stderr } = await execPromise(
-        `lerna ls --since ${sha} -all --json`
+function getChangedServicesSinceSha(
+    sha: string
+): string[] | Error {
+    const { stdout, stderr, error, status } = spawnSync(
+        'lerna', [ 'ls', '--since', sha, '-all', '--json']
     )
 
-    const lernaList: LernaListItem[] = JSON.parse(stdout)
-    if (stderr) {
-        console.info(stderr)
+    if (error || status !== 0) {
+        console.error(error, stderr.toString())
+        return new Error('Failed to find changes since recent SHA in Lerna')
     }
+
+    const lernaList: LernaListItem[] = JSON.parse(stdout.toString())
 
     return lernaList.map((i) => i.name)
 }

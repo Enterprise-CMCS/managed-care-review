@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import {
     ColumnFiltersState,
     createColumnHelper,
@@ -9,14 +9,23 @@ import {
     RowData,
     useReactTable,
     getFacetedUniqueValues,
+    Column,
 } from '@tanstack/react-table'
+import { useAtom } from 'jotai'
+import { atomWithHash } from 'jotai-location'
 import { HealthPlanPackageStatus, Program, User } from '../../gen/gqlClient'
 import styles from './HealthPlanPackageTable.module.scss'
 import { Table, Tag, Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
+import qs from 'qs'
 import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
-import { FilterAccordion, FilterSelect } from '../FilterAccordion'
+import {
+    FilterAccordion,
+    FilterSelect,
+    FilterSelectedOptionsType,
+    FilterOptionType,
+} from '../FilterAccordion'
 import { InfoTag, TagProps } from '../InfoTag/InfoTag'
 import { pluralize } from '../../common-code/formatters'
 
@@ -93,9 +102,39 @@ const submissionTypeOptions = [
     },
 ]
 
-// To keep the memoization from being refreshed every time, this needs to be
-// created outside the render function
+/* To keep the memoization from being refreshed every time, this needs to be
+    created outside the render function */
 const columnHelper = createColumnHelper<PackageInDashboardType>()
+
+type ReadableFilters = {
+    [key: string]: string[]
+}
+
+const fromColumnFiltersToReadableUrl = (input: ColumnFiltersState) => {
+    const output: ReadableFilters = {}
+    input.forEach((element) => {
+        output[element.id] = element.value as string[]
+    })
+    return qs.stringify(output, { arrayFormat: 'comma', encode: false })
+}
+
+const fromReadableUrlToColumnFilters = (
+    input: string | null
+): ColumnFiltersState => {
+    if (!input) {
+        return []
+    }
+    const parsed = qs.parse(input) as { [key: string]: string }
+    return Object.entries(parsed).map(([id, value]) => ({
+        id,
+        value: value.split(','),
+    }))
+}
+
+const columnHash = atomWithHash('filters', [] as ColumnFiltersState, {
+    serialize: fromColumnFiltersToReadableUrl,
+    deserialize: fromReadableUrlToColumnFilters,
+})
 
 export const HealthPlanPackageTable = ({
     caption,
@@ -103,11 +142,64 @@ export const HealthPlanPackageTable = ({
     user,
     showFilters = false,
 }: PackageTableProps): React.ReactElement => {
-    const [columnFilters, setColumnFilters] =
-        React.useState<ColumnFiltersState>([])
+    const lastClickedElement = useRef<string | null>(null)
+    const [columnFilters, setColumnFilters] = useAtom(columnHash)
+
+    /* we store the last clicked element in a ref so that when the url is updated and the page rerenders
+        we can focus that element.  this useEffect (with no dependency array) will run once on each render. 
+        Note that the React-y way to do this is to use forwardRef, but the clearFilters button is deeply nested 
+        and we'd wind up passing down the ref through several layers to achieve what we can do here in a few lines 
+        with DOM methods */
+    useEffect(() => {
+        const currentValue = lastClickedElement?.current
+        if (!currentValue) {
+            return
+        }
+        /* if the last clicked element had a label, it was a react-select component and the label will match our
+        naming convention */
+        const labels = document.getElementsByTagName('label')
+        const labelNames = Array.from(labels).map((item) => item.htmlFor)
+        const indexOfLabel = labelNames.indexOf(
+            `${currentValue}-filter-select-input`
+        )
+        if (indexOfLabel > -1) {
+            labels[indexOfLabel].focus()
+            /* if the last clicked element was NOT a label, then it was the clear filters button, which we can look
+            up by id */
+        } else {
+            const element = document.getElementById(currentValue)
+            if (element) {
+                element.focus()
+            }
+        }
+        lastClickedElement.current = null
+    })
+
+    /* transform react-table's ColumnFilterState (stringified, formatted, and stored in the URL) to react-select's FilterOptionType
+        and return only the items matching the FilterSelect component that's calling the function*/
+    const getSelectedFiltersFromUrl = (id: string) => {
+        type TempRecord = { value: string; label: string; id: string }
+        const valuesFromUrl = [] as TempRecord[]
+        columnFilters.forEach((filter) => {
+            if (Array.isArray(filter.value)) {
+                filter.value.forEach((value) => {
+                    valuesFromUrl.push({
+                        value: value,
+                        label: value,
+                        id: filter.id,
+                    })
+                })
+            }
+        })
+        const filterValues = valuesFromUrl
+            .filter((item) => item.id === id)
+            .map((item) => ({ value: item.value, label: item.value }))
+        return filterValues as FilterOptionType[]
+    }
+
+    const [tableCaption, setTableCaption] = useState<React.ReactNode | null>()
 
     const isCMSUser = user.__typename === 'CMSUser'
-
     const tableColumns = React.useMemo(
         () => [
             columnHelper.accessor((row) => row, {
@@ -242,38 +334,74 @@ export const HealthPlanPackageTable = ({
               tableData.length
           )}`
 
+    const updateFilters = (
+        column: Column<PackageInDashboardType>,
+        selectedOptions: FilterSelectedOptionsType,
+        filterName: string
+    ) => {
+        lastClickedElement.current = filterName
+        setTableCaption(null)
+        column.setFilterValue(
+            selectedOptions.map((selection) => selection.value)
+        )
+    }
+
+    const clearFilters = () => {
+        lastClickedElement.current = 'clearFiltersButton'
+        setTableCaption(null)
+
+        setColumnFilters([])
+    }
+
+    //Store caption element in state in order for screen readers to read dynamic captions.
+    useEffect(() => {
+        setTableCaption(
+            <caption className={caption ? '' : styles.srOnly}>
+                {caption ?? 'Submissions'}
+                {showFilters && (
+                    <span
+                        className={styles.srOnly}
+                    >{`, ${filtersApplied}`}</span>
+                )}
+                <span className={styles.srOnly}>{`, ${submissionCount}.`}</span>
+            </caption>
+        )
+    }, [filtersApplied, submissionCount, caption, showFilters])
+
     return (
         <>
             {tableData.length ? (
                 <>
                     {showFilters && (
                         <FilterAccordion
-                            onClearFilters={() => {
-                                setColumnFilters([])
-                            }}
+                            onClearFilters={clearFilters}
                             filterTitle="Filters"
                         >
                             <FilterSelect
+                                value={getSelectedFiltersFromUrl('stateName')}
                                 name="state"
                                 label="State"
                                 filterOptions={stateFilterOptions}
                                 onChange={(selectedOptions) =>
-                                    stateColumn.setFilterValue(
-                                        selectedOptions.map(
-                                            (selection) => selection.value
-                                        )
+                                    updateFilters(
+                                        stateColumn,
+                                        selectedOptions,
+                                        'state'
                                     )
                                 }
                             />
                             <FilterSelect
+                                value={getSelectedFiltersFromUrl(
+                                    'submissionType'
+                                )}
                                 name="submissionType"
                                 label="Submission type"
                                 filterOptions={submissionTypeOptions}
                                 onChange={(selectedOptions) =>
-                                    submissionTypeColumn.setFilterValue(
-                                        selectedOptions.map(
-                                            (selection) => selection.value
-                                        )
+                                    updateFilters(
+                                        submissionTypeColumn,
+                                        selectedOptions,
+                                        'submissionType'
                                     )
                                 }
                             />
@@ -290,7 +418,6 @@ export const HealthPlanPackageTable = ({
                         </div>
                     </div>
                     <Table fullWidth>
-                        {caption && <caption>{caption}</caption>}
                         <thead>
                             {reactTable.getHeaderGroups().map((headerGroup) => (
                                 <tr key={headerGroup.id}>
@@ -331,6 +458,7 @@ export const HealthPlanPackageTable = ({
                                 </tr>
                             ))}
                         </tbody>
+                        {tableCaption}
                     </Table>
                     {!hasFilteredRows && (
                         <div

@@ -50,7 +50,7 @@ declare global {
             fillOutBaseContractDetails(): void
             fillOutAmendmentToBaseContractDetails(): void
             fillOutNewRateCertification(): void
-            fillOutAmendmentToPriorRateCertification(): void
+            fillOutAmendmentToPriorRateCertification(id?: number): void
             fillOutStateContact(): void
             fillOutAdditionalActuaryContact(): void
             fillOutSupportingDocuments(): void

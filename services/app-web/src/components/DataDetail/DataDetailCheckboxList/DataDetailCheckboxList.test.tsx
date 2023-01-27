@@ -42,4 +42,33 @@ describe('DataDetailCheckboxList', () => {
         expect(screen.getByText(/etc/)).toBeInTheDocument()
         expect(screen.getByText(/another important thing/)).toBeInTheDocument()
     })
+
+    it('renders missing field error when list is empty by default', () => {
+        const ValuesLookup: Record<string, string> = {
+            THIS: 'this',
+            THAT: 'that',
+            THE_OTHER: 'the other',
+        }
+        render(<DataDetailCheckboxList list={[]} dict={ValuesLookup} />)
+        expect(
+            screen.getByText(/You must provide this information/)
+        ).toBeInTheDocument()
+    })
+    it('renders null when displayEmptyList and list is empty', () => {
+        const ValuesLookup: Record<string, string> = {
+            THIS: 'this',
+            THAT: 'that',
+            THE_OTHER: 'the other',
+        }
+        render(
+            <div data-testid="container">
+                <DataDetailCheckboxList
+                    list={[]}
+                    dict={ValuesLookup}
+                    displayEmptyList
+                />
+            </div>
+        )
+        expect(screen.getByTestId('container')).toBeEmptyDOMElement()
+    })
 })
