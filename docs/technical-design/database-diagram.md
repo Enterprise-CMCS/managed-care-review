@@ -38,5 +38,16 @@ User {
     string role
 }
 
+Document {
+    string id
+    string name
+    string s3URL
+    string uploadedBy
+    datetime createdAt
+    bool virusScan
+}
+
+User }|--|| Document: "has many"
+
 User }|--|{ State: "many to many"
 ```
