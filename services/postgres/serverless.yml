@@ -110,7 +110,7 @@ resources:
           PasswordLength: 30
           ExcludePunctuation: true
 
-    PostgresAurora:
+    PostgresAuroraCluster:
       Type: AWS::RDS::DBCluster
       DeletionPolicy: ${self:custom.deletionPolicy.${opt:stage}, self:custom.deletionPolicy.other}
       Properties:
@@ -124,6 +124,13 @@ resources:
         ServerlessV2ScalingConfiguration:
           MinCapacity: 1
           MaxCapacity: 32
+
+    PostgresInstance:
+      Type: 'AWS::RDS::DBInstance'
+      Properties:
+        Engine: aurora-postgresql
+        DBInstanceClass: db.serverless
+        DBClusterIdentifier: !Ref PostgresAuroraCluster
 
     PostgresSubnetGroup:
       Type: AWS::RDS::DBSubnetGroup
