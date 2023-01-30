@@ -2,13 +2,14 @@
  * Lambda function that will be perform the scan and tag the file accordingly.
  */
 
-console.log('LOADING entirely new bag')
+console.log('LOADING entirely new bag');
 
-const { S3Client,
+const {
+    S3Client,
     HeadObjectCommand,
     GetObjectCommand,
     PutObjectTaggingCommand,
-} = require("@aws-sdk/client-s3");
+} = require('@aws-sdk/client-s3');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -16,7 +17,7 @@ const clamav = require('./clamav');
 const utils = require('./utils');
 const constants = require('./constants');
 
-const s3 = new S3Client({ region: "REGION" });
+const s3 = new S3Client({ region: 'REGION' });
 /**
  * Retrieve the file size of S3 object without downloading.
  * @param {string} key    Key of S3 object
@@ -24,8 +25,8 @@ const s3 = new S3Client({ region: "REGION" });
  * @return {int} Length of S3 object in bytes.
  */
 async function sizeOf(key, bucket) {
-    const cmd = new HeadObjectCommand({ Key: key, Bucket: bucket })
-    let res = await s3.send(cmd)
+    const cmd = new HeadObjectCommand({ Key: key, Bucket: bucket });
+    let res = await s3.send(cmd);
     return res.ContentLength;
 }
 
@@ -65,7 +66,7 @@ function downloadFileFromS3(s3ObjectKey, s3ObjectBucket) {
     };
 
     return new Promise((resolve, reject) => {
-        const cmd = new GetObjectCommand(options)
+        const cmd = new GetObjectCommand(options);
         s3.send(cmd)
             .createReadStream()
             .on('end', function () {
@@ -84,7 +85,6 @@ function downloadFileFromS3(s3ObjectKey, s3ObjectBucket) {
 
 async function lambdaHandleEvent(event, context) {
     utils.generateSystemMessage('Start Antivirus Lambda function');
-    console.log('SOHOHOWE entierly new bag')
 
     let s3ObjectKey = utils.extractKeyFromS3Event(event);
     let s3ObjectBucket = utils.extractBucketFromS3Event(event);
@@ -123,7 +123,7 @@ async function lambdaHandleEvent(event, context) {
     };
 
     try {
-        const cmd = new PutObjectTaggingCommand(taggingParams)
+        const cmd = new PutObjectTaggingCommand(taggingParams);
         await s3.send(cmd);
         utils.generateSystemMessage('Tagging successful');
     } catch (err) {
@@ -150,7 +150,7 @@ async function scanS3Object(s3ObjectKey, s3ObjectBucket) {
     };
 
     try {
-        const cmd = new PutObjectTaggingCommand(taggingParams)
+        const cmd = new PutObjectTaggingCommand(taggingParams);
         await s3.send(cmd);
         utils.generateSystemMessage('Tagging successful');
     } catch (err) {
