@@ -2,14 +2,15 @@
  * Lambda function that will be perform the scan and tag the file accordingly.
  */
 
-const AWS = require('aws-sdk');
+import * as AWS from "@aws-sdk/client-s3";
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const clamav = require('./clamav');
-const s3 = new AWS.S3();
 const utils = require('./utils');
 const constants = require('./constants');
+
+const s3 = new AWS.S3();
 
 /**
  * Retrieve the file size of S3 object without downloading.

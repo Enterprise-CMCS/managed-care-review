@@ -1,4 +1,4 @@
-const AWS = require('aws-sdk');
+import * as AWS from "@aws-sdk/client-s3";
 const fs = require('fs');
 const spawnSync = require('child_process').spawnSync;
 const path = require('path');
