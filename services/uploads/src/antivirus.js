@@ -2,22 +2,15 @@
  * Lambda function that will be perform the scan and tag the file accordingly.
  */
 
-console.log('LOADING entirely new bag');
-
-const {
-    S3Client,
-    HeadObjectCommand,
-    GetObjectCommand,
-    PutObjectTaggingCommand,
-} = require('@aws-sdk/client-s3');
+const AWS = require('aws-sdk');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const clamav = require('./clamav');
+const s3 = new AWS.S3();
 const utils = require('./utils');
 const constants = require('./constants');
 
-const s3 = new S3Client({ region: 'REGION' });
 /**
  * Retrieve the file size of S3 object without downloading.
  * @param {string} key    Key of S3 object
@@ -25,8 +18,7 @@ const s3 = new S3Client({ region: 'REGION' });
  * @return {int} Length of S3 object in bytes.
  */
 async function sizeOf(key, bucket) {
-    const cmd = new HeadObjectCommand({ Key: key, Bucket: bucket });
-    let res = await s3.send(cmd);
+    let res = await s3.headObject({ Key: key, Bucket: bucket }).promise();
     return res.ContentLength;
 }
 
@@ -66,8 +58,7 @@ function downloadFileFromS3(s3ObjectKey, s3ObjectBucket) {
     };
 
     return new Promise((resolve, reject) => {
-        const cmd = new GetObjectCommand(options);
-        s3.send(cmd)
+        s3.getObject(options)
             .createReadStream()
             .on('end', function () {
                 utils.generateSystemMessage(
@@ -123,8 +114,7 @@ async function lambdaHandleEvent(event, context) {
     };
 
     try {
-        const cmd = new PutObjectTaggingCommand(taggingParams);
-        await s3.send(cmd);
+        await s3.putObjectTagging(taggingParams).promise();
         utils.generateSystemMessage('Tagging successful');
     } catch (err) {
         console.log(err);
@@ -150,8 +140,7 @@ async function scanS3Object(s3ObjectKey, s3ObjectBucket) {
     };
 
     try {
-        const cmd = new PutObjectTaggingCommand(taggingParams);
-        await s3.send(cmd);
+        await s3.putObjectTagging(taggingParams).promise();
         utils.generateSystemMessage('Tagging successful');
     } catch (err) {
         console.log(err);
