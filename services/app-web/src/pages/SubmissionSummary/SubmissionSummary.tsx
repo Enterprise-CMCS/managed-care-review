@@ -32,6 +32,8 @@ import { useFetchHealthPlanPackageWrapper } from '../../gqlHelpers'
 import { recordJSException } from '../../otelHelpers'
 import { handleApolloError } from '../../gqlHelpers/apolloErrors'
 import { ApolloError } from '@apollo/client'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../common-code/featureFlags'
 
 export type DocumentDateLookupTable = {
     [key: string]: string
@@ -74,6 +76,13 @@ export const SubmissionSummary = (): React.ReactElement => {
     useEffect(() => {
         updateHeading({ customHeading: pkgName })
     }, [pkgName, updateHeading])
+
+    const ldClient = useLDClient()
+
+    const showQuestionsAnswers = ldClient?.variation(
+        featureFlags.CMS_QUESTIONS.flag,
+        featureFlags.CMS_QUESTIONS.defaultValue
+    )
 
     const { result: fetchResult } = useFetchHealthPlanPackageWrapper(id)
 
@@ -183,27 +192,29 @@ export const SubmissionSummary = (): React.ReactElement => {
                     />
                 )}
 
-                <Link
-                    asCustom={NavLink}
-                    variant="unstyled"
-                    to={{
-                        pathname: '/dashboard',
-                    }}
-                >
-                    <svg
-                        className="usa-icon"
-                        aria-hidden="true"
-                        focusable="false"
-                        role="img"
+                {!showQuestionsAnswers && (
+                    <Link
+                        asCustom={NavLink}
+                        variant="unstyled"
+                        to={{
+                            pathname: '/dashboard',
+                        }}
                     >
-                        <use xlinkHref={`${sprite}#arrow_back`}></use>
-                    </svg>
-                    {loggedInUser?.__typename === 'StateUser' ? (
-                        <span>&nbsp;Back to state dashboard</span>
-                    ) : (
-                        <span>&nbsp;Back to dashboard</span>
-                    )}
-                </Link>
+                        <svg
+                            className="usa-icon"
+                            aria-hidden="true"
+                            focusable="false"
+                            role="img"
+                        >
+                            <use xlinkHref={`${sprite}#arrow_back`}></use>
+                        </svg>
+                        {loggedInUser?.__typename === 'StateUser' ? (
+                            <span>&nbsp;Back to state dashboard</span>
+                        ) : (
+                            <span>&nbsp;Back to dashboard</span>
+                        )}
+                    </Link>
+                )}
 
                 <SubmissionTypeSummarySection
                     submission={packageData}
