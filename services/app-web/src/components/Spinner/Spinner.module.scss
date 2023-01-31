@@ -52,11 +52,11 @@ $animation-speed-4: 0.8s * $speed-base !default;
 // CMS Colors
 
 .ds-u-fill--background-inverse {
-    background-color: $cms-color-primary !important;
+    background-color: $theme-color-primary!important;
 }
 
 .ds-u-color--base-inverse:not(:focus) {
-    color: $cms-color-white !important;
+    color: #fff !important;
 }
 
 // Below is all from the CMS Design system for the spinner
@@ -121,9 +121,9 @@ $animation-speed-4: 0.8s * $speed-base !default;
 
 .ds-c-spinner--filled {
     @include spinner-size($spacer-4, $spacer-6);
-    background-color: $cms-color-white; // $color-background;
+    background-color: custom.$background-white;
     border-radius: 50%;
-    color: $cms-color-primary; // $color-base;
+    color: $theme-color-primary; // $color-base;
     height: $spacer-6;
     width: $spacer-6;
 }

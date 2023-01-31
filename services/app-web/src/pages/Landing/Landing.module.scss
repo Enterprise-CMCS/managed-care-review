@@ -39,7 +39,7 @@
                     position: absolute;
                     left: -18px;
                     top: -5px;
-                    background-color: $cms-color-white;
+                    background-color: custom.$background-white;
                 }
                 &.login::before {
                     content: url(../../assets/images/login-icon.svg);

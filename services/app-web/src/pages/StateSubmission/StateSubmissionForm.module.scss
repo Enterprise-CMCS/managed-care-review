@@ -33,8 +33,7 @@
         padding: units(4);
         margin-bottom: units(2);
         margin-top: units(2);
-        background: $cms-color-white;
-        border: 1px solid $theme-color-base-lighter;
+        background: $polid $theme-color-base-lighter;
         @include u-radius('md');
     }
 

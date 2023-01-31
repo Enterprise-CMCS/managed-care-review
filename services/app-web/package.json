@@ -6,7 +6,7 @@
         "precommit": "lint-staged",
         "start": "craco -r @cypress/instrument-cra start",
         "build": "sh ../../run_build.sh",
-        "build:prod": "craco build",
+        "build:prod": "craco build --verbose",
         "build:instrumented": "CYPRESS_INSTRUMENT_PRODUCTION=true craco -r @cypress/instrument-cra build",
         "test": "TZ=UTC craco test",
         "eject": "craco eject",

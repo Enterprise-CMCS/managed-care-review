@@ -5,10 +5,10 @@ Sass entry point - order matters.
 
 // 1. Load USWDS theme and settings
  @forward "styles/uswds-theme";
- @forward "uswds";
 
 
 // 2. Load USWDS (and react-uswds) source code
+@forward "@uswds/uswds/packages/uswds/_index.scss"; // this should do this same thing as 'uswds', including full path for clarity
 @import '@trussworks/react-uswds/lib/index.css';
 
 

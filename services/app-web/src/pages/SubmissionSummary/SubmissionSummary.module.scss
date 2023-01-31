@@ -2,12 +2,12 @@
 @import '../../styles/custom.scss';
 
 .background {
-    background-color: $cms-color-white;
+    background-color: custom.$background-white;
     width: 100%;
 }
 
 .container {
-    max-width: $width-max-contained;
+    max-width: $container-width-max-fixed;
     padding: 2rem 0;
 }
 

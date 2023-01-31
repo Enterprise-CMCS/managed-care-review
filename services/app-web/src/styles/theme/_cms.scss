@@ -1,4 +1,13 @@
-// Generic
+/*  
+    CMS Colors
+
+    Our application design system is USWDS-first, we override with CMS colors when needed.
+    This private file is used for reference by design/engineering and in the entrypoint scss files.
+    Entrypoint files: _uswds-theme.scss and custom.scss (they are both brought in to index.scss). To import, use the sass @forward syntax.
+   
+    This file should not be imported into component `*.module.scss` files.
+*/
+
 $cms-color-white: #fff !default;
 $cms-color-base: #212121 !default;
 $cms-color-black: #000 !default;
