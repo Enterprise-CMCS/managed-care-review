@@ -44,7 +44,7 @@ jobs:
           STAGE_PREFIX: ${{ secrets.STAGE_PREFIX }}
           # the default secrets.GITHUB_TOKEN granted to workflows won't suffice here
           # this script needs a personal access token with repo scope since it deletes GitHub secrets
-          GITHUB_TOKEN: ${{ secrets.BHARVEY_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SERVICE_ACCOUNT_TOKEN }}
         run: node ./scripts/destroy_stage.js $stage_name
 
       - name: Alert Slack On Destroy Failure

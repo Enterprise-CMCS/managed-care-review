@@ -25,53 +25,99 @@ const validateSecretName = (name: string): Error | void => {
 /**
 * adapted from https://docs.github.com/en/rest/actions/secrets?apiVersion=2022-11-28#create-or-update-a-repository-secret
 */
-const setSecret = async (name: string, value: string): Promise<void> => {
-  const validateError = validateSecretName(name)
-  if (validateError instanceof Error) {
-    console.error(`${validateError}`)
-    process.exit(1)
-  }
+const encryptSecret = async (key: string, value: string): Promise<string> => {
+  return new Promise(resolve => {
+    sodium.ready.then(async () => {
+      // convert secret & base64 key to Uint8Array.
+      const binkey = sodium.from_base64(key, sodium.base64_variants.ORIGINAL)
+      const binsec = sodium.from_string(value)
 
-  // get GitHub repository public key
+      // encrypt the secret using libsodium
+      const encBytes = sodium.crypto_box_seal(binsec, binkey)
+
+      // convert encrypted uint8array to base64
+      const base64Key = sodium.to_base64(encBytes, sodium.base64_variants.ORIGINAL)
+      resolve(base64Key)
+    })
+  })
+}
+
+const setActionsRepoSecret = async (name: string, value: string): Promise<void> => {
+  // get the Actions repo public key
   let publicKeyResponse
   try {
     publicKeyResponse = await client.actions.getRepoPublicKey({
       owner,
       repo
     })
-  } catch(e: any) {
-    console.error(`Error getting public key for repo ${ownerAndRepo}: ${e.message}`)
+  } catch (e: any) {
+    console.error(`Error getting Actions public key for repo ${ownerAndRepo}: ${e.message}`)
     process.exit(1)
   }
+
   const key = publicKeyResponse.data.key
   const keyId = publicKeyResponse.data.key_id
+  const base64Key = await encryptSecret(key, value)
 
-  sodium.ready.then(async () => {
-    // convert secret & base64 key to Uint8Array.
-    const binkey = sodium.from_base64(key, sodium.base64_variants.ORIGINAL)
-    const binsec = sodium.from_string(value)
+  // set the Actions repo secret
+  try {
+    await client.rest.actions.createOrUpdateRepoSecret({
+      owner: 'CMSgov',
+      repo: 'managed-care-review',
+      secret_name: name,
+      encrypted_value: base64Key,
+      key_id: keyId
+    });
+    console.log(`Actions repo secret ${name} was created/updated successfully for ${ownerAndRepo}`)
+  } catch (e: any) {
+    console.error(`Error creating/updating Actions repo secret ${name} for ${ownerAndRepo}: ${e.message}`)
+    process.exit(1)
+  }
+}
 
-    // encrypt the secret using libsodium
-    const encBytes = sodium.crypto_box_seal(binsec, binkey)
+const setDependabotRepoSecret = async (name: string, value: string): Promise<void> => {
+  // get the Dependabot repo public key
+  let publicKeyResponse
+  try {
+    publicKeyResponse = await client.rest.dependabot.getRepoPublicKey({
+      owner,
+      repo
+    })
+  } catch (e: any) {
+    console.error(`Error getting Dependabot public key for repo ${ownerAndRepo}: ${e.message}`)
+    process.exit(1)
+  }
 
-    // convert encrypted uint8array to base64
-    const base64Key = sodium.to_base64(encBytes, sodium.base64_variants.ORIGINAL)
+  const key = publicKeyResponse.data.key
+  const keyId = publicKeyResponse.data.key_id
+  const base64Key = await encryptSecret(key, value)
 
-    // set the secret
-    try {
-      await client.rest.actions.createOrUpdateRepoSecret({
-        owner: 'CMSgov',
-        repo: 'managed-care-review',
-        secret_name: name,
-        encrypted_value: base64Key,
-        key_id: keyId
-      });
-      console.log(`GitHub secret ${name} was created/updated successfully for ${ownerAndRepo}`)
-    } catch(e: any) {
-      console.error(`Error creating/updating repo secret ${name} for ${ownerAndRepo}: ${e.message}`)
-      process.exit(1)
-    }
-  })
+  try {
+    await client.rest.dependabot.createOrUpdateRepoSecret({
+      owner: 'CMSgov',
+      repo: 'managed-care-review',
+      secret_name: name,
+      encrypted_value: base64Key,
+      key_id: keyId
+    });
+    console.log(`Dependabot repo secret ${name} was created/updated successfully for ${ownerAndRepo}`)
+  } catch (e: any) {
+    console.error(`Error creating/updating Dependabot repo secret ${name} for ${ownerAndRepo}: ${e.message}`)
+    process.exit(1)
+  }
+}
+
+const setSecrets = async (name: string, value: string, dependabot: boolean): Promise<void> => {
+  const validateError = validateSecretName(name)
+  if (validateError instanceof Error) {
+    console.error(`${validateError}`)
+    process.exit(1)
+  }
+
+  await setActionsRepoSecret(name, value)
+  if (dependabot) {
+    await setDependabotRepoSecret(name, value)
+  }
 }
 
 /**
@@ -80,21 +126,21 @@ const setSecret = async (name: string, value: string): Promise<void> => {
  * @param name GitHub repo secret name
  * @returns void
  */
-const deleteSecret = async (name: string): Promise<void> => {
+const deleteActionsRepoSecret = async (name: string): Promise<void> => {
   try {
     await client.rest.actions.deleteRepoSecret({
       owner: 'CMSgov',
       repo: 'managed-care-review',
       secret_name: name,
     });
-    console.log(`GitHub repo secret ${name} was deleted successfully from ${ownerAndRepo}`)
-  } catch(e: any) {
+    console.log(`Actions repo secret ${name} was deleted successfully from ${ownerAndRepo}`)
+  } catch (e: any) {
     const error = e as RequestError
     if (error.status == 404) {
-      console.log(`No repo secret named ${name} was found for ${ownerAndRepo}`)
+      console.log(`No Actions repo secret named ${name} was found for ${ownerAndRepo}`)
       process.exit(0)
     }
-    console.error(`Error deleting repo secret ${name} from ${ownerAndRepo}: ${e.message}`)
+    console.error(`Error deleting Actions repo secret ${name} from ${ownerAndRepo}: ${e.message}`)
     process.exit(1)
   }
 }
@@ -104,28 +150,29 @@ function main() {
     .demandCommand(1, 1, "Script requires exactly one command")
     .command(
       'set',
-      'Create or update a GitHub repo secret',
+      'Create or update a GitHub Actions repo secret, and optionally a Dependabot repo secret',
       (yargs) => {
         return yargs
           .options({
-            name: {type: 'string', demandOption: true, describe: 'Secret name' },
-            value: {type: 'string', demandOption: true, describe: 'Secret value' },
+            name: { type: 'string', demandOption: true, describe: 'Secret name' },
+            value: { type: 'string', demandOption: true, describe: 'Secret value' },
+            dependabot: { type: 'boolean', demandOption: false, describe: 'Also set a Dependabot repo secret', default: false },
           })
-          .example('$0 set --name MY_SECRET --value topSecretValue', '')
+          .example('$0 set --name MY_SECRET --value topSecretValue --dependabot', '')
       },
-      async (args) => await setSecret(args.name, args.value)
-      )
+      async (args) => await setSecrets(args.name, args.value, args.dependabot)
+    )
     .command(
       'delete',
-      'Delete a GitHub repo secret',
+      'Delete a GitHub Actions repo secret',
       (yargs) => {
         return yargs
           .options({
-            name: {type: 'string', demandOption: true, describe: 'Secret name' },
+            name: { type: 'string', demandOption: true, describe: 'Secret name' },
           })
           .example('$0 delete --name MY_SECRET', '')
       },
-      async (args) => await deleteSecret(args.name)
+      async (args) => await deleteActionsRepoSecret(args.name)
     )
     .help('h')
     .alias('h', 'help')
@@ -148,4 +195,4 @@ if (require.main === module) {
   main()
 }
 
-export { deleteSecret }
+export { deleteActionsRepoSecret }

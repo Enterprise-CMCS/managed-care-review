@@ -1,6 +1,6 @@
 # github-oidc
 
-This service  manages resources for using GitHub's OIDC provider to retrieve short-term AWS credentials in a GitHub Actions workflow. The advantage of this approach is that there is no need to create an IAM user and store long-term AWS credentials in GitHub secrets.
+This service manages resources for using GitHub's OIDC provider to retrieve short-term AWS credentials in a GitHub Actions workflow. The advantage of this approach is that there is no need to create an IAM user and store long-term AWS credentials in GitHub secrets.
 
 - [Read more about using GitHub OIDC](https://docs.github.com/en/enterprise-server@3.5/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect)
 - [Read more about configuring OpenID Connect in AWS](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services)
@@ -15,12 +15,12 @@ Each environment can have a maximum of one AWS IdP configured for GitHub.  Attem
 
 ### IAM Role
 
-This is the role that the Actions workflow assumes via the OIDC request. The permissions defined for the role dictate the scope of the short-term credentials that are passed back to GitHub by AWS. This service creates a GitHub repo secret that contains the OIDC role ARN, and the secret is referenced by the [GitHub Action that configures AWS credentials for workflows](https://github.com/aws-actions/configure-aws-credentials#assuming-a-role).  See the example below under "Using the OIDC Provider in a Workflow."
+This is the role that the Actions workflow assumes via the OIDC request. The permissions defined for the role dictate the scope of the short-term credentials that are passed back to GitHub by AWS. This service creates an Actions repo secret (as well as a matching Dependabot repo secret for the 'main' stage) that contains the OIDC role ARN, and the secrets are referenced by the [GitHub Action that configures AWS credentials for workflows](https://github.com/aws-actions/configure-aws-credentials#assuming-a-role).  See the example below under "Using the OIDC Provider in a Workflow."
 
 Each environment can have many OIDC roles with varying permissions.  However, each role has a trust relationship with the single AWS IdP for GitHub for that environment.
 
 ## GitHub Repo Secrets
-This service uses a post-deploy script that creates or updates a GitHub repo secret containing the OIDC role ARN.  Because of this, when the service is deployed there must be a GitHub personal access token with `repo` and `read:public_key` scopes set as `GITHUB_TOKEN` in the environment for the deployment. The [default token granted to Actions workflows by GitHub](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#modifying-the-permissions-for-the-github_token) does not permit the management of repo secrets.
+This service uses a post-deploy script that creates or updates an Actions repo secret containing the OIDC role ARN (and for the 'main' stage, a matching Dependabot secret).  Because of this, when the service is deployed there must be a GitHub personal access token with `repo` and `read:public_key` scopes set as `GITHUB_TOKEN` in the environment for the deployment. The [default token granted to Actions workflows by GitHub](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#modifying-the-permissions-for-the-github_token) does not permit the management of repo secrets.
 
 ## Usage
 ### Bootstrapping
@@ -28,7 +28,7 @@ The OIDC resources for each environment need to be manually bootstrapped for two
 - this service uses OIDC for permissions to deploy itself (chicken and egg problem)
 - the fact that only one AWS IdP for GitHub can exist per environment makes it tricky to manage multiple stages in the dev environment. CloudFormation isn't great at checking if resources exist before trying to create them and trying to create a duplicate IdP for each feature branch in dev will fail.
 
-The service is configured to be bootstrapped by running `serverless deploy` locally once for the 'official' stage for each environment. This will create both the AWS OIDC IdP and the IAM role for that stage and environment.  Subsequent automated deploys of the service will update the IAM role, but won't touch the IdP.  Configuration changes for the IdP should be infrequent, but if they occur they will need to be applied manually following the steps below.
+The service is configured to be bootstrapped by running `serverless deploy` locally once for the 'official' stage for each environment (see step 4 below). This will create both the AWS OIDC IdP and the IAM role for that stage and environment.  Subsequent automated deploys of the service will update the IAM role, but won't touch the IdP.  Configuration changes for the IdP should be infrequent, but if they occur they will need to be applied manually following the steps below.
 
 Steps:
 1. Set AWS creds from CloudTamer/Kion for the target environment (dev, val, prod), then confirm the correct target

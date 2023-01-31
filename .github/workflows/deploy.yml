@@ -223,7 +223,7 @@ jobs:
       oidc_role_arn: ${{ secrets.DEV_OIDC_ROLE_ARN }}
       # the default secrets.GITHUB_TOKEN granted to workflows won't suffice here
       # this workflow needs a personal access token with 'read:public_key, repo' scope since it creates GitHub secrets
-      personal_access_token: ${{ secrets.BHARVEY_GITHUB_TOKEN }}
+      personal_access_token: ${{ secrets.SERVICE_ACCOUNT_TOKEN }}
 
   deploy-app:
     needs:

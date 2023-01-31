@@ -14,11 +14,12 @@ custom:
       - prod
       - main
   scripts:
-    # get the service role ARN from the stack outputs, and set it as a GitHub secret with the correct name depending on the stage:
+    # get the service role ARN from the stack outputs, and set it as an Actions repo secret with the correct name depending on the stage:
     # - main: DEV_OIDC_ROLE_ARN
     # - val: VAL_OIDC_ROLE_ARN
     # - prod: PROD_OIDC_ROLE_ARN
     # - other stages for feature branches: ${BRANCH_NAME}_OIDC_ROLE_ARN
+    # for the main stage, also set a Dependabot repo secret
     # note that the format of the secret name here should only be changed in concert with the code in ./destroy_stage.ts that deletes the secret
     hooks:
       deploy:finalize: |
@@ -30,7 +31,13 @@ custom:
         else
             echo $stage | tr '[:lower:]' '[:upper:]'
         fi)
-        node ../../scripts/manage_repo_secrets.js set --name ${formatted_stage}_OIDC_ROLE_ARN --value $service_role_arn
+        dependabot=$(if [ $stage = 'main' ];
+        then
+            echo 'true'
+        else
+            echo 'false'
+        fi)
+        node ../../scripts/manage_repo_secrets.js set --name ${formatted_stage}_OIDC_ROLE_ARN --value $service_role_arn --dependabot $dependabot
 
 params:
   val:

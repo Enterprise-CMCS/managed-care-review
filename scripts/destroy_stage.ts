@@ -13,7 +13,7 @@ import {
     DeleteObjectsCommand,
     PutBucketVersioningCommand,
 } from '@aws-sdk/client-s3'
-import { deleteSecret } from './manage_repo_secrets'
+import { deleteActionsRepoSecret } from './manage_repo_secrets'
 
 const AWSConfig = {
     region: 'us-east-1',
@@ -94,7 +94,7 @@ async function deleteGitHubOidcSecret(stageName: string): Promise<void | Error> 
     // note that the format of the secret name here should only be changed in concert with the script in services/github-oidc/serverless.yml that creates the secret
     const secretName = `${stageName.toUpperCase()}_OIDC_ROLE_ARN`
     try {
-        await deleteSecret(secretName)
+        await deleteActionsRepoSecret(secretName)
     } catch(e: any) {
         return new Error(e.message)
     }
