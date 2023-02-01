@@ -2,7 +2,7 @@
   "name": "github-oidc",
   "version": "1.0.0",
   "private": true,
-  "description": "A service that creates the resources necessary to use GitHub's OIDC provider to retrieve short-term credentials for performing AWS actions in a GitHub Actions workflow",
+  "description": "A service that creates the resources necessary to use GitHub's OIDC provider to retrieve short-term AWS credentials in a GitHub Actions workflow",
   "license": "CC0-1.0",
   "devDependencies": {
     "serverless": "^3.19.0",

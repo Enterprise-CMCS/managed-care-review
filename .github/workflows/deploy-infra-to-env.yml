@@ -21,6 +21,7 @@ permissions:
   id-token: write
 
 jobs:
+  # deploy the OIDC service first, as subsequent deploys may depend on updated OIDC permissions
   github-oidc:
       if: ${{ contains(inputs.changed_services, 'github-oidc') }}
       runs-on: ubuntu-20.04
@@ -50,8 +51,9 @@ jobs:
             pushd services/github-oidc && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   postgres:
+    # for this and subsequent jobs, wait for the OIDC service unless it was skipped
     needs: github-oidc
-    if: ${{ contains(inputs.changed_services, 'postgres') }}
+    if: ${{ always() && contains(inputs.changed_services, 'postgres') }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -73,7 +75,7 @@ jobs:
 
   ui:
     needs: github-oidc
-    if: ${{ contains(inputs.changed_services, 'ui') }}
+    if: ${{ always() && contains(inputs.changed_services, 'ui') }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -95,7 +97,7 @@ jobs:
 
   storybook:
     needs: github-oidc
-    if: ${{ contains(inputs.changed_services, 'storybook') }}
+    if: ${{ always() && contains(inputs.changed_services, 'storybook') }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -117,7 +119,7 @@ jobs:
 
   uploads:
     needs: github-oidc
-    if: ${{ contains(inputs.changed_services, 'uploads') }}
+    if: ${{ always() && contains(inputs.changed_services, 'uploads') }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -139,7 +141,7 @@ jobs:
 
   infra-api:
     needs: github-oidc
-    if: ${{ contains(inputs.changed_services, 'infra-api') }}
+    if: ${{ always() && contains(inputs.changed_services, 'infra-api') }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -161,7 +163,7 @@ jobs:
 
   ui-auth:
     needs: [github-oidc, infra-api, ui, uploads]
-    if: ${{ contains(inputs.changed_services, 'ui-auth') }}
+    if: ${{ always() && contains(inputs.changed_services, 'ui-auth') }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository

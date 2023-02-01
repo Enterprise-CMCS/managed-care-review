@@ -62,8 +62,8 @@ const setActionsRepoSecret = async (name: string, value: string): Promise<void> 
   // set the Actions repo secret
   try {
     await client.rest.actions.createOrUpdateRepoSecret({
-      owner: 'CMSgov',
-      repo: 'managed-care-review',
+      owner,
+      repo,
       secret_name: name,
       encrypted_value: base64Key,
       key_id: keyId
@@ -92,10 +92,11 @@ const setDependabotRepoSecret = async (name: string, value: string): Promise<voi
   const keyId = publicKeyResponse.data.key_id
   const base64Key = await encryptSecret(key, value)
 
+  // set the Dependabot repo secret
   try {
     await client.rest.dependabot.createOrUpdateRepoSecret({
-      owner: 'CMSgov',
-      repo: 'managed-care-review',
+      owner,
+      repo,
       secret_name: name,
       encrypted_value: base64Key,
       key_id: keyId
@@ -129,8 +130,8 @@ const setSecrets = async (name: string, value: string, dependabot: boolean): Pro
 const deleteActionsRepoSecret = async (name: string): Promise<void> => {
   try {
     await client.rest.actions.deleteRepoSecret({
-      owner: 'CMSgov',
-      repo: 'managed-care-review',
+      owner,
+      repo,
       secret_name: name,
     });
     console.log(`Actions repo secret ${name} was deleted successfully from ${ownerAndRepo}`)
