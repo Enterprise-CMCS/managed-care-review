@@ -210,7 +210,8 @@ jobs:
 
   deploy-infra:
     needs: [begin-deployment]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+  # TODO pin back to main after bharvey-github-oidc is merged to main
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@bharvey-github-oidc
     permissions:
       id-token: write
     with:
@@ -235,7 +236,8 @@ jobs:
     if: |
       always() &&
       (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped')
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
+    # TODO pin back to main after bharvey-github-oidc is merged to main
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@bharvey-github-oidc
     with:
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
       app_version: ${{ needs.begin-deployment.outputs.app-version }}

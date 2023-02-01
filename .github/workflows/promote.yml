@@ -118,7 +118,8 @@ jobs:
 
   promote-infra-dev:
     needs: [build-prisma-client-lambda-layer, unit-tests]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@3387456541f472c47c59df73cf328a3e739a895f
+    # TODO pin back to main after verifying OIDC in dev
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@10f745b1ba147dbef9b4161bb41d9c4aa1b4f2b9
     with:
       stage_name: main
       changed_services: ${{ needs.unit-tests.outputs.changed-services}}
@@ -129,7 +130,8 @@ jobs:
 
   promote-app-dev:
     needs: [promote-infra-dev, build-prisma-client-lambda-layer, unit-tests]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@3387456541f472c47c59df73cf328a3e739a895f
+    # TODO pin back to main after verifying OIDC in dev
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@10f745b1ba147dbef9b4161bb41d9c4aa1b4f2b9
     with:
       stage_name: main
       app_version: ${{ needs.unit-tests.outputs.app-version }}
@@ -143,7 +145,8 @@ jobs:
 
   promote-infra-val:
     needs: [promote-app-dev, unit-tests]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@3387456541f472c47c59df73cf328a3e739a895f
+    # TODO pin back to main after verifying OIDC in dev
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@10f745b1ba147dbef9b4161bb41d9c4aa1b4f2b9
     with:
       stage_name: val
       changed_services: ${{ needs.unit-tests.outputs.changed-services}}
@@ -154,7 +157,8 @@ jobs:
 
   promote-app-val:
     needs: [promote-app-dev, promote-infra-val, unit-tests]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@3387456541f472c47c59df73cf328a3e739a895f
+    # TODO pin back to main after verifying OIDC in dev
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@10f745b1ba147dbef9b4161bb41d9c4aa1b4f2b9
     with:
       stage_name: val
       app_version: ${{ needs.unit-tests.outputs.app-version }}
@@ -168,7 +172,8 @@ jobs:
 
   promote-infra-prod:
     needs: [promote-app-val, unit-tests]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@3387456541f472c47c59df73cf328a3e739a895f
+    # TODO pin back to main after verifying OIDC in dev
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@10f745b1ba147dbef9b4161bb41d9c4aa1b4f2b9
     with:
       stage_name: prod
       changed_services: ${{ needs.unit-tests.outputs.changed-services}}
@@ -179,7 +184,8 @@ jobs:
 
   promote-app-prod:
     needs: [promote-app-val, promote-infra-prod, unit-tests]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@3387456541f472c47c59df73cf328a3e739a895f
+    # TODO pin back to main after verifying OIDC in dev
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@10f745b1ba147dbef9b4161bb41d9c4aa1b4f2b9
     with:
       stage_name: prod
       app_version: ${{ needs.unit-tests.outputs.app-version }}
