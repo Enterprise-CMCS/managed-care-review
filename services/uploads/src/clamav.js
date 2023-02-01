@@ -1,6 +1,6 @@
 const AWS = require("@aws-sdk/client-s3");
 const fs = require('fs');
-const spawnSync = require('child_process').spawnSync;
+const child_process = require('child_process');
 const path = require('path');
 const constants = require('./constants');
 const utils = require('./utils');
@@ -34,7 +34,7 @@ async function listBucketFiles(bucketName) {
  */
 function updateAVDefinitonsWithFreshclam() {
     try {
-        let executionResult = execSync(
+        let executionResult = child_process.execSync(
             `${constants.PATH_TO_FRESHCLAM} --config-file=${constants.FRESHCLAM_CONFIG} --datadir=${constants.FRESHCLAM_WORK_DIR}`
         );
 
@@ -196,7 +196,7 @@ async function uploadAVDefinitions() {
  */
 function scanLocalFile(pathToFile) {
     try {
-        let avResult = spawnSync(constants.PATH_TO_CLAMAV, [
+        let avResult = child_process.spawnSync(constants.PATH_TO_CLAMAV, [
             '--stdout',
             '-v',
             '-a',
