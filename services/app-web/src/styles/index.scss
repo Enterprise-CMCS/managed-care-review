@@ -1,0 +1,15 @@
+/* 
+Sass entry point - order matters.
+    https://designsystem.digital.gov/documentation/getting-started/developers/phase-two-compile/#about-sass-entry-points
+*/
+
+// 1. Load USWDS theme and settings
+ @forward 'uswds-theme';
+
+
+// 2. Load USWDS source code
+
+@forward 'uswds';
+
+// 3. Load your project's custom Sass
+@forward 'custom.scss';

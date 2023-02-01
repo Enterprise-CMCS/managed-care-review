@@ -11,7 +11,7 @@
 */
 
 // @forward 'theme/cms' show  $cms-color-gold-darker, $cms-color-primary-alt, $cms-color-primary-darker, $cms-color-white;
-@use "theme/cms";
+@use "cms";
 @use "uswds-core" as *;
 
 // ACCESSIBILITY

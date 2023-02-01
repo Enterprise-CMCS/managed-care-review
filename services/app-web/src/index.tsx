@@ -4,7 +4,7 @@ import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
 import { Amplify } from 'aws-amplify'
 import { loader } from 'graphql.macro'
 
-import './index.scss'
+import './styles/index.scss'
 
 import App from './pages/App/App'
 import reportWebVitals from './reportWebVitals'

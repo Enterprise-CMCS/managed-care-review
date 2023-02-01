@@ -1,12 +1,12 @@
 /*
-    USWDS customizations, themes and settings
+    USWDS theme settings
 
     See v3 documentation around USWDS core 
     https://designsystem.digital.gov/documentation/settings/
 */
 
 // @forward 'theme/cms' show $cms-color-primary, $cms-color-primary-darker, $cms-color-primary-darkest;
-@use 'theme/cms';
+@use 'cms';
 
 @use "uswds-core" with (  
     $theme-font-path:  '~@uswds/uswds/fonts',
