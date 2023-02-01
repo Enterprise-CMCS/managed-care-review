@@ -5,10 +5,10 @@ import { Loading, SectionHeader } from '../../components'
 import { NavLink, useOutletContext } from 'react-router-dom'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { usePage } from '../../contexts/PageContext'
-import { SubmissionOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
+import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
 
 export const QuestionsAnswers = () => {
-    const outletContext = useOutletContext<SubmissionOutletContextType>()
+    const outletContext = useOutletContext<SideNavOutletContextType>()
     const { updateHeading } = usePage()
     const [pkgName, setPkgName] = useState<string | undefined>(undefined)
 

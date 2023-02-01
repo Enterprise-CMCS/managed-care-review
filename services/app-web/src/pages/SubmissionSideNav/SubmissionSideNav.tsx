@@ -17,7 +17,7 @@ import { Error404 } from '../Errors/Error404Page'
 import { HealthPlanPackage, User } from '../../gen/gqlClient'
 import { HealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
 
-export type SubmissionOutletContextType = {
+export type SideNavOutletContextType = {
     pkg: HealthPlanPackage
     packageData: HealthPlanFormDataType
     user: User | undefined
@@ -100,7 +100,7 @@ export const SubmissionSideNav = () => {
     const currentRevision = edge.node
     const packageData = formDatas[currentRevision.id]
 
-    const outletContext: SubmissionOutletContextType = {
+    const outletContext: SideNavOutletContextType = {
         pkg,
         packageData,
         user: loggedInUser,
