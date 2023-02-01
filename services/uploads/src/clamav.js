@@ -1,4 +1,4 @@
-import * as AWS from "@aws-sdk/client-s3";
+const AWS = require("@aws-sdk/client-s3");
 const fs = require('fs');
 const spawnSync = require('child_process').spawnSync;
 const path = require('path');
@@ -16,7 +16,7 @@ async function listBucketFiles(bucketName) {
     try {
         const listFilesResult = await S3.listObjectsV2({
             Bucket: bucketName,
-        }).promise();
+        });
 
         const keys = listFilesResult.Contents.map((c) => c.Key);
         return keys;
@@ -133,7 +133,7 @@ async function uploadAVDefinitions() {
                         return { Key: k };
                     }),
                 },
-            }).promise();
+            });
             utils.generateSystemMessage(
                 `Deleted extant definitions: ${s3DefinitionFileFullKeys}`
             );

@@ -2,7 +2,7 @@
  * Lambda function that will be perform the scan and tag the file accordingly.
  */
 
-import * as AWS from "@aws-sdk/client-s3";
+const AWS = require("@aws-sdk/client-s3");
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
@@ -19,7 +19,7 @@ const s3 = new AWS.S3();
  * @return {int} Length of S3 object in bytes.
  */
 async function sizeOf(key, bucket) {
-    let res = await s3.headObject({ Key: key, Bucket: bucket }).promise();
+    let res = await s3.headObject({ Key: key, Bucket: bucket });
     return res.ContentLength;
 }
 
@@ -115,7 +115,7 @@ async function lambdaHandleEvent(event, context) {
     };
 
     try {
-        await s3.putObjectTagging(taggingParams).promise();
+        await s3.putObjectTagging(taggingParams);
         utils.generateSystemMessage('Tagging successful');
     } catch (err) {
         console.log(err);
@@ -141,7 +141,7 @@ async function scanS3Object(s3ObjectKey, s3ObjectBucket) {
     };
 
     try {
-        await s3.putObjectTagging(taggingParams).promise();
+        await s3.putObjectTagging(taggingParams);
         utils.generateSystemMessage('Tagging successful');
     } catch (err) {
         console.log(err);
