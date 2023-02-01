@@ -3,7 +3,7 @@ describe('Q&A', () => {
         cy.stubFeatureFlags()
     })
 
-    it('cannot navigate to and from Q&A page with cms-questions flag off ', () => {
+    it('cannot navigate to and from Q&A page with cms-questions flag off', () => {
         cy.interceptFeatureFlags({
             'rate-cert-assurance': true,
             'cms-questions': false
