@@ -142,7 +142,7 @@ export const SubmissionSideNav = () => {
                                     'SUBMISSIONS_SUMMARY'
                                 )}
                             >
-                                Submission Summary
+                                Submission summary
                             </Link>,
                             <Link
                                 to={`/submissions/${id}/q&a`}
