@@ -1,5 +1,5 @@
- @use "uswds-core" as *;
-@import '../../styles/custom.scss';
+@use "uswds-core" as *;
+@use '../../styles/custom.scss';
 
 .app {
     display: flex;
@@ -16,7 +16,7 @@
 }
 
 .testEnvironmentBanner {
-    background-color: $app-warning-gold;
+    background-color: custom.$app-warning-gold;
     font-weight: bold;
     text-align: center;
     font-size: 1rem;

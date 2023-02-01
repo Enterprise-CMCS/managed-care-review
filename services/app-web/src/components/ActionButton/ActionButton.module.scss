@@ -1,5 +1,5 @@
- @use "uswds-core" as *;
-@import '../../styles/custom.scss';
+@use "uswds-core" as *;
+@use '../../styles/custom.scss';
 
 // preferred way to show a button that is disabled. avoid cursor: none
 .disabledCursor {

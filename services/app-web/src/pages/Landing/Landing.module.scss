@@ -1,8 +1,8 @@
- @use "uswds-core" as *;
-@import '../../styles/custom.scss';
+@use "uswds-core" as *;
+@use '../../styles/custom.scss';
 
 .detailsSection {
-    background-color: $cms-color-background;
+    background-color: custom.$background-white;
     flex: 1;
     padding: units(4) 0;
     .detailsSectionContent {

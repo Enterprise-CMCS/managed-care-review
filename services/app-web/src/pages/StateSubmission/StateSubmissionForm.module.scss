@@ -1,5 +1,5 @@
- @use "uswds-core" as *;
-@import '../../styles/custom.scss';
+@use "uswds-core" as *;
+@use '../../styles/custom.scss';
 
 .formPage {
     width: 100%; 
@@ -33,7 +33,7 @@
         padding: units(4);
         margin-bottom: units(2);
         margin-top: units(2);
-        background: $polid $theme-color-base-lighter;
+        background: 1px solid $theme-color-base-lighter;
         @include u-radius('md');
     }
 

@@ -5,7 +5,8 @@
     https://designsystem.digital.gov/documentation/settings/
 */
 
-@forward 'theme/_cms' show $cms-color-primary, $cms-color-primary-darker, $cms-color-primary-darkest;
+// @forward 'theme/cms' show $cms-color-primary, $cms-color-primary-darker, $cms-color-primary-darkest;
+@use 'theme/cms';
 
 @use "uswds-core" with (  
     $theme-font-path:  '~@uswds/uswds/fonts',
@@ -45,9 +46,9 @@
     
     // /* COLOR */
     $theme-color-base-ink: #1b1b1b,
-    $theme-color-primary: $cms-color-primary,
-    $theme-color-primary-dark: $cms-color-primary-darker,
-    $theme-color-primary-darker: $cms-color-primary-darkest,
+    $theme-color-primary: cms.$cms-color-primary,
+    $theme-color-primary-dark: cms.$cms-color-primary-darker,
+    $theme-color-primary-darker: cms.$cms-color-primary-darkest,
     $theme-color-info-dark: #009ec1,
     $theme-link-color: 'primary',
     $theme-link-hover-color: 'primary-dark',

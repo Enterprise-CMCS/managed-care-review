@@ -1,5 +1,5 @@
- @use "uswds-core" as *;
-@import '../../styles/custom.scss';
+@use "uswds-core" as *;
+@use '../../styles/custom.scss';
 
 .background {
     background-color: custom.$background-white;
@@ -7,7 +7,7 @@
 }
 
 .container {
-    max-width: $container-width-max-fixed;
+    max-width: custom.$container-width-max-fixed;
     padding: 2rem 0;
 
     [id=submissionTypeSection] {

@@ -10,7 +10,8 @@
    If you have determined you still need a change in this file, please use css selectors to target your change precisely and also add a comment inline to your change.
 */
 
-@forward 'theme/_cms' show  $cms-color-gold-darker, $cms-color-primary-alt, $cms-color-primary-darker, $cms-color-white;
+// @forward 'theme/cms' show  $cms-color-gold-darker, $cms-color-primary-alt, $cms-color-primary-darker, $cms-color-white;
+@use "theme/cms";
 @use "uswds-core" as *;
 
 // ACCESSIBILITY
@@ -37,8 +38,8 @@
 
 
 // CONTAINERS 
-custom.$background-white: $cms-color-white; // Used for almost all containers
-$app-warning-gold: $cms-color-gold-darker; // Used for top alert "You are in test environment" on dev/val
+$background-white: cms.$cms-color-white; // Used for almost all containers
+$app-warning-gold: cms.$cms-color-gold-darker; // Used for top alert "You are in test environment" on dev/val
 
 // Once user in logged in, many pages in the application have a set horizontal pad 
 $container-width-max-fixed: 50rem; 
@@ -47,8 +48,8 @@ $container-width-max-fixed: 50rem;
 }
 
 // Used for gradient styling on tables
-$gradient-light: $cms-color-primary-alt; 
-$gradient-dark: $cms-color-primary-darker;
+$gradient-light: cms.$cms-color-primary-alt; 
+$gradient-dark: cms.$cms-color-primary-darker;
 .borderTopLinearGradient { // Gradient styling used on tables
     border: 0 solid;
     border-top: 10px solid;

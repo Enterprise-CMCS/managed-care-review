@@ -1,5 +1,5 @@
- @use "uswds-core" as *;
-@import '../../styles/custom.scss';
+@use "uswds-core" as *;
+@use '../../styles/custom.scss';
 
 .userInfo {
     font-weight: font-weight('light');
@@ -48,7 +48,7 @@
 }
 
 .banner {
-    background: $cms-color-primary;
+    background: $theme-color-primary;
 }
 
 .bannerLogo {
