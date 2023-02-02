@@ -1,5 +1,3 @@
-// this script requires a GitHub personal access token with 'repo' scope set as an env var called GITHUB_TOKEN
-
 import {
     CloudFormationClient,
     DeleteStackCommand,
@@ -13,7 +11,6 @@ import {
     DeleteObjectsCommand,
     PutBucketVersioningCommand,
 } from '@aws-sdk/client-s3'
-import { deleteActionsRepoSecret } from './manage_repo_secrets'
 
 const AWSConfig = {
     region: 'us-east-1',
@@ -30,7 +27,6 @@ const stackPrefixes = [
     'ui',
     'database',
     'stream-functions',
-    'github-oidc'
 ]
 
 const protectedStages = [
@@ -78,25 +74,7 @@ async function main() {
             process.exit(1)
         }
 
-        if (stack.startsWith('github-oidc')) {
-            const deleteSecretOutput = await deleteGitHubOidcSecret(stage)
-            if (deleteSecretOutput instanceof Error) {
-                console.error(deleteSecretOutput)
-                process.exit(1)
-            }
-        }
-
         console.info(`Destroy successful: ${stack}`)
-    }
-}
-
-async function deleteGitHubOidcSecret(stageName: string): Promise<void | Error> {
-    // note that the format of the secret name here should only be changed in concert with the script in services/github-oidc/serverless.yml that creates the secret
-    const secretName = `${stageName.toUpperCase()}_OIDC_ROLE_ARN`
-    try {
-        await deleteActionsRepoSecret(secretName)
-    } catch(e: any) {
-        return new Error(e.message)
     }
 }
 

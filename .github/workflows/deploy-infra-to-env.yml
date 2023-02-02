@@ -12,16 +12,14 @@ on:
     secrets:
       aws_default_region:
         required: true
-      oidc_role_arn:
-        required: true
-      personal_access_token:
+      aws_account_id:
         required: true
 
 permissions:
   id-token: write
 
 jobs:
-  # deploy the OIDC service first, as subsequent deploys may depend on updated OIDC permissions
+  # deploy the OIDC service first, as subsequent deploys depend on updated OIDC permissions
   github-oidc:
       if: ${{ contains(inputs.changed_services, 'github-oidc') }}
       runs-on: ubuntu-20.04
@@ -37,11 +35,13 @@ jobs:
           run: |
             lerna run build:ci-scripts
 
-        - name: Configure AWS credentials
-          uses: aws-actions/configure-aws-credentials@v1-node16
+        - name: Get AWS credentials
+          uses: ./.github/actions/get_aws_credentials
           with:
-            aws-region: ${{ secrets.aws_default_region }}
-            role-to-assume: ${{ secrets.oidc_role_arn }}
+            region: ${{ secrets.aws_default_region }}
+            account-id: ${{ secrets.aws_account_id }}
+            # use the manually bootstrapped OIDC role to solve the chicken-and-egg problem of deploying the OIDC service via OIDC
+            stage-name: main
 
         - name: deploy github-oidc
           id: deploy-github-oidc
@@ -62,11 +62,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
         with:
-          aws-region: ${{ secrets.aws_default_region }}
-          role-to-assume: ${{ secrets.oidc_role_arn }}
+          region: ${{ secrets.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          stage-name: ${{ inputs.stage_name }}
 
       - name: deploy postgres
         id: deploy-postgres
@@ -84,11 +85,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
         with:
-          aws-region: ${{ secrets.aws_default_region }}
-          role-to-assume: ${{ secrets.oidc_role_arn }}
+          region: ${{ secrets.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          stage-name: ${{ inputs.stage_name }}
 
       - name: deploy ui
         id: deploy-ui
@@ -106,11 +108,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
         with:
-          aws-region: ${{ secrets.aws_default_region }}
-          role-to-assume: ${{ secrets.oidc_role_arn }}
+          region: ${{ secrets.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          stage-name: ${{ inputs.stage_name }}
 
       - name: deploy storybook
         id: deploy-storybook
@@ -128,11 +131,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
         with:
-          aws-region: ${{ secrets.aws_default_region }}
-          role-to-assume: ${{ secrets.oidc_role_arn }}
+          region: ${{ secrets.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          stage-name: ${{ inputs.stage_name }}
 
       - name: deploy uploads
         id: deploy-uploads
@@ -150,11 +154,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
         with:
-          aws-region: ${{ secrets.aws_default_region }}
-          role-to-assume: ${{ secrets.oidc_role_arn }}
+          region: ${{ secrets.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          stage-name: ${{ inputs.stage_name }}
 
       - name: deploy infra-api
         id: deploy-uploads
@@ -172,11 +177,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
         with:
-          aws-region: ${{ secrets.aws_default_region }}
-          role-to-assume: ${{ secrets.oidc_role_arn }}
+          region: ${{ secrets.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          stage-name: ${{ inputs.stage_name }}
 
       - name: deploy ui-auth
         id: deploy-ui-auth

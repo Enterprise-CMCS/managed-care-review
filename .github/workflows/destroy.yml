@@ -23,11 +23,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
         with:
-          aws-region:  ${{ secrets.AWS_DEFAULT_REGION }}
-          role-to-assume: ${{ secrets.DEV_OIDC_ROLE_ARN }}
+          region: ${{ secrets.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: main
 
       - name: build scripts
         shell: bash
@@ -42,9 +43,6 @@ jobs:
       - name: destroy all
         env:
           STAGE_PREFIX: ${{ secrets.STAGE_PREFIX }}
-          # the default secrets.GITHUB_TOKEN granted to workflows won't suffice here
-          # this script needs a personal access token with repo scope since it deletes GitHub secrets
-          GITHUB_TOKEN: ${{ secrets.SERVICE_ACCOUNT_TOKEN }}
         run: node ./scripts/destroy_stage.js $stage_name
 
       - name: Alert Slack On Destroy Failure

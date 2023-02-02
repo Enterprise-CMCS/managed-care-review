@@ -1,0 +1,30 @@
+name: 'Set GitHub OIDC credentials'
+description: "Sets AWS credentials in the environment via GitHub's OIDC provider"
+
+inputs:
+  region:
+    description: 'AWS region'
+    required: true
+  account-id:
+    description: 'AWS account ID'
+    required: true
+  stage-name:
+    description: 'Serverless stage name'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    # the ARN format here should only be changed in concert with the role naming convention in services/github-oidc/serverless.yml
+    - name: Format OIDC role ARN
+      shell: bash
+      id: format-oidc-role-arn
+      run: |
+        ARN="arn:aws:iam::${{ inputs.account-id }}:role/delegatedadmin/developer/github-oidc-${{ inputs.stage-name }}-ServiceRole"
+        echo "arn=$ARN" >> $GITHUB_OUTPUT
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1-node16
+      with:
+        aws-region: ${{ inputs.region }}
+        role-to-assume: ${{ steps.format-oidc-role-arn.outputs.arn }}

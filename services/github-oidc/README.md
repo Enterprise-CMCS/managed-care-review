@@ -15,12 +15,11 @@ Each environment can have a maximum of one AWS IdP configured for GitHub.  Attem
 
 ### IAM Role
 
-This is the role that the Actions workflow assumes via the OIDC request. The permissions defined for the role dictate the scope of the short-term credentials that are passed back to GitHub by AWS. This service creates an Actions repo secret (as well as a matching Dependabot repo secret for the 'main' stage) that contains the OIDC role ARN, and the secrets are referenced by the [GitHub Action that configures AWS credentials for workflows](https://github.com/aws-actions/configure-aws-credentials#assuming-a-role).  See the example below under "Using the OIDC Provider in a Workflow."
+This is the role that the Actions workflow assumes via an OIDC request. The permissions defined for the role dictate the scope of the short-term credentials that are passed back to GitHub by AWS. The [GitHub Action that configures AWS credentials for workflows](https://github.com/aws-actions/configure-aws-credentials#assuming-a-role) is configured with the ARN of the OIDC role that the workflow will assume, given that the request from GitHub's OIDC provider meets the requirements that are configured on the AWS side.
 
-Each environment can have many OIDC roles with varying permissions.  However, each role has a trust relationship with the single AWS IdP for GitHub for that environment.
+In the `dev` environment, there can be many OIDC roles: one 'offical' one that corresponds to the `main` branch, and one for each feature branch that includes a change to this service. The composite action for getting AWS credentials (see the example in 'Using the OIDC Provider in a Workflow' below) takes in parameters that tell the action which OIDC role to assume.
 
-## GitHub Repo Secrets
-This service uses a post-deploy script that creates or updates an Actions repo secret containing the OIDC role ARN (and for the 'main' stage, a matching Dependabot secret).  Because of this, when the service is deployed there must be a GitHub personal access token with `repo` and `read:public_key` scopes set as `GITHUB_TOKEN` in the environment for the deployment. The [default token granted to Actions workflows by GitHub](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#modifying-the-permissions-for-the-github_token) does not permit the management of repo secrets.
+The `val` and `prod` environments each have a single OIDC role that is promoted from `dev`. Each role in a given environment has a trust relationship with the single AWS IdP for GitHub for that environment.
 
 ## Usage
 ### Bootstrapping
@@ -39,16 +38,11 @@ export AWS_SESSION_TOKEN=***
 
 aws sts get-caller-identity
 ```
-2. Set a GitHub personal access token with `repo` and `read:public_key` scopes, and a variable that enables the `manage-repo-secrets` script called by the service to run locally
-```bash
-export GITHUB_TOKEN=***
-export GITHUB_ACTION=true
-```
-3. Navigate to the `github-oidc` directory
+2. Navigate to the `github-oidc` directory
 ```bash
 cd services/github-oidc
 ```
-4. Deploy the service, passing the bootstrap flag and the stage name that corresponds to the 'official' stage for the target environment:
+3. Deploy the service, passing the bootstrap flag and the stage name that corresponds to the 'official' stage for the target environment:
     - `main` for dev
     - `val` for val
     - `prod` for prod
@@ -57,17 +51,20 @@ serverless deploy --stage ${stage_name} --param='bootstrap=true'
 ```
 
 ## Examples
-
 ### Updating AWS permissions for a workflow
-Here's an example for a common use case: you want to add a new step to a workflow job that calls an AWS API (let's say it's Security Hub), and access to that API isn't currently permitted by the existing OIDC role.
+Here's an example for a common use case: you want to add a new resource to a service that involves calling a new AWS API (let's say it's Security Hub), and access to that API isn't currently permitted by the existing OIDC role.
 
-You're making this change on your feature branch, `mybranch`.  You update the `githubActionsAllowedAwsActions` parameter in the `github-oidc` service's `serverless.yml` by adding "securityhub:*".  When you push your change and the `github-oidc` service is deployed for the feature branch, it will create/update an OIDC service role that includes Security Hub permissions and has a trust relationship with the AWS IdP provider for GitHub that was created when bootstrapping.  It will also create a GitHub secret called `MYBRANCH_OIDC_ROLE_ARN`.  You can reference this secret when getting AWS credentials to test out the workflow that talks to Security Hub on your feature branch. Note that if you are creating/updating an OIDC role and testing it in the same workflow run, you may need to add temporary step to pause and wait for the role to settle before using it due to [AWS's eventual consistency model](https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_general.html#troubleshoot_general_eventual-consistency).
+You're making this change on your feature branch, `mybranch`.  You update the `githubActionsAllowedAwsActions` parameter in the `github-oidc` service's `serverless.yml` by adding "securityhub:*".  When you push your change and the `github-oidc` service is deployed for the feature branch, it will create/update an OIDC service role that includes Security Hub permissions and has a trust relationship with the AWS IdP provider for GitHub that was created when bootstrapping. The `github-oidc` service is always deployed before any other services, so that subsequent services can test out the new permissions by getting credentials using the ephemeral OIDC role for the feature branch.
 
-When it's time to merge your feature branch to `main`, the service will update roles and set `${ENVIRONMENT}_OIDC_ROLE_ARN` secrets for the respective environments as the change is promoted.  When the feature branch is deleted, the `destroy` script will clean up the now-unneeded `MYBRANCH_OIDC_ROLE_ARN` secret.
+Note that if you are creating/updating an OIDC role and testing it in the same workflow run, you may need to add temporary step to pause and wait for the role to settle before using it due to [AWS's eventual consistency model](https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_general.html#troubleshoot_general_eventual-consistency). When deploying services, the build time for the service usually takes care of this.
+
+When it's time to merge your feature branch to `main`, the service will add the new permission to the OIDC roles for the higher environments as the change is promoted.
 
 ### Using the OIDC Provider in a Workflow
 
 Note that the `id-token: write` permission is [required to authorize the request for the GitHub OIDC token](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#adding-permissions-settings). You can set the permission globally, or per job. If you forget to do this, the workflow will fail with `Error: Credentials could not be loaded, please check your action inputs: Could not load credentials from any providers`.
+
+The OIDC role is designed to be used with the composite [`get_aws_credentials`](../../.github/actions/get_aws_credentials/) action. The action uses the target AWS account, AWS region, and the stage name to construct the ARN of the OIDC role that the workflow will assume.
 
 ```yml
 jobs:
@@ -76,11 +73,15 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
         with:
-          aws-region: us-east-1
-          role-to-assume: ${{ secrets.DEV_OIDC_ROLE_ARN }}
+          region: ${{ secrets.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.{DEV,VAL,PROD}_AWS_ACCOUNT_ID }}
+          stage-name: {your stage name}
      ...
 ```
 

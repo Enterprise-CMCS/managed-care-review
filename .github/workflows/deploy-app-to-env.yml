@@ -15,7 +15,7 @@ on:
     secrets:
       aws_default_region:
         required: true
-      oidc_role_arn:
+      aws_account_id:
         required: true
       react_app_auth_mode:
         required: true
@@ -36,11 +36,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
         with:
-          aws-region: ${{ secrets.aws_default_region }}
-          role-to-assume: ${{ secrets.oidc_role_arn }}
+          region: ${{ secrets.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          stage-name: ${{ inputs.stage_name }}
 
       - name: Generate Code
         run: lerna run generate
@@ -63,11 +64,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
         with:
-          aws-region: ${{ secrets.aws_default_region }}
-          role-to-assume: ${{ secrets.oidc_role_arn }}
+          region: ${{ secrets.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          stage-name: ${{ inputs.stage_name }}
 
       - name: Generate Code
         run: lerna run generate

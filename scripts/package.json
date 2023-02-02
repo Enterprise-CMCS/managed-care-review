@@ -21,17 +21,12 @@
         "@aws-sdk/client-cloudformation": "^3.202.0",
         "@aws-sdk/client-cognito-identity-provider": "^3.202.0",
         "@aws-sdk/client-s3": "^3.204.0",
-        "octokit": "^2.0.4",
-        "yargs": "^17.6.2"
+        "octokit": "^2.0.4"
     },
     "devDependencies": {
         "@actions/core": "^1.6.0",
         "@octokit/action": "^4.0.6",
-        "@octokit/request-error": "^3.0.2",
-        "@types/libsodium-wrappers": "^0.7.10",
-        "@types/yargs": "^17.0.19",
         "csv-parser": "^3.0.0",
-        "libsodium-wrappers": "^0.7.10",
         "typescript": "^4.5.4",
         "uuid": "^9.0.0"
     }
