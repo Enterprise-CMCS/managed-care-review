@@ -1,13 +1,13 @@
 @use "uswds-core" as *;
-@use '../../styles/custom.scss';
+@use '../../styles/custom.scss' as *;
 
 .background {
-    background-color: custom.$background-white;
+    background-color: $mcr-color-white;
     width: 100%;
 }
 
 .container {
-    max-width: custom.$container-width-max-fixed;
+    max-width: $mcr-container-max-width-fixed;
     padding: 2rem 0;
 }
 

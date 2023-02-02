@@ -1,5 +1,5 @@
 @use "uswds-core" as *;
-@use '../../styles/custom.scss';
+@use '../../styles/custom.scss' as *;
 
 .messageBodyText{
   p {

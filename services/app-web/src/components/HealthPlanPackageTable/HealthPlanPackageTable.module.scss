@@ -1,5 +1,5 @@
 @use "uswds-core" as *;
-@use '../../styles/custom.scss';
+@use '../../styles/custom.scss' as *;
 
 .panelEmptyNoFilteredResults {
     margin-top: units(8);
@@ -28,26 +28,26 @@
 
 .programTag {
     background: color($theme-color-secondary-lighter);
-    color: color($theme-color-base-ink);
+    color: $mcr-color-ink;
     display: inline-block;
 }
 
 .submittedTag {
-    background: color($theme-color-success);
+    background: $mcr-color-success;
 }
 
 .draftTag {
-    background: color($theme-color-warning-dark);
-    color: color($theme-color-base-ink);
+    background: $mcr-gold-dark;
+    color: $mcr-color-ink;
 }
 
 .unlockedTag {
-    background: #99deea;
-    color: color($theme-color-base-ink);
+    background: $mcr-color-cyan-light;
+    color: $mcr-color-ink;
 }
 
 .filterCount {
     font-weight: font-weight('bold');
-    color: color($theme-color-base-ink);
+    color: $mcr-color-ink;
     padding-top: units(3);
 }

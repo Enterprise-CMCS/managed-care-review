@@ -1,9 +1,9 @@
 @use "uswds-core" as *;
-@use '../../../styles/custom.scss';
+@use '../../../styles/custom.scss' as *;
 
 .uploadedDocumentsTable {
+    @extend .borderTopLinearGradient;
     width: 100%;
-
     caption {
         text-align: left;
         margin-bottom: units(2);
@@ -21,7 +21,7 @@
 
     tbody {
         tr:nth-child(even) {
-            background: color($theme-color-base-lightest);
+            background: $mcr-gray-lightest;
         }
     }
 }

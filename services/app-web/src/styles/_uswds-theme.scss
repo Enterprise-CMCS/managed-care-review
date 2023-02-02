@@ -4,9 +4,7 @@
     See v3 documentation around USWDS core 
     https://designsystem.digital.gov/documentation/settings/
 */
-
-// @forward 'theme/cms' show $cms-color-primary, $cms-color-primary-darker, $cms-color-primary-darkest;
-@use 'cms';
+@use 'mcr-colors' as *;
 
 @use "uswds-core" with (  
     $theme-font-path:  '~@uswds/uswds/fonts',
@@ -29,29 +27,28 @@
      ),
 
 
-    // /* TYPOGRAPHY */
+   /* TYPOGRAPHY */
     $theme-font-type-mono: 'roboto-mono',
     $theme-font-type-sans: 'open-sans',
     $theme-font-type-serif: 'merriweather',
     $theme-font-role-heading: 'sans',
 
-    // // /* SPACING */
+   /* SPACING */
     $theme-header-max-width: 'desktop-lg',
     $theme-grid-container-max-width: 'desktop-lg',
     $theme-banner-max-width: 'desktop-lg',
     $theme-footer-max-width: 'desktop-lg',
     
-    // /* MODAL */
+     /* MODAL */
     $theme-modal-border-radius: 0,
     
-    // /* COLOR */
-    $theme-color-base-ink: #1b1b1b,
-    $theme-color-primary: cms.$cms-color-primary,
-    $theme-color-primary-dark: cms.$cms-color-primary-darker,
-    $theme-color-primary-darker: cms.$cms-color-primary-darkest,
-    $theme-color-info-dark: #009ec1,
+    /* COLOR */
+    $theme-color-base-ink: $mcr-color-ink,
+    $theme-color-primary: $mcr-color-blue,
+    $theme-color-primary-dark: $mcr-color-blue-dark,
+    $theme-color-primary-darker: $mcr-color-blue-darkest,
+    $theme-color-info-dark: $mcr-color-cyan-dark,
     $theme-link-color: 'primary',
     $theme-link-hover-color: 'primary-dark',
     $theme-link-active-color: 'primary-darker',
-
 );

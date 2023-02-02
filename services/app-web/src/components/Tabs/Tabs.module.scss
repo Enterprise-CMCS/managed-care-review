@@ -1,5 +1,5 @@
 @use "uswds-core" as *;
-@use '../../styles/custom.scss';
+@use '../../styles/custom.scss' as *;
 
 .easi-only-print {
     display: none;
@@ -23,7 +23,7 @@
         margin: 0 0 -1px;
         list-style-type: none;
         white-space: nowrap;
-        background-color: custom.$background-white;
+        background-color: $mcr-color-white;
     }
 
     &__tab {
@@ -32,11 +32,11 @@
         height: 54px;
         flex-shrink: 0;
         position: relative;
-        border: 1px solid color($theme-color-base-lighter);
-        border-right: 1px solid color($theme-color-base-lighter);
+        border: 1px solid $mcr-gray-lighter;
+        border-right: 1px solid $mcr-gray-lighter;
 
         &:after {
-            background-color: color($theme-color-primary);
+            background-color: $mcr-color-blue;
             content: '';
             height: 4px;
             left: -1px;
@@ -51,7 +51,7 @@
             border-bottom: 1px solid #fff;
 
             .easi-tabs__tab-btn {
-                color: color($theme-color-primary);
+                color: $mcr-color-blue;
             }
 
             &:after {
@@ -79,7 +79,7 @@
 
     &__tab-panel {
         overflow: auto;
-        border: 1px solid color($theme-color-base-lighter);
+        border: 1px solid $mcr-gray-lighter;
         border-top: none;
         height: 100%;
         background-color: #fff;

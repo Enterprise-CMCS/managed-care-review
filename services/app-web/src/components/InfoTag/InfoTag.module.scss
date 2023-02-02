@@ -1,5 +1,5 @@
 @use "uswds-core" as *;
-@use '../../styles/custom.scss';
+@use '../../styles/custom.scss' as *;
 
 .green {
     @include u-bg('green-cool-50');
@@ -7,15 +7,15 @@
 
 .gold {
     @include u-bg('gold-20v');
-    color: color($theme-color-base-ink);
+    color: $mcr-color-ink;
 }
 
 .cyan {
     @include u-bg('cyan-40v');
-    color: color($theme-color-base-ink);
+    color: $mcr-color-ink;
 }
 
 .blue {
     @include u-bg('blue-cool-5v');
-    color: color($theme-color-base-ink);
+    color: $mcr-color-ink;
 }

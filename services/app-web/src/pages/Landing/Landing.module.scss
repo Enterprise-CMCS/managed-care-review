@@ -1,8 +1,8 @@
 @use "uswds-core" as *;
-@use '../../styles/custom.scss';
+@use '../../styles/custom.scss' as *;
 
 .detailsSection {
-    background-color: custom.$background-white;
+    background-color: $mcr-color-white;
     flex: 1;
     padding: units(4) 0;
     .detailsSectionContent {
@@ -13,7 +13,7 @@
         .detailsSteps {
             padding: units(4);
             margin: units(2) 0;
-            border: 1px solid color($theme-color-base-lighter);
+            border: 1px solid $mcr-gray-lighter;
             @include u-radius('lg');
             h2 {
                 margin-top: 0;
@@ -26,7 +26,7 @@
             }
             ul > li {
                 padding: 0 0 units(7) 0;
-                border-left: 3px solid color($theme-color-base-lighter);
+                border-left: 3px solid $mcr-gray-lighter;
                 padding-left: units(4);
                 position: relative;
                 line-height: line-height('body', 3);
@@ -39,7 +39,7 @@
                     position: absolute;
                     left: -18px;
                     top: -5px;
-                    background-color: custom.$background-white;
+                    background-color: $mcr-color-white;
                 }
                 &.login::before {
                     content: url(../../assets/images/login-icon.svg);

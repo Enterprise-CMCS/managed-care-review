@@ -9,7 +9,7 @@
         font-weight: normal;
         text-align: left;
         &, &:visited {
-            color: color($theme-link-color);
+            color: $theme-link-color;
         }
     }
 }

@@ -1,22 +1,24 @@
 /* 
     Custom application styles
     
-    Use caution with this file. Most styles in the application live close to the component in a `*.module.scss` file. The advantage of those files are they are automatically namespaced and scoped to that component. There are some cases, though, where global styles and overrides are needed. Here are examples: 
-    1. We are dealing with container elements that repeat throughout the application (divs, cards, display tables)
-    2. We need adjust behavior in USWDS that we can't control via setting (list of settings can be found here - https://designsystem.digital.gov/documentation/settings/#general-settings)
-    3. We want to hide an element from the screen using our global screenreader only class 
-    
-   
-   If you have determined you still need a change in this file, please use css selectors to target your change precisely and also add a comment inline to your change.
-*/
+    Use caution with this file.
 
-// @forward 'theme/cms' show  $cms-color-gold-darker, $cms-color-primary-alt, $cms-color-primary-darker, $cms-color-white;
-@use "cms";
+    Here are examples where global styles may be needed: 
+    1. We are dealing with container elements that repeat throughout the application outside of a specific component (divs, cards, display tables)
+    2. We need override a behavior in USWDS that we can't control via setting 
+    3. We want to hide an element from the screen using our global screenreader only class 
+
+    Why it matters:     
+    When styles live close to the component in a `*.module.scss` file they are automatically namespaced. 
+    Here, overrides are global could disrupt styles application wide. 
+*/
+@forward "mcr-colors";  // whenever custom is imported, bring along app colors
+
+@use "mcr-colors" as *;
 @use "uswds-core" as *;
 
-// ACCESSIBILITY
-
-// Re-useable classname for hiding some UI from view but still having it be read by screenreaders
+/* ACCESSIBILITY */
+// Re-useable classname for hiding UI visually but still having it be read by screenreaders
 .srOnly {
     position: absolute;
     left: -1000px;
@@ -26,7 +28,7 @@
     overflow: hidden;
 }
 
-// Accessibility button contrast fix for inverse button. 
+// Accessibility button contrast color fix for inverse button. 
 .usa-button--outline.usa-button--inverse {
     box-shadow: inset 0 0 0 2px #fff;
     color: #fff !important;
@@ -36,86 +38,37 @@
     }
 }
 
-
-// CONTAINERS 
-$background-white: cms.$cms-color-white; // Used for almost all containers
-$app-warning-gold: cms.$cms-color-gold-darker; // Used for top alert "You are in test environment" on dev/val
-
-// Once user in logged in, many pages in the application have a set horizontal pad 
-$container-width-max-fixed: 50rem; 
+/* CONTAINERS */
+// Limit how far page content can stretch laterally, used on most logged in pages
+$mcr-container-max-width-fixed: 50rem; 
 .app-container-horizontal-pad {
-    max-width: $container-width-max-fixed;
+    max-width: $mcr-container-max-width-fixed;
 }
 
-// Used for gradient styling on tables
-$gradient-light: cms.$cms-color-primary-alt; 
-$gradient-dark: cms.$cms-color-primary-darker;
-.borderTopLinearGradient { // Gradient styling used on tables
+// Add top gradient to container, used on document tables
+.borderTopLinearGradient {
     border: 0 solid;
     border-top: 10px solid;
     border-image-slice: 1;
     border-image-source: linear-gradient(
         to right,
-        $gradient-dark, 
-        $gradient-light
+        $mcr-color-blue-dark, 
+        $mcr-color-cyan
     );
-    box-shadow: inset 0 0 1px $theme-color-base-dark,
+    box-shadow: inset 0 0 1px $mcr-color-gray-dark,
         0px 0px 24px rgb(0 0 0 / 5%);
 }
 
-
-// FORMS
-// Treat both labels and legends as our form questions. These should be bold.
-.usa-label,
-.usa-legend {
-    font-weight: bold; 
-}
-
-// Give more space to hints so they aren't compressed against the label 
-.usa-hint span {
-    display: block;
-    margin-top: units(1);
-}
-
-.usa-checkbox__label,
-.usa-radio__label {
-    // The default spacing between checkboxes and radio buttons in USWDS feels too small, would like to increase this across the app.
-    margin-top: 1rem;
-}
-
-
-
-// TODO /START - refactor these styles. They could be moved to associated components or we can make new components. 
-.usa-logo {
-    @include u-margin-y(2); // This is in the header and footer
-}
-.address {
-    line-height: 1.5; // Give standard spacing to the address (primarily used on submission summary page)
-}
-// we have styled our step indicator a bit differently than USWDS. 
+/* HTML element overrides */
 h3 {
     margin-top: 0;
     font-weight: normal;
     font-size: 1.3em;
 }
 
-div[class^='usa-step-indicator'] {
-    background-color: transparent;
-    width: 66rem;
-    margin: 1.25rem auto;
-    text-align: center;
-
-    ol {
-        justify-content: center;
-    }
-}
-
-[class^='usa-step-indicator__header'] {
-    display: inline;
-}
-// Remove html link styles from uswds button-styled links - This should probably be a standalone component, something like ButtonLink
+// Remove html link styles from uswds button-styled links, used anywhere we have a link (Add New Submission) that is supposed to look like a button 
+// This should probably be a standalone component rather than set in global styles
 a[class^='usa-button usa-button--outline'] {
     text-decoration: none !important;
-    color: #1a4480 !important;
+    color: $mcr-color-link-hover !important;
 }
-// TODO /END

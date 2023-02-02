@@ -1,5 +1,5 @@
 @use "uswds-core" as *;
-@use '../../styles/custom.scss';
+@use '../../styles/custom.scss' as *;
 
 // preferred way to show a button that is disabled. avoid cursor: none
 .disabledCursor {
@@ -12,11 +12,11 @@
 }
 
 .successButton {
-    background: color($theme-color-success);
+    background: $mcr-color-success;
     &:hover {
-        background-color: #2a7a3b !important;
+        background-color: $mcr-color-success-hover !important;
     }
     &:active {
-       background-color: #2a7a3b !important;
+       background-color: $mcr-color-success-hover !important;
     }
 }

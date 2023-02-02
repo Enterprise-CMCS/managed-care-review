@@ -1,8 +1,8 @@
 @use "uswds-core" as *;
-@use '../../styles/custom.scss';
+@use '../../styles/custom.scss' as *;
 
 .summarySection {
-    background: custom.$background-white;
+    background: $mcr-color-white;
     line-height: units(3);
     @include u-radius('md');
 

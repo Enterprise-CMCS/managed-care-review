@@ -1,5 +1,5 @@
 @use "uswds-core" as *;
-@use '../../styles/custom.scss';
+@use '../../styles/custom.scss' as *;
 
 .logosRow {
     background-color: #f0fafd;
@@ -29,19 +29,19 @@
 }
 
 .contactRow {
-    background-color: color($theme-color-primary);
-    color: custom.$background-white;
+    background-color: $mcr-color-blue;
+    color: $mcr-color-white;
     padding: units(3) 0;
     > span {
         margin: units(1);
     }
     a {
-        color: custom.$background-white;
+        color: $mcr-color-white;
 
         &:hover,
         &:active,
         &:visited {
-            color: custom.$background-white;
+            color: $mcr-color-white;
         }
     }
 }
