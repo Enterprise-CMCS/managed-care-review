@@ -28,12 +28,10 @@ describe('Q&A', () => {
 
         // Store submission name and url for reference later
         let submissionId = ''
-        let submissionUrl = ''
         cy.location().then((fullUrl) => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             submissionId = pathnameArray[2]
-            submissionUrl = fullUrl.toString()
         })
         cy.findByRole('heading', { level: 2, name: /Review and submit/ })
 
