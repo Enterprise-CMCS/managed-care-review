@@ -22,7 +22,7 @@
 }
 
 .dashboardHeading {
-    background-color: $theme-color-primary-dark;
+    background-color: color($theme-color-primary-dark);
     color: #fff;
     & h1 {
         display: flex;
@@ -35,7 +35,7 @@
 }
 
 .landingPageHeading {
-    background-color: $theme-color-primary-dark;
+    background-color: color($theme-color-primary-dark);
     color: #fff;
     padding: units(2) 0;
     & h1 {
@@ -48,7 +48,7 @@
 }
 
 .banner {
-    background: $theme-color-primary;
+    background: color($theme-color-primary);
 }
 
 .bannerLogo {

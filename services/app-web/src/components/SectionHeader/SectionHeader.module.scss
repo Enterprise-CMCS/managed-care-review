@@ -9,7 +9,7 @@
     margin: units(2) auto;
     background: custom.$background-white;
     padding: units(2) units(4);
-    border: 1px solid $theme-color-base-lighter;
+    border: 1px solid color($theme-color-base-lighter);
     line-height: units(3);
     @include u-radius('md');
 
@@ -57,7 +57,7 @@
 }
 
 .summarySectionHeaderBorder {
-    border-bottom: 1px solid $theme-color-base-lighter;
+    border-bottom: 1px solid color($theme-color-base-lighter);
     margin-bottom: units(2);
 }
 
@@ -67,7 +67,7 @@
     align-items: center;
     margin: units(4) 0;
     padding-top: units(4);
-    border-top: 1px solid $theme-color-base-lighter;
+    border-top: 1px solid color($theme-color-base-lighter);
 }
 
 .contactInfo p {
@@ -79,7 +79,7 @@
 }
 
 .submitButton {
-    background: $theme-color-success;
+    background: color($theme-color-success);
     &:hover {
         background-color: #2a7a3b !important;
     }

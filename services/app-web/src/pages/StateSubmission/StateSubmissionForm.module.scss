@@ -33,7 +33,7 @@
         padding: units(4);
         margin-bottom: units(2);
         margin-top: units(2);
-        background: 1px solid $theme-color-base-lighter;
+        background: 1px solid color($theme-color-base-lighter);
         @include u-radius('md');
     }
 
@@ -81,7 +81,7 @@
 .nestedOptions {
     padding-left: units(4);
     margin: units(2) 0;
-    border-left: 4px solid $theme-color-primary;
+    border-left: 4px solid color($theme-color-primary);
 
     legend,
     label {
@@ -92,7 +92,7 @@
 .nestedOptionsError {
     padding-left: units(4);
     margin: units(2) 0;
-    border-left: 4px solid $theme-color-error-darker;
+    border-left: 4px solid color($theme-color-error-darker);
 }
 
 .stateContact,

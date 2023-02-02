@@ -75,7 +75,7 @@
 }
 
 .submitButton {
-    background: $theme-color-success;
+    background: color($theme-color-success);
     &:hover {
         background-color: #2a7a3b !important;
     }

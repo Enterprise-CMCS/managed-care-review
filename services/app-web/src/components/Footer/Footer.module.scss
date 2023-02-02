@@ -29,7 +29,7 @@
 }
 
 .contactRow {
-    background-color: $theme-color-primary;
+    background-color: color($theme-color-primary);
     color: custom.$background-white;
     padding: units(3) 0;
     > span {
