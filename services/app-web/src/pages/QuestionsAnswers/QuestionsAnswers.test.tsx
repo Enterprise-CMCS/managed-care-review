@@ -2,7 +2,7 @@ import { screen, waitFor } from '@testing-library/react'
 import { Route, Routes } from 'react-router-dom'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { QuestionsAnswers } from '../QuestionsAnswers'
-import { renderWithProviders } from '../../testHelpers'
+import { ldUseClientSpy, renderWithProviders } from '../../testHelpers'
 import { RoutesRecord } from '../../constants/routes'
 import React from 'react'
 import {
@@ -12,6 +12,12 @@ import {
 } from '../../testHelpers/apolloHelpers'
 
 describe('QuestionsAnswers', () => {
+    beforeEach(() => {
+        ldUseClientSpy({ 'cms-questions': true })
+    })
+    afterEach(() => {
+        jest.resetAllMocks()
+    })
     it('CMS users see add questions link on Q&A page', async () => {
         renderWithProviders(
             <Routes>

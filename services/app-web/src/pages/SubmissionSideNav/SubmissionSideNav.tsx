@@ -14,18 +14,25 @@ import { handleApolloError } from '../../gqlHelpers/apolloErrors'
 import { recordJSException } from '../../otelHelpers'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
-import { HealthPlanPackage, User } from '../../gen/gqlClient'
+import {
+    HealthPlanPackage,
+    HealthPlanRevision,
+    User,
+} from '../../gen/gqlClient'
 import { HealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../common-code/featureFlags'
+import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
 
 export type SideNavOutletContextType = {
     pkg: HealthPlanPackage
+    currentRevision: HealthPlanRevision
     packageData: HealthPlanFormDataType
+    documentDates: DocumentDateLookupTable
     user: User | undefined
 }
 
 export const SubmissionSideNav = () => {
-    const { loggedInUser } = useAuth()
-
     const { id } = useParams<{ id: string }>()
     if (!id) {
         throw new Error(
@@ -33,8 +40,15 @@ export const SubmissionSideNav = () => {
         )
     }
 
+    const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
     const navigate = useNavigate()
+    const ldClient = useLDClient()
+
+    const showQuestionsAnswers = ldClient?.variation(
+        featureFlags.CMS_QUESTIONS.flag,
+        featureFlags.CMS_QUESTIONS.defaultValue
+    )
 
     const isSelectedLink = (route: RouteT): string => {
         return getRouteName(pathname) === route ? 'usa-current' : ''
@@ -60,7 +74,7 @@ export const SubmissionSideNav = () => {
         return <GenericErrorPage /> // api failure or protobuf decode failure
     }
 
-    const { data, formDatas } = fetchResult
+    const { data, formDatas, documentDates } = fetchResult
     const pkg = data.fetchHealthPlanPackage.pkg
 
     // fetchHPP returns null if no package is found with the given ID
@@ -102,60 +116,64 @@ export const SubmissionSideNav = () => {
 
     const outletContext: SideNavOutletContextType = {
         pkg,
+        currentRevision,
         packageData,
+        documentDates,
         user: loggedInUser,
     }
 
     return (
         <div className={styles.background}>
             <GridContainer className={styles.container}>
-                <div className={styles.sideNavContainer}>
-                    <div className={styles.backLink}>
-                        <Link
-                            asCustom={NavLink}
-                            variant="unstyled"
-                            to={{
-                                pathname: '/dashboard',
-                            }}
-                        >
-                            <svg
-                                className="usa-icon"
-                                aria-hidden="true"
-                                focusable="false"
-                                role="img"
+                {showQuestionsAnswers && (
+                    <div className={styles.sideNavContainer}>
+                        <div className={styles.backLink}>
+                            <Link
+                                asCustom={NavLink}
+                                variant="unstyled"
+                                to={{
+                                    pathname: '/dashboard',
+                                }}
                             >
-                                <use xlinkHref={`${sprite}#arrow_back`} />
-                            </svg>
-                            {loggedInUser?.__typename === 'StateUser' ? (
-                                <span>&nbsp;Back to state dashboard</span>
-                            ) : (
-                                <span>&nbsp;Back to dashboard</span>
-                            )}
-                        </Link>
+                                <svg
+                                    className="usa-icon"
+                                    aria-hidden="true"
+                                    focusable="false"
+                                    role="img"
+                                >
+                                    <use xlinkHref={`${sprite}#arrow_back`} />
+                                </svg>
+                                {loggedInUser?.__typename === 'StateUser' ? (
+                                    <span>&nbsp;Back to state dashboard</span>
+                                ) : (
+                                    <span>&nbsp;Back to dashboard</span>
+                                )}
+                            </Link>
+                        </div>
+                        <SideNav
+                            items={[
+                                <Link
+                                    to={`/submissions/${id}`}
+                                    asCustom={NavLink}
+                                    className={isSelectedLink(
+                                        'SUBMISSIONS_SUMMARY'
+                                    )}
+                                >
+                                    Submission summary
+                                </Link>,
+                                <Link
+                                    to={`/submissions/${id}/q&a`}
+                                    asCustom={NavLink}
+                                    className={isSelectedLink(
+                                        'SUBMISSIONS_QUESTIONS_AND_ANSWERS'
+                                    )}
+                                >
+                                    Q&A
+                                </Link>,
+                            ]}
+                        />
                     </div>
-                    <SideNav
-                        items={[
-                            <Link
-                                to={`/submissions/${id}`}
-                                asCustom={NavLink}
-                                className={isSelectedLink(
-                                    'SUBMISSIONS_SUMMARY'
-                                )}
-                            >
-                                Submission summary
-                            </Link>,
-                            <Link
-                                to={`/submissions/${id}/q&a`}
-                                asCustom={NavLink}
-                                className={isSelectedLink(
-                                    'SUBMISSIONS_QUESTIONS_AND_ANSWERS'
-                                )}
-                            >
-                                Q&A
-                            </Link>,
-                        ]}
-                    />
-                </div>
+                )}
                 <Outlet context={outletContext} />
             </GridContainer>
         </div>

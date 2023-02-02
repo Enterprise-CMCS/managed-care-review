@@ -45,25 +45,6 @@ function componentForAuthMode(
     }
 }
 
-const questionAnswersRoutes = (
-    <>
-        <Route element={<SubmissionSideNav />}>
-            <Route
-                path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
-                element={<QuestionsAnswers />}
-            />
-            <Route
-                path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                element={<SubmissionSummary />}
-            />
-        </Route>
-        <Route
-            path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
-            element={<UploadQuestions />}
-        />
-    </>
-)
-
 const StateUserRoutes = ({
     authMode,
     setAlert,
@@ -91,12 +72,24 @@ const StateUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_NEW}
                     element={<NewStateSubmissionForm />}
                 />
-                {showQuestionsAnswers ? (
-                    questionAnswersRoutes
-                ) : (
+                <Route element={<SubmissionSideNav />}>
+                    {showQuestionsAnswers && (
+                        <Route
+                            path={
+                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                            }
+                            element={<QuestionsAnswers />}
+                        />
+                    )}
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
                         element={<SubmissionSummary />}
+                    />
+                </Route>
+                {showQuestionsAnswers && (
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                        element={<UploadQuestions />}
                     />
                 )}
                 <Route
@@ -130,12 +123,24 @@ const CMSUserRoutes = ({
                     path={RoutesRecord.DASHBOARD}
                     element={<CMSDashboard />}
                 />
-                {showQuestionsAnswers ? (
-                    questionAnswersRoutes
-                ) : (
+                <Route element={<SubmissionSideNav />}>
+                    {showQuestionsAnswers && (
+                        <Route
+                            path={
+                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                            }
+                            element={<QuestionsAnswers />}
+                        />
+                    )}
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
                         element={<SubmissionSummary />}
+                    />
+                </Route>
+                {showQuestionsAnswers && (
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                        element={<UploadQuestions />}
                     />
                 )}
                 <Route
