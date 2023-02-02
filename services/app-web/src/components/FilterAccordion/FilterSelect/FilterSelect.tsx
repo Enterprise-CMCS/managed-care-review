@@ -5,6 +5,7 @@ import Select, {
     Props,
     components,
     MenuListProps,
+    MultiValue,
 } from 'react-select'
 
 export type FilterSelectPropType = {
@@ -19,6 +20,8 @@ export type FilterOptionType = {
     readonly label: string
     readonly value: string
 }
+
+export type FilterSelectedOptionsType = MultiValue<FilterOptionType>
 
 export const FilterSelect = ({
     name,

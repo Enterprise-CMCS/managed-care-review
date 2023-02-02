@@ -85,6 +85,11 @@
                     "id": "ec6dea29-bf65-4dec-9292-09c64bb6bd6f",
                     "fullName": "Arizona Long Term Care System - Elderly and Physically Disabled",
                     "name": "ALTCS/EPD"
+                },
+                {
+                    "id": "bc07dfe3-4ecf-4f9c-bf3d-b8b105ce5e41",
+                    "fullName": "Regional Behavioral Health Agreements",
+                    "name": "RBHA"
                 }
             ],
             "code": "AZ"
@@ -852,7 +857,7 @@
             "programs": [
                 {
                     "id": "867b91fa-f470-4553-8e99-5e15afd891b5",
-                    "fullName": "Living Independence for the Elderly (LIFE) program",
+                    "fullName": "Living Independence for the Elderly",
                     "name": "LIFE"
                 },
                 {
@@ -981,24 +986,14 @@
                     "name": "Dental"
                 },
                 {
-                    "id": "128bfe46-25d2-4422-8d29-3fd236f7daa9",
-                    "fullName": "Uniform Managed Care Contract",
-                    "name": "UMCC"
+                    "id": "0a9c93f7-803a-46f2-8a60-8c928efb6e7b",
+                    "fullName": "CHIP",
+                    "name": "CHIP"
                 },
                 {
-                    "id": "76820038-2c6c-4e12-98ab-fad0907ff6f5",
-                    "fullName": "Star+ Plus Medicaid Rural Service Area ",
-                    "name": "MRSA"
-                },
-                {
-                    "id": "c2539135-41b9-439e-abd2-5d5707d85f4b",
-                    "fullName": "Medicare-Medicaid Dual Demonstration",
-                    "name": "MMDD"
-                },
-                {
-                    "id": "64b8b337-1ef9-4653-ad2a-77bce21ed168",
-                    "fullName": "Medical Transportation Program",
-                    "name": "NEMT"
+                    "id": "6b6afeaf-aeff-45f7-a14c-992a03fa372f",
+                    "fullName": "Children's CHIP Dental Services",
+                    "name": "CHIP Dental "
                 }
             ],
             "code": "TX"
@@ -1153,7 +1148,7 @@
             "programs": [
                 {
                     "id": "871d19a9-d555-469d-8af8-ce4897ace9d2",
-                    "fullName": "Mountain Health Trust (includes West Virginia Health Bridge Medicaid Expansion)",
+                    "fullName": "Mountain Health Trust (West Virginia Health Bridge Medicaid Expansion)",
                     "name": "MHT/WVHB Expansion"
                 },
                 {

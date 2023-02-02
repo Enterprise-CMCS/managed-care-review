@@ -73,6 +73,7 @@ export {
     ErrorAlertSiteUnavailable,
     ErrorAlertFailedRequest,
     ErrorAlertSessionExpired,
+    ErrorAlertScheduledMaintenance,
 } from './ErrorAlert'
 
 export { FilterAccordion } from './FilterAccordion'
