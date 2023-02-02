@@ -110,7 +110,7 @@ resources:
           PasswordLength: 30
           ExcludePunctuation: true
 
-    PostgresAuroraCluster:
+    PostgresAurora:
       Type: AWS::RDS::DBCluster
       DeletionPolicy: ${self:custom.deletionPolicy.${opt:stage}, self:custom.deletionPolicy.other}
       Properties:
@@ -130,7 +130,7 @@ resources:
       Properties:
         Engine: aurora-postgresql
         DBInstanceClass: db.serverless
-        DBClusterIdentifier: !Ref PostgresAuroraCluster
+        DBClusterIdentifier: !Ref PostgresAurora
 
     PostgresSubnetGroup:
       Type: AWS::RDS::DBSubnetGroup
@@ -142,13 +142,13 @@ resources:
       Type: AWS::SecretsManager::SecretTargetAttachment
       Properties:
         SecretId: !Ref PostgresSecret
-        TargetId: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAuroraCluster}'
+        TargetId: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAurora}'
         TargetType: AWS::RDS::DBCluster
 
     PostgresSecretsRotationSchedule:
       Type: AWS::SecretsManager::RotationSchedule
       DependsOn:
-        - PostgresAuroraCluster
+        - PostgresAurora
         - PostgresInstance
         - SecretsRDSAttachment
       Properties:
@@ -168,4 +168,4 @@ resources:
 
   Outputs:
     PostgresAuroraArn:
-      Value: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAuroraCluster}'
+      Value: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAurora}'
