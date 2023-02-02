@@ -5,7 +5,8 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "start": "npx serverless s3 start --stage local"
+        "start": "npx serverless s3 start --stage local",
+        "test": "jest --watch"
     },
     "author": "",
     "license": "CC0-1.0",
@@ -23,6 +24,8 @@
         "serverless-plugin-scripts": "^1.0.2",
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "serverless-s3-local": "^0.6.22",
-        "serverless-stack-termination-protection": "^2.0.2"
+        "serverless-stack-termination-protection": "^2.0.2",
+        "ts-loader": "^9.2.8",
+        "tsconfig-paths-webpack-plugin": "^4.0.0"
     }
 }

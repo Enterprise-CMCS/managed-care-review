@@ -72,6 +72,7 @@ custom:
         # the serverless-s3-local plugin starts any bucket with a BucketName
         # the attachments bucket has no name, so we need to make one up on our own
       - local-qa
+      - test-uploads
   serverlessTerminationProtection:
     stages:
       - dev
@@ -86,7 +87,7 @@ layers:
 
 functions:
   avScan:
-    handler: src/antivirus.lambdaHandleEvent
+    handler: src/rewrite/avScan.avScanLambda
     name: ${self:service}-${sls:stage}-avScan
     timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
     memorySize: 3008
