@@ -1,6 +1,6 @@
 const AWS = require('aws-sdk');
 const fs = require('fs');
-const spawnSync = require('child_process').spawnSync;
+const child_process = require('child_process');
 const path = require('path');
 const constants = require('./constants');
 const utils = require('./utils');
@@ -34,7 +34,7 @@ async function listBucketFiles(bucketName) {
  */
 function updateAVDefinitonsWithFreshclam() {
     try {
-        let executionResult = execSync(
+        let executionResult = child_process.execSync(
             `${constants.PATH_TO_FRESHCLAM} --config-file=${constants.FRESHCLAM_CONFIG} --datadir=${constants.FRESHCLAM_WORK_DIR}`
         );
 
@@ -196,27 +196,35 @@ async function uploadAVDefinitions() {
  */
 function scanLocalFile(pathToFile) {
     try {
-        let avResult = spawnSync(constants.PATH_TO_CLAMAV, [
+        let avResult = child_process.spawnSync(constants.PATH_TO_CLAMAV, [
             '--stdout',
             '-v',
             '-a',
-            `-d ${pathToFile}`,
+            '-d',
+            '/tmp/',
+            pathToFile
         ]);
 
+        // Error status 1 means that the file is infected.
+        if (avResult.status === 1) {
+            utils.generateSystemMessage('SUCCESSFUL SCAN, FILE INFECTED');
+            return constants.STATUS_INFECTED_FILE;
+        } else if (avResult.status !== 0) {
+            utils.generateSystemMessage('SCAN FAILED WITH ERROR');
+            console.error('stderror', avResult.stderr.toString());
+            console.error('stdout', avResult.stdout.toString());
+            console.error('err', avResult.error);
+            return constants.STATUS_ERROR_PROCESSING_FILE;
+        }
+
         utils.generateSystemMessage('SUCCESSFUL SCAN, FILE CLEAN');
-        console.log(avResult.toString());
+        console.info(avResult.stdout.toString());
 
         return constants.STATUS_CLEAN_FILE;
     } catch (err) {
-        // Error status 1 means that the file is infected.
-        if (err.status === 1) {
-            utils.generateSystemMessage('SUCCESSFUL SCAN, FILE INFECTED');
-            return constants.STATUS_INFECTED_FILE;
-        } else {
-            utils.generateSystemMessage('-- SCAN FAILED --');
-            console.log(err);
-            return constants.STATUS_ERROR_PROCESSING_FILE;
-        }
+        utils.generateSystemMessage('-- SCAN FAILED ERR--');
+        console.errror(err);
+        return constants.STATUS_ERROR_PROCESSING_FILE;
     }
 }
 
