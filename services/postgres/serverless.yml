@@ -41,7 +41,7 @@ provider:
 custom:
   stage: ${opt:stage, self:provider.stage}
   databaseName: !Sub aurora_${self:service}_${sls:stage}_${AWS::AccountId}
-  v2databaseName: !Sub aurora_v2_$self:service}_${sls:stage}_${AWS::AccountId}
+  databaseClusterName: !Sub aurora_cluster_${self:service}_${sls:stage}_${AWS::AccountId}
   vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
   sgId: ${ssm:/configuration/${sls:stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
   privateSubnets:
@@ -132,7 +132,7 @@ resources:
       Properties:
         Engine: aurora-postgresql
         EngineVersion: '14.6'
-        DatabaseName: '${self:custom.v2databaseName}'
+        DatabaseName: '${self:custom.databaseClusterName}'
         MasterUsername: !Sub '{{resolve:secretsmanager:${PostgresSecret}::username}}'
         MasterUserPassword: !Sub '{{resolve:secretsmanager:${PostgresSecret}::password}}'
         DBSubnetGroupName: !Ref PostgresSubnetGroup
