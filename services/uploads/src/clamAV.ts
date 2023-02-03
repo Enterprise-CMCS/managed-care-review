@@ -108,7 +108,7 @@ async function downloadAVDefinitions(config: ClamAVConfig, s3Client: S3UploadsCl
     const definitionFileKeys = allFileKeys
         .filter((key) => key.startsWith(config.definitionsPath))
 
-    const res = await s3Client.downloadFiles(definitionFileKeys, config.bucketName, '/tmp')
+    const res = await s3Client.downloadAllFiles(definitionFileKeys, config.bucketName, '/tmp')
     if (res) {
         return res
     }
