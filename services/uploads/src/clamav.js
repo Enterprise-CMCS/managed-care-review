@@ -203,20 +203,26 @@ function scanLocalFile(pathToFile) {
             `-d ${pathToFile}`,
         ]);
 
+        // Error status 1 means that the file is infected.
+        if (avResult.status === 1) {
+            utils.generateSystemMessage('SUCCESSFUL SCAN, FILE INFECTED');
+            return constants.STATUS_INFECTED_FILE;
+        } else if (avResult.status !== 0) {
+            utils.generateSystemMessage('-- SCAN FAILED WITH ERROR --');
+            console.error('stderror', avResult.stderr.toString());
+            console.error('stdout', avResult.stdout.toString());
+            console.error('err', avResult.error);
+            return constants.STATUS_ERROR_PROCESSING_FILE;
+        }
+
         utils.generateSystemMessage('SUCCESSFUL SCAN, FILE CLEAN');
-        console.log(avResult.toString());
+        console.info(avResult.stdout.toString());
 
         return constants.STATUS_CLEAN_FILE;
     } catch (err) {
-        // Error status 1 means that the file is infected.
-        if (err.status === 1) {
-            utils.generateSystemMessage('SUCCESSFUL SCAN, FILE INFECTED');
-            return constants.STATUS_INFECTED_FILE;
-        } else {
-            utils.generateSystemMessage('-- SCAN FAILED --');
-            console.log(err);
-            return constants.STATUS_ERROR_PROCESSING_FILE;
-        }
+        utils.generateSystemMessage('-- SCAN FAILED ERR--');
+        console.errror(err);
+        return constants.STATUS_ERROR_PROCESSING_FILE;
     }
 }
 
