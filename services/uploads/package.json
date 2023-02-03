@@ -11,8 +11,7 @@
     "author": "",
     "license": "CC0-1.0",
     "dependencies": {
-        "aws-sdk": "^2.1303.0",
-        "ts-jest": "^29.0.5"
+        "@aws-sdk/client-s3": "^3.262.0"
     },
     "devDependencies": {
         "copy-webpack-plugin": "^11.0.0",
@@ -26,6 +25,7 @@
         "serverless-s3-local": "^0.7.1",
         "serverless-stack-termination-protection": "^2.0.2",
         "serverless-webpack": "^5.7.1",
+        "ts-jest": "^27.1.4",
         "ts-loader": "^9.2.8",
         "tsconfig-paths-webpack-plugin": "^4.0.0"
     }

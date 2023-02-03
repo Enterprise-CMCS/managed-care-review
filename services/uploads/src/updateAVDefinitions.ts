@@ -1,5 +1,5 @@
 import { Context, S3Event } from 'aws-lambda';
-import { rm, mkdir, stat, readdir } from 'fs/promises'
+import { rm, stat, readdir } from 'fs/promises'
 import path from 'path'
 
 import { NewS3UploadsClient, S3UploadsClient } from './s3'
