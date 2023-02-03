@@ -108,22 +108,11 @@ async function downloadAVDefinitions(config: ClamAVConfig, s3Client: S3UploadsCl
     const definitionFileKeys = allFileKeys
         .filter((key) => key.startsWith(config.definitionsPath))
 
-
-    const downloadPromises = []
-    for (const defFileKey of definitionFileKeys) {
-        let destinationFile = path.join('/tmp/', defFileKey)
-
-        console.info(`Downloading ${defFileKey} from S3 to ${destinationFile}`)
-
-        const filename = path.basename(defFileKey)
-        const localPath = path.join('/tmp/', filename)
-
-        const downloadPromise = s3Client.downloadFileFromS3(defFileKey, config.bucketName, localPath)
-
-        downloadPromises.push(downloadPromise)
+    const res = await s3Client.downloadFiles(definitionFileKeys, config.bucketName, '/tmp')
+    if (res) {
+        return res
     }
 
-    await Promise.all(downloadPromises)
     console.log('Downloaded all AV definition files locally')
     return
 

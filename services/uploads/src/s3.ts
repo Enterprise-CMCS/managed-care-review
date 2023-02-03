@@ -19,6 +19,7 @@ interface S3UploadsClient {
     sizeOf: (key: string, bucket: string) => Promise<number | Error>
     listBucketFiles: (bucketName: string) => Promise<string[] | Error>
     downloadFileFromS3: (s3ObjectKey: string, s3ObjectBucket: string, destinationPath: string) => Promise<string | Error>
+    downloadAllFiles: (keys: string[], bucket: string, targetDir: string) => Promise<undefined | Error>,
     tagObject: (key: string, bucket: string, tagSet: Tagging) => Promise<undefined | Error>
     deleteObjects: (keys: string[], bucket: string) => Promise<undefined | Error>
     uploadObject: (key: string, bucket: string, filepath: string) => Promise<undefined | Error>
@@ -29,6 +30,7 @@ function uploadsClient(s3Client: S3Client): S3UploadsClient {
         sizeOf: (key, bucket) => sizeOf(s3Client, key, bucket),
         listBucketFiles: (bucketName) => listBucketFiles(s3Client, bucketName),
         downloadFileFromS3: (s3ObjectKey, s3ObjectBucket, destinationPath) => downloadFileFromS3(s3Client, s3ObjectKey, s3ObjectBucket, destinationPath),
+        downloadAllFiles: (keys, bucket, targetDir) => downloadAllFiles(s3Client, keys, bucket, targetDir),
         tagObject: (key, bucket, tagSet) => tagObject(s3Client, key, bucket, tagSet),
         deleteObjects: (keys, buckets) => deleteObjects(s3Client, keys, buckets),
         uploadObject: (key, bucket, filepath) => uploadObject(s3Client, key, bucket, filepath)
@@ -164,6 +166,38 @@ async function downloadFileFromS3(client: S3Client, s3ObjectKey: string, s3Objec
     }
 
 }
+
+async function downloadAllFiles(client: S3Client, keys: string[], bucket: string, targetDir: string): Promise<undefined | Error> {
+
+    const downloadPromises = []
+    for (const key of keys) {
+        const filename = path.basename(key)
+        const localPath = path.join(targetDir, filename)
+
+        console.info(`Downloading ${key} from S3 to ${localPath}`)
+
+        const downloadPromise = downloadFileFromS3(client, key, bucket, localPath)
+
+        downloadPromises.push(downloadPromise)
+    }
+
+    try {
+        const responses = await Promise.all(downloadPromises)
+        const errors = responses.filter((r) => r instanceof Error)
+        if (errors.length > 0) {
+            console.error('Got errors downloading files: ', errors)
+            return new Error('Error downloading all files')
+        }
+        console.log('Downloaded all given files locally')
+        return undefined
+
+    } catch (err) {
+        console.error('Error downloading all files', err)
+        return err
+    }
+
+}
+
 
 // deleteObjects removes all the given keys from the given bucket
 async function deleteObjects(client: S3Client, keys: string[], bucket: string): Promise<undefined | Error> {

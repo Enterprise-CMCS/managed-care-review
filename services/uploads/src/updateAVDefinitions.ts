@@ -37,21 +37,6 @@ export async function updateAVDefinitionsLambda(event: S3Event, _context: Contex
     return 'FILE SCANNED'
 }
 
-async function directoryExists(dir: string): Promise<boolean | Error> {
-    try {
-        const statRes = await stat(dir)
-        console.log('Stat Says NO', statRes)
-        return true
-    } catch (err) {
-        // stat throws ENOENT if the file does not exist
-        if (err.code === 'ENOENT') {
-            return false
-        }
-        console.error("Error Statting", err)
-        return err
-    }
-}
-
 async function emptyWorkdir(workdir: string): Promise<undefined | Error> {
 
     console.info('cleaning workdir: ', workdir)
