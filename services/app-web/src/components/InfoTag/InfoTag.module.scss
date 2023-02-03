@@ -7,15 +7,15 @@
 
 .gold {
     @include u-bg('gold-20v');
-    color: $mcr-color-ink;
+    color: $mcr-ink;
 }
 
 .cyan {
     @include u-bg('cyan-40v');
-    color: $mcr-color-ink;
+    color: $mcr-ink;
 }
 
 .blue {
     @include u-bg('blue-cool-5v');
-    color: $mcr-color-ink;
+    color: $mcr-ink;
 }

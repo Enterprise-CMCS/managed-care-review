@@ -2,7 +2,7 @@
 @use '../../styles/custom.scss' as *;
 
 .summarySection {
-    background: $mcr-color-white;
+    background: $mcr-white;
     line-height: units(3);
     @include u-radius('md');
 

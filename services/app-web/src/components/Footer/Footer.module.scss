@@ -29,19 +29,19 @@
 }
 
 .contactRow {
-    background-color: $mcr-color-blue;
-    color: $mcr-color-white;
+    background-color: $mcr-blue;
+    color: $mcr-white;
     padding: units(3) 0;
     > span {
         margin: units(1);
     }
     a {
-        color: $mcr-color-white;
+        color: $mcr-white;
 
         &:hover,
         &:active,
         &:visited {
-            color: $mcr-color-white;
+            color: $mcr-white;
         }
     }
 }

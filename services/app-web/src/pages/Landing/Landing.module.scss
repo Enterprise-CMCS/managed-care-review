@@ -2,7 +2,7 @@
 @use '../../styles/custom.scss' as *;
 
 .detailsSection {
-    background-color: $mcr-color-white;
+    background-color: $mcr-white;
     flex: 1;
     padding: units(4) 0;
     .detailsSectionContent {
@@ -39,7 +39,7 @@
                     position: absolute;
                     left: -18px;
                     top: -5px;
-                    background-color: $mcr-color-white;
+                    background-color: $mcr-white;
                 }
                 &.login::before {
                     content: url(../../assets/images/login-icon.svg);

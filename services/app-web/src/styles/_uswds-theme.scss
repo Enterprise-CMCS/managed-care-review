@@ -43,11 +43,11 @@
     $theme-modal-border-radius: 0,
     
     /* COLOR */
-    $theme-color-base-ink: $mcr-color-ink,
-    $theme-color-primary: $mcr-color-blue,
-    $theme-color-primary-dark: $mcr-color-blue-dark,
-    $theme-color-primary-darker: $mcr-color-blue-darkest,
-    $theme-color-info-dark: $mcr-color-cyan-dark,
+    $theme-color-base-ink: $mcr-ink,
+    $theme-color-primary: $mcr-blue,
+    $theme-color-primary-dark: $mcr-blue-dark,
+    $theme-color-primary-darker: $mcr-blue-darkest,
+    $theme-color-info-dark: $mcr-cyan-dark,
     $theme-link-color: 'primary',
     $theme-link-hover-color: 'primary-dark',
     $theme-link-active-color: 'primary-darker',

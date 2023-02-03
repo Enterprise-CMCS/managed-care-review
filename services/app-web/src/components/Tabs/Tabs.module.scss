@@ -23,7 +23,7 @@
         margin: 0 0 -1px;
         list-style-type: none;
         white-space: nowrap;
-        background-color: $mcr-color-white;
+        background-color: $mcr-white;
     }
 
     &__tab {
@@ -36,7 +36,7 @@
         border-right: 1px solid $mcr-gray-lighter;
 
         &:after {
-            background-color: $mcr-color-blue;
+            background-color: $mcr-blue;
             content: '';
             height: 4px;
             left: -1px;
@@ -51,7 +51,7 @@
             border-bottom: 1px solid #fff;
 
             .easi-tabs__tab-btn {
-                color: $mcr-color-blue;
+                color: $mcr-blue;
             }
 
             &:after {

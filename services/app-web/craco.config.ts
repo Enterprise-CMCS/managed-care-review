@@ -28,10 +28,9 @@ module.exports = {
                 sourceMap: true,
                 sassOptions: {
                     includePaths: [
-                        './src/styles',
-                        '../../node_modules/@trussworks/react-uswds',
                         '../../node_modules/@uswds',
                         '../../node_modules/@uswds/uswds/packages',
+                        './src/styles',
                     ],
                 },
             },

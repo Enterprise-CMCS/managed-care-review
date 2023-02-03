@@ -6,8 +6,8 @@
 }
 
 .submitButton {
-    background: $mcr-color-success;
+    background: $mcr-success;
     &:hover {
-        background-color: $mcr-color-success-hover !important;
+        background-color: $mcr-success-hover !important;
     }
 }

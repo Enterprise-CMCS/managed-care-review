@@ -1,6 +1,7 @@
 @use "uswds-core" as *;
 @use '../../styles/custom.scss' as *;
 
+// TODO - form styes should be refactor in mcr-forms mixin so it can be used for forms outside state submission 
 .formPage {
     width: 100%; 
 }
@@ -33,7 +34,8 @@
         padding: units(4);
         margin-bottom: units(2);
         margin-top: units(2);
-        background: 1px solid $mcr-gray-lighter;
+        border: 1px solid $mcr-gray-lighter;
+        background: $mcr-white;
         @include u-radius('md');
     }
 
@@ -56,22 +58,6 @@
             margin: 0 auto;
         }
     }
-
-    .usa-label,
-    .usa-legend {
-        font-weight: bold; 
-    }
-
-    .usa-hint span {
-        display: block;
-        margin-top: units(1);
-    }
-
-    .usa-checkbox__label,
-    .usa-radio__label {
-        margin-top: 1rem;
-    }
-
 }
 
 [class^='usa-legend'] {
@@ -97,7 +83,7 @@
 .nestedOptions {
     padding-left: units(4);
     margin: units(2) 0;
-    border-left: 4px solid $mcr-color-blue;
+    border-left: 4px solid $mcr-blue;
 
     legend,
     label {
