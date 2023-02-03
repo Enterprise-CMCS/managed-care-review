@@ -41,7 +41,6 @@ provider:
 custom:
   stage: ${opt:stage, self:provider.stage}
   databaseName: !Sub aurora_${self:service}_${sls:stage}_${AWS::AccountId}
-  databaseClusterName: !Sub aurora_cluster_${self:service}_${sls:stage}_${AWS::AccountId}
   vpcId: ${ssm:/configuration/${sls:stage}/vpc/id, ssm:/configuration/default/vpc/id}
   sgId: ${ssm:/configuration/${sls:stage}/vpc/sg/id, ssm:/configuration/default/vpc/sg/id}
   privateSubnets:
@@ -116,23 +115,8 @@ resources:
       DeletionPolicy: ${self:custom.deletionPolicy.${opt:stage}, self:custom.deletionPolicy.other}
       Properties:
         Engine: aurora-postgresql
-        EngineMode: serverless
-        EngineVersion: '11.13'
-        DatabaseName: '${self:custom.databaseName}'
-        MasterUsername: !Sub '{{resolve:secretsmanager:${PostgresSecret}::username}}'
-        MasterUserPassword: !Sub '{{resolve:secretsmanager:${PostgresSecret}::password}}'
-        DBSubnetGroupName: !Ref PostgresSubnetGroup
-        VpcSecurityGroupIds: ['${self:custom.sgId}']
-        ScalingConfiguration:
-          AutoPause: ${self:custom.pauseAurora.${opt:stage}, self:custom.pauseAurora.other}
-
-    PostgresAuroraCluster:
-      Type: AWS::RDS::DBCluster
-      DeletionPolicy: ${self:custom.deletionPolicy.${opt:stage}, self:custom.deletionPolicy.other}
-      Properties:
-        Engine: aurora-postgresql
         EngineVersion: '14.6'
-        DatabaseName: '${self:custom.databaseClusterName}'
+        DatabaseName: '${self:custom.databaseName}'
         MasterUsername: !Sub '{{resolve:secretsmanager:${PostgresSecret}::username}}'
         MasterUserPassword: !Sub '{{resolve:secretsmanager:${PostgresSecret}::password}}'
         DBSubnetGroupName: !Ref PostgresSubnetGroup
@@ -146,7 +130,7 @@ resources:
       Properties:
         Engine: aurora-postgresql
         DBInstanceClass: db.serverless
-        DBClusterIdentifier: !Ref PostgresAuroraCluster
+        DBClusterIdentifier: !Ref PostgresAurora
 
     PostgresSubnetGroup:
       Type: AWS::RDS::DBSubnetGroup
