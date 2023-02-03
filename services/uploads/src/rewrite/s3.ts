@@ -3,7 +3,9 @@ import {
     HeadObjectCommand,
     ListObjectsV2Command,
     GetObjectCommand,
+    PutObjectCommand,
     PutObjectTaggingCommand,
+    DeleteObjectsCommand,
     Tagging,
 } from "@aws-sdk/client-s3"
 
@@ -12,11 +14,53 @@ import path from 'path'
 import { Readable } from 'stream'
 
 
+
+interface S3UploadsClient {
+    sizeOf: (key: string, bucket: string) => Promise<number | Error>
+    listBucketFiles: (bucketName: string) => Promise<string[] | Error>
+    downloadFileFromS3: (s3ObjectKey: string, s3ObjectBucket: string, destinationPath: string) => Promise<string | Error>
+    tagObject: (key: string, bucket: string, tagSet: Tagging) => Promise<undefined | Error>
+    deleteObjects: (keys: string[], bucket: string) => Promise<undefined | Error>
+    uploadObject: (key: string, bucket: string, filepath: string) => Promise<undefined | Error>
+}
+
+function uploadsClient(s3Client: S3Client): S3UploadsClient {
+    return {
+        sizeOf: (key, bucket) => sizeOf(s3Client, key, bucket),
+        listBucketFiles: (bucketName) => listBucketFiles(s3Client, bucketName),
+        downloadFileFromS3: (s3ObjectKey, s3ObjectBucket, destinationPath) => downloadFileFromS3(s3Client, s3ObjectKey, s3ObjectBucket, destinationPath),
+        tagObject: (key, bucket, tagSet) => tagObject(s3Client, key, bucket, tagSet),
+        deleteObjects: (keys, buckets) => deleteObjects(s3Client, keys, buckets),
+        uploadObject: (key, bucket, filepath) => uploadObject(s3Client, key, bucket, filepath)
+    }
+}
+
+function NewS3UploadsClient(): S3UploadsClient {
+    const client = new S3Client({})
+
+    return uploadsClient(client)
+}
+
+function NewTestS3UploadsClient(): S3UploadsClient {
+
+    const testClient = new S3Client({
+        forcePathStyle: true,
+        apiVersion: '2006-03-01',
+        credentials: {
+            accessKeyId: 'S3RVER', // This specific key is required when working offline
+            secretAccessKey: 'S3RVER', // pragma: allowlist secret pre-set by serverless-s3-offline
+        },
+        endpoint: 'http://localhost:4569',
+        region: 'us-east', // This region cannot be undefined and any string here will work.
+    })
+
+    return uploadsClient(testClient)
+}
+
 /**
  * Retrieve the file size of S3 object without downloading.
  */
-async function sizeOf(key: string, bucket: string): Promise<number | Error> {
-    const client = new S3Client({})
+async function sizeOf(client: S3Client, key: string, bucket: string): Promise<number | Error> {
     const head = new HeadObjectCommand({ Key: key, Bucket: bucket })
 
     try {
@@ -32,14 +76,12 @@ async function sizeOf(key: string, bucket: string): Promise<number | Error> {
     }
 }
 
-
 /**
  * Lists all the files from a bucket
  *
  * returns a list of keys
  */
-async function listBucketFiles(bucketName: string): Promise<string[] | Error> {
-    const client = new S3Client({})
+async function listBucketFiles(client: S3Client, bucketName: string): Promise<string[] | Error> {
     const listCmd = new ListObjectsV2Command({ Bucket: bucketName })
 
     try {
@@ -55,78 +97,124 @@ async function listBucketFiles(bucketName: string): Promise<string[] | Error> {
         const objects = listFilesResult.Contents
 
         const keys = objects.map((obj) => obj.Key).filter((key): key is string => key !== undefined)
-        return keys;
+        return keys
     } catch (err) {
-        console.error(`Error listing files`);
-        console.log(err);
-        return err;
+        console.error(`Error listing files`)
+        console.log(err)
+        return err
     }
 }
 
 /**
  * Download a file from S3 to a local temp directory.
  */
-async function downloadFileFromS3(s3ObjectKey: string, s3ObjectBucket: string, destinationPath: string): Promise<string | Error>{
+async function downloadFileFromS3(client: S3Client, s3ObjectKey: string, s3ObjectBucket: string, destinationPath: string): Promise<string | Error>{
     const destinationDir = path.dirname(destinationPath)
 
     if (!fs.existsSync(destinationDir)) {
         fs.mkdirSync(destinationDir)
     }
 
-    // const tmpFileName = `${crypto.randomUUID()}.tmp`;
-    // let localPath = path.join(destinationDir, tmpFileName);
+    // const tmpFileName = `${crypto.randomUUID()}.tmp`
+    // let localPath = path.join(destinationDir, tmpFileName)
     
-    let writeStream = fs.createWriteStream(destinationPath);
+    let writeStream = fs.createWriteStream(destinationPath)
 
     console.info(
         `Downloading file s3://${s3ObjectBucket}/${s3ObjectKey}`
-    );
+    )
 
-    const client = new S3Client({})
     const getCommand = new GetObjectCommand({
         Bucket: s3ObjectBucket,
         Key: s3ObjectKey,
     })
-    const s3Item = await client.send(getCommand)
 
-    return new Promise((resolve, reject) => {
+    try {
+        const s3Item = await client.send(getCommand)
 
-        if (!s3Item.Body) {
-            reject(new Error(`stream for ${s3ObjectKey} returned undefined`))
-            return
-        }
+        return new Promise((resolve, reject) => {
 
-        if (!(s3Item.Body instanceof Readable)) {
-            console.error('Unexpected S3 Item Body: ', s3Item.Body)
-            reject(new Error ('Unexpected S3 Item Body returned'))
-            return
-        }
+            if (!s3Item.Body) {
+                reject(new Error(`stream for ${s3ObjectKey} returned undefined`))
+                return
+            }
 
-        s3Item.Body
-            .on('end', function () {
-                console.info(
-                    `Finished downloading new object ${s3ObjectKey}`
-                );
-                resolve(destinationPath);
-            })
-            .on('error', function (err) {
-                console.error('Error writing file', err);
-                reject(err);
-            })
-            .pipe(writeStream);
-    });
+            if (!(s3Item.Body instanceof Readable)) {
+                console.error('Unexpected S3 Item Body: ', s3Item.Body)
+                reject(new Error ('Unexpected S3 Item Body returned'))
+                return
+            }
+
+            s3Item.Body
+                .on('end', function () {
+                    console.info(
+                        `Finished downloading new object ${s3ObjectKey}`
+                    )
+                    resolve(destinationPath)
+                })
+                .on('error', function (err) {
+                    console.error('Error writing file', err)
+                    reject(err)
+                })
+                .pipe(writeStream)
+        })
+    } catch (err) {
+        console.error('failed to download the file from s3', err)
+        return err
+    }
 
 }
 
-// S3.deleteObjects
+// deleteObjects removes all the given keys from the given bucket
+async function deleteObjects(client: S3Client, keys: string[], bucket: string): Promise<undefined | Error> {
 
-// S3.putObject
+    try {
+            const deleteCmd = new DeleteObjectsCommand({
+                Bucket: bucket,
+                Delete: {
+                    Objects: keys.map((k) => {
+                        return { Key: k }
+                    }),
+                },
+            })
+            const result = await client.send(deleteCmd)
+            console.info(
+                `Deleted extant definitions: ${keys}`, result
+            )
+            return undefined
+        } catch (err) {
+            console.info(
+                `Error deleting current definition files: ${keys}`
+            )
+            console.log(err)
+            return err
+        }
+
+}
+
+// upload an object to the given key, given the local filepath
+async function uploadObject(client: S3Client, key: string, bucket: string, filepath: string): Promise<undefined | Error> {
+
+    const putCmd = new PutObjectCommand({
+        Bucket: bucket,
+        Key: key,
+        Body: fs.createReadStream(filepath),
+    })
+
+    try {
+        await client.send(putCmd)
+        return undefined
+    } catch (err) {
+        console.error('Error putting file', err)
+        return err
+    }
+
+}
 
 
-// putObjectTagging
-async function tagObject(key: string, bucket: string, tagSet: Tagging): Promise<undefined | Error> {
+// set the tagging for the specific object.
+async function tagObject(client: S3Client, key: string, bucket: string, tagSet: Tagging): Promise<undefined | Error> {
 
-    const client = new S3Client({})
     const tagCmd = new PutObjectTaggingCommand({
         Key: key,
         Bucket: bucket,
@@ -135,18 +223,17 @@ async function tagObject(key: string, bucket: string, tagSet: Tagging): Promise<
 
     try {
         await client.send(tagCmd)
-        console.info('Tagging successful');
+        console.info('Tagging successful')
         return
     } catch (err) {
-        console.error(err);
+        console.error(err)
         return err
     } 
 }
 
 
 export {
-    sizeOf,
-    listBucketFiles,
-    downloadFileFromS3,
-    tagObject,
+    S3UploadsClient,
+    NewS3UploadsClient,
+    NewTestS3UploadsClient,
 }

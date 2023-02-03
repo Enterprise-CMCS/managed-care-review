@@ -73,6 +73,7 @@ custom:
         # the attachments bucket has no name, so we need to make one up on our own
       - local-qa
       - test-uploads
+      - test-av-definitions
   serverlessTerminationProtection:
     stages:
       - dev
@@ -101,7 +102,7 @@ functions:
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
 
   avDownloadDefinitions:
-    handler: src/download-definitions.lambdaHandleEvent
+    handler: src/rewrite/updateAVDefinitions.updateAVDefinitionsLambda
     events:
       - schedule: cron(0 */6 * * ? *)
     timeout: 300 # 300 seconds = 5 minutes

@@ -2,10 +2,9 @@ import { Context, S3Event } from 'aws-lambda';
 import path from 'path'
 import crypto from 'crypto'
 
-import { sizeOf, downloadFileFromS3, tagObject } from './s3'
+import { NewS3UploadsClient, S3UploadsClient } from './s3'
 
 import { NewClamAV, ClamAV } from './clamAV'
-
 
 const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || '314572800')
 
@@ -23,10 +22,13 @@ export async function avScanLambda(event: S3Event, _context: Context) {
         throw new Error('Configuration Error: PATH_TO_AV_DEFINITIONS must be set')
     } 
 
+    const s3Client = NewS3UploadsClient()
+
+
     const clamAV = NewClamAV({
         bucketName: clamAVBucketName,
         definitionsPath: clamAVDefintionsPath
-    })
+    }, s3Client)
 
 
     const record = event.Records[0]
@@ -38,7 +40,7 @@ export async function avScanLambda(event: S3Event, _context: Context) {
     const s3ObjectBucket = record.s3.bucket.name
 
     console.info('Scanning ', s3ObjectKey, s3ObjectBucket)
-    const err = await scanFile(s3ObjectKey, s3ObjectBucket, clamAV)
+    const err = await scanFile(s3Client, clamAV, s3ObjectKey, s3ObjectBucket)
 
 
     if (err) {
@@ -73,11 +75,10 @@ function generateTagSet(virusScanStatus: ScanStatus) {
     };
 }
 
-
-async function scanFile(key: string, bucket: string, clamAV: ClamAV): Promise<undefined | Error> {
+async function scanFile(s3Client: S3UploadsClient, clamAV: ClamAV, key: string, bucket: string): Promise<undefined | Error> {
     //You need to verify that you are not getting too large a file
     //currently lambdas max out at 500MB storage.
-    const fileSize = await sizeOf(key, bucket)
+    const fileSize = await s3Client.sizeOf(key, bucket)
     if (fileSize instanceof Error) {
         return fileSize
     }
@@ -95,7 +96,7 @@ async function scanFile(key: string, bucket: string, clamAV: ClamAV): Promise<un
         const scanFileName = `${crypto.randomUUID()}.tmp`;
         const scanFilePath = path.join('/tmp/download', scanFileName )
 
-        const err = await downloadFileFromS3(key, bucket, scanFilePath)
+        const err = await s3Client.downloadFileFromS3(key, bucket, scanFilePath)
         if (err instanceof Error) {
             return err
         }
@@ -113,7 +114,7 @@ async function scanFile(key: string, bucket: string, clamAV: ClamAV): Promise<un
     }
 
     const tags = generateTagSet(tagResult)
-    const err = await tagObject(key, bucket, tags)
+    const err = await s3Client.tagObject(key, bucket, tags)
     if (err instanceof Error) {
         console.error('Failed to tag object', err)
         return err
