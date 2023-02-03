@@ -116,8 +116,8 @@ functions:
       AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
 
-  avAuditBucket:
-    handler: src/auditBucket.auditBucketLambda
+  avAuditUploads:
+    handler: src/auditUploads.auditUploadsLambda
     timeout: 600 # 600 seconds = 10 minutes
     memorySize: 1024
     layers:
