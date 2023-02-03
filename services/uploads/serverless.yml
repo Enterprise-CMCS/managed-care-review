@@ -88,7 +88,7 @@ layers:
 
 functions:
   avScan:
-    handler: src/rewrite/avScan.avScanLambda
+    handler: src/avScan.avScanLambda
     name: ${self:service}-${sls:stage}-avScan
     timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
     memorySize: 3008
@@ -102,7 +102,7 @@ functions:
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
 
   avDownloadDefinitions:
-    handler: src/rewrite/updateAVDefinitions.updateAVDefinitionsLambda
+    handler: src/updateAVDefinitions.updateAVDefinitionsLambda
     events:
       - schedule: cron(0 */6 * * ? *)
     timeout: 300 # 300 seconds = 5 minutes
