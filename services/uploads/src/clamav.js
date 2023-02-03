@@ -223,7 +223,7 @@ function scanLocalFile(pathToFile) {
         return constants.STATUS_CLEAN_FILE;
     } catch (err) {
         utils.generateSystemMessage('-- SCAN FAILED ERR--');
-        console.errror(err);
+        console.error(err);
         return constants.STATUS_ERROR_PROCESSING_FILE;
     }
 }
