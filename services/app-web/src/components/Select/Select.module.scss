@@ -8,17 +8,17 @@
     border-radius: 99rem 99rem 99rem 99rem;
   }
   [class*='select__multi-value__label'] {
-    background: color($theme-color-secondary-lighter);
+    background: $mcr-primary-lightest;
     color: $mcr-ink;
     border-radius: 99rem 0rem 0rem 99rem;
   }
   [class*='select__multi-value__remove'] {
-    background: color($theme-color-secondary-lighter);
+    background: $mcr-primary-lightest;
     color: $mcr-ink;
     border-radius: 0rem 99rem 99rem 0rem;
 
     &:hover {
-      background: darken(color($theme-color-secondary-lighter), 5%);
+      background: darken($mcr-primary-lightest, 5%);
       color: $mcr-ink;
     }
   }

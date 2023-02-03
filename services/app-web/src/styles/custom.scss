@@ -52,7 +52,7 @@ $mcr-container-max-width-fixed: 50rem;
     border-image-slice: 1;
     border-image-source: linear-gradient(
         to right,
-        $mcr-blue-dark, 
+        $mcr-primary-dark, 
         $mcr-cyan
     );
     box-shadow: inset 0 0 1px $mcr-gray-dark,
@@ -93,5 +93,5 @@ h3 {
 // Removes html link styles from uswds button-styled links, used anywhere we have a link (Add New Submission) that looks a button 
 a[class^='usa-button usa-button--outline'] {
     text-decoration: none !important;
-    color: $mcr-link-hover !important;
+    color: $mcr-primary-dark !important;
 }
