@@ -6,7 +6,7 @@ import path from 'path'
 describe('updateAVDefinitions', () => {
     it('can be called', async () => {
 
-        console.log("OUR FILESNEM", __dirname)
+        console.info("OUR FILESNEM", __dirname)
         const thisDir = __dirname
         const testDir = path.join(thisDir, 'testDefinitions')
 

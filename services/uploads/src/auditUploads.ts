@@ -48,7 +48,6 @@ async function emptyWorkdir(workdir: string): Promise<undefined | Error> {
     try {
 
         const files = await readdir(workdir)
-        console.log('files before: ', files)
 
         for (const file of files) {
             const filePath = path.join(workdir, file)
@@ -56,7 +55,6 @@ async function emptyWorkdir(workdir: string): Promise<undefined | Error> {
         }
 
         const filesAfter = await readdir(workdir)
-        console.log('files after: ', filesAfter)
 
     } catch (err) {
         console.error('FS Error cleaning workdir', err)
@@ -67,6 +65,13 @@ async function emptyWorkdir(workdir: string): Promise<undefined | Error> {
 // audit bucket returns a list of keys that are INFECTED that were previously marked CLEAN
 async function auditBucket(s3Client: S3UploadsClient, clamAV: ClamAV, bucketName: string): Promise<undefined | Error> {
 
+    // get the virus definition files
+    const defsRes = await clamAV.downloadAVDefinitions()
+    if (defsRes) {
+        console.error('failed to fetch definitions')
+        return defsRes
+    }
+
     // list all objects in bucket, with pagination probably -- 200 is our max right now, can skip that.
     const objects = await s3Client.listBucketFiles(bucketName)
     if (objects instanceof Error) {
@@ -76,7 +81,7 @@ async function auditBucket(s3Client: S3UploadsClient, clamAV: ClamAV, bucketName
 
     // chunk objects into arrays of 10 or less
     const chunks: string[][] = []
-    const chunkSize = 10
+    const chunkSize = 20
     for (let i = 0; i < objects.length; i += chunkSize ) {
         chunks.push(objects.slice(i, i + chunkSize))
     }
@@ -92,12 +97,15 @@ async function auditBucket(s3Client: S3UploadsClient, clamAV: ClamAV, bucketName
         }
 
         const scanRes = clamAV.scanLocalFile('/tmp/download')
-        if (scanRes !== 'CLEAN') {
+        if (scanRes instanceof Error) {
+            console.error('failed to scan files', scanRes)
+            return new Error('Failed to scan')
+        } else if (scanRes === 'INFECTED') {
             console.error('something in this chunk is dirty', chunk, bucketName)
             return new Error(`Encountered a dirty file in ${chunk}`)
         }
 
-        console.log('that chunk is clean')
+        console.info('that chunk is clean')
 
         // remove the scanned files locally
         const eraseRes = await emptyWorkdir('/tmp/download')

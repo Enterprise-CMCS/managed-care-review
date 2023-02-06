@@ -113,7 +113,7 @@ async function downloadAVDefinitions(config: ClamAVConfig, s3Client: S3UploadsCl
         return res
     }
 
-    console.log('Downloaded all AV definition files locally')
+    console.info('Downloaded all AV definition files locally')
     return
 
 }
@@ -130,6 +130,7 @@ async function downloadAVDefinitions(config: ClamAVConfig, s3Client: S3UploadsCl
  */
 function scanLocalFile(config: ClamAVConfig, pathToFile: string): ClamAVScanResult | Error {
     try {
+        console.info('Executing clamav')
         let avResult = spawnSync(config.pathToClamav, [
             '--stdout',
             '-v',
@@ -139,26 +140,26 @@ function scanLocalFile(config: ClamAVConfig, pathToFile: string): ClamAVScanResu
             pathToFile,
         ])
 
+        console.info('stderror', avResult.stderr && avResult.stderr.toString())
+        console.info('stdout', avResult.stdout && avResult.stdout.toString())
+        console.info('err', avResult.error)
+
         // Exit status 1 means file is infected
         if (avResult.status === 1) {
             console.info('SUCCESSFUL SCAN, FILE INFECTED')
             return 'INFECTED'
         } else if (avResult.status !== 0) {
             console.info('SCAN FAILED WITH ERROR')
-            console.error('stderror', avResult.stderr && avResult.stderr.toString())
-            console.error('stdout', avResult.stdout && avResult.stdout.toString())
-            console.error('err', avResult.error)
             return avResult.error || new Error(`Failed to scan file: ${avResult.stderr.toString()}`)
         }
 
          console.info('SUCCESSFUL SCAN, FILE CLEAN')
-         console.info(avResult.stdout.toString())
 
          return 'CLEAN'
 
     } catch (err) {
-        console.info('-- SCAN FAILED ERR --')
-        console.log(err)
+        console.error('-- SCAN FAILED ERR --')
+        console.error(err)
         return err
     }
 }
@@ -171,7 +172,7 @@ function scanLocalFile(config: ClamAVConfig, pathToFile: string): ClamAVScanResu
 async function fetchAVDefinitionsWithFreshclam(config: ClamAVConfig, workdir: string): Promise<undefined | Error> {
     try {
 
-        console.log('config.pathToConfig', config.pathToConfig, workdir)
+        console.info('config.pathToConfig', config.pathToConfig, workdir)
 
         // freshclam does not handle long arguments the unix way, the equal signs are required here
         let executionResult = spawnSync(config.pathToFreshclam, [
@@ -188,9 +189,9 @@ async function fetchAVDefinitionsWithFreshclam(config: ClamAVConfig, workdir: st
         }
 
         console.info('Update message')
-        console.log(executionResult.toString())
+        console.info(executionResult.toString())
 
-        console.log(
+        console.info(
             'Downloaded:',
             await readdir(workdir)
         )

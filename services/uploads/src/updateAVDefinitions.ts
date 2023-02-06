@@ -43,15 +43,11 @@ async function emptyWorkdir(workdir: string): Promise<undefined | Error> {
     try {
 
         const files = await readdir(workdir)
-        console.log('files before: ', files)
 
         for (const file of files) {
             const filePath = path.join(workdir, file)
             await rm(filePath)
         }
-
-        const filesAfter = await readdir(workdir)
-        console.log('files after: ', filesAfter)
 
     } catch (err) {
         console.error('FS Error cleaning workdir', err)

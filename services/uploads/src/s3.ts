@@ -89,10 +89,8 @@ async function listBucketFiles(client: S3Client, bucketName: string): Promise<st
     try {
         const listFilesResult = await client.send(listCmd)
 
-        console.log('GOT BACK ', listFilesResult)
-
         if (!listFilesResult.Contents) {
-            console.log("NO CONTENTS")
+            console.info("NO CONTENTS")
             return []
         }
 
@@ -102,7 +100,7 @@ async function listBucketFiles(client: S3Client, bucketName: string): Promise<st
         return keys
     } catch (err) {
         console.error(`Error listing files`)
-        console.log(err)
+        console.error(err)
         return err
     }
 }
@@ -188,7 +186,7 @@ async function downloadAllFiles(client: S3Client, keys: string[], bucket: string
             console.error('Got errors downloading files: ', errors)
             return new Error('Error downloading all files')
         }
-        console.log('Downloaded all given files locally')
+        console.info('Downloaded all given files locally')
         return undefined
 
     } catch (err) {
@@ -217,10 +215,10 @@ async function deleteObjects(client: S3Client, keys: string[], bucket: string): 
             )
             return undefined
         } catch (err) {
-            console.info(
+            console.error(
                 `Error deleting current definition files: ${keys}`
             )
-            console.log(err)
+            console.error(err)
             return err
         }
 

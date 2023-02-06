@@ -90,7 +90,11 @@ async function scanFile(s3Client: S3UploadsClient, clamAV: ClamAV, key: string, 
         tagResult = 'SKIPPED'
     } else {
         console.info('Download AV Definitions')
-        await clamAV.downloadAVDefinitions()
+        const defsRes = await clamAV.downloadAVDefinitions()
+        if (defsRes) {
+            console.error('failed to fetch definitions')
+            return defsRes
+        }
 
         console.info('Downloading file to be scanned')
         const scanFileName = `${crypto.randomUUID()}.tmp`;
@@ -103,7 +107,7 @@ async function scanFile(s3Client: S3UploadsClient, clamAV: ClamAV, key: string, 
 
         console.info('Scanning File')
         const virusScanStatus = clamAV.scanLocalFile(scanFilePath);
-        console.log('VIRUS SCANNED', virusScanStatus)
+        console.info('VIRUS SCANNED', virusScanStatus)
 
         if (virusScanStatus instanceof Error) {
             tagResult = 'ERROR'
