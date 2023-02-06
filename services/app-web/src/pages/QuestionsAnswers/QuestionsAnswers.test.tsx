@@ -41,7 +41,7 @@ describe('QuestionsAnswers', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/q&a',
+                    route: '/submissions/15/question-and-answers',
                 },
             }
         )
@@ -76,7 +76,7 @@ describe('QuestionsAnswers', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submissions/15/q&a',
+                    route: '/submissions/15/question-and-answers',
                 },
             }
         )

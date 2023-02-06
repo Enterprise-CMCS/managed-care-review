@@ -17,7 +17,7 @@ describe('UploadQuestions', () => {
             </Routes>,
             {
                 routerProvider: {
-                    route: `/submissions/15/q&a/${division}/upload-questions`,
+                    route: `/submissions/15/question-and-answers/${division}/upload-questions`,
                 },
             }
         )

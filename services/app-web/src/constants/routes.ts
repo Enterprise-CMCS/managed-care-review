@@ -46,9 +46,9 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_REVIEW_SUBMIT: '/submissions/:id/edit/review-and-submit',
     SUBMISSIONS_SUMMARY: '/submissions/:id',
     SUBMISSIONS_REVISION: '/submissions/:id/revisions/:revisionVersion',
-    SUBMISSIONS_QUESTIONS_AND_ANSWERS: '/submissions/:id/q&a',
+    SUBMISSIONS_QUESTIONS_AND_ANSWERS: '/submissions/:id/question-and-answers',
     SUBMISSIONS_UPLOAD_QUESTION:
-        '/submissions/:id/q&a/:division/upload-questions',
+        '/submissions/:id/question-and-answers/:division/upload-questions',
 }
 
 const STATE_SUBMISSION_FORM_ROUTES: RouteTWithUnknown[] = [

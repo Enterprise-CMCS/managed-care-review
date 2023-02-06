@@ -86,7 +86,10 @@ describe('SubmissionSideNav', () => {
         // Expect Q&A link to not be currently selected
         expect(qaLink).not.toHaveClass('usa-current')
         // Expect Q&A link to have correct href url
-        expect(qaLink).toHaveAttribute('href', '/submissions/15/q&a')
+        expect(qaLink).toHaveAttribute(
+            'href',
+            '/submissions/15/question-and-answers'
+        )
     })
 
     it('sidebar nav links routes to correct pages', async () => {
@@ -149,7 +152,9 @@ describe('SubmissionSideNav', () => {
         // Navigate to Q&A page by link.
         await userEvent.click(qaLink)
         await waitFor(() => {
-            expect(testLocation.pathname).toBe(`/submissions/15/q&a`)
+            expect(testLocation.pathname).toBe(
+                `/submissions/15/question-and-answers`
+            )
             expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
             expect(
                 screen.queryByRole('heading', { name: 'Q&A' })
