@@ -278,7 +278,12 @@ async function initializeGQLHandler(): Promise<Handler> {
         )
 
     // Configure LaunchDarkly
-    ldClient = ld.init(ldSDKKey)
+    const ldOptions: ld.LDOptions = {
+        baseUri: 'https://app.launchdarkly.us',
+        streamUri: 'https://stream.launchdarkly.us',
+        eventsUri: 'https://events.launchdarkly.us',
+    }
+    ldClient = ld.init(ldSDKKey, ldOptions)
     let launchDarkly: LDService
 
     // Wait for initialization. On initialization failure default to offlineLDService and close ldClient.
