@@ -84,10 +84,6 @@ export const SubmissionSideNav = () => {
 
     const submissionStatus = pkg.status
 
-    // Check if user is logged in
-    if (!loggedInUser) {
-        return <GenericErrorPage />
-    }
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
 
     // CMS Users can't see DRAFT, it's an error
@@ -127,7 +123,7 @@ export const SubmissionSideNav = () => {
             <GridContainer className={styles.container}>
                 {showQuestionsAnswers && (
                     <div className={styles.sideNavContainer}>
-                        <div className={styles.backLink}>
+                        <div className={styles.backLinkContainer}>
                             <Link
                                 asCustom={NavLink}
                                 variant="unstyled"
@@ -162,7 +158,7 @@ export const SubmissionSideNav = () => {
                                     Submission summary
                                 </Link>,
                                 <Link
-                                    to={`/submissions/${id}/q&a`}
+                                    to={`/submissions/${id}/question-and-answers`}
                                     asCustom={NavLink}
                                     className={isSelectedLink(
                                         'SUBMISSIONS_QUESTIONS_AND_ANSWERS'
