@@ -10,6 +10,7 @@ import {
     submitHealthPlanPackageResolver,
     unlockHealthPlanPackageResolver,
     updateHealthPlanFormDataResolver,
+    indexQuestionsResolver,
 } from './healthPlanPackage'
 import {
     fetchCurrentUserResolver,
@@ -35,6 +36,7 @@ export function configureResolvers(
             fetchHealthPlanPackage: fetchHealthPlanPackageResolver(store),
             indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
             indexUsers: indexUsersResolver(store),
+            indexQuestions: indexQuestionsResolver(store),
         },
         Mutation: {
             createHealthPlanPackage: createHealthPlanPackageResolver(store),
