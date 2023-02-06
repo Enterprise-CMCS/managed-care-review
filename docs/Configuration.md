@@ -183,7 +183,7 @@ This is the client ID for Launch Darkly in our frontend. This key is designed to
 
 ## Email configuration
 
-Important email configuration is currently stored in AWS Parameter Store. If these values are not set properly, emails will not be sent for notification purposes and some unexpected errors may occur. 
+Important email configuration is currently stored in AWS Parameter Store. We plan to move this to the DB soon. Until then, know that if these values are not set properly, unexpected errors may occur.
 
 **Guidelines for usage of Parameter Store**
 
@@ -193,19 +193,23 @@ Important email configuration is currently stored in AWS Parameter Store. If the
 
 **Expected variables and their usage across the application**
 ### /configuration/email/emailSource
-This is the application-wide email sender.
+*[same in all env]* This is the application-wide email sender.
 
-### /configuration/email/ratesAddresses
-These are group-wide emails for teams that look at rate related submissions
-### /configuration/email/reviewTeamAddresses
-These are group-wide emails for review team. 
+### /configuration/email/oactdmcpshared
+*[same in all env]* This is a static reference to the oactdmcp shared address.
 ### /configuration/email/devTeamHelpAddress
-This the help address displayed in the application across environments for the dev team.
+*[same in all env]* This the help address displayed in the application across environments for contacting the dev team. In this this is the dev team CMS address.
 
 ### /configuration/email/rateHelpAddress
-This the help address displayed in the application across environments for the rates team.
+*[same in all env]* This the help address displayed in the application across environments for contacting the rates team.  In prod, this is the OACT-DMCP shared rate inbox.
 
 ### /configuration/email/reviewHelpAddress
-This the help address displayed in the application across environments for the review team team.
+*[same in all env]* This the help address displayed in the application across environments for contacting the review team team. In prod, this is the DMCO inbox.
+
+### /configuration/email/ratesAddresses
+*[environment specific]* List of group-wide emails for the teams follow rate related submissions. In prod, this is the OACT inbox.
+### /configuration/email/reviewTeamAddresses
+*[environment specific]* List of group-wide emails for the review team. They receive emails for all submissions. In prod, this is the OACT-DMCP shared rate inbox, the DMCO inbox, and two addresses associated with MC-Review team to make sure we are following communications.
+
 ### /configuration/**[state abbreviation]**/stateanalysts/email
-These are email addresses for analysts specific to a state. Use lower-cased state abbreviations as defined in `StateCodeType` 
+*[environment specific]* These are email addresses for analysts specific to a state. Use lower-cased state abbreviations as defined in `StateCodeType` 
