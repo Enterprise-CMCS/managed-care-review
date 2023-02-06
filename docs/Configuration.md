@@ -195,19 +195,26 @@ Important email configuration is currently stored in AWS Parameter Store. We pla
 ### /configuration/email/emailSource
 *[same in all env]* This is the application-wide email sender.
 
-### /configuration/email/oactdmcpshared
-*[same in all env]* This is a static reference to the oactdmcp shared address.
 ### /configuration/email/devTeamHelpAddress
-*[same in all env]* This the help address displayed in the application across environments for contacting the dev team. In this this is the dev team CMS address.
+*[same in all env, for display only]* This the help address displayed in the application across environments for contacting the dev team. In this this is the dev team CMS address.
 
 ### /configuration/email/rateHelpAddress
-*[same in all env]* This the help address displayed in the application across environments for contacting the rates team.  In prod, this is the OACT-DMCP shared rate inbox.
-
+*[same in all env, for display only]* This the help address displayed in the application across environments for contacting the rates team.  In prod, this is the OACT-DMCP shared rate inbox.
 ### /configuration/email/reviewHelpAddress
-*[same in all env]* This the help address displayed in the application across environments for contacting the review team team. In prod, this is the DMCO inbox.
+*[same in all env, for display only]* This the help address displayed in the application across environments for contacting the review team team. In prod, this is the DMCO inbox.
+
+### /configuration/email/oactdmcpshared
+*[environment specific]* This is a static reference to the oactdmcp shared address.
+
+### /configuration/email/oact
+*[environment specific]* This is a static reference to the oact inbox.
+
+### /configuration/email/dmco
+*[environment specific]* This is a static reference to the dmco inbox.
 
 ### /configuration/email/ratesAddresses
 *[environment specific]* List of group-wide emails for the teams follow rate related submissions. In prod, this is the OACT inbox.
+
 ### /configuration/email/reviewTeamAddresses
 *[environment specific]* List of group-wide emails for the review team. They receive emails for all submissions. In prod, this is the OACT-DMCP shared rate inbox, the DMCO inbox, and two addresses associated with MC-Review team to make sure we are following communications.
 
