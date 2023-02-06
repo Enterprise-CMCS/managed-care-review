@@ -139,7 +139,6 @@ export const SubmissionSummary = (): React.ReactElement => {
                 {!showQuestionsAnswers && (
                     <Link
                         asCustom={NavLink}
-                        variant="unstyled"
                         to={{
                             pathname: '/dashboard',
                         }}

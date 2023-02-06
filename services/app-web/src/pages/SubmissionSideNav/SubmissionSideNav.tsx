@@ -126,7 +126,6 @@ export const SubmissionSideNav = () => {
                         <div className={styles.backLinkContainer}>
                             <Link
                                 asCustom={NavLink}
-                                variant="unstyled"
                                 to={{
                                     pathname: '/dashboard',
                                 }}
