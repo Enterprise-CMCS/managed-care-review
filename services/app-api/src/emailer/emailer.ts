@@ -18,12 +18,24 @@ import { UpdateInfoType, ProgramType } from '../domain-models'
 type EmailConfiguration = {
     stage: string
     baseUrl: string
+
+    /* Email sender */
     emailSource: string // an email address for the generic application-wide sender
+
+    /* Email receivers 
+        These are group-wide emails that are relevant across submissions.
+        Does not include state specific emails, which are calculated within the specific email with getStateAnalystsEmails
+     */
     cmsReviewSharedEmails: string[] // list of shared emails that all new managed care packages must be sent to
     ratesReviewSharedEmails: string[] // list of shared emails that managed care packages with rates must be sent to
-    cmsReviewHelpEmailAddress: string // email address for the managed care organization group
-    cmsRateHelpEmailAddress: string // email address for rates help
-    cmsDevTeamHelpEmailAddress: string // email address for all other help
+
+    /* Email addresses used in display text
+        These email addresses are in specific email content, such as help text. Prod-like values may be used in staging env.
+        Accordingly, do NOT use for receivers.
+    */
+    cmsReviewHelpEmailAddress: string //  managed care review group help
+    cmsRateHelpEmailAddress: string //  rates help
+    cmsDevTeamHelpEmailAddress: string //  all other help
 }
 
 type StateAnalystsEmails = string[]
