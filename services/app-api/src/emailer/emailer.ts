@@ -20,18 +20,17 @@ type EmailConfiguration = {
     baseUrl: string
 
     /* Email sender */
-    emailSource: string // an email address for the generic application-wide sender
+    emailSource: string
 
     /* Email receivers 
         These are group-wide emails that are relevant across submissions.
-        Does not include state specific emails, which are calculated within the specific email with getStateAnalystsEmails
+        Does not include state specific emails. Those are calculated with getStateAnalystsEmails close to the specific email function
      */
     cmsReviewSharedEmails: string[] // list of shared emails that all new managed care packages must be sent to
     ratesReviewSharedEmails: string[] // list of shared emails that managed care packages with rates must be sent to
 
     /* Email addresses used in display text
         These email addresses are in specific email content, such as help text. Prod-like values may be used in staging env.
-        Accordingly, do NOT use for receivers.
     */
     cmsReviewHelpEmailAddress: string //  managed care review group help
     cmsRateHelpEmailAddress: string //  rates help

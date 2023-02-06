@@ -180,3 +180,32 @@ This is the key for Launch Darkly SDK access in our backend. There is one per en
 Read by `app-web`
 
 This is the client ID for Launch Darkly in our frontend. This key is designed to have limited access since it's exposed in our client side code. There is one per environment of local/dev/val/prod.
+
+## Email configuration
+
+Important email configuration is currently stored in AWS Parameter Store. If these values are not set properly, emails will not be sent for notification purposes and some unexpected errors may occur. 
+
+**Guidelines for usage of Parameter Store**
+
+1. Parameter stores across environments will have the same names. Faked data will be used in lower environments, except for display text.
+2. Valid values in parameter store are strings and string lists.
+3. Store state emails in Parameter Store as they on-boarded to MC-Review.
+
+**Expected variables and their usage across the application**
+### /configuration/email/emailSource
+This is the application-wide email sender.
+
+### /configuration/email/ratesAddresses
+These are group-wide emails for teams that look at rate related submissions
+### /configuration/email/reviewTeamAddresses
+These are group-wide emails for review team. 
+### /configuration/email/devTeamHelpAddress
+This the help address displayed in the application across environments for the dev team.
+
+### /configuration/email/rateHelpAddress
+This the help address displayed in the application across environments for the rates team.
+
+### /configuration/email/reviewHelpAddress
+This the help address displayed in the application across environments for the review team team.
+### /configuration/**[state abbreviation]**/stateanalysts/email
+These are email addresses for analysts specific to a state. Use lower-cased state abbreviations as defined in `StateCodeType` 
