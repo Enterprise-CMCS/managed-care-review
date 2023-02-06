@@ -187,9 +187,8 @@ Important email configuration is currently stored in AWS Parameter Store. We pla
 
 **Guidelines for usage of Parameter Store**
 
-1. Parameter stores across environments will have the same names. Faked data will be used in lower environments, except for display text.
+1. Parameter stores across environments will have the same names.We will clearly define the purpose of each variable in this file, as well as if it is configured differently by environment or we expect the same values for all environments.
 2. Valid values in parameter store are strings and string lists.
-3. Store state emails in Parameter Store as they on-boarded to MC-Review.
 
 **Expected variables and their usage across the application**
 ### /configuration/email/emailSource
@@ -200,6 +199,7 @@ Important email configuration is currently stored in AWS Parameter Store. We pla
 
 ### /configuration/email/rateHelpAddress
 *[same in all env, for display only]* This the help address displayed in the application across environments for contacting the rates team.  In prod, this is the OACT-DMCP shared rate inbox.
+
 ### /configuration/email/reviewHelpAddress
 *[same in all env, for display only]* This the help address displayed in the application across environments for contacting the review team team. In prod, this is the DMCO inbox.
 
