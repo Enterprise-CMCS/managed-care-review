@@ -75,15 +75,9 @@ const generateCMSReviewerEmails = (
     pkg: LockedHealthPlanFormDataType | UnlockedHealthPlanFormDataType,
     stateAnalystsEmails: StateAnalystsEmails
 ): string[] | Error => {
-    // OACT email, receives only CONTRACT_AND_RATES submission, excludes CHIP and state of PR
-    const oactEmails: string[] = config.ratesReviewSharedEmails
+    const oactEmails: string[] = config.ratesReviewSharedEmails // TODO: change to config.oact
 
-    // DMCP and OACT share an inbox that receives all submissions, excludes CHIP and state of PR and should be included
-    // in cmsReviewSharedEmails.
-    // cmsRateHelpEmailAddress is also set to this shared DMCP and OACT inbox. We are setting this const in order to
-    // filter it out for CHIP and State of PR submissions because we cannot store the actual email in the API. This
-    // will eventually be fixed when moving to storing emails in our DB.
-    const dmcpOACTSharedEmail: string = config.cmsRateHelpEmailAddress
+    const dmcpOACTSharedEmail: string = config.cmsRateHelpEmailAddress // TODO: change to config.dmcp
 
     // CHIP programs and state of PR submission does not include OACT and DMCP emails.
     const filterChipAndPRSubmission = (reviewers: string[]) =>

@@ -247,7 +247,7 @@ async function initializeGQLHandler(): Promise<Handler> {
     const cmsDevTeamHelpEmailAddress =
         await emailParameterStore.getCmsDevTeamHelpEmail()
     const ratesReviewSharedEmails =
-        await emailParameterStore.getRatesReviewSharedEmails()
+        await emailParameterStore.getRatesReviewSharedEmails() // TODO: change to OACT inbox
 
     if (emailSource instanceof Error)
         throw new Error(`Configuration Error: ${emailSource.message}`)

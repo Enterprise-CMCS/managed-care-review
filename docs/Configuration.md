@@ -188,35 +188,36 @@ Important email configuration is currently stored in AWS Parameter Store. We pla
 **Guidelines for usage of Parameter Store**
 
 1. Parameter stores across environments will have the same names.We will clearly define the purpose of each variable in this file, as well as if it is configured differently by environment or we expect the same values for all environments.
-2. Valid values in parameter store are strings and string lists.
+2. Valid values in parameter store are strings and string lists. We prefer string lists to allow additional addresses to be added if needed.
 
 **Expected variables and their usage across the application**
+
 ### /configuration/email/emailSource
 *[same in all env]* This is the application-wide email sender.
 
 ### /configuration/email/devTeamHelpAddress
-*[same in all env, for display only]* This the help address displayed in the application across environments for contacting the dev team. In this this is the dev team CMS address.
+*[same in all env, for display only]* This the help address for contacting the MC-Review dev team.
 
 ### /configuration/email/rateHelpAddress
-*[same in all env, for display only]* This the help address displayed in the application across environments for contacting the rates team.  In prod, this is the OACT-DMCP shared rate inbox.
+*[same in all env, for display only]* This the help address for contacting the rate policy team.
 
 ### /configuration/email/reviewHelpAddress
-*[same in all env, for display only]* This the help address displayed in the application across environments for contacting the review team team. In prod, this is the DMCO inbox.
+*[same in all env, for display only]* This the help address for contacting the analyst review team.
 
-### /configuration/email/oactdmcpshared
-*[environment specific]* This is a static reference to the oactdmcp shared address.
+### /configuration/email/dmcp
+*[environment specific]* This contains DMCP's primary inbox (though it is a shared with OACT). It receives all submissions, excluding CHIP and state of PR.
 
 ### /configuration/email/oact
-*[environment specific]* This is a static reference to the oact inbox.
+*[environment specific]* This contains the OACT primary inbox. It receives only CONTRACT_AND_RATES submissions, excluding CHIP and state of PR.
 
 ### /configuration/email/dmco
-*[environment specific]* This is a static reference to the dmco inbox.
+*[environment specific]* This contains the DMCO primary inbox.
 
-### /configuration/email/ratesAddresses
-*[environment specific]* List of group-wide emails for the teams follow rate related submissions. In prod, this is the OACT inbox.
+### /configuration/email/ratesAddresses (Deprecated)
+*[environment specific]* List of group-wide emails for the teams that follow rate related submissions. In prod, this was the OACT inbox.
 
 ### /configuration/email/reviewTeamAddresses
-*[environment specific]* List of group-wide emails for the review team. They receive emails for all submissions. In prod, this is the OACT-DMCP shared rate inbox, the DMCO inbox, and two addresses associated with MC-Review team to make sure we are following communications.
+*[environment specific]* List of group-wide emails for the teams that follow all incoming submission mail. In prod, this is the DMCP shared rate inbox, the DMCO inbox, and two addresses associated with MC-Review dev team.
 
 ### /configuration/**[state abbreviation]**/stateanalysts/email
 *[environment specific]* These are email addresses for analysts specific to a state. Use lower-cased state abbreviations as defined in `StateCodeType` 
