@@ -3,6 +3,9 @@ name: Promote to an environment
 on:
   workflow_call:
     inputs:
+      environment:
+        required: true
+        type: string
       stage_name:
         required: true
         type: string
@@ -19,9 +22,10 @@ permissions:
   id-token: write
 
 jobs:
-  # deploy the OIDC service first, as subsequent deploys depend on updated OIDC permissions
+  # deploy the OIDC service first, as subsequent deploys may depend on updated OIDC permissions
   github-oidc:
       if: ${{ contains(inputs.changed_services, 'github-oidc') }}
+      environment: ${{ inputs.environment }}
       runs-on: ubuntu-20.04
       steps:
         - name: Check out repository
@@ -51,9 +55,10 @@ jobs:
             pushd services/github-oidc && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   postgres:
-    # for this and subsequent jobs, wait for the OIDC service unless it was skipped
+    # for this and subsequent jobs, wait for the OIDC service to deploy (unless it was skipped)
     needs: github-oidc
     if: ${{ always() && contains(inputs.changed_services, 'postgres') }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -68,6 +73,7 @@ jobs:
           region: ${{ secrets.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
+          changed-services: ${{ inputs.changed_services }}
 
       - name: deploy postgres
         id: deploy-postgres
@@ -77,6 +83,7 @@ jobs:
   ui:
     needs: github-oidc
     if: ${{ always() && contains(inputs.changed_services, 'ui') }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -91,6 +98,7 @@ jobs:
           region: ${{ secrets.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
+          changed-services: ${{ inputs.changed_services }}
 
       - name: deploy ui
         id: deploy-ui
@@ -100,6 +108,7 @@ jobs:
   storybook:
     needs: github-oidc
     if: ${{ always() && contains(inputs.changed_services, 'storybook') }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -114,6 +123,7 @@ jobs:
           region: ${{ secrets.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
+          changed-services: ${{ inputs.changed_services }}
 
       - name: deploy storybook
         id: deploy-storybook
@@ -123,6 +133,7 @@ jobs:
   uploads:
     needs: github-oidc
     if: ${{ always() && contains(inputs.changed_services, 'uploads') }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -137,6 +148,7 @@ jobs:
           region: ${{ secrets.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
+          changed-services: ${{ inputs.changed_services }}
 
       - name: deploy uploads
         id: deploy-uploads
@@ -146,6 +158,7 @@ jobs:
   infra-api:
     needs: github-oidc
     if: ${{ always() && contains(inputs.changed_services, 'infra-api') }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -160,6 +173,7 @@ jobs:
           region: ${{ secrets.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
+          changed-services: ${{ inputs.changed_services }}
 
       - name: deploy infra-api
         id: deploy-uploads
@@ -169,6 +183,7 @@ jobs:
   ui-auth:
     needs: [github-oidc, infra-api, ui, uploads]
     if: ${{ always() && contains(inputs.changed_services, 'ui-auth') }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -183,6 +198,7 @@ jobs:
           region: ${{ secrets.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
+          changed-services: ${{ inputs.changed_services }}
 
       - name: deploy ui-auth
         id: deploy-ui-auth

@@ -3,6 +3,9 @@ name: Promote to an environment
 on:
   workflow_call:
     inputs:
+      environment:
+        required: true
+        type: string
       stage_name:
         required: true
         type: string
@@ -28,6 +31,7 @@ permissions:
 jobs:
   app-web:
     if: ${{ contains(inputs.changed_services, 'app-web') }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -42,6 +46,7 @@ jobs:
           region: ${{ secrets.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
+          changed-services: ${{ inputs.changed_services }}
 
       - name: Generate Code
         run: lerna run generate
@@ -56,6 +61,7 @@ jobs:
 
   app-api:
     if: ${{ contains(inputs.changed_services, 'app-api') || contains(inputs.changed_services, 'app-proto') }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -70,6 +76,8 @@ jobs:
           region: ${{ secrets.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
+          changed-services: ${{ inputs.changed_services }}
+
 
       - name: Generate Code
         run: lerna run generate

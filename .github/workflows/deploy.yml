@@ -215,6 +215,7 @@ jobs:
     permissions:
       id-token: write
     with:
+      environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
       changed_services: ${{ needs.begin-deployment.outputs.changed-services }}
     secrets:
@@ -236,6 +237,7 @@ jobs:
     # TODO pin back to main after bharvey-github-oidc is merged to main
     uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@bharvey-github-oidc
     with:
+      environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
       app_version: ${{ needs.begin-deployment.outputs.app-version }}
       changed_services: ${{ needs.begin-deployment.outputs.changed-services }}
@@ -248,6 +250,7 @@ jobs:
   finishing-prep:
     name: Finishing Prep
     needs: [deploy-infra, begin-deployment, deploy-app]
+    environment: dev
     if: |
       always()
       && (needs.begin-deployment.result == 'success')
@@ -270,6 +273,7 @@ jobs:
           region: ${{ secrets.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
+          changed-services: ${{ needs.begin-deployment.outputs.changed-services }}
 
       - name: Create Test Users
         env:

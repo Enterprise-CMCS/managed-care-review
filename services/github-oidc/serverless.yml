@@ -14,15 +14,20 @@ custom:
       - main
 
 params:
+  # only the main, val and prod stages can deploy from the main branch in our org and repo
+  main:
+    allowedSubjectClaim: "repo:CMSgov/managed-care-review:ref:refs/heads/main"
+    blockedSubjectClaim: !Ref AWS::NoValue
   val:
-    # only workflows running on the val branch can use val OIDC
-    subjectClaimFilters: "repo:CMSgov/managed-care-review:ref:refs/heads/val"
+    allowedSubjectClaim: "repo:CMSgov/managed-care-review:ref:refs/heads/main"
+    blockedSubjectClaim: !Ref AWS::NoValue
   prod:
-    # only workflows running on the prod branch can use prod OIDC
-    subjectClaimFilters: "repo:CMSgov/managed-care-review:ref:refs/heads/prod"
+    allowedSubjectClaim: "repo:CMSgov/managed-care-review:ref:refs/heads/main"
+    blockedSubjectClaim: !Ref AWS::NoValue
   default:
-    # the catchall subject claim filter for dev OIDC, including the main branch and all feature branches
-    subjectClaimFilters: "repo:CMSgov/managed-care-review:*"
+    # this is the catchall for stages corresponding to feature branches, which can deploy from any branch in our org and repo except main
+    allowedSubjectClaim: "repo:CMSgov/managed-care-review:ref:refs/heads/*"
+    blockedSubjectClaim: "repo:CMSgov/managed-care-review:ref:refs/heads/main"
 
     # this param should be overridden with a value of 'true' via the CLI when bootstrapping an environment. see https://www.serverless.com/framework/docs/guides/parameters#inheritance-and-overriding
     bootstrap: 'false'
@@ -122,7 +127,10 @@ resources:
                 StringEquals:
                   "token.actions.githubusercontent.com:aud": ${param:audienceList}
                 StringLike:
-                  "token.actions.githubusercontent.com:sub": ${param:subjectClaimFilters}
+                  "token.actions.githubusercontent.com:sub": ${param:allowedSubjectClaim}
+                StringNotLike:
+                  "token.actions.githubusercontent.com:sub": ${param:blockedSubjectClaim}
+
         ManagedPolicyArns: !If
           - AttachManagedPolicyArns
           - ${param:managedPolicyArns}

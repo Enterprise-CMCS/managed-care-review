@@ -11,18 +11,18 @@ Workflows that need access to AWS APIs will call a new composite action `get-aws
 
 ### Pro/Cons
 #### OIDC
-+ short-term creds that automatically expire are more secure
-+ can be managed directly by the team (vs. an IAM user)
-+ more granular control over how workflows can use credentials via OIDC subject claims
-+ creds are more tightly scoped to follow principle of least privilege
-- requires inital manual bootstrapping (managed by automated deploys of a serverless service thereafter)
-- setup and maintainance is more complex
+- `+` short-term creds that automatically expire are more secure
+- `+` can be managed directly by the team (vs. an IAM user)
+- `+` more granular control over how workflows can use credentials via OIDC subject claims
+- `+` since they are easy to manage, creds can be tightly scoped to follow principle of least privilege
+- `-` requires inital manual bootstrapping (managed by automated deploys of a serverless service thereafter)
+- `-` setup and maintainance is more complex
 
 #### Long-term AWS creds via IAM service user
-+ easier to understand
-+ admin access means no workflow failures due to permissions errors when new AWS APIs are called
-- the IAM user that backs the creds can't be managed directly (Cloud Support ticket required)
-- must be rotated quarterly
-- long-term creds mean a greater attack window if leaked
+- `+` easier to understand
+- `+` admin access means no workflow failures due to permissions errors when new AWS APIs are called
+- `-` the IAM user that backs the creds can't be managed directly (Cloud Support ticket required)
+- `-` must be rotated quarterly
+- `-` long-term creds mean a greater attack window if leaked
 
 
