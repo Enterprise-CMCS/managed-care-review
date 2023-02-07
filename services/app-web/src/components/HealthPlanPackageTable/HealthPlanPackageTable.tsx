@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import {
+    ColumnFiltersState,
     createColumnHelper,
     flexRender,
     getCoreRowModel,
@@ -109,24 +110,17 @@ type ReadableFilters = {
     [key: string]: string[]
 }
 
-/* react-table has a ColumnFilterState type that depends on a ColumnFilter type that's
-    { id: string, value: unknown }.  We know our value is an array of strings, so we'll use our own type */
-type ColumnFilter = {
-    id: string
-    value: string[]
-}
-
-const fromColumnFiltersToReadableUrl = (input: ColumnFilter[]) => {
+const fromColumnFiltersToReadableUrl = (input: ColumnFiltersState) => {
     const output: ReadableFilters = {}
     input.forEach((element) => {
-        output[element.id] = element.value
+        output[element.id] = element.value as string[]
     })
-    return qs.stringify(output, { arrayFormat: 'comma' })
+    return qs.stringify(output, { arrayFormat: 'comma', encode: false })
 }
 
 const fromReadableUrlToColumnFilters = (
     input: string | null
-): ColumnFilter[] => {
+): ColumnFiltersState => {
     if (!input) {
         return []
     }
@@ -137,7 +131,7 @@ const fromReadableUrlToColumnFilters = (
     }))
 }
 
-const columnHash = atomWithHash('filters', [], {
+const columnHash = atomWithHash('filters', [] as ColumnFiltersState, {
     serialize: fromColumnFiltersToReadableUrl,
     deserialize: fromReadableUrlToColumnFilters,
 })
@@ -148,8 +142,38 @@ export const HealthPlanPackageTable = ({
     user,
     showFilters = false,
 }: PackageTableProps): React.ReactElement => {
-    const [columnFilters, setColumnFilters] =
-        useAtom<ColumnFilter[]>(columnHash)
+    const lastClickedElement = useRef<string | null>(null)
+    const [columnFilters, setColumnFilters] = useAtom(columnHash)
+
+    /* we store the last clicked element in a ref so that when the url is updated and the page rerenders
+        we can focus that element.  this useEffect (with no dependency array) will run once on each render. 
+        Note that the React-y way to do this is to use forwardRef, but the clearFilters button is deeply nested 
+        and we'd wind up passing down the ref through several layers to achieve what we can do here in a few lines 
+        with DOM methods */
+    useEffect(() => {
+        const currentValue = lastClickedElement?.current
+        if (!currentValue) {
+            return
+        }
+        /* if the last clicked element had a label, it was a react-select component and the label will match our
+        naming convention */
+        const labels = document.getElementsByTagName('label')
+        const labelNames = Array.from(labels).map((item) => item.htmlFor)
+        const indexOfLabel = labelNames.indexOf(
+            `${currentValue}-filter-select-input`
+        )
+        if (indexOfLabel > -1) {
+            labels[indexOfLabel].focus()
+            /* if the last clicked element was NOT a label, then it was the clear filters button, which we can look
+            up by id */
+        } else {
+            const element = document.getElementById(currentValue)
+            if (element) {
+                element.focus()
+            }
+        }
+        lastClickedElement.current = null
+    })
 
     /* transform react-table's ColumnFilterState (stringified, formatted, and stored in the URL) to react-select's FilterOptionType
         and return only the items matching the FilterSelect component that's calling the function*/
@@ -312,8 +336,10 @@ export const HealthPlanPackageTable = ({
 
     const updateFilters = (
         column: Column<PackageInDashboardType>,
-        selectedOptions: FilterSelectedOptionsType
+        selectedOptions: FilterSelectedOptionsType,
+        filterName: string
     ) => {
+        lastClickedElement.current = filterName
         setTableCaption(null)
         column.setFilterValue(
             selectedOptions.map((selection) => selection.value)
@@ -321,9 +347,9 @@ export const HealthPlanPackageTable = ({
     }
 
     const clearFilters = () => {
+        lastClickedElement.current = 'clearFiltersButton'
         setTableCaption(null)
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
+
         setColumnFilters([])
     }
 
@@ -357,7 +383,11 @@ export const HealthPlanPackageTable = ({
                                 label="State"
                                 filterOptions={stateFilterOptions}
                                 onChange={(selectedOptions) =>
-                                    updateFilters(stateColumn, selectedOptions)
+                                    updateFilters(
+                                        stateColumn,
+                                        selectedOptions,
+                                        'state'
+                                    )
                                 }
                             />
                             <FilterSelect
@@ -370,7 +400,8 @@ export const HealthPlanPackageTable = ({
                                 onChange={(selectedOptions) =>
                                     updateFilters(
                                         submissionTypeColumn,
-                                        selectedOptions
+                                        selectedOptions,
+                                        'submissionType'
                                     )
                                 }
                             />
