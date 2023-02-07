@@ -279,8 +279,8 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     // Configure LaunchDarkly
     const ldOptions: ld.LDOptions = {
-        baseUri: 'https://app.launchdarkly.us',
         streamUri: 'https://stream.launchdarkly.us',
+        baseUri: 'https://app.launchdarkly.us',
         eventsUri: 'https://events.launchdarkly.us',
     }
     ldClient = ld.init(ldSDKKey, ldOptions)
