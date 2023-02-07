@@ -5,6 +5,8 @@ erDiagram
 
 HealthPlanPackageTable ||--|{ HealthPlanRevisionTable: "has many"
 HealthPlanPackageTable }|--|| State: "has many"
+HealthPlanPackageTable ||--|{ Question: "has many"
+State }|--|{ User: "many to many"
 
 HealthPlanPackageTable {
     string id
@@ -49,5 +51,33 @@ Document {
 
 User }|--|| Document: "has many"
 
-User }|--|{ State: "many to many"
+User }|--|| Question: "has many"
+
+Question }|--|| QuestionResponse: "has many"
+
+Question }|--|| Document: "has many"
+
+QuestionResponse }|--|| Document: "has many"
+
+Question {
+    string id
+    string pkgID
+    datetime dateAdded
+    User addedBy
+    Document[] documents
+    string noteText
+    date dueDate
+    string[] rateIDs
+    QuestionResponse[] responses
+}
+
+QuestionResponse {
+    string id
+    string questionID
+    datetime dateAdded
+    User addedBy
+    Document[] documents
+    string noteText
+}
+
 ```
