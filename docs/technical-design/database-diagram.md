@@ -53,7 +53,7 @@ User }|--|| Document: "has many"
 
 User }|--|| Question: "has many"
 
-Question }|--|| QuestionResponse: "has many"
+Question ||--|{ QuestionResponse: "has many"
 
 Question }|--|| Document: "has many"
 
