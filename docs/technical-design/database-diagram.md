@@ -4,7 +4,7 @@
 erDiagram
 
 HealthPlanPackageTable ||--|{ HealthPlanRevisionTable: "has many"
-HealthPlanPackageTable }|--|| State: "has many"
+HealthPlanPackageTable ||--|{ State: "has many"
 HealthPlanPackageTable ||--|{ Question: "has many"
 State }|--|{ User: "many to many"
 
@@ -49,15 +49,15 @@ Document {
     bool virusScan
 }
 
-User }|--|| Document: "has many"
+User ||--|{ Document: "has many"
 
-User }|--|| Question: "has many"
+User ||--|{ Question: "has many"
 
 Question ||--|{ QuestionResponse: "has many"
 
-Question }|--|| Document: "has many"
+Question ||--|{ Document: "has many"
 
-QuestionResponse }|--|| Document: "has many"
+QuestionResponse ||--|{ Document: "has many"
 
 Question {
     string id
