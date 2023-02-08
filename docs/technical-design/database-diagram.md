@@ -44,7 +44,7 @@ Document {
     string id
     string name
     string s3URL
-    string uploadedBy
+    User uploadedBy
     datetime createdAt
     bool virusScan
 }
