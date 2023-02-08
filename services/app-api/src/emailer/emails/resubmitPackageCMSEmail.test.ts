@@ -297,7 +297,7 @@ describe('with rates', () => {
             })
         )
     })
-    it('includes ratesReviewSharedEmails and state specific analysts emails on contract and rate resubmission email', async () => {
+    it('includes oactEmails and state specific analysts emails on contract and rate resubmission email', async () => {
         const template = await resubmitPackageCMSEmail(
             submission,
             resubmitData,
@@ -307,7 +307,7 @@ describe('with rates', () => {
         )
         const reviewerEmails = [
             ...testEmailConfig.cmsReviewSharedEmails,
-            ...testEmailConfig.ratesReviewSharedEmails,
+            ...testEmailConfig.oactEmails,
         ]
 
         if (template instanceof Error) {
@@ -384,7 +384,7 @@ describe('with rates', () => {
             )
         })
     })
-    it('CHIP contract and rate resubmission does not include ratesReviewSharedEmails, cmsRateHelpEmailAddress or state specific analysts emails', async () => {
+    it('CHIP contract and rate resubmission does not include oactEmails, cmsRateHelpEmailAddress or state specific analysts emails', async () => {
         const sub = mockContractAndRatesFormData({
             stateCode: 'MS',
             programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
@@ -425,7 +425,7 @@ describe('with rates', () => {
             msStatePrograms
         )
         const excludedEmails = [
-            ...testEmailConfig.ratesReviewSharedEmails,
+            ...testEmailConfig.oactEmails,
             testEmailConfig.cmsRateHelpEmailAddress,
         ]
 
@@ -461,7 +461,7 @@ describe('contract only', () => {
     const testStateAnalystEmails = testStateAnalystsEmails
     const defaultStatePrograms = mockMNState().programs
 
-    it('does not include ratesReviewSharedEmails', async () => {
+    it('does not include oactEmails', async () => {
         const contractOnlyTemplate = await resubmitPackageCMSEmail(
             submission,
             resubmitData,
@@ -469,7 +469,7 @@ describe('contract only', () => {
             testStateAnalystEmails,
             defaultStatePrograms
         )
-        const rateReviewerEmails = [...testEmailConfig.ratesReviewSharedEmails]
+        const rateReviewerEmails = [...testEmailConfig.oactEmails]
 
         if (contractOnlyTemplate instanceof Error) {
             console.error(contractOnlyTemplate)
@@ -580,7 +580,7 @@ describe('contract only', () => {
         })
     })
 
-    it('CHIP contract only resubmission does not include ratesReviewSharedEmails, cmsRateHelpEmailAddress or state specific analysts emails', async () => {
+    it('CHIP contract only resubmission does not include oactEmails, cmsRateHelpEmailAddress or state specific analysts emails', async () => {
         const sub = mockContractOnlyFormData({
             stateCode: 'MS',
             programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
@@ -595,7 +595,7 @@ describe('contract only', () => {
             msStatePrograms
         )
         const excludedEmails = [
-            ...testEmailConfig.ratesReviewSharedEmails,
+            ...testEmailConfig.oactEmails,
             testEmailConfig.cmsRateHelpEmailAddress,
         ]
 

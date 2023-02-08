@@ -15,6 +15,7 @@ import {
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { UpdateInfoType, ProgramType } from '../domain-models'
 
+// See more discussion of configuration in docs/Configuration.md
 type EmailConfiguration = {
     stage: string
     baseUrl: string
@@ -23,11 +24,13 @@ type EmailConfiguration = {
     emailSource: string
 
     /* Email receivers 
-        These are group-wide emails that are relevant across submissions.
-        Does not include state specific emails. Those are calculated with getStateAnalystsEmails close to the specific email function
+        These are general group-wide emails, relevant across submissions as potential receivers.
+        Does not include any state specific emails, that is handled elsewhere with getStateAnalystsEmail.
      */
-    cmsReviewSharedEmails: string[] // list of shared emails that all new managed care packages must be sent to
-    ratesReviewSharedEmails: string[] // list of shared emails that managed care packages with rates must be sent to
+    cmsReviewSharedEmails: string[] // added by default to all incoming submissions
+    oactEmails: string[] // OACT division emails
+    dmcpEmails: string[] // DMCP division emails
+    dmcoEmails: string[] // DMCO division emails
 
     /* Email addresses used in display text
         These email addresses are in specific email content, such as help text. Prod-like values may be used in staging env.

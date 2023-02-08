@@ -185,39 +185,45 @@ This is the client ID for Launch Darkly in our frontend. This key is designed to
 
 Important email configuration is currently stored in AWS Parameter Store. We plan to move this to the DB soon. Until then, know that if these values are not set properly, unexpected errors may occur.
 
-**Guidelines for usage of Parameter Store**
+### Guidelines for usage of Parameter Store for emails
 
 1. Parameter stores across environments will have the same names.We will clearly define the purpose of each variable in this file, as well as if it is configured differently by environment or we expect the same values for all environments.
 2. Valid values in parameter store are strings and string lists. We prefer string lists to allow additional addresses to be added if needed.
 
-**Expected variables and their usage across the application**
+### Expected email config and their intended usage across the application
 
-### /configuration/email/emailSource
+#### `/configuration/email/emailSource`
+
 *[same in all env]* This is the application-wide email sender.
 
-### /configuration/email/devTeamHelpAddress
-*[same in all env, for display only]* This the help address for contacting the MC-Review dev team.
+#### `/configuration/email/devTeamHelpAddress`
 
-### /configuration/email/rateHelpAddress
-*[same in all env, for display only]* This the help address for contacting the rate policy team.
+*[same in all env]* This is the help address displayed in state emails for contacting the MC-Review dev team.
 
-### /configuration/email/reviewHelpAddress
-*[same in all env, for display only]* This the help address for contacting the analyst review team.
+#### `/configuration/email/rateHelpAddress`
 
-### /configuration/email/dmcp
-*[environment specific]* This contains DMCP's primary inbox (though it is a shared with OACT). It receives all submissions, excluding CHIP and state of PR.
+*[same in all env]* This the help address displayed in state emails for contacting the rate policy team.
 
-### /configuration/email/oact
-*[environment specific]* This contains the OACT primary inbox. It receives only CONTRACT_AND_RATES submissions, excluding CHIP and state of PR.
+#### `/configuration/email/reviewHelpAddress`
 
-### /configuration/email/dmco
-*[environment specific]* This contains the DMCO primary inbox.
+*[same in all env]* This the help address displayed in state emails for contacting the analyst review team.
 
-### /configuration/email/ratesAddresses (Deprecated)
-*[environment specific]* List of group-wide emails for the teams that follow rate related submissions. In prod, this was the OACT inbox.
+#### `/configuration/email/dmcp`
 
-### /configuration/email/reviewTeamAddresses
-*[environment specific]* List of group-wide emails for the teams that follow all incoming submission mail. In prod, this is the DMCP shared rate inbox, the DMCO inbox, and two addresses associated with MC-Review dev team.
+*[environment specific]* This contains the DMCP primary inbox. The DMCP team is focused on policy issues related to managed care. They review all submissions, excluding CHIP and state of PR.
 
-### /configuration/**[state abbreviation]**/stateanalysts/email
-*[environment specific]* These are email addresses for analysts specific to a state. Use lower-cased state abbreviations as defined in `StateCodeType` 
+#### `/configuration/email/oact`
+
+*[environment specific]* This contains the OACT primary inbox. The OACT team is focused on actuarial overview of rates. They review submissions that have rates associated, excluding CHIP and state of PR.
+
+#### `/configuration/email/dmco`
+
+*[environment specific]* This contains the DMCO primary inbox. The DMCO team is focused on managed care contracts process overall and they review all submissions.
+
+#### `/configuration/email/reviewTeamAddresses`
+
+*[environment specific]* List of emails for teams/individuals that want to follow all incoming submissions. In prod, this is the DMCP shared rate inbox, the DMCO inbox, and two addresses associated with MC-Review dev team.
+
+#### `/configuration/**[state abbreviation]**/stateanalysts/email`
+
+*[environment specific]* This contains email addresses for analysts specific to a state. Use lower-cased state abbreviations as defined in `StateCodeType`.

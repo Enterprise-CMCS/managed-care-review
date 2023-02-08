@@ -18,5 +18,6 @@ What follow are step-by-step instructions on how to add those addresses. This pr
 1. [in lower environments] **Paste the value you previously copied from an existing state's configuration** Be sure to **change the state details** to allow better testing.
 2. [in production] **Enter the specific state analyst emails as a comma-separated list with no spaces**, like `jim.smith@cms.hhs.gov,wendy.williams@cms.hhs.gov`.  REMEMBER, IN PROD, YOU WILL BE ENTERING ACTUAL EMAIL ADDRESSES
 1. Once you've entered the information, **click Create parameter**.
+2. Make sure you [document](../Configuration.md) any new email configuration you create (if it is not a state email) so others know what is intended by that variable.
 
 Once you've done that for all three environments, you're done.
