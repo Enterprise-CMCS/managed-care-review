@@ -1,10 +1,10 @@
 import { Context, S3Event } from 'aws-lambda';
-import { rm, stat, readdir } from 'fs/promises'
+import { rm, readdir } from 'fs/promises'
 import path from 'path'
 
-import { NewS3UploadsClient, S3UploadsClient } from './s3'
+import { NewS3UploadsClient, S3UploadsClient } from '../s3'
 
-import { NewClamAV, ClamAV } from './clamAV'
+import { NewClamAV, ClamAV } from '../clamAV'
 
 export async function auditUploadsLambda(event: S3Event, _context: Context) {
     console.info('-----Start Audit Uploads function-----')
@@ -53,8 +53,6 @@ async function emptyWorkdir(workdir: string): Promise<undefined | Error> {
             const filePath = path.join(workdir, file)
             await rm(filePath)
         }
-
-        const filesAfter = await readdir(workdir)
 
     } catch (err) {
         console.error('FS Error cleaning workdir', err)

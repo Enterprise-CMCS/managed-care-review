@@ -1,0 +1,1 @@
+export { auditUploadsLambda } from './auditUploads'

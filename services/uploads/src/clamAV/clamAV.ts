@@ -2,7 +2,7 @@ import path from 'path'
 import { spawnSync } from 'child_process'
 import { readdir } from 'fs/promises'
 
-import { S3UploadsClient } from './s3'
+import { S3UploadsClient } from '../s3'
 
 type ClamAVScanResult = 'CLEAN' | 'INFECTED'
 
@@ -10,6 +10,7 @@ interface ClamAV {
     downloadAVDefinitions: () => Promise<undefined | Error>
     uploadAVDefinitions: (workdir: string) => Promise<undefined | Error>
     scanLocalFile: (path: string) => ClamAVScanResult | Error
+    scanForInfectedFiles: (path: string) => string[] | Error
     fetchAVDefinitionsWithFreshclam: (workdir: string) => Promise<undefined | Error>
 }
 
@@ -19,6 +20,7 @@ interface ClamAVConfig {
     pathToClamav: string
     pathToFreshclam: string
     pathToConfig: string
+    pathToDefintions: string
 }
 
 function NewClamAV(config: Partial<ClamAVConfig>, s3Client: S3UploadsClient) {
@@ -33,13 +35,15 @@ function NewClamAV(config: Partial<ClamAVConfig>, s3Client: S3UploadsClient) {
 
         pathToClamav: config.pathToClamav || '/opt/bin/clamscan',
         pathToFreshclam: config.pathToFreshclam || '/opt/bin/freshclam',
-        pathToConfig: config.pathToConfig || '/opt/bin/freshclam.conf'
+        pathToConfig: config.pathToConfig || '/opt/bin/freshclam.conf',
+        pathToDefintions: config.pathToDefintions || '/tmp'
     }
 
     return {
         downloadAVDefinitions: () => downloadAVDefinitions(fullConfig, s3Client),
         uploadAVDefinitions: (workdir: string) => uploadAVDefinitions(fullConfig, s3Client, workdir),
         scanLocalFile: (path: string) => scanLocalFile(fullConfig, path),
+        scanForInfectedFiles: (path: string) => scanForInfectedFiles(fullConfig, path),
         fetchAVDefinitionsWithFreshclam: (workdir: string) => fetchAVDefinitionsWithFreshclam(fullConfig, workdir),
     }
 }
@@ -96,7 +100,7 @@ async function uploadAVDefinitions(config: ClamAVConfig, s3Client: S3UploadsClie
     }
 }
 
-
+// downloads AV definition files from the bucket for local scanning
 async function downloadAVDefinitions(config: ClamAVConfig, s3Client: S3UploadsClient): Promise<undefined | Error> {
     console.info('Downloading AV Definitions from S3')
 
@@ -108,7 +112,7 @@ async function downloadAVDefinitions(config: ClamAVConfig, s3Client: S3UploadsCl
     const definitionFileKeys = allFileKeys
         .filter((key) => key.startsWith(config.definitionsPath))
 
-    const res = await s3Client.downloadAllFiles(definitionFileKeys, config.bucketName, '/tmp')
+    const res = await s3Client.downloadAllFiles(definitionFileKeys, config.bucketName, config.pathToDefintions)
     if (res) {
         return res
     }
@@ -129,14 +133,45 @@ async function downloadAVDefinitions(config: ClamAVConfig, s3Client: S3UploadsCl
  *
  */
 function scanLocalFile(config: ClamAVConfig, pathToFile: string): ClamAVScanResult | Error {
+    const infectedFiles = scanForInfectedFiles(config, pathToFile)
+    if (infectedFiles instanceof Error) {
+        return infectedFiles
+    }
+
+    if (infectedFiles.length === 0) {
+        return 'CLEAN'
+    }
+
+    return 'INFECTED'
+}
+
+// parses the output from clamscan for a failed scan run and returns the list of bad files
+function parseInfectedFiles(clamscanOutput: string): string[] {
+
+    const infectedFiles = []
+    for (const line of clamscanOutput.split('\n')) {
+        if (line.includes('FOUND')) {
+            const [filepath] = line.split(':')
+            infectedFiles.push(path.basename(filepath))
+        }
+    }
+    return infectedFiles
+}
+
+/**
+ * Function to scan the given file(s). This function requires ClamAV and the definitions to be available.
+ * This function does not download the file so the file should also be accessible.
+ *
+ * Returns a list of infected files, returning [] means no files are infected.
+ *
+ */
+function scanForInfectedFiles(config: ClamAVConfig, pathToFile: string): string[] | Error {
     try {
         console.info('Executing clamav')
         let avResult = spawnSync(config.pathToClamav, [
             '--stdout',
-            '-v',
-            '-a',
             '-d',
-            '/tmp',
+            config.pathToDefintions,
             pathToFile,
         ])
 
@@ -147,7 +182,8 @@ function scanLocalFile(config: ClamAVConfig, pathToFile: string): ClamAVScanResu
         // Exit status 1 means file is infected
         if (avResult.status === 1) {
             console.info('SUCCESSFUL SCAN, FILE INFECTED')
-            return 'INFECTED'
+
+            return parseInfectedFiles(avResult.stdout.toString())
         } else if (avResult.status !== 0) {
             console.info('SCAN FAILED WITH ERROR')
             return avResult.error || new Error(`Failed to scan file: ${avResult.stderr.toString()}`)
@@ -155,7 +191,7 @@ function scanLocalFile(config: ClamAVConfig, pathToFile: string): ClamAVScanResu
 
          console.info('SUCCESSFUL SCAN, FILE CLEAN')
 
-         return 'CLEAN'
+         return []
 
     } catch (err) {
         console.error('-- SCAN FAILED ERR --')
@@ -189,7 +225,7 @@ async function fetchAVDefinitionsWithFreshclam(config: ClamAVConfig, workdir: st
         }
 
         console.info('Update message')
-        console.info(executionResult.toString())
+        console.info(executionResult.stdout.toString())
 
         console.info(
             'Downloaded:',
@@ -210,4 +246,5 @@ async function fetchAVDefinitionsWithFreshclam(config: ClamAVConfig, workdir: st
 export {
     NewClamAV,
     ClamAV,
+    parseInfectedFiles,
 }
