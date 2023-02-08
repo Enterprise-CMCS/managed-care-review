@@ -177,18 +177,7 @@ functions:
       - http:
           path: otel
           method: post
-          cors:
-            origin: '*'
-            headers:
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-              - X-Amz-User-Agent
-              - x-amzn-trace-id
-              - b3
-              - traceparent
+          cors: true
           authorizer: aws_iam
 
   graphql:
@@ -197,34 +186,12 @@ functions:
       - http:
           path: graphql
           method: post
-          cors:
-            origin: '*'
-            headers:
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-              - X-Amz-User-Agent
-              - x-amzn-trace-id
-              - b3
-              - traceparent
+          cors: true
           authorizer: aws_iam
       - http:
           path: graphql
           method: get
-          cors:
-            origin: '*'
-            headers:
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-              - X-Amz-User-Agent
-              - x-amzn-trace-id
-              - b3
-              - traceparent
+          cors: true
           authorizer: aws_iam
     timeout: 60 # aurora cold start can be long
     vpc:
