@@ -312,7 +312,7 @@ describe('unlockPackageCMSEmail', () => {
             return
         }
 
-        testEmailConfig.cmsReviewSharedEmails.forEach((emailAddress) => {
+        testEmailConfig.oactEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
@@ -320,7 +320,7 @@ describe('unlockPackageCMSEmail', () => {
             )
         })
 
-        testEmailConfig.cmsReviewSharedEmails.forEach((emailAddress) => {
+        testEmailConfig.dmcpEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
@@ -328,7 +328,7 @@ describe('unlockPackageCMSEmail', () => {
             )
         })
 
-        testEmailConfig.cmsReviewSharedEmails.forEach((emailAddress) => {
+        testEmailConfig.dmcoEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),

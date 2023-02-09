@@ -55,7 +55,7 @@ test('to addresses list includes all division emails for contract and rate packa
         return
     }
 
-    testEmailConfig.cmsReviewSharedEmails.forEach((emailAddress) => {
+    testEmailConfig.oactEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),
@@ -63,7 +63,7 @@ test('to addresses list includes all division emails for contract and rate packa
         )
     })
 
-    testEmailConfig.cmsReviewSharedEmails.forEach((emailAddress) => {
+    testEmailConfig.dmcoEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),
@@ -71,7 +71,7 @@ test('to addresses list includes all division emails for contract and rate packa
         )
     })
 
-    testEmailConfig.cmsReviewSharedEmails.forEach((emailAddress) => {
+    testEmailConfig.dmcpEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),
