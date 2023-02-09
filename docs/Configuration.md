@@ -218,7 +218,7 @@ Important email configuration is currently stored in AWS Parameter Store. We pla
 
 #### `/configuration/email/dmco`
 
-*[environment specific]* This contains the DMCO primary inbox. The DMCO team is focused on managed care contracts process overall and they review all submissions.
+*[environment specific]* This contains the DMCO primary inbox. The DMCO team is focused on managed care contracts and they review all submissions.
 
 #### `/configuration/email/reviewTeamAddresses`
 

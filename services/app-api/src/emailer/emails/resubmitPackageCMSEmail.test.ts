@@ -297,7 +297,77 @@ describe('with rates', () => {
             })
         )
     })
-    it('includes oactEmails and state specific analysts emails on contract and rate resubmission email', async () => {
+    test('to addresses list includes all division emails for contract and rate package', async () => {
+        const template = await resubmitPackageCMSEmail(
+            submission,
+            resubmitData,
+            testEmailConfig,
+            testStateAnalystEmails,
+            defaultStatePrograms
+        )
+
+        if (template instanceof Error) {
+            console.error(template)
+            return
+        }
+
+        testEmailConfig.cmsReviewSharedEmails.forEach((emailAddress) => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    toAddresses: expect.arrayContaining([emailAddress]),
+                })
+            )
+        })
+
+        testEmailConfig.cmsReviewSharedEmails.forEach((emailAddress) => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    toAddresses: expect.arrayContaining([emailAddress]),
+                })
+            )
+        })
+
+        testEmailConfig.cmsReviewSharedEmails.forEach((emailAddress) => {
+            expect(template).toEqual(
+                expect.objectContaining({
+                    toAddresses: expect.arrayContaining([emailAddress]),
+                })
+            )
+        })
+    })
+
+    test('to addresses list does not include help addresses', async () => {
+        const template = await resubmitPackageCMSEmail(
+            submission,
+            resubmitData,
+            testEmailConfig,
+            testStateAnalystEmails,
+            defaultStatePrograms
+        )
+
+        if (template instanceof Error) {
+            console.error(template)
+            return
+        }
+
+        expect(template).toEqual(
+            expect.objectContaining({
+                toAddresses: expect.not.arrayContaining([
+                    testEmailConfig.cmsRateHelpEmailAddress,
+                ]),
+            })
+        )
+
+        expect(template).toEqual(
+            expect.objectContaining({
+                toAddresses: expect.not.arrayContaining([
+                    testEmailConfig.cmsReviewHelpEmailAddress,
+                ]),
+            })
+        )
+    })
+
+    it('includes state specific analysts emails on contract and rate resubmission email', async () => {
         const template = await resubmitPackageCMSEmail(
             submission,
             resubmitData,
@@ -384,7 +454,7 @@ describe('with rates', () => {
             )
         })
     })
-    it('CHIP contract and rate resubmission does not include oactEmails, cmsRateHelpEmailAddress or state specific analysts emails', async () => {
+    it('CHIP contract and rate resubmission does not include oactEmails or state specific analysts emails', async () => {
         const sub = mockContractAndRatesFormData({
             stateCode: 'MS',
             programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
@@ -424,10 +494,7 @@ describe('with rates', () => {
             [],
             msStatePrograms
         )
-        const excludedEmails = [
-            ...testEmailConfig.oactEmails,
-            testEmailConfig.cmsRateHelpEmailAddress,
-        ]
+        const excludedEmails = [...testEmailConfig.oactEmails]
 
         if (template instanceof Error) {
             console.error(template)
@@ -580,7 +647,7 @@ describe('contract only', () => {
         })
     })
 
-    it('CHIP contract only resubmission does not include oactEmails, cmsRateHelpEmailAddress or state specific analysts emails', async () => {
+    it('CHIP contract only resubmission does not include oactEmails or state specific analysts emails', async () => {
         const sub = mockContractOnlyFormData({
             stateCode: 'MS',
             programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
@@ -594,10 +661,7 @@ describe('contract only', () => {
             [],
             msStatePrograms
         )
-        const excludedEmails = [
-            ...testEmailConfig.oactEmails,
-            testEmailConfig.cmsRateHelpEmailAddress,
-        ]
+        const excludedEmails = [...testEmailConfig.oactEmails]
 
         if (template instanceof Error) {
             console.error(testStateAnalystEmails)
