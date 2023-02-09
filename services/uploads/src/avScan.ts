@@ -5,6 +5,7 @@ import crypto from 'crypto'
 import { NewS3UploadsClient, S3UploadsClient } from './s3'
 
 import { NewClamAV, ClamAV } from './clamAV'
+import { generateVirusScanTagSet, ScanStatus } from './tags';
 
 const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || '314572800')
 
@@ -50,31 +51,6 @@ export async function avScanLambda(event: S3Event, _context: Context) {
     return 'FILE SCANNED'
 }
 
-
-// Constants for tagging file after a virus scan.
-const VIRUS_SCAN_STATUS_KEY = 'virusScanStatus'
-const VIRUS_SCAN_TIMESTAMP_KEY = 'virusScanTimestamp'
-type ScanStatus = 'CLEAN' | 'INFECTED' | 'ERROR' | 'SKIPPED'
-
-
-/**
- * Generates the set of tags that will be used to tag the files of S3.
- */
-function generateTagSet(virusScanStatus: ScanStatus) {
-    return {
-        TagSet: [
-            {
-                Key: VIRUS_SCAN_STATUS_KEY,
-                Value: virusScanStatus,
-            },
-            {
-                Key: VIRUS_SCAN_TIMESTAMP_KEY,
-                Value: new Date().getTime().toString(),
-            },
-        ],
-    };
-}
-
 async function scanFile(s3Client: S3UploadsClient, clamAV: ClamAV, key: string, bucket: string): Promise<undefined | Error> {
     //You need to verify that you are not getting too large a file
     //currently lambdas max out at 500MB storage.
@@ -117,7 +93,7 @@ async function scanFile(s3Client: S3UploadsClient, clamAV: ClamAV, key: string, 
 
     }
 
-    const tags = generateTagSet(tagResult)
+    const tags = generateVirusScanTagSet(tagResult)
     const err = await s3Client.tagObject(key, bucket, tags)
     if (err instanceof Error) {
         console.error('Failed to tag object', err)

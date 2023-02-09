@@ -4,9 +4,11 @@ import {
     ListObjectsV2Command,
     GetObjectCommand,
     PutObjectCommand,
+    GetObjectTaggingCommand,
     PutObjectTaggingCommand,
     DeleteObjectsCommand,
     Tagging,
+    Tag,
 } from "@aws-sdk/client-s3"
 
 import fs from 'fs'
@@ -20,6 +22,7 @@ interface S3UploadsClient {
     listBucketFiles: (bucketName: string) => Promise<string[] | Error>
     downloadFileFromS3: (s3ObjectKey: string, s3ObjectBucket: string, destinationPath: string) => Promise<string | Error>
     downloadAllFiles: (keys: string[], bucket: string, targetDir: string) => Promise<undefined | Error>,
+    getObjectTags: (key: string, bucket: string) => Promise<Tag[] | Error>
     tagObject: (key: string, bucket: string, tagSet: Tagging) => Promise<undefined | Error>
     deleteObjects: (keys: string[], bucket: string) => Promise<undefined | Error>
     uploadObject: (key: string, bucket: string, filepath: string) => Promise<undefined | Error>
@@ -31,6 +34,7 @@ function uploadsClient(s3Client: S3Client): S3UploadsClient {
         listBucketFiles: (bucketName) => listBucketFiles(s3Client, bucketName),
         downloadFileFromS3: (s3ObjectKey, s3ObjectBucket, destinationPath) => downloadFileFromS3(s3Client, s3ObjectKey, s3ObjectBucket, destinationPath),
         downloadAllFiles: (keys, bucket, targetDir) => downloadAllFiles(s3Client, keys, bucket, targetDir),
+        getObjectTags: (key, bucket) => getObjectTags(s3Client, key, bucket),
         tagObject: (key, bucket, tagSet) => tagObject(s3Client, key, bucket, tagSet),
         deleteObjects: (keys, buckets) => deleteObjects(s3Client, keys, buckets),
         uploadObject: (key, bucket, filepath) => uploadObject(s3Client, key, bucket, filepath)
@@ -73,6 +77,25 @@ async function sizeOf(client: S3Client, key: string, bucket: string): Promise<nu
         }
 
         return new Error('Didnt get a size back from S3')
+    } catch (err) {
+        return err
+    }
+}
+
+/**
+ * Retrieve the tags on an S3 object without downloading.
+ */
+async function getObjectTags(client: S3Client, key: string, bucket: string): Promise<Tag[] | Error> {
+    const tags = new GetObjectTaggingCommand({ Key: key, Bucket: bucket })
+
+    try {
+        const res = await client.send(tags)
+
+        if (res.TagSet) {
+            return res.TagSet
+        }
+
+        return new Error('Didnt get tags back from S3')
     } catch (err) {
         return err
     }
@@ -255,7 +278,6 @@ async function tagObject(client: S3Client, key: string, bucket: string, tagSet: 
 
     try {
         await client.send(tagCmd)
-        console.info('Tagging successful')
         return
     } catch (err) {
         console.error(err)

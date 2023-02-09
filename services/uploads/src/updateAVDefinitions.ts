@@ -1,12 +1,12 @@
 import { Context, S3Event } from 'aws-lambda';
-import { rm, stat, readdir } from 'fs/promises'
+import { rm, readdir } from 'fs/promises'
 import path from 'path'
 
 import { NewS3UploadsClient, S3UploadsClient } from './s3'
 
 import { NewClamAV, ClamAV } from './clamAV'
 
-export async function updateAVDefinitionsLambda(event: S3Event, _context: Context) {
+export async function updateAVDefinitionsLambda(_event: S3Event, _context: Context) {
     console.info('-----Start Update AV Definitions function-----')
 
     // Check on the values for our required config
@@ -55,7 +55,7 @@ async function emptyWorkdir(workdir: string): Promise<undefined | Error> {
     }
 }
 
-async function updateAVDefinitions(s3Client: S3UploadsClient, clamAV: ClamAV, workdir: string): Promise<undefined | Error> {
+async function updateAVDefinitions(_s3Client: S3UploadsClient, clamAV: ClamAV, workdir: string): Promise<undefined | Error> {
 
     // cleanup the workdir
     const res = await emptyWorkdir(workdir)

@@ -5,8 +5,10 @@ import path from 'path'
 import { NewS3UploadsClient, S3UploadsClient } from '../s3'
 
 import { NewClamAV, ClamAV } from '../clamAV'
+import { scanFiles } from '../scanFiles';
+import { generateVirusScanTagSet, virusScanStatus } from '../tags';
 
-export async function auditUploadsLambda(event: S3Event, _context: Context) {
+export async function auditUploadsLambda(_event: S3Event, _context: Context) {
     console.info('-----Start Audit Uploads function-----')
 
     // Check on the values for our required config
@@ -33,7 +35,7 @@ export async function auditUploadsLambda(event: S3Event, _context: Context) {
     }, s3Client)
 
     console.info('Updating ', clamAVBucketName)
-    const err = await auditBucket(s3Client, clamAV, auditBucketName)
+    const err = await auditBucket(s3Client, clamAV, auditBucketName, '/tmp/download')
 
     if (err) {
         throw err
@@ -61,7 +63,7 @@ async function emptyWorkdir(workdir: string): Promise<undefined | Error> {
 }
 
 // audit bucket returns a list of keys that are INFECTED that were previously marked CLEAN
-async function auditBucket(s3Client: S3UploadsClient, clamAV: ClamAV, bucketName: string): Promise<undefined | Error> {
+async function auditBucket(s3Client: S3UploadsClient, clamAV: ClamAV, bucketName: string, scanFolder: string): Promise<undefined | Error> {
 
     // get the virus definition files
     const defsRes = await clamAV.downloadAVDefinitions()
@@ -84,37 +86,85 @@ async function auditBucket(s3Client: S3UploadsClient, clamAV: ClamAV, bucketName
         chunks.push(objects.slice(i, i + chunkSize))
     }
 
+    let allInfectedFiles: string[] = []
     // Download files chunk by chunk
     for (const chunk of chunks) {
         console.info('scanning a chunk of documents')
 
-        const downloadRes = await s3Client.downloadAllFiles(chunk, bucketName, '/tmp/download')
-        if (downloadRes) {
-            console.error('couldnt get this chunk of files', chunk)
-            return downloadRes
+
+        const infectedFilesInChunk = await scanFiles(s3Client, clamAV, chunk, bucketName, scanFolder)
+        if (infectedFilesInChunk instanceof Error) {
+            console.error('failed to scan chunk of files', infectedFilesInChunk)
+            return infectedFilesInChunk
         }
 
-        const scanRes = clamAV.scanLocalFile('/tmp/download')
-        if (scanRes instanceof Error) {
-            console.error('failed to scan files', scanRes)
-            return new Error('Failed to scan')
-        } else if (scanRes === 'INFECTED') {
-            console.error('something in this chunk is dirty', chunk, bucketName)
-            return new Error(`Encountered a dirty file in ${chunk}`)
-        }
+        console.info('Infected Files In Chunk:', infectedFilesInChunk)
 
-        console.info('that chunk is clean')
+        allInfectedFiles = allInfectedFiles.concat(infectedFilesInChunk)
 
         // remove the scanned files locally
-        const eraseRes = await emptyWorkdir('/tmp/download')
+        const eraseRes = await emptyWorkdir(scanFolder)
         if (eraseRes) {
             console.error('failed to erase scanned files')
             return eraseRes
         }
     }
 
-    console.info('scanned all chunks, all files clean: count', objects.length)
+    console.info(`scanned all chunks, found ${allInfectedFiles.length} infected files: ${allInfectedFiles}`)
+
+    // Now for all the infected files, determine if they have their tags set incorrectly
+    const misTaggedInfectedFiles: string[] = []
+    const taggingErrors: Error[] = []
+    for (const infectedFile of allInfectedFiles) {
+
+        const tags = await s3Client.getObjectTags(infectedFile, bucketName)
+        if (tags instanceof Error) {
+            console.error('Failed to get tags for key: ', infectedFile)
+            taggingErrors.push(tags)
+            continue
+        }
+        console.log('tags for ', infectedFile, tags)
+
+        const scanStatus = virusScanStatus(tags)
+
+        if (scanStatus === 'INFECTED') {
+            console.log('Infected File is marked Infected')
+            continue
+        }
+
+        if (scanStatus === 'CLEAN') {
+            console.info('BAD: Infected File Is Marked CLEAN: ', infectedFile)
+            misTaggedInfectedFiles.push(infectedFile)
+
+            const infectedTags = generateVirusScanTagSet('INFECTED')
+            const tag = await s3Client.tagObject(infectedFile, bucketName, infectedTags)
+            if (tag instanceof Error) {
+                const errMsg = `Failed to set infected tags for: ${infectedFile}, got: ${tag}`
+                console.error(errMsg)
+                taggingErrors.push(new Error(errMsg))
+            }
+            console.info('Corrected tags for ', infectedFile)
+
+            continue
+        }
+
+        const errMsg = `Unable to verify tags for file: ${infectedFile}, got: ${scanStatus}`
+        console.error(errMsg)
+        taggingErrors.push(new Error(errMsg))
+
+    }
+
+    if (taggingErrors.length >0) {
+        console.error('All Errors from attempting to update tags', taggingErrors)
+        return new Error('We encountered errors trying to fix the tags for improperly tagged objects')
+    }
+
+    console.info(`Found ${misTaggedInfectedFiles.length} mistagged infected files: ${misTaggedInfectedFiles} and correctly marked them as INFECTED`)
 
     return undefined
 
+}
+
+export {
+    auditBucket
 }
