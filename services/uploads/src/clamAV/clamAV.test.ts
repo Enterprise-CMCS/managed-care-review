@@ -39,7 +39,6 @@ describe('clamAV', () => {
 
 
     it('returns a list of bad files when scanning a directory', async () => {
-
         const thisDir = __dirname
 
         const s3Client = NewTestS3UploadsClient()
@@ -80,7 +79,7 @@ describe('clamAV', () => {
         const testFilesDir = path.join(thisDir, 'testData')
 
         // call test files on it
-        const res = await clamAV.scanForInfectedFiles(testFilesDir)
+        const res = clamAV.scanForInfectedFiles(testFilesDir)
 
         if (res instanceof Error) {
             throw res

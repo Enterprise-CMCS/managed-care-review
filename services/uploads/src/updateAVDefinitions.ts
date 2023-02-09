@@ -63,13 +63,13 @@ async function updateAVDefinitions(s3Client: S3UploadsClient, clamAV: ClamAV, wo
         return res
     }
 
-    // run the tool, calling out to the place
+    // run freshclam, fetching the latest virus definition files from ClamAV
     const freshErr = await clamAV.fetchAVDefinitionsWithFreshclam(workdir)
     if (freshErr) {
         return freshErr
     }
 
-    // upload the new definitions
+    // upload the new definitions to the definitions bucket
     const uploadErr = await clamAV.uploadAVDefinitions(workdir)
     if (uploadErr) {
         return uploadErr

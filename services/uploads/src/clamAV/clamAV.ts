@@ -112,6 +112,10 @@ async function downloadAVDefinitions(config: ClamAVConfig, s3Client: S3UploadsCl
     const definitionFileKeys = allFileKeys
         .filter((key) => key.startsWith(config.definitionsPath))
 
+    if (definitionFileKeys.length === 0) {
+        return new Error(`No AV Definitions found to download in bucket: ${config.bucketName}`)
+    }
+
     const res = await s3Client.downloadAllFiles(definitionFileKeys, config.bucketName, config.pathToDefintions)
     if (res) {
         return res
@@ -227,9 +231,11 @@ async function fetchAVDefinitionsWithFreshclam(config: ClamAVConfig, workdir: st
         console.info('Update message')
         console.info(executionResult.stdout.toString())
 
+        const files = await readdir(workdir)
+
         console.info(
             'Downloaded:',
-            await readdir(workdir)
+            files
         )
 
         if (executionResult.stderr) {

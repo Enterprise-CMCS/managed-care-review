@@ -62,6 +62,7 @@ custom:
     ssm:
       '/configuration/iam/full_permissions_boundary_policy': 'arn:aws:iam::local:policy/local/developer-boundary-policy'
   s3:
+    address: 127.0.0.1 # this started defaulting to ipv6 which prevented tests from connecting
     # when vhostBuckets are enabled all non-localhost hostnames are re-written as buckets
     # setting this false allows the workaround for docker to work.
     vhostBuckets: false
