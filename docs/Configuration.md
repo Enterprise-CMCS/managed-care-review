@@ -198,15 +198,15 @@ Important email configuration is currently stored in AWS Parameter Store. We pla
 
 #### `/configuration/email/devTeamHelpAddress`
 
-*[same in all env]* This is the help address displayed in state emails for contacting the MC-Review dev team.
+*[same in prod/val]* This is the help address displayed in state emails for contacting the MC-Review dev team.
 
 #### `/configuration/email/rateHelpAddress`
 
-*[same in all env]* This the help address displayed in state emails for contacting the rate policy team.
+*[same in prod/val* This the help address displayed in state emails for contacting the rate policy team.
 
 #### `/configuration/email/reviewHelpAddress`
 
-*[same in all env]* This the help address displayed in state emails for contacting the analyst review team.
+*[same in prod/val]* This the help address displayed in state emails for contacting the analyst review team.
 
 #### `/configuration/email/dmcp`
 
