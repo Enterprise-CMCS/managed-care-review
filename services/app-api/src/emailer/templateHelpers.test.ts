@@ -29,6 +29,7 @@ describe('templateHelpers', () => {
             expectedResult: [
                 ...testEmailConfig.cmsReviewSharedEmails,
                 ...testStateAnalystsEmails,
+                ...testEmailConfig.dmcoEmails,
             ],
         },
         {
@@ -39,6 +40,7 @@ describe('templateHelpers', () => {
             expectedResult: [
                 ...testEmailConfig.cmsReviewSharedEmails,
                 ...testStateAnalystsEmails,
+                ...testEmailConfig.dmcoEmails,
                 ...testEmailConfig.dmcpEmails,
                 ...testEmailConfig.oactEmails,
             ],
@@ -57,6 +59,7 @@ describe('templateHelpers', () => {
                 'cmsreview2@example.com',
                 '"State Analyst 1" <StateAnalyst1@example.com>',
                 '"State Analyst 2" <StateAnalyst2@example.com>',
+                ...testEmailConfig.dmcoEmails,
             ],
         },
         {
@@ -101,6 +104,7 @@ describe('templateHelpers', () => {
                 'cmsreview2@example.com',
                 '"State Analyst 1" <StateAnalyst1@example.com>',
                 '"State Analyst 2" <StateAnalyst2@example.com>',
+                ...testEmailConfig.dmcoEmails,
             ],
         },
         {
@@ -115,6 +119,7 @@ describe('templateHelpers', () => {
                 'cmsreview2@example.com',
                 '"State Analyst 1" <StateAnalyst1@example.com>',
                 '"State Analyst 2" <StateAnalyst2@example.com>',
+                ...testEmailConfig.dmcoEmails,
             ],
         },
         {

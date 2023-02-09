@@ -102,7 +102,7 @@ const generateCMSReviewerEmails = (
         )
     }
 
-    const { oactEmails, dmcpEmails } = config
+    const { oactEmails, dmcpEmails, dmcoEmails } = config
     const programIDs = findAllPackageProgramIds(pkg)
     let reviewers: string[] = []
 
@@ -111,6 +111,7 @@ const generateCMSReviewerEmails = (
         reviewers = [
             ...config.cmsReviewSharedEmails,
             ...stateAnalystsEmails,
+            ...dmcoEmails,
             ...dmcpEmails,
         ]
     } else if (pkg.submissionType === 'CONTRACT_AND_RATES') {
@@ -118,6 +119,7 @@ const generateCMSReviewerEmails = (
         reviewers = [
             ...config.cmsReviewSharedEmails,
             ...stateAnalystsEmails,
+            ...dmcoEmails,
             ...dmcpEmails,
             ...oactEmails,
         ]
