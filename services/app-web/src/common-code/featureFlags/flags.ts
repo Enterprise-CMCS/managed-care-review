@@ -64,6 +64,13 @@ export const featureFlags = {
         defaultValue: false,
     },
     /**
+     * Enables state and CMS Q&A features
+     */
+    CMS_QUESTIONS: {
+        flag: 'cms-questions',
+        defaultValue: false,
+    },
+    /**
      * Used in testing to simulate errors in fetching flag value.
      * This flag does not exist in LaunchDarkly dashboard so fetching this will return the defaultValue.
      */

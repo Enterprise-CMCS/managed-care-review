@@ -4,7 +4,9 @@
 erDiagram
 
 HealthPlanPackageTable ||--|{ HealthPlanRevisionTable: "has many"
-HealthPlanPackageTable }|--|| State: "has many"
+HealthPlanPackageTable ||--|{ State: "has many"
+HealthPlanPackageTable ||--|{ Question: "has many"
+State }|--|{ User: "many to many"
 
 HealthPlanPackageTable {
     string id
@@ -38,5 +40,44 @@ User {
     string role
 }
 
-User }|--|{ State: "many to many"
+Document {
+    string id
+    string name
+    string s3URL
+    User uploadedBy
+    datetime createdAt
+    bool virusScan
+}
+
+User ||--|{ Document: "has many"
+
+User ||--|{ Question: "has many"
+
+Question ||--|{ QuestionResponse: "has many"
+
+Question ||--|{ Document: "has many"
+
+QuestionResponse ||--|{ Document: "has many"
+
+Question {
+    string id
+    string pkgID
+    datetime dateAdded
+    User addedBy
+    Document[] documents
+    string noteText
+    date dueDate
+    string[] rateIDs
+    QuestionResponse[] responses
+}
+
+QuestionResponse {
+    string id
+    string questionID
+    datetime dateAdded
+    User addedBy
+    Document[] documents
+    string noteText
+}
+
 ```

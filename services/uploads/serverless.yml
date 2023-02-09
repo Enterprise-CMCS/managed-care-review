@@ -15,7 +15,7 @@ plugins:
 # The `provider` block defines where your service will be deployed
 provider:
   name: aws
-  runtime: nodejs16.x
+  runtime: nodejs18.x
   region: us-east-1
   iam:
     role:
@@ -72,6 +72,8 @@ custom:
         # the serverless-s3-local plugin starts any bucket with a BucketName
         # the attachments bucket has no name, so we need to make one up on our own
       - local-qa
+      - test-uploads
+      - test-av-definitions
   serverlessTerminationProtection:
     stages:
       - dev
@@ -86,13 +88,13 @@ layers:
 
 functions:
   avScan:
-    handler: src/antivirus.lambdaHandleEvent
+    handler: src/avScan.avScanLambda
     name: ${self:service}-${sls:stage}-avScan
     timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
     memorySize: 3008
     layers:
       - !Ref ClamDefsLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-8-0:2
     environment:
       CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
       PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
@@ -100,15 +102,31 @@ functions:
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
 
   avDownloadDefinitions:
-    handler: src/download-definitions.lambdaHandleEvent
+    handler: src/updateAVDefinitions.updateAVDefinitionsLambda
     events:
       - schedule: cron(0 */6 * * ? *)
     timeout: 300 # 300 seconds = 5 minutes
     memorySize: 1024
     layers:
       - !Ref ClamDefsLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-8-0:2
     environment:
+      CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
+      PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
+      AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
+      OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
+
+  avAuditUploads:
+    handler: src/auditUploads.auditUploadsLambda
+    timeout: 900 # 900 seconds = 15 minutes Lambda MAX
+    memorySize: 2048
+    ephemeralStorageSize: 1024
+    maximumRetryAttempts: 0
+    layers:
+      - !Ref ClamDefsLambdaLayer
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-8-0:2
+    environment:
+      AUDIT_BUCKET_NAME: !Ref DocumentUploadsBucket
       CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
       PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
       AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
