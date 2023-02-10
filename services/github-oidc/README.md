@@ -132,8 +132,9 @@ The trust policy verifies claims in the JWT based on the following inputs:
 
 #### Subject Claim (sub)
 
-Subject claims allow you to configure the GitHub branch or environment that is permitted to perform AWS actions via the OIDC provider. This is an extra layer of insurance that changes in resources are targeted to the correct account.  [Read more about subject claims](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#example-subject-claims) and see `params.{val, prod, default}.subjectClaimFilters` for more detail on how this service configures subject claims.
+Subject claims allow you to configure the GitHub environment that is permitted to perform AWS actions via the OIDC provider. This is an extra layer of insurance that changes in resources are targeted to the correct account.  [Read more about subject claims](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#example-subject-claims) and see `params.{val, prod, default}.subjectClaim` in the YAML for more detail on how this service configures subject claims.
 
+Note that these claims rely on having a `dev`, `val` and `prod` GitHub environments configured via the GitHub UI.  See the [ADR](../../docs/architectural-decision-records/021-use-github-environments.md) for more information on GitHub environments.
 
 #### Audience Claim (aud)
 
