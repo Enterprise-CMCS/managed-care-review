@@ -1,8 +1,11 @@
 # 020 — Use GitHub's OIDC provider to get AWS credentials
 
 ## Considered Options
+
+### Current setup
 We currently use long-term AWS credentials backed by an IAM service user.  The credentials for each AWS environment are stored as GitHub secrets and are injected into the environment of the GitHub Actions workflows that require them.  Currently the service user's credentials have access to all AWS APIs via the `AdminAccess` managed policy.
 
+### OIDC
 The proposed option is to use GitHub's OIDC provider to get short-term credentials. [More on OIDC for GitHub Actions](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect)
 
 ## Chosen Decision
@@ -23,6 +26,6 @@ Workflows that need access to AWS APIs will call a new composite action `get-aws
 - `+` admin access means no workflow failures due to permissions errors when new AWS APIs are called
 - `-` the IAM user that backs the creds can't be managed directly (Cloud Support ticket required)
 - `-` must be rotated quarterly
-- `-` long-term creds mean a greater attack window if leaked
+- `-` long-term creds mean a longer attack window if leaked
 
 
