@@ -29,6 +29,7 @@ import {
 import statePrograms from '../../../app-web/src/common-code/data/statePrograms.json'
 import { testLDService } from './launchDarklyHelpers'
 import { LDService } from '../launchDarkly/launchDarkly'
+import { insertUserToLocalAurora } from '../authn'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -83,6 +84,9 @@ const constructTestPostgresServer = async (opts?: {
 
     const prismaClient = await sharedTestPrismaClient()
     const postgresStore = opts?.store || NewPostgresStore(prismaClient)
+
+    await insertUserToLocalAurora(postgresStore, context.user)
+
     const postgresResolvers = configureResolvers(
         postgresStore,
         emailer,
