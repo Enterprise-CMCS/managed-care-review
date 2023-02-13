@@ -38,4 +38,5 @@ module.exports = {
     },
 }
 
+// make this a module, otherwise its a global script file
 export {}

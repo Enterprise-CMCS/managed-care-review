@@ -1,10 +1,10 @@
 const path = require('path')
 
 const webpackConfig = (config) => {
-    config.resolve.alias.uswds = path.resolve(
-        __dirname,
-        '../../node_modules/@uswds/uswds'
-    );
+    // config.resolve.alias.uswds = path.resolve(
+    //     __dirname,
+    //     '../../node_modules/@uswds/uswds'
+    // );
 
     config.module.rules.push({
         test: /\.(sa|sc|c)ss$/,
@@ -18,14 +18,14 @@ const webpackConfig = (config) => {
                     sourceMap: true,
                     sassOptions: {
                         includePaths: [
-                            '../../node_modules/@uswds',
-                            '../../node_modules/@uswds/uswds/packages',
+                            './node_modules/@uswds',
+                            './node_modules/@uswds/uswds/packages',
                         ],
                     },
                 },
             },
         ],
-        include: path.resolve(__dirname, '../'),
+        include: path.resolve(__dirname, '../../'),
     });
 
     return config;
@@ -58,7 +58,7 @@ const webpackConfig = (config) => {
               lazyCompilation: true,
           },
       },
-      webpackFinal(config) {
-         return webpackConfig(config)
-      },
+        webpackFinal(config) {
+           return webpackConfig(config)
+        },
   };
