@@ -1,17 +1,8 @@
-import { CMSUserType, StateUserType } from './UserType'
+import { CMSUserType } from './UserType'
 
 type Document = {
     name: string
     s3URL: string
-}
-
-type QuestionResponse = {
-    id: string
-    questionID: string
-    dateAdded: Date
-    addedBy: StateUserType
-    documents: [Document]
-    noteText?: string
 }
 
 type Question = {
@@ -19,12 +10,7 @@ type Question = {
     pkgID: string
     dateAdded: Date
     addedBy: CMSUserType
-    documents: [Document]
-    noteText?: string
-    dueDate?: Date
-    rateIDs: string[]
-
-    responses: QuestionResponse[]
+    documents: Document[]
 }
 
 type QuestionList = {
@@ -45,4 +31,20 @@ type IndexQuestionsPayload = {
     OACTQuestions: QuestionList
 }
 
-export { IndexQuestionsPayload }
+type CreateQuestionPayload = {
+    question: Question
+}
+
+type CreateQuestionInput = {
+    pkgID: string
+    documents: Document[]
+}
+
+export {
+    IndexQuestionsPayload,
+    CreateQuestionPayload,
+    CreateQuestionInput,
+    Question,
+    Document,
+    QuestionList,
+}
