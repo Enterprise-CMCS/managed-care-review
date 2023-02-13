@@ -7,6 +7,10 @@ import { NewS3UploadsClient, S3UploadsClient } from '../s3'
 import { NewClamAV, ClamAV } from '../clamAV'
 import { scanFiles } from '../scanFiles';
 import { generateVirusScanTagSet, virusScanStatus } from '../tags';
+import { _Object } from '@aws-sdk/client-s3';
+import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda"
+import { fromUtf8 } from "@aws-sdk/util-utf8-node"
+import { ScanFilesInput } from './scanFiles';
 
 export async function auditUploadsLambda(_event: S3Event, _context: Context) {
     console.info('-----Start Audit Uploads function-----')
@@ -34,14 +38,29 @@ export async function auditUploadsLambda(_event: S3Event, _context: Context) {
         definitionsPath: clamAVDefintionsPath
     }, s3Client)
 
-    console.info('Updating ', clamAVBucketName)
-    const err = await auditBucket(s3Client, clamAV, auditBucketName, '/tmp/download')
+    // TEST
+    console.log('Test Invoking Other Lambda')
 
-    if (err) {
-        throw err
-    }
+    const lambdaClient = new LambdaClient({})
 
-    return 'FILE SCANNED'
+    const payload: ScanFilesInput = {bucket: 'foo', keys: ['onefile', 'twofile', 'threefiles']} 
+    const payloadJSON = fromUtf8(JSON.stringify(payload))
+    const invocation = new InvokeCommand({ FunctionName: 'avListInfectedFiles', Payload: payloadJSON})
+
+    const res = await lambdaClient.send(invocation)
+
+    console.log('LAMBVDA RAIN', res)
+
+    return 'TESTED LAMBDA CONNECTION'
+
+    // console.info('Updating ', clamAVBucketName)
+    // const err = await auditBucket(s3Client, clamAV, auditBucketName, '/tmp/download')
+
+    // if (err) {
+    //     throw err
+    // }
+
+    // return 'FILE SCANNED'
 }
 
 async function emptyWorkdir(workdir: string): Promise<undefined | Error> {
@@ -62,6 +81,37 @@ async function emptyWorkdir(workdir: string): Promise<undefined | Error> {
     }
 }
 
+// Chunk the objects, by file size. Prevent chunks from having more than 20 objects in them, or from being greater than 500 megs.
+// doing it simple, not trying to get into bin packing here
+function chunkS3Objects(objects: _Object[]): _Object[][] {
+
+    const maxChunkSize = 500_000_000 // Size is reported in Bytes, this is 500 megs, less than the max allowed download size.
+
+    const chunks: _Object[][] = []
+    let currentChunk: _Object[] = []
+    let currentChunkSize = 0
+    for (const obj of objects) {
+        console.log('chunking ojbec', obj.Size)
+        const size = obj.Size || maxChunkSize
+        if ((size + currentChunkSize) > maxChunkSize || currentChunk.length === 20) {
+            chunks.push(currentChunk)
+            currentChunk = []
+            currentChunkSize = 0
+        }
+
+        currentChunk.push(obj)
+        currentChunkSize += size
+    }
+
+    if (currentChunk.length > 0) {
+        chunks.push(currentChunk)
+    }
+
+    return chunks
+}
+
+
+
 // audit bucket returns a list of keys that are INFECTED that were previously marked CLEAN
 async function auditBucket(s3Client: S3UploadsClient, clamAV: ClamAV, bucketName: string, scanFolder: string): Promise<undefined | Error> {
 
@@ -72,27 +122,26 @@ async function auditBucket(s3Client: S3UploadsClient, clamAV: ClamAV, bucketName
         return defsRes
     }
 
-    // list all objects in bucket, with pagination probably -- 200 is our max right now, can skip that.
-    const objects = await s3Client.listBucketFiles(bucketName)
+    // list all objects in bucket, TODO: with pagination probably
+    const objects = await s3Client.listBucketObjects(bucketName)
     if (objects instanceof Error) {
         console.error('failed to list files', objects)
         return objects
     }
 
-    // chunk objects into arrays of 10 or less
-    const chunks: string[][] = []
-    const chunkSize = 20
-    for (let i = 0; i < objects.length; i += chunkSize ) {
-        chunks.push(objects.slice(i, i + chunkSize))
-    }
+    // TODO: If any single file is too big, make sure it's marked SKIPPED and skip it.
+
+    // chunk objects into groups by filesize and count
+    const chunks = chunkS3Objects(objects)
+    console.log('make chunks of size: ', chunks.map((c) => c.length))
 
     let allInfectedFiles: string[] = []
     // Download files chunk by chunk
     for (const chunk of chunks) {
         console.info('scanning a chunk of documents')
+        const keys = chunk.map((obj) => obj.Key).filter((key): key is string => key !== undefined)
 
-
-        const infectedFilesInChunk = await scanFiles(s3Client, clamAV, chunk, bucketName, scanFolder)
+        const infectedFilesInChunk = await scanFiles(s3Client, clamAV, keys, bucketName, scanFolder)
         if (infectedFilesInChunk instanceof Error) {
             console.error('failed to scan chunk of files', infectedFilesInChunk)
             return infectedFilesInChunk

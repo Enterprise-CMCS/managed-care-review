@@ -9,6 +9,7 @@ import {
     DeleteObjectsCommand,
     Tagging,
     Tag,
+    _Object,
 } from "@aws-sdk/client-s3"
 
 import fs from 'fs'
@@ -20,6 +21,7 @@ import { Readable } from 'stream'
 interface S3UploadsClient {
     sizeOf: (key: string, bucket: string) => Promise<number | Error>
     listBucketFiles: (bucketName: string) => Promise<string[] | Error>
+    listBucketObjects: (bucketName: string) => Promise<_Object[] | Error>
     downloadFileFromS3: (s3ObjectKey: string, s3ObjectBucket: string, destinationPath: string) => Promise<string | Error>
     downloadAllFiles: (keys: string[], bucket: string, targetDir: string) => Promise<undefined | Error>,
     getObjectTags: (key: string, bucket: string) => Promise<Tag[] | Error>
@@ -32,6 +34,7 @@ function uploadsClient(s3Client: S3Client): S3UploadsClient {
     return {
         sizeOf: (key, bucket) => sizeOf(s3Client, key, bucket),
         listBucketFiles: (bucketName) => listBucketFiles(s3Client, bucketName),
+        listBucketObjects: (bucketName) => listBucketObjects(s3Client, bucketName),
         downloadFileFromS3: (s3ObjectKey, s3ObjectBucket, destinationPath) => downloadFileFromS3(s3Client, s3ObjectKey, s3ObjectBucket, destinationPath),
         downloadAllFiles: (keys, bucket, targetDir) => downloadAllFiles(s3Client, keys, bucket, targetDir),
         getObjectTags: (key, bucket) => getObjectTags(s3Client, key, bucket),
@@ -107,6 +110,21 @@ async function getObjectTags(client: S3Client, key: string, bucket: string): Pro
  * returns a list of keys
  */
 async function listBucketFiles(client: S3Client, bucketName: string): Promise<string[] | Error> {
+    const objects = await listBucketObjects(client, bucketName)
+    if (objects instanceof Error) {
+        return objects
+    }
+
+    const keys = objects.map((obj) => obj.Key).filter((key): key is string => key !== undefined)
+    return keys
+}
+
+/**
+ * Lists all the files from a bucket
+ *
+ * returns a list of Objects
+ */
+async function listBucketObjects(client: S3Client, bucketName: string): Promise<_Object[] | Error> {
     const listCmd = new ListObjectsV2Command({ Bucket: bucketName })
 
     try {
@@ -117,10 +135,7 @@ async function listBucketFiles(client: S3Client, bucketName: string): Promise<st
             return []
         }
 
-        const objects = listFilesResult.Contents
-
-        const keys = objects.map((obj) => obj.Key).filter((key): key is string => key !== undefined)
-        return keys
+        return listFilesResult.Contents
     } catch (err) {
         console.error(`Error listing files`)
         console.error(err)

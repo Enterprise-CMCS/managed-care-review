@@ -118,8 +118,24 @@ functions:
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
 
   avAuditUploads:
-    handler: src/auditUploads.auditUploadsLambda
+    handler: src/auditUploads/index.auditUploadsLambda
     timeout: 900 # 900 seconds = 15 minutes Lambda MAX
+    memorySize: 2048
+    ephemeralStorageSize: 1024
+    maximumRetryAttempts: 0
+    layers:
+      - !Ref ClamDefsLambdaLayer
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-8-0:2
+    environment:
+      AUDIT_BUCKET_NAME: !Ref DocumentUploadsBucket
+      CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
+      PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
+      AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
+      OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
+
+  avListInfectedFiles:
+    handler: src/auditUploads/index.scanFilesLambda
+    timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
     memorySize: 2048
     ephemeralStorageSize: 1024
     maximumRetryAttempts: 0

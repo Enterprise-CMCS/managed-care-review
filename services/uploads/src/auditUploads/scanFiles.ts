@@ -24,12 +24,17 @@ async function scanFilesLambda(event: S3Event, _context: Context) {
 
     // get a list of keys out of the event
 
+    console.log('EVENT: ', event)
 
     //download and scan files
 
 
     // return error or list of files
 
+
+    return {
+        infectedKeys: ['onefile.txt', 'twofile.txt']
+    }
 }
 
 // async function executeScanFilesLambda()
