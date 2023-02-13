@@ -183,16 +183,19 @@ This is the client ID for Launch Darkly in our frontend. This key is designed to
 
 ## Email configuration
 
-Important email configuration is currently stored in AWS Parameter Store. We plan to move this to the DB soon. Until then, know that if these values are not set properly, unexpected errors may occur.
+Important email configuration is stored in AWS Parameter Store. Reference for the expected values can be found in [Confluence](https://qmacbis.atlassian.net/wiki/spaces/OY2/pages/3164864517/Emails)
+
+We plan to move this to the DB down the road. Until then, know that if these values are not set properly, unexpected errors may occur in deployed applications. We guard against this with the [Parameter Store module](/services/app-api/src/parameterStore/awsParameterStore.ts) and in config checks in [apollo_gql](../services/app-api/src/handlers/apollo_gql.ts).
 
 ### Guidelines for usage of Parameter Store for emails
 
-1. Parameter stores across environments will have the same names.We will clearly define the purpose of each variable in this file, as well as if it is configured differently by environment or we expect the same values for all environments.
-2. Valid values in parameter store are strings and string lists. We prefer string lists to allow additional addresses to be added if needed.
+1. Parameter stores across environments will have the same names.
+2. Clearly define the purpose of each variable in this file, as well as if it is configured differently by environment or we expect the same values for all environments.
+3. Valid values in parameter store are strings and string lists. We prefer string lists to allow additional addresses to be added if needed.
 
 ### Expected email config and their intended usage across the application
 
-#### `/configuration/email/emailSource`
+#### `/configuration/email/sourceAddress`
 
 *[same in all env]* This is the application-wide email sender.
 
