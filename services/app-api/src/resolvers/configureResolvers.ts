@@ -10,8 +10,11 @@ import {
     submitHealthPlanPackageResolver,
     unlockHealthPlanPackageResolver,
     updateHealthPlanFormDataResolver,
-    indexQuestionsResolver,
 } from './healthPlanPackage'
+import {
+    indexQuestionsResolver,
+    createQuestionResolver,
+} from './questionAnswers'
 import {
     fetchCurrentUserResolver,
     updateCMSUserResolver,
@@ -53,6 +56,7 @@ export function configureResolvers(
                 emailParameterStore
             ),
             updateCMSUser: updateCMSUserResolver(store),
+            createQuestion: createQuestionResolver(store),
         },
         User: {
             // resolveType is required to differentiate Unions
