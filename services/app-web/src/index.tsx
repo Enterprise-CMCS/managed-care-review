@@ -117,7 +117,7 @@ if (ldClientId === undefined) {
         },
         options: {
             bootstrap: 'localStorage',
-            baseUrl: 'https://clientsdk.launchdarkly.us',
+            baseUrl: 'https://app.launchdarkly.us',
             streamUrl: 'https://clientstream.launchdarkly.us',
             eventsUrl: 'https://events.launchdarkly.us',
         },
