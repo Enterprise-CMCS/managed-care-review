@@ -246,8 +246,9 @@ async function initializeGQLHandler(): Promise<Handler> {
         await emailParameterStore.getCmsRateHelpEmail()
     const cmsDevTeamHelpEmailAddress =
         await emailParameterStore.getCmsDevTeamHelpEmail()
-    const ratesReviewSharedEmails =
-        await emailParameterStore.getRatesReviewSharedEmails()
+    const oactEmails = await emailParameterStore.getOACTEmails()
+    const dmcpEmails = await emailParameterStore.getDMCPEmails()
+    const dmcoEmails = await emailParameterStore.getDMCOEmails()
 
     if (emailSource instanceof Error)
         throw new Error(`Configuration Error: ${emailSource.message}`)
@@ -272,10 +273,14 @@ async function initializeGQLHandler(): Promise<Handler> {
             `Configuration Error: ${cmsDevTeamHelpEmailAddress.message}`
         )
     }
-    if (ratesReviewSharedEmails instanceof Error)
-        throw new Error(
-            `Configuration Error: ${ratesReviewSharedEmails.message}`
-        )
+    if (oactEmails instanceof Error)
+        throw new Error(`Configuration Error: ${oactEmails.message}`)
+
+    if (dmcpEmails instanceof Error)
+        throw new Error(`Configuration Error: ${dmcpEmails.message}`)
+
+    if (dmcoEmails instanceof Error)
+        throw new Error(`Configuration Error: ${dmcoEmails.message}`)
 
     // Configure LaunchDarkly
     ldClient = ld.init(ldSDKKey)
@@ -315,7 +320,9 @@ async function initializeGQLHandler(): Promise<Handler> {
                   cmsReviewHelpEmailAddress,
                   cmsRateHelpEmailAddress,
                   cmsDevTeamHelpEmailAddress,
-                  ratesReviewSharedEmails,
+                  oactEmails,
+                  dmcpEmails,
+                  dmcoEmails,
               })
             : newSESEmailer({
                   emailSource,
@@ -325,7 +332,9 @@ async function initializeGQLHandler(): Promise<Handler> {
                   cmsReviewHelpEmailAddress,
                   cmsRateHelpEmailAddress,
                   cmsDevTeamHelpEmailAddress,
-                  ratesReviewSharedEmails,
+                  oactEmails,
+                  dmcpEmails,
+                  dmcoEmails,
               })
 
     // Resolvers are defined and tested in the resolvers package

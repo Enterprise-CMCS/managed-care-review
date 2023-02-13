@@ -26,6 +26,9 @@ import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
 import { featureFlags } from '../../common-code/featureFlags'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { recordJSException } from '../../otelHelpers'
+import { SubmissionSideNav } from '../SubmissionSideNav'
+import { UploadQuestions } from '../QuestionsAnswers/UploadQuestions/UploadQuestions'
+import { QuestionsAnswers } from '../QuestionsAnswers'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -45,9 +48,11 @@ function componentForAuthMode(
 const StateUserRoutes = ({
     authMode,
     setAlert,
+    showQuestionsAnswers,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
+    showQuestionsAnswers: boolean
 }): React.ReactElement => {
     return (
         <AuthenticatedRouteWrapper setAlert={setAlert} authMode={authMode}>
@@ -67,10 +72,26 @@ const StateUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_NEW}
                     element={<NewStateSubmissionForm />}
                 />
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                    element={<SubmissionSummary />}
-                />
+                <Route element={<SubmissionSideNav />}>
+                    {showQuestionsAnswers && (
+                        <Route
+                            path={
+                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                            }
+                            element={<QuestionsAnswers />}
+                        />
+                    )}
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Route>
+                {showQuestionsAnswers && (
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                        element={<UploadQuestions />}
+                    />
+                )}
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
                     element={<SubmissionRevisionSummary />}
@@ -88,9 +109,11 @@ const StateUserRoutes = ({
 const CMSUserRoutes = ({
     authMode,
     setAlert,
+    showQuestionsAnswers,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
+    showQuestionsAnswers: boolean
 }): React.ReactElement => {
     return (
         <AuthenticatedRouteWrapper authMode={authMode} setAlert={setAlert}>
@@ -100,10 +123,26 @@ const CMSUserRoutes = ({
                     path={RoutesRecord.DASHBOARD}
                     element={<CMSDashboard />}
                 />
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                    element={<SubmissionSummary />}
-                />
+                <Route element={<SubmissionSideNav />}>
+                    {showQuestionsAnswers && (
+                        <Route
+                            path={
+                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                            }
+                            element={<QuestionsAnswers />}
+                        />
+                    )}
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Route>
+                {showQuestionsAnswers && (
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                        element={<UploadQuestions />}
+                    />
+                )}
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
                     element={<SubmissionRevisionSummary />}
@@ -159,6 +198,12 @@ export const AppRoutes = ({
         featureFlags.SESSION_EXPIRING_MODAL.flag,
         featureFlags.SESSION_EXPIRING_MODAL.defaultValue
     )
+
+    const showQuestionsAnswers = ldClient?.variation(
+        featureFlags.CMS_QUESTIONS.flag,
+        featureFlags.CMS_QUESTIONS.defaultValue
+    )
+
     const route = getRouteName(pathname)
     const { updateHeading } = usePage()
     const [initialPath] = useState(pathname) // this gets written on mount, so we don't call the effect on every path change
@@ -244,8 +289,20 @@ export const AppRoutes = ({
     if (!loggedInUser) {
         return <UnauthenticatedRoutes authMode={authMode} />
     } else if (loggedInUser.__typename === 'StateUser') {
-        return <StateUserRoutes authMode={authMode} setAlert={setAlert} />
+        return (
+            <StateUserRoutes
+                authMode={authMode}
+                setAlert={setAlert}
+                showQuestionsAnswers={showQuestionsAnswers}
+            />
+        )
     } else {
-        return <CMSUserRoutes authMode={authMode} setAlert={setAlert} />
+        return (
+            <CMSUserRoutes
+                authMode={authMode}
+                setAlert={setAlert}
+                showQuestionsAnswers={showQuestionsAnswers}
+            />
+        )
     }
 }

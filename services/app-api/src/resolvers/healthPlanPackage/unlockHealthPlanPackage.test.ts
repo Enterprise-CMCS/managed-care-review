@@ -454,7 +454,7 @@ describe('unlockHealthPlanPackage', () => {
         const cmsEmails = [
             ...config.cmsReviewSharedEmails,
             ...stateAnalystsEmails,
-            ...config.ratesReviewSharedEmails,
+            ...config.oactEmails,
         ]
 
         // email subject line is correct for CMS email

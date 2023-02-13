@@ -37,7 +37,11 @@ export async function updateUserAssignedState(
                     },
                 },
                 include: {
-                    stateAssignments: true,
+                    stateAssignments: {
+                        orderBy: {
+                            stateCode: 'asc',
+                        },
+                    },
                 },
             }),
         ])

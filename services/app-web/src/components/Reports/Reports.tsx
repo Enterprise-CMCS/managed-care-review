@@ -38,6 +38,7 @@ export const Reports = (): React.ReactElement => {
                 console.info('Error downloading report: ', e)
             })
     }
+
     return (
         <>
             <Button

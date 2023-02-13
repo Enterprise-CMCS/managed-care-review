@@ -31,18 +31,24 @@ const formatEmailAddresses = (str: string) => {
 
     This function will remove duplicate emails, including aliased emails that duplicate the same raw email string used elsewhere as a standalone entry
     However, multiple aliased email addresses that do not replicate a raw email string elsewhere in list are allowed as duplicates because there is not way to determine which to prefer
+    e.g. if FooBar@example.com and foobar@example.com are both in list, only foobar@example.com will remain after prune
     e.g. if "Foo Bar" <foobar@example> and foobar@example.com are both in the list, only foobar@example.com will remain after prune
     e.g. if "Foo Bar" <foobar@example> and "The best Foo Bar" <foobar@example> are both in the list, both remain after prune
 */
 const pruneDuplicateEmails = (emails: string[]): string[] =>
     emails.filter((email, index) => {
+        const aliasedEmail = !isEmailAddress(email)
         const rawEmailAddress = formatEmailAddresses(email)
 
-        // if we know that we have a possible aliased email address that is also included elsewhere on list as a raw email, remove it
-        if (!isEmailAddress(email) && emails.indexOf(rawEmailAddress) !== -1) {
+        if (aliasedEmail && emails.indexOf(rawEmailAddress) !== -1) {
+            // aliased email address is also included elsewhere on list as a raw email, remove it
             emails.indexOf(rawEmailAddress) === index
-        } else {
+        } else if (aliasedEmail) {
+            // return unique aliased email address
             return emails.indexOf(email) === index
+        } else {
+            // return unique email address, prefer lowercased if duplicates exist
+            return emails.indexOf(email.toLowerCase()) === index
         }
     })
 
