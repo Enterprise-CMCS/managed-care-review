@@ -1,7 +1,7 @@
 import {
     getStateAnalystsEmails,
     getSourceEmail,
-    getRatesReviewSharedEmails,
+    getOACTEmails,
     getCmsReviewHelpEmail,
     getCmsRateHelpEmail,
     getCmsDevTeamHelpEmail,
@@ -113,40 +113,7 @@ describe('emailParameterStore', () => {
             )
         })
     })
-    describe('getRatesReviewSharedEmails', () => {
-        it('returns rates review shared emails as array of string', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
-            spy.mockResolvedValue({
-                value: '"Rate Submission Reviewer 1" <rate.reviewer.1@example.com>,"Rate Submission Reviewer 2" <rate.reviewer.2@example.com>,"Rate Submission Reviewer 3" <rate.reviewer.3@example.com>',
-                type: 'StringList',
-            })
-            const result = await getRatesReviewSharedEmails()
-            expect(result).toStrictEqual([
-                `"Rate Submission Reviewer 1" <rate.reviewer.1@example.com>`,
-                `"Rate Submission Reviewer 2" <rate.reviewer.2@example.com>`,
-                `"Rate Submission Reviewer 3" <rate.reviewer.3@example.com>`,
-            ])
-        })
-        it('returns error when fetching store value fails', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
-            spy.mockResolvedValue(new Error('No store found'))
-            const result = await getRatesReviewSharedEmails()
-            expect(result).toBeInstanceOf(Error)
-        })
-        it('returns error when Type of parameter store value is incompatible', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
-            spy.mockResolvedValue({
-                value: '"CMS Source Email" <local@example.com>',
-                type: 'String',
-            })
-            const result = await getRatesReviewSharedEmails()
-            expect(result).toEqual(
-                new Error(
-                    'Parameter store /configuration/email/ratesAddresses value of Type String is not supported'
-                )
-            )
-        })
-    })
+
     describe('getCmsReviewHelpEmail', () => {
         it('returns review help email as string', async () => {
             const spy = jest.spyOn(ParameterStore, 'getParameterStore')
@@ -209,6 +176,7 @@ describe('emailParameterStore', () => {
             )
         })
     })
+
     describe('getCmsDevTeamHelpEmail', () => {
         it('returns dev team help email as string', async () => {
             const spy = jest.spyOn(ParameterStore, 'getParameterStore')
@@ -235,6 +203,41 @@ describe('emailParameterStore', () => {
             expect(result).toEqual(
                 new Error(
                     'Parameter store /configuration/email/devTeamHelpAddress value of Type StringList is not supported'
+                )
+            )
+        })
+    })
+
+    describe('getOACTEmails', () => {
+        it('returns oact emails as array of string', async () => {
+            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            spy.mockResolvedValue({
+                value: '"Rate Submission Reviewer 1" <rate.reviewer.1@example.com>,"Rate Submission Reviewer 2" <rate.reviewer.2@example.com>,"Rate Submission Reviewer 3" <rate.reviewer.3@example.com>',
+                type: 'StringList',
+            })
+            const result = await getOACTEmails()
+            expect(result).toStrictEqual([
+                `"Rate Submission Reviewer 1" <rate.reviewer.1@example.com>`,
+                `"Rate Submission Reviewer 2" <rate.reviewer.2@example.com>`,
+                `"Rate Submission Reviewer 3" <rate.reviewer.3@example.com>`,
+            ])
+        })
+        it('returns error when fetching store value fails', async () => {
+            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            spy.mockResolvedValue(new Error('No store found'))
+            const result = await getOACTEmails()
+            expect(result).toBeInstanceOf(Error)
+        })
+        it('returns error when Type of parameter store value is incompatible', async () => {
+            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            spy.mockResolvedValue({
+                value: '"CMS Source Email" <local@example.com>',
+                type: 'String',
+            })
+            const result = await getOACTEmails()
+            expect(result).toEqual(
+                new Error(
+                    'Parameter store /configuration/email/oact value of Type String is not supported'
                 )
             )
         })

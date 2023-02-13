@@ -86,6 +86,8 @@ describe('pruneDuplicateEmails', () => {
                 '"Foo Bar 1" <foo@bar.com>',
                 'foo@bar.com',
                 'bar@foo.com',
+                'Bar@foo.com',
+                'FoO@bar.com',
                 '"Bar 1" <bar@foo.com>',
                 '"Bar 2" <bar@foo.com>',
             ],
