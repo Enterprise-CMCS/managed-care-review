@@ -12,44 +12,11 @@ fragment questionEdgeFragment on QuestionEdge {
             stateAssignments {
                 code
                 name
-                programs {
-                    fullName
-                    id
-                    name
-                }
             }
         }
         documents {
             s3URL
             name
-        }
-        noteText
-        dueDate
-        rateIDs
-        responses {
-            id
-            questionID
-            dateAdded
-            addedBy {
-                id
-                role
-                email
-                givenName
-                familyName
-                state {
-                    code
-                    name
-                    programs {
-                        id
-                        name
-                        fullName
-                    }
-                }
-            }
-            documents {
-                name
-                s3URL
-            }
         }
     }
 }
