@@ -54,11 +54,11 @@ serverless deploy --stage ${stage_name} --param='bootstrap=true'
 ### Updating AWS permissions for a workflow
 Here's an example for a common use case: you want to add a new resource to a service that involves calling a new AWS API (let's say it's Security Hub), and access to that API isn't currently permitted by the existing OIDC role.
 
-You're making this change on your feature branch, `mybranch`.  You update the `githubActionsAllowedAwsActions` parameter in the `github-oidc` service's `serverless.yml` by adding "securityhub:*".  When you push your change and the `github-oidc` service is deployed for the feature branch, it will create/update an OIDC service role that includes Security Hub permissions and has a trust relationship with the AWS IdP provider for GitHub that was created when bootstrapping. The `github-oidc` service is always deployed before any other services, so that subsequent services can test out the new permissions by getting credentials using the ephemeral OIDC role for the feature branch.
+You're making this change on your feature branch, `mybranch`.  You update the `githubActionsAllowedAwsActions` parameter in the `github-oidc` service's `serverless.yml` by adding "securityhub:*".  When you push your change and the `github-oidc` service is deployed for the feature branch, it will create/update an ephemeral OIDC service role that includes Security Hub permissions and has a trust relationship with the AWS IdP provider for GitHub that was created when bootstrapping. The `github-oidc` service is always deployed before any other services, so that subsequent services can test out the new permissions by getting credentials using the ephemeral OIDC role for the feature branch.
 
-Note that if you are creating/updating an OIDC role and testing it in the same workflow run, you may need to add temporary step to pause and wait for the role to settle before using it due to [AWS's eventual consistency model](https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_general.html#troubleshoot_general_eventual-consistency). When deploying services, the build time for the service usually takes care of this.
+Note that if you are creating/updating an OIDC role and testing it in the same workflow run, you may need to add temporary step to pause and wait for the role to settle before using it due to [AWS's eventual consistency model](https://docs.aws.amazon.com/IAM/latest/UserGuide/troubleshoot_general.html#troubleshoot_general_eventual-consistency). When deploying services, the build time for the service takes care of this.
 
-When it's time to merge your feature branch to `main`, the service will add the new permission to the OIDC roles for the higher environments as the change is promoted.
+When it's time to merge your feature branch to `main`, the service will add the new permission to the OIDC roles for the higher environments as the change is promoted, and the ephemeral OIDC role will be destroyed when the feature branch is deleted.
 
 ### Using the OIDC Provider in a Workflow
 
@@ -146,5 +146,5 @@ This policy grants permission to perform AWS actions in the workflow. For exampl
 
 The permissions policy is defined by two parameters in `serverless.yml`:
 
-- `GitHubActionsAllowedAWSActions` is a list of strings that are comprised of an AWS service and an allowed action. See the [IAM documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_action.html) for examples. The service/action pairs listed will be granted access to all resources (`"Resource": "*"`).
+- `GitHubActionsAllowedAWSActions` is a list of strings that are comprised of an AWS service and an allowed action. See the [IAM documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_action.html) for examples. The service/action pairs listed will be granted access to all resources (`"Resource": "*"`).  The fact that the serverless stage name is sometimes truncated to fit AWS character limits for resource names makes it tricky to target resources more specifically.
 - `ManagedPolicyARNs` is a list of IAM policy ARNs to attach to the OIDC role. These can be AWS-managed or custom-managed policy ARNs.

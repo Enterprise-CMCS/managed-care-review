@@ -31,7 +31,7 @@ params:
 
     # list of allowed audiences for tokens sent by the GitHub OIDC provider
     # value is the audience for the official AWS credentials action: https://github.com/aws-actions/configure-aws-credentials
-    audienceList: sts.amazonaws.com
+    audienceList: [sts.amazonaws.com]
 
     # list of ARNs for managed IAM policies to attach to the GitHub OIDC role
     managedPolicyArns: []
@@ -128,9 +128,3 @@ resources:
         # path and permissions boundary as required per https://cloud.cms.gov/creating-identity-access-management-policies
         Path: "/delegatedadmin/developer/"
         PermissionsBoundary: !Sub "arn:aws:iam::${AWS::AccountId}:policy/cms-cloud-admin/ct-ado-poweruser-permissions-boundary-policy"
-
-  Outputs:
-      # note: if this output name changes, custom.scripts.hooks.deploy:finalize must also change
-    serviceRoleArn:
-      Description: ARN of the service role for GitHub OIDC
-      Value: !GetAtt GitHubActionsServiceRole.Arn
