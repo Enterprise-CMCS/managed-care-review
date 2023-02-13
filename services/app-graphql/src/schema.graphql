@@ -181,36 +181,36 @@ type Mutation {
     """
     createQuestion(input: CreateQuestionInput!): CreateQuestionPayload!
 
-    """
-    updateQuestion updates a Question for the given HealthPlanPackage
-    Only the due date can be changed
+#    """
+#    updateQuestion updates a Question for the given HealthPlanPackage
+#    Only the due date can be changed
+#
+#    This can only be called by a CMSUser
+#
+#    Errors:
+#    - ForbiddenError:
+#        - A non CMSUser called this
+#    - UserInputError
+#        - A Question cannot be found given `questionID`
+#        - The due date is in the past
+#    """
+#    updateQuestion(input: UpdateQuestionInput!): UpdateQuestionPayload!
 
-    This can only be called by a CMSUser
-
-    Errors:
-    - ForbiddenError:
-        - A non CMSUser called this
-    - UserInputError
-        - A Question cannot be found given `questionID`
-        - The due date is in the past
-    """
-    updateQuestion(input: UpdateQuestionInput!): UpdateQuestionPayload!
-
-    """
-    createQuestionResponse creates a new QuestionResponse for the given Question
-    A State User can add text to a note field and append a document to their response
-
-    This can only be called by a StateUser
-
-    Errors:
-    - ForbiddenError:
-        - A non StateUser called this
-    - UserInputError
-        - A Question cannot be found given `questionID`
-    """
-    createQuestionResponse(
-        input: CreateQuestionResponseInput!
-    ): CreateQuestionResponsePayload!
+#    """
+#    createQuestionResponse creates a new QuestionResponse for the given Question
+#    A State User can add text to a note field and append a document to their response
+#
+#    This can only be called by a StateUser
+#
+#    Errors:
+#    - ForbiddenError:
+#        - A non StateUser called this
+#    - UserInputError
+#        - A Question cannot be found given `questionID`
+#    """
+#    createQuestionResponse(
+#        input: CreateQuestionResponseInput!
+#    ): CreateQuestionResponsePayload!
 }
 
 input CreateHealthPlanPackageInput {
@@ -297,31 +297,31 @@ type CreateQuestionPayload {
     question: Question!
 }
 
-input UpdateQuestionInput {
-    "The ID of the question to update"
-    questionID: ID!
-    "The new due date for the question"
-    dueDate: Date
-}
+#input UpdateQuestionInput {
+#    "The ID of the question to update"
+#    questionID: ID!
+#    "The new due date for the question"
+#    dueDate: Date
+#}
 
-type UpdateQuestionPayload {
-    "The updated Question"
-    question: Question!
-}
+#type UpdateQuestionPayload {
+#    "The updated Question"
+#    question: Question!
+#}
 
-input CreateQuestionResponseInput {
-    "The ID of the question for which to create a response"
-    questionID: ID!
-    "A list of documents to attach to the response"
-    documents: [DocumentInput!]!
-    "A note to attach to the response"
-    noteText: String
-}
+#input CreateQuestionResponseInput {
+#    "The ID of the question for which to create a response"
+#    questionID: ID!
+#    "A list of documents to attach to the response"
+#    documents: [DocumentInput!]!
+#    "A note to attach to the response"
+#    noteText: String
+#}
 
-type CreateQuestionResponsePayload {
-    "The newly created QuestionResponse"
-    response: QuestionResponse!
-}
+#type CreateQuestionResponsePayload {
+#    "The newly created QuestionResponse"
+#    response: QuestionResponse!
+#}
 
 type UserEdge {
     node: User!
@@ -564,22 +564,22 @@ type Question {
     dateAdded: DateTime!
     addedBy: CMSUser!
     documents: [Document!]!
-    noteText: String
-    dueDate: Date
-    rateIDs: [String!]
-
-    responses: [QuestionResponse!]!
+#    noteText: String
+#    dueDate: Date
+#    rateIDs: [String!]
+#
+#    responses: [QuestionResponse!]!
 }
 
-"""
-QuestionResponse is a response by a StateUser to a Question sent by CMS. States may upload one or
-more documents full of responses to a single QuestionResponse, in addition to a text note.
-"""
-type QuestionResponse {
-    id: ID!
-    questionID: ID!
-    dateAdded: DateTime!
-    addedBy: StateUser!
-    documents: [Document!]!
-    noteText: String
-}
+#"""
+#QuestionResponse is a response by a StateUser to a Question sent by CMS. States may upload one or
+#more documents full of responses to a single QuestionResponse, in addition to a text note.
+#"""
+#type QuestionResponse {
+#    id: ID!
+#    questionID: ID!
+#    dateAdded: DateTime!
+#    addedBy: StateUser!
+#    documents: [Document!]!
+#    noteText: String
+#}
