@@ -11,8 +11,6 @@ export function indexQuestionsResolver(
 ): QueryResolvers['indexQuestions'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
-
-        //TODO: Update all error codes to be more specific
         const pkgResult = await store.findHealthPlanPackage(input.pkgID)
 
         if (isStoreError(pkgResult)) {
