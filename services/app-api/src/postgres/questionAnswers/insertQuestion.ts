@@ -9,50 +9,39 @@ export async function insertQuestion(
     questionInput: CreateQuestionInput,
     user: CMSUserType
 ): Promise<Question | StoreError> {
-    const questionData = {
+    const documents = questionInput.documents.map((document) => ({
         id: uuidv4(),
-        pkgID: questionInput.pkgID,
-        dateAdded: new Date(),
-        addedBy: user,
-        documents: questionInput.documents.map((document) => ({
-            id: uuidv4(),
-            name: document.name,
-            s3URL: document.s3URL,
-        })),
-    }
+        name: document.name,
+        s3URL: document.s3URL,
+    }))
 
     try {
         const result = await client.question.create({
             data: {
-                id: questionData.id,
-                dateAdded: questionData.dateAdded,
+                id: uuidv4(),
+                dateAdded: new Date(),
                 pkg: {
                     connect: {
-                        id: questionData.pkgID,
+                        id: questionInput.pkgID,
                     },
                 },
                 addedBy: {
                     connect: {
-                        id: questionData.addedBy.id,
+                        id: user.id,
                     },
                 },
                 documents: {
-                    create: questionData.documents,
+                    create: documents,
                 },
             },
             include: {
                 documents: true,
-                addedBy: {
-                    include: {
-                        stateAssignments: true,
-                    },
-                },
             },
         })
 
         const createdQuestion: Question = {
             ...result,
-            addedBy: result.addedBy as CMSUserType,
+            addedBy: user,
         }
 
         return createdQuestion

@@ -21,7 +21,7 @@ export function indexQuestionsResolver(
         }
 
         if (pkgResult === undefined) {
-            const errMessage = `Issue finding a package with id ${input.pkgID}. Message: Result was undefined`
+            const errMessage = `Issue finding a package with id ${input.pkgID}. Message: Package with id ${input.pkgID} does not exist`
             logError('createQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {

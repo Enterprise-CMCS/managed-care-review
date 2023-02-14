@@ -1,10 +1,12 @@
 import INDEX_QUESTIONS from 'app-graphql/src/queries/indexQuestions.graphql'
-import CREATE_QUESTION from 'app-graphql/src/mutations/createQuestion.graphql'
 import {
     constructTestPostgresServer,
     createAndSubmitTestHealthPlanPackage,
+    createTestQuestion,
+    indexTestQuestions,
 } from '../../testHelpers/gqlHelpers'
 import { UserType } from '../../domain-models'
+import { assertAnError, assertAnErrorCode } from '../../testHelpers'
 
 describe('indexQuestions', () => {
     const testUserCMS: UserType = {
@@ -25,62 +27,39 @@ describe('indexQuestions', () => {
 
         const submittedPkg = await createAndSubmitTestHealthPlanPackage(server)
 
-        await cmsServer.executeOperation({
-            query: CREATE_QUESTION,
-            variables: {
-                input: {
-                    pkgID: submittedPkg.id,
-                    documents: [
-                        {
-                            name: 'Test Question 1',
-                            s3URL: 'testS3Url1',
-                        },
-                    ],
+        await createTestQuestion(cmsServer, submittedPkg.id, {
+            documents: [
+                {
+                    name: 'Test Question 1',
+                    s3URL: 'testS3Url1',
                 },
-            },
+            ],
         })
 
-        await cmsServer.executeOperation({
-            query: CREATE_QUESTION,
-            variables: {
-                input: {
-                    pkgID: submittedPkg.id,
-                    documents: [
-                        {
-                            name: 'Test Question 2',
-                            s3URL: 'testS3Url2',
-                        },
-                    ],
+        await createTestQuestion(cmsServer, submittedPkg.id, {
+            documents: [
+                {
+                    name: 'Test Question 2',
+                    s3URL: 'testS3Url2',
                 },
-            },
+            ],
         })
 
-        await cmsServer.executeOperation({
-            query: CREATE_QUESTION,
-            variables: {
-                input: {
-                    pkgID: submittedPkg.id,
-                    documents: [
-                        {
-                            name: 'Test Question 3',
-                            s3URL: 'testS3Url3',
-                        },
-                    ],
+        await createTestQuestion(cmsServer, submittedPkg.id, {
+            documents: [
+                {
+                    name: 'Test Question 3',
+                    s3URL: 'testS3Url3',
                 },
-            },
+            ],
         })
 
-        const indexQuestionsResult = await server.executeOperation({
-            query: INDEX_QUESTIONS,
-            variables: {
-                input: {
-                    pkgID: submittedPkg.id,
-                },
-            },
-        })
+        const indexQuestionsResult = await indexTestQuestions(
+            cmsServer,
+            submittedPkg.id
+        )
 
-        expect(indexQuestionsResult.errors).toBeUndefined()
-        expect(indexQuestionsResult?.data?.indexQuestions).toEqual(
+        expect(indexQuestionsResult).toEqual(
             expect.objectContaining({
                 DMCOQuestions: expect.objectContaining({
                     totalCount: 3,
@@ -141,17 +120,8 @@ describe('indexQuestions', () => {
         )
     })
     it('returns an error if you are requesting for a different state (403)', async () => {
-        const server = await constructTestPostgresServer()
-
-        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
-            server
-        )
-
-        const input = {
-            pkgID: stateSubmission.id,
-        }
-
-        const otherUserServer = await constructTestPostgresServer({
+        const stateServer = await constructTestPostgresServer()
+        const otherStateServer = await constructTestPostgresServer({
             context: {
                 user: {
                     id: '4fed22c0-6d05-4bae-9e9a-b2345073ccf8',
@@ -163,20 +133,30 @@ describe('indexQuestions', () => {
                 },
             },
         })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testUserCMS,
+            },
+        })
 
-        const result = await otherUserServer.executeOperation({
+        const submittedPkg = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
+
+        await createTestQuestion(cmsServer, submittedPkg.id)
+
+        const result = await otherStateServer.executeOperation({
             query: INDEX_QUESTIONS,
-            variables: { input },
+            variables: {
+                input: {
+                    pkgID: submittedPkg.id,
+                },
+            },
         })
 
         expect(result.errors).toBeDefined()
-        if (result.errors === undefined) {
-            throw new Error('annoying jest typing behavior')
-        }
-        expect(result.errors).toHaveLength(1)
-        const resultErr = result.errors[0]
-
-        expect(resultErr?.message).toBe(
+        expect(assertAnErrorCode(result)).toBe('FORBIDDEN')
+        expect(assertAnError(result).message).toBe(
             'User not authorized to fetch data from a different state'
         )
     })
@@ -195,15 +175,9 @@ describe('indexQuestions', () => {
         })
 
         expect(result.errors).toBeDefined()
-        if (result.errors === undefined) {
-            throw new Error('annoying jest typing behavior')
-        }
-
-        expect(result.errors).toHaveLength(1)
-        const resultErr = result.errors[0]
-
-        expect(resultErr?.message).toBe(
-            'Issue finding a package with id invalid-pkg-id. Message: Result was undefined'
+        expect(assertAnErrorCode(result)).toBe('NOT_FOUND')
+        expect(assertAnError(result).message).toBe(
+            'Issue finding a package with id invalid-pkg-id. Message: Package with id invalid-pkg-id does not exist'
         )
     })
 })

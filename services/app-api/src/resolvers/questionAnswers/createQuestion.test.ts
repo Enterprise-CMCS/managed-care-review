@@ -1,14 +1,15 @@
 import CREATE_QUESTION from 'app-graphql/src/mutations/createQuestion.graphql'
-import CREATE_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/createHealthPlanPackage.graphql'
 import {
     constructTestPostgresServer,
     createAndSubmitTestHealthPlanPackage,
+    createTestHealthPlanPackage,
     resubmitTestHealthPlanPackage,
     unlockTestHealthPlanPackage,
+    createTestQuestion,
+    indexTestQuestions,
 } from '../../testHelpers/gqlHelpers'
 import { CMSUserType } from '../../domain-models'
-import { CreateHealthPlanPackageInput } from '../../gen/gqlServer'
-import INDEX_QUESTIONS from 'app-graphql/src/queries/indexQuestions.graphql'
+import { assertAnError, assertAnErrorCode } from '../../testHelpers'
 
 describe('createQuestion', () => {
     const testUserCMS: CMSUserType = {
@@ -32,23 +33,12 @@ describe('createQuestion', () => {
             stateServer
         )
 
-        const input = {
-            pkgID: submittedPkg.id,
-            documents: [
-                {
-                    name: 'Test Question',
-                    s3URL: 'testS3Url',
-                },
-            ],
-        }
+        const createdQuestion = await createTestQuestion(
+            cmsServer,
+            submittedPkg.id
+        )
 
-        const result = await cmsServer.executeOperation({
-            query: CREATE_QUESTION,
-            variables: { input },
-        })
-
-        expect(result.errors).toBeUndefined()
-        expect(result.data?.createQuestion.question).toEqual(
+        expect(createdQuestion.question).toEqual(
             expect.objectContaining({
                 id: expect.any(String),
                 pkgID: submittedPkg.id,
@@ -80,23 +70,7 @@ describe('createQuestion', () => {
             'test unlock'
         )
 
-        const createdQuestionOnUnlock = await cmsServer.executeOperation({
-            query: CREATE_QUESTION,
-            variables: {
-                input: {
-                    pkgID: submittedPkg.id,
-                    documents: [
-                        {
-                            name: 'Test Question 1',
-                            s3URL: 'testS3Url1',
-                        },
-                    ],
-                },
-            },
-        })
-
-        // Expect no errors when creating question for UNLOCKED package
-        expect(createdQuestionOnUnlock.errors).toBeUndefined()
+        await createTestQuestion(cmsServer, submittedPkg.id)
 
         // Resubmit package
         await resubmitTestHealthPlanPackage(
@@ -105,37 +79,22 @@ describe('createQuestion', () => {
             'resubmit reason'
         )
 
-        // Create question for resubmitted package.
-        const createdQuestionOnResubmit = await cmsServer.executeOperation({
-            query: CREATE_QUESTION,
-            variables: {
-                input: {
-                    pkgID: submittedPkg.id,
-                    documents: [
-                        {
-                            name: 'Test Question 2',
-                            s3URL: 'testS3Url2',
-                        },
-                    ],
+        await createTestQuestion(cmsServer, submittedPkg.id, {
+            documents: [
+                {
+                    name: 'Test Question 2',
+                    s3URL: 'testS3Url2',
                 },
-            },
+            ],
         })
 
-        // Expect no errors when creating question for resubmitted package
-        expect(createdQuestionOnResubmit.errors).toBeUndefined()
-
-        // Expect two questions from indexQuestions
-        const indexQuestionsResult = await cmsServer.executeOperation({
-            query: INDEX_QUESTIONS,
-            variables: {
-                input: {
-                    pkgID: submittedPkg.id,
-                },
-            },
-        })
+        const indexQuestionsPayload = await indexTestQuestions(
+            cmsServer,
+            submittedPkg.id
+        )
 
         // Expect package to have two questions
-        expect(indexQuestionsResult?.data?.indexQuestions).toEqual(
+        expect(indexQuestionsPayload).toEqual(
             expect.objectContaining({
                 DMCOQuestions: expect.objectContaining({
                     totalCount: 2,
@@ -147,8 +106,8 @@ describe('createQuestion', () => {
                                 pkgID: submittedPkg.id,
                                 documents: [
                                     {
-                                        name: 'Test Question 1',
-                                        s3URL: 'testS3Url1',
+                                        name: 'Test Question',
+                                        s3URL: 'testS3Url',
                                     },
                                 ],
                                 addedBy: testUserCMS,
@@ -189,74 +148,55 @@ describe('createQuestion', () => {
             },
         })
 
-        const newSubInput: CreateHealthPlanPackageInput = {
-            programIDs: [
-                '5c10fe9f-bec9-416f-a20c-718b152ad633',
-                '037af66b-81eb-4472-8b80-01edf17d12d9',
-            ],
-            riskBasedContract: false,
-            submissionType: 'CONTRACT_ONLY',
-            submissionDescription: 'A real submission',
-            contractType: 'BASE',
-        }
-
-        const draftPkg = await stateServer.executeOperation({
-            query: CREATE_HEALTH_PLAN_PACKAGE,
-            variables: {
-                input: newSubInput,
-            },
-        })
-
-        const pkg = draftPkg.data?.createHealthPlanPackage.pkg
-
-        const input = {
-            pkgID: pkg.id,
-            documents: [
-                {
-                    name: 'Test Question',
-                    s3URL: 'testS3Url',
-                },
-            ],
-        }
+        const draftPkg = await createTestHealthPlanPackage(stateServer)
 
         const createdQuestion = await cmsServer.executeOperation({
             query: CREATE_QUESTION,
-            variables: { input },
+            variables: {
+                input: {
+                    pkgID: draftPkg.id,
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 'testS3Url',
+                        },
+                    ],
+                },
+            },
         })
 
         expect(createdQuestion.errors).toBeDefined()
-        expect(
-            createdQuestion.errors && createdQuestion.errors[0].message
-        ).toBe(
+        expect(assertAnErrorCode(createdQuestion)).toBe('BAD_USER_INPUT')
+        expect(assertAnError(createdQuestion).message).toBe(
             'Issue creating question for health plan package. Message: Cannot create question for health plan package in DRAFT status'
         )
     })
     it('returns an error if a state user attempts to create a question for a package', async () => {
         const stateServer = await constructTestPostgresServer()
-
         const submittedPkg = await createAndSubmitTestHealthPlanPackage(
             stateServer
         )
 
-        const input = {
-            pkgID: submittedPkg.id,
-            documents: [
-                {
-                    name: 'Test Question',
-                    s3URL: 'testS3Url',
-                },
-            ],
-        }
-
         const createdQuestion = await stateServer.executeOperation({
             query: CREATE_QUESTION,
-            variables: { input },
+            variables: {
+                input: {
+                    pkgID: submittedPkg.id,
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 'testS3Url',
+                        },
+                    ],
+                },
+            },
         })
 
         expect(createdQuestion.errors).toBeDefined()
-        expect(
-            createdQuestion.errors && createdQuestion.errors[0].message
-        ).toBe('user not authorized to create a question')
+        expect(assertAnErrorCode(createdQuestion)).toBe('FORBIDDEN')
+        expect(assertAnError(createdQuestion).message).toBe(
+            'user not authorized to create a question'
+        )
     })
     it('returns error on invalid package id', async () => {
         const stateServer = await constructTestPostgresServer()
@@ -265,39 +205,28 @@ describe('createQuestion', () => {
                 user: testUserCMS,
             },
         })
-        await constructTestPostgresServer({
-            context: {
-                user: testUserCMS,
-            },
-        })
-        await constructTestPostgresServer({
-            context: {
-                user: testUserCMS,
-            },
-        })
 
         await createAndSubmitTestHealthPlanPackage(stateServer)
 
-        const input = {
-            pkgID: 'invalid-pkg-id',
-            documents: [
-                {
-                    name: 'Test Question',
-                    s3URL: 'testS3Url',
-                },
-            ],
-        }
-
         const createdQuestion = await cmsServer.executeOperation({
             query: CREATE_QUESTION,
-            variables: { input },
+            variables: {
+                input: {
+                    pkgID: 'invalid-pkg-id',
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 'testS3Url',
+                        },
+                    ],
+                },
+            },
         })
 
         expect(createdQuestion.errors).toBeDefined()
-        expect(
-            createdQuestion.errors && createdQuestion.errors[0].message
-        ).toBe(
-            `Issue finding a package with id invalid-pkg-id. Message: Result was undefined`
+        expect(assertAnErrorCode(createdQuestion)).toBe('NOT_FOUND')
+        expect(assertAnError(createdQuestion).message).toBe(
+            `Issue finding a package with id invalid-pkg-id. Message: Package with id invalid-pkg-id does not exist`
         )
     })
 })
