@@ -81,6 +81,12 @@ function mockStoreThatErrors(): Store {
         updateUserAssignedState: async (_ID, _State) => {
             return genericStoreError
         },
+        insertQuestion: async (_ID) => {
+            return genericStoreError
+        },
+        findAllQuestionsByHealthPlanPackage: async (_pkgID) => {
+            return genericStoreError
+        },
     }
 }
 

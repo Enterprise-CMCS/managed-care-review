@@ -1,5 +1,8 @@
 export { userFromAuthProvider } from './authn'
 
-export { userFromCognitoAuthProvider } from './cognitoAuthn'
+export { userFromCognitoAuthProvider, lookupUserAurora } from './cognitoAuthn'
 
-export { userFromLocalAuthProvider } from './localAuthn'
+export {
+    userFromLocalAuthProvider,
+    insertUserToLocalAurora,
+} from './localAuthn'
