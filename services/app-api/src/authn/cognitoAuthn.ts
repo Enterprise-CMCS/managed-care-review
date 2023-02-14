@@ -226,7 +226,7 @@ async function lookupUserCognito(
     return userTypeFromAttributes(userId, attributes)
 }
 
-async function lookupUserAurora(
+export async function lookupUserAurora(
     store: Store,
     userID: string
 ): Promise<UserType | undefined | Error> {

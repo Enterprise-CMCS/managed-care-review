@@ -1,0 +1,24 @@
+mutation createQuestion($input: CreateQuestionInput!) {
+    createQuestion(input: $input) {
+        question {
+            id
+            pkgID
+            createdAt
+            addedBy {
+                id
+                role
+                email
+                givenName
+                familyName
+                stateAssignments {
+                    code
+                    name
+                }
+            }
+            documents {
+                name
+                s3URL
+            }
+        }
+    }
+}

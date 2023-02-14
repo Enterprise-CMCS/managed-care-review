@@ -13,6 +13,7 @@ model HealthPlanPackageTable {
   stateCode String
   state     State                     @relation(fields: [stateCode], references: [stateCode])
   revisions HealthPlanRevisionTable[]
+  questions Question[]
 }
 
 model ProtoMigrationsTable {
@@ -42,13 +43,33 @@ model State {
 }
 
 model User {
-  id         String  @id
-  givenName  String
-  familyName String
-  email      String
-  role       Role
-  stateAssignments     State[]
-  stateCode  String?
+  id               String     @id
+  givenName        String
+  familyName       String
+  email            String
+  role             Role
+  stateAssignments State[]
+  stateCode        String?
+  questions        Question[]
+}
+
+model Question {
+  id            String                 @id
+  pkgID         String
+  pkg           HealthPlanPackageTable @relation(fields: [pkgID], references: [id])
+  createdAt     DateTime               @default(now())
+  addedBy       User                   @relation(fields: [addedByUserID], references: [id])
+  addedByUserID String
+  documents     QuestionDocument[]
+}
+
+model QuestionDocument {
+  id         String   @id
+  name       String
+  s3URL      String
+  createdAt  DateTime @default(now())
+  questionID String
+  question   Question @relation(fields: [questionID], references: [id])
 }
 
 enum Role {

@@ -1,0 +1,44 @@
+fragment questionEdgeFragment on QuestionEdge {
+    node {
+        id
+        pkgID
+        createdAt
+        addedBy {
+            id
+            role
+            email
+            givenName
+            familyName
+            stateAssignments {
+                code
+                name
+            }
+        }
+        documents {
+            s3URL
+            name
+        }
+    }
+}
+query indexQuestions($input: IndexQuestionsInput!) {
+    indexQuestions(input: $input) {
+        DMCOQuestions {
+            edges {
+                ...questionEdgeFragment
+            }
+            totalCount
+        }
+        DMCPQuestions {
+            edges {
+                ...questionEdgeFragment
+            }
+            totalCount
+        }
+        OACTQuestions {
+            edges {
+                ...questionEdgeFragment
+            }
+            totalCount
+        }
+    }
+}

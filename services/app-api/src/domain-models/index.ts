@@ -22,3 +22,12 @@ export type {
     HealthPlanPackageStatusType,
     UpdateInfoType,
 } from './HealthPlanPackageType'
+
+export type {
+    IndexQuestionsPayload,
+    CreateQuestionPayload,
+    CreateQuestionInput,
+    Question,
+    Document,
+    QuestionList,
+} from './QuestionsType'
