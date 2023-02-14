@@ -111,16 +111,13 @@ if (ldClientId === undefined) {
 ;(async () => {
     const LDProvider = await asyncWithLDProvider({
         clientSideID: ldClientId,
-        context: {
-            kind: 'user',
-            key: 'anonymous',
-        },
         options: {
             bootstrap: 'localStorage',
             baseUrl: 'https://clientsdk.launchdarkly.us',
             streamUrl: 'https://clientstream.launchdarkly.us',
             eventsUrl: 'https://events.launchdarkly.us',
         },
+        deferInitialization: false,
     })
 
     const container = document.getElementById('root')
