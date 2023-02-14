@@ -23212,7 +23212,7 @@ launchdarkly-node-server-sdk@7.0.0:
     tunnel "0.0.6"
     uuid "^8.3.2"
 
-launchdarkly-react-client-sdk@^2.25.2:
+launchdarkly-react-client-sdk@^2.29.4:
   version "2.29.4"
   resolved "https://registry.yarnpkg.com/launchdarkly-react-client-sdk/-/launchdarkly-react-client-sdk-2.29.4.tgz#7c1bb9c3db5d1df55688d801eed2e7c56f173526"
   integrity sha512-f0vcrn/PtZl6DC0r2qQwwXg0JY/bkrFahijOfeB9RJY/gEgSAmO/eNmTGEyjKEGdc9SwzVmRzwS6i8OXs8np/w==

@@ -117,7 +117,6 @@ if (ldClientId === undefined) {
             streamUrl: 'https://clientstream.launchdarkly.us',
             eventsUrl: 'https://events.launchdarkly.us',
         },
-        deferInitialization: false,
     })
 
     const container = document.getElementById('root')
