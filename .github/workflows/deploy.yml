@@ -8,6 +8,9 @@ on:
       - '!skipci*'
       - '!main'
 
+permissions:
+  id-token: write
+
 jobs:
   begin-deployment:
     name: Begin Deployment
@@ -209,12 +212,12 @@ jobs:
     needs: [begin-deployment]
     uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
     with:
+      environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
       changed_services: ${{ needs.begin-deployment.outputs.changed-services }}
     secrets:
-      aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
 
   deploy-app:
     needs:
@@ -228,26 +231,26 @@ jobs:
     if: |
       always() &&
       (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped')
-
     uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
+      environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
       app_version: ${{ needs.begin-deployment.outputs.app-version }}
       changed_services: ${{ needs.begin-deployment.outputs.changed-services }}
     secrets:
-      aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       react_app_auth_mode: AWS_COGNITO
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   finishing-prep:
     name: Finishing Prep
     needs: [deploy-infra, begin-deployment, deploy-app]
+    environment: dev
     if: |
-      always() 
+      always()
       && (needs.begin-deployment.result == 'success')
-      && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') 
+      && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped')
       && (needs.deploy-app.result == 'success' || needs.deploy-app.result == 'skipped')
     runs-on: ubuntu-20.04
     outputs:
@@ -260,11 +263,16 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ secrets.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
+          changed-services: ${{ needs.begin-deployment.outputs.changed-services }}
+
       - name: Create Test Users
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
         run: |
@@ -275,9 +283,6 @@ jobs:
       - name: Run migrate to turn on Aurora
         id: run-migrations
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_NAME-migrate
@@ -285,9 +290,6 @@ jobs:
       - name: get application endpoint
         id: save-app-endpoint
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           cd services
@@ -298,9 +300,6 @@ jobs:
       - name: get storybook endpoint
         id: save-storybook-endpoint
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           cd services

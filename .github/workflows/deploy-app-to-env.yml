@@ -3,6 +3,9 @@ name: Promote to an environment
 on:
   workflow_call:
     inputs:
+      environment:
+        required: true
+        type: string
       stage_name:
         required: true
         type: string
@@ -13,20 +16,22 @@ on:
         required: true
         type: string
     secrets:
-      aws_access_key_id:
-        required: true
-      aws_secret_access_key:
-        required: true
       aws_default_region:
+        required: true
+      aws_account_id:
         required: true
       react_app_auth_mode:
         required: true
       nr_license_key:
         required: true
 
+permissions:
+  id-token: write
+
 jobs:
   app-web:
     if: ${{ contains(inputs.changed_services, 'app-web') }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -34,6 +39,14 @@ jobs:
 
       - name: Setup env
         uses: ./.github/actions/setup_env
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ secrets.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          stage-name: ${{ inputs.stage_name }}
+          changed-services: ${{ inputs.changed_services }}
 
       - name: Generate Code
         run: lerna run generate
@@ -42,15 +55,13 @@ jobs:
         id: deploy-app-web
         env:
           NODE_OPTIONS: --max_old_space_size=6000
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
         run: |
           pushd services/app-web && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   app-api:
     if: ${{ contains(inputs.changed_services, 'app-api') || contains(inputs.changed_services, 'app-proto') }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -58,6 +69,15 @@ jobs:
 
       - name: Setup env
         uses: ./.github/actions/setup_env
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ secrets.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          stage-name: ${{ inputs.stage_name }}
+          changed-services: ${{ inputs.changed_services }}
+
 
       - name: Generate Code
         run: lerna run generate
@@ -89,9 +109,6 @@ jobs:
         id: deploy-app-api
         env:
           NODE_OPTIONS: --max_old_space_size=6000
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
           APP_VERSION: ${{ inputs.app_version }}
           DATABASE_URL: AWS_SM
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
@@ -103,9 +120,6 @@ jobs:
       - name: run migrations
         id: run-migrations
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
           STAGE_NAME: ${{ inputs.stage_name }}
         run: |
           pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_NAME-migrate

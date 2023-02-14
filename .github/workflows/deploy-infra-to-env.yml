@@ -3,6 +3,9 @@ name: Promote to an environment
 on:
   workflow_call:
     inputs:
+      environment:
+        required: true
+        type: string
       stage_name:
         required: true
         type: string
@@ -10,16 +13,52 @@ on:
         required: true
         type: string
     secrets:
-      aws_access_key_id:
-        required: true
-      aws_secret_access_key:
-        required: true
       aws_default_region:
         required: true
+      aws_account_id:
+        required: true
+
+permissions:
+  id-token: write
 
 jobs:
+  # deploy the OIDC service first, as subsequent deploys may depend on updated OIDC permissions
+  github-oidc:
+      if: ${{ contains(inputs.changed_services, 'github-oidc') }}
+      environment: ${{ inputs.environment }}
+      runs-on: ubuntu-20.04
+      steps:
+        - name: Check out repository
+          uses: actions/checkout@v3
+
+        - name: Setup env
+          uses: ./.github/actions/setup_env
+
+        - name: build scripts
+          shell: bash
+          run: |
+            lerna run build:ci-scripts
+
+        - name: Get AWS credentials
+          uses: ./.github/actions/get_aws_credentials
+          with:
+            region: ${{ secrets.aws_default_region }}
+            account-id: ${{ secrets.aws_account_id }}
+            # use the manually bootstrapped OIDC role to solve the chicken-and-egg problem of deploying the OIDC service via OIDC
+            stage-name: main
+
+        - name: deploy github-oidc
+          id: deploy-github-oidc
+          env:
+            GITHUB_TOKEN: ${{ secrets.personal_access_token }}
+          run: |
+            pushd services/github-oidc && npx serverless deploy --stage ${{ inputs.stage_name }}
+
   postgres:
-    if: ${{ contains(inputs.changed_services, 'postgres') }}
+    # for this and subsequent jobs, wait for the OIDC service to deploy (unless it was skipped)
+    needs: github-oidc
+    if: ${{ always() && contains(inputs.changed_services, 'postgres') }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -28,17 +67,23 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ secrets.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          stage-name: ${{ inputs.stage_name }}
+          changed-services: ${{ inputs.changed_services }}
+
       - name: deploy postgres
         id: deploy-postgres
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
         run: |
           pushd services/postgres && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   ui:
-    if: ${{ contains(inputs.changed_services, 'ui') }}
+    needs: github-oidc
+    if: ${{ always() && contains(inputs.changed_services, 'ui') }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -47,17 +92,23 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ secrets.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          stage-name: ${{ inputs.stage_name }}
+          changed-services: ${{ inputs.changed_services }}
+
       - name: deploy ui
         id: deploy-ui
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
         run: |
           pushd services/ui && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   storybook:
-    if: ${{ contains(inputs.changed_services, 'storybook') }}
+    needs: github-oidc
+    if: ${{ always() && contains(inputs.changed_services, 'storybook') }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -66,17 +117,23 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ secrets.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          stage-name: ${{ inputs.stage_name }}
+          changed-services: ${{ inputs.changed_services }}
+
       - name: deploy storybook
         id: deploy-storybook
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
         run: |
           pushd services/storybook && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   uploads:
-    if: ${{ contains(inputs.changed_services, 'uploads') }}
+    needs: github-oidc
+    if: ${{ always() && contains(inputs.changed_services, 'uploads') }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -85,17 +142,23 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ secrets.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          stage-name: ${{ inputs.stage_name }}
+          changed-services: ${{ inputs.changed_services }}
+
       - name: deploy uploads
         id: deploy-uploads
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
         run: |
           pushd services/uploads && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   infra-api:
-    if: ${{ contains(inputs.changed_services, 'infra-api') }}
+    needs: github-oidc
+    if: ${{ always() && contains(inputs.changed_services, 'infra-api') }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -104,18 +167,23 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ secrets.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          stage-name: ${{ inputs.stage_name }}
+          changed-services: ${{ inputs.changed_services }}
+
       - name: deploy infra-api
         id: deploy-uploads
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
         run: |
           pushd services/infra-api && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   ui-auth:
-    needs: [infra-api, ui, uploads]
-    if: ${{ contains(inputs.changed_services, 'ui-auth') }}
+    needs: [github-oidc, infra-api, ui, uploads]
+    if: ${{ always() && contains(inputs.changed_services, 'ui-auth') }}
+    environment: ${{ inputs.environment }}
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -124,11 +192,15 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ secrets.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          stage-name: ${{ inputs.stage_name }}
+          changed-services: ${{ inputs.changed_services }}
+
       - name: deploy ui-auth
         id: deploy-ui-auth
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
-          AWS_DEFAULT_REGION: ${{ secrets.aws_default_region }}
         run: |
           pushd services/ui-auth && npx serverless deploy --stage ${{ inputs.stage_name }}
