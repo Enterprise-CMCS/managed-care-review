@@ -7,6 +7,7 @@ import { NewTestS3UploadsClient } from '../s3'
 import { updateAVDefinitions } from '../updateAVDefinitions'
 import { auditBucket } from './auditUploads'
 import { generateVirusScanTagSet, virusScanStatus } from '../tags'
+import { NewLocalInfectedFilesLister } from './scanFiles'
 
 
 
@@ -30,6 +31,8 @@ describe('auditUploads', () => {
             pathToConfig: path.join(thisDir, '..', 'testData', 'freshclam.conf'),
             pathToDefintions: tmpDefsDir,
         }, s3Client)
+
+        const fileScanner = NewLocalInfectedFilesLister(s3Client, clamAV)
 
         // clamupdate if necessary 
         const testDefs = await listFilesInDirectory(path.join(thisDir, '..', '..', 'local_buckets', 'test-av-definitions'))
@@ -56,8 +59,6 @@ describe('auditUploads', () => {
         }
 
         console.log('Time TO SCAN THEM FILES')
-
-        const tmpScanDir = await mkdtemp('/tmp/scanFiles-')
 
         // ----done with clamscan
 
@@ -91,10 +92,13 @@ describe('auditUploads', () => {
             const fileName = `${crypto.randomUUID()}.${goodfileExt}`
 
             const testKey = path.join('allusers', fileName)
+            console.log("UPLOAIND OBINE")
             const res = await s3Client.uploadObject(testKey, 'test-uploads', goodFile)
             if (res) {
                 throw res
             }
+
+            console.log("DON UPLOER")
 
             const tags = generateVirusScanTagSet('CLEAN')
             const res2 = await s3Client.tagObject(testKey, 'test-uploads', tags)
@@ -147,7 +151,7 @@ describe('auditUploads', () => {
 
         // TEST
         // run auditor
-        const improperlyTaggedFiles = await auditBucket(s3Client, clamAV, 'test-uploads', tmpScanDir)
+        const improperlyTaggedFiles = await auditBucket(s3Client, clamAV, fileScanner, 'test-uploads')
         if (improperlyTaggedFiles instanceof Error) {
             throw improperlyTaggedFiles
         }
@@ -163,7 +167,6 @@ describe('auditUploads', () => {
         }
 
         await rm(tmpDefsDir, { force: true, recursive: true })
-        await rm(tmpScanDir, { force: true, recursive: true })
 
     })
 

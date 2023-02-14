@@ -43,6 +43,11 @@ provider:
             - !Sub arn:aws:s3:::${self:service}-${sls:stage}-uploads-${AWS::AccountId}
             - !Sub arn:aws:s3:::${self:service}-${sls:stage}-avscan-${AWS::AccountId}
             - !Sub arn:aws:s3:::${self:service}-${sls:stage}-qa-${AWS::AccountId}
+        - Effect: 'Allow'
+          Action:
+            - lambda:InvokeFunction
+          Resource:
+            - !Sub arn:aws:lambda:::${self:service}-${sls:stage}-avListInfectedFiles
 
 custom:
   region: ${aws:region}

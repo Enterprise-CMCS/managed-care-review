@@ -1,18 +1,11 @@
-import { Context, S3Event } from 'aws-lambda';
-import { rm, readdir } from 'fs/promises'
-import path from 'path'
-
+import { Context } from 'aws-lambda';
 import { NewS3UploadsClient, S3UploadsClient } from '../s3'
-
 import { NewClamAV, ClamAV } from '../clamAV'
-import { scanFiles } from '../scanFiles';
 import { generateVirusScanTagSet, virusScanStatus } from '../tags';
 import { _Object } from '@aws-sdk/client-s3';
-import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda"
-import { fromUtf8 } from "@aws-sdk/util-utf8-node"
-import { ScanFilesInput } from './scanFiles';
+import { invokeListInfectedFiles, listInfectedFilesFn, ScanFilesOutput } from './scanFiles';
 
-export async function auditUploadsLambda(_event: S3Event, _context: Context) {
+export async function auditUploadsLambda(_event: unknown, _context: Context) {
     console.info('-----Start Audit Uploads function-----')
 
     // Check on the values for our required config
@@ -38,47 +31,16 @@ export async function auditUploadsLambda(_event: S3Event, _context: Context) {
         definitionsPath: clamAVDefintionsPath
     }, s3Client)
 
-    // TEST
-    console.log('Test Invoking Other Lambda')
+    const fileScanner = invokeListInfectedFiles
 
-    const lambdaClient = new LambdaClient({})
+    console.info('Updating ', clamAVBucketName)
+    const err = await auditBucket(s3Client, clamAV, fileScanner, auditBucketName)
 
-    const payload: ScanFilesInput = {bucket: 'foo', keys: ['onefile', 'twofile', 'threefiles']} 
-    const payloadJSON = fromUtf8(JSON.stringify(payload))
-    const invocation = new InvokeCommand({ FunctionName: 'avListInfectedFiles', Payload: payloadJSON})
-
-    const res = await lambdaClient.send(invocation)
-
-    console.log('LAMBVDA RAIN', res)
-
-    return 'TESTED LAMBDA CONNECTION'
-
-    // console.info('Updating ', clamAVBucketName)
-    // const err = await auditBucket(s3Client, clamAV, auditBucketName, '/tmp/download')
-
-    // if (err) {
-    //     throw err
-    // }
-
-    // return 'FILE SCANNED'
-}
-
-async function emptyWorkdir(workdir: string): Promise<undefined | Error> {
-
-    console.info('cleaning workdir: ', workdir)
-    try {
-
-        const files = await readdir(workdir)
-
-        for (const file of files) {
-            const filePath = path.join(workdir, file)
-            await rm(filePath)
-        }
-
-    } catch (err) {
-        console.error('FS Error cleaning workdir', err)
-        return err
+    if (err) {
+        throw err
     }
+
+    return 'FILE SCANNED'
 }
 
 // Chunk the objects, by file size. Prevent chunks from having more than 20 objects in them, or from being greater than 500 megs.
@@ -110,10 +72,8 @@ function chunkS3Objects(objects: _Object[]): _Object[][] {
     return chunks
 }
 
-
-
 // audit bucket returns a list of keys that are INFECTED that were previously marked CLEAN
-async function auditBucket(s3Client: S3UploadsClient, clamAV: ClamAV, bucketName: string, scanFolder: string): Promise<undefined | Error> {
+async function auditBucket(s3Client: S3UploadsClient, clamAV: ClamAV, fileScanner: listInfectedFilesFn, bucketName: string): Promise<undefined | Error> {
 
     // get the virus definition files
     const defsRes = await clamAV.downloadAVDefinitions()
@@ -136,27 +96,29 @@ async function auditBucket(s3Client: S3UploadsClient, clamAV: ClamAV, bucketName
     console.log('make chunks of size: ', chunks.map((c) => c.length))
 
     let allInfectedFiles: string[] = []
-    // Download files chunk by chunk
+    // Download files chunk by chunk by invoking a lambda
+    const scanPromises: Promise<ScanFilesOutput | Error>[] = []
     for (const chunk of chunks) {
         console.info('scanning a chunk of documents')
         const keys = chunk.map((obj) => obj.Key).filter((key): key is string => key !== undefined)
 
-        const infectedFilesInChunk = await scanFiles(s3Client, clamAV, keys, bucketName, scanFolder)
-        if (infectedFilesInChunk instanceof Error) {
-            console.error('failed to scan chunk of files', infectedFilesInChunk)
-            return infectedFilesInChunk
+        scanPromises.push(fileScanner({
+            bucket: bucketName,
+            keys
+        }))
+    }
+
+    const chunkResults = await Promise.all(scanPromises)
+
+    // now all the lambdas are done, compile all the infected files
+    for (const chunkRes of chunkResults) {
+        if (chunkRes instanceof Error) {
+            console.error('failed to scan chunk of files', chunkRes)
+            return chunkRes
         }
 
-        console.info('Infected Files In Chunk:', infectedFilesInChunk)
-
-        allInfectedFiles = allInfectedFiles.concat(infectedFilesInChunk)
-
-        // remove the scanned files locally
-        const eraseRes = await emptyWorkdir(scanFolder)
-        if (eraseRes) {
-            console.error('failed to erase scanned files')
-            return eraseRes
-        }
+        console.info('Infected Files In Chunk:', chunkRes)
+        allInfectedFiles = allInfectedFiles.concat(chunkRes.infectedKeys)
     }
 
     console.info(`scanned all chunks, found ${allInfectedFiles.length} infected files: ${allInfectedFiles}`)
