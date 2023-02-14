@@ -103,10 +103,12 @@ const constructTestEmailer = (): Emailer => {
         stage: 'localtest',
         baseUrl: 'http://localtest',
         cmsReviewSharedEmails: ['test@example.com'],
-        ratesReviewSharedEmails: ['testRate@example.com'],
         cmsReviewHelpEmailAddress: 'mcog@example.com',
         cmsRateHelpEmailAddress: 'rates@example.com',
         cmsDevTeamHelpEmailAddress: 'mc-review@example.com',
+        oactEmails: ['testRate@example.com'],
+        dmcpEmails: ['testPolicy@example.com'],
+        dmcoEmails: ['testDmco@example.com'],
     }
     return newLocalEmailer(config)
 }

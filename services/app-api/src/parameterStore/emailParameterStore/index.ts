@@ -7,10 +7,6 @@ export {
     getCmsReviewSharedEmailsLocal,
 } from './reviewSharedEmails/getCmsReviewSharedEmails'
 export {
-    getRatesReviewSharedEmails,
-    getRatesReviewSharedEmailsLocal,
-} from './ratesReviewSharedEmails/getRatesReviewSharedEmails'
-export {
     getCmsReviewHelpEmail,
     getCmsReviewHelpEmailLocal,
 } from './cmsReviewHelpEmail/getCmsReviewHelpEmail'
@@ -22,6 +18,9 @@ export {
     getCmsDevTeamHelpEmail,
     getCmsDevTeamHelpEmailLocal,
 } from './cmsDevTeamHelpEmail/getCmsDevTeamHelpEmail'
+export { getDMCOEmails, getDMCOEmailsLocal } from './dmcoEmails/getDMCOEmails'
+export { getOACTEmails, getOACTEmailsLocal } from './oactEmails/getOACTEmails'
+export { getDMCPEmails, getDMCPEmailsLocal } from './dmcpEmails/getDMCPEmails'
 export {
     getSourceEmail,
     getSourceEmailLocal,
