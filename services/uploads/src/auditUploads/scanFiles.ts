@@ -17,37 +17,39 @@ interface ScanFilesOutput {
 
 type listInfectedFilesFn = (input: ScanFilesInput) => Promise<ScanFilesOutput | Error>
 
-async function invokeListInfectedFiles(input: ScanFilesInput): Promise<ScanFilesOutput | Error> {
-    const lambdaClient = new LambdaClient({})
+function NewLambdaInfectedFilesLister(lambdaName: string): listInfectedFilesFn {
+    return async (input: ScanFilesInput): Promise<ScanFilesOutput | Error> => {
+        const lambdaClient = new LambdaClient({})
 
-    const payloadJSON = fromUtf8(JSON.stringify(input))
-    const invocation = new InvokeCommand({ FunctionName: 'uploads-wmluploadsrefinement-avListInfectedFiles', Payload: payloadJSON})
+        const payloadJSON = fromUtf8(JSON.stringify(input))
+        const invocation = new InvokeCommand({ FunctionName: lambdaName, Payload: payloadJSON})
 
-    try {
-        const res = await lambdaClient.send(invocation)
-        console.log('RESPONSE', res)
-        if (res.Payload) {
-            const lambdaResult = JSON.parse(toUtf8(res.Payload))
-            console.log("GOT OUT", lambdaResult)
+        try {
+            const res = await lambdaClient.send(invocation)
+            console.log('RESPONSE', res)
+            if (res.Payload) {
+                const lambdaResult = JSON.parse(toUtf8(res.Payload))
+                console.log("GOT OUT", lambdaResult)
 
-            if (lambdaResult.errorType) {
-                const errMsg = `Got an error back from the list infected files lambda: ${JSON.stringify(lambdaResult)}`
-                console.error(errMsg)
-                return new Error(errMsg)
+                if (lambdaResult.errorType) {
+                    const errMsg = `Got an error back from the list infected files lambda: ${JSON.stringify(lambdaResult)}`
+                    console.error(errMsg)
+                    return new Error(errMsg)
+                }
+
+                if (!lambdaResult.infectedKeys) {
+                    const errMsg = `Didn't get back a list of keys from the lambda: ${JSON.stringify(lambdaResult)}`
+                    console.error(errMsg)
+                    return new Error(errMsg)
+                }
+
+                return lambdaResult
             }
-
-            if (!lambdaResult.infectedKeys) {
-                const errMsg = `Didn't get back a list of keys from the lambda: ${JSON.stringify(lambdaResult)}`
-                console.error(errMsg)
-                return new Error(errMsg)
-            }
-
-            return lambdaResult
+            return new Error(`Failed to get correct results out of lambda: ${res}`)
+        } catch (err) {
+            console.log('Error invoking lambda', err)
+            return err
         }
-        return new Error(`Failed to get correct results out of lambda: ${res}`)
-    } catch (err) {
-        console.log('Error invoking lambda', err)
-        return err
     }
 }
 
@@ -117,7 +119,7 @@ export {
     scanFilesLambda,
     ScanFilesInput,
     ScanFilesOutput,
-    invokeListInfectedFiles,
     listInfectedFilesFn,   
     NewLocalInfectedFilesLister,
+    NewLambdaInfectedFilesLister,
 }

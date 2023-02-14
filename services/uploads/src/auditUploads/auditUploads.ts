@@ -1,9 +1,9 @@
 import { Context } from 'aws-lambda';
 import { NewS3UploadsClient, S3UploadsClient } from '../s3'
 import { NewClamAV, ClamAV } from '../clamAV'
-import { generateVirusScanTagSet, virusScanStatus } from '../tags';
+import { generateVirusScanTagSet, virusScanStatus, ScanStatus } from '../tags';
 import { _Object } from '@aws-sdk/client-s3';
-import { invokeListInfectedFiles, listInfectedFilesFn, ScanFilesOutput } from './scanFiles';
+import { listInfectedFilesFn, NewLambdaInfectedFilesLister, ScanFilesOutput } from './scanFiles';
 
 export async function auditUploadsLambda(_event: unknown, _context: Context) {
     console.info('-----Start Audit Uploads function-----')
@@ -22,7 +22,12 @@ export async function auditUploadsLambda(_event: unknown, _context: Context) {
     const auditBucketName = process.env.AUDIT_BUCKET_NAME
     if (!auditBucketName || auditBucketName === '') {
         throw new Error('Configuration Error: AUDIT_BUCKET_NAME must be set')
-    } 
+    }
+
+    const listInfectedFilesName = process.env.LIST_INFECTED_FILES_LAMBDA_NAME
+    if (!listInfectedFilesName || listInfectedFilesName === '') {
+        throw new Error('Configuration Error: LIST_INFECTED_FILES_LAMBDA_NAME must be set')
+    }
 
     const s3Client = NewS3UploadsClient()
 
@@ -31,7 +36,7 @@ export async function auditUploadsLambda(_event: unknown, _context: Context) {
         definitionsPath: clamAVDefintionsPath
     }, s3Client)
 
-    const fileScanner = invokeListInfectedFiles
+    const fileScanner = NewLambdaInfectedFilesLister(listInfectedFilesName)
 
     console.info('Updating ', clamAVBucketName)
     const err = await auditBucket(s3Client, clamAV, fileScanner, auditBucketName)
@@ -72,8 +77,42 @@ function chunkS3Objects(objects: _Object[]): _Object[][] {
     return chunks
 }
 
+
+// This pulls the current tagging for the given object and verifies that the scan status tag is what we expect
+async function verifyTag(s3Client: S3UploadsClient, bucketName: string, key: string, expectedTag: ScanStatus): Promise<'WAS_CORRECT' | 'CORRECTED' | Error> {
+
+    const tags = await s3Client.getObjectTags(key, bucketName)
+        if (tags instanceof Error) {
+            console.error('Failed to get tags for key: ', key)
+            return tags
+        }
+        console.log('tags for ', key, tags)
+
+        const scanStatus = virusScanStatus(tags)
+
+        if (scanStatus === expectedTag) {
+            console.log('Infected File is marked Infected')
+            return 'WAS_CORRECT'
+        }
+
+        console.info(`BAD: File Is mistagged. Expected: ${expectedTag} Actual: ${scanStatus} Key: ${key}`)
+
+        const infectedTags = generateVirusScanTagSet(expectedTag)
+        const tag = await s3Client.tagObject(key, bucketName, infectedTags)
+        if (tag instanceof Error) {
+            const errMsg = `Failed to set infected tags for: ${key}, got: ${tag}`
+            console.error(errMsg)
+            return tag
+        }
+        console.info('Corrected tags for ', key)
+
+        return 'CORRECTED'
+}
+
+
+
 // audit bucket returns a list of keys that are INFECTED that were previously marked CLEAN
-async function auditBucket(s3Client: S3UploadsClient, clamAV: ClamAV, fileScanner: listInfectedFilesFn, bucketName: string): Promise<undefined | Error> {
+async function auditBucket(s3Client: S3UploadsClient, clamAV: ClamAV, fileScanner: listInfectedFilesFn, bucketName: string): Promise<string[] | Error> {
 
     // get the virus definition files
     const defsRes = await clamAV.downloadAVDefinitions()
@@ -89,11 +128,24 @@ async function auditBucket(s3Client: S3UploadsClient, clamAV: ClamAV, fileScanne
         return objects
     }
 
-    // TODO: If any single file is too big, make sure it's marked SKIPPED and skip it.
+    // If any single file is too big, make sure it's marked SKIPPED and skip it.
+    const tooBigFiles = objects.filter((o) => !o.Size || o.Size > 314572800)
+    const allValidObjects = objects.filter((o) => o.Size && o.Size <= 314572800)
+    
+    // Verify the tags on files that are too big. If there are errors, we'll just log them since
+    // they aren't being scanned one way or another
+    for (const bigFileKey of tooBigFiles.map((obj) => obj.Key).filter((key): key is string => key !== undefined)) {
+        const result = await verifyTag(s3Client, bucketName, bigFileKey, 'SKIPPED')
+        if (result instanceof Error) {
+            console.error('Error attempting to verify tags on a SKIPPED file')
+        } else if (result === 'CORRECTED') {
+            console.error('had to correct a SKIPPED file', bigFileKey)
+        }
+    }
 
     // chunk objects into groups by filesize and count
-    const chunks = chunkS3Objects(objects)
-    console.log('make chunks of size: ', chunks.map((c) => c.length))
+    const chunks = chunkS3Objects(allValidObjects)
+    console.log('made chunks of size: ', chunks.map((c) => c.length))
 
     let allInfectedFiles: string[] = []
     // Download files chunk by chunk by invoking a lambda
@@ -127,42 +179,12 @@ async function auditBucket(s3Client: S3UploadsClient, clamAV: ClamAV, fileScanne
     const misTaggedInfectedFiles: string[] = []
     const taggingErrors: Error[] = []
     for (const infectedFile of allInfectedFiles) {
-
-        const tags = await s3Client.getObjectTags(infectedFile, bucketName)
-        if (tags instanceof Error) {
-            console.error('Failed to get tags for key: ', infectedFile)
-            taggingErrors.push(tags)
-            continue
-        }
-        console.log('tags for ', infectedFile, tags)
-
-        const scanStatus = virusScanStatus(tags)
-
-        if (scanStatus === 'INFECTED') {
-            console.log('Infected File is marked Infected')
-            continue
-        }
-
-        if (scanStatus === 'CLEAN') {
-            console.info('BAD: Infected File Is Marked CLEAN: ', infectedFile)
+        const tagResult = await verifyTag(s3Client, bucketName, infectedFile, 'INFECTED')
+        if (tagResult instanceof Error) {
+            taggingErrors.push(tagResult)
+        } else if (tagResult === 'CORRECTED') {
             misTaggedInfectedFiles.push(infectedFile)
-
-            const infectedTags = generateVirusScanTagSet('INFECTED')
-            const tag = await s3Client.tagObject(infectedFile, bucketName, infectedTags)
-            if (tag instanceof Error) {
-                const errMsg = `Failed to set infected tags for: ${infectedFile}, got: ${tag}`
-                console.error(errMsg)
-                taggingErrors.push(new Error(errMsg))
-            }
-            console.info('Corrected tags for ', infectedFile)
-
-            continue
         }
-
-        const errMsg = `Unable to verify tags for file: ${infectedFile}, got: ${scanStatus}`
-        console.error(errMsg)
-        taggingErrors.push(new Error(errMsg))
-
     }
 
     if (taggingErrors.length >0) {
@@ -170,9 +192,14 @@ async function auditBucket(s3Client: S3UploadsClient, clamAV: ClamAV, fileScanne
         return new Error('We encountered errors trying to fix the tags for improperly tagged objects')
     }
 
+    if (misTaggedInfectedFiles.length === 0) {
+        console.info('No mistagged files found. Audit is clean.')
+        return []
+    }
+
     console.info(`Found ${misTaggedInfectedFiles.length} mistagged infected files: ${misTaggedInfectedFiles} and correctly marked them as INFECTED`)
 
-    return undefined
+    return misTaggedInfectedFiles
 
 }
 

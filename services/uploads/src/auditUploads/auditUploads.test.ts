@@ -163,8 +163,11 @@ describe('auditUploads', () => {
                 throw res2
             }
 
+            expect(improperlyTaggedFiles).toContain(testKey)
             expect(virusScanStatus(res2)).toBe('INFECTED')
         }
+
+        expect(improperlyTaggedFiles.length).toEqual(incorrectlyTaggedInfectedKeys.length)
 
         await rm(tmpDefsDir, { force: true, recursive: true })
 
