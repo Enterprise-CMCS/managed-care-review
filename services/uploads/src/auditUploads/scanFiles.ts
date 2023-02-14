@@ -26,10 +26,8 @@ function NewLambdaInfectedFilesLister(lambdaName: string): listInfectedFilesFn {
 
         try {
             const res = await lambdaClient.send(invocation)
-            console.log('RESPONSE', res)
             if (res.Payload) {
                 const lambdaResult = JSON.parse(toUtf8(res.Payload))
-                console.log("GOT OUT", lambdaResult)
 
                 if (lambdaResult.errorType) {
                     const errMsg = `Got an error back from the list infected files lambda: ${JSON.stringify(lambdaResult)}`
@@ -47,7 +45,7 @@ function NewLambdaInfectedFilesLister(lambdaName: string): listInfectedFilesFn {
             }
             return new Error(`Failed to get correct results out of lambda: ${res}`)
         } catch (err) {
-            console.log('Error invoking lambda', err)
+            console.error('Error invoking lambda', err)
             return err
         }
     }
@@ -61,10 +59,7 @@ function NewLocalInfectedFilesLister(s3Client: S3UploadsClient, clamAV: ClamAV):
 
         const result = await scanFiles(s3Client, clamAV, input.keys, input.bucket, tmpScanDir)
 
-        console.log('LOCALLY GOT SCANNED: ', result)
-
         if (result instanceof Error) {
-            console.log('local Error', result)
             return result
         }
 
@@ -106,7 +101,7 @@ async function scanFilesLambda(event: ScanFilesInput, _context: Context) {
     const result = await scanFiles(s3Client, clamAV, event.keys, event.bucket, downloadsPath)
 
     if (result instanceof Error) {
-        console.log('Error scanning files', result)
+        console.error('Error scanning files', result)
         throw result
     }
 

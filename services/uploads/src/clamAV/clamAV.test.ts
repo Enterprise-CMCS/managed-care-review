@@ -59,7 +59,6 @@ describe('clamAV', () => {
         try { 
             await stat(definitionsDir)
         } catch (err) {
-            console.log('Creating definitions File')
             await mkdir(definitionsDir)
         }
 
@@ -67,7 +66,6 @@ describe('clamAV', () => {
         const theseDefs = await readdir(definitionsDir)
         if (theseDefs.length === 0) {
             // get the files
-            console.log('getting files')
             const dlfiles = await clamAV.fetchAVDefinitionsWithFreshclam(definitionsDir)
             if (dlfiles instanceof Error) {
                 throw dlfiles
@@ -75,7 +73,6 @@ describe('clamAV', () => {
         }
 
         // have a list of files
-        console.log("GOT TES Tfiles")
         const testFilesDir = path.join(thisDir, 'testData')
 
         // call test files on it

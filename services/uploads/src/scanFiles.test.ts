@@ -35,7 +35,6 @@ describe('scanFiles', () => {
         for (const testFile of testFilesToScan) {
             const testKey = path.join('allusers', testFile)
             const testPath = path.join(testFilesToScanPath, testFile)
-            console.log('Uploading')
             const res = await s3Client.uploadObject(testKey, 'test-uploads', testPath)
             testKeys.push(testKey)
             if (res) {
@@ -49,25 +48,19 @@ describe('scanFiles', () => {
             throw testDefs
         }
 
-        console.log('RESTEDFE', testDefs)
 
         if (testDefs.length < 2) { // TODO should update this more often... or get them from elsewhere.
             console.info('TEST: Invoking Freshclam')
 
             const tmpdir = await mkdtemp('/tmp/freshclam-')
-            console.log("TMP", tmpdir)
 
             const res = await updateAVDefinitions(s3Client, clamAV, tmpdir)
             if (res) {
                 throw res
             }
 
-            console.log('GOT BACK TO THE PLACdE')
-
             await rm(tmpdir, { force: true, recursive: true })
         }
-
-        console.log('Time TO SCAN THEM FILES')
 
         const tmpScanDir = await mkdtemp('/tmp/scanFiles-')
 
@@ -114,7 +107,6 @@ describe('scanFiles', () => {
         for (const testFile of testFilesToScan) {
             const testKey = path.join('allusers', testFile)
             const testPath = path.join(testFilesToScanPath, testFile)
-            console.log('Uploading')
             const res = await s3Client.uploadObject(testKey, 'test-uploads', testPath)
             testKeys.push(testKey)
             if (res) {
@@ -128,25 +120,18 @@ describe('scanFiles', () => {
             throw testDefs
         }
 
-        console.log('RESTEDFE', testDefs)
-
         if (testDefs.length < 2) { // TODO should update this more often... or get them from elsewhere.
             console.info('TEST: Invoking Freshclam')
 
             const tmpdir = await mkdtemp('/tmp/freshclam-')
-            console.log("TMP", tmpdir)
 
             const res = await updateAVDefinitions(s3Client, clamAV, tmpdir)
             if (res) {
                 throw res
             }
 
-            console.log('GOT BACK TO THE PLACdE')
-
             await rm(tmpdir, { force: true, recursive: true })
         }
-
-        console.log('Time TO SCAN THEM FILES')
 
         const tmpScanDir = await mkdtemp('/tmp/scanFiles-')
 

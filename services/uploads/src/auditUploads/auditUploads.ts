@@ -58,7 +58,6 @@ function chunkS3Objects(objects: _Object[]): _Object[][] {
     let currentChunk: _Object[] = []
     let currentChunkSize = 0
     for (const obj of objects) {
-        console.log('chunking ojbec', obj.Size)
         const size = obj.Size || maxChunkSize
         if ((size + currentChunkSize) > maxChunkSize || currentChunk.length === 20) {
             chunks.push(currentChunk)
@@ -86,12 +85,10 @@ async function verifyTag(s3Client: S3UploadsClient, bucketName: string, key: str
             console.error('Failed to get tags for key: ', key)
             return tags
         }
-        console.log('tags for ', key, tags)
 
         const scanStatus = virusScanStatus(tags)
 
         if (scanStatus === expectedTag) {
-            console.log('Infected File is marked Infected')
             return 'WAS_CORRECT'
         }
 
@@ -145,7 +142,7 @@ async function auditBucket(s3Client: S3UploadsClient, clamAV: ClamAV, fileScanne
 
     // chunk objects into groups by filesize and count
     const chunks = chunkS3Objects(allValidObjects)
-    console.log('made chunks of size: ', chunks.map((c) => c.length))
+    console.info('made chunks of size: ', chunks.map((c) => c.length))
 
     let allInfectedFiles: string[] = []
     // Download files chunk by chunk by invoking a lambda

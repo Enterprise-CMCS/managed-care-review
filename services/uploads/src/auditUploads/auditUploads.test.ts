@@ -40,39 +40,18 @@ describe('auditUploads', () => {
             throw testDefs
         }
 
-        console.log('RESTEDFE', testDefs)
-
         if (testDefs.length < 2) { // TODO should update this more often... or get them from elsewhere.
             console.info('TEST: Invoking Freshclam')
 
             const tmpdir = await mkdtemp('/tmp/freshclam-')
-            console.log("TMP", tmpdir)
 
             const res = await updateAVDefinitions(s3Client, clamAV, tmpdir)
             if (res) {
                 throw res
             }
 
-            console.log('GOT BACK TO THE PLACdE')
-
             await rm(tmpdir, { force: true, recursive: true })
         }
-
-        console.log('Time TO SCAN THEM FILES')
-
-        // ----done with clamscan
-
-        // delete all objects from filesystem
-
-        // do tags work?
-
-        // upload test objects to s3
-        // want a bunch of files, with one of them being DANGER
-        
-
-        // SETUP TEST DATA
-        // Goal is to have a bunch of files in our bucket with some of them infected and some of them mistagged. 
-        // Then we ensure we fix the tags on them
 
         // remove all objects from the current bucket. 
         const allUsersDir = path.join(thisDir, '..','..', 'local_buckets', 'test-uploads', 'allusers')
@@ -88,17 +67,13 @@ describe('auditUploads', () => {
         for (let i = 0; i < 20; i++) {
             const goodFile = goodSourceFiles[i % goodSourceFiles.length]
             const goodfileExt = path.basename(goodFile).split('.')[1]
-            console.log('SOURCE', goodFile, goodfileExt)
             const fileName = `${crypto.randomUUID()}.${goodfileExt}`
 
             const testKey = path.join('allusers', fileName)
-            console.log("UPLOAIND OBINE")
             const res = await s3Client.uploadObject(testKey, 'test-uploads', goodFile)
             if (res) {
                 throw res
             }
-
-            console.log("DON UPLOER")
 
             const tags = generateVirusScanTagSet('CLEAN')
             const res2 = await s3Client.tagObject(testKey, 'test-uploads', tags)
@@ -110,7 +85,6 @@ describe('auditUploads', () => {
         // make two bad ones that were correctly tagged
         for (const badfile of badSourceFiles) {
             const badfileExt = path.basename(badfile).split('.')[1]
-            console.log('SOURCE', badfile, badfileExt)
 
             const fileName = `${crypto.randomUUID()}.${badfileExt}`
             const testKey = path.join('allusers', fileName)
@@ -130,7 +104,6 @@ describe('auditUploads', () => {
         const incorrectlyTaggedInfectedKeys = []
         for (const badfile of badSourceFiles) {
             const badfileExt = path.basename(badfile).split('.')[1]
-            console.log('SOURCE', badfile, badfileExt)
 
             const fileName = `${crypto.randomUUID()}.${badfileExt}`
             const testKey = path.join('allusers', fileName)
