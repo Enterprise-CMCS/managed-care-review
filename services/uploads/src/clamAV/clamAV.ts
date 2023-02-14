@@ -86,8 +86,20 @@ async function uploadAVDefinitions(config: ClamAVConfig, s3Client: S3UploadsClie
         const key = `${config.definitionsPath}/${filenameToUpload}`
         const filepath = path.join(workdir, filenameToUpload)
 
-        
-        return s3Client.uploadObject(key, config.bucketName, filepath)
+        // In addition to uploading the object, tag it with the current time
+        // this is used in testing to determine when to re-run freshclam
+        return s3Client.uploadObject(key, config.bucketName, filepath).then(() => {
+            const tags = {
+                TagSet: [
+                    {
+                        Key: 'uploadedAt',
+                        Value: new Date().toString(),
+                    },
+                ],
+            }
+
+            return s3Client.tagObject(key, config.bucketName, tags)
+        })
     });
 
     try {
@@ -233,10 +245,7 @@ async function fetchAVDefinitionsWithFreshclam(config: ClamAVConfig, workdir: st
 
         const files = await readdir(workdir)
 
-        console.info(
-            'Downloaded:',
-            files
-        )
+        console.info('Downloaded:', files)
 
         if (executionResult.stderr) {
             console.error('stderr: ', executionResult.stderr.toString())

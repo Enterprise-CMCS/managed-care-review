@@ -22,7 +22,7 @@ function generateVirusScanTagSet(virusScanStatus: ScanStatus) {
                 Value: new Date().getTime().toString(),
             },
         ],
-    };
+    }
 }
 
 /**
@@ -47,10 +47,25 @@ function virusScanStatus(tags: Tag[]): ScanStatus | Error | undefined {
     return undefined
 }
 
+function uploadedAt(tags: Tag[]): Date | Error | undefined {
+    for (const tag of tags) {
+        if (tag.Key === 'uploadedAt') {
+            if (!tag.Value) {
+                return new Error('No Value in this tag.')
+            }
+            
+            return new Date(tag.Value)
+        }
+    }
+
+    return undefined
+}
+
 
 export {
     generateVirusScanTagSet,
     virusScanStatus,
+    uploadedAt,
 }
 
 export type { ScanStatus }

@@ -10,6 +10,7 @@ import {
     Tagging,
     Tag,
     _Object,
+    HeadObjectOutput,
 } from "@aws-sdk/client-s3"
 
 import fs from 'fs'
@@ -19,6 +20,7 @@ import { Readable } from 'stream'
 
 
 interface S3UploadsClient {
+    headObject: (key: string, bucket: string) => Promise<HeadObjectOutput | Error>
     sizeOf: (key: string, bucket: string) => Promise<number | Error>
     listBucketFiles: (bucketName: string) => Promise<string[] | Error>
     listBucketObjects: (bucketName: string) => Promise<_Object[] | Error>
@@ -32,6 +34,7 @@ interface S3UploadsClient {
 
 function uploadsClient(s3Client: S3Client): S3UploadsClient {
     return {
+        headObject: (key, bucket) => headObject(s3Client, key, bucket),
         sizeOf: (key, bucket) => sizeOf(s3Client, key, bucket),
         listBucketFiles: (bucketName) => listBucketFiles(s3Client, bucketName),
         listBucketObjects: (bucketName) => listBucketObjects(s3Client, bucketName),
@@ -67,22 +70,31 @@ function NewTestS3UploadsClient(): S3UploadsClient {
 }
 
 /**
- * Retrieve the file size of S3 object without downloading.
+ * Retrieve metadata about the object without downloading.
  */
-async function sizeOf(client: S3Client, key: string, bucket: string): Promise<number | Error> {
+async function headObject(client: S3Client, key: string, bucket: string): Promise<HeadObjectOutput | Error> {
     const head = new HeadObjectCommand({ Key: key, Bucket: bucket })
-
     try {
-        const res = await client.send(head)
-
-        if (res.ContentLength) {
-            return res.ContentLength
-        }
-
-        return new Error('Didnt get a size back from S3')
+        return await client.send(head)
     } catch (err) {
         return err
     }
+}
+
+/**
+ * Retrieve the file size of S3 object without downloading.
+ */
+async function sizeOf(client: S3Client, key: string, bucket: string): Promise<number | Error> {
+    const head = await headObject(client, key, bucket)
+    if (head instanceof Error) {
+        return head
+    }
+
+    if (!head.ContentLength) {
+        return new Error('Didnt get a size back from S3')
+    }
+
+    return head.ContentLength
 }
 
 /**
@@ -280,7 +292,6 @@ async function uploadObject(client: S3Client, key: string, bucket: string, filep
     }
 
 }
-
 
 // set the tagging for the specific object.
 async function tagObject(client: S3Client, key: string, bucket: string, tagSet: Tagging): Promise<undefined | Error> {
