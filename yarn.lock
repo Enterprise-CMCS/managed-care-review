@@ -28376,21 +28376,6 @@ serverless-webpack@^5.11.0:
   optionalDependencies:
     ts-node ">= 8.3.0"
 
-serverless-webpack@^5.7.1:
-  version "5.10.0"
-  resolved "https://registry.yarnpkg.com/serverless-webpack/-/serverless-webpack-5.10.0.tgz#398434d0ae609ade13e68e80d7ea488c6e9ace62"
-  integrity sha512-XFNkH1jgfNtUj2v6XwWiaL+5cLL7jYvh4dSIsyilzh2vB2WdcJnldAzAbQyKnSLDx3fDoQUvkc7zEwCOySosxw==
-  dependencies:
-    archiver "^5.3.1"
-    bluebird "^3.7.2"
-    fs-extra "^9.1.0"
-    glob "^7.2.3"
-    is-builtin-module "^3.2.0"
-    lodash "^4.17.21"
-    semver "^7.3.7"
-  optionalDependencies:
-    ts-node ">= 8.3.0"
-
 serverless@^3.26.0, serverless@^3.27.0:
   version "3.27.0"
   resolved "https://registry.yarnpkg.com/serverless/-/serverless-3.27.0.tgz#06e38fb150ef95419ad83d9f0b8878533b1517a0"

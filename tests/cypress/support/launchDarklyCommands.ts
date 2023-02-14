@@ -62,7 +62,7 @@ Cypress.Commands.add('stubFeatureFlags', () => {
 
     // turn off push updates from LaunchDarkly (EventSource)
     cy.intercept(
-        { method: 'GET', hostname: /\.*clientstream\.launchdarkly\.com/ },
+        { method: 'GET', hostname: /\.*clientstream\.launchdarkly\.us/ },
         // access the request handler and stub a response
         (req) => {
             req.on('response', (res) => {
