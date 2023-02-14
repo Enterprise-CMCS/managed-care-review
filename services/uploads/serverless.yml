@@ -47,7 +47,7 @@ provider:
           Action:
             - lambda:InvokeFunction
           Resource:
-            - !Sub arn:aws:lambda:${self:region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-avListInfectedFiles
+            - !Sub arn:aws:lambda:${self:provider.region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-avListInfectedFiles
 
 custom:
   region: ${aws:region}
