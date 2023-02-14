@@ -210,8 +210,7 @@ jobs:
 
   deploy-infra:
     needs: [begin-deployment]
-  # TODO pin back to main after bharvey-github-oidc is merged to main
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@bharvey-github-oidc
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
@@ -232,8 +231,7 @@ jobs:
     if: |
       always() &&
       (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped')
-    # TODO pin back to main after bharvey-github-oidc is merged to main
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@bharvey-github-oidc
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
