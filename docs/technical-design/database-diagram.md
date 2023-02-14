@@ -26,7 +26,7 @@ HealthPlanRevisionTable {
 }
 Question {
    String pkgID
-   DateTime dateAdded
+   DateTime createdAt
    String addedByUserID
    String noteText
    DateTime dueDate
@@ -51,7 +51,7 @@ User {
 
 QuestionReponse {
     String questionID
-    DateTime dateAdded
+    DateTime createdAt
     String addedByUserID
     String documentID
     String noteText

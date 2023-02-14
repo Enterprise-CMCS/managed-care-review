@@ -3,7 +3,7 @@ mutation createQuestion($input: CreateQuestionInput!) {
         question {
             id
             pkgID
-            dateAdded
+            createdAt
             addedBy {
                 id
                 role

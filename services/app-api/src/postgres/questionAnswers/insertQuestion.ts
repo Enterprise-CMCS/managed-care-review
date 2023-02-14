@@ -19,7 +19,6 @@ export async function insertQuestion(
         const result = await client.question.create({
             data: {
                 id: uuidv4(),
-                dateAdded: new Date(),
                 pkg: {
                     connect: {
                         id: questionInput.pkgID,

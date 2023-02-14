@@ -16,7 +16,7 @@ export async function findAllQuestionsByHealthPlanPackage(
                 addedBy: true,
             },
             orderBy: {
-                dateAdded: 'desc',
+                createdAt: 'desc',
             },
         })
 

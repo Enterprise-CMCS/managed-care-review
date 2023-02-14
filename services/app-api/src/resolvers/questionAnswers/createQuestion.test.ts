@@ -102,7 +102,7 @@ describe('createQuestion', () => {
                         {
                             node: expect.objectContaining({
                                 id: expect.any(String),
-                                dateAdded: expect.any(Date),
+                                createdAt: expect.any(Date),
                                 pkgID: submittedPkg.id,
                                 documents: [
                                     {
@@ -116,7 +116,7 @@ describe('createQuestion', () => {
                         {
                             node: expect.objectContaining({
                                 id: expect.any(String),
-                                dateAdded: expect.any(Date),
+                                createdAt: expect.any(Date),
                                 pkgID: submittedPkg.id,
                                 documents: [
                                     {

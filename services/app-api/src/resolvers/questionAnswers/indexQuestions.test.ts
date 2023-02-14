@@ -67,7 +67,7 @@ describe('indexQuestions', () => {
                         {
                             node: expect.objectContaining({
                                 id: expect.any(String),
-                                dateAdded: expect.any(Date),
+                                createdAt: expect.any(Date),
                                 pkgID: submittedPkg.id,
                                 documents: [
                                     {
@@ -81,7 +81,7 @@ describe('indexQuestions', () => {
                         {
                             node: expect.objectContaining({
                                 id: expect.any(String),
-                                dateAdded: expect.any(Date),
+                                createdAt: expect.any(Date),
                                 pkgID: submittedPkg.id,
                                 documents: [
                                     {
@@ -95,7 +95,7 @@ describe('indexQuestions', () => {
                         {
                             node: expect.objectContaining({
                                 id: expect.any(String),
-                                dateAdded: expect.any(Date),
+                                createdAt: expect.any(Date),
                                 pkgID: submittedPkg.id,
                                 documents: [
                                     {

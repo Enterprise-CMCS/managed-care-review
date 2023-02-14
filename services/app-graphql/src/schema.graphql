@@ -561,7 +561,7 @@ QuestionResponse with documents that answer the questions posed by CMS.
 type Question {
     id: ID!
     pkgID: ID!
-    dateAdded: DateTime!
+    createdAt: DateTime!
     addedBy: CMSUser!
     documents: [Document!]!
 #    noteText: String
@@ -578,7 +578,7 @@ type Question {
 #type QuestionResponse {
 #    id: ID!
 #    questionID: ID!
-#    dateAdded: DateTime!
+#    createdAt: DateTime!
 #    addedBy: StateUser!
 #    documents: [Document!]!
 #    noteText: String

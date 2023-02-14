@@ -8,7 +8,7 @@ type Document = {
 type Question = {
     id: string
     pkgID: string
-    dateAdded: Date
+    createdAt: Date
     addedBy: CMSUserType
     documents: Document[]
 }

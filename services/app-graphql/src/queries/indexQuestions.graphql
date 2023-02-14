@@ -2,7 +2,7 @@ fragment questionEdgeFragment on QuestionEdge {
     node {
         id
         pkgID
-        dateAdded
+        createdAt
         addedBy {
             id
             role

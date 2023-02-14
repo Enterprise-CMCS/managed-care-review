@@ -57,7 +57,7 @@ model Question {
   id            String                 @id
   pkgID         String
   pkg           HealthPlanPackageTable @relation(fields: [pkgID], references: [id])
-  dateAdded     DateTime
+  createdAt     DateTime               @default(now())
   addedBy       User                   @relation(fields: [addedByUserID], references: [id])
   addedByUserID String
   documents     QuestionDocument[]
