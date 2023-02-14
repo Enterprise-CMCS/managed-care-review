@@ -79,6 +79,7 @@ custom:
         # the attachments bucket has no name, so we need to make one up on our own
       - local-qa
       - test-uploads
+      - test-audit
       - test-av-definitions
   serverlessTerminationProtection:
     stages:

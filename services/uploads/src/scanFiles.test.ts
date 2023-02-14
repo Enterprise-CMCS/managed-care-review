@@ -48,8 +48,7 @@ describe('scanFiles', () => {
             throw testDefs
         }
 
-
-        if (testDefs.length < 2) { // TODO should update this more often... or get them from elsewhere.
+        if (testDefs.length < 2) {
             console.info('TEST: Invoking Freshclam')
 
             const tmpdir = await mkdtemp('/tmp/freshclam-')

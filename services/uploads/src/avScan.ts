@@ -7,9 +7,7 @@ import { NewS3UploadsClient, S3UploadsClient } from './s3'
 import { NewClamAV, ClamAV } from './clamAV'
 import { generateVirusScanTagSet, ScanStatus } from './tags';
 
-const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || '314572800')
-
-export async function avScanLambda(event: S3Event, _context: Context) {
+async function avScanLambda(event: S3Event, _context: Context) {
     console.info('-----Start Antivirus Lambda function-----')
 
     // Check on the values for our required config
@@ -22,6 +20,8 @@ export async function avScanLambda(event: S3Event, _context: Context) {
     if (!clamAVDefintionsPath || clamAVDefintionsPath === '') {
         throw new Error('Configuration Error: PATH_TO_AV_DEFINITIONS must be set')
     } 
+
+    const maxFileSize = parseInt(process.env.MAX_FILE_SIZE || '314572800')
 
     const s3Client = NewS3UploadsClient()
 
@@ -41,9 +41,7 @@ export async function avScanLambda(event: S3Event, _context: Context) {
     const s3ObjectBucket = record.s3.bucket.name
 
     console.info('Scanning ', s3ObjectKey, s3ObjectBucket)
-    const err = await scanFile(s3Client, clamAV, s3ObjectKey, s3ObjectBucket)
-
-
+    const err = await scanFile(s3Client, clamAV, s3ObjectKey, s3ObjectBucket, maxFileSize)
     if (err) {
         throw err
     }
@@ -51,16 +49,19 @@ export async function avScanLambda(event: S3Event, _context: Context) {
     return 'FILE SCANNED'
 }
 
-async function scanFile(s3Client: S3UploadsClient, clamAV: ClamAV, key: string, bucket: string): Promise<undefined | Error> {
+async function scanFile(s3Client: S3UploadsClient, clamAV: ClamAV, key: string, bucket: string, maxFileSize: number): Promise<undefined | Error> {
     //You need to verify that you are not getting too large a file
     //currently lambdas max out at 500MB storage.
     const fileSize = await s3Client.sizeOf(key, bucket)
     if (fileSize instanceof Error) {
+        if (fileSize.name === 'NotFound') {
+            console.error('Object not found with Key: ', key)
+        }
         return fileSize
     }
 
     let tagResult: ScanStatus | undefined = undefined
-    if (fileSize > MAX_FILE_SIZE) {
+    if (fileSize > maxFileSize) {
         console.warn('S3 File is too big. Size: ', fileSize)
         // tag with skipped.
         tagResult = 'SKIPPED'
@@ -102,5 +103,7 @@ async function scanFile(s3Client: S3UploadsClient, clamAV: ClamAV, key: string, 
     console.info('Tagged object ', tagResult)
 }
 
-
-
+export {
+    avScanLambda,
+    scanFile,
+}

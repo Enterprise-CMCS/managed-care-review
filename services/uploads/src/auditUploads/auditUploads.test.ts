@@ -10,7 +10,6 @@ import { generateVirusScanTagSet, virusScanStatus } from '../tags'
 import { NewLocalInfectedFilesLister } from './scanFiles'
 
 
-
 describe('auditUploads', () => {
 
     it('will audit a bucket', async () => {
@@ -53,10 +52,11 @@ describe('auditUploads', () => {
             await rm(tmpdir, { force: true, recursive: true })
         }
 
-        // remove all objects from the current bucket. 
-        const allUsersDir = path.join(thisDir, '..','..', 'local_buckets', 'test-uploads', 'allusers')
-        await rm(allUsersDir, { force: true, recursive: true })
+        const testBucketName = 'test-audit'
 
+        // remove all objects from the current bucket. 
+        const allUsersDir = path.join(thisDir, '..','..', 'local_buckets', testBucketName, 'allusers')
+        await rm(allUsersDir, { force: true, recursive: true })
 
         const testFilesToScanPath = path.join(thisDir, '..', 'clamAV', 'testData')
         const goodSourceFiles = ['dummy.pdf', 'goodList.csv'].map((name) => path.join(testFilesToScanPath, name))
@@ -70,13 +70,13 @@ describe('auditUploads', () => {
             const fileName = `${crypto.randomUUID()}.${goodfileExt}`
 
             const testKey = path.join('allusers', fileName)
-            const res = await s3Client.uploadObject(testKey, 'test-uploads', goodFile)
+            const res = await s3Client.uploadObject(testKey, testBucketName, goodFile)
             if (res) {
                 throw res
             }
 
             const tags = generateVirusScanTagSet('CLEAN')
-            const res2 = await s3Client.tagObject(testKey, 'test-uploads', tags)
+            const res2 = await s3Client.tagObject(testKey, testBucketName, tags)
             if (res2) {
                 throw res2
             }
@@ -88,13 +88,13 @@ describe('auditUploads', () => {
 
             const fileName = `${crypto.randomUUID()}.${badfileExt}`
             const testKey = path.join('allusers', fileName)
-            const res = await s3Client.uploadObject(testKey, 'test-uploads', badfile)
+            const res = await s3Client.uploadObject(testKey, testBucketName, badfile)
             if (res) {
                 throw res
             }
 
             const tags = generateVirusScanTagSet('INFECTED')
-            const res2 = await s3Client.tagObject(testKey, 'test-uploads', tags)
+            const res2 = await s3Client.tagObject(testKey, testBucketName, tags)
             if (res2) {
                 throw res2
             }
@@ -107,13 +107,13 @@ describe('auditUploads', () => {
 
             const fileName = `${crypto.randomUUID()}.${badfileExt}`
             const testKey = path.join('allusers', fileName)
-            const res = await s3Client.uploadObject(testKey, 'test-uploads', badfile)
+            const res = await s3Client.uploadObject(testKey, testBucketName, badfile)
             if (res) {
                 throw res
             }
 
             const tags = generateVirusScanTagSet('CLEAN')
-            const res2 = await s3Client.tagObject(testKey, 'test-uploads', tags)
+            const res2 = await s3Client.tagObject(testKey, testBucketName, tags)
             if (res2) {
                 throw res2
             }
@@ -124,14 +124,14 @@ describe('auditUploads', () => {
 
         // TEST
         // run auditor
-        const improperlyTaggedFiles = await auditBucket(s3Client, clamAV, fileScanner, 'test-uploads')
+        const improperlyTaggedFiles = await auditBucket(s3Client, clamAV, fileScanner, testBucketName)
         if (improperlyTaggedFiles instanceof Error) {
             throw improperlyTaggedFiles
         }
 
         // check that the keys are now "INFECTED". 
         for (const testKey of incorrectlyTaggedInfectedKeys) {
-            const res2 = await s3Client.getObjectTags(testKey, 'test-uploads')
+            const res2 = await s3Client.getObjectTags(testKey, testBucketName)
             if (res2 instanceof Error) {
                 throw res2
             }

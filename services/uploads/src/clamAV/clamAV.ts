@@ -169,14 +169,14 @@ function parseInfectedFiles(clamscanOutput: string): string[] {
  * Returns a list of infected files, returning [] means no files are infected.
  *
  */
-function scanForInfectedFiles(config: ClamAVConfig, pathToFile: string): string[] | Error {
+function scanForInfectedFiles(config: ClamAVConfig, pathToScan: string): string[] | Error {
     try {
         console.info('Executing clamav')
         let avResult = spawnSync(config.pathToClamav, [
             '--stdout',
             '-d',
             config.pathToDefintions,
-            pathToFile,
+            pathToScan,
         ])
 
         console.info('stderror', avResult.stderr && avResult.stderr.toString())

@@ -4,6 +4,7 @@ import { ClamAV } from "./clamAV";
 import { S3UploadsClient } from "./s3";
 
 // returns a list of aws keys that are infected
+// scanDir is the directory where files should be downloaded and scanned and should exist already
 async function scanFiles(s3Client: S3UploadsClient, clamAV: ClamAV, keys: string[], bucket: string, scanDir: string): Promise<string[] | Error> {
 
     // fetch definition files
@@ -13,7 +14,6 @@ async function scanFiles(s3Client: S3UploadsClient, clamAV: ClamAV, keys: string
         console.error('failed to fetch definitions')
         return defsRes
     }
-
 
     // clamScan wants files to be top level in the scanned directory, so we map each key to a UUID
     const filemap: { [filename: string]: string } = {}
