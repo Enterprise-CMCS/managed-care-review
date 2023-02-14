@@ -2,6 +2,9 @@ name: Destroy
 
 on: delete
 
+permissions:
+  id-token: write
+
 jobs:
   destroy:
     # Protected branches should be designated as such in the GitHub UI.
@@ -10,6 +13,7 @@ jobs:
     # This is a list of branch names that are commonly used for protected branches/environments.
     # Add/remove names from this list as appropriate.
     if: github.event.ref_type == 'branch' && !contains(fromJson('["develop", "main", "master", "impl", "val", "prod", "production"]'), github.event.ref)
+    environment: dev
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -19,6 +23,13 @@ jobs:
 
       - name: Setup env
         uses: ./.github/actions/setup_env
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ secrets.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: main
 
       - name: build scripts
         shell: bash
@@ -32,9 +43,6 @@ jobs:
 
       - name: destroy all
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
           STAGE_PREFIX: ${{ secrets.STAGE_PREFIX }}
         run: node ./scripts/destroy_stage.js $stage_name
 
