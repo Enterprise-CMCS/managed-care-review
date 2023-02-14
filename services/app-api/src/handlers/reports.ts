@@ -114,29 +114,17 @@ export const main: APIGatewayProxyHandler = async () => {
                 revision.formDataProto,
                 programList
             )
-            // add the derived status to the revision
-            if (
-                revision.formDataProto.status === 'DRAFT' &&
-                revision.unlockedReason !== null
-            ) {
-                revision.derivedStatus = 'UNLOCKED'
-            } else if (
-                revision.formDataProto.status === 'SUBMITTED' &&
-                revision.unlockedReason !== null
-            ) {
-                revision.derivedStatus = 'RESUBMITTED'
-            } else {
-                revision.derivedStatus = revision.formDataProto.status
-            }
+            // add the rateInfo fields to the revision
+            revision.formDataProto.rateInfos.forEach((rateInfo, index) => {
+                revision['rateInfo' + index] = rateInfo
+            })
+            revision.formDataProto.rateInfos = []
+            /* both saved/unsubmitted and submitted/unlocked revisions have a DRAFT status
+            we only want the unlocked revisions */
             if (
                 revision.formDataProto.status !== 'DRAFT' ||
-                revision.derivedStatus === 'UNLOCKED'
+                revision.unlockedReason !== null
             ) {
-                // add the rateInfo fields to the revision
-                revision.formDataProto.rateInfos.forEach((rateInfo, index) => {
-                    revision['rateInfo' + index] = rateInfo
-                })
-                revision.formDataProto.rateInfos = []
                 bucket.push(revision)
             }
         }
