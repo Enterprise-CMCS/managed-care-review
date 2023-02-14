@@ -90,7 +90,6 @@ async function scanFile(s3Client: S3UploadsClient, clamAV: ClamAV, key: string, 
         } else {
             tagResult = virusScanStatus
         }
-
     }
 
     const tags = generateVirusScanTagSet(tagResult)
@@ -101,7 +100,6 @@ async function scanFile(s3Client: S3UploadsClient, clamAV: ClamAV, key: string, 
     }
 
     console.info('Tagged object ', tagResult)
-
 }
 
 

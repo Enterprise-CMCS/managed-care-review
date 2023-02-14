@@ -40,7 +40,7 @@ export async function auditUploadsLambda(_event: unknown, _context: Context) {
         throw err
     }
 
-    return 'FILE SCANNED'
+    return 'FILES SCANNED'
 }
 
 // Chunk the objects, by file size. Prevent chunks from having more than 20 objects in them, or from being greater than 500 megs.
