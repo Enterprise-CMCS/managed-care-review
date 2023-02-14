@@ -39,7 +39,7 @@ Cypress.Commands.add(
         // Intercepts LD request and returns with our own feature flags and values.
         return cy
             .intercept(
-                { method: 'GET', hostname: /\.*app\.launchdarkly\.us/ },
+                { method: 'GET', hostname: /\.*clientsdk\.launchdarkly\.us/ },
                 { body: featureFlagObject }
             )
             .as('LDApp')
