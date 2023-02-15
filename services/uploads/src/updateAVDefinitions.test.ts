@@ -6,8 +6,8 @@ import path from 'path'
 import { uploadedAt } from './tags'
 
 describe('updateAVDefinitions', () => {
-    // This test will trample over other tests, so only run it when attempting to actually
-    // test updateAVDefinitions.
+    // This test will trample over other tests by deleting files in the test-av-definitions bucket,
+    // so only run it when attempting to actually test updateAVDefinitions.
     // eslint-disable-next-line jest/no-disabled-tests
     it.skip('correctly updates the definition files', async () => {
         console.info('OUR FILESNEM', __dirname)
@@ -45,8 +45,6 @@ describe('updateAVDefinitions', () => {
             console.info('Error getting tags', res)
             return res
         } else if (!(res instanceof Error)) {
-            console.info('HEAD OVJECT: ', res)
-
             const uploadedDate = uploadedAt(res)
 
             // This doesn't respect DST or leap anythings but is good enough for testing

@@ -11,7 +11,8 @@ const MAX_FILE_SIZE = 314572800
 describe('avScan', () => {
     it('tags clean for a clean file', async () => {
         const thisDir = __dirname
-        const tmpDefsDir = await mkdtemp('/tmp/clamscan-')
+        const tmpDefsDir = await mkdtemp('/tmp/freshclam-')
+        const tmpScanDir = await mkdtemp('/tmp/clamscan-')
 
         const s3Client = NewTestS3UploadsClient()
 
@@ -47,7 +48,8 @@ describe('avScan', () => {
             clamAV,
             goodFileKey,
             'test-uploads',
-            MAX_FILE_SIZE
+            MAX_FILE_SIZE,
+            tmpScanDir
         )
         if (scanResult instanceof Error) {
             throw scanResult
@@ -64,11 +66,13 @@ describe('avScan', () => {
         expect(virusScanStatus(res2)).toBe('CLEAN')
 
         await rm(tmpDefsDir, { force: true, recursive: true })
+        await rm(tmpScanDir, { force: true, recursive: true })
     })
 
     it('marks infected for an infected file', async () => {
         const thisDir = __dirname
-        const tmpDefsDir = await mkdtemp('/tmp/clamscan-')
+        const tmpDefsDir = await mkdtemp('/tmp/freshclam-')
+        const tmpScanDir = await mkdtemp('/tmp/clamscan-')
 
         const s3Client = NewTestS3UploadsClient()
 
@@ -104,7 +108,8 @@ describe('avScan', () => {
             clamAV,
             badFileKey,
             'test-uploads',
-            MAX_FILE_SIZE
+            MAX_FILE_SIZE,
+            tmpScanDir
         )
         if (scanResult instanceof Error) {
             throw scanResult
@@ -121,11 +126,13 @@ describe('avScan', () => {
         expect(virusScanStatus(res2)).toBe('INFECTED')
 
         await rm(tmpDefsDir, { force: true, recursive: true })
+        await rm(tmpScanDir, { force: true, recursive: true })
     })
 
     it('marks skipped for too big a file (config a smaller max size)', async () => {
         const thisDir = __dirname
-        const tmpDefsDir = await mkdtemp('/tmp/clamscan-')
+        const tmpDefsDir = await mkdtemp('/tmp/freshclam-')
+        const tmpScanDir = await mkdtemp('/tmp/clamscan-')
 
         const s3Client = NewTestS3UploadsClient()
 
@@ -161,7 +168,8 @@ describe('avScan', () => {
             clamAV,
             badFileKey,
             'test-uploads',
-            2
+            2,
+            tmpScanDir
         )
         if (scanResult instanceof Error) {
             throw scanResult
@@ -178,11 +186,13 @@ describe('avScan', () => {
         expect(virusScanStatus(res2)).toBe('SKIPPED')
 
         await rm(tmpDefsDir, { force: true, recursive: true })
+        await rm(tmpScanDir, { force: true, recursive: true })
     })
 
     it('marks error if ClamAV errors', async () => {
         const thisDir = __dirname
-        const tmpDefsDir = await mkdtemp('/tmp/clamscan-')
+        const tmpDefsDir = await mkdtemp('/tmp/freshclam-')
+        const tmpScanDir = await mkdtemp('/tmp/clamscan-')
 
         const s3Client = NewTestS3UploadsClient()
 
@@ -199,7 +209,7 @@ describe('avScan', () => {
             s3Client
         )
 
-        clamAV.scanLocalFile = () => {
+        clamAV.scanForInfectedFiles = () => {
             return new Error('test unexpected error')
         }
 
@@ -222,7 +232,8 @@ describe('avScan', () => {
             clamAV,
             badFileKey,
             'test-uploads',
-            MAX_FILE_SIZE
+            MAX_FILE_SIZE,
+            tmpScanDir
         )
         if (scanResult instanceof Error) {
             throw scanResult
@@ -239,11 +250,13 @@ describe('avScan', () => {
         expect(virusScanStatus(res2)).toBe('ERROR')
 
         await rm(tmpDefsDir, { force: true, recursive: true })
+        await rm(tmpScanDir, { force: true, recursive: true })
     })
 
     it('returns not found if the key doesnt exist', async () => {
         const thisDir = __dirname
-        const tmpDefsDir = await mkdtemp('/tmp/clamscan-')
+        const tmpDefsDir = await mkdtemp('/tmp/freshclam-')
+        const tmpScanDir = await mkdtemp('/tmp/clamscan-')
 
         const s3Client = NewTestS3UploadsClient()
 
@@ -269,7 +282,8 @@ describe('avScan', () => {
             clamAV,
             badFileKey,
             'test-uploads',
-            MAX_FILE_SIZE
+            MAX_FILE_SIZE,
+            tmpScanDir
         )
         if (!(scanResult instanceof Error)) {
             throw new Error('Didnt error on a nonexistant file')
@@ -277,5 +291,6 @@ describe('avScan', () => {
         expect(scanResult.name).toBe('NotFound')
 
         await rm(tmpDefsDir, { force: true, recursive: true })
+        await rm(tmpScanDir, { force: true, recursive: true })
     })
 })

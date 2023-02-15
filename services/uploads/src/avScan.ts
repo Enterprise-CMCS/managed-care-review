@@ -1,11 +1,9 @@
-import { Context, S3Event } from 'aws-lambda';
-import path from 'path'
-import crypto from 'crypto'
-
+import { Context, S3Event } from 'aws-lambda'
 import { NewS3UploadsClient, S3UploadsClient } from './s3'
 
 import { NewClamAV, ClamAV } from './clamAV'
-import { generateVirusScanTagSet, ScanStatus } from './tags';
+import { generateVirusScanTagSet, ScanStatus } from './tags'
+import { scanFiles } from './scanFiles'
 
 async function avScanLambda(event: S3Event, _context: Context) {
     console.info('-----Start Antivirus Lambda function-----')
@@ -18,19 +16,22 @@ async function avScanLambda(event: S3Event, _context: Context) {
 
     const clamAVDefintionsPath = process.env.PATH_TO_AV_DEFINITIONS
     if (!clamAVDefintionsPath || clamAVDefintionsPath === '') {
-        throw new Error('Configuration Error: PATH_TO_AV_DEFINITIONS must be set')
-    } 
+        throw new Error(
+            'Configuration Error: PATH_TO_AV_DEFINITIONS must be set'
+        )
+    }
 
     const maxFileSize = parseInt(process.env.MAX_FILE_SIZE || '314572800')
 
     const s3Client = NewS3UploadsClient()
 
-
-    const clamAV = NewClamAV({
-        bucketName: clamAVBucketName,
-        definitionsPath: clamAVDefintionsPath
-    }, s3Client)
-
+    const clamAV = NewClamAV(
+        {
+            bucketName: clamAVBucketName,
+            definitionsPath: clamAVDefintionsPath,
+        },
+        s3Client
+    )
 
     const record = event.Records[0]
     if (!record) {
@@ -41,7 +42,14 @@ async function avScanLambda(event: S3Event, _context: Context) {
     const s3ObjectBucket = record.s3.bucket.name
 
     console.info('Scanning ', s3ObjectKey, s3ObjectBucket)
-    const err = await scanFile(s3Client, clamAV, s3ObjectKey, s3ObjectBucket, maxFileSize)
+    const err = await scanFile(
+        s3Client,
+        clamAV,
+        s3ObjectKey,
+        s3ObjectBucket,
+        maxFileSize,
+        '/tmp/downloads'
+    )
     if (err) {
         throw err
     }
@@ -49,7 +57,14 @@ async function avScanLambda(event: S3Event, _context: Context) {
     return 'FILE SCANNED'
 }
 
-async function scanFile(s3Client: S3UploadsClient, clamAV: ClamAV, key: string, bucket: string, maxFileSize: number): Promise<undefined | Error> {
+async function scanFile(
+    s3Client: S3UploadsClient,
+    clamAV: ClamAV,
+    key: string,
+    bucket: string,
+    maxFileSize: number,
+    scanDir: string
+): Promise<undefined | Error> {
     //You need to verify that you are not getting too large a file
     //currently lambdas max out at 500MB storage.
     const fileSize = await s3Client.sizeOf(key, bucket)
@@ -66,30 +81,22 @@ async function scanFile(s3Client: S3UploadsClient, clamAV: ClamAV, key: string, 
         // tag with skipped.
         tagResult = 'SKIPPED'
     } else {
-        console.info('Download AV Definitions')
-        const defsRes = await clamAV.downloadAVDefinitions()
-        if (defsRes) {
-            console.error('failed to fetch definitions')
-            return defsRes
-        }
+        const infectedFiles = await scanFiles(
+            s3Client,
+            clamAV,
+            [key],
+            bucket,
+            scanDir
+        )
 
-        console.info('Downloading file to be scanned')
-        const scanFileName = `${crypto.randomUUID()}.tmp`;
-        const scanFilePath = path.join('/tmp/download', scanFileName )
-
-        const err = await s3Client.downloadFileFromS3(key, bucket, scanFilePath)
-        if (err instanceof Error) {
-            return err
-        }
-
-        console.info('Scanning File')
-        const virusScanStatus = clamAV.scanLocalFile(scanFilePath);
-        console.info('VIRUS SCANNED', virusScanStatus)
-
-        if (virusScanStatus instanceof Error) {
+        if (infectedFiles instanceof Error) {
             tagResult = 'ERROR'
         } else {
-            tagResult = virusScanStatus
+            if (infectedFiles.length === 0) {
+                tagResult = 'CLEAN'
+            } else {
+                tagResult = 'INFECTED'
+            }
         }
     }
 
@@ -103,7 +110,4 @@ async function scanFile(s3Client: S3UploadsClient, clamAV: ClamAV, key: string, 
     console.info('Tagged object ', tagResult)
 }
 
-export {
-    avScanLambda,
-    scanFile,
-}
+export { avScanLambda, scanFile }

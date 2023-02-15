@@ -4,12 +4,9 @@ import { readdir } from 'fs/promises'
 
 import { S3UploadsClient } from '../s3'
 
-type ClamAVScanResult = 'CLEAN' | 'INFECTED'
-
 interface ClamAV {
     downloadAVDefinitions: () => Promise<undefined | Error>
     uploadAVDefinitions: (workdir: string) => Promise<undefined | Error>
-    scanLocalFile: (path: string) => ClamAVScanResult | Error
     scanForInfectedFiles: (path: string) => string[] | Error
     fetchAVDefinitionsWithFreshclam: (
         workdir: string
@@ -45,7 +42,6 @@ function NewClamAV(config: Partial<ClamAVConfig>, s3Client: S3UploadsClient) {
             downloadAVDefinitions(fullConfig, s3Client),
         uploadAVDefinitions: (workdir: string) =>
             uploadAVDefinitions(fullConfig, s3Client, workdir),
-        scanLocalFile: (path: string) => scanLocalFile(fullConfig, path),
         scanForInfectedFiles: (path: string) =>
             scanForInfectedFiles(fullConfig, path),
         fetchAVDefinitionsWithFreshclam: (workdir: string) =>
@@ -159,32 +155,6 @@ async function downloadAVDefinitions(
 
     console.info('Downloaded all AV definition files locally')
     return
-}
-
-/**
- * Function to scan the given file. This function requires ClamAV and the definitions to be available.
- * This function does not download the file so the file should also be accessible.
- *
- * Three possible case can happen:
- * - The file is clean, the clamAV command returns 0 and the function return "CLEAN"
- * - The file is infected, the clamAV command returns 1 and this function will return "INFECTED"
- * - Any other error and the function will return an Error
- *
- */
-function scanLocalFile(
-    config: ClamAVConfig,
-    pathToFile: string
-): ClamAVScanResult | Error {
-    const infectedFiles = scanForInfectedFiles(config, pathToFile)
-    if (infectedFiles instanceof Error) {
-        return infectedFiles
-    }
-
-    if (infectedFiles.length === 0) {
-        return 'CLEAN'
-    }
-
-    return 'INFECTED'
 }
 
 // parses the output from clamscan for a failed scan run and returns the list of bad files
