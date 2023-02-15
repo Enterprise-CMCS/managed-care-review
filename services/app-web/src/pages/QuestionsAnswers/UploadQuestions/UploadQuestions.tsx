@@ -5,7 +5,7 @@ import {
     FormGroup,
     ButtonGroup,
 } from '@trussworks/react-uswds'
-import styles from '../../StateSubmission/StateSubmissionForm.module.scss'
+import styles from './UploadQuestions.module.scss'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useS3 } from '../../../contexts/S3Context'
 import {
