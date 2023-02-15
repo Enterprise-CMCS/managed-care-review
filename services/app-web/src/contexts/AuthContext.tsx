@@ -111,6 +111,18 @@ function AuthProvider({
     // add current authenticated user to launchdarkly client
     const client = useLDClient()
     async function setLDUser(user: UserType) {
+        const ldContext: ld.LDSingleKindContext = {
+            kind: 'user',
+            key: user.email,
+            email: user.email,
+            role: user.role,
+            state: '',
+        }
+        if (user.__typename === 'StateUser' && user.state.code) {
+            ldContext.state = user.state.code
+        }
+        await client?.identify(ldContext)
+        /*
         const ldUser: ld.LDUser = {
             key: user.email,
             email: user.email,
@@ -130,6 +142,7 @@ function AuthProvider({
         const previousUser = client?.getUser() || {}
         await client?.identify(ldUser)
         client?.alias(ldUser, previousUser)
+        */
     }
 
     const computedLoginStatus: LoginStatusType = loading
