@@ -6,7 +6,9 @@ import path from 'path'
 import { uploadedAt } from "./tags"
 
 describe('updateAVDefinitions', () => {
-    it.skip('can be called', async () => {
+    // This test will trample over other tests, so only run it when attempting to actually
+    // test updateAVDefinitions. 
+    it.skip('correctly updates the definition files', async () => {
 
         console.info("OUR FILESNEM", __dirname)
         const thisDir = __dirname
@@ -103,7 +105,6 @@ describe('updateAVDefinitions', () => {
         const now = new Date()
         const diff = now.getTime() - uploadedDat.getTime()
         expect(diff).toBeLessThan(2000)
-
 
     }, 100000)
 
