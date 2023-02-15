@@ -127,27 +127,6 @@ function AuthProvider({
         } catch (err) {
             return new Error(`Could not identify user ${err}`)
         }
-        /*
-        const ldUser: ld.LDUser = {
-            key: user.email,
-            email: user.email,
-            custom: {
-                role: user.role,
-            },
-        }
-
-        if (
-            user.__typename === 'StateUser' &&
-            user.state.code &&
-            ldUser.custom
-        ) {
-            Object.assign(ldUser.custom, { state: user.state.code })
-        }
-
-        const previousUser = client?.getUser() || {}
-        await client?.identify(ldUser)
-        client?.alias(ldUser, previousUser)
-        */
     }
 
     const computedLoginStatus: LoginStatusType = loading
