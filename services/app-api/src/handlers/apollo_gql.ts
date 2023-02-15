@@ -58,7 +58,6 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
     context: any
 }) => Promise<Context> {
     return async ({ event, context }) => {
-        console.log('event in graphql handler: ', event)
         // pull the current span out of the LAMBDA context, to place it in the APOLLO context
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const anyContext = context as any
@@ -379,7 +378,6 @@ async function initializeGQLHandler(): Promise<Handler> {
 const handlerPromise = initializeGQLHandler()
 
 const gqlHandler: Handler = async (event, context, completion) => {
-    console.log('Received event: ', event)
     // Once initialized, future awaits will return immediately
     const initializedHandler = await handlerPromise
 
