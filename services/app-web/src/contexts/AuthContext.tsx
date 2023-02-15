@@ -110,7 +110,7 @@ function AuthProvider({
 
     // add current authenticated user to launchdarkly client
     const client = useLDClient()
-    async function setLDUser(user: UserType) {
+    async function setLDUser(user: UserType): Promise<Error | undefined> {
         const ldContext: ld.LDSingleKindContext = {
             kind: 'user',
             key: user.email,
@@ -121,7 +121,12 @@ function AuthProvider({
         if (user.__typename === 'StateUser' && user.state.code) {
             ldContext.state = user.state.code
         }
-        await client?.identify(ldContext)
+
+        try {
+            await client?.identify(ldContext)
+        } catch (err) {
+            return new Error(`Could not identify user ${err}`)
+        }
         /*
         const ldUser: ld.LDUser = {
             key: user.email,
