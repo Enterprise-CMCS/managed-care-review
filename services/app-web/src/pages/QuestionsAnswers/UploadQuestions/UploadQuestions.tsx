@@ -1,68 +1,89 @@
-import React, { useState } from 'react'
-import { GridContainer, Form as UswdsForm, FormGroup,ButtonGroup } from '@trussworks/react-uswds'
+import React from 'react'
+import {
+    GridContainer,
+    Form as UswdsForm,
+    FormGroup,
+    ButtonGroup,
+} from '@trussworks/react-uswds'
 import styles from '../../StateSubmission/StateSubmissionForm.module.scss'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useS3 } from '../../../contexts/S3Context'
-import { ActionButton, ErrorSummary,  FileUpload } from '../../../components'
+import {
+    ActionButton,
+    ErrorSummary,
+    FileUpload,
+    GenericApiErrorBanner,
+} from '../../../components'
 import { useFileUpload } from '../../../hooks/useFileUpload'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
+import {
+    CreateQuestionInput,
+    useCreateQuestionMutation,
+} from '../../../gen/gqlClient'
 
 export const UploadQuestions = () => {
-    // third party 
+    // third party
     const { division, id } = useParams<{ division: string; id: string }>()
     const navigate = useNavigate()
 
+    // api
+    const [createQuestion, { loading: apiLoading, error: apiError }] =
+        useCreateQuestionMutation()
+
     // page level state
     const [shouldValidate, setShouldValidate] = React.useState(false)
-    const [isSubmitting, setIsSubmitting] = useState(false)
 
-    // component specific support 
+    // component specific support
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
     const {
         hasValidFiles,
         hasNoFiles,
         onFileItemsUpdate,
         fileUploadErrorMessage,
-        cleanFileItemsBeforeSave
+        cleanFileItemsBeforeSave,
     } = useFileUpload(shouldValidate)
-    const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } = useErrorSummary()
+    const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
+        useErrorSummary()
     const showFileUploadError = shouldValidate && !hasValidFiles
-    const fileUploadErrorFocusKey=
-        hasNoFiles ? 'questions-upload' : '#file-items-list'
+    const fileUploadErrorFocusKey = hasNoFiles
+        ? 'questions-upload'
+        : '#file-items-list'
 
-
-   const handleFormSubmit = async () => {
+    const handleFormSubmit = async () => {
         // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
         // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
-            if (!hasValidFiles) {
-                setShouldValidate(true)
-                setFocusErrorSummaryHeading(true)
-                setIsSubmitting(false)
-                return
-            }
+        if (!hasValidFiles) {
+            setShouldValidate(true)
+            setFocusErrorSummaryHeading(true)
+            return
+        }
 
         try {
             const cleaned = cleanFileItemsBeforeSave()
-            const questionDocs = cleaned.map((item) => { return {
+            const questionDocs = cleaned.map((item) => {
+                return {
                     name: item.name,
-                    s3URL: item.s3URL,
-    
-                }})
-            
-                const updatedSubmission = await createQuestion(cleaned)
-                if (updatedSubmission instanceof Error) {
-                    setIsSubmitting(false)
-                    console.info(
-                        'Error creating Question ',
-                    )
-                } else if (updatedSubmission) {
-                    navigate(`/submissions/${id}/question-and-answers`)
+                    s3URL: item.s3URL as string,
                 }
-            setIsSubmitting(false)
+            })
+
+            const input: CreateQuestionInput = {
+                pkgID: id as string,
+                documents: questionDocs,
+            }
+
+            const update = await createQuestion({ variables: { input } })
+
+            if (update instanceof Error) {
+                console.info('Error creating question')
+            } else {
+                console.info('Upload success')
+                navigate(`/submissions/${id}/question-and-answers`)
+            }
         } catch (serverError) {
-            setIsSubmitting(false)
+            console.info(serverError)
         }
     }
 
@@ -73,8 +94,11 @@ export const UploadQuestions = () => {
                 id="AddQuestionsForm"
                 aria-label="Add Questions Form"
                 aria-describedby="form-guidance"
-                onSubmit={(e) => console.log('ah')}
+                onSubmit={() => {
+                    return
+                }}
             >
+                {apiError && <GenericApiErrorBanner />}
                 <fieldset className="usa-fieldset">
                     <h2>Add questions</h2>
                     <p className="text-bold">{`Questions from ${division?.toUpperCase()}`}</p>
@@ -125,9 +149,9 @@ export const UploadQuestions = () => {
                             type="button"
                             variant="outline"
                             data-testid="page-actions-left-secondary"
-                            disabled={isSubmitting}
+                            disabled={apiLoading}
                             onClick={async () => {
-                                return isSubmitting
+                                return apiLoading
                                     ? undefined
                                     : navigate(
                                           `/submissions/${id}/question-and-answers`
@@ -142,13 +166,14 @@ export const UploadQuestions = () => {
                             variant="default"
                             data-testid="page-actions-right-primary"
                             disabled={showFileUploadError}
-                            onClick={async () => {
-                                return isSubmitting || showFileUploadError
-                                    ? undefined
-                                    : await handleFormSubmit
+                            onClick={async (e) => {
+                                e.preventDefault()
+                                // return apiLoading || showFileUploadError
+                                //     ? undefined
+                                await handleFormSubmit()
                             }}
                             animationTimeout={1000}
-                            loading={isSubmitting && !showFileUploadError}
+                            loading={apiLoading}
                         >
                             Add questions
                         </ActionButton>
