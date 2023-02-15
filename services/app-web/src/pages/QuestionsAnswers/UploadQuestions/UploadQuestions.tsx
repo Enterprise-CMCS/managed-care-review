@@ -1,76 +1,68 @@
-import React, { FormEvent, useEffect, useState } from 'react'
-import { GridContainer, Form as UswdsForm, FormGroup, Link } from '@trussworks/react-uswds'
+import React, { useState } from 'react'
+import { GridContainer, Form as UswdsForm, FormGroup,ButtonGroup } from '@trussworks/react-uswds'
 import styles from '../../StateSubmission/StateSubmissionForm.module.scss'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useS3 } from '../../../contexts/S3Context'
-import { ErrorSummary, FileItemT, FileUpload } from '../../../components'
+import { ActionButton, ErrorSummary,  FileUpload } from '../../../components'
 import { useFileUpload } from '../../../hooks/useFileUpload'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
-import { PageActions } from '../../StateSubmission/PageActions'
+import { PageActionsContainer } from '../../StateSubmission/PageActions'
+import { useErrorSummary } from '../../../hooks/useErrorSummary'
 
 export const UploadQuestions = () => {
-    const { division } = useParams<{ division: string }>()
-    const [shouldValidate, setShouldValidate] = React.useState(false)
+    // third party 
+    const { division, id } = useParams<{ division: string; id: string }>()
+    const navigate = useNavigate()
 
-    /* Documents state management */
+    // page level state
+    const [shouldValidate, setShouldValidate] = React.useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    // component specific support 
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
     const {
         hasValidFiles,
-        hasLoadingFiles,
+        hasNoFiles,
         onFileItemsUpdate,
-        fileItems,
-    } = useFileUpload()
-    const [isSubmitting, setIsSubmitting] = useState(false) // mock same behavior as formik isSubmitting
-     const showFileUploadError = shouldValidate && !hasValidFiles
-    const documentsErrorMessage =
-        showFileUploadError && hasLoadingFiles
-            ? 'You must wait for all documents to finish uploading before continuing'
-            : showFileUploadError && fileItems.length === 0
-            ? ' You must upload at least one document'
-            : showFileUploadError && !hasValidFiles
-            ? ' You must remove all documents with error messages before continuing'
-            : undefined
-    const documentsErrorKey =
-        fileItems.length === 0 ? 'documents' : '#file-items-list'
+        fileUploadErrorMessage,
+        cleanFileItemsBeforeSave
+    } = useFileUpload(shouldValidate)
+    const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } = useErrorSummary()
+    const showFileUploadError = shouldValidate && !hasValidFiles
+    const fileUploadErrorFocusKey=
+        hasNoFiles ? 'questions-upload' : '#file-items-list'
 
 
-
-    /* Error summary state management */
-    const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
-    const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
-        React.useState(false)
-        useEffect(() => {
-            // Focus the error summary heading only if we are displaying
-            // validation errors and the heading element exists
-            if (focusErrorSummaryHeading && errorSummaryHeadingRef.current) {
-                errorSummaryHeadingRef.current.focus()
-            }
-            setFocusErrorSummaryHeading(false)
-        }, [focusErrorSummaryHeading])
-
-   const handleFormSubmit = async (
-        setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
-        options: {
-            shouldValidateDocuments: boolean
-            redirectPath: string
-        }
-    ) => {
+   const handleFormSubmit = async () => {
         // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
         // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
-        if (options.shouldValidateDocuments) {
             if (!hasValidFiles) {
                 setShouldValidate(true)
                 setFocusErrorSummaryHeading(true)
-                setSubmitting(false)
+                setIsSubmitting(false)
                 return
             }
-        }
-
 
         try {
-            setSubmitting(false)
+            const cleaned = cleanFileItemsBeforeSave()
+            const questionDocs = cleaned.map((item) => { return {
+                    name: item.name,
+                    s3URL: item.s3URL,
+    
+                }})
+            
+                const updatedSubmission = await createQuestion(cleaned)
+                if (updatedSubmission instanceof Error) {
+                    setIsSubmitting(false)
+                    console.info(
+                        'Error creating Question ',
+                    )
+                } else if (updatedSubmission) {
+                    navigate(`/submissions/${id}/question-and-answers`)
+                }
+            setIsSubmitting(false)
         } catch (serverError) {
-            setSubmitting(false)
+            setIsSubmitting(false)
         }
     }
 
@@ -84,33 +76,40 @@ export const UploadQuestions = () => {
                 onSubmit={(e) => console.log('ah')}
             >
                 <fieldset className="usa-fieldset">
-                    <legend>Add questions</legend>
                     <h2>Add questions</h2>
-                    <p>{`Questions from ${division?.toUpperCase()}`}</p>
+                    <p className="text-bold">{`Questions from ${division?.toUpperCase()}`}</p>
+
+                    {shouldValidate && (
+                        <ErrorSummary
+                            errors={
+                                showFileUploadError && fileUploadErrorMessage
+                                    ? {
+                                          [fileUploadErrorFocusKey]:
+                                              fileUploadErrorMessage,
+                                      }
+                                    : {}
+                            }
+                            headingRef={errorSummaryHeadingRef}
+                        />
+                    )}
 
                     <FormGroup error={showFileUploadError}>
                         <FileUpload
-                            id="documents"
-                            name="documents"
-                            label="Upload contract"
+                            id="questions-upload"
+                            name="questions-upload"
+                            label="Upload questions"
                             renderMode="list"
                             aria-required
-                            error={documentsErrorMessage}
+                            error={
+                                showFileUploadError
+                                    ? fileUploadErrorMessage
+                                    : ''
+                            }
                             hint={
-                                <>
-                                    <Link
-                                        aria-label="Document definitions and requirements (opens in new window)"
-                                        href={'/help#key-documents'}
-                                        variant="external"
-                                        target="_blank"
-                                    >
-                                        Document definitions and requirements
-                                    </Link>
-                                    <span>
-                                        This input only accepts PDF, CSV, DOC,
-                                        DOCX, XLS, XLSX, XLSM files.
-                                    </span>
-                                </>
+                                <span>
+                                    This input only accepts PDF, CSV, DOC, DOCX,
+                                    XLS, XLSX, XLSM files.
+                                </span>
                             }
                             accept={ACCEPTED_SUBMISSION_FILE_TYPES}
                             uploadFile={handleUploadFile}
@@ -120,18 +119,41 @@ export const UploadQuestions = () => {
                         />
                     </FormGroup>
                 </fieldset>
-                <PageActions
-                    backOnClick={async () => {
-                        // do not need to validate or resubmit if no documents are uploaded
-                        // if (fileItems.length === 0) {
-                        //     navigate('../type')
-                        // } else {
-                            // await handleFormSubmit( )
-                        }
-                    }
-                    disableContinue={showFileUploadError}
-                    actionInProgress={isSubmitting}
-                />
+                <PageActionsContainer>
+                    <ButtonGroup type="default">
+                        <ActionButton
+                            type="button"
+                            variant="outline"
+                            data-testid="page-actions-left-secondary"
+                            disabled={isSubmitting}
+                            onClick={async () => {
+                                return isSubmitting
+                                    ? undefined
+                                    : navigate(
+                                          `/submissions/${id}/question-and-answers`
+                                      )
+                            }}
+                        >
+                            Cancel
+                        </ActionButton>
+
+                        <ActionButton
+                            type="submit"
+                            variant="default"
+                            data-testid="page-actions-right-primary"
+                            disabled={showFileUploadError}
+                            onClick={async () => {
+                                return isSubmitting || showFileUploadError
+                                    ? undefined
+                                    : await handleFormSubmit
+                            }}
+                            animationTimeout={1000}
+                            loading={isSubmitting && !showFileUploadError}
+                        >
+                            Add questions
+                        </ActionButton>
+                    </ButtonGroup>
+                </PageActionsContainer>
             </UswdsForm>
         </GridContainer>
     )
