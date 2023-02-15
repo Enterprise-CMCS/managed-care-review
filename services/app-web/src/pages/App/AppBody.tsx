@@ -30,12 +30,12 @@ export function AppBody({
     useTealium()
     useOTEL()
 
-    const siteUnderMantenanceBannerFlag: string = ldClient?.variation(
+    const siteUnderMaintenanceBannerFlag: string = ldClient?.variation(
         featureFlags.SITE_UNDER_MAINTENANCE_BANNER.flag,
         featureFlags.SITE_UNDER_MAINTENANCE_BANNER.defaultValue
     )
 
-    const siteUnderMaintenance = siteUnderMantenanceBannerFlag !== 'OFF'
+    const siteUnderMaintenance = siteUnderMaintenanceBannerFlag !== 'OFF'
 
     return (
         <div id="App" className={styles.app}>
