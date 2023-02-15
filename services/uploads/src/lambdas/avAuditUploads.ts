@@ -1,6 +1,5 @@
 import { Context } from 'aws-lambda'
 import { NewS3UploadsClient } from '../deps/s3'
-import { NewClamAV } from '../deps/clamAV'
 import { NewLambdaInfectedFilesLister } from './avAuditFiles'
 import { auditBucket } from '../lib/auditUploads'
 
@@ -34,23 +33,10 @@ async function avAuditUploads(_event: unknown, _context: Context) {
 
     const s3Client = NewS3UploadsClient()
 
-    const clamAV = NewClamAV(
-        {
-            bucketName: clamAVBucketName,
-            definitionsPath: clamAVDefintionsPath,
-        },
-        s3Client
-    )
-
     const fileScanner = NewLambdaInfectedFilesLister(listInfectedFilesName)
 
     console.info('Updating ', clamAVBucketName)
-    const err = await auditBucket(
-        s3Client,
-        clamAV,
-        fileScanner,
-        auditBucketName
-    )
+    const err = await auditBucket(s3Client, fileScanner, auditBucketName)
 
     if (err) {
         throw err

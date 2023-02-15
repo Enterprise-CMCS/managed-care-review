@@ -137,7 +137,6 @@ describe('auditUploads', () => {
         // run auditor
         const improperlyTaggedFiles = await auditBucket(
             s3Client,
-            clamAV,
             fileScanner,
             testBucketName
         )

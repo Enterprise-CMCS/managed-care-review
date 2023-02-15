@@ -1,5 +1,4 @@
 import { S3UploadsClient } from '../deps/s3'
-import { ClamAV } from '../deps/clamAV'
 import { generateVirusScanTagSet, virusScanStatus, ScanStatus } from './tags'
 import { _Object } from '@aws-sdk/client-s3'
 import { listInfectedFilesFn, ScanFilesOutput } from '../lambdas/avAuditFiles'
@@ -72,7 +71,6 @@ async function verifyTag(
 // audit bucket returns a list of keys that are INFECTED that were previously marked CLEAN
 async function auditBucket(
     s3Client: S3UploadsClient,
-    clamAV: ClamAV,
     fileScanner: listInfectedFilesFn,
     bucketName: string
 ): Promise<string[] | Error> {
