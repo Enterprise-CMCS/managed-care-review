@@ -259,12 +259,11 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
 Cypress.Commands.add('fillOutNewRateCertification', () => {
     // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
-
     cy.findByRole(
         'radiogroup',
         { name: /Was this rate certification uploaded to any other submissions?/}
     ).should('exist').within(() => {
-        cy.findByRole('radio', { name: /No/}).click()
+        cy.findByText('No').click()
     })
 
     cy.findByText('New rate certification').click()
@@ -299,7 +298,6 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
 Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
     // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
-
     cy.findByRole(
         'radiogroup',
         { name: /Was this rate certification uploaded to any other submissions?/}
