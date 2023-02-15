@@ -33,25 +33,6 @@ describe('auditUploads', () => {
 
         const fileScanner = NewLocalInfectedFilesLister(s3Client, clamAV)
 
-        // clamupdate if necessary 
-        const testDefs = await listFilesInDirectory(path.join(thisDir, '..', '..', 'local_buckets', 'test-av-definitions'))
-        if (testDefs instanceof Error) {
-            throw testDefs
-        }
-
-        if (testDefs.length < 2) { // TODO should update this more often... or get them from elsewhere.
-            console.info('TEST: Invoking Freshclam')
-
-            const tmpdir = await mkdtemp('/tmp/freshclam-')
-
-            const res = await updateAVDefinitions(s3Client, clamAV, tmpdir)
-            if (res) {
-                throw res
-            }
-
-            await rm(tmpdir, { force: true, recursive: true })
-        }
-
         const testBucketName = 'test-audit'
 
         // remove all objects from the current bucket. 

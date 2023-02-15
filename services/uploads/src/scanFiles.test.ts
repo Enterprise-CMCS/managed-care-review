@@ -42,25 +42,6 @@ describe('scanFiles', () => {
             }
         }
 
-        // clamupdate if necessary 
-        const testDefs = await listFilesInDirectory(path.join(thisDir, '..', 'local_buckets', 'test-av-definitions'))
-        if (testDefs instanceof Error) {
-            throw testDefs
-        }
-
-        if (testDefs.length < 2) {
-            console.info('TEST: Invoking Freshclam')
-
-            const tmpdir = await mkdtemp('/tmp/freshclam-')
-
-            const res = await updateAVDefinitions(s3Client, clamAV, tmpdir)
-            if (res) {
-                throw res
-            }
-
-            await rm(tmpdir, { force: true, recursive: true })
-        }
-
         const tmpScanDir = await mkdtemp('/tmp/scanFiles-')
 
         // TEST
@@ -111,25 +92,6 @@ describe('scanFiles', () => {
             if (res) {
                 throw res
             }
-        }
-
-        // clamupdate if necessary 
-        const testDefs = await listFilesInDirectory(path.join(thisDir, '..', 'local_buckets', 'test-av-definitions'))
-        if (testDefs instanceof Error) {
-            throw testDefs
-        }
-
-        if (testDefs.length < 2) { // TODO should update this more often... or get them from elsewhere.
-            console.info('TEST: Invoking Freshclam')
-
-            const tmpdir = await mkdtemp('/tmp/freshclam-')
-
-            const res = await updateAVDefinitions(s3Client, clamAV, tmpdir)
-            if (res) {
-                throw res
-            }
-
-            await rm(tmpdir, { force: true, recursive: true })
         }
 
         const tmpScanDir = await mkdtemp('/tmp/scanFiles-')

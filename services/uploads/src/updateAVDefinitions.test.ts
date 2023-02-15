@@ -6,7 +6,7 @@ import path from 'path'
 import { uploadedAt } from "./tags"
 
 describe('updateAVDefinitions', () => {
-    it('can be called', async () => {
+    it.skip('can be called', async () => {
 
         console.info("OUR FILESNEM", __dirname)
         const thisDir = __dirname

@@ -28,27 +28,6 @@ describe('avScan', () => {
             pathToDefintions: tmpDefsDir,
         }, s3Client)
 
-        // clamupdate if necessary 
-        const testDefs = await listFilesInDirectory(path.join(thisDir, '..', 'local_buckets', 'test-av-definitions'))
-        if (testDefs instanceof Error) {
-            throw testDefs
-        }
-
-        console.log('DEFS FOUND', testDefs)
-
-        if (testDefs.length < 2) { // TODO should update this more often... or get them from elsewhere.
-            console.info('TEST: Invoking Freshclam')
-
-            const tmpdir = await mkdtemp('/tmp/freshclam-')
-
-            const res = await updateAVDefinitions(s3Client, clamAV, tmpdir)
-            if (res) {
-                throw res
-            }
-
-            await rm(tmpdir, { force: true, recursive: true })
-        }
-
         const goodFile = path.join(thisDir, 'clamAV', 'testData', 'dummy.pdf')
         const goodFileKey = path.join('allusers', crypto.randomUUID())
 
@@ -94,25 +73,6 @@ describe('avScan', () => {
             pathToDefintions: tmpDefsDir,
         }, s3Client)
 
-        // clamupdate if necessary 
-        const testDefs = await listFilesInDirectory(path.join(thisDir, '..', 'local_buckets', 'test-av-definitions'))
-        if (testDefs instanceof Error) {
-            throw testDefs
-        }
-
-        if (testDefs.length < 2) { // TODO should update this more often... or get them from elsewhere.
-            console.info('TEST: Invoking Freshclam')
-
-            const tmpdir = await mkdtemp('/tmp/freshclam-')
-
-            const res = await updateAVDefinitions(s3Client, clamAV, tmpdir)
-            if (res) {
-                throw res
-            }
-
-            await rm(tmpdir, { force: true, recursive: true })
-        }
-
         const badFile = path.join(thisDir, 'clamAV', 'testData', 'badDummy.pdf')
         const badFileKey = path.join('allusers', crypto.randomUUID())
 
@@ -156,25 +116,6 @@ describe('avScan', () => {
             pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
             pathToDefintions: tmpDefsDir,
         }, s3Client)
-
-        // clamupdate if necessary 
-        const testDefs = await listFilesInDirectory(path.join(thisDir, '..', 'local_buckets', 'test-av-definitions'))
-        if (testDefs instanceof Error) {
-            throw testDefs
-        }
-
-        if (testDefs.length < 2) { // TODO should update this more often... or get them from elsewhere.
-            console.info('TEST: Invoking Freshclam')
-
-            const tmpdir = await mkdtemp('/tmp/freshclam-')
-
-            const res = await updateAVDefinitions(s3Client, clamAV, tmpdir)
-            if (res) {
-                throw res
-            }
-
-            await rm(tmpdir, { force: true, recursive: true })
-        }
 
         const badFile = path.join(thisDir, 'clamAV', 'testData', 'badDummy.pdf')
         const badFileKey = path.join('allusers', crypto.randomUUID())
@@ -224,25 +165,6 @@ describe('avScan', () => {
             return new Error('test unexpected error')
         }
 
-        // clamupdate if necessary 
-        const testDefs = await listFilesInDirectory(path.join(thisDir, '..', 'local_buckets', 'test-av-definitions'))
-        if (testDefs instanceof Error) {
-            throw testDefs
-        }
-
-        if (testDefs.length < 2) { // TODO should update this more often... or get them from elsewhere.
-            console.info('TEST: Invoking Freshclam')
-
-            const tmpdir = await mkdtemp('/tmp/freshclam-')
-
-            const res = await updateAVDefinitions(s3Client, clamAV, tmpdir)
-            if (res) {
-                throw res
-            }
-
-            await rm(tmpdir, { force: true, recursive: true })
-        }
-
         const badFile = path.join(thisDir, 'clamAV', 'testData', 'badDummy.pdf')
         const badFileKey = path.join('allusers', crypto.randomUUID())
 
@@ -286,25 +208,6 @@ describe('avScan', () => {
             pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
             pathToDefintions: tmpDefsDir,
         }, s3Client)
-
-        // clamupdate if necessary 
-        const testDefs = await listFilesInDirectory(path.join(thisDir, '..', 'local_buckets', 'test-av-definitions'))
-        if (testDefs instanceof Error) {
-            throw testDefs
-        }
-
-        if (testDefs.length < 2) { // TODO should update this more often... or get them from elsewhere.
-            console.info('TEST: Invoking Freshclam')
-
-            const tmpdir = await mkdtemp('/tmp/freshclam-')
-
-            const res = await updateAVDefinitions(s3Client, clamAV, tmpdir)
-            if (res) {
-                throw res
-            }
-
-            await rm(tmpdir, { force: true, recursive: true })
-        }
 
         const badFileKey = path.join('allusers', crypto.randomUUID())
 
