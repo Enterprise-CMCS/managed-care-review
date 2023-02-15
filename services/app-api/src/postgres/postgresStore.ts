@@ -10,6 +10,8 @@ import {
     UpdateInfoType,
     UserType,
     CMSUserType,
+    Question,
+    CreateQuestionInput,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
 import { StoreError } from './storeError'
@@ -30,6 +32,10 @@ import {
     updateUserAssignedState,
     findAllUsers,
 } from './user'
+import {
+    findAllQuestionsByHealthPlanPackage,
+    insertQuestion,
+} from './questionAnswers'
 
 type Store = {
     findPrograms: (
@@ -80,6 +86,15 @@ type Store = {
         userID: string,
         states: StateCodeType[]
     ) => Promise<CMSUserType | StoreError>
+
+    insertQuestion: (
+        questionInput: CreateQuestionInput,
+        user: CMSUserType
+    ) => Promise<Question | StoreError>
+
+    findAllQuestionsByHealthPlanPackage: (
+        pkgID: string
+    ) => Promise<Question[] | StoreError>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -113,6 +128,10 @@ function NewPostgresStore(client: PrismaClient): Store {
         findStatePrograms: findStatePrograms,
         findAllRevisions: () => findAllRevisions(client),
         findAllUsers: () => findAllUsers(client),
+        insertQuestion: (questionInput, user) =>
+            insertQuestion(client, questionInput, user),
+        findAllQuestionsByHealthPlanPackage: (pkgID) =>
+            findAllQuestionsByHealthPlanPackage(client, pkgID),
     }
 }
 

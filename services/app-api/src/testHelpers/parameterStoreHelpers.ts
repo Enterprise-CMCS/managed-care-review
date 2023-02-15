@@ -9,9 +9,6 @@ function mockEmailParameterStoreError(error?: string): EmailParameterStore {
         getCmsReviewSharedEmails: async (): Promise<Error> => {
             return new Error(message)
         },
-        getRatesReviewSharedEmails: async (): Promise<Error> => {
-            return new Error(message)
-        },
         getCmsReviewHelpEmail: async (): Promise<Error> => {
             return new Error(message)
         },
@@ -19,6 +16,15 @@ function mockEmailParameterStoreError(error?: string): EmailParameterStore {
             return new Error(message)
         },
         getCmsDevTeamHelpEmail: async (): Promise<Error> => {
+            return new Error(message)
+        },
+        getOACTEmails: async (): Promise<Error> => {
+            return new Error(message)
+        },
+        getDMCOEmails: async (): Promise<Error> => {
+            return new Error(message)
+        },
+        getDMCPEmails: async (): Promise<Error> => {
             return new Error(message)
         },
         getSourceEmail: async (): Promise<Error> => {
@@ -38,7 +44,7 @@ const getTestCmsReviewSharedEmails = (): string[] => [
     `"CMS Reviewer 3" <CMS.reviewer.3@example.com>`,
 ]
 
-const getTestRatesReviewSharedEmails = (): string[] => [
+const getTestOactEmails = (): string[] => [
     `"Rate Submission Reviewer 1" <rate.reviewer.1@example.com>`,
     `"Rate Submission Reviewer 2" <rate.reviewer.2@example.com>`,
     `"Rate Submission Reviewer 3" <rate.reviewer.3@example.com>`,
@@ -48,5 +54,5 @@ export {
     mockEmailParameterStoreError,
     getTestStateAnalystsEmails,
     getTestCmsReviewSharedEmails,
-    getTestRatesReviewSharedEmails,
+    getTestOactEmails,
 }
