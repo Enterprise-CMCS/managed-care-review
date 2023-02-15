@@ -43,13 +43,6 @@ export const featureFlags = {
         defaultValue: 2,
     },
     /**
-     * Enables rates across submissions features
-     */
-    RATES_ACROSS_SUBMISSIONS: {
-        flag: 'rates-across-submissions',
-        defaultValue: false,
-    },
-    /**
      * Enables filter on CMS dashboard
      */
     CMS_DASHBOARD_FILTER: {

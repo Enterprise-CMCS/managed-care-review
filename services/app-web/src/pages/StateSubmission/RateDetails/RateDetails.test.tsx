@@ -25,7 +25,6 @@ import {
     TEST_XLS_FILE,
     TEST_PNG_FILE,
     dragAndDrop,
-    ldUseClientSpy,
     updateDateRange,
 } from '../../../testHelpers'
 import { RateDetails } from './RateDetails'
@@ -419,10 +418,6 @@ describe('RateDetails', () => {
         })
 
         it('progressively disclose new rate form fields as expected', async () => {
-            ldUseClientSpy({
-                'rates-across-submissions': true,
-            })
-
             renderWithProviders(
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
@@ -854,16 +849,7 @@ describe('RateDetails', () => {
         })
     })
 
-    describe('rates across submissions', () => {
-        beforeEach(() =>
-            ldUseClientSpy({
-                'rates-across-submissions': true,
-            })
-        )
-        afterEach(() => {
-            jest.clearAllMocks()
-        })
-
+    describe('handles rates across submissions', () => {
         it('correctly checks shared rate certification radios and selects shared packages', async () => {
             //Spy on useStatePrograms hook to get up-to-date state programs
             jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
