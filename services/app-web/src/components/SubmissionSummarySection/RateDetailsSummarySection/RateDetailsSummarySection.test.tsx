@@ -4,10 +4,7 @@ import {
     mockStateSubmission,
     mockMNState,
 } from '../../../testHelpers/apolloHelpers'
-import {
-    ldUseClientSpy,
-    renderWithProviders,
-} from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import * as usePreviousSubmission from '../../../hooks/usePreviousSubmission'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
 import { RateInfoType } from '../../../common-code/healthPlanFormDataType'
@@ -530,7 +527,6 @@ describe('RateDetailsSummarySection', () => {
         })
     })
     it('renders all necessary information for documents with shared rate certifications', async () => {
-        ldUseClientSpy({ 'rates-across-submissions': true })
         const testSubmission = {
             ...draftSubmission,
             rateInfos: [
@@ -627,7 +623,6 @@ describe('RateDetailsSummarySection', () => {
             usePreviousSubmission,
             'usePreviousSubmission'
         ).mockReturnValue(true)
-        ldUseClientSpy({ 'rates-across-submissions': true })
         const testSubmission = {
             ...draftSubmission,
             rateInfos: [
@@ -700,7 +695,6 @@ describe('RateDetailsSummarySection', () => {
         })
     })
     it('does not render shared rate cert info if none are present', async () => {
-        ldUseClientSpy({ 'rates-across-submissions': true })
         const testSubmission = {
             ...draftSubmission,
             rateInfos: [
