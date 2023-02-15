@@ -21,8 +21,8 @@ describe('updateAVDefinitions', () => {
                 bucketName: 'test-av-definitions',
                 definitionsPath: 'lambda/s3-antivirus/av-definitions',
 
-                pathToClamav: '/usr/local/clamav/bin/clamscan',
-                pathToFreshclam: '/usr/local/clamav/bin/freshclam',
+                pathToClamav: 'clamscan',
+                pathToFreshclam: 'freshclam',
                 pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
             },
             s3Client
