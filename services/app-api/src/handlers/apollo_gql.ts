@@ -85,7 +85,7 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                 }
 
                 const store = NewPostgresStore(pgResult)
-
+                console.log('jjauthprovider in graphql: ', authProvider)
                 const userResult = await userFetcher(authProvider, store)
 
                 if (!userResult.isErr()) {

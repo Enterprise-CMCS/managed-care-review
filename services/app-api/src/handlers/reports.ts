@@ -13,6 +13,10 @@ import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormD
 import statePrograms from '../../../app-web/src/common-code/data/statePrograms.json'
 import { isStoreError, StoreError } from '../postgres/storeError'
 import { HealthPlanPackageStatusType } from '../domain-models'
+import {
+    userFromCognitoAuthProvider,
+    userFromLocalAuthProvider,
+} from '../authn'
 
 type RequiredRevisionWithDecodedProtobufProperties = {
     formDataProto: HealthPlanFormDataType | Error
@@ -66,7 +70,10 @@ const decodeRevisions = (
     return allRevisions
 }
 
-export const main: APIGatewayProxyHandler = async () => {
+export const main: APIGatewayProxyHandler = async (event, context) => {
+    const authProvider =
+        event.requestContext.identity.cognitoAuthenticationProvider || ''
+
     const programList = [] as ProgramArgType[]
     statePrograms.states.forEach((state) => {
         programList.push(...state.programs)
@@ -92,6 +99,17 @@ export const main: APIGatewayProxyHandler = async () => {
     }
 
     const store = NewPostgresStore(pgResult)
+    const authMode = process.env.REACT_APP_AUTH_MODE
+    console.log('jjauthMode in reports', authMode)
+    console.log('jjevent in reports', event)
+    console.log('jjcontext in reports', context)
+    console.log('jjauthProvider in reports', authProvider)
+    const userFetcher =
+        authMode === 'LOCAL'
+            ? userFromLocalAuthProvider
+            : userFromCognitoAuthProvider
+    const userResult = await userFetcher(authProvider, store)
+    console.log('jjuserResult', userResult)
     const result: HealthPlanRevisionTable[] | StoreError =
         await store.findAllRevisions()
     if (isStoreError(result)) {

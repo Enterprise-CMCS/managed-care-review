@@ -8,6 +8,7 @@ export async function userFromLocalAuthProvider(
     store?: Store
 ): Promise<Result<UserType, Error>> {
     try {
+        console.log('jjauthProvider in local', authProvider)
         const localUser: UserType = JSON.parse(authProvider)
 
         if (store === undefined) {
