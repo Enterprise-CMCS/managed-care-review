@@ -304,7 +304,7 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
         'radiogroup',
         { name: /Was this rate certification uploaded to any other submissions?/}
     ).should('exist').within(() => {
-        cy.findByRole('radio', { name: /No/}).click()
+        cy.findByText('No').click()
     })
 
     cy.findByText('Amendment to prior rate certification').click()
