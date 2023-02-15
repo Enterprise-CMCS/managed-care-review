@@ -1,7 +1,7 @@
 import path from 'path'
-import { NewClamAV } from './clamAV'
+import { NewClamAV } from '../deps/clamAV'
 import { mkdtemp, rm, readdir } from 'fs/promises'
-import { NewTestS3UploadsClient } from './s3'
+import { NewTestS3UploadsClient } from '../deps/s3'
 import { scanFiles } from './scanFiles'
 
 describe('scanFiles', () => {
@@ -20,14 +20,25 @@ describe('scanFiles', () => {
 
                 pathToClamav: 'clamscan',
                 pathToFreshclam: 'freshclam',
-                pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
+                pathToConfig: path.join(
+                    thisDir,
+                    '..',
+                    'testData',
+                    'freshclam.conf'
+                ),
                 pathToDefintions: tmpDefsDir,
             },
             s3Client
         )
 
         // upload test objects to s3
-        const testFilesToScanPath = path.join(thisDir, 'clamAV', 'testData')
+        const testFilesToScanPath = path.join(
+            thisDir,
+            '..',
+            'deps',
+            'clamAV',
+            'testData'
+        )
         const testFilesToScan = await readdir(testFilesToScanPath)
 
         const testKeys = []
@@ -82,14 +93,25 @@ describe('scanFiles', () => {
 
                 pathToClamav: 'clamscan',
                 pathToFreshclam: 'freshclam',
-                pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
+                pathToConfig: path.join(
+                    thisDir,
+                    '..',
+                    'testData',
+                    'freshclam.conf'
+                ),
                 pathToDefintions: tmpDefsDir,
             },
             s3Client
         )
 
         // upload test objects to s3
-        const testFilesToScanPath = path.join(thisDir, 'clamAV', 'testData')
+        const testFilesToScanPath = path.join(
+            thisDir,
+            '..',
+            'deps',
+            'clamAV',
+            'testData'
+        )
         const allTestFiles = await readdir(testFilesToScanPath)
         const testFilesToScan = allTestFiles.filter(
             (name) => !name.startsWith('bad')

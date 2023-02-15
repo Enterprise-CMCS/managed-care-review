@@ -1,8 +1,8 @@
 import path from 'path'
 import crypto from 'crypto'
 import { mkdtemp, rm } from 'fs/promises'
-import { NewClamAV } from './clamAV'
-import { NewTestS3UploadsClient } from './s3'
+import { NewClamAV } from '../deps/clamAV'
+import { NewTestS3UploadsClient } from '../deps/s3'
 import { scanFile } from './avScan'
 import { virusScanStatus } from './tags'
 
@@ -23,13 +23,25 @@ describe('avScan', () => {
 
                 pathToClamav: 'clamscan',
                 pathToFreshclam: 'freshclam',
-                pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
+                pathToConfig: path.join(
+                    thisDir,
+                    '..',
+                    'testData',
+                    'freshclam.conf'
+                ),
                 pathToDefintions: tmpDefsDir,
             },
             s3Client
         )
 
-        const goodFile = path.join(thisDir, 'clamAV', 'testData', 'dummy.pdf')
+        const goodFile = path.join(
+            thisDir,
+            '..',
+            'deps',
+            'clamAV',
+            'testData',
+            'dummy.pdf'
+        )
         const goodFileKey = path.join('allusers', crypto.randomUUID())
 
         const res = await s3Client.uploadObject(
@@ -83,13 +95,25 @@ describe('avScan', () => {
 
                 pathToClamav: 'clamscan',
                 pathToFreshclam: 'freshclam',
-                pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
+                pathToConfig: path.join(
+                    thisDir,
+                    '..',
+                    'testData',
+                    'freshclam.conf'
+                ),
                 pathToDefintions: tmpDefsDir,
             },
             s3Client
         )
 
-        const badFile = path.join(thisDir, 'clamAV', 'testData', 'badDummy.pdf')
+        const badFile = path.join(
+            thisDir,
+            '..',
+            'deps',
+            'clamAV',
+            'testData',
+            'badDummy.pdf'
+        )
         const badFileKey = path.join('allusers', crypto.randomUUID())
 
         const res = await s3Client.uploadObject(
@@ -143,13 +167,25 @@ describe('avScan', () => {
 
                 pathToClamav: 'clamscan',
                 pathToFreshclam: 'freshclam',
-                pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
+                pathToConfig: path.join(
+                    thisDir,
+                    '..',
+                    'testData',
+                    'freshclam.conf'
+                ),
                 pathToDefintions: tmpDefsDir,
             },
             s3Client
         )
 
-        const badFile = path.join(thisDir, 'clamAV', 'testData', 'badDummy.pdf')
+        const badFile = path.join(
+            thisDir,
+            '..',
+            'deps',
+            'clamAV',
+            'testData',
+            'badDummy.pdf'
+        )
         const badFileKey = path.join('allusers', crypto.randomUUID())
 
         const res = await s3Client.uploadObject(
@@ -203,7 +239,12 @@ describe('avScan', () => {
 
                 pathToClamav: 'clamscan',
                 pathToFreshclam: 'freshclam',
-                pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
+                pathToConfig: path.join(
+                    thisDir,
+                    '..',
+                    'testData',
+                    'freshclam.conf'
+                ),
                 pathToDefintions: tmpDefsDir,
             },
             s3Client
@@ -213,7 +254,14 @@ describe('avScan', () => {
             return new Error('test unexpected error')
         }
 
-        const badFile = path.join(thisDir, 'clamAV', 'testData', 'badDummy.pdf')
+        const badFile = path.join(
+            thisDir,
+            '..',
+            'deps',
+            'clamAV',
+            'testData',
+            'badDummy.pdf'
+        )
         const badFileKey = path.join('allusers', crypto.randomUUID())
 
         const res = await s3Client.uploadObject(
@@ -267,7 +315,12 @@ describe('avScan', () => {
 
                 pathToClamav: 'clamscan',
                 pathToFreshclam: 'freshclam',
-                pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
+                pathToConfig: path.join(
+                    thisDir,
+                    '..',
+                    'testData',
+                    'freshclam.conf'
+                ),
                 pathToDefintions: tmpDefsDir,
             },
             s3Client

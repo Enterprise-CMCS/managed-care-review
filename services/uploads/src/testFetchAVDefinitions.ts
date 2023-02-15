@@ -1,9 +1,9 @@
-import { NewClamAV } from './clamAV'
-import { NewTestS3UploadsClient } from './s3'
-import { updateAVDefinitions } from './updateAVDefinitions'
+import { NewClamAV } from './deps/clamAV'
+import { NewTestS3UploadsClient } from './deps/s3'
+import { updateAVDefinitions } from './lib/updateAVDefinitions'
 import { mkdtemp } from 'fs/promises'
 import path from 'path'
-import { uploadedAt } from './tags'
+import { uploadedAt } from './lib/tags'
 
 // setupAVDefinitionsBucket is called by jest as 'globalSetup' and runs
 // once on startup of Jest. It runs freshclam to populate the test-av-definitions

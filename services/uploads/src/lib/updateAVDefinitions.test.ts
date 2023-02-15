@@ -1,5 +1,5 @@
-import { NewClamAV } from './clamAV'
-import { NewTestS3UploadsClient } from './s3'
+import { NewClamAV } from '../deps/clamAV'
+import { NewTestS3UploadsClient } from '../deps/s3'
 import { updateAVDefinitions } from './updateAVDefinitions'
 import { readdir, cp } from 'fs/promises'
 import path from 'path'
@@ -23,7 +23,12 @@ describe('updateAVDefinitions', () => {
 
                 pathToClamav: 'clamscan',
                 pathToFreshclam: 'freshclam',
-                pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
+                pathToConfig: path.join(
+                    thisDir,
+                    '..',
+                    'testData',
+                    'freshclam.conf'
+                ),
             },
             s3Client
         )
@@ -58,6 +63,8 @@ describe('updateAVDefinitions', () => {
                 clamAV.fetchAVDefinitionsWithFreshclam = async () => {
                     const sourceDefsDir = path.join(
                         thisDir,
+                        '..',
+                        'deps',
                         'clamAV',
                         'testDefinitions'
                     )
@@ -80,6 +87,8 @@ describe('updateAVDefinitions', () => {
         // add a superfluous file to s3 to confirm we are clearing the bucket every time.
         const superfluousFile = path.join(
             thisDir,
+            '..',
+            'deps',
             'clamAV',
             'testData',
             'dummy.pdf'

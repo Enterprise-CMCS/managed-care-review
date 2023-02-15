@@ -95,7 +95,7 @@ layers:
 
 functions:
   avScan:
-    handler: src/avScan.avScanLambda
+    handler: src/lambdas/index.avScan
     name: ${self:service}-${sls:stage}-avScan
     timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
     memorySize: 3008
@@ -109,7 +109,7 @@ functions:
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
 
   avDownloadDefinitions:
-    handler: src/updateAVDefinitions.updateAVDefinitionsLambda
+    handler: src/lambdas/index.avDownloadDefinitions
     events:
       - schedule: cron(0 */6 * * ? *)
     timeout: 300 # 300 seconds = 5 minutes
@@ -124,7 +124,7 @@ functions:
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
 
   avAuditUploads:
-    handler: src/auditUploads/index.auditUploadsLambda
+    handler: src/lambdas/index.avAuditUploads
     timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
     maximumRetryAttempts: 0
     layers:
@@ -134,12 +134,12 @@ functions:
       AUDIT_BUCKET_NAME: !Ref DocumentUploadsBucket
       CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
       PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
-      LIST_INFECTED_FILES_LAMBDA_NAME: ${self.functions.avListInfectedFiles.name}
+      LIST_INFECTED_FILES_LAMBDA_NAME: ${self.functions.avAuditFiles.name}
       AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
 
-  avListInfectedFiles:
-    handler: src/auditUploads/index.scanFilesLambda
+  avAuditFiles:
+    handler: src/lambdas/index.avAuditFiles
     timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
     memorySize: 2048
     ephemeralStorageSize: 1024

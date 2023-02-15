@@ -1,11 +1,11 @@
 import path from 'path'
 import crypto from 'crypto'
-import { NewClamAV } from '../clamAV'
+import { NewClamAV } from '../deps/clamAV'
 import { mkdtemp, rm } from 'fs/promises'
-import { NewTestS3UploadsClient } from '../s3'
+import { NewTestS3UploadsClient } from '../deps/s3'
 import { auditBucket } from './auditUploads'
-import { generateVirusScanTagSet, virusScanStatus } from '../tags'
-import { NewLocalInfectedFilesLister } from './scanFiles'
+import { generateVirusScanTagSet, virusScanStatus } from './tags'
+import { NewLocalInfectedFilesLister } from '../lambdas/avAuditFiles'
 
 describe('auditUploads', () => {
     it('will audit a bucket', async () => {
@@ -52,6 +52,7 @@ describe('auditUploads', () => {
         const testFilesToScanPath = path.join(
             thisDir,
             '..',
+            'deps',
             'clamAV',
             'testData'
         )

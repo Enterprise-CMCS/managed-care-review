@@ -1,12 +1,17 @@
-import path from 'path';
+import path from 'path'
 import crypto from 'crypto'
-import { ClamAV } from "./clamAV";
-import { S3UploadsClient } from "./s3";
+import { ClamAV } from '../deps/clamAV'
+import { S3UploadsClient } from '../deps/s3'
 
 // returns a list of aws keys that are infected
 // scanDir is the directory where files should be downloaded and scanned and should exist already
-async function scanFiles(s3Client: S3UploadsClient, clamAV: ClamAV, keys: string[], bucket: string, scanDir: string): Promise<string[] | Error> {
-
+async function scanFiles(
+    s3Client: S3UploadsClient,
+    clamAV: ClamAV,
+    keys: string[],
+    bucket: string,
+    scanDir: string
+): Promise<string[] | Error> {
     // fetch definition files
     console.info('Download AV Definitions')
     const defsRes = await clamAV.downloadAVDefinitions()
@@ -32,7 +37,7 @@ async function scanFiles(s3Client: S3UploadsClient, clamAV: ClamAV, keys: string
     }
 
     console.info('Scanning Files')
-    const res = clamAV.scanForInfectedFiles(scanDir);
+    const res = clamAV.scanForInfectedFiles(scanDir)
     console.info('VIRUSES SCANNED', res)
 
     if (res instanceof Error) {
@@ -40,9 +45,6 @@ async function scanFiles(s3Client: S3UploadsClient, clamAV: ClamAV, keys: string
     }
 
     return res.map((filename) => filemap[filename])
-
 }
 
-export {
-    scanFiles,
-}
+export { scanFiles }
