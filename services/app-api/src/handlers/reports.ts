@@ -100,7 +100,6 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
     const authMode = process.env.REACT_APP_AUTH_MODE
 
     // reject the request if it's not from a CMS or ADMIN user
-    // if (authMode !== 'LOCAL') {
     const userFetcher =
         authMode === 'LOCAL'
             ? userFromLocalAuthProvider
