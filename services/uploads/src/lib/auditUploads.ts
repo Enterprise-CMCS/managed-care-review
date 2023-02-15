@@ -76,13 +76,6 @@ async function auditBucket(
     fileScanner: listInfectedFilesFn,
     bucketName: string
 ): Promise<string[] | Error> {
-    // get the virus definition files
-    const defsRes = await clamAV.downloadAVDefinitions()
-    if (defsRes) {
-        console.error('failed to fetch definitions')
-        return defsRes
-    }
-
     // list all objects in bucket, TODO: with pagination probably
     const objects = await s3Client.listBucketObjects(bucketName)
     if (objects instanceof Error) {

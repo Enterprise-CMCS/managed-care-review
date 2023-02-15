@@ -23,6 +23,8 @@ function NewLambdaInfectedFilesLister(lambdaName: string): listInfectedFilesFn {
     return async (input: ScanFilesInput): Promise<ScanFilesOutput | Error> => {
         const lambdaClient = new LambdaClient({})
 
+        console.info('Invoking Function: ', lambdaName)
+
         const payloadJSON = fromUtf8(JSON.stringify(input))
         const invocation = new InvokeCommand({
             FunctionName: lambdaName,
