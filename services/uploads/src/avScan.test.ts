@@ -3,8 +3,6 @@ import crypto from 'crypto'
 import { mkdtemp, rm } from 'fs/promises'
 import { NewClamAV } from './clamAV'
 import { NewTestS3UploadsClient } from './s3'
-import { listFilesInDirectory } from './fs'
-import { updateAVDefinitions } from './updateAVDefinitions'
 import { scanFile } from './avScan'
 import { virusScanStatus } from './tags'
 
@@ -12,33 +10,45 @@ const MAX_FILE_SIZE = 314572800
 
 describe('avScan', () => {
     it('tags clean for a clean file', async () => {
-
         const thisDir = __dirname
         const tmpDefsDir = await mkdtemp('/tmp/clamscan-')
 
         const s3Client = NewTestS3UploadsClient()
 
-        const clamAV = NewClamAV({
-            bucketName: 'test-av-definitions',
-            definitionsPath: 'lambda/s3-antivirus/av-definitions',
+        const clamAV = NewClamAV(
+            {
+                bucketName: 'test-av-definitions',
+                definitionsPath: 'lambda/s3-antivirus/av-definitions',
 
-            pathToClamav: '/usr/local/clamav/bin/clamscan',
-            pathToFreshclam: '/usr/local/clamav/bin/freshclam',
-            pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
-            pathToDefintions: tmpDefsDir,
-        }, s3Client)
+                pathToClamav: '/usr/local/clamav/bin/clamscan',
+                pathToFreshclam: '/usr/local/clamav/bin/freshclam',
+                pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
+                pathToDefintions: tmpDefsDir,
+            },
+            s3Client
+        )
 
         const goodFile = path.join(thisDir, 'clamAV', 'testData', 'dummy.pdf')
         const goodFileKey = path.join('allusers', crypto.randomUUID())
 
-        const res = await s3Client.uploadObject(goodFileKey, 'test-uploads', goodFile)
+        const res = await s3Client.uploadObject(
+            goodFileKey,
+            'test-uploads',
+            goodFile
+        )
         if (res) {
             throw res
         }
 
         // TEST
         // run check file
-        const scanResult = await scanFile(s3Client, clamAV, goodFileKey, 'test-uploads', MAX_FILE_SIZE)
+        const scanResult = await scanFile(
+            s3Client,
+            clamAV,
+            goodFileKey,
+            'test-uploads',
+            MAX_FILE_SIZE
+        )
         if (scanResult instanceof Error) {
             throw scanResult
         }
@@ -54,36 +64,48 @@ describe('avScan', () => {
         expect(virusScanStatus(res2)).toBe('CLEAN')
 
         await rm(tmpDefsDir, { force: true, recursive: true })
-
     })
-    
+
     it('marks infected for an infected file', async () => {
         const thisDir = __dirname
         const tmpDefsDir = await mkdtemp('/tmp/clamscan-')
 
         const s3Client = NewTestS3UploadsClient()
 
-        const clamAV = NewClamAV({
-            bucketName: 'test-av-definitions',
-            definitionsPath: 'lambda/s3-antivirus/av-definitions',
+        const clamAV = NewClamAV(
+            {
+                bucketName: 'test-av-definitions',
+                definitionsPath: 'lambda/s3-antivirus/av-definitions',
 
-            pathToClamav: '/usr/local/clamav/bin/clamscan',
-            pathToFreshclam: '/usr/local/clamav/bin/freshclam',
-            pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
-            pathToDefintions: tmpDefsDir,
-        }, s3Client)
+                pathToClamav: '/usr/local/clamav/bin/clamscan',
+                pathToFreshclam: '/usr/local/clamav/bin/freshclam',
+                pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
+                pathToDefintions: tmpDefsDir,
+            },
+            s3Client
+        )
 
         const badFile = path.join(thisDir, 'clamAV', 'testData', 'badDummy.pdf')
         const badFileKey = path.join('allusers', crypto.randomUUID())
 
-        const res = await s3Client.uploadObject(badFileKey, 'test-uploads', badFile)
+        const res = await s3Client.uploadObject(
+            badFileKey,
+            'test-uploads',
+            badFile
+        )
         if (res) {
             throw res
         }
 
         // TEST
         // run check file
-        const scanResult = await scanFile(s3Client, clamAV, badFileKey, 'test-uploads', MAX_FILE_SIZE)
+        const scanResult = await scanFile(
+            s3Client,
+            clamAV,
+            badFileKey,
+            'test-uploads',
+            MAX_FILE_SIZE
+        )
         if (scanResult instanceof Error) {
             throw scanResult
         }
@@ -107,27 +129,40 @@ describe('avScan', () => {
 
         const s3Client = NewTestS3UploadsClient()
 
-        const clamAV = NewClamAV({
-            bucketName: 'test-av-definitions',
-            definitionsPath: 'lambda/s3-antivirus/av-definitions',
+        const clamAV = NewClamAV(
+            {
+                bucketName: 'test-av-definitions',
+                definitionsPath: 'lambda/s3-antivirus/av-definitions',
 
-            pathToClamav: '/usr/local/clamav/bin/clamscan',
-            pathToFreshclam: '/usr/local/clamav/bin/freshclam',
-            pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
-            pathToDefintions: tmpDefsDir,
-        }, s3Client)
+                pathToClamav: '/usr/local/clamav/bin/clamscan',
+                pathToFreshclam: '/usr/local/clamav/bin/freshclam',
+                pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
+                pathToDefintions: tmpDefsDir,
+            },
+            s3Client
+        )
 
         const badFile = path.join(thisDir, 'clamAV', 'testData', 'badDummy.pdf')
         const badFileKey = path.join('allusers', crypto.randomUUID())
 
-        const res = await s3Client.uploadObject(badFileKey, 'test-uploads', badFile)
+        const res = await s3Client.uploadObject(
+            badFileKey,
+            'test-uploads',
+            badFile
+        )
         if (res) {
             throw res
         }
 
         // TEST
         // run check file
-        const scanResult = await scanFile(s3Client, clamAV, badFileKey, 'test-uploads', 2)
+        const scanResult = await scanFile(
+            s3Client,
+            clamAV,
+            badFileKey,
+            'test-uploads',
+            2
+        )
         if (scanResult instanceof Error) {
             throw scanResult
         }
@@ -151,15 +186,18 @@ describe('avScan', () => {
 
         const s3Client = NewTestS3UploadsClient()
 
-        const clamAV = NewClamAV({
-            bucketName: 'test-av-definitions',
-            definitionsPath: 'lambda/s3-antivirus/av-definitions',
+        const clamAV = NewClamAV(
+            {
+                bucketName: 'test-av-definitions',
+                definitionsPath: 'lambda/s3-antivirus/av-definitions',
 
-            pathToClamav: '/usr/local/clamav/bin/clamscan',
-            pathToFreshclam: '/usr/local/clamav/bin/freshclam',
-            pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
-            pathToDefintions: tmpDefsDir,
-        }, s3Client)
+                pathToClamav: '/usr/local/clamav/bin/clamscan',
+                pathToFreshclam: '/usr/local/clamav/bin/freshclam',
+                pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
+                pathToDefintions: tmpDefsDir,
+            },
+            s3Client
+        )
 
         clamAV.scanLocalFile = () => {
             return new Error('test unexpected error')
@@ -168,14 +206,24 @@ describe('avScan', () => {
         const badFile = path.join(thisDir, 'clamAV', 'testData', 'badDummy.pdf')
         const badFileKey = path.join('allusers', crypto.randomUUID())
 
-        const res = await s3Client.uploadObject(badFileKey, 'test-uploads', badFile)
+        const res = await s3Client.uploadObject(
+            badFileKey,
+            'test-uploads',
+            badFile
+        )
         if (res) {
             throw res
         }
 
         // TEST
         // run check file
-        const scanResult = await scanFile(s3Client, clamAV, badFileKey, 'test-uploads', MAX_FILE_SIZE)
+        const scanResult = await scanFile(
+            s3Client,
+            clamAV,
+            badFileKey,
+            'test-uploads',
+            MAX_FILE_SIZE
+        )
         if (scanResult instanceof Error) {
             throw scanResult
         }
@@ -199,27 +247,34 @@ describe('avScan', () => {
 
         const s3Client = NewTestS3UploadsClient()
 
-        const clamAV = NewClamAV({
-            bucketName: 'test-av-definitions',
-            definitionsPath: 'lambda/s3-antivirus/av-definitions',
+        const clamAV = NewClamAV(
+            {
+                bucketName: 'test-av-definitions',
+                definitionsPath: 'lambda/s3-antivirus/av-definitions',
 
-            pathToClamav: '/usr/local/clamav/bin/clamscan',
-            pathToFreshclam: '/usr/local/clamav/bin/freshclam',
-            pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
-            pathToDefintions: tmpDefsDir,
-        }, s3Client)
+                pathToClamav: '/usr/local/clamav/bin/clamscan',
+                pathToFreshclam: '/usr/local/clamav/bin/freshclam',
+                pathToConfig: path.join(thisDir, 'testData', 'freshclam.conf'),
+                pathToDefintions: tmpDefsDir,
+            },
+            s3Client
+        )
 
         const badFileKey = path.join('allusers', crypto.randomUUID())
 
         // TEST
         // run check file
-        const scanResult = await scanFile(s3Client, clamAV, badFileKey, 'test-uploads', MAX_FILE_SIZE)
-        if (scanResult instanceof Error) {
-            console.log('error')
-            expect(scanResult.name).toBe('NotFound')
-        } else {
+        const scanResult = await scanFile(
+            s3Client,
+            clamAV,
+            badFileKey,
+            'test-uploads',
+            MAX_FILE_SIZE
+        )
+        if (!(scanResult instanceof Error)) {
             throw new Error('Didnt error on a nonexistant file')
         }
+        expect(scanResult.name).toBe('NotFound')
 
         await rm(tmpDefsDir, { force: true, recursive: true })
     })

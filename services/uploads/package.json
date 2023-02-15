@@ -13,6 +13,12 @@
     },
     "author": "",
     "license": "CC0-1.0",
+    "lint-staged": {
+        "*.ts": [
+            "eslint --max-warnings=0",
+            "prettier --write"
+        ]
+    },
     "dependencies": {
         "@aws-sdk/client-s3": "^3.262.0",
         "@aws-sdk/lib-storage": "^3.267.0"

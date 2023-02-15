@@ -1,48 +1,66 @@
 import path from 'path'
 import crypto from 'crypto'
 import { NewClamAV } from '../clamAV'
-import { listFilesInDirectory } from '../fs'
 import { mkdtemp, rm } from 'fs/promises'
 import { NewTestS3UploadsClient } from '../s3'
-import { updateAVDefinitions } from '../updateAVDefinitions'
 import { auditBucket } from './auditUploads'
 import { generateVirusScanTagSet, virusScanStatus } from '../tags'
 import { NewLocalInfectedFilesLister } from './scanFiles'
 
-
 describe('auditUploads', () => {
-
     it('will audit a bucket', async () => {
-
-        console.info("OUR FILESNEM", __dirname)
+        console.info('OUR FILESNEM', __dirname)
         const thisDir = __dirname
 
         const tmpDefsDir = await mkdtemp('/tmp/clamscan-')
 
         const s3Client = NewTestS3UploadsClient()
 
-        const clamAV = NewClamAV({
-            bucketName: 'test-av-definitions',
-            definitionsPath: 'lambda/s3-antivirus/av-definitions',
+        const clamAV = NewClamAV(
+            {
+                bucketName: 'test-av-definitions',
+                definitionsPath: 'lambda/s3-antivirus/av-definitions',
 
-            pathToClamav: '/usr/local/clamav/bin/clamscan',
-            pathToFreshclam: '/usr/local/clamav/bin/freshclam',
-            pathToConfig: path.join(thisDir, '..', 'testData', 'freshclam.conf'),
-            pathToDefintions: tmpDefsDir,
-        }, s3Client)
+                pathToClamav: '/usr/local/clamav/bin/clamscan',
+                pathToFreshclam: '/usr/local/clamav/bin/freshclam',
+                pathToConfig: path.join(
+                    thisDir,
+                    '..',
+                    'testData',
+                    'freshclam.conf'
+                ),
+                pathToDefintions: tmpDefsDir,
+            },
+            s3Client
+        )
 
         const fileScanner = NewLocalInfectedFilesLister(s3Client, clamAV)
 
         const testBucketName = 'test-audit'
 
-        // remove all objects from the current bucket. 
-        const allUsersDir = path.join(thisDir, '..','..', 'local_buckets', testBucketName, 'allusers')
+        // remove all objects from the current bucket.
+        const allUsersDir = path.join(
+            thisDir,
+            '..',
+            '..',
+            'local_buckets',
+            testBucketName,
+            'allusers'
+        )
         await rm(allUsersDir, { force: true, recursive: true })
 
-        const testFilesToScanPath = path.join(thisDir, '..', 'clamAV', 'testData')
-        const goodSourceFiles = ['dummy.pdf', 'goodList.csv'].map((name) => path.join(testFilesToScanPath, name))
-        const badSourceFiles = ['badDummy.pdf', 'badList.csv'].map((name) => path.join(testFilesToScanPath, name))
-
+        const testFilesToScanPath = path.join(
+            thisDir,
+            '..',
+            'clamAV',
+            'testData'
+        )
+        const goodSourceFiles = ['dummy.pdf', 'goodList.csv'].map((name) =>
+            path.join(testFilesToScanPath, name)
+        )
+        const badSourceFiles = ['badDummy.pdf', 'badList.csv'].map((name) =>
+            path.join(testFilesToScanPath, name)
+        )
 
         // make 20 random good files.
         for (let i = 0; i < 20; i++) {
@@ -51,7 +69,11 @@ describe('auditUploads', () => {
             const fileName = `${crypto.randomUUID()}.${goodfileExt}`
 
             const testKey = path.join('allusers', fileName)
-            const res = await s3Client.uploadObject(testKey, testBucketName, goodFile)
+            const res = await s3Client.uploadObject(
+                testKey,
+                testBucketName,
+                goodFile
+            )
             if (res) {
                 throw res
             }
@@ -69,7 +91,11 @@ describe('auditUploads', () => {
 
             const fileName = `${crypto.randomUUID()}.${badfileExt}`
             const testKey = path.join('allusers', fileName)
-            const res = await s3Client.uploadObject(testKey, testBucketName, badfile)
+            const res = await s3Client.uploadObject(
+                testKey,
+                testBucketName,
+                badfile
+            )
             if (res) {
                 throw res
             }
@@ -88,7 +114,11 @@ describe('auditUploads', () => {
 
             const fileName = `${crypto.randomUUID()}.${badfileExt}`
             const testKey = path.join('allusers', fileName)
-            const res = await s3Client.uploadObject(testKey, testBucketName, badfile)
+            const res = await s3Client.uploadObject(
+                testKey,
+                testBucketName,
+                badfile
+            )
             if (res) {
                 throw res
             }
@@ -102,15 +132,19 @@ describe('auditUploads', () => {
             incorrectlyTaggedInfectedKeys.push(testKey)
         }
 
-
         // TEST
         // run auditor
-        const improperlyTaggedFiles = await auditBucket(s3Client, clamAV, fileScanner, testBucketName)
+        const improperlyTaggedFiles = await auditBucket(
+            s3Client,
+            clamAV,
+            fileScanner,
+            testBucketName
+        )
         if (improperlyTaggedFiles instanceof Error) {
             throw improperlyTaggedFiles
         }
 
-        // check that the keys are now "INFECTED". 
+        // check that the keys are now "INFECTED".
         for (const testKey of incorrectlyTaggedInfectedKeys) {
             const res2 = await s3Client.getObjectTags(testKey, testBucketName)
             if (res2 instanceof Error) {
@@ -121,10 +155,10 @@ describe('auditUploads', () => {
             expect(virusScanStatus(res2)).toBe('INFECTED')
         }
 
-        expect(improperlyTaggedFiles.length).toEqual(incorrectlyTaggedInfectedKeys.length)
+        expect(improperlyTaggedFiles).toHaveLength(
+            incorrectlyTaggedInfectedKeys.length
+        )
 
         await rm(tmpDefsDir, { force: true, recursive: true })
-
     })
-
 })

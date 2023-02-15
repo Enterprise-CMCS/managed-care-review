@@ -11,7 +11,9 @@ interface ClamAV {
     uploadAVDefinitions: (workdir: string) => Promise<undefined | Error>
     scanLocalFile: (path: string) => ClamAVScanResult | Error
     scanForInfectedFiles: (path: string) => string[] | Error
-    fetchAVDefinitionsWithFreshclam: (workdir: string) => Promise<undefined | Error>
+    fetchAVDefinitionsWithFreshclam: (
+        workdir: string
+    ) => Promise<undefined | Error>
 }
 
 interface ClamAVConfig {
@@ -24,7 +26,6 @@ interface ClamAVConfig {
 }
 
 function NewClamAV(config: Partial<ClamAVConfig>, s3Client: S3UploadsClient) {
-
     if (!config.bucketName || !config.definitionsPath) {
         throw new Error('BucketName and DefinitionsPath are required')
     }
@@ -36,26 +37,34 @@ function NewClamAV(config: Partial<ClamAVConfig>, s3Client: S3UploadsClient) {
         pathToClamav: config.pathToClamav || '/opt/bin/clamscan',
         pathToFreshclam: config.pathToFreshclam || '/opt/bin/freshclam',
         pathToConfig: config.pathToConfig || '/opt/bin/freshclam.conf',
-        pathToDefintions: config.pathToDefintions || '/tmp'
+        pathToDefintions: config.pathToDefintions || '/tmp',
     }
 
     return {
-        downloadAVDefinitions: () => downloadAVDefinitions(fullConfig, s3Client),
-        uploadAVDefinitions: (workdir: string) => uploadAVDefinitions(fullConfig, s3Client, workdir),
+        downloadAVDefinitions: () =>
+            downloadAVDefinitions(fullConfig, s3Client),
+        uploadAVDefinitions: (workdir: string) =>
+            uploadAVDefinitions(fullConfig, s3Client, workdir),
         scanLocalFile: (path: string) => scanLocalFile(fullConfig, path),
-        scanForInfectedFiles: (path: string) => scanForInfectedFiles(fullConfig, path),
-        fetchAVDefinitionsWithFreshclam: (workdir: string) => fetchAVDefinitionsWithFreshclam(fullConfig, workdir),
+        scanForInfectedFiles: (path: string) =>
+            scanForInfectedFiles(fullConfig, path),
+        fetchAVDefinitionsWithFreshclam: (workdir: string) =>
+            fetchAVDefinitionsWithFreshclam(fullConfig, workdir),
     }
 }
 
 /**
  * Uploads the AV definitions to the S3 bucket.
  */
-async function uploadAVDefinitions(config: ClamAVConfig, s3Client: S3UploadsClient, workdir: string) {
+async function uploadAVDefinitions(
+    config: ClamAVConfig,
+    s3Client: S3UploadsClient,
+    workdir: string
+) {
     // delete all the definitions currently in the bucket.
     // first list them.
-    console.info('Uploading Definitions');
-    const s3AllFullKeys = await s3Client.listBucketFiles(config.bucketName);
+    console.info('Uploading Definitions')
+    const s3AllFullKeys = await s3Client.listBucketFiles(config.bucketName)
     if (s3AllFullKeys instanceof Error) {
         console.error('Error listing current defs')
         return s3AllFullKeys
@@ -63,11 +72,14 @@ async function uploadAVDefinitions(config: ClamAVConfig, s3Client: S3UploadsClie
 
     const s3DefinitionFileFullKeys = s3AllFullKeys.filter((key) =>
         key.startsWith(config.definitionsPath)
-    );
+    )
 
     // If there are any s3 Definition files in the s3 bucket, delete them.
     if (s3DefinitionFileFullKeys.length != 0) {
-        const res = await s3Client.deleteObjects(s3DefinitionFileFullKeys, config.bucketName)
+        const res = await s3Client.deleteObjects(
+            s3DefinitionFileFullKeys,
+            config.bucketName
+        )
         if (res) {
             console.error('Error deleting previous definitions', res)
             return res
@@ -75,32 +87,34 @@ async function uploadAVDefinitions(config: ClamAVConfig, s3Client: S3UploadsClie
     }
 
     // list all the files in the work dir for upload
-    const definitionFiles = await readdir(workdir);
+    const definitionFiles = await readdir(workdir)
     console.info('defs to upload', definitionFiles)
 
     const uploadPromises = definitionFiles.map((filenameToUpload) => {
         console.info(
             `Uploading updated definitions for file ${filenameToUpload} ---`
-        );
+        )
 
         const key = `${config.definitionsPath}/${filenameToUpload}`
         const filepath = path.join(workdir, filenameToUpload)
 
         // In addition to uploading the object, tag it with the current time
         // this is used in testing to determine when to re-run freshclam
-        return s3Client.uploadObject(key, config.bucketName, filepath).then(() => {
-            const tags = {
-                TagSet: [
-                    {
-                        Key: 'uploadedAt',
-                        Value: new Date().toString(),
-                    },
-                ],
-            }
+        return s3Client
+            .uploadObject(key, config.bucketName, filepath)
+            .then(() => {
+                const tags = {
+                    TagSet: [
+                        {
+                            Key: 'uploadedAt',
+                            Value: new Date().toString(),
+                        },
+                    ],
+                }
 
-            return s3Client.tagObject(key, config.bucketName, tags)
-        })
-    });
+                return s3Client.tagObject(key, config.bucketName, tags)
+            })
+    })
 
     try {
         await Promise.all(uploadPromises)
@@ -113,7 +127,10 @@ async function uploadAVDefinitions(config: ClamAVConfig, s3Client: S3UploadsClie
 }
 
 // downloads AV definition files from the bucket for local scanning
-async function downloadAVDefinitions(config: ClamAVConfig, s3Client: S3UploadsClient): Promise<undefined | Error> {
+async function downloadAVDefinitions(
+    config: ClamAVConfig,
+    s3Client: S3UploadsClient
+): Promise<undefined | Error> {
     console.info('Downloading AV Definitions from S3')
 
     const allFileKeys = await s3Client.listBucketFiles(config.bucketName)
@@ -121,21 +138,27 @@ async function downloadAVDefinitions(config: ClamAVConfig, s3Client: S3UploadsCl
         return allFileKeys
     }
 
-    const definitionFileKeys = allFileKeys
-        .filter((key) => key.startsWith(config.definitionsPath))
+    const definitionFileKeys = allFileKeys.filter((key) =>
+        key.startsWith(config.definitionsPath)
+    )
 
     if (definitionFileKeys.length === 0) {
-        return new Error(`No AV Definitions found to download in bucket: ${config.bucketName}`)
+        return new Error(
+            `No AV Definitions found to download in bucket: ${config.bucketName}`
+        )
     }
 
-    const res = await s3Client.downloadAllFiles(definitionFileKeys, config.bucketName, config.pathToDefintions)
+    const res = await s3Client.downloadAllFiles(
+        definitionFileKeys,
+        config.bucketName,
+        config.pathToDefintions
+    )
     if (res) {
         return res
     }
 
     console.info('Downloaded all AV definition files locally')
     return
-
 }
 
 /**
@@ -148,7 +171,10 @@ async function downloadAVDefinitions(config: ClamAVConfig, s3Client: S3UploadsCl
  * - Any other error and the function will return an Error
  *
  */
-function scanLocalFile(config: ClamAVConfig, pathToFile: string): ClamAVScanResult | Error {
+function scanLocalFile(
+    config: ClamAVConfig,
+    pathToFile: string
+): ClamAVScanResult | Error {
     const infectedFiles = scanForInfectedFiles(config, pathToFile)
     if (infectedFiles instanceof Error) {
         return infectedFiles
@@ -163,7 +189,6 @@ function scanLocalFile(config: ClamAVConfig, pathToFile: string): ClamAVScanResu
 
 // parses the output from clamscan for a failed scan run and returns the list of bad files
 function parseInfectedFiles(clamscanOutput: string): string[] {
-
     const infectedFiles = []
     for (const line of clamscanOutput.split('\n')) {
         if (line.includes('FOUND')) {
@@ -181,10 +206,13 @@ function parseInfectedFiles(clamscanOutput: string): string[] {
  * Returns a list of infected files, returning [] means no files are infected.
  *
  */
-function scanForInfectedFiles(config: ClamAVConfig, pathToScan: string): string[] | Error {
+function scanForInfectedFiles(
+    config: ClamAVConfig,
+    pathToScan: string
+): string[] | Error {
     try {
         console.info('Executing clamav')
-        let avResult = spawnSync(config.pathToClamav, [
+        const avResult = spawnSync(config.pathToClamav, [
             '--stdout',
             '-d',
             config.pathToDefintions,
@@ -202,13 +230,15 @@ function scanForInfectedFiles(config: ClamAVConfig, pathToScan: string): string[
             return parseInfectedFiles(avResult.stdout.toString())
         } else if (avResult.status !== 0) {
             console.info('SCAN FAILED WITH ERROR')
-            return avResult.error || new Error(`Failed to scan file: ${avResult.stderr.toString()}`)
+            return (
+                avResult.error ||
+                new Error(`Failed to scan file: ${avResult.stderr.toString()}`)
+            )
         }
 
-         console.info('SUCCESSFUL SCAN, FILE CLEAN')
+        console.info('SUCCESSFUL SCAN, FILE CLEAN')
 
-         return []
-
+        return []
     } catch (err) {
         console.error('-- SCAN FAILED ERR --')
         console.error(err)
@@ -221,23 +251,36 @@ function scanForInfectedFiles(config: ClamAVConfig, pathToScan: string): string[
  *
  * It will download the latest definitions to the current work dir
  */
-async function fetchAVDefinitionsWithFreshclam(config: ClamAVConfig, workdir: string): Promise<undefined | Error> {
+async function fetchAVDefinitionsWithFreshclam(
+    config: ClamAVConfig,
+    workdir: string
+): Promise<undefined | Error> {
     try {
-
         console.info('config.pathToConfig', config.pathToConfig, workdir)
 
         // freshclam does not handle long arguments the unix way, the equal signs are required here
-        let executionResult = spawnSync(config.pathToFreshclam, [
-            `--config-file=${config.pathToConfig}`, 
+        const executionResult = spawnSync(config.pathToFreshclam, [
+            `--config-file=${config.pathToConfig}`,
             `--datadir=${workdir}`,
         ])
 
         if (executionResult.status !== 0) {
-             console.info('Freshclam Error', executionResult)
-             console.error('stderror', executionResult.stderr && executionResult.stderr.toString())
-             console.error('stdout', executionResult.stdout && executionResult.stdout.toString())
-             console.error('err', executionResult.error)
-             return executionResult.error || new Error(`Failed to scan file: ${executionResult.stderr.toString()}`)
+            console.info('Freshclam Error', executionResult)
+            console.error(
+                'stderror',
+                executionResult.stderr && executionResult.stderr.toString()
+            )
+            console.error(
+                'stdout',
+                executionResult.stdout && executionResult.stdout.toString()
+            )
+            console.error('err', executionResult.error)
+            return (
+                executionResult.error ||
+                new Error(
+                    `Failed to scan file: ${executionResult.stderr.toString()}`
+                )
+            )
         }
 
         console.info('Update message')
@@ -258,8 +301,4 @@ async function fetchAVDefinitionsWithFreshclam(config: ClamAVConfig, workdir: st
     }
 }
 
-export {
-    NewClamAV,
-    ClamAV,
-    parseInfectedFiles,
-}
+export { NewClamAV, ClamAV, parseInfectedFiles }
