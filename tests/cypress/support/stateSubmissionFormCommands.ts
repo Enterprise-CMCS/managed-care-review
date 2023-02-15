@@ -259,7 +259,14 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
 Cypress.Commands.add('fillOutNewRateCertification', () => {
     // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
-    cy.wait(2000)
+
+    cy.findByRole(
+        'radiogroup',
+        { name: /Was this rate certification uploaded to any other submissions?/}
+    ).should('exist').within(() => {
+        cy.findByRole('radio', { name: /No/}).click()
+    })
+
     cy.findByText('New rate certification').click()
     cy.findByText(
         'Certification of capitation rates specific to each rate cell'
@@ -292,7 +299,14 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
 Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
     // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
-    cy.wait(2000)
+
+    cy.findByRole(
+        'radiogroup',
+        { name: /Was this rate certification uploaded to any other submissions?/}
+    ).should('exist').within(() => {
+        cy.findByRole('radio', { name: /No/}).click()
+    })
+
     cy.findByText('Amendment to prior rate certification').click()
     cy.findByText(
         'Certification of capitation rates specific to each rate cell'
