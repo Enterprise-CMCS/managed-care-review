@@ -65,7 +65,6 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
 
         const authProvider =
             event.requestContext.identity.cognitoAuthenticationProvider
-
         if (authProvider) {
             try {
                 // check if the user is stored in postgres
@@ -85,7 +84,6 @@ function contextForRequestForFetcher(userFetcher: userFromAuthProvider): ({
                 }
 
                 const store = NewPostgresStore(pgResult)
-                console.log('jjauthprovider in graphql: ', authProvider)
                 const userResult = await userFetcher(authProvider, store)
 
                 if (!userResult.isErr()) {

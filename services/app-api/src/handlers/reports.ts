@@ -73,7 +73,6 @@ const decodeRevisions = (
 export const main: APIGatewayProxyHandler = async (event, context) => {
     const authProvider =
         event.requestContext.identity.cognitoAuthenticationProvider || ''
-
     const programList = [] as ProgramArgType[]
     statePrograms.states.forEach((state) => {
         programList.push(...state.programs)
@@ -97,19 +96,29 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
     } else {
         console.info('Postgres configured in data exporter')
     }
-
     const store = NewPostgresStore(pgResult)
     const authMode = process.env.REACT_APP_AUTH_MODE
-    console.log('jjauthMode in reports', authMode)
-    console.log('jjevent in reports', event)
-    console.log('jjcontext in reports', context)
-    console.log('jjauthProvider in reports', authProvider)
+
+    // reject the request if it's not from a CMS or ADMIN user
+    // if (authMode !== 'LOCAL') {
     const userFetcher =
         authMode === 'LOCAL'
             ? userFromLocalAuthProvider
             : userFromCognitoAuthProvider
     const userResult = await userFetcher(authProvider, store)
-    console.log('jjuserResult', userResult)
+    if (userResult.isErr()) {
+        console.error('Error getting user from auth provider')
+        throw new Error('Error getting user from auth provider')
+    }
+    if (
+        userResult.value.role !== 'CMS_USER' &&
+        userResult.value.role !== 'ADMIN_USER'
+    ) {
+        console.error('User is not authorized to run reports')
+        throw new Error('User is not authorized to run reports')
+    }
+    console.info('User is authorized to run reports')
+
     const result: HealthPlanRevisionTable[] | StoreError =
         await store.findAllRevisions()
     if (isStoreError(result)) {
