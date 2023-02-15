@@ -1,15 +1,26 @@
 import React from 'react'
 import { API } from 'aws-amplify'
 import { Button } from '@trussworks/react-uswds'
+import { getLoggedInUser } from '../../localAuth'
 import styles from './Reports.module.scss'
 
 export const Reports = (): React.ReactElement => {
     const getReports = async (): Promise<void> => {
-        // code for downloading a file taken from https://gist.github.com/Sleavely/b243e4400a9e4772b00128d3e99b9946
-        await API.get('api', '/reports', {
+        const currentUser = await getLoggedInUser()
+        const authMode = process.env.REACT_APP_AUTH_MODE
+        const options = {
             responseType: 'blob',
             response: true,
-        })
+            headers:
+                authMode === 'LOCAL'
+                    ? {
+                          'cognito-authentication-provider':
+                              JSON.stringify(currentUser),
+                      }
+                    : {},
+        }
+        // code for downloading a file taken from https://gist.github.com/Sleavely/b243e4400a9e4772b00128d3e99b9946
+        await API.get('api', '/reports', options)
             .then((response) => {
                 const blob = new Blob([response.data], {
                     type: 'application/octet-stream',

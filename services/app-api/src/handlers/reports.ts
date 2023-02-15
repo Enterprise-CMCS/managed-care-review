@@ -71,6 +71,8 @@ const decodeRevisions = (
 }
 
 export const main: APIGatewayProxyHandler = async (event, context) => {
+    console.log('reports event: ', event)
+    console.log('reports context: ', context)
     const authProvider =
         event.requestContext.identity.cognitoAuthenticationProvider || ''
     const programList = [] as ProgramArgType[]
