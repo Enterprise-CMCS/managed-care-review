@@ -28326,17 +28326,18 @@ serverless-stack-termination-protection@^2.0.2:
   integrity sha512-pPUVJmH5if8A12KVSTMqNjo7u8rfW0/vJO+UFp19lvkY0t8jfoO3R3DySwTDVcB+jzaCrU/NyEHPtbiDLVjSSw==
 
 serverless-webpack@^5.7.1:
-  version "5.10.0"
-  resolved "https://registry.yarnpkg.com/serverless-webpack/-/serverless-webpack-5.10.0.tgz#398434d0ae609ade13e68e80d7ea488c6e9ace62"
-  integrity sha512-XFNkH1jgfNtUj2v6XwWiaL+5cLL7jYvh4dSIsyilzh2vB2WdcJnldAzAbQyKnSLDx3fDoQUvkc7zEwCOySosxw==
+  version "5.11.0"
+  resolved "https://registry.yarnpkg.com/serverless-webpack/-/serverless-webpack-5.11.0.tgz#1cd4397925af47943fffec79d755e15d91720406"
+  integrity sha512-0OjwSAMrf1OZZfbFwWUGuqz9eiMJIinTRWz2XNkKD3TY5EifvwU7oAF7mEXKPZTgtVhusSzz408C3FWgcIHizg==
   dependencies:
     archiver "^5.3.1"
     bluebird "^3.7.2"
+    find-yarn-workspace-root "^2.0.0"
     fs-extra "^9.1.0"
     glob "^7.2.3"
     is-builtin-module "^3.2.0"
     lodash "^4.17.21"
-    semver "^7.3.7"
+    semver "^7.3.8"
   optionalDependencies:
     ts-node ">= 8.3.0"
 
