@@ -16,8 +16,8 @@
         "test:once": "TZ=UTC craco test --watchAll=false --runInBand --ci",
         "test:update": "craco test -u",
         "test:coverage": "yarn test --coverage --watchAll=false",
-        "storybook": "start-storybook -p 6006 -s public --quiet",
-        "build-storybook": "build-storybook -s public --quiet",
+        "storybook": "start-storybook -p 6006 -s public",
+        "build-storybook": "build-storybook -s public",
         "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""
     },
     "lint-staged": {
@@ -152,6 +152,7 @@
         "graphql.macro": "^1.4.2",
         "jest-launchdarkly-mock": "^1.0.6",
         "lint-staged": "^13.0.1",
+        "mini-css-extract-plugin": "^2.7.2",
         "prettier": "^2.3.2",
         "react-scripts": "5.0.1",
         "react-select-event": "^5.5.0",
