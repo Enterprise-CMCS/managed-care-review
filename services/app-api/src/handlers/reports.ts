@@ -4,12 +4,21 @@ import { NewPostgresStore } from '../postgres/postgresStore'
 import { Parser, transforms } from 'json2csv'
 import { HealthPlanRevisionTable } from '@prisma/client'
 import { ProgramArgType } from '../../../app-web/src/common-code/healthPlanFormDataType/State'
-import { HealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import {
+    HealthPlanFormDataType,
+    RateInfoType,
+    packageName,
+} from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import statePrograms from '../../../app-web/src/common-code/data/statePrograms.json'
 import { isStoreError, StoreError } from '../postgres/storeError'
+import { HealthPlanPackageStatusType } from '../domain-models'
+import {
+    userFromCognitoAuthProvider,
+    userFromLocalAuthProvider,
+} from '../authn'
 
-type RevisionWithDecodedProtobuf = {
+type RequiredRevisionWithDecodedProtobufProperties = {
     formDataProto: HealthPlanFormDataType | Error
     id: string
     createdAt: Date
@@ -21,7 +30,20 @@ type RevisionWithDecodedProtobuf = {
     submittedBy: string | null
     submittedReason: string | null
     programNames?: string[]
+    derivedStatus?: HealthPlanPackageStatusType
+    packageName?: string
 }
+
+/* We want to show the rateInfos array with each field in its own column,
+so we attach each RateInfoType to the revision object and let the CSV parser
+take it from there.  This is the typing for supporting 
+rateInfo0: RateInfoType,
+rateInfo1: RateInfoType, 
+etc. */
+type RevisionWithDecodedProtobuf =
+    RequiredRevisionWithDecodedProtobufProperties & {
+        [key: string]: RateInfoType
+    }
 
 /* formProtoData is an encoded protocal buffer in the db,
 so we decode it and put it back on the revision as readable data */
@@ -48,7 +70,9 @@ const decodeRevisions = (
     return allRevisions
 }
 
-export const main: APIGatewayProxyHandler = async () => {
+export const main: APIGatewayProxyHandler = async (event, context) => {
+    const authProvider =
+        event.requestContext.identity.cognitoAuthenticationProvider || ''
     const programList = [] as ProgramArgType[]
     statePrograms.states.forEach((state) => {
         programList.push(...state.programs)
@@ -72,8 +96,28 @@ export const main: APIGatewayProxyHandler = async () => {
     } else {
         console.info('Postgres configured in data exporter')
     }
-
     const store = NewPostgresStore(pgResult)
+    const authMode = process.env.REACT_APP_AUTH_MODE
+
+    // reject the request if it's not from a CMS or ADMIN user
+    const userFetcher =
+        authMode === 'LOCAL'
+            ? userFromLocalAuthProvider
+            : userFromCognitoAuthProvider
+    const userResult = await userFetcher(authProvider, store)
+    if (userResult.isErr()) {
+        console.error('Error getting user from auth provider')
+        throw new Error('Error getting user from auth provider')
+    }
+    if (
+        userResult.value.role !== 'CMS_USER' &&
+        userResult.value.role !== 'ADMIN_USER'
+    ) {
+        console.error('User is not authorized to run reports')
+        throw new Error('User is not authorized to run reports')
+    }
+    console.info('User is authorized to run reports')
+
     const result: HealthPlanRevisionTable[] | StoreError =
         await store.findAllRevisions()
     if (isStoreError(result)) {
@@ -91,10 +135,26 @@ export const main: APIGatewayProxyHandler = async () => {
             console.error('Error decoding revision')
             throw new Error(`Error generating reports array`)
         } else {
-            bucket.push(revision)
+            // add the package name to the revision
+            revision.packageName = packageName(
+                revision.formDataProto,
+                programList
+            )
+            // add the rateInfo fields to the revision
+            revision.formDataProto.rateInfos.forEach((rateInfo, index) => {
+                revision['rateInfo' + index] = rateInfo
+            })
+            revision.formDataProto.rateInfos = []
+            /* both saved/unsubmitted and submitted/unlocked revisions have a DRAFT status
+            we only want the unlocked revisions */
+            if (
+                revision.formDataProto.status !== 'DRAFT' ||
+                revision.unlockedReason !== null
+            ) {
+                bucket.push(revision)
+            }
         }
     })
-
     const parser = new Parser({
         transforms: [
             transforms.flatten({
@@ -104,7 +164,7 @@ export const main: APIGatewayProxyHandler = async () => {
             }),
         ],
     })
-    const csv = await parser.parse(bucket)
+    const csv = parser.parse(bucket)
 
     return {
         statusCode: 200,
