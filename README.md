@@ -311,7 +311,7 @@ You should now be at our New Relic dashboard where all our OTEL metrics are bein
 
 ## Launch Darkly
 
-We currently use the CMS Federal (.us) install of Launch Darkly to manage our feature flags. This can be accessed through the [CMS SSO portal](https://mo-idp.cms.gov) if you have the appropriate EUA job code.
+We currently use the CMS Federal (.us) install of Launch Darkly to manage our feature flags. This can be accessed through [LD Federal](https://app.launchdarkly.us) by providing the email address associated with your EUA account (e.g. `@teamtrussworks.com`), which will redirect you to CMS SSO.
 
 There are [technical design docs](docs/technical-design) about how to add feature flags and how to test with them.
 
