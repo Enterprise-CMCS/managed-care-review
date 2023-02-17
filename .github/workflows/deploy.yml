@@ -338,6 +338,13 @@ jobs:
           state: 'success'
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
+      # GitHub creates a deployment each time you reference an environment, and you can't opt out: https://github.com/actions/runner/issues/2120
+      # We need to clean them up manually so they don't spam our PRs
+      - name: Clean up dev deployments
+        uses: ./.github/actions/clean_up_deployments
+        with:
+          environment: dev
+
   cypress:
     name: cypress-run
     timeout-minutes: 20

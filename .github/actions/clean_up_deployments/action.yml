@@ -1,0 +1,44 @@
+
+name: 'Clean up deployments'
+description: "Mark the specified deployments as inactive, then delete them"
+
+inputs:
+  environment:
+    description: 'Target deployment environment'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Clean up dev deployments
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const deployments = await github.rest.repos.listDeployments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: context.sha,
+            ref: context.ref,
+            environment: ${{ inputs.environment }}
+          });
+          core.info(`Found ${deployments.data.length} deployments for ${context.ref}/${context.sha}`)
+
+          await Promise.all(
+            deployments.data.map(async (deployment) => {
+              core.info(`Setting deployment ${deployment.id} to inactive`)
+              await github.rest.repos.createDeploymentStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                deployment_id: deployment.id,
+                state: 'inactive'
+              });
+
+              core.info(`Deleting deployment ${deployment.id}`)
+              return github.rest.repos.deleteDeployment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                deployment_id: deployment.id
+              });
+            })
+          );
