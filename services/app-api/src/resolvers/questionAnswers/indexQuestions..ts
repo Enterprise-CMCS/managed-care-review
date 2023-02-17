@@ -1,10 +1,11 @@
-import { isStateUser, IndexQuestionsPayload } from '../../domain-models'
+import { isStateUser } from '../../domain-models'
 import { QueryResolvers } from '../../gen/gqlServer'
 import { isStoreError, Store } from '../../postgres'
 import { logError } from '../../logger'
 import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { GraphQLError } from 'graphql'
+import { convertToIndexQuestionsPayload } from '../../postgres/questionAnswers'
 
 export function indexQuestionsResolver(
     store: Store
@@ -49,22 +50,8 @@ export function indexQuestionsResolver(
             throw new Error(errMessage)
         }
 
-        const indexQuestionPayload: IndexQuestionsPayload = {
-            DMCOQuestions: {
-                totalCount: questionResult.length,
-                edges: questionResult.map((question) => ({
-                    node: question,
-                })),
-            },
-            DMCPQuestions: {
-                totalCount: 0,
-                edges: [],
-            },
-            OACTQuestions: {
-                totalCount: 0,
-                edges: [],
-            },
-        }
+        const indexQuestionPayload =
+            convertToIndexQuestionsPayload(questionResult)
 
         return indexQuestionPayload
     }

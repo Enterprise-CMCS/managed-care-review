@@ -8,6 +8,7 @@ import {
     submitMutationWrapper,
 } from './mutationWrappersForUserFriendlyErrors'
 import { useFetchHealthPlanPackageWrapper } from './fetchHealthPlanPackageWrapper'
+import { useIndexQuestionsQueryWrapper } from './useIndexQuestionsQueryWrapper'
 
 const isGraphQLErrors = (input: unknown): input is GraphQLErrors => {
     if (Array.isArray(input)) {
@@ -25,4 +26,5 @@ export {
     useFetchHealthPlanPackageWrapper,
     unlockMutationWrapper,
     submitMutationWrapper,
+    useIndexQuestionsQueryWrapper,
 }

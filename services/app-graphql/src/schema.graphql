@@ -486,6 +486,7 @@ type HealthPlanPackage {
     for the package and contains the full data from when it was submitted
     """
     revisions: [HealthPlanRevisionEdge!]!
+    questions: IndexQuestionsPayload
 }
 
 """

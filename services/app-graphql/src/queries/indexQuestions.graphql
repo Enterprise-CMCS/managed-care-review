@@ -12,6 +12,11 @@ fragment questionEdgeFragment on QuestionEdge {
             stateAssignments {
                 code
                 name
+                programs {
+                    id
+                    name
+                    fullName
+                }
             }
         }
         documents {
