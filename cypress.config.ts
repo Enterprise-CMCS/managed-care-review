@@ -10,6 +10,8 @@ export default defineConfig({
         specPattern: 'tests/cypress/integration/**/*.spec.ts',
         screenshotsFolder: 'tests/cypress/screenshots',
         videosFolder: 'tests/cypress/videos',
+        viewportHeight: 1080,
+        viewportWidth: 1920,
         setupNodeEvents(on, config) {
             task(on, config)
             const newConfig = config
