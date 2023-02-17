@@ -12,473 +12,484 @@ permissions:
   id-token: write
 
 jobs:
-  begin-deployment:
-    name: Begin Deployment
-    runs-on: ubuntu-20.04
-    permissions:
-      deployments: write
-    outputs:
-      deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
-      stage-name: ${{ steps.stage-name.outputs.stage-name-for-branch}}
-      app-version: ${{ steps.branch-name.outputs.app-version}}
-      changed-services: ${{ steps.changed-services-action.outputs.changed-services }}
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 40
-
-      - name: Check for secrets
-        uses: ./.github/actions/check_secrets
-        with:
-          expected-secret: ${{ secrets.REACT_APP_AUTH_MODE }}
-
-      - name: lock this branch to prevent concurrent deploys
-        run: ./.github/github-lock.sh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: set app version
-        id: app-version
-        shell: bash
-        run: echo "::set-output name=app-version::$(scripts/app_version.sh)"
-
-      - name: set stage name
-        id: stage-name
-        shell: bash
-        run: |
-          echo "::set-output name=stage-name-for-branch::$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})"
-
-      - name: set branch name
-        id: branch-name
-        shell: bash
-        run: echo "::set-output name=branch-name::$(echo ${GITHUB_REF#refs/heads/})"
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: build scripts
-        shell: bash
-        run: |
-          lerna run build:ci-scripts
-
-      - name: run get_changed_services
-        id: changed-services-action
-        uses: ./scripts/get-changed-services/
-        with:
-          branchName: ${{ steps.branch-name.outputs.branch-name}}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: test we have changed services output
-        id: test
-        shell: bash
-        run: |
-          echo "${{steps.changed-services-action.outputs.changed-services}}"
-
-      - uses: chrnorm/deployment-action@releases/v2
-        name: Create GitHub deployment
-        id: ghdeployment
-        with:
-          token: '${{ github.token }}'
-          environment: review-apps
-          description: stack ${{ steps.branch-name.outputs.stage-name-for-branch}}
-          initial-status: in_progress
-
-  web-unit-tests:
-    name: test - web unit tests
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: Web Unit Tests
-        env:
-          REACT_APP_AUTH_MODE: AWS_COGNITO
-          DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
-        run: ./dev test web --unit
-
-      - name: upload unit test coverage
-        uses: actions/upload-artifact@v3
-        with:
-          name: unit-test-coverage
-          path: ./services/app-web/coverage/coverage-final.json
-
-      - name: publish code coverage
-        uses: paambaati/codeclimate-action@v3.2.0
-        continue-on-error: true
-        env:
-          CC_TEST_REPORTER_ID: cace182021fe88d327fa8d95355ac6081f420e094a214fe77feb5df2f0259e9d
-        with:
-          debug: true
-          coverageLocations: |
-            ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
-
-  api-unit-tests:
-    name: test - api unit tests
-    runs-on: ubuntu-20.04
-    services:
-      postgres:
-        image: postgres:13.3
-        env:
-          REACT_APP_AUTH_MODE: AWS_COGNITO
-          POSTGRES_PASSWORD: shhhsecret #pragma: allowlist secret
-        # Set health checks to wait until postgres has started
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: API Unit Tests
-        env:
-          NODE_OPTIONS: --max_old_space_size=6000
-          REACT_APP_AUTH_MODE: AWS_COGNITO
-          DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
-        run: ./dev test api --unit
-
-      - name: upload api test coverage
-        uses: actions/upload-artifact@v3
-        with:
-          name: api-test-coverage
-          path: ./services/app-api/coverage/coverage-final.json
-
-      - name: publish code coverage
-        uses: paambaati/codeclimate-action@v3.2.0
-        continue-on-error: true
-        env:
-          CC_TEST_REPORTER_ID: cace182021fe88d327fa8d95355ac6081f420e094a214fe77feb5df2f0259e9d
-        with:
-          debug: true
-          coverageLocations: |
-            ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
-
-  build-prisma-client-lambda-layer:
-    name: build - postgres prisma layer
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-
-      - uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          cache: yarn
-
-      - name: Get yarn cache directory path
-        shell: bash
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - name: Install packages
-        working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
-
-      - name: Generate protos
-        run: lerna run generate --scope=app-proto && lerna run build --scope=app-proto
-
-      # Generate Prisma Client and binary that can run in a lambda environment
-      - name: Prepare prisma client
-        working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn prisma generate
-
-      - name: Prepare "@prisma/client" lambda layer
-        working-directory: services/app-api
-        run: ./scripts/prepare-prisma-layer.sh
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: lambda-layers-prisma-client-migration
-          path: ./services/app-api/lambda-layers-prisma-client-migration
-
-      - uses: actions/upload-artifact@v3
-        with:
-          name: lambda-layers-prisma-client-engine
-          path: ./services/app-api/lambda-layers-prisma-client-engine
-
-  deploy-infra:
-    needs: [begin-deployment]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
-    with:
-      environment: dev
-      stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
-      changed_services: ${{ needs.begin-deployment.outputs.changed-services }}
-    secrets:
-      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
-
-  deploy-app:
-    needs:
-      [
-        begin-deployment,
-        build-prisma-client-lambda-layer,
-        web-unit-tests,
-        api-unit-tests,
-        deploy-infra,
-      ]
-    if: |
-      always() &&
-      (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped')
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
-    with:
-      environment: dev
-      stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
-      app_version: ${{ needs.begin-deployment.outputs.app-version }}
-      changed_services: ${{ needs.begin-deployment.outputs.changed-services }}
-    secrets:
-      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
-      aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
-      react_app_auth_mode: AWS_COGNITO
-      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
-
-  finishing-prep:
-    name: Finishing Prep
-    needs: [deploy-infra, begin-deployment, deploy-app]
-    environment: dev
-    if: |
-      always()
-      && (needs.begin-deployment.result == 'success')
-      && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped')
-      && (needs.deploy-app.result == 'success' || needs.deploy-app.result == 'skipped')
-    runs-on: ubuntu-20.04
-    outputs:
-      application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
-      cypress-uuid: ${{ steps.uuid.outputs.value }}
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
-      - name: Get AWS credentials
-        uses: ./.github/actions/get_aws_credentials
-        with:
-          region: ${{ secrets.AWS_DEFAULT_REGION }}
-          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
-          stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
-          changed-services: ${{ needs.begin-deployment.outputs.changed-services }}
-
-      - name: Create Test Users
-        env:
-          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
-        run: |
-          cd scripts
-          yarn tsc
-          node ./add_cypress_test_users.js $STAGE_NAME $TEST_USERS_PASS
-
-      - name: Run migrate to turn on Aurora
-        id: run-migrations
-        env:
-          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-        run: |
-          pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_NAME-migrate
-
-      - name: get application endpoint
-        id: save-app-endpoint
-        env:
-          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-        run: |
-          cd services
-          endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_NAME)
-          echo $endpoint
-          echo "::set-output name=app-endpoint::$endpoint"
-
-      - name: get storybook endpoint
-        id: save-storybook-endpoint
-        env:
-          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-        run: |
-          cd services
-          endpoint=$(./output.sh storybook CloudFrontEndpointUrl $STAGE_NAME)
-          echo $endpoint
-          echo "::set-output name=storybook-endpoint::$endpoint"
-
-      - name: Generate unique ID for Cypress
-        id: uuid
-        run: echo "::set-output name=value::sha-$GITHUB_SHA-time-$(date +"%s")"
-
-  end-deployment:
-    needs: [begin-deployment, deploy-app, finishing-prep]
-    if: always() && needs.begin-deployment.result == 'success'
-    name: End Deployment
-    runs-on: ubuntu-20.04
-    permissions:
-      deployments: write
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Update deployment status (failure)
-        if: failure() && needs.begin-deployment.result == 'success'
-        uses: chrnorm/deployment-status@releases/v2
-        with:
-          token: '${{ github.token }}'
-          state: 'failure'
-          deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
-
-      - name: Update deployment status (success)
-        if: needs.deploy-app.result == 'success'
-        uses: chrnorm/deployment-status@releases/v2
-        with:
-          token: '${{ github.token }}'
-          environment-url: ${{ needs.finishing-prep.outputs.application-endpoint }}
-          state: 'success'
-          deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
-
       # GitHub creates a deployment each time you reference an environment, and you can't opt out: https://github.com/actions/runner/issues/2120
       # We need to clean them up manually so they don't spam our PRs
-      - name: Clean up dev deployments
-        uses: ./.github/actions/clean_up_deployments
-        with:
-          environment: dev
+ clean-up-deployments:
+  runs-on: ubuntu-20.04
+  steps:
+    - uses: actions/checkout@v3
 
-  cypress:
-    name: cypress-run
-    timeout-minutes: 20
-    needs: [deploy-app, finishing-prep]
-    if: always() && needs.finishing-prep.result == 'success'
-    runs-on: ubuntu-20.04
-    container:
-      image: cypress/browsers:node16.17.0-chrome106
-      options: --user 1001
-    permissions:
-      deployments: write
-    strategy:
-      fail-fast: true
-      matrix:
-        # run copies of the current job in parallel
-        containers: [1, 2, 3, 4, 5, 6]
-    steps:
-      - uses: actions/checkout@v3
+    - name: Clean up dev deployments
+      uses: ./.github/actions/clean_up_deployments
+      with:
+        environment: dev
+  # begin-deployment:
+  #   name: Begin Deployment
+  #   runs-on: ubuntu-20.04
+  #   permissions:
+  #     deployments: write
+  #   outputs:
+  #     deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
+  #     stage-name: ${{ steps.stage-name.outputs.stage-name-for-branch}}
+  #     app-version: ${{ steps.branch-name.outputs.app-version}}
+  #     changed-services: ${{ steps.changed-services-action.outputs.changed-services }}
+  #   steps:
+  #     - name: Check out repository
+  #       uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 40
 
-      - name: check ip
-        id: check-ip
-        shell: bash
-        run: curl ifconfig.me/ip
+  #     - name: Check for secrets
+  #       uses: ./.github/actions/check_secrets
+  #       with:
+  #         expected-secret: ${{ secrets.REACT_APP_AUTH_MODE }}
 
-      - name: Cypress hack
-        run: |
-          export DISPLAY=:1
-          Xvfb :1 -screen 0 1024x768x16 2>/dev/null &
+  #     - name: lock this branch to prevent concurrent deploys
+  #       run: ./.github/github-lock.sh
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Cypress -- Chrome
-        id: cypress
-        uses: cypress-io/github-action@v5
-        with:
-          config: baseUrl=${{ needs.finishing-prep.outputs.application-endpoint }}
-          record: true
-          parallel: true
-          browser: chrome
-          group: 'Chrome'
-          ci-build-id: ${{ needs.finishing-prep.outputs.cypress-uuid }}
-        env:
-          REACT_APP_AUTH_MODE: AWS_COGNITO
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
+  #     - name: set app version
+  #       id: app-version
+  #       shell: bash
+  #       run: echo "::set-output name=app-version::$(scripts/app_version.sh)"
 
-      - name: Upload cypress screenshots
-        uses: actions/upload-artifact@v3
-        if: failure() && steps.cypress.outcome == 'failure'
-        with:
-          name: cypress-screenshots
-          path: tests/cypress/screenshots
+  #     - name: set stage name
+  #       id: stage-name
+  #       shell: bash
+  #       run: |
+  #         echo "::set-output name=stage-name-for-branch::$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})"
 
-      - name: Upload cypress video
-        uses: actions/upload-artifact@v3
-        if: always() && steps.cypress.outcome != 'skipped'
-        with:
-          name: cypress-videos
-          path: tests/cypress/videos
-      - name: upload partial cypress coverage
-        uses: actions/upload-artifact@v3
-        with:
-          name: partial-cypress-coverage-${{ matrix.containers}}
-          path: ./coverage-cypress/lcov.info
+  #     - name: set branch name
+  #       id: branch-name
+  #       shell: bash
+  #       run: echo "::set-output name=branch-name::$(echo ${GITHUB_REF#refs/heads/})"
 
-      - name: upload partial cypress coverage json
-        uses: actions/upload-artifact@v3
-        with:
-          name: cypress-json-coverage-${{ matrix.containers}}
-          path: ./coverage-cypress/coverage-final.json
+  #     - name: Setup env
+  #       uses: ./.github/actions/setup_env
 
-      - name: publish code coverage
-        uses: paambaati/codeclimate-action@v3.2.0
-        continue-on-error: true
-        env:
-          CC_TEST_REPORTER_ID: cace182021fe88d327fa8d95355ac6081f420e094a214fe77feb5df2f0259e9d
-        with:
-          debug: true
-          coverageLocations: |
-            ${{github.workspace}}/coverage-cypress/lcov.info
-  coverage:
-    name: test-coverage
-    needs: [cypress]
-    if: always() && needs.finishing-prep.result == 'success'
-    runs-on: ubuntu-latest
-    permissions:
-      deployments: write
-    strategy:
-      fail-fast: false
-    steps:
-      - uses: actions/checkout@v3
-      - name: Collate test coverage reports
-        run: |
-          ls
-          echo $(pwd)
-          cd ./services/app-web
-          echo $(pwd)
-          ls
-      - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+  #     - name: build scripts
+  #       shell: bash
+  #       run: |
+  #         lerna run build:ci-scripts
 
-      - name: Create combined test coverage report
-        run: |
-          echo "Combining all coverage reports"
-          echo "prepare the folders to hold the reports"
-          mkdir -p reports
-          mkdir -p cypress_temp
-          mkdir -p .nyc_output
-          echo "listing current folder"
-          ls
-          echo "listing a cypress folder"
-          ls ./cypress-json-coverage-1/
-          echo "copy the separate cypress reports from parallel runs to one folder"
-          cp ./cypress-json-coverage-1/coverage-final.json ./cypress_temp/from-cypress-1.json
-          cp ./cypress-json-coverage-2/coverage-final.json ./cypress_temp/from-cypress-2.json
-          cp ./cypress-json-coverage-3/coverage-final.json ./cypress_temp/from-cypress-3.json
-          cp ./cypress-json-coverage-4/coverage-final.json ./cypress_temp/from-cypress-4.json
-          cp ./cypress-json-coverage-5/coverage-final.json ./cypress_temp/from-cypress-5.json
-          cp ./cypress-json-coverage-6/coverage-final.json ./cypress_temp/from-cypress-6.json
-          echo "merge the collected cypress reports into one report"
-          npx nyc merge cypress_temp ./reports/from-cypress.json
-          echo "Temp merge done"
-          ls ./cypress_temp
-          echo "copy the web and api coverage reports to the reports folder"
-          cp ./api-test-coverage/coverage-final.json ./reports/from-api.json
-          cp ./unit-test-coverage/coverage-final.json ./reports/from-unit-test.json
-          echo "Copied all files"
-          echo "merge the cypress, web, and api reports into one report"
-          npx nyc merge reports && mv coverage.json .nyc_output/out.json
-          echo "generate the html report from the combined coverage report"
-          mkdir -p coverage-all && npx nyc report --reporter lcov --reporter text --reporter json-summary --report-dir coverage-all
-          cd coverage-all
-          echo "Coverage reports merged"
-      - name: Upload combined test coverage
-        uses: actions/upload-artifact@v3
-        with:
-          name: combined-test-coverage
-          path: ./coverage-all/
+  #     - name: run get_changed_services
+  #       id: changed-services-action
+  #       uses: ./scripts/get-changed-services/
+  #       with:
+  #         branchName: ${{ steps.branch-name.outputs.branch-name}}
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  #     - name: test we have changed services output
+  #       id: test
+  #       shell: bash
+  #       run: |
+  #         echo "${{steps.changed-services-action.outputs.changed-services}}"
+
+  #     - uses: chrnorm/deployment-action@releases/v2
+  #       name: Create GitHub deployment
+  #       id: ghdeployment
+  #       with:
+  #         token: '${{ github.token }}'
+  #         environment: review-apps
+  #         description: stack ${{ steps.branch-name.outputs.stage-name-for-branch}}
+  #         initial-status: in_progress
+
+  # web-unit-tests:
+  #   name: test - web unit tests
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #     - name: Check out repository
+  #       uses: actions/checkout@v3
+
+  #     - name: Setup env
+  #       uses: ./.github/actions/setup_env
+
+  #     - name: Web Unit Tests
+  #       env:
+  #         REACT_APP_AUTH_MODE: AWS_COGNITO
+  #         DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
+  #       run: ./dev test web --unit
+
+  #     - name: upload unit test coverage
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: unit-test-coverage
+  #         path: ./services/app-web/coverage/coverage-final.json
+
+  #     - name: publish code coverage
+  #       uses: paambaati/codeclimate-action@v3.2.0
+  #       continue-on-error: true
+  #       env:
+  #         CC_TEST_REPORTER_ID: cace182021fe88d327fa8d95355ac6081f420e094a214fe77feb5df2f0259e9d
+  #       with:
+  #         debug: true
+  #         coverageLocations: |
+  #           ${{github.workspace}}/services/app-web/coverage/lcov.info:lcov
+
+  # api-unit-tests:
+  #   name: test - api unit tests
+  #   runs-on: ubuntu-20.04
+  #   services:
+  #     postgres:
+  #       image: postgres:13.3
+  #       env:
+  #         REACT_APP_AUTH_MODE: AWS_COGNITO
+  #         POSTGRES_PASSWORD: shhhsecret #pragma: allowlist secret
+  #       # Set health checks to wait until postgres has started
+  #       options: >-
+  #         --health-cmd pg_isready
+  #         --health-interval 10s
+  #         --health-timeout 5s
+  #         --health-retries 5
+  #       ports:
+  #         - 5432:5432
+
+  #   steps:
+  #     - name: Check out repository
+  #       uses: actions/checkout@v3
+
+  #     - name: Setup env
+  #       uses: ./.github/actions/setup_env
+
+  #     - name: API Unit Tests
+  #       env:
+  #         NODE_OPTIONS: --max_old_space_size=6000
+  #         REACT_APP_AUTH_MODE: AWS_COGNITO
+  #         DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
+  #       run: ./dev test api --unit
+
+  #     - name: upload api test coverage
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: api-test-coverage
+  #         path: ./services/app-api/coverage/coverage-final.json
+
+  #     - name: publish code coverage
+  #       uses: paambaati/codeclimate-action@v3.2.0
+  #       continue-on-error: true
+  #       env:
+  #         CC_TEST_REPORTER_ID: cace182021fe88d327fa8d95355ac6081f420e094a214fe77feb5df2f0259e9d
+  #       with:
+  #         debug: true
+  #         coverageLocations: |
+  #           ${{github.workspace}}/services/app-api/coverage/lcov.info:lcov
+
+  # build-prisma-client-lambda-layer:
+  #   name: build - postgres prisma layer
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #     - name: Check out repository
+  #       uses: actions/checkout@v3
+
+  #     - uses: actions/setup-node@v3
+  #       with:
+  #         node-version-file: '.nvmrc'
+  #         cache: yarn
+
+  #     - name: Get yarn cache directory path
+  #       shell: bash
+  #       id: yarn-cache-dir-path
+  #       run: echo "::set-output name=dir::$(yarn cache dir)"
+
+  #     - name: Install packages
+  #       working-directory: services/app-api
+  #       run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
+
+  #     - name: Generate protos
+  #       run: lerna run generate --scope=app-proto && lerna run build --scope=app-proto
+
+  #     # Generate Prisma Client and binary that can run in a lambda environment
+  #     - name: Prepare prisma client
+  #       working-directory: services/app-api
+  #       run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn prisma generate
+
+  #     - name: Prepare "@prisma/client" lambda layer
+  #       working-directory: services/app-api
+  #       run: ./scripts/prepare-prisma-layer.sh
+
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         name: lambda-layers-prisma-client-migration
+  #         path: ./services/app-api/lambda-layers-prisma-client-migration
+
+  #     - uses: actions/upload-artifact@v3
+  #       with:
+  #         name: lambda-layers-prisma-client-engine
+  #         path: ./services/app-api/lambda-layers-prisma-client-engine
+
+  # deploy-infra:
+  #   needs: [begin-deployment]
+  #   uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+  #   with:
+  #     environment: dev
+  #     stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
+  #     changed_services: ${{ needs.begin-deployment.outputs.changed-services }}
+  #   secrets:
+  #     aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+  #     aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+
+  # deploy-app:
+  #   needs:
+  #     [
+  #       begin-deployment,
+  #       build-prisma-client-lambda-layer,
+  #       web-unit-tests,
+  #       api-unit-tests,
+  #       deploy-infra,
+  #     ]
+  #   if: |
+  #     always() &&
+  #     (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped')
+  #   uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
+  #   with:
+  #     environment: dev
+  #     stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
+  #     app_version: ${{ needs.begin-deployment.outputs.app-version }}
+  #     changed_services: ${{ needs.begin-deployment.outputs.changed-services }}
+  #   secrets:
+  #     aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+  #     aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+  #     react_app_auth_mode: AWS_COGNITO
+  #     nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
+
+  # finishing-prep:
+  #   name: Finishing Prep
+  #   needs: [deploy-infra, begin-deployment, deploy-app]
+  #   environment: dev
+  #   if: |
+  #     always()
+  #     && (needs.begin-deployment.result == 'success')
+  #     && (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped')
+  #     && (needs.deploy-app.result == 'success' || needs.deploy-app.result == 'skipped')
+  #   runs-on: ubuntu-20.04
+  #   outputs:
+  #     application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
+  #     cypress-uuid: ${{ steps.uuid.outputs.value }}
+
+  #   steps:
+  #     - uses: actions/checkout@v3
+
+  #     - name: Setup env
+  #       uses: ./.github/actions/setup_env
+
+  #     - name: Get AWS credentials
+  #       uses: ./.github/actions/get_aws_credentials
+  #       with:
+  #         region: ${{ secrets.AWS_DEFAULT_REGION }}
+  #         account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+  #         stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
+  #         changed-services: ${{ needs.begin-deployment.outputs.changed-services }}
+
+  #     - name: Create Test Users
+  #       env:
+  #         STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+  #         TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
+  #       run: |
+  #         cd scripts
+  #         yarn tsc
+  #         node ./add_cypress_test_users.js $STAGE_NAME $TEST_USERS_PASS
+
+  #     - name: Run migrate to turn on Aurora
+  #       id: run-migrations
+  #       env:
+  #         STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+  #       run: |
+  #         pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_NAME-migrate
+
+  #     - name: get application endpoint
+  #       id: save-app-endpoint
+  #       env:
+  #         STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+  #       run: |
+  #         cd services
+  #         endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_NAME)
+  #         echo $endpoint
+  #         echo "::set-output name=app-endpoint::$endpoint"
+
+  #     - name: get storybook endpoint
+  #       id: save-storybook-endpoint
+  #       env:
+  #         STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+  #       run: |
+  #         cd services
+  #         endpoint=$(./output.sh storybook CloudFrontEndpointUrl $STAGE_NAME)
+  #         echo $endpoint
+  #         echo "::set-output name=storybook-endpoint::$endpoint"
+
+  #     - name: Generate unique ID for Cypress
+  #       id: uuid
+  #       run: echo "::set-output name=value::sha-$GITHUB_SHA-time-$(date +"%s")"
+
+  # end-deployment:
+  #   needs: [begin-deployment, deploy-app, finishing-prep]
+  #   if: always() && needs.begin-deployment.result == 'success'
+  #   name: End Deployment
+  #   runs-on: ubuntu-20.04
+  #   permissions:
+  #     deployments: write
+  #   steps:
+  #     - uses: actions/checkout@v3
+
+  #     - name: Update deployment status (failure)
+  #       if: failure() && needs.begin-deployment.result == 'success'
+  #       uses: chrnorm/deployment-status@releases/v2
+  #       with:
+  #         token: '${{ github.token }}'
+  #         state: 'failure'
+  #         deployment_id: ${{ needs.begin-deployment.outputs.deploy-id }}
+
+  #     - name: Update deployment status (success)
+  #       if: needs.deploy-app.result == 'success'
+  #       uses: chrnorm/deployment-status@releases/v2
+  #       with:
+  #         token: '${{ github.token }}'
+  #         environment-url: ${{ needs.finishing-prep.outputs.application-endpoint }}
+  #         state: 'success'
+  #         deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
+
+  #     # GitHub creates a deployment each time you reference an environment, and you can't opt out: https://github.com/actions/runner/issues/2120
+  #     # We need to clean them up manually so they don't spam our PRs
+  #     - name: Clean up dev deployments
+  #       uses: ./.github/actions/clean_up_deployments
+  #       with:
+  #         environment: dev
+
+  # cypress:
+  #   name: cypress-run
+  #   timeout-minutes: 20
+  #   needs: [deploy-app, finishing-prep]
+  #   if: always() && needs.finishing-prep.result == 'success'
+  #   runs-on: ubuntu-20.04
+  #   container:
+  #     image: cypress/browsers:node16.17.0-chrome106
+  #     options: --user 1001
+  #   permissions:
+  #     deployments: write
+  #   strategy:
+  #     fail-fast: true
+  #     matrix:
+  #       # run copies of the current job in parallel
+  #       containers: [1, 2, 3, 4, 5, 6]
+  #   steps:
+  #     - uses: actions/checkout@v3
+
+  #     - name: check ip
+  #       id: check-ip
+  #       shell: bash
+  #       run: curl ifconfig.me/ip
+
+  #     - name: Cypress hack
+  #       run: |
+  #         export DISPLAY=:1
+  #         Xvfb :1 -screen 0 1024x768x16 2>/dev/null &
+
+  #     - name: Cypress -- Chrome
+  #       id: cypress
+  #       uses: cypress-io/github-action@v5
+  #       with:
+  #         config: baseUrl=${{ needs.finishing-prep.outputs.application-endpoint }}
+  #         record: true
+  #         parallel: true
+  #         browser: chrome
+  #         group: 'Chrome'
+  #         ci-build-id: ${{ needs.finishing-prep.outputs.cypress-uuid }}
+  #       env:
+  #         REACT_APP_AUTH_MODE: AWS_COGNITO
+  #         CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
+
+  #     - name: Upload cypress screenshots
+  #       uses: actions/upload-artifact@v3
+  #       if: failure() && steps.cypress.outcome == 'failure'
+  #       with:
+  #         name: cypress-screenshots
+  #         path: tests/cypress/screenshots
+
+  #     - name: Upload cypress video
+  #       uses: actions/upload-artifact@v3
+  #       if: always() && steps.cypress.outcome != 'skipped'
+  #       with:
+  #         name: cypress-videos
+  #         path: tests/cypress/videos
+  #     - name: upload partial cypress coverage
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: partial-cypress-coverage-${{ matrix.containers}}
+  #         path: ./coverage-cypress/lcov.info
+
+  #     - name: upload partial cypress coverage json
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: cypress-json-coverage-${{ matrix.containers}}
+  #         path: ./coverage-cypress/coverage-final.json
+
+  #     - name: publish code coverage
+  #       uses: paambaati/codeclimate-action@v3.2.0
+  #       continue-on-error: true
+  #       env:
+  #         CC_TEST_REPORTER_ID: cace182021fe88d327fa8d95355ac6081f420e094a214fe77feb5df2f0259e9d
+  #       with:
+  #         debug: true
+  #         coverageLocations: |
+  #           ${{github.workspace}}/coverage-cypress/lcov.info
+  # coverage:
+  #   name: test-coverage
+  #   needs: [cypress]
+  #   if: always() && needs.finishing-prep.result == 'success'
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     deployments: write
+  #   strategy:
+  #     fail-fast: false
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Collate test coverage reports
+  #       run: |
+  #         ls
+  #         echo $(pwd)
+  #         cd ./services/app-web
+  #         echo $(pwd)
+  #         ls
+  #     - uses: actions/checkout@v3
+  #     - uses: actions/download-artifact@v3
+
+  #     - name: Create combined test coverage report
+  #       run: |
+  #         echo "Combining all coverage reports"
+  #         echo "prepare the folders to hold the reports"
+  #         mkdir -p reports
+  #         mkdir -p cypress_temp
+  #         mkdir -p .nyc_output
+  #         echo "listing current folder"
+  #         ls
+  #         echo "listing a cypress folder"
+  #         ls ./cypress-json-coverage-1/
+  #         echo "copy the separate cypress reports from parallel runs to one folder"
+  #         cp ./cypress-json-coverage-1/coverage-final.json ./cypress_temp/from-cypress-1.json
+  #         cp ./cypress-json-coverage-2/coverage-final.json ./cypress_temp/from-cypress-2.json
+  #         cp ./cypress-json-coverage-3/coverage-final.json ./cypress_temp/from-cypress-3.json
+  #         cp ./cypress-json-coverage-4/coverage-final.json ./cypress_temp/from-cypress-4.json
+  #         cp ./cypress-json-coverage-5/coverage-final.json ./cypress_temp/from-cypress-5.json
+  #         cp ./cypress-json-coverage-6/coverage-final.json ./cypress_temp/from-cypress-6.json
+  #         echo "merge the collected cypress reports into one report"
+  #         npx nyc merge cypress_temp ./reports/from-cypress.json
+  #         echo "Temp merge done"
+  #         ls ./cypress_temp
+  #         echo "copy the web and api coverage reports to the reports folder"
+  #         cp ./api-test-coverage/coverage-final.json ./reports/from-api.json
+  #         cp ./unit-test-coverage/coverage-final.json ./reports/from-unit-test.json
+  #         echo "Copied all files"
+  #         echo "merge the cypress, web, and api reports into one report"
+  #         npx nyc merge reports && mv coverage.json .nyc_output/out.json
+  #         echo "generate the html report from the combined coverage report"
+  #         mkdir -p coverage-all && npx nyc report --reporter lcov --reporter text --reporter json-summary --report-dir coverage-all
+  #         cd coverage-all
+  #         echo "Coverage reports merged"
+  #     - name: Upload combined test coverage
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: combined-test-coverage
+  #         path: ./coverage-all/
