@@ -8,6 +8,7 @@ import {
     createAndSubmitTestHealthPlanPackage,
     unlockTestHealthPlanPackage,
     resubmitTestHealthPlanPackage,
+    createTestQuestion,
 } from '../../testHelpers/gqlHelpers'
 
 describe('fetchHealthPlanPackage', () => {
@@ -395,5 +396,63 @@ describe('fetchHealthPlanPackage', () => {
             )
             mostRecentDate = rev.node.createdAt
         }
+    })
+    it('returns package with questions', async () => {
+        const server = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testUserCMS,
+            },
+        })
+
+        const stateSubmission = await createAndSubmitTestHealthPlanPackage(
+            server
+        )
+
+        const createdID = stateSubmission.id
+
+        await createTestQuestion(cmsServer, createdID)
+
+        const result = await server.executeOperation({
+            query: FETCH_HEALTH_PLAN_PACKAGE,
+            variables: {
+                input: {
+                    pkgID: createdID,
+                },
+            },
+        })
+
+        const pkg = result.data?.fetchHealthPlanPackage.pkg
+        expect(pkg.questions).toEqual(
+            expect.objectContaining({
+                DMCOQuestions: expect.objectContaining({
+                    totalCount: 1,
+                    edges: expect.arrayContaining([
+                        {
+                            node: expect.objectContaining({
+                                id: expect.any(String),
+                                createdAt: expect.any(Date),
+                                pkgID: createdID,
+                                documents: [
+                                    {
+                                        name: 'Test Question',
+                                        s3URL: 'testS3Url',
+                                    },
+                                ],
+                                addedBy: testUserCMS,
+                            }),
+                        },
+                    ]),
+                }),
+                DMCPQuestions: expect.objectContaining({
+                    totalCount: 0,
+                    edges: [],
+                }),
+                OACTQuestions: expect.objectContaining({
+                    totalCount: 0,
+                    edges: [],
+                }),
+            })
+        )
     })
 })

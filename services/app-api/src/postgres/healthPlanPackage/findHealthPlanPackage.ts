@@ -8,6 +8,7 @@ import {
 import {
     convertToHealthPlanPackageType,
     HealthPlanPackageWithRevisionsTable,
+    setQuestionUserTypeAsCMS,
 } from './healthPlanPackageHelpers'
 
 export async function findUniqueSubmissionWrapper(
@@ -25,6 +26,19 @@ export async function findUniqueSubmissionWrapper(
                         createdAt: 'desc', // We expect our revisions most-recent-first
                     },
                 },
+                questions: {
+                    include: {
+                        addedBy: {
+                            include: {
+                                stateAssignments: true,
+                            },
+                        },
+                        documents: true,
+                    },
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                },
             },
         })
 
@@ -32,7 +46,12 @@ export async function findUniqueSubmissionWrapper(
             return undefined
         }
 
-        return findResult
+        const result = {
+            ...findResult,
+            questions: setQuestionUserTypeAsCMS(findResult.questions),
+        }
+
+        return result
     } catch (e: unknown) {
         return convertPrismaErrorToStoreError(e)
     }

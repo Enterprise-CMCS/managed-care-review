@@ -1,9 +1,27 @@
-import { HealthPlanPackageTable, HealthPlanRevisionTable } from '@prisma/client'
-import { HealthPlanPackageType, UpdateInfoType } from '../../domain-models'
+import {
+    HealthPlanPackageTable,
+    HealthPlanRevisionTable,
+    Question as PrismaQuestionType,
+    QuestionDocument,
+    User,
+} from '@prisma/client'
+import {
+    CMSUserType,
+    HealthPlanPackageType,
+    Question,
+    UpdateInfoType,
+} from '../../domain-models'
 import { StoreError } from '../storeError'
+import { convertToIndexQuestionsPayload } from '../questionAnswers'
 
 export type HealthPlanPackageWithRevisionsTable = HealthPlanPackageTable & {
     revisions: HealthPlanRevisionTable[]
+    questions?: Question[]
+}
+
+type QuestionWithDocuments = PrismaQuestionType & {
+    addedBy: User
+    documents: QuestionDocument[]
 }
 
 // getCurrentRevision returns the first revision associated with a package
@@ -70,7 +88,26 @@ function convertToHealthPlanPackageType(
                 formDataProto: r.formDataProto,
             }
         }),
+        questions:
+            dbPkg.questions && convertToIndexQuestionsPayload(dbPkg.questions),
     }
 }
 
-export { getCurrentRevision, convertToHealthPlanPackageType }
+// sets the addedBy user type as a CMS user type for every question
+function setQuestionUserTypeAsCMS(
+    questions: QuestionWithDocuments[]
+): Question[] {
+    return questions.map((question) => ({
+        ...question,
+        addedBy: {
+            ...question.addedBy,
+            stateAssignments: [],
+        } as CMSUserType,
+    }))
+}
+
+export {
+    getCurrentRevision,
+    convertToHealthPlanPackageType,
+    setQuestionUserTypeAsCMS,
+}

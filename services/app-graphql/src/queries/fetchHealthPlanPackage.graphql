@@ -1,3 +1,31 @@
+fragment questionEdgeFragment on QuestionEdge {
+    node {
+        id
+        pkgID
+        createdAt
+        addedBy {
+            id
+            role
+            email
+            givenName
+            familyName
+            stateAssignments {
+                code
+                name
+                programs {
+                    id
+                    name
+                    fullName
+                }
+            }
+        }
+        documents {
+            s3URL
+            name
+        }
+    }
+}
+
 query fetchHealthPlanPackage($input: FetchHealthPlanPackageInput!) {
     fetchHealthPlanPackage(input: $input) {
         pkg {
@@ -29,6 +57,26 @@ query fetchHealthPlanPackage($input: FetchHealthPlanPackageInput!) {
                         updatedReason
                     }
                     formDataProto
+                }
+            }
+            questions {
+                DMCOQuestions {
+                    edges {
+                        ...questionEdgeFragment
+                    }
+                    totalCount
+                }
+                DMCPQuestions {
+                    edges {
+                        ...questionEdgeFragment
+                    }
+                    totalCount
+                }
+                OACTQuestions {
+                    edges {
+                        ...questionEdgeFragment
+                    }
+                    totalCount
                 }
             }
         }
