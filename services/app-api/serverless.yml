@@ -32,7 +32,7 @@ custom:
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   reactAppOtelCollectorUrl: ${env:REACT_APP_OTEL_COLLECTOR_URL, ssm:/configuration/react_app_otel_collector_url}
   dbURL: ${env:DATABASE_URL}
-  ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key}
+  ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key_feds}
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
@@ -40,6 +40,8 @@ custom:
       forceExclude:
         - '@prisma/client'
       nodeModulesRelativeDir: '../../'
+    packagerOptions:
+      lockFile: '../../yarn.lock'
     excludeRegex: 'darwin|debian'
   serverlessTerminationProtection:
     stages:
@@ -177,18 +179,7 @@ functions:
       - http:
           path: otel
           method: post
-          cors:
-            origin: '*'
-            headers:
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-              - X-Amz-User-Agent
-              - x-amzn-trace-id
-              - b3
-              - traceparent
+          cors: true
           authorizer: aws_iam
 
   graphql:
@@ -197,34 +188,12 @@ functions:
       - http:
           path: graphql
           method: post
-          cors:
-            origin: '*'
-            headers:
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-              - X-Amz-User-Agent
-              - x-amzn-trace-id
-              - b3
-              - traceparent
+          cors: true
           authorizer: aws_iam
       - http:
           path: graphql
           method: get
-          cors:
-            origin: '*'
-            headers:
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-              - X-Amz-User-Agent
-              - x-amzn-trace-id
-              - b3
-              - traceparent
+          cors: true
           authorizer: aws_iam
     timeout: 60 # aurora cold start can be long
     vpc:
@@ -252,18 +221,7 @@ functions:
       - http:
           path: zip
           method: post
-          cors:
-            origin: '*'
-            headers:
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-              - X-Amz-User-Agent
-              - x-amzn-trace-id
-              - b3
-              - traceparent
+          cors: true
           authorizer: aws_iam
 
   cleanup:

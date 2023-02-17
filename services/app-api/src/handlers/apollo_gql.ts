@@ -281,7 +281,12 @@ async function initializeGQLHandler(): Promise<Handler> {
         throw new Error(`Configuration Error: ${dmcoEmails.message}`)
 
     // Configure LaunchDarkly
-    ldClient = ld.init(ldSDKKey)
+    const ldOptions: ld.LDOptions = {
+        streamUri: 'https://stream.launchdarkly.us',
+        baseUri: 'https://app.launchdarkly.us',
+        eventsUri: 'https://events.launchdarkly.us',
+    }
+    ldClient = ld.init(ldSDKKey, ldOptions)
     let launchDarkly: LDService
 
     // Wait for initialization. On initialization failure default to offlineLDService and close ldClient.
