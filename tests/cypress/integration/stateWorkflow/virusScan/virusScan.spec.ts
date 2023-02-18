@@ -14,7 +14,7 @@ describe('documents', () => {
                 `/submissions/${draftSubmissionID}/edit/documents`
             )
             cy.findByTestId('file-input-input').attachFile(
-                'documents/eicar-adobe-acrobat-attachment.pdf'
+                'documents/eicar_com.pdf'
             )
             cy.findAllByTestId('upload-finished-indicator', {
                 timeout: 120000,
