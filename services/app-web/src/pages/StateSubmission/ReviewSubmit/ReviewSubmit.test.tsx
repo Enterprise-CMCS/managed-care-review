@@ -2,7 +2,7 @@ import { screen, waitFor } from '@testing-library/react'
 import {
     fetchCurrentUserMock,
     mockCompleteDraft,
-} from '../../../testHelpers/apolloHelpers'
+} from '../../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { ReviewSubmit } from './ReviewSubmit'
 

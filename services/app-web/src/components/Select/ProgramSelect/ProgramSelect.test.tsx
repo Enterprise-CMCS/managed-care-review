@@ -3,7 +3,7 @@ import { ProgramSelect } from './ProgramSelect'
 import {
     fetchCurrentUserMock,
     mockMNState,
-} from '../../../testHelpers/apolloHelpers'
+} from '../../../testHelpers/apolloMocks'
 import { screen, waitFor } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import userEvent from '@testing-library/user-event'

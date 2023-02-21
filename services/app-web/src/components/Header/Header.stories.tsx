@@ -2,7 +2,7 @@ import { Story } from '@storybook/react'
 
 import ProvidersDecorator from '../../../.storybook/providersDecorator'
 import { Header, HeaderProps } from './Header'
-import { fetchCurrentUserMock } from '../../testHelpers/apolloHelpers'
+import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks'
 
 export default {
     title: 'Components/Header',

@@ -12,7 +12,7 @@ import {
 } from '../../testHelpers/jestHelpers'
 import { CognitoLogin } from './CognitoLogin'
 import { LocalLogin } from '../../localAuth'
-import { fetchCurrentUserMock } from '../../testHelpers/apolloHelpers'
+import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks'
 /*  
 This file should only have basic user flows for auth. Form and implementation details are tested at the component level.
 */

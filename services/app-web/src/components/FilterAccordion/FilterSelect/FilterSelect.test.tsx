@@ -1,6 +1,6 @@
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { FilterSelect } from './FilterSelect'
-import { fetchCurrentUserMock } from '../../../testHelpers/apolloHelpers'
+import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
 import { screen, waitFor } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 

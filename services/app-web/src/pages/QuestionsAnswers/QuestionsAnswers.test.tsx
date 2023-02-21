@@ -9,7 +9,7 @@ import {
     fetchCurrentUserMock,
     fetchStateHealthPlanPackageMockSuccess,
     mockValidCMSUser,
-} from '../../testHelpers/apolloHelpers'
+} from '../../testHelpers/apolloMocks'
 
 describe('QuestionsAnswers', () => {
     beforeEach(() => {
