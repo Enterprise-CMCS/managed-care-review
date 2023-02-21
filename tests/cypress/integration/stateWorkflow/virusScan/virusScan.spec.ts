@@ -14,10 +14,10 @@ describe.only('documents', () => {
                 `/submissions/${draftSubmissionID}/edit/documents`
             )
             cy.findByTestId('file-input-input').attachFile(
-                'documents/eicar_com.pdf'
+                'documents/testing.csv'
             )
             cy.findAllByTestId('upload-finished-indicator', {
-                timeout: 120001,
+                timeout: 120000,
             })
             if (Cypress.env('AUTH_MODE') === 'LOCAL') {
                 cy.findByText('Failed security scan, please remove').should(
