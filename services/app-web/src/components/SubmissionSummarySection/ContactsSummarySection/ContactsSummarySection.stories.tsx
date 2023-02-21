@@ -4,7 +4,7 @@ import {
     ContactsSummarySectionProps,
     ContactsSummarySection,
 } from './ContactsSummarySection'
-import { mockContractAndRatesDraft } from '../../../testHelpers/apolloHelpers'
+import { mockContractAndRatesDraft } from '../../../testHelpers/apolloMocks'
 
 export default {
     title: 'Components/SubmissionSummary/ContactsSummarySection',

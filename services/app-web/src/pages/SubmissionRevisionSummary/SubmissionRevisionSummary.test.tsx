@@ -6,7 +6,7 @@ import {
     fetchStateHealthPlanPackageMockSuccess,
     mockValidCMSUser,
     mockSubmittedHealthPlanPackageWithRevisions,
-} from '../../testHelpers/apolloHelpers'
+} from '../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { SubmissionRevisionSummary } from './SubmissionRevisionSummary'
 import { dayjs } from '../../common-code/dateHelpers'

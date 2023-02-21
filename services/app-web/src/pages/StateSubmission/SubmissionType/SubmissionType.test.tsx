@@ -7,7 +7,7 @@ import {
     waitForElementToBeRemoved,
 } from '@testing-library/react'
 import selectEvent from 'react-select-event'
-import { fetchCurrentUserMock } from '../../../testHelpers/apolloHelpers'
+import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
 import {
     ldUseClientSpy,
     renderWithProviders,
