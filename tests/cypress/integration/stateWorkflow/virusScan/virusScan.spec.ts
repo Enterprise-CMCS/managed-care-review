@@ -14,7 +14,7 @@ describe.only('documents', () => {
                 `/submissions/${draftSubmissionID}/edit/documents`
             )
             cy.findByTestId('file-input-input').attachFile(
-                'documents/testing.csv'
+                'documents/eicar_com.pdf'
             )
             cy.findAllByTestId('upload-finished-indicator', {
                 timeout: 120000,
