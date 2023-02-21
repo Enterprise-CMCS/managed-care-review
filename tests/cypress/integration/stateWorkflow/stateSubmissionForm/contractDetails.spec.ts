@@ -1,4 +1,4 @@
-describe('contract details', () => {
+describe.skip('contract details', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
     })

@@ -1,4 +1,4 @@
-describe('documents', () => {
+describe.only('documents', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
     })

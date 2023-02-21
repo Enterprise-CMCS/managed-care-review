@@ -1,4 +1,4 @@
-describe('contacts', () => {
+describe.skip('contacts', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
     })

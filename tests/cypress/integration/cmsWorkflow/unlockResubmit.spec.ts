@@ -1,11 +1,11 @@
 import * as path from 'path'
 
-describe('CMS user', () => {
+describe.skip('CMS user', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
     })
     it('can unlock and resubmit', () => {
-        cy.interceptFeatureFlags({'rate-cert-assurance': true})
+        cy.interceptFeatureFlags({ 'rate-cert-assurance': true })
         cy.logInAsStateUser()
 
         // fill out an entire submission

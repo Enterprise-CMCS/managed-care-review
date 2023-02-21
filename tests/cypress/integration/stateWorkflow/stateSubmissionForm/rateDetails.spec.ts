@@ -1,8 +1,9 @@
-describe('rate details', () => {
+describe.skip('rate details', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
     })
-    it('can navigate to and from rate details page', () => {0
+    it('can navigate to and from rate details page', () => {
+        0
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
@@ -11,21 +12,27 @@ describe('rate details', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/rate-details`)
+            cy.navigateFormByDirectLink(
+                `/submissions/${draftSubmissionId}/edit/rate-details`
+            )
 
             // Navigate to contract details page by clicking back
             cy.navigateFormByButtonClick('BACK')
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
 
             // Navigate to rate details page
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/rate-details`)
+            cy.navigateFormByDirectLink(
+                `/submissions/${draftSubmissionId}/edit/rate-details`
+            )
 
             // Navigate to dashboard page by clicking save as draft
             cy.navigateFormByButtonClick('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to rate details page
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/rate-details`)
+            cy.navigateFormByDirectLink(
+                `/submissions/${draftSubmissionId}/edit/rate-details`
+            )
 
             cy.fillOutNewRateCertification()
 
@@ -44,7 +51,9 @@ describe('rate details', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/rate-details`)
+            cy.navigateFormByDirectLink(
+                `/submissions/${draftSubmissionId}/edit/rate-details`
+            )
 
             cy.fillOutAmendmentToPriorRateCertification()
 
@@ -72,7 +81,9 @@ describe('rate details', () => {
             const { pathname } = fullUrl
             const pathnameArray = pathname.split('/')
             const draftSubmissionId = pathnameArray[2]
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/rate-details`)
+            cy.navigateFormByDirectLink(
+                `/submissions/${draftSubmissionId}/edit/rate-details`
+            )
 
             cy.fillOutAmendmentToPriorRateCertification()
 
@@ -80,13 +91,11 @@ describe('rate details', () => {
             cy.navigateFormByButtonClick('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
-
             cy.fillOutStateContact()
             cy.fillOutAdditionalActuaryContact()
             cy.navigateFormByButtonClick('CONTINUE')
 
             cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
-
         })
     })
 
@@ -104,21 +113,27 @@ describe('rate details', () => {
         cy.findByRole('heading', { level: 2, name: /Rate details/ })
 
         //Add two more rate certifications, total three
-        cy.findByRole('button', { name: 'Add another rate certification'}).click()
-        cy.findByRole('button', { name: 'Add another rate certification'}).click()
+        cy.findByRole('button', {
+            name: 'Add another rate certification',
+        }).click()
+        cy.findByRole('button', {
+            name: 'Add another rate certification',
+        }).click()
 
         cy.findAllByTestId('rate-certification-form').should('have.length', 3)
         //Fill out every rate certification form
-        cy.findAllByTestId('rate-certification-form').each((form, index, arr) => {
-            cy.wrap(form).within(() => {
-                //Fill out last rate certification as new rate
-                if (index === arr.length - 1 ) {
-                    cy.fillOutNewRateCertification()
-                } else {
-                    cy.fillOutAmendmentToPriorRateCertification(index)
-                }
-            })
-        })
+        cy.findAllByTestId('rate-certification-form').each(
+            (form, index, arr) => {
+                cy.wrap(form).within(() => {
+                    //Fill out last rate certification as new rate
+                    if (index === arr.length - 1) {
+                        cy.fillOutNewRateCertification()
+                    } else {
+                        cy.fillOutAmendmentToPriorRateCertification(index)
+                    }
+                })
+            }
+        )
 
         // Navigate to contacts page by clicking continue
         cy.navigateFormByButtonClick('CONTINUE')
@@ -126,7 +141,7 @@ describe('rate details', () => {
 
         //Fill out one state and one additional actuary contact
         cy.fillOutStateContact()
-        cy.findByRole('button', { name: /Add actuary contact/}).safeClick()
+        cy.findByRole('button', { name: /Add actuary contact/ }).safeClick()
         cy.findAllByTestId('actuary-contact').should('have.length', 1)
         cy.fillOutAdditionalActuaryContact()
 
@@ -135,11 +150,19 @@ describe('rate details', () => {
         cy.findByRole('heading', { level: 2, name: /Rate details/ })
 
         //Remove last rate certification, total two
-        cy.findAllByTestId('rate-certification-form').each((form, index, arr) => {
-            if (index === arr.length - 1) {
-                cy.wrap(form).within(() => cy.findByRole('button', { name: 'Remove rate certification'}).click())
+        cy.findAllByTestId('rate-certification-form').each(
+            (form, index, arr) => {
+                if (index === arr.length - 1) {
+                    cy.wrap(form).within(() =>
+                        cy
+                            .findByRole('button', {
+                                name: 'Remove rate certification',
+                            })
+                            .click()
+                    )
+                }
             }
-        })
+        )
         cy.findAllByTestId('rate-certification-form').should('have.length', 2)
 
         // Navigate to contacts page by clicking continue

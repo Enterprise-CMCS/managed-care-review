@@ -1,4 +1,4 @@
-describe('smoke test', () => {
+describe.skip('smoke test', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
     })

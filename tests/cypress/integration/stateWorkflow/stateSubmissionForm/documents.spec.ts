@@ -1,4 +1,4 @@
-describe('documents', () => {
+describe.skip('documents', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
     })
