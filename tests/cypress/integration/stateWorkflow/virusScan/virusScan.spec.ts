@@ -17,7 +17,7 @@ describe('documents', () => {
                 'documents/eicar_com.pdf'
             )
             cy.findAllByTestId('upload-finished-indicator', {
-                timeout: 120000,
+                timeout: 120001,
             })
             if (Cypress.env('AUTH_MODE') === 'LOCAL') {
                 cy.findByText('Failed security scan, please remove').should(
