@@ -1,5 +1,5 @@
 import { makeDocumentList } from './makeDocumentKeyLookupList'
-import { mockSubmittedHealthPlanPackageWithRevision } from '../testHelpers/apolloHelpers'
+import { mockSubmittedHealthPlanPackageWithRevision } from '../testHelpers/apolloMocks'
 import { UnlockedHealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
 
 describe('makeDocumentList', () => {
