@@ -1,7 +1,8 @@
 module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'node',
-    globalSetup: '<rootDir>/src/testFetchAVDefinitions.ts',
+    testTimeout: 30000, // Most of these test run clamscan which takes a while
+    globalSetup: '<rootDir>/src/jestGlobalSetup.ts',
     coverageReporters: [
         [
             'json',

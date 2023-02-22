@@ -9,7 +9,7 @@ import { uploadedAt } from './lib/tags'
 // once on startup of Jest. It runs freshclam to populate the test-av-definitions
 // bucket that is used by all the tests that scan files in this service.
 async function setupAVDefinitionsBucket(): Promise<undefined> {
-    console.info('setting up AV definitions bucket in globalSetup')
+    console.info('setting up AV definitions bucket in globalSetup!')
 
     const thisDir = __dirname
     const tmpDefsDir = await mkdtemp('/tmp/clamscan-')
