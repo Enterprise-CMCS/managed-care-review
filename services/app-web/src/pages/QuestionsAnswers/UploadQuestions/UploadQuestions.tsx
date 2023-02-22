@@ -29,8 +29,10 @@ export const UploadQuestions = () => {
     const navigate = useNavigate()
 
     // api
-    const [createQuestion, { loading: apiLoading, error: apiError }] =
-        useCreateQuestionMutation()
+    const [
+        createQuestion,
+        { data: apiResponseData, loading: apiLoading, error: apiError },
+    ] = useCreateQuestionMutation()
 
     // page level state
     const [shouldValidate, setShouldValidate] = React.useState(false)
@@ -74,11 +76,9 @@ export const UploadQuestions = () => {
                 documents: questionDocs,
             }
 
-            const update = await createQuestion({ variables: { input } })
+            await createQuestion({ variables: { input } })
 
-            if (update instanceof Error) {
-                console.info('Error creating question')
-            } else {
+            if (apiResponseData) {
                 console.info('Upload success')
                 navigate(`/submissions/${id}/question-and-answers`)
             }
