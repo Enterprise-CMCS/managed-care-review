@@ -1,6 +1,8 @@
 import React from 'react'
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
-import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
+import {
+    WebTracerProvider,
+    BatchSpanProcessor,
+} from '@opentelemetry/sdk-trace-web'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http/build/esnext'
 import { Resource } from '@opentelemetry/resources'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
