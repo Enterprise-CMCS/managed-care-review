@@ -76,7 +76,7 @@ provider:
     restApiId: ${self:custom.appApiGatewayId}
     restApiRootResourceId: ${self:custom.appApiGatewayRootResourceId}
   layers:
-    - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-8-0:2
+    - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:1
   iam:
     role:
       path: ${ssm:/configuration/iam/path, "/"}
@@ -166,7 +166,7 @@ functions:
           authorizer: aws_iam
     layers:
       - !Ref PrismaClientEngineLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-8-0:2
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:1
     timeout: 60
     vpc:
       securityGroupIds:
@@ -202,7 +202,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientEngineLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-8-0:2
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:1
 
   migrate:
     handler: src/handlers/postgres_migrate.main
@@ -213,7 +213,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientMigrationLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-8-0:2
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:1
 
   zip_keys:
     handler: src/handlers/bulk_download.main
@@ -229,7 +229,7 @@ functions:
     events:
       - schedule: cron(0 14 ? * MON-FRI *)
     layers:
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-8-0:2
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:1
 
 resources:
   Resources:
