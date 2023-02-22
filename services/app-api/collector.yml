@@ -1,7 +1,10 @@
 receivers:
   otlp:
     protocols:
-      http: 'localhost:4318'
+      grpc:
+        endpoint: 'localhost:4317'
+      http:
+        endpoint: 'localhost:4318'
 
 exporters:
   otlp:
