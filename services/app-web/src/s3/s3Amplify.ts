@@ -33,6 +33,11 @@ function assertIsS3PutError(val: unknown): asserts val is s3PutError {
 }
 
 // MAIN
+// TODO pass buckets object
+// TODO clarify what gets3URL versus getURL are doing
+// type Bucket = 'HEALTH_PLAN_DOCS' | 'QA'
+// type Buckets = { [K in Bucket]: string}
+
 function newAmplifyS3Client(bucketName: string): S3ClientT {
     return {
         uploadFile: async (file: File): Promise<string | S3Error> => {
@@ -43,6 +48,7 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
 
             try {
                 const stored = await Storage.put(`${uuid}.${ext}`, file, {
+                    bucket: process.env.REACT_APP_S3_QA_BUCKET,
                     contentType: file.type,
                     contentDisposition: `attachment; filename=${fileName}`,
                 })
@@ -66,7 +72,9 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
 
         deleteFile: async (filename: string): Promise<void | S3Error> => {
             try {
-                await Storage.remove(filename)
+                await Storage.remove(filename, {
+                    bucket: process.env.REACT_APP_S3_QA_BUCKET,
+                })
                 return
             } catch (err) {
                 assertIsS3PutError(err)
@@ -93,6 +101,7 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
                 await waitFor(20000)
                 await retryWithBackoff(async () => {
                     await Storage.get(filename, {
+                        bucket: process.env.REACT_APP_S3_QA_BUCKET,
                         download: true,
                     })
                 })
@@ -109,14 +118,16 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
             }
         },
         getS3URL: async (key: string, fileName: string): Promise<string> => {
-            return `s3://${bucketName}/${key}/${fileName}`
+            return `s3://${process.env.REACT_APP_S3_QA_BUCKET}/${key}/${fileName}`
         },
         getKey: (s3URL: string) => {
             const key = parseKey(s3URL)
             return key instanceof Error ? null : key
         },
         getURL: async (key: string): Promise<string> => {
-            const result = await Storage.get(key)
+            const result = await Storage.get(key, {
+                bucket: process.env.REACT_APP_S3_QA_BUCKET,
+            })
             if (typeof result === 'string') {
                 return result
             } else {
