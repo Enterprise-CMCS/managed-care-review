@@ -1,7 +1,7 @@
 import path from 'path'
 import { NewTestS3UploadsClient } from '../s3'
 import { NewClamAV, parseInfectedFiles } from './clamAV'
-import { readdir, stat, mkdir } from 'fs/promises'
+import { rm, mkdtemp } from 'fs/promises'
 
 describe('clamAV', () => {
     it('parses clamscan output correctly', () => {
@@ -36,12 +36,11 @@ describe('clamAV', () => {
         const thisDir = __dirname
 
         const s3Client = NewTestS3UploadsClient()
-
-        const definitionsDir = path.join(thisDir, 'testDefinitions')
+        const tmpDefsDir = await mkdtemp('/tmp/freshclam-')
 
         const clamAV = NewClamAV(
             {
-                bucketName: 'test-uploads',
+                bucketName: 'test-av-definitions',
                 definitionsPath: 'lambda/s3-antivirus/av-definitions',
 
                 pathToClamav: 'clamscan',
@@ -49,31 +48,18 @@ describe('clamAV', () => {
                 pathToConfig: path.join(
                     thisDir,
                     '..',
+                    '..',
                     'testData',
                     'freshclam.conf'
                 ),
-                pathToDefintions: definitionsDir,
+                pathToDefintions: tmpDefsDir,
             },
             s3Client
         )
 
-        // if the definitions dir doesn't exist, create it.
-        try {
-            await stat(definitionsDir)
-        } catch (err) {
-            await mkdir(definitionsDir)
-        }
-
-        // if the files don't exist, download the files
-        const theseDefs = await readdir(definitionsDir)
-        if (theseDefs.length === 0) {
-            // get the files
-            const dlfiles = await clamAV.fetchAVDefinitionsWithFreshclam(
-                definitionsDir
-            )
-            if (dlfiles instanceof Error) {
-                throw dlfiles
-            }
+        const defsRes = await clamAV.downloadAVDefinitions()
+        if (defsRes instanceof Error) {
+            throw defsRes
         }
 
         // have a list of files
@@ -88,5 +74,7 @@ describe('clamAV', () => {
 
         // assert things.
         expect(res).toStrictEqual(['badList.csv', 'badDummy.pdf'])
+
+        await rm(tmpDefsDir, { force: true, recursive: true })
     })
 })

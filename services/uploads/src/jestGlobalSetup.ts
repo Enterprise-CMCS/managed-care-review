@@ -1,7 +1,7 @@
 import { NewClamAV } from './deps/clamAV'
 import { NewTestS3UploadsClient } from './deps/s3'
 import { updateAVDefinitions } from './lib/updateAVDefinitions'
-import { mkdtemp } from 'fs/promises'
+import { rm, mkdtemp } from 'fs/promises'
 import path from 'path'
 import { uploadedAt } from './lib/tags'
 
@@ -70,6 +70,9 @@ async function setupAVDefinitionsBucket(): Promise<undefined> {
         }
         console.info('Ran freshclam')
     }
+
+    await rm(tmpDefsDir, { force: true, recursive: true })
+
     return
 }
 
