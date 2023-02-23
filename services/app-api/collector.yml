@@ -14,12 +14,12 @@ exporters:
 
 processors:
   batch/traces:
-    timeout: 1s
-    send_batch_size: 50
+    timeout: 5s
+    send_batch_size: 512
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
       exporters: [otlp]
-      processors: [batch/traces]
+      processors: ['batch/traces']
