@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { usePrevious } from '../../hooks'
 import { v4 as uuidv4 } from 'uuid'
 import {
@@ -16,6 +16,16 @@ import { FileItemsList } from './FileItemList/FileItemsList'
 import { pluralize } from '../../common-code/formatters'
 
 import { recordUserInputException } from '../../otelHelpers'
+
+async function calculateSHA256(file: File): Promise<string> {
+    const buffer = await file.arrayBuffer()
+    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer)
+    const hashArray = Array.from(new Uint8Array(hashBuffer))
+    const hashHex = hashArray
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('')
+    return hashHex
+}
 
 export type S3FileData = {
     key: string
@@ -67,6 +77,18 @@ export const FileUpload = ({
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
     const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
+    const [sha, setSha] = useState<string>('no_sha_yet')
+    useEffect(() => {
+        const sha = async () =>
+            fileItems[0].file
+                ? await calculateSHA256(fileItems[0].file)
+                : 'no_sha_here'
+        sha()
+            .then((sha) => setSha(sha))
+            .catch((err) => {
+                console.error(err)
+            })
+    }, [fileItems])
     const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
     const summaryRef = useRef<HTMLHeadingElement>(null) // reference to the heading that we will focus
     const previousFileItems = usePrevious(fileItems)
@@ -433,6 +455,7 @@ export const FileUpload = ({
             <h5 tabIndex={-1} ref={summaryRef} className={styles.fileSummary}>
                 {`${summary} ${summaryDetailText}`}
             </h5>
+            <h4>{sha}</h4>
             <FileItemsList
                 retryItem={retryFile}
                 deleteItem={deleteItem}
