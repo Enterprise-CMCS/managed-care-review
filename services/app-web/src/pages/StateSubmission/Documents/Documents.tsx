@@ -157,7 +157,7 @@ export const Documents = ({
 
     const handleUploadFile = async (file: File): Promise<S3FileData> => {
         const sha = await calculateSHA256(file)
-        console.log('sha prior to upload: ', sha)
+        console.info('sha prior to upload: ', sha)
 
         const s3Key = await uploadFile(file)
 
