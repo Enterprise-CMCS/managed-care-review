@@ -1,7 +1,7 @@
 module.exports = {
     preset: 'ts-jest',
     testEnvironment: 'node',
-    testTimeout: 30000, // Most of these test run clamscan which takes a while
+    testTimeout: 60000, // Most of these test run clamscan which takes a while
     globalSetup: '<rootDir>/src/jestGlobalSetup.ts',
     coverageReporters: [
         [
