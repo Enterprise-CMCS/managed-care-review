@@ -5,6 +5,7 @@ export const main: APIGatewayProxyHandler = async (event) => {
     const options = {
         headers: { 'content-type': 'application/json' },
     }
+    console.info(`Received payload from app-web: ${JSON.stringify(event.body)}`)
 
     try {
         await axios.post('http://localhost:4318/v1/traces', event.body, options)
