@@ -13,7 +13,7 @@ exporters:
       api-key: $NR_LICENSE_KEY
 
 processors:
-  batch/traces:
+  batch:
     timeout: 5s
     send_batch_size: 512
 
@@ -22,4 +22,4 @@ service:
     traces:
       receivers: [otlp]
       exporters: [otlp]
-      processors: ['batch/traces']
+      processors: [batch]
