@@ -87,8 +87,8 @@ if (s3Region !== undefined && s3LocalURL !== undefined) {
 
 let s3Client: S3ClientT
 const S3_BUCKETS_CONFIG: S3BucketConfigType = {
-          HEALTH_PLAN: s3DocumentsBucket,
-          QUESTION_AND_ANSWER: s3QABucket,
+          HEALTH_PLAN_DOCS: s3DocumentsBucket,
+          QUESTION_ANSWER_DOCS: s3QABucket,
       }
 if (s3Region) {
     s3Client = newAmplifyS3Client(S3_BUCKETS_CONFIG)
