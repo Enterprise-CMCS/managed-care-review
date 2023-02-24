@@ -133,9 +133,15 @@ export const UploadQuestions = () => {
                                 </span>
                             }
                             accept={ACCEPTED_SUBMISSION_FILE_TYPES}
-                            uploadFile={handleUploadFile}
-                            scanFile={handleScanFile}
-                            deleteFile={handleDeleteFile}
+                            uploadFile={(file) =>
+                                handleUploadFile(file, 'QUESTION_ANSWER_DOCS')
+                            }
+                            scanFile={(key) =>
+                                handleScanFile(key, 'QUESTION_ANSWER_DOCS')
+                            }
+                            deleteFile={(key) =>
+                                handleDeleteFile(key, 'QUESTION_ANSWER_DOCS')
+                            }
                             onFileItemsUpdate={onFileItemsUpdate}
                         />
                     </FormGroup>

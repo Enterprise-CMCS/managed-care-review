@@ -12,6 +12,7 @@ import { localGQLFetch, fakeAmplifyFetch } from './api'
 import { assertIsAuthMode } from './common-code/config'
 import { S3ClientT, newAmplifyS3Client, newLocalS3Client } from './s3'
 import { asyncWithLDProvider } from 'launchdarkly-react-client-sdk'
+import  type { S3BucketConfigType } from './s3/s3Amplify'
 
 const gqlSchema = loader('../../app-web/src/gen/schema.graphql')
 
@@ -70,24 +71,29 @@ const apolloClient = new ApolloClient({
 const s3Region = process.env.REACT_APP_S3_REGION
 const s3LocalURL = process.env.REACT_APP_S3_LOCAL_URL
 const s3DocumentsBucket = process.env.REACT_APP_S3_DOCUMENTS_BUCKET
+const s3QABucket = process.env.REACT_APP_S3_QA_BUCKET 
 
-if (s3DocumentsBucket === undefined) {
+if (s3DocumentsBucket === undefined || s3QABucket === undefined) {
     throw new Error(
-        'To configure s3, you  must set REACT_APP_S3_DOCUMENTS_BUCKET'
+        'To configure s3, you  must set REACT_APP_S3_DOCUMENTS_BUCKET and REACT_APP_S3_QA_BUCKET'
     )
 }
 
 if (s3Region !== undefined && s3LocalURL !== undefined) {
     throw new Error(
-        'You cant set both REACT_APP_S3_REGION and REACT_APP_S3_LOCAL_URL. Pick one dependning on what environment you are in'
+        'You cant set both REACT_APP_S3_REGION and REACT_APP_S3_LOCAL_URL. Pick one depending on what environment you are in'
     )
 }
 
 let s3Client: S3ClientT
+const S3_BUCKETS_CONFIG: S3BucketConfigType = {
+          HEALTH_PLAN: s3DocumentsBucket,
+          QUESTION_AND_ANSWER: s3QABucket,
+      }
 if (s3Region) {
-    s3Client = newAmplifyS3Client(s3DocumentsBucket)
+    s3Client = newAmplifyS3Client(S3_BUCKETS_CONFIG)
 } else if (s3LocalURL) {
-    s3Client = newLocalS3Client(s3LocalURL, s3DocumentsBucket)
+    s3Client = newLocalS3Client(s3LocalURL, S3_BUCKETS_CONFIG)
 } else {
     throw new Error(
         'You must set either REACT_APP_S3_REGION or REACT_APP_S3_LOCAL_URL depending on what environment you are in'

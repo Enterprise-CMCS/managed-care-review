@@ -2,11 +2,18 @@ import * as React from 'react'
 import { isS3Error } from '../s3'
 import { S3FileData } from '../components'
 import type { S3ClientT } from '../s3'
+import { BucketShortName } from '../s3/s3Amplify'
 
 type S3ContextT = {
-    handleUploadFile: (file: File) => Promise<S3FileData>
-    handleScanFile: (key: string) => Promise<void | Error>
-    handleDeleteFile: (key: string) => Promise<void>
+    handleUploadFile: (
+        file: File,
+        bucket: BucketShortName
+    ) => Promise<S3FileData>
+    handleScanFile: (
+        key: string,
+        bucket: BucketShortName
+    ) => Promise<void | Error>
+    handleDeleteFile: (key: string, bucket: BucketShortName) => Promise<void>
 } & S3ClientT
 
 const S3Context = React.createContext<S3ClientT| undefined>(undefined)
@@ -30,20 +37,26 @@ const useS3 = (): S3ContextT => {
     const { deleteFile, uploadFile, scanFile, getS3URL } = context
 
 
-    const handleUploadFile = async (file: File): Promise<S3FileData> => {
-        const s3Key = await uploadFile(file)
+    const handleUploadFile = async (
+        file: File,
+        bucket: BucketShortName
+    ): Promise<S3FileData> => {
+        const s3Key = await uploadFile(file, bucket)
 
         if (isS3Error(s3Key)) {
             throw new Error(`Error in S3: ${file.name}`)
         }
 
-        const s3URL = await getS3URL(s3Key, file.name)
+        const s3URL = await getS3URL(s3Key, file.name, bucket)
         return { key: s3Key, s3URL: s3URL }
     }
 
-    const handleScanFile = async (key: string): Promise<void | Error> => {
+    const handleScanFile = async (
+        key: string,
+        bucket: BucketShortName
+    ): Promise<void | Error> => {
         try {
-            await scanFile(key)
+            await scanFile(key, bucket)
         } catch (e) {
             if (isS3Error(e)) {
                 throw new Error(`Error in S3: ${key}`)
@@ -53,13 +66,13 @@ const useS3 = (): S3ContextT => {
     }
     // We often don't want to actually delete a resource from s3 and that's what permanentFileKeys is for
     // e.g. document files that also exist on already submitted packages are part of permanent record, even if deleted on a later revision 
-    const handleDeleteFile = async (key: string, permanentFileKeys?: string[]) => {
+    const handleDeleteFile = async (key: string, bucket: BucketShortName, permanentFileKeys?: string[]) => {
         const shouldPreserveFile =
             permanentFileKeys &&
             Boolean(permanentFileKeys.some((testFileKey) => testFileKey === key))
 
         if (!shouldPreserveFile) {
-            const result = await deleteFile(key)
+            const result = await deleteFile(key, bucket)
             if (isS3Error(result)) {
                 throw new Error(`Error in S3 key: ${key}`)
             }
