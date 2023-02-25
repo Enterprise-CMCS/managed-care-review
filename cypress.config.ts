@@ -11,7 +11,7 @@ export default defineConfig({
         screenshotsFolder: 'tests/cypress/screenshots',
         videosFolder: 'tests/cypress/videos',
         viewportHeight: 1080,
-        viewportWidth: 1920,
+        viewportWidth: 1440,
         setupNodeEvents(on, config) {
             task(on, config)
             const newConfig = config
