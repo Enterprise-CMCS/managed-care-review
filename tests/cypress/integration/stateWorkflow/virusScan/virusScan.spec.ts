@@ -13,9 +13,10 @@ describe.only('documents', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionID}/edit/documents`
             )
-            cy.findByTestId('file-input-input').attachFile(
-                'documents/eicar_com.pdf'
-            )
+            cy.findByTestId('file-input-input').attachFile({
+                filePath: 'documents/eicar_com.pdf',
+                encoding: 'binary',
+            })
             cy.findAllByTestId('upload-finished-indicator', {
                 timeout: 120000,
             })
