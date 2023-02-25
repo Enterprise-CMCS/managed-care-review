@@ -13,7 +13,7 @@ import {
 import {
     fetchCurrentUserMock,
     mockDraft,
-} from '../../../testHelpers/apolloHelpers'
+} from '../../../testHelpers/apolloMocks'
 import { Documents } from './Documents'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 

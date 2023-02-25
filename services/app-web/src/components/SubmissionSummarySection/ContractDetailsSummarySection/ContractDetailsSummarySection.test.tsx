@@ -7,7 +7,7 @@ import {
 import {
     mockContractAndRatesDraft,
     mockStateSubmission,
-} from '../../../testHelpers/apolloHelpers'
+} from '../../../testHelpers/apolloMocks'
 import {
     ModifiedProvisions,
     UnlockedHealthPlanFormDataType,

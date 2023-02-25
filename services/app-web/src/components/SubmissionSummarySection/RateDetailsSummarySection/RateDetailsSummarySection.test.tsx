@@ -3,7 +3,7 @@ import {
     mockContractAndRatesDraft,
     mockStateSubmission,
     mockMNState,
-} from '../../../testHelpers/apolloHelpers'
+} from '../../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import * as usePreviousSubmission from '../../../hooks/usePreviousSubmission'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'

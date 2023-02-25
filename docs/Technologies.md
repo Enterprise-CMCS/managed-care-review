@@ -20,7 +20,7 @@ Protobuf is a tool for serializing key-value data. Designed for API requests, th
 
 ## API handling
 
-### GraphQL 
+### GraphQL
 
 [GraphQL](https://graphql.org/learn/) is a strictly typed protocol built on top of HTTP that exposes your API as a graph of related entities. It uses a schema to define the API and excels in providing easy retrieval of related entities along with any request (see [Queries](https://graphql.org/learn/queries/)).
 
@@ -74,7 +74,7 @@ More about the MC-Review testing approach can be found in [here](technical-desig
 
 ### Launch Darkly
 
-[LaunchDarkly](https://launchdarkly.com/implementation/) is third party feature flag management tool that includes a online dashboard for viewing/auditing/updating flags and SDKs that are integrated into our codebase. The use of feature flags with LaunchDarkly allows us to de-couple the act of delivering code from the act of enabling a new feature to subsets of users.
+[LaunchDarkly](https://launchdarkly.com/implementation/) is a third party feature flag management tool that includes a online dashboard for viewing/auditing/updating flags and SDKs that are integrated into our codebase. The use of feature flags with LaunchDarkly allows us to de-couple the act of delivering code from the act of enabling a new feature to subsets of users. We currently use the CMS provisioned Federal instances that can be accessed through the [SSO portal](https://mo-idp.cms.gov).
 
 ### Jest
 
