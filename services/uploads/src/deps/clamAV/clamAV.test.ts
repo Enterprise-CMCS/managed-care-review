@@ -7,21 +7,21 @@ describe('clamAV', () => {
     it('parses clamscan output correctly', () => {
         const tests = [
             {
-                output: `/Users/macrae/ccode/mc-review/managed-care-review/services/uploads/src/clamAV/testData/badList.csv: Win.Test.EICAR_HDB-1 FOUND
-    /Users/macrae/ccode/mc-review/managed-care-review/services/uploads/src/clamAV/testData/dummy.pdf: OK
-    /Users/macrae/ccode/mc-review/managed-care-review/services/uploads/src/clamAV/testData/goodList.csv: OK
-    /Users/macrae/ccode/mc-review/managed-care-review/services/uploads/src/clamAV/testData/badDummy.pdf: Win.Test.EICAR_HDB-1 FOUND`,
+                output: `/Users/alice/code/managed-care-review/services/uploads/src/clamAV/testData/badList.csv: Win.Test.EICAR_HDB-1 FOUND
+    /Users/alice/code/managed-care-review/services/uploads/src/clamAV/testData/dummy.pdf: OK
+    /Users/alice/code/managed-care-review/services/uploads/src/clamAV/testData/goodList.csv: OK
+    /Users/alice/code/managed-care-review/services/uploads/src/clamAV/testData/badDummy.pdf: Win.Test.EICAR_HDB-1 FOUND`,
                 expected: ['badList.csv', 'badDummy.pdf'],
             },
             {
-                output: `/Users/macrae/ccode/mc-review/managed-care-review/services/uploads/src/clamAV/testData/dummy.pdf: OK
-    /Users/macrae/ccode/mc-review/managed-care-review/services/uploads/src/clamAV/testData/goodList.csv: OK`,
+                output: `/Users/alice/code/managed-care-review/services/uploads/src/clamAV/testData/dummy.pdf: OK
+    /Users/alice/code/managed-care-review/services/uploads/src/clamAV/testData/goodList.csv: OK`,
                 expected: [],
             },
             {
-                output: `/Users/macrae/ccode/mc-review/managed-care-review/services/uploads/src/clamAV/testData/badList.csv: Win.Test.EICAR_HDB-1 FOUND
-    /Users/macrae/ccode/mc-review/managed-care-review/services/uploads/src/clamAV/testData/dummy.pdf: OK
-    /Users/macrae/ccode/mc-review/managed-care-review/services/uploads/src/clamAV/testData/goodList.csv: OK`,
+                output: `/Users/alice/code/managed-care-review/services/uploads/src/clamAV/testData/badList.csv: Win.Test.EICAR_HDB-1 FOUND
+    /Users/alice/code/managed-care-review/services/uploads/src/clamAV/testData/dummy.pdf: OK
+    /Users/alice/code/managed-care-review/services/uploads/src/clamAV/testData/goodList.csv: OK`,
                 expected: ['badList.csv'],
             },
         ]

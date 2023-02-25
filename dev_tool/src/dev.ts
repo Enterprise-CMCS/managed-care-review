@@ -7,7 +7,7 @@ import {
     runAPILocally,
     runPostgresLocally,
     runOtelLocally,
-    runS3Locally,
+    runUploadsLocally,
     runStorybookLocally,
     runWebAgainstAWS,
     runWebAgainstDocker,
@@ -56,7 +56,7 @@ type runLocalFlags = {
     runWeb: boolean
     runPostgres: boolean
     runOtel: boolean
-    runS3: boolean
+    runUploads: boolean
     runStoryBook: boolean
 }
 async function runAllLocally({
@@ -64,14 +64,14 @@ async function runAllLocally({
     runWeb,
     runPostgres,
     runOtel,
-    runS3,
+    runUploads,
     runStoryBook,
 }: runLocalFlags) {
     const runner = new LabeledProcessRunner()
 
     runPostgres && runPostgresLocally(runner)
     runOtel && runOtelLocally(runner)
-    runS3 && runS3Locally(runner)
+    runUploads && runUploadsLocally(runner)
     runAPI && runAPILocally(runner)
     runWeb && runWebLocally(runner)
     runStoryBook && runStorybookLocally(runner)
@@ -159,7 +159,7 @@ function main() {
             (yargs) => {
                 return yargs
                     .command(
-                        ['all', '*'], // adding '*' here makes this subcommand the default command
+                        ['$0'], // adding '*' here makes this subcommand the default command
                         'runs all local services. You can exclude specific services with --no-* like --no-storybook',
                         (yargs) => {
                             return yargs
@@ -175,9 +175,10 @@ function main() {
                                     type: 'boolean',
                                     describe: 'run api locally',
                                 })
-                                .option('s3', {
+                                .option('uploads', {
+                                    alias: 's3',
                                     type: 'boolean',
-                                    describe: 'run s3 locally',
+                                    describe: 'run uploads (s3) locally',
                                 })
                                 .option('postgres', {
                                     type: 'boolean',
@@ -195,7 +196,7 @@ function main() {
                                     ],
                                     [
                                         '$0 local --api --postgres',
-                                        'run app-api and the databse',
+                                        'run app-api and the database',
                                     ],
                                 ])
                         },
@@ -205,7 +206,7 @@ function main() {
                                 runWeb: args.web,
                                 runPostgres: args.postgres,
                                 runOtel: args.otel,
-                                runS3: args.s3,
+                                runUploads: args.uploads,
                                 runStoryBook: args.storybook,
                             }
 
@@ -279,11 +280,15 @@ function main() {
                             runStorybookLocally(runner)
                         }
                     )
-                    .command('s3', 'run s3 locally', () => {
-                        const runner = new LabeledProcessRunner()
+                    .command(
+                        ['uploads', 's3'],
+                        'run uploads service locally',
+                        () => {
+                            const runner = new LabeledProcessRunner()
 
-                        runS3Locally(runner)
-                    })
+                            runUploadsLocally(runner)
+                        }
+                    )
                     .command('postgres', 'run postgres locally.', () => {
                         const runner = new LabeledProcessRunner()
 

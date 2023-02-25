@@ -1,5 +1,5 @@
 import { spawn } from 'child_process'
-import { requireBinary } from '../deps.js'
+import { requireBinary, checkURLIsUp } from '../deps.js'
 
 function checkUploadsDeps() {
     const helpString =
@@ -10,8 +10,22 @@ function checkUploadsDeps() {
     requireBinary(['command', '-v', 'freshclam'], helpString)
 }
 
+async function checkUploadsRunning() {
+    // check to see if s3 is running locally on the default serverless-s3-local port
+    // that is required for these tests to work.
+    const isUp = await checkURLIsUp('http://localhost:4569')
+    if (!isUp) {
+        console.info(
+            'in order to run the uploads tests, you must also be running the uploads service. `./dev local uploads` will do the trick'
+        )
+        process.exit(2)
+    }
+}
+
 export async function runUploadsTestWatch(jestArgs: string[]) {
     checkUploadsDeps()
+
+    await checkUploadsRunning()
 
     // because we are inheriting stdio for this process,
     // we need to not run spawnSync or else all the output

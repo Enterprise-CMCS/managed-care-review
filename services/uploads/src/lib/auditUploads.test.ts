@@ -9,7 +9,6 @@ import { NewLocalInfectedFilesLister } from '../lambdas/avAuditFiles'
 
 describe('auditUploads', () => {
     it('will audit a bucket', async () => {
-        console.info('OUR FILESNEM', __dirname)
         const thisDir = __dirname
 
         const tmpDefsDir = await mkdtemp('/tmp/clamscan-')
