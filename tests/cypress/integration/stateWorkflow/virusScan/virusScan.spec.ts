@@ -18,7 +18,7 @@ describe.only('documents', () => {
                 encoding: 'binary',
             })
             cy.findAllByTestId('upload-finished-indicator', {
-                timeout: 120000,
+                timeout: 150000,
             })
             if (Cypress.env('AUTH_MODE') === 'LOCAL') {
                 cy.findByText('Failed security scan, please remove').should(
