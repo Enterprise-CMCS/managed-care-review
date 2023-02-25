@@ -1,4 +1,4 @@
-describe.skip('Generate reports', () => {
+describe('Generate reports', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
     })

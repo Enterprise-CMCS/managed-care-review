@@ -1,4 +1,4 @@
-describe.skip('Q&A', () => {
+describe('Q&A', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
     })
@@ -6,7 +6,7 @@ describe.skip('Q&A', () => {
     it('cms-questions flag toggles navigation to and from Q&A page', () => {
         cy.interceptFeatureFlags({
             'rate-cert-assurance': true,
-            'cms-questions': true,
+            'cms-questions': true
         })
         cy.logInAsStateUser()
 
@@ -60,10 +60,7 @@ describe.skip('Q&A', () => {
 
             // Find QA Link and click
             cy.findByRole('link', { name: /Q&A/ }).click()
-            cy.url({ timeout: 10_000 }).should(
-                'contain',
-                `${submissionId}/question-and-answers`
-            )
+            cy.url({ timeout: 10_000 }).should('contain', `${submissionId}/question-and-answers`)
 
             // Make sure Heading is correct with 'Upload questions' in addition to submission name
             cy.findByRole('heading', {
@@ -85,7 +82,7 @@ describe.skip('Q&A', () => {
             // Turn off cms questions flag
             cy.interceptFeatureFlags({
                 'rate-cert-assurance': true,
-                'cms-questions': false,
+                'cms-questions': false
             })
 
             // it cannot navigate to q&a page when flag is off
@@ -100,10 +97,7 @@ describe.skip('Q&A', () => {
             cy.visit(`/summary/${submissionId}/question-and-answers`)
 
             // Look for 404 text on page
-            cy.findByRole('heading', {
-                name: '404 / Page not found',
-                level: 1,
-            }).should('exist')
+            cy.findByRole('heading', { name: '404 / Page not found', level: 1}).should('exist')
         })
     })
 })

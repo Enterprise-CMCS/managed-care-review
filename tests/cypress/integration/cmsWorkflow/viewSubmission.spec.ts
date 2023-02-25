@@ -1,4 +1,4 @@
-describe.skip('CMS user can view submission', () => {
+describe('CMS user can view submission', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
     })
@@ -12,14 +12,14 @@ describe.skip('CMS user can view submission', () => {
 
         cy.findByRole('heading', {
             level: 2,
-            name: /Rate details/,
+            name: /Rate details/
         }).should('exist')
         cy.fillOutNewRateCertification()
         cy.navigateFormByButtonClick('CONTINUE')
 
         cy.findByRole('heading', {
             level: 2,
-            name: /Contacts/,
+            name: /Contacts/
         }).should('exist')
         cy.fillOutStateContact()
         cy.fillOutAdditionalActuaryContact()
@@ -27,7 +27,7 @@ describe.skip('CMS user can view submission', () => {
 
         cy.findByRole('heading', {
             level: 2,
-            name: /Supporting documents/,
+            name: /Supporting documents/
         }).should('exist')
         cy.fillOutSupportingDocuments()
         cy.navigateFormByButtonClick('CONTINUE')
@@ -60,9 +60,7 @@ describe.skip('CMS user can view submission', () => {
             })
                 .should('exist')
                 .click()
-            cy.findByText(
-                'Medicaid and CHIP Managed Care Reporting and Review System'
-            )
+             cy.findByText('Medicaid and CHIP Managed Care Reporting and Review System')
 
             //  sign in CMS user
             cy.logInAsCMSUser()
@@ -73,8 +71,7 @@ describe.skip('CMS user can view submission', () => {
 
             // only one matching entry
             cy.get('table')
-                .findAllByText(submissionName)
-                .should('have.length', 1)
+                .findAllByText(submissionName).should('have.length', 1)
 
             // has proper row data
             cy.get('table')
@@ -90,6 +87,7 @@ describe.skip('CMS user can view submission', () => {
                 .parent()
                 .siblings('[data-testid="submission-status"]')
                 .should('have.text', 'Submitted')
+
 
             cy.get('table')
                 .contains('a', submissionName)

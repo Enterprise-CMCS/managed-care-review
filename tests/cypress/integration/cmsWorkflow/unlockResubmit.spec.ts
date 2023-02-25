@@ -1,6 +1,6 @@
 import * as path from 'path'
 
-describe.skip('CMS user', () => {
+describe('CMS user', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
     })

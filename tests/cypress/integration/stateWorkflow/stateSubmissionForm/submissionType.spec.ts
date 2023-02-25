@@ -1,4 +1,4 @@
-describe.skip('submission type', () => {
+describe('submission type', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
     })

@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Form as UswdsForm, Link } from '@trussworks/react-uswds'
 import { useNavigate } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
+
 import styles from '../StateSubmissionForm.module.scss'
 import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
 import { useS3 } from '../../../contexts/S3Context'
@@ -16,16 +17,6 @@ import classNames from 'classnames'
 import { ErrorSummary } from '../../../components/Form'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
-
-async function calculateSHA256(file: File): Promise<string> {
-    const buffer = await file.arrayBuffer()
-    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer)
-    const hashArray = Array.from(new Uint8Array(hashBuffer))
-    const hashHex = hashArray
-        .map((b) => b.toString(16).padStart(2, '0'))
-        .join('')
-    return hashHex
-}
 
 export const Documents = ({
     draftSubmission,
@@ -156,9 +147,6 @@ export const Documents = ({
     }
 
     const handleUploadFile = async (file: File): Promise<S3FileData> => {
-        const sha = await calculateSHA256(file)
-        console.info('sha prior to upload: ', sha)
-
         const s3Key = await uploadFile(file)
 
         if (isS3Error(s3Key)) {

@@ -1,4 +1,4 @@
-describe.skip('promote', () => {
+describe('promote', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
     })
