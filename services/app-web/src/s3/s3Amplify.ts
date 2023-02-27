@@ -55,7 +55,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
 
             try {
                 const stored = await Storage.put(`${uuid}.${ext}`, file, {
-                    bucket,
+                    bucket: bucketConfig[bucket],
                     contentType: file.type,
                     contentDisposition: `attachment; filename=${fileName}`,
                 })
