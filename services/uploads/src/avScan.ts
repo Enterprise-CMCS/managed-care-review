@@ -7,15 +7,15 @@ import { NewS3UploadsClient, S3UploadsClient } from './s3'
 
 import { NewClamAV, ClamAV } from './clamAV'
 
-import { NodeSDK } from '@opentelemetry/sdk-node'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { Resource } from '@opentelemetry/resources'
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node'
 import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
 import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
+import { CollectorTraceExporter } from '@opentelemetry/exporter-collector'
+import { registerInstrumentations } from '@opentelemetry/instrumentation'
 
 const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || '314572800')
 
@@ -30,7 +30,7 @@ export async function avScanLambda(event: S3Event, _context: Context) {
         )
     }
 
-    const exporter = new OTLPTraceExporter({
+    const exporter = new CollectorTraceExporter({
         url: process.env.REACT_APP_OTEL_COLLECTOR_URL,
         headers: {},
     })
@@ -44,19 +44,9 @@ export async function avScanLambda(event: S3Event, _context: Context) {
     provider.register({
         propagator: new AWSXRayPropagator(),
     })
-    const sdk = new NodeSDK({
-        traceExporter: exporter,
+
+    registerInstrumentations({
         instrumentations: [getNodeAutoInstrumentations()],
-    })
-
-    sdk.start()
-
-    // gracefully shut down the OTEL SDK on process exit
-    process.on('SIGTERM', () => {
-        sdk.shutdown()
-            .then(() => console.log('Tracing terminated'))
-            .catch((error) => console.log('Error terminating tracing', error))
-            .finally(() => process.exit(0))
     })
 
     // Check on the values for our required config
