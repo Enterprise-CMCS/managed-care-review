@@ -1,15 +1,63 @@
-import { Context, S3Event } from 'aws-lambda';
+import { Context, S3Event } from 'aws-lambda'
 import path from 'path'
 import crypto from 'crypto'
+import process from 'process'
 
 import { NewS3UploadsClient, S3UploadsClient } from './s3'
 
 import { NewClamAV, ClamAV } from './clamAV'
 
+import { NodeSDK } from '@opentelemetry/sdk-node'
+import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
+import { Resource } from '@opentelemetry/resources'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node'
+import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
+import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
+
 const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || '314572800')
 
 export async function avScanLambda(event: S3Event, _context: Context) {
     console.info('-----Start Antivirus Lambda function-----')
+
+    console.info('-----Setting OTEL instrumentation-----')
+    const otelCollector = process.env.REACT_APP_OTEL_COLLECTOR_URL
+    if (!otelCollector || otelCollector === '') {
+        throw new Error(
+            'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
+        )
+    }
+
+    const exporter = new OTLPTraceExporter({
+        url: process.env.REACT_APP_OTEL_COLLECTOR_URL,
+        headers: {},
+    })
+    const provider = new NodeTracerProvider({
+        idGenerator: new AWSXRayIdGenerator(),
+        resource: new Resource({
+            [SemanticResourceAttributes.SERVICE_NAME]: 'uploads-avscan',
+        }),
+    })
+    provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
+    provider.register({
+        propagator: new AWSXRayPropagator(),
+    })
+    const sdk = new NodeSDK({
+        traceExporter: exporter,
+        instrumentations: [getNodeAutoInstrumentations()],
+    })
+
+    sdk.start()
+
+    // gracefully shut down the OTEL SDK on process exit
+    process.on('SIGTERM', () => {
+        sdk.shutdown()
+            .then(() => console.log('Tracing terminated'))
+            .catch((error) => console.log('Error terminating tracing', error))
+            .finally(() => process.exit(0))
+    })
 
     // Check on the values for our required config
     const clamAVBucketName = process.env.CLAMAV_BUCKET_NAME
@@ -19,17 +67,20 @@ export async function avScanLambda(event: S3Event, _context: Context) {
 
     const clamAVDefintionsPath = process.env.PATH_TO_AV_DEFINITIONS
     if (!clamAVDefintionsPath || clamAVDefintionsPath === '') {
-        throw new Error('Configuration Error: PATH_TO_AV_DEFINITIONS must be set')
-    } 
+        throw new Error(
+            'Configuration Error: PATH_TO_AV_DEFINITIONS must be set'
+        )
+    }
 
     const s3Client = NewS3UploadsClient()
 
-
-    const clamAV = NewClamAV({
-        bucketName: clamAVBucketName,
-        definitionsPath: clamAVDefintionsPath
-    }, s3Client)
-
+    const clamAV = NewClamAV(
+        {
+            bucketName: clamAVBucketName,
+            definitionsPath: clamAVDefintionsPath,
+        },
+        s3Client
+    )
 
     const record = event.Records[0]
     if (!record) {
@@ -42,7 +93,6 @@ export async function avScanLambda(event: S3Event, _context: Context) {
     console.info('Scanning ', s3ObjectKey, s3ObjectBucket)
     const err = await scanFile(s3Client, clamAV, s3ObjectKey, s3ObjectBucket)
 
-
     if (err) {
         throw err
     }
@@ -50,12 +100,10 @@ export async function avScanLambda(event: S3Event, _context: Context) {
     return 'FILE SCANNED'
 }
 
-
 // Constants for tagging file after a virus scan.
 const VIRUS_SCAN_STATUS_KEY = 'virusScanStatus'
 const VIRUS_SCAN_TIMESTAMP_KEY = 'virusScanTimestamp'
 type ScanStatus = 'CLEAN' | 'INFECTED' | 'ERROR' | 'SKIPPED'
-
 
 /**
  * Generates the set of tags that will be used to tag the files of S3.
@@ -72,10 +120,15 @@ function generateTagSet(virusScanStatus: ScanStatus) {
                 Value: new Date().getTime().toString(),
             },
         ],
-    };
+    }
 }
 
-async function scanFile(s3Client: S3UploadsClient, clamAV: ClamAV, key: string, bucket: string): Promise<undefined | Error> {
+async function scanFile(
+    s3Client: S3UploadsClient,
+    clamAV: ClamAV,
+    key: string,
+    bucket: string
+): Promise<undefined | Error> {
     //You need to verify that you are not getting too large a file
     //currently lambdas max out at 500MB storage.
     const fileSize = await s3Client.sizeOf(key, bucket)
@@ -97,8 +150,8 @@ async function scanFile(s3Client: S3UploadsClient, clamAV: ClamAV, key: string, 
         }
 
         console.info('Downloading file to be scanned')
-        const scanFileName = `${crypto.randomUUID()}.tmp`;
-        const scanFilePath = path.join('/tmp/download', scanFileName )
+        const scanFileName = `${crypto.randomUUID()}.tmp`
+        const scanFilePath = path.join('/tmp/download', scanFileName)
 
         const err = await s3Client.downloadFileFromS3(key, bucket, scanFilePath)
         if (err instanceof Error) {
@@ -106,7 +159,7 @@ async function scanFile(s3Client: S3UploadsClient, clamAV: ClamAV, key: string, 
         }
 
         console.info('Scanning File')
-        const virusScanStatus = clamAV.scanLocalFile(scanFilePath);
+        const virusScanStatus = clamAV.scanLocalFile(scanFilePath)
         console.info('VIRUS SCANNED', virusScanStatus)
 
         if (virusScanStatus instanceof Error) {
@@ -114,7 +167,6 @@ async function scanFile(s3Client: S3UploadsClient, clamAV: ClamAV, key: string, 
         } else {
             tagResult = virusScanStatus
         }
-
     }
 
     const tags = generateTagSet(tagResult)
@@ -125,8 +177,4 @@ async function scanFile(s3Client: S3UploadsClient, clamAV: ClamAV, key: string, 
     }
 
     console.info('Tagged object ', tagResult)
-
 }
-
-
-
