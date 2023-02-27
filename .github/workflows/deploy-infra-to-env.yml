@@ -49,8 +49,6 @@ jobs:
 
         - name: deploy github-oidc
           id: deploy-github-oidc
-          env:
-            GITHUB_TOKEN: ${{ secrets.personal_access_token }}
           run: |
             pushd services/github-oidc && npx serverless deploy --stage ${{ inputs.stage_name }}
 
