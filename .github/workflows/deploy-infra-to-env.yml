@@ -17,6 +17,8 @@ on:
         required: true
       aws_account_id:
         required: true
+      nr_license_key:
+        required: true
 
 permissions:
   id-token: write
@@ -24,35 +26,35 @@ permissions:
 jobs:
   # deploy the OIDC service first, as subsequent deploys may depend on updated OIDC permissions
   github-oidc:
-      if: ${{ contains(inputs.changed_services, 'github-oidc') }}
-      environment: ${{ inputs.environment }}
-      runs-on: ubuntu-20.04
-      steps:
-        - name: Check out repository
-          uses: actions/checkout@v3
+    if: ${{ contains(inputs.changed_services, 'github-oidc') }}
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
 
-        - name: Setup env
-          uses: ./.github/actions/setup_env
+      - name: Setup env
+        uses: ./.github/actions/setup_env
 
-        - name: build scripts
-          shell: bash
-          run: |
-            lerna run build:ci-scripts
+      - name: build scripts
+        shell: bash
+        run: |
+          lerna run build:ci-scripts
 
-        - name: Get AWS credentials
-          uses: ./.github/actions/get_aws_credentials
-          with:
-            region: ${{ secrets.aws_default_region }}
-            account-id: ${{ secrets.aws_account_id }}
-            # use the manually bootstrapped OIDC role to solve the chicken-and-egg problem of deploying the OIDC service via OIDC
-            stage-name: main
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ secrets.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          # use the manually bootstrapped OIDC role to solve the chicken-and-egg problem of deploying the OIDC service via OIDC
+          stage-name: main
 
-        - name: deploy github-oidc
-          id: deploy-github-oidc
-          env:
-            GITHUB_TOKEN: ${{ secrets.personal_access_token }}
-          run: |
-            pushd services/github-oidc && npx serverless deploy --stage ${{ inputs.stage_name }}
+      - name: deploy github-oidc
+        id: deploy-github-oidc
+        env:
+          GITHUB_TOKEN: ${{ secrets.personal_access_token }}
+        run: |
+          pushd services/github-oidc && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   postgres:
     # for this and subsequent jobs, wait for the OIDC service to deploy (unless it was skipped)
@@ -152,6 +154,8 @@ jobs:
 
       - name: deploy uploads
         id: deploy-uploads
+        env:
+          NR_LICENSE_KEY: ${{ secrets.nr_license_key }}
         run: |
           pushd services/uploads && npx serverless deploy --stage ${{ inputs.stage_name }}
 
