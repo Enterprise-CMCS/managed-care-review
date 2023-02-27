@@ -27,8 +27,8 @@ import { featureFlags } from '../../common-code/featureFlags'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { recordJSException } from '../../otelHelpers'
 import { SubmissionSideNav } from '../SubmissionSideNav'
-import { UploadQuestions } from '../QuestionsAnswers/UploadQuestions/UploadQuestions'
-import { QuestionsAnswers } from '../QuestionsAnswers'
+import { UploadQuestions } from '../QuestionsResponses/UploadQuestions/UploadQuestions'
+import { QuestionsResponses } from '../QuestionsResponses'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -48,11 +48,11 @@ function componentForAuthMode(
 const StateUserRoutes = ({
     authMode,
     setAlert,
-    showQuestionsAnswers,
+    showQuestionsResponses,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
-    showQuestionsAnswers: boolean
+    showQuestionsResponses: boolean
 }): React.ReactElement => {
     return (
         <AuthenticatedRouteWrapper setAlert={setAlert} authMode={authMode}>
@@ -73,12 +73,12 @@ const StateUserRoutes = ({
                     element={<NewStateSubmissionForm />}
                 />
                 <Route element={<SubmissionSideNav />}>
-                    {showQuestionsAnswers && (
+                    {showQuestionsResponses && (
                         <Route
                             path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_RESPONSES
                             }
-                            element={<QuestionsAnswers />}
+                            element={<QuestionsResponses />}
                         />
                     )}
                     <Route
@@ -86,7 +86,7 @@ const StateUserRoutes = ({
                         element={<SubmissionSummary />}
                     />
                 </Route>
-                {showQuestionsAnswers && (
+                {showQuestionsResponses && (
                     <Route
                         path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
                         element={<UploadQuestions />}
@@ -109,11 +109,11 @@ const StateUserRoutes = ({
 const CMSUserRoutes = ({
     authMode,
     setAlert,
-    showQuestionsAnswers,
+    showQuestionsResponses,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
-    showQuestionsAnswers: boolean
+    showQuestionsResponses: boolean
 }): React.ReactElement => {
     return (
         <AuthenticatedRouteWrapper authMode={authMode} setAlert={setAlert}>
@@ -124,12 +124,12 @@ const CMSUserRoutes = ({
                     element={<CMSDashboard />}
                 />
                 <Route element={<SubmissionSideNav />}>
-                    {showQuestionsAnswers && (
+                    {showQuestionsResponses && (
                         <Route
                             path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_RESPONSES
                             }
-                            element={<QuestionsAnswers />}
+                            element={<QuestionsResponses />}
                         />
                     )}
                     <Route
@@ -137,7 +137,7 @@ const CMSUserRoutes = ({
                         element={<SubmissionSummary />}
                     />
                 </Route>
-                {showQuestionsAnswers && (
+                {showQuestionsResponses && (
                     <Route
                         path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
                         element={<UploadQuestions />}
@@ -199,7 +199,7 @@ export const AppRoutes = ({
         featureFlags.SESSION_EXPIRING_MODAL.defaultValue
     )
 
-    const showQuestionsAnswers = ldClient?.variation(
+    const showQuestionsResponses = ldClient?.variation(
         featureFlags.CMS_QUESTIONS.flag,
         featureFlags.CMS_QUESTIONS.defaultValue
     )
@@ -293,7 +293,7 @@ export const AppRoutes = ({
             <StateUserRoutes
                 authMode={authMode}
                 setAlert={setAlert}
-                showQuestionsAnswers={showQuestionsAnswers}
+                showQuestionsResponses={showQuestionsResponses}
             />
         )
     } else {
@@ -301,7 +301,7 @@ export const AppRoutes = ({
             <CMSUserRoutes
                 authMode={authMode}
                 setAlert={setAlert}
-                showQuestionsAnswers={showQuestionsAnswers}
+                showQuestionsResponses={showQuestionsResponses}
             />
         )
     }

@@ -35,7 +35,7 @@ import {
 import {
     findAllQuestionsByHealthPlanPackage,
     insertQuestion,
-} from './questionAnswers'
+} from './questionResponses'
 
 type Store = {
     findPrograms: (

@@ -12,7 +12,11 @@ export async function findAllQuestionsByHealthPlanPackage(
                 pkgID: pkgID,
             },
             include: {
-                documents: true,
+                documents: {
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                },
                 addedBy: true,
             },
             orderBy: {

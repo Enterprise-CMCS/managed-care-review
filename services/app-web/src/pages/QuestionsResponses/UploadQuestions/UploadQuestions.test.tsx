@@ -1,6 +1,6 @@
 import { screen, waitFor } from '@testing-library/react'
 import { Route, Routes } from 'react-router-dom'
-import { UploadQuestions } from '../../QuestionsAnswers'
+import { UploadQuestions } from './.'
 import { renderWithProviders } from '../../../testHelpers'
 import { RoutesRecord } from '../../../constants/routes'
 import React from 'react'

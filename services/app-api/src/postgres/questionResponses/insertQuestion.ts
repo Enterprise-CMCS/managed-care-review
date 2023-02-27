@@ -34,7 +34,11 @@ export async function insertQuestion(
                 },
             },
             include: {
-                documents: true,
+                documents: {
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                },
             },
         })
 
