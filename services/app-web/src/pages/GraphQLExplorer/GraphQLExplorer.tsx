@@ -135,6 +135,7 @@ export const GraphQLExplorer = () => {
                     },
                     displayOptions: {
                         docsPanelState: 'open',
+                        theme: 'light',
                     },
                 }}
             />
