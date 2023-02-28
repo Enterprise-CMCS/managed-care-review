@@ -9,7 +9,7 @@ import {
     fetchCurrentUserMock,
     mockValidCMSUser,
     fetchStateHealthPlanPackageWithQuestionsMockSuccess,
-} from '../../testHelpers/apolloHelpers'
+} from '../../testHelpers/apolloMocks'
 import { CmsUser } from '../../gen/gqlClient'
 
 describe('QuestionsResponses', () => {

@@ -38,4 +38,12 @@ export {
     mockValidUser,
 } from './userGQLMock'
 
+export {
+    fetchStateHealthPlanPackageWithQuestionsMockSuccess,
+    fetchStateHealthPlanPackageWithQuestionsMockNotFound,
+    createQuestionNetworkFailure,
+} from './questionAnswerGQLMock'
+
+export { mockQuestionsPayload } from './questionAnswerDataMocks'
+
 export { mockMNState } from './stateMock'

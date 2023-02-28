@@ -1,13 +1,15 @@
 import { renderWithProviders } from '../../../testHelpers'
 import { Route, Routes } from 'react-router-dom'
-import { mockValidCMSUser } from '../../../testHelpers/apolloHelpers'
+import {
+    mockValidCMSUser,
+    mockValidUser,
+} from '../../../testHelpers/apolloMocks'
 import { screen, waitFor, within } from '@testing-library/react'
 import React from 'react'
 import { QATable } from './QATable'
-import { mockUser } from 'app-api/src/testHelpers/emailerHelpers'
 import { CmsUser } from '../../../gen/gqlClient'
 
-const stateUser = mockUser()
+const stateUser = mockValidUser()
 const cmsUser = mockValidCMSUser() as CmsUser
 
 const testQuestionData = {
