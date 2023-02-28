@@ -16,7 +16,7 @@ type S3ContextT = {
     handleDeleteFile: (key: string, bucket: BucketShortName) => Promise<void>
 } & S3ClientT
 
-const S3Context = React.createContext<S3ClientT| undefined>(undefined)
+const S3Context = React.createContext<S3ClientT | undefined>(undefined)
 
 export type S3ProviderProps = {
     client: S3ClientT
@@ -33,9 +33,7 @@ const useS3 = (): S3ContextT => {
         throw new Error('useS3 can only be used within an S3Provider')
     }
 
-
     const { deleteFile, uploadFile, scanFile, getS3URL } = context
-
 
     const handleUploadFile = async (
         file: File,
@@ -65,11 +63,17 @@ const useS3 = (): S3ContextT => {
         }
     }
     // We often don't want to actually delete a resource from s3 and that's what permanentFileKeys is for
-    // e.g. document files that also exist on already submitted packages are part of permanent record, even if deleted on a later revision 
-    const handleDeleteFile = async (key: string, bucket: BucketShortName, permanentFileKeys?: string[]) => {
+    // e.g. document files that also exist on already submitted packages are part of permanent record, even if deleted on a later revision
+    const handleDeleteFile = async (
+        key: string,
+        bucket: BucketShortName,
+        permanentFileKeys?: string[]
+    ) => {
         const shouldPreserveFile =
             permanentFileKeys &&
-            Boolean(permanentFileKeys.some((testFileKey) => testFileKey === key))
+            Boolean(
+                permanentFileKeys.some((testFileKey) => testFileKey === key)
+            )
 
         if (!shouldPreserveFile) {
             const result = await deleteFile(key, bucket)
@@ -77,10 +81,9 @@ const useS3 = (): S3ContextT => {
                 throw new Error(`Error in S3 key: ${key}`)
             }
         }
-    return
     }
 
-    return {...context, handleUploadFile, handleScanFile, handleDeleteFile}
+    return { ...context, handleUploadFile, handleScanFile, handleDeleteFile }
 }
 
 export { S3Provider, useS3 }
