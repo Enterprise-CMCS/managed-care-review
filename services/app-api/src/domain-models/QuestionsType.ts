@@ -40,7 +40,7 @@ type CreateQuestionInput = {
     documents: Document[]
 }
 
-export {
+export type {
     IndexQuestionsPayload,
     CreateQuestionPayload,
     CreateQuestionInput,
