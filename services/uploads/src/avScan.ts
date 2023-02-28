@@ -19,26 +19,15 @@ import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
 
 const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || '314572800')
 
-export async function avScanLambda(event: S3Event, _context: Context) {
-    console.info('-----Start Antivirus Lambda function-----')
-
+export function initTracer(serviceName: string, otelCollectorURL: string) {
     console.info('-----Setting OTEL instrumentation-----')
-    const otelCollector = process.env.REACT_APP_OTEL_COLLECTOR_URL
-    if (!otelCollector || otelCollector === '') {
-        throw new Error(
-            'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
-        )
-    }
 
-    const stageName = process.env.stage
-    if (!stageName || stageName === '') {
-        throw new Error('Configuration Error: stage env var must be set')
-    }
-
-    const serviceName = `uploads-avScanLambda-${stageName}`
+    registerInstrumentations({
+        instrumentations: [getNodeAutoInstrumentations()],
+    })
 
     const exporter = new CollectorTraceExporter({
-        url: process.env.REACT_APP_OTEL_COLLECTOR_URL,
+        url: otelCollectorURL,
         headers: {},
     })
     const provider = new NodeTracerProvider({
@@ -54,10 +43,10 @@ export async function avScanLambda(event: S3Event, _context: Context) {
     provider.register({
         propagator: new AWSXRayPropagator(),
     })
+}
 
-    registerInstrumentations({
-        instrumentations: [getNodeAutoInstrumentations()],
-    })
+export async function avScanLambda(event: S3Event, _context: Context) {
+    console.info('-----Start Antivirus Lambda function-----')
 
     // Check on the values for our required config
     const clamAVBucketName = process.env.CLAMAV_BUCKET_NAME
@@ -71,6 +60,22 @@ export async function avScanLambda(event: S3Event, _context: Context) {
             'Configuration Error: PATH_TO_AV_DEFINITIONS must be set'
         )
     }
+
+    const stageName = process.env.stage
+    if (!stageName || stageName === '') {
+        throw new Error('Configuration Error: stage env var must be set')
+    }
+
+    const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
+    if (!otelCollectorURL || otelCollectorURL === '') {
+        throw new Error(
+            'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
+        )
+    }
+
+    // init otel tracer
+    const serviceName = `uploads-avScanLambda-${stageName}`
+    initTracer(serviceName, otelCollectorURL)
 
     const s3Client = NewS3UploadsClient()
 
