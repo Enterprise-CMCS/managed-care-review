@@ -7,15 +7,11 @@ import { NewS3UploadsClient, S3UploadsClient } from './s3'
 
 import { NewClamAV, ClamAV } from './clamAV'
 
-import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
-import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
+import { NodeSDK } from '@opentelemetry/sdk-node'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { Resource } from '@opentelemetry/resources'
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node'
-import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
-import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
 import { CollectorTraceExporter } from '@opentelemetry/exporter-collector'
-import { registerInstrumentations } from '@opentelemetry/instrumentation'
 
 const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || '314572800')
 
@@ -30,23 +26,33 @@ export async function avScanLambda(event: S3Event, _context: Context) {
         )
     }
 
+    const stageName = process.env.stage
+    if (!stageName || stageName === '') {
+        throw new Error('Configuration Error: stage env var must be set')
+    }
+
+    const serviceName = `uploads-avScanLambda-${stageName}`
+
     const exporter = new CollectorTraceExporter({
         url: process.env.REACT_APP_OTEL_COLLECTOR_URL,
         headers: {},
     })
-    const provider = new NodeTracerProvider({
-        idGenerator: new AWSXRayIdGenerator(),
-        resource: new Resource({
-            [SemanticResourceAttributes.SERVICE_NAME]: 'uploads-avscan',
-        }),
-    })
-    provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
-    provider.register({
-        propagator: new AWSXRayPropagator(),
-    })
 
-    registerInstrumentations({
+    const sdk = new NodeSDK({
+        resource: new Resource({
+            [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
+        }),
+        traceExporter: exporter,
         instrumentations: [getNodeAutoInstrumentations()],
+    })
+    sdk.start()
+
+    // gracefully shut down the SDK on process exit
+    process.on('SIGTERM', () => {
+        sdk.shutdown()
+            .then(() => console.log('Tracing terminated'))
+            .catch((error) => console.log('Error terminating tracing', error))
+            .finally(() => process.exit(0))
     })
 
     // Check on the values for our required config
