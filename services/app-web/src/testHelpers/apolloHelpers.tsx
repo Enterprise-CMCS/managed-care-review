@@ -34,6 +34,10 @@ import {
     CreateHealthPlanPackageDocument,
     CreateHealthPlanPackageMutation,
     UpdateInformation,
+    IndexQuestionsPayload,
+    FetchHealthPlanPackageWithQuestionsDocument,
+    CmsUser,
+    FetchHealthPlanPackageWithQuestionsQuery,
 } from '../gen/gqlClient'
 
 /* For use with Apollo MockedProvider in jest tests */
@@ -457,6 +461,60 @@ export function mockMNState(): State {
             },
         ],
         code: 'MN',
+    }
+}
+
+export function mockQuestionsPayload(pkgID: string): IndexQuestionsPayload {
+    return {
+        DMCOQuestions: {
+            totalCount: 2,
+            edges: [
+                {
+                    __typename: 'QuestionEdge' as const,
+                    node: {
+                        __typename: 'Question' as const,
+                        id: 'question-1-id',
+                        pkgID,
+                        createdAt: new Date(),
+                        addedBy: mockValidCMSUser() as CmsUser,
+                        documents: [
+                            {
+                                s3URL: 's3://bucketname/key/question-1-document-1',
+                                name: 'question-1-document-1',
+                            },
+                        ],
+                    },
+                },
+                {
+                    __typename: 'QuestionEdge' as const,
+                    node: {
+                        __typename: 'Question' as const,
+                        id: 'question-2-id',
+                        pkgID,
+                        createdAt: new Date(),
+                        addedBy: mockValidCMSUser() as CmsUser,
+                        documents: [
+                            {
+                                s3URL: 's3://bucketname/key/question-2-document-1',
+                                name: 'question-2-document-1',
+                            },
+                            {
+                                s3URL: 's3://bucketname/key/question-2-document-2',
+                                name: 'question-2-document-2',
+                            },
+                        ],
+                    },
+                },
+            ],
+        },
+        DMCPQuestions: {
+            totalCount: 0,
+            edges: [],
+        },
+        OACTQuestions: {
+            totalCount: 0,
+            edges: [],
+        },
     }
 }
 
@@ -919,6 +977,70 @@ const fetchStateHealthPlanPackageMockSuccess = ({
     }
 }
 
+const fetchStateHealthPlanPackageWithQuestionsMockSuccess = ({
+    stateSubmission = mockSubmittedHealthPlanPackage(),
+    id,
+    questions,
+}: fetchStateHealthPlanPackageMockSuccessProps & {
+    questions?: IndexQuestionsPayload
+}): MockedResponse<Record<string, unknown>> => {
+    const questionPayload = questions || {
+        DMCOQuestions: {
+            totalCount: 0,
+            edges: [],
+        },
+        DMCPQuestions: {
+            totalCount: 0,
+            edges: [],
+        },
+        OACTQuestions: {
+            totalCount: 0,
+            edges: [],
+        },
+    }
+    const pkg = {
+        ...stateSubmission,
+        questions: questionPayload,
+    }
+
+    // override the ID of the returned draft to match the queried id.
+    const mergedStateSubmission = Object.assign({}, pkg, { id })
+
+    return {
+        request: {
+            query: FetchHealthPlanPackageWithQuestionsDocument,
+            variables: { input: { pkgID: id } },
+        },
+        result: {
+            data: {
+                fetchHealthPlanPackage: {
+                    pkg: mergedStateSubmission,
+                },
+            },
+        },
+    }
+}
+
+const fetchStateHealthPlanPackageWithQuestionsMockNotFound = ({
+    id,
+}: fetchStateHealthPlanPackageMockSuccessProps & {
+    questions?: IndexQuestionsPayload
+}): MockedResponse<FetchHealthPlanPackageWithQuestionsQuery> => {
+    return {
+        request: {
+            query: FetchHealthPlanPackageWithQuestionsDocument,
+            variables: { input: { pkgID: id } },
+        },
+        result: {
+            data: {
+                fetchHealthPlanPackage: {
+                    pkg: undefined,
+                },
+            },
+        },
+    }
+}
+
 const mockSubmittedHealthPlanPackageWithRevision = ({
     currentSubmissionData,
     previousSubmissionData,
@@ -1326,4 +1448,6 @@ export {
     createHealthPlanPackageMockSuccess,
     createHealthPlanPackageMockAuthFailure,
     createHealthPlanPackageMockNetworkFailure,
+    fetchStateHealthPlanPackageWithQuestionsMockSuccess,
+    fetchStateHealthPlanPackageWithQuestionsMockNotFound,
 }
