@@ -29,11 +29,7 @@ import {
 } from '../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
-import {
-    GenericApiErrorBanner,
-    ProgramSelect,
-    FieldPreserveScrollPosition,
-} from '../../../components'
+import { GenericApiErrorBanner, ProgramSelect } from '../../../components'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { useStatePrograms } from '../../../hooks/useStatePrograms'
 import {
@@ -373,11 +369,6 @@ export const SubmissionType = ({
                             <FormGroup
                                 error={showFieldErrors(errors.contractType)}
                             >
-                                <FieldPreserveScrollPosition
-                                    fieldName={
-                                        'contractType' as keyof SubmissionTypeFormValues
-                                    }
-                                />
                                 <Fieldset
                                     role="radiogroup"
                                     aria-required
