@@ -7,6 +7,7 @@ import { NewS3UploadsClient, S3UploadsClient } from './s3'
 
 import { NewClamAV, ClamAV } from './clamAV'
 
+import opentelemetry from '@opentelemetry/api'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { Resource } from '@opentelemetry/resources'
@@ -18,32 +19,6 @@ import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
 
 const MAX_FILE_SIZE = parseInt(process.env.MAX_FILE_SIZE || '314572800')
-
-export function initTracer(serviceName: string, otelCollectorURL: string) {
-    console.info('-----Setting OTEL instrumentation-----')
-
-    registerInstrumentations({
-        instrumentations: [getNodeAutoInstrumentations()],
-    })
-
-    const exporter = new CollectorTraceExporter({
-        url: otelCollectorURL,
-        headers: {},
-    })
-    const provider = new NodeTracerProvider({
-        idGenerator: new AWSXRayIdGenerator(),
-        resource: new Resource({
-            [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
-        }),
-    })
-
-    provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
-
-    // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
-    provider.register({
-        propagator: new AWSXRayPropagator(),
-    })
-}
 
 export async function avScanLambda(event: S3Event, _context: Context) {
     console.info('-----Start Antivirus Lambda function-----')
@@ -89,7 +64,9 @@ export async function avScanLambda(event: S3Event, _context: Context) {
 
     const record = event.Records[0]
     if (!record) {
-        throw new Error('no record in request')
+        const error = new Error('no record in request')
+        recordException(error, serviceName)
+        throw error
     }
 
     const s3ObjectKey = record.s3.object.key
@@ -97,8 +74,8 @@ export async function avScanLambda(event: S3Event, _context: Context) {
 
     console.info('Scanning ', s3ObjectKey, s3ObjectBucket)
     const err = await scanFile(s3Client, clamAV, s3ObjectKey, s3ObjectBucket)
-
     if (err) {
+        recordException(err, serviceName)
         throw err
     }
 
@@ -182,4 +159,38 @@ async function scanFile(
     }
 
     console.info('Tagged object ', tagResult)
+}
+
+function initTracer(serviceName: string, otelCollectorURL: string) {
+    console.info('-----Setting OTEL instrumentation-----')
+
+    registerInstrumentations({
+        instrumentations: [getNodeAutoInstrumentations()],
+    })
+
+    const exporter = new CollectorTraceExporter({
+        url: otelCollectorURL,
+        headers: {},
+    })
+    const provider = new NodeTracerProvider({
+        idGenerator: new AWSXRayIdGenerator(),
+        resource: new Resource({
+            [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
+        }),
+    })
+
+    provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
+
+    // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
+    provider.register({
+        propagator: new AWSXRayPropagator(),
+    })
+}
+
+function recordException(error: string | Error, serviceName: string) {
+    const tracer = opentelemetry.trace.getTracer(serviceName)
+    const span = tracer.startSpan('JSException')
+    span.recordException(error)
+    console.error(error)
+    span.end()
 }
