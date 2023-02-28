@@ -41,12 +41,12 @@ export const UploadQuestions = () => {
         hasValidFiles,
         hasNoFiles,
         onFileItemsUpdate,
-        fileUploadErrorMessage,
+        fileUploadError,
         cleanFileItemsBeforeSave,
     } = useFileUpload(shouldValidate)
     const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
         useErrorSummary()
-    const showFileUploadError = shouldValidate && (!hasValidFiles || hasNoFiles)
+    const showFileUploadError = Boolean(shouldValidate && fileUploadError)
     const fileUploadErrorFocusKey = hasNoFiles
         ? 'questions-upload'
         : '#file-items-list'
@@ -103,10 +103,10 @@ export const UploadQuestions = () => {
                     {shouldValidate && (
                         <ErrorSummary
                             errors={
-                                showFileUploadError && fileUploadErrorMessage
+                                showFileUploadError && fileUploadError
                                     ? {
                                           [fileUploadErrorFocusKey]:
-                                              fileUploadErrorMessage,
+                                              fileUploadError,
                                       }
                                     : {}
                             }
@@ -121,11 +121,7 @@ export const UploadQuestions = () => {
                             label="Upload questions"
                             renderMode="list"
                             aria-required
-                            error={
-                                showFileUploadError
-                                    ? fileUploadErrorMessage
-                                    : ''
-                            }
+                            error={showFileUploadError ? fileUploadError : ''}
                             hint={
                                 <span>
                                     This input only accepts PDF, CSV, DOC, DOCX,
@@ -171,8 +167,6 @@ export const UploadQuestions = () => {
                             disabled={showFileUploadError}
                             onClick={async (e) => {
                                 e.preventDefault()
-                                // return apiLoading || showFileUploadError
-                                //     ? undefined
                                 await handleFormSubmit()
                             }}
                             animationTimeout={1000}

@@ -1,13 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { FileItemT } from '../components'
 
 // Intended for use with FileUpload component
 const useFileUpload = (shouldValidate = false) => {
     const [fileItems, setFileItems] = useState<FileItemT[]>([])
-    const [hasValidFiles, setHasValidFiles] = useState(false)
-    const [hasLoadingFiles, setHasLoadingFiles] = useState(false)
     const hasNoFiles = fileItems.length === 0
+    const hasValidFiles = fileItems.every(
+        (item) => item.status === 'UPLOAD_COMPLETE'
+    )
+    const hasLoadingFiles = fileItems.some(
+        (item) => item.status === 'PENDING' || item.status === 'SCANNING'
+    )
 
+    // Handle file items update
     // This is surfaced to consumers instead of setFileItems to ensures we avoid unnecessary updates. This is a "functional update" in React language
     const onFileItemsUpdate = async ({
         fileItems,
@@ -21,37 +26,22 @@ const useFileUpload = (shouldValidate = false) => {
                 : prevValue
         )
     }
-    useEffect(() => {
-        const allFilesComplete = fileItems.every(
-            (item) => item.status === 'UPLOAD_COMPLETE'
-        )
-        setHasValidFiles(allFilesComplete)
 
-        if (!allFilesComplete) {
-            const updatedLoading = fileItems.some(
-                (item) =>
-                    item.status === 'PENDING' || item.status === 'SCANNING'
-            )
-            setHasLoadingFiles(updatedLoading)
-        }
-    }, [fileItems])
+    // Calculate error messages
+    let fileUploadError = undefined
 
-    let fileUploadErrorMessage = undefined
-
-    if (shouldValidate) {
-        if (hasLoadingFiles) {
-            fileUploadErrorMessage =
-                'You must wait for all documents to finish uploading before continuing'
-        } else if (fileItems.length === 0) {
-            fileUploadErrorMessage = 'You must upload at least one document'
-        } else if (!hasValidFiles) {
-            fileUploadErrorMessage =
-                'You must remove all documents with error messages before continuing'
-        }
+    if (hasLoadingFiles) {
+        fileUploadError =
+            'You must wait for all documents to finish uploading before continuing'
+    } else if (hasNoFiles) {
+        fileUploadError = 'You must upload at least one document'
+    } else if (!hasValidFiles) {
+        fileUploadError =
+            'You must remove all documents with error messages before continuing'
     }
 
-    // This is a safeguard. In case something goes wrong with managing the state of file items (see FileUpload component for that logic) we surface a function to double check everything, filter out bad states, and log errors
-    // Can be used right before we transform React-based "file items" to database friendly documents
+    // Transform React-based "file items" to database friendly documents
+    // Use of this function is a safeguard. We double check everything, filter out bad states, and log errors before sending to API
     const cleanFileItemsBeforeSave = () => {
         return fileItems.reduce((cleanedFileItems, fileItem) => {
             if (fileItem.status === 'UPLOAD_ERROR') {
@@ -83,7 +73,7 @@ const useFileUpload = (shouldValidate = false) => {
         hasLoadingFiles,
         fileItems,
         onFileItemsUpdate,
-        fileUploadErrorMessage,
+        fileUploadError,
         cleanFileItemsBeforeSave,
     }
 }
