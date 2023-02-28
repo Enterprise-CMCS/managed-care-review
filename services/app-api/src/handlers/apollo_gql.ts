@@ -36,6 +36,10 @@ import {
 } from '../launchDarkly/launchDarkly'
 import { LDClient } from 'launchdarkly-node-server-sdk'
 import * as ld from 'launchdarkly-node-server-sdk'
+import {
+    ApolloServerPluginLandingPageLocalDefault,
+    ApolloServerPluginLandingPageDisabled,
+} from 'apollo-server-core'
 
 const requestSpanKey = 'REQUEST_SPAN'
 let tracer: Tracer
@@ -301,6 +305,14 @@ async function initializeGQLHandler(): Promise<Handler> {
         launchDarkly = offlineLDService()
     }
 
+    // Configure Apollo sandbox plugin
+    let plugins = []
+    if (stageName === 'prod') {
+        plugins = [ApolloServerPluginLandingPageDisabled()]
+    } else {
+        plugins = [ApolloServerPluginLandingPageLocalDefault({ embed: true })]
+    }
+
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
     console.info('Running With Config: ', {
         authMode,
@@ -360,6 +372,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         typeDefs,
         resolvers,
         context: contextForRequest,
+        plugins,
     })
 
     const handler = server.createHandler({
