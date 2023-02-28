@@ -9,9 +9,10 @@ import { RoutesRecord } from '../../constants/routes'
 import React from 'react'
 import {
     fetchCurrentUserMock,
-    fetchHealthPlanPackageMockNotFound,
-    fetchStateHealthPlanPackageMockSuccess,
+    fetchStateHealthPlanPackageWithQuestionsMockNotFound,
+    fetchStateHealthPlanPackageWithQuestionsMockSuccess,
     mockDraftHealthPlanPackage,
+    mockQuestionsPayload,
     mockSubmittedHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
     mockValidCMSUser,
@@ -46,7 +47,7 @@ describe('SubmissionSideNav', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageMockSuccess({
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
                             id: '15',
                         }),
                     ],
@@ -114,7 +115,7 @@ describe('SubmissionSideNav', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageMockSuccess({
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
                             id: '15',
                         }),
                     ],
@@ -221,7 +222,7 @@ describe('SubmissionSideNav', () => {
                         fetchCurrentUserMock({
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageMockSuccess({
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
                             id: '15',
                         }),
                     ],
@@ -257,7 +258,7 @@ describe('SubmissionSideNav', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageMockSuccess({
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
                             id: '15',
                         }),
                     ],
@@ -301,10 +302,12 @@ describe('SubmissionSideNav', () => {
                             fetchCurrentUserMock({
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                                stateSubmission: pkg,
-                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: pkg,
+                                }
+                            ),
                         ],
                     },
                     routerProvider: {
@@ -341,10 +344,12 @@ describe('SubmissionSideNav', () => {
                             fetchCurrentUserMock({
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                                stateSubmission: pkg,
-                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: pkg,
+                                }
+                            ),
                         ],
                     },
                     routerProvider: {
@@ -381,10 +386,12 @@ describe('SubmissionSideNav', () => {
                             fetchCurrentUserMock({
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                                stateSubmission: pkg,
-                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: pkg,
+                                }
+                            ),
                         ],
                     },
                     routerProvider: {
@@ -424,10 +431,12 @@ describe('SubmissionSideNav', () => {
                             fetchCurrentUserMock({
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                                stateSubmission: pkg,
-                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: pkg,
+                                }
+                            ),
                         ],
                     },
                     routerProvider: {
@@ -467,10 +476,12 @@ describe('SubmissionSideNav', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                                stateSubmission: pkg,
-                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: pkg,
+                                }
+                            ),
                         ],
                     },
                     routerProvider: {
@@ -502,9 +513,11 @@ describe('SubmissionSideNav', () => {
                     apolloProvider: {
                         mocks: [
                             fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchHealthPlanPackageMockNotFound({
-                                id: '404',
-                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockNotFound(
+                                {
+                                    id: '404',
+                                }
+                            ),
                         ],
                     },
                     routerProvider: { route: '/submissions/404' },
@@ -513,6 +526,43 @@ describe('SubmissionSideNav', () => {
 
             const notFound = await screen.findByText('404 / Page not found')
             expect(notFound).toBeInTheDocument()
+        })
+        it('shows a generic error page when user is undefined', async () => {
+            const testQuestions = mockQuestionsPayload('15')
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={
+                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_RESPONSES
+                            }
+                            element={<QuestionsResponses />}
+                        />
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<SubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 403 }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    questions: testQuestions,
+                                }
+                            ),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/15/question-and-answers',
+                    },
+                }
+            )
+
+            expect(await screen.findByText('System error')).toBeInTheDocument()
         })
     })
 })

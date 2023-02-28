@@ -7,7 +7,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import sprite from 'uswds/src/img/sprite.svg'
 import { RouteT } from '../../constants/routes'
 import { getRouteName } from '../../routeHelpers'
-import { useFetchHealthPlanPackageWrapper } from '../../gqlHelpers'
+import { useFetchHealthPlanPackageWithQuestionsWrapper } from '../../gqlHelpers'
 import { Loading } from '../../components'
 import { ApolloError } from '@apollo/client'
 import { handleApolloError } from '../../gqlHelpers/apolloErrors'
@@ -29,7 +29,7 @@ export type SideNavOutletContextType = {
     currentRevision: HealthPlanRevision
     packageData: HealthPlanFormDataType
     documentDates: DocumentDateLookupTable
-    user: User | undefined
+    user: User
 }
 
 export const SubmissionSideNav = () => {
@@ -54,7 +54,8 @@ export const SubmissionSideNav = () => {
         return getRouteName(pathname) === route ? 'usa-current' : ''
     }
 
-    const { result: fetchResult } = useFetchHealthPlanPackageWrapper(id)
+    const { result: fetchResult } =
+        useFetchHealthPlanPackageWithQuestionsWrapper(id)
     if (fetchResult.status === 'LOADING') {
         return (
             <GridContainer>
@@ -77,6 +78,11 @@ export const SubmissionSideNav = () => {
     const { data, formDatas, documentDates } = fetchResult
     const pkg = data.fetchHealthPlanPackage.pkg
 
+    // Display generic error page if getting logged in user returns undefined.
+    if (!loggedInUser) {
+        return <GenericErrorPage />
+    }
+
     // fetchHPP returns null if no package is found with the given ID
     if (!pkg) {
         return <Error404 />
@@ -84,7 +90,7 @@ export const SubmissionSideNav = () => {
 
     const submissionStatus = pkg.status
 
-    const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const isCMSUser = loggedInUser.role === 'CMS_USER'
 
     // CMS Users can't see DRAFT, it's an error
     if (submissionStatus === 'DRAFT' && isCMSUser) {
@@ -160,7 +166,7 @@ export const SubmissionSideNav = () => {
                                     to={`/submissions/${id}/question-and-answers`}
                                     asCustom={NavLink}
                                     className={isSelectedLink(
-                                        'SUBMISSIONS_QUESTIONS_AND_ANSWERS'
+                                        'SUBMISSIONS_QUESTIONS_AND_RESPONSES'
                                     )}
                                 >
                                     Q&A
