@@ -1,0 +1,84 @@
+fragment questionEdgeFragment on QuestionEdge {
+    node {
+        id
+        pkgID
+        createdAt
+        addedBy {
+            id
+            role
+            email
+            givenName
+            familyName
+            stateAssignments {
+                code
+                name
+                programs {
+                    id
+                    name
+                    fullName
+                }
+            }
+        }
+        documents {
+            s3URL
+            name
+        }
+    }
+}
+
+query fetchHealthPlanPackageWithQuestions($input: FetchHealthPlanPackageInput!) {
+    fetchHealthPlanPackage(input: $input) {
+        pkg {
+            id
+            status
+            initiallySubmittedAt
+            stateCode
+            state {
+                code
+                name
+                programs {
+                    id
+                    name
+                    fullName
+                }
+            }
+            revisions {
+                node {
+                    id
+                    unlockInfo {
+                        updatedAt
+                        updatedBy
+                        updatedReason
+                    }
+                    submitInfo {
+                        updatedAt
+                        updatedBy
+                        updatedReason
+                    }
+                    createdAt
+                    formDataProto
+                }
+            }
+            questions {
+                DMCOQuestions {
+                    edges {
+                        ...questionEdgeFragment
+                    }
+                    totalCount
+                }
+                DMCPQuestions {
+                    edges {
+                        ...questionEdgeFragment
+                    }
+                    totalCount
+                }
+                OACTQuestions {
+                    edges {
+                        ...questionEdgeFragment
+                    }
+                    totalCount
+                }
+            }
+        }
+    }
+}

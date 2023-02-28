@@ -1,6 +1,7 @@
 import {
     useFetchHealthPlanPackageQuery,
     FetchHealthPlanPackageQuery,
+    useFetchHealthPlanPackageWithQuestionsQuery,
 } from '../gen/gqlClient'
 import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto'
@@ -32,6 +33,11 @@ type ParsedFetchResultType = ApolloResultType<
 
 type WrappedFetchResultType = WrappedApolloResultType<
     ReturnType<typeof useFetchHealthPlanPackageQuery>,
+    AdditionalParsedDataType
+>
+
+type WrappedFetchResultWithQuestionsType = WrappedApolloResultType<
+    ReturnType<typeof useFetchHealthPlanPackageWithQuestionsQuery>,
     AdditionalParsedDataType
 >
 
@@ -125,4 +131,36 @@ function useFetchHealthPlanPackageWrapper(id: string): WrappedFetchResultType {
     }
 }
 
-export { useFetchHealthPlanPackageWrapper }
+function useFetchHealthPlanPackageWithQuestionsWrapper(
+    id: string
+): WrappedFetchResultWithQuestionsType {
+    const results = wrapApolloResult(
+        useFetchHealthPlanPackageWithQuestionsQuery({
+            variables: {
+                input: {
+                    pkgID: id,
+                },
+            },
+        })
+    )
+    const result = results.result
+
+    if (result.status === 'SUCCESS') {
+        const parsedResult = parseProtos(result)
+
+        return {
+            ...results,
+            result: parsedResult,
+        }
+    }
+
+    return {
+        ...results,
+        result: result,
+    }
+}
+
+export {
+    useFetchHealthPlanPackageWrapper,
+    useFetchHealthPlanPackageWithQuestionsWrapper,
+}
