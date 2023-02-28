@@ -2,40 +2,62 @@ import { packageStatus, packageSubmittedAt } from '../../domain-models'
 import { protoToBase64 } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
 import { Resolvers } from '../../gen/gqlServer'
+import { isStoreError, Store } from '../../postgres'
+import { convertToIndexQuestionsPayload } from '../../postgres/questionResponses'
+import { logError } from '../../logger'
 
-export const healthPlanPackageResolver: Resolvers['HealthPlanPackage'] = {
-    revisions(parent) {
-        return parent.revisions.map((r) => {
-            return {
-                node: {
-                    id: r.id,
-                    unlockInfo: r.unlockInfo,
-                    submitInfo: r.submitInfo,
-                    createdAt: r.createdAt,
-                    formDataProto: protoToBase64(r.formDataProto),
-                },
+export function healthPlanPackageResolver(
+    store: Store
+): Resolvers['HealthPlanPackage'] {
+    return {
+        revisions(parent) {
+            return parent.revisions.map((r) => {
+                return {
+                    node: {
+                        id: r.id,
+                        unlockInfo: r.unlockInfo,
+                        submitInfo: r.submitInfo,
+                        createdAt: r.createdAt,
+                        formDataProto: protoToBase64(r.formDataProto),
+                    },
+                }
+            })
+        },
+        status(parent) {
+            const status = packageStatus(parent)
+            if (status instanceof Error) {
+                throw status
             }
-        })
-    },
-    status(parent) {
-        const status = packageStatus(parent)
-        if (status instanceof Error) {
-            throw status
-        }
-        return status
-    },
-    initiallySubmittedAt(parent) {
-        return packageSubmittedAt(parent) || null
-    },
-    state(parent) {
-        const packageState = parent.stateCode
-        const state = statePrograms.states.find(
-            (st) => st.code === packageState
-        )
+            return status
+        },
+        initiallySubmittedAt(parent) {
+            return packageSubmittedAt(parent) || null
+        },
+        state(parent) {
+            const packageState = parent.stateCode
+            const state = statePrograms.states.find(
+                (st) => st.code === packageState
+            )
 
-        if (state === undefined) {
-            throw new Error('State not found in database: ' + packageState)
-        }
-        return state
-    },
+            if (state === undefined) {
+                throw new Error('State not found in database: ' + packageState)
+            }
+            return state
+        },
+        questions: async (parent) => {
+            const pkgID = parent.id
+            const result = await store.findAllQuestionsByHealthPlanPackage(
+                pkgID
+            )
+
+            if (isStoreError(result)) {
+                const errMessage = `Issue finding questions of type ${result.code}. Message: ${result.message}`
+                logError('indexQuestions', errMessage)
+                throw new Error(errMessage)
+            }
+            const questions2 = convertToIndexQuestionsPayload(result)
+
+            return questions2
+        },
+    }
 }

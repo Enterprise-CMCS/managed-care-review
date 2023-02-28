@@ -14,7 +14,7 @@ import {
 import {
     indexQuestionsResolver,
     createQuestionResolver,
-} from './questionAnswers'
+} from './questionResponses'
 import {
     fetchCurrentUserResolver,
     updateCMSUserResolver,
@@ -74,7 +74,7 @@ export function configureResolvers(
         },
         StateUser: stateUserResolver,
         CMSUser: cmsUserResolver,
-        HealthPlanPackage: healthPlanPackageResolver,
+        HealthPlanPackage: healthPlanPackageResolver(store),
     }
 
     return resolvers
