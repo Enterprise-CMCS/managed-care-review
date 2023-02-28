@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import {
     mockDraft,
     fetchCurrentUserMock,
-} from '../../../testHelpers/apolloHelpers'
+} from '../../../testHelpers/apolloMocks'
 
 import {
     renderWithProviders,

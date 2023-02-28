@@ -9,7 +9,7 @@ import { AppBody } from './AppBody'
 import {
     fetchCurrentUserMock,
     indexHealthPlanPackagesMockSuccess,
-} from '../../testHelpers/apolloHelpers'
+} from '../../testHelpers/apolloMocks'
 
 window.scrollTo = jest.fn()
 jest.mock('../../hooks/useTealium', () => ({

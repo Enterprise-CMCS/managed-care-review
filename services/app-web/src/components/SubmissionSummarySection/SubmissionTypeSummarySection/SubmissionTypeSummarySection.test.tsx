@@ -8,7 +8,7 @@ import {
     mockContractAndRatesDraft,
     mockStateSubmission,
     mockMNState,
-} from '../../../testHelpers/apolloHelpers'
+} from '../../../testHelpers/apolloMocks'
 import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 
 describe('SubmissionTypeSummarySection', () => {

@@ -14,7 +14,7 @@ import {
     mockUnlockedHealthPlanPackageWithDocuments,
     updateHealthPlanFormDataMockSuccess,
     updateHealthPlanFormDataMockAuthFailure,
-} from '../../testHelpers/apolloHelpers'
+} from '../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 import { StateSubmissionForm } from './StateSubmissionForm'

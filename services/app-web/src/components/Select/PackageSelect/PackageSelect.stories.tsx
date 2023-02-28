@@ -1,6 +1,6 @@
 import { Story } from '@storybook/react'
 import { PackageSelect, PackageSelectPropType } from '../index'
-import { mockDraft, mockMNState } from '../../../testHelpers/apolloHelpers'
+import { mockDraft, mockMNState } from '../../../testHelpers/apolloMocks'
 import React from 'react'
 import ProvidersDecorator from '../../../../.storybook/providersDecorator'
 

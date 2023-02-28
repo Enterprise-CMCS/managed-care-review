@@ -3,7 +3,7 @@ import { screen, waitFor } from '@testing-library/react'
 import {
     fetchCurrentUserMock,
     createHealthPlanPackageMockAuthFailure,
-} from '../../../testHelpers/apolloHelpers'
+} from '../../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { NewStateSubmissionForm } from './NewStateSubmissionForm'
 import userEvent from '@testing-library/user-event'

@@ -16,7 +16,7 @@ import {
     mockSubmittedHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
     mockValidCMSUser,
-} from '../../testHelpers/apolloHelpers'
+} from '../../testHelpers/apolloMocks'
 import { ldUseClientSpy } from '../../testHelpers'
 
 describe('SubmissionSideNav', () => {
