@@ -1,5 +1,9 @@
 import { MockedResponse } from '@apollo/client/testing'
-import { FetchCurrentUserDocument, User as UserType } from '../../gen/gqlClient'
+import {
+    CmsUser,
+    FetchCurrentUserDocument,
+    User as UserType,
+} from '../../gen/gqlClient'
 
 import { mockMNState } from './stateMock'
 function mockValidUser(): UserType {
@@ -14,7 +18,7 @@ function mockValidUser(): UserType {
     }
 }
 
-function mockValidCMSUser(): UserType {
+function mockValidCMSUser(): CmsUser {
     return {
         __typename: 'CMSUser' as const,
         id: 'bar-id',
