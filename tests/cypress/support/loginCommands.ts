@@ -43,7 +43,7 @@ Cypress.Commands.add(
             aliasQuery(req, 'indexHealthPlanPackages')
         })
 
-        const initialURLPath = initialURL?.replace(/^(?:\S+\.\S+?\/|\/)/, '') || '/'
+        const initialURLPath = initialURL?.replace(/^(?:\S+\.\S+?\/|\/)/, '/') || '/'
 
         cy.visit(initialURLPath)
         //Add assertion looking for test on the page before findByRole
