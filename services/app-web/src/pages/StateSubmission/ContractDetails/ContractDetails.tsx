@@ -187,7 +187,7 @@ export const ContractDetails = ({
             )
 
         if (!isSubmittedFile) {
-            const result = await deleteFile(key)
+            const result = await deleteFile(key, 'HEALTH_PLAN_DOCS')
             if (isS3Error(result)) {
                 throw new Error(`Error in S3 key: ${key}`)
             }
@@ -196,19 +196,19 @@ export const ContractDetails = ({
     }
 
     const handleUploadFile = async (file: File): Promise<S3FileData> => {
-        const s3Key = await uploadFile(file)
+        const s3Key = await uploadFile(file, 'HEALTH_PLAN_DOCS')
 
         if (isS3Error(s3Key)) {
             throw new Error(`Error in S3: ${file.name}`)
         }
 
-        const s3URL = await getS3URL(s3Key, file.name)
+        const s3URL = await getS3URL(s3Key, file.name, 'HEALTH_PLAN_DOCS')
         return { key: s3Key, s3URL: s3URL }
     }
 
     const handleScanFile = async (key: string): Promise<void | Error> => {
         try {
-            await scanFile(key)
+            await scanFile(key, 'HEALTH_PLAN_DOCS')
         } catch (e) {
             if (isS3Error(e)) {
                 throw new Error(`Error in S3: ${key}`)
