@@ -16,7 +16,7 @@
         "test": "tests"
     },
     "scripts": {
-        "clean": "lerna clean",
+        "clean": "lerna clean && rm -f .yarn_install",
         "format": "yarn prettier --write",
         "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
         "cypress:open": "cypress open --env AUTH_MODE=LOCAL",

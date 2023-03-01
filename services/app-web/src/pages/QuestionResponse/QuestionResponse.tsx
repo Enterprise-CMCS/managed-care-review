@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { GridContainer, Link } from '@trussworks/react-uswds'
-import styles from './QuestionsResponses.module.scss'
+import styles from './QuestionResponse.module.scss'
 import { SectionHeader } from '../../components'
 import { NavLink, useOutletContext } from 'react-router-dom'
 import { packageName } from '../../common-code/healthPlanFormDataType'
@@ -30,7 +30,7 @@ type QADivisionQuestions = {
     }
 }
 
-export const QuestionsResponses = () => {
+export const QuestionResponse = () => {
     const outletContext = useOutletContext<SideNavOutletContextType>()
     const { updateHeading } = usePage()
     const [pkgName, setPkgName] = useState<string | undefined>(undefined)

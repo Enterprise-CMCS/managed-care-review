@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router-dom'
 import { SubmissionSideNav } from '../SubmissionSideNav'
-import { QuestionsResponses } from './'
+import { QuestionResponse } from './'
 import { ldUseClientSpy, renderWithProviders } from '../../testHelpers'
 import { RoutesRecord } from '../../constants/routes'
 import React from 'react'
@@ -12,7 +12,7 @@ import {
 } from '../../testHelpers/apolloMocks'
 import { CmsUser } from '../../gen/gqlClient'
 
-describe('QuestionsResponses', () => {
+describe('QuestionResponse', () => {
     beforeEach(() => {
         ldUseClientSpy({ 'cms-questions': true })
     })
@@ -75,8 +75,8 @@ describe('QuestionsResponses', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_RESPONSES}
-                        element={<QuestionsResponses />}
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        element={<QuestionResponse />}
                     />
                 </Route>
             </Routes>,
@@ -165,8 +165,8 @@ describe('QuestionsResponses', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_RESPONSES}
-                        element={<QuestionsResponses />}
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        element={<QuestionResponse />}
                     />
                 </Route>
             </Routes>,
@@ -222,8 +222,8 @@ describe('QuestionsResponses', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_RESPONSES}
-                        element={<QuestionsResponses />}
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        element={<QuestionResponse />}
                     />
                 </Route>
             </Routes>,
@@ -257,8 +257,8 @@ describe('QuestionsResponses', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_RESPONSES}
-                        element={<QuestionsResponses />}
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        element={<QuestionResponse />}
                     />
                 </Route>
             </Routes>,

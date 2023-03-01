@@ -166,7 +166,7 @@ export const SubmissionSideNav = () => {
                                     to={`/submissions/${id}/question-and-answers`}
                                     asCustom={NavLink}
                                     className={isSelectedLink(
-                                        'SUBMISSIONS_QUESTIONS_AND_RESPONSES'
+                                        'SUBMISSIONS_QUESTIONS_AND_ANSWERS'
                                     )}
                                 >
                                     Q&A

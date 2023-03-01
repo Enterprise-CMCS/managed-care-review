@@ -14,7 +14,7 @@ import {
 import {
     indexQuestionsResolver,
     createQuestionResolver,
-} from './questionResponses'
+} from './questionResponse'
 import {
     fetchCurrentUserResolver,
     updateCMSUserResolver,

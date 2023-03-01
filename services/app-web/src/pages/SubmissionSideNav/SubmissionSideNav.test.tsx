@@ -3,7 +3,7 @@ import { Location, Route, Routes } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { SubmissionSideNav } from './SubmissionSideNav'
 import { SubmissionSummary } from '../SubmissionSummary'
-import { QuestionsResponses } from '../QuestionsResponses'
+import { QuestionResponse } from '../QuestionResponse'
 import { renderWithProviders } from '../../testHelpers'
 import { RoutesRecord } from '../../constants/routes'
 import React from 'react'
@@ -31,8 +31,8 @@ describe('SubmissionSideNav', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_RESPONSES}
-                        element={<QuestionsResponses />}
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        element={<QuestionResponse />}
                     />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
@@ -99,8 +99,8 @@ describe('SubmissionSideNav', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_RESPONSES}
-                        element={<QuestionsResponses />}
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        element={<QuestionResponse />}
                     />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
@@ -207,8 +207,8 @@ describe('SubmissionSideNav', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_RESPONSES}
-                        element={<QuestionsResponses />}
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        element={<QuestionResponse />}
                     />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
@@ -242,8 +242,8 @@ describe('SubmissionSideNav', () => {
             <Routes>
                 <Route element={<SubmissionSideNav />}>
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_RESPONSES}
-                        element={<QuestionsResponses />}
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        element={<QuestionResponse />}
                     />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
@@ -286,9 +286,9 @@ describe('SubmissionSideNav', () => {
                     <Route element={<SubmissionSideNav />}>
                         <Route
                             path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_RESPONSES
+                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
                             }
-                            element={<QuestionsResponses />}
+                            element={<QuestionResponse />}
                         />
                         <Route
                             path={RoutesRecord.SUBMISSIONS_SUMMARY}
@@ -328,9 +328,9 @@ describe('SubmissionSideNav', () => {
                     <Route element={<SubmissionSideNav />}>
                         <Route
                             path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_RESPONSES
+                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
                             }
-                            element={<QuestionsResponses />}
+                            element={<QuestionResponse />}
                         />
                         <Route
                             path={RoutesRecord.SUBMISSIONS_SUMMARY}
@@ -370,9 +370,9 @@ describe('SubmissionSideNav', () => {
                     <Route element={<SubmissionSideNav />}>
                         <Route
                             path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_RESPONSES
+                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
                             }
-                            element={<QuestionsResponses />}
+                            element={<QuestionResponse />}
                         />
                         <Route
                             path={RoutesRecord.SUBMISSIONS_SUMMARY}
@@ -415,9 +415,9 @@ describe('SubmissionSideNav', () => {
                     <Route element={<SubmissionSideNav />}>
                         <Route
                             path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_RESPONSES
+                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
                             }
-                            element={<QuestionsResponses />}
+                            element={<QuestionResponse />}
                         />
                         <Route
                             path={RoutesRecord.SUBMISSIONS_SUMMARY}
@@ -459,9 +459,9 @@ describe('SubmissionSideNav', () => {
                     <Route element={<SubmissionSideNav />}>
                         <Route
                             path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_RESPONSES
+                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
                             }
-                            element={<QuestionsResponses />}
+                            element={<QuestionResponse />}
                         />
                         <Route
                             path={RoutesRecord.SUBMISSIONS_SUMMARY}
@@ -499,9 +499,9 @@ describe('SubmissionSideNav', () => {
                     <Route element={<SubmissionSideNav />}>
                         <Route
                             path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_RESPONSES
+                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
                             }
-                            element={<QuestionsResponses />}
+                            element={<QuestionResponse />}
                         />
                         <Route
                             path={RoutesRecord.SUBMISSIONS_SUMMARY}
@@ -534,9 +534,9 @@ describe('SubmissionSideNav', () => {
                     <Route element={<SubmissionSideNav />}>
                         <Route
                             path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_RESPONSES
+                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
                             }
-                            element={<QuestionsResponses />}
+                            element={<QuestionResponse />}
                         />
                         <Route
                             path={RoutesRecord.SUBMISSIONS_SUMMARY}
