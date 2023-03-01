@@ -110,7 +110,7 @@ const INTROSPECTION_QUERY = gql`
 `
 
 export const GraphQLExplorer = () => {
-    const endpointUrl = 'http://localhost:3030/local/graphql'
+    const endpointUrl = process.env.REACT_APP_API_URL
     const { loggedInUser } = useAuth()
     const { loading, error, data } = useQuery(INTROSPECTION_QUERY)
 
@@ -118,7 +118,7 @@ export const GraphQLExplorer = () => {
         return <Loading />
     }
 
-    if (error || !loggedInUser) {
+    if (error || !loggedInUser || !endpointUrl) {
         return <GenericErrorPage />
     }
 
