@@ -25,20 +25,20 @@ async function avScan(event: S3Event, _context: Context) {
 
     const clamAVBucketName = process.env.CLAMAV_BUCKET_NAME
     if (!clamAVBucketName || clamAVBucketName === '') {
-        const error = new Error(
+        const err = new Error(
             'Configuration Error: CLAMAV_BUCKET_NAME must be set'
         )
-        recordException(error, serviceName)
-        throw error
+        recordException(err, serviceName)
+        throw err
     }
 
     const clamAVDefintionsPath = process.env.PATH_TO_AV_DEFINITIONS
     if (!clamAVDefintionsPath || clamAVDefintionsPath === '') {
-        const error = new Error(
+        const err = new Error(
             'Configuration Error: PATH_TO_AV_DEFINITIONS must be set'
         )
-        recordException(error, serviceName)
-        throw error
+        recordException(err, serviceName)
+        throw err
     }
 
     const maxFileSize = parseInt(process.env.MAX_FILE_SIZE || '314572800')
@@ -55,9 +55,9 @@ async function avScan(event: S3Event, _context: Context) {
 
     const record = event.Records[0]
     if (!record) {
-        const error = new Error('no record in request')
-        recordException(error, serviceName)
-        throw error
+        const err = new Error('no record in request')
+        recordException(err, serviceName)
+        throw err
     }
 
     const s3ObjectKey = record.s3.object.key
@@ -72,7 +72,7 @@ async function avScan(event: S3Event, _context: Context) {
         maxFileSize,
         '/tmp/downloads'
     )
-    if (err) {
+    if (err instanceof Error) {
         recordException(err, serviceName)
         throw err
     }
