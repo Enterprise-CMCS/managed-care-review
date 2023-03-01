@@ -4,6 +4,8 @@ import { NewClamAV } from '../deps/clamAV'
 import { scanFile } from '../lib/avScan'
 import { initTracer, initMeter, recordException } from '../lib/otel'
 
+import opentelemetry from '@opentelemetry/api'
+
 async function avScan(event: S3Event, _context: Context) {
     console.info('-----Start Antivirus Lambda function-----')
 
@@ -65,6 +67,11 @@ async function avScan(event: S3Event, _context: Context) {
     const s3ObjectBucket = record.s3.bucket.name
 
     console.info('Scanning ', s3ObjectKey, s3ObjectBucket)
+
+    // record the duration of the av scan
+    const meter = opentelemetry.metrics.getMeter(serviceName)
+    const timeAvScan = meter.createHistogram('avScan.duration')
+    const startTime = new Date().getTime()
     const err = await scanFile(
         s3Client,
         clamAV,
@@ -73,11 +80,16 @@ async function avScan(event: S3Event, _context: Context) {
         maxFileSize,
         '/tmp/downloads'
     )
+
+    // Record the duration of the av scan before the err check
+    const endTime = new Date().getTime()
+    const executionTime = endTime - startTime
+    timeAvScan.record(executionTime)
+
     if (err instanceof Error) {
         recordException(err, serviceName)
         throw err
     }
-
     return 'FILE SCANNED'
 }
 
