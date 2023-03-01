@@ -126,7 +126,7 @@ export const UploadedDocumentsTable = ({
                             url: null,
                         }
 
-                    const documentLink = await getURL(key)
+                    const documentLink = await getURL(key, 'HEALTH_PLAN_DOCS')
                     return {
                         ...doc,
                         url: documentLink,

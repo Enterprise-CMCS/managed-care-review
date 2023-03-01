@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 
 import * as CognitoAuthApi from '../../pages/Auth/cognitoAuth'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
-import { fetchCurrentUserMock } from '../../testHelpers/apolloHelpers'
+import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks'
 import { Header } from './Header'
 
 describe('Header', () => {

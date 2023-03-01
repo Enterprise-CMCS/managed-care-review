@@ -15,6 +15,12 @@ type s3PutResponse = {
     key: string
 }
 
+type BucketShortName = 'HEALTH_PLAN_DOCS' | 'QUESTION_ANSWER_DOCS'
+type S3BucketConfigType = {
+    [K in BucketShortName]: string
+}
+
+
 function assertIsS3PutResponse(val: unknown): asserts val is s3PutResponse {
     if (typeof val === 'object' && val && !('key' in val)) {
         throw new Error('We dont have a key in this response')
@@ -33,9 +39,15 @@ function assertIsS3PutError(val: unknown): asserts val is s3PutError {
 }
 
 // MAIN
-function newAmplifyS3Client(bucketName: string): S3ClientT {
+// TODO clarify what gets3URL versus getURL are doing
+
+
+function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
     return {
-        uploadFile: async (file: File): Promise<string | S3Error> => {
+        uploadFile: async (
+            file: File,
+            bucket: BucketShortName
+        ): Promise<string | S3Error> => {
             const uuid = uuidv4()
             const ext = file.name.split('.').pop()
             //encode file names and decoding done in bulk_downloads.ts
@@ -43,6 +55,7 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
 
             try {
                 const stored = await Storage.put(`${uuid}.${ext}`, file, {
+                    bucket: bucketConfig[bucket],
                     contentType: file.type,
                     contentDisposition: `attachment; filename=${fileName}`,
                 })
@@ -64,9 +77,14 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
             }
         },
 
-        deleteFile: async (filename: string): Promise<void | S3Error> => {
+        deleteFile: async (
+            filename: string,
+            bucket: BucketShortName
+        ): Promise<void | S3Error> => {
             try {
-                await Storage.remove(filename)
+                await Storage.remove(filename, {
+                    bucket: bucketConfig[bucket],
+                })
                 return
             } catch (err) {
                 assertIsS3PutError(err)
@@ -88,11 +106,15 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
             - In total, each file could be up to 40 sec in a loading state (20s wait for scanning + 8s of retries + extra time for uploading and scanning api requests to resolve)
             - While the file is scanning, returns 403. When scanning is complete, the resource returns 200
         */
-        scanFile: async (filename: string): Promise<void | S3Error> => {
+        scanFile: async (
+            filename: string,
+            bucket: BucketShortName
+        ): Promise<void | S3Error> => {
             try {
                 await waitFor(20000)
                 await retryWithBackoff(async () => {
                     await Storage.get(filename, {
+                        bucket: bucketConfig[bucket],
                         download: true,
                     })
                 })
@@ -108,15 +130,24 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
                 throw err
             }
         },
-        getS3URL: async (key: string, fileName: string): Promise<string> => {
-            return `s3://${bucketName}/${key}/${fileName}`
+        getS3URL: async (
+            key: string,
+            fileName: string,
+            bucket: BucketShortName
+        ): Promise<string> => {
+            return `s3://${bucketConfig[bucket]}/${key}/${fileName}`
         },
         getKey: (s3URL: string) => {
             const key = parseKey(s3URL)
             return key instanceof Error ? null : key
         },
-        getURL: async (key: string): Promise<string> => {
-            const result = await Storage.get(key)
+        getURL: async (
+            key: string,
+            bucket: BucketShortName
+        ): Promise<string> => {
+            const result = await Storage.get(key, {
+                bucket: bucketConfig[bucket],
+            })
             if (typeof result === 'string') {
                 return result
             } else {
@@ -127,14 +158,15 @@ function newAmplifyS3Client(bucketName: string): S3ClientT {
         },
         getBulkDlURL: async (
             keys: string[],
-            filename: string
+            filename: string,
+            bucket: BucketShortName
         ): Promise<string | Error> => {
             const prependedKeys = keys.map((key) => `allusers/${key}`)
             const prependedFilename = `allusers/${filename}`
 
             const zipRequestParams = {
                 keys: prependedKeys,
-                bucket: bucketName,
+                bucket: bucketConfig[bucket],
                 zipFileName: prependedFilename,
             }
 
@@ -184,3 +216,4 @@ const retryWithBackoff = async (
 }
 
 export { newAmplifyS3Client }
+export type { BucketShortName, S3BucketConfigType }

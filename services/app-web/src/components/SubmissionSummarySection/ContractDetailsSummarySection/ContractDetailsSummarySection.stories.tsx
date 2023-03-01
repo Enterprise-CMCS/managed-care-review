@@ -4,7 +4,7 @@ import {
     ContractDetailsSummarySectionProps,
     ContractDetailsSummarySection,
 } from './ContractDetailsSummarySection'
-import { mockContractAndRatesDraft } from '../../../testHelpers/apolloHelpers'
+import { mockContractAndRatesDraft } from '../../../testHelpers/apolloMocks'
 
 export default {
     title: 'Components/SubmissionSummary/ContractDetailsSummarySection',

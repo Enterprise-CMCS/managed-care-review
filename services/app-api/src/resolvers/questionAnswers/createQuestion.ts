@@ -22,6 +22,13 @@ export function createQuestionResolver(
             throw new ForbiddenError(msg)
         }
 
+        if (input.documents.length === 0 ) {
+            const msg = 'question documents are required'
+            logError('createQuestion', msg)
+            setErrorAttributesOnActiveSpan(msg, span)
+            throw new UserInputError(msg)
+        }
+
         // Return error if package is not found or errors
         const result = await store.findHealthPlanPackage(input.pkgID)
 

@@ -16,7 +16,7 @@ import {
     mockUnlockedHealthPlanPackage,
     mockSubmittedHealthPlanPackage,
     mockMNState,
-} from '../../../testHelpers/apolloHelpers'
+} from '../../../testHelpers/apolloMocks'
 
 import {
     renderWithProviders,

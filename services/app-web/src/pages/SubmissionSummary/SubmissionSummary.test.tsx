@@ -12,7 +12,7 @@ import {
     mockSubmittedHealthPlanPackageWithRevision,
     mockUnlockedHealthPlanPackageWithOldProtos,
     indexHealthPlanPackagesMockSuccess,
-} from '../../testHelpers/apolloHelpers'
+} from '../../testHelpers/apolloMocks'
 import {
     ldUseClientSpy,
     renderWithProviders,

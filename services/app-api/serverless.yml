@@ -28,6 +28,7 @@ custom:
   parameterStoreMode: ${env:PARAMETER_STORE_MODE, ssm:/configuration/parameterStoreMode}
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${sls:stage}.PostgresAuroraArn }
   document_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.DocumentUploadsBucketArn}
+  qa_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.QAUploadsBucketArn}
   secretsManagerSecret: aurora_postgres_${sls:stage} #pragma: allowlist secret
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   reactAppOtelCollectorUrl: ${env:REACT_APP_OTEL_COLLECTOR_URL, ssm:/configuration/react_app_otel_collector_url}
@@ -111,6 +112,8 @@ provider:
           Resource:
             # this is the "public" folder for all regular uploads from Amplify
             - ${self:custom.document_uploads_bucket_arn}/allusers/*
+            - ${self:custom.qa_uploads_bucket_arn}/allusers/*
+
         - Effect: 'Allow'
           Action:
             - ssm:GetParameter

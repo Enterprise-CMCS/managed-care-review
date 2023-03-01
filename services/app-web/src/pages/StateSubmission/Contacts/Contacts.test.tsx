@@ -2,16 +2,26 @@ import { screen, waitFor } from '@testing-library/react'
 
 import {
     mockDraft,
-    mockContactAndRatesDraft,
+    mockContractAndRatesDraft,
     mockCompleteDraft,
     fetchCurrentUserMock,
-} from '../../../testHelpers/apolloHelpers'
+} from '../../../testHelpers/apolloMocks'
 
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { Contacts } from './'
 import userEvent from '@testing-library/user-event'
+import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
 
 describe('Contacts', () => {
+    const contractAndRatesWithEmptyContacts =
+        (): UnlockedHealthPlanFormDataType => {
+            const draft = {
+                ...mockContractAndRatesDraft(),
+                addtlActuaryContacts: [],
+                stateContacts: [],
+            }
+            return draft
+        }
     afterEach(() => jest.clearAllMocks())
 
     it('renders without errors', async () => {
@@ -55,7 +65,7 @@ describe('Contacts', () => {
     it('displays correct form guidance for contract and rates submission', async () => {
         renderWithProviders(
             <Contacts
-                draftSubmission={mockContactAndRatesDraft()}
+                draftSubmission={contractAndRatesWithEmptyContacts()}
                 updateDraft={jest.fn()}
             />,
             {
@@ -244,7 +254,7 @@ describe('Contacts', () => {
     })
 
     it('after "Add actuary contact" button click, it should focus on the field name of the new actuary contact', async () => {
-        const mock = mockContactAndRatesDraft()
+        const mock = contractAndRatesWithEmptyContacts()
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
@@ -304,7 +314,7 @@ describe('Contacts', () => {
     })
 
     it('after actuary contact "Remove contact" button click, should focus on add new actuary contact button', async () => {
-        const mock = mockContactAndRatesDraft()
+        const mock = contractAndRatesWithEmptyContacts()
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
@@ -332,7 +342,7 @@ describe('Contacts', () => {
     })
 
     it('when there are multiple state contacts, they should numbered', async () => {
-        const mock = mockContactAndRatesDraft()
+        const mock = contractAndRatesWithEmptyContacts()
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
@@ -355,7 +365,7 @@ describe('Contacts', () => {
     })
 
     it('when there are multiple actuary contacts, they should numbered', async () => {
-        const mock = mockContactAndRatesDraft()
+        const mock = contractAndRatesWithEmptyContacts()
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
@@ -383,7 +393,7 @@ describe('Contacts', () => {
 
     /* This test is likely to time out if we use userEvent.type().  Converted to .paste() */
     it('when there are multiple state and actuary contacts, remove button works as expected', async () => {
-        const mock = mockContactAndRatesDraft()
+        const mock = contractAndRatesWithEmptyContacts()
         const mockUpdateDraftFn = jest.fn()
 
         renderWithProviders(
