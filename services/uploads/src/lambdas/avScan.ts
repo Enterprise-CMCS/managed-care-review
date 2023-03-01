@@ -2,21 +2,43 @@ import { Context, S3Event } from 'aws-lambda'
 import { NewS3UploadsClient } from '../deps/s3'
 import { NewClamAV } from '../deps/clamAV'
 import { scanFile } from '../lib/avScan'
+import { initTracer, recordException } from '../lib/otel'
 
 async function avScan(event: S3Event, _context: Context) {
     console.info('-----Start Antivirus Lambda function-----')
 
     // Check on the values for our required config
+    const stageName = process.env.stage
+    if (!stageName || stageName === '') {
+        throw new Error('Configuration Error: stage env var must be set')
+    }
+
+    const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
+    if (!otelCollectorURL || otelCollectorURL === '') {
+        throw new Error(
+            'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
+        )
+    }
+
+    const serviceName = `uploads-avScanLambda-${stageName}`
+    initTracer(serviceName, otelCollectorURL)
+
     const clamAVBucketName = process.env.CLAMAV_BUCKET_NAME
     if (!clamAVBucketName || clamAVBucketName === '') {
-        throw new Error('Configuration Error: CLAMAV_BUCKET_NAME must be set')
+        const error = new Error(
+            'Configuration Error: CLAMAV_BUCKET_NAME must be set'
+        )
+        recordException(error, serviceName)
+        throw error
     }
 
     const clamAVDefintionsPath = process.env.PATH_TO_AV_DEFINITIONS
     if (!clamAVDefintionsPath || clamAVDefintionsPath === '') {
-        throw new Error(
+        const error = new Error(
             'Configuration Error: PATH_TO_AV_DEFINITIONS must be set'
         )
+        recordException(error, serviceName)
+        throw error
     }
 
     const maxFileSize = parseInt(process.env.MAX_FILE_SIZE || '314572800')
@@ -33,7 +55,9 @@ async function avScan(event: S3Event, _context: Context) {
 
     const record = event.Records[0]
     if (!record) {
-        throw new Error('no record in request')
+        const error = new Error('no record in request')
+        recordException(error, serviceName)
+        throw error
     }
 
     const s3ObjectKey = record.s3.object.key
@@ -49,6 +73,7 @@ async function avScan(event: S3Event, _context: Context) {
         '/tmp/downloads'
     )
     if (err) {
+        recordException(err, serviceName)
         throw err
     }
 
