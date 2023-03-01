@@ -103,7 +103,7 @@ This policy establishes the trust relationship between GitHub and AWS based on v
   "sub": "repo:{organization}/{repo}:ref:refs/heads/{branch}",
   "aud": "sts.amazonaws.com",
   "ref": "refs/heads/{branch}",
-  "sha": "ec7d38be2362bfaaf8878a1cebb4b0f695eab764",
+  "sha": "ec7d38be2362bfaaf8878a1cebb4b0f695eab764", //pragma: allowlist secret
   "repository": "{organization}/{repo}",
   "repository_owner": "{organization}",
   "repository_owner_id": "3209407",
