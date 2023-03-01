@@ -15,12 +15,8 @@ exporters:
     tls:
       insecure: true
 
-processors:
-  batch:
-
 service:
   pipelines:
     traces:
       receivers: [otlp]
       exporters: [jaeger]
-      processors: [batch]
