@@ -1,7 +1,7 @@
 import { screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router-dom'
-import { UploadQuestions } from '../../QuestionsAnswers'
+import { UploadQuestions } from '../../QuestionResponse'
 import {
     dragAndDrop,
     renderWithProviders,
@@ -13,7 +13,7 @@ import {
 import { RoutesRecord } from '../../../constants/routes'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
-import { createQuestionNetworkFailure } from '../../../testHelpers/apolloMocks/questionAnswerGQLMock'
+import { createQuestionNetworkFailure } from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
 
 describe('UploadQuestions', () => {
     it('displays file upload for correct cms division', async () => {

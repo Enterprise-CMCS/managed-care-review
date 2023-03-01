@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react'
 import { Route, Routes } from 'react-router-dom'
 import { SubmissionSideNav } from '../SubmissionSideNav'
-import { QuestionsAnswers } from '../QuestionsAnswers'
+import { QuestionResponse } from './QuestionResponse'
 import { ldUseClientSpy, renderWithProviders } from '../../testHelpers'
 import { RoutesRecord } from '../../constants/routes'
 import React from 'react'
@@ -11,7 +11,7 @@ import {
     mockValidCMSUser,
 } from '../../testHelpers/apolloMocks'
 
-describe('QuestionsAnswers', () => {
+describe('QuestionResponse', () => {
     beforeEach(() => {
         ldUseClientSpy({ 'cms-questions': true })
     })
@@ -24,7 +24,7 @@ describe('QuestionsAnswers', () => {
                 <Route element={<SubmissionSideNav />}>
                     <Route
                         path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
-                        element={<QuestionsAnswers />}
+                        element={<QuestionResponse />}
                     />
                 </Route>
             </Routes>,
@@ -60,7 +60,7 @@ describe('QuestionsAnswers', () => {
                 <Route element={<SubmissionSideNav />}>
                     <Route
                         path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
-                        element={<QuestionsAnswers />}
+                        element={<QuestionResponse />}
                     />
                 </Route>
             </Routes>,
