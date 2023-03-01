@@ -1,4 +1,4 @@
-import opentelemetry from '@opentelemetry/api'
+import opentelemetry, { SpanStatusCode } from '@opentelemetry/api'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { Resource } from '@opentelemetry/resources'
@@ -39,6 +39,7 @@ export function recordException(error: string | Error, serviceName: string) {
     const tracer = opentelemetry.trace.getTracer(serviceName)
     const span = tracer.startSpan('JSException')
     span.recordException(error)
+    span.setStatus({ code: SpanStatusCode.ERROR })
     console.error(error)
     span.end()
 }
