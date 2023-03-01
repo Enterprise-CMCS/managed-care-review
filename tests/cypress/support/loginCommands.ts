@@ -79,7 +79,7 @@ Cypress.Commands.add(
             const isQAPages = pathnameArray.length >= 4 && pathnameArray[3] === 'question-and-answers'
 
             // QA and Submission Summary page uses a different graphql query
-            if (isSubmissionSummaryPage && isQAPages) {
+            if (isSubmissionSummaryPage || isQAPages) {
                 cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20000 })
             } else {
                 cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 }) // for cases where CMs user goes to specific submission on login
