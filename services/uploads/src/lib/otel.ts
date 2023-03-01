@@ -9,7 +9,7 @@ import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
 
-import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc'
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http'
 import {
     MeterProvider,
     PeriodicExportingMetricReader,

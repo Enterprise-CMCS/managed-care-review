@@ -11244,20 +11244,7 @@
     "@opentelemetry/semantic-conventions" "1.9.1"
     jaeger-client "^3.15.0"
 
-"@opentelemetry/exporter-metrics-otlp-grpc@^0.35.1":
-  version "0.35.1"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/exporter-metrics-otlp-grpc/-/exporter-metrics-otlp-grpc-0.35.1.tgz#8e314b0b7b485e99aa7b70feccacfb49639ecbbe"
-  integrity sha512-XZ5+T5LkkncPFcfpbscYI/8urNQ/CAnYpjigeclHnssSHW/Zohe5VOVKIdKnAftxWQwRmZdlENhh0OxhFTZxvQ==
-  dependencies:
-    "@grpc/grpc-js" "^1.7.1"
-    "@opentelemetry/core" "1.9.1"
-    "@opentelemetry/exporter-metrics-otlp-http" "0.35.1"
-    "@opentelemetry/otlp-grpc-exporter-base" "0.35.1"
-    "@opentelemetry/otlp-transformer" "0.35.1"
-    "@opentelemetry/resources" "1.9.1"
-    "@opentelemetry/sdk-metrics" "1.9.1"
-
-"@opentelemetry/exporter-metrics-otlp-http@0.35.1":
+"@opentelemetry/exporter-metrics-otlp-http@^0.35.1":
   version "0.35.1"
   resolved "https://registry.yarnpkg.com/@opentelemetry/exporter-metrics-otlp-http/-/exporter-metrics-otlp-http-0.35.1.tgz#497939ed9bf80f50cba0e96d84c21f3f9edc2e8a"
   integrity sha512-BnPFYHX0Qfby+Cv0/X6QaR+FTaHtMiYQMzolFANc2S6wybx+yOYVW/scMIZBsV/BiCLYwsxk96SGx5vyIR0lyw==
