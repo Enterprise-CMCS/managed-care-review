@@ -2,7 +2,7 @@ import { GridContainer } from '@trussworks/react-uswds'
 import React from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useIndexUsersQuery, IndexUsersQuery } from '../../gen/gqlClient'
-import { CmsUser } from '../../gen/gqlClient'
+import { CmsUser, AdminUser, StateUser } from '../../gen/gqlClient'
 import styles from '../StateDashboard/StateDashboard.module.scss'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
 import {
@@ -55,25 +55,37 @@ export const Settings = (): React.ReactElement => {
     if (loginStatus === 'LOADING' || !loggedInUser || loading || !data) {
         return <Loading />
     }
-    function isCMSUser(
-        obj: CmsUser | IndexUsersQuery
-    ): obj is CmsUser | IndexUsersQuery {
-        return obj !== undefined && obj !== null && obj.__typename === 'CMSUser'
+
+    type UserTypesInIndexQuery = Pick<
+        IndexUsersQuery['indexUsers']['edges'][number],
+        'node'
+    >['node']
+
+    function isCmsUser(obj: UserTypesInIndexQuery): obj is CmsUser {
+        return obj.__typename === 'CMSUser'
     }
 
-    // const tableData = data.indexUsers.edges
-    const cmsUsers = data.return(
+    const filterCmsUsers = (payload: IndexUsersQuery): CmsUser[] => {
+        const edges = payload.indexUsers.edges
+        const cmsUsers = edges
+            .filter((edge) => isCmsUser(edge.node))
+            .map((edge) => edge.node as CmsUser)
+        return cmsUsers
+    }
+
+    return (
         <>
-            {cmsUsers.map((user) => {
-                const name = `${user.node.givenName} ${user.node.familyName}`
-                const email = user.node.email
-                const stateAssignments = user.node.stateAssignments
-                    ? user.node.stateAssignments.map((sa) => sa.name).join(', ')
+            {filterCmsUsers(data).map((user) => {
+                const name = `${user.givenName} ${user.familyName}`
+                const email = user.email
+                const stateAssignments = user.stateAssignments
+                    ? user.stateAssignments.map((sa) => sa.name).join(', ')
                     : ''
                 return (
-                    <div key={user.node.id}>
-                        <span>{`${user.node.givenName} ${user.node.familyName}`}</span>
-                        <span>{user.node.email}</span>
+                    <div key={user.id}>
+                        <span>{name}</span>
+                        <span>{email}</span>
+                        <span>{stateAssignments}</span>
                     </div>
                 )
             })}
