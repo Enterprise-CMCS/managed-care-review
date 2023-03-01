@@ -39,6 +39,7 @@ Cypress.Commands.add(
         cy.intercept('POST', '*/graphql', (req) => {
             aliasQuery(req, 'fetchCurrentUser')
             aliasQuery(req, 'fetchHealthPlanPackage')
+            aliasQuery(req, 'fetchHealthPlanPackageWithQuestions')
             aliasQuery(req, 'indexHealthPlanPackages')
         })
 
@@ -66,10 +67,25 @@ Cypress.Commands.add(
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
         }
         cy.wait('@fetchCurrentUserQuery', { timeout: 20000 })
-        if (initialURL !== '/') {
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 }) // for cases where CMs user goes to specific submission on login
-        } else {
+        if (initialURL === '/') {
             cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80000 })
+        } else if (initialURL) {
+            const pathnameArray = initialURL.split('/')
+
+            // Check for submission summary page. Url should split into array of 3 strings. Second should be 'submissions` and third should be anything expect 'new'.
+            const isSubmissionSummaryPage = pathnameArray.length === 3 && pathnameArray[1] === 'submissions' && pathnameArray[2] !== 'new'
+
+            // Check for QA pages. Url should split into array of at least 4 strings where the 4th string is 'question-and-answers'
+            const isQAPages = pathnameArray.length >= 4 && pathnameArray[3] === 'question-and-answers'
+
+            // QA and Submission Summary page uses a different graphql query
+            if (isSubmissionSummaryPage && isQAPages) {
+                cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20000 })
+            } else {
+                cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 }) // for cases where CMs user goes to specific submission on login
+            }
+        } else {
+            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 })
         }
     }
 )
