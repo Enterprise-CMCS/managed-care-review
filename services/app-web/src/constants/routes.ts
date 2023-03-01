@@ -34,7 +34,7 @@ const RoutesRecord: Record<RouteT, string> = {
     ROOT: '/',
     AUTH: '/auth',
     DASHBOARD: '/dashboard',
-    GRAPHQL_EXPLORER: '/graphql-explorer',
+    GRAPHQL_EXPLORER: '/dev/graphql-explorer',
     HELP: '/help',
     REPORTS: '/reports',
     SUBMISSIONS: '/submissions',
