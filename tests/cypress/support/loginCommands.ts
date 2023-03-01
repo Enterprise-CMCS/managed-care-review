@@ -43,7 +43,9 @@ Cypress.Commands.add(
             aliasQuery(req, 'indexHealthPlanPackages')
         })
 
-        cy.visit(initialURL)
+        const initialURLPath = initialURL?.replace(/^(?:\S+\.\S+?\/|\/)/, '') || '/'
+
+        cy.visit(initialURLPath)
         //Add assertion looking for test on the page before findByRole
         cy.findByText(
             'Medicaid and CHIP Managed Care Reporting and Review System'
@@ -67,12 +69,13 @@ Cypress.Commands.add(
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
         }
         cy.wait('@fetchCurrentUserQuery', { timeout: 20000 })
-        if (initialURL === '/') {
+        if (initialURLPath === '/') {
             cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80000 })
-        } else if (initialURL) {
-            const pathnameArray = initialURL.split('/')
+        } else if (initialURLPath) {
+            const pathnameArray = initialURLPath.split('/')
 
-            // Check for submission summary page. Url should split into array of 3 strings. Second should be 'submissions` and third should be anything expect 'new'.
+            // Check for submission summary page. Url should split into array of 3 strings. Second should be
+            // 'submissions` and third should be anything expect 'new'.
             const isSubmissionSummaryPage = pathnameArray.length === 3 && pathnameArray[1] === 'submissions' && pathnameArray[2] !== 'new'
 
             // Check for QA pages. Url should split into array of at least 4 strings where the 4th string is 'question-and-answers'
