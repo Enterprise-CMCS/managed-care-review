@@ -126,17 +126,24 @@ export const GraphQLExplorer = () => {
         <div className={styles.background}>
             <ApolloExplorer
                 className={styles.explorer}
-                endpointUrl={endpointUrl}
+                endpointUrl={`${endpointUrl}/graphql`}
                 schema={data}
                 initialState={{
-                    headers: {
-                        'cognito-authentication-provider':
-                            JSON.stringify(loggedInUser),
-                    },
                     displayOptions: {
                         docsPanelState: 'open',
                         theme: 'light',
                     },
+                    document: ``,
+                }}
+                handleRequest={(endpointUrl, options) => {
+                    return fetch(endpointUrl, {
+                        ...options,
+                        headers: {
+                            ...options.headers,
+                            'cognito-authentication-provider':
+                                JSON.stringify(loggedInUser),
+                        },
+                    })
                 }}
             />
         </div>
