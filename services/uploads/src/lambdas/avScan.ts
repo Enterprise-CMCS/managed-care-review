@@ -2,7 +2,7 @@ import { Context, S3Event } from 'aws-lambda'
 import { NewS3UploadsClient } from '../deps/s3'
 import { NewClamAV } from '../deps/clamAV'
 import { scanFile } from '../lib/avScan'
-import { initTracer, recordException } from '../lib/otel'
+import { initTracer, initMeter, recordException } from '../lib/otel'
 
 async function avScan(event: S3Event, _context: Context) {
     console.info('-----Start Antivirus Lambda function-----')
@@ -22,6 +22,7 @@ async function avScan(event: S3Event, _context: Context) {
 
     const serviceName = `uploads-avScanLambda-${stageName}`
     initTracer(serviceName, otelCollectorURL)
+    initMeter(serviceName, otelCollectorURL)
 
     const clamAVBucketName = process.env.CLAMAV_BUCKET_NAME
     if (!clamAVBucketName || clamAVBucketName === '') {

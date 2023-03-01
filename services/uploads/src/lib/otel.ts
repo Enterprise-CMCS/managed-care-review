@@ -9,6 +9,12 @@ import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
 
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc'
+import {
+    MeterProvider,
+    PeriodicExportingMetricReader,
+} from '@opentelemetry/sdk-metrics'
+
 export function initTracer(serviceName: string, otelCollectorURL: string) {
     console.info('-----Setting OTEL instrumentation-----')
 
@@ -33,6 +39,27 @@ export function initTracer(serviceName: string, otelCollectorURL: string) {
     provider.register({
         propagator: new AWSXRayPropagator(),
     })
+}
+
+export function initMeter(serviceName: string, otelCollectorURL: string) {
+    const resource = Resource.default().merge(
+        new Resource({
+            [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
+        })
+    )
+    const metricReader = new PeriodicExportingMetricReader({
+        exporter: new OTLPMetricExporter({
+            url: otelCollectorURL,
+        }),
+        exportIntervalMillis: 1000,
+    })
+
+    const provider = new MeterProvider({
+        resource: resource,
+    })
+
+    provider.addMetricReader(metricReader)
+    opentelemetry.metrics.setGlobalMeterProvider(provider)
 }
 
 export function recordException(error: string | Error, serviceName: string) {
