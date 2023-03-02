@@ -141,6 +141,7 @@ export const GraphQLExplorer = () => {
                     document: ``,
                     headers: stageName === 'local' ? localHeaders : undefined,
                 }}
+                includeCookies={stageName !== 'local'}
             />
         </div>
     )
