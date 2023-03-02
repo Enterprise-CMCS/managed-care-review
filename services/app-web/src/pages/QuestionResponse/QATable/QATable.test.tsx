@@ -6,7 +6,7 @@ import {
 } from '../../../testHelpers/apolloMocks'
 import { screen, waitFor, within } from '@testing-library/react'
 import React from 'react'
-import { QATable } from './QATable'
+import { QATable, QuestionDocumentWithLink } from './QATable'
 import { CmsUser } from '../../../gen/gqlClient'
 
 const stateUser = mockValidUser()
@@ -22,7 +22,7 @@ const testQuestionData = {
             s3URL: 's3://bucketname/key/question-1-document-1',
             name: 'question-1-document-1',
             url: 'https://fakes3.com/key?sekret=deadbeef',
-        },
+        } as QuestionDocumentWithLink,
     ],
 }
 
@@ -111,7 +111,7 @@ it('renders multiple documents and links correctly', async () => {
             {
                 s3URL: '',
                 name: 'question-1-document-2',
-                url: undefined,
+                url: null,
             },
         ],
     }

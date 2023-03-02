@@ -4,9 +4,9 @@ import { CmsUser, User } from '../../../gen/gqlClient'
 import { Link } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
 
-export type QuestionDocument = {
+export type QuestionDocumentWithLink = {
     name: string
-    url?: string
+    url: string | null
 }
 
 export type QuestionData = {
@@ -14,7 +14,7 @@ export type QuestionData = {
     pkgID: string
     createdAt: Date
     addedBy: CmsUser
-    documents: QuestionDocument[]
+    documents: QuestionDocumentWithLink[]
 }
 
 export const QATable = ({
