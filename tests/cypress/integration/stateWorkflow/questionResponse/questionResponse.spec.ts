@@ -80,6 +80,8 @@ describe('Q&A', () => {
             )
             cy.logInAsCMSUser({ initialURL: `/submissions/${submissionId}/question-and-answers` })
 
+            cy.wait(2000)
+
             cy.findByRole('heading', {
                 name: `CMS ${submissionName} Upload questions`,
             }).should('exist')
