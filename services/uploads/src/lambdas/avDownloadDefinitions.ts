@@ -2,7 +2,7 @@ import { Context, S3Event } from 'aws-lambda'
 import { NewS3UploadsClient } from '../deps/s3'
 import { NewClamAV } from '../deps/clamAV'
 import { updateAVDefinitions } from '../lib/updateAVDefinitions'
-import { initTracer, recordException } from '../lib/otel'
+import { initMeter, initTracer, recordException } from '../lib/otel'
 
 async function avDownloadDefinitions(_event: S3Event, _context: Context) {
     console.info('-----Start Update AV Definitions function-----')
@@ -20,8 +20,9 @@ async function avDownloadDefinitions(_event: S3Event, _context: Context) {
         )
     }
 
-    const serviceName = `uploads-avScanLambda-${stageName}`
+    const serviceName = `uploads-avDownloadDefinitions-${stageName}`
     initTracer(serviceName, otelCollectorURL)
+    initMeter(serviceName)
 
     const clamAVBucketName = process.env.CLAMAV_BUCKET_NAME
     if (!clamAVBucketName || clamAVBucketName === '') {
@@ -51,11 +52,11 @@ async function avDownloadDefinitions(_event: S3Event, _context: Context) {
         s3Client
     )
 
-    console.info('Updating ', clamAVBucketName)
-    const err = await updateAVDefinitions(s3Client, clamAV, '/tmp')
-    if (err instanceof Error) {
+    console.info('Updating AV definitions ', clamAVBucketName)
+    try {
+        await updateAVDefinitions(s3Client, clamAV, '/tmp')
+    } catch (err) {
         recordException(err, serviceName)
-        throw err
     }
 
     return 'FILE SCANNED'

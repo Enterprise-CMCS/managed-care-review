@@ -2,9 +2,12 @@ import { Context, S3Event } from 'aws-lambda'
 import { NewS3UploadsClient } from '../deps/s3'
 import { NewClamAV } from '../deps/clamAV'
 import { scanFile } from '../lib/avScan'
-import { initTracer, initMeter, recordException } from '../lib/otel'
-
-import opentelemetry from '@opentelemetry/api'
+import {
+    initTracer,
+    initMeter,
+    recordException,
+    recordHistogram,
+} from '../lib/otel'
 
 async function avScan(event: S3Event, _context: Context) {
     console.info('-----Start Antivirus Lambda function-----')
@@ -70,10 +73,6 @@ async function avScan(event: S3Event, _context: Context) {
 
     try {
         // start the timing of the av scan
-        const meter = opentelemetry.metrics
-            .getMeterProvider()
-            .getMeter(serviceName)
-        const timeAvScan = meter.createHistogram('avScan.duration')
         const startTime = new Date().getTime()
 
         // scan the file
@@ -89,7 +88,8 @@ async function avScan(event: S3Event, _context: Context) {
         // Record the duration of the av scan
         const endTime = new Date().getTime()
         const executionTime = endTime - startTime
-        timeAvScan.record(executionTime)
+        console.info(`av scan time: ${executionTime}`)
+        recordHistogram(serviceName, 'avscan.time', executionTime)
     } catch (err) {
         recordException(err, serviceName)
         throw err

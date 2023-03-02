@@ -68,3 +68,13 @@ export function recordException(error: string | Error, serviceName: string) {
     console.error(error)
     span.end()
 }
+
+export function recordHistogram(
+    serviceName: string,
+    metricName: string,
+    executionTime: number
+) {
+    const meter = opentelemetry.metrics.getMeterProvider().getMeter(serviceName)
+    const timeAvScan = meter.createHistogram(metricName)
+    timeAvScan.record(executionTime)
+}
