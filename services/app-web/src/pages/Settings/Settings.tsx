@@ -1,20 +1,14 @@
 import { GridContainer, Table } from '@trussworks/react-uswds'
 import React, { useMemo } from 'react'
 import {
-    ColumnFiltersState,
     createColumnHelper,
     flexRender,
     getCoreRowModel,
-    getFilteredRowModel,
-    getSortedRowModel,
-    RowData,
     useReactTable,
-    getFacetedUniqueValues,
-    Column,
 } from '@tanstack/react-table'
 import { useAuth } from '../../contexts/AuthContext'
 import { useIndexUsersQuery, IndexUsersQuery } from '../../gen/gqlClient'
-import { CmsUser, AdminUser, StateUser } from '../../gen/gqlClient'
+import { CmsUser } from '../../gen/gqlClient'
 import styles from './Settings.module.scss'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
 import {
@@ -26,14 +20,11 @@ import {
     ErrorAlertSignIn,
     Loading,
 } from '../../components'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
 
 const columnHelper = createColumnHelper<CmsUser>()
 
 export const Settings = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
-    const ldClient = useLDClient()
     const { loading, data, error } = useIndexUsersQuery({
         fetchPolicy: 'network-only',
     })
@@ -58,6 +49,7 @@ export const Settings = (): React.ReactElement => {
 
     const errorMessage = () => {
         if (error) {
+            recordJSException(error)
             handleApolloError(error, isAuthenticated)
             if (isLikelyUserAuthError(error, isAuthenticated)) {
                 return (
@@ -87,10 +79,6 @@ export const Settings = (): React.ReactElement => {
 
     const showLoading =
         loginStatus === 'LOADING' || !loggedInUser || loading || !data
-
-    // if (loginStatus === 'LOADING' || !loggedInUser || loading || !data) {
-    //     return <Loading />
-    // }
 
     // pick out the part of IndexUsersQuery that specifies Admin/CMS/StateUser
     type UserTypesInIndexQuery = Pick<
@@ -124,7 +112,11 @@ export const Settings = (): React.ReactElement => {
 
     return (
         <div className={styles.table}>
-            {cmsUsers.length ? (
+            {error ? (
+                errorMessage()
+            ) : showLoading ? (
+                <Loading />
+            ) : cmsUsers.length ? (
                 <Table bordered striped caption="CMS Users">
                     <thead className={styles.header}>
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -158,9 +150,7 @@ export const Settings = (): React.ReactElement => {
                         ))}
                     </tbody>
                 </Table>
-            ) : (
-                <Loading />
-            )}
+            ) : null}
         </div>
     )
 }
