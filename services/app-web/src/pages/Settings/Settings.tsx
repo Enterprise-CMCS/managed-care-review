@@ -56,6 +56,7 @@ export const Settings = (): React.ReactElement => {
         return <Loading />
     }
 
+    // pick out the part of IndexUsersQuery that specifies Admin/CMS/StateUser
     type UserTypesInIndexQuery = Pick<
         IndexUsersQuery['indexUsers']['edges'][number],
         'node'
@@ -65,17 +66,19 @@ export const Settings = (): React.ReactElement => {
         return obj.__typename === 'CMSUser'
     }
 
-    const filterCmsUsers = (payload: IndexUsersQuery): CmsUser[] => {
-        const edges = payload.indexUsers.edges
+    const filterForCmsUsers = (data: IndexUsersQuery): CmsUser[] => {
+        const edges = data.indexUsers.edges
         const cmsUsers = edges
             .filter((edge) => isCmsUser(edge.node))
             .map((edge) => edge.node as CmsUser)
         return cmsUsers
     }
 
+    const cmsUsers = filterForCmsUsers(data)
+
     return (
         <>
-            {filterCmsUsers(data).map((user) => {
+            {cmsUsers.map((user) => {
                 const name = `${user.givenName} ${user.familyName}`
                 const email = user.email
                 const stateAssignments = user.stateAssignments
