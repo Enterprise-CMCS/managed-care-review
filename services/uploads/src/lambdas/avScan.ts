@@ -69,7 +69,7 @@ async function avScan(event: S3Event, _context: Context) {
     console.info('Scanning ', s3ObjectKey, s3ObjectBucket)
 
     // record the duration of the av scan
-    const meter = opentelemetry.metrics.getMeter(serviceName)
+    const meter = opentelemetry.metrics.getMeterProvider().getMeter(serviceName)
     const timeAvScan = meter.createHistogram('avScan.duration')
     const startTime = new Date().getTime()
     const err = await scanFile(
