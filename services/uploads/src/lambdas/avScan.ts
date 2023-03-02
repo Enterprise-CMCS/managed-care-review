@@ -68,28 +68,33 @@ async function avScan(event: S3Event, _context: Context) {
 
     console.info('Scanning ', s3ObjectKey, s3ObjectBucket)
 
-    // record the duration of the av scan
-    const meter = opentelemetry.metrics.getMeterProvider().getMeter(serviceName)
-    const timeAvScan = meter.createHistogram('avScan.duration')
-    const startTime = new Date().getTime()
-    const err = await scanFile(
-        s3Client,
-        clamAV,
-        s3ObjectKey,
-        s3ObjectBucket,
-        maxFileSize,
-        '/tmp/downloads'
-    )
+    try {
+        // start the timing of the av scan
+        const meter = opentelemetry.metrics
+            .getMeterProvider()
+            .getMeter(serviceName)
+        const timeAvScan = meter.createHistogram('avScan.duration')
+        const startTime = new Date().getTime()
 
-    // Record the duration of the av scan before the err check
-    const endTime = new Date().getTime()
-    const executionTime = endTime - startTime
-    timeAvScan.record(executionTime)
+        // scan the file
+        await scanFile(
+            s3Client,
+            clamAV,
+            s3ObjectKey,
+            s3ObjectBucket,
+            maxFileSize,
+            '/tmp/downloads'
+        )
 
-    if (err instanceof Error) {
+        // Record the duration of the av scan
+        const endTime = new Date().getTime()
+        const executionTime = endTime - startTime
+        timeAvScan.record(executionTime)
+    } catch (err) {
         recordException(err, serviceName)
         throw err
     }
+
     return 'FILE SCANNED'
 }
 
