@@ -178,6 +178,8 @@ function scanForInfectedFiles(
         console.info('Executing clamav')
         const avResult = spawnSync(config.pathToClamav, [
             '--stdout',
+            '-v',
+            '--statistics',
             '-d',
             config.pathToDefintions,
             pathToScan,
