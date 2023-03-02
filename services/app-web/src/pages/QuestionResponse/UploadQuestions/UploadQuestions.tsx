@@ -74,7 +74,10 @@ export const UploadQuestions = () => {
                 documents: questionDocs,
             }
 
-            const createResult = await createQuestion({ variables: { input } })
+            const createResult = await createQuestion({
+                variables: { input },
+                refetchQueries: ['fetchHealthPlanPackageWithQuestions'],
+            })
 
             if (createResult) {
                 navigate(`/submissions/${id}/question-and-answers`)
