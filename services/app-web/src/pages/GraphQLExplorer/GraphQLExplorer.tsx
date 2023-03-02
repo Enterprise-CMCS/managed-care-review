@@ -111,6 +111,7 @@ const INTROSPECTION_QUERY = gql`
 
 export const GraphQLExplorer = () => {
     const endpointUrl = process.env.REACT_APP_API_URL
+    const stageName = process.env.REACT_APP_STAGE_NAME
     const { loggedInUser } = useAuth()
     const { loading, error, data } = useQuery(INTROSPECTION_QUERY)
 
@@ -121,6 +122,12 @@ export const GraphQLExplorer = () => {
     if (error || !loggedInUser || !endpointUrl) {
         return <GenericErrorPage />
     }
+
+    const localDevHeaders = {
+        'cognito-authentication-provider': JSON.stringify(loggedInUser),
+    }
+
+    const isLocalOrDev = stageName === 'local' || stageName === 'dev'
 
     return (
         <div className={styles.background}>
@@ -134,10 +141,7 @@ export const GraphQLExplorer = () => {
                         theme: 'light',
                     },
                     document: ``,
-                    headers: {
-                        'cognito-authentication-provider':
-                            JSON.stringify(loggedInUser),
-                    },
+                    headers: isLocalOrDev ? localDevHeaders : undefined,
                 }}
             />
         </div>
