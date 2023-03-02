@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link, SideNav, GridContainer } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import styles from './SubmissionSideNav.module.scss'
@@ -15,14 +15,22 @@ import { recordJSException } from '../../otelHelpers'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
 import {
+    CmsUser,
     HealthPlanPackage,
     HealthPlanRevision,
+    IndexQuestionsPayload,
+    QuestionEdge,
     User,
 } from '../../gen/gqlClient'
 import { HealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
 import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
+import {
+    QuestionData,
+    QuestionDocumentWithLink,
+} from '../QuestionResponse/QATable/QATable'
+import { useDocument } from '../../hooks/useDocument'
 
 export type SideNavOutletContextType = {
     pkg: HealthPlanPackage
@@ -30,6 +38,22 @@ export type SideNavOutletContextType = {
     packageData: HealthPlanFormDataType
     documentDates: DocumentDateLookupTable
     user: User
+    parsedQuestions: QADivisionQuestions
+}
+
+type QADivisionQuestions = {
+    dmco: {
+        totalCount: number
+        questions: QuestionData[]
+    }
+    dmcp: {
+        totalCount: number
+        questions: QuestionData[]
+    }
+    oact: {
+        totalCount: number
+        questions: QuestionData[]
+    }
 }
 
 export const SubmissionSideNav = () => {
@@ -39,11 +63,14 @@ export const SubmissionSideNav = () => {
             'PROGRAMMING ERROR: id param not set in state submission form.'
         )
     }
-
+    const [questions, setQuestions] = useState<QADivisionQuestions | undefined>(
+        undefined
+    )
     const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
     const navigate = useNavigate()
     const ldClient = useLDClient()
+    const { getDocumentsUrl } = useDocument()
 
     const showQuestionsAnswers = ldClient?.variation(
         featureFlags.CMS_QUESTIONS.flag,
@@ -54,9 +81,89 @@ export const SubmissionSideNav = () => {
         return getRouteName(pathname) === route ? 'usa-current' : ''
     }
 
+    const parseQuestions = async (
+        questions: IndexQuestionsPayload
+    ): Promise<QADivisionQuestions> => {
+        const extractQuestions = async (
+            edges: QuestionEdge[]
+        ): Promise<QuestionData[]> => {
+            const questions = await Promise.all(
+                edges.map(async ({ node }) => ({
+                    id: node.id,
+                    pkgID: node.pkgID,
+                    createdAt: node.createdAt,
+                    addedBy: node.addedBy as CmsUser,
+                    documents: (await getDocumentsUrl(
+                        node.documents,
+                        'QUESTION_ANSWER_DOCS'
+                    )) as QuestionDocumentWithLink[],
+                }))
+            ).catch((err) => {
+                console.info(err)
+                return []
+            })
+
+            return questions
+        }
+
+        const divisionQuestions = {
+            dmco: {
+                totalCount: questions.DMCOQuestions.totalCount ?? 0,
+                questions: await extractQuestions(
+                    questions.DMCOQuestions.edges
+                ),
+            },
+            dmcp: {
+                totalCount: questions.DMCPQuestions.totalCount ?? 0,
+                questions: await extractQuestions(
+                    questions.DMCPQuestions.edges
+                ),
+            },
+            oact: {
+                totalCount: questions.OACTQuestions.totalCount ?? 0,
+                questions: await extractQuestions(
+                    questions.OACTQuestions.edges
+                ),
+            },
+        }
+
+        return divisionQuestions
+    }
+
     const { result: fetchResult } =
-        useFetchHealthPlanPackageWithQuestionsWrapper(id)
-    if (fetchResult.status === 'LOADING') {
+        useFetchHealthPlanPackageWithQuestionsWrapper(id, async (data) => {
+            const pkg = data.fetchHealthPlanPackage.pkg
+            if (pkg && pkg.questions) {
+                const questions = await parseQuestions(pkg.questions)
+                setQuestions(questions)
+            } else {
+                /* Here if questions returned is undefined or null we just set questions to empty array, which will display the
+                 * no questions text.
+                 *
+                 * TODO: Do we want to do something else here? We can log an error, but do we want to render a generic error?
+                 *  some things to consider:
+                 *  - On the backend healthPlanPackageResolver will throw an error so the it would hit the error when checking for pkg
+                 *  - The only way we could get undefined back for questions is if we used useFetchHealthPlanPackage query which does not
+                 *    include questions.
+                 */
+                setQuestions({
+                    dmco: {
+                        totalCount: 0,
+                        questions: [],
+                    },
+                    dmcp: {
+                        totalCount: 0,
+                        questions: [],
+                    },
+                    oact: {
+                        totalCount: 0,
+                        questions: [],
+                    },
+                })
+            }
+        })
+
+    if (fetchResult.status === 'LOADING' || !questions) {
         return (
             <GridContainer>
                 <Loading />
@@ -122,6 +229,7 @@ export const SubmissionSideNav = () => {
         packageData,
         documentDates,
         user: loggedInUser,
+        parsedQuestions: questions,
     }
 
     return (
