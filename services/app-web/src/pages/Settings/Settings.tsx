@@ -1,4 +1,4 @@
-import { GridContainer } from '@trussworks/react-uswds'
+import { GridContainer, Table } from '@trussworks/react-uswds'
 import React, { useMemo } from 'react'
 import {
     ColumnFiltersState,
@@ -15,7 +15,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext'
 import { useIndexUsersQuery, IndexUsersQuery } from '../../gen/gqlClient'
 import { CmsUser, AdminUser, StateUser } from '../../gen/gqlClient'
-import styles from '../StateDashboard/StateDashboard.module.scss'
+import styles from './Settings.module.scss'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
 import {
     handleApolloError,
@@ -42,49 +42,51 @@ export const Settings = (): React.ReactElement => {
         () => [
             columnHelper.accessor('familyName', {
                 cell: (info) => info.getValue(),
-                footer: (info) => info.column.id,
+                header: () => 'Family Name',
             }),
             columnHelper.accessor('givenName', {
-                id: 'lastName',
-                cell: (info) => <i>{info.getValue()}</i>,
-                header: () => <span>Last Name</span>,
-                footer: (info) => info.column.id,
+                cell: (info) => info.getValue(),
+                header: () => 'Given Name',
             }),
             columnHelper.accessor('email', {
-                header: () => 'Age',
-                cell: (info) => info.renderValue(),
-                footer: (info) => info.column.id,
+                cell: (info) => info.getValue(),
+                header: () => 'Email',
             }),
         ],
         []
     )
 
-    // if (error) {
-    //     handleApolloError(error, isAuthenticated)
-    //     if (isLikelyUserAuthError(error, isAuthenticated)) {
-    //         return (
-    //             <div id="settings-page" className={styles.wrapper}>
-    //                 <GridContainer
-    //                     data-testid="settings-page"
-    //                     className={styles.container}
-    //                 >
-    //                     <ErrorAlertSignIn />
-    //                 </GridContainer>
-    //             </div>
-    //         )
-    //     } else {
-    //         return (
-    //             <div id="settings-page" className={styles.wrapper}>
-    //                 <GridContainer
-    //                     data-testid="settings-page"
-    //                     className={styles.container}
-    //                 >
-    //                     <ErrorAlertFailedRequest />
-    //                 </GridContainer>
-    //             </div>
-    //         )
-    //     }
-    // }
+    const errorMessage = () => {
+        if (error) {
+            handleApolloError(error, isAuthenticated)
+            if (isLikelyUserAuthError(error, isAuthenticated)) {
+                return (
+                    <div id="settings-page" className={styles.wrapper}>
+                        <GridContainer
+                            data-testid="settings-page"
+                            className={styles.container}
+                        >
+                            <ErrorAlertSignIn />
+                        </GridContainer>
+                    </div>
+                )
+            } else {
+                return (
+                    <div id="settings-page" className={styles.wrapper}>
+                        <GridContainer
+                            data-testid="settings-page"
+                            className={styles.container}
+                        >
+                            <ErrorAlertFailedRequest />
+                        </GridContainer>
+                    </div>
+                )
+            }
+        }
+    }
+
+    const showLoading =
+        loginStatus === 'LOADING' || !loggedInUser || loading || !data
 
     // if (loginStatus === 'LOADING' || !loggedInUser || loading || !data) {
     //     return <Loading />
@@ -115,16 +117,16 @@ export const Settings = (): React.ReactElement => {
     const cmsUsers = filterForCmsUsers(data)
 
     const table = useReactTable({
-        cmsUsers,
+        data: cmsUsers,
         columns,
         getCoreRowModel: getCoreRowModel(),
     })
 
     return (
-        <>
+        <div className={styles.table}>
             {cmsUsers.length ? (
-                <table>
-                    <thead>
+                <Table bordered striped caption="CMS Users">
+                    <thead className={styles.header}>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <tr key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
@@ -155,27 +157,10 @@ export const Settings = (): React.ReactElement => {
                             </tr>
                         ))}
                     </tbody>
-                    <tfoot>
-                        {table.getFooterGroups().map((footerGroup) => (
-                            <tr key={footerGroup.id}>
-                                {footerGroup.headers.map((header) => (
-                                    <th key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                  header.column.columnDef
-                                                      .footer,
-                                                  header.getContext()
-                                              )}
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </tfoot>
-                </table>
+                </Table>
             ) : (
-                <div>No data</div>
+                <Loading />
             )}
-        </>
+        </div>
     )
 }
