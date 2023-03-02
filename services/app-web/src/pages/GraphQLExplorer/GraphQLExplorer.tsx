@@ -123,11 +123,9 @@ export const GraphQLExplorer = () => {
         return <GenericErrorPage />
     }
 
-    const localDevHeaders = {
+    const localHeaders = {
         'cognito-authentication-provider': JSON.stringify(loggedInUser),
     }
-
-    const isLocalOrDev = stageName === 'local' || stageName === 'dev'
 
     return (
         <div className={styles.background}>
@@ -141,7 +139,7 @@ export const GraphQLExplorer = () => {
                         theme: 'light',
                     },
                     document: ``,
-                    headers: isLocalOrDev ? localDevHeaders : undefined,
+                    headers: stageName === 'local' ? localHeaders : undefined,
                 }}
             />
         </div>
