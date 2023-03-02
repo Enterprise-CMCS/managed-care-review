@@ -67,8 +67,7 @@ export const Settings = (): React.ReactElement => {
     }
 
     const filterForCmsUsers = (data: IndexUsersQuery): CmsUser[] => {
-        const edges = data.indexUsers.edges
-        const cmsUsers = edges
+        const cmsUsers = data.indexUsers.edges
             .filter((edge) => isCmsUser(edge.node))
             .map((edge) => edge.node as CmsUser)
         return cmsUsers
