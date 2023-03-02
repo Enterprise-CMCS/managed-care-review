@@ -9,6 +9,9 @@ import {
     recordHistogram,
 } from '../lib/otel'
 
+import opentelemetry from '@opentelemetry/api'
+import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
+
 async function avScan(event: S3Event, _context: Context) {
     console.info('-----Start Antivirus Lambda function-----')
 
@@ -72,8 +75,11 @@ async function avScan(event: S3Event, _context: Context) {
     console.info('Scanning ', s3ObjectKey, s3ObjectBucket)
 
     try {
-        // start the timing of the av scan
+        // start the timing of the av scan for otel metrics
         const startTime = new Date().getTime()
+
+        const activeSpan = opentelemetry.trace.getActiveSpan()
+        activeSpan?.setAttribute(SemanticAttributes.CODE_FUNCTION, 'scanFile')
 
         // scan the file
         await scanFile(
@@ -84,6 +90,7 @@ async function avScan(event: S3Event, _context: Context) {
             maxFileSize,
             '/tmp/downloads'
         )
+        activeSpan?.end()
 
         // Record the duration of the av scan
         const endTime = new Date().getTime()
