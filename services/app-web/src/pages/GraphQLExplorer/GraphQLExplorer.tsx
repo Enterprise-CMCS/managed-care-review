@@ -134,16 +134,10 @@ export const GraphQLExplorer = () => {
                         theme: 'light',
                     },
                     document: ``,
-                }}
-                handleRequest={(endpointUrl, options) => {
-                    return fetch(endpointUrl, {
-                        ...options,
-                        headers: {
-                            ...options.headers,
-                            'cognito-authentication-provider':
-                                JSON.stringify(loggedInUser),
-                        },
-                    })
+                    headers: {
+                        'cognito-authentication-provider':
+                            JSON.stringify(loggedInUser),
+                    },
                 }}
             />
         </div>
