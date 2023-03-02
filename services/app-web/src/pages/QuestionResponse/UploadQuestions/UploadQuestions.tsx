@@ -77,6 +77,7 @@ export const UploadQuestions = () => {
             const createResult = await createQuestion({
                 variables: { input },
                 refetchQueries: ['fetchHealthPlanPackageWithQuestions'],
+                awaitRefetchQueries: true,
             })
 
             if (createResult) {
