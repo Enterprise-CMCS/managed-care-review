@@ -5,6 +5,7 @@ import { Resolvers } from '../../gen/gqlServer'
 import { isStoreError, Store } from '../../postgres'
 import { convertToIndexQuestionsPayload } from '../../postgres/questionResponses'
 import { logError } from '../../logger'
+import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
 
 export function healthPlanPackageResolver(
     store: Store
@@ -44,20 +45,20 @@ export function healthPlanPackageResolver(
             }
             return state
         },
-        questions: async (parent) => {
+        questions: async (parent, args, context) => {
+            const { span } = context
             const pkgID = parent.id
             const result = await store.findAllQuestionsByHealthPlanPackage(
                 pkgID
             )
 
             if (isStoreError(result)) {
-                const errMessage = `Issue finding questions of type ${result.code}. Message: ${result.message}`
+                const errMessage = `Issue finding questions of type ${result.code} for package with id: ${pkgID}. Message: ${result.message}`
                 logError('indexQuestions', errMessage)
+                setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new Error(errMessage)
             }
-            const questions2 = convertToIndexQuestionsPayload(result)
-
-            return questions2
+            return convertToIndexQuestionsPayload(result)
         },
     }
 }
