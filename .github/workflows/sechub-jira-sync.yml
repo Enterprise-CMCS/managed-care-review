@@ -1,0 +1,54 @@
+name: Sync Security Hub findings and Jira issues
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '25 1 * * *' # daily at 6:25 am EST
+
+permissions:
+  id-token: write
+
+jobs:
+  sync:
+    name: Run sync
+    environment: prod
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ secrets.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
+          stage-name: prod
+
+      - name: Sync Security Hub and Jira
+        uses: Enterprise-CMCS/security-hub-visibility@v1.0.1
+        with:
+          jira-token: ${{ secrets.JIRA_TOKEN }}
+          jira-username: ${{ secrets.JIRA_USERNAME }}
+          jira-host: qmacbis.atlassian.net
+          jira-project-key: MR # add issues to the 'MC-Review' project
+          jira-epic-key: MR-3092 # add issues to the '[Tech Maintenance] Security Hub' epic
+          jira-custom-fields: '{ "customfield_10006": 925 }' # add issues to the 'Tech Maintenance' sprint
+          jira-ignore-statuses: Done
+          aws-region: us-east-1
+          aws-severities: CRITICAL, HIGH, MEDIUM
+
+  slack:
+    name: Slack notification on failure
+    runs-on: ubuntu-20.04
+    if: failure()
+    steps:
+      - name: Alert Slack On Failure
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: Deploy Alerts
+          SLACK_ICON_EMOJI: ':bell:'
+          SLACK_COLOR: failure
+          SLACK_FOOTER: ''
+          SLACK_MESSAGE: 'Syncing Security Hub findings with Jira issues failed'
+          MSG_MINIMAL: actions url

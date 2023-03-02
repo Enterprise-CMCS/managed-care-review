@@ -57,6 +57,7 @@ params:
       - "ssm:*"
       - "s3:*"
       - "wafv2:*"
+      - "securityhub:*"
 
 provider:
   name: aws
