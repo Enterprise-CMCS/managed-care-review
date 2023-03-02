@@ -70,7 +70,7 @@ Cypress.Commands.add(
         if (initialURL !== '/') {
             cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20000 }) // for cases where CMs user goes to specific submission on login
         } else {
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 })
+            cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80000 })
         }
     }
 )
