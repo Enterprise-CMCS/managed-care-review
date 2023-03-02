@@ -17,6 +17,7 @@ import {
     LookupListType,
     makeDocumentListFromFormDatas,
 } from '../documentHelpers/makeDocumentKeyLookupList'
+import { QueryFunctionOptions } from '@apollo/client'
 
 // We return a slightly modified version of the wrapped result adding formDatas
 // all of these fields will be added to the SUCCESS type
@@ -132,7 +133,8 @@ function useFetchHealthPlanPackageWrapper(id: string): WrappedFetchResultType {
 }
 
 function useFetchHealthPlanPackageWithQuestionsWrapper(
-    id: string
+    id: string,
+    onCompleted?: QueryFunctionOptions['onCompleted']
 ): WrappedFetchResultWithQuestionsType {
     const results = wrapApolloResult(
         useFetchHealthPlanPackageWithQuestionsQuery({
@@ -141,6 +143,7 @@ function useFetchHealthPlanPackageWithQuestionsWrapper(
                     pkgID: id,
                 },
             },
+            onCompleted,
         })
     )
     const result = results.result
