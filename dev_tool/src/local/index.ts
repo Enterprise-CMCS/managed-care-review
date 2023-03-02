@@ -7,8 +7,13 @@ export {
 } from './graphql.js'
 export { installPrismaDeps, runPostgresLocally } from './postgres.js'
 export { compileProto, compileProtoWatch } from './proto.js'
-export { runUploadsLocally } from './uploads.js'
+export { runS3Locally } from './s3.js'
 export { runStorybookLocally } from './storybook.js'
-export { runWebAgainstAWS, runWebAgainstDocker, runWebLocally } from './web.js'
+export {
+    installWebDepsOnce,
+    runWebAgainstAWS,
+    runWebAgainstDocker,
+    runWebLocally,
+} from './web.js'
 
 export { runOtelLocally } from './otel.js'
