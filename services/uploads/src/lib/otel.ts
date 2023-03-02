@@ -4,7 +4,7 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { Resource } from '@opentelemetry/resources'
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node'
 import { CollectorTraceExporter } from '@opentelemetry/exporter-collector'
-import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 
@@ -21,18 +21,22 @@ export function initTracer(serviceName: string, otelCollectorURL: string) {
         instrumentations: [getNodeAutoInstrumentations()],
     })
 
+    const resource = Resource.default().merge(
+        new Resource({
+            [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
+        })
+    )
+
     const exporter = new CollectorTraceExporter({
         url: otelCollectorURL,
         headers: {},
     })
     const provider = new NodeTracerProvider({
         idGenerator: new AWSXRayIdGenerator(),
-        resource: new Resource({
-            [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
-        }),
+        resource: resource,
     })
 
-    provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
+    provider.addSpanProcessor(new BatchSpanProcessor(exporter))
 
     // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
     provider.register()
