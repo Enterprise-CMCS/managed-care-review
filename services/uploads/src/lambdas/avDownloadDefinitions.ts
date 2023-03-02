@@ -2,7 +2,12 @@ import { Context, S3Event } from 'aws-lambda'
 import { NewS3UploadsClient } from '../deps/s3'
 import { NewClamAV } from '../deps/clamAV'
 import { updateAVDefinitions } from '../lib/updateAVDefinitions'
-import { initMeter, initTracer, recordException } from '../lib/otel'
+import {
+    initMeter,
+    initTracer,
+    recordException,
+    recordHistogram,
+} from '../lib/otel'
 
 async function avDownloadDefinitions(_event: S3Event, _context: Context) {
     console.info('-----Start Update AV Definitions function-----')
@@ -54,7 +59,17 @@ async function avDownloadDefinitions(_event: S3Event, _context: Context) {
 
     console.info('Updating AV definitions ', clamAVBucketName)
     try {
+        // start the timing of the av scan
+        const startTime = new Date().getTime()
+
+        // run the update
         await updateAVDefinitions(s3Client, clamAV, '/tmp')
+
+        // Record the duration of the av scan
+        const endTime = new Date().getTime()
+        const executionTime = endTime - startTime
+        console.info(`av scan time: ${executionTime}`)
+        recordHistogram(serviceName, 'avscan.time', executionTime)
     } catch (err) {
         recordException(err, serviceName)
     }

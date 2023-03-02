@@ -7,7 +7,6 @@ import { CollectorTraceExporter } from '@opentelemetry/exporter-collector'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
-import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
 
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http'
 import {
@@ -36,9 +35,7 @@ export function initTracer(serviceName: string, otelCollectorURL: string) {
     provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
 
     // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
-    provider.register({
-        propagator: new AWSXRayPropagator(),
-    })
+    provider.register()
 }
 
 export function initMeter(serviceName: string) {
