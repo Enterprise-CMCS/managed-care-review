@@ -68,70 +68,70 @@ const includesChipPrograms = (programIDs: string[]): boolean => {
     const chipProgramIds = Object.values(CHIP_PROGRAMS_UUID)
     return programIDs.some((id: string) => chipProgramIds.includes(id))
 }
+// Filter reviewers email list to ensure CHIP programs and state of PR submission do not include OACT and DMCP emails.
+const filterChipAndPRSubmissionReviewers = (
+    reviewers: string[],
+    config: EmailConfiguration
+) => {
+    const { oactEmails, dmcpEmails } = config
 
-// Determine who should be notified as a reviewer for a given health plan package and state
+    return reviewers.filter(
+        (email) => !dmcpEmails.includes(email) && !oactEmails.includes(email)
+    )
+}
+
+/* 
+    Determine reviewers for a given health plan package and state
+    - cmsReviewSharedEmails added to all emails by default
+    - dmcoEmails added to all emails by default
+    - dmcpEmails added in both CONTRACT_ONLY and CONTRACT_AND_RATES
+    - oactEmails added for CONTRACT_AND_RATES
+    
+    Return should be wrapped in pruneDuplicate to ensure even if config is added twice, we get unique list of reviewers
+*/
 const generateCMSReviewerEmails = (
     config: EmailConfiguration,
     pkg: LockedHealthPlanFormDataType | UnlockedHealthPlanFormDataType,
     stateAnalystsEmails: StateAnalystsEmails
 ): string[] | Error => {
-    // OACT email, receives only CONTRACT_AND_RATES submission, excludes CHIP and state of PR
-    const oactEmails: string[] = config.ratesReviewSharedEmails
-
-    // DMCP and OACT share an inbox that receives all submissions, excludes CHIP and state of PR and should be included
-    // in cmsReviewSharedEmails.
-    // cmsRateHelpEmailAddress is also set to this shared DMCP and OACT inbox. We are setting this const in order to
-    // filter it out for CHIP and State of PR submissions because we cannot store the actual email in the API. This
-    // will eventually be fixed when moving to storing emails in our DB.
-    const dmcpOACTSharedEmail: string = config.cmsRateHelpEmailAddress
-
-    // CHIP programs and state of PR submission does not include OACT and DMCP emails.
-    const filterChipAndPRSubmission = (reviewers: string[]) =>
-        reviewers.filter(
-            (email) =>
-                email !== dmcpOACTSharedEmail && !oactEmails.includes(email)
-        )
-
-    //This list of program IDs combines programs specified for contract certification and rate certification.
-    const programIDs = findAllPackageProgramIds(pkg)
-
-    // dmcpEmail is added in both CONTRACT_ONLY and CONTRACT_AND_RATES, in case it wasn't included in cmsReviewSharedEmails.
-    // cmsReviewSharedEmail emails are pulled from parameter store /configuration/email/reviewTeamAddresses.
-    // pruneDuplicateEmails function will remove dmcpEmail if it's a duplicate.
-    if (pkg.submissionType === 'CONTRACT_ONLY') {
-        // Contract submissions reviewer emails
-        let reviewers = pruneDuplicateEmails([
-            ...config.cmsReviewSharedEmails,
-            ...stateAnalystsEmails,
-            dmcpOACTSharedEmail,
-        ])
-
-        //Remove OACT and DMCP emails from CHIP or State of PR submissions
-        if (includesChipPrograms(programIDs) || pkg.stateCode === 'PR') {
-            reviewers = filterChipAndPRSubmission(reviewers)
-        }
-
-        return reviewers
-    } else if (pkg.submissionType === 'CONTRACT_AND_RATES') {
-        //Contract and rate submissions reviewer emails.
-        let reviewers = pruneDuplicateEmails([
-            ...config.cmsReviewSharedEmails,
-            ...stateAnalystsEmails,
-            dmcpOACTSharedEmail,
-            ...oactEmails,
-        ])
-
-        //Remove OACT nad DMCP emails from CHIP or State of PR submissions
-        if (includesChipPrograms(programIDs) || pkg.stateCode === 'PR') {
-            reviewers = filterChipAndPRSubmission(reviewers)
-        }
-
-        return reviewers
-    } else {
+    if (
+        pkg.submissionType !== 'CONTRACT_AND_RATES' &&
+        pkg.submissionType !== 'CONTRACT_ONLY'
+    ) {
         return new Error(
             `generateCMSReviewerEmails does not currently support submission type: ${pkg.submissionType}.`
         )
     }
+
+    const { oactEmails, dmcpEmails, dmcoEmails } = config
+    const programIDs = findAllPackageProgramIds(pkg)
+    let reviewers: string[] = []
+
+    if (pkg.submissionType === 'CONTRACT_ONLY') {
+        // Contract submissions reviewer emails
+        reviewers = [
+            ...config.cmsReviewSharedEmails,
+            ...stateAnalystsEmails,
+            ...dmcoEmails,
+            ...dmcpEmails,
+        ]
+    } else if (pkg.submissionType === 'CONTRACT_AND_RATES') {
+        //Contract and rate submissions reviewer emails.
+        reviewers = [
+            ...config.cmsReviewSharedEmails,
+            ...stateAnalystsEmails,
+            ...dmcoEmails,
+            ...dmcpEmails,
+            ...oactEmails,
+        ]
+    }
+
+    //Remove OACT and DMCP emails from CHIP or State of PR submissions
+    if (includesChipPrograms(programIDs) || pkg.stateCode === 'PR') {
+        reviewers = filterChipAndPRSubmissionReviewers(reviewers, config)
+    }
+
+    return pruneDuplicateEmails(reviewers)
 }
 
 //Finds all package program and rate program ids in a package and combines them into one array removing duplicates.
@@ -196,4 +196,5 @@ export {
     SubmissionTypeRecord,
     findAllPackageProgramIds,
     findPackagePrograms,
+    filterChipAndPRSubmissionReviewers,
 }

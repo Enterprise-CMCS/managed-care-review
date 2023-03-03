@@ -31,7 +31,7 @@ To get the tools needed for local development, you can run:
 
 ```bash
 brew tap yoheimuta/protolint
-brew install yarn lerna direnv shellcheck protolint detect-secrets
+brew install yarn lerna direnv shellcheck protolint detect-secrets clamav
 yarn husky install
 ```
 
@@ -308,6 +308,12 @@ We currently are using Open Telemetry for distributed tracing, with our OTEL exp
 6. Enter your MFA token.
 
 You should now be at our New Relic dashboard where all our OTEL metrics are being displayed.
+
+## Launch Darkly
+
+We currently use the CMS Federal (.us) install of Launch Darkly to manage our feature flags. This can be accessed through [LD Federal](https://app.launchdarkly.us) by providing the email address associated with your EUA account (e.g. `@teamtrussworks.com`), which will redirect you to CMS SSO.
+
+There are [technical design docs](docs/technical-design) about how to add feature flags and how to test with them.
 
 ## Contributing
 

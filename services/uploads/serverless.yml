@@ -15,7 +15,7 @@ plugins:
 # The `provider` block defines where your service will be deployed
 provider:
   name: aws
-  runtime: nodejs16.x
+  runtime: nodejs18.x
   region: us-east-1
   iam:
     role:
@@ -42,7 +42,12 @@ provider:
           Resource:
             - !Sub arn:aws:s3:::${self:service}-${sls:stage}-uploads-${AWS::AccountId}
             - !Sub arn:aws:s3:::${self:service}-${sls:stage}-avscan-${AWS::AccountId}
-            - !Sub arn:aws:s3:::${self:service}-${sls:stage}-qa-${AWS::AccountId}/*
+            - !Sub arn:aws:s3:::${self:service}-${sls:stage}-qa-${AWS::AccountId}
+        - Effect: 'Allow'
+          Action:
+            - lambda:InvokeFunction
+          Resource:
+            - !Sub arn:aws:lambda:${self:provider.region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-avAuditFiles
 
 custom:
   region: ${aws:region}
@@ -62,6 +67,7 @@ custom:
     ssm:
       '/configuration/iam/full_permissions_boundary_policy': 'arn:aws:iam::local:policy/local/developer-boundary-policy'
   s3:
+    # address: 127.0.0.1 # this started defaulting to ipv6 which prevented tests from connecting
     # when vhostBuckets are enabled all non-localhost hostnames are re-written as buckets
     # setting this false allows the workaround for docker to work.
     vhostBuckets: false
@@ -72,6 +78,9 @@ custom:
         # the serverless-s3-local plugin starts any bucket with a BucketName
         # the attachments bucket has no name, so we need to make one up on our own
       - local-qa
+      - test-uploads
+      - test-audit
+      - test-av-definitions
   serverlessTerminationProtection:
     stages:
       - dev
@@ -86,13 +95,13 @@ layers:
 
 functions:
   avScan:
-    handler: src/antivirus.lambdaHandleEvent
+    handler: src/lambdas/index.avScan
     name: ${self:service}-${sls:stage}-avScan
     timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
     memorySize: 3008
     layers:
       - !Ref ClamDefsLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:1
     environment:
       CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
       PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
@@ -100,15 +109,47 @@ functions:
       OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
 
   avDownloadDefinitions:
-    handler: src/download-definitions.lambdaHandleEvent
+    handler: src/lambdas/index.avDownloadDefinitions
     events:
       - schedule: cron(0 */6 * * ? *)
     timeout: 300 # 300 seconds = 5 minutes
     memorySize: 1024
     layers:
       - !Ref ClamDefsLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-0-1:1
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:1
     environment:
+      CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
+      PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
+      AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
+      OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
+
+  avAuditUploads:
+    handler: src/lambdas/index.avAuditUploads
+    timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
+    maximumRetryAttempts: 0
+    layers:
+      - !Ref ClamDefsLambdaLayer
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-8-0:2
+    environment:
+      AUDIT_BUCKET_NAME: !Ref DocumentUploadsBucket
+      CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
+      PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
+      LIST_INFECTED_FILES_LAMBDA_NAME: ${self:functions.avAuditFiles.name}
+      AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler
+      OPENTELEMETRY_COLLECTOR_CONFIG_FILE: /var/task/collector.yml
+
+  avAuditFiles:
+    handler: src/lambdas/index.avAuditFiles
+    name: ${self:service}-${sls:stage}-avAuditFiles
+    timeout: 300 # 300 seconds = 5 minutes. Average scan is 25 seconds.
+    memorySize: 2048
+    ephemeralStorageSize: 1024
+    maximumRetryAttempts: 0
+    layers:
+      - !Ref ClamDefsLambdaLayer
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:1
+    environment:
+      AUDIT_BUCKET_NAME: !Ref DocumentUploadsBucket
       CLAMAV_BUCKET_NAME: !Ref ClamDefsBucket
       PATH_TO_AV_DEFINITIONS: 'lambda/s3-antivirus/av-definitions'
       AWS_LAMBDA_EXEC_WRAPPER: /opt/otel-handler

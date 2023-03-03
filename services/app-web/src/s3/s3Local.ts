@@ -7,12 +7,13 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 import { parseKey } from '../common-code/s3URLEncoding'
+import { BucketShortName, S3BucketConfigType } from './s3Amplify'
 import { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
 
 export function newLocalS3Client(
     endpoint: string,
-    bucketName: string
+    bucketConfig: S3BucketConfigType
 ): S3ClientT {
     const s3Client = new S3Client({
         forcePathStyle: true,
@@ -26,10 +27,13 @@ export function newLocalS3Client(
     })
 
     return {
-        uploadFile: async (file: File): Promise<string | S3Error> => {
+        uploadFile: async (
+            file: File,
+            bucket: BucketShortName
+        ): Promise<string | S3Error> => {
             const filename = `${Date.now()}-${file.name}`
             const command = new PutObjectCommand({
-                Bucket: bucketName,
+                Bucket: bucketConfig[bucket],
                 Key: filename,
                 Body: file,
             })
@@ -58,9 +62,12 @@ export function newLocalS3Client(
             }
         },
 
-        deleteFile: async (s3Key: string): Promise<void | S3Error> => {
+        deleteFile: async (
+            s3Key: string,
+            bucket: BucketShortName
+        ): Promise<void | S3Error> => {
             const command = new DeleteObjectCommand({
-                Bucket: bucketName,
+                Bucket: bucketConfig[bucket],
                 Key: s3Key,
             })
             try {
@@ -79,7 +86,10 @@ export function newLocalS3Client(
                 return err
             }
         },
-        scanFile: async (s3Key: string): Promise<void | S3Error> => {
+        scanFile: async (
+            s3Key: string,
+            bucket: BucketShortName
+        ): Promise<void | S3Error> => {
             return new Promise((resolve) => {
                 setTimeout(() => {
                     resolve()
@@ -90,13 +100,20 @@ export function newLocalS3Client(
             const key = parseKey(s3URL)
             return key instanceof Error ? null : key
         },
-        getS3URL: async (s3key: string, filename: string): Promise<string> => {
+        getS3URL: async (
+            s3key: string,
+            filename: string,
+            bucket: BucketShortName
+        ): Promise<string> => {
             // ignore what's passed in as the bucket and use whats in LocalS3Client
-            return `s3://${bucketName}/${s3key}/${filename}`
+            return `s3://${bucketConfig[bucket]}/${s3key}/${filename}`
         },
-        getURL: async (s3key: string): Promise<string> => {
+        getURL: async (
+            s3key: string,
+            bucket: BucketShortName
+        ): Promise<string> => {
             const command = new GetObjectCommand({
-                Bucket: bucketName,
+                Bucket: bucketConfig[bucket],
                 Key: s3key,
             })
             // Create the presigned URL.
@@ -105,10 +122,11 @@ export function newLocalS3Client(
         },
         getBulkDlURL: async (
             keys: string[],
-            filename: string
+            filename: string,
+            bucket: BucketShortName
         ): Promise<string | Error> => {
             const command = new GetObjectCommand({
-                Bucket: bucketName,
+                Bucket: bucketConfig[bucket],
                 Key: filename,
             })
             const signedUrl = await getSignedUrl(s3Client, command)

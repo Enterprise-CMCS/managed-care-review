@@ -3,22 +3,20 @@ receivers:
     protocols:
       grpc:
       http:
-        cors_allowed_origins:
-          - http://localhost:3000
-          - http://localhost:3002
-          - http://localhost:3030
+        cors:
+          allowed_origins:
+            - http://localhost:3000
+            - http://localhost:3002
+            - http://localhost:3030
 
 exporters:
   jaeger:
     endpoint: jaeger-all-in-one:14250
-    insecure: true
-
-processors:
-  batch:
+    tls:
+      insecure: true
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
       exporters: [jaeger]
-      processors: [batch]

@@ -4,7 +4,7 @@ import { UploadedDocumentsTable } from './UploadedDocumentsTable'
 import {
     fetchCurrentUserMock,
     mockValidCMSUser,
-} from '../../../testHelpers/apolloHelpers'
+} from '../../../testHelpers/apolloMocks'
 
 describe('UploadedDocumentsTable', () => {
     it('renders documents without errors', async () => {

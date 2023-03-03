@@ -5,21 +5,37 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "start": "npx serverless s3 start --stage local"
+        "precommit": "lint-staged",
+        "lint": "tsc --noEmit && eslint . --max-warnings=0",
+        "clean": "rm -rf node_modules && yarn cache clean",
+        "start": "npx serverless s3 start --stage local",
+        "test": "jest --watch"
     },
     "author": "",
     "license": "CC0-1.0",
+    "lint-staged": {
+        "*.ts": [
+            "eslint --max-warnings=0",
+            "prettier --write"
+        ]
+    },
+    "dependencies": {
+        "@aws-sdk/client-s3": "^3.262.0"
+    },
     "devDependencies": {
         "copy-webpack-plugin": "^11.0.0",
-        "serverless-webpack": "^5.7.1",
-        "serverless": "^3.19.0",
-        "serverless-offline": "^8.8.0",
-        "serverless-offline-ssm": "^6.2.0",
+        "serverless": "^3.26.0",
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
         "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
+        "serverless-offline": "^12.0.4",
+        "serverless-offline-ssm": "^6.2.0",
         "serverless-plugin-scripts": "^1.0.2",
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
-        "serverless-s3-local": "^0.6.22",
-        "serverless-stack-termination-protection": "^2.0.2"
+        "serverless-s3-local": "^0.7.1",
+        "serverless-stack-termination-protection": "^2.0.2",
+        "serverless-webpack": "^5.11.0",
+        "ts-jest": "^27.1.4",
+        "ts-loader": "^9.2.8",
+        "tsconfig-paths-webpack-plugin": "^4.0.0"
     }
 }

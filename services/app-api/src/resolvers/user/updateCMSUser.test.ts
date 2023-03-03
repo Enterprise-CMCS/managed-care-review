@@ -94,16 +94,19 @@ describe('updateCMSUser', () => {
 
         const user2 = updateRes2.data.updateCMSUser.user
         expect(user2.email).toBe(newUser.email)
-        expect(user2.stateAssignments).toEqual([
-            {
-                code: 'MA',
-                name: 'Massachusetts',
-            },
-            {
-                code: 'VA',
-                name: 'Virginia',
-            },
-        ])
+        expect(user2.stateAssignments).toHaveLength(2)
+        expect(user2.stateAssignments).toEqual(
+            expect.arrayContaining([
+                {
+                    code: 'MA',
+                    name: 'Massachusetts',
+                },
+                {
+                    code: 'VA',
+                    name: 'Virginia',
+                },
+            ])
+        )
     })
 
     it('errors if the target is not a CMS user', async () => {

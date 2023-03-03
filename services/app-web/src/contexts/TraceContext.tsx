@@ -1,6 +1,8 @@
 import React from 'react'
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
-import { WebTracerProvider } from '@opentelemetry/sdk-trace-web'
+import {
+    WebTracerProvider,
+    SimpleSpanProcessor,
+} from '@opentelemetry/sdk-trace-web'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http/build/esnext'
 import { Resource } from '@opentelemetry/resources'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
@@ -24,7 +26,7 @@ const collectorOptions = {
 }
 const exporter = new OTLPTraceExporter(collectorOptions)
 
-provider.addSpanProcessor(new BatchSpanProcessor(exporter))
+provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
 
 provider.register({
     propagator: new AWSXRayPropagator(),
@@ -36,12 +38,12 @@ registerInstrumentations({
         getWebAutoInstrumentations({
             // load custom configuration for xml-http-request instrumentation
             '@opentelemetry/instrumentation-xml-http-request': {
-                ignoreUrls: [/(.*).launchdarkly.com/g],
+                ignoreUrls: [/(.*).launchdarkly\.(com|us)/g],
                 propagateTraceHeaderCorsUrls: [/.+/g],
             },
             // load custom configuration for fetch instrumentation
             '@opentelemetry/instrumentation-fetch': {
-                ignoreUrls: [/(.*).launchdarkly.com/g],
+                ignoreUrls: [/(.*).launchdarkly\.(com|us)/g],
                 propagateTraceHeaderCorsUrls: [/.+/g],
             },
         }),

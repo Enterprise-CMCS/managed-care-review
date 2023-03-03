@@ -12,7 +12,7 @@ import {
     unlockHealthPlanPackageMockError,
     unlockHealthPlanPackageMockSuccess,
     mockUnlockedHealthPlanPackage,
-} from '../../testHelpers/apolloHelpers'
+} from '../../testHelpers/apolloMocks'
 import { UnlockSubmitModal } from './UnlockSubmitModal'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { Location } from 'react-router-dom'

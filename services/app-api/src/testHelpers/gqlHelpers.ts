@@ -10,7 +10,12 @@ import {
     UnlockedHealthPlanFormDataType,
     StateCodeType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { ProgramType } from '../domain-models'
+import {
+    CreateQuestionInput,
+    CreateQuestionPayload,
+    IndexQuestionsPayload,
+    ProgramType,
+} from '../domain-models'
 import { Emailer, newLocalEmailer } from '../emailer'
 import {
     CreateHealthPlanPackageInput,
@@ -29,6 +34,9 @@ import {
 import statePrograms from '../../../app-web/src/common-code/data/statePrograms.json'
 import { testLDService } from './launchDarklyHelpers'
 import { LDService } from '../launchDarkly/launchDarkly'
+import { insertUserToLocalAurora } from '../authn'
+import CREATE_QUESTION from 'app-graphql/src/mutations/createQuestion.graphql'
+import INDEX_QUESTIONS from 'app-graphql/src/queries/indexQuestions.graphql'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -83,6 +91,9 @@ const constructTestPostgresServer = async (opts?: {
 
     const prismaClient = await sharedTestPrismaClient()
     const postgresStore = opts?.store || NewPostgresStore(prismaClient)
+
+    await insertUserToLocalAurora(postgresStore, context.user)
+
     const postgresResolvers = configureResolvers(
         postgresStore,
         emailer,
@@ -103,10 +114,12 @@ const constructTestEmailer = (): Emailer => {
         stage: 'localtest',
         baseUrl: 'http://localtest',
         cmsReviewSharedEmails: ['test@example.com'],
-        ratesReviewSharedEmails: ['testRate@example.com'],
         cmsReviewHelpEmailAddress: 'mcog@example.com',
         cmsRateHelpEmailAddress: 'rates@example.com',
         cmsDevTeamHelpEmailAddress: 'mc-review@example.com',
+        oactEmails: ['testRate@example.com'],
+        dmcpEmails: ['testPolicy@example.com'],
+        dmcoEmails: ['testDmco@example.com'],
     }
     return newLocalEmailer(config)
 }
@@ -365,6 +378,66 @@ const fetchTestHealthPlanPackageById = async (
     return result.data.fetchHealthPlanPackage.pkg
 }
 
+const createTestQuestion = async (
+    server: ApolloServer,
+    pkgID: string,
+    questionData?: Omit<CreateQuestionInput, 'pkgID'>
+): Promise<CreateQuestionPayload> => {
+    const question = questionData || {
+        documents: [
+            {
+                name: 'Test Question',
+                s3URL: 'testS3Url',
+            },
+        ],
+    }
+    const createdQuestion = await server.executeOperation({
+        query: CREATE_QUESTION,
+        variables: {
+            input: {
+                pkgID,
+                ...question,
+            },
+        },
+    })
+
+    if (createdQuestion.errors)
+        throw new Error(
+            `createTestQuestion mutation failed with errors ${createdQuestion.errors}`
+        )
+
+    if (!createdQuestion.data) {
+        throw new Error('createTestQuestion returned nothing')
+    }
+
+    return createdQuestion.data.createQuestion
+}
+
+const indexTestQuestions = async (
+    server: ApolloServer,
+    pkgID: string
+): Promise<IndexQuestionsPayload> => {
+    const indexQuestionsResult = await server.executeOperation({
+        query: INDEX_QUESTIONS,
+        variables: {
+            input: {
+                pkgID: pkgID,
+            },
+        },
+    })
+
+    if (indexQuestionsResult.errors)
+        throw new Error(
+            `indexTestQuestions query failed with errors ${indexQuestionsResult.errors}`
+        )
+
+    if (!indexQuestionsResult.data) {
+        throw new Error('indexTestQuestions returned nothing')
+    }
+
+    return indexQuestionsResult.data.indexQuestions
+}
+
 export {
     constructTestPostgresServer,
     createTestHealthPlanPackage,
@@ -378,4 +451,6 @@ export {
     defaultContext,
     defaultFloridaProgram,
     defaultFloridaRateProgram,
+    createTestQuestion,
+    indexTestQuestions,
 }

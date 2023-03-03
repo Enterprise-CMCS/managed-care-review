@@ -20,15 +20,13 @@ const testEmailConfig: EmailConfiguration = {
     stage: 'LOCAL',
     baseUrl: 'http://localhost',
     emailSource: 'emailSource@example.com',
-    cmsReviewSharedEmails: [
-        'cmsreview1@example.com',
-        'cmsreview2@example.com',
-        '"Rates Example" <rates@example.com>',
-    ],
+    cmsReviewSharedEmails: ['cmsreview1@example.com', 'cmsreview2@example.com'],
     cmsReviewHelpEmailAddress: '"MCOG Example" <mcog@example.com>',
     cmsRateHelpEmailAddress: '"Rates Example" <rates@example.com>',
     cmsDevTeamHelpEmailAddress: '"MC-Review Example" <mc-review@example.com>',
-    ratesReviewSharedEmails: ['ratesreview@example.com'],
+    oactEmails: ['ratesreview@example.com'],
+    dmcpEmails: ['policyreview1@example.com'],
+    dmcoEmails: ['overallreview@example.com'],
 }
 
 const testDuplicateEmailConfig: EmailConfiguration = {
@@ -43,7 +41,9 @@ const testDuplicateEmailConfig: EmailConfiguration = {
     cmsReviewHelpEmailAddress: 'duplicate@example.com',
     cmsRateHelpEmailAddress: 'duplicate@example.com',
     cmsDevTeamHelpEmailAddress: 'duplicate@example.com',
-    ratesReviewSharedEmails: ['duplicate@example.com'],
+    oactEmails: ['duplicate@example.com', 'duplicate@example.com'],
+    dmcpEmails: ['duplicate@example.com', 'duplicate@example.com'],
+    dmcoEmails: ['duplicate@example.com', 'duplicate@example.com'],
 }
 
 const testStateAnalystsEmails: string[] = [

@@ -5,7 +5,7 @@ import {
     fetchCurrentUserMock,
     mockContractAndRatesDraft,
     mockStateSubmission,
-} from '../../../testHelpers/apolloHelpers'
+} from '../../../testHelpers/apolloMocks'
 
 describe('SupportingDocumentsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()

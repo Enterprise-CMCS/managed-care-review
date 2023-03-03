@@ -15,10 +15,8 @@ import {
     RateInfoType,
 } from '../../../common-code/healthPlanFormDataType'
 import { HealthPlanPackageStatus, Program } from '../../../gen/gqlClient'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { useIndexHealthPlanPackagesQuery } from '../../../gen/gqlClient'
 import { recordJSException } from '../../../otelHelpers'
-import { featureFlags } from '../../../common-code/featureFlags'
 import { getCurrentRevisionFromHealthPlanPackage } from '../../../gqlHelpers'
 import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
@@ -54,12 +52,6 @@ export const RateDetailsSummarySection = ({
     const [packageNamesLookup, setPackageNamesLookup] =
         React.useState<PackageNamesLookupType | null>(null)
 
-    // Launch Darkly
-    const ldClient = useLDClient()
-    const showSharedRates = ldClient?.variation(
-        featureFlags.RATES_ACROSS_SUBMISSIONS.flag,
-        featureFlags.RATES_ACROSS_SUBMISSIONS.defaultValue
-    )
     const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && navigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
@@ -189,7 +181,8 @@ export const RateDetailsSummarySection = ({
             // call the lambda to zip the files and get the url
             const zippedURL = await getBulkDlURL(
                 keysFromDocs,
-                submissionName + '-rate-details.zip'
+                submissionName + '-rate-details.zip',
+                'HEALTH_PLAN_DOCS'
             )
             if (zippedURL instanceof Error) {
                 console.info('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
@@ -325,12 +318,9 @@ export const RateDetailsSummarySection = ({
                                 {!loading ? (
                                     <UploadedDocumentsTable
                                         documents={rateInfo.rateDocuments}
-                                        packagesWithSharedRateCerts={
-                                            showSharedRates &&
-                                            refreshPackagesWithSharedRateCert(
-                                                rateInfo
-                                            )
-                                        }
+                                        packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
+                                            rateInfo
+                                        )}
                                         documentDateLookupTable={
                                             documentDateLookupTable
                                         }

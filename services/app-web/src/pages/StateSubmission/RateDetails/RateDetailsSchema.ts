@@ -7,6 +7,11 @@ Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 // Form validations that are always true, regardless of feature flag
 const SingleRateCertSchema = Yup.object().shape({
+    hasSharedRateCert: Yup.string().defined('You must select yes or no'),
+    packagesWithSharedRateCerts: Yup.array().when('hasSharedRateCert', {
+        is: 'YES',
+        then: Yup.array().min(1, 'You must select at least one submission'),
+    }),
     rateProgramIDs: Yup.array().min(1, 'You must select a program'),
     rateType: Yup.string().defined('You must choose a rate certification type'),
     rateCapitationType: Yup.string().defined(
@@ -115,30 +120,16 @@ const SingleRateCertSchema = Yup.object().shape({
 const RateDetailsFormSchema = (
     activeFeatureFlags?: Partial<Record<FeatureFlagTypes, boolean>>
 ) => {
-    const rateAcrossSubsFields = Yup.object().shape({
-        hasSharedRateCert: Yup.string().defined('You must select yes or no'),
-        packagesWithSharedRateCerts: Yup.array().when('hasSharedRateCert', {
-            is: 'YES',
-            then: Yup.array().min(1, 'You must select at least one submission'),
-        }),
-    })
-
-    if (!activeFeatureFlags) {
+    // Configure schema when flags are passed in.
+    if (activeFeatureFlags) {
         return Yup.object().shape({
             rateInfos: Yup.array().of(SingleRateCertSchema),
         })
-    } else {
-        let singleRateCertSchemaWithFlags = SingleRateCertSchema
-
-        if (activeFeatureFlags['rates-across-submissions']) {
-            singleRateCertSchemaWithFlags =
-                singleRateCertSchemaWithFlags.concat(rateAcrossSubsFields)
-        }
-
-        return Yup.object().shape({
-            rateInfos: Yup.array().of(singleRateCertSchemaWithFlags),
-        })
     }
+
+    return Yup.object().shape({
+        rateInfos: Yup.array().of(SingleRateCertSchema),
+    })
 }
 
 export { RateDetailsFormSchema }

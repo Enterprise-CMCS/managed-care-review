@@ -22,13 +22,13 @@ function maintenanceBannerForVariation(flag: string): React.ReactNode {
 export const Landing = (): React.ReactElement => {
     const location = useLocation()
     const ldClient = useLDClient()
-    const siteUnderMantenanceBannerFlag: string = ldClient?.variation(
+    const siteUnderMaintenanceBannerFlag: string = ldClient?.variation(
         featureFlags.SITE_UNDER_MAINTENANCE_BANNER.flag,
         featureFlags.SITE_UNDER_MAINTENANCE_BANNER.defaultValue
     )
 
     const maybeMaintenaceBanner = maintenanceBannerForVariation(
-        siteUnderMantenanceBannerFlag
+        siteUnderMaintenanceBannerFlag
     )
 
     const redirectFromSessionTimeout = new URLSearchParams(location.search).get(

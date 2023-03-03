@@ -6,7 +6,7 @@ import {
     mockMNState,
     mockSubmittedHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
-} from '../../testHelpers/apolloHelpers'
+} from '../../testHelpers/apolloMocks'
 import {
     ldUseClientSpy,
     renderWithProviders,
@@ -118,7 +118,7 @@ describe('CMSDashboard', () => {
     })
 
     it('displays name, type, programs and last update based on previously submitted revision for UNLOCKED package', async () => {
-        const mockMN = mockMNState() // this is the state used in apolloHelpers
+        const mockMN = mockMNState() // this is the state used in apolloMocks
 
         // Set new data on the unlocked form. This would be a state users update and the CMS user should not see this data.
         const unlocked = mockUnlockedHealthPlanPackage(

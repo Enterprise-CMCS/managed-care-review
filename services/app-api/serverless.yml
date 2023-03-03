@@ -28,11 +28,12 @@ custom:
   parameterStoreMode: ${env:PARAMETER_STORE_MODE, ssm:/configuration/parameterStoreMode}
   auroraArn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:postgres-${sls:stage}.PostgresAuroraArn }
   document_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.DocumentUploadsBucketArn}
+  qa_uploads_bucket_arn: ${env:CF_CONFIG_IGNORED_LOCALLY, cf:uploads-${sls:stage}.QAUploadsBucketArn}
   secretsManagerSecret: aurora_postgres_${sls:stage} #pragma: allowlist secret
   reactAppAuthMode: ${env:REACT_APP_AUTH_MODE}
   reactAppOtelCollectorUrl: ${env:REACT_APP_OTEL_COLLECTOR_URL, ssm:/configuration/react_app_otel_collector_url}
   dbURL: ${env:DATABASE_URL}
-  ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key}
+  ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key_feds}
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
@@ -40,6 +41,8 @@ custom:
       forceExclude:
         - '@prisma/client'
       nodeModulesRelativeDir: '../../'
+    packagerOptions:
+      lockFile: '../../yarn.lock'
     excludeRegex: 'darwin|debian'
   serverlessTerminationProtection:
     stages:
@@ -67,14 +70,14 @@ custom:
 
 provider:
   name: aws
-  runtime: nodejs16.x
+  runtime: nodejs18.x
   region: us-east-1
   stage: dev
   apiGateway:
     restApiId: ${self:custom.appApiGatewayId}
     restApiRootResourceId: ${self:custom.appApiGatewayRootResourceId}
   layers:
-    - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-2-0:1
+    - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:1
   iam:
     role:
       path: ${ssm:/configuration/iam/path, "/"}
@@ -109,6 +112,8 @@ provider:
           Resource:
             # this is the "public" folder for all regular uploads from Amplify
             - ${self:custom.document_uploads_bucket_arn}/allusers/*
+            - ${self:custom.qa_uploads_bucket_arn}/allusers/*
+
         - Effect: 'Allow'
           Action:
             - ssm:GetParameter
@@ -164,7 +169,7 @@ functions:
           authorizer: aws_iam
     layers:
       - !Ref PrismaClientEngineLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-2-0:1
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:1
     timeout: 60
     vpc:
       securityGroupIds:
@@ -177,19 +182,7 @@ functions:
       - http:
           path: otel
           method: post
-          cors:
-            origin: '*'
-            headers:
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-              - X-Amz-User-Agent
-              - x-amzn-trace-id
-              - b3
-              - traceparent
-          authorizer: aws_iam
+          cors: true
 
   graphql:
     handler: src/handlers/apollo_gql.graphqlHandler
@@ -197,34 +190,12 @@ functions:
       - http:
           path: graphql
           method: post
-          cors:
-            origin: '*'
-            headers:
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-              - X-Amz-User-Agent
-              - x-amzn-trace-id
-              - b3
-              - traceparent
+          cors: true
           authorizer: aws_iam
       - http:
           path: graphql
           method: get
-          cors:
-            origin: '*'
-            headers:
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-              - X-Amz-User-Agent
-              - x-amzn-trace-id
-              - b3
-              - traceparent
+          cors: true
           authorizer: aws_iam
     timeout: 60 # aurora cold start can be long
     vpc:
@@ -233,7 +204,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientEngineLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-2-0:1
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:1
 
   migrate:
     handler: src/handlers/postgres_migrate.main
@@ -244,7 +215,7 @@ functions:
       subnetIds: ${self:custom.privateSubnets}
     layers:
       - !Ref PrismaClientMigrationLambdaLayer
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-2-0:1
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:1
 
   zip_keys:
     handler: src/handlers/bulk_download.main
@@ -252,18 +223,7 @@ functions:
       - http:
           path: zip
           method: post
-          cors:
-            origin: '*'
-            headers:
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-              - X-Amz-User-Agent
-              - x-amzn-trace-id
-              - b3
-              - traceparent
+          cors: true
           authorizer: aws_iam
 
   cleanup:
@@ -271,7 +231,7 @@ functions:
     events:
       - schedule: cron(0 14 ? * MON-FRI *)
     layers:
-      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-2-0:1
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:1
 
 resources:
   Resources:

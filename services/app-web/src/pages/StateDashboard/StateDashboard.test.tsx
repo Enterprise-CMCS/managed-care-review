@@ -7,7 +7,7 @@ import {
     mockDraftHealthPlanPackage,
     mockSubmittedHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
-} from '../../testHelpers/apolloHelpers'
+} from '../../testHelpers/apolloMocks'
 import {
     ldUseClientSpy,
     renderWithProviders,

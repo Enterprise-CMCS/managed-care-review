@@ -72,9 +72,11 @@ export const UserLoginInfo = ({
     logout: LogoutHandlerT
     disableLogin: boolean
 }): React.ReactElement | null => {
-    return user
-        ? LoggedInUserInfo(user, logout)
-        : loginStatus === 'LOADING' || disableLogin
-        ? null
-        : LoggedOutUserInfo(authMode)
+    if (loginStatus === 'LOADING' || disableLogin) {
+        return user ? LoggedInUserInfo(user, logout) : null
+    } else {
+        return user
+            ? LoggedInUserInfo(user, logout)
+            : LoggedOutUserInfo(authMode)
+    }
 }

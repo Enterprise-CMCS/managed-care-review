@@ -1,0 +1,51 @@
+# the ARN format here should only be changed in concert with the role naming convention in services/github-oidc/serverless.yml
+
+name: 'Set GitHub OIDC credentials'
+description: "Sets AWS credentials in the environment via GitHub's OIDC provider"
+
+inputs:
+  region:
+    description: 'AWS region'
+    required: true
+  account-id:
+    description: 'AWS account ID'
+    required: true
+  stage-name:
+    description: 'Serverless stage name'
+    required: true
+  changed-services:
+    description: 'List of changed services'
+    required: false
+  dry-run:
+    description: 'For testing purposes, output the OIDC role ARN without actually assuming the role'
+    default: 'false'
+
+outputs:
+  oidc-role-arn:
+    description: 'ARN of the OIDC role to assume'
+    value: ${{ steps.format-oidc-role-arn.outputs.arn }}
+
+runs:
+  using: 'composite'
+  steps:
+    # if it's an ephemeral stage but the OIDC service didn't change, there is no OIDC role deployed for the stage so use the OIDC role for main
+    # otherwise, use the OIDC role for the stage
+    - name: Set the correct stage name for formatting the OIDC role ARN
+      id: set-oidc-stage-name
+      shell: bash
+      run: |
+        echo "stage-name=${{ (contains('main, val, prod', inputs.stage-name) || contains(inputs.changed-services, 'github-oidc')) && inputs.stage-name || 'main' }}" >> $GITHUB_OUTPUT
+
+    - name: Format OIDC role ARN
+      shell: bash
+      id: format-oidc-role-arn
+      run: |
+        ARN="arn:aws:iam::${{ inputs.account-id }}:role/delegatedadmin/developer/github-oidc-${{ steps.set-oidc-stage-name.outputs.stage-name }}-ServiceRole"
+        echo "arn=$ARN" >> $GITHUB_OUTPUT
+
+    - name: Configure AWS credentials
+      if: ${{ inputs.dry-run != 'true' }}
+      uses: aws-actions/configure-aws-credentials@v1-node16
+      with:
+        aws-region: ${{ inputs.region }}
+        role-to-assume: ${{ steps.format-oidc-role-arn.outputs.arn }}

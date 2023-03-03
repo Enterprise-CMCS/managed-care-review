@@ -48,7 +48,7 @@ export const SupportingDocumentsSummarySection = ({
                             url: null,
                         }
 
-                    const documentLink = await getURL(key)
+                    const documentLink = await getURL(key, 'HEALTH_PLAN_DOCS')
                     return {
                         ...doc,
                         url: documentLink,
@@ -83,7 +83,8 @@ export const SupportingDocumentsSummarySection = ({
             // call the lambda to zip the files and get the url
             const zippedURL = await getBulkDlURL(
                 keysFromDocs,
-                submissionName + '-supporting-documents.zip'
+                submissionName + '-supporting-documents.zip',
+                'HEALTH_PLAN_DOCS'
             )
             if (zippedURL instanceof Error) {
                 console.info('ERROR: TODO: DISPLAY AN ERROR MESSAGE')

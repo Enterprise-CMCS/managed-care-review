@@ -43,13 +43,6 @@ export const featureFlags = {
         defaultValue: 2,
     },
     /**
-     * Enables rates across submissions features
-     */
-    RATES_ACROSS_SUBMISSIONS: {
-        flag: 'rates-across-submissions',
-        defaultValue: false,
-    },
-    /**
      * Enables filter on CMS dashboard
      */
     CMS_DASHBOARD_FILTER: {
@@ -61,6 +54,13 @@ export const featureFlags = {
      */
     RATE_CERT_ASSURANCE: {
         flag: 'rate-cert-assurance',
+        defaultValue: false,
+    },
+    /**
+     * Enables state and CMS Q&A features
+     */
+    CMS_QUESTIONS: {
+        flag: 'cms-questions',
         defaultValue: false,
     },
     /**
