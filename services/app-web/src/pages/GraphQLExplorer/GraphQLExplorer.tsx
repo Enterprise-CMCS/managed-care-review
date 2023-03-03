@@ -3,6 +3,8 @@ import styles from './GraphQLExplorer.module.scss'
 import { useAuth } from '../../contexts/AuthContext'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { loader } from 'graphql.macro'
+import { FetchCurrentUserDocument } from '../../gen/gqlClient'
+import { fakeAmplifyFetch } from '../../api'
 
 export const GraphQLExplorer = () => {
     const endpointUrl = process.env.REACT_APP_API_URL
@@ -16,8 +18,24 @@ export const GraphQLExplorer = () => {
         return <GenericErrorPage />
     }
 
-    const localHeaders = {
-        'cognito-authentication-provider': JSON.stringify(loggedInUser),
+    const isLocal = stageName === 'local'
+
+    const handleRequest = async (
+        options: Omit<RequestInit, 'headers'> & {
+            headers: Record<string, string>
+        }
+    ) => {
+        if (isLocal) {
+            options.headers = Object.assign({}, options.headers, {
+                'cognito-authentication-provider': loggedInUser
+                    ? JSON.stringify(loggedInUser)
+                    : 'NO_USER',
+            })
+        }
+        return await fakeAmplifyFetch('/graphql', {
+            ...options,
+            method: 'POST',
+        })
     }
 
     return (
@@ -31,10 +49,10 @@ export const GraphQLExplorer = () => {
                         docsPanelState: 'open',
                         theme: 'light',
                     },
-                    document: ``,
-                    headers: stageName === 'local' ? localHeaders : undefined,
+                    document: FetchCurrentUserDocument.loc?.source.body,
                 }}
-                includeCookies={stageName !== 'local'}
+                includeCookies={true}
+                handleRequest={(endpointUrl, options) => handleRequest(options)}
             />
         </div>
     )
