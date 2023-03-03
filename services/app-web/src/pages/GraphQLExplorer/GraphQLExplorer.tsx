@@ -10,9 +10,9 @@ export const GraphQLExplorer = () => {
     const { loggedInUser } = useAuth()
     const gqlSchema = loader('../../gen/schema.graphql')
 
-    const source = gqlSchema.loc?.source.body
+    const schema = gqlSchema.loc?.source.body
 
-    if (!loggedInUser || !endpointUrl || !source) {
+    if (!loggedInUser || !endpointUrl || !schema) {
         return <GenericErrorPage />
     }
 
@@ -25,7 +25,7 @@ export const GraphQLExplorer = () => {
             <ApolloExplorer
                 className={styles.explorer}
                 endpointUrl={`${endpointUrl}/graphql`}
-                schema={source}
+                schema={schema}
                 initialState={{
                     displayOptions: {
                         docsPanelState: 'open',
