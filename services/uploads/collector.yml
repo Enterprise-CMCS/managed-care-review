@@ -9,11 +9,16 @@ exporters:
     headers:
       api-key: $NR_LICENSE_KEY
 
+processors:
+  batch:
+
 service:
   pipelines:
     traces:
       receivers: [otlp]
+      processors: [batch]
       exporters: [otlp]
     metrics:
       receivers: [otlp]
+      processors: [batch]
       exporters: [otlp]
