@@ -7,32 +7,26 @@ import { FetchCurrentUserDocument } from '../../gen/gqlClient'
 import { fakeAmplifyFetch } from '../../api'
 
 export const GraphQLExplorer = () => {
-    const endpointUrl = process.env.REACT_APP_API_URL
     const stageName = process.env.REACT_APP_STAGE_NAME
     const { loggedInUser } = useAuth()
     const gqlSchema = loader('../../gen/schema.graphql')
-
     const schema = gqlSchema.loc?.source.body
 
-    if (!loggedInUser || !endpointUrl || !schema) {
+    if (!loggedInUser || !schema) {
         return <GenericErrorPage />
     }
 
     const isLocal = stageName === 'local'
+    const localHeaders = {
+        'cognito-authentication-provider':
+            JSON.stringify(loggedInUser) || 'NO_USER',
+    }
 
-    const handleRequest = async (
-        options: Omit<RequestInit, 'headers'> & {
-            headers: Record<string, string>
-        }
+    const handleAmplifyRequest = async (
+        endpointUrl: string,
+        options: RequestInit
     ) => {
-        if (isLocal) {
-            options.headers = Object.assign({}, options.headers, {
-                'cognito-authentication-provider': loggedInUser
-                    ? JSON.stringify(loggedInUser)
-                    : 'NO_USER',
-            })
-        }
-        return await fakeAmplifyFetch('/graphql', {
+        return await fakeAmplifyFetch(endpointUrl, {
             ...options,
             method: 'POST',
         })
@@ -42,7 +36,7 @@ export const GraphQLExplorer = () => {
         <div className={styles.background}>
             <ApolloExplorer
                 className={styles.explorer}
-                endpointUrl={`${endpointUrl}/graphql`}
+                endpointUrl={'/graphql'}
                 schema={schema}
                 initialState={{
                     displayOptions: {
@@ -50,9 +44,12 @@ export const GraphQLExplorer = () => {
                         theme: 'light',
                     },
                     document: FetchCurrentUserDocument.loc?.source.body,
+                    // Configuring request for local env. This is done here so the UI will display localHeaders which can be modified
+                    headers: isLocal ? localHeaders : undefined,
                 }}
-                includeCookies={true}
-                handleRequest={(endpointUrl, options) => handleRequest(options)}
+                handleRequest={(endpointUrl, options) =>
+                    handleAmplifyRequest(endpointUrl, options)
+                }
             />
         </div>
     )
