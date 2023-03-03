@@ -3,10 +3,10 @@ import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { Resource } from '@opentelemetry/resources'
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node'
-import { CollectorTraceExporter } from '@opentelemetry/exporter-collector'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http'
 import {
@@ -27,7 +27,7 @@ export function initTracer(serviceName: string, otelCollectorURL: string) {
         })
     )
 
-    const exporter = new CollectorTraceExporter({
+    const exporter = new OTLPTraceExporter({
         url: otelCollectorURL,
         headers: {},
     })
