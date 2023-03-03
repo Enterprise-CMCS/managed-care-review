@@ -13,12 +13,12 @@ export function indexUsersResolver(store: Store): QueryResolvers['indexUsers'] {
         const { user: currentUser, span } = context
         setResolverDetailsOnActiveSpan('indexUsers', currentUser, span)
 
-        // if (!isAdminUser(currentUser)) {
-        //     const errMsg = 'user not authorized to fetch users'
-        //     logError('indexUsers', errMsg)
-        //     setErrorAttributesOnActiveSpan(errMsg, span)
-        //     throw new ForbiddenError(errMsg)
-        // }
+        if (!isAdminUser(currentUser)) {
+            const errMsg = 'user not authorized to fetch users'
+            logError('indexUsers', errMsg)
+            setErrorAttributesOnActiveSpan(errMsg, span)
+            throw new ForbiddenError(errMsg)
+        }
 
         const findResult = await store.findAllUsers()
         if (isStoreError(findResult)) {
