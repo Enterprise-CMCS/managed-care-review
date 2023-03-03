@@ -9,9 +9,6 @@ import {
     recordHistogram,
 } from '../lib/otel'
 
-import opentelemetry from '@opentelemetry/api'
-import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
-
 async function avScan(event: S3Event, _context: Context) {
     console.info('-----Start Antivirus Lambda function-----')
 
@@ -30,14 +27,14 @@ async function avScan(event: S3Event, _context: Context) {
 
     const serviceName = `uploads-avScanLambda-${stageName}`
     initTracer(serviceName, otelCollectorURL)
-    initMeter(serviceName)
+    initMeter(serviceName, otelCollectorURL)
 
     const clamAVBucketName = process.env.CLAMAV_BUCKET_NAME
     if (!clamAVBucketName || clamAVBucketName === '') {
         const err = new Error(
             'Configuration Error: CLAMAV_BUCKET_NAME must be set'
         )
-        recordException(err, serviceName)
+        recordException(err, serviceName, 'clamAVEnvCheck')
         throw err
     }
 
@@ -46,7 +43,7 @@ async function avScan(event: S3Event, _context: Context) {
         const err = new Error(
             'Configuration Error: PATH_TO_AV_DEFINITIONS must be set'
         )
-        recordException(err, serviceName)
+        recordException(err, serviceName, 'avDefPathCheck')
         throw err
     }
 
@@ -65,7 +62,7 @@ async function avScan(event: S3Event, _context: Context) {
     const record = event.Records[0]
     if (!record) {
         const err = new Error('no record in request')
-        recordException(err, serviceName)
+        recordException(err, serviceName, 'noRecord')
         throw err
     }
 
@@ -78,9 +75,6 @@ async function avScan(event: S3Event, _context: Context) {
         // start the timing of the av scan for otel metrics
         const startTime = new Date().getTime()
 
-        const activeSpan = opentelemetry.trace.getActiveSpan()
-        activeSpan?.setAttribute(SemanticAttributes.CODE_FUNCTION, 'scanFile')
-
         // scan the file
         await scanFile(
             s3Client,
@@ -90,7 +84,6 @@ async function avScan(event: S3Event, _context: Context) {
             maxFileSize,
             '/tmp/downloads'
         )
-        activeSpan?.end()
 
         // Record the duration of the av scan
         const endTime = new Date().getTime()
@@ -98,7 +91,7 @@ async function avScan(event: S3Event, _context: Context) {
         console.info(`av scan time: ${executionTime}`)
         recordHistogram(serviceName, 'avscan.time', executionTime)
     } catch (err) {
-        recordException(err, serviceName)
+        recordException(err, serviceName, 'avScanFile')
         throw err
     }
 

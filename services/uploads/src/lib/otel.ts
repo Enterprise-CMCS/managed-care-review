@@ -1,10 +1,10 @@
-import opentelemetry, { SpanStatusCode } from '@opentelemetry/api'
+import opentelemetry from '@opentelemetry/api'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { Resource } from '@opentelemetry/resources'
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node'
 import { CollectorTraceExporter } from '@opentelemetry/exporter-collector'
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 
@@ -36,21 +36,23 @@ export function initTracer(serviceName: string, otelCollectorURL: string) {
         resource: resource,
     })
 
-    provider.addSpanProcessor(new BatchSpanProcessor(exporter))
+    provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
 
     // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
     provider.register()
 }
 
-export function initMeter(serviceName: string) {
+export function initMeter(serviceName: string, otelCollectorURL: string) {
     const resource = Resource.default().merge(
         new Resource({
             [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
         })
     )
     const metricReader = new PeriodicExportingMetricReader({
-        exporter: new OTLPMetricExporter(),
-        exportIntervalMillis: 1000,
+        exporter: new OTLPMetricExporter({
+            url: otelCollectorURL,
+        }),
+        exportIntervalMillis: 10000, // default is 60000
     })
 
     const provider = new MeterProvider({
@@ -61,13 +63,15 @@ export function initMeter(serviceName: string) {
     opentelemetry.metrics.setGlobalMeterProvider(provider)
 }
 
-export function recordException(error: string | Error, serviceName: string) {
+export function recordException(
+    error: string | Error,
+    serviceName: string,
+    spanName: string
+) {
     const tracer = opentelemetry.trace.getTracer(serviceName)
-    const span = tracer.startSpan('JSException')
+    const span = tracer.startSpan(spanName)
     span.recordException(error)
-    span.setStatus({ code: SpanStatusCode.ERROR })
     console.error(error)
-    span.end()
 }
 
 export function recordHistogram(

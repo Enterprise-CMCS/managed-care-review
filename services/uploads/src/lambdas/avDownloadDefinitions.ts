@@ -27,14 +27,14 @@ async function avDownloadDefinitions(_event: S3Event, _context: Context) {
 
     const serviceName = `uploads-avDownloadDefinitions-${stageName}`
     initTracer(serviceName, otelCollectorURL)
-    initMeter(serviceName)
+    initMeter(serviceName, otelCollectorURL)
 
     const clamAVBucketName = process.env.CLAMAV_BUCKET_NAME
     if (!clamAVBucketName || clamAVBucketName === '') {
         const err = new Error(
             'Configuration Error: CLAMAV_BUCKET_NAME must be set'
         )
-        recordException(err, serviceName)
+        recordException(err, serviceName, 'clamAVEnvCheck')
         throw err
     }
 
@@ -43,7 +43,7 @@ async function avDownloadDefinitions(_event: S3Event, _context: Context) {
         const err = new Error(
             'Configuration Error: PATH_TO_AV_DEFINITIONS must be set'
         )
-        recordException(err, serviceName)
+        recordException(err, serviceName, 'avDefPathCheck')
         throw err
     }
 
@@ -69,9 +69,9 @@ async function avDownloadDefinitions(_event: S3Event, _context: Context) {
         const endTime = new Date().getTime()
         const executionTime = endTime - startTime
         console.info(`av scan time: ${executionTime}`)
-        recordHistogram(serviceName, 'avscan.time', executionTime)
+        recordHistogram(serviceName, 'avDefUpdate.time', executionTime)
     } catch (err) {
-        recordException(err, serviceName)
+        recordException(err, serviceName, 'avDefUpdate')
     }
 
     return 'FILE SCANNED'
