@@ -137,15 +137,6 @@ export const SubmissionSideNav = () => {
                 const questions = await parseQuestions(pkg.questions)
                 setQuestions(questions)
             } else {
-                /* Here if questions returned is undefined or null we just set questions to empty array, which will display the
-                 * no questions text.
-                 *
-                 * TODO: Do we want to do something else here? We can log an error, but do we want to render a generic error?
-                 *  some things to consider:
-                 *  - On the backend healthPlanPackageResolver will throw an error so the it would hit the error when checking for pkg
-                 *  - The only way we could get undefined back for questions is if we used useFetchHealthPlanPackage query which does not
-                 *    include questions.
-                 */
                 setQuestions({
                     dmco: {
                         totalCount: 0,
