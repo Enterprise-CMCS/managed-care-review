@@ -21,6 +21,9 @@ import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import {
     CreateQuestionInput,
     useCreateQuestionMutation,
+    FetchHealthPlanPackageWithQuestionsDocument,
+    FetchHealthPlanPackageWithQuestionsQuery,
+    IndexQuestionsPayload,
 } from '../../../gen/gqlClient'
 
 export const UploadQuestions = () => {
@@ -76,8 +79,62 @@ export const UploadQuestions = () => {
 
             const createResult = await createQuestion({
                 variables: { input },
-                refetchQueries: ['fetchHealthPlanPackageWithQuestions'],
-                awaitRefetchQueries: true,
+                update(cache, { data }) {
+                    if (data) {
+                        const newQuestion = data.createQuestion.question
+                        const result =
+                            cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
+                                {
+                                    query: FetchHealthPlanPackageWithQuestionsDocument,
+                                    variables: {
+                                        input: {
+                                            pkgID: newQuestion.pkgID,
+                                        },
+                                    },
+                                }
+                            )
+
+                        const pkg = result?.fetchHealthPlanPackage.pkg
+
+                        if (pkg) {
+                            const questions =
+                                pkg.questions as IndexQuestionsPayload
+
+                            const newQuestionEdge = {
+                                __typename: 'QuestionEdge',
+                                node: newQuestion,
+                            }
+
+                            const dmcoQuestions = {
+                                ...questions.DMCOQuestions,
+                                totalCount: questions.DMCOQuestions.totalCount
+                                    ? questions.DMCOQuestions.totalCount + 1
+                                    : 1,
+                                edges: [
+                                    newQuestionEdge,
+                                    ...questions.DMCOQuestions.edges,
+                                ],
+                            }
+
+                            const pkgWithNewQuestion = {
+                                ...pkg,
+                                questions: {
+                                    ...questions,
+                                    DMCOQuestions: dmcoQuestions,
+                                },
+                            }
+
+                            cache.writeQuery({
+                                query: FetchHealthPlanPackageWithQuestionsDocument,
+                                data: {
+                                    fetchHealthPlanPackage: {
+                                        pkg: pkgWithNewQuestion,
+                                    },
+                                },
+                            })
+                        }
+                    }
+                },
             })
 
             if (createResult) {
