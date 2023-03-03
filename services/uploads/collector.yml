@@ -4,7 +4,7 @@ receivers:
       http:
 
 exporters:
-  otlp:
+  otlphttp:
     endpoint: https://gov-otlp.nr-data.net:4318
     headers:
       api-key: $NR_LICENSE_KEY
@@ -15,10 +15,10 @@ processors:
 service:
   pipelines:
     traces:
-      receivers: [otlp]
+      receivers: [otlphttp]
       processors: [batch]
-      exporters: [otlp]
+      exporters: [otlphttp]
     metrics:
-      receivers: [otlp]
+      receivers: [otlphttp]
       processors: [batch]
-      exporters: [otlp]
+      exporters: [otlphttp]
