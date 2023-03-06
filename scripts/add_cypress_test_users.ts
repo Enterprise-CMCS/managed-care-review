@@ -49,7 +49,7 @@ function IDMRole(role: UserRole): string {
         case 'STATE_USER':
             return 'macmcrrs-state-user'
         case 'ADMIN_USER':
-            return 'macmcrrs-admin-user'
+            return 'macmcrrs-approver'
         case 'UNKNOWN_USER':
             return 'foo-bar-user'
     }
