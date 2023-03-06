@@ -1,5 +1,5 @@
-import { 
-    S3Client, 
+import {
+    S3Client,
     HeadObjectCommand,
     ListObjectsV2Command,
     GetObjectCommand,
@@ -117,7 +117,7 @@ async function downloadFileFromS3(client: S3Client, s3ObjectKey: string, s3Objec
 
     // const tmpFileName = `${crypto.randomUUID()}.tmp`
     // let localPath = path.join(destinationDir, tmpFileName)
-    
+
     let writeStream = fs.createWriteStream(destinationPath)
 
     console.info(
@@ -141,7 +141,7 @@ async function downloadFileFromS3(client: S3Client, s3ObjectKey: string, s3Objec
 
             if (!(s3Item.Body instanceof Readable)) {
                 console.error('Unexpected S3 Item Body: ', s3Item.Body)
-                reject(new Error ('Unexpected S3 Item Body returned'))
+                reject(new Error('Unexpected S3 Item Body returned'))
                 return
             }
 
@@ -150,8 +150,8 @@ async function downloadFileFromS3(client: S3Client, s3ObjectKey: string, s3Objec
                     console.info(
                         `Finished downloading new object ${s3ObjectKey}`
                     )
-                    resolve(destinationPath)
-                })
+                resolve(destinationPath)
+            })
                 .on('error', function (err) {
                     console.error('Error writing file', err)
                     reject(err)
@@ -201,26 +201,26 @@ async function downloadAllFiles(client: S3Client, keys: string[], bucket: string
 async function deleteObjects(client: S3Client, keys: string[], bucket: string): Promise<undefined | Error> {
 
     try {
-            const deleteCmd = new DeleteObjectsCommand({
-                Bucket: bucket,
-                Delete: {
-                    Objects: keys.map((k) => {
-                        return { Key: k }
-                    }),
-                },
-            })
-            const result = await client.send(deleteCmd)
+        const deleteCmd = new DeleteObjectsCommand({
+            Bucket: bucket,
+            Delete: {
+                Objects: keys.map((k) => {
+                    return { Key: k }
+                }),
+            },
+        })
+        const result = await client.send(deleteCmd)
             console.info(
                 `Deleted extant definitions: ${keys}`, result
             )
-            return undefined
-        } catch (err) {
+        return undefined
+    } catch (err) {
             console.error(
                 `Error deleting current definition files: ${keys}`
             )
-            console.error(err)
-            return err
-        }
+        console.error(err)
+        return err
+    }
 
 }
 
@@ -260,7 +260,7 @@ async function tagObject(client: S3Client, key: string, bucket: string, tagSet: 
     } catch (err) {
         console.error(err)
         return err
-    } 
+    }
 }
 
 

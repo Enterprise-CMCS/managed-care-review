@@ -30,7 +30,7 @@ describe('review and submit', () => {
     })
 
     it('can not submit an incomplete submission', () => {
-        cy.interceptFeatureFlags({'rate-cert-assurance': true})
+        cy.interceptFeatureFlags({ 'rate-cert-assurance': true })
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
