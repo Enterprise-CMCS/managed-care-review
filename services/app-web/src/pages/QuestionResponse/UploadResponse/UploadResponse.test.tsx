@@ -38,7 +38,7 @@ describe('UploadResponse', () => {
         await waitFor(() => {
             expect(
                 screen.queryByRole('heading', {
-                    name: /New Response/,
+                    name: /New response/,
                     level: 2,
                 })
             ).toBeInTheDocument()
