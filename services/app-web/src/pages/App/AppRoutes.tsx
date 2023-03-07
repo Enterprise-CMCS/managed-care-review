@@ -28,7 +28,7 @@ import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { recordJSException } from '../../otelHelpers'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { UploadQuestions } from '../QuestionResponse/UploadQuestions/UploadQuestions'
-import { QuestionResponse } from '../QuestionResponse'
+import { QuestionResponse, UploadResponse } from '../QuestionResponse'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -88,8 +88,8 @@ const StateUserRoutes = ({
                 </Route>
                 {showQuestionResponse && (
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
-                        element={<UploadQuestions />}
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                        element={<UploadResponse />}
                     />
                 )}
                 <Route
