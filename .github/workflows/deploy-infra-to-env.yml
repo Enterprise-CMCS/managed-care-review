@@ -46,12 +46,12 @@ jobs:
           # if the environment isn't one of [dev, val, prod], fail the job
           run: |
             echo "stage-name=$(
-              if [[ "${{ github.event.inputs.environment }}" == "val" || "${{ github.event.inputs.environment }}" == "prod" ]]; then
-                echo "${{ github.event.inputs.environment }}";
-              elif [[ ${{ github.event.inputs.environment }} == "dev" ]]; then
+              if [[ "${{ inputs.environment }}" == "val" || "${{ inputs.environment }}" == "prod" ]]; then
+                echo "${{ inputs.environment }}";
+              elif [[ ${{ inputs.environment }} == "dev" ]]; then
                 echo "main";
               else
-                echo "Invalid environment: ${{ github.event.inputs.environment }}" >&2;
+                echo "Invalid environment: ${{ inputs.environment }}" >&2;
                 kill -HUP $$
               fi
             )" >> $GITHUB_OUTPUT
