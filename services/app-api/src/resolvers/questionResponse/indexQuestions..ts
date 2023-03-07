@@ -5,7 +5,7 @@ import { logError } from '../../logger'
 import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { GraphQLError } from 'graphql'
-import { convertToIndexQuestionsPayload } from '../../postgres/questionResponses'
+import { convertToIndexQuestionsPayload } from '../../postgres/questionResponse'
 
 export function indexQuestionsResolver(
     store: Store

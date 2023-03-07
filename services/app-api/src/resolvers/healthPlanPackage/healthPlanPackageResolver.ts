@@ -3,7 +3,7 @@ import { protoToBase64 } from '../../../../app-web/src/common-code/proto/healthP
 import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
 import { Resolvers } from '../../gen/gqlServer'
 import { isStoreError, Store } from '../../postgres'
-import { convertToIndexQuestionsPayload } from '../../postgres/questionResponses'
+import { convertToIndexQuestionsPayload } from '../../postgres/questionResponse'
 import { logError } from '../../logger'
 import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
 
