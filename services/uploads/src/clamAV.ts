@@ -153,9 +153,9 @@ function scanLocalFile(config: ClamAVConfig, pathToFile: string): ClamAVScanResu
             return avResult.error || new Error(`Failed to scan file: ${avResult.stderr.toString()}`)
         }
 
-         console.info('SUCCESSFUL SCAN, FILE CLEAN')
+        console.info('SUCCESSFUL SCAN, FILE CLEAN')
 
-         return 'CLEAN'
+        return 'CLEAN'
 
     } catch (err) {
         console.error('-- SCAN FAILED ERR --')
@@ -176,15 +176,15 @@ async function fetchAVDefinitionsWithFreshclam(config: ClamAVConfig, workdir: st
 
         // freshclam does not handle long arguments the unix way, the equal signs are required here
         let executionResult = spawnSync(config.pathToFreshclam, [
-            `--config-file=${config.pathToConfig}`, 
+            `--config-file=${config.pathToConfig}`,
             `--datadir=${workdir}`,
         ])
 
         if (executionResult.status !== 0) {
-             console.info('Freshclam Error', executionResult)
+            console.info('Freshclam Error', executionResult)
              console.error('stderror', executionResult.stderr && executionResult.stderr.toString())
              console.error('stdout', executionResult.stdout && executionResult.stdout.toString())
-             console.error('err', executionResult.error)
+            console.error('err', executionResult.error)
              return executionResult.error || new Error(`Failed to scan file: ${executionResult.stderr.toString()}`)
         }
 

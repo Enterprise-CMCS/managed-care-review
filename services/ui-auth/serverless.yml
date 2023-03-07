@@ -12,6 +12,7 @@ custom:
   stage: ${opt:stage, self:provider.stage}
   region: ${aws:region}
   document_uploads_bucket_arn: ${cf:uploads-${sls:stage}.DocumentUploadsBucketArn}
+  qa_uploads_bucket_arn: ${cf:uploads-${sls:stage}.QAUploadsBucketArn}
   api_gateway_rest_api_name: ${cf:infra-api-${sls:stage}.ApiGatewayRestApiId}
   application_endpoint_url: ${cf:ui-${sls:stage}.CloudFrontEndpointUrl}
   okta_metadata_url: ${ssm:/configuration/okta_metadata_url}
@@ -196,6 +197,7 @@ resources:
                   Resource:
                     # Must use Join here.  See: https://github.com/serverless/serverless/issues/3565
                     - ${self:custom.document_uploads_bucket_arn}/allusers/*
+                    - ${self:custom.qa_uploads_bucket_arn}/allusers/*
                     # This private bucket is used by any files stored "private" by Amplify
                     # https://docs.amplify.aws/lib/storage/configureaccess/q/platform/js/
                     - Fn::Join:

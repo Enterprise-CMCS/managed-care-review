@@ -142,7 +142,7 @@ describe('submission type', () => {
             //Check to make sure edited stuff was saved
             cy.get('[aria-label="Remove PMAP"]').should('exist')
             cy.get('[aria-label="Remove SNBC"]').should('exist')
-             cy.findByLabelText('Contract action and rate certification').should(
+            cy.findByLabelText('Contract action and rate certification').should(
                 'be.checked'
             )
 

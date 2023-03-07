@@ -181,7 +181,8 @@ export const RateDetailsSummarySection = ({
             // call the lambda to zip the files and get the url
             const zippedURL = await getBulkDlURL(
                 keysFromDocs,
-                submissionName + '-rate-details.zip'
+                submissionName + '-rate-details.zip',
+                'HEALTH_PLAN_DOCS'
             )
             if (zippedURL instanceof Error) {
                 console.info('ERROR: TODO: DISPLAY AN ERROR MESSAGE')
