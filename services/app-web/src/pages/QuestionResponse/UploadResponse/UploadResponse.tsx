@@ -5,7 +5,7 @@ import {
     FormGroup,
     ButtonGroup,
 } from '@trussworks/react-uswds'
-import styles from '../UploadQuestions/UploadQuestions.module.scss'
+import styles from '../QuestionResponse.module.scss'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useS3 } from '../../../contexts/S3Context'
 import {

@@ -152,10 +152,16 @@ const CMSUserRoutes = ({
                     />
                 </Route>
                 {showQuestionResponse && (
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
-                        element={<UploadQuestions />}
-                    />
+                    <>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                            element={<UploadQuestions />}
+                        />
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                            element={<UploadResponse />}
+                        />
+                    </>
                 )}
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
