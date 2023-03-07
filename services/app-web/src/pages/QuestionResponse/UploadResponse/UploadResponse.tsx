@@ -19,20 +19,22 @@ import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import {
-    CreateQuestionInput,
-    useCreateQuestionMutation,
-    FetchHealthPlanPackageWithQuestionsDocument,
-    FetchHealthPlanPackageWithQuestionsQuery,
+    CreateQuestionResponseInput,
+    useCreateQuestionResponseMutation,
 } from '../../../gen/gqlClient'
 
-export const UploadQuestions = () => {
+export const UploadResponse = () => {
     // third party
-    const { division, id } = useParams<{ division: string; id: string }>()
+    const { division, id, questionID } = useParams<{
+        division: string
+        id: string
+        questionID: string
+    }>()
     const navigate = useNavigate()
 
     // api
-    const [createQuestion, { loading: apiLoading, error: apiError }] =
-        useCreateQuestionMutation()
+    const [createResponse, { loading: apiLoading, error: apiError }] =
+        useCreateQuestionResponseMutation()
 
     // page level state
     const [shouldValidate, setShouldValidate] = React.useState(false)
@@ -71,37 +73,12 @@ export const UploadQuestions = () => {
                 }
             })
 
-            const input: CreateQuestionInput = {
-                pkgID: id as string,
+            const input: CreateQuestionResponseInput = {
+                questionID: questionID as string,
                 documents: questionDocs,
             }
 
-            const createResult = await createQuestion({
-                variables: { input },
-                update(cache, { data }) {
-                    if (data) {
-                        const newQuestion = data.createQuestion.question
-                        const result =
-                            cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
-                                {
-                                    query: FetchHealthPlanPackageWithQuestionsDocument,
-                                    variables: {
-                                        input: {
-                                            pkgID: newQuestion.pkgID,
-                                        },
-                                    },
-                                }
-                            )
-
-                        const pkg = result?.fetchHealthPlanPackage.pkg
-
-                        if (pkg) {
-                            cache.evict({ id: cache.identify(pkg) })
-                            cache.gc()
-                        }
-                    }
-                },
-            })
+            const createResult = await createResponse({ variables: { input } })
 
             if (createResult) {
                 navigate(`/submissions/${id}/question-and-answers`)
@@ -115,8 +92,8 @@ export const UploadQuestions = () => {
         <GridContainer>
             <UswdsForm
                 className={styles.formContainer}
-                id="AddQuestionsForm"
-                aria-label="Add Questions Form"
+                id="AddQuestionResponseForm"
+                aria-label="Add Response"
                 aria-describedby="form-guidance"
                 onSubmit={() => {
                     return
@@ -124,7 +101,7 @@ export const UploadQuestions = () => {
             >
                 {apiError && <GenericApiErrorBanner />}
                 <fieldset className="usa-fieldset">
-                    <h2>Add questions</h2>
+                    <h2>New response</h2>
                     <p className="text-bold">{`Questions from ${division?.toUpperCase()}`}</p>
 
                     {shouldValidate && (
@@ -143,9 +120,9 @@ export const UploadQuestions = () => {
 
                     <FormGroup error={showFileUploadError}>
                         <FileUpload
-                            id="questions-upload"
-                            name="questions-upload"
-                            label="Upload questions"
+                            id="response-upload"
+                            name="response-upload"
+                            label="Upload response"
                             renderMode="list"
                             aria-required
                             error={showFileUploadError ? fileUploadError : ''}
@@ -199,7 +176,7 @@ export const UploadQuestions = () => {
                             animationTimeout={1000}
                             loading={apiLoading}
                         >
-                            Add questions
+                            Send response
                         </ActionButton>
                     </ButtonGroup>
                 </PageActionsContainer>

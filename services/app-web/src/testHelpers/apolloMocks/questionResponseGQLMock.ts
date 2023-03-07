@@ -7,7 +7,7 @@ import {
     FetchHealthPlanPackageWithQuestionsDocument,
     FetchHealthPlanPackageWithQuestionsQuery,
     HealthPlanPackage,
-    IndexQuestionsPayload
+    IndexQuestionsPayload,
 } from '../../gen/gqlClient'
 import { mockValidCMSUser } from './userGQLMock'
 import { mockSubmittedHealthPlanPackage, mockQuestionsPayload } from './'
@@ -65,12 +65,12 @@ const createQuestionNetworkFailure = (
 }
 
 const fetchStateHealthPlanPackageWithQuestionsMockSuccess = ({
-                                                                 stateSubmission = mockSubmittedHealthPlanPackage(),
-                                                                 id,
-                                                                 questions,
-                                                             }: fetchStateHealthPlanPackageWithQuestionsProps): MockedResponse<
+    stateSubmission = mockSubmittedHealthPlanPackage(),
+    id,
+    questions,
+}: fetchStateHealthPlanPackageWithQuestionsProps): MockedResponse<
     Record<string, unknown>
-    > => {
+> => {
     const questionPayload = questions || mockQuestionsPayload(id)
     const pkg = {
         ...stateSubmission,
@@ -96,8 +96,8 @@ const fetchStateHealthPlanPackageWithQuestionsMockSuccess = ({
 }
 
 const fetchStateHealthPlanPackageWithQuestionsMockNotFound = ({
-                                                                  id,
-                                                              }: fetchStateHealthPlanPackageWithQuestionsProps): MockedResponse<FetchHealthPlanPackageWithQuestionsQuery> => {
+    id,
+}: fetchStateHealthPlanPackageWithQuestionsProps): MockedResponse<FetchHealthPlanPackageWithQuestionsQuery> => {
     return {
         request: {
             query: FetchHealthPlanPackageWithQuestionsDocument,

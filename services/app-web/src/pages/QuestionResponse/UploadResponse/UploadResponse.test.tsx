@@ -1,7 +1,7 @@
 import { screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router-dom'
-import { UploadQuestions } from '../../QuestionResponse'
+import { UploadResponse } from './UploadResponse'
 import {
     dragAndDrop,
     renderWithProviders,
@@ -15,19 +15,21 @@ import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
 import { createQuestionNetworkFailure } from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
 
-describe('UploadQuestions', () => {
+describe('UploadResponse', () => {
+    const division = 'testDivision'
+    const questionID = 'testQuestion'
+
     it('displays file upload for correct cms division', async () => {
-        const division = 'testDivision'
         renderWithProviders(
             <Routes>
                 <Route
-                    path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
-                    element={<UploadQuestions />}
+                    path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                    element={<UploadResponse />}
                 />
             </Routes>,
             {
                 routerProvider: {
-                    route: `/submissions/15/question-and-answers/${division}/upload-questions`,
+                    route: `/submissions/15/question-and-answers/${division}/${questionID}/upload-response`,
                 },
             }
         )
@@ -36,7 +38,7 @@ describe('UploadQuestions', () => {
         await waitFor(() => {
             expect(
                 screen.queryByRole('heading', {
-                    name: /Add questions/,
+                    name: /New response/,
                     level: 2,
                 })
             ).toBeInTheDocument()
@@ -46,25 +48,25 @@ describe('UploadQuestions', () => {
         })
         // Expect file upload input on page
         expect(await screen.findByTestId('file-input')).toBeInTheDocument()
-        expect(screen.getByLabelText('Upload questions')).toBeInTheDocument()
+        expect(screen.getByLabelText('Upload response')).toBeInTheDocument()
     })
 
     it('file upload accepts multiple pdf, word, excel documents', async () => {
         renderWithProviders(
             <Routes>
                 <Route
-                    path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
-                    element={<UploadQuestions />}
+                    path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                    element={<UploadResponse />}
                 />
             </Routes>,
             {
                 routerProvider: {
-                    route: `/submissions/15/question-and-answers/dmco/upload-questions`,
+                    route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
                 },
             }
         )
 
-        const input = screen.getByLabelText('Upload questions')
+        const input = screen.getByLabelText('Upload response')
         expect(input).toBeInTheDocument()
         expect(input).toHaveAttribute('accept', ACCEPTED_SUBMISSION_FILE_TYPES)
         await userEvent.upload(input, [
@@ -83,13 +85,13 @@ describe('UploadQuestions', () => {
         renderWithProviders(
             <Routes>
                 <Route
-                    path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
-                    element={<UploadQuestions />}
+                    path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                    element={<UploadResponse />}
                 />
             </Routes>,
             {
                 routerProvider: {
-                    route: `/submissions/15/question-and-answers/dmco/upload-questions`,
+                    route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
                 },
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -98,7 +100,7 @@ describe('UploadQuestions', () => {
         )
 
         const continueButton = screen.getByRole('button', {
-            name: 'Add questions',
+            name: 'Send response',
         })
         expect(continueButton).not.toHaveAttribute('aria-disabled')
 
@@ -115,13 +117,13 @@ describe('UploadQuestions', () => {
         renderWithProviders(
             <Routes>
                 <Route
-                    path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
-                    element={<UploadQuestions />}
+                    path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                    element={<UploadResponse />}
                 />
             </Routes>,
             {
                 routerProvider: {
-                    route: `/submissions/15/question-and-answers/dmco/upload-questions`,
+                    route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
                 },
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -129,7 +131,7 @@ describe('UploadQuestions', () => {
             }
         )
         const continueButton = screen.getByRole('button', {
-            name: 'Add questions',
+            name: 'Send response',
         })
 
         const targetEl = screen.getByTestId('file-input-droptarget')
@@ -151,13 +153,13 @@ describe('UploadQuestions', () => {
         renderWithProviders(
             <Routes>
                 <Route
-                    path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
-                    element={<UploadQuestions />}
+                    path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                    element={<UploadResponse />}
                 />
             </Routes>,
             {
                 routerProvider: {
-                    route: `/submissions/15/question-and-answers/dmco/upload-questions`,
+                    route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
                 },
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
@@ -165,7 +167,7 @@ describe('UploadQuestions', () => {
             }
         )
         const continueButton = screen.getByRole('button', {
-            name: 'Add questions',
+            name: 'Send response',
         })
         const targetEl = screen.getByTestId('file-input-droptarget')
 
@@ -198,13 +200,13 @@ describe('UploadQuestions', () => {
         renderWithProviders(
             <Routes>
                 <Route
-                    path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
-                    element={<UploadQuestions />}
+                    path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                    element={<UploadResponse />}
                 />
             </Routes>,
             {
                 routerProvider: {
-                    route: `/submissions/15/question-and-answers/dmco/upload-questions`,
+                    route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
                 },
                 apolloProvider: {
                     mocks: [
@@ -216,9 +218,9 @@ describe('UploadQuestions', () => {
         )
 
         const createQuestionButton = screen.getByRole('button', {
-            name: 'Add questions',
+            name: 'Send response',
         })
-        const input = screen.getByLabelText('Upload questions')
+        const input = screen.getByLabelText('Upload response')
 
         await userEvent.upload(input, [TEST_DOC_FILE])
         createQuestionButton.click()

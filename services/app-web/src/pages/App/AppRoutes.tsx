@@ -27,7 +27,11 @@ import { featureFlags } from '../../common-code/featureFlags'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { recordJSException } from '../../otelHelpers'
 import { SubmissionSideNav } from '../SubmissionSideNav'
-import { QuestionResponse, UploadQuestions } from '../QuestionResponse'
+import {
+    QuestionResponse,
+    UploadResponse,
+    UploadQuestions,
+} from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 
 function componentForAuthMode(
@@ -90,8 +94,8 @@ const StateUserRoutes = ({
                 </Route>
                 {showQuestionResponse && (
                     <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
-                        element={<UploadQuestions />}
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                        element={<UploadResponse />}
                     />
                 )}
                 <Route
@@ -147,11 +151,18 @@ const CMSUserRoutes = ({
                         element={<SubmissionSummary />}
                     />
                 </Route>
+
                 {showQuestionResponse && (
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
-                        element={<UploadQuestions />}
-                    />
+                    <>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                            element={<UploadQuestions />}
+                        />
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                            element={<UploadResponse />}
+                        />
+                    </>
                 )}
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}

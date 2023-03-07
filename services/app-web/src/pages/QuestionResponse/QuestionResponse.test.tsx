@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router-dom'
 import { SubmissionSideNav } from '../SubmissionSideNav'
-import { QuestionResponse } from './'
+import { QuestionResponse } from './QuestionResponse'
 import { ldUseClientSpy, renderWithProviders } from '../../testHelpers'
 import { RoutesRecord } from '../../constants/routes'
 import React from 'react'

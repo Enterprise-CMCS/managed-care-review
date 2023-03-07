@@ -72,7 +72,7 @@ export const SubmissionSideNav = () => {
     const ldClient = useLDClient()
     const { getDocumentsUrl } = useDocument()
 
-    const showQuestionsAnswers = ldClient?.variation(
+    const showQuestionResponse = ldClient?.variation(
         featureFlags.CMS_QUESTIONS.flag,
         featureFlags.CMS_QUESTIONS.defaultValue
     )
@@ -226,7 +226,7 @@ export const SubmissionSideNav = () => {
     return (
         <div className={styles.background}>
             <GridContainer className={styles.container}>
-                {showQuestionsAnswers && (
+                {showQuestionResponse && (
                     <div className={styles.sideNavContainer}>
                         <div className={styles.backLinkContainer}>
                             <Link

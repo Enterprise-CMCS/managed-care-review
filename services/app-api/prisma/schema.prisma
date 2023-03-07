@@ -43,7 +43,7 @@ model State {
 }
 
 model User {
-  id               String     @id
+  id               String             @id
   givenName        String
   familyName       String
   email            String
@@ -51,25 +51,50 @@ model User {
   stateAssignments State[]
   stateCode        String?
   questions        Question[]
+  responses        QuestionResponse[]
 }
 
 model Question {
   id            String                 @id
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
   pkgID         String
   pkg           HealthPlanPackageTable @relation(fields: [pkgID], references: [id])
-  createdAt     DateTime               @default(now())
   addedBy       User                   @relation(fields: [addedByUserID], references: [id])
   addedByUserID String
   documents     QuestionDocument[]
+  responses     QuestionResponse[]
 }
 
 model QuestionDocument {
   id         String   @id
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
   name       String
   s3URL      String
-  createdAt  DateTime @default(now())
   questionID String
   question   Question @relation(fields: [questionID], references: [id])
+}
+
+model QuestionResponseDocument {
+  id         String           @id
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  response   QuestionResponse @relation(fields: [responseID], references: [id])
+  responseID String
+  name       String
+  s3URL      String
+}
+
+model QuestionResponse {
+  id            String             @id
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  question      Question           @relation(fields: [questionID], references: [id])
+  addedBy       User               @relation(fields: [addedByUserID], references: [id])
+  questionID    String
+  addedByUserID String
+  documents     QuestionResponseDocument[]
 }
 
 enum Role {

@@ -22,6 +22,7 @@ const ROUTES = [
     'SUBMISSIONS_SUMMARY',
     'SUBMISSIONS_QUESTIONS_AND_ANSWERS',
     'SUBMISSIONS_UPLOAD_QUESTION',
+    'SUBMISSIONS_UPLOAD_RESPONSE',
 ] as const // iterable union type
 type RouteT = typeof ROUTES[number]
 type RouteTWithUnknown = RouteT | 'UNKNOWN_ROUTE'
@@ -51,6 +52,8 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_QUESTIONS_AND_ANSWERS: '/submissions/:id/question-and-answers',
     SUBMISSIONS_UPLOAD_QUESTION:
         '/submissions/:id/question-and-answers/:division/upload-questions',
+    SUBMISSIONS_UPLOAD_RESPONSE:
+        '/submissions/:id/question-and-answers/:division/:questionID/upload-response',
 }
 
 const STATE_SUBMISSION_FORM_ROUTES: RouteTWithUnknown[] = [
@@ -107,6 +110,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_SUMMARY: 'Submission summary',
     SUBMISSIONS_QUESTIONS_AND_ANSWERS: 'Q&A',
     SUBMISSIONS_UPLOAD_QUESTION: 'Add questions',
+    SUBMISSIONS_UPLOAD_RESPONSE: 'Add response',
     UNKNOWN_ROUTE: 'Not found',
 }
 

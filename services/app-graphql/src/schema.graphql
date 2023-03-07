@@ -223,9 +223,9 @@ type Mutation {
 #    - UserInputError
 #        - A Question cannot be found given `questionID`
 #    """
-#    createQuestionResponse(
-#        input: CreateQuestionResponseInput!
-#    ): CreateQuestionResponsePayload!
+   createQuestionResponse(
+       input: CreateQuestionResponseInput!
+   ): CreateQuestionResponsePayload!
 }
 
 input CreateHealthPlanPackageInput {
@@ -324,19 +324,19 @@ type CreateQuestionPayload {
 #    question: Question!
 #}
 
-#input CreateQuestionResponseInput {
-#    "The ID of the question for which to create a response"
-#    questionID: ID!
-#    "A list of documents to attach to the response"
-#    documents: [DocumentInput!]!
-#    "A note to attach to the response"
-#    noteText: String
-#}
+input CreateQuestionResponseInput {
+   "The ID of the question for which to create a response"
+   questionID: ID!
+   "A list of documents to attach to the response"
+   documents: [DocumentInput!]!
+   "A note to attach to the response"
+   noteText: String
+}
 
-#type CreateQuestionResponsePayload {
-#    "The newly created QuestionResponse"
-#    response: QuestionResponse!
-#}
+type CreateQuestionResponsePayload {
+   "The newly created QuestionResponse"
+   response: QuestionResponse!
+}
 
 type UserEdge {
     node: User!
@@ -584,18 +584,18 @@ type Question {
 #    dueDate: Date
 #    rateIDs: [String!]
 #
-#    responses: [QuestionResponse!]!
+   responses: [QuestionResponse!]!
 }
 
 #"""
 #QuestionResponse is a response by a StateUser to a Question sent by CMS. States may upload one or
 #more documents full of responses to a single QuestionResponse, in addition to a text note.
 #"""
-#type QuestionResponse {
-#    id: ID!
-#    questionID: ID!
-#    createdAt: DateTime!
-#    addedBy: StateUser!
-#    documents: [Document!]!
+type QuestionResponse {
+   id: ID!
+   questionID: ID!
+   createdAt: DateTime!
+   addedBy: StateUser!
+   documents: [Document!]!
 #    noteText: String
-#}
+}

@@ -1,0 +1,29 @@
+mutation createQuestionResponse($input: CreateQuestionResponseInput!) {
+    createQuestionResponse(input: $input) {
+        response {
+            id
+            questionID
+            createdAt
+            addedBy {
+                id
+                role
+                email
+                givenName
+                familyName
+                state {
+                    code
+                    name
+                    programs {
+                        id
+                        name
+                        fullName
+                    }
+                }
+            }
+            documents {
+                name
+                s3URL
+            }
+        }
+    }
+}

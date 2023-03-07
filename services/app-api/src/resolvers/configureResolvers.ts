@@ -14,6 +14,7 @@ import {
 import {
     indexQuestionsResolver,
     createQuestionResolver,
+    createQuestionResponseResolver,
 } from './questionResponse'
 import {
     fetchCurrentUserResolver,
@@ -57,6 +58,7 @@ export function configureResolvers(
             ),
             updateCMSUser: updateCMSUserResolver(store),
             createQuestion: createQuestionResolver(store),
+            createQuestionResponse: createQuestionResponseResolver(store),
         },
         User: {
             // resolveType is required to differentiate Unions
