@@ -27,8 +27,12 @@ import { featureFlags } from '../../common-code/featureFlags'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { recordJSException } from '../../otelHelpers'
 import { SubmissionSideNav } from '../SubmissionSideNav'
-import { UploadQuestions } from '../QuestionResponse/UploadQuestions/UploadQuestions'
-import { QuestionResponse, UploadResponse } from '../QuestionResponse'
+import {
+    QuestionResponse,
+    UploadResponse,
+    UploadQuestions,
+} from '../QuestionResponse'
+import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -49,10 +53,12 @@ const StateUserRoutes = ({
     authMode,
     setAlert,
     showQuestionResponse,
+    stageName,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
     showQuestionResponse: boolean
+    stageName?: string
 }): React.ReactElement => {
     return (
         <AuthenticatedRouteWrapper setAlert={setAlert} authMode={authMode}>
@@ -100,6 +106,12 @@ const StateUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_FORM}
                     element={<StateSubmissionForm />}
                 />
+                {stageName !== 'prod' && (
+                    <Route
+                        path={RoutesRecord.GRAPHQL_EXPLORER}
+                        element={<GraphQLExplorer />}
+                    />
+                )}
                 <Route path="*" element={<Error404 />} />
             </Routes>
         </AuthenticatedRouteWrapper>
@@ -110,10 +122,12 @@ const CMSUserRoutes = ({
     authMode,
     setAlert,
     showQuestionResponse,
+    stageName,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
     showQuestionResponse: boolean
+    stageName?: string
 }): React.ReactElement => {
     return (
         <AuthenticatedRouteWrapper authMode={authMode} setAlert={setAlert}>
@@ -147,6 +161,12 @@ const CMSUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_REVISION}
                     element={<SubmissionRevisionSummary />}
                 />
+                {stageName !== 'prod' && (
+                    <Route
+                        path={RoutesRecord.GRAPHQL_EXPLORER}
+                        element={<GraphQLExplorer />}
+                    />
+                )}
                 <Route path={RoutesRecord.REPORTS} element={<Reports />} />
                 <Route path="*" element={<Error404 />} />
             </Routes>
@@ -194,6 +214,7 @@ export const AppRoutes = ({
         'LOGIN_REDIRECT',
         null
     )
+    const stageName = process.env.REACT_APP_STAGE_NAME
     const showExpirationModal: boolean = ldClient?.variation(
         featureFlags.SESSION_EXPIRING_MODAL.flag,
         featureFlags.SESSION_EXPIRING_MODAL.defaultValue
@@ -294,6 +315,7 @@ export const AppRoutes = ({
                 authMode={authMode}
                 setAlert={setAlert}
                 showQuestionResponse={showQuestionResponse}
+                stageName={stageName}
             />
         )
     } else {
@@ -302,6 +324,7 @@ export const AppRoutes = ({
                 authMode={authMode}
                 setAlert={setAlert}
                 showQuestionResponse={showQuestionResponse}
+                stageName={stageName}
             />
         )
     }

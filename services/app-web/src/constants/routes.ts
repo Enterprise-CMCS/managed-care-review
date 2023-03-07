@@ -6,6 +6,7 @@ const ROUTES = [
     'ROOT',
     'AUTH',
     'DASHBOARD',
+    'GRAPHQL_EXPLORER',
     'HELP',
     'REPORTS',
     'SUBMISSIONS',
@@ -21,7 +22,7 @@ const ROUTES = [
     'SUBMISSIONS_SUMMARY',
     'SUBMISSIONS_QUESTIONS_AND_ANSWERS',
     'SUBMISSIONS_UPLOAD_QUESTION',
-    'SUBMISSIONS_UPLOAD_RESPONSE'
+    'SUBMISSIONS_UPLOAD_RESPONSE',
 ] as const // iterable union type
 type RouteT = typeof ROUTES[number]
 type RouteTWithUnknown = RouteT | 'UNKNOWN_ROUTE'
@@ -34,6 +35,7 @@ const RoutesRecord: Record<RouteT, string> = {
     ROOT: '/',
     AUTH: '/auth',
     DASHBOARD: '/dashboard',
+    GRAPHQL_EXPLORER: '/dev/graphql-explorer',
     HELP: '/help',
     REPORTS: '/reports',
     SUBMISSIONS: '/submissions',
@@ -91,6 +93,7 @@ const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
 const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     ROOT: 'Home',
     AUTH: 'Login',
+    GRAPHQL_EXPLORER: 'GraphQL explorer',
     HELP: 'Help',
     REPORTS: 'Reports',
     DASHBOARD: 'Dashboard',
