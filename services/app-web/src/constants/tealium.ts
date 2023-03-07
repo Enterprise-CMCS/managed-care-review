@@ -33,6 +33,7 @@ const CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     AUTH: 'login',
     DASHBOARD: 'table',
     HELP: 'glossary',
+    GRAPHQL_EXPLORER: 'dev',
     REPORTS: 'table',
     SUBMISSIONS: 'form',
     SUBMISSIONS_NEW: 'form',
