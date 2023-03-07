@@ -23,7 +23,6 @@ import {
     useCreateQuestionMutation,
     FetchHealthPlanPackageWithQuestionsDocument,
     FetchHealthPlanPackageWithQuestionsQuery,
-    IndexQuestionsPayload,
 } from '../../../gen/gqlClient'
 
 export const UploadQuestions = () => {
@@ -97,41 +96,8 @@ export const UploadQuestions = () => {
                         const pkg = result?.fetchHealthPlanPackage.pkg
 
                         if (pkg) {
-                            const questions =
-                                pkg.questions as IndexQuestionsPayload
-
-                            const newQuestionEdge = {
-                                __typename: 'QuestionEdge',
-                                node: newQuestion,
-                            }
-
-                            const dmcoQuestions = {
-                                ...questions.DMCOQuestions,
-                                totalCount: questions.DMCOQuestions.totalCount
-                                    ? questions.DMCOQuestions.totalCount + 1
-                                    : 1,
-                                edges: [
-                                    newQuestionEdge,
-                                    ...questions.DMCOQuestions.edges,
-                                ],
-                            }
-
-                            const pkgWithNewQuestion = {
-                                ...pkg,
-                                questions: {
-                                    ...questions,
-                                    DMCOQuestions: dmcoQuestions,
-                                },
-                            }
-
-                            cache.writeQuery({
-                                query: FetchHealthPlanPackageWithQuestionsDocument,
-                                data: {
-                                    fetchHealthPlanPackage: {
-                                        pkg: pkgWithNewQuestion,
-                                    },
-                                },
-                            })
+                            cache.evict({ id: cache.identify(pkg) })
+                            cache.gc()
                         }
                     }
                 },
