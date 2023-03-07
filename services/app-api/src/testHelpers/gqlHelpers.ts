@@ -1,42 +1,45 @@
 import { ApolloServer } from 'apollo-server-lambda'
-import CREATE_HEALTH_PLAN_PACKAGE from '../../../app-graphql/src/mutations/createHealthPlanPackage.graphql'
-import SUBMIT_HEALTH_PLAN_PACKAGE from '../../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
-import UNLOCK_HEALTH_PLAN_PACKAGE from '../../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
-import FETCH_HEALTH_PLAN_PACKAGE from '../../../app-graphql/src/queries/fetchHealthPlanPackage.graphql'
-import UPDATE_HEALTH_PLAN_FORM_DATA from '../../../app-graphql/src/mutations/updateHealthPlanFormData.graphql'
-import typeDefs from '../../../app-graphql/src/schema.graphql'
+import CREATE_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/createHealthPlanPackage.graphql'
+import SUBMIT_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/submitHealthPlanPackage.graphql'
+import UNLOCK_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
+import FETCH_HEALTH_PLAN_PACKAGE from 'app-graphql/src/queries/fetchHealthPlanPackage.graphql'
+import UPDATE_HEALTH_PLAN_FORM_DATA from 'app-graphql/src/mutations/updateHealthPlanFormData.graphql'
+import CREATE_QUESTION from 'app-graphql/src/mutations/createQuestion.graphql'
+import INDEX_QUESTIONS from 'app-graphql/src/queries/indexQuestions.graphql'
+import CREATE_QUESTION_RESPONSE from 'app-graphql/src/mutations/createQuestionResponse.graphql'
+import typeDefs from 'app-graphql/src/schema.graphql'
 import {
     HealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
     StateCodeType,
-} from '../../../app-web/src/common-code/healthPlanFormDataType'
+} from 'app-web/src/common-code/healthPlanFormDataType'
 import {
     CreateQuestionInput,
-    CreateQuestionPayload,
-    IndexQuestionsPayload,
+    InsertQuestionResponseArgs,
     ProgramType,
 } from '../domain-models'
 import { Emailer, newLocalEmailer } from '../emailer'
 import {
     CreateHealthPlanPackageInput,
     HealthPlanPackage,
+    CreateQuestionResponsePayload,
+    CreateQuestionPayload,
+    IndexQuestionsPayload
 } from '../gen/gqlServer'
 import { Context } from '../handlers/apollo_gql'
 import { NewPostgresStore, Store } from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { latestFormData } from './healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from './storeHelpers'
-import { domainToBase64 } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import { domainToBase64 } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
 import {
     newLocalEmailParameterStore,
     EmailParameterStore,
 } from '../parameterStore'
-import statePrograms from '../../../app-web/src/common-code/data/statePrograms.json'
+import statePrograms from 'app-web/src/common-code/data/statePrograms.json'
 import { testLDService } from './launchDarklyHelpers'
 import { LDService } from '../launchDarkly/launchDarkly'
 import { insertUserToLocalAurora } from '../authn'
-import CREATE_QUESTION from 'app-graphql/src/mutations/createQuestion.graphql'
-import INDEX_QUESTIONS from 'app-graphql/src/queries/indexQuestions.graphql'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -438,6 +441,41 @@ const indexTestQuestions = async (
     return indexQuestionsResult.data.indexQuestions
 }
 
+
+const createTestQuestionResponse = async (
+    server: ApolloServer,
+    questionID: string,
+    responseData?: Omit<InsertQuestionResponseArgs, 'questionID'>
+): Promise<CreateQuestionResponsePayload> => {
+    const response = responseData|| {
+        documents: [
+            {
+                name: 'Test Question',
+                s3URL: 'testS3Url',
+            },
+        ],
+    }
+    const createdResponse = await server.executeOperation({
+        query: CREATE_QUESTION_RESPONSE,
+        variables: {
+            input: {
+                questionID,
+                ...response,
+            },
+        },
+    })
+
+    if (createdResponse.errors)
+        throw new Error(
+            `createTestQuestionResponse mutation failed with errors ${createdResponse.errors}`
+        )
+
+    if (!createdResponse.data) {
+        throw new Error('createTestQuestionResponse returned nothing')
+    }
+
+    return createdResponse.data.createQuestionResponse
+}
 export {
     constructTestPostgresServer,
     createTestHealthPlanPackage,
@@ -453,4 +491,5 @@ export {
     defaultFloridaRateProgram,
     createTestQuestion,
     indexTestQuestions,
+    createTestQuestionResponse
 }
