@@ -3,7 +3,7 @@ describe('CMS user can view submission', () => {
         cy.stubFeatureFlags()
     })
     it('in the CMS dashboard', () => {
-        cy.interceptFeatureFlags({'rate-cert-assurance': true})
+        cy.interceptFeatureFlags({ 'rate-cert-assurance': true })
         // state user adds a new package
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
@@ -46,7 +46,7 @@ describe('CMS user can view submission', () => {
         cy.findByText('Dashboard').should('exist')
         cy.findByText('Programs').should('exist')
 
-    // store submission name for later
+        // store submission name for later
         cy.location().then((loc) => {
             expect(loc.search).to.match(/.*justSubmitted=*/)
             const submissionName = loc.search.split('=').pop()
@@ -54,12 +54,12 @@ describe('CMS user can view submission', () => {
                 throw new Error('No submission name found' + loc.search)
             }
 
-    // sign out state user
+            // sign out state user
             cy.findByRole('button', {
-                    name: 'Sign out',
-                })
-                    .should('exist')
-                    .click()
+                name: 'Sign out',
+            })
+                .should('exist')
+                .click()
              cy.findByText('Medicaid and CHIP Managed Care Reporting and Review System')
 
             //  sign in CMS user
@@ -81,19 +81,19 @@ describe('CMS user can view submission', () => {
                 .findByTestId('submission-date')
                 .should('not.be.empty')
 
-             cy.get('table')
-                 .should('exist')
-                 .findByText(submissionName)
-                 .parent()
-                 .siblings('[data-testid="submission-status"]')
-                 .should('have.text', 'Submitted')
+            cy.get('table')
+                .should('exist')
+                .findByText(submissionName)
+                .parent()
+                .siblings('[data-testid="submission-status"]')
+                .should('have.text', 'Submitted')
 
 
             cy.get('table')
                 .contains('a', submissionName)
                 .parents('tr')
                 .findByTestId('submission-type')
-                .should('have.text', 'Contract action and rate certification' )
+                .should('have.text', 'Contract action and rate certification')
 
             cy.get('table')
                 .contains('a', submissionName)
