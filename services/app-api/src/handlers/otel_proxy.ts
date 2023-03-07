@@ -6,7 +6,19 @@ export const main: APIGatewayProxyHandler = async (event) => {
         headers: { 'content-type': 'application/json' },
     }
 
-    await axios.post('http://localhost:4318/v1/traces', event.body, options)
+    try {
+        await axios.post('http://localhost:4318/v1/traces', event.body, options)
+    } catch (err) {
+        console.error(`Could not send OTEL trace: ${JSON.stringify(err)}`)
+        return {
+            statusCode: 500,
+            body: JSON.stringify(err.message),
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
+            },
+        }
+    }
 
     return {
         statusCode: 200,

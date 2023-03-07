@@ -11,7 +11,7 @@ import {
     getFacetedUniqueValues,
     Column,
 } from '@tanstack/react-table'
-import { useAtom } from 'jotai'
+import { useAtom } from 'jotai/react'
 import { atomWithHash } from 'jotai-location'
 import { HealthPlanPackageStatus, Program, User } from '../../gen/gqlClient'
 import styles from './HealthPlanPackageTable.module.scss'

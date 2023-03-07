@@ -5,20 +5,11 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "precommit": "lint-staged",
-        "lint": "tsc --noEmit && eslint . --max-warnings=0",
-        "clean": "rm -rf node_modules && yarn cache clean",
         "start": "npx serverless s3 start --stage local",
         "test": "jest --watch"
     },
     "author": "",
     "license": "CC0-1.0",
-    "lint-staged": {
-        "*.ts": [
-            "eslint --max-warnings=0",
-            "prettier --write"
-        ]
-    },
     "dependencies": {
         "@aws-sdk/client-s3": "^3.262.0"
     },

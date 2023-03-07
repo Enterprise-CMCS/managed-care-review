@@ -7,7 +7,7 @@ import {
     runAPILocally,
     runPostgresLocally,
     runOtelLocally,
-    runUploadsLocally,
+    runS3Locally,
     runStorybookLocally,
     runWebAgainstAWS,
     runWebAgainstDocker,
@@ -23,7 +23,6 @@ import {
     runWebTests,
     runWebTestsWatch,
 } from './test/index.js'
-import { runUploadsTestWatch } from './test/uploads.js'
 
 async function runAllClean() {
     const runner = new LabeledProcessRunner()
@@ -56,7 +55,7 @@ type runLocalFlags = {
     runWeb: boolean
     runPostgres: boolean
     runOtel: boolean
-    runUploads: boolean
+    runS3: boolean
     runStoryBook: boolean
 }
 async function runAllLocally({
@@ -64,14 +63,14 @@ async function runAllLocally({
     runWeb,
     runPostgres,
     runOtel,
-    runUploads,
+    runS3,
     runStoryBook,
 }: runLocalFlags) {
     const runner = new LabeledProcessRunner()
 
     runPostgres && runPostgresLocally(runner)
     runOtel && runOtelLocally(runner)
-    runUploads && runUploadsLocally(runner)
+    runS3 && runS3Locally(runner)
     runAPI && runAPILocally(runner)
     runWeb && runWebLocally(runner)
     runStoryBook && runStorybookLocally(runner)
@@ -159,7 +158,7 @@ function main() {
             (yargs) => {
                 return yargs
                     .command(
-                        ['$0'], // adding '*' here makes this subcommand the default command
+                        ['all', '*'], // adding '*' here makes this subcommand the default command
                         'runs all local services. You can exclude specific services with --no-* like --no-storybook',
                         (yargs) => {
                             return yargs
@@ -175,10 +174,9 @@ function main() {
                                     type: 'boolean',
                                     describe: 'run api locally',
                                 })
-                                .option('uploads', {
-                                    alias: 's3',
+                                .option('s3', {
                                     type: 'boolean',
-                                    describe: 'run uploads (s3) locally',
+                                    describe: 'run s3 locally',
                                 })
                                 .option('postgres', {
                                     type: 'boolean',
@@ -196,7 +194,7 @@ function main() {
                                     ],
                                     [
                                         '$0 local --api --postgres',
-                                        'run app-api and the database',
+                                        'run app-api and the databse',
                                     ],
                                 ])
                         },
@@ -206,7 +204,7 @@ function main() {
                                 runWeb: args.web,
                                 runPostgres: args.postgres,
                                 runOtel: args.otel,
-                                runUploads: args.uploads,
+                                runS3: args.s3,
                                 runStoryBook: args.storybook,
                             }
 
@@ -280,15 +278,11 @@ function main() {
                             runStorybookLocally(runner)
                         }
                     )
-                    .command(
-                        ['uploads', 's3'],
-                        'run uploads service locally',
-                        () => {
-                            const runner = new LabeledProcessRunner()
+                    .command('s3', 'run s3 locally', () => {
+                        const runner = new LabeledProcessRunner()
 
-                            runUploadsLocally(runner)
-                        }
-                    )
+                        runS3Locally(runner)
+                    })
                     .command('postgres', 'run postgres locally.', () => {
                         const runner = new LabeledProcessRunner()
 
@@ -421,45 +415,6 @@ function main() {
                                 process.exit(await runWebTests(runner))
                             }
                             runWebTestsWatch(unparsedJestArgs)
-                        }
-                    )
-                    .command(
-                        'uploads',
-                        'run & watch uploads jest tests. Any args passed after a -- will be passed directly to jest',
-                        (yargs) => {
-                            return yargs
-                                .option('unit', {
-                                    type: 'boolean',
-                                    describe: 'run tests with coverage data',
-                                })
-                                .example([
-                                    [
-                                        '$0 test uploads',
-                                        'run the uploads jest tests, rerunning on save',
-                                    ],
-                                    [
-                                        '$0 test uploads -- -t submit',
-                                        'run tests that match the pattern /submit/',
-                                    ],
-                                    [
-                                        '$0 test uploads -- --watchAll=false',
-                                        'run the tests once and exit',
-                                    ],
-                                ])
-                        },
-                        async (args) => {
-                            // all args that come after a `--` hang out in args._, along with the command name(s)
-                            // they can be strings or numbers so we map them before passing them on
-                            const unparsedJestArgs = args._.slice(2).map(
-                                (intOrString) => {
-                                    return intOrString.toString()
-                                }
-                            )
-                            if (args.unit) {
-                                const runner = new LabeledProcessRunner()
-                                process.exit(await runWebTests(runner))
-                            }
-                            runUploadsTestWatch(unparsedJestArgs)
                         }
                     )
                     .command(

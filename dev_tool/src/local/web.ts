@@ -1,14 +1,23 @@
 import LabeledProcessRunner from '../runner.js'
+import { once } from '../deps.js'
 import { commandMustSucceedSync } from '../localProcess.js'
 import { checkStageAccess, getWebAuthVars } from '../serverless.js'
 
 import { compileGraphQLTypesWatchOnce } from './graphql.js'
 import { compileProtoWatch } from './proto.js'
 
+async function installWebDeps(runner: LabeledProcessRunner) {
+    return runner.runCommandAndOutput('web deps', ['yarn', 'install'], '')
+}
+
+export const installWebDepsOnce = once(installWebDeps)
+
 // runWebLocally runs app-web locally
 export async function runWebLocally(runner: LabeledProcessRunner) {
     await compileGraphQLTypesWatchOnce(runner)
     await compileProtoWatch(runner)
+
+    await installWebDepsOnce(runner)
 
     runner.runCommandAndOutput(
         'web',
