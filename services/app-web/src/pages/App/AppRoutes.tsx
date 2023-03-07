@@ -151,6 +151,7 @@ const CMSUserRoutes = ({
                         element={<SubmissionSummary />}
                     />
                 </Route>
+
                 {showQuestionResponse && (
                     <>
                         <Route
