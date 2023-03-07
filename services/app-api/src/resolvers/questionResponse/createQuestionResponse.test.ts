@@ -5,7 +5,7 @@ import {
     createTestQuestion,
     createTestQuestionResponse,
 } from '../../testHelpers/gqlHelpers'
-import { CMSUserType} from '../../domain-models'
+import { CMSUserType } from '../../domain-models'
 import { assertAnError, assertAnErrorCode } from '../../testHelpers'
 
 describe('createQuestionResponse', () => {
@@ -41,35 +41,31 @@ describe('createQuestionResponse', () => {
         )
 
         expect(createdResponse).toEqual({
-            response: 
-                expect.objectContaining({
-                    id: expect.any(String),
-                    questionID: createdQuestion?.question.id,
-                    documents: [
-                        {
-                            name: 'Test Question',
-                            s3URL: 'testS3Url',
-                        },
-                    ],
-                    addedBy: expect.objectContaining({
-                        role: 'STATE_USER'}
-                    )
-                })
-            }
-        )
-
+            response: expect.objectContaining({
+                id: expect.any(String),
+                questionID: createdQuestion?.question.id,
+                documents: [
+                    {
+                        name: 'Test Question',
+                        s3URL: 'testS3Url',
+                    },
+                ],
+                addedBy: expect.objectContaining({
+                    role: 'STATE_USER',
+                }),
+            }),
+        })
     })
 
     it('returns an error when attempting to create response for a question that does not exist', async () => {
         const stateServer = await constructTestPostgresServer()
         const fakeID = 'abc-123'
 
-        
         const createdResponse = await stateServer.executeOperation({
             query: CREATE_QUESTION_RESPONSE,
             variables: {
                 input: {
-                    fakeID,
+                    questionID: fakeID,
                     documents: [
                         {
                             name: 'Test Question',
@@ -83,7 +79,7 @@ describe('createQuestionResponse', () => {
         expect(createdResponse.errors).toBeDefined()
         expect(assertAnErrorCode(createdResponse)).toBe('BAD_USER_INPUT')
         expect(assertAnError(createdResponse).message).toBe(
-            `Issue creating question response for question ${fakeID}`
+            `Issue creating question response for question ${fakeID} of type INSERT_ERROR. Message: insert failed because required record not found`
         )
     })
 
@@ -102,21 +98,20 @@ describe('createQuestionResponse', () => {
             submittedPkg.id
         )
 
-
-      const createdResponse = await stateServer.executeOperation({
-          query: CREATE_QUESTION_RESPONSE,
-          variables: {
-              input: {
-                  questionID: createdQuestion.question.id,
-                  documents: [
-                      {
-                          name: 'Test Question',
-                          s3URL: 'testS3Url',
-                      },
-                  ],
-              },
-          },
-      })
+        const createdResponse = await cmsServer.executeOperation({
+            query: CREATE_QUESTION_RESPONSE,
+            variables: {
+                input: {
+                    questionID: createdQuestion.question.id,
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 'testS3Url',
+                        },
+                    ],
+                },
+            },
+        })
 
         expect(createdResponse.errors).toBeDefined()
         expect(assertAnErrorCode(createdResponse)).toBe('FORBIDDEN')

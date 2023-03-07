@@ -15,7 +15,7 @@ export function createQuestionResponseResolver(
         const { user, span } = context
 
         if (!isStateUser(user)) {
-            const msg = 'user not authorized to create a question'
+            const msg = 'user not authorized to create a question response'
             logError('createQuestionResponse', msg)
             setErrorAttributesOnActiveSpan(msg, span)
             throw new ForbiddenError(msg)
@@ -34,7 +34,7 @@ export function createQuestionResponseResolver(
             const errMessage = `Issue creating question response for question ${input.questionID} of type ${responseResult.code}. Message: ${responseResult.message}`
             logError('createQuestionResponse', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
+            throw new UserInputError(errMessage)
         }
 
         logSuccess('createQuestionResponse')

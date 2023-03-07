@@ -5,7 +5,7 @@ import {
     FormGroup,
     ButtonGroup,
 } from '@trussworks/react-uswds'
-import styles from '../UploadAnswers.module.scss'
+import styles from '../UploadQuestions/UploadQuestions.module.scss'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useS3 } from '../../../contexts/S3Context'
 import {
@@ -18,15 +18,23 @@ import { useFileUpload } from '../../../hooks/useFileUpload'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
-import { CreateQuestionResponseInput, useCreateQuestionResponseMutation} from '../../../gen/gqlClient'
+import {
+    CreateQuestionResponseInput,
+    useCreateQuestionResponseMutation,
+} from '../../../gen/gqlClient'
 
 export const UploadResponse = () => {
     // third party
-    const { division, id, questionID } = useParams<{ division: string; id: string; questionID: string }>()
+    const { division, id, questionID } = useParams<{
+        division: string
+        id: string
+        questionID: string
+    }>()
     const navigate = useNavigate()
 
     // api
-    const [createResponse, { loading: apiLoading, error: apiError }] = useCreateQuestionResponseMutation()
+    const [createResponse, { loading: apiLoading, error: apiError }] =
+        useCreateQuestionResponseMutation()
 
     // page level state
     const [shouldValidate, setShouldValidate] = React.useState(false)
@@ -117,11 +125,7 @@ export const UploadResponse = () => {
                             label="Upload response"
                             renderMode="list"
                             aria-required
-                            error={
-                                showFileUploadError
-                                    ? fileUploadError
-                                    : ''
-                            }
+                            error={showFileUploadError ? fileUploadError : ''}
                             hint={
                                 <span>
                                     This input only accepts PDF, CSV, DOC, DOCX,
@@ -172,7 +176,7 @@ export const UploadResponse = () => {
                             animationTimeout={1000}
                             loading={apiLoading}
                         >
-                           Send response
+                            Send response
                         </ActionButton>
                     </ButtonGroup>
                 </PageActionsContainer>
