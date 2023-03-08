@@ -23,6 +23,31 @@ fragment questionEdgeFragment on QuestionEdge {
             s3URL
             name
         }
+        responses {
+            id
+            questionID
+            createdAt
+            addedBy {
+                id
+                role
+                email
+                givenName
+                familyName
+                state {
+                    code
+                    name
+                    programs {
+                        id
+                        name
+                        fullName
+                    }
+                }
+            }
+            documents {
+                name
+                s3URL
+            }
+        }
     }
 }
 

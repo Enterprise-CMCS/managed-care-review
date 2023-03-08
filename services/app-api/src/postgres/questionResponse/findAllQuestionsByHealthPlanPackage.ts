@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { CMSUserType, Question } from '../../domain-models'
+import { CMSUserType, Question, StateUserType } from '../../domain-models'
 import { convertPrismaErrorToStoreError, StoreError } from '../storeError'
 
 export async function findAllQuestionsByHealthPlanPackage(
@@ -17,6 +17,15 @@ export async function findAllQuestionsByHealthPlanPackage(
                         createdAt: 'desc',
                     },
                 },
+                responses: {
+                    include: {
+                        addedBy: true,
+                        documents: true,
+                    },
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                },
                 addedBy: true,
             },
             orderBy: {
@@ -30,6 +39,10 @@ export async function findAllQuestionsByHealthPlanPackage(
                 ...question.addedBy,
                 stateAssignments: [],
             } as CMSUserType,
+            responses: question.responses.map((response) => ({
+                ...response,
+                addedBy: response.addedBy as StateUserType,
+            })),
         }))
 
         return questions
