@@ -15,22 +15,17 @@ import { recordJSException } from '../../otelHelpers'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
 import {
-    CmsUser,
     HealthPlanPackage,
     HealthPlanRevision,
     IndexQuestionsPayload,
-    QuestionEdge,
     User,
 } from '../../gen/gqlClient'
 import { HealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
 import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
-import {
-    QuestionData,
-    QuestionDocumentWithLink,
-} from '../QuestionResponse/QATable/QATable'
-import { useDocument } from '../../hooks/useDocument'
+import { QuestionData } from '../QuestionResponse/QATable/QATable'
+import { useQuestions } from '../../hooks'
 
 export type SideNavOutletContextType = {
     pkg: HealthPlanPackage
@@ -70,7 +65,7 @@ export const SubmissionSideNav = () => {
     const { pathname } = useLocation()
     const navigate = useNavigate()
     const ldClient = useLDClient()
-    const { getDocumentsUrl } = useDocument()
+    const { extractQuestions } = useQuestions()
 
     const showQuestionResponse = ldClient?.variation(
         featureFlags.CMS_QUESTIONS.flag,
@@ -84,29 +79,7 @@ export const SubmissionSideNav = () => {
     const parseQuestions = async (
         questions: IndexQuestionsPayload
     ): Promise<QADivisionQuestions> => {
-        const extractQuestions = async (
-            edges: QuestionEdge[]
-        ): Promise<QuestionData[]> => {
-            const questions = await Promise.all(
-                edges.map(async ({ node }) => ({
-                    id: node.id,
-                    pkgID: node.pkgID,
-                    createdAt: node.createdAt,
-                    addedBy: node.addedBy as CmsUser,
-                    documents: (await getDocumentsUrl(
-                        node.documents,
-                        'QUESTION_ANSWER_DOCS'
-                    )) as QuestionDocumentWithLink[],
-                }))
-            ).catch((err) => {
-                console.info(err)
-                return []
-            })
-
-            return questions
-        }
-
-        const divisionQuestions = {
+        return {
             dmco: {
                 totalCount: questions.DMCOQuestions.totalCount ?? 0,
                 questions: await extractQuestions(
@@ -126,8 +99,6 @@ export const SubmissionSideNav = () => {
                 ),
             },
         }
-
-        return divisionQuestions
     }
 
     const { result: fetchResult } =
