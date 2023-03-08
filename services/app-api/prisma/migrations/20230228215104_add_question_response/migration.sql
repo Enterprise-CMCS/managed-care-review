@@ -1,15 +1,8 @@
-/*
-  Warnings:
-
-  - Added the required column `updatedAt` to the `Question` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `updatedAt` to the `QuestionDocument` table without a default value. This is not possible if the table is not empty.
-
-*/
 -- AlterTable
-ALTER TABLE "Question" ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL;
+ALTER TABLE "Question" ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 -- AlterTable
-ALTER TABLE "QuestionDocument" ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL;
+ALTER TABLE "QuestionDocument" ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 -- CreateTable
 CREATE TABLE "QuestionResponseDocument" (
