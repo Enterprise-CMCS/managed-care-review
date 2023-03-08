@@ -4,5 +4,15 @@
 
 .qaDocumentTable {
   @extend .uploadedDocumentsTable;
-  margin: units(2) 0 units(2) 0;
+  margin: 0 0 units(4) 0;
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: units(2);
+  p {
+    margin: 0;
+  }
 }

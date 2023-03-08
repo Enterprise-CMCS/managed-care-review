@@ -6,13 +6,13 @@ import {
 } from '../../../testHelpers/apolloMocks'
 import { screen, waitFor, within } from '@testing-library/react'
 import React from 'react'
-import { QATable, QuestionDocumentWithLink } from './QATable'
-import { CmsUser } from '../../../gen/gqlClient'
+import { QATable, QuestionDocumentWithLink, QuestionData } from './QATable'
+import { CmsUser, StateUser } from '../../../gen/gqlClient'
 
-const stateUser = mockValidUser()
+const stateUser = mockValidUser() as StateUser
 const cmsUser = mockValidCMSUser() as CmsUser
 
-const testQuestionData = {
+const testQuestionData: QuestionData = {
     id: 'question-1-id',
     pkgID: '15',
     createdAt: new Date('2022-12-23T00:00:00.000Z'),
@@ -24,6 +24,21 @@ const testQuestionData = {
             url: 'https://fakes3.com/key?sekret=deadbeef',
         } as QuestionDocumentWithLink,
     ],
+    responses: [
+        {
+            id: 'response-1-id',
+            questionID: 'question-1-id',
+            addedBy: stateUser,
+            createdAt: new Date('2022-12-24T00:00:00.000Z'),
+            documents: [
+                {
+                    s3URL: 's3://bucketname/key/response-1-document-1',
+                    name: 'response-1-document-1',
+                    url: 'https://fakes3.com/key?sekret=deadbeef',
+                } as QuestionDocumentWithLink,
+            ],
+        },
+    ],
 }
 
 it('renders question correctly as a CMS user that created the question', async () => {
@@ -31,17 +46,30 @@ it('renders question correctly as a CMS user that created the question', async (
         <Routes>
             <Route
                 path={'/'}
-                element={<QATable question={testQuestionData} user={cmsUser} />}
+                element={
+                    <QATable
+                        question={testQuestionData}
+                        user={cmsUser}
+                        division={'DMCO'}
+                    />
+                }
             />
         </Routes>
     )
 
     await waitFor(() => {
         const rows = screen.getAllByRole('row')
-        expect(rows).toHaveLength(2)
-        expect(rows[1]).toHaveTextContent('question-1-document-1')
-        expect(rows[1]).toHaveTextContent('12/23/22')
-        expect(rows[1]).toHaveTextContent('You')
+        expect(rows).toHaveLength(3)
+
+        //Expect Response to be first on table
+        expect(rows[1]).toHaveTextContent('response-1-document-1')
+        expect(rows[1]).toHaveTextContent('12/24/22')
+        expect(rows[1]).toHaveTextContent('bob (MN)')
+
+        //Expect Question to be last on table
+        expect(rows[2]).toHaveTextContent('question-1-document-1')
+        expect(rows[2]).toHaveTextContent('12/23/22')
+        expect(rows[2]).toHaveTextContent('You')
     })
 })
 it('renders question correctly as a CMS user that did not create the question', async () => {
@@ -62,6 +90,7 @@ it('renders question correctly as a CMS user that did not create the question', 
                     <QATable
                         question={testQuestionData}
                         user={otherStateUser}
+                        division={'DMCO'}
                     />
                 }
             />
@@ -70,10 +99,10 @@ it('renders question correctly as a CMS user that did not create the question', 
 
     await waitFor(() => {
         const rows = screen.getAllByRole('row')
-        expect(rows).toHaveLength(2)
-        expect(rows[1]).toHaveTextContent('question-1-document-1')
-        expect(rows[1]).toHaveTextContent('12/23/22')
-        expect(rows[1]).toHaveTextContent(`${cmsUser.givenName} (CMS)`)
+        expect(rows).toHaveLength(3)
+        expect(rows[2]).toHaveTextContent('question-1-document-1')
+        expect(rows[2]).toHaveTextContent('12/23/22')
+        expect(rows[2]).toHaveTextContent(`${cmsUser.givenName} (CMS)`)
     })
 })
 it('renders question correctly as a state user', async () => {
@@ -82,7 +111,11 @@ it('renders question correctly as a state user', async () => {
             <Route
                 path={'/'}
                 element={
-                    <QATable question={testQuestionData} user={stateUser} />
+                    <QATable
+                        question={testQuestionData}
+                        user={stateUser}
+                        division={'DMCO'}
+                    />
                 }
             />
         </Routes>
@@ -90,14 +123,14 @@ it('renders question correctly as a state user', async () => {
 
     await waitFor(() => {
         const rows = screen.getAllByRole('row')
-        expect(rows).toHaveLength(2)
-        expect(rows[1]).toHaveTextContent('question-1-document-1')
-        expect(rows[1]).toHaveTextContent('12/23/22')
-        expect(rows[1]).toHaveTextContent(`${cmsUser.givenName} (CMS)`)
+        expect(rows).toHaveLength(3)
+        expect(rows[2]).toHaveTextContent('question-1-document-1')
+        expect(rows[2]).toHaveTextContent('12/23/22')
+        expect(rows[2]).toHaveTextContent(`${cmsUser.givenName} (CMS)`)
     })
 })
 it('renders multiple documents and links correctly', async () => {
-    const testQuestionDocLinks = {
+    const testQuestionDocLinks: QuestionData = {
         id: 'question-1-id',
         pkgID: '15',
         createdAt: new Date('2022-12-23T00:00:00.000Z'),
@@ -114,13 +147,32 @@ it('renders multiple documents and links correctly', async () => {
                 url: null,
             },
         ],
+        responses: [
+            {
+                id: 'response-1-id',
+                questionID: 'question-1-id',
+                addedBy: stateUser,
+                createdAt: new Date('2022-12-24T00:00:00.000Z'),
+                documents: [
+                    {
+                        s3URL: 's3://bucketname/key/response-1-document-1',
+                        name: 'response-1-document-1',
+                        url: 'https://fakes3.com/key?sekret=deadbeef',
+                    } as QuestionDocumentWithLink,
+                ],
+            },
+        ],
     }
     renderWithProviders(
         <Routes>
             <Route
                 path={'/'}
                 element={
-                    <QATable question={testQuestionDocLinks} user={cmsUser} />
+                    <QATable
+                        question={testQuestionDocLinks}
+                        user={cmsUser}
+                        division={'DMCO'}
+                    />
                 }
             />
         </Routes>
@@ -128,17 +180,24 @@ it('renders multiple documents and links correctly', async () => {
 
     await waitFor(() => {
         const rows = screen.getAllByRole('row')
-        expect(rows).toHaveLength(3)
+        expect(rows).toHaveLength(4)
 
-        // expect first document to have a link
-        expect(rows[1]).toHaveTextContent('question-1-document-1')
+        // expect response document to have a link
+        expect(rows[1]).toHaveTextContent('response-1-document-1')
         expect(within(rows[1]).getByRole('link')).toHaveAttribute(
             'href',
             'https://fakes3.com/key?sekret=deadbeef'
         )
 
-        // expect second document to not have a link
-        expect(rows[2]).toHaveTextContent('question-1-document-2')
-        expect(within(rows[2]).queryByRole('link')).toBeNull()
+        // expect first question document to have a link
+        expect(rows[2]).toHaveTextContent('question-1-document-1')
+        expect(within(rows[2]).getByRole('link')).toHaveAttribute(
+            'href',
+            'https://fakes3.com/key?sekret=deadbeef'
+        )
+
+        // expect second question document to not have a link
+        expect(rows[3]).toHaveTextContent('question-1-document-2')
+        expect(within(rows[3]).queryByRole('link')).toBeNull()
     })
 })
