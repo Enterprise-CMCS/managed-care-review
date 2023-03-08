@@ -59,7 +59,7 @@ export const main: APIGatewayProxyHandler = async () => {
 
     // take a snapshot of the DB before running data migration.
     // don't take a snapshot if we're in a PR branch
-    if (['dev', 'val', 'prod', 'main'].includes(stage)) {
+    if (['dev', 'val', 'prod', 'main', 'mtuseidpgsm'].includes(stage)) {
         const dbClusterId = await getDBClusterID(secretsManagerSecret)
         if (dbClusterId instanceof Error) {
             console.error(
