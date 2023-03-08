@@ -6,7 +6,7 @@ import { NavLink, useOutletContext } from 'react-router-dom'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { usePage } from '../../contexts/PageContext'
 import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
-import { QATable, QuestionData } from './QATable/QATable'
+import { QATable, QuestionData, Division } from './QATable/QATable'
 
 export const QuestionResponse = () => {
     const outletContext = useOutletContext<SideNavOutletContextType>()
@@ -29,12 +29,16 @@ export const QuestionResponse = () => {
         setPkgName(name)
     }
 
-    const mapQuestionTable = (divisionQuestions: QuestionData[]) => {
+    const mapQuestionTable = (
+        divisionQuestions: QuestionData[],
+        division: Division
+    ) => {
         return divisionQuestions.length ? (
             divisionQuestions.map((question) => (
                 <QATable
                     key={question.id}
                     question={question}
+                    division={division}
                     user={outletContext.user}
                 />
             ))
@@ -67,21 +71,21 @@ export const QuestionResponse = () => {
                     data-testid="dmco-qa-section"
                 >
                     <h3>Questions from DMCO</h3>
-                    {mapQuestionTable(questions.dmco.questions)}
+                    {mapQuestionTable(questions.dmco.questions, 'DMCO')}
                 </section>
                 <section
                     className={styles.questionSection}
                     data-testid="dmcp-qa-section"
                 >
                     <h3>Questions from OACT</h3>
-                    {mapQuestionTable(questions.dmcp.questions)}
+                    {mapQuestionTable(questions.dmcp.questions, 'DMCP')}
                 </section>
                 <section
                     className={styles.questionSection}
                     data-testid="oact-qa-section"
                 >
                     <h3>Questions from DMCP</h3>
-                    {mapQuestionTable(questions.oact.questions)}
+                    {mapQuestionTable(questions.oact.questions, 'OACT')}
                 </section>
             </GridContainer>
         </div>
