@@ -9,8 +9,8 @@ import {
     fetchCurrentUserMock,
     mockValidCMSUser,
     fetchStateHealthPlanPackageWithQuestionsMockSuccess,
+    mockQuestionsPayload,
 } from '../../testHelpers/apolloMocks'
-import { CmsUser } from '../../gen/gqlClient'
 
 describe('QuestionResponse', () => {
     beforeEach(() => {
@@ -19,58 +19,9 @@ describe('QuestionResponse', () => {
     afterEach(() => {
         jest.resetAllMocks()
     })
+
     it('renders expected questions correctly', async () => {
-        const mockQuestions = {
-            DMCOQuestions: {
-                totalCount: 2,
-                edges: [
-                    {
-                        __typename: 'QuestionEdge' as const,
-                        node: {
-                            __typename: 'Question' as const,
-                            id: 'question-2-id',
-                            pkgID: '15',
-                            createdAt: new Date('2023-01-01'),
-                            addedBy: mockValidCMSUser() as CmsUser,
-                            documents: [
-                                {
-                                    s3URL: 's3://bucketname/key/question-2-document-1',
-                                    name: 'question-2-document-1',
-                                },
-                                {
-                                    s3URL: 's3://bucketname/key/question-2-document-2',
-                                    name: 'question-2-document-2',
-                                },
-                            ],
-                        },
-                    },
-                    {
-                        __typename: 'QuestionEdge' as const,
-                        node: {
-                            __typename: 'Question' as const,
-                            id: 'question-1-id',
-                            pkgID: '15',
-                            createdAt: new Date('2022-12-23'),
-                            addedBy: mockValidCMSUser() as CmsUser,
-                            documents: [
-                                {
-                                    s3URL: 's3://bucketname/key/question-1-document-1',
-                                    name: 'question-1-document-1',
-                                },
-                            ],
-                        },
-                    },
-                ],
-            },
-            DMCPQuestions: {
-                totalCount: 0,
-                edges: [],
-            },
-            OACTQuestions: {
-                totalCount: 0,
-                edges: [],
-            },
-        }
+        const mockQuestions = mockQuestionsPayload('15')
         renderWithProviders(
             <Routes>
                 <Route element={<SubmissionSideNav />}>
@@ -128,10 +79,17 @@ describe('QuestionResponse', () => {
             within(table1).getByText('question-1-document-1')
         ).toBeInTheDocument()
         expect(
+            within(table1).getByText('response-1-document-1')
+        ).toBeInTheDocument()
+
+        expect(
             within(table2).getByText('question-2-document-1')
         ).toBeInTheDocument()
         expect(
             within(table2).getByText('question-2-document-2')
+        ).toBeInTheDocument()
+        expect(
+            within(table2).getByText('response-2-document-1')
         ).toBeInTheDocument()
 
         // expect dmcp and oact section to display no questions text
