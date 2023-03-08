@@ -78,11 +78,7 @@ async function getDBClusterID(secretName: string): Promise<string | Error> {
         )
         return secretsResult
     }
-    console.info(
-        `returned from secrets manager ${secretsResult.dbClusterIdentifier}`
-    )
     const dbID = secretsResult.dbClusterIdentifier.split(':').slice(-1)[0]
-    console.info(`parsed DB ID ${dbID}`)
     return dbID
 }
 
