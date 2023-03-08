@@ -20,6 +20,8 @@ import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import {
     CreateQuestionResponseInput,
+    FetchHealthPlanPackageWithQuestionsDocument,
+    FetchHealthPlanPackageWithQuestionsQuery,
     useCreateQuestionResponseMutation,
 } from '../../../gen/gqlClient'
 
@@ -78,7 +80,31 @@ export const UploadResponse = () => {
                 documents: questionDocs,
             }
 
-            const createResult = await createResponse({ variables: { input } })
+            const createResult = await createResponse({
+                variables: { input },
+                update(cache, { data }) {
+                    if (data) {
+                        const result =
+                            cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
+                                {
+                                    query: FetchHealthPlanPackageWithQuestionsDocument,
+                                    variables: {
+                                        input: {
+                                            pkgID: id,
+                                        },
+                                    },
+                                }
+                            )
+
+                        const pkg = result?.fetchHealthPlanPackage.pkg
+
+                        if (pkg) {
+                            cache.evict({ id: cache.identify(pkg) })
+                            cache.gc()
+                        }
+                    }
+                },
+            })
 
             if (createResult) {
                 navigate(`/submissions/${id}/question-and-answers`)
