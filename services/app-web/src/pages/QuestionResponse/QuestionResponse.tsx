@@ -34,11 +34,12 @@ export const QuestionResponse = () => {
         division: Division
     ) => {
         return divisionQuestions.length ? (
-            divisionQuestions.map((question) => (
+            divisionQuestions.map((question, index) => (
                 <QATable
                     key={question.id}
                     question={question}
                     division={division}
+                    round={divisionQuestions.length - index}
                     user={outletContext.user}
                 />
             ))

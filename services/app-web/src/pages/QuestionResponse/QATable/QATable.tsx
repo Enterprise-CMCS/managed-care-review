@@ -38,10 +38,12 @@ type TableData = QuestionDocumentWithLink & {
 export const QATable = ({
     question,
     division,
+    round,
     user,
 }: {
     question: QuestionData
     division: Division
+    round: number
     user: User
 }) => {
     const isStateUser = user.__typename === 'StateUser'
@@ -91,7 +93,7 @@ export const QATable = ({
     return (
         <>
             <div className={styles.tableHeader}>
-                <div />
+                <h4>{`Round ${round}`}</h4>
                 {isStateUser && (
                     <Link
                         asCustom={NavLink}

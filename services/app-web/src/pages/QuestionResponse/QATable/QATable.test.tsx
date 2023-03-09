@@ -51,6 +51,7 @@ it('renders question correctly as a CMS user that created the question', async (
                         question={testQuestionData}
                         user={cmsUser}
                         division={'DMCO'}
+                        round={1}
                     />
                 }
             />
@@ -91,6 +92,7 @@ it('renders question correctly as a CMS user that did not create the question', 
                         question={testQuestionData}
                         user={otherStateUser}
                         division={'DMCO'}
+                        round={1}
                     />
                 }
             />
@@ -115,6 +117,7 @@ it('renders question correctly as a state user', async () => {
                         question={testQuestionData}
                         user={stateUser}
                         division={'DMCO'}
+                        round={1}
                     />
                 }
             />
@@ -172,6 +175,7 @@ it('renders multiple documents and links correctly', async () => {
                         question={testQuestionDocLinks}
                         user={cmsUser}
                         division={'DMCO'}
+                        round={1}
                     />
                 }
             />
