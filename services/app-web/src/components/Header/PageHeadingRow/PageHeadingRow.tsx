@@ -5,13 +5,13 @@ import styles from '../Header.module.scss'
 
 import { PageHeading } from '../../../components/PageHeading'
 import { StateIcon, StateIconProps } from '../StateIcon/StateIcon'
-import { User, StateUser, CmsUser } from '../../../gen/gqlClient'
+import { User, StateUser, CmsUser, AdminUser } from '../../../gen/gqlClient'
 
 const CMSUserRow = ({
     user,
     heading,
 }: {
-    user: CmsUser
+    user: CmsUser | AdminUser
     heading?: string
 }) => {
     return (
@@ -105,7 +105,10 @@ export const PageHeadingRow = ({
         return <LandingRow isLoading={isLoading} />
     }
 
-    if (loggedInUser.__typename === 'CMSUser') {
+    if (
+        loggedInUser.__typename === 'CMSUser' ||
+        loggedInUser.__typename === 'AdminUser'
+    ) {
         return <CMSUserRow user={loggedInUser} heading={heading} />
     } else if (loggedInUser.__typename === 'StateUser') {
         return <StateUserRow user={loggedInUser} heading={heading} />

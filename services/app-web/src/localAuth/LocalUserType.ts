@@ -35,7 +35,8 @@ function isLocalUser(user: unknown): user is LocalUserType {
             if (typeof roleUser.role === 'string') {
                 if (
                     roleUser.role === 'STATE_USER' ||
-                    roleUser.role === 'CMS_USER'
+                    roleUser.role === 'CMS_USER' ||
+                    roleUser.role === 'ADMIN_USER'
                 ) {
                     return true
                 }

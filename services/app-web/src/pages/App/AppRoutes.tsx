@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router'
 import { Route, Routes } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { extendSession } from '../../pages/Auth/cognitoAuth'
+import { extendSession, idmRedirectURL } from '../../pages/Auth/cognitoAuth'
 import { assertNever, AuthModeType } from '../../common-code/config'
 import { PageTitlesRecord, RoutesRecord, RouteT } from '../../constants/routes'
 import { getRouteName } from '../../routeHelpers'
@@ -10,10 +10,10 @@ import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import { useTitle } from '../../hooks/useTitle'
 import { LocalLogin } from '../../localAuth'
-import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
 import { CognitoLogin } from '../Auth/CognitoLogin'
 import { CMSDashboard } from '../CMSDashboard/CMSDashboard'
 import { StateDashboard } from '../StateDashboard/StateDashboard'
+import { Settings } from '../Settings/Settings'
 import { AuthenticatedRouteWrapper } from '../Wrapper/AuthenticatedRouteWrapper'
 import { Error404 } from '../Errors/Error404Page'
 import { Help } from '../Help/Help'
@@ -175,6 +175,7 @@ const CMSUserRoutes = ({
                     />
                 )}
                 <Route path={RoutesRecord.REPORTS} element={<Reports />} />
+                <Route path={RoutesRecord.SETTINGS} element={<Settings />} />
                 <Route path="*" element={<Error404 />} />
             </Routes>
         </AuthenticatedRouteWrapper>

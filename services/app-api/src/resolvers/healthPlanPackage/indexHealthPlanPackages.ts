@@ -4,6 +4,7 @@ import {
     isStateUser,
     HealthPlanPackageType,
     isCMSUser,
+    isAdminUser,
 } from '../../domain-models'
 import { QueryResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
@@ -52,7 +53,7 @@ export function indexHealthPlanPackagesResolver(
                 user.stateCode
             )
             return validateAndReturnHealthPlanPackages(results, span)
-        } else if (isCMSUser(user)) {
+        } else if (isCMSUser(user) || isAdminUser(user)) {
             const results = await store.findAllHealthPlanPackagesBySubmittedAt()
 
             return validateAndReturnHealthPlanPackages(results, span)
