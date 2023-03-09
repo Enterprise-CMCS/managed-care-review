@@ -1,1 +1,1 @@
-export {UploadResponse} from './UploadResponse'
+export { UploadResponse } from './UploadResponse'

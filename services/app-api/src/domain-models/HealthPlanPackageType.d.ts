@@ -1,3 +1,5 @@
+import { IndexQuestionsPayload } from './QuestionsType'
+
 type HealthPlanPackageStatusType =
     | 'DRAFT'
     | 'SUBMITTED'
@@ -8,6 +10,7 @@ type HealthPlanPackageType = {
     id: string
     stateCode: string
     revisions: HealthPlanRevisionType[]
+    questions?: IndexQuestionsPayload
 }
 
 type UpdateInfoType = {

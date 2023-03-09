@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react'
 import { Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
-import { useS3 } from '../../../contexts/S3Context'
 import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
 import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import styles from './UploadedDocumentsTable.module.scss'
 import { usePreviousSubmission } from '../../../hooks'
 import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { DocumentTag } from './DocumentTag'
+import { useDocument } from '../../../hooks/useDocument'
 export type UploadedDocumentsTableProps = {
     documents: SubmissionDocument[]
     caption: string | null
@@ -74,7 +74,7 @@ export const UploadedDocumentsTable = ({
     isEditing = false,
     isCMSUser,
 }: UploadedDocumentsTableProps): React.ReactElement => {
-    const { getURL, getKey } = useS3()
+    const { getDocumentsUrl } = useDocument()
     const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
     const shouldShowEditButton = isEditing && isSupportingDocuments
     const shouldShowAsteriskExplainer = refreshedDocs.some((doc) =>
@@ -117,30 +117,17 @@ export const UploadedDocumentsTable = ({
 
     useEffect(() => {
         const refreshDocuments = async () => {
-            const newDocuments = await Promise.all(
-                documents.map(async (doc) => {
-                    const key = getKey(doc.s3URL)
-                    if (!key)
-                        return {
-                            ...doc,
-                            url: null,
-                        }
-
-                    const documentLink = await getURL(key, 'HEALTH_PLAN_DOCS')
-                    return {
-                        ...doc,
-                        url: documentLink,
-                    }
-                })
-            ).catch((err) => {
-                console.info(err)
-                return []
-            })
-            setRefreshedDocs(newDocuments)
+            const newDocuments = (await getDocumentsUrl(
+                documents,
+                'HEALTH_PLAN_DOCS'
+            )) as DocumentWithLink[]
+            if (newDocuments.length) {
+                setRefreshedDocs(newDocuments)
+            }
         }
 
         void refreshDocuments()
-    }, [documents, getKey, getURL])
+    }, [documents, getDocumentsUrl])
     // Empty State
     if (refreshedDocs.length === 0) {
         return (

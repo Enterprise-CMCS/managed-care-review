@@ -3,6 +3,7 @@ import {
     constructTestPostgresServer,
     createAndSubmitTestHealthPlanPackage,
     createTestQuestion,
+    createTestQuestionResponse,
     indexTestQuestions,
 } from '../../testHelpers/gqlHelpers'
 import { UserType } from '../../domain-models'
@@ -17,33 +18,53 @@ describe('indexQuestions', () => {
         givenName: 'Prince',
         stateAssignments: [],
     }
-    it('returns package with questions', async () => {
-        const server = await constructTestPostgresServer()
+    it('returns package with questions and responses', async () => {
+        const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: testUserCMS,
             },
         })
 
-        const submittedPkg = await createAndSubmitTestHealthPlanPackage(server)
+        const submittedPkg = await createAndSubmitTestHealthPlanPackage(
+            stateServer
+        )
 
-        await createTestQuestion(cmsServer, submittedPkg.id, {
-            documents: [
-                {
-                    name: 'Test Question 1',
-                    s3URL: 'testS3Url1',
-                },
-            ],
-        })
+        const createdQuestion1 = await createTestQuestion(
+            cmsServer,
+            submittedPkg.id,
+            {
+                documents: [
+                    {
+                        name: 'Test Question 1',
+                        s3URL: 'testS3Url1',
+                    },
+                ],
+            }
+        )
 
-        await createTestQuestion(cmsServer, submittedPkg.id, {
-            documents: [
-                {
-                    name: 'Test Question 2',
-                    s3URL: 'testS3Url2',
-                },
-            ],
-        })
+        const response1 = await createTestQuestionResponse(
+            stateServer,
+            createdQuestion1.question.id
+        )
+
+        const createdQuestion2 = await createTestQuestion(
+            cmsServer,
+            submittedPkg.id,
+            {
+                documents: [
+                    {
+                        name: 'Test Question 2',
+                        s3URL: 'testS3Url2',
+                    },
+                ],
+            }
+        )
+
+        const response2 = await createTestQuestionResponse(
+            stateServer,
+            createdQuestion2.question.id
+        )
 
         await createTestQuestion(cmsServer, submittedPkg.id, {
             documents: [
@@ -76,6 +97,7 @@ describe('indexQuestions', () => {
                                     },
                                 ],
                                 addedBy: testUserCMS,
+                                responses: [response1.response],
                             }),
                         },
                         {
@@ -90,6 +112,7 @@ describe('indexQuestions', () => {
                                     },
                                 ],
                                 addedBy: testUserCMS,
+                                responses: [response2.response],
                             }),
                         },
                         {

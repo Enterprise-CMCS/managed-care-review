@@ -24,7 +24,7 @@ import {
     HealthPlanPackage,
     CreateQuestionResponsePayload,
     CreateQuestionPayload,
-    IndexQuestionsPayload
+    IndexQuestionsPayload,
 } from '../gen/gqlServer'
 import { Context } from '../handlers/apollo_gql'
 import { NewPostgresStore, Store } from '../postgres'
@@ -441,13 +441,12 @@ const indexTestQuestions = async (
     return indexQuestionsResult.data.indexQuestions
 }
 
-
 const createTestQuestionResponse = async (
     server: ApolloServer,
     questionID: string,
     responseData?: Omit<InsertQuestionResponseArgs, 'questionID'>
 ): Promise<CreateQuestionResponsePayload> => {
-    const response = responseData|| {
+    const response = responseData || {
         documents: [
             {
                 name: 'Test Question',
@@ -491,5 +490,5 @@ export {
     defaultFloridaRateProgram,
     createTestQuestion,
     indexTestQuestions,
-    createTestQuestionResponse
+    createTestQuestionResponse,
 }

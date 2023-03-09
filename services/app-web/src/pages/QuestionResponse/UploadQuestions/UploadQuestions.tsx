@@ -21,6 +21,8 @@ import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import {
     CreateQuestionInput,
     useCreateQuestionMutation,
+    FetchHealthPlanPackageWithQuestionsDocument,
+    FetchHealthPlanPackageWithQuestionsQuery,
 } from '../../../gen/gqlClient'
 
 export const UploadQuestions = () => {
@@ -74,7 +76,32 @@ export const UploadQuestions = () => {
                 documents: questionDocs,
             }
 
-            const createResult = await createQuestion({ variables: { input } })
+            const createResult = await createQuestion({
+                variables: { input },
+                update(cache, { data }) {
+                    if (data) {
+                        const newQuestion = data.createQuestion.question
+                        const result =
+                            cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
+                                {
+                                    query: FetchHealthPlanPackageWithQuestionsDocument,
+                                    variables: {
+                                        input: {
+                                            pkgID: newQuestion.pkgID,
+                                        },
+                                    },
+                                }
+                            )
+
+                        const pkg = result?.fetchHealthPlanPackage.pkg
+
+                        if (pkg) {
+                            cache.evict({ id: cache.identify(pkg) })
+                            cache.gc()
+                        }
+                    }
+                },
+            })
 
             if (createResult) {
                 navigate(`/submissions/${id}/question-and-answers`)

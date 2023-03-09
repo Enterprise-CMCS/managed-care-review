@@ -1,9 +1,15 @@
+import {aliasQuery} from '../../../utils/graphql-test-utils';
+
 describe('Q&A', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
+        cy.intercept('POST', '*/graphql', (req) => {
+            aliasQuery(req, 'createQuestion')
+            aliasQuery(req, 'fetchHealthPlanPackageWithQuestions')
+        })
     })
 
-    it('cms-questions flag toggles navigation to and from Q&A page', () => {
+    it('can add and display cms questions', () => {
         cy.interceptFeatureFlags({
             'rate-cert-assurance': true,
             'cms-questions': true
@@ -67,37 +73,52 @@ describe('Q&A', () => {
                 name: `Minnesota ${submissionName} Upload questions`,
             }).should('exist')
 
+            // Log out and log back in as cms user, visiting submission summary page,
+            cy.findByRole('button', { name: 'Sign out' }).click()
+            cy.findByText(
+                'Medicaid and CHIP Managed Care Reporting and Review System'
+            )
+            cy.logInAsCMSUser({ initialURL: `/submissions/${submissionId}/question-and-answers` })
+
+            cy.wait(2000)
+
+            cy.findByRole('heading', {
+                name: `CMS ${submissionName} Upload questions`,
+            }).should('exist')
+
+            // Add second question
+            cy.addQuestion({
+                documentPath: 'documents/trussel-guide.pdf'
+            })
+
+            // Newly uploaded questions document should exist within DMCO section
+            cy.findByTestId('dmco-qa-section').should('exist').within(() => {
+                // Add timeout to findByText to allow time for generating document urls
+                cy.findByText('trussel-guide.pdf',  { timeout: 5000 }).should('exist')
+            })
+
+            // Add a second question
+            cy.addQuestion({
+                documentPath: 'documents/testing.csv'
+            })
+
+            // Newly uploaded questions document should exist within DMCO section
+            cy.findByTestId('dmco-qa-section').should('exist').within(() => {
+                // Add timeout to findByText to allow time for generating document urls
+                cy.findByText('testing.csv',  { timeout: 5000 }).should('exist')
+            })
+
             // Find submission summary link and click
             cy.findByRole('link', { name: /Submission summary/ }).click()
             cy.url({ timeout: 10_000 }).should('contain', submissionId)
 
             // Find back to dashboard link and click
-            cy.findByText('Back to state dashboard').should('exist').click()
+            cy.findByText('Back to dashboard').should('exist').click()
             cy.url({ timeout: 10_000 }).should('contain', 'dashboard')
 
             cy.get('table')
                 .findByRole('link', { name: submissionName })
                 .should('exist')
-
-            // Turn off cms questions flag
-            cy.interceptFeatureFlags({
-                'rate-cert-assurance': true,
-                'cms-questions': false
-            })
-
-            // it cannot navigate to q&a page when flag is off
-            cy.findByRole('link', { name: submissionName }).click()
-            cy.url({ timeout: 10_000 }).should('contain', submissionId)
-            cy.findByTestId('submission-summary').should('exist')
-            cy.findByRole('heading', {
-                name: `Minnesota ${submissionName}`,
-            }).should('exist')
-
-            //Try to visit Q&A page
-            cy.visit(`/summary/${submissionId}/question-and-answers`)
-
-            // Look for 404 text on page
-            cy.findByRole('heading', { name: '404 / Page not found', level: 1}).should('exist')
         })
     })
 })

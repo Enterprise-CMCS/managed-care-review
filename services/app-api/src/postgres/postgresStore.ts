@@ -38,7 +38,7 @@ import {
 import {
     findAllQuestionsByHealthPlanPackage,
     insertQuestion,
-    insertQuestionResponse
+    insertQuestionResponse,
 } from './questionResponse'
 
 type Store = {
@@ -142,7 +142,7 @@ function NewPostgresStore(client: PrismaClient): Store {
         findAllQuestionsByHealthPlanPackage: (pkgID) =>
             findAllQuestionsByHealthPlanPackage(client, pkgID),
         insertQuestionResponse: (questionInput, user) =>
-        insertQuestionResponse(client, questionInput, user),
+            insertQuestionResponse(client, questionInput, user),
     }
 }
 

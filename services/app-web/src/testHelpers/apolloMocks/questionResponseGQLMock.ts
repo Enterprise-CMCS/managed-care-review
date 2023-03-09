@@ -4,8 +4,19 @@ import {
     CreateQuestionInput,
     CreateQuestionMutation,
     Question as QuestionType,
+    FetchHealthPlanPackageWithQuestionsDocument,
+    FetchHealthPlanPackageWithQuestionsQuery,
+    HealthPlanPackage,
+    IndexQuestionsPayload,
 } from '../../gen/gqlClient'
 import { mockValidCMSUser } from './userGQLMock'
+import { mockSubmittedHealthPlanPackage, mockQuestionsPayload } from './'
+
+type fetchStateHealthPlanPackageWithQuestionsProps = {
+    stateSubmission?: HealthPlanPackage | Partial<HealthPlanPackage>
+    id: string
+    questions?: IndexQuestionsPayload
+}
 
 const createQuestionSuccess = (
     question?: CreateQuestionInput | Partial<CreateQuestionInput>
@@ -53,4 +64,58 @@ const createQuestionNetworkFailure = (
     }
 }
 
-export { createQuestionNetworkFailure, createQuestionSuccess }
+const fetchStateHealthPlanPackageWithQuestionsMockSuccess = ({
+    stateSubmission = mockSubmittedHealthPlanPackage(),
+    id,
+    questions,
+}: fetchStateHealthPlanPackageWithQuestionsProps): MockedResponse<
+    Record<string, unknown>
+> => {
+    const questionPayload = questions || mockQuestionsPayload(id)
+    const pkg = {
+        ...stateSubmission,
+        questions: questionPayload,
+    }
+
+    // override the ID of the returned draft to match the queried id.
+    const mergedStateSubmission = Object.assign({}, pkg, { id })
+
+    return {
+        request: {
+            query: FetchHealthPlanPackageWithQuestionsDocument,
+            variables: { input: { pkgID: id } },
+        },
+        result: {
+            data: {
+                fetchHealthPlanPackage: {
+                    pkg: mergedStateSubmission,
+                },
+            },
+        },
+    }
+}
+
+const fetchStateHealthPlanPackageWithQuestionsMockNotFound = ({
+    id,
+}: fetchStateHealthPlanPackageWithQuestionsProps): MockedResponse<FetchHealthPlanPackageWithQuestionsQuery> => {
+    return {
+        request: {
+            query: FetchHealthPlanPackageWithQuestionsDocument,
+            variables: { input: { pkgID: id } },
+        },
+        result: {
+            data: {
+                fetchHealthPlanPackage: {
+                    pkg: undefined,
+                },
+            },
+        },
+    }
+}
+
+export {
+    createQuestionNetworkFailure,
+    createQuestionSuccess,
+    fetchStateHealthPlanPackageWithQuestionsMockSuccess,
+    fetchStateHealthPlanPackageWithQuestionsMockNotFound,
+}
