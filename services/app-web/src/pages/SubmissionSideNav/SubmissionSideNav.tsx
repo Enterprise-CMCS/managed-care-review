@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link, SideNav, GridContainer } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import styles from './SubmissionSideNav.module.scss'
@@ -7,7 +7,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import sprite from 'uswds/src/img/sprite.svg'
 import { RouteT } from '../../constants/routes'
 import { getRouteName } from '../../routeHelpers'
-import { useFetchHealthPlanPackageWrapper } from '../../gqlHelpers'
+import { useFetchHealthPlanPackageWithQuestionsWrapper } from '../../gqlHelpers'
 import { Loading } from '../../components'
 import { ApolloError } from '@apollo/client'
 import { handleApolloError } from '../../gqlHelpers/apolloErrors'
@@ -17,19 +17,38 @@ import { Error404 } from '../Errors/Error404Page'
 import {
     HealthPlanPackage,
     HealthPlanRevision,
+    IndexQuestionsPayload,
     User,
 } from '../../gen/gqlClient'
 import { HealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
 import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
+import { QuestionData } from '../QuestionResponse/QATable/QATable'
+import { useQuestions } from '../../hooks'
 
 export type SideNavOutletContextType = {
     pkg: HealthPlanPackage
     currentRevision: HealthPlanRevision
     packageData: HealthPlanFormDataType
     documentDates: DocumentDateLookupTable
-    user: User | undefined
+    user: User
+    parsedQuestions: QADivisionQuestions
+}
+
+type QADivisionQuestions = {
+    dmco: {
+        totalCount: number
+        questions: QuestionData[]
+    }
+    dmcp: {
+        totalCount: number
+        questions: QuestionData[]
+    }
+    oact: {
+        totalCount: number
+        questions: QuestionData[]
+    }
 }
 
 export const SubmissionSideNav = () => {
@@ -39,13 +58,16 @@ export const SubmissionSideNav = () => {
             'PROGRAMMING ERROR: id param not set in state submission form.'
         )
     }
-
+    const [questions, setQuestions] = useState<QADivisionQuestions | undefined>(
+        undefined
+    )
     const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
     const navigate = useNavigate()
     const ldClient = useLDClient()
+    const { extractQuestions } = useQuestions()
 
-    const showQuestionsAnswers = ldClient?.variation(
+    const showQuestionResponse = ldClient?.variation(
         featureFlags.CMS_QUESTIONS.flag,
         featureFlags.CMS_QUESTIONS.defaultValue
     )
@@ -54,8 +76,56 @@ export const SubmissionSideNav = () => {
         return getRouteName(pathname) === route ? 'usa-current' : ''
     }
 
-    const { result: fetchResult } = useFetchHealthPlanPackageWrapper(id)
-    if (fetchResult.status === 'LOADING') {
+    const parseQuestions = async (
+        questions: IndexQuestionsPayload
+    ): Promise<QADivisionQuestions> => {
+        return {
+            dmco: {
+                totalCount: questions.DMCOQuestions.totalCount ?? 0,
+                questions: await extractQuestions(
+                    questions.DMCOQuestions.edges
+                ),
+            },
+            dmcp: {
+                totalCount: questions.DMCPQuestions.totalCount ?? 0,
+                questions: await extractQuestions(
+                    questions.DMCPQuestions.edges
+                ),
+            },
+            oact: {
+                totalCount: questions.OACTQuestions.totalCount ?? 0,
+                questions: await extractQuestions(
+                    questions.OACTQuestions.edges
+                ),
+            },
+        }
+    }
+
+    const { result: fetchResult } =
+        useFetchHealthPlanPackageWithQuestionsWrapper(id, async (data) => {
+            const pkg = data.fetchHealthPlanPackage.pkg
+            if (pkg && pkg.questions) {
+                const questions = await parseQuestions(pkg.questions)
+                setQuestions(questions)
+            } else {
+                setQuestions({
+                    dmco: {
+                        totalCount: 0,
+                        questions: [],
+                    },
+                    dmcp: {
+                        totalCount: 0,
+                        questions: [],
+                    },
+                    oact: {
+                        totalCount: 0,
+                        questions: [],
+                    },
+                })
+            }
+        })
+
+    if (fetchResult.status === 'LOADING' || !questions) {
         return (
             <GridContainer>
                 <Loading />
@@ -76,6 +146,11 @@ export const SubmissionSideNav = () => {
 
     const { data, formDatas, documentDates } = fetchResult
     const pkg = data.fetchHealthPlanPackage.pkg
+
+    // Display generic error page if getting logged in user returns undefined.
+    if (!loggedInUser) {
+        return <GenericErrorPage />
+    }
 
     // fetchHPP returns null if no package is found with the given ID
     if (!pkg) {
@@ -117,12 +192,13 @@ export const SubmissionSideNav = () => {
         packageData,
         documentDates,
         user: loggedInUser,
+        parsedQuestions: questions,
     }
 
     return (
         <div className={styles.background}>
             <GridContainer className={styles.container}>
-                {showQuestionsAnswers && (
+                {showQuestionResponse && (
                     <div className={styles.sideNavContainer}>
                         <div className={styles.backLinkContainer}>
                             <Link

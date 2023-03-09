@@ -39,6 +39,7 @@ Cypress.Commands.add(
         cy.intercept('POST', '*/graphql', (req) => {
             aliasQuery(req, 'fetchCurrentUser')
             aliasQuery(req, 'fetchHealthPlanPackage')
+            aliasQuery(req, 'fetchHealthPlanPackageWithQuestions')
             aliasQuery(req, 'indexHealthPlanPackages')
         })
 
@@ -67,7 +68,7 @@ Cypress.Commands.add(
         }
         cy.wait('@fetchCurrentUserQuery', { timeout: 20000 })
         if (initialURL !== '/') {
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 }) // for cases where CMs user goes to specific submission on login
+            cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20000 }) // for cases where CMs user goes to specific submission on login
         } else {
             cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80000 })
         }

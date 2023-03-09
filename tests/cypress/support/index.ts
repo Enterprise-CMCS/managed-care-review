@@ -16,6 +16,7 @@ import './loginCommands'
 import './stateSubmissionFormCommands'
 import './dashboardCommands'
 import './navigateCommands'
+import './questionResponseCommands'
 import './launchDarklyCommands'
 import './e2e'
 import {
@@ -69,8 +70,15 @@ declare global {
             ): void
             navigateFormByDirectLink(url: string, waitForLoad?: boolean): void
 
-            //dashboard commands
+            // dashboard commands
             clickSubmissionLink(testId: string): void
+
+            // question response commands
+            addQuestion({
+                documentPath
+            }: {
+                documentPath: string
+            }): void
 
             //Launch Darkly commands
             stubFeatureFlags(): void

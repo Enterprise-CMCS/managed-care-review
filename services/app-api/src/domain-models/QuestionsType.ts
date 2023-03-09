@@ -1,4 +1,5 @@
 import { CMSUserType } from './UserType'
+import { QuestionResponseType } from './QuestionResponseType'
 
 type Document = {
     name: string
@@ -11,6 +12,7 @@ type Question = {
     createdAt: Date
     addedBy: CMSUserType
     documents: Document[]
+    responses: QuestionResponseType[]
 }
 
 type QuestionList = {
@@ -40,7 +42,7 @@ type CreateQuestionInput = {
     documents: Document[]
 }
 
-export {
+export type {
     IndexQuestionsPayload,
     CreateQuestionPayload,
     CreateQuestionInput,

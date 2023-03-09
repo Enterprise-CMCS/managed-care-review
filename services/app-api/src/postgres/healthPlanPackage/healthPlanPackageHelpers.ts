@@ -1,9 +1,14 @@
 import { HealthPlanPackageTable, HealthPlanRevisionTable } from '@prisma/client'
-import { HealthPlanPackageType, UpdateInfoType } from '../../domain-models'
+import {
+    HealthPlanPackageType,
+    Question,
+    UpdateInfoType,
+} from '../../domain-models'
 import { StoreError } from '../storeError'
 
 export type HealthPlanPackageWithRevisionsTable = HealthPlanPackageTable & {
     revisions: HealthPlanRevisionTable[]
+    questions?: Question[]
 }
 
 // getCurrentRevision returns the first revision associated with a package

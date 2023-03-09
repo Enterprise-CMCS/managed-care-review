@@ -78,7 +78,8 @@ async function getDBClusterID(secretName: string): Promise<string | Error> {
         )
         return secretsResult
     }
-    return secretsResult.dbClusterIdentifier
+    const dbID = secretsResult.dbClusterIdentifier.split(':').slice(-1)[0]
+    return dbID
 }
 
 export { configurePostgres, getPostgresURL, getDBClusterID }

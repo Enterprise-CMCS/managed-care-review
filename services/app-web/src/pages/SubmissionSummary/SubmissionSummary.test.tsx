@@ -6,7 +6,7 @@ import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
 import { RoutesRecord } from '../../constants/routes'
 import {
     fetchCurrentUserMock,
-    fetchStateHealthPlanPackageMockSuccess,
+    fetchStateHealthPlanPackageWithQuestionsMockSuccess,
     mockUnlockedHealthPlanPackage,
     mockValidCMSUser,
     mockSubmittedHealthPlanPackageWithRevision,
@@ -45,7 +45,7 @@ describe('SubmissionSummary', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageMockSuccess({
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
                             id: '15',
                         }),
                     ],
@@ -80,7 +80,7 @@ describe('SubmissionSummary', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageMockSuccess({
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
                             stateSubmission: submissionsWithRevisions,
                             id: '15',
                         }),
@@ -129,7 +129,7 @@ describe('SubmissionSummary', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageMockSuccess({
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
                             stateSubmission: submissionsWithRevisions,
                             id: '15',
                         }),
@@ -173,7 +173,7 @@ describe('SubmissionSummary', () => {
                         fetchCurrentUserMock({
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageMockSuccess({
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
                             stateSubmission: submissionsWithRevisions,
                             id: '15',
                         }),
@@ -216,7 +216,7 @@ describe('SubmissionSummary', () => {
                         fetchCurrentUserMock({
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageMockSuccess({
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
                             id: '15',
                         }),
                     ],
@@ -253,7 +253,7 @@ describe('SubmissionSummary', () => {
                             user: mockValidCMSUser(),
                             statusCode: 200,
                         }),
-                        fetchStateHealthPlanPackageMockSuccess({
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
                             id: '15',
                         }),
                     ],
@@ -300,10 +300,12 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                                stateSubmission: pkg,
-                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission: pkg,
+                                }
+                            ),
                         ],
                     },
                     routerProvider: {
@@ -339,9 +341,11 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                }
+                            ),
                         ],
                     },
                     routerProvider: {
@@ -385,10 +389,12 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: submission.id,
-                                stateSubmission: submission,
-                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: submission.id,
+                                    stateSubmission: submission,
+                                }
+                            ),
                         ],
                     },
                     routerProvider: {
@@ -428,11 +434,13 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                                stateSubmission:
-                                    mockUnlockedHealthPlanPackage(),
-                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission:
+                                        mockUnlockedHealthPlanPackage(),
+                                }
+                            ),
                         ],
                     },
                     routerProvider: {
@@ -467,11 +475,13 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                                stateSubmission:
-                                    mockUnlockedHealthPlanPackage(),
-                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission:
+                                        mockUnlockedHealthPlanPackage(),
+                                }
+                            ),
                         ],
                     },
                     routerProvider: {
@@ -533,13 +543,15 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                                stateSubmission:
-                                    mockUnlockedHealthPlanPackageWithOldProtos(
-                                        proto
-                                    ),
-                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission:
+                                        mockUnlockedHealthPlanPackageWithOldProtos(
+                                            proto
+                                        ),
+                                }
+                            ),
                             indexHealthPlanPackagesMockSuccess(),
                         ],
                     },
@@ -900,13 +912,15 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                                stateSubmission:
-                                    mockUnlockedHealthPlanPackageWithOldProtos(
-                                        proto
-                                    ),
-                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission:
+                                        mockUnlockedHealthPlanPackageWithOldProtos(
+                                            proto
+                                        ),
+                                }
+                            ),
                             indexHealthPlanPackagesMockSuccess(),
                         ],
                     },
@@ -1267,13 +1281,15 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                                stateSubmission:
-                                    mockUnlockedHealthPlanPackageWithOldProtos(
-                                        proto
-                                    ),
-                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission:
+                                        mockUnlockedHealthPlanPackageWithOldProtos(
+                                            proto
+                                        ),
+                                }
+                            ),
                             indexHealthPlanPackagesMockSuccess(),
                         ],
                     },
@@ -1634,13 +1650,15 @@ describe('SubmissionSummary', () => {
                                 user: mockValidCMSUser(),
                                 statusCode: 200,
                             }),
-                            fetchStateHealthPlanPackageMockSuccess({
-                                id: '15',
-                                stateSubmission:
-                                    mockUnlockedHealthPlanPackageWithOldProtos(
-                                        proto
-                                    ),
-                            }),
+                            fetchStateHealthPlanPackageWithQuestionsMockSuccess(
+                                {
+                                    id: '15',
+                                    stateSubmission:
+                                        mockUnlockedHealthPlanPackageWithOldProtos(
+                                            proto
+                                        ),
+                                }
+                            ),
                             indexHealthPlanPackagesMockSuccess(),
                         ],
                     },

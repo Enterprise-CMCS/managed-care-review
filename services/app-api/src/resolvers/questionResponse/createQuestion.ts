@@ -22,7 +22,7 @@ export function createQuestionResolver(
             throw new ForbiddenError(msg)
         }
 
-        if (input.documents.length === 0 ) {
+        if (input.documents.length === 0) {
             const msg = 'question documents are required'
             logError('createQuestion', msg)
             setErrorAttributesOnActiveSpan(msg, span)

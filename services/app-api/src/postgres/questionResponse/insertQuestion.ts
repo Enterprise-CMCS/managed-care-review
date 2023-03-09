@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { CMSUserType } from '../../domain-models'
+import { CMSUserType, StateUserType } from '../../domain-models'
 import { convertPrismaErrorToStoreError, StoreError } from '../storeError'
 import { Question, CreateQuestionInput } from '../../domain-models'
 import { v4 as uuidv4 } from 'uuid'
@@ -34,13 +34,30 @@ export async function insertQuestion(
                 },
             },
             include: {
-                documents: true,
+                documents: {
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                },
+                responses: {
+                    include: {
+                        addedBy: true,
+                        documents: true,
+                    },
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                },
             },
         })
 
         const createdQuestion: Question = {
             ...result,
             addedBy: user,
+            responses: result.responses.map((response) => ({
+                ...response,
+                addedBy: response.addedBy as StateUserType,
+            })),
         }
 
         return createdQuestion
