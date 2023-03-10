@@ -21,7 +21,8 @@ jobs:
         'uploads',
         'run-migrations',
         'prisma-layer',
-        'infra-api'
+        'infra-api',
+        'github-oidc'
         ]"
     services:
       postgres:
