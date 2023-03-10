@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
     GridContainer,
     Form as UswdsForm,
@@ -6,7 +6,7 @@ import {
     ButtonGroup,
 } from '@trussworks/react-uswds'
 import styles from '../QuestionResponse.module.scss'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { useS3 } from '../../../contexts/S3Context'
 import {
     ActionButton,
@@ -24,9 +24,12 @@ import {
     FetchHealthPlanPackageWithQuestionsQuery,
     useCreateQuestionResponseMutation,
 } from '../../../gen/gqlClient'
+import { usePage } from '../../../contexts/PageContext'
+import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
+import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
 
 export const UploadResponse = () => {
-    // third party
+    // router context
     const { division, id, questionID } = useParams<{
         division: string
         id: string
@@ -40,6 +43,11 @@ export const UploadResponse = () => {
 
     // page level state
     const [shouldValidate, setShouldValidate] = React.useState(false)
+    const { updateHeading } = usePage()
+    const { packageName } = useOutletContext<SideNavOutletContextType>()
+    useEffect(() => {
+        updateHeading({ customHeading: packageName })
+    }, [packageName, updateHeading])
 
     // component specific support
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
@@ -54,7 +62,7 @@ export const UploadResponse = () => {
         useErrorSummary()
     const showFileUploadError = Boolean(shouldValidate && fileUploadError)
     const fileUploadErrorFocusKey = hasNoFiles
-        ? 'questions-upload'
+        ? 'response-upload'
         : '#file-items-list'
 
     const handleFormSubmit = async () => {
@@ -68,7 +76,7 @@ export const UploadResponse = () => {
 
         try {
             const cleaned = cleanFileItemsBeforeSave()
-            const questionDocs = cleaned.map((item) => {
+            const responseDocs = cleaned.map((item) => {
                 return {
                     name: item.name,
                     s3URL: item.s3URL as string,
@@ -77,7 +85,7 @@ export const UploadResponse = () => {
 
             const input: CreateQuestionResponseInput = {
                 questionID: questionID as string,
-                documents: questionDocs,
+                documents: responseDocs,
             }
 
             const createResult = await createResponse({
@@ -107,7 +115,9 @@ export const UploadResponse = () => {
             })
 
             if (createResult) {
-                navigate(`/submissions/${id}/question-and-answers`)
+                navigate(
+                    `/submissions/${id}/question-and-answers?submit=response`
+                )
             }
         } catch (serverError) {
             console.info(serverError)
@@ -116,6 +126,14 @@ export const UploadResponse = () => {
 
     return (
         <GridContainer>
+            <Breadcrumbs
+                items={[
+                    { link: `/dashboard`, text: 'Dashboard' },
+                    { link: `/submissions/${id}`, text: packageName },
+                    { text: 'Upload response' },
+                ]}
+            />
+
             <UswdsForm
                 className={styles.formContainer}
                 id="AddQuestionResponseForm"

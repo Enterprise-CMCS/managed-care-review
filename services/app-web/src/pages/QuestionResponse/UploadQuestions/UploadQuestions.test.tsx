@@ -12,8 +12,14 @@ import {
 } from '../../../testHelpers'
 import { RoutesRecord } from '../../../constants/routes'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
-import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
-import { createQuestionNetworkFailure } from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
+import {
+    fetchCurrentUserMock,
+    mockValidCMSUser,
+} from '../../../testHelpers/apolloMocks'
+import {
+    createQuestionNetworkFailure,
+    fetchStateHealthPlanPackageWithQuestionsMockSuccess,
+} from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
 
 describe('UploadQuestions', () => {
     it('displays file upload for correct cms division', async () => {
@@ -58,6 +64,17 @@ describe('UploadQuestions', () => {
                 />
             </Routes>,
             {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: '15',
+                        }),
+                    ],
+                },
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/dmco/upload-questions`,
                 },
@@ -92,7 +109,15 @@ describe('UploadQuestions', () => {
                     route: `/submissions/15/question-and-answers/dmco/upload-questions`,
                 },
                 apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: '15',
+                        }),
+                    ],
                 },
             }
         )

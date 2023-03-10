@@ -196,7 +196,7 @@ describe('UploadResponse', () => {
         ).toHaveLength(2)
     })
 
-    it('displays api error if createQuestion fails', async () => {
+    it('displays api error if createQuestionResponse fails', async () => {
         renderWithProviders(
             <Routes>
                 <Route

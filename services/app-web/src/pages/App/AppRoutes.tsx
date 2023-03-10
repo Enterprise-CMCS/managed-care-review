@@ -80,24 +80,24 @@ const StateUserRoutes = ({
                 />
                 <Route element={<SubmissionSideNav />}>
                     {showQuestionResponse && (
-                        <Route
-                            path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                            }
-                            element={<QuestionResponse />}
-                        />
+                        <>
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                }
+                                element={<QuestionResponse />}
+                            />
+                            <Route
+                                path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                                element={<UploadResponse />}
+                            />
+                        </>
                     )}
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
                         element={<SubmissionSummary />}
                     />
                 </Route>
-                {showQuestionResponse && (
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
-                        element={<UploadResponse />}
-                    />
-                )}
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
                     element={<SubmissionRevisionSummary />}
@@ -139,12 +139,18 @@ const CMSUserRoutes = ({
                 />
                 <Route element={<SubmissionSideNav />}>
                     {showQuestionResponse && (
-                        <Route
-                            path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                            }
-                            element={<QuestionResponse />}
-                        />
+                        <>
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                }
+                                element={<QuestionResponse />}
+                            />
+                            <Route
+                                path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                                element={<UploadQuestions />}
+                            />
+                        </>
                     )}
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
@@ -152,18 +158,6 @@ const CMSUserRoutes = ({
                     />
                 </Route>
 
-                {showQuestionResponse && (
-                    <>
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
-                            element={<UploadQuestions />}
-                        />
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
-                            element={<UploadResponse />}
-                        />
-                    </>
-                )}
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
                     element={<SubmissionRevisionSummary />}
