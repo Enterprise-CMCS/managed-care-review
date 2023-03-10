@@ -124,6 +124,28 @@ resources:
         ScalingConfiguration:
           AutoPause: ${self:custom.pauseAurora.${opt:stage}, self:custom.pauseAurora.other}
 
+    PostgresAuroraV2:
+      Type: AWS::RDS::DBCluster
+      DeletionPolicy: ${self:custom.deletionPolicy.${opt:stage}, self:custom.deletionPolicy.other}
+      Properties:
+        Engine: aurora-postgresql
+        DatabaseName: '${self:custom.databaseName}'
+        MasterUsername: !Sub '{{resolve:secretsmanager:${PostgresSecret}::username}}'
+        MasterUserPassword: !Sub '{{resolve:secretsmanager:${PostgresSecret}::password}}'
+        DBSubnetGroupName: !Ref PostgresSubnetGroup
+        VpcSecurityGroupIds: ['${self:custom.sgId}']
+        ServerlessV2ScalingConfiguration:
+          MinCapacity: 1
+          MaxCapacity: 32
+
+    PostgresAuroraV2Instance:
+      Type: AWS::RDS::DBInstance
+      DeletionPolicy: ${self:custom.deletionPolicy.${opt:stage}, self:custom.deletionPolicy.other}
+      Properties:
+        Engine: aurora-postgresql
+        DBInstanceClass: db.serverless
+        DBClusterIdentifier: !Ref PostgresAuroraV2
+
     PostgresSubnetGroup:
       Type: AWS::RDS::DBSubnetGroup
       Properties:
