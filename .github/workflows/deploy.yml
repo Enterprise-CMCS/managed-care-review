@@ -76,12 +76,13 @@ jobs:
         run: |
           echo "${{steps.changed-services-action.outputs.changed-services}}"
 
-      - uses: chrnorm/deployment-action@releases/v2
+      - uses: chrnorm/deployment-action@v2
         name: Create GitHub deployment
         id: ghdeployment
         with:
           token: '${{ github.token }}'
           environment: review-apps
+          transient-environment: true
           description: stack ${{ steps.branch-name.outputs.stage-name-for-branch}}
           initial-status: in_progress
 
@@ -230,7 +231,11 @@ jobs:
       ]
     if: |
       always() &&
-      (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped')
+      (needs.deploy-infra.result == 'success' || needs.deploy-infra.result == 'skipped') &&
+      needs.web-unit-tests.result == 'success' &&
+      needs.api-unit-tests.result == 'success' &&
+      needs.build-prisma-client-lambda-layer.result == 'success' &&
+      needs.begin-deployment.result == 'success'
     uses: CMSgov/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
     with:
       environment: dev
@@ -323,7 +328,7 @@ jobs:
 
       - name: Update deployment status (failure)
         if: failure() && needs.begin-deployment.result == 'success'
-        uses: chrnorm/deployment-status@releases/v2
+        uses: chrnorm/deployment-status@v2
         with:
           token: '${{ github.token }}'
           state: 'failure'
@@ -331,7 +336,7 @@ jobs:
 
       - name: Update deployment status (success)
         if: needs.deploy-app.result == 'success'
-        uses: chrnorm/deployment-status@releases/v2
+        uses: chrnorm/deployment-status@v2
         with:
           token: '${{ github.token }}'
           environment-url: ${{ needs.finishing-prep.outputs.application-endpoint }}

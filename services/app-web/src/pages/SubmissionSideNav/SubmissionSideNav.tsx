@@ -159,16 +159,17 @@ export const SubmissionSideNav = () => {
 
     const submissionStatus = pkg.status
 
-    const isCMSUser = loggedInUser.role === 'CMS_USER'
+    const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
 
     // CMS Users can't see DRAFT, it's an error
-    if (submissionStatus === 'DRAFT' && isCMSUser) {
+    if (submissionStatus === 'DRAFT' && (isCMSUser || isAdminUser)) {
         return <GenericErrorPage />
     }
 
     // State users should not see the submission summary page for DRAFT or UNLOCKED, it should redirect them to the edit flow.
     if (
-        !isCMSUser &&
+        !(isCMSUser || isAdminUser) &&
         (submissionStatus === 'DRAFT' || submissionStatus === 'UNLOCKED')
     ) {
         navigate(`/submissions/${id}/edit/type`)

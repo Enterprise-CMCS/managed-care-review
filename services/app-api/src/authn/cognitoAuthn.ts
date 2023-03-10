@@ -80,6 +80,7 @@ async function fetchUserFromCognito(
 // these are the strings sent for the "role" by IDM.
 const CMS_ROLE_ATTRIBUTE = 'macmcrrs-cms-user'
 const STATE_ROLE_ATTRIBUTE = 'macmcrrs-state-user'
+const ADMIN_ROLE_ATTRIBUTE = 'macmcrrs-approver'
 
 export function userTypeFromAttributes(
     id: string,
@@ -133,6 +134,17 @@ export function userTypeFromAttributes(
         return ok({
             id,
             role: 'CMS_USER',
+            email: attributes.email,
+            givenName: attributes.given_name,
+            familyName: attributes.family_name,
+            stateAssignments: [],
+        })
+    }
+
+    if (roles.includes(ADMIN_ROLE_ATTRIBUTE)) {
+        return ok({
+            id,
+            role: 'ADMIN_USER',
             email: attributes.email,
             givenName: attributes.given_name,
             familyName: attributes.family_name,
