@@ -2,6 +2,7 @@ import { ForbiddenError } from 'apollo-server-lambda'
 import {
     isCMSUser,
     isStateUser,
+    isAdminUser,
     HealthPlanPackageType,
     packageStatus,
 } from '../../domain-models'
@@ -57,7 +58,7 @@ export function fetchHealthPlanPackageResolver(
                     'user not authorized to fetch data from a different state'
                 )
             }
-        } else if (isCMSUser(context.user)) {
+        } else if (isCMSUser(context.user) || isAdminUser(context.user)) {
             if (packageStatus(pkg) === 'DRAFT') {
                 logError(
                     'fetchHealthPlanPackage',
