@@ -1,8 +1,5 @@
-import {
-    BreadcrumbBar,
-    Breadcrumb,
-    BreadcrumbLink,
-} from '@trussworks/react-uswds'
+import { BreadcrumbBar, Breadcrumb, Link } from '@trussworks/react-uswds'
+import { NavLink } from 'react-router-dom'
 import styles from './Breadcrumbs.module.scss'
 
 type BreadcrumbItem = {
@@ -18,9 +15,9 @@ const Crumb = (crumb: BreadcrumbItem) => {
     if (link) {
         return (
             <Breadcrumb>
-                <BreadcrumbLink href={link}>
+                <Link asCustom={NavLink} to={link}>
                     <span>{text}</span>
-                </BreadcrumbLink>
+                </Link>
             </Breadcrumb>
         )
     } else {

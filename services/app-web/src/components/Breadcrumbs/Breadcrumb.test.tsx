@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
+import { renderWithProviders } from '../../testHelpers'
 import { Breadcrumbs } from './Breadcrumbs'
 
 describe('Breadcrumbs', () => {
@@ -7,7 +8,7 @@ describe('Breadcrumbs', () => {
             { text: 'First link', link: '/firstlink' },
             { text: 'Second link', link: '/secondlink' },
         ]
-        render(<Breadcrumbs items={items} />)
+        renderWithProviders(<Breadcrumbs items={items} />)
         expect(screen.getByText('First link')).toBeInTheDocument()
         expect(screen.getByText('Second link')).toBeInTheDocument()
     })
@@ -18,13 +19,13 @@ describe('Breadcrumbs', () => {
             { text: 'Second link', link: '/secondlink' },
             { text: 'Active link, no href needed' },
         ]
-        render(<Breadcrumbs items={items} />)
+        renderWithProviders(<Breadcrumbs items={items} />)
         expect(screen.getAllByRole('listitem')).toHaveLength(items.length)
         expect(screen.getAllByRole('link')).toHaveLength(items.length - 1)
     })
 
     it('renders nothing if no items passed in', () => {
-        render(
+        renderWithProviders(
             <div data-testid="test1">
                 <Breadcrumbs items={[]} />
             </div>
