@@ -130,7 +130,7 @@ export const UploadResponse = () => {
                 items={[
                     { link: `/dashboard`, text: 'Dashboard' },
                     { link: `/submissions/${id}`, text: packageName },
-                    { text: 'Upload response' },
+                    { text: 'Add response' },
                 ]}
             />
 

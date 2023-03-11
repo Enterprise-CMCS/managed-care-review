@@ -13,11 +13,11 @@ export const QuestionResponse = () => {
     // router context
     const location = useLocation()
     const submitType = new URLSearchParams(location.search).get('submit')
+    const { user, packageData, packageName, parsedQuestions } =
+        useOutletContext<SideNavOutletContextType>()
 
     // page context
     const { updateHeading } = usePage()
-    const { user, packageData, packageName, parsedQuestions } =
-        useOutletContext<SideNavOutletContextType>()
     const questions = parsedQuestions
     const isCMSUser = user?.role === 'CMS_USER'
 

@@ -129,7 +129,7 @@ export const UploadQuestions = () => {
                         text: 'Dashboard',
                     },
                     { link: `/submissions/${id}`, text: packageName },
-                    { text: 'Upload questions' },
+                    { text: 'Add questions' },
                 ]}
             />
 
