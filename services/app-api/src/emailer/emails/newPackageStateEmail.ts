@@ -26,6 +26,7 @@ export const newPackageStateEmail = async (
     const receiverEmails = pruneDuplicateEmails([
         ...stateContactEmails,
         ...submitterEmails,
+        ...config.cmsReviewSharedEmails,
     ])
 
     //This checks to make sure all programs contained in submission exists for the state.
