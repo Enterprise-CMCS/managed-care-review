@@ -27,7 +27,7 @@ type EmailConfiguration = {
         These are general group-wide emails, relevant across submissions as potential receivers.
         Does not include any state specific emails, that is handled elsewhere with getStateAnalystsEmail.
      */
-    cmsReviewSharedEmails: string[] // added by default to all incoming submissions
+    devReviewTeamEmails: string[] // added by default to all incoming submissions
     oactEmails: string[] // OACT division emails
     dmcpEmails: string[] // DMCP division emails
     dmcoEmails: string[] // DMCO division emails

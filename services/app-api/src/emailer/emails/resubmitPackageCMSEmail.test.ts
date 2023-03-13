@@ -376,7 +376,7 @@ describe('with rates', () => {
             defaultStatePrograms
         )
         const reviewerEmails = [
-            ...testEmailConfig.cmsReviewSharedEmails,
+            ...testEmailConfig.devReviewTeamEmails,
             ...testEmailConfig.oactEmails,
         ]
 

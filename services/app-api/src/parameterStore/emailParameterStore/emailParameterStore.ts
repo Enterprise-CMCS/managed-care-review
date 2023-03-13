@@ -1,8 +1,8 @@
 import {
     getStateAnalystsEmails,
     getStateAnalystsEmailsLocal,
-    getCmsReviewSharedEmails,
-    getCmsReviewSharedEmailsLocal,
+    getDevReviewTeamEmails,
+    getDevReviewTeamEmailsLocal,
     getCmsReviewHelpEmail,
     getCmsReviewHelpEmailLocal,
     getCmsRateHelpEmail,
@@ -21,7 +21,7 @@ import {
 
 export type EmailParameterStore = {
     getStateAnalystsEmails: (stateCode: string) => Promise<string[] | Error>
-    getCmsReviewSharedEmails: () => Promise<string[] | Error>
+    getDevReviewTeamEmails: () => Promise<string[] | Error>
     getCmsReviewHelpEmail: () => Promise<string | Error>
     getCmsRateHelpEmail: () => Promise<string | Error>
     getCmsDevTeamHelpEmail: () => Promise<string | Error>
@@ -34,7 +34,7 @@ export type EmailParameterStore = {
 function newLocalEmailParameterStore(): EmailParameterStore {
     return {
         getStateAnalystsEmails: getStateAnalystsEmailsLocal,
-        getCmsReviewSharedEmails: getCmsReviewSharedEmailsLocal,
+        getDevReviewTeamEmails: getDevReviewTeamEmailsLocal,
         getCmsReviewHelpEmail: getCmsReviewHelpEmailLocal,
         getCmsRateHelpEmail: getCmsRateHelpEmailLocal,
         getCmsDevTeamHelpEmail: getCmsDevTeamHelpEmailLocal,
@@ -48,7 +48,7 @@ function newLocalEmailParameterStore(): EmailParameterStore {
 function newAWSEmailParameterStore(): EmailParameterStore {
     return {
         getStateAnalystsEmails: getStateAnalystsEmails,
-        getCmsReviewSharedEmails: getCmsReviewSharedEmails,
+        getDevReviewTeamEmails: getDevReviewTeamEmails,
         getCmsReviewHelpEmail: getCmsReviewHelpEmail,
         getCmsRateHelpEmail: getCmsRateHelpEmail,
         getCmsDevTeamHelpEmail: getCmsDevTeamHelpEmail,

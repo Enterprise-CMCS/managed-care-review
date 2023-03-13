@@ -6,7 +6,7 @@ function mockEmailParameterStoreError(error?: string): EmailParameterStore {
         getStateAnalystsEmails: async (stateCode: string): Promise<Error> => {
             return new Error(message)
         },
-        getCmsReviewSharedEmails: async (): Promise<Error> => {
+        getDevReviewTeamEmails: async (): Promise<Error> => {
             return new Error(message)
         },
         getCmsReviewHelpEmail: async (): Promise<Error> => {

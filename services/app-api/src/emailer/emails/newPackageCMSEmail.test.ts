@@ -31,7 +31,7 @@ test('to addresses list includes review team email addresses', async () => {
         return
     }
 
-    testEmailConfig.cmsReviewSharedEmails.forEach((emailAddress) => {
+    testEmailConfig.devReviewTeamEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),
@@ -653,7 +653,7 @@ test('includes state specific analyst on contract only submission', async () => 
     }
 
     const reviewerEmails = [
-        ...testEmailConfig.cmsReviewSharedEmails,
+        ...testEmailConfig.devReviewTeamEmails,
         ...testStateAnalystEmails,
     ]
     reviewerEmails.forEach((emailAddress) => {
@@ -682,7 +682,7 @@ test('includes state specific analyst on contract and rate submission', async ()
     }
 
     const reviewerEmails = [
-        ...testEmailConfig.cmsReviewSharedEmails,
+        ...testEmailConfig.devReviewTeamEmails,
         ...testEmailConfig.oactEmails,
         ...testStateAnalystEmails,
     ]
@@ -736,7 +736,7 @@ test('includes oactEmails on contract and rate submission', async () => {
     }
 
     const reviewerEmails = [
-        ...testEmailConfig.cmsReviewSharedEmails,
+        ...testEmailConfig.devReviewTeamEmails,
         ...testEmailConfig.oactEmails,
     ]
     reviewerEmails.forEach((emailAddress) => {

@@ -452,7 +452,7 @@ describe('unlockHealthPlanPackage', () => {
         const stateAnalystsEmails = getTestStateAnalystsEmails(sub.stateCode)
 
         const cmsEmails = [
-            ...config.cmsReviewSharedEmails,
+            ...config.devReviewTeamEmails,
             ...stateAnalystsEmails,
             ...config.oactEmails,
         ]
@@ -587,7 +587,7 @@ describe('unlockHealthPlanPackage', () => {
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining(
-                    Array.from(config.cmsReviewSharedEmails)
+                    Array.from(config.devReviewTeamEmails)
                 ),
             })
         )

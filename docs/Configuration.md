@@ -225,7 +225,7 @@ We plan to move this to the DB down the road. Until then, know that if these val
 
 #### `/configuration/email/reviewTeamAddresses`
 
-*[environment specific]* List of emails for teams/individuals that want to follow all incoming submissions. In prod, this is the DMCP shared rate inbox, the DMCO inbox, and two addresses associated with MC-Review dev team.
+*[environment specific]* List of emails for den teams/individuals that want to follow all emails. In prod, this is two addresses associated with MC-Review dev team.
 
 #### `/configuration/**[state abbreviation]**/stateanalysts/email`
 
