@@ -125,14 +125,6 @@ export const SubmissionSideNav = () => {
             }
         })
 
-    if (fetchResult.status === 'LOADING' || !questions) {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
-    }
-
     if (fetchResult.status === 'ERROR') {
         const err = fetchResult.error
         console.error('Error from API fetch', fetchResult.error)
@@ -142,6 +134,14 @@ export const SubmissionSideNav = () => {
             recordJSException(err)
         }
         return <GenericErrorPage /> // api failure or protobuf decode failure
+    }
+
+    if (fetchResult.status === 'LOADING' || !questions) {
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
     }
 
     const { data, formDatas, documentDates } = fetchResult
