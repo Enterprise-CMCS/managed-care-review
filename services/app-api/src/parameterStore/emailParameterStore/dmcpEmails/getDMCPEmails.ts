@@ -1,22 +1,10 @@
 import { getParameterStore } from '../../awsParameterStore'
+import { validateAndReturnValueArray } from '../helpers'
 
 export const getDMCPEmails = async (): Promise<string[] | Error> => {
     const name = `/configuration/email/dmcp`
     const dmcpTeamAddresses = await getParameterStore(name)
-
-    if (dmcpTeamAddresses instanceof Error) {
-        return dmcpTeamAddresses
-    }
-
-    const { type, value } = dmcpTeamAddresses
-
-    if (type !== 'StringList') {
-        const errorMessage = `Parameter store ${name} value of Type ${type} is not supported`
-        return new Error(errorMessage)
-    }
-
-    //Split string into array using ',' separator and trim each array item.
-    return value.split(',').map((email) => email.trim())
+    return validateAndReturnValueArray(dmcpTeamAddresses, name)
 }
 
 export const getDMCPEmailsLocal = async (): Promise<string[] | Error> => [
