@@ -23,6 +23,7 @@ import {
     useCreateQuestionMutation,
     FetchHealthPlanPackageWithQuestionsDocument,
     FetchHealthPlanPackageWithQuestionsQuery,
+    IndexQuestionsPayload,
 } from '../../../gen/gqlClient'
 
 export const UploadQuestions = () => {
@@ -96,8 +97,40 @@ export const UploadQuestions = () => {
                         const pkg = result?.fetchHealthPlanPackage.pkg
 
                         if (pkg) {
-                            cache.evict({ id: cache.identify(pkg) })
-                            cache.gc()
+                            const questions =
+                                pkg.questions as IndexQuestionsPayload
+                            const updatedPkg = {
+                                ...pkg,
+                                questions: {
+                                    ...pkg.questions,
+                                    DMCOQuestions: {
+                                        totalCount: questions.DMCPQuestions
+                                            .totalCount
+                                            ? questions.DMCPQuestions
+                                                  .totalCount + 1
+                                            : 1,
+                                        edges: [
+                                            {
+                                                __typename: 'QuestionEdge',
+                                                node: {
+                                                    ...newQuestion,
+                                                    responses: [],
+                                                },
+                                            },
+                                            ...questions.DMCOQuestions.edges,
+                                        ],
+                                    },
+                                },
+                            }
+
+                            cache.writeQuery({
+                                query: FetchHealthPlanPackageWithQuestionsDocument,
+                                data: {
+                                    fetchHealthPlanPackage: {
+                                        pkg: updatedPkg,
+                                    },
+                                },
+                            })
                         }
                     }
                 },

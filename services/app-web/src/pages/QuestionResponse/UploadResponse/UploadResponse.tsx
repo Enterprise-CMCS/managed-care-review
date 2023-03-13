@@ -84,6 +84,7 @@ export const UploadResponse = () => {
                 variables: { input },
                 update(cache, { data }) {
                     if (data) {
+                        const newResponse = data.createQuestionResponse.response
                         const result =
                             cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
                                 {
@@ -99,8 +100,47 @@ export const UploadResponse = () => {
                         const pkg = result?.fetchHealthPlanPackage.pkg
 
                         if (pkg) {
-                            cache.evict({ id: cache.identify(pkg) })
-                            cache.gc()
+                            const updatedQuestionsEdge =
+                                pkg.questions?.DMCOQuestions.edges.map(
+                                    (edge) => {
+                                        if (
+                                            edge.node.id ===
+                                            newResponse.questionID
+                                        ) {
+                                            return {
+                                                __typename: 'QuestionEdge',
+                                                node: {
+                                                    ...edge.node,
+                                                    responses: [
+                                                        newResponse,
+                                                        ...edge.node.responses,
+                                                    ],
+                                                },
+                                            }
+                                        }
+                                        return edge
+                                    }
+                                )
+
+                            const updatedPkg = {
+                                ...pkg,
+                                questions: {
+                                    ...pkg.questions,
+                                    DMCOQuestions: {
+                                        ...pkg.questions?.DMCOQuestions,
+                                        edges: updatedQuestionsEdge,
+                                    },
+                                },
+                            }
+
+                            cache.writeQuery({
+                                query: FetchHealthPlanPackageWithQuestionsDocument,
+                                data: {
+                                    fetchHealthPlanPackage: {
+                                        pkg: updatedPkg,
+                                    },
+                                },
+                            })
                         }
                     }
                 },
