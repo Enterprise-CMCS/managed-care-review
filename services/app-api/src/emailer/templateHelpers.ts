@@ -104,6 +104,15 @@ const generateCMSReviewerEmails = (
     }
 
     const { oactEmails, dmcpEmails, dmcoEmails } = config
+    if (
+        oactEmails.length == 0 ||
+        dmcpEmails.length == 0 ||
+        dmcoEmails.length == 0
+    ) {
+        console.error(
+            'generateCMSReviewerEmails - no division emails pulled out of config'
+        )
+    }
     const programIDs = findAllPackageProgramIds(pkg)
     let reviewers: string[] = []
 
