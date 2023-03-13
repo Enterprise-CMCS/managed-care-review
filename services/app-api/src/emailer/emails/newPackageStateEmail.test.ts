@@ -105,6 +105,8 @@ test('to addresses list does not include duplicate state receiver emails on subm
 
     expect(template.toAddresses).toEqual([
         'test1@example.com',
+        'cmsreview1@example.com',
+        'cmsreview2@example.com',
         ...defaultSubmitters,
     ])
 })
