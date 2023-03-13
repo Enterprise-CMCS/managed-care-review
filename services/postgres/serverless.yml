@@ -156,13 +156,13 @@ resources:
       Type: AWS::SecretsManager::SecretTargetAttachment
       Properties:
         SecretId: !Ref PostgresSecret
-        TargetId: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAurora}'
+        TargetId: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAuroraV2}'
         TargetType: AWS::RDS::DBCluster
 
     PostgresSecretsRotationSchedule:
       Type: AWS::SecretsManager::RotationSchedule
       DependsOn:
-        - PostgresAurora
+        - PostgresAuroraV2
         - SecretsRDSAttachment
       Properties:
         SecretId:
@@ -182,3 +182,5 @@ resources:
   Outputs:
     PostgresAuroraArn:
       Value: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAurora}'
+    PostgresAuroraV2Arn:
+      Value: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAuroraV2}'
