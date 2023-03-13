@@ -23,11 +23,9 @@ The `val` and `prod` environments each have a single OIDC role that is promoted 
 
 ## Usage
 ### Bootstrapping
-The OIDC resources for each environment need to be manually bootstrapped for two reasons:
-- this service uses OIDC for permissions to deploy itself (chicken and egg problem)
-- the fact that only one AWS IdP for GitHub can exist per environment makes it tricky to manage multiple stages in the dev environment. CloudFormation isn't great at checking if resources exist before trying to create them and trying to create a duplicate IdP for each feature branch in dev will fail.
+The OIDC resources for each environment need to be manually bootstrapped because this service uses OIDC for permissions to deploy itself (chicken and egg problem)
 
-The service is configured to be bootstrapped by running `serverless deploy` locally once for the 'official' stage for each environment (see step 4 below). This will create both the AWS OIDC IdP and the IAM role for that stage and environment.  Subsequent automated deploys of the service will update the IAM role, but won't touch the IdP.  Configuration changes for the IdP should be infrequent, but if they occur they will need to be applied manually following the steps below.
+The service is configured to be bootstrapped by running `serverless deploy` locally once for the 'official' stage for each environment (see step 4 below).
 
 Steps:
 1. Set AWS creds from CloudTamer/Kion for the target environment (dev, val, prod), then confirm the correct target
@@ -42,12 +40,12 @@ aws sts get-caller-identity
 ```bash
 cd services/github-oidc
 ```
-3. Deploy the service, passing the bootstrap flag and the stage name that corresponds to the 'official' stage for the target environment:
+3. Deploy the service with the stage name that corresponds to the 'official' stage for the target environment:
     - `main` for dev
     - `val` for val
     - `prod` for prod
 ```bash
-serverless deploy --stage ${stage_name} --param='bootstrap=true'
+serverless deploy --stage ${stage_name}
 ```
 
 ## Examples
