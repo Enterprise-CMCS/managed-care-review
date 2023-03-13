@@ -30,6 +30,7 @@ describe('templateHelpers', () => {
                 ...testEmailConfig.cmsReviewSharedEmails,
                 ...testStateAnalystsEmails,
                 ...testEmailConfig.dmcoEmails,
+                ...testEmailConfig.dmcpEmails,
             ],
         },
         {

@@ -124,6 +124,8 @@ const generateCMSReviewerEmails = (
             ...dmcpEmails,
             ...oactEmails,
         ]
+    } else {
+        console.error('generateCMSReviewerEmails - unknown package type')
     }
 
     //Remove OACT and DMCP emails from CHIP or State of PR submissions
