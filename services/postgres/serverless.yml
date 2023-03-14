@@ -134,6 +134,11 @@ resources:
         MasterUserPassword: !Sub '{{resolve:secretsmanager:${PostgresSecret}::password}}'
         DBSubnetGroupName: !Ref PostgresSubnetGroup
         VpcSecurityGroupIds: ['${self:custom.sgId}']
+        CopyTagsToSnapshot: true
+        BackupRetentionPeriod: 7
+        AutoMinorVersionUpgrade: true
+        EnableCloudwatchLogsExports:
+          - postgresql
         ServerlessV2ScalingConfiguration:
           MinCapacity: 1
           MaxCapacity: 32
