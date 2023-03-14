@@ -150,6 +150,11 @@ resources:
         Engine: aurora-postgresql
         DBInstanceClass: db.serverless
         DBClusterIdentifier: !Ref PostgresAuroraV2
+        AutoMinorVersionUpgrade: true
+        BackupRetentionPeriod: 7
+        CopyTagsToSnapshot: true
+        EnableCloudwatchLogsExports:
+          - postgresql
 
     PostgresSubnetGroup:
       Type: AWS::RDS::DBSubnetGroup
