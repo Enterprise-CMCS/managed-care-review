@@ -41,7 +41,7 @@ export const UploadQuestions = () => {
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const { updateHeading } = usePage()
     useEffect(() => {
-        updateHeading({ customHeading: packageName })
+        updateHeading({ customHeading: `${packageName} Add questions` })
     }, [packageName, updateHeading])
 
     // component specific support
