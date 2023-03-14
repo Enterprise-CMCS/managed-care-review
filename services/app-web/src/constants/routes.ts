@@ -72,6 +72,11 @@ const STATE_SUBMISSION_SUMMARY_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_REVISION',
 ]
 
+const QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
+    'SUBMISSIONS_QUESTIONS_AND_ANSWERS',
+    'SUBMISSIONS_SUMMARY',
+]
+
 /*
     Page headings used in the <header> when user logged in.
     Dynamic headings, when necessary, are set in page specific parent component.
@@ -124,6 +129,7 @@ export {
     ROUTES,
     STATE_SUBMISSION_FORM_ROUTES,
     STATE_SUBMISSION_SUMMARY_ROUTES,
+    QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES,
 }
 
 export type { RouteT, RouteTWithUnknown }
