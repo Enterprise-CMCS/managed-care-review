@@ -22,9 +22,6 @@ params:
     # catchall for feature stages and the main stage
     subjectClaim: "repo:CMSgov/managed-care-review:environment:dev"
 
-    # this param should be overridden with a value of 'true' via the CLI when bootstrapping an environment. see https://www.serverless.com/framework/docs/guides/parameters#inheritance-and-overriding
-    bootstrap: 'false'
-
     # list of valid server thumbprints for tokens sent by the GitHub OIDC provider
     # value comes from https://github.blog/changelog/2022-01-13-github-actions-update-on-oidc-based-deployments-to-aws/
     githubActionsThumbprint: [6938fd4d98bab03faadb97b34396831e3780aea1]
@@ -63,9 +60,17 @@ provider:
 
 resources:
   Conditions:
-    CreateGitHubIdentityProvider: !Equals
-      - ${param:bootstrap}
-      - 'true'
+    # only one IdP is allowed per AWS account, so only create the IdP if the stage is one of the three official environments [main, val, prod]
+    CreateGitHubIdentityProvider: !Or
+      - !Equals
+        - ${sls:stage}
+        - main
+      - !Equals
+        - ${sls:stage}
+        - val
+      - !Equals
+        - ${sls:stage}
+        - prod
     CreateGitHubActionsPermissionsPolicy: !Not
       - !Equals
         - ""
