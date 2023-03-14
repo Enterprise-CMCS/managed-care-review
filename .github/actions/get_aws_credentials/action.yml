@@ -34,7 +34,7 @@ runs:
       id: set-oidc-stage-name
       shell: bash
       run: |
-        echo "stage-name=${{ (contains('main, val, prod', inputs.stage-name) || contains(inputs.changed-services, 'github-oidc')) && inputs.stage-name || 'main' }}" >> $GITHUB_OUTPUT
+        echo "stage-name=${{ (contains('main, val, prod', inputs.stage-name) || inputs.changed-services == '' || contains(inputs.changed-services, 'github-oidc')) && inputs.stage-name || 'main' }}" >> $GITHUB_OUTPUT
 
     - name: Format OIDC role ARN
       shell: bash
