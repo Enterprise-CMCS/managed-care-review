@@ -136,7 +136,6 @@ resources:
         VpcSecurityGroupIds: ['${self:custom.sgId}']
         CopyTagsToSnapshot: true
         BackupRetentionPeriod: 7
-        AutoMinorVersionUpgrade: true
         EnableCloudwatchLogsExports:
           - postgresql
         ServerlessV2ScalingConfiguration:
