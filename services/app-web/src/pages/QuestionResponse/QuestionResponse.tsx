@@ -56,7 +56,9 @@ export const QuestionResponse = () => {
     return (
         <div className={styles.background}>
             <GridContainer className={styles.container}>
-                <QuestionResponseSubmitBanner submitType={submitType} />
+                {submitType && (
+                    <QuestionResponseSubmitBanner submitType={submitType} />
+                )}
                 <section>
                     <SectionHeader header="Q&A" hideBorder>
                         {isCMSUser && (

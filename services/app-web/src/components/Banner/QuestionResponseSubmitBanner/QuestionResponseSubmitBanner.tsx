@@ -3,7 +3,7 @@ import styles from '../Banner.module.scss'
 
 type SubmitType = 'question' | 'response'
 export type QuestionResponseSubmitBannerProps = {
-    submitType?: string | null
+    submitType: string
 }
 function isSubmitType(type: SubmitType | string): type is SubmitType {
     return type === 'question' || type === 'response'
@@ -12,7 +12,7 @@ function isSubmitType(type: SubmitType | string): type is SubmitType {
 const QuestionResponseSubmitBanner = ({
     submitType,
 }: QuestionResponseSubmitBannerProps) => {
-    if (!submitType || !isSubmitType(submitType)) return null
+    if (!isSubmitType(submitType)) return null
     const cmsQuestion = submitType === 'question'
     const heading = cmsQuestion ? 'Questions sent' : 'Response sent'
     const message = cmsQuestion

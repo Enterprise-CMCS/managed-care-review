@@ -11,6 +11,7 @@ import {
     mockValidCMSUser,
     fetchStateHealthPlanPackageWithQuestionsMockSuccess,
     mockQuestionsPayload,
+    mockValidUser,
 } from '../../testHelpers/apolloMocks'
 
 describe('QuestionResponse', () => {
@@ -175,6 +176,79 @@ describe('QuestionResponse', () => {
                 'This division has not submitted questions yet.'
             )
         ).toBeInTheDocument()
+
+        // no submit banner
+        expect(screen.queryByTestId('alert')).toBeNull()
+    })
+
+    it('renders with question submit banner after question submitted', async () => {
+        const mockQuestions = mockQuestionsPayload('15')
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        element={<QuestionResponse />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: '15',
+                            questions: mockQuestions,
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15/question-and-answers?submit=question',
+                },
+            }
+        )
+
+        await screen.findByTestId('sidenav')
+        expect(screen.getByTestId('alert')).toHaveClass('usa-alert--success')
+        expect(screen.getByText('Questions sent')).toBeInTheDocument()
+    })
+
+    it('renders with response submit banner after response submitted', async () => {
+        const mockQuestions = mockQuestionsPayload('15')
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS}
+                        element={<QuestionResponse />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: '15',
+                            questions: mockQuestions,
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/15/question-and-answers?submit=response',
+                },
+            }
+        )
+
+        await screen.findByTestId('sidenav')
+        expect(screen.getByTestId('alert')).toHaveClass('usa-alert--success')
+        expect(screen.getByText('Response sent')).toBeInTheDocument()
     })
     it('CMS users see add questions link on Q&A page', async () => {
         renderWithProviders(
