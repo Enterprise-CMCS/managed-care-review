@@ -59,6 +59,7 @@ const testDuplicateStateAnalystsEmails: string[] = [
 function testEmailer(customConfig?: EmailConfiguration): Emailer {
     const config = customConfig || testEmailConfig
     return {
+        config,
         sendEmail: jest.fn(
             async (emailData: EmailData): Promise<void | Error> => {
                 console.info('Email content' + JSON.stringify(emailData))

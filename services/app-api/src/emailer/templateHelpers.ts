@@ -104,15 +104,7 @@ const generateCMSReviewerEmails = (
     }
 
     const { oactEmails, dmcpEmails, dmcoEmails } = config
-    if (
-        oactEmails.length == 0 ||
-        dmcpEmails.length == 0 ||
-        dmcoEmails.length == 0
-    ) {
-        console.error(
-            'generateCMSReviewerEmails - no division emails pulled out of config'
-        )
-    }
+
     const programIDs = findAllPackageProgramIds(pkg)
     let reviewers: string[] = []
 
@@ -133,8 +125,6 @@ const generateCMSReviewerEmails = (
             ...dmcpEmails,
             ...oactEmails,
         ]
-    } else {
-        console.error('generateCMSReviewerEmails - unknown package type')
     }
 
     //Remove OACT and DMCP emails from CHIP or State of PR submissions

@@ -1,0 +1,16 @@
+query fetchEmailSettings {
+    fetchEmailSettings {
+        config {
+            stage
+            baseUrl
+            emailSource
+            devReviewTeamEmails
+            oactEmails
+            dmcpEmails
+            dmcoEmails
+            cmsReviewHelpEmailAddress
+            cmsRateHelpEmailAddress
+            cmsDevTeamHelpEmailAddress
+        }
+    }
+}

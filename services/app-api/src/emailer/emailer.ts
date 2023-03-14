@@ -56,6 +56,7 @@ type EmailData = {
 }
 
 type Emailer = {
+    config: EmailConfiguration
     sendEmail: (emailData: EmailData) => Promise<void | Error>
     sendCMSNewPackage: (
         formData: LockedHealthPlanFormDataType,
@@ -95,6 +96,7 @@ type Emailer = {
 
 function newSESEmailer(config: EmailConfiguration): Emailer {
     return {
+        config,
         sendEmail: async (emailData: EmailData): Promise<void | Error> => {
             const emailRequestParams = getSESEmailParams(emailData)
 
@@ -228,6 +230,7 @@ const localEmailerLogger = (emailData: EmailData) =>
 
 function newLocalEmailer(config: EmailConfiguration): Emailer {
     return {
+        config,
         sendEmail: async (emailData: EmailData): Promise<void | Error> => {
             localEmailerLogger(emailData)
         },
