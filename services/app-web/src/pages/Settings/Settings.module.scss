@@ -1,8 +1,11 @@
 .table {
     width: 60%;
-    margin: 2% 2% 2% 22%;
 }
 
+.pageContainer {
+    margin: units(2) 0;
+    align-items: start;
+}
 .header {
     text-align: left;
 }
