@@ -88,7 +88,7 @@ describe('Q&A', () => {
             cy.wait(2000)
 
             cy.findByRole('heading', {
-                name: `CMS ${submissionName} Upload questions`,
+                name: `CMS ${submissionName}`,
             }).should('exist')
 
             // Add a question
@@ -125,7 +125,7 @@ describe('Q&A', () => {
 
             // Make sure Heading is correct with 'Upload questions' in addition to submission name
             cy.findByRole('heading', {
-                name: `Minnesota ${submissionName} Upload questions`,
+                name: `Minnesota ${submissionName}`,
             }).should('exist')
 
             // Make sure question by CMS exists
