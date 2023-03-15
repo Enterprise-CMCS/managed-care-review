@@ -26,7 +26,6 @@ import {
     TEST_PNG_FILE,
     dragAndDrop,
     updateDateRange,
-    prettyDebug,
 } from '../../../testHelpers'
 import { RateDetails } from './RateDetails'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
@@ -546,14 +545,14 @@ describe('RateDetails', () => {
                 const rateCertsAfterAddAnother = rateCertifications(screen)
                 expect(rateCertsAfterAddAnother).toHaveLength(3)
             })
-            prettyDebug()
+
             await clickRemoveIndexRate(screen, 1)
 
             await waitFor(() => {
                 const rateCertsAfterRemove = rateCertifications(screen)
                 expect(rateCertsAfterRemove).toHaveLength(2)
             })
-        }, 13000)
+        }, 10000)
 
         it('accepts documents on second rate', async () => {
             renderWithProviders(
