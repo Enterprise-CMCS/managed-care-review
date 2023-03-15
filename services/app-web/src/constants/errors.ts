@@ -14,6 +14,9 @@ const ERROR_MESSAGES = {
     unlock_invalid_package_status:
         'Error attempting to unlock. Submission may be already unlocked.',
     resubmit_error_heading: 'Resubmission error',
+    question_missing_field: 'Your question is missing information.',
+    question_error_generic: 'Error attempting to add question.',
+    response_error_generic: 'Error attempting to add response.',
 }
 
 const MAIL_TO_SUPPORT = 'mc-review@cms.hhs.gov'

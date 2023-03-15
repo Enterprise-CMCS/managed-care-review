@@ -20,13 +20,12 @@ import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import {
     CreateQuestionResponseInput,
-    FetchHealthPlanPackageWithQuestionsDocument,
-    FetchHealthPlanPackageWithQuestionsQuery,
     useCreateQuestionResponseMutation,
 } from '../../../gen/gqlClient'
 import { usePage } from '../../../contexts/PageContext'
 import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
+import { createResponseWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 
 export const UploadResponse = () => {
     // router context
@@ -88,71 +87,11 @@ export const UploadResponse = () => {
                 documents: responseDocs,
             }
 
-            const createResult = await createResponse({
-                variables: { input },
-                update(cache, { data }) {
-                    if (data) {
-                        const newResponse = data.createQuestionResponse.response
-                        const result =
-                            cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
-                                {
-                                    query: FetchHealthPlanPackageWithQuestionsDocument,
-                                    variables: {
-                                        input: {
-                                            pkgID: id,
-                                        },
-                                    },
-                                }
-                            )
-
-                        const pkg = result?.fetchHealthPlanPackage.pkg
-
-                        if (pkg) {
-                            const updatedQuestionsEdge =
-                                pkg.questions?.DMCOQuestions.edges.map(
-                                    (edge) => {
-                                        if (
-                                            edge.node.id ===
-                                            newResponse.questionID
-                                        ) {
-                                            return {
-                                                __typename: 'QuestionEdge',
-                                                node: {
-                                                    ...edge.node,
-                                                    responses: [
-                                                        newResponse,
-                                                        ...edge.node.responses,
-                                                    ],
-                                                },
-                                            }
-                                        }
-                                        return edge
-                                    }
-                                )
-
-                            const updatedPkg = {
-                                ...pkg,
-                                questions: {
-                                    ...pkg.questions,
-                                    DMCOQuestions: {
-                                        ...pkg.questions?.DMCOQuestions,
-                                        edges: updatedQuestionsEdge,
-                                    },
-                                },
-                            }
-
-                            cache.writeQuery({
-                                query: FetchHealthPlanPackageWithQuestionsDocument,
-                                data: {
-                                    fetchHealthPlanPackage: {
-                                        pkg: updatedPkg,
-                                    },
-                                },
-                            })
-                        }
-                    }
-                },
-            })
+            const createResult = await createResponseWrapper(
+                createResponse,
+                id as string,
+                input
+            )
 
             if (createResult) {
                 navigate(

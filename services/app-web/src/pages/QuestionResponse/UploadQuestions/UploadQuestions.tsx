@@ -21,13 +21,12 @@ import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import {
     CreateQuestionInput,
     useCreateQuestionMutation,
-    FetchHealthPlanPackageWithQuestionsDocument,
-    FetchHealthPlanPackageWithQuestionsQuery,
-    IndexQuestionsPayload,
 } from '../../../gen/gqlClient'
 import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
 import { usePage } from '../../../contexts/PageContext'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
+import { createQuestionWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
+
 export const UploadQuestions = () => {
     // router context
     const { division, id } = useParams<{ division: string; id: string }>()
@@ -84,64 +83,10 @@ export const UploadQuestions = () => {
                 documents: questionDocs,
             }
 
-            const createResult = await createQuestion({
-                variables: { input },
-                update(cache, { data }) {
-                    if (data) {
-                        const newQuestion = data.createQuestion.question
-                        const result =
-                            cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
-                                {
-                                    query: FetchHealthPlanPackageWithQuestionsDocument,
-                                    variables: {
-                                        input: {
-                                            pkgID: newQuestion.pkgID,
-                                        },
-                                    },
-                                }
-                            )
-
-                        const pkg = result?.fetchHealthPlanPackage.pkg
-
-                        if (pkg) {
-                            const questions =
-                                pkg.questions as IndexQuestionsPayload
-                            const updatedPkg = {
-                                ...pkg,
-                                questions: {
-                                    ...pkg.questions,
-                                    DMCOQuestions: {
-                                        totalCount: questions.DMCPQuestions
-                                            .totalCount
-                                            ? questions.DMCPQuestions
-                                                  .totalCount + 1
-                                            : 1,
-                                        edges: [
-                                            {
-                                                __typename: 'QuestionEdge',
-                                                node: {
-                                                    ...newQuestion,
-                                                    responses: [],
-                                                },
-                                            },
-                                            ...questions.DMCOQuestions.edges,
-                                        ],
-                                    },
-                                },
-                            }
-
-                            cache.writeQuery({
-                                query: FetchHealthPlanPackageWithQuestionsDocument,
-                                data: {
-                                    fetchHealthPlanPackage: {
-                                        pkg: updatedPkg,
-                                    },
-                                },
-                            })
-                        }
-                    }
-                },
-            })
+            const createResult = await createQuestionWrapper(
+                createQuestion,
+                input
+            )
 
             if (createResult) {
                 navigate(
