@@ -73,33 +73,29 @@ export const UploadResponse = () => {
             return
         }
 
-        try {
-            const cleaned = cleanFileItemsBeforeSave()
-            const responseDocs = cleaned.map((item) => {
-                return {
-                    name: item.name,
-                    s3URL: item.s3URL as string,
-                }
-            })
-
-            const input: CreateQuestionResponseInput = {
-                questionID: questionID as string,
-                documents: responseDocs,
+        const cleaned = cleanFileItemsBeforeSave()
+        const responseDocs = cleaned.map((item) => {
+            return {
+                name: item.name,
+                s3URL: item.s3URL as string,
             }
+        })
 
-            const createResult = await createResponseWrapper(
-                createResponse,
-                id as string,
-                input
-            )
+        const input: CreateQuestionResponseInput = {
+            questionID: questionID as string,
+            documents: responseDocs,
+        }
 
-            if (createResult) {
-                navigate(
-                    `/submissions/${id}/question-and-answers?submit=response`
-                )
-            }
-        } catch (serverError) {
-            console.info(serverError)
+        const createResult = await createResponseWrapper(
+            createResponse,
+            id as string,
+            input
+        )
+
+        if (createResult instanceof Error) {
+            console.info(createResult.message)
+        } else {
+            navigate(`/submissions/${id}/question-and-answers?submit=response`)
         }
     }
 
