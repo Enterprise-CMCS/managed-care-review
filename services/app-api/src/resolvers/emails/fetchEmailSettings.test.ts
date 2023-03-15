@@ -3,7 +3,7 @@ import FETCH_EMAIL_SETTINGS from '../../../../app-graphql/src/queries/fetchEmail
 import { UserType } from '../../domain-models'
 
 describe('fetchEmailSettings', () => {
-    const testUserCMS = {
+    const testUserCMS: UserType = {
         id: 'f7571910-ef02-427d-bae3-3e945e20e59d',
         role: 'CMS_USER',
         email: 'zuko@example.com',
@@ -59,11 +59,18 @@ describe('fetchEmailSettings', () => {
             query: FETCH_EMAIL_SETTINGS,
         })
 
-        // confirm that we get what we got
-        expect(res.errors).toBeUndefined()
+        if (res.errors === undefined) {
+            throw new Error('Expected errors to be defined')
+        }
+        expect(res.errors).toHaveLength(1)
+        const resultErr = res.errors[0]
 
-        expect(res.data?.fetchEmailSettings.config).toBeDefined()
+        expect(resultErr?.message).toBe(
+            'Non-admin user not authorized to fetch a settings'
+        )
+        expect(resultErr?.extensions?.code).toBe('FORBIDDEN')
     })
+
     it('returns  error for state user', async () => {
         const server = await constructTestPostgresServer({
             context: {
@@ -76,9 +83,15 @@ describe('fetchEmailSettings', () => {
             query: FETCH_EMAIL_SETTINGS,
         })
 
-        // confirm that we get what we got
-        expect(res.errors).toBeDefined()
+        if (res.errors === undefined) {
+            throw new Error('Expected errors to be defined')
+        }
+        expect(res.errors).toHaveLength(1)
+        const resultErr = res.errors[0]
 
-        expect(res.data?.fetchEmailSettings.config).toBeDefined()
+        expect(resultErr?.message).toBe(
+            'Non-admin user not authorized to fetch a settings'
+        )
+        expect(resultErr?.extensions?.code).toBe('FORBIDDEN')
     })
 })
