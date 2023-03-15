@@ -402,7 +402,7 @@ describe('submitHealthPlanPackage', () => {
         const stateAnalystsEmails = getTestStateAnalystsEmails(sub.stateCode)
 
         const cmsEmails = [
-            ...config.cmsReviewSharedEmails,
+            ...config.devReviewTeamEmails,
             ...stateAnalystsEmails,
         ]
 
@@ -442,7 +442,7 @@ describe('submitHealthPlanPackage', () => {
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining(
-                    Array.from(config.cmsReviewSharedEmails)
+                    Array.from(config.devReviewTeamEmails)
                 ),
             })
         )
@@ -624,7 +624,7 @@ describe('submitHealthPlanPackage', () => {
                     `The state completed their edits on submission ${name}`
                 ),
                 toAddresses: expect.arrayContaining(
-                    Array.from(config.cmsReviewSharedEmails)
+                    Array.from(config.devReviewTeamEmails)
                 ),
             })
         )

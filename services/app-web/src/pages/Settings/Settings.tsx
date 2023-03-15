@@ -1,4 +1,4 @@
-import { GridContainer, Table } from '@trussworks/react-uswds'
+import { Grid, GridContainer, Table } from '@trussworks/react-uswds'
 import React, { useMemo } from 'react'
 import {
     createColumnHelper,
@@ -20,15 +20,18 @@ import {
     ErrorAlertSignIn,
     Loading,
 } from '../../components'
+import { EmailSettings } from './EmailSettings/EmailSettings'
 
 const columnHelper = createColumnHelper<CmsUser>()
 
+// Eventually this page will use a tabbed interface
 export const Settings = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
     const { loading, data, error } = useIndexUsersQuery({
         fetchPolicy: 'network-only',
     })
     const isAuthenticated = loginStatus === 'LOGGED_IN'
+    const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const columns = useMemo(
         () => [
             columnHelper.accessor('familyName', {
@@ -111,46 +114,53 @@ export const Settings = (): React.ReactElement => {
     })
 
     return (
-        <div className={styles.table}>
-            {error ? (
-                errorMessage()
-            ) : showLoading ? (
-                <Loading />
-            ) : cmsUsers.length ? (
-                <Table bordered striped caption="CMS Users">
-                    <thead className={styles.header}>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => (
-                                    <th key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                  header.column.columnDef
-                                                      .header,
-                                                  header.getContext()
-                                              )}
-                                    </th>
+        <GridContainer className={styles.pageContainer}>
+            <Grid>
+                <div className={styles.table}>
+                    {error ? (
+                        errorMessage()
+                    ) : showLoading ? (
+                        <Loading />
+                    ) : cmsUsers.length ? (
+                        <Table bordered striped caption="CMS Users">
+                            <thead className={styles.header}>
+                                {table.getHeaderGroups().map((headerGroup) => (
+                                    <tr key={headerGroup.id}>
+                                        {headerGroup.headers.map((header) => (
+                                            <th key={header.id}>
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(
+                                                          header.column
+                                                              .columnDef.header,
+                                                          header.getContext()
+                                                      )}
+                                            </th>
+                                        ))}
+                                    </tr>
                                 ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody>
-                        {table.getRowModel().rows.map((row) => (
-                            <tr key={row.id}>
-                                {row.getVisibleCells().map((cell) => (
-                                    <td key={cell.id}>
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext()
-                                        )}
-                                    </td>
+                            </thead>
+                            <tbody>
+                                {table.getRowModel().rows.map((row) => (
+                                    <tr key={row.id}>
+                                        {row.getVisibleCells().map((cell) => (
+                                            <td key={cell.id}>
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </td>
+                                        ))}
+                                    </tr>
                                 ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </Table>
-            ) : null}
-        </div>
+                            </tbody>
+                        </Table>
+                    ) : (
+                        <p>No CMS users to display</p>
+                    )}
+                </div>
+            </Grid>
+            <Grid>{isAdminUser && <EmailSettings />}</Grid>
+        </GridContainer>
     )
 }

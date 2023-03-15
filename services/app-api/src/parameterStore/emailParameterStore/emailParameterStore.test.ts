@@ -5,7 +5,7 @@ import {
     getCmsReviewHelpEmail,
     getCmsRateHelpEmail,
     getCmsDevTeamHelpEmail,
-    getCmsReviewSharedEmails,
+    getDevReviewTeamEmails,
 } from './'
 import * as ParameterStore from '../awsParameterStore'
 
@@ -46,14 +46,14 @@ describe('emailParameterStore', () => {
             )
         })
     })
-    describe('getCmsReviewSharedEmails', () => {
+    describe('getDevReviewTeamEmails', () => {
         it('returns review shared emails email as array of strings', async () => {
             const spy = jest.spyOn(ParameterStore, 'getParameterStore')
             spy.mockResolvedValue({
                 value: `"CMS Reviewer 1" <CMS.reviewer.1@example.com>,"CMS Reviewer 2" <CMS.reviewer.2@example.com>,"CMS Reviewer 3" <CMS.reviewer.3@example.com>`,
                 type: 'StringList',
             })
-            const result = await getCmsReviewSharedEmails()
+            const result = await getDevReviewTeamEmails()
             expect(result).toStrictEqual([
                 `"CMS Reviewer 1" <CMS.reviewer.1@example.com>`,
                 `"CMS Reviewer 2" <CMS.reviewer.2@example.com>`,
@@ -63,7 +63,7 @@ describe('emailParameterStore', () => {
         it('returns error when fetching store value fails', async () => {
             const spy = jest.spyOn(ParameterStore, 'getParameterStore')
             spy.mockResolvedValue(new Error('No store found'))
-            const result = await getCmsReviewSharedEmails()
+            const result = await getDevReviewTeamEmails()
             expect(result).toBeInstanceOf(Error)
         })
         it('returns error when Type of parameter store value is incompatible', async () => {
@@ -72,7 +72,7 @@ describe('emailParameterStore', () => {
                 value: '"CMS Source Email" <local@example.com>',
                 type: 'String',
             })
-            const result = await getCmsReviewSharedEmails()
+            const result = await getDevReviewTeamEmails()
             expect(result).toEqual(
                 new Error(
                     'Parameter store /configuration/email/reviewTeamAddresses value of Type String is not supported'

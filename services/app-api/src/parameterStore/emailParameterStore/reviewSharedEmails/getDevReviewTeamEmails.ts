@@ -1,6 +1,6 @@
 import { getParameterStore } from '../../awsParameterStore'
 
-export const getCmsReviewSharedEmails = async (): Promise<string[] | Error> => {
+export const getDevReviewTeamEmails = async (): Promise<string[] | Error> => {
     const name = `/configuration/email/reviewTeamAddresses`
     const reviewTeamAddresses = await getParameterStore(name)
 
@@ -19,10 +19,10 @@ export const getCmsReviewSharedEmails = async (): Promise<string[] | Error> => {
     return value.split(',').map((email) => email.trim())
 }
 
-export const getCmsReviewSharedEmailsLocal = async (): Promise<
+export const getDevReviewTeamEmailsLocal = async (): Promise<
     string[] | Error
 > => [
-    `"CMS Reviewer 1" <CMS.reviewer.1@example.com>`,
-    `"CMS Reviewer 2" <CMS.reviewer.2@example.com>`,
-    `"CMS Reviewer 3" <CMS.reviewer.3@example.com>`,
+    `"Dev Reviewer 1" <Dev.reviewer.1@example.com>`,
+    `"Dev Reviewer 2" <Dev.reviewer.2@example.com>`,
+    `"Dev Reviewer 3" <Dev.reviewer.3@example.com>`,
 ]

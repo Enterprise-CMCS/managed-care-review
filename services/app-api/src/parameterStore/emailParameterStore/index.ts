@@ -3,9 +3,9 @@ export {
     getStateAnalystsEmailsLocal,
 } from './stateAnalystsEmails/getStateAnalystsEmails'
 export {
-    getCmsReviewSharedEmails,
-    getCmsReviewSharedEmailsLocal,
-} from './reviewSharedEmails/getCmsReviewSharedEmails'
+    getDevReviewTeamEmails,
+    getDevReviewTeamEmailsLocal,
+} from './reviewSharedEmails/getDevReviewTeamEmails'
 export {
     getCmsReviewHelpEmail,
     getCmsReviewHelpEmailLocal,
