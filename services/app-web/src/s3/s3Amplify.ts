@@ -155,6 +155,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                 const error = new Error(
                     `Didn't get a string back from s3.get. We should have to use a different config for that.`
                 )
+                recordJSException(error)
                 throw error
             }
         },
