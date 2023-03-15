@@ -4,9 +4,9 @@ import {
     mockValidCMSUser,
     mockValidUser,
 } from '../../../testHelpers/apolloMocks'
-import { screen, waitFor, within } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import React from 'react'
-import { QATable, QuestionDocumentWithLink, QuestionData } from './QATable'
+import { QATable, QuestionData } from './QATable'
 import { CmsUser, StateUser } from '../../../gen/gqlClient'
 
 const stateUser = mockValidUser() as StateUser
@@ -21,8 +21,7 @@ const testQuestionData: QuestionData = {
         {
             s3URL: 's3://bucketname/key/question-1-document-1',
             name: 'question-1-document-1',
-            url: 'https://fakes3.com/key?sekret=deadbeef',
-        } as QuestionDocumentWithLink,
+        },
     ],
     responses: [
         {
@@ -34,8 +33,7 @@ const testQuestionData: QuestionData = {
                 {
                     s3URL: 's3://bucketname/key/response-1-document-1',
                     name: 'response-1-document-1',
-                    url: 'https://fakes3.com/key?sekret=deadbeef',
-                } as QuestionDocumentWithLink,
+                },
             ],
         },
     ],
@@ -51,6 +49,7 @@ it('renders question correctly as a CMS user that created the question', async (
                         question={testQuestionData}
                         user={cmsUser}
                         division={'DMCO'}
+                        round={1}
                     />
                 }
             />
@@ -91,6 +90,7 @@ it('renders question correctly as a CMS user that did not create the question', 
                         question={testQuestionData}
                         user={otherStateUser}
                         division={'DMCO'}
+                        round={1}
                     />
                 }
             />
@@ -115,6 +115,7 @@ it('renders question correctly as a state user', async () => {
                         question={testQuestionData}
                         user={stateUser}
                         division={'DMCO'}
+                        round={1}
                     />
                 }
             />
@@ -129,7 +130,7 @@ it('renders question correctly as a state user', async () => {
         expect(rows[2]).toHaveTextContent(`${cmsUser.givenName} (CMS)`)
     })
 })
-it('renders multiple documents and links correctly', async () => {
+it('renders multiple documents', async () => {
     const testQuestionDocLinks: QuestionData = {
         id: 'question-1-id',
         pkgID: '15',
@@ -138,13 +139,11 @@ it('renders multiple documents and links correctly', async () => {
         documents: [
             {
                 s3URL: 's3://bucketname/key/question-1-document-1',
-                name: 'question-1-document-1',
-                url: 'https://fakes3.com/key?sekret=deadbeef',
+                name: 'question-1-document-2',
             },
             {
                 s3URL: '',
-                name: 'question-1-document-2',
-                url: null,
+                name: 'question-1-document-1',
             },
         ],
         responses: [
@@ -157,8 +156,7 @@ it('renders multiple documents and links correctly', async () => {
                     {
                         s3URL: 's3://bucketname/key/response-1-document-1',
                         name: 'response-1-document-1',
-                        url: 'https://fakes3.com/key?sekret=deadbeef',
-                    } as QuestionDocumentWithLink,
+                    },
                 ],
             },
         ],
@@ -172,32 +170,26 @@ it('renders multiple documents and links correctly', async () => {
                         question={testQuestionDocLinks}
                         user={cmsUser}
                         division={'DMCO'}
+                        round={1}
                     />
                 }
             />
         </Routes>
     )
 
+    //TODO: Figure out a way to check for links, they are updated in a useEffect not sure how to check after that update
+    // - spyOn getDocumentsUrl hook doesn't work because we dont have s3 context.
     await waitFor(() => {
         const rows = screen.getAllByRole('row')
         expect(rows).toHaveLength(4)
 
-        // expect response document to have a link
+        // expect response document top be on top
         expect(rows[1]).toHaveTextContent('response-1-document-1')
-        expect(within(rows[1]).getByRole('link')).toHaveAttribute(
-            'href',
-            'https://fakes3.com/key?sekret=deadbeef'
-        )
 
-        // expect first question document to have a link
-        expect(rows[2]).toHaveTextContent('question-1-document-1')
-        expect(within(rows[2]).getByRole('link')).toHaveAttribute(
-            'href',
-            'https://fakes3.com/key?sekret=deadbeef'
-        )
+        // expect second question document to be in the middle
+        expect(rows[2]).toHaveTextContent('question-1-document-2')
 
-        // expect second question document to not have a link
-        expect(rows[3]).toHaveTextContent('question-1-document-2')
-        expect(within(rows[3]).queryByRole('link')).toBeNull()
+        // expect first question document to be in the middle
+        expect(rows[3]).toHaveTextContent('question-1-document-1')
     })
 })

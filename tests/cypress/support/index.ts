@@ -79,6 +79,11 @@ declare global {
             }: {
                 documentPath: string
             }): void
+            addResponse({
+                            documentPath
+                        }: {
+                documentPath: string
+            }): void
 
             //Launch Darkly commands
             stubFeatureFlags(): void

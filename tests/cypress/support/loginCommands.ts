@@ -38,7 +38,6 @@ Cypress.Commands.add(
     ({ initialURL } = { initialURL: '/' }) => {
         cy.intercept('POST', '*/graphql', (req) => {
             aliasQuery(req, 'fetchCurrentUser')
-            aliasQuery(req, 'fetchHealthPlanPackage')
             aliasQuery(req, 'fetchHealthPlanPackageWithQuestions')
             aliasQuery(req, 'indexHealthPlanPackages')
         })

@@ -8,17 +8,46 @@ import { usePage } from '../../contexts/PageContext'
 import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
 import { QuestionResponseSubmitBanner } from '../../components/Banner/QuestionResponseSubmitBanner/QuestionResponseSubmitBanner'
 import { QATable, QuestionData, Division } from './QATable/QATable'
+import { CmsUser, QuestionEdge, StateUser } from '../../gen/gqlClient'
+
+type QADivisionQuestions = {
+    dmco: {
+        totalCount: number
+        questions: QuestionData[]
+    }
+    dmcp: {
+        totalCount: number
+        questions: QuestionData[]
+    }
+    oact: {
+        totalCount: number
+        questions: QuestionData[]
+    }
+}
+
+const extractQuestions = (edges?: QuestionEdge[]): QuestionData[] => {
+    if (!edges) {
+        return []
+    }
+    return edges.map(({ node }) => ({
+        ...node,
+        addedBy: node.addedBy as CmsUser,
+        responses: node.responses.map((response) => ({
+            ...response,
+            addedBy: response.addedBy as StateUser,
+        })),
+    }))
+}
 
 export const QuestionResponse = () => {
     // router context
     const location = useLocation()
     const submitType = new URLSearchParams(location.search).get('submit')
-    const { user, packageData, packageName, parsedQuestions } =
+    const { user, packageData, packageName, pkg } =
         useOutletContext<SideNavOutletContextType>()
 
     // page context
     const { updateHeading } = usePage()
-    const questions = parsedQuestions
     const isCMSUser = user?.role === 'CMS_USER'
 
     useEffect(() => {
@@ -33,16 +62,32 @@ export const QuestionResponse = () => {
         )
     }
 
+    const questions: QADivisionQuestions = {
+        dmco: {
+            totalCount: pkg.questions?.DMCOQuestions.totalCount ?? 0,
+            questions: extractQuestions(pkg.questions?.DMCOQuestions.edges),
+        },
+        dmcp: {
+            totalCount: pkg.questions?.DMCPQuestions.totalCount ?? 0,
+            questions: extractQuestions(pkg.questions?.DMCPQuestions.edges),
+        },
+        oact: {
+            totalCount: pkg.questions?.OACTQuestions.totalCount ?? 0,
+            questions: extractQuestions(pkg.questions?.OACTQuestions.edges),
+        },
+    }
+
     const mapQuestionTable = (
         divisionQuestions: QuestionData[],
         division: Division
     ) => {
         return divisionQuestions.length ? (
-            divisionQuestions.map((question) => (
+            divisionQuestions.map((question, index) => (
                 <QATable
                     key={question.id}
                     question={question}
                     division={division}
+                    round={divisionQuestions.length - index}
                     user={user}
                 />
             ))

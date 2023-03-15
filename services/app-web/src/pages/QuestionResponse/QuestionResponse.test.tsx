@@ -22,7 +22,7 @@ describe('QuestionResponse', () => {
         jest.resetAllMocks()
     })
 
-    it('renders expected questions correctly', async () => {
+    it('renders expected questions correctly with rounds', async () => {
         const mockQuestions = mockQuestionsPayload('15')
         renderWithProviders(
             <Routes>
@@ -75,6 +75,18 @@ describe('QuestionResponse', () => {
         // expect two tables to be in dmco section
         expect(table1).toBeInTheDocument()
         expect(table2).toBeInTheDocument()
+
+        const rounds = dmcoSection.queryAllByRole('heading', {
+            name: /Round [0-9]+$/,
+            level: 4,
+        })
+
+        //expect two rounds of questions
+        expect(rounds).toHaveLength(2)
+        // Expect first displayed round to be the latest round
+        expect(rounds[0]).toHaveTextContent('Round 2')
+        // Expect last displayed round to be the first round
+        expect(rounds[1]).toHaveTextContent('Round 1')
 
         // expect documents to be on respective question tables
         expect(

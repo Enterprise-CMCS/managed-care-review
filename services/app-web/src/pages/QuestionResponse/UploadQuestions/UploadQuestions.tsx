@@ -21,12 +21,12 @@ import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import {
     CreateQuestionInput,
     useCreateQuestionMutation,
-    FetchHealthPlanPackageWithQuestionsDocument,
-    FetchHealthPlanPackageWithQuestionsQuery,
 } from '../../../gen/gqlClient'
 import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
 import { usePage } from '../../../contexts/PageContext'
 import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
+import { createQuestionWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
+
 export const UploadQuestions = () => {
     // router context
     const { division, id } = useParams<{ division: string; id: string }>()
@@ -69,54 +69,25 @@ export const UploadQuestions = () => {
             return
         }
 
-        try {
-            const cleaned = cleanFileItemsBeforeSave()
-            const questionDocs = cleaned.map((item) => {
-                return {
-                    name: item.name,
-                    s3URL: item.s3URL as string,
-                }
-            })
-
-            const input: CreateQuestionInput = {
-                pkgID: id as string,
-                documents: questionDocs,
+        const cleaned = cleanFileItemsBeforeSave()
+        const questionDocs = cleaned.map((item) => {
+            return {
+                name: item.name,
+                s3URL: item.s3URL as string,
             }
+        })
 
-            const createResult = await createQuestion({
-                variables: { input },
-                update(cache, { data }) {
-                    if (data) {
-                        const newQuestion = data.createQuestion.question
-                        const result =
-                            cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
-                                {
-                                    query: FetchHealthPlanPackageWithQuestionsDocument,
-                                    variables: {
-                                        input: {
-                                            pkgID: newQuestion.pkgID,
-                                        },
-                                    },
-                                }
-                            )
+        const input: CreateQuestionInput = {
+            pkgID: id as string,
+            documents: questionDocs,
+        }
 
-                        const pkg = result?.fetchHealthPlanPackage.pkg
+        const createResult = await createQuestionWrapper(createQuestion, input)
 
-                        if (pkg) {
-                            cache.evict({ id: cache.identify(pkg) })
-                            cache.gc()
-                        }
-                    }
-                },
-            })
-
-            if (createResult) {
-                navigate(
-                    `/submissions/${id}/question-and-answers?submit=question`
-                )
-            }
-        } catch (serverError) {
-            console.info(serverError)
+        if (createResult instanceof Error) {
+            console.info(createResult.message)
+        } else {
+            navigate(`/submissions/${id}/question-and-answers?submit=question`)
         }
     }
 

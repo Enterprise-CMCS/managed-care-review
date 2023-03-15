@@ -1,7 +1,15 @@
 import {
+    CreateQuestionMutationFn,
     HealthPlanPackage,
     SubmitHealthPlanPackageMutationFn,
     UnlockHealthPlanPackageMutationFn,
+    Document,
+    FetchHealthPlanPackageWithQuestionsQuery,
+    FetchHealthPlanPackageWithQuestionsDocument,
+    IndexQuestionsPayload,
+    CreateQuestionMutation,
+    CreateQuestionResponseMutationFn,
+    CreateQuestionResponseMutation,
 } from '../gen/gqlClient'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
@@ -14,7 +22,10 @@ Adds user friendly/facing error messages to health plan package mutations.
 - Error messages returned here are displayed to user in UnlockSubmitModal > GenericApiBanner.
 */
 
-type MutationType = 'SUBMIT_HEALTH_PLAN_PACKAGE' | 'UNLOCK_HEALTH_PLAN_PACKAGE'
+type MutationType =
+    | 'SUBMIT_HEALTH_PLAN_PACKAGE'
+    | 'UNLOCK_HEALTH_PLAN_PACKAGE'
+    | 'CREATE_QUESTION'
 
 const handleApolloErrorsAndAddUserFacingMessages = (
     apolloError: ApolloError,
@@ -111,5 +122,168 @@ export const submitMutationWrapper = async (
             error,
             'SUBMIT_HEALTH_PLAN_PACKAGE'
         )
+    }
+}
+
+export const createQuestionWrapper = async (
+    createQuestion: CreateQuestionMutationFn,
+    input: {
+        pkgID: string
+        documents: Document[]
+    }
+): Promise<CreateQuestionMutation | GraphQLErrors | Error> => {
+    try {
+        const result = await createQuestion({
+            variables: { input },
+            update(cache, { data }) {
+                if (data) {
+                    const newQuestion = data.createQuestion.question
+                    const result =
+                        cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
+                            {
+                                query: FetchHealthPlanPackageWithQuestionsDocument,
+                                variables: {
+                                    input: {
+                                        pkgID: newQuestion.pkgID,
+                                    },
+                                },
+                            }
+                        )
+
+                    const pkg = result?.fetchHealthPlanPackage.pkg
+
+                    if (pkg) {
+                        const questions = pkg.questions as IndexQuestionsPayload
+                        const updatedPkg = {
+                            ...pkg,
+                            questions: {
+                                ...pkg.questions,
+                                DMCOQuestions: {
+                                    totalCount: questions.DMCPQuestions
+                                        .totalCount
+                                        ? questions.DMCPQuestions.totalCount + 1
+                                        : 1,
+                                    edges: [
+                                        {
+                                            __typename: 'QuestionEdge',
+                                            node: {
+                                                ...newQuestion,
+                                                responses: [],
+                                            },
+                                        },
+                                        ...questions.DMCOQuestions.edges,
+                                    ],
+                                },
+                            },
+                        }
+
+                        cache.writeQuery({
+                            query: FetchHealthPlanPackageWithQuestionsDocument,
+                            data: {
+                                fetchHealthPlanPackage: {
+                                    pkg: updatedPkg,
+                                },
+                            },
+                        })
+                    }
+                }
+            },
+            onQueryUpdated: () => true,
+        })
+
+        if (result.data?.createQuestion) {
+            return result.data
+        } else {
+            recordJSException(
+                `[UNEXPECTED]: Error attempting to add question, no data present but returning 200.`
+            )
+            return new Error(ERROR_MESSAGES.question_error_generic)
+        }
+    } catch (error) {
+        return error
+    }
+}
+
+export const createResponseWrapper = async (
+    createResponse: CreateQuestionResponseMutationFn,
+    pkgID: string,
+    input: {
+        questionID: string
+        documents: Document[]
+    }
+): Promise<CreateQuestionResponseMutation | GraphQLErrors | Error> => {
+    try {
+        const result = await createResponse({
+            variables: { input },
+            update(cache, { data }) {
+                if (data) {
+                    const newResponse = data.createQuestionResponse.response
+                    const result =
+                        cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
+                            {
+                                query: FetchHealthPlanPackageWithQuestionsDocument,
+                                variables: {
+                                    input: {
+                                        pkgID: pkgID,
+                                    },
+                                },
+                            }
+                        )
+
+                    const pkg = result?.fetchHealthPlanPackage.pkg
+
+                    if (pkg) {
+                        const updatedQuestionsEdge =
+                            pkg.questions?.DMCOQuestions.edges.map((edge) => {
+                                if (edge.node.id === newResponse.questionID) {
+                                    return {
+                                        __typename: 'QuestionEdge',
+                                        node: {
+                                            ...edge.node,
+                                            responses: [
+                                                newResponse,
+                                                ...edge.node.responses,
+                                            ],
+                                        },
+                                    }
+                                }
+                                return edge
+                            })
+
+                        const updatedPkg = {
+                            ...pkg,
+                            questions: {
+                                ...pkg.questions,
+                                DMCOQuestions: {
+                                    ...pkg.questions?.DMCOQuestions,
+                                    edges: updatedQuestionsEdge,
+                                },
+                            },
+                        }
+
+                        cache.writeQuery({
+                            query: FetchHealthPlanPackageWithQuestionsDocument,
+                            data: {
+                                fetchHealthPlanPackage: {
+                                    pkg: updatedPkg,
+                                },
+                            },
+                        })
+                    }
+                }
+            },
+            onQueryUpdated: () => true,
+        })
+
+        if (result.data?.createQuestionResponse) {
+            return result.data
+        } else {
+            recordJSException(
+                `[UNEXPECTED]: Error attempting to add response, no data present but returning 200.`
+            )
+            return new Error(ERROR_MESSAGES.response_error_generic)
+        }
+    } catch (error) {
+        return error
     }
 }
