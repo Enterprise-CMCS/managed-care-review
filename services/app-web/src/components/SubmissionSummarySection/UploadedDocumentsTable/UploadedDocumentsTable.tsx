@@ -74,8 +74,13 @@ export const UploadedDocumentsTable = ({
     isEditing = false,
     isCMSUser,
 }: UploadedDocumentsTableProps): React.ReactElement => {
+    const initialDocState = documents.map((doc) => ({
+        ...doc,
+        url: null,
+    }))
     const { getDocumentsUrl } = useDocument()
-    const [refreshedDocs, setRefreshedDocs] = useState<DocumentWithLink[]>([])
+    const [refreshedDocs, setRefreshedDocs] =
+        useState<DocumentWithLink[]>(initialDocState)
     const shouldShowEditButton = isEditing && isSupportingDocuments
     const shouldShowAsteriskExplainer = refreshedDocs.some((doc) =>
         isBothContractAndRateSupporting(doc)

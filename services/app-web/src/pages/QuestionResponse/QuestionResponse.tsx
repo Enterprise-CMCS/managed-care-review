@@ -7,18 +7,48 @@ import { packageName } from '../../common-code/healthPlanFormDataType'
 import { usePage } from '../../contexts/PageContext'
 import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
 import { QATable, QuestionData, Division } from './QATable/QATable'
+import { CmsUser, QuestionEdge, StateUser } from '../../gen/gqlClient'
+
+type QADivisionQuestions = {
+    dmco: {
+        totalCount: number
+        questions: QuestionData[]
+    }
+    dmcp: {
+        totalCount: number
+        questions: QuestionData[]
+    }
+    oact: {
+        totalCount: number
+        questions: QuestionData[]
+    }
+}
+
+const extractQuestions = (edges?: QuestionEdge[]): QuestionData[] => {
+    if (!edges) {
+        return []
+    }
+    return edges.map(({ node }) => ({
+        ...node,
+        addedBy: node.addedBy as CmsUser,
+        responses: node.responses.map((response) => ({
+            ...response,
+            addedBy: response.addedBy as StateUser,
+        })),
+    }))
+}
 
 export const QuestionResponse = () => {
     const outletContext = useOutletContext<SideNavOutletContextType>()
     const { updateHeading } = usePage()
     const [pkgName, setPkgName] = useState<string | undefined>(undefined)
-    const questions = outletContext.parsedQuestions
+    const { pkg, user } = outletContext
 
     useEffect(() => {
         updateHeading({ customHeading: `${pkgName} Upload questions` })
     }, [pkgName, updateHeading])
 
-    const isCMSUser = outletContext.user.role === 'CMS_USER'
+    const isCMSUser = user.role === 'CMS_USER'
 
     // set the page heading
     const name = packageName(
@@ -27,6 +57,21 @@ export const QuestionResponse = () => {
     )
     if (pkgName !== name) {
         setPkgName(name)
+    }
+
+    const questions: QADivisionQuestions = {
+        dmco: {
+            totalCount: pkg.questions?.DMCOQuestions.totalCount ?? 0,
+            questions: extractQuestions(pkg.questions?.DMCOQuestions.edges),
+        },
+        dmcp: {
+            totalCount: pkg.questions?.DMCPQuestions.totalCount ?? 0,
+            questions: extractQuestions(pkg.questions?.DMCPQuestions.edges),
+        },
+        oact: {
+            totalCount: pkg.questions?.OACTQuestions.totalCount ?? 0,
+            questions: extractQuestions(pkg.questions?.OACTQuestions.edges),
+        },
     }
 
     const mapQuestionTable = (
@@ -40,7 +85,7 @@ export const QuestionResponse = () => {
                     question={question}
                     division={division}
                     round={divisionQuestions.length - index}
-                    user={outletContext.user}
+                    user={user}
                 />
             ))
         ) : (

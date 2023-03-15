@@ -1,14 +1,21 @@
 import styles from './QATable.module.scss'
-import React from 'react'
-import { CmsUser, StateUser, User } from '../../../gen/gqlClient'
+import React, { useState } from 'react'
+import {
+    CmsUser,
+    Document,
+    QuestionResponse,
+    User,
+} from '../../../gen/gqlClient'
 import { Link } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
 import { NavLink } from 'react-router-dom'
+import { useDocument } from '../../../hooks/useDocument'
+import useDeepCompareEffect from 'use-deep-compare-effect'
 
-export type QuestionDocumentWithLink = {
-    s3URL?: string
+type QuestionDocumentWithLink = {
+    s3URL: string
     name: string
-    url: string | null
+    url?: string | null
 }
 
 export type QuestionData = {
@@ -16,16 +23,8 @@ export type QuestionData = {
     pkgID: string
     createdAt: Date
     addedBy: CmsUser
-    documents: QuestionDocumentWithLink[]
-    responses: ResponseData[]
-}
-
-export type ResponseData = {
-    id: string
-    questionID: string
-    createdAt: Date
-    addedBy: StateUser
-    documents: QuestionDocumentWithLink[]
+    documents: Document[]
+    responses: QuestionResponse[]
 }
 
 export type Division = 'DMCO' | 'DMCP' | 'OACT'
@@ -46,6 +45,28 @@ export const QATable = ({
     round: number
     user: User
 }) => {
+    const { getDocumentsUrl } = useDocument()
+    const tableDocuments = [
+        ...question.documents.map((doc) => ({
+            ...doc,
+            createdAt: question.createdAt,
+            addedBy: question.addedBy,
+        })),
+        ...question.responses.flatMap((res) =>
+            res.documents.map((doc) => ({
+                ...doc,
+                createdAt: res.createdAt,
+                addedBy: res.addedBy,
+            }))
+        ),
+    ].sort((a, b) =>
+        new Date(a.createdAt).getTime() > new Date(b.createdAt).getTime()
+            ? -1
+            : 1
+    )
+
+    const [refreshedDocs, setRefreshedDocs] =
+        useState<TableData[]>(tableDocuments)
     const isStateUser = user.__typename === 'StateUser'
 
     const getAddedByName = (addedBy: User) => {
@@ -61,34 +82,19 @@ export const QATable = ({
         return `${addedBy.givenName}`
     }
 
-    const tableData = (): TableData[] => {
-        const data: TableData[] = []
-
-        question.documents.map((doc) =>
-            data.push({
-                ...doc,
-                createdAt: question.createdAt,
-                addedBy: question.addedBy,
-            })
-        )
-
-        question.responses.map((res) =>
-            res.documents.map((doc) =>
-                data.push({
-                    ...doc,
-                    createdAt: res.createdAt,
-                    addedBy: res.addedBy,
-                })
+    useDeepCompareEffect(() => {
+        const refreshDocuments = async () => {
+            const newDocuments = await getDocumentsUrl(
+                tableDocuments,
+                'HEALTH_PLAN_DOCS'
             )
-        )
+            if (newDocuments.length) {
+                setRefreshedDocs(newDocuments)
+            }
+        }
 
-        //Sort by createdAt in descending order.
-        return data.sort((a, b) =>
-            new Date(a.createdAt).getTime() > new Date(b.createdAt).getTime()
-                ? -1
-                : 1
-        )
-    }
+        void refreshDocuments()
+    }, [tableDocuments, getDocumentsUrl, setRefreshedDocs])
 
     return (
         <>
@@ -119,7 +125,7 @@ export const QATable = ({
                     </tr>
                 </thead>
                 <tbody>
-                    {tableData().map((doc, index) => (
+                    {refreshedDocs.map((doc, index) => (
                         <tr key={doc.name + index}>
                             <td>
                                 {doc.url ? (
