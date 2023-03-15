@@ -27,7 +27,7 @@ export const unlockPackageStateEmail = async (
     const receiverEmails = pruneDuplicateEmails([
         ...stateContactEmails,
         ...submitterEmails,
-        ...config.cmsReviewSharedEmails,
+        ...config.devReviewTeamEmails,
     ])
 
     //This checks to make sure all programs contained in submission exists for the state.
