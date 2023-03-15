@@ -12,8 +12,6 @@
         "plugin:jsx-a11y/recommended",
         "plugin:@typescript-eslint/recommended",
         "prettier",
-        "prettier/react",
-        "prettier/@typescript-eslint",
         "react-app"
     ],
     "env": {
