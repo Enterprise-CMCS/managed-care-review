@@ -134,6 +134,10 @@ resources:
         MasterUserPassword: !Sub '{{resolve:secretsmanager:${PostgresSecret}::password}}'
         DBSubnetGroupName: !Ref PostgresSubnetGroup
         VpcSecurityGroupIds: ['${self:custom.sgId}']
+        CopyTagsToSnapshot: true
+        BackupRetentionPeriod: 7
+        EnableCloudwatchLogsExports:
+          - postgresql
         ServerlessV2ScalingConfiguration:
           MinCapacity: 1
           MaxCapacity: 32
@@ -145,6 +149,7 @@ resources:
         Engine: aurora-postgresql
         DBInstanceClass: db.serverless
         DBClusterIdentifier: !Ref PostgresAuroraV2
+        AutoMinorVersionUpgrade: true
 
     PostgresSubnetGroup:
       Type: AWS::RDS::DBSubnetGroup

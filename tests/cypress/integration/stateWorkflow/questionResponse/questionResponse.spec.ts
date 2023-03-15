@@ -66,11 +66,14 @@ describe('Q&A', () => {
 
             // Find QA Link and click
             cy.findByRole('link', { name: /Q&A/ }).click()
-            cy.url({ timeout: 10_000 }).should('contain', `${submissionId}/question-and-answers`)
+            cy.url({ timeout: 10_000 }).should(
+                'contain',
+                `${submissionId}/question-and-answers`
+            )
 
-            // Make sure Heading is correct with 'Upload questions' in addition to submission name
+            // Heading is correct for Q&A main page
             cy.findByRole('heading', {
-                name: `Minnesota ${submissionName} Upload questions`,
+                name: `Minnesota ${submissionName}`,
             }).should('exist')
 
             // Log out and log back in as cms user, visiting submission summary page,
@@ -78,7 +81,9 @@ describe('Q&A', () => {
             cy.findByText(
                 'Medicaid and CHIP Managed Care Reporting and Review System'
             )
-            cy.logInAsCMSUser({ initialURL: `/submissions/${submissionId}/question-and-answers` })
+            cy.logInAsCMSUser({
+                initialURL: `/submissions/${submissionId}/question-and-answers`,
+            })
 
             cy.wait(2000)
 

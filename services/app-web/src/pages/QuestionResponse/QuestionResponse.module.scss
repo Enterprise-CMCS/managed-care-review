@@ -29,8 +29,11 @@
   }
 }
 
+.breadcrumbs {
+  background: none;
+  margin: units(2) auto;
+}
 .formContainer {
-        padding-top: 5rem;
     > [class^='usa-fieldset'] {
         padding: units(4);
         margin-bottom: units(2);

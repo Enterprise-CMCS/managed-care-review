@@ -5,7 +5,10 @@ import styles from './SubmissionSideNav.module.scss'
 import { useParams, useLocation, useNavigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import sprite from 'uswds/src/img/sprite.svg'
-import { RouteT } from '../../constants/routes'
+import {
+    QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES,
+    RouteT,
+} from '../../constants/routes'
 import { getRouteName } from '../../routeHelpers'
 import { useFetchHealthPlanPackageWithQuestionsWrapper } from '../../gqlHelpers'
 import { Loading } from '../../components'
@@ -19,13 +22,17 @@ import {
     HealthPlanRevision,
     User,
 } from '../../gen/gqlClient'
-import { HealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
+import {
+    HealthPlanFormDataType,
+    packageName,
+} from '../../common-code/healthPlanFormDataType'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
 import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
 
 export type SideNavOutletContextType = {
     pkg: HealthPlanPackage
+    packageName: string
     currentRevision: HealthPlanRevision
     packageData: HealthPlanFormDataType
     documentDates: DocumentDateLookupTable
@@ -44,13 +51,17 @@ export const SubmissionSideNav = () => {
     const navigate = useNavigate()
     const ldClient = useLDClient()
 
+    const routeName = getRouteName(pathname)
+
     const showQuestionResponse = ldClient?.variation(
         featureFlags.CMS_QUESTIONS.flag,
         featureFlags.CMS_QUESTIONS.defaultValue
     )
-
+    const showSidebar =
+        showQuestionResponse &&
+        QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES.includes(routeName)
     const isSelectedLink = (route: RouteT): string => {
-        return getRouteName(pathname) === route ? 'usa-current' : ''
+        return routeName === route ? 'usa-current' : ''
     }
 
     const { result: fetchResult } =
@@ -116,9 +127,11 @@ export const SubmissionSideNav = () => {
     }
     const currentRevision = edge.node
     const packageData = formDatas[currentRevision.id]
+    const pkgName = packageName(packageData, pkg.state.programs)
 
     const outletContext: SideNavOutletContextType = {
         pkg,
+        packageName: pkgName,
         currentRevision,
         packageData,
         documentDates,
@@ -126,9 +139,13 @@ export const SubmissionSideNav = () => {
     }
 
     return (
-        <div className={styles.background}>
+        <div
+            className={
+                showSidebar ? styles.backgroundSidebar : styles.backgroundForm
+            }
+        >
             <GridContainer className={styles.container}>
-                {showQuestionResponse && (
+                {showSidebar && (
                     <div className={styles.sideNavContainer}>
                         <div className={styles.backLinkContainer}>
                             <Link

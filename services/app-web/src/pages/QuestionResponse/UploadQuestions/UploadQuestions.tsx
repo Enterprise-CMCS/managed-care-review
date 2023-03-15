@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
     GridContainer,
     Form as UswdsForm,
@@ -6,7 +6,7 @@ import {
     ButtonGroup,
 } from '@trussworks/react-uswds'
 import styles from '../QuestionResponse.module.scss'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { useS3 } from '../../../contexts/S3Context'
 import {
     ActionButton,
@@ -25,11 +25,14 @@ import {
     FetchHealthPlanPackageWithQuestionsQuery,
     IndexQuestionsPayload,
 } from '../../../gen/gqlClient'
-
+import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
+import { usePage } from '../../../contexts/PageContext'
+import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
 export const UploadQuestions = () => {
-    // third party
+    // router context
     const { division, id } = useParams<{ division: string; id: string }>()
     const navigate = useNavigate()
+    const { packageName } = useOutletContext<SideNavOutletContextType>()
 
     // api
     const [createQuestion, { loading: apiLoading, error: apiError }] =
@@ -37,6 +40,10 @@ export const UploadQuestions = () => {
 
     // page level state
     const [shouldValidate, setShouldValidate] = React.useState(false)
+    const { updateHeading } = usePage()
+    useEffect(() => {
+        updateHeading({ customHeading: `${packageName} Add questions` })
+    }, [packageName, updateHeading])
 
     // component specific support
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
@@ -137,7 +144,9 @@ export const UploadQuestions = () => {
             })
 
             if (createResult) {
-                navigate(`/submissions/${id}/question-and-answers`)
+                navigate(
+                    `/submissions/${id}/question-and-answers?submit=question`
+                )
             }
         } catch (serverError) {
             console.info(serverError)
@@ -146,6 +155,17 @@ export const UploadQuestions = () => {
 
     return (
         <GridContainer>
+            <Breadcrumbs
+                items={[
+                    {
+                        link: `/dashboard`,
+                        text: 'Dashboard',
+                    },
+                    { link: `/submissions/${id}`, text: packageName },
+                    { text: 'Add questions' },
+                ]}
+            />
+
             <UswdsForm
                 className={styles.formContainer}
                 id="AddQuestionsForm"
