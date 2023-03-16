@@ -11,7 +11,7 @@ import {
     getFacetedUniqueValues,
     Column,
 } from '@tanstack/react-table'
-import { useAtom } from 'jotai'
+import { useAtom } from 'jotai/react'
 import { atomWithHash } from 'jotai-location'
 import { HealthPlanPackageStatus, Program, User } from '../../gen/gqlClient'
 import styles from './HealthPlanPackageTable.module.scss'
@@ -60,9 +60,9 @@ const isSubmitted = (status: HealthPlanPackageStatus) =>
 function submissionURL(
     id: PackageInDashboardType['id'],
     status: PackageInDashboardType['status'],
-    isCMSUser: boolean
+    isCMSOrAdminUser: boolean
 ): string {
-    if (isCMSUser) {
+    if (isCMSOrAdminUser) {
         return `/submissions/${id}`
     } else if (status === 'DRAFT') {
         return `/submissions/${id}/edit/type`
@@ -199,7 +199,8 @@ export const HealthPlanPackageTable = ({
 
     const [tableCaption, setTableCaption] = useState<React.ReactNode | null>()
 
-    const isCMSUser = user.__typename === 'CMSUser'
+    const isCMSOrAdminUser =
+        user.__typename === 'CMSUser' || user.__typename === 'AdminUser'
     const tableColumns = React.useMemo(
         () => [
             columnHelper.accessor((row) => row, {
@@ -211,7 +212,7 @@ export const HealthPlanPackageTable = ({
                         to={submissionURL(
                             info.getValue().id,
                             info.getValue().status,
-                            isCMSUser
+                            isCMSOrAdminUser
                         )}
                     >
                         {info.getValue().name}
@@ -285,7 +286,7 @@ export const HealthPlanPackageTable = ({
                 },
             }),
         ],
-        [isCMSUser]
+        [isCMSOrAdminUser]
     )
 
     const reactTable = useReactTable({
@@ -297,8 +298,8 @@ export const HealthPlanPackageTable = ({
         state: {
             columnFilters,
             columnVisibility: {
-                stateName: isCMSUser,
-                submissionType: isCMSUser,
+                stateName: isCMSOrAdminUser,
+                submissionType: isCMSOrAdminUser,
             },
         },
         onColumnFiltersChange: setColumnFilters,

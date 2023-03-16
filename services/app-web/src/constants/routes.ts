@@ -6,8 +6,10 @@ const ROUTES = [
     'ROOT',
     'AUTH',
     'DASHBOARD',
+    'GRAPHQL_EXPLORER',
     'HELP',
     'REPORTS',
+    'SETTINGS',
     'SUBMISSIONS',
     'SUBMISSIONS_NEW',
     'SUBMISSIONS_TYPE',
@@ -21,6 +23,7 @@ const ROUTES = [
     'SUBMISSIONS_SUMMARY',
     'SUBMISSIONS_QUESTIONS_AND_ANSWERS',
     'SUBMISSIONS_UPLOAD_QUESTION',
+    'SUBMISSIONS_UPLOAD_RESPONSE',
 ] as const // iterable union type
 type RouteT = typeof ROUTES[number]
 type RouteTWithUnknown = RouteT | 'UNKNOWN_ROUTE'
@@ -33,8 +36,10 @@ const RoutesRecord: Record<RouteT, string> = {
     ROOT: '/',
     AUTH: '/auth',
     DASHBOARD: '/dashboard',
+    GRAPHQL_EXPLORER: '/dev/graphql-explorer',
     HELP: '/help',
     REPORTS: '/reports',
+    SETTINGS: '/settings',
     SUBMISSIONS: '/submissions',
     SUBMISSIONS_NEW: '/submissions/new',
     SUBMISSIONS_FORM: '/submissions/:id/edit/*',
@@ -49,6 +54,8 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_QUESTIONS_AND_ANSWERS: '/submissions/:id/question-and-answers',
     SUBMISSIONS_UPLOAD_QUESTION:
         '/submissions/:id/question-and-answers/:division/upload-questions',
+    SUBMISSIONS_UPLOAD_RESPONSE:
+        '/submissions/:id/question-and-answers/:division/:questionID/upload-response',
 }
 
 const STATE_SUBMISSION_FORM_ROUTES: RouteTWithUnknown[] = [
@@ -63,6 +70,11 @@ const STATE_SUBMISSION_FORM_ROUTES: RouteTWithUnknown[] = [
 const STATE_SUBMISSION_SUMMARY_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_SUMMARY',
     'SUBMISSIONS_REVISION',
+]
+
+const QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
+    'SUBMISSIONS_QUESTIONS_AND_ANSWERS',
+    'SUBMISSIONS_SUMMARY',
 ]
 
 /*
@@ -88,8 +100,10 @@ const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
 const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     ROOT: 'Home',
     AUTH: 'Login',
+    GRAPHQL_EXPLORER: 'GraphQL explorer',
     HELP: 'Help',
     REPORTS: 'Reports',
+    SETTINGS: 'Settings',
     DASHBOARD: 'Dashboard',
     SUBMISSIONS: 'Submissions',
     SUBMISSIONS_NEW: 'New submission',
@@ -104,6 +118,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_SUMMARY: 'Submission summary',
     SUBMISSIONS_QUESTIONS_AND_ANSWERS: 'Q&A',
     SUBMISSIONS_UPLOAD_QUESTION: 'Add questions',
+    SUBMISSIONS_UPLOAD_RESPONSE: 'Add response',
     UNKNOWN_ROUTE: 'Not found',
 }
 
@@ -114,6 +129,7 @@ export {
     ROUTES,
     STATE_SUBMISSION_FORM_ROUTES,
     STATE_SUBMISSION_SUMMARY_ROUTES,
+    QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES,
 }
 
 export type { RouteT, RouteTWithUnknown }

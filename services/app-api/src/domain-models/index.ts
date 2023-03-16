@@ -31,3 +31,9 @@ export type {
     Document,
     QuestionList,
 } from './QuestionsType'
+
+export type {
+    InsertQuestionResponseArgs,
+    QuestionResponseType,
+    QuestionResponseDocument,
+} from './QuestionResponseType'

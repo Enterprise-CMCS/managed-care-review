@@ -16,6 +16,7 @@ import './loginCommands'
 import './stateSubmissionFormCommands'
 import './dashboardCommands'
 import './navigateCommands'
+import './questionResponseCommands'
 import './launchDarklyCommands'
 import './e2e'
 import {
@@ -38,6 +39,7 @@ declare global {
             // login commands
             logInAsStateUser(): void
             logInAsCMSUser(args?: { initialURL?: string }): void
+            logInAsAdminUser(args?: { initialURL?: string }): void
 
             // state submission form commands
             waitForDocumentsToLoad(): void
@@ -68,8 +70,20 @@ declare global {
             ): void
             navigateFormByDirectLink(url: string, waitForLoad?: boolean): void
 
-            //dashboard commands
+            // dashboard commands
             clickSubmissionLink(testId: string): void
+
+            // question response commands
+            addQuestion({
+                documentPath
+            }: {
+                documentPath: string
+            }): void
+            addResponse({
+                            documentPath
+                        }: {
+                documentPath: string
+            }): void
 
             //Launch Darkly commands
             stubFeatureFlags(): void

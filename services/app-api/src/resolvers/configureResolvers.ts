@@ -14,7 +14,8 @@ import {
 import {
     indexQuestionsResolver,
     createQuestionResolver,
-} from './questionAnswers'
+    createQuestionResponseResolver,
+} from './questionResponse'
 import {
     fetchCurrentUserResolver,
     updateCMSUserResolver,
@@ -24,6 +25,7 @@ import {
 } from './user'
 import { EmailParameterStore } from '../parameterStore'
 import { LDService } from '../launchDarkly/launchDarkly'
+import { fetchEmailSettingsResolver } from './emails/fetchEmailSettings'
 
 export function configureResolvers(
     store: Store,
@@ -40,6 +42,7 @@ export function configureResolvers(
             indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
             indexUsers: indexUsersResolver(store),
             indexQuestions: indexQuestionsResolver(store),
+            fetchEmailSettings: fetchEmailSettingsResolver(emailer),
         },
         Mutation: {
             createHealthPlanPackage: createHealthPlanPackageResolver(store),
@@ -57,6 +60,7 @@ export function configureResolvers(
             ),
             updateCMSUser: updateCMSUserResolver(store),
             createQuestion: createQuestionResolver(store),
+            createQuestionResponse: createQuestionResponseResolver(store),
         },
         User: {
             // resolveType is required to differentiate Unions
@@ -74,7 +78,7 @@ export function configureResolvers(
         },
         StateUser: stateUserResolver,
         CMSUser: cmsUserResolver,
-        HealthPlanPackage: healthPlanPackageResolver,
+        HealthPlanPackage: healthPlanPackageResolver(store),
     }
 
     return resolvers

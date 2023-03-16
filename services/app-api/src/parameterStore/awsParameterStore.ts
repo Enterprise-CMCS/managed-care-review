@@ -1,6 +1,6 @@
 import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm'
 
-type ParameterStoreType = { value: string; type: string } | Error
+export type ParameterStoreType = { value: string; type: string } | Error
 
 const ssm = new SSMClient({ region: 'us-east-1' })
 

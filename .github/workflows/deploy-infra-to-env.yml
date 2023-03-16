@@ -41,18 +41,33 @@ jobs:
         run: |
           lerna run build:ci-scripts
 
+      - name: Set the correct stage name for the bootstrapped OIDC role based on the environment
+        id: set-oidc-stage-name
+        shell: bash
+        # the dev environment uses 'main' as the stage name; otherwise the stage name is same as the environment name
+        # if the environment isn't one of [dev, val, prod], fail the job
+        run: |
+          echo "stage-name=$(
+            if [[ "${{ inputs.environment }}" == "val" || "${{ inputs.environment }}" == "prod" ]]; then
+              echo "${{ inputs.environment }}";
+            elif [[ ${{ inputs.environment }} == "dev" ]]; then
+              echo "main";
+            else
+              echo "Invalid environment: ${{ inputs.environment }}" >&2;
+              kill -HUP $$
+            fi
+          )" >> $GITHUB_OUTPUT
+
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
           region: ${{ secrets.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           # use the manually bootstrapped OIDC role to solve the chicken-and-egg problem of deploying the OIDC service via OIDC
-          stage-name: main
+          stage-name: ${{ steps.set-oidc-stage-name.outputs.stage-name }}
 
       - name: deploy github-oidc
         id: deploy-github-oidc
-        env:
-          GITHUB_TOKEN: ${{ secrets.personal_access_token }}
         run: |
           pushd services/github-oidc && npx serverless deploy --stage ${{ inputs.stage_name }}
 

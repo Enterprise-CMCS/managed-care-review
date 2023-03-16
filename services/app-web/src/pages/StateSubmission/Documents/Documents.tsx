@@ -11,12 +11,12 @@ import {
     FileUpload,
     S3FileData,
     FileItemT,
+    ACCEPTED_SUBMISSION_FILE_TYPES,
 } from '../../../components/FileUpload'
 import { PageActions } from '../PageActions'
 import classNames from 'classnames'
 import { ErrorSummary } from '../../../components/Form'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
-import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 
 export const Documents = ({
     draftSubmission,

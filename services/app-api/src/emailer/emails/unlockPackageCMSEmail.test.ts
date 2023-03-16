@@ -400,7 +400,7 @@ describe('unlockPackageCMSEmail', () => {
         )
 
         const reviewerEmails = [
-            ...testEmailConfig.cmsReviewSharedEmails,
+            ...testEmailConfig.devReviewTeamEmails,
             ...testEmailConfig.oactEmails,
         ]
 

@@ -27,9 +27,10 @@ describe('templateHelpers', () => {
             stateAnalystsEmails: testStateAnalystsEmails,
             testDescription: 'Contract only submission',
             expectedResult: [
-                ...testEmailConfig.cmsReviewSharedEmails,
+                ...testEmailConfig.devReviewTeamEmails,
                 ...testStateAnalystsEmails,
                 ...testEmailConfig.dmcoEmails,
+                ...testEmailConfig.dmcpEmails,
             ],
         },
         {
@@ -38,7 +39,7 @@ describe('templateHelpers', () => {
             stateAnalystsEmails: testStateAnalystsEmails,
             testDescription: 'Contract and rates submission',
             expectedResult: [
-                ...testEmailConfig.cmsReviewSharedEmails,
+                ...testEmailConfig.devReviewTeamEmails,
                 ...testStateAnalystsEmails,
                 ...testEmailConfig.dmcoEmails,
                 ...testEmailConfig.dmcpEmails,
@@ -55,8 +56,8 @@ describe('templateHelpers', () => {
             testDescription:
                 'Submission with CHIP program specified for contract certification',
             expectedResult: [
-                'cmsreview1@example.com',
-                'cmsreview2@example.com',
+                'devreview1@example.com',
+                'devreview2@example.com',
                 '"State Analyst 1" <StateAnalyst1@example.com>',
                 '"State Analyst 2" <StateAnalyst2@example.com>',
                 ...testEmailConfig.dmcoEmails,
@@ -100,8 +101,8 @@ describe('templateHelpers', () => {
             testDescription:
                 'Submission with CHIP program specified for rate certification',
             expectedResult: [
-                'cmsreview1@example.com',
-                'cmsreview2@example.com',
+                'devreview1@example.com',
+                'devreview2@example.com',
                 '"State Analyst 1" <StateAnalyst1@example.com>',
                 '"State Analyst 2" <StateAnalyst2@example.com>',
                 ...testEmailConfig.dmcoEmails,
@@ -115,8 +116,8 @@ describe('templateHelpers', () => {
             stateAnalystsEmails: testStateAnalystsEmails,
             testDescription: 'Puerto Rico submission',
             expectedResult: [
-                'cmsreview1@example.com',
-                'cmsreview2@example.com',
+                'devreview1@example.com',
+                'devreview2@example.com',
                 '"State Analyst 1" <StateAnalyst1@example.com>',
                 '"State Analyst 2" <StateAnalyst2@example.com>',
                 ...testEmailConfig.dmcoEmails,

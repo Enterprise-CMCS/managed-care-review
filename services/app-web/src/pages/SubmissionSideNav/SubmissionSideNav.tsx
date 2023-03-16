@@ -5,9 +5,12 @@ import styles from './SubmissionSideNav.module.scss'
 import { useParams, useLocation, useNavigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import sprite from 'uswds/src/img/sprite.svg'
-import { RouteT } from '../../constants/routes'
+import {
+    QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES,
+    RouteT,
+} from '../../constants/routes'
 import { getRouteName } from '../../routeHelpers'
-import { useFetchHealthPlanPackageWrapper } from '../../gqlHelpers'
+import { useFetchHealthPlanPackageWithQuestionsWrapper } from '../../gqlHelpers'
 import { Loading } from '../../components'
 import { ApolloError } from '@apollo/client'
 import { handleApolloError } from '../../gqlHelpers/apolloErrors'
@@ -19,17 +22,21 @@ import {
     HealthPlanRevision,
     User,
 } from '../../gen/gqlClient'
-import { HealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
+import {
+    HealthPlanFormDataType,
+    packageName,
+} from '../../common-code/healthPlanFormDataType'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
 import { DocumentDateLookupTable } from '../SubmissionSummary/SubmissionSummary'
 
 export type SideNavOutletContextType = {
     pkg: HealthPlanPackage
+    packageName: string
     currentRevision: HealthPlanRevision
     packageData: HealthPlanFormDataType
     documentDates: DocumentDateLookupTable
-    user: User | undefined
+    user: User
 }
 
 export const SubmissionSideNav = () => {
@@ -39,29 +46,26 @@ export const SubmissionSideNav = () => {
             'PROGRAMMING ERROR: id param not set in state submission form.'
         )
     }
-
     const { loggedInUser } = useAuth()
     const { pathname } = useLocation()
     const navigate = useNavigate()
     const ldClient = useLDClient()
 
-    const showQuestionsAnswers = ldClient?.variation(
+    const routeName = getRouteName(pathname)
+
+    const showQuestionResponse = ldClient?.variation(
         featureFlags.CMS_QUESTIONS.flag,
         featureFlags.CMS_QUESTIONS.defaultValue
     )
-
+    const showSidebar =
+        showQuestionResponse &&
+        QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES.includes(routeName)
     const isSelectedLink = (route: RouteT): string => {
-        return getRouteName(pathname) === route ? 'usa-current' : ''
+        return routeName === route ? 'usa-current' : ''
     }
 
-    const { result: fetchResult } = useFetchHealthPlanPackageWrapper(id)
-    if (fetchResult.status === 'LOADING') {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
-    }
+    const { result: fetchResult } =
+        useFetchHealthPlanPackageWithQuestionsWrapper(id)
 
     if (fetchResult.status === 'ERROR') {
         const err = fetchResult.error
@@ -74,10 +78,23 @@ export const SubmissionSideNav = () => {
         return <GenericErrorPage /> // api failure or protobuf decode failure
     }
 
+    if (fetchResult.status === 'LOADING') {
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
+    }
+
     const { data, formDatas, documentDates } = fetchResult
     const pkg = data.fetchHealthPlanPackage.pkg
 
-    // fetchHPP returns null if no package is found with the given ID
+    // Display generic error page if getting logged in user returns undefined.
+    if (!loggedInUser) {
+        return <GenericErrorPage />
+    }
+
+    // fetchHPP with questions returns null if no package or questions is found with the given ID
     if (!pkg) {
         return <Error404 />
     }
@@ -85,15 +102,16 @@ export const SubmissionSideNav = () => {
     const submissionStatus = pkg.status
 
     const isCMSUser = loggedInUser?.role === 'CMS_USER'
+    const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
 
     // CMS Users can't see DRAFT, it's an error
-    if (submissionStatus === 'DRAFT' && isCMSUser) {
+    if (submissionStatus === 'DRAFT' && (isCMSUser || isAdminUser)) {
         return <GenericErrorPage />
     }
 
     // State users should not see the submission summary page for DRAFT or UNLOCKED, it should redirect them to the edit flow.
     if (
-        !isCMSUser &&
+        !(isCMSUser || isAdminUser) &&
         (submissionStatus === 'DRAFT' || submissionStatus === 'UNLOCKED')
     ) {
         navigate(`/submissions/${id}/edit/type`)
@@ -109,9 +127,11 @@ export const SubmissionSideNav = () => {
     }
     const currentRevision = edge.node
     const packageData = formDatas[currentRevision.id]
+    const pkgName = packageName(packageData, pkg.state.programs)
 
     const outletContext: SideNavOutletContextType = {
         pkg,
+        packageName: pkgName,
         currentRevision,
         packageData,
         documentDates,
@@ -119,9 +139,13 @@ export const SubmissionSideNav = () => {
     }
 
     return (
-        <div className={styles.background}>
+        <div
+            className={
+                showSidebar ? styles.backgroundSidebar : styles.backgroundForm
+            }
+        >
             <GridContainer className={styles.container}>
-                {showQuestionsAnswers && (
+                {showSidebar && (
                     <div className={styles.sideNavContainer}>
                         <div className={styles.backLinkContainer}>
                             <Link

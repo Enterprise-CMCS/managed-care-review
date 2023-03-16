@@ -1,22 +1,11 @@
 import { getParameterStore } from '../../awsParameterStore'
+import { validateAndReturnValueArray } from '../helpers'
 
 export const getOACTEmails = async (): Promise<string[] | Error> => {
     const name = `/configuration/email/oact`
     const oactTeamAddresses = await getParameterStore(name)
 
-    if (oactTeamAddresses instanceof Error) {
-        return oactTeamAddresses
-    }
-
-    const { type, value } = oactTeamAddresses
-
-    if (type !== 'StringList') {
-        const errorMessage = `Parameter store ${name} value of Type ${type} is not supported`
-        return new Error(errorMessage)
-    }
-
-    //Split string into array using ',' separator and trim each array item.
-    return value.split(',').map((email) => email.trim())
+    return validateAndReturnValueArray(oactTeamAddresses, name)
 }
 
 export const getOACTEmailsLocal = async (): Promise<string[] | Error> => [

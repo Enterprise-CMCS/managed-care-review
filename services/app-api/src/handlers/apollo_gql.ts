@@ -36,6 +36,10 @@ import {
 } from '../launchDarkly/launchDarkly'
 import { LDClient } from 'launchdarkly-node-server-sdk'
 import * as ld from 'launchdarkly-node-server-sdk'
+import {
+    ApolloServerPluginLandingPageLocalDefault,
+    ApolloServerPluginLandingPageDisabled,
+} from 'apollo-server-core'
 
 const requestSpanKey = 'REQUEST_SPAN'
 let tracer: Tracer
@@ -236,8 +240,8 @@ async function initializeGQLHandler(): Promise<Handler> {
     // emailParameterStore because serverless does not like array of strings as env variables.
     // For more context see this ticket https://qmacbis.atlassian.net/browse/MR-2539.
     const emailSource = await emailParameterStore.getSourceEmail()
-    const cmsReviewSharedEmails =
-        await emailParameterStore.getCmsReviewSharedEmails()
+    const devReviewTeamEmails =
+        await emailParameterStore.getDevReviewTeamEmails()
     const cmsReviewHelpEmailAddress =
         await emailParameterStore.getCmsReviewHelpEmail()
     const cmsRateHelpEmailAddress =
@@ -251,8 +255,8 @@ async function initializeGQLHandler(): Promise<Handler> {
     if (emailSource instanceof Error)
         throw new Error(`Configuration Error: ${emailSource.message}`)
 
-    if (cmsReviewSharedEmails instanceof Error)
-        throw new Error(`Configuration Error: ${cmsReviewSharedEmails.message}`)
+    if (devReviewTeamEmails instanceof Error)
+        throw new Error(`Configuration Error: ${devReviewTeamEmails.message}`)
 
     if (cmsReviewHelpEmailAddress instanceof Error) {
         throw new Error(
@@ -301,6 +305,14 @@ async function initializeGQLHandler(): Promise<Handler> {
         launchDarkly = offlineLDService()
     }
 
+    // Configure Apollo sandbox plugin
+    let plugins = []
+    if (stageName === 'prod') {
+        plugins = [ApolloServerPluginLandingPageDisabled()]
+    } else {
+        plugins = [ApolloServerPluginLandingPageLocalDefault({ embed: true })]
+    }
+
     // Print out all the variables we've been configured with. Leave sensitive ones out, please.
     console.info('Running With Config: ', {
         authMode,
@@ -319,7 +331,7 @@ async function initializeGQLHandler(): Promise<Handler> {
                   emailSource,
                   stage: 'local',
                   baseUrl: applicationEndpoint,
-                  cmsReviewSharedEmails,
+                  devReviewTeamEmails,
                   cmsReviewHelpEmailAddress,
                   cmsRateHelpEmailAddress,
                   cmsDevTeamHelpEmailAddress,
@@ -331,7 +343,7 @@ async function initializeGQLHandler(): Promise<Handler> {
                   emailSource,
                   stage: stageName,
                   baseUrl: applicationEndpoint,
-                  cmsReviewSharedEmails,
+                  devReviewTeamEmails,
                   cmsReviewHelpEmailAddress,
                   cmsRateHelpEmailAddress,
                   cmsDevTeamHelpEmailAddress,
@@ -360,6 +372,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         typeDefs,
         resolvers,
         context: contextForRequest,
+        plugins,
     })
 
     const handler = server.createHandler({

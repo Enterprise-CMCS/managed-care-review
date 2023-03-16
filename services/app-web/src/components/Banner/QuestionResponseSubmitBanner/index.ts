@@ -1,0 +1,1 @@
+export { QuestionResponseSubmitBanner } from './QuestionResponseSubmitBanner'

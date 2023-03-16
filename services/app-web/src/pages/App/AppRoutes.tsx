@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router'
 import { Route, Routes } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { extendSession } from '../../pages/Auth/cognitoAuth'
+import { extendSession, idmRedirectURL } from '../../pages/Auth/cognitoAuth'
 import { assertNever, AuthModeType } from '../../common-code/config'
 import { PageTitlesRecord, RoutesRecord, RouteT } from '../../constants/routes'
 import { getRouteName } from '../../routeHelpers'
@@ -10,10 +10,10 @@ import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import { useTitle } from '../../hooks/useTitle'
 import { LocalLogin } from '../../localAuth'
-import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
 import { CognitoLogin } from '../Auth/CognitoLogin'
 import { CMSDashboard } from '../CMSDashboard/CMSDashboard'
 import { StateDashboard } from '../StateDashboard/StateDashboard'
+import { Settings } from '../Settings/Settings'
 import { AuthenticatedRouteWrapper } from '../Wrapper/AuthenticatedRouteWrapper'
 import { Error404 } from '../Errors/Error404Page'
 import { Help } from '../Help/Help'
@@ -27,8 +27,12 @@ import { featureFlags } from '../../common-code/featureFlags'
 import { useLocalStorage } from '../../hooks/useLocalStorage'
 import { recordJSException } from '../../otelHelpers'
 import { SubmissionSideNav } from '../SubmissionSideNav'
-import { UploadQuestions } from '../QuestionsAnswers/UploadQuestions/UploadQuestions'
-import { QuestionsAnswers } from '../QuestionsAnswers'
+import {
+    QuestionResponse,
+    UploadResponse,
+    UploadQuestions,
+} from '../QuestionResponse'
+import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -48,11 +52,13 @@ function componentForAuthMode(
 const StateUserRoutes = ({
     authMode,
     setAlert,
-    showQuestionsAnswers,
+    showQuestionResponse,
+    stageName,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
-    showQuestionsAnswers: boolean
+    showQuestionResponse: boolean
+    stageName?: string
 }): React.ReactElement => {
     return (
         <AuthenticatedRouteWrapper setAlert={setAlert} authMode={authMode}>
@@ -73,25 +79,25 @@ const StateUserRoutes = ({
                     element={<NewStateSubmissionForm />}
                 />
                 <Route element={<SubmissionSideNav />}>
-                    {showQuestionsAnswers && (
-                        <Route
-                            path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                            }
-                            element={<QuestionsAnswers />}
-                        />
+                    {showQuestionResponse && (
+                        <>
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                }
+                                element={<QuestionResponse />}
+                            />
+                            <Route
+                                path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                                element={<UploadResponse />}
+                            />
+                        </>
                     )}
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
                         element={<SubmissionSummary />}
                     />
                 </Route>
-                {showQuestionsAnswers && (
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
-                        element={<UploadQuestions />}
-                    />
-                )}
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
                     element={<SubmissionRevisionSummary />}
@@ -100,6 +106,12 @@ const StateUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_FORM}
                     element={<StateSubmissionForm />}
                 />
+                {stageName !== 'prod' && (
+                    <Route
+                        path={RoutesRecord.GRAPHQL_EXPLORER}
+                        element={<GraphQLExplorer />}
+                    />
+                )}
                 <Route path="*" element={<Error404 />} />
             </Routes>
         </AuthenticatedRouteWrapper>
@@ -109,11 +121,13 @@ const StateUserRoutes = ({
 const CMSUserRoutes = ({
     authMode,
     setAlert,
-    showQuestionsAnswers,
+    showQuestionResponse,
+    stageName,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
-    showQuestionsAnswers: boolean
+    showQuestionResponse: boolean
+    stageName?: string
 }): React.ReactElement => {
     return (
         <AuthenticatedRouteWrapper authMode={authMode} setAlert={setAlert}>
@@ -124,30 +138,38 @@ const CMSUserRoutes = ({
                     element={<CMSDashboard />}
                 />
                 <Route element={<SubmissionSideNav />}>
-                    {showQuestionsAnswers && (
-                        <Route
-                            path={
-                                RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
-                            }
-                            element={<QuestionsAnswers />}
-                        />
+                    {showQuestionResponse && (
+                        <>
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_QUESTIONS_AND_ANSWERS
+                                }
+                                element={<QuestionResponse />}
+                            />
+                            <Route
+                                path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
+                                element={<UploadQuestions />}
+                            />
+                        </>
                     )}
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
                         element={<SubmissionSummary />}
                     />
                 </Route>
-                {showQuestionsAnswers && (
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_UPLOAD_QUESTION}
-                        element={<UploadQuestions />}
-                    />
-                )}
+
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
                     element={<SubmissionRevisionSummary />}
                 />
+                {stageName !== 'prod' && (
+                    <Route
+                        path={RoutesRecord.GRAPHQL_EXPLORER}
+                        element={<GraphQLExplorer />}
+                    />
+                )}
                 <Route path={RoutesRecord.REPORTS} element={<Reports />} />
+                <Route path={RoutesRecord.SETTINGS} element={<Settings />} />
                 <Route path="*" element={<Error404 />} />
             </Routes>
         </AuthenticatedRouteWrapper>
@@ -194,12 +216,13 @@ export const AppRoutes = ({
         'LOGIN_REDIRECT',
         null
     )
+    const stageName = process.env.REACT_APP_STAGE_NAME
     const showExpirationModal: boolean = ldClient?.variation(
         featureFlags.SESSION_EXPIRING_MODAL.flag,
         featureFlags.SESSION_EXPIRING_MODAL.defaultValue
     )
 
-    const showQuestionsAnswers = ldClient?.variation(
+    const showQuestionResponse = ldClient?.variation(
         featureFlags.CMS_QUESTIONS.flag,
         featureFlags.CMS_QUESTIONS.defaultValue
     )
@@ -293,7 +316,8 @@ export const AppRoutes = ({
             <StateUserRoutes
                 authMode={authMode}
                 setAlert={setAlert}
-                showQuestionsAnswers={showQuestionsAnswers}
+                showQuestionResponse={showQuestionResponse}
+                stageName={stageName}
             />
         )
     } else {
@@ -301,7 +325,8 @@ export const AppRoutes = ({
             <CMSUserRoutes
                 authMode={authMode}
                 setAlert={setAlert}
-                showQuestionsAnswers={showQuestionsAnswers}
+                showQuestionResponse={showQuestionResponse}
+                stageName={stageName}
             />
         )
     }

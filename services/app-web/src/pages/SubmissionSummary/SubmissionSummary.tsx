@@ -65,7 +65,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     }, [pkgName, updateHeading])
 
     const ldClient = useLDClient()
-    const showQuestionsAnswers = ldClient?.variation(
+    const showQuestionResponse = ldClient?.variation(
         featureFlags.CMS_QUESTIONS.flag,
         featureFlags.CMS_QUESTIONS.defaultValue
     )
@@ -136,7 +136,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     />
                 )}
 
-                {!showQuestionsAnswers && (
+                {!showQuestionResponse && (
                     <Link
                         asCustom={NavLink}
                         to={{

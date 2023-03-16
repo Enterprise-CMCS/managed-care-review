@@ -20,7 +20,7 @@ const testEmailConfig: EmailConfiguration = {
     stage: 'LOCAL',
     baseUrl: 'http://localhost',
     emailSource: 'emailSource@example.com',
-    cmsReviewSharedEmails: ['cmsreview1@example.com', 'cmsreview2@example.com'],
+    devReviewTeamEmails: ['devreview1@example.com', 'devreview2@example.com'],
     cmsReviewHelpEmailAddress: '"MCOG Example" <mcog@example.com>',
     cmsRateHelpEmailAddress: '"Rates Example" <rates@example.com>',
     cmsDevTeamHelpEmailAddress: '"MC-Review Example" <mc-review@example.com>',
@@ -33,7 +33,7 @@ const testDuplicateEmailConfig: EmailConfiguration = {
     stage: 'LOCAL',
     baseUrl: 'http://localhost',
     emailSource: 'emailSource@example.com',
-    cmsReviewSharedEmails: [
+    devReviewTeamEmails: [
         'duplicate@example.com',
         'duplicate@example.com',
         'duplicate@example.com',
@@ -59,6 +59,7 @@ const testDuplicateStateAnalystsEmails: string[] = [
 function testEmailer(customConfig?: EmailConfiguration): Emailer {
     const config = customConfig || testEmailConfig
     return {
+        config,
         sendEmail: jest.fn(
             async (emailData: EmailData): Promise<void | Error> => {
                 console.info('Email content' + JSON.stringify(emailData))

@@ -5,7 +5,7 @@ import { S3UploadsClient } from '../deps/s3'
 
 // returns a list of aws keys that are infected
 // scanDir is the directory where files should be downloaded and scanned and should exist already
-async function scanFiles(
+export async function scanFiles(
     s3Client: S3UploadsClient,
     clamAV: ClamAV,
     keys: string[],
@@ -46,5 +46,3 @@ async function scanFiles(
 
     return res.map((filename) => filemap[filename])
 }
-
-export { scanFiles }

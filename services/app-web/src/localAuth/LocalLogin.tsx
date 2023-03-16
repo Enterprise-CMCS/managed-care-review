@@ -17,6 +17,7 @@ import { loginLocalUser } from '.'
 import aangAvatar from '../assets/images/aang.png'
 import tophAvatar from '../assets/images/toph.png'
 import zukoAvatar from '../assets/images/zuko.png'
+import irohAvatar from '../assets/images/iroh.png'
 
 import { useAuth } from '../contexts/AuthContext'
 import { LocalUserType } from './LocalUserType'
@@ -46,12 +47,20 @@ const localUsers: LocalUserType[] = [
         role: 'CMS_USER',
         stateAssignments: [],
     },
+    {
+        id: 'user4',
+        email: 'iroh@example.com',
+        givenName: 'Iroh',
+        familyName: 'Coldstart',
+        role: 'ADMIN_USER',
+    },
 ]
 
 const userAvatars: { [key: string]: string } = {
     'aang@example.com': aangAvatar,
     'toph@example.com': tophAvatar,
     'zuko@example.com': zukoAvatar,
+    'iroh@example.com': irohAvatar,
 }
 
 export function LocalLogin(): React.ReactElement {
@@ -84,7 +93,11 @@ export function LocalLogin(): React.ReactElement {
             <CardGroup>
                 {localUsers.map((user) => {
                     const fromString =
-                        user.role === 'STATE_USER' ? user.stateCode : 'CMS'
+                        user.role === 'ADMIN_USER'
+                            ? 'CMS (Admin)'
+                            : user.role === 'CMS_USER'
+                            ? 'CMS'
+                            : user.stateCode
 
                     return (
                         <Card key={user.email}>
