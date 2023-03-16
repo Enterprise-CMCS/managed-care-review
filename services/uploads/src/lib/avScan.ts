@@ -3,7 +3,7 @@ import { ClamAV } from '../deps/clamAV'
 import { generateVirusScanTagSet, ScanStatus } from './tags'
 import { scanFiles } from './scanFiles'
 
-async function scanFile(
+export async function scanFile(
     s3Client: S3UploadsClient,
     clamAV: ClamAV,
     key: string,
@@ -55,5 +55,3 @@ async function scanFile(
 
     console.info('Tagged object ', tagResult)
 }
-
-export { scanFile }
