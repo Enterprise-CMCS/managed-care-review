@@ -99,9 +99,15 @@ describe('pruneDuplicateEmails', () => {
             ['"Foo Bar 1" foo@bar.com', '"Foo Bar 2" <foo@bar.com>'],
             ['"Foo Bar 1" foo@bar.com', '"Foo Bar 2" <foo@bar.com>'],
         ],
+        // simple email addresses that are duplicates due to casing are pruned and lowercase preferred
         [
-            ['foo@bar.com', 'foo@nothing.com', 'bar@foo.com', 'bar@foo.com'],
-            ['foo@bar.com', 'foo@nothing.com', 'bar@foo.com'],
+            ['Foo@bar.com', 'Fo.b-r@bar.com', 'fo.b-r@bar.com', 'foo@bar.com'],
+            ['fo.b-r@bar.com', 'foo@bar.com'],
+        ],
+        // simple email addresses that are not duplicates remain the same
+        [
+            ['Foo@bar.com', 'Fo.b-r@bar.com', 'foo@nothing.com'],
+            ['Foo@bar.com', 'Fo.b-r@bar.com', 'foo@nothing.com'],
         ],
     ]
 
