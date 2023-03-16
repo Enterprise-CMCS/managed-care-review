@@ -35,22 +35,28 @@ const formatEmailAddresses = (str: string) => {
     e.g. if "Foo Bar" <foobar@example> and foobar@example.com are both in the list, only foobar@example.com will remain after prune
     e.g. if "Foo Bar" <foobar@example> and "The best Foo Bar" <foobar@example> are both in the list, both remain after prune
 */
-const pruneDuplicateEmails = (emails: string[]): string[] =>
-    emails.filter((email, index) => {
+const pruneDuplicateEmails = (emails: string[]): string[] => {
+    /* we'll use all-lowercase to compare, but return the original case
+    when one address appears with mixed casing, we'll return the first one we find */
+    const lowercasedEmails = emails.map((email) => email.toLowerCase())
+    return emails.filter((email, index) => {
         const aliasedEmail = !isEmailAddress(email)
         const rawEmailAddress = formatEmailAddresses(email)
-
-        if (aliasedEmail && emails.indexOf(rawEmailAddress) !== -1) {
+        if (
+            aliasedEmail &&
+            lowercasedEmails.indexOf(rawEmailAddress.toLowerCase()) !== -1
+        ) {
             // aliased email address is also included elsewhere on list as a raw email, remove it
-            emails.indexOf(rawEmailAddress) === index
+            lowercasedEmails.indexOf(rawEmailAddress.toLowerCase()) === index
         } else if (aliasedEmail) {
             // return unique aliased email address
-            return emails.indexOf(email) === index
+            return lowercasedEmails.indexOf(email.toLowerCase()) === index
         } else {
-            // return unique email address, prefer lowercased if duplicates exist
-            return emails.indexOf(email.toLowerCase()) === index
+            // return unique email address
+            return lowercasedEmails.indexOf(email.toLowerCase()) === index
         }
     })
+}
 
 export {
     isEmailAddress,

@@ -102,7 +102,7 @@ describe('pruneDuplicateEmails', () => {
         // simple email addresses that are duplicates due to casing are pruned and lowercase preferred
         [
             ['Foo@bar.com', 'Fo.b-r@bar.com', 'fo.b-r@bar.com', 'foo@bar.com'],
-            ['fo.b-r@bar.com', 'foo@bar.com'],
+            ['Foo@bar.com', 'Fo.b-r@bar.com'],
         ],
         // simple email addresses that are not duplicates remain the same
         [
