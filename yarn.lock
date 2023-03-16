@@ -15264,7 +15264,7 @@ async-retry@^1.2.1, async-retry@^1.3.3:
   dependencies:
     retry "0.13.1"
 
-async@^3.1.0, async@^3.2.0, async@^3.2.3:
+async@^3.2.0, async@^3.2.3, async@^3.2.4:
   version "3.2.4"
   resolved "https://registry.yarnpkg.com/async/-/async-3.2.4.tgz#2d22e00f8cddeb5fde5dd33522b56d1cf569a81c"
   integrity sha512-iAB+JbDEGXhyIUavoDl9WP/Jj106Kz9DEn1DPgYw5ruDn0e3Wgi3sKFm55sASdGBNOQB8F59d9qQ7deqrHA8wQ==
@@ -23525,12 +23525,12 @@ launchdarkly-js-sdk-common@5.0.1:
     fast-deep-equal "^2.0.1"
     uuid "^8.0.0"
 
-launchdarkly-node-server-sdk@7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/launchdarkly-node-server-sdk/-/launchdarkly-node-server-sdk-7.0.0.tgz#edec9b11cc25f1aaae28cc16e827873a9051eaa4"
-  integrity sha512-mJAjkJgtq4TY7IfpB+lzL+R3DrbR5nacmho6dpolldyOEHJXs0o0+0hHKnqDw4vcf7cRNOQD45jcLsxHiBxdvQ==
+launchdarkly-node-server-sdk@7.0.1:
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/launchdarkly-node-server-sdk/-/launchdarkly-node-server-sdk-7.0.1.tgz#4476a55fa4eb416ea9c3c93a4643af28b28b0efd"
+  integrity sha512-vliVBgoO3eZVBXl7LWE3hsB+8WEeyYS2Hf0BzgNx5yYrlFDHSAB2Ug+GEawgQEd9kxWESc3n5WyCn1sdMhG1xA==
   dependencies:
-    async "^3.1.0"
+    async "^3.2.4"
     launchdarkly-eventsource "1.4.4"
     lru-cache "^6.0.0"
     node-cache "^5.1.0"
