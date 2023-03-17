@@ -11,7 +11,7 @@ const includesEmailAddress = (str: string) => {
 const emailAddressOnlyRegex =
     /^[a-zA-Z0-9+._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+$/
 const matchExactEmail = (str: string) => str.match(emailAddressOnlyRegex)
-const isEmailAddress = (str: string) => Boolean(matchExactEmail(str))
+const hasAlias = (str: string) => !matchExactEmail(str)
 
 /*
    Change parameter store string into a raw email address for user display
@@ -30,30 +30,39 @@ const formatEmailAddresses = (str: string) => {
     Remove duplicate emails from email string array
 
     This function will remove duplicate emails, including aliased emails that duplicate the same raw email string used elsewhere as a standalone entry
-    However, multiple aliased email addresses that do not replicate a raw email string elsewhere in list are allowed as duplicates because there is not way to determine which to prefer
-    e.g. if FooBar@example.com and foobar@example.com are both in list, only foobar@example.com will remain after prune
-    e.g. if "Foo Bar" <foobar@example> and foobar@example.com are both in the list, only foobar@example.com will remain after prune
-    e.g. if "Foo Bar" <foobar@example> and "The best Foo Bar" <foobar@example> are both in the list, both remain after prune
+    If there are multiple aliased emails that duplicate the same raw email string, we'll keep only the first aliased email
+    We prefer aliased emails over standalone emails because they make it easier to catch potential errors in our lower environments
+    e.g. if FooBar@example.com and foobar@example.com are both in list, only one will remain
+    e.g. if "Foo Bar" <foobar@example> and foobar@example.com are both in the list, only "Foo Bar" <foobar@example> will remain
+    e.g. if "Foo Bar" <foobar@example> and "The best Foo Bar" <foobar@example> are both in the list, "Foo Bar" <foobar@example> will remain
 */
-const pruneDuplicateEmails = (emails: string[]): string[] =>
-    emails.filter((email, index) => {
-        const aliasedEmail = !isEmailAddress(email)
-        const rawEmailAddress = formatEmailAddresses(email)
-
-        if (aliasedEmail && emails.indexOf(rawEmailAddress) !== -1) {
-            // aliased email address is also included elsewhere on list as a raw email, remove it
-            emails.indexOf(rawEmailAddress) === index
-        } else if (aliasedEmail) {
-            // return unique aliased email address
-            return emails.indexOf(email) === index
-        } else {
-            // return unique email address, prefer lowercased if duplicates exist
-            return emails.indexOf(email.toLowerCase()) === index
+const pruneDuplicateEmails = (emails: string[]): string[] => {
+    const uniqueEmails: { [key: string]: string } = {}
+    emails.forEach((currentEmail: string) => {
+        const rawEmail = formatEmailAddresses(currentEmail).toLowerCase()
+        const emailInObject = uniqueEmails[rawEmail]
+        /* ['Jane Johnson <jane@example.com>', 'jane@example.com', 'ROGER@example.com' 'Bill Smith <BILL@example.com>']
+        becomes
+        {
+            jane@example.com: 'Jane Johnson <jane@example.com>',
+            roger@example.com: 'ROGER@example.com',
+            bill@example.com: 'Bill Smith <BILL@example.com>'
+        }
+        */
+        if (
+            emailInObject === undefined ||
+            /* we prefer the aliased email */
+            (!hasAlias(emailInObject) && hasAlias(currentEmail))
+        ) {
+            uniqueEmails[rawEmail] = currentEmail
         }
     })
 
+    return Object.values(uniqueEmails)
+}
+
 export {
-    isEmailAddress,
+    hasAlias,
     includesEmailAddress,
     formatEmailAddresses,
     pruneDuplicateEmails,
