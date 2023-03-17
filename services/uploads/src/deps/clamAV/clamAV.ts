@@ -2,6 +2,8 @@ import path from 'path'
 import { spawnSync } from 'child_process'
 import { readdir } from 'fs/promises'
 
+import fs from 'fs'
+
 import { S3UploadsClient } from '../s3'
 
 interface ClamAV {
@@ -182,6 +184,13 @@ function scanForInfectedFiles(
 ): string[] | Error {
     try {
         console.info('Executing clamav')
+
+        fs.readdir('/tmp/downloads', (_err, files) => {
+            files.forEach((file) => {
+                console.info(file)
+            })
+        })
+
         const avResult = spawnSync(config.pathToClamav, [
             '--stdout',
             '-d',
