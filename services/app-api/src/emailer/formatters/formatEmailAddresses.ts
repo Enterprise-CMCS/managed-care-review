@@ -45,7 +45,7 @@ const pruneDuplicateEmails = (emails: string[]): string[] => {
         becomes
         {
             jane@example.com: 'Jane Johnson <jane@example.com>',
-            bill@example.com: 'Bill Smith <bill@example.com>'
+            bill@example.com: 'Bill Smith <BILL@example.com>'
         }
         */
         if (
