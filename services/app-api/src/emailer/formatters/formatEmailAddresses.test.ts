@@ -1,11 +1,11 @@
 import {
     formatEmailAddresses,
-    isEmailAddress,
+    hasAlias,
     includesEmailAddress,
     pruneDuplicateEmails,
 } from './formatEmailAddresses'
 
-describe('isEmailAddress', () => {
+describe('hasAlias', () => {
     const validEmails = ['foo@bar.com', 'foo_bar@bar.com', 'foo+bar@foo.com']
 
     const notEmails = [
@@ -17,7 +17,7 @@ describe('isEmailAddress', () => {
     test.each(validEmails)(
         'given %s as a valid email, returns true',
         (firstArg) => {
-            const result = isEmailAddress(firstArg)
+            const result = !hasAlias(firstArg)
             expect(result).toBe(true)
         }
     )
@@ -25,7 +25,7 @@ describe('isEmailAddress', () => {
     test.each(notEmails)(
         'given %s which is not an email address, returns false',
         (firstArg) => {
-            const result = isEmailAddress(firstArg)
+            const result = !hasAlias(firstArg)
             expect(result).toBe(false)
         }
     )
@@ -81,7 +81,7 @@ describe('formatEmailAddresses', () => {
 describe('pruneDuplicateEmails', () => {
     const sampleEmailLists = [
         [
-            // multiple aliased email addresses that duplicate an email elsewhere on list are pruned
+            // multiple aliased email addresses: keep the first aliased version of each raw email address
             [
                 '"Foo Bar 1" <foo@bar.com>',
                 'foo@bar.com',
@@ -91,15 +91,14 @@ describe('pruneDuplicateEmails', () => {
                 '"Bar 1" <bar@foo.com>',
                 '"Bar 2" <bar@foo.com>',
             ],
-            ['foo@bar.com', 'bar@foo.com'],
+            ['"Foo Bar 1" <foo@bar.com>', '"Bar 1" <bar@foo.com>'],
         ],
-        // multiple aliased email addresses that do not duplicate a raw email string elsewhere in list will remain
-        // this is because there is not way to determine which to prefer
+        // if there are multiple aliased emails, keep the first one
         [
             ['"Foo Bar 1" foo@bar.com', '"Foo Bar 2" <foo@bar.com>'],
-            ['"Foo Bar 1" foo@bar.com', '"Foo Bar 2" <foo@bar.com>'],
+            ['"Foo Bar 1" foo@bar.com'],
         ],
-        // simple email addresses that are duplicates due to casing are pruned and lowercase preferred
+        // simple email addresses that are duplicates due to casing are pruned
         [
             ['Foo@bar.com', 'Fo.b-r@bar.com', 'fo.b-r@bar.com', 'foo@bar.com'],
             ['Foo@bar.com', 'Fo.b-r@bar.com'],
@@ -108,6 +107,24 @@ describe('pruneDuplicateEmails', () => {
         [
             ['Foo@bar.com', 'Fo.b-r@bar.com', 'foo@nothing.com'],
             ['Foo@bar.com', 'Fo.b-r@bar.com', 'foo@nothing.com'],
+        ],
+        // ensure that changing the order of raw addresses in relation to aliased addresses doesn't make a difference
+        [
+            [
+                'FOO@BAR.COM',
+                '"Foo Bar 1" foo@bar.com',
+                '"Foo Bar 2" <foo@bar.com>',
+            ],
+            ['"Foo Bar 1" foo@bar.com'],
+        ],
+        // changing the order of aliased email addresses with the same raw address in relation to *each other* _does_ make a difference
+        [
+            [
+                '"Foo Bar 2" <foo@bar.com>',
+                '"Foo Bar 1" foo@bar.com',
+                'FOO@BAR.COM',
+            ],
+            ['"Foo Bar 2" <foo@bar.com>'],
         ],
     ]
 
