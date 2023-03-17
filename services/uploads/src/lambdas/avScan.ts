@@ -76,7 +76,7 @@ async function avScan(event: S3Event, _context: Context) {
         const startTime = new Date().getTime()
 
         // scan the file
-        await scanFile(
+        const err = await scanFile(
             s3Client,
             clamAV,
             s3ObjectKey,
@@ -90,6 +90,10 @@ async function avScan(event: S3Event, _context: Context) {
         const executionTime = endTime - startTime
         console.info(`av scan time: ${executionTime}`)
         recordHistogram(serviceName, 'avscan.time', executionTime)
+
+        if (err instanceof Error) {
+            recordException(err, serviceName, 'avScanFile')
+        }
     } catch (err) {
         recordException(err, serviceName, 'avScanFile')
         throw err
