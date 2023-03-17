@@ -48,7 +48,7 @@ Cypress.Commands.add('fillOutContractActionOnlyWithBaseContract', () => {
     cy.findByText('Base contract').click()
 
     //rate-cert-assurance
-    cy.getFeatureFlagStore(['rate-cert-assurance']).then(store => {
+    cy.getFeatureFlagStore(['rate-cert-assurance']).then((store) => {
         if (store['rate-cert-assurance']) {
             cy.get('label[for="riskBasedContractNo"]').click()
         }
@@ -71,9 +71,9 @@ Cypress.Commands.add('fillOutContractActionOnlyWithAmendment', () => {
     cy.findByText('Contract action only').click()
 
     //rate-cert-assurance
-    cy.getFeatureFlagStore(['rate-cert-assurance']).then(store => {
-      if (store['rate-cert-assurance']) {
-          cy.get('label[for="riskBasedContractNo"]').click()
+    cy.getFeatureFlagStore(['rate-cert-assurance']).then((store) => {
+        if (store['rate-cert-assurance']) {
+            cy.get('label[for="riskBasedContractNo"]').click()
         }
     })
 
@@ -136,10 +136,10 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     // Must be on '/submissions/:id/edit/contract-details'
     cy.findByText('Unexecuted by some or all parties').click()
     cy.wait(2000)
-   cy.findAllByLabelText('Start date')
-       .parents()
-       .findByTestId('date-picker-external-input')
-       .type('04/01/2024')
+    cy.findAllByLabelText('Start date')
+        .parents()
+        .findByTestId('date-picker-external-input')
+        .type('04/01/2024')
     cy.findAllByLabelText('End date')
         .parents()
         .findByTestId('date-picker-external-input')
@@ -259,20 +259,28 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
 Cypress.Commands.add('fillOutNewRateCertification', () => {
     // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
-    cy.findByRole(
-        'radiogroup',
-        { name: /Was this rate certification uploaded to any other submissions?/}
-    ).should('exist').within(() => {
-        cy.findByText('No').click()
+    cy.findByRole('radiogroup', {
+        name: /Was this rate certification uploaded to any other submissions?/,
     })
+        .should('exist')
+        .within(() => {
+            cy.findByText('No').click()
+        })
 
     cy.findByText('New rate certification').click()
     cy.findByText(
         'Certification of capitation rates specific to each rate cell'
     ).click()
     cy.wait(2000)
-    cy.findAllByLabelText('Start date').parents().findByTestId('date-picker-external-input').type('02/29/2024')
-    cy.findAllByLabelText('End date').parents().findByTestId('date-picker-external-input').type('02/28/2025').blur()
+    cy.findAllByLabelText('Start date')
+        .parents()
+        .findByTestId('date-picker-external-input')
+        .type('02/29/2024')
+    cy.findAllByLabelText('End date')
+        .parents()
+        .findByTestId('date-picker-external-input')
+        .type('02/28/2025')
+        .blur()
     cy.findByLabelText('Date certified').type('03/01/2024')
 
     cy.findByRole('combobox', { name: 'programs (required)' }).click({
@@ -298,12 +306,13 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
 Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
     // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
-    cy.findByRole(
-        'radiogroup',
-        { name: /Was this rate certification uploaded to any other submissions?/}
-    ).should('exist').within(() => {
-        cy.findByText('No').click()
+    cy.findByRole('radiogroup', {
+        name: /Was this rate certification uploaded to any other submissions?/,
     })
+        .should('exist')
+        .within(() => {
+            cy.findByText('No').click()
+        })
 
     cy.findByText('Amendment to prior rate certification').click()
     cy.findByText(
@@ -312,7 +321,7 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
 
     cy.wait(2000)
 
-/* 
+    /* 
     There are currently multiple date range pickers on the page with the same label names (start date, end date) and different headings
     Preferred approach would be targeting by via findBy* or a custom data-cyid attribute
     However, surfacing custom attributes on the nested inputs in third party component DateRangePicker not possible in current react-uswds version 
@@ -412,7 +421,7 @@ Cypress.Commands.add('waitForDocumentsToLoad', () => {
     const authMode = Cypress.env('AUTH_MODE')
     if (authMode !== 'LOCAL') {
         // Must wait for scanning to complete in AWS environments
-        cy.wait(20000)
+        cy.wait(150000)
     }
     cy.findAllByTestId('file-input-preview-image', {
         timeout: 40000,
