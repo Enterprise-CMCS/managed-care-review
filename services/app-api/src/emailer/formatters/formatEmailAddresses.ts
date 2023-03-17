@@ -41,10 +41,11 @@ const pruneDuplicateEmails = (emails: string[]): string[] => {
     emails.forEach((currentEmail: string) => {
         const rawEmail = formatEmailAddresses(currentEmail).toLowerCase()
         const emailInObject = uniqueEmails[rawEmail]
-        /* ['Jane Johnson <jane@example.com>', 'jane@example.com', 'Bill Smith <BILL@example.com>']
+        /* ['Jane Johnson <jane@example.com>', 'jane@example.com', 'ROGER@example.com' 'Bill Smith <BILL@example.com>']
         becomes
         {
             jane@example.com: 'Jane Johnson <jane@example.com>',
+            roger@example.com: 'ROGER@example.com',
             bill@example.com: 'Bill Smith <BILL@example.com>'
         }
         */
