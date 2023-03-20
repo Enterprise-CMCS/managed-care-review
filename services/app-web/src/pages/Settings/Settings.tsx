@@ -1,4 +1,4 @@
-import { GridContainer, Table } from '@trussworks/react-uswds'
+import { Grid, GridContainer, Table } from '@trussworks/react-uswds'
 import React, { useMemo } from 'react'
 import {
     createColumnHelper,
@@ -19,10 +19,9 @@ import {
     ErrorAlertFailedRequest,
     ErrorAlertSignIn,
     Loading,
-    Tabs,
-    TabPanel,
 } from '../../components'
 import { EmailSettings } from './EmailSettings/EmailSettings'
+import { ApolloError } from '@apollo/client'
 
 const columnHelper = createColumnHelper<CmsUser>()
 
@@ -51,36 +50,6 @@ export const Settings = (): React.ReactElement => {
         ],
         []
     )
-
-    const errorMessage = () => {
-        if (error) {
-            recordJSException(error)
-            handleApolloError(error, isAuthenticated)
-            if (isLikelyUserAuthError(error, isAuthenticated)) {
-                return (
-                    <div id="settings-page" className={styles.wrapper}>
-                        <GridContainer
-                            data-testid="settings-page"
-                            className={styles.container}
-                        >
-                            <ErrorAlertSignIn />
-                        </GridContainer>
-                    </div>
-                )
-            } else {
-                return (
-                    <div id="settings-page" className={styles.wrapper}>
-                        <GridContainer
-                            data-testid="settings-page"
-                            className={styles.container}
-                        >
-                            <ErrorAlertFailedRequest />
-                        </GridContainer>
-                    </div>
-                )
-            }
-        }
-    }
 
     const showLoading =
         loginStatus === 'LOADING' || !loggedInUser || loading || !data
@@ -117,15 +86,18 @@ export const Settings = (): React.ReactElement => {
 
     return (
         <GridContainer className={styles.pageContainer}>
-            <Tabs>
-                <TabPanel id="cms-users" tabName="CMS Users">
+            <Grid>
+                {error ? (
+                    <ErrorMessage
+                        isAuthenticated={isAuthenticated}
+                        error={error}
+                    />
+                ) : (
                     <div className={styles.table}>
-                        {error ? (
-                            errorMessage()
-                        ) : showLoading ? (
+                        {showLoading ? (
                             <Loading />
                         ) : cmsUsers.length ? (
-                            <Table bordered striped caption="CMS Users">
+                            <Table bordered caption="CMS Users">
                                 <thead className={styles.header}>
                                     {table
                                         .getHeaderGroups()
@@ -171,9 +143,48 @@ export const Settings = (): React.ReactElement => {
                             <p>No CMS users to display</p>
                         )}
                     </div>
-                </TabPanel>
-                <>{isAdminUser && <EmailSettings />}</>
-            </Tabs>
+                )}
+            </Grid>
+            {isAdminUser && (
+                <Grid>
+                    {' '}
+                    <EmailSettings />
+                </Grid>
+            )}
         </GridContainer>
     )
+}
+
+const ErrorMessage = ({
+    error,
+    isAuthenticated,
+}: {
+    error: ApolloError
+    isAuthenticated: boolean
+}): React.ReactElement => {
+    recordJSException(error)
+    handleApolloError(error, isAuthenticated)
+    if (isLikelyUserAuthError(error, isAuthenticated)) {
+        return (
+            <div id="settings-page" className={styles.wrapper}>
+                <GridContainer
+                    data-testid="settings-page"
+                    className={styles.container}
+                >
+                    <ErrorAlertSignIn />
+                </GridContainer>
+            </div>
+        )
+    } else {
+        return (
+            <div id="settings-page" className={styles.wrapper}>
+                <GridContainer
+                    data-testid="settings-page"
+                    className={styles.container}
+                >
+                    <ErrorAlertFailedRequest />
+                </GridContainer>
+            </div>
+        )
+    }
 }

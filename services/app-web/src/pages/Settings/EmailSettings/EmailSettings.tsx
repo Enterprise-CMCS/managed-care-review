@@ -1,6 +1,6 @@
 import { Table } from '@trussworks/react-uswds'
 import React from 'react'
-import { Loading, TabPanel } from '../../../components'
+import { Loading, TabPanel, Tabs } from '../../../components'
 import { useFetchEmailSettingsQuery } from '../../../gen/gqlClient'
 
 export const EmailSettings = (): React.ReactElement => {
@@ -16,13 +16,13 @@ export const EmailSettings = (): React.ReactElement => {
             {loading && <Loading />}
             {error && <p>An Error has occurred</p>}
             {data && (
-                <>
+                <Tabs>
                     <TabPanel id="automated-emails" tabName="Automated emails">
                         <p>
                             Shared inboxes receive emails for different
                             submissions, as described below.
                         </p>
-                        <Table bordered striped caption="Automated emails">
+                        <Table bordered caption="Automated emails">
                             <thead>
                                 <th>Inbox</th>
                                 <th>Type</th>
@@ -100,7 +100,7 @@ export const EmailSettings = (): React.ReactElement => {
                             email addresses, depending on the issue. States see
                             these addresses in submission-related emails.
                         </p>
-                        <Table bordered striped caption="Support emails">
+                        <Table bordered caption="Support emails">
                             <thead>
                                 <th>Inbox</th>
                                 <th>Type</th>
@@ -130,7 +130,7 @@ export const EmailSettings = (): React.ReactElement => {
                             </tbody>
                         </Table>
                     </TabPanel>
-                </>
+                </Tabs>
             )}
         </>
     )
