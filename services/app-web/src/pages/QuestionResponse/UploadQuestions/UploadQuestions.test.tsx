@@ -268,7 +268,7 @@ describe('UploadQuestions', () => {
             'file-input-preview-image'
         )[1]
         await waitFor(() => {
-            /* The folowing tested states--that the "Add questions" button is disabled and an error message shown--ONLY happen
+            /* The following tested states--that the "Add questions" button is disabled and an error message shown--only happen
             AFTER the user clicks "Add questions".  The reason we don't disable the button before a user tries to click
             is that it could be confusing to accessibility users to tab into a disabled button and not know why it's disabled. So they 
             have to make the mistake before we show any errors. */
