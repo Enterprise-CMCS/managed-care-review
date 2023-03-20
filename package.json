@@ -113,5 +113,8 @@
     "dependencies": {
         "cypress-file-upload": "^5.0.8",
         "path-browserify": "^1.0.1"
+    },
+    "resolutions": {
+        "**/fork-ts-checker-webpack-plugin": "^8.0.0"
     }
 }
