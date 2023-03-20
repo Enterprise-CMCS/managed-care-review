@@ -1,4 +1,4 @@
-import { Grid, GridContainer, Table } from '@trussworks/react-uswds'
+import { GridContainer, Table } from '@trussworks/react-uswds'
 import React, { useMemo } from 'react'
 import {
     createColumnHelper,
@@ -19,6 +19,8 @@ import {
     ErrorAlertFailedRequest,
     ErrorAlertSignIn,
     Loading,
+    Tabs,
+    TabPanel,
 } from '../../components'
 import { EmailSettings } from './EmailSettings/EmailSettings'
 
@@ -115,52 +117,63 @@ export const Settings = (): React.ReactElement => {
 
     return (
         <GridContainer className={styles.pageContainer}>
-            <Grid>
-                <div className={styles.table}>
-                    {error ? (
-                        errorMessage()
-                    ) : showLoading ? (
-                        <Loading />
-                    ) : cmsUsers.length ? (
-                        <Table bordered striped caption="CMS Users">
-                            <thead className={styles.header}>
-                                {table.getHeaderGroups().map((headerGroup) => (
-                                    <tr key={headerGroup.id}>
-                                        {headerGroup.headers.map((header) => (
-                                            <th key={header.id}>
-                                                {header.isPlaceholder
-                                                    ? null
-                                                    : flexRender(
-                                                          header.column
-                                                              .columnDef.header,
-                                                          header.getContext()
-                                                      )}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                ))}
-                            </thead>
-                            <tbody>
-                                {table.getRowModel().rows.map((row) => (
-                                    <tr key={row.id}>
-                                        {row.getVisibleCells().map((cell) => (
-                                            <td key={cell.id}>
-                                                {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext()
+            <Tabs>
+                <TabPanel id="cms-users" tabName="CMS Users">
+                    <div className={styles.table}>
+                        {error ? (
+                            errorMessage()
+                        ) : showLoading ? (
+                            <Loading />
+                        ) : cmsUsers.length ? (
+                            <Table bordered striped caption="CMS Users">
+                                <thead className={styles.header}>
+                                    {table
+                                        .getHeaderGroups()
+                                        .map((headerGroup) => (
+                                            <tr key={headerGroup.id}>
+                                                {headerGroup.headers.map(
+                                                    (header) => (
+                                                        <th key={header.id}>
+                                                            {header.isPlaceholder
+                                                                ? null
+                                                                : flexRender(
+                                                                      header
+                                                                          .column
+                                                                          .columnDef
+                                                                          .header,
+                                                                      header.getContext()
+                                                                  )}
+                                                        </th>
+                                                    )
                                                 )}
-                                            </td>
+                                            </tr>
                                         ))}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </Table>
-                    ) : (
-                        <p>No CMS users to display</p>
-                    )}
-                </div>
-            </Grid>
-            <Grid>{isAdminUser && <EmailSettings />}</Grid>
+                                </thead>
+                                <tbody>
+                                    {table.getRowModel().rows.map((row) => (
+                                        <tr key={row.id}>
+                                            {row
+                                                .getVisibleCells()
+                                                .map((cell) => (
+                                                    <td key={cell.id}>
+                                                        {flexRender(
+                                                            cell.column
+                                                                .columnDef.cell,
+                                                            cell.getContext()
+                                                        )}
+                                                    </td>
+                                                ))}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </Table>
+                        ) : (
+                            <p>No CMS users to display</p>
+                        )}
+                    </div>
+                </TabPanel>
+                <>{isAdminUser && <EmailSettings />}</>
+            </Tabs>
         </GridContainer>
     )
 }
