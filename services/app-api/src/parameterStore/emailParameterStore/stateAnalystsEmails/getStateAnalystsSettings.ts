@@ -1,7 +1,7 @@
 import {
     isValidStateCode,
     StateCodeType,
-} from 'app-web/src/common-code/healthPlanFormDataType'
+} from '../../../../../app-web/src/common-code/healthPlanFormDataType'
 import { ParameterStore } from '../../awsParameterStore'
 
 type StateAnalystsWithState = {

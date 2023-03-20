@@ -1,5 +1,5 @@
 import { ForbiddenError } from 'apollo-server-lambda'
-import { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { isAdminUser, StateType } from '../../domain-models'
 import { Emailer } from '../../emailer'
 import { QueryResolvers } from '../../gen/gqlServer'
