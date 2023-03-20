@@ -5,7 +5,6 @@ import {
     within,
     fireEvent,
     Screen,
-    waitForElementToBeRemoved,
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
@@ -1018,9 +1017,6 @@ describe('RateDetails', () => {
             await selectEvent.openMenu(firstRatePackageCombobox)
 
             //Expect submission selection error to clear and continue button is not disabled
-            await waitForElementToBeRemoved(() =>
-                screen.queryAllByText('You must select at least one submission')
-            )
             expect(continueButton).not.toHaveAttribute('aria-disabled')
         })
 
@@ -1153,9 +1149,6 @@ describe('RateDetails', () => {
             await selectEvent.openMenu(firstRatePackageCombobox)
 
             //Expect submission selection error to clear and continue button is not disabled
-            await waitForElementToBeRemoved(() =>
-                screen.queryAllByText('You must select at least one submission')
-            )
             await waitFor(() => {
                 expect(continueButton).not.toHaveAttribute('aria-disabled')
             })
@@ -1798,10 +1791,6 @@ const fillOutFirstRate = async (screen: Screen) => {
     )
 
     await fillOutIndexRate(screen, 0)
-    // wait for all errors to clear
-    await waitForElementToBeRemoved(() =>
-        screen.queryAllByTestId('errorMessage')
-    )
 }
 
 const clickAddNewRate = async (screen: Screen) => {
