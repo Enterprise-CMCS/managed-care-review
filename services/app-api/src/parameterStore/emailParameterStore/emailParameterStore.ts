@@ -1,3 +1,4 @@
+import { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
 import {
     getStateAnalystsEmails,
     getStateAnalystsEmailsLocal,
@@ -17,9 +18,15 @@ import {
     getDMCOEmailsLocal,
     getSourceEmailLocal,
     getSourceEmail,
+    getStateAnalystsSettings,
+    getStateAnalystsSettingsLocal,
 } from './'
+import type { StateAnalystsWithState } from './stateAnalystsEmails/getStateAnalystsSettings'
 
 export type EmailParameterStore = {
+    getStateAnalystsSettings: (
+        stateCodes: StateCodeType[]
+    ) => Promise<StateAnalystsWithState | Error>
     getStateAnalystsEmails: (stateCode: string) => Promise<string[] | Error>
     getDevReviewTeamEmails: () => Promise<string[] | Error>
     getCmsReviewHelpEmail: () => Promise<string | Error>
@@ -33,6 +40,7 @@ export type EmailParameterStore = {
 
 function newLocalEmailParameterStore(): EmailParameterStore {
     return {
+        getStateAnalystsSettings: getStateAnalystsSettingsLocal,
         getStateAnalystsEmails: getStateAnalystsEmailsLocal,
         getDevReviewTeamEmails: getDevReviewTeamEmailsLocal,
         getCmsReviewHelpEmail: getCmsReviewHelpEmailLocal,
@@ -47,6 +55,7 @@ function newLocalEmailParameterStore(): EmailParameterStore {
 
 function newAWSEmailParameterStore(): EmailParameterStore {
     return {
+        getStateAnalystsSettings: getStateAnalystsSettings,
         getStateAnalystsEmails: getStateAnalystsEmails,
         getDevReviewTeamEmails: getDevReviewTeamEmails,
         getCmsReviewHelpEmail: getCmsReviewHelpEmail,

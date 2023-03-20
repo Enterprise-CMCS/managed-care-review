@@ -1,9 +1,9 @@
-import { getParameterStore } from '../../awsParameterStore'
+import { ParameterStore } from '../../awsParameterStore'
 import { validateAndReturnValueArray } from '../helpers'
 
 export const getDMCPEmails = async (): Promise<string[] | Error> => {
     const name = `/configuration/email/dmcp`
-    const dmcpTeamAddresses = await getParameterStore(name)
+    const dmcpTeamAddresses = await ParameterStore.getParameter(name)
     return validateAndReturnValueArray(dmcpTeamAddresses, name)
 }
 
