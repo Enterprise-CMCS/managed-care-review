@@ -2,21 +2,26 @@ import React from 'react'
 import { Grid, GridContainer } from '@trussworks/react-uswds'
 import { useAuth } from '../../contexts/AuthContext'
 import styles from './Settings.module.scss'
-import { Tabs, TabPanel, Loading, ErrorAlertSignIn } from '../../components'
+import { Tabs, TabPanel, Loading } from '../../components'
 import { EmailSettingsTable } from './EmailSettingsTables/EmailSettingsTables'
 import { CMSUsersTable } from './CMSUsersTable/CMSUsersTable'
+import { SettingsErrorAlert } from './SettingsErrorAlert'
 
 export const Settings = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
     const isAuthenticated = loginStatus === 'LOGGED_IN'
-    const isAdminUser = loggedInUser?.role === 'AdminUser'
+    const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
+
     const loading = loginStatus === 'LOADING' || !loggedInUser
     return (
         <GridContainer className={styles.pageContainer}>
             {loading ? (
                 <Loading />
-            ) : !isAuthenticated ? (
-                <ErrorAlertSignIn />
+            ) : !isAuthenticated || !isAdminUser ? (
+                <SettingsErrorAlert
+                    isAuthenticated={isAuthenticated}
+                    isAdmin={isAdminUser}
+                />
             ) : (
                 <Grid>
                     <h2>Settings</h2>
@@ -29,22 +34,13 @@ export const Settings = (): React.ReactElement => {
                             id="automated-emails"
                             tabName="Automated emails"
                         >
-                            <EmailSettingsTable
-                                isAdmin={isAdminUser}
-                                type="GENERAL"
-                            />
+                            <EmailSettingsTable type="GENERAL" />
                         </TabPanel>
                         <TabPanel id="analysts" tabName="State analysts">
-                            <EmailSettingsTable
-                                isAdmin={isAdminUser}
-                                type="ANALYSTS"
-                            />
+                            <EmailSettingsTable type="ANALYSTS" />
                         </TabPanel>
                         <TabPanel id="support-emails" tabName="Support emails">
-                            <EmailSettingsTable
-                                isAdmin={isAdminUser}
-                                type="SUPPORT"
-                            />
+                            <EmailSettingsTable type="SUPPORT" />
                         </TabPanel>
                     </Tabs>
                 </Grid>

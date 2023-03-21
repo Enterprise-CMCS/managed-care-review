@@ -79,10 +79,12 @@ export const CMSUsersTable = (): React.ReactElement => {
 
     return (
         <div className={styles.table}>
+            <h2>CMS users</h2>
             {showLoading ? (
                 <Loading />
             ) : cmsUsers.length ? (
-                <Table bordered caption="CMS Users">
+                <Table>
+                    <caption className="srOnly">CMS Users</caption>
                     <thead className={styles.header}>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <tr key={headerGroup.id}>

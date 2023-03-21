@@ -2,8 +2,23 @@
 @import '../../styles/custom.scss';
 
 .table {
-    width: 60%;
-}
+    h2{
+        font-weight: 300
+    }
+   thead {
+        th{
+            background-color: transparent;
+            border-top: 0;  
+            border-left: 0;
+            border-right: 0;
+        }
+    }
+
+    table {
+        padding-top: 1em;
+        width: 100%;
+    }
+} 
 .tabs {
     padding: 2em 0;
 }
@@ -14,4 +29,8 @@
 }
 .header {
     text-align: left;
+}
+
+.wrapper {
+   height: 100vh;
 }

@@ -7,24 +7,22 @@ import {
     useFetchEmailSettingsQuery,
 } from '../../../gen/gqlClient'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
+import styles from '../Settings.module.scss'
 
 const formatEmails = (arr?: string[]) => (arr ? arr.join(',') : 'NOT DEFINED')
 
 export const EmailSettingsTable = ({
     type,
-    isAdmin,
 }: {
-    isAdmin: boolean
     type: 'GENERAL' | 'ANALYSTS' | 'SUPPORT'
 }): React.ReactElement => {
     const { loading, data, error } = useFetchEmailSettingsQuery()
     const config = data?.fetchEmailSettings.config
     const analysts = data?.fetchEmailSettings.stateAnalysts
-    if (isAdmin) return <SettingsErrorAlert isAdmin />
     if (error) return <SettingsErrorAlert error={error} />
 
     return (
-        <>
+        <div className={styles.table}>
             {loading && <Loading />}
 
             {data && config && type === 'GENERAL' && (
@@ -37,7 +35,7 @@ export const EmailSettingsTable = ({
             {data && config && type === 'SUPPORT' && (
                 <EmailsSupportTable config={config} />
             )}
-        </>
+        </div>
     )
 }
 
@@ -45,11 +43,13 @@ const EmailsGeneralTable = ({ config }: { config: EmailConfiguration }) => {
     console.info('ALL CONFIG', JSON.stringify(config))
     return (
         <>
+            <h2>Automated emails</h2>
             <p>
                 Shared inboxes receive emails for different submissions, as
                 described below.
             </p>
-            <Table bordered caption="Automated emails">
+            <Table bordered>
+                <caption className="srOnly">Automated emails</caption>
                 <thead>
                     <tr>
                         <th>Inbox</th>
@@ -97,12 +97,13 @@ const EmailsAnalystsTable = ({
 }) => {
     return (
         <>
+            <h2>State Analyst emails</h2>
             <p>
-                State analysts email settings. This is currently not connected
-                to Users table and is standalone configuration based on the
-                state programs spreadsheet.
+                State analysts email settings. Currently a standalone
+                configuration based on the state programs spreadsheet.
             </p>
-            <Table bordered striped caption="State analyst emails">
+            <Table bordered>
+                <caption className="srOnly">Analyst emails</caption>
                 <thead>
                     <tr>
                         <th>Inbox</th>
@@ -130,12 +131,15 @@ const EmailsAnalystsTable = ({
 const EmailsSupportTable = ({ config }: { config: EmailConfiguration }) => {
     return (
         <>
+            <h2>Support emails</h2>
             <p>
-                States that need support should contact one of these // email
-                addresses, depending on the issue. States see // these addresses
-                in submission-related emails.
+                States that need support should contact one of these email
+                addresses, depending on the issue.
             </p>
-            <Table bordered caption="Support emails">
+            <p>States see these addresses in submission-related emails.</p>
+
+            <Table bordered>
+                <caption className="srOnly">Support emails</caption>
                 <thead>
                     <tr>
                         <th>Inbox</th>
