@@ -12,6 +12,7 @@ import {
     mockSubmittedHealthPlanPackageWithRevision,
     mockUnlockedHealthPlanPackageWithOldProtos,
     indexHealthPlanPackagesMockSuccess,
+    mockValidUser,
 } from '../../testHelpers/apolloMocks'
 import {
     ldUseClientSpy,
@@ -140,20 +141,21 @@ describe('SubmissionSummary', () => {
                 },
             }
         )
-
-        expect(await screen.findByTestId('unlockedBanner')).toBeInTheDocument()
-        expect(await screen.findByTestId('unlockedBanner')).toHaveClass(
-            'usa-alert--warning'
-        )
-        expect(await screen.findByTestId('unlockedBanner')).toHaveTextContent(
-            /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
-        )
-        expect(await screen.findByTestId('unlockedBanner')).toHaveTextContent(
-            'by: bob@dmas.mn.gov'
-        )
-        expect(await screen.findByTestId('unlockedBanner')).toHaveTextContent(
-            'Reason for unlock: Test unlock reason'
-        )
+        await waitFor(() => {
+            expect(screen.getByTestId('unlockedBanner')).toBeInTheDocument()
+            expect(screen.getByTestId('unlockedBanner')).toHaveClass(
+                'usa-alert--warning'
+            )
+            expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
+                /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+            )
+            expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
+                'by: bob@dmas.mn.gov'
+            )
+            expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
+                'Reason for unlock: Test unlock reason'
+            )
+        })
     })
 
     it('renders submission unlocked banner for State user', async () => {
@@ -171,6 +173,7 @@ describe('SubmissionSummary', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
+                            user: mockValidUser(),
                             statusCode: 200,
                         }),
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
@@ -184,20 +187,21 @@ describe('SubmissionSummary', () => {
                 },
             }
         )
-
-        expect(await screen.findByTestId('unlockedBanner')).toBeInTheDocument()
-        expect(await screen.findByTestId('unlockedBanner')).toHaveClass(
-            'usa-alert--info'
-        )
-        expect(await screen.findByTestId('unlockedBanner')).toHaveTextContent(
-            /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
-        )
-        expect(await screen.findByTestId('unlockedBanner')).toHaveTextContent(
-            'by: bob@dmas.mn.gov'
-        )
-        expect(await screen.findByTestId('unlockedBanner')).toHaveTextContent(
-            'Reason for unlock: Test unlock reason'
-        )
+        await waitFor(() => {
+            expect(screen.getByTestId('unlockedBanner')).toBeInTheDocument()
+            expect(screen.getByTestId('unlockedBanner')).toHaveClass(
+                'usa-alert--info'
+            )
+            expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
+                /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+            )
+            expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
+                'by: bob@dmas.mn.gov'
+            )
+            expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
+                'Reason for unlock: Test unlock reason'
+            )
+        })
     })
 
     it('renders back to dashboard link for state users', async () => {

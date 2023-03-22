@@ -267,15 +267,17 @@ describe('UploadQuestions', () => {
         const imageElFile2 = screen.getAllByTestId(
             'file-input-preview-image'
         )[1]
-        await waitFor(() => expect(imageElFile2).toHaveClass('is-loading'))
-
-        fireEvent.click(continueButton)
         await waitFor(() => {
-            expect(continueButton).toHaveAttribute('aria-disabled', 'true')
+            /* The following tested states--that the "Add questions" button is disabled and an error message shown--only happen
+            AFTER the user clicks "Add questions".  The reason we don't disable the button before a user tries to click
+            is that it could be confusing to accessibility users to tab into a disabled button and not know why it's disabled. So they 
+            have to make the mistake before we show any errors. */
+            expect(imageElFile2).toHaveClass('is-loading')
+            fireEvent.click(continueButton)
         })
-
+        expect(continueButton).toHaveAttribute('aria-disabled', 'true')
         expect(
-            await screen.findAllByText(
+            screen.getAllByText(
                 'You must wait for all documents to finish uploading before continuing'
             )
         ).toHaveLength(2)
