@@ -1,17 +1,18 @@
 import { rm, readdir } from 'fs/promises'
-import path from 'path'
 import { S3UploadsClient } from '../deps/s3'
 import { ClamAV } from '../deps/clamAV'
 
 async function emptyWorkdir(workdir: string): Promise<undefined | Error> {
     console.info('cleaning workdir: ', workdir)
     try {
+        console.info('-- Folder before cleanup --')
         const files = await readdir(workdir)
+        console.info(files)
+        await rm(workdir, { recursive: true })
+        console.info('-- Folder after cleanup --')
 
-        for (const file of files) {
-            const filePath = path.join(workdir, file)
-            await rm(filePath)
-        }
+        const filesAfter = await readdir(workdir)
+        console.info(filesAfter)
     } catch (err) {
         console.error('FS Error cleaning workdir', err)
         return err
