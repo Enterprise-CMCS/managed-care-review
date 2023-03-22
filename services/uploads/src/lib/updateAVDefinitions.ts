@@ -6,9 +6,7 @@ import { ClamAV } from '../deps/clamAV'
 async function emptyWorkdir(workdir: string): Promise<undefined | Error> {
     console.info('cleaning workdir: ', workdir)
     try {
-        console.info('-- Folder before cleanup --')
         const files = await readdir(workdir)
-        console.info(files)
 
         for (const file of files) {
             const filePath = path.join(workdir, file)

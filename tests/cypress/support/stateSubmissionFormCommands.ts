@@ -421,7 +421,7 @@ Cypress.Commands.add('waitForDocumentsToLoad', () => {
     const authMode = Cypress.env('AUTH_MODE')
     if (authMode !== 'LOCAL') {
         // Must wait for scanning to complete in AWS environments
-        cy.wait(150000)
+        cy.wait(20000)
     }
     cy.findAllByTestId('file-input-preview-image', {
         timeout: 40000,
