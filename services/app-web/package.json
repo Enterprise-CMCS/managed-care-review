@@ -118,9 +118,9 @@
         "zod": "^3.10.1"
     },
     "devDependencies": {
-        "@aws-sdk/client-amplify": "^3.204.0",
-        "@aws-sdk/client-s3": "^3.204.0",
-        "@aws-sdk/s3-request-presigner": "^3.204.0",
+        "@aws-sdk/client-amplify": "^3.294.0",
+        "@aws-sdk/client-s3": "^3.294.0",
+        "@aws-sdk/s3-request-presigner": "^3.294.0",
         "@storybook/addon-a11y": "^6.5.15",
         "@storybook/addon-essentials": "^6.5.15",
         "@storybook/addon-links": "^6.5.15",
@@ -130,7 +130,7 @@
         "@storybook/react": "^6.5.15",
         "@testing-library/cypress": "^9.0.0",
         "@testing-library/jest-dom": "^5.16.5",
-        "@testing-library/react": "^13.4.0",
+        "@testing-library/react": "^14.0.0",
         "@testing-library/user-event": "^14.4.3",
         "@types/classnames": "^2.2.11",
         "@types/jest": "^27.0.1",

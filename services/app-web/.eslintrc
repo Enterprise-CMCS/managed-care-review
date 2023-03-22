@@ -19,6 +19,7 @@
     },
     "ignorePatterns": ["src/gen/*", "*.config.ts"],
     "rules": {
+        "array-callback-return": "error",
         "prefer-promise-reject-errors": "error",
         "no-throw-literal": "error",
         "jest/no-focused-tests": "error",

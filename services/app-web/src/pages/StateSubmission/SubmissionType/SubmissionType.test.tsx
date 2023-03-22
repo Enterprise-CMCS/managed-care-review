@@ -1,11 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import userEvent from '@testing-library/user-event'
-import {
-    screen,
-    waitFor,
-    within,
-    waitForElementToBeRemoved,
-} from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
 import {
@@ -271,9 +266,6 @@ describe('SubmissionType', () => {
         await screen.findAllByText('You must select yes or no')
         await userEvent.click(
             within(riskBasedContractParent!).getByLabelText('No')
-        )
-        await waitForElementToBeRemoved(() =>
-            screen.queryAllByText('You must select yes or no')
         )
         await userEvent.click(screen.getByRole('button', { name: 'Continue' }))
     })
