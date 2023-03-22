@@ -1,18 +1,18 @@
-@import '../../styles/uswdsImports.scss';
-@import '../../styles/custom.scss';
+@use "uswds-core" as *;
+@use '../../styles/custom.scss' as *;
 
 .userInfo {
     font-weight: font-weight('light');
     padding: 0 units(1);
-    color: $cms-color-white;
+    color: #fff;
 
     button, a {
-        color: $cms-color-white;
+        color: #fff;
 
         &:hover,
         &:active,
         &:visited {
-            color: $cms-color-white;
+            color: #fff;
         }
     }
 }
@@ -22,8 +22,8 @@
 }
 
 .dashboardHeading {
-    background-color: $theme-color-primary-dark;
-    color: $cms-color-white;
+    background-color: $mcr-cms-blue-dark;
+    color: #fff;
     & h1 {
         display: flex;
         flex-wrap: wrap;
@@ -35,8 +35,8 @@
 }
 
 .landingPageHeading {
-    background-color: $theme-color-primary-dark;
-    color: $cms-color-white;
+    background-color: $mcr-cms-blue-dark;
+    color: #fff;
     padding: units(2) 0;
     & h1 {
         display: flex;
@@ -48,7 +48,7 @@
 }
 
 .banner {
-    background: $cms-color-primary;
+    background: $mcr-cms-blue;
 }
 
 .bannerLogo {
@@ -58,14 +58,14 @@
     text-decoration: none;
 
     .logoImg {
-        border-right: 2px solid $cms-color-white;
+        border-right: 2px solid #fff;
         padding-right: units(2);
     }
 
     span {
         margin-left: units(2);
         font-size: size('body', 'lg');
-        color: $cms-color-white;
+        color: #fff;
         height: 100%;
     }
 }

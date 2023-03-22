@@ -1,6 +1,7 @@
-@import '../../styles/uswdsImports.scss';
-@import '../../styles/custom.scss';
+@use "uswds-core" as *;
+@use '../../styles/custom.scss' as *;
 
+// TODO - form styes should be refactor in mcr-forms mixin so it can be used for forms outside state submission 
 .formPage {
     width: 100%; 
 }
@@ -33,8 +34,8 @@
         padding: units(4);
         margin-bottom: units(2);
         margin-top: units(2);
-        background: $cms-color-white;
-        border: 1px solid $theme-color-base-lighter;
+        border: 1px solid $mcr-gray-lighter;
+        background: $mcr-white;
         @include u-radius('md');
     }
 
@@ -82,7 +83,7 @@
 .nestedOptions {
     padding-left: units(4);
     margin: units(2) 0;
-    border-left: 4px solid $theme-color-primary;
+    border-left: 4px solid $mcr-primary;
 
     legend,
     label {
@@ -93,7 +94,7 @@
 .nestedOptionsError {
     padding-left: units(4);
     margin: units(2) 0;
-    border-left: 4px solid $theme-color-error-darker;
+    border-left: 4px solid color($theme-color-error-darker);
 }
 
 .stateContact,

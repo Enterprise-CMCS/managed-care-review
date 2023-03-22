@@ -1,5 +1,5 @@
 import './storybook.scss';
-import '../src/index.scss';
+import '../src/styles/index.scss';
 
 export const parameters = {
     layout: 'fullscreen',

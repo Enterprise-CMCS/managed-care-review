@@ -1,5 +1,5 @@
 import { StepIndicator, StepIndicatorStep } from '@trussworks/react-uswds'
-
+import styles from './DynamicStepIndicator.module.scss'
 import { PageTitlesRecord, RouteTWithUnknown } from '../../constants/routes'
 
 export type DynamicStepIndicatorProps = {
@@ -38,7 +38,7 @@ export const DynamicStepIndicator = ({
     })
 
     return (
-        <StepIndicator headingLevel="h2">
+        <StepIndicator className={styles.stepIndicator} headingLevel="h2">
             {formPagesWithStatus.map((formPage) => {
                 return (
                     <StepIndicatorStep

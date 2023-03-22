@@ -1,0 +1,40 @@
+/*  
+   MC-Review Colors 
+
+   Application-wide colors. Must be prefixed with mcr-. Please use these everywhere you want to reference color.
+   Generally our application uses USWDS but sometimes our designs include CMS-influenced variations, particularly with blues.
+   
+   CMDS palette: https://design.cms.gov/style/color/
+   USWDS palette: https://designsystem.digital.gov/design-tokens/color/system-tokens/
+*/
+
+$mcr-primary: #005ea2; // USWDS 'primary'
+$mcr-primary-dark : #1a4480; // USWDS 'primary-dark'
+$mcr-primary-darkest:  #162e51; // USWDS 'primary-darker',
+$mcr-primary-light: #73b3e7; // USWDS 'primary-light',
+$mcr-primary-lightest: #e1f3f8; // USWDS 'blue-cool-10'
+
+$mcr-cms-blue: #0071bc; // CMSDS 'color-primary'
+$mcr-cms-blue-dark: #205493; // CMSDS 'color-primary-darker
+$mcr-cms-blue-darkest: #112e51; // CMSDS 'color-primary-darkest'
+
+$mcr-cyan: #02bfe7; // CMSDS 'color-primary-alt'
+$mcr-cyan-dark: #009ec1; // USWDS 'cyan-40v' 
+$mcr-cyan-light: #99deea;// USWDS 'cyan-20' 
+
+$mcr-gold: #ffbe2e; // USWFS 'gold-20v'
+$mcr-gold-dark: #e5a000; // USWDS 'gold-30v'
+$mcr-gold-darker: #ca9318; // CMSDS 'color-warn-darker'
+
+$mcr-green-dark:#4d8055; // USWDS 'gray-cool-50'
+
+$mcr-gray :#a9aeb1; // USWDS 'gray-cool-30'
+$mcr-gray-dark: #565c65; // USWDS 'gray-cool-60'
+$mcr-gray-lightest: #f0f0f0; /// USWDS 'gray-5'
+$mcr-gray-lighter:#dfe1e2; // USWDS 'gray-cool-10'
+
+$mcr-success: #00a91c; // USWDS 'green-cool-40v'
+$mcr-success-hover:#2a7a3b; // CMSDS 'color-success-dark"
+
+$mcr-ink:#1b1b1b; // USWDS 'gray-90'
+$mcr-white:#fff;

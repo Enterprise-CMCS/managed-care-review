@@ -6,7 +6,7 @@ import {
 } from '@trussworks/react-uswds'
 import React, { useEffect, useRef, useState } from 'react'
 import { NavLink, useOutletContext } from 'react-router-dom'
-import sprite from 'uswds/src/img/sprite.svg'
+import { Icon } from '@trussworks/react-uswds'
 import { packageName } from '../../common-code/healthPlanFormDataType'
 import { Loading } from '../../components/Loading'
 import {
@@ -138,25 +138,19 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 {!showQuestionResponse && (
                     <Link
-                        asCustom={NavLink}
-                        to={{
-                            pathname: '/dashboard',
-                        }}
-                    >
-                        <svg
-                            className="usa-icon"
-                            aria-hidden="true"
-                            focusable="false"
-                            role="img"
-                        >
-                            <use xlinkHref={`${sprite}#arrow_back`}></use>
-                        </svg>
-                        {user?.__typename === 'StateUser' ? (
-                            <span>&nbsp;Back to state dashboard</span>
-                        ) : (
-                            <span>&nbsp;Back to dashboard</span>
-                        )}
-                    </Link>
+                    asCustom={NavLink}
+                    variant="unstyled"
+                    to={{
+                        pathname: '/dashboard',
+                    }}
+                >
+                    <Icon.ArrowBack />
+                    {user?.__typename === 'StateUser' ? (
+                        <span>&nbsp;Back to state dashboard</span>
+                    ) : (
+                        <span>&nbsp;Back to dashboard</span>
+                    )}
+                </Link>
                 )}
 
                 <SubmissionTypeSummarySection
