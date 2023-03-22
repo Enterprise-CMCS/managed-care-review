@@ -20,8 +20,7 @@ export function fetchEmailSettingsResolver(
     return async (_parent, __, context) => {
         const { user, span } = context
         if (!isAdminUser(user)) {
-            const errMessage =
-                'Non-admin user not authorized to fetch a settings'
+            const errMessage = 'Non-admin user not authorized to fetch settings'
             logError('fetchEmailSettings', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new ForbiddenError(errMessage)
