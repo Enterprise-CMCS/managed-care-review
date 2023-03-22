@@ -18,6 +18,7 @@ type LocalCMSUserType = {
     givenName: string
     familyName: string
     stateAssignments: StateType[]
+    divisionAssignment?: 'DMCO' | 'DMCP' | 'OACT'
 }
 
 type LocalAdminUserType = {

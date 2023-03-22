@@ -43,21 +43,22 @@ model State {
 }
 
 model User {
-  id               String             @id
-  givenName        String
-  familyName       String
-  email            String
-  role             Role
-  stateAssignments State[]
-  stateCode        String?
-  questions        Question[]
-  responses        QuestionResponse[]
+  id                 String             @id
+  givenName          String
+  familyName         String
+  email              String
+  role               Role
+  divisionAssignment Division?
+  stateAssignments   State[]
+  stateCode          String?
+  questions          Question[]
+  responses          QuestionResponse[]
 }
 
 model Question {
   id            String                 @id
   createdAt     DateTime               @default(now())
-  updatedAt     DateTime               @updatedAt  @default(now())
+  updatedAt     DateTime               @default(now()) @updatedAt
   pkgID         String
   pkg           HealthPlanPackageTable @relation(fields: [pkgID], references: [id])
   addedBy       User                   @relation(fields: [addedByUserID], references: [id])
@@ -69,7 +70,7 @@ model Question {
 model QuestionDocument {
   id         String   @id
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt  @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
   name       String
   s3URL      String
   questionID String
@@ -87,14 +88,20 @@ model QuestionResponseDocument {
 }
 
 model QuestionResponse {
-  id            String             @id
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
-  question      Question           @relation(fields: [questionID], references: [id])
-  addedBy       User               @relation(fields: [addedByUserID], references: [id])
+  id            String                     @id
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @updatedAt
+  question      Question                   @relation(fields: [questionID], references: [id])
+  addedBy       User                       @relation(fields: [addedByUserID], references: [id])
   questionID    String
   addedByUserID String
   documents     QuestionResponseDocument[]
+}
+
+enum Division {
+  DMCO
+  DMCP
+  OACT
 }
 
 enum Role {
