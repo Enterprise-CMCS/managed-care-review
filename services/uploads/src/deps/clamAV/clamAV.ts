@@ -103,7 +103,7 @@ async function uploadAVDefinitions(
                     TagSet: [
                         {
                             Key: 'uploadedAt',
-                            Value: new Date().toUTCString(),
+                            Value: new Date().toUTCString().replace(/,/, ''),
                         },
                     ],
                 }
