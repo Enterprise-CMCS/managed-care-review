@@ -11,7 +11,7 @@ import styles from './Settings.module.scss'
 
 export const SettingsErrorAlert = ({
     error,
-    isAuthenticated = true,
+    isAuthenticated = true, // By default, user is valid because Settings are within wrapped auth routes. We only want to check for authentication when the prop passed in
     isAdmin = false,
 }: {
     error?: ApolloError
@@ -59,5 +59,5 @@ export const SettingsErrorAlert = ({
                 </GridContainer>
             </div>
         )
-    } else return null //
+    } else return null // we are adding this alert to multiple tabs in the UI,  want to have it return nothing if that tab is fine.
 }

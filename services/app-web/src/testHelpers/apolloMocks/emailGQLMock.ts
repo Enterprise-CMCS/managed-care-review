@@ -6,7 +6,6 @@ import {
 
 export const fetchEmailSettings =
     (): MockedResponse<FetchEmailSettingsQuery> => {
-        // override the ID of the returned draft to match the queried id.
         return {
             request: {
                 query: FetchEmailSettingsDocument,
