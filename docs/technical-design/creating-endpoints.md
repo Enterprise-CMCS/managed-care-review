@@ -19,23 +19,25 @@ You can use the [Apollo Sandbox tool](https://www.apollographql.com/docs/graphos
 
 We have two ways to access the Apollo Sandbox tool:
 
-**Embedded Explorer Tool**:
->In all environments, except `prod`, we have embedded the Apollo Explorer Tool into the MC-Review app. The main reason for embedding the tool into the app was due to authorization configuration for `dev` and `val` environments. Embedding the tool allows us to configure the tools' authorization programmatically, removing the need for the user to manually do the configuration.
+**Embedded Apollo Explorer Tool**:
+>In all environments, except `prod`, we have embedded the Apollo Explorer Tool into the MC-Review app. We embedded the tool into the app to simplify authorization configuration for `dev` and `val` environments. By doing so, we can programmatically configure the tool's authorization, eliminating the need for manual configuration by the user.
 >
 >Accessing the embedded tool:
 >- Log into the MC-Review app
 >   - Depending on the user, performing certain GraphQL operations will be restricted. The operation authorization is done in the resolvers, `services/app-api/src/resolvers`.
->   - For example, a state user will not be allowed to unlock a submission. The graphql operation will return an unauthorized error.
+>   - For example, a state user will not be allowed to unlock a submission. The GraphQL operation will return an unauthorized error.
 >- Once logged in, input this url `[hostname]/dev/graphql-explorer` to access the tool.
 
-**External Explorer Tool**:
->For local graphql deployment we need to configure connection settings in the Explorer tool manually. This process is only applicable to `local` deployments
->
->Access external Explorer tool.
+**External Apollo Explorer Tool**:
+>Apollo Explorer is embedded in the local deployment, so there's no need to access it externally, except in rare cases like when the frontend is not accessible, and we need to perform GraphQL operations.
+> 
+>To connect Apollo Explorer to our local GraphQL api, we must manually configure connection settings in the Explorer tool.
+> 
+>Access the external tool (Only applicable to `local` deployment):
 >- Visit the tool at `https://studio.apollographql.com/sandbox/explorer`.
 >- Top left of the browser, the `SANDBOX` input field will have a gear icon.
 >- Click on this gear icon to open `Connection settings` modal.
->- In the modal input our local graphql endpoint `http://localhost:3030/local/graphql` into the `Endpoint` field.
+>- In the modal input our local GraphQL endpoint `http://localhost:3030/local/graphql` into the `Endpoint` field.
 >- Under `Shared headers` we will need to configure our cognito authentication.
 >   - There are two inputs in the `Shared headers`  section, the first is `header` name field and second is the `value`.
 >   - For the `header` name field it should be `cognito-authentication-provider`.
