@@ -1,5 +1,5 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
-import { isAdminUser } from '../../domain-models'
+import { isAdminUser, isValidCmsDivison } from '../../domain-models'
 import {
     isValidStateCode,
     StateCodeType,
@@ -41,6 +41,19 @@ export function updateCMSUserResolver(
         let { divisionAssignment } = input
         if (divisionAssignment === null) {
             divisionAssignment = undefined
+        }
+
+        // validate division assignment and throw an error if invalid
+        if (divisionAssignment !== undefined) {
+            if (!isValidCmsDivison(divisionAssignment)) {
+                const errMsg = 'Invalid division assignment'
+                logError('updateStateAssignments', errMsg)
+                setErrorAttributesOnActiveSpan(errMsg, span)
+                throw new UserInputError(errMsg, {
+                    argumentName: 'divisionAssignment',
+                    argumentValues: divisionAssignment,
+                })
+            }
         }
 
         const stateAssignmentCodes: StateCodeType[] = []
