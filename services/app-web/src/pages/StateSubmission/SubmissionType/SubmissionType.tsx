@@ -26,6 +26,8 @@ import {
     SubmissionType as SubmissionTypeT,
     useCreateHealthPlanPackageMutation,
     CreateHealthPlanPackageInput,
+    IndexHealthPlanPackagesDocument,
+    IndexHealthPlanPackagesQuery,
 } from '../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
@@ -87,28 +89,33 @@ export const SubmissionType = ({
             // without a refresh. Anytime a mutation does more than "modify an existing object"
             // you'll need to handle the cache.
             update(cache, { data }) {
-                if (data) {
-                    cache.modify({
-                        fields: {
-                            indexHealthPlanPackages(
-                                index = { totalCount: 0, edges: [] }
-                            ) {
-                                const newID = cache.identify(
-                                    data.createHealthPlanPackage.pkg
-                                )
-                                // This isn't quite what is documented, but it's clear this
-                                // is how things work from looking at the dev-tools
-                                const newRef = { __ref: newID }
+                const pkg = data?.createHealthPlanPackage.pkg
+                if (pkg) {
+                    const result =
+                        cache.readQuery<IndexHealthPlanPackagesQuery>({
+                            query: IndexHealthPlanPackagesDocument,
+                        })
 
-                                return {
-                                    totalCount: index.totalCount + 1,
-                                    edges: [
-                                        {
-                                            node: newRef,
-                                        },
-                                        ...index.edges,
-                                    ],
-                                }
+                    const indexHealthPlanPackages = {
+                        totalCount:
+                            result?.indexHealthPlanPackages.totalCount || 0,
+                        edges: result?.indexHealthPlanPackages.edges || [],
+                    }
+
+                    cache.writeQuery({
+                        query: IndexHealthPlanPackagesDocument,
+                        data: {
+                            indexHealthPlanPackages: {
+                                __typename: 'IndexHealthPlanPackagesPayload',
+                                totalCount:
+                                    indexHealthPlanPackages.totalCount + 1,
+                                edges: [
+                                    {
+                                        __typename: 'HealthPlanPackageEdge',
+                                        node: pkg,
+                                    },
+                                    ...indexHealthPlanPackages.edges,
+                                ],
                             },
                         },
                     })
