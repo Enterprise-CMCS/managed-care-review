@@ -27,7 +27,7 @@ async function avDownloadDefinitions(_event: S3Event, _context: Context) {
 
     const serviceName = `uploads-avDownloadDefinitions-${stageName}`
     initTracer(serviceName, otelCollectorURL)
-    initMeter(serviceName, otelCollectorURL)
+    initMeter(serviceName)
 
     const clamAVBucketName = process.env.CLAMAV_BUCKET_NAME
     if (!clamAVBucketName || clamAVBucketName === '') {

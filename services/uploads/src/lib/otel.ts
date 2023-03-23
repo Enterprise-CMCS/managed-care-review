@@ -42,17 +42,15 @@ export function initTracer(serviceName: string, otelCollectorURL: string) {
     provider.register()
 }
 
-export function initMeter(serviceName: string, otelCollectorURL: string) {
+export function initMeter(serviceName: string) {
     const resource = Resource.default().merge(
         new Resource({
             [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
         })
     )
     const metricReader = new PeriodicExportingMetricReader({
-        exporter: new OTLPMetricExporter({
-            url: otelCollectorURL,
-        }),
-        exportIntervalMillis: 10000, // default is 60000
+        exporter: new OTLPMetricExporter(),
+        exportIntervalMillis: 1000,
     })
 
     const provider = new MeterProvider({
