@@ -32,6 +32,7 @@ import { toDomain } from '../../../../app-web/src/common-code/proto/healthPlanFo
 import { EmailParameterStore } from '../../parameterStore'
 import { LDService } from '../../launchDarkly/launchDarkly'
 import { FlagValueTypes } from 'app-web/src/common-code/featureFlags'
+import { GraphQLError } from 'graphql'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
@@ -343,7 +344,11 @@ export function submitHealthPlanPackageResolver(
                 cmsPackageEmailResult
             )
             setErrorAttributesOnActiveSpan('CMS email failed', span)
-            throw cmsPackageEmailResult
+            throw new GraphQLError(cmsPackageEmailResult.message, {
+                extensions: {
+                    code: 'EMAIL_ERROR',
+                },
+            })
         }
 
         if (statePackageEmailResult instanceof Error) {
@@ -352,7 +357,11 @@ export function submitHealthPlanPackageResolver(
                 statePackageEmailResult
             )
             setErrorAttributesOnActiveSpan('state email failed', span)
-            throw statePackageEmailResult
+            throw new GraphQLError(statePackageEmailResult.message, {
+                extensions: {
+                    code: 'EMAIL_ERROR',
+                },
+            })
         }
 
         logSuccess('submitHealthPlanPackage')
