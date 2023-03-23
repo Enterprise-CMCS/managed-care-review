@@ -612,7 +612,12 @@ type EmailConfiguration {
     cmsDevTeamHelpEmailAddress: String!
 }
 
+type StateAnalystsConfiguration {
+    stateCode: String!
+    emails: [String!]!
+}
 type FetchEmailSettingsPayload {
     "Email settings"
     config: EmailConfiguration
+    stateAnalysts: [StateAnalystsConfiguration!]
 }

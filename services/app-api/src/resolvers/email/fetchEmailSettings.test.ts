@@ -46,6 +46,23 @@ describe('fetchEmailSettings', () => {
 
         expect(res.data?.fetchEmailSettings.config).toBeDefined()
     })
+    it('returns state analysts', async () => {
+        const server = await constructTestPostgresServer({
+            context: {
+                user: testUserAdmin,
+            },
+        })
+
+        // make a mock request
+        const res = await server.executeOperation({
+            query: FETCH_EMAIL_SETTINGS,
+        })
+
+        // confirm that we get what we got
+        expect(res.errors).toBeUndefined()
+
+        expect(res.data?.fetchEmailSettings.stateAnalysts).toBeDefined()
+    })
 
     it('returns  error for cms user', async () => {
         const server = await constructTestPostgresServer({
