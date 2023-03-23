@@ -26,6 +26,11 @@ import {
     mockUnlockedHealthPlanPackageWithDocuments,
     mockUnlockedHealthPlanPackage,
 } from './healthPlanFormDataMock'
+import { ApolloError } from '@apollo/client'
+import {
+    GRAPHQL_ERROR_MESSAGES,
+    GraphQLErrorTypes,
+} from '../../constants/errors'
 
 type fetchHealthPlanPackageMockProps = {
     submission?: HealthPlanPackage
@@ -416,21 +421,33 @@ const submitHealthPlanPackageMockSuccess = ({
 
 const submitHealthPlanPackageMockError = ({
     id,
+    errorCode,
 }: {
     id: string
-}): MockedResponse<SubmitHealthPlanPackageMutation> => {
+    errorCode?: GraphQLErrorTypes
+}): MockedResponse<SubmitHealthPlanPackageMutation | ApolloError> => {
+    const graphQLError = new GraphQLError(
+        errorCode
+            ? GRAPHQL_ERROR_MESSAGES[errorCode]
+            : 'Error attempting to submit.',
+        {
+            extensions: {
+                code: errorCode,
+            },
+        }
+    )
+
     return {
         request: {
             query: SubmitHealthPlanPackageDocument,
-            variables: { input: { submissionID: id } },
+            variables: { input: { pkgID: id } },
         },
+        error: new ApolloError({
+            graphQLErrors: [graphQLError],
+        }),
         result: {
-            errors: [
-                new GraphQLError(
-                    'Incomplete submission cannot be submitted',
-                    {}
-                ),
-            ],
+            data: null,
+            errors: [graphQLError],
         },
     }
 }
@@ -458,22 +475,34 @@ const unlockHealthPlanPackageMockSuccess = ({
 const unlockHealthPlanPackageMockError = ({
     id,
     reason,
+    errorCode,
 }: {
     id: string
     reason: string
+    errorCode?: GraphQLErrorTypes
 }): MockedResponse<UnlockHealthPlanPackageMutation> => {
+    const graphQLError = new GraphQLError(
+        errorCode
+            ? GRAPHQL_ERROR_MESSAGES[errorCode]
+            : 'Error attempting to unlock.',
+        {
+            extensions: {
+                code: errorCode,
+            },
+        }
+    )
+
     return {
         request: {
             query: UnlockHealthPlanPackageDocument,
             variables: { input: { pkgID: id, unlockedReason: reason } },
         },
+        error: new ApolloError({
+            graphQLErrors: [graphQLError],
+        }),
         result: {
-            errors: [
-                new GraphQLError(
-                    'Incomplete submission cannot be submitted',
-                    {}
-                ),
-            ],
+            data: null,
+            errors: [graphQLError],
         },
     }
 }
