@@ -4,14 +4,15 @@ import {
     StoreError,
 } from '../storeError'
 import { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { PrismaClient } from '@prisma/client'
+import { Division, PrismaClient } from '@prisma/client'
 import { CMSUserType } from '../../domain-models'
 import { domainUserFromPrismaUser } from './prismaDomainUser'
 
 export async function updateUserAssignedState(
     client: PrismaClient,
     userID: string,
-    stateCodes: StateCodeType[]
+    stateCodes: StateCodeType[],
+    divisionAssignment?: Division
 ): Promise<CMSUserType | StoreError> {
     try {
         const statesWithCode = stateCodes.map((s) => {
@@ -35,6 +36,7 @@ export async function updateUserAssignedState(
                     stateAssignments: {
                         set: statesWithCode,
                     },
+                    divisionAssignment,
                 },
                 include: {
                     stateAssignments: {

@@ -37,8 +37,11 @@ export function updateCMSUserResolver(
                 'user not authorized to modify state assignments'
             )
         }
-
         const { cmsUserID, stateAssignments } = input
+        let { divisionAssignment } = input
+        if (divisionAssignment === null) {
+            divisionAssignment = undefined
+        }
 
         const stateAssignmentCodes: StateCodeType[] = []
         const invalidCodes = []
@@ -68,7 +71,8 @@ export function updateCMSUserResolver(
 
         const result = await store.updateUserAssignedState(
             cmsUserID,
-            stateAssignmentCodes
+            stateAssignmentCodes,
+            divisionAssignment
         )
         if (isStoreError(result)) {
             if (result.code === 'INSERT_ERROR') {

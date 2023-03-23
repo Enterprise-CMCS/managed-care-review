@@ -9,6 +9,7 @@ mutation updateCMSUser($input: UpdateCMSUserInput!) {
                     code
                     name
                 }
+                divisionAssignment
             }
         }
     }

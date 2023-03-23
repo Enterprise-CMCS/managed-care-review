@@ -13,23 +13,27 @@ The relative merits of each approach should become clear below.
 The major mental shift in using GraphQL, in contrast to RESTful services, is that you have to _begin_ by thinking of the data you want returned. With REST, it's common to hit an endpoint, get back a large JSON, browse through it, and then, in the application code, whittle it down, or pluck the bits that you need. But we'll construct our GraphQL queries to return to return exactly what we need, before we hit the application code at all.
 
 ### Apollo Sandbox
+
 You can use the [Apollo Sandbox tool](https://www.apollographql.com/docs/graphos/explorer/sandbox/) to write your graphql queries and mutations to the local graphql deployment. A couple of notable apollo sandbox features:
-- [The Explorer](https://www.apollographql.com/docs/graphos/explorer/explorer/): A web IDE for creating, running, and managing GraphQL operations
-- Schema referencing
+
+-   [The Explorer](https://www.apollographql.com/docs/graphos/explorer/explorer/): A web IDE for creating, running, and managing GraphQL operations
+-   Schema referencing
 
 To connect to the local graphql deployment we need to configure connection settings in the Explorer tool.
-- Visit the tool at https://studio.apollographql.com/sandbox/explorer.
-- Top left of the browser, the `SANDBOX` input field will have a gear icon.
-- Click on this gear icon to open `Connection settings` modal.
-- In the modal input our local graphql endpoint `http://localhost:3030/local/graphql` into the `Endpoint` field.
-- Under `Shared headers` we will need to configure our cognito authentication.
-   - There are two inputs in the `Shared headers`  section, the first is `header` name field and second is the `value`.
-   - For the `header` name field it should be `cognito-authentication-provider`.
-   - For the `value` field, you can paste in the following for each user's authentication.
-      - CMS User Zuko: `{"id":"user3","email":"zuko@example.com","givenName":"Zuko","familyName":"Hotman","role":"CMS_USER","stateAssignments":[]}`
-      - State User Aang: `{"id":"user1","email":"aang@example.com","givenName":"Aang","familyName":"Avatar","role":"STATE_USER","stateCode":"MN"}`
-      - State User Toph: `{"id":"user2","email":"toph@example.com","givenName":"Toph","familyName":"Beifong","role":"STATE_USER","stateCode":"VA"}`
-   - Click the save button, and you should see a green dot with our endpoint inside the `SANDBOX` input field.
+
+-   Visit the tool at https://studio.apollographql.com/sandbox/explorer.
+-   Top left of the browser, the `SANDBOX` input field will have a gear icon.
+-   Click on this gear icon to open `Connection settings` modal.
+-   In the modal input our local graphql endpoint `http://localhost:3030/local/graphql` into the `Endpoint` field.
+-   Under `Shared headers` we will need to configure our cognito authentication.
+    -   There are two inputs in the `Shared headers` section, the first is `header` name field and second is the `value`.
+    -   For the `header` name field it should be `cognito-authentication-provider`.
+    -   For the `value` field, you can paste in the following for each user's authentication.
+        -   CMS User Zuko: `{"id":"user3","email":"zuko@example.com","givenName":"Zuko","familyName":"Hotman","role":"CMS_USER","stateAssignments":[]}`
+        -   State User Aang: `{"id":"user1","email":"aang@example.com","givenName":"Aang","familyName":"Avatar","role":"STATE_USER","stateCode":"MN"}`
+        -   State User Toph: `{"id":"user2","email":"toph@example.com","givenName":"Toph","familyName":"Beifong","role":"STATE_USER","stateCode":"VA"}`
+        -   Admin User Iroh: `{"id":"user4", "email":"iroh@example.com", "givenName":"Iroh","familyName":"Coldstart","role":"ADMIN_USER" }`
+    -   Click the save button, and you should see a green dot with our endpoint inside the `SANDBOX` input field.
 
 With configuration finished you should now be able to write queries and mutation to hit our resolvers.
 
