@@ -124,6 +124,7 @@
         "@aws-sdk/client-amplify": "^3.294.0",
         "@aws-sdk/client-s3": "^3.294.0",
         "@aws-sdk/s3-request-presigner": "^3.294.0",
+        "@craco/craco": "^7.1.0",
         "@storybook/addon-a11y": "^6.5.15",
         "@storybook/addon-essentials": "^6.5.15",
         "@storybook/addon-links": "^6.5.15",
@@ -163,7 +164,6 @@
         "serverless-cloudfront-invalidate": "^1.11.0",
         "serverless-s3-sync": "^3.0.0",
         "serverless-stack-termination-protection": "^2.0.2",
-        "storybook-preset-craco": "^0.0.6",
         "webpack": "^5.72.0"
     }
 }

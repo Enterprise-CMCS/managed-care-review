@@ -4,7 +4,6 @@ import { NavLink } from 'react-router-dom'
 import styles from './SubmissionSideNav.module.scss'
 import { useParams, useLocation, useNavigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-import sprite from 'uswds/src/img/sprite.svg'
 import {
     QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES,
     RouteT,

@@ -1,7 +1,18 @@
 const path = require('path')
 
-
+// Feedback from Drew - instead of pushing a rule modify config 
+// 
 const webpackConfig = (config) => {
+        process.stdout.write('HERE \n');
+    process.stdout.write(JSON.stringify(config.module.rules));
+    //  config.module.rules.forEach((p) => {
+    //      if (p.options) {
+    //          // Ignore warnings about ordering from mini-css-extract-plugin
+    //          if (p.options.hasOwnProperty('sassOptions')) {
+    //              p.options.ignoreOrder = true;
+    //          }
+    //      }
+    //  });
 
     config.module.rules.push(
       {
