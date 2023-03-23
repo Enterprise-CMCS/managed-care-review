@@ -28,9 +28,9 @@ import {
 } from './healthPlanFormDataMock'
 import { ApolloError } from '@apollo/client'
 import {
-    GRAPHQL_ERROR_MESSAGES,
-    GraphQLErrorTypes,
-} from '../../constants/errors'
+    GRAPHQL_ERROR_MOCK_MESSAGES,
+    GraphQLErrorMockCodeType,
+} from './apolloErrorCodeMocks'
 
 type fetchHealthPlanPackageMockProps = {
     submission?: HealthPlanPackage
@@ -424,11 +424,11 @@ const submitHealthPlanPackageMockError = ({
     errorCode,
 }: {
     id: string
-    errorCode?: GraphQLErrorTypes
+    errorCode?: GraphQLErrorMockCodeType
 }): MockedResponse<SubmitHealthPlanPackageMutation | ApolloError> => {
     const graphQLError = new GraphQLError(
         errorCode
-            ? GRAPHQL_ERROR_MESSAGES[errorCode]
+            ? GRAPHQL_ERROR_MOCK_MESSAGES[errorCode]
             : 'Error attempting to submit.',
         {
             extensions: {
@@ -479,11 +479,11 @@ const unlockHealthPlanPackageMockError = ({
 }: {
     id: string
     reason: string
-    errorCode?: GraphQLErrorTypes
+    errorCode?: GraphQLErrorMockCodeType
 }): MockedResponse<UnlockHealthPlanPackageMutation> => {
     const graphQLError = new GraphQLError(
         errorCode
-            ? GRAPHQL_ERROR_MESSAGES[errorCode]
+            ? GRAPHQL_ERROR_MOCK_MESSAGES[errorCode]
             : 'Error attempting to unlock.',
         {
             extensions: {

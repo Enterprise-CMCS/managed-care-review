@@ -23,12 +23,4 @@ const ERROR_MESSAGES = {
 
 const MAIL_TO_SUPPORT = 'mc-review@cms.hhs.gov'
 
-const GRAPHQL_ERROR_MESSAGES = {
-    EMAIL_ERROR: 'Error attempting to send emails.',
-    BAD_USER_INPUT: 'Your submission is missing information.',
-    FORBIDDEN: 'User not authorized to fetch state data.',
-}
-
-export type GraphQLErrorTypes = keyof typeof GRAPHQL_ERROR_MESSAGES
-
-export { MAIL_TO_SUPPORT, ERROR_MESSAGES, GRAPHQL_ERROR_MESSAGES }
+export { MAIL_TO_SUPPORT, ERROR_MESSAGES }
