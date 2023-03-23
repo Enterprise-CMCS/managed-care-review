@@ -3,6 +3,7 @@ import { spawnSync } from 'child_process'
 import { readdir } from 'fs/promises'
 
 import { S3UploadsClient } from '../s3'
+import { generateUploadedAtTagSet } from '../../lib/tags'
 
 interface ClamAV {
     downloadAVDefinitions: () => Promise<undefined | Error>
@@ -99,14 +100,7 @@ async function uploadAVDefinitions(
         return s3Client
             .uploadObject(key, config.bucketName, filepath)
             .then(() => {
-                const tags = {
-                    TagSet: [
-                        {
-                            Key: 'uploadedAt',
-                            Value: new Date().toUTCString().replace(/,/, ''),
-                        },
-                    ],
-                }
+                const tags = generateUploadedAtTagSet()
 
                 return s3Client.tagObject(key, config.bucketName, tags)
             })

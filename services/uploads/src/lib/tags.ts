@@ -53,7 +53,18 @@ function virusScanStatus(tags: Tag[]): ScanStatus | Error | undefined {
     return undefined
 }
 
-function uploadedAt(tags: Tag[]): Date | Error | undefined {
+function generateUploadedAtTagSet() {
+    return {
+        TagSet: [
+            {
+                Key: 'uploadedAt',
+                Value: new Date().toISOString(),
+            },
+        ],
+    }
+}
+
+function parseUploadedAtFromTags(tags: Tag[]): Date | Error | undefined {
     for (const tag of tags) {
         if (tag.Key === 'uploadedAt') {
             if (!tag.Value) {
@@ -67,6 +78,12 @@ function uploadedAt(tags: Tag[]): Date | Error | undefined {
     return undefined
 }
 
-export { generateVirusScanTagSet, virusScanStatus, uploadedAt, isScanStatus }
+export {
+    generateVirusScanTagSet,
+    virusScanStatus,
+    parseUploadedAtFromTags as uploadedAt,
+    generateUploadedAtTagSet,
+    isScanStatus,
+}
 
 export type { ScanStatus }

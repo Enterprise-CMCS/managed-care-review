@@ -3,7 +3,7 @@ import { NewTestS3UploadsClient } from '../deps/s3'
 import { updateAVDefinitions } from './updateAVDefinitions'
 import { readdir, cp } from 'fs/promises'
 import path from 'path'
-import { uploadedAt } from './tags'
+import { generateUploadedAtTagSet, uploadedAt } from './tags'
 
 describe('updateAVDefinitions', () => {
     // This test will trample over other tests by deleting files in the test-av-definitions bucket,
@@ -132,18 +132,26 @@ describe('updateAVDefinitions', () => {
         if (freshDat instanceof Error) {
             throw freshDat
         }
-        const uploadedDat = uploadedAt(freshDat)
-        if (uploadedDat instanceof Error) {
-            throw uploadedDat
+        const uploadedDate = uploadedAt(freshDat)
+        if (uploadedDate instanceof Error) {
+            throw uploadedDate
         }
 
-        if (uploadedDat === undefined) {
+        if (uploadedDate === undefined) {
             throw new Error('No uploaded At on freshclam.dat')
         }
 
         // this file should have been uploaded in the last two seconds
         const now = new Date()
-        const diff = now.getTime() - uploadedDat.getTime()
+        const diff = now.getTime() - uploadedDate.getTime()
         expect(diff).toBeLessThan(2000)
     }, 100000)
+
+    it('doesnt generate invalid TagValues', async () => {
+        const tags = generateUploadedAtTagSet()
+
+        const value = tags.TagSet[0].Value
+        // adapted from https://docs.aws.amazon.com/directoryservice/latest/devguide/API_Tag.html
+        expect(value).toMatch(/^([\w\s\d_.:/=+\-@]*)$/)
+    })
 })
