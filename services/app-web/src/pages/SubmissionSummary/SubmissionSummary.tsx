@@ -8,7 +8,6 @@ import React, { useEffect, useRef, useState } from 'react'
 import { NavLink, useOutletContext } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
 import { packageName } from '../../common-code/healthPlanFormDataType'
-import { Loading } from '../../components/Loading'
 import {
     ContactsSummarySection,
     ContractDetailsSummarySection,
@@ -70,17 +69,8 @@ export const SubmissionSummary = (): React.ReactElement => {
         featureFlags.CMS_QUESTIONS.defaultValue
     )
 
-    const outletContext = useOutletContext<SideNavOutletContextType>()
-    if (!outletContext) {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
-    }
-
     const { pkg, currentRevision, packageData, user, documentDates } =
-        outletContext
+        useOutletContext<SideNavOutletContextType>()
 
     const isCMSUser = user?.role === 'CMS_USER'
     const submissionStatus = pkg.status
