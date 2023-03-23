@@ -82,7 +82,7 @@ export function updateCMSUserResolver(
             })
         }
 
-        const result = await store.updateUserAssignedState(
+        const result = await store.updateCmsUserProperties(
             cmsUserID,
             stateAssignmentCodes,
             divisionAssignment
