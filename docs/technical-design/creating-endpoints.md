@@ -17,19 +17,34 @@ You can use the [Apollo Sandbox tool](https://www.apollographql.com/docs/graphos
 - [The Explorer](https://www.apollographql.com/docs/graphos/explorer/explorer/): A web IDE for creating, running, and managing GraphQL operations
 - Schema referencing
 
-To connect to the local graphql deployment we need to configure connection settings in the Explorer tool.
-- Visit the tool at https://studio.apollographql.com/sandbox/explorer.
-- Top left of the browser, the `SANDBOX` input field will have a gear icon.
-- Click on this gear icon to open `Connection settings` modal.
-- In the modal input our local graphql endpoint `http://localhost:3030/local/graphql` into the `Endpoint` field.
-- Under `Shared headers` we will need to configure our cognito authentication.
-   - There are two inputs in the `Shared headers`  section, the first is `header` name field and second is the `value`.
-   - For the `header` name field it should be `cognito-authentication-provider`.
-   - For the `value` field, you can paste in the following for each user's authentication.
-      - CMS User Zuko: `{"id":"user3","email":"zuko@example.com","givenName":"Zuko","familyName":"Hotman","role":"CMS_USER","stateAssignments":[]}`
-      - State User Aang: `{"id":"user1","email":"aang@example.com","givenName":"Aang","familyName":"Avatar","role":"STATE_USER","stateCode":"MN"}`
-      - State User Toph: `{"id":"user2","email":"toph@example.com","givenName":"Toph","familyName":"Beifong","role":"STATE_USER","stateCode":"VA"}`
-   - Click the save button, and you should see a green dot with our endpoint inside the `SANDBOX` input field.
+We have two ways to access the Apollo Sandbox tool:
+
+**Embedded Explorer Tool**:
+>In all environments, except `prod`, we have embedded the Apollo Explorer Tool into the MC-Review app. The main reason for embedding the tool into the app was due to authorization configuration for `dev` and `val` environments. Embedding the tool allows us to configure the tools' authorization programmatically, removing the need for the user to manually do the configuration.
+>
+>Accessing the embedded tool:
+>- Log into the MC-Review app
+>   - Depending on the user, performing certain GraphQL operations will be restricted. The operation authorization is done in the resolvers, `services/app-api/src/resolvers`.
+>   - For example, a state user will not be allowed to unlock a submission. The graphql operation will return an unauthorized error.
+>- Once logged in, input this url `[hostname]/dev/graphql-explorer` to access the tool.
+
+**External Explorer Tool**:
+>For local graphql deployment we need to configure connection settings in the Explorer tool manually. This process is only applicable to `local` deployments
+>
+>Access external Explorer tool.
+>- Visit the tool at `https://studio.apollographql.com/sandbox/explorer`.
+>- Top left of the browser, the `SANDBOX` input field will have a gear icon.
+>- Click on this gear icon to open `Connection settings` modal.
+>- In the modal input our local graphql endpoint `http://localhost:3030/local/graphql` into the `Endpoint` field.
+>- Under `Shared headers` we will need to configure our cognito authentication.
+>   - There are two inputs in the `Shared headers`  section, the first is `header` name field and second is the `value`.
+>   - For the `header` name field it should be `cognito-authentication-provider`.
+>   - For the `value` field, you can paste in the following for each user's authentication.
+>     - Admin User Iroh: `{"id":"user4","email":"iroh@example.com","givenName":"Iroh","familyName":"Coldstart","role":"ADMIN_USER"}`
+>     - CMS User Zuko: `{"id":"user3","email":"zuko@example.com","givenName":"Zuko","familyName":"Hotman","role":"CMS_USER","stateAssignments":[]}`
+>     - State User Aang: `{"id":"user1","email":"aang@example.com","givenName":"Aang","familyName":"Avatar","role":"STATE_USER","stateCode":"MN"}`
+>     - State User Toph: `{"id":"user2","email":"toph@example.com","givenName":"Toph","familyName":"Beifong","role":"STATE_USER","stateCode":"VA"}`
+>   - Click the save button, and you should see a green dot with our endpoint inside the `SANDBOX` input field.
 
 With configuration finished you should now be able to write queries and mutation to hit our resolvers.
 
