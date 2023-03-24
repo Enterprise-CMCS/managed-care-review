@@ -105,7 +105,7 @@ model UpdateInfoTable {
   id String @id
 
   updatedAt     DateTime
-  updatedByID String 
+  updatedByID String
   updatedBy     User @relation(fields: [updatedByID], references: [id])
   updatedReason String
 
