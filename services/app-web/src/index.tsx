@@ -1,3 +1,4 @@
+import './wdyr'
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
@@ -12,7 +13,7 @@ import { localGQLFetch, fakeAmplifyFetch } from './api'
 import { assertIsAuthMode } from './common-code/config'
 import { S3ClientT, newAmplifyS3Client, newLocalS3Client } from './s3'
 import { asyncWithLDProvider } from 'launchdarkly-react-client-sdk'
-import  type { S3BucketConfigType } from './s3/s3Amplify'
+import type { S3BucketConfigType } from './s3/s3Amplify'
 
 const gqlSchema = loader('../../app-web/src/gen/schema.graphql')
 
@@ -71,7 +72,7 @@ const apolloClient = new ApolloClient({
 const s3Region = process.env.REACT_APP_S3_REGION
 const s3LocalURL = process.env.REACT_APP_S3_LOCAL_URL
 const s3DocumentsBucket = process.env.REACT_APP_S3_DOCUMENTS_BUCKET
-const s3QABucket = process.env.REACT_APP_S3_QA_BUCKET 
+const s3QABucket = process.env.REACT_APP_S3_QA_BUCKET
 
 if (s3DocumentsBucket === undefined || s3QABucket === undefined) {
     throw new Error(
@@ -87,9 +88,9 @@ if (s3Region !== undefined && s3LocalURL !== undefined) {
 
 let s3Client: S3ClientT
 const S3_BUCKETS_CONFIG: S3BucketConfigType = {
-          HEALTH_PLAN_DOCS: s3DocumentsBucket,
-          QUESTION_ANSWER_DOCS: s3QABucket,
-      }
+    HEALTH_PLAN_DOCS: s3DocumentsBucket,
+    QUESTION_ANSWER_DOCS: s3QABucket,
+}
 if (s3Region) {
     s3Client = newAmplifyS3Client(S3_BUCKETS_CONFIG)
 } else if (s3LocalURL) {

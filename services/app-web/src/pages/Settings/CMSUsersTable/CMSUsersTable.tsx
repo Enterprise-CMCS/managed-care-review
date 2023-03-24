@@ -12,6 +12,7 @@ import {
     useIndexUsersQuery,
     IndexUsersQuery,
     Division,
+    useUpdateHealthPlanFormDataMutation,
 } from '../../../gen/gqlClient'
 
 import styles from '../Settings.module.scss'
@@ -28,7 +29,15 @@ type DivisionSelectOptions = {
 }
 
 export const CMSUsersTable = (): React.ReactElement => {
-    const [updateCmsUser] = useUpdateCmsUserMutation()
+    // const [updateCmsUser] = useUpdateCmsUserMutation()
+    const useMemoizedUpdateCmsUserMutation = () => {
+        const [updateCmsUser] = useUpdateCmsUserMutation()
+
+        return useMemo(() => updateCmsUser, [updateCmsUser])
+    }
+    const updateCmsUser = useMemoizedUpdateCmsUserMutation()
+
+    const [updateform] = useUpdateHealthPlanFormDataMutation()
 
     const divisionSelect = useCallback(
         (
@@ -38,22 +47,35 @@ export const CMSUsersTable = (): React.ReactElement => {
                 | undefined,
             row: CmsUser
         ) => {
+            // console.log('divisionSelect called with:', currentAssignment, row)
             const handleChange = async (
                 selectedOption: OnChangeValue<DivisionSelectOptions, false>,
                 actionMeta: ActionMeta<DivisionSelectOptions>,
                 row: CmsUser
             ) => {
+                // console.log('handleChange called with:', selectedOption, row)
                 if (selectedOption && 'value' in selectedOption) {
-                    const updatedUser = await updateCmsUser({
-                        variables: {
-                            input: {
-                                cmsUserID: row.id,
-                                stateAssignments: [],
-                                divisionAssignment: selectedOption.value,
-                            },
-                        },
-                    })
-                    console.log('Updated user:', updatedUser)
+                    await updateform()
+                    // await updateCmsUser({
+                    //     variables: {
+                    //         input: {
+                    //             cmsUserID: row.id,
+                    //             stateAssignments: [],
+                    //             divisionAssignment: selectedOption.value,
+                    //         },
+                    //     },
+                    // })
+                    // await new Promise((resolve) => setTimeout(resolve, 2000))
+                    // const updatedUser = await updateCmsUser({
+                    //     variables: {
+                    //         input: {
+                    //             cmsUserID: row.id,
+                    //             stateAssignments: [],
+                    //             divisionAssignment: selectedOption.value,
+                    //         },
+                    //     },
+                    // })
+                    // console.log('Updated user:', updatedUser)
                     console.log('Selected value:', selectedOption.value)
                     console.log('Row object:', row)
                 }
@@ -70,12 +92,11 @@ export const CMSUsersTable = (): React.ReactElement => {
                 if (!value) return null
                 return options.find((option) => option.value === value) || null
             }
-
             const defaultOption = findOptionByValue(currentAssignment)
 
             return (
                 <Select
-                    defaultValue={defaultOption}
+                    value={defaultOption}
                     options={options}
                     onChange={(selectedOption, actionMeta) =>
                         handleChange(selectedOption, actionMeta, row)
@@ -83,36 +104,41 @@ export const CMSUsersTable = (): React.ReactElement => {
                 />
             )
         },
-        [updateCmsUser] // dependencies array
+        [updateform]
     )
-    const { loading, data, error } = useIndexUsersQuery({
-        fetchPolicy: 'network-only',
-    })
 
+    const { loading, data, error } = useIndexUsersQuery({
+        fetchPolicy: 'cache-and-network',
+    })
+    // console.log('CMSUsersTable called with:', data)
     const showLoading = loading || !data
 
-    const columns = useMemo(
-        () => [
+    const columns = useMemo(() => {
+        console.log('columns useMemo called')
+        return [
             columnHelper.accessor('familyName', {
+                id: 'familyName',
                 cell: (info) => info.getValue(),
                 header: () => 'Family Name',
             }),
             columnHelper.accessor('givenName', {
+                id: 'givenName',
                 cell: (info) => info.getValue(),
                 header: () => 'Given Name',
             }),
             columnHelper.accessor('email', {
+                id: 'email',
                 cell: (info) => info.getValue(),
                 header: () => 'Email',
             }),
             columnHelper.accessor('divisionAssignment', {
+                id: 'divisionAssignment',
                 cell: (info) =>
                     divisionSelect(info.getValue(), info.row.original),
                 header: () => 'Division',
             }),
-        ],
-        [divisionSelect]
-    )
+        ]
+    }, [divisionSelect])
 
     // pick out the part of IndexUsersQuery that specifies Admin/CMS/StateUser
     type UserTypesInIndexQuery = Pick<
@@ -120,23 +146,24 @@ export const CMSUsersTable = (): React.ReactElement => {
         'node'
     >['node']
 
-    function isCmsUser(obj: UserTypesInIndexQuery): obj is CmsUser {
-        return obj.__typename === 'CMSUser'
-    }
-
-    const filterForCmsUsers = (
-        data: IndexUsersQuery | undefined
-    ): CmsUser[] => {
-        if (!data) {
-            return []
+    const filterForCmsUsers = useMemo(() => {
+        function isCmsUser(obj: UserTypesInIndexQuery): obj is CmsUser {
+            return obj.__typename === 'CMSUser'
         }
-        const cmsUsers = data.indexUsers.edges
-            .filter((edge) => isCmsUser(edge.node))
-            .map((edge) => edge.node as CmsUser)
-        return cmsUsers
-    }
+        return (data: IndexUsersQuery | undefined): CmsUser[] => {
+            if (!data) {
+                return []
+            }
+            const cmsUsers = data.indexUsers.edges
+                .filter((edge) => isCmsUser(edge.node))
+                .map((edge) => edge.node as CmsUser)
+            return cmsUsers
+        }
+    }, [])
 
     const cmsUsers = filterForCmsUsers(data)
+    // console.log('cmsUsers:', cmsUsers)
+    // console.log('columns:', columns)
 
     const table = useReactTable({
         data: cmsUsers,
@@ -196,3 +223,5 @@ export const CMSUsersTable = (): React.ReactElement => {
         </div>
     )
 }
+
+CMSUsersTable.whyDidYouRender = true
