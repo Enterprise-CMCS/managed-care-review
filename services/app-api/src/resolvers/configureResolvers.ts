@@ -25,7 +25,7 @@ import {
 } from './user'
 import { EmailParameterStore } from '../parameterStore'
 import { LDService } from '../launchDarkly/launchDarkly'
-import { fetchEmailSettingsResolver } from './emails/fetchEmailSettings'
+import { fetchEmailSettingsResolver } from './email/fetchEmailSettings'
 
 export function configureResolvers(
     store: Store,
@@ -42,7 +42,11 @@ export function configureResolvers(
             indexHealthPlanPackages: indexHealthPlanPackagesResolver(store),
             indexUsers: indexUsersResolver(store),
             indexQuestions: indexQuestionsResolver(store),
-            fetchEmailSettings: fetchEmailSettingsResolver(emailer),
+            fetchEmailSettings: fetchEmailSettingsResolver(
+                store,
+                emailer,
+                emailParameterStore
+            ),
         },
         Mutation: {
             createHealthPlanPackage: createHealthPlanPackageResolver(store),

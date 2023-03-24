@@ -46,6 +46,23 @@ describe('fetchEmailSettings', () => {
 
         expect(res.data?.fetchEmailSettings.config).toBeDefined()
     })
+    it('returns state analysts', async () => {
+        const server = await constructTestPostgresServer({
+            context: {
+                user: testUserAdmin,
+            },
+        })
+
+        // make a mock request
+        const res = await server.executeOperation({
+            query: FETCH_EMAIL_SETTINGS,
+        })
+
+        // confirm that we get what we got
+        expect(res.errors).toBeUndefined()
+
+        expect(res.data?.fetchEmailSettings.stateAnalysts).toBeDefined()
+    })
 
     it('returns  error for cms user', async () => {
         const server = await constructTestPostgresServer({
@@ -66,7 +83,7 @@ describe('fetchEmailSettings', () => {
         const resultErr = res.errors[0]
 
         expect(resultErr?.message).toBe(
-            'Non-admin user not authorized to fetch a settings'
+            'Non-admin user not authorized to fetch settings'
         )
         expect(resultErr?.extensions?.code).toBe('FORBIDDEN')
     })
@@ -90,7 +107,7 @@ describe('fetchEmailSettings', () => {
         const resultErr = res.errors[0]
 
         expect(resultErr?.message).toBe(
-            'Non-admin user not authorized to fetch a settings'
+            'Non-admin user not authorized to fetch settings'
         )
         expect(resultErr?.extensions?.code).toBe('FORBIDDEN')
     })
