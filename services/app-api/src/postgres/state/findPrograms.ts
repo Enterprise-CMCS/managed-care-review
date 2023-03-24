@@ -1,5 +1,5 @@
 import { ProgramType } from '../../domain-models'
-import statePrograms from 'app-web/src/common-code/data/statePrograms.json'
+import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
 
 // Currently relies on state programs json; does not query postgres
 function findPrograms(
