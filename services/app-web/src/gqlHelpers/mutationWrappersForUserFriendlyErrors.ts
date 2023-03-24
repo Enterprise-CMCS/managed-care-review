@@ -16,8 +16,8 @@ import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 import { recordJSException } from '../otelHelpers'
 import { handleGQLErrors as handleGQLErrorLogging } from './apolloErrors'
 import { ERROR_MESSAGES } from '../constants/errors'
-/* 
-Adds user friendly/facing error messages to health plan package mutations. 
+/*
+Adds user friendly/facing error messages to health plan package mutations.
 - Reminder, we handle graphql requests via apollo client in our web app.
 - Error messages returned here are displayed to user in UnlockSubmitModal > GenericApiBanner.
 */
@@ -36,26 +36,37 @@ const handleApolloErrorsAndAddUserFacingMessages = (
             ? ERROR_MESSAGES.submit_error_generic
             : ERROR_MESSAGES.unlock_error_generic
 
+    const options = {
+        cause: {},
+    }
+
     if (apolloError.graphQLErrors) {
         handleGQLErrorLogging(apolloError.graphQLErrors)
 
         apolloError.graphQLErrors.forEach(({ extensions }) => {
             // handle most common error cases with more specific messaging
+            if (extensions.code === 'EMAIL_ERROR') {
+                message = ERROR_MESSAGES.email_error_generic
+                options.cause = extensions.code
+            }
             if (
                 extensions.code === 'BAD_USER_INPUT' &&
                 mutation === 'SUBMIT_HEALTH_PLAN_PACKAGE'
             ) {
                 message = ERROR_MESSAGES.submit_missing_field
+                options.cause = extensions.code
             }
             if (
                 extensions.code === 'BAD_USER_INPUT' &&
                 mutation === 'UNLOCK_HEALTH_PLAN_PACKAGE'
             ) {
                 message = ERROR_MESSAGES.unlock_invalid_package_status // / TODO: This is should be a custom ApolloError such as INVALID_PACKAGE_STATUS or ACTION_UNAVAILABLE, not user input error since doesn't involve form fields the user controls
+                options.cause = extensions.code
             }
         })
     }
-    return new Error(message)
+
+    return new Error(message, options)
 }
 
 export const unlockMutationWrapper = async (
