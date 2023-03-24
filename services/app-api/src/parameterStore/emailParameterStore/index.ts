@@ -1,7 +1,9 @@
 export {
     getStateAnalystsEmails,
     getStateAnalystsEmailsLocal,
-} from './stateAnalystsEmails/getStateAnalystsEmails'
+    getStateAnalystsSettings,
+    getStateAnalystsSettingsLocal,
+} from './stateAnalystsEmails'
 export {
     getDevReviewTeamEmails,
     getDevReviewTeamEmailsLocal,

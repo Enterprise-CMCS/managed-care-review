@@ -1,9 +1,9 @@
-import { getParameterStore } from '../../awsParameterStore'
+import { ParameterStore } from '../../awsParameterStore'
 import { validateAndReturnValueArray } from '../helpers'
 
 export const getDMCOEmails = async (): Promise<string[] | Error> => {
     const name = `/configuration/email/dmco`
-    const dmcoTeamAddresses = await getParameterStore(name)
+    const dmcoTeamAddresses = await ParameterStore.getParameter(name)
 
     return validateAndReturnValueArray(dmcoTeamAddresses, name)
 }
