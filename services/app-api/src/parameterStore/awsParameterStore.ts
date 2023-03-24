@@ -26,9 +26,10 @@ const getParameters = async (names: string[]): Promise<ParametersType> => {
         const { Parameters: parameters } = await ssm.send(command)
 
         if (!parameters || parameters.length === 0) {
-            return new Error(
+            console.error(
                 `Failed to return parameters for ${names} data was undefined or empty.`
             )
+            return [] // not an error state, just return empty array for none found
         }
 
         const parametersList: ParametersType = []
