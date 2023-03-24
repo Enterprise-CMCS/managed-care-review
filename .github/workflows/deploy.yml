@@ -211,7 +211,7 @@ jobs:
 
   deploy-infra:
     needs: [begin-deployment]
-    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@mt-instrument-uploads
+    uses: CMSgov/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
