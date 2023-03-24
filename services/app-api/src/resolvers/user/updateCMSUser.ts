@@ -96,6 +96,12 @@ export function updateCMSUserResolver(
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw new Error(errMsg)
         }
+        if (!result) {
+            const errMsg = 'Failed to update user'
+            logError('updateCmsUser', errMsg)
+            setErrorAttributesOnActiveSpan(errMsg, span)
+            throw new Error(errMsg)
+        }
 
         logSuccess('updateCmsUser')
 
