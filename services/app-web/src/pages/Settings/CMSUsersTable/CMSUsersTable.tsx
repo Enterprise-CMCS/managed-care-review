@@ -12,7 +12,6 @@ import {
     useIndexUsersQuery,
     IndexUsersQuery,
     Division,
-    useUpdateHealthPlanFormDataMutation,
 } from '../../../gen/gqlClient'
 
 import styles from '../Settings.module.scss'
@@ -37,8 +36,6 @@ export const CMSUsersTable = (): React.ReactElement => {
     }
     const updateCmsUser = useMemoizedUpdateCmsUserMutation()
 
-    const [updateform] = useUpdateHealthPlanFormDataMutation()
-
     const divisionSelect = useCallback(
         (
             currentAssignment:
@@ -55,16 +52,15 @@ export const CMSUsersTable = (): React.ReactElement => {
             ) => {
                 // console.log('handleChange called with:', selectedOption, row)
                 if (selectedOption && 'value' in selectedOption) {
-                    await updateform()
-                    // await updateCmsUser({
-                    //     variables: {
-                    //         input: {
-                    //             cmsUserID: row.id,
-                    //             stateAssignments: [],
-                    //             divisionAssignment: selectedOption.value,
-                    //         },
-                    //     },
-                    // })
+                    await updateCmsUser({
+                        variables: {
+                            input: {
+                                cmsUserID: row.id,
+                                stateAssignments: [],
+                                divisionAssignment: selectedOption.value,
+                            },
+                        },
+                    })
                     // await new Promise((resolve) => setTimeout(resolve, 2000))
                     // const updatedUser = await updateCmsUser({
                     //     variables: {
@@ -104,7 +100,7 @@ export const CMSUsersTable = (): React.ReactElement => {
                 />
             )
         },
-        [updateform]
+        [updateCmsUser]
     )
 
     const { loading, data, error } = useIndexUsersQuery({
