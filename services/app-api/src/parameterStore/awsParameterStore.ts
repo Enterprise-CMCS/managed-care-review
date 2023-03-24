@@ -44,9 +44,9 @@ const getParameters = async (names: string[]): Promise<ParametersType> => {
         return parametersList
     } catch (err) {
         console.error(
-            `Failed to fetch parameter ${name}. Error: ${err.message}`
+            `Failed to fetch parameters ${names}. Error: ${err.message}`
         )
-        return new Error(err)
+        return new Error(err) // Future refactor: make ParameterStoreError
     }
 }
 
@@ -77,7 +77,7 @@ const getParameter = async (name: string): Promise<ParameterType> => {
         console.error(
             `Failed to fetch parameter ${name}. Error: ${err.message}`
         )
-        return new Error(err)
+        return new Error(err) // Future refactor: make ParameterStoreError
     }
 }
 
