@@ -1,24 +1,90 @@
 import { Table } from '@trussworks/react-uswds'
-import React, { useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 import {
     createColumnHelper,
     flexRender,
     getCoreRowModel,
     useReactTable,
 } from '@tanstack/react-table'
+import Select, { ActionMeta, OnChangeValue } from 'react-select'
 import {
     CmsUser,
     useIndexUsersQuery,
     IndexUsersQuery,
+    Division,
 } from '../../../gen/gqlClient'
 
 import styles from '../Settings.module.scss'
 import { Loading } from '../../../components'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 
+import { useUpdateCmsUserMutation } from '../../../gen/gqlClient'
+
 const columnHelper = createColumnHelper<CmsUser>()
 
+type DivisionSelectOptions = {
+    label: string
+    value: Division
+}
+
 export const CMSUsersTable = (): React.ReactElement => {
+    const [updateCmsUser] = useUpdateCmsUserMutation()
+
+    const divisionSelect = useCallback(
+        (
+            currentAssignment:
+                | DivisionSelectOptions['value']
+                | null
+                | undefined,
+            row: CmsUser
+        ) => {
+            const handleChange = async (
+                selectedOption: OnChangeValue<DivisionSelectOptions, false>,
+                actionMeta: ActionMeta<DivisionSelectOptions>,
+                row: CmsUser
+            ) => {
+                if (selectedOption && 'value' in selectedOption) {
+                    const updatedUser = await updateCmsUser({
+                        variables: {
+                            input: {
+                                cmsUserID: row.id,
+                                stateAssignments: [],
+                                divisionAssignment: selectedOption.value,
+                            },
+                        },
+                    })
+                    console.log('Updated user:', updatedUser)
+                    console.log('Selected value:', selectedOption.value)
+                    console.log('Row object:', row)
+                }
+            }
+            const options: DivisionSelectOptions[] = [
+                { label: 'DMCO', value: 'DMCO' },
+                { label: 'DMCP', value: 'DMCP' },
+                { label: 'OACT', value: 'OACT' },
+            ]
+
+            const findOptionByValue = (
+                value: Division | null | undefined
+            ): DivisionSelectOptions | null => {
+                if (!value) return null
+                return options.find((option) => option.value === value) || null
+            }
+
+            const defaultOption = findOptionByValue(currentAssignment)
+
+            return (
+                <Select
+                    defaultValue={defaultOption}
+                    options={options}
+                    onChange={(selectedOption, actionMeta) =>
+                        handleChange(selectedOption, actionMeta, row)
+                    }
+                />
+            )
+        },
+        [updateCmsUser] // dependencies array
+    )
     const { loading, data, error } = useIndexUsersQuery({
         fetchPolicy: 'network-only',
     })
@@ -39,8 +105,13 @@ export const CMSUsersTable = (): React.ReactElement => {
                 cell: (info) => info.getValue(),
                 header: () => 'Email',
             }),
+            columnHelper.accessor('divisionAssignment', {
+                cell: (info) =>
+                    divisionSelect(info.getValue(), info.row.original),
+                header: () => 'Division',
+            }),
         ],
-        []
+        [divisionSelect]
     )
 
     // pick out the part of IndexUsersQuery that specifies Admin/CMS/StateUser

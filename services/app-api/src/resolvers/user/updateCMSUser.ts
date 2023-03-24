@@ -5,7 +5,7 @@ import {
     StateCodeType,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import { MutationResolvers } from '../../gen/gqlServer'
-import { logError } from '../../logger'
+import { logError, logSuccess } from '../../logger'
 import { isStoreError, Store } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
@@ -17,11 +17,7 @@ export function updateCMSUserResolver(
 ): MutationResolvers['updateCMSUser'] {
     return async (_parent, { input }, context) => {
         const { user: currentUser, span } = context
-        setResolverDetailsOnActiveSpan(
-            'updateStateAssignments',
-            currentUser,
-            span
-        )
+        setResolverDetailsOnActiveSpan('updateCmsUser', currentUser, span)
 
         // This resolver is only callable by admin users
         if (!isAdminUser(currentUser)) {
@@ -47,7 +43,7 @@ export function updateCMSUserResolver(
         if (divisionAssignment !== undefined) {
             if (!isValidCmsDivison(divisionAssignment)) {
                 const errMsg = 'Invalid division assignment'
-                logError('updateStateAssignments', errMsg)
+                logError('updateCmsUser', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)
                 throw new UserInputError(errMsg, {
                     argumentName: 'divisionAssignment',
@@ -74,7 +70,7 @@ export function updateCMSUserResolver(
             )
 
             const errMsg = 'Invalid state codes'
-            logError('updateStateAssignments', errMsg)
+            logError('updateCmsUser', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw new UserInputError(errMsg, {
                 argumentName: 'stateAssignments',
@@ -90,16 +86,18 @@ export function updateCMSUserResolver(
         if (isStoreError(result)) {
             if (result.code === 'INSERT_ERROR') {
                 const errMsg = 'cmsUserID does not exist'
-                logError('updateStateAssignments', errMsg)
+                logError('updateCmsUser', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)
                 throw new UserInputError(errMsg, { argumentName: 'cmsUserID' })
             }
 
             const errMsg = `Issue assigning states to user. Message: ${result.message}`
-            logError('updateStateAssignments', errMsg)
+            logError('updateCmsUser', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw new Error(errMsg)
         }
+
+        logSuccess('updateCmsUser')
 
         // return updated user
         return {
