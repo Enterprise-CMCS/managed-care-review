@@ -34,6 +34,42 @@ model HealthPlanRevisionTable {
   pkg             HealthPlanPackageTable @relation(fields: [pkgID], references: [id])
 }
 
+
+model ContractTable {
+  id              String                 @id
+}
+
+model RateTable {
+  id              String                 @id
+}
+
+model ContractRevisionTable {
+  id              String                 @id
+  contractID String String
+  contract  ContractTable @relation(fields: [contractID], references: [id])
+
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt  @default(now())
+
+  name String
+  contractDescription String?
+
+
+}
+
+model RateRevisionTable {
+  id              String                 @id
+  rateID String String
+  rate  RateTable @relation(fields: [rateID], references: [id])
+
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt  @default(now())
+
+  name String
+  rateCertURL String?
+}
+
+
 model State {
   stateCode                   String                   @id
   name                        String
