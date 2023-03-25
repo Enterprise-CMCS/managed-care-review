@@ -82,7 +82,6 @@ describe('submission type', () => {
     })
 
     it('can save submission edits using Save as draft button', () => {
-        cy.interceptFeatureFlags({ 'rate-cert-assurance': true })
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmissionWithBaseContract()
 
