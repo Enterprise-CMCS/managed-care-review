@@ -41,7 +41,7 @@ import {
     insertQuestion,
     insertQuestionResponse,
 } from './questionResponse'
-import { findAllSupportedStates } from './state/findAllSupportedStates'
+import { findAllSupportedStates } from './state'
 
 type Store = {
     findPrograms: (

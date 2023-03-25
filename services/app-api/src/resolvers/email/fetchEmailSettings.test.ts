@@ -83,7 +83,7 @@ describe('fetchEmailSettings', () => {
         const resultErr = res.errors[0]
 
         expect(resultErr?.message).toBe(
-            'Non-admin user not authorized to fetch a settings'
+            'Non-admin user not authorized to fetch settings'
         )
         expect(resultErr?.extensions?.code).toBe('FORBIDDEN')
     })
@@ -107,7 +107,7 @@ describe('fetchEmailSettings', () => {
         const resultErr = res.errors[0]
 
         expect(resultErr?.message).toBe(
-            'Non-admin user not authorized to fetch a settings'
+            'Non-admin user not authorized to fetch settings'
         )
         expect(resultErr?.extensions?.code).toBe('FORBIDDEN')
     })
