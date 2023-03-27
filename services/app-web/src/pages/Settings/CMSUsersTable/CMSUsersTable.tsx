@@ -36,7 +36,6 @@ function DivisionSelect({
     setDivision: SetDivisionCallbackType
 }): React.ReactElement {
     async function handleChange(
-        setDivision: SetDivisionCallbackType,
         selectedOption: OnChangeValue<DivisionSelectOptions, false>,
         row: CmsUser
     ) {
@@ -63,9 +62,7 @@ function DivisionSelect({
         <Select
             value={defaultOption}
             options={options}
-            onChange={(selectedOption) =>
-                handleChange(setDivision, selectedOption, user)
-            }
+            onChange={(selectedOption) => handleChange(selectedOption, user)}
         />
     )
 }
