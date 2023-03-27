@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { FormGroup, ModalRef, Textarea } from '@trussworks/react-uswds'
 import { useNavigate } from 'react-router-dom'
 import {
+    FetchHealthPlanPackageWithQuestionsDocument,
     HealthPlanPackage,
     useSubmitHealthPlanPackageMutation,
     useUnlockHealthPlanPackageMutation,
@@ -16,6 +17,7 @@ import * as Yup from 'yup'
 import styles from './UnlockSubmitModal.module.scss'
 import { GenericApiErrorProps } from '../Banner/GenericApiErrorBanner/GenericApiErrorBanner'
 import { ERROR_MESSAGES } from '../../constants/errors'
+import { useAuth } from '../../contexts/AuthContext'
 
 type ModalType = 'SUBMIT' | 'RESUBMIT' | 'UNLOCK'
 
@@ -76,6 +78,7 @@ export const UnlockSubmitModal = ({
         GenericApiErrorProps | undefined
     >(undefined) // when api errors error
     const navigate = useNavigate()
+    const { loggedInUser } = useAuth()
     const modalValues: ModalValueType = modalValueDictionary[modalType]
 
     const modalFormInitialValues = {
@@ -84,8 +87,10 @@ export const UnlockSubmitModal = ({
 
     const [submitHealthPlanPackage, { loading: submitMutationLoading }] =
         useSubmitHealthPlanPackageMutation()
-    const [unlockHealthPlanPackage, { loading: unlockMutationLoading }] =
-        useUnlockHealthPlanPackageMutation()
+    const [
+        unlockHealthPlanPackage,
+        { loading: unlockMutationLoading, client },
+    ] = useUnlockHealthPlanPackageMutation()
 
     const formik = useFormik({
         initialValues: modalFormInitialValues,
@@ -129,7 +134,52 @@ export const UnlockSubmitModal = ({
             )
         }
 
-        if (result instanceof Error) {
+        //Allow submitting/unlocking to continue on EMAIL_ERROR.
+        if (result instanceof Error && result.cause === 'EMAIL_ERROR') {
+            modalRef.current?.toggleModal(undefined, false)
+            if (modalType !== 'UNLOCK' && submissionName) {
+                navigate(`/dashboard?justSubmitted=${submissionName}`)
+            } else {
+                // Updating the cache here with unlockInfo before manually re-fetching query.
+                // This will prevent the loading animation to happen and have up-to-date unlock banner.
+                // We cannot update cache and re-fetch query inside the mutation because it returns an apollo
+                // error on failing emails.
+                const pkg = healthPlanPackage as HealthPlanPackage
+                client.cache.writeQuery({
+                    query: FetchHealthPlanPackageWithQuestionsDocument,
+                    data: {
+                        fetchHealthPlanPackage: {
+                            pkg: {
+                                ...pkg,
+                                status: 'UNLOCKED',
+                                revisions: [
+                                    {
+                                        __typename: 'HealthPlanRevisionEdge',
+                                        node: {
+                                            ...pkg.revisions[
+                                                pkg.revisions.length - 1
+                                            ].node,
+                                            unlockInfo: {
+                                                updatedAt: new Date(),
+                                                updatedBy: loggedInUser?.email,
+                                                updatedReason:
+                                                    unlockSubmitModalInput,
+                                            },
+                                            submitInfo: null,
+                                            id: null,
+                                        },
+                                    },
+                                    ...pkg.revisions,
+                                ],
+                            },
+                        },
+                    },
+                })
+                await client.refetchQueries({
+                    include: [FetchHealthPlanPackageWithQuestionsDocument],
+                })
+            }
+        } else if (result instanceof Error) {
             setModalAlert({
                 heading: modalValues.errorHeading,
                 message: result.message,

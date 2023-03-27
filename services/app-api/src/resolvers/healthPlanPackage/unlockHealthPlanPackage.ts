@@ -21,6 +21,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { EmailParameterStore } from '../../parameterStore'
+import { GraphQLError } from 'graphql'
 
 // unlock is a state machine transforming a LockedFormData and turning it into UnlockedFormData
 // Since Unlocked is a strict subset of Locked, this can't error today.
@@ -176,7 +177,11 @@ export function unlockHealthPlanPackageResolver(
                 'unlockPackageCMSEmail - CMS email failed',
                 unlockPackageCMSEmailResult
             )
-            throw unlockPackageCMSEmailResult
+            throw new GraphQLError(unlockPackageCMSEmailResult.message, {
+                extensions: {
+                    code: 'EMAIL_ERROR',
+                },
+            })
         }
 
         if (unlockPackageStateEmailResult instanceof Error) {
@@ -184,7 +189,11 @@ export function unlockHealthPlanPackageResolver(
                 'unlockPackageCMSEmail - CMS email failed',
                 unlockPackageStateEmailResult
             )
-            throw unlockPackageStateEmailResult
+            throw new GraphQLError(unlockPackageStateEmailResult.message, {
+                extensions: {
+                    code: 'EMAIL_ERROR',
+                },
+            })
         }
 
         logSuccess('unlockHealthPlanPackage')

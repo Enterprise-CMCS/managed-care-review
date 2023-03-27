@@ -1,5 +1,5 @@
 import { StateType } from '../../domain-models'
-import statePrograms from 'app-web/src/common-code/data/statePrograms.json'
+import statePrograms from '../../../../app-web/src/common-code/data/statePrograms.json'
 import { convertPrismaErrorToStoreError, StoreError } from '../storeError'
 import { PrismaClient } from '@prisma/client'
 
