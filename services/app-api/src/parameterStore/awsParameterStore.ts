@@ -5,9 +5,7 @@ import {
 } from '@aws-sdk/client-ssm'
 
 export type ParameterType = { value: string; type: string } | Error
-export type ParametersType =
-    | { name: string; value: string; type: string }[]
-    | Error
+export type ParametersType = ParameterType[] | Error
 
 const ssm = new SSMClient({ region: 'us-east-1' })
 
@@ -16,44 +14,74 @@ type ParameterStoreType = {
     getParameters: (names: string[]) => Promise<ParametersType>
 }
 
-// Used for email settings
+// Used for email settings. Must fetch parameters in batches of 10.
 const getParameters = async (names: string[]): Promise<ParametersType> => {
-    const command = new GetParametersCommand({
-        Names: names,
-    })
-
-    try {
-        const { Parameters: parameters, InvalidParameters: invalidParameters } =
-            await ssm.send(command)
-        if (!parameters || parameters.length === 0) {
-            console.error(
-                `Failed to return parameters for ${names} data was undefined or empty.`
-            )
-            return [] // not an error state, just return empty array for none found
-        }
-
-        if (invalidParameters) {
-            console.error(
-                `Failed to return parameters for ${invalidParameters}.`
-            )
-        }
-
-        const parametersList: ParametersType = []
-        parameters.forEach((param) => {
-            if (!param.Value || !param.Type || !param.Name) return
-
-            parametersList.push({
-                name: param.Name,
-                value: param.Value,
-                type: param.Type,
-            })
+    const getParametersSSMCommand = async (validNamesList: string[]) => {
+        const command = new GetParametersCommand({
+            Names: validNamesList,
         })
-        return parametersList
-    } catch (err) {
-        console.error(
-            `Failed to fetch parameters ${names}. Error: ${err.message}`
-        )
-        return new Error(err) // Future refactor: make ParameterStoreError
+
+        try {
+            const {
+                Parameters: parameters,
+                InvalidParameters: invalidParameters,
+            } = await ssm.send(command)
+            if (!parameters || parameters.length === 0) {
+                console.error(
+                    `Failed to return parameters for ${names} data was undefined or empty.`
+                )
+                return [] // not an error state, just return empty array for none found
+            }
+
+            if (invalidParameters) {
+                console.error(
+                    `Failed to return parameters for ${invalidParameters}.`
+                )
+            }
+
+            const parametersList: ParametersType = []
+            parameters.forEach((param) => {
+                if (!param.Value || !param.Type || !param.Name) return
+
+                parametersList.push({
+                    name: param.Name,
+                    value: param.Value,
+                    type: param.Type,
+                })
+            })
+            return parametersList
+        } catch (err) {
+            console.error(
+                `GetParameters: Failed to fetch parameters ${names}. Error: ${err.message}`
+            )
+            return new Error(err) // Future refactor: make ParameterStoreError
+        }
+    }
+
+    // MAIN
+    if (names.length <= 10) {
+        return await getParametersSSMCommand(names)
+    } else {
+        const maxSize = 10
+        const finalParametersList: ParameterType[] = []
+        const finalErrorsList: Error[] = []
+        for (let i = 0; i < names.length; i += maxSize) {
+            const namesChunk = names.slice(i, i + maxSize)
+
+            const result = await getParametersSSMCommand(namesChunk)
+
+            if (result instanceof Error) {
+                finalErrorsList.push(result)
+            } else {
+                finalParametersList.concat(result)
+            }
+        }
+
+        return names.length == finalErrorsList.length
+            ? new Error(
+                  `GetParameters: Failed to fetch all parameters ${names}`
+              )
+            : finalParametersList
     }
 }
 
@@ -82,7 +110,7 @@ const getParameter = async (name: string): Promise<ParameterType> => {
         }
     } catch (err) {
         console.error(
-            `Failed to fetch parameter ${name}. Error: ${err.message}`
+            `GetParameter: Failed to fetch parameter ${name}. Error: ${err.message}`
         )
         return new Error(err) // Future refactor: make ParameterStoreError
     }
