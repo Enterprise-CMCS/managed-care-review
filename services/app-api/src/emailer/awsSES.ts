@@ -68,14 +68,10 @@ class AWSResponseError extends Error {
 async function sendSESEmail(
     params: SendEmailRequest
 ): Promise<SendEmailResponse | SESServiceException> {
-    try {
-        console.info('SendEmailCommand params: ', params)
-        const command = new SendEmailCommand(params)
-        console.info('SendEmailCommand: ', command)
-        return await ses.send(command)
-    } catch (err) {
-        return err
-    }
+    console.info('SendEmailCommand params: ', params)
+    const command = new SendEmailCommand(params)
+    console.info('SendEmailCommand: ', command)
+    return await ses.send(command)
 }
 
 export { getSESEmailParams, sendSESEmail, AWSResponseError }
