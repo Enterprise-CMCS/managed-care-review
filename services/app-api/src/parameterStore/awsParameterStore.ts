@@ -29,16 +29,16 @@ const getParameters = async (names: string[]): Promise<ParametersType> => {
                 InvalidParameters: invalidParameters,
                 $metadata: metadata,
             } = await ssm.send(command)
+
             if (!parameters || parameters.length === 0) {
-                console.error(
-                    `GetParameters: Parameters not found: ${invalidParameters}. Metadata: ${metadata}`
-                )
                 return [] // not an error state, just return empty array for none found
             }
 
             if (invalidParameters) {
                 console.error(
-                    `GetParameters: Invalid parameters: ${invalidParameters}.`
+                    `GetParameters: Invalid parameters: ${invalidParameters}.  Metadata: ${JSON.stringify(
+                        metadata
+                    )}`
                 )
             }
 
@@ -56,6 +56,7 @@ const getParameters = async (names: string[]): Promise<ParametersType> => {
                     type: param.Type,
                 })
             })
+            console.info(`GetParameters: return valid params ${parametersList}`)
             return parametersList
         } catch (err) {
             console.error(
