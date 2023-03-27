@@ -74,7 +74,6 @@ async function sendSESEmail(
         console.info('SendEmailCommand: ', command)
         return await ses.send(command)
     } catch (err) {
-        console.error(JSON.stringify(err))
         return err
     }
 }
