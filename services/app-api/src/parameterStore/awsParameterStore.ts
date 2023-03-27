@@ -5,7 +5,9 @@ import {
 } from '@aws-sdk/client-ssm'
 
 export type ParameterType = { value: string; type: string } | Error
-export type ParametersType = ParameterType[] | Error
+export type ParametersType =
+    | { name: string; value: string; type: string }[]
+    | Error
 
 const ssm = new SSMClient({ region: 'us-east-1' })
 
@@ -63,7 +65,11 @@ const getParameters = async (names: string[]): Promise<ParametersType> => {
         return await getParametersSSMCommand(names)
     } else {
         const maxSize = 10
-        const finalParametersList: ParameterType[] = []
+        const finalParametersList: {
+            name: string
+            value: string
+            type: string
+        }[] = []
         const finalErrorsList: Error[] = []
         for (let i = 0; i < names.length; i += maxSize) {
             const namesChunk = names.slice(i, i + maxSize)
