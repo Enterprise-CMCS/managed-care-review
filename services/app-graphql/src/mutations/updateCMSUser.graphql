@@ -3,6 +3,7 @@ mutation updateCMSUser($input: UpdateCMSUserInput!) {
         user {
             __typename
             ... on CMSUser {
+                id
                 email
                 role
                 stateAssignments {

@@ -14,13 +14,15 @@ export const SettingsErrorAlert = ({
     isAuthenticated = true, // By default, user is valid because Settings are within wrapped auth routes. We only want to check for authentication when the prop passed in
     isAdmin = false,
 }: {
-    error?: ApolloError
+    error?: ApolloError | Error
     isAuthenticated?: boolean
     isAdmin?: boolean
 }): React.ReactElement | null => {
     if (error) {
         recordJSException(error)
-        handleApolloError(error, true)
+        if (error instanceof ApolloError) {
+            handleApolloError(error, true)
+        }
     }
 
     if (!isAdmin) {

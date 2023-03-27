@@ -6,111 +6,80 @@ import {
     getCoreRowModel,
     useReactTable,
 } from '@tanstack/react-table'
-import Select, { ActionMeta, OnChangeValue } from 'react-select'
+import Select, { OnChangeValue } from 'react-select'
 import {
     CmsUser,
     useIndexUsersQuery,
-    IndexUsersQuery,
     Division,
+    useUpdateCmsUserMutation,
 } from '../../../gen/gqlClient'
 
 import styles from '../Settings.module.scss'
 import { Loading } from '../../../components'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 
-import { useUpdateCmsUserMutation } from '../../../gen/gqlClient'
-
-const columnHelper = createColumnHelper<CmsUser>()
+import { wrapApolloResult } from '../../../gqlHelpers/apolloQueryWrapper'
+import { handleGQLErrors } from '../../../gqlHelpers/apolloErrors'
 
 type DivisionSelectOptions = {
     label: string
     value: Division
 }
 
-export const CMSUsersTable = (): React.ReactElement => {
-    // const [updateCmsUser] = useUpdateCmsUserMutation()
-    const useMemoizedUpdateCmsUserMutation = () => {
-        const [updateCmsUser] = useUpdateCmsUserMutation()
-
-        return useMemo(() => updateCmsUser, [updateCmsUser])
+function DivisionSelect({
+    currentAssignment,
+    user,
+    setDivision,
+}: {
+    currentAssignment: Division | null | undefined
+    user: CmsUser
+    setDivision: SetDivisionCallbackType
+}): React.ReactElement {
+    async function handleChange(
+        setDivision: SetDivisionCallbackType,
+        selectedOption: OnChangeValue<DivisionSelectOptions, false>,
+        row: CmsUser
+    ) {
+        if (selectedOption && 'value' in selectedOption) {
+            await setDivision(row.id, selectedOption.value)
+        }
     }
-    const updateCmsUser = useMemoizedUpdateCmsUserMutation()
 
-    const divisionSelect = useCallback(
-        (
-            currentAssignment:
-                | DivisionSelectOptions['value']
-                | null
-                | undefined,
-            row: CmsUser
-        ) => {
-            // console.log('divisionSelect called with:', currentAssignment, row)
-            const handleChange = async (
-                selectedOption: OnChangeValue<DivisionSelectOptions, false>,
-                actionMeta: ActionMeta<DivisionSelectOptions>,
-                row: CmsUser
-            ) => {
-                // console.log('handleChange called with:', selectedOption, row)
-                if (selectedOption && 'value' in selectedOption) {
-                    await updateCmsUser({
-                        variables: {
-                            input: {
-                                cmsUserID: row.id,
-                                stateAssignments: [],
-                                divisionAssignment: selectedOption.value,
-                            },
-                        },
-                    })
-                    // await new Promise((resolve) => setTimeout(resolve, 2000))
-                    // const updatedUser = await updateCmsUser({
-                    //     variables: {
-                    //         input: {
-                    //             cmsUserID: row.id,
-                    //             stateAssignments: [],
-                    //             divisionAssignment: selectedOption.value,
-                    //         },
-                    //     },
-                    // })
-                    // console.log('Updated user:', updatedUser)
-                    console.log('Selected value:', selectedOption.value)
-                    console.log('Row object:', row)
-                }
+    const options: DivisionSelectOptions[] = [
+        { label: 'DMCO', value: 'DMCO' },
+        { label: 'DMCP', value: 'DMCP' },
+        { label: 'OACT', value: 'OACT' },
+    ]
+
+    const findOptionByValue = (
+        value: Division | null | undefined
+    ): DivisionSelectOptions | null => {
+        if (!value) return null
+        return options.find((option) => option.value === value) || null
+    }
+    const defaultOption = findOptionByValue(currentAssignment)
+
+    return (
+        <Select
+            value={defaultOption}
+            options={options}
+            onChange={(selectedOption) =>
+                handleChange(setDivision, selectedOption, user)
             }
-            const options: DivisionSelectOptions[] = [
-                { label: 'DMCO', value: 'DMCO' },
-                { label: 'DMCP', value: 'DMCP' },
-                { label: 'OACT', value: 'OACT' },
-            ]
-
-            const findOptionByValue = (
-                value: Division | null | undefined
-            ): DivisionSelectOptions | null => {
-                if (!value) return null
-                return options.find((option) => option.value === value) || null
-            }
-            const defaultOption = findOptionByValue(currentAssignment)
-
-            return (
-                <Select
-                    value={defaultOption}
-                    options={options}
-                    onChange={(selectedOption, actionMeta) =>
-                        handleChange(selectedOption, actionMeta, row)
-                    }
-                />
-            )
-        },
-        [updateCmsUser]
+        />
     )
+}
 
-    const { loading, data, error } = useIndexUsersQuery({
-        fetchPolicy: 'cache-and-network',
-    })
-    // console.log('CMSUsersTable called with:', data)
-    const showLoading = loading || !data
-
+// useReactTable wants to be called with data, preferably
+function CMSUserTableWithData({
+    cmsUsers,
+    setDivision,
+}: {
+    cmsUsers: CmsUser[]
+    setDivision: SetDivisionCallbackType
+}): React.ReactElement {
     const columns = useMemo(() => {
-        console.log('columns useMemo called')
+        const columnHelper = createColumnHelper<CmsUser>()
         return [
             columnHelper.accessor('familyName', {
                 id: 'familyName',
@@ -129,37 +98,19 @@ export const CMSUsersTable = (): React.ReactElement => {
             }),
             columnHelper.accessor('divisionAssignment', {
                 id: 'divisionAssignment',
-                cell: (info) =>
-                    divisionSelect(info.getValue(), info.row.original),
+                cell: (info) => {
+                    return (
+                        <DivisionSelect
+                            currentAssignment={info.getValue()}
+                            user={info.row.original}
+                            setDivision={setDivision}
+                        />
+                    )
+                },
                 header: () => 'Division',
             }),
         ]
-    }, [divisionSelect])
-
-    // pick out the part of IndexUsersQuery that specifies Admin/CMS/StateUser
-    type UserTypesInIndexQuery = Pick<
-        IndexUsersQuery['indexUsers']['edges'][number],
-        'node'
-    >['node']
-
-    const filterForCmsUsers = useMemo(() => {
-        function isCmsUser(obj: UserTypesInIndexQuery): obj is CmsUser {
-            return obj.__typename === 'CMSUser'
-        }
-        return (data: IndexUsersQuery | undefined): CmsUser[] => {
-            if (!data) {
-                return []
-            }
-            const cmsUsers = data.indexUsers.edges
-                .filter((edge) => isCmsUser(edge.node))
-                .map((edge) => edge.node as CmsUser)
-            return cmsUsers
-        }
-    }, [])
-
-    const cmsUsers = filterForCmsUsers(data)
-    // console.log('cmsUsers:', cmsUsers)
-    // console.log('columns:', columns)
+    }, [setDivision])
 
     const table = useReactTable({
         data: cmsUsers,
@@ -167,50 +118,103 @@ export const CMSUsersTable = (): React.ReactElement => {
         getCoreRowModel: getCoreRowModel(),
     })
 
-    if (error) {
-        return <SettingsErrorAlert error={error} />
+    return (
+        <Table>
+            <caption className="srOnly">CMS Users</caption>
+            <thead className={styles.header}>
+                {table.getHeaderGroups().map((headerGroup) => (
+                    <tr key={headerGroup.id}>
+                        {headerGroup.headers.map((header) => (
+                            <th key={header.id}>
+                                {header.isPlaceholder
+                                    ? null
+                                    : flexRender(
+                                          header.column.columnDef.header,
+                                          header.getContext()
+                                      )}
+                            </th>
+                        ))}
+                    </tr>
+                ))}
+            </thead>
+            <tbody>
+                {table.getRowModel().rows.map((row) => (
+                    <tr key={row.id}>
+                        {row.getVisibleCells().map((cell) => (
+                            <td key={cell.id}>
+                                {flexRender(
+                                    cell.column.columnDef.cell,
+                                    cell.getContext()
+                                )}
+                            </td>
+                        ))}
+                    </tr>
+                ))}
+            </tbody>
+        </Table>
+    )
+}
+
+type SetDivisionCallbackType = (
+    userID: string,
+    division: Division
+) => Promise<void>
+
+export const CMSUsersTable = (): React.ReactElement => {
+    const { result } = wrapApolloResult(
+        useIndexUsersQuery({
+            fetchPolicy: 'cache-and-network',
+        })
+    )
+
+    const [updateCmsUser] = useUpdateCmsUserMutation()
+
+    const setDivisionCallback: SetDivisionCallbackType = useCallback(
+        async (userID: string, division: Division) => {
+            const res = await updateCmsUser({
+                variables: {
+                    input: {
+                        cmsUserID: userID,
+                        stateAssignments: [],
+                        divisionAssignment: division,
+                    },
+                },
+            })
+
+            if (res.errors) {
+                console.error('Errored attempting to update user: ', res.errors)
+                handleGQLErrors(res.errors)
+            }
+        },
+        [updateCmsUser]
+    )
+
+    if (result.status === 'LOADING') {
+        return (
+            <div className={styles.table}>
+                <h2>CMS users</h2>
+                <Loading />
+            </div>
+        )
     }
+
+    if (result.status === 'ERROR') {
+        return <SettingsErrorAlert error={result.error} />
+    }
+
+    // filter to just CMS users
+    const cmsUsers = result.data.indexUsers.edges
+        .filter((edge) => edge.node.__typename === 'CMSUser')
+        .map((edge) => edge.node as CmsUser)
 
     return (
         <div className={styles.table}>
             <h2>CMS users</h2>
-            {showLoading ? (
-                <Loading />
-            ) : cmsUsers.length ? (
-                <Table>
-                    <caption className="srOnly">CMS Users</caption>
-                    <thead className={styles.header}>
-                        {table.getHeaderGroups().map((headerGroup) => (
-                            <tr key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => (
-                                    <th key={header.id}>
-                                        {header.isPlaceholder
-                                            ? null
-                                            : flexRender(
-                                                  header.column.columnDef
-                                                      .header,
-                                                  header.getContext()
-                                              )}
-                                    </th>
-                                ))}
-                            </tr>
-                        ))}
-                    </thead>
-                    <tbody>
-                        {table.getRowModel().rows.map((row) => (
-                            <tr key={row.id}>
-                                {row.getVisibleCells().map((cell) => (
-                                    <td key={cell.id}>
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext()
-                                        )}
-                                    </td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </Table>
+            {cmsUsers.length ? (
+                <CMSUserTableWithData
+                    cmsUsers={cmsUsers}
+                    setDivision={setDivisionCallback}
+                />
             ) : (
                 <div>
                     <p>No CMS users to display</p>
