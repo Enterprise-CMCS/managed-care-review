@@ -27,23 +27,28 @@ const getParameters = async (names: string[]): Promise<ParametersType> => {
             const {
                 Parameters: parameters,
                 InvalidParameters: invalidParameters,
+                $metadata: metadata,
             } = await ssm.send(command)
             if (!parameters || parameters.length === 0) {
                 console.error(
-                    `Failed to return parameters for ${names} data was undefined or empty.`
+                    `GetParameters: Parameters not found: ${invalidParameters}. Metadata: ${metadata}`
                 )
                 return [] // not an error state, just return empty array for none found
             }
 
             if (invalidParameters) {
                 console.error(
-                    `Failed to return parameters for ${invalidParameters}.`
+                    `GetParameters: Invalid parameters: ${invalidParameters}.`
                 )
             }
 
             const parametersList: ParametersType = []
             parameters.forEach((param) => {
-                if (!param.Value || !param.Type || !param.Name) return
+                console.info('PARAM check:', JSON.stringify(param))
+                if (!param.Value || !param.Type || !param.Name) {
+                    console.info('PARAM check: missing expected values')
+                    return
+                }
 
                 parametersList.push({
                     name: param.Name,
@@ -54,7 +59,7 @@ const getParameters = async (names: string[]): Promise<ParametersType> => {
             return parametersList
         } catch (err) {
             console.error(
-                `GetParameters: Failed to fetch parameters ${names}. Error: ${err.message}`
+                `GetParameters: Failed to fetch parameters: ${names}. Error: ${err.message}`
             )
             return new Error(err) // Future refactor: make ParameterStoreError
         }
@@ -82,12 +87,7 @@ const getParameters = async (names: string[]): Promise<ParametersType> => {
                 finalParametersList.concat(result)
             }
         }
-
-        return names.length == finalErrorsList.length
-            ? new Error(
-                  `GetParameters: Failed to fetch all parameters ${names}`
-              )
-            : finalParametersList
+        return finalParametersList
     }
 }
 
