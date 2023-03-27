@@ -535,9 +535,7 @@ export const RateDetails = ({
     }
 
     const handleRateInfoLegend = (index: number) => {
-        return index === 0
-            ? 'Rate certification'
-            : `Additional rate certification ${index}`
+        return `Rate certification ${index + 1}`
     }
 
     return (
@@ -632,6 +630,31 @@ export const RateDetails = ({
                                                                 }
                                                                 hint={
                                                                     <>
+                                                                        <span
+                                                                            className={
+                                                                                styles.rateDirections
+                                                                            }
+                                                                        >
+                                                                            Upload
+                                                                            rate
+                                                                            certification
+                                                                            only.
+                                                                        </span>
+                                                                        <span
+                                                                            className={
+                                                                                styles.rateDirections
+                                                                            }
+                                                                        >
+                                                                            Additional
+                                                                            rates
+                                                                            and
+                                                                            supporting
+                                                                            documents
+                                                                            will
+                                                                            be
+                                                                            added
+                                                                            later.
+                                                                        </span>
                                                                         <Link
                                                                             aria-label="Document definitions and requirements (opens in new window)"
                                                                             href={

@@ -109,6 +109,16 @@
 .rateCertContainer {
      margin-top: units(2);
 }
+
+.rateDirections {
+    margin-top: units(2);
+    color: black;
+}
+
+.rateDirections + .rateDirections {
+    margin-top: 0;
+}
+
 .stateContacts,
 .actuaryContacts {
     .addContactBtn {
