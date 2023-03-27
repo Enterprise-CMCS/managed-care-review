@@ -1,9 +1,9 @@
-import { getParameterStore } from '../../awsParameterStore'
+import { ParameterStore } from '../../awsParameterStore'
 import { validateAndReturnValueArray } from '../helpers'
 
 export const getOACTEmails = async (): Promise<string[] | Error> => {
     const name = `/configuration/email/oact`
-    const oactTeamAddresses = await getParameterStore(name)
+    const oactTeamAddresses = await ParameterStore.getParameter(name)
 
     return validateAndReturnValueArray(oactTeamAddresses, name)
 }

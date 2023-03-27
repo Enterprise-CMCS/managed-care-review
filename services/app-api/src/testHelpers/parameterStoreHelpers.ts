@@ -3,6 +3,11 @@ import { EmailParameterStore } from '../parameterStore'
 function mockEmailParameterStoreError(error?: string): EmailParameterStore {
     const message = error || 'No store found'
     return {
+        getStateAnalystsSettings: async (
+            stateCodes: string[]
+        ): Promise<Error> => {
+            return new Error(message)
+        },
         getStateAnalystsEmails: async (stateCode: string): Promise<Error> => {
             return new Error(message)
         },

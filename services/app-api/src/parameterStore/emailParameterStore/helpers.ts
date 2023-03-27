@@ -1,7 +1,7 @@
-import { ParameterStoreType } from '../awsParameterStore'
+import { ParameterType } from '../awsParameterStore'
 
 const validateAndReturnValueArray = (
-    storeResponse: ParameterStoreType,
+    storeResponse: ParameterType,
     name: string
 ): Error | string[] => {
     if (storeResponse instanceof Error) {

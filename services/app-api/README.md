@@ -45,7 +45,7 @@ Sets up authentication based on environment variables. Options are local or Amaz
 ### `/parameterStore`
 
 - `awsParameterStore.ts` main file that contains general [AWS SSM](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SSM.html) parameter store functions.
-  - `getParameterStore()` is used to retrieve parameter store values. This uses [getParameter](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SSM.html#getParameter-property) operation in AWS SSM
+  - `ParameterStore.getParameter()` is used to retrieve parameter store values. This uses [getParameter](https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/SSM.html#getParameter-property) operation in AWS SSM
   
 - `/emailParameterStore/emailParameterStore.ts` this file contains two functions used to configure our automated emails for local and cloud deployment.
   - `newAWSEmailParameterStore` is for emailer configuration of `Dev`, `Impl` and `Prod` environments done in `/handlers/apollo_gql.ts`. The exception is `getStateAnalystsEmails` where it is called at resolvers before passed to emailer functions.

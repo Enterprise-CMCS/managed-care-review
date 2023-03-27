@@ -12,5 +12,9 @@ query fetchEmailSettings {
             cmsRateHelpEmailAddress
             cmsDevTeamHelpEmailAddress
         }
+        stateAnalysts {
+            stateCode
+            emails
+        }
     }
 }

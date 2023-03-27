@@ -1,8 +1,8 @@
-import { getParameterStore } from '../../awsParameterStore'
+import { ParameterStore } from '../../awsParameterStore'
 
 export const getCmsDevTeamHelpEmail = async (): Promise<string | Error> => {
     const name = `/configuration/email/devTeamHelpAddress`
-    const reviewHelpAddress = await getParameterStore(name)
+    const reviewHelpAddress = await ParameterStore.getParameter(name)
 
     if (reviewHelpAddress instanceof Error) {
         return reviewHelpAddress

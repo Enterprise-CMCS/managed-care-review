@@ -219,6 +219,7 @@ jobs:
     secrets:
       aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+      nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   deploy-app:
     needs:
