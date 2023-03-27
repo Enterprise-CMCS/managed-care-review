@@ -636,6 +636,7 @@ export const RateDetails = ({
                                                                             }
                                                                         >
                                                                             Upload
+                                                                            one
                                                                             rate
                                                                             certification
                                                                             only.
@@ -650,7 +651,7 @@ export const RateDetails = ({
                                                                             and
                                                                             supporting
                                                                             documents
-                                                                            will
+                                                                            can
                                                                             be
                                                                             added
                                                                             later.
