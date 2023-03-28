@@ -775,15 +775,14 @@ describe('submitHealthPlanPackage', () => {
         // expect correct graphql error.
         expect(submitResult.errors?.[0]).toEqual(
             expect.objectContaining({
-                message:
-                    'SES email send failed. Error: Error: Network error occurred',
+                message: 'CMS and State email failed',
                 locations: [{ line: 2, column: 5 }],
                 path: ['submitHealthPlanPackage'],
                 extensions: {
-                    code: 'EMAIL_ERROR',
+                    code: 'INTERNAL_SERVER_ERROR',
+                    argumentName: 'EMAIL_ERROR',
                     exception: {
-                        message:
-                            'SES email send failed. Error: Error: Network error occurred',
+                        message: 'CMS and State email failed',
                         path: undefined,
                         locations: undefined,
                     },
