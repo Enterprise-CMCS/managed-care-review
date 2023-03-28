@@ -69,7 +69,7 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
                 } catch (err) {
                     if (err instanceof SESServiceException) {
                         return new Error(
-                            'SES email send failed. Error: ' +
+                            'SES email send failed. Error is from Amazon SES. Error: ' +
                                 JSON.stringify(err)
                         )
                     }
