@@ -101,15 +101,18 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
         sendEmail: async (emailData: EmailData): Promise<void | Error> => {
             const emailRequestParams = getSESEmailParams(emailData)
 
-            const emailResult = await sendSESEmail(emailRequestParams)
+            try {
+                await sendSESEmail(emailRequestParams)
+                return
+            } catch (err) {
+                if (err instanceof SESServiceException) {
+                    return new Error(
+                        'SES email send failed. Error: ' + JSON.stringify(err)
+                    )
+                }
 
-            if (emailResult instanceof SESServiceException) {
-                return new Error(
-                    'SES email send failed. Error: ' +
-                        JSON.stringify(emailResult)
-                )
+                return new Error('SES email send failed. Error: ' + err)
             }
-            return
         },
         sendCMSNewPackage: async function (
             formData,
