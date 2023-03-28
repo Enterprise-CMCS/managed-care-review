@@ -27,7 +27,7 @@ We have two ways to access the Apollo Explorer tool:
 >- Once logged in, input this url `[hostname]/dev/graphql-explorer` to access the tool.
 
 **External Apollo Explorer Tool**:
->Apollo Explorer is embedded in the local deployment, so there's no need to access it externally, except in rare cases like accessing user roles that have no users yet, and we need to perform GraphQL operations with that user role.
+>Apollo Explorer is embedded in the local deployment, so there's no need to access it externally, except in rare cases like executing GraphQL operations as user role `ADMIN_USER` when no users with that role has been added.
 > 
 >To connect Apollo Explorer to our local GraphQL api, we must manually configure connection settings in the Explorer tool.
 > 
