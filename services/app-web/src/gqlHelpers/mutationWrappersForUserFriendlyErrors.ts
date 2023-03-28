@@ -45,9 +45,12 @@ const handleApolloErrorsAndAddUserFacingMessages = (
 
         apolloError.graphQLErrors.forEach(({ extensions }) => {
             // handle most common error cases with more specific messaging
-            if (extensions.code === 'EMAIL_ERROR') {
+            if (
+                extensions.code === 'INTERNAL_SERVER_ERROR' &&
+                extensions.argumentName === 'EMAIL_ERROR'
+            ) {
                 message = ERROR_MESSAGES.email_error_generic
-                options.cause = extensions.code
+                options.cause = extensions.argumentName
             }
             if (
                 extensions.code === 'BAD_USER_INPUT' &&

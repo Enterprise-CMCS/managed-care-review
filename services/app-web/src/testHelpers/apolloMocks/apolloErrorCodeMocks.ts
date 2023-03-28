@@ -1,7 +1,13 @@
-export const GRAPHQL_ERROR_MOCK_MESSAGES = {
+export const GRAPHQL_ERROR_ARGUMENT_MESSAGES = {
     EMAIL_ERROR: 'Error attempting to send emails.',
-    BAD_USER_INPUT: 'An error occurred due to bad user input.',
-    FORBIDDEN: "You don't have permission to access the requested resource.",
 }
 
-export type GraphQLErrorMockCodeType = keyof typeof GRAPHQL_ERROR_MOCK_MESSAGES
+type GraphQLErrorCodeTypes =
+    | 'BAD_USER_INPUT'
+    | 'FORBIDDEN'
+    | 'INTERNAL_SERVER_ERROR'
+
+type GraphQLErrorArgumentNameTypes =
+    keyof typeof GRAPHQL_ERROR_ARGUMENT_MESSAGES
+
+export type { GraphQLErrorCodeTypes, GraphQLErrorArgumentNameTypes }

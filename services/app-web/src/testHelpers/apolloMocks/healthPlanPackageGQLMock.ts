@@ -28,8 +28,9 @@ import {
 } from './healthPlanFormDataMock'
 import { ApolloError } from '@apollo/client'
 import {
-    GRAPHQL_ERROR_MOCK_MESSAGES,
-    GraphQLErrorMockCodeType,
+    GRAPHQL_ERROR_ARGUMENT_MESSAGES,
+    GraphQLErrorArgumentNameTypes,
+    GraphQLErrorCodeTypes,
 } from './apolloErrorCodeMocks'
 
 type fetchHealthPlanPackageMockProps = {
@@ -421,18 +422,22 @@ const submitHealthPlanPackageMockSuccess = ({
 
 const submitHealthPlanPackageMockError = ({
     id,
-    errorCode,
+    error,
 }: {
     id: string
-    errorCode?: GraphQLErrorMockCodeType
+    error?: {
+        errorCode: GraphQLErrorCodeTypes
+        errorArgumentName: GraphQLErrorArgumentNameTypes
+    }
 }): MockedResponse<SubmitHealthPlanPackageMutation | ApolloError> => {
     const graphQLError = new GraphQLError(
-        errorCode
-            ? GRAPHQL_ERROR_MOCK_MESSAGES[errorCode]
+        error
+            ? GRAPHQL_ERROR_ARGUMENT_MESSAGES[error.errorArgumentName]
             : 'Error attempting to submit.',
         {
             extensions: {
-                code: errorCode,
+                code: error?.errorCode,
+                argumentName: error?.errorArgumentName,
             },
         }
     )
@@ -475,19 +480,23 @@ const unlockHealthPlanPackageMockSuccess = ({
 const unlockHealthPlanPackageMockError = ({
     id,
     reason,
-    errorCode,
+    error,
 }: {
     id: string
     reason: string
-    errorCode?: GraphQLErrorMockCodeType
+    error?: {
+        errorCode: GraphQLErrorCodeTypes
+        errorArgumentName: GraphQLErrorArgumentNameTypes
+    }
 }): MockedResponse<UnlockHealthPlanPackageMutation> => {
     const graphQLError = new GraphQLError(
-        errorCode
-            ? GRAPHQL_ERROR_MOCK_MESSAGES[errorCode]
-            : 'Error attempting to unlock.',
+        error
+            ? GRAPHQL_ERROR_ARGUMENT_MESSAGES[error.errorArgumentName]
+            : 'Error attempting to submit.',
         {
             extensions: {
-                code: errorCode,
+                code: error?.errorCode,
+                argumentName: error?.errorArgumentName,
             },
         }
     )
