@@ -88,9 +88,7 @@ const getParameters = async (names: string[]): Promise<ParametersType> => {
             }
         }
         console.info(
-            `getParameters: out of ${
-                names.length
-            } states, returns ${JSON.stringify(finalParametersList)}`
+            `getParameters: out of ${names.length} states, returned ${finalParametersList.length}`
         )
         return finalParametersList
     }
