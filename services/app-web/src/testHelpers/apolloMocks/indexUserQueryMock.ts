@@ -18,6 +18,7 @@ export const indexUsersQueryMock = (): MockedResponse<IndexUsersQuery> => {
                                 id: '1',
                                 familyName: 'Hotman',
                                 givenName: 'Zuko',
+                                divisionAssignment: null,
                                 email: 'zuko@example.com',
                                 stateAssignments: [],
                             },

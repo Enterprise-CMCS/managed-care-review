@@ -1,8 +1,12 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { AdminUser } from '../../../gen/gqlClient'
 import { renderWithProviders } from '../../../testHelpers'
-import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
-import { fetchEmailSettings } from '../../../testHelpers/apolloMocks/emailGQLMock'
+import {
+    fetchCurrentUserMock,
+    updateUserMockError,
+    updateUserMockSuccess,
+} from '../../../testHelpers/apolloMocks'
 import { indexUsersQueryMock } from '../../../testHelpers/apolloMocks/indexUserQueryMock'
 import { CMSUsersTable } from './CMSUsersTable'
 
@@ -17,6 +21,7 @@ describe('CMSUsersTable', () => {
             email: 'bob@dmas.mn.gov',
         }
     }
+
     it('should render the CMS users table with the correct columns and data', async () => {
         renderWithProviders(<CMSUsersTable />, {
             apolloProvider: {
@@ -26,7 +31,6 @@ describe('CMSUsersTable', () => {
                         user: mockValidAdminUser(),
                         statusCode: 200,
                     }),
-                    fetchEmailSettings(),
                 ],
             },
         })
@@ -53,5 +57,108 @@ describe('CMSUsersTable', () => {
         expect(within(table).getByText('Hotman')).toBeInTheDocument()
         expect(within(table).getByText('Zuko')).toBeInTheDocument()
         expect(within(table).getByText('zuko@example.com')).toBeInTheDocument()
+    })
+
+    it('should update the dropdown after an edit', async () => {
+        renderWithProviders(<CMSUsersTable />, {
+            apolloProvider: {
+                mocks: [
+                    indexUsersQueryMock(),
+                    fetchCurrentUserMock({
+                        user: mockValidAdminUser(),
+                        statusCode: 200,
+                    }),
+                    updateUserMockSuccess({
+                        cmsUserID: '1',
+                        stateAssignments: [],
+                        divisionAssignment: 'OACT',
+                    }),
+                ],
+            },
+        })
+        // Find the table by its caption
+        const table = await screen.findByRole('table', { name: 'CMS Users' })
+        expect(table).toBeInTheDocument()
+
+        // Count the table rows
+        const tableRows = await within(table).findAllByRole('row')
+        expect(tableRows).toHaveLength(2)
+
+        const zukRow = within(table).getByText('Hotman').parentElement
+        if (!zukRow) {
+            throw new Error('no zuko row in the table')
+        }
+
+        const divisionChooser = within(zukRow).getByRole('combobox')
+        expect(divisionChooser).toBeInTheDocument()
+
+        await userEvent.click(divisionChooser)
+
+        await waitFor(() => {
+            expect(within(zukRow).getByText('OACT')).toBeInTheDocument()
+        })
+
+        const oact = within(zukRow).getByText('OACT')
+
+        await userEvent.click(oact)
+
+        expect(within(zukRow).getByText('OACT')).toBeInTheDocument()
+    })
+
+    it('should display an error if updateUser fails', async () => {
+        renderWithProviders(<CMSUsersTable />, {
+            apolloProvider: {
+                mocks: [
+                    indexUsersQueryMock(),
+                    fetchCurrentUserMock({
+                        user: mockValidAdminUser(),
+                        statusCode: 200,
+                    }),
+                    updateUserMockError({
+                        cmsUserID: '1',
+                        stateAssignments: [],
+                        divisionAssignment: 'OACT',
+                    }),
+                ],
+            },
+        })
+        // Find the table by its caption
+        const table = await screen.findByRole('table', { name: 'CMS Users' })
+        expect(table).toBeInTheDocument()
+
+        // Count the table rows
+        const tableRows = await within(table).findAllByRole('row')
+        expect(tableRows).toHaveLength(2)
+
+        const zukRow = within(table).getByText('Hotman').parentElement
+        if (!zukRow) {
+            throw new Error('no zuko row in the table')
+        }
+
+        const divisionChooser = within(zukRow).getByRole('combobox')
+        expect(divisionChooser).toBeInTheDocument()
+
+        await userEvent.click(divisionChooser)
+
+        await waitFor(() => {
+            expect(within(zukRow).getByText('OACT')).toBeInTheDocument()
+        })
+
+        const oact = within(zukRow).getByText('OACT')
+
+        await userEvent.click(oact)
+
+        // OK this is heinous. There's probably a better way to use styles for this error
+        // but I went with the first recommendation on react-select which was setting
+        // styles directly. This while loop finds the particular "control" div that gets
+        // the red border on error.
+        let parent = divisionChooser.parentElement
+        while (parent && !parent.className.endsWith('-control')) {
+            parent = parent.parentElement
+        }
+
+        await waitFor(() => {
+            expect(parent).toHaveStyle('border-color: red;')
+        })
     })
 })

@@ -47,3 +47,5 @@ export {
 export { mockQuestionsPayload } from './questionResponseDataMocks'
 
 export { mockMNState } from './stateMock'
+
+export { updateUserMockError, updateUserMockSuccess } from './updateUserMock'

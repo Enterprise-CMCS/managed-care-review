@@ -1,5 +1,5 @@
 import { Table } from '@trussworks/react-uswds'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import {
     createColumnHelper,
     flexRender,
@@ -19,7 +19,9 @@ import { Loading } from '../../../components'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 
 import { wrapApolloResult } from '../../../gqlHelpers/apolloQueryWrapper'
-import { handleGQLErrors } from '../../../gqlHelpers/apolloErrors'
+import { handleApolloError } from '../../../gqlHelpers/apolloErrors'
+import { updateCMSUser } from '../../../gqlHelpers/updateCMSUser'
+import { ApolloError } from '@apollo/client'
 
 type DivisionSelectOptions = {
     label: string
@@ -35,12 +37,19 @@ function DivisionSelect({
     user: CmsUser
     setDivision: SetDivisionCallbackType
 }): React.ReactElement {
+    const [updateErrored, setUpdateErrored] = useState<boolean>(false)
+
     async function handleChange(
         selectedOption: OnChangeValue<DivisionSelectOptions, false>,
         row: CmsUser
     ) {
         if (selectedOption && 'value' in selectedOption) {
-            await setDivision(row.id, selectedOption.value)
+            const err = await setDivision(row.id, selectedOption.value)
+            if (err) {
+                setUpdateErrored(true)
+            } else {
+                setUpdateErrored(false)
+            }
         }
     }
 
@@ -60,6 +69,18 @@ function DivisionSelect({
 
     return (
         <Select
+            styles={{
+                control: (baseStyles) => {
+                    if (updateErrored) {
+                        return {
+                            ...baseStyles,
+                            borderColor: 'red',
+                            borderWidth: '3px',
+                        }
+                    }
+                    return baseStyles
+                },
+            }}
             value={defaultOption}
             options={options}
             onChange={(selectedOption) => handleChange(selectedOption, user)}
@@ -155,7 +176,7 @@ function CMSUserTableWithData({
 type SetDivisionCallbackType = (
     userID: string,
     division: Division
-) => Promise<void>
+) => Promise<undefined | Error>
 
 export const CMSUsersTable = (): React.ReactElement => {
     const { result } = wrapApolloResult(
@@ -164,26 +185,27 @@ export const CMSUsersTable = (): React.ReactElement => {
         })
     )
 
-    const [updateCmsUser] = useUpdateCmsUserMutation()
+    const [updateCmsUserMutation] = useUpdateCmsUserMutation()
 
     const setDivisionCallback: SetDivisionCallbackType = useCallback(
         async (userID: string, division: Division) => {
-            const res = await updateCmsUser({
-                variables: {
-                    input: {
-                        cmsUserID: userID,
-                        stateAssignments: [],
-                        divisionAssignment: division,
-                    },
-                },
+            const res = await updateCMSUser(updateCmsUserMutation, {
+                cmsUserID: userID,
+                stateAssignments: [],
+                divisionAssignment: division,
             })
 
-            if (res.errors) {
-                console.error('Errored attempting to update user: ', res.errors)
-                handleGQLErrors(res.errors)
+            if (res instanceof Error) {
+                console.error('Errored attempting to update user: ', res)
+                if (res instanceof ApolloError) {
+                    handleApolloError(res, true)
+                }
+                return res
             }
+
+            return undefined
         },
-        [updateCmsUser]
+        [updateCmsUserMutation]
     )
 
     if (result.status === 'LOADING') {
