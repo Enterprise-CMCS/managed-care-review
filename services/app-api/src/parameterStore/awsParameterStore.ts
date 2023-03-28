@@ -49,14 +49,19 @@ const getParameters = async (names: string[]): Promise<ParametersType> => {
                     console.info('PARAM check: missing expected values')
                     return
                 }
-
-                parametersList.push({
+                const constructedParam = {
                     name: param.Name,
                     value: param.Value,
                     type: param.Type,
-                })
+                }
+                console.info('PARAM check constructed:', constructedParam)
+                parametersList.push(constructedParam)
             })
-            console.info(`GetParameters: return valid params ${parametersList}`)
+            console.info(
+                `GetParameters: return valid params ${JSON.stringify(
+                    parametersList
+                )[0]} ${JSON.stringify(parametersList)}`
+            )
             return parametersList
         } catch (err) {
             console.error(
