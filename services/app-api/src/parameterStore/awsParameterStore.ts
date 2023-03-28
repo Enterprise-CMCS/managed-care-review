@@ -19,6 +19,7 @@ type ParameterStoreType = {
 // Used for email settings. Must fetch parameters in batches of 10.
 const getParameters = async (names: string[]): Promise<ParametersType> => {
     const getParametersSSMCommand = async (validNamesList: string[]) => {
+        console.info(`GetParameters: input ${JSON.stringify(validNamesList)}`)
         const command = new GetParametersCommand({
             Names: validNamesList,
         })
@@ -54,13 +55,19 @@ const getParameters = async (names: string[]): Promise<ParametersType> => {
                     value: param.Value,
                     type: param.Type,
                 }
-                console.info('PARAM check constructed:', constructedParam)
+                console.info(
+                    'PARAM check constructed:',
+                    JSON.stringify(constructedParam)
+                )
                 parametersList.push(constructedParam)
             })
             console.info(
-                `GetParameters: return valid params ${JSON.stringify(
-                    parametersList
-                )[0]} ${JSON.stringify(parametersList)}`
+                `GetParameters: output ${JSON.stringify(parametersList)}`
+            )
+            console.info(
+                `GetParameters: output first in list ${JSON.stringify(
+                    parametersList[0]
+                )}`
             )
             return parametersList
         } catch (err) {
