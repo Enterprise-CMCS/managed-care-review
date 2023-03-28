@@ -19,7 +19,6 @@ type ParameterStoreType = {
 // Used for email settings. Must fetch parameters in batches of 10.
 const getParameters = async (names: string[]): Promise<ParametersType> => {
     const getParametersSSMCommand = async (validNamesList: string[]) => {
-        console.info(`GetParameters: input ${JSON.stringify(validNamesList)}`)
         const command = new GetParametersCommand({
             Names: validNamesList,
         })
@@ -28,7 +27,6 @@ const getParameters = async (names: string[]): Promise<ParametersType> => {
             const {
                 Parameters: parameters,
                 InvalidParameters: invalidParameters,
-                $metadata: metadata,
             } = await ssm.send(command)
 
             if (!parameters || parameters.length === 0) {
@@ -36,18 +34,19 @@ const getParameters = async (names: string[]): Promise<ParametersType> => {
             }
 
             if (invalidParameters) {
-                console.error(
-                    `GetParameters: Invalid parameters: ${invalidParameters}.  Metadata: ${JSON.stringify(
-                        metadata
-                    )}`
+                console.info(
+                    `GetParameters: Invalid parameters, state analyst config not found: ${invalidParameters}.`
                 )
             }
 
             const parametersList: ParametersType = []
             parameters.forEach((param) => {
-                console.info('PARAM check:', JSON.stringify(param))
                 if (!param.Value || !param.Type || !param.Name) {
-                    console.info('PARAM check: missing expected values')
+                    console.info(
+                        `GetParameters: Param fetched but missing expected values ${JSON.stringify(
+                            param
+                        )}`
+                    )
                     return
                 }
                 const constructedParam = {
@@ -55,20 +54,8 @@ const getParameters = async (names: string[]): Promise<ParametersType> => {
                     value: param.Value,
                     type: param.Type,
                 }
-                console.info(
-                    'PARAM check constructed:',
-                    JSON.stringify(constructedParam)
-                )
                 parametersList.push(constructedParam)
             })
-            console.info(
-                `GetParameters: output ${JSON.stringify(parametersList)}`
-            )
-            console.info(
-                `GetParameters: output first in list ${JSON.stringify(
-                    parametersList[0]
-                )}`
-            )
             return parametersList
         } catch (err) {
             console.error(
@@ -83,7 +70,7 @@ const getParameters = async (names: string[]): Promise<ParametersType> => {
         return await getParametersSSMCommand(names)
     } else {
         const maxSize = 10
-        const finalParametersList: {
+        let finalParametersList: {
             name: string
             value: string
             type: string
@@ -97,9 +84,14 @@ const getParameters = async (names: string[]): Promise<ParametersType> => {
             if (result instanceof Error) {
                 finalErrorsList.push(result)
             } else {
-                finalParametersList.concat(result)
+                finalParametersList = finalParametersList.concat(result)
             }
         }
+        console.info(
+            `getParameters: out of ${
+                names.length
+            } states, returns ${JSON.stringify(finalParametersList)}`
+        )
         return finalParametersList
     }
 }

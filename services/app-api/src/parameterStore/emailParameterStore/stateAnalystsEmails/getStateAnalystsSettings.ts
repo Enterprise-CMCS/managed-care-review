@@ -12,17 +12,12 @@ type StateAnalystsWithState = {
 const getStateAnalystsSettings = async (
     stateCodes: StateCodeType[]
 ): Promise<StateAnalystsWithState | Error> => {
-    console.info('getStateAnalystsSettings: input ', JSON.stringify(stateCodes))
     const names = stateCodes.map(
         (code) => `/configuration/${code}/stateanalysts/email`
     )
     const stateAnalysts = await ParameterStore.getParameters(names)
-    console.info(
-        'getStateAnalystsSettings: returned value from getParameters ',
-        JSON.stringify(stateAnalysts)
-    )
+
     if (stateAnalysts instanceof Error) {
-        console.info('getStateAnalystsSettings: analysts error')
         return stateAnalysts
     }
 
@@ -39,11 +34,7 @@ const getStateAnalystsSettings = async (
             const stateCode = stateAnalyst.name
                 .replace('/configuration/', '')
                 .replace('/stateanalysts/email', '')
-            console.info(
-                'isValidStateCode: ',
-                stateCode,
-                isValidStateCode(stateCode)
-            )
+
             if (isValidStateCode(stateCode)) {
                 cleanedStateAnalysts.push({
                     stateCode: stateCode,
@@ -56,7 +47,6 @@ const getStateAnalystsSettings = async (
             }
         }
     )
-    console.info('getStateAnalystsSettings: output ', cleanedStateAnalysts)
     return cleanedStateAnalysts
 }
 
