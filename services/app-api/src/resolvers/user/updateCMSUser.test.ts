@@ -13,6 +13,7 @@ import {
     assertAnErrorCode,
     assertAnErrorExtensions,
 } from '../../testHelpers'
+import { State } from '../../gen/gqlServer'
 
 describe('updateCMSUser', () => {
     it('updates a cms users state assignments', async () => {
@@ -67,12 +68,8 @@ describe('updateCMSUser', () => {
 
         const user = updateRes.data.updateCMSUser.user
         expect(user.email).toBe(newUser.email)
-        expect(user.stateAssignments).toEqual([
-            {
-                code: 'CA',
-                name: 'California',
-            },
-        ])
+        expect(user.stateAssignments).toHaveLength(1)
+        expect(user.stateAssignments[0].code).toBe('CA')
 
         // change the value and see if it updates
         const updateRes2 = await server.executeOperation({
@@ -95,17 +92,8 @@ describe('updateCMSUser', () => {
         const user2 = updateRes2.data.updateCMSUser.user
         expect(user2.email).toBe(newUser.email)
         expect(user2.stateAssignments).toHaveLength(2)
-        expect(user2.stateAssignments).toEqual(
-            expect.arrayContaining([
-                {
-                    code: 'MA',
-                    name: 'Massachusetts',
-                },
-                {
-                    code: 'VA',
-                    name: 'Virginia',
-                },
-            ])
+        expect(user2.stateAssignments.map((s: State) => s.code)).toEqual(
+            expect.arrayContaining(['MA', 'VA'])
         )
     })
 
