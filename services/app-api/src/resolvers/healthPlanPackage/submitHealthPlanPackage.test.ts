@@ -24,6 +24,7 @@ import {
 } from '../../testHelpers/parameterStoreHelpers'
 import { UserType } from '../../domain-models'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import * as awsSESHelpers from '../../testHelpers/awsSESHelpers'
 
 describe('submitHealthPlanPackage', () => {
     const testUserCMS: UserType = {
@@ -738,6 +739,57 @@ describe('submitHealthPlanPackage', () => {
 
         expect(submitResult.errors).toBeDefined()
         expect(mockEmailer.sendEmail).not.toHaveBeenCalled()
+    })
+
+    it('errors when SES email has failed.', async () => {
+        const mockEmailer = testEmailer()
+
+        jest.spyOn(awsSESHelpers, 'testSendSESEmail').mockImplementation(
+            async () => {
+                throw new Error('Network error occurred')
+            }
+        )
+
+        //mock invoke email submit lambda
+        const server = await constructTestPostgresServer({
+            emailer: mockEmailer,
+        })
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {})
+        const draftID = draft.id
+
+        const submitResult = await server.executeOperation({
+            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            variables: {
+                input: {
+                    pkgID: draftID,
+                },
+            },
+        })
+
+        // expect errors from submission
+        expect(submitResult.errors).toBeDefined()
+
+        // expect sendEmail to have been called, so we know it did not error earlier
+        expect(mockEmailer.sendEmail).toHaveBeenCalled()
+
+        // expect correct graphql error.
+        expect(submitResult.errors?.[0]).toEqual(
+            expect.objectContaining({
+                message:
+                    'SES email send failed. Error: Error: Network error occurred',
+                locations: [{ line: 2, column: 5 }],
+                path: ['submitHealthPlanPackage'],
+                extensions: {
+                    code: 'EMAIL_ERROR',
+                    exception: {
+                        message:
+                            'SES email send failed. Error: Error: Network error occurred',
+                        path: undefined,
+                        locations: undefined,
+                    },
+                },
+            })
+        )
     })
 })
 
