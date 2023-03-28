@@ -359,7 +359,7 @@ export function submitHealthPlanPackageResolver(
             throw new GraphQLError('Email failed', {
                 extensions: {
                     code: 'INTERNAL_SERVER_ERROR',
-                    argumentName: 'EMAIL_ERROR',
+                    cause: 'EMAIL_ERROR',
                 },
             })
         }

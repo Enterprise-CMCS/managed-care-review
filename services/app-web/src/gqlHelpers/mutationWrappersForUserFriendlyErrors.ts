@@ -47,10 +47,10 @@ const handleApolloErrorsAndAddUserFacingMessages = (
             // handle most common error cases with more specific messaging
             if (
                 extensions.code === 'INTERNAL_SERVER_ERROR' &&
-                extensions.argumentName === 'EMAIL_ERROR'
+                extensions.cause === 'EMAIL_ERROR'
             ) {
                 message = ERROR_MESSAGES.email_error_generic
-                options.cause = extensions.argumentName
+                options.cause = extensions.cause
             }
             if (
                 extensions.code === 'BAD_USER_INPUT' &&

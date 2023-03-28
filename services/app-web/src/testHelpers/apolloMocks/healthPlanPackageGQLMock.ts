@@ -427,17 +427,17 @@ const submitHealthPlanPackageMockError = ({
     id: string
     error?: {
         errorCode: GraphQLErrorCodeTypes
-        errorArgumentName: GraphQLErrorArgumentNameTypes
+        errorCause: GraphQLErrorArgumentNameTypes
     }
 }): MockedResponse<SubmitHealthPlanPackageMutation | ApolloError> => {
     const graphQLError = new GraphQLError(
         error
-            ? GRAPHQL_ERROR_ARGUMENT_MESSAGES[error.errorArgumentName]
+            ? GRAPHQL_ERROR_ARGUMENT_MESSAGES[error.errorCause]
             : 'Error attempting to submit.',
         {
             extensions: {
                 code: error?.errorCode,
-                argumentName: error?.errorArgumentName,
+                cause: error?.errorCause,
             },
         }
     )
@@ -486,17 +486,17 @@ const unlockHealthPlanPackageMockError = ({
     reason: string
     error?: {
         errorCode: GraphQLErrorCodeTypes
-        errorArgumentName: GraphQLErrorArgumentNameTypes
+        errorCause: GraphQLErrorArgumentNameTypes
     }
 }): MockedResponse<UnlockHealthPlanPackageMutation> => {
     const graphQLError = new GraphQLError(
         error
-            ? GRAPHQL_ERROR_ARGUMENT_MESSAGES[error.errorArgumentName]
+            ? GRAPHQL_ERROR_ARGUMENT_MESSAGES[error.errorCause]
             : 'Error attempting to submit.',
         {
             extensions: {
                 code: error?.errorCode,
-                argumentName: error?.errorArgumentName,
+                cause: error?.errorCause,
             },
         }
     )

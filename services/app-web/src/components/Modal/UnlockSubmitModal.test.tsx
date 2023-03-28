@@ -112,7 +112,7 @@ describe('UnlockSubmitModal', () => {
                                 id: mockCompleteDraft().id,
                                 error: {
                                     errorCode: 'INTERNAL_SERVER_ERROR',
-                                    errorArgumentName: 'EMAIL_ERROR',
+                                    errorCause: 'EMAIL_ERROR',
                                 },
                             }),
                         ],
@@ -380,7 +380,7 @@ describe('UnlockSubmitModal', () => {
                                 reason: 'Test unlock summary',
                                 error: {
                                     errorCode: 'INTERNAL_SERVER_ERROR',
-                                    errorArgumentName: 'EMAIL_ERROR',
+                                    errorCause: 'EMAIL_ERROR',
                                 },
                             }),
                         ],

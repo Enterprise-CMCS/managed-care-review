@@ -780,7 +780,7 @@ describe('submitHealthPlanPackage', () => {
                 path: ['submitHealthPlanPackage'],
                 extensions: {
                     code: 'INTERNAL_SERVER_ERROR',
-                    argumentName: 'EMAIL_ERROR',
+                    cause: 'EMAIL_ERROR',
                     exception: {
                         message: 'Email failed',
                         path: undefined,
