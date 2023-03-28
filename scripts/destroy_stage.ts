@@ -27,6 +27,7 @@ const stackPrefixes = [
     'ui',
     'database',
     'stream-functions',
+    'github-oidc',
 ]
 
 const protectedStages = [
