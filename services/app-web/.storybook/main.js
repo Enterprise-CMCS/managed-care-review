@@ -1,70 +1,70 @@
-const path = require('path')
+const path = require('path');
 
-// Feedback from Drew - instead of pushing a rule modify config 
-// 
+// This should match whats in craco
+const sassLoaderOptions = {
+    sourceMap: true,
+    sassOptions: {
+        includePaths: [
+            '../../node_modules/@uswds',
+            '../../node_modules/@uswds/uswds/packages',
+        ],
+    },
+};
+
 const webpackConfig = (config) => {
-        process.stdout.write('HERE \n');
-    process.stdout.write(JSON.stringify(config.module.rules));
-    //  config.module.rules.forEach((p) => {
-    //      if (p.options) {
-    //          // Ignore warnings about ordering from mini-css-extract-plugin
-    //          if (p.options.hasOwnProperty('sassOptions')) {
-    //              p.options.ignoreOrder = true;
-    //          }
-    //      }
-    //  });
-
-    config.module.rules.push(
-      {
-        test: /\.(sa|sc|c)ss$/,
-        exclude: /\.module\.(sa|sc|c)ss$/i,
-        use: ['style-loader', 'css-loader', {
-        loader: "sass-loader",
-        options: {
-            sourceMap: true,
-            sassOptions: {
-            includePaths: [
-                "../../../node_modules/@uswds",
-                "../../../node_modules/@uswds/uswds/packages",
-            ],
-            },
-        },
-        },],
-        include: path.resolve(__dirname, '../'),
-    }
-    );
-
+    // We have workaround in our craco config (used for the application) we also need to bring to storybook
+    // Currently there is no up to date tooling to wire craco into storybook so we must manually edit config to get the changes we want.
+    config.module.rules.forEach((r) => {
+        if (r.oneOf) {
+            r.oneOf.forEach((oo) => {
+                if (oo.use) {
+                    oo.use.forEach((u) => {
+                        if (u.loader && u.loader.includes('/sass-loader/')) {
+                            process.stdout.write(
+                                `RULE MATCH \n ${JSON.stringify(u)} \n`
+                            );
+                            // Override to bring in uswds scss
+                            u.options = sassLoaderOptions;
+                                process.stdout
+                                    .write(`WEBPACK UPDATE: updated sass-loader to bring in uswds ${JSON.stringify(u.options.sassOptions)}`)
+                        }
+                    });
+                }
+            });
+        }
+         process.stdout.write(JSON.stringify(config.module.rules.length));
+    });
     return config;
 };
 
-  module.exports = {
-      stories: ['../src/**/*.stories.@(ts|tsx)'],
-      addons: [
-          '@storybook/addon-a11y',
-          '@storybook/addon-links',
-          '@storybook/addon-essentials',
-          '@storybook/preset-create-react-app',
-      ],
-      framework: '@storybook/react',
-      typescript: {
-          check: false,
-          checkOptions: {},
-          reactDocgen: 'react-docgen-typescript',
-          reactDocgenTypescriptOptions: {
-              shouldExtractLiteralValuesFromEnum: true,
-              compilerOptions: {
-                  allowSyntheticDefaultImports: false,
-                  esModuleInterop: false,
-              },
-          },
-      },
-      core: {
-          builder: 'webpack5',
-          options: {
-              lazyCompilation: true,
-          },
-      },
-        webpackFinal: async (config) => {
-           return webpackConfig(config)
+module.exports = {
+    stories: ['../src/**/*.stories.@(ts|tsx)'],
+    addons: [
+        '@storybook/addon-a11y',
+        '@storybook/addon-links',
+        '@storybook/addon-essentials',
+        '@storybook/preset-create-react-app',
+    ],
+    framework: '@storybook/react',
+    typescript: {
+        check: false,
+        checkOptions: {},
+        reactDocgen: 'react-docgen-typescript',
+        reactDocgenTypescriptOptions: {
+            shouldExtractLiteralValuesFromEnum: true,
+            compilerOptions: {
+                allowSyntheticDefaultImports: false,
+                esModuleInterop: false,
+            },
         },
-  };
+    },
+    core: {
+        builder: 'webpack5',
+        options: {
+            lazyCompilation: true,
+        },
+    },
+    webpackFinal: async (config) => {
+        return webpackConfig(config);
+    },
+};
