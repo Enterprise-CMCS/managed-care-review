@@ -609,5 +609,4 @@ export {
     mockUnlockedContractOnlyFormData,
     mockUser,
     testEmailer,
-    testSendSESEmail,
 }
