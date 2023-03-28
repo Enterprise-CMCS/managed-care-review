@@ -10,14 +10,12 @@ The relative merits of each approach should become clear below.
 
 ## GraphQL
 
-The major mental shift in using GraphQL, in contrast to RESTful services, is that you have to _begin_ by thinking of the data you want returned. With REST, it's common to hit an endpoint, get back a large JSON, browse through it, and then, in the application code, whittle it down, or pluck the bits that you need. But we'll construct our GraphQL queries to return to return exactly what we need, before we hit the application code at all.
+The major mental shift in using GraphQL, in contrast to RESTful services, is that you have to _begin_ by thinking of the data you want returned. With REST, it's common to hit an endpoint, get back a large JSON, browse through it, and then, in the application code, whittle it down, or pluck the bits that you need. But we'll construct our GraphQL queries to return exactly what we need, before we hit the application code at all.
 
-### Apollo Sandbox
-You can use the [Apollo Sandbox tool](https://www.apollographql.com/docs/graphos/explorer/sandbox/) to write your graphql queries and mutations to the local graphql deployment. A couple of notable apollo sandbox features:
-- [The Explorer](https://www.apollographql.com/docs/graphos/explorer/explorer/): A web IDE for creating, running, and managing GraphQL operations
-- Schema referencing
+### Apollo Studio Explorer
+[Apollo Explorer tool](https://www.apollographql.com/docs/graphos/explorer/) is a web-based IDE for writing and executing GraphQL operations on our deployed GraphQL API, with features such as schema referencing, query linting, autocomplete, and a jump-to-definition tool. With this tool we can test and write GraphQL operations without the need of front-end UI to execute the operation.
 
-We have two ways to access the Apollo Sandbox tool:
+We have two ways to access the Apollo Explorer tool:
 
 **Embedded Apollo Explorer Tool**:
 >In all environments, except `prod`, we have embedded the Apollo Explorer Tool into the MC-Review app. We embedded the tool into the app to simplify authorization configuration for `dev` and `val` environments. By doing so, we can programmatically configure the tool's authorization, eliminating the need for manual configuration by the user.
@@ -29,7 +27,7 @@ We have two ways to access the Apollo Sandbox tool:
 >- Once logged in, input this url `[hostname]/dev/graphql-explorer` to access the tool.
 
 **External Apollo Explorer Tool**:
->Apollo Explorer is embedded in the local deployment, so there's no need to access it externally, except in rare cases like when the frontend is not accessible, and we need to perform GraphQL operations.
+>Apollo Explorer is embedded in the local deployment, so there's no need to access it externally, except in rare cases like accessing user roles that have no users yet, and we need to perform GraphQL operations with that user role.
 > 
 >To connect Apollo Explorer to our local GraphQL api, we must manually configure connection settings in the Explorer tool.
 > 
