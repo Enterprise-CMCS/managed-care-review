@@ -775,14 +775,14 @@ describe('submitHealthPlanPackage', () => {
         // expect correct graphql error.
         expect(submitResult.errors?.[0]).toEqual(
             expect.objectContaining({
-                message: 'CMS and State email failed',
+                message: 'Email failed',
                 locations: [{ line: 2, column: 5 }],
                 path: ['submitHealthPlanPackage'],
                 extensions: {
                     code: 'INTERNAL_SERVER_ERROR',
                     argumentName: 'EMAIL_ERROR',
                     exception: {
-                        message: 'CMS and State email failed',
+                        message: 'Email failed',
                         path: undefined,
                         locations: undefined,
                     },

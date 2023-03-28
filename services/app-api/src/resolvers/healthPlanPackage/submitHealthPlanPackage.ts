@@ -338,51 +338,25 @@ export function submitHealthPlanPackageResolver(
             )
         }
 
-        const logCMSEmailFailure = (cmsPackageEmailResult: string | Error) => {
-            logError(
-                'submitHealthPlanPackage - CMS email failed',
-                cmsPackageEmailResult
-            )
-            setErrorAttributesOnActiveSpan('CMS email failed', span)
-        }
-
-        const logStateEmailFailure = (
-            statePackageEmailResult: string | Error
-        ) => {
-            logError(
-                'submitHealthPlanPackage - state email failed',
-                statePackageEmailResult
-            )
-            setErrorAttributesOnActiveSpan('state email failed', span)
-        }
-
         if (
-            cmsPackageEmailResult instanceof Error &&
+            cmsPackageEmailResult instanceof Error ||
             statePackageEmailResult instanceof Error
         ) {
-            logCMSEmailFailure(cmsPackageEmailResult)
-            logStateEmailFailure(statePackageEmailResult)
-            throw new GraphQLError('CMS and State email failed', {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    argumentName: 'EMAIL_ERROR',
-                },
-            })
-        }
-
-        if (cmsPackageEmailResult instanceof Error) {
-            logCMSEmailFailure(cmsPackageEmailResult)
-            throw new GraphQLError('CMS email failed', {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    argumentName: 'EMAIL_ERROR',
-                },
-            })
-        }
-
-        if (statePackageEmailResult instanceof Error) {
-            logStateEmailFailure(statePackageEmailResult)
-            throw new GraphQLError('State email failed', {
+            if (cmsPackageEmailResult instanceof Error) {
+                logError(
+                    'submitHealthPlanPackage - CMS email failed',
+                    cmsPackageEmailResult
+                )
+                setErrorAttributesOnActiveSpan('CMS email failed', span)
+            }
+            if (statePackageEmailResult instanceof Error) {
+                logError(
+                    'submitHealthPlanPackage - state email failed',
+                    statePackageEmailResult
+                )
+                setErrorAttributesOnActiveSpan('state email failed', span)
+            }
+            throw new GraphQLError('Email failed', {
                 extensions: {
                     code: 'INTERNAL_SERVER_ERROR',
                     argumentName: 'EMAIL_ERROR',

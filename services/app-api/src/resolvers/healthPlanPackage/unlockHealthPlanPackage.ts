@@ -172,26 +172,28 @@ export function unlockHealthPlanPackageResolver(
                 submitterEmails
             )
 
-        if (unlockPackageCMSEmailResult instanceof Error) {
-            logError(
-                'unlockPackageCMSEmail - CMS email failed',
-                unlockPackageCMSEmailResult
-            )
-            throw new GraphQLError(unlockPackageCMSEmailResult.message, {
+        if (
+            unlockPackageCMSEmailResult instanceof Error ||
+            unlockPackageStateEmailResult instanceof Error
+        ) {
+            if (unlockPackageCMSEmailResult instanceof Error) {
+                logError(
+                    'unlockPackageCMSEmail - CMS email failed',
+                    unlockPackageCMSEmailResult
+                )
+                setErrorAttributesOnActiveSpan('CMS email failed', span)
+            }
+            if (unlockPackageStateEmailResult instanceof Error) {
+                logError(
+                    'unlockPackageStateEmail - state email failed',
+                    unlockPackageStateEmailResult
+                )
+                setErrorAttributesOnActiveSpan('state email failed', span)
+            }
+            throw new GraphQLError('Email failed.', {
                 extensions: {
-                    code: 'EMAIL_ERROR',
-                },
-            })
-        }
-
-        if (unlockPackageStateEmailResult instanceof Error) {
-            logError(
-                'unlockPackageCMSEmail - CMS email failed',
-                unlockPackageStateEmailResult
-            )
-            throw new GraphQLError(unlockPackageStateEmailResult.message, {
-                extensions: {
-                    code: 'EMAIL_ERROR',
+                    code: 'INTERNAL_SERVER_ERROR',
+                    argumentName: 'EMAIL_ERROR',
                 },
             })
         }
