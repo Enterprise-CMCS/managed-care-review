@@ -44,6 +44,8 @@ model State {
 
 model User {
   id                 String             @id
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @default(now()) @updatedAt
   givenName          String
   familyName         String
   email              String
