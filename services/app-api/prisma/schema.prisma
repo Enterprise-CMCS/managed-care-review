@@ -34,41 +34,55 @@ model HealthPlanRevisionTable {
   pkg             HealthPlanPackageTable @relation(fields: [pkgID], references: [id])
 }
 
-
 model ContractTable {
-  id              String                 @id
+  id        String                  @id
+  revisions ContractRevisionTable[]
 }
 
 model RateTable {
-  id              String                 @id
+  id        String              @id
+  revisions RateRevisionTable[]
 }
 
 model ContractRevisionTable {
-  id              String                 @id
-  contractID String String
-  contract  ContractTable @relation(fields: [contractID], references: [id])
+  id         String        @id
+  contractID String
+  contract   ContractTable @relation(fields: [contractID], references: [id])
+  rateRevisions RateRevisionsOnContractRevisionsTable[]
 
-  createdAt     DateTime               @default(now())
-  updatedAt     DateTime               @updatedAt  @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
-  name String
+  name                String
   contractDescription String?
-
-
 }
 
 model RateRevisionTable {
-  id              String                 @id
-  rateID String String
-  rate  RateTable @relation(fields: [rateID], references: [id])
+  id     String    @id
+  rateID String
+  rate   RateTable @relation(fields: [rateID], references: [id])
+  contractRevisions RateRevisionsOnContractRevisionsTable[]
 
-  createdAt     DateTime               @default(now())
-  updatedAt     DateTime               @updatedAt  @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
-  name String
+  name        String
   rateCertURL String?
 }
 
+model RateRevisionsOnContractRevisionsTable {
+  rateRevisionID String
+  rateRevision   RateRevisionTable @relation(fields: [rateRevisionID], references: [id])
+  contractRevisionID String
+  contractRevision ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
+
+  validAfter DateTime @default(now())
+  validUntil DateTime?
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@id([rateRevisionID, contractRevisionID, validAfter])
+
+}
 
 model State {
   stateCode                   String                   @id
@@ -93,7 +107,7 @@ model User {
 model Question {
   id            String                 @id
   createdAt     DateTime               @default(now())
-  updatedAt     DateTime               @updatedAt  @default(now())
+  updatedAt     DateTime               @default(now()) @updatedAt
   pkgID         String
   pkg           HealthPlanPackageTable @relation(fields: [pkgID], references: [id])
   addedBy       User                   @relation(fields: [addedByUserID], references: [id])
@@ -105,7 +119,7 @@ model Question {
 model QuestionDocument {
   id         String   @id
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt  @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
   name       String
   s3URL      String
   questionID String
@@ -123,11 +137,11 @@ model QuestionResponseDocument {
 }
 
 model QuestionResponse {
-  id            String             @id
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
-  question      Question           @relation(fields: [questionID], references: [id])
-  addedBy       User               @relation(fields: [addedByUserID], references: [id])
+  id            String                     @id
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @updatedAt
+  question      Question                   @relation(fields: [questionID], references: [id])
+  addedBy       User                       @relation(fields: [addedByUserID], references: [id])
   questionID    String
   addedByUserID String
   documents     QuestionResponseDocument[]
