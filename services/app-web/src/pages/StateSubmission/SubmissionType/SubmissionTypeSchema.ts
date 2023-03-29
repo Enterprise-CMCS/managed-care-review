@@ -10,6 +10,11 @@ type FeatureFlagsForYup = Partial<Record<FeatureFlagTypes, boolean>>
 // Should be listed in order of appearance on field to allow errors to focus as expected
 const SubmissionTypeFormSchema = (flags: FeatureFlagsForYup = {}) =>
     Yup.object().shape({
+        population: flags['chip-only-form']
+            ? Yup.string().required(
+                  'You must select the population this contract covers'
+              )
+            : Yup.string().optional(),
         programIDs: Yup.array().min(1, 'You must select at least one program'),
         submissionType: Yup.string().required(
             'You must choose a submission type'

@@ -64,6 +64,13 @@ export const featureFlags = {
         defaultValue: false,
     },
     /**
+     * Enables Chip-only form changes
+     */
+    CHIP_ONLY_FORM: {
+        flag: 'chip-only-form',
+        defaultValue: false,
+    },
+    /**
      * Used in testing to simulate errors in fetching flag value.
      * This flag does not exist in LaunchDarkly dashboard so fetching this will return the defaultValue.
      */
