@@ -16,6 +16,7 @@ const getStateAnalystsSettings = async (
         (code) => `/configuration/${code}/stateanalysts/email`
     )
     const stateAnalysts = await ParameterStore.getParameters(names)
+
     if (stateAnalysts instanceof Error) {
         return stateAnalysts
     }
@@ -40,11 +41,12 @@ const getStateAnalystsSettings = async (
                     emails: value,
                 })
             } else {
-                console.error(`Email settings: invalid state code ${stateCode}`)
+                console.error(
+                    `getStateAnalystsSettings: invalid state code ${stateCode}`
+                )
             }
         }
     )
-
     return cleanedStateAnalysts
 }
 

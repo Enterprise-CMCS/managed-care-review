@@ -3,6 +3,9 @@ import {
     CmsUser,
     FetchCurrentUserDocument,
     User as UserType,
+    AdminUser,
+    IndexUsersDocument,
+    IndexUsersQuery,
 } from '../../gen/gqlClient'
 
 import { mockMNState } from './stateMock'
@@ -27,6 +30,17 @@ function mockValidCMSUser(): CmsUser {
         familyName: 'ddmas',
         email: 'bob@dmas.mn.gov',
         stateAssignments: [],
+    }
+}
+
+function mockValidAdminUser(): AdminUser {
+    return {
+        __typename: 'AdminUser' as const,
+        id: 'bar-id',
+        role: 'ADMIN_USER',
+        givenName: 'bob',
+        familyName: 'ddmas',
+        email: 'bob@dmas.mn.gov',
     }
 }
 
@@ -62,4 +76,38 @@ fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
     }
 }
 
-export { fetchCurrentUserMock, mockValidCMSUser, mockValidUser }
+const indexUsersQueryMock = (): MockedResponse<IndexUsersQuery> => {
+    return {
+        request: {
+            query: IndexUsersDocument,
+        },
+        result: {
+            data: {
+                indexUsers: {
+                    totalCount: 1,
+                    edges: [
+                        {
+                            node: {
+                                __typename: 'CMSUser',
+                                role: 'CMS_USER',
+                                id: '1',
+                                familyName: 'Hotman',
+                                givenName: 'Zuko',
+                                email: 'zuko@example.com',
+                                stateAssignments: [],
+                            },
+                        },
+                    ],
+                },
+            },
+        },
+    }
+}
+
+export {
+    fetchCurrentUserMock,
+    mockValidCMSUser,
+    mockValidUser,
+    mockValidAdminUser,
+    indexUsersQueryMock,
+}
