@@ -260,7 +260,7 @@ describe('unlockHealthPlanPackage', () => {
         expect(err.message).toBe('user not authorized to unlock package')
     })
 
-    it('returns errors if unlocked from the wrong state', async () => {
+    it('returns errors if trying to unlock package with invalid package status', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
@@ -287,7 +287,7 @@ describe('unlockHealthPlanPackage', () => {
         expect(unlockDraftResult.errors).toBeDefined()
         const err = (unlockDraftResult.errors as GraphQLError[])[0]
 
-        expect(err.extensions['code']).toBe('BAD_USER_INPUT')
+        expect(err.extensions['code']).toBe('INVALID_PACKAGE_STATUS')
         expect(err.message).toBe(
             'Attempted to unlock package with wrong status'
         )
@@ -315,7 +315,7 @@ describe('unlockHealthPlanPackage', () => {
         expect(unlockUnlockedResult.errors).toBeDefined()
         const unlockErr = (unlockUnlockedResult.errors as GraphQLError[])[0]
 
-        expect(unlockErr.extensions['code']).toBe('BAD_USER_INPUT')
+        expect(unlockErr.extensions['code']).toBe('INVALID_PACKAGE_STATUS')
         expect(unlockErr.message).toBe(
             'Attempted to unlock package with wrong status'
         )

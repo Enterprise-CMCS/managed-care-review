@@ -149,7 +149,9 @@ describe('submitHealthPlanPackage', () => {
 
         expect(submitResult.errors).toBeDefined()
 
-        expect(submitResult.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(submitResult.errors?.[0].extensions?.code).toBe(
+            'INVALID_PACKAGE_STATUS'
+        )
         expect(submitResult.errors?.[0].message).toBe(
             'Attempted to submit an already submitted package.'
         )

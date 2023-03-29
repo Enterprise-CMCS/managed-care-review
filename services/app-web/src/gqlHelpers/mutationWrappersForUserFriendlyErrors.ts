@@ -60,7 +60,7 @@ const handleApolloErrorsAndAddUserFacingMessages = (
                 options.cause = extensions.code
             }
             if (
-                extensions.code === 'BAD_USER_INPUT' &&
+                extensions.code === 'INVALID_PACKAGE_STATUS' &&
                 mutation === 'UNLOCK_HEALTH_PLAN_PACKAGE'
             ) {
                 message = ERROR_MESSAGES.unlock_invalid_package_status // / TODO: This is should be a custom ApolloError such as INVALID_PACKAGE_STATUS or ACTION_UNAVAILABLE, not user input error since doesn't involve form fields the user controls
