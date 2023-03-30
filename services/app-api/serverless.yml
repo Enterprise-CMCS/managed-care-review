@@ -119,6 +119,7 @@ provider:
         - Effect: 'Allow'
           Action:
             - ssm:GetParameter
+            - ssm:GetParameters
           Resource: '*'
         - Effect: 'Allow'
           Action:

@@ -44,8 +44,7 @@ export function fetchEmailSettingsResolver(
         const stateCodesList = states.map(
             (state) => state.stateCode as StateCodeType
         )
-
-        // Then get state analysts emails  for each supported state
+        // Then get state analysts emails for each supported state
         let stateAnalystsEmailsSettings =
             await emailParameterStore.getStateAnalystsSettings(stateCodesList)
 

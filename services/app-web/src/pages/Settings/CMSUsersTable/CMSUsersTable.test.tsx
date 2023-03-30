@@ -6,8 +6,8 @@ import {
     fetchCurrentUserMock,
     updateUserMockError,
     updateUserMockSuccess,
+    indexUsersQueryMock,
 } from '../../../testHelpers/apolloMocks'
-import { indexUsersQueryMock } from '../../../testHelpers/apolloMocks/indexUserQueryMock'
 import { CMSUsersTable } from './CMSUsersTable'
 
 describe('CMSUsersTable', () => {

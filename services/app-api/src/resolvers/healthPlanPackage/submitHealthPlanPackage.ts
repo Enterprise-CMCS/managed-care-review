@@ -31,7 +31,6 @@ import {
 import { toDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { EmailParameterStore } from '../../parameterStore'
 import { LDService } from '../../launchDarkly/launchDarkly'
-import { FlagValueTypes } from 'app-web/src/common-code/featureFlags'
 import { GraphQLError } from 'graphql'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
@@ -66,8 +65,7 @@ export function isSubmissionError(err: unknown): err is SubmissionError {
 // This strategy (returning a different type from validation) is taken from the
 // "parse, don't validate" article: https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
 function submit(
-    draft: UnlockedHealthPlanFormDataType,
-    rateCertAssuranceFlag: FlagValueTypes
+    draft: UnlockedHealthPlanFormDataType
 ): LockedHealthPlanFormDataType | SubmissionError {
     const maybeStateSubmission: Record<string, unknown> = {
         ...draft,
@@ -75,14 +73,9 @@ function submit(
         submittedAt: new Date(),
     }
 
-    // Valid rate cert assurance questions always true if feature flag is off so to not block submissions. Otherwise
-    // hasValidRateCertAssurance will validate submission on rate cert assurance questions.
-    const validRateCertAssurance = rateCertAssuranceFlag
-        ? hasValidRateCertAssurance(
-              maybeStateSubmission as LockedHealthPlanFormDataType
-          )
-        : true
-
+    const validRateCertAssurance = hasValidRateCertAssurance(
+        maybeStateSubmission as LockedHealthPlanFormDataType
+    )
     if (
         isLockedHealthPlanFormData(maybeStateSubmission) &&
         validRateCertAssurance
@@ -145,11 +138,6 @@ export function submitHealthPlanPackageResolver(
         setResolverDetailsOnActiveSpan('submitHealthPlanPackage', user, span)
         span?.setAttribute('mcreview.package_id', pkgID)
 
-        const rateCertAssuranceFlag = await launchDarkly.getFeatureFlag(
-            context,
-            'rate-cert-assurance'
-        )
-
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
             logError(
@@ -170,7 +158,12 @@ export function submitHealthPlanPackageResolver(
             const errMessage = `Issue finding a package of type ${result.code}. Message: ${result.message}`
             logError('submitHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         if (result === undefined) {
@@ -225,7 +218,12 @@ export function submitHealthPlanPackageResolver(
         ) {
             const errMessage = `Attempted to submit an already submitted package.`
             logError('submitHealthPlanPackage', errMessage)
-            throw new UserInputError(errMessage) // TODO: This is should be a custom ApolloError such as INVALID_PACKAGE_STATUS or ACTION_UNAVAILABLE, not user input error since doesn't involve form fields the user controls
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'INVALID_PACKAGE_STATUS',
+                },
+            })
         }
 
         const draftResult = toDomain(currentRevision.formDataProto)
@@ -233,13 +231,23 @@ export function submitHealthPlanPackageResolver(
         if (draftResult instanceof Error) {
             const errMessage = `Failed to decode draft proto ${draftResult}.`
             logError('submitHealthPlanPackage', errMessage)
-            throw new Error(errMessage)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'PROTO_DECODE_ERROR',
+                },
+            })
         }
 
         if (draftResult.status === 'SUBMITTED') {
             const errMessage = `Attempted to submit an already submitted package.`
             logError('submitHealthPlanPackage', errMessage)
-            throw new Error(errMessage)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'INVALID_PACKAGE_STATUS',
+                },
+            })
         }
 
         // CONTRACT_ONLY submission should not contain any CONTRACT_AND_RATE rates data. We will delete if any valid
@@ -253,7 +261,7 @@ export function submitHealthPlanPackageResolver(
         }
 
         // attempt to parse into a StateSubmission
-        const submissionResult = submit(draftResult, rateCertAssuranceFlag)
+        const submissionResult = submit(draftResult)
 
         if (isSubmissionError(submissionResult)) {
             const errMessage = submissionResult.message
@@ -277,7 +285,12 @@ export function submitHealthPlanPackageResolver(
             const errMessage = `Issue updating a package of type ${updateResult.code}. Message: ${updateResult.message}`
             logError('submitHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         const updatedPackage: HealthPlanPackageType = updateResult
@@ -305,7 +318,12 @@ export function submitHealthPlanPackageResolver(
         if (statePrograms instanceof Error) {
             logError('findStatePrograms', statePrograms.message)
             setErrorAttributesOnActiveSpan(statePrograms.message, span)
-            throw new Error(statePrograms.message)
+            throw new GraphQLError(statePrograms.message, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         let cmsPackageEmailResult
@@ -338,28 +356,28 @@ export function submitHealthPlanPackageResolver(
             )
         }
 
-        if (cmsPackageEmailResult instanceof Error) {
-            logError(
-                'submitHealthPlanPackage - CMS email failed',
-                cmsPackageEmailResult
-            )
-            setErrorAttributesOnActiveSpan('CMS email failed', span)
-            throw new GraphQLError(cmsPackageEmailResult.message, {
+        if (
+            cmsPackageEmailResult instanceof Error ||
+            statePackageEmailResult instanceof Error
+        ) {
+            if (cmsPackageEmailResult instanceof Error) {
+                logError(
+                    'submitHealthPlanPackage - CMS email failed',
+                    cmsPackageEmailResult
+                )
+                setErrorAttributesOnActiveSpan('CMS email failed', span)
+            }
+            if (statePackageEmailResult instanceof Error) {
+                logError(
+                    'submitHealthPlanPackage - state email failed',
+                    statePackageEmailResult
+                )
+                setErrorAttributesOnActiveSpan('state email failed', span)
+            }
+            throw new GraphQLError('Email failed', {
                 extensions: {
-                    code: 'EMAIL_ERROR',
-                },
-            })
-        }
-
-        if (statePackageEmailResult instanceof Error) {
-            logError(
-                'submitHealthPlanPackage - state email failed',
-                statePackageEmailResult
-            )
-            setErrorAttributesOnActiveSpan('state email failed', span)
-            throw new GraphQLError(statePackageEmailResult.message, {
-                extensions: {
-                    code: 'EMAIL_ERROR',
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
                 },
             })
         }

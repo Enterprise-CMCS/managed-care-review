@@ -5,7 +5,6 @@ describe('CMS user', () => {
         cy.stubFeatureFlags()
     })
     it('can unlock and resubmit', () => {
-        cy.interceptFeatureFlags({ 'rate-cert-assurance': true })
         cy.logInAsStateUser()
 
         // fill out an entire submission

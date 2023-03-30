@@ -15,6 +15,8 @@ import {
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { StateUserType } from '../domain-models'
+import { SESServiceException } from '@aws-sdk/client-ses'
+import { testSendSESEmail } from './awsSESHelpers'
 
 const testEmailConfig: EmailConfiguration = {
     stage: 'LOCAL',
@@ -62,7 +64,18 @@ function testEmailer(customConfig?: EmailConfiguration): Emailer {
         config,
         sendEmail: jest.fn(
             async (emailData: EmailData): Promise<void | Error> => {
-                console.info('Email content' + JSON.stringify(emailData))
+                try {
+                    await testSendSESEmail(emailData)
+                } catch (err) {
+                    if (err instanceof SESServiceException) {
+                        return new Error(
+                            'SES email send failed. Error is from Amazon SES. Error: ' +
+                                JSON.stringify(err)
+                        )
+                    }
+
+                    return new Error('SES email send failed. Error: ' + err)
+                }
             }
         ),
         sendCMSNewPackage: async function (

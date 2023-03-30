@@ -14,6 +14,7 @@ import {
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { UpdateInfoType, ProgramType } from '../domain-models'
+import { SESServiceException } from '@aws-sdk/client-ses'
 
 // See more discussion of configuration in docs/Configuration.md
 type EmailConfiguration = {
@@ -104,7 +105,13 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
                 await sendSESEmail(emailRequestParams)
                 return
             } catch (err) {
-                return new Error('SES email send failed. ' + err)
+                if (err instanceof SESServiceException) {
+                    return new Error(
+                        'SES email send failed. Error: ' + JSON.stringify(err)
+                    )
+                }
+
+                return new Error('SES email send failed. Error: ' + err)
             }
         },
         sendCMSNewPackage: async function (
