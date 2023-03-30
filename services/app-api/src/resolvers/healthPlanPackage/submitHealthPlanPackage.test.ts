@@ -23,7 +23,6 @@ import {
     getTestStateAnalystsEmails,
 } from '../../testHelpers/parameterStoreHelpers'
 import { UserType } from '../../domain-models'
-import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import * as awsSESHelpers from '../../testHelpers/awsSESHelpers'
 
 describe('submitHealthPlanPackage', () => {
@@ -804,12 +803,9 @@ describe('submitHealthPlanPackage', () => {
     })
 })
 
-describe('submitHealthPlanPackage with feature flags', () => {
-    it('errors when risk based question is undefined and rate-cert-assurance feature flag is on', async () => {
-        const mockLDService = testLDService({ 'rate-cert-assurance': true })
-        const server = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
+describe('submitHealthPlanPackage risk based question tests', () => {
+    it('errors when risk based question is undefined', async () => {
+        const server = await constructTestPostgresServer()
 
         // setup
         const initialPkg = await createAndUpdateTestHealthPlanPackage(server, {
@@ -834,78 +830,5 @@ describe('submitHealthPlanPackage with feature flags', () => {
         expect(submitResult.errors?.[0].extensions?.message).toBe(
             'formData is missing required contract fields'
         )
-    }, 20000)
-
-    it('does not error when risk based question is undefined and rate-cert-assurance feature flag is off', async () => {
-        const mockLDService = testLDService({ 'rate-cert-assurance': false })
-        const server = await constructTestPostgresServer({
-            ldService: mockLDService,
-        })
-
-        // setup
-        const initialPkg = await createAndUpdateTestHealthPlanPackage(server, {
-            riskBasedContract: undefined,
-        })
-        const draft = latestFormData(initialPkg)
-        const draftID = draft.id
-
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-
-        // submit
-        const submitResult = await server.executeOperation({
-            query: SUBMIT_HEALTH_PLAN_PACKAGE,
-            variables: {
-                input: {
-                    pkgID: draftID,
-                },
-            },
-        })
-
-        expect(submitResult.errors).toBeUndefined()
-        const createdID = submitResult?.data?.submitHealthPlanPackage.pkg.id
-
-        // test result
-        const pkg = await fetchTestHealthPlanPackageById(server, createdID)
-
-        const resultDraft = latestFormData(pkg)
-
-        // The submission fields should still be set
-        expect(resultDraft.id).toEqual(createdID)
-        expect(resultDraft.submissionType).toBe('CONTRACT_AND_RATES')
-        expect(resultDraft.programIDs).toEqual([defaultFloridaProgram().id])
-        // check that the stateNumber is being returned the same
-        expect(resultDraft.stateNumber).toEqual(draft.stateNumber)
-        expect(resultDraft.submissionDescription).toBe('An updated submission')
-        expect(resultDraft.documents).toEqual(draft.documents)
-
-        // Contract details fields should still be set
-        expect(resultDraft.contractType).toEqual(draft.contractType)
-        expect(resultDraft.contractExecutionStatus).toEqual(
-            draft.contractExecutionStatus
-        )
-        expect(resultDraft.contractDateStart).toEqual(draft.contractDateStart)
-        expect(resultDraft.contractDateEnd).toEqual(draft.contractDateEnd)
-        expect(resultDraft.managedCareEntities).toEqual(
-            draft.managedCareEntities
-        )
-        expect(resultDraft.contractDocuments).toEqual(draft.contractDocuments)
-
-        expect(resultDraft.federalAuthorities).toEqual(draft.federalAuthorities)
-
-        if (resultDraft.status == 'DRAFT') {
-            throw new Error('Not a locked submission')
-        }
-
-        // submittedAt should be set to today's date
-        const today = new Date()
-        const expectedDate = today.toISOString().split('T')[0]
-        expect(pkg.initiallySubmittedAt).toEqual(expectedDate)
-
-        // UpdatedAt should be after the former updatedAt
-        const resultUpdated = new Date(resultDraft.updatedAt)
-        const createdUpdated = new Date(draft.updatedAt)
-        expect(
-            resultUpdated.getTime() - createdUpdated.getTime()
-        ).toBeGreaterThan(0)
     }, 20000)
 })

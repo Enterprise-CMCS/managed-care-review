@@ -1,8 +1,5 @@
 import { screen } from '@testing-library/react'
-import {
-    renderWithProviders,
-    ldUseClientSpy,
-} from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SubmissionTypeSummarySection } from './SubmissionTypeSummarySection'
 import {
     mockContractAndRatesDraft,
@@ -69,9 +66,6 @@ describe('SubmissionTypeSummarySection', () => {
     })
 
     it('renders expected fields for draft package on review and submit', () => {
-        ldUseClientSpy({
-            'rate-cert-assurance': true,
-        })
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
@@ -101,9 +95,6 @@ describe('SubmissionTypeSummarySection', () => {
     })
 
     it('renders missing field message for risk based contract when expected', () => {
-        ldUseClientSpy({
-            'rate-cert-assurance': true,
-        })
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={

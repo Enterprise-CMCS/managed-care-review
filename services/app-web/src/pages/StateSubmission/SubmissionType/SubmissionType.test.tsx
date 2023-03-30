@@ -3,10 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { screen, waitFor, within } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
-import {
-    ldUseClientSpy,
-    renderWithProviders,
-} from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SubmissionType, SubmissionTypeFormValues } from './'
 import { Formik } from 'formik'
 import { contractOnly } from '../../../common-code/healthPlanFormDataMocks'
@@ -227,9 +224,6 @@ describe('SubmissionType', () => {
     })
 
     it('displays risk-based contract radio buttons and validation message', async () => {
-        ldUseClientSpy({
-            'rate-cert-assurance': true,
-        })
         renderWithProviders(
             <Formik
                 initialValues={SubmissionTypeInitialValues}

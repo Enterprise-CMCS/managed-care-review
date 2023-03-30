@@ -31,7 +31,6 @@ import {
 import { toDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { EmailParameterStore } from '../../parameterStore'
 import { LDService } from '../../launchDarkly/launchDarkly'
-import { FlagValueTypes } from 'app-web/src/common-code/featureFlags'
 import { GraphQLError } from 'graphql'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
@@ -66,8 +65,7 @@ export function isSubmissionError(err: unknown): err is SubmissionError {
 // This strategy (returning a different type from validation) is taken from the
 // "parse, don't validate" article: https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
 function submit(
-    draft: UnlockedHealthPlanFormDataType,
-    rateCertAssuranceFlag: FlagValueTypes
+    draft: UnlockedHealthPlanFormDataType
 ): LockedHealthPlanFormDataType | SubmissionError {
     const maybeStateSubmission: Record<string, unknown> = {
         ...draft,
@@ -75,14 +73,9 @@ function submit(
         submittedAt: new Date(),
     }
 
-    // Valid rate cert assurance questions always true if feature flag is off so to not block submissions. Otherwise
-    // hasValidRateCertAssurance will validate submission on rate cert assurance questions.
-    const validRateCertAssurance = rateCertAssuranceFlag
-        ? hasValidRateCertAssurance(
-              maybeStateSubmission as LockedHealthPlanFormDataType
-          )
-        : true
-
+    const validRateCertAssurance = hasValidRateCertAssurance(
+        maybeStateSubmission as LockedHealthPlanFormDataType
+    )
     if (
         isLockedHealthPlanFormData(maybeStateSubmission) &&
         validRateCertAssurance
@@ -144,11 +137,6 @@ export function submitHealthPlanPackageResolver(
         const { submittedReason, pkgID } = input
         setResolverDetailsOnActiveSpan('submitHealthPlanPackage', user, span)
         span?.setAttribute('mcreview.package_id', pkgID)
-
-        const rateCertAssuranceFlag = await launchDarkly.getFeatureFlag(
-            context,
-            'rate-cert-assurance'
-        )
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
@@ -273,7 +261,7 @@ export function submitHealthPlanPackageResolver(
         }
 
         // attempt to parse into a StateSubmission
-        const submissionResult = submit(draftResult, rateCertAssuranceFlag)
+        const submissionResult = submit(draftResult)
 
         if (isSubmissionError(submissionResult)) {
             const errMessage = submissionResult.message

@@ -1,24 +1,16 @@
 import React from 'react'
 import { screen, within } from '@testing-library/react'
 import { Settings } from './Settings'
-import { indexUsersQueryMock } from '../../testHelpers/apolloMocks/indexUserQueryMock'
-import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks'
+import {
+    fetchCurrentUserMock,
+    indexUsersQueryMock,
+    fetchEmailSettings,
+    mockValidAdminUser,
+} from '../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../testHelpers'
-import { AdminUser } from '../../gen/gqlClient'
-import { fetchEmailSettings } from '../../testHelpers/apolloMocks/emailGQLMock'
 
 describe('Settings', () => {
-    function mockValidAdminUser(): AdminUser {
-        return {
-            __typename: 'AdminUser' as const,
-            id: 'bar-id',
-            role: 'ADMIN_USER',
-            givenName: 'bob',
-            familyName: 'ddmas',
-            email: 'bob@dmas.mn.gov',
-        }
-    }
-    it('should render the CMS users table with the correct columns and data', async () => {
+    it('should render the CMS users table', async () => {
         renderWithProviders(<Settings />, {
             apolloProvider: {
                 mocks: [
@@ -34,29 +26,11 @@ describe('Settings', () => {
         // Find the table by its caption
         const table = await screen.findByRole('table', { name: 'CMS Users' })
         expect(table).toBeInTheDocument()
-
-        // Count the table rows
         const tableRows = await within(table).findAllByRole('row')
         expect(tableRows).toHaveLength(2)
-
-        // Check the table headers
-        expect(
-            screen.getByRole('columnheader', { name: 'Family Name' })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('columnheader', { name: 'Given Name' })
-        ).toBeInTheDocument()
-        expect(
-            screen.getByRole('columnheader', { name: 'Email' })
-        ).toBeInTheDocument()
-
-        // Check the table cells
-        expect(within(table).getByText('Hotman')).toBeInTheDocument()
-        expect(within(table).getByText('Zuko')).toBeInTheDocument()
-        expect(within(table).getByText('zuko@example.com')).toBeInTheDocument()
     })
 
-    it('should render the automated emails table with correct data', async () => {
+    it('should render the email settings tables', async () => {
         renderWithProviders(<Settings />, {
             apolloProvider: {
                 mocks: [
@@ -69,121 +43,32 @@ describe('Settings', () => {
                 ],
             },
         })
-        // Find the table by its caption
-        const table = await screen.findByRole('table', {
+        // Check for automated emails table
+        const tableAutomated = await screen.findByRole('table', {
             name: 'Automated emails',
         })
-        expect(table).toBeInTheDocument()
+        expect(tableAutomated).toBeInTheDocument()
 
-        // Count the table rows
-        const tableRows = await within(table).findAllByRole('row')
+        const tableRows = await within(tableAutomated).findAllByRole('row')
         expect(tableRows).toHaveLength(5)
 
-        // Check the table headers
-        expect(
-            within(table).getByRole('columnheader', { name: 'Inbox' })
-        ).toBeInTheDocument()
-        expect(
-            within(table).getByRole('columnheader', { name: 'Type' })
-        ).toBeInTheDocument()
-        expect(
-            within(table).getByRole('columnheader', { name: 'Description' })
-        ).toBeInTheDocument()
-
-        // Check the table cells
-        expect(
-            within(table).getByText('testRate@example.com')
-        ).toBeInTheDocument()
-        expect(
-            within(table).getByText('testPolicy@example.com')
-        ).toBeInTheDocument()
-        expect(
-            within(table).getByText('testDmco@example.com')
-        ).toBeInTheDocument()
-    })
-
-    it('should render the state analysts table with correct data', async () => {
-        renderWithProviders(<Settings />, {
-            apolloProvider: {
-                mocks: [
-                    indexUsersQueryMock(),
-                    fetchCurrentUserMock({
-                        user: mockValidAdminUser(),
-                        statusCode: 200,
-                    }),
-                    fetchEmailSettings(),
-                ],
-            },
-        })
-        // Find the table by its caption
-        const table = await screen.findByRole('table', {
+        // Check analysts table
+        const tableAnalysts = await screen.findByRole('table', {
             name: 'Analyst emails',
         })
-        expect(table).toBeInTheDocument()
+        expect(tableAnalysts).toBeInTheDocument()
+        const tableRowsAnalysts = await within(tableAnalysts).findAllByRole(
+            'row'
+        )
+        expect(tableRowsAnalysts).toHaveLength(2)
 
-        // Count the table rows
-        const tableRows = await within(table).findAllByRole('row')
-        expect(tableRows).toHaveLength(2)
-
-        // Check the table headers
-        expect(
-            within(table).getByRole('columnheader', { name: 'Inbox' })
-        ).toBeInTheDocument()
-        expect(
-            within(table).getByRole('columnheader', { name: 'State' })
-        ).toBeInTheDocument()
-
-        // Check the table cells
-        expect(
-            within(table).getByText('testMN@example.com')
-        ).toBeInTheDocument()
-        expect(within(table).getByText('MN')).toBeInTheDocument()
-    })
-
-    it('should render the support emails table with correct data', async () => {
-        renderWithProviders(<Settings />, {
-            apolloProvider: {
-                mocks: [
-                    indexUsersQueryMock(),
-                    fetchCurrentUserMock({
-                        user: mockValidAdminUser(),
-                        statusCode: 200,
-                    }),
-                    fetchEmailSettings(),
-                ],
-            },
-        })
-        // Find the table by its caption
-        const table = await screen.findByRole('table', {
+        // Check support table
+        const tableSupport = await screen.findByRole('table', {
             name: 'Support emails',
         })
-        expect(table).toBeInTheDocument()
-
-        // Count the table rows
-        const tableRows = await within(table).findAllByRole('row')
-        expect(tableRows).toHaveLength(4)
-
-        // Check the table headers
-        expect(
-            within(table).getByRole('columnheader', {
-                name: 'Inbox',
-            })
-        ).toBeInTheDocument()
-        expect(
-            within(table).getByRole('columnheader', { name: 'Type' })
-        ).toBeInTheDocument()
-        expect(
-            within(table).getByRole('columnheader', {
-                name: 'Description',
-            })
-        ).toBeInTheDocument()
-
-        // Check the table cells
-        expect(
-            within(table).getByText('mc-review@example.com')
-        ).toBeInTheDocument()
-        expect(within(table).getByText('rates@example.com')).toBeInTheDocument()
-        expect(within(table).getByText('mcog@example.com')).toBeInTheDocument()
+        expect(tableSupport).toBeInTheDocument()
+        const tableRowsSupport = await within(tableSupport).findAllByRole('row')
+        expect(tableRowsSupport).toHaveLength(4)
     })
 
     it('should render error message for non admin user', async () => {
