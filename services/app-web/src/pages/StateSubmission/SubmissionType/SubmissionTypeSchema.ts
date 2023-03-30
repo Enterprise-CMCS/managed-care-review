@@ -15,9 +15,7 @@ const SubmissionTypeFormSchema = (flags: FeatureFlagsForYup = {}) =>
             'You must choose a submission type'
         ),
         contractType: Yup.string().required('You must choose a contract type'),
-        riskBasedContract: flags['rate-cert-assurance']
-            ? Yup.string().required('You must select yes or no')
-            : Yup.string().optional(),
+        riskBasedContract: Yup.string().required('You must select yes or no'),
         submissionDescription: Yup.string().required(
             'You must provide a description of any major changes or updates'
         ),
