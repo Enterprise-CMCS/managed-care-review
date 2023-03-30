@@ -49,3 +49,5 @@ export {
 export { mockQuestionsPayload } from './questionResponseDataMocks'
 export { fetchEmailSettings } from './emailGQLMock'
 export { mockMNState } from './stateMock'
+
+export { updateUserMockError, updateUserMockSuccess } from './updateUserMock'

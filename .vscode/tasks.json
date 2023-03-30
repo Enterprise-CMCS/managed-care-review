@@ -1,0 +1,26 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "TSC custom task",
+            "type": "shell",
+            "command": "./node_modules/.bin/tsc",
+            "args": [
+                "--noEmit",
+                "--jsx",
+                "react-jsx",
+                "--allowSyntheticDefaultImports",
+                "--resolveJsonModule",
+                "--downlevelIteration"
+                // "--watch"
+            ],
+            "presentation": {
+                "reveal": "never",
+                "echo": false,
+                "focus": false,
+                "panel": "dedicated"
+            },
+            "problemMatcher": "$tsc"
+        }
+    ]
+}

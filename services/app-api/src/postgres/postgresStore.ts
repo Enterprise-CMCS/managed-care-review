@@ -1,4 +1,4 @@
-import { PrismaClient, HealthPlanRevisionTable } from '@prisma/client'
+import { PrismaClient, HealthPlanRevisionTable, Division } from '@prisma/client'
 import {
     UnlockedHealthPlanFormDataType,
     HealthPlanFormDataType,
@@ -33,7 +33,7 @@ import {
     findUser,
     insertUser,
     InsertUserArgsType,
-    updateUserAssignedState,
+    updateCmsUserProperties,
     findAllUsers,
 } from './user'
 import {
@@ -90,9 +90,10 @@ type Store = {
 
     insertUser: (user: InsertUserArgsType) => Promise<UserType | StoreError>
 
-    updateUserAssignedState: (
+    updateCmsUserProperties: (
         userID: string,
-        states: StateCodeType[]
+        states: StateCodeType[],
+        division?: Division
     ) => Promise<CMSUserType | StoreError>
 
     insertQuestion: (
@@ -136,8 +137,13 @@ function NewPostgresStore(client: PrismaClient): Store {
         findPrograms: findPrograms,
         findUser: (id) => findUser(client, id),
         insertUser: (args) => insertUser(client, args),
-        updateUserAssignedState: (userID, stateCodes) =>
-            updateUserAssignedState(client, userID, stateCodes),
+        updateCmsUserProperties: (userID, stateCodes, divisionAssignment) =>
+            updateCmsUserProperties(
+                client,
+                userID,
+                stateCodes,
+                divisionAssignment
+            ),
         findStatePrograms: findStatePrograms,
         findAllSupportedStates: () => findAllSupportedStates(client),
         findAllRevisions: () => findAllRevisions(client),

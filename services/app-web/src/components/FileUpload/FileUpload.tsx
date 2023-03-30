@@ -284,7 +284,7 @@ export const FileUpload = ({
                         }
                     }
                 })
-                .catch((e) => {
+                .catch((_e) => {
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
                         return newItems.map((item) => {
@@ -364,7 +364,7 @@ export const FileUpload = ({
         addFilesAndUpdateList(files)
     }
 
-    const handleOnChange = (e: React.ChangeEvent): void => {
+    const handleOnChange = (_e: React.ChangeEvent): void => {
         const files = Array.from(fileInputRef.current?.input?.files || []) // Web API File objects
         addFilesAndUpdateList(files)
     }
