@@ -45,9 +45,12 @@ const handleApolloErrorsAndAddUserFacingMessages = (
 
         apolloError.graphQLErrors.forEach(({ extensions }) => {
             // handle most common error cases with more specific messaging
-            if (extensions.code === 'EMAIL_ERROR') {
+            if (
+                extensions.code === 'INTERNAL_SERVER_ERROR' &&
+                extensions.cause === 'EMAIL_ERROR'
+            ) {
                 message = ERROR_MESSAGES.email_error_generic
-                options.cause = extensions.code
+                options.cause = extensions.cause
             }
             if (
                 extensions.code === 'BAD_USER_INPUT' &&
@@ -57,11 +60,11 @@ const handleApolloErrorsAndAddUserFacingMessages = (
                 options.cause = extensions.code
             }
             if (
-                extensions.code === 'BAD_USER_INPUT' &&
+                extensions.cause === 'INVALID_PACKAGE_STATUS' &&
                 mutation === 'UNLOCK_HEALTH_PLAN_PACKAGE'
             ) {
                 message = ERROR_MESSAGES.unlock_invalid_package_status // / TODO: This is should be a custom ApolloError such as INVALID_PACKAGE_STATUS or ACTION_UNAVAILABLE, not user input error since doesn't involve form fields the user controls
-                options.cause = extensions.code
+                options.cause = extensions.cause
             }
         })
     }

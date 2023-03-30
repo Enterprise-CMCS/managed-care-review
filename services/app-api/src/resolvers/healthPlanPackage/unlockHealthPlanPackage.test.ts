@@ -260,7 +260,7 @@ describe('unlockHealthPlanPackage', () => {
         expect(err.message).toBe('user not authorized to unlock package')
     })
 
-    it('returns errors if unlocked from the wrong state', async () => {
+    it('returns errors if trying to unlock package with wrong package status', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
@@ -287,7 +287,17 @@ describe('unlockHealthPlanPackage', () => {
         expect(unlockDraftResult.errors).toBeDefined()
         const err = (unlockDraftResult.errors as GraphQLError[])[0]
 
-        expect(err.extensions['code']).toBe('BAD_USER_INPUT')
+        expect(err.extensions).toEqual(
+            expect.objectContaining({
+                code: 'INTERNAL_SERVER_ERROR',
+                cause: 'INVALID_PACKAGE_STATUS',
+                exception: {
+                    locations: undefined,
+                    message: 'Attempted to unlock package with wrong status',
+                    path: undefined,
+                },
+            })
+        )
         expect(err.message).toBe(
             'Attempted to unlock package with wrong status'
         )
@@ -315,7 +325,17 @@ describe('unlockHealthPlanPackage', () => {
         expect(unlockUnlockedResult.errors).toBeDefined()
         const unlockErr = (unlockUnlockedResult.errors as GraphQLError[])[0]
 
-        expect(unlockErr.extensions['code']).toBe('BAD_USER_INPUT')
+        expect(unlockErr.extensions).toEqual(
+            expect.objectContaining({
+                code: 'INTERNAL_SERVER_ERROR',
+                cause: 'INVALID_PACKAGE_STATUS',
+                exception: {
+                    locations: undefined,
+                    message: 'Attempted to unlock package with wrong status',
+                    path: undefined,
+                },
+            })
+        )
         expect(unlockErr.message).toBe(
             'Attempted to unlock package with wrong status'
         )

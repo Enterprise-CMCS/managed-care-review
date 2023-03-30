@@ -23,6 +23,7 @@ import {
     getTestStateAnalystsEmails,
 } from '../../testHelpers/parameterStoreHelpers'
 import { UserType } from '../../domain-models'
+import * as awsSESHelpers from '../../testHelpers/awsSESHelpers'
 
 describe('submitHealthPlanPackage', () => {
     const testUserCMS: UserType = {
@@ -147,7 +148,19 @@ describe('submitHealthPlanPackage', () => {
 
         expect(submitResult.errors).toBeDefined()
 
-        expect(submitResult.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(submitResult.errors?.[0].extensions).toEqual(
+            expect.objectContaining({
+                code: 'INTERNAL_SERVER_ERROR',
+                cause: 'INVALID_PACKAGE_STATUS',
+                exception: {
+                    locations: undefined,
+                    message:
+                        'Attempted to submit an already submitted package.',
+                    path: undefined,
+                },
+            })
+        )
+
         expect(submitResult.errors?.[0].message).toBe(
             'Attempted to submit an already submitted package.'
         )
@@ -737,6 +750,56 @@ describe('submitHealthPlanPackage', () => {
 
         expect(submitResult.errors).toBeDefined()
         expect(mockEmailer.sendEmail).not.toHaveBeenCalled()
+    })
+
+    it('errors when SES email has failed.', async () => {
+        const mockEmailer = testEmailer()
+
+        jest.spyOn(awsSESHelpers, 'testSendSESEmail').mockImplementation(
+            async () => {
+                throw new Error('Network error occurred')
+            }
+        )
+
+        //mock invoke email submit lambda
+        const server = await constructTestPostgresServer({
+            emailer: mockEmailer,
+        })
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {})
+        const draftID = draft.id
+
+        const submitResult = await server.executeOperation({
+            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            variables: {
+                input: {
+                    pkgID: draftID,
+                },
+            },
+        })
+
+        // expect errors from submission
+        expect(submitResult.errors).toBeDefined()
+
+        // expect sendEmail to have been called, so we know it did not error earlier
+        expect(mockEmailer.sendEmail).toHaveBeenCalled()
+
+        // expect correct graphql error.
+        expect(submitResult.errors?.[0]).toEqual(
+            expect.objectContaining({
+                message: 'Email failed',
+                locations: [{ line: 2, column: 5 }],
+                path: ['submitHealthPlanPackage'],
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                    exception: {
+                        message: 'Email failed',
+                        path: undefined,
+                        locations: undefined,
+                    },
+                },
+            })
+        )
     })
 })
 
