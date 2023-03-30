@@ -11,7 +11,6 @@ describe('Q&A', () => {
 
     it('can add questions and responses', () => {
         cy.interceptFeatureFlags({
-            'rate-cert-assurance': true,
             'cms-questions': true
         })
         cy.logInAsStateUser()

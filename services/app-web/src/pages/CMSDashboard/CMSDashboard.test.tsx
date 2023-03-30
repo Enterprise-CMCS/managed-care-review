@@ -7,10 +7,7 @@ import {
     mockSubmittedHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
 } from '../../testHelpers/apolloMocks'
-import {
-    ldUseClientSpy,
-    renderWithProviders,
-} from '../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { CMSDashboard } from './CMSDashboard'
 import { User } from '../../gen/gqlClient'
 
@@ -169,8 +166,7 @@ describe('CMSDashboard', () => {
         expect(lastUpdated).toHaveTextContent('01/22/2100')
     })
 
-    it('should display filters on cms dashboard page when feature flag is on', async () => {
-        ldUseClientSpy({ 'cms-dashboard-filter': true })
+    it('should display filters on cms dashboard', async () => {
         const unlocked = mockUnlockedHealthPlanPackage()
         const submitted = mockSubmittedHealthPlanPackage()
         submitted.id = 'test-abc-submitted'

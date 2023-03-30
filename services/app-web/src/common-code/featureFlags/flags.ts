@@ -43,20 +43,6 @@ export const featureFlags = {
         defaultValue: 2,
     },
     /**
-     * Enables filter on CMS dashboard
-     */
-    CMS_DASHBOARD_FILTER: {
-        flag: 'cms-dashboard-filter',
-        defaultValue: false,
-    },
-    /**
-     * Enables rate cert assurance workflow
-     */
-    RATE_CERT_ASSURANCE: {
-        flag: 'rate-cert-assurance',
-        defaultValue: false,
-    },
-    /**
      * Enables state and CMS Q&A features
      */
     CMS_QUESTIONS: {
