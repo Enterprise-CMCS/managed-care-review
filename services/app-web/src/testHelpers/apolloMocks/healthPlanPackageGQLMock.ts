@@ -28,8 +28,8 @@ import {
 } from './healthPlanFormDataMock'
 import { ApolloError } from '@apollo/client'
 import {
-    GRAPHQL_ERROR_ARGUMENT_MESSAGES,
-    GraphQLErrorArgumentNameTypes,
+    GRAPHQL_ERROR_CAUSE_MESSAGES,
+    GraphQLErrorCauseTypes,
     GraphQLErrorCodeTypes,
 } from './apolloErrorCodeMocks'
 
@@ -426,18 +426,18 @@ const submitHealthPlanPackageMockError = ({
 }: {
     id: string
     error?: {
-        errorCode: GraphQLErrorCodeTypes
-        errorCause: GraphQLErrorArgumentNameTypes
+        code: GraphQLErrorCodeTypes
+        cause: GraphQLErrorCauseTypes
     }
 }): MockedResponse<SubmitHealthPlanPackageMutation | ApolloError> => {
     const graphQLError = new GraphQLError(
         error
-            ? GRAPHQL_ERROR_ARGUMENT_MESSAGES[error.errorCause]
+            ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
             : 'Error attempting to submit.',
         {
             extensions: {
-                code: error?.errorCode,
-                cause: error?.errorCause,
+                code: error?.code,
+                cause: error?.cause,
             },
         }
     )
@@ -485,18 +485,18 @@ const unlockHealthPlanPackageMockError = ({
     id: string
     reason: string
     error?: {
-        errorCode: GraphQLErrorCodeTypes
-        errorCause: GraphQLErrorArgumentNameTypes
+        code: GraphQLErrorCodeTypes
+        cause: GraphQLErrorCauseTypes
     }
 }): MockedResponse<UnlockHealthPlanPackageMutation> => {
     const graphQLError = new GraphQLError(
         error
-            ? GRAPHQL_ERROR_ARGUMENT_MESSAGES[error.errorCause]
+            ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
             : 'Error attempting to submit.',
         {
             extensions: {
-                code: error?.errorCode,
-                cause: error?.errorCause,
+                code: error?.code,
+                cause: error?.cause,
             },
         }
     )

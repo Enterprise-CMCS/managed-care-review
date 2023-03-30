@@ -232,7 +232,7 @@ export function submitHealthPlanPackageResolver(
             logError('submitHealthPlanPackage', errMessage)
             throw new GraphQLError(errMessage, {
                 extensions: {
-                    code: 'INVALID_PACKAGE_STATUS',
+                    code: 'INTERNAL_SERVER_ERROR',
                     cause: 'INVALID_PACKAGE_STATUS',
                 },
             })

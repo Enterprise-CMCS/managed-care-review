@@ -111,8 +111,8 @@ describe('UnlockSubmitModal', () => {
                             submitHealthPlanPackageMockError({
                                 id: mockCompleteDraft().id,
                                 error: {
-                                    errorCode: 'INTERNAL_SERVER_ERROR',
-                                    errorCause: 'EMAIL_ERROR',
+                                    code: 'INTERNAL_SERVER_ERROR',
+                                    cause: 'EMAIL_ERROR',
                                 },
                             }),
                         ],
@@ -379,8 +379,8 @@ describe('UnlockSubmitModal', () => {
                                 id: mockUnlockedHealthPlanPackage().id,
                                 reason: 'Test unlock summary',
                                 error: {
-                                    errorCode: 'INTERNAL_SERVER_ERROR',
-                                    errorCause: 'EMAIL_ERROR',
+                                    code: 'INTERNAL_SERVER_ERROR',
+                                    cause: 'EMAIL_ERROR',
                                 },
                             }),
                         ],

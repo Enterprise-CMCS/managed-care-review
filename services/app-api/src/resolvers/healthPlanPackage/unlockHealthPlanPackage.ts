@@ -98,7 +98,7 @@ export function unlockHealthPlanPackageResolver(
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {
-                    code: 'INVALID_PACKAGE_STATUS',
+                    code: 'INTERNAL_SERVER_ERROR',
                     cause: 'INVALID_PACKAGE_STATUS',
                 },
             })
@@ -122,7 +122,7 @@ export function unlockHealthPlanPackageResolver(
             logError('unlockHealthPlanPackage', errMessage)
             throw new GraphQLError(errMessage, {
                 extensions: {
-                    code: 'INVALID_PACKAGE_STATUS',
+                    code: 'INTERNAL_SERVER_ERROR',
                     cause: 'INVALID_PACKAGE_STATUS',
                 },
             })

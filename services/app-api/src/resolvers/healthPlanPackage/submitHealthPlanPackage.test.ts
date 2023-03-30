@@ -149,9 +149,19 @@ describe('submitHealthPlanPackage', () => {
 
         expect(submitResult.errors).toBeDefined()
 
-        expect(submitResult.errors?.[0].extensions?.code).toBe(
-            'INVALID_PACKAGE_STATUS'
+        expect(submitResult.errors?.[0].extensions).toEqual(
+            expect.objectContaining({
+                code: 'INTERNAL_SERVER_ERROR',
+                cause: 'INVALID_PACKAGE_STATUS',
+                exception: {
+                    locations: undefined,
+                    message:
+                        'Attempted to submit an already submitted package.',
+                    path: undefined,
+                },
+            })
         )
+
         expect(submitResult.errors?.[0].message).toBe(
             'Attempted to submit an already submitted package.'
         )
