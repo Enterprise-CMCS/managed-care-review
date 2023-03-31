@@ -13434,10 +13434,10 @@
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-2.0.0.tgz#f544a148d3ab35801c1f633a7441fd87c2e484bf"
   integrity sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==
 
-"@trussworks/react-uswds@^3.2.0":
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/@trussworks/react-uswds/-/react-uswds-3.2.0.tgz#3193b968419837895444a6e9e72a832bd7afcb84"
-  integrity sha512-wZYK03JoP+BwzBaJ3AN5jG5nmsIQokTk863zKo+zkEiynbUAeXLd+IZUKu+yTjfc4RpSlt1aIEo+sxaQZSu10A==
+"@trussworks/react-uswds@^4.1.1":
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@trussworks/react-uswds/-/react-uswds-4.1.1.tgz#57cba59dad7d252a563522ca9a1b970054a31958"
+  integrity sha512-J68eM8HtCYngLPsWCdPFERC6AvEAVPZUBUP0/Rk8QEhOGxWJqEtepZo7Xv1pOFhZDOX647/392ZMIQw8y5TW8g==
 
 "@trysound/sax@0.2.0":
   version "0.2.0"
@@ -14548,10 +14548,10 @@
     "@typescript-eslint/types" "5.57.0"
     eslint-visitor-keys "^3.3.0"
 
-"@uswds/uswds@^3.3.0":
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/@uswds/uswds/-/uswds-3.3.0.tgz#19097ada5bb07cd51269811d0309b021604823e9"
-  integrity sha512-qiugkbwrO+eIIwi4lbEdH15LCHuAjfUMDRQNBBujakR99Ka3iqmrLpPllffdKaJJnnYkt75v0lltnJ5Nnd/obQ==
+"@uswds/uswds@^3.1.0":
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/@uswds/uswds/-/uswds-3.4.1.tgz#dd15644d791e1969dff2394d9d2ec2ea1e795128"
+  integrity sha512-eLYbWUqf9eWUa2P6CO3ckIjtQyM3AylrIOHxN5gYG3P62TDd3FzRDyoACfvOe6CNk0w0PqXWJnuPzxpNoOgWNA==
   dependencies:
     classlist-polyfill "1.0.3"
     object-assign "4.1.1"
@@ -25051,13 +25051,6 @@ mini-css-extract-plugin@^2.4.5:
   dependencies:
     schema-utils "^4.0.0"
 
-mini-css-extract-plugin@^2.7.2:
-  version "2.7.5"
-  resolved "https://registry.yarnpkg.com/mini-css-extract-plugin/-/mini-css-extract-plugin-2.7.5.tgz#afbb344977659ec0f1f6e050c7aea456b121cfc5"
-  integrity sha512-9HaR++0mlgom81s95vvNjxkg52n2b5s//3ZTI1EtzFb98awsLSivs2LMsVqnQ3ay0PVhqWcGNyDaTE961FOcjQ==
-  dependencies:
-    schema-utils "^4.0.0"
-
 minimalistic-assert@^1.0.0, minimalistic-assert@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/minimalistic-assert/-/minimalistic-assert-1.0.1.tgz#2e194de044626d4a10e7f7fbc00ce73e83e4d5c7"
@@ -27453,6 +27446,7 @@ postcss@^8.4.19:
     nanoid "^3.3.4"
     picocolors "^1.0.0"
     source-map-js "^1.0.2"
+
 postgres-array@~2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/postgres-array/-/postgres-array-2.0.0.tgz#48f8fce054fbc69671999329b8834b772652d82e"
@@ -29042,14 +29036,6 @@ sass-loader@^12.3.0:
   version "12.6.0"
   resolved "https://registry.yarnpkg.com/sass-loader/-/sass-loader-12.6.0.tgz#5148362c8e2cdd4b950f3c63ac5d16dbfed37bcb"
   integrity sha512-oLTaH0YCtX4cfnJZxKSLAyglED0naiYfNG1iXfU5w1LNZ+ukoA5DtyDIN5zmKVZwYNJP4KRc5Y3hkWga+7tYfA==
-  dependencies:
-    klona "^2.0.4"
-    neo-async "^2.6.2"
-
-sass-loader@^13.2.0:
-  version "13.2.0"
-  resolved "https://registry.yarnpkg.com/sass-loader/-/sass-loader-13.2.0.tgz#80195050f58c9aac63b792fa52acb6f5e0f6bdc3"
-  integrity sha512-JWEp48djQA4nbZxmgC02/Wh0eroSUutulROUusYJO9P9zltRbNN80JCBHqRGzjd4cmZCa/r88xgfkjGD0TXsHg==
   dependencies:
     klona "^2.0.4"
     neo-async "^2.6.2"
