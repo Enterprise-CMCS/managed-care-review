@@ -78,9 +78,9 @@
     &__tab-panel {
         overflow: auto;
         border: 1px solid $mcr-gray-lighter;
-        border-top: none;
         height: 100%;
         background-color: $mcr-foundation-white;
+        padding: 1.5em;
         min-height: 500px;
     }
 

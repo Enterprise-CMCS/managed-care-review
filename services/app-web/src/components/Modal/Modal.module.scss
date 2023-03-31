@@ -2,7 +2,7 @@
 @use '../../styles/custom.scss' as *;
 
 .modal {
- @include form-page-container;
+  max-width: $mcr-container-standard-width-fixed;
   div {
     div {
       margin: 0;
