@@ -16,7 +16,7 @@ async function main() {
     // get the workflow runs for this branch
     // we pass in branchName as input from the action
     const allWorkflowRuns = await octokit.actions.listWorkflowRuns({
-        owner: 'CMSgov',
+        owner: 'Enterprise-CMCS',
         repo: 'managed-care-review',
         workflow_id: 'deploy.yml',
         branch: core.getInput('branchName', { required: true }),
@@ -81,7 +81,7 @@ async function getJobsToSkip(
     // look for jobs in the last non-skipped GHA run that we might be able to skip
     const jobsFromLastRun = await octokit.actions.listJobsForWorkflowRunAttempt(
         {
-            owner: 'CMSgov',
+            owner: 'Enterprise-CMCS',
             repo: 'managed-care-review',
             run_id: lastCompletedRunId,
             attempt_number: runAttempt,
@@ -117,7 +117,11 @@ interface LernaListItem {
 
 // a list of all of our deployable service names from lerna
 function getAllServicesFromLerna(): string[] | Error {
-    const { stdout, stderr, error, status } = spawnSync('lerna', ['ls', '-a', '--json'])
+    const { stdout, stderr, error, status } = spawnSync('lerna', [
+        'ls',
+        '-a',
+        '--json',
+    ])
 
     if (error || status !== 0) {
         console.error('Error: ', error, stderr.toString())
@@ -129,12 +133,14 @@ function getAllServicesFromLerna(): string[] | Error {
 }
 
 // uses lerna to find services that have changed since the passed sha
-function getChangedServicesSinceSha(
-    sha: string
-): string[] | Error {
-    const { stdout, stderr, error, status } = spawnSync(
-        'lerna', [ 'ls', '--since', sha, '-all', '--json']
-    )
+function getChangedServicesSinceSha(sha: string): string[] | Error {
+    const { stdout, stderr, error, status } = spawnSync('lerna', [
+        'ls',
+        '--since',
+        sha,
+        '-all',
+        '--json',
+    ])
 
     if (error || status !== 0) {
         console.error(error, stderr.toString())

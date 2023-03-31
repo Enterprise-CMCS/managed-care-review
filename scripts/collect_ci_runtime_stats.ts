@@ -58,7 +58,7 @@ async function fetchDeployRuns(): Promise<WorkflowRun[]> {
     const {
         data: { workflows },
     } = await octokit.rest.actions.listRepoWorkflows({
-        owner: 'CMSgov',
+        owner: 'Enterprise-CMCS',
         repo: 'managed-care-review',
     })
 
@@ -73,7 +73,7 @@ async function fetchDeployRuns(): Promise<WorkflowRun[]> {
     const {
         data: { workflow_runs },
     } = await octokit.rest.actions.listWorkflowRuns({
-        owner: 'CMSgov',
+        owner: 'Enterprise-CMCS',
         repo: 'managed-care-review',
         workflow_id: deploy.id,
         status: 'success',
@@ -89,7 +89,7 @@ async function fetchDeployRuns(): Promise<WorkflowRun[]> {
         const {
             data: { jobs },
         } = await octokit.rest.actions.listJobsForWorkflowRun({
-            owner: 'CMSgov',
+            owner: 'Enterprise-CMCS',
             repo: 'managed-care-review',
             run_id: run.id,
         })

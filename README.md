@@ -1,7 +1,7 @@
-# Managed Care Review ![Build & Deploy](https://github.com/CMSgov/managed-care-review/actions/workflows/promote.yml/badge.svg?branch=main)
+# Managed Care Review ![Build & Deploy](https://github.com/Enterprise-CMCS/managed-care-review/actions/workflows/promote.yml/badge.svg?branch=main)
 
 <a href="https://codeclimate.com/repos/616dbb175e8227015001784f/maintainability"><img src="https://api.codeclimate.com/v1/badges/42503a338d09d6a358a5/maintainability" /></a> <a href="https://codeclimate.com/repos/616dbb175e8227015001784f/test_coverage"><img src="https://api.codeclimate.com/v1/badges/42503a338d09d6a358a5/test_coverage" /></a>
-[![CodeQL](https://github.com/CMSgov/managed-care-review/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/CMSgov/managed-care-review/actions/workflows/codeql.yml)
+[![CodeQL](https://github.com/Enterprise-CMCS/managed-care-review/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/Enterprise-CMCS/managed-care-review/actions/workflows/codeql.yml)
 
 Managed Care Review is an application that accepts Managed Care contract and rate submissions from states and packages them for review by CMS. It uses a Serverless architecture (services deployed as AWS Lambdas) with React and Node as client/server and GraphQL as the api protocol. The codebase is a Typescript monorepo. An [architectural diagram](.images/architecture.svg) is also available.
 
@@ -176,7 +176,7 @@ Whenever you run `./dev postgres` we start a new postgres docker container and r
 
 ## Build & Deploy
 
-See main build/deploy [here](https://github.com/CMSgov/managed-care-review/actions/workflows/promote.yml?query=branch%3Amain)
+See main build/deploy [here](https://github.com/Enterprise-CMCS/managed-care-review/actions/workflows/promote.yml?query=branch%3Amain)
 
 This application is built and deployed via GitHub Actions. See `.github/workflows`.
 
@@ -184,7 +184,7 @@ This application is deployed into three different AWS accounts: Dev, Val, and Pr
 
 In the Dev account, in addition to deploying the main branch, we deploy a full version of the app on every branch that is pushed that is not the main branch. We call these deployments "review apps" since they host all the changes for a PR in a full deployment. These review apps are differentiated by their Serverless "stack" name. This is set to the branch name and all infra ends up being prefixed with it to keep from there being any overlapping.
 
-You can see the deploys for review apps [here](https://github.com/CMSgov/managed-care-review/actions/workflows/deploy.yml)
+You can see the deploys for review apps [here](https://github.com/Enterprise-CMCS/managed-care-review/actions/workflows/deploy.yml)
 
 ### Building scripts
 
