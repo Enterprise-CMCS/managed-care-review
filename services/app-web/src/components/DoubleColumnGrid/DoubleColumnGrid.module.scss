@@ -1,5 +1,5 @@
-@use "uswds-core" as *;
 @use '../../styles/custom.scss' as *;
+
 .row {
     @include at-media(tablet) {
         margin-bottom: units(2);
