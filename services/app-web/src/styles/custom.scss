@@ -1,21 +1,63 @@
 /* 
-    Custom application styles
+    Custom application styles and main file imported into component specific modules.
     
-    Use caution with this file.
+    Use caution editing this file. Please add comments for any new class or variable.
 
-    Here are examples where global styles may be needed: 
+    Here are concrete examples where global styles are needed: 
     1. We are dealing with container elements that repeat throughout the application outside of a specific component (divs, cards, display tables)
-    2. We need override a behavior in USWDS that we can't control via setting 
+    2. We need override a behavior in USWDS that we can't control via settings throughout the application
     3. We want to hide an element from the screen using our global screenreader only class 
 
     Why it matters:     
-    When styles live close to the component in a `*.module.scss` file they are automatically namespaced. 
-    Here, overrides are global could disrupt styles application wide. 
+    When styles live close to the component in a `*.module.scss` file they are automatically namespaced. This ensures separation of concerns. 
+    In this files, overrides are global and can disrupt styles application wide. These trickle effects can be hard to debug and are a common form of styles tech debt.
 */
-@forward "mcr-colors";  // whenever custom is imported, bring along app colors
 
+// Allows access of all app styles in component scss modules by forward
+@forward "mcr-colors"; 
+@forward  "uswds-core"; 
+
+// Allows access of app styles in this file
 @use "mcr-colors" as *;
 @use "uswds-core" as *;
+
+/* CONTAINERS */
+
+// Every page starts with a flex container
+@mixin container {
+  display: flex;
+  flex: 1 0 auto;
+}
+// We have some established width limits how far page content should stretch laterally. Right now this is controlled by CSS width properties
+$mcr-container-standard-width-fixed: 50rem;
+$mcr-container-max-width-fixed: 75rem;
+
+// Default page width and styles in MC-Review
+@mixin default-page-container {
+    @include container;
+    width: $mcr-container-max-width-fixed;
+    background-color: $mcr-foundation-white;
+}
+
+// Form pages have larger margin on either side
+@mixin form-page-container {
+    @include container;
+    width: $mcr-container-standard-width-fixed;
+}
+
+// Adds blue-cyan  gradient to top border of a container, used on document tables
+.borderTopLinearGradient {
+    border: 0 solid;
+    border-top: 10px solid;
+    border-image-slice: 1;
+    border-image-source: linear-gradient(
+        to right,
+        $mcr-primary-dark, 
+        $mcr-cyan-base
+    );
+    box-shadow: inset 0 0 1px $mcr-gray-dark,
+        0px 0px 24px rgb(0 0 0 / 5%);
+}
 
 /* ACCESSIBILITY */
 // Re-useable classname for hiding UI visually but still having it be read by screenreaders
@@ -30,33 +72,12 @@
 
 // Accessibility button contrast color fix for inverse button. 
 .usa-button--outline.usa-button--inverse {
-    box-shadow: inset 0 0 0 2px #fff;
-    color: #fff !important;
+    box-shadow: inset 0 0 0 2px $mcr-foundation-white;
+    color: $mcr-foundation-white !important;
     &:hover {
-        box-shadow: inset 0 0 0 2px #dfe1e2;
-        color: #dfe1e2 !important;
+        box-shadow: inset 0 0 0 2px $mcr-gray-lighter;
+        color: $mcr-gray-lighter !important;
     }
-}
-
-/* CONTAINERS */
-// Limit how far page content can stretch laterally, used on most logged in pages
-$mcr-container-max-width-fixed: 50rem; 
-.app-container-horizontal-pad {
-    max-width: $mcr-container-max-width-fixed;
-}
-
-// Add top gradient to container, used on document tables
-.borderTopLinearGradient {
-    border: 0 solid;
-    border-top: 10px solid;
-    border-image-slice: 1;
-    border-image-source: linear-gradient(
-        to right,
-        $mcr-primary-dark, 
-        $mcr-cyan
-    );
-    box-shadow: inset 0 0 1px $mcr-gray-dark,
-        0px 0px 24px rgb(0 0 0 / 5%);
 }
 
 /* COMPONENT OR ELEMENT SPECIFIC */

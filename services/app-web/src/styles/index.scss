@@ -6,8 +6,10 @@ Sass entry point - order matters.
 // 1. Load USWDS theme and settings
 @forward 'uswds-theme';
 
-// 2. Load USWDS source code
+// 2. Load USWDS and react-uswds source code
 @forward 'uswds';
+@use '~@trussworks/react-uswds/lib/index';
 
 // 3. Load your project's custom Sass
 @use 'custom';
+

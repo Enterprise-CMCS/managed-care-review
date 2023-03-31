@@ -8,33 +8,43 @@
    USWDS palette: https://designsystem.digital.gov/design-tokens/color/system-tokens/
 */
 
-$mcr-primary: #005ea2; // USWDS 'primary'
+$mcr-primary-base: #005ea2; // USWDS 'primary'
 $mcr-primary-dark : #1a4480; // USWDS 'primary-dark'
 $mcr-primary-darkest:  #162e51; // USWDS 'primary-darker',
 $mcr-primary-light: #73b3e7; // USWDS 'primary-light',
-$mcr-primary-lightest: #e1f3f8; // USWDS 'blue-cool-10'
+$mcr-primary-lighter: #e1f3f8; // USWDS 'blue-cool-5v'
+$mcr-primary-lightest: #d9e8f6; // USWDS 'blue-10'
 
-$mcr-cms-blue: #0071bc; // CMSDS 'color-primary'
-$mcr-cms-blue-dark: #205493; // CMSDS 'color-primary-darker
-$mcr-cms-blue-darkest: #112e51; // CMSDS 'color-primary-darkest'
+$mcr-cmsblue-base: #0071bc; // CMSDS 'color-primary'
+$mcr-cmsblue-dark: #205493; // CMSDS 'color-primary-darker
+$mcr-cmsblue-darkest: #112e51; // CMSDS 'color-primary-darkest'
+$mcr-cmsblue-lightest: #f0fafd;// This color is slightly off from CMSDS 'color-primary-alt-lightest', don't think it maps to either system
 
-$mcr-cyan: #02bfe7; // CMSDS 'color-primary-alt'
+$mcr-cyan-base: #02bfe7; // CMSDS 'color-primary-alt'
 $mcr-cyan-dark: #009ec1; // USWDS 'cyan-40v' 
 $mcr-cyan-light: #99deea;// USWDS 'cyan-20' 
 
-$mcr-gold: #ffbe2e; // USWFS 'gold-20v'
+$mcr-gold-base: #ffbe2e; // USWFS 'gold-20v'
 $mcr-gold-dark: #e5a000; // USWDS 'gold-30v'
 $mcr-gold-darker: #ca9318; // CMSDS 'color-warn-darker'
 
-$mcr-green-dark:#4d8055; // USWDS 'gray-cool-50'
-
-$mcr-gray :#a9aeb1; // USWDS 'gray-cool-30'
+$mcr-gray-base :#a9aeb1; // USWDS 'gray-cool-30'
 $mcr-gray-dark: #565c65; // USWDS 'gray-cool-60'
-$mcr-gray-lightest: #f0f0f0; /// USWDS 'gray-5'
 $mcr-gray-lighter:#dfe1e2; // USWDS 'gray-cool-10'
+$mcr-gray-lightest: #f0f0f0; /// USWDS 'gray-5'
 
-$mcr-success: #00a91c; // USWDS 'green-cool-40v'
+// mcr-foundation is used for text and containers
+$mcr-foundation-ink:#1b1b1b; // USWDS 'gray-90' 
+$mcr-foundation-hint: #71767a; // USWDS 'text-base'
+$mcr-foundation-link: $mcr-primary-base;
+$mcr-foundation-white: #fff; 
+
+// mcr-success is used for submit buttons and completed actions
+$mcr-success-base: #2e8540; // CMSDS 'color-success'
 $mcr-success-hover:#2a7a3b; // CMSDS 'color-success-dark"
+$mcr-success-dark: #4d8055; // USWDS 'green-cool-50'
 
-$mcr-ink:#1b1b1b; // USWDS 'gray-90'
-$mcr-white:#fff;
+// mcr-error is used for error, validations, and incomplete actions
+$mcr-error-base: #b50909; // USWDS  'red-60v' 
+$mcr-error-light:#f4e3db; // USWDS 'red-warm-10' 
+
