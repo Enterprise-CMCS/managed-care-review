@@ -26,6 +26,8 @@ import {
     SubmissionType as SubmissionTypeT,
     useCreateHealthPlanPackageMutation,
     CreateHealthPlanPackageInput,
+    IndexHealthPlanPackagesDocument,
+    IndexHealthPlanPackagesQuery,
 } from '../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
@@ -36,8 +38,6 @@ import {
     booleanAsYesNoFormValue,
     yesNoFormValueAsBoolean,
 } from '../../../components/Form/FieldYesNo/FieldYesNo'
-import { featureFlags } from '../../../common-code/featureFlags'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { SubmissionTypeFormSchema } from './SubmissionTypeSchema'
 
 export interface SubmissionTypeFormValues {
@@ -73,13 +73,6 @@ export const SubmissionType = ({
 
     const statePrograms = useStatePrograms()
 
-    // Launch Darkly
-    const ldClient = useLDClient()
-    const showRateCertAssurance = ldClient?.variation(
-        featureFlags.RATE_CERT_ASSURANCE.flag,
-        featureFlags.RATE_CERT_ASSURANCE.defaultValue
-    )
-
     const [createHealthPlanPackage, { error }] =
         useCreateHealthPlanPackageMutation({
             // This function updates the Apollo Client Cache after we create a new DraftSubmission
@@ -87,28 +80,33 @@ export const SubmissionType = ({
             // without a refresh. Anytime a mutation does more than "modify an existing object"
             // you'll need to handle the cache.
             update(cache, { data }) {
-                if (data) {
-                    cache.modify({
-                        fields: {
-                            indexHealthPlanPackages(
-                                index = { totalCount: 0, edges: [] }
-                            ) {
-                                const newID = cache.identify(
-                                    data.createHealthPlanPackage.pkg
-                                )
-                                // This isn't quite what is documented, but it's clear this
-                                // is how things work from looking at the dev-tools
-                                const newRef = { __ref: newID }
+                const pkg = data?.createHealthPlanPackage.pkg
+                if (pkg) {
+                    const result =
+                        cache.readQuery<IndexHealthPlanPackagesQuery>({
+                            query: IndexHealthPlanPackagesDocument,
+                        })
 
-                                return {
-                                    totalCount: index.totalCount + 1,
-                                    edges: [
-                                        {
-                                            node: newRef,
-                                        },
-                                        ...index.edges,
-                                    ],
-                                }
+                    const indexHealthPlanPackages = {
+                        totalCount:
+                            result?.indexHealthPlanPackages.totalCount || 0,
+                        edges: result?.indexHealthPlanPackages.edges || [],
+                    }
+
+                    cache.writeQuery({
+                        query: IndexHealthPlanPackagesDocument,
+                        data: {
+                            indexHealthPlanPackages: {
+                                __typename: 'IndexHealthPlanPackagesPayload',
+                                totalCount:
+                                    indexHealthPlanPackages.totalCount + 1,
+                                edges: [
+                                    {
+                                        __typename: 'HealthPlanPackageEdge',
+                                        node: pkg,
+                                    },
+                                    ...indexHealthPlanPackages.edges,
+                                ],
                             },
                         },
                     })
@@ -179,9 +177,9 @@ export const SubmissionType = ({
                 const input: CreateHealthPlanPackageInput = {
                     programIDs: values.programIDs,
                     submissionType: values.submissionType,
-                    riskBasedContract: showRateCertAssurance
-                        ? yesNoFormValueAsBoolean(values.riskBasedContract)
-                        : undefined,
+                    riskBasedContract: yesNoFormValueAsBoolean(
+                        values.riskBasedContract
+                    ),
                     submissionDescription: values.submissionDescription,
                     contractType: values.contractType,
                 }
@@ -219,9 +217,9 @@ export const SubmissionType = ({
             draftSubmission.programIDs = values.programIDs
             draftSubmission.submissionType =
                 values.submissionType as SubmissionTypeT
-            draftSubmission.riskBasedContract = showRateCertAssurance
-                ? yesNoFormValueAsBoolean(values.riskBasedContract)
-                : undefined
+            draftSubmission.riskBasedContract = yesNoFormValueAsBoolean(
+                values.riskBasedContract
+            )
             draftSubmission.submissionDescription = values.submissionDescription
             draftSubmission.contractType = values.contractType as ContractType
 
@@ -258,9 +256,7 @@ export const SubmissionType = ({
         <Formik
             initialValues={submissionTypeInitialValues}
             onSubmit={handleFormSubmit}
-            validationSchema={SubmissionTypeFormSchema({
-                'rate-cert-assurance': showRateCertAssurance,
-            })}
+            validationSchema={SubmissionTypeFormSchema}
         >
             {({
                 values,
@@ -402,17 +398,15 @@ export const SubmissionType = ({
                                     errors.riskBasedContract
                                 )}
                             >
-                                {showRateCertAssurance && (
-                                    <FieldYesNo
-                                        id="riskBasedContract"
-                                        name="riskBasedContract"
-                                        label="Is this a risk-based contract?"
-                                        hint="See 42 CFR § 438.2"
-                                        showError={showFieldErrors(
-                                            errors.riskBasedContract
-                                        )}
-                                    />
-                                )}
+                                <FieldYesNo
+                                    id="riskBasedContract"
+                                    name="riskBasedContract"
+                                    label="Is this a risk-based contract?"
+                                    hint="See 42 CFR § 438.2"
+                                    showError={showFieldErrors(
+                                        errors.riskBasedContract
+                                    )}
+                                />
                             </FormGroup>
                             <FieldTextarea
                                 label="Submission description"

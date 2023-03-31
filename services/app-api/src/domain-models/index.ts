@@ -6,6 +6,9 @@ export type {
 } from './UserType'
 export type { StateType } from './StateType'
 
+export type { DivisionType } from './DivisionType'
+export { isValidCmsDivison } from './division'
+
 export type { ProgramType } from './ProgramType'
 export { isCMSUser, isUser, isStateUser, isAdminUser } from './user'
 

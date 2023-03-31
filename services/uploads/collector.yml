@@ -1,12 +1,11 @@
 receivers:
   otlp:
     protocols:
-      grpc:
       http:
 
 exporters:
-  otlp:
-    endpoint: https://gov-otlp.nr-data.net:4317
+  otlphttp:
+    endpoint: https://gov-otlp.nr-data.net:4318
     headers:
       api-key: $NR_LICENSE_KEY
 
@@ -14,4 +13,7 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlp]
+      exporters: [otlphttp]
+    metrics:
+      receivers: [otlp]
+      exporters: [otlphttp]

@@ -1,4 +1,4 @@
 export { findUser } from './findUser'
 export { insertUser, InsertUserArgsType } from './insertUser'
-export { updateUserAssignedState } from './updateUserAssignedState'
+export { updateCmsUserProperties } from './updateCmsUserProperties'
 export { findAllUsers } from './findAllUsers'

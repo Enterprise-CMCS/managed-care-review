@@ -1,4 +1,5 @@
 import { StateType } from '../common-code/healthPlanFormDataType'
+import { Division } from '../pages/QuestionResponse/QATable/QATable'
 
 type LocalUserType = LocalStateUserType | LocalCMSUserType | LocalAdminUserType
 
@@ -18,6 +19,7 @@ type LocalCMSUserType = {
     givenName: string
     familyName: string
     stateAssignments: StateType[]
+    divisionAssignment?: Division
 }
 
 type LocalAdminUserType = {

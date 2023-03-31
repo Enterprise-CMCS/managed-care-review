@@ -33,6 +33,12 @@ import * as useStatePrograms from '../../../hooks/useStatePrograms'
 import { unlockedWithALittleBitOfEverything } from '../../../common-code/healthPlanFormDataMocks'
 
 describe('RateDetails', () => {
+    beforeAll(() => {
+        jest.setTimeout(10000)
+        // TODO: These tests are too long and need to be fully refactored. They are starting to flake in recent versions of RTL, particularly the multi-rate and contract amendment  ests
+        // See this guidance for waitFor and getBy Role: https://github.com/testing-library/dom-testing-library/issues/820
+    })
+
     afterEach(() => {
         jest.clearAllMocks()
         jest.spyOn(useStatePrograms, 'useStatePrograms').mockRestore()
@@ -551,7 +557,7 @@ describe('RateDetails', () => {
                 const rateCertsAfterRemove = rateCertifications(screen)
                 expect(rateCertsAfterRemove).toHaveLength(2)
             })
-        }, 10000)
+        })
 
         it('accepts documents on second rate', async () => {
             renderWithProviders(

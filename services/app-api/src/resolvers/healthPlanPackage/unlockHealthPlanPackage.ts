@@ -21,6 +21,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { EmailParameterStore } from '../../parameterStore'
+import { GraphQLError } from 'graphql'
 
 // unlock is a state machine transforming a LockedFormData and turning it into UnlockedFormData
 // Since Unlocked is a strict subset of Locked, this can't error today.
@@ -69,7 +70,12 @@ export function unlockHealthPlanPackageResolver(
             const errMessage = `Issue finding a package of type ${result.code}. Message: ${result.message}`
             logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         if (result === undefined) {
@@ -90,7 +96,12 @@ export function unlockHealthPlanPackageResolver(
             const errMessage = 'Attempted to unlock package with wrong status'
             logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new UserInputError(errMessage) // / TODO: This is should be a custom ApolloError such as INVALID_PACKAGE_STATUS or ACTION_UNAVAILABLE, not user input error since doesn't involve form fields the user controls
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'INVALID_PACKAGE_STATUS',
+                },
+            })
         }
 
         // pull the current revision out to unlock it.
@@ -98,13 +109,23 @@ export function unlockHealthPlanPackageResolver(
         if (formDataResult instanceof Error) {
             const errMessage = `Failed to decode proto ${formDataResult}.`
             logError('unlockHealthPlanPackage', errMessage)
-            throw new Error(errMessage)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'PROTO_DECODE_ERROR',
+                },
+            })
         }
 
         if (formDataResult.status !== 'SUBMITTED') {
             const errMessage = `A locked package had unlocked formData.`
             logError('unlockHealthPlanPackage', errMessage)
-            throw new Error(errMessage)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'INVALID_PACKAGE_STATUS',
+                },
+            })
         }
 
         const draftformData: UnlockedHealthPlanFormDataType =
@@ -127,7 +148,12 @@ export function unlockHealthPlanPackageResolver(
             const errMessage = `Issue unlocking a package of type ${unlockedPackage.code}. Message: ${unlockedPackage.message}`
             logError('unlockHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         // Send emails!
@@ -152,7 +178,12 @@ export function unlockHealthPlanPackageResolver(
         if (statePrograms instanceof Error) {
             logError('findStatePrograms', statePrograms.message)
             setErrorAttributesOnActiveSpan(statePrograms.message, span)
-            throw new Error(statePrograms.message)
+            throw new GraphQLError(statePrograms.message, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         const unlockPackageCMSEmailResult =
@@ -171,20 +202,30 @@ export function unlockHealthPlanPackageResolver(
                 submitterEmails
             )
 
-        if (unlockPackageCMSEmailResult instanceof Error) {
-            logError(
-                'unlockPackageCMSEmail - CMS email failed',
-                unlockPackageCMSEmailResult
-            )
-            throw unlockPackageCMSEmailResult
-        }
-
-        if (unlockPackageStateEmailResult instanceof Error) {
-            logError(
-                'unlockPackageCMSEmail - CMS email failed',
-                unlockPackageStateEmailResult
-            )
-            throw unlockPackageStateEmailResult
+        if (
+            unlockPackageCMSEmailResult instanceof Error ||
+            unlockPackageStateEmailResult instanceof Error
+        ) {
+            if (unlockPackageCMSEmailResult instanceof Error) {
+                logError(
+                    'unlockPackageCMSEmail - CMS email failed',
+                    unlockPackageCMSEmailResult
+                )
+                setErrorAttributesOnActiveSpan('CMS email failed', span)
+            }
+            if (unlockPackageStateEmailResult instanceof Error) {
+                logError(
+                    'unlockPackageStateEmail - state email failed',
+                    unlockPackageStateEmailResult
+                )
+                setErrorAttributesOnActiveSpan('state email failed', span)
+            }
+            throw new GraphQLError('Email failed.', {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                },
+            })
         }
 
         logSuccess('unlockHealthPlanPackage')

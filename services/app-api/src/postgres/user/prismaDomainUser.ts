@@ -8,6 +8,7 @@ import { isStoreError, StoreError } from '../storeError'
 function domainUserFromPrismaUser(
     prismaUser: User & { stateAssignments?: State[] }
 ): UserType | StoreError {
+    const divisionAssignment = prismaUser.divisionAssignment ?? undefined
     switch (prismaUser.role) {
         case 'STATE_USER':
             if (!prismaUser.stateCode) {
@@ -40,6 +41,7 @@ function domainUserFromPrismaUser(
                 familyName: prismaUser.familyName,
                 email: prismaUser.email,
                 stateAssignments: prismaUser.stateAssignments,
+                divisionAssignment: divisionAssignment,
             }
         case 'ADMIN_USER':
             return {

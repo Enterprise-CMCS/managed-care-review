@@ -18,6 +18,7 @@ type CMSUserType = {
     givenName: string
     familyName: string
     stateAssignments: StateType[]
+    divisionAssignment?: string
 }
 
 type AdminUserType = {

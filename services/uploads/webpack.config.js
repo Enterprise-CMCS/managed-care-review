@@ -25,12 +25,6 @@ module.exports = {
     performance: {
         hints: false,
     },
-    externals: [
-        nodeExternals({
-            modulesDir: path.resolve(__dirname, '../../node_modules'),
-        }),
-        '@aws-sdk/client-s3',
-    ],
     devtool: 'source-map',
     resolve: {
         symlinks: false,

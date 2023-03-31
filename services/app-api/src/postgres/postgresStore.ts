@@ -1,4 +1,4 @@
-import { PrismaClient, HealthPlanRevisionTable } from '@prisma/client'
+import { PrismaClient, HealthPlanRevisionTable, Division } from '@prisma/client'
 import {
     UnlockedHealthPlanFormDataType,
     HealthPlanFormDataType,
@@ -15,6 +15,7 @@ import {
     CreateQuestionInput,
     QuestionResponseType,
     InsertQuestionResponseArgs,
+    StateType,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
 import { StoreError } from './storeError'
@@ -32,7 +33,7 @@ import {
     findUser,
     insertUser,
     InsertUserArgsType,
-    updateUserAssignedState,
+    updateCmsUserProperties,
     findAllUsers,
 } from './user'
 import {
@@ -40,6 +41,7 @@ import {
     insertQuestion,
     insertQuestionResponse,
 } from './questionResponse'
+import { findAllSupportedStates } from './state'
 
 type Store = {
     findPrograms: (
@@ -48,6 +50,8 @@ type Store = {
     ) => ProgramType[] | Error
 
     findStatePrograms: (stateCode: string) => ProgramType[] | Error
+
+    findAllSupportedStates: () => Promise<StateType[] | StoreError>
 
     findAllRevisions: () => Promise<HealthPlanRevisionTable[] | StoreError>
 
@@ -86,9 +90,10 @@ type Store = {
 
     insertUser: (user: InsertUserArgsType) => Promise<UserType | StoreError>
 
-    updateUserAssignedState: (
+    updateCmsUserProperties: (
         userID: string,
-        states: StateCodeType[]
+        states: StateCodeType[],
+        division?: Division
     ) => Promise<CMSUserType | StoreError>
 
     insertQuestion: (
@@ -132,9 +137,15 @@ function NewPostgresStore(client: PrismaClient): Store {
         findPrograms: findPrograms,
         findUser: (id) => findUser(client, id),
         insertUser: (args) => insertUser(client, args),
-        updateUserAssignedState: (userID, stateCodes) =>
-            updateUserAssignedState(client, userID, stateCodes),
+        updateCmsUserProperties: (userID, stateCodes, divisionAssignment) =>
+            updateCmsUserProperties(
+                client,
+                userID,
+                stateCodes,
+                divisionAssignment
+            ),
         findStatePrograms: findStatePrograms,
+        findAllSupportedStates: () => findAllSupportedStates(client),
         findAllRevisions: () => findAllRevisions(client),
         findAllUsers: () => findAllUsers(client),
         insertQuestion: (questionInput, user) =>

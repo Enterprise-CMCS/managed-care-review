@@ -26,6 +26,12 @@ import {
     mockUnlockedHealthPlanPackageWithDocuments,
     mockUnlockedHealthPlanPackage,
 } from './healthPlanFormDataMock'
+import { ApolloError } from '@apollo/client'
+import {
+    GRAPHQL_ERROR_CAUSE_MESSAGES,
+    GraphQLErrorCauseTypes,
+    GraphQLErrorCodeTypes,
+} from './apolloErrorCodeMocks'
 
 type fetchHealthPlanPackageMockProps = {
     submission?: HealthPlanPackage
@@ -416,21 +422,37 @@ const submitHealthPlanPackageMockSuccess = ({
 
 const submitHealthPlanPackageMockError = ({
     id,
+    error,
 }: {
     id: string
-}): MockedResponse<SubmitHealthPlanPackageMutation> => {
+    error?: {
+        code: GraphQLErrorCodeTypes
+        cause: GraphQLErrorCauseTypes
+    }
+}): MockedResponse<SubmitHealthPlanPackageMutation | ApolloError> => {
+    const graphQLError = new GraphQLError(
+        error
+            ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
+            : 'Error attempting to submit.',
+        {
+            extensions: {
+                code: error?.code,
+                cause: error?.cause,
+            },
+        }
+    )
+
     return {
         request: {
             query: SubmitHealthPlanPackageDocument,
-            variables: { input: { submissionID: id } },
+            variables: { input: { pkgID: id } },
         },
+        error: new ApolloError({
+            graphQLErrors: [graphQLError],
+        }),
         result: {
-            errors: [
-                new GraphQLError(
-                    'Incomplete submission cannot be submitted',
-                    {}
-                ),
-            ],
+            data: null,
+            errors: [graphQLError],
         },
     }
 }
@@ -458,22 +480,38 @@ const unlockHealthPlanPackageMockSuccess = ({
 const unlockHealthPlanPackageMockError = ({
     id,
     reason,
+    error,
 }: {
     id: string
     reason: string
+    error?: {
+        code: GraphQLErrorCodeTypes
+        cause: GraphQLErrorCauseTypes
+    }
 }): MockedResponse<UnlockHealthPlanPackageMutation> => {
+    const graphQLError = new GraphQLError(
+        error
+            ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
+            : 'Error attempting to submit.',
+        {
+            extensions: {
+                code: error?.code,
+                cause: error?.cause,
+            },
+        }
+    )
+
     return {
         request: {
             query: UnlockHealthPlanPackageDocument,
             variables: { input: { pkgID: id, unlockedReason: reason } },
         },
+        error: new ApolloError({
+            graphQLErrors: [graphQLError],
+        }),
         result: {
-            errors: [
-                new GraphQLError(
-                    'Incomplete submission cannot be submitted',
-                    {}
-                ),
-            ],
+            data: null,
+            errors: [graphQLError],
         },
     }
 }

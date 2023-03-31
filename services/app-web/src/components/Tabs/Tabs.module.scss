@@ -14,7 +14,6 @@
         position: relative;
         max-width: $mcr-container-max-width-fixed;
         margin: 0 auto;
-        padding: 0 2rem;
     }
 
     &__tab-list {
@@ -25,7 +24,6 @@
         white-space: nowrap;
         background-color: $mcr-foundation-white;
     }
-
     &__tab {
         display: inline-flex;
         align-items: center;
@@ -83,5 +81,7 @@
         border-top: none;
         height: 100%;
         background-color: $mcr-foundation-white;
+        min-height: 500px;
     }
+
 }

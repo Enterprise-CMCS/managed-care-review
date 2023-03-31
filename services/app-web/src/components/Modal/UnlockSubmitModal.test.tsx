@@ -92,6 +92,55 @@ describe('UnlockSubmitModal', () => {
                 )
             )
         })
+        it('redirects if submission succeeds, but failed sending emails', async () => {
+            let testLocation: Location
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    healthPlanPackage={mockCompleteDraft()}
+                    submissionName="Test-Submission"
+                    modalType="SUBMIT"
+                    modalRef={modalRef}
+                    setIsSubmitting={mockSetIsSubmitting}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            submitHealthPlanPackageMockError({
+                                id: mockCompleteDraft().id,
+                                error: {
+                                    code: 'INTERNAL_SERVER_ERROR',
+                                    cause: 'EMAIL_ERROR',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `draftSubmission/${
+                            mockCompleteDraft().id
+                        }/review-and-submit`,
+                    },
+                    location: (location) => (testLocation = location),
+                }
+            )
+
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            await userEvent.click(screen.getByTestId('submit-modal-submit'))
+
+            await waitFor(() =>
+                expect(testLocation.pathname).toBe(`/dashboard`)
+            )
+            await waitFor(() =>
+                expect(testLocation.search).toBe(
+                    `?justSubmitted=Test-Submission`
+                )
+            )
+        })
         it('displays modal alert banner error if submit api request fails', async () => {
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
@@ -312,6 +361,55 @@ describe('UnlockSubmitModal', () => {
                 expect(errorHeading).toBeInTheDocument()
                 expect(errorMessage).toBeInTheDocument()
             })
+        })
+        it('does not display modal alert banner error if unlock succeeds, but fails sending emails', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    modalRef={modalRef}
+                    modalType="UNLOCK"
+                    healthPlanPackage={mockSubmittedHealthPlanPackage()}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            unlockHealthPlanPackageMockError({
+                                id: mockUnlockedHealthPlanPackage().id,
+                                reason: 'Test unlock summary',
+                                error: {
+                                    code: 'INTERNAL_SERVER_ERROR',
+                                    cause: 'EMAIL_ERROR',
+                                },
+                            }),
+                        ],
+                    },
+                }
+            )
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            await userEvent.type(
+                screen.getByTestId('unlockSubmitModalInput'),
+                'Test unlock summary'
+            )
+
+            await userEvent.click(screen.getByTestId('unlock-modal-submit'))
+
+            await waitFor(() => {
+                const errorHeading = screen.queryByRole('heading', {
+                    name: 'Unlock error',
+                })
+                const errorMessage = screen.queryByText(
+                    'Error attempting to unlock.'
+                )
+                expect(errorHeading).not.toBeInTheDocument()
+                expect(errorMessage).not.toBeInTheDocument()
+            })
+
+            await waitFor(() => expect(dialog).toHaveClass('is-hidden'))
         })
     })
 
