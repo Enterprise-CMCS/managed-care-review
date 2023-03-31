@@ -1,6 +1,9 @@
 @use "uswds-core" as *;
 @use '../../styles/custom.scss' as *;
 
+.formContainer {
+    @include form-page-container;
+}
 .expandableBlock {
     line-height: initial;
 }

@@ -12,7 +12,7 @@
         display: flex;
         justify-content: space-between;
         position: relative;
-        max-width: 75rem;
+        max-width: $mcr-container-max-width-fixed;
         margin: 0 auto;
         padding: 0 2rem;
     }
@@ -23,7 +23,7 @@
         margin: 0 0 -1px;
         list-style-type: none;
         white-space: nowrap;
-        background-color: $mcr-white;
+        background-color: $mcr-foundation-white;
     }
 
     &__tab {
@@ -36,7 +36,7 @@
         border-right: 1px solid $mcr-gray-lighter;
 
         &:after {
-            background-color: $mcr-primary;
+            background-color: $mcr-primary-base;
             content: '';
             height: 4px;
             left: -1px;
@@ -48,10 +48,10 @@
         }
 
         &--selected {
-            border-bottom: 1px solid #fff;
+            border-bottom: 1px solid $mcr-foundation-white;
 
             .easi-tabs__tab-btn {
-                color: $mcr-primary;
+                color: $mcr-primary-base;
             }
 
             &:after {
@@ -82,6 +82,6 @@
         border: 1px solid $mcr-gray-lighter;
         border-top: none;
         height: 100%;
-        background-color: #fff;
+        background-color: $mcr-foundation-white;
     }
 }

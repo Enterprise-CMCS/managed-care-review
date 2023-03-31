@@ -1,7 +1,7 @@
 import React from 'react'
 import { ExpandableText, ExpandableTextProps } from './ExpandableText'
 import { GridContainer } from '@trussworks/react-uswds'
-
+import styles from './ExpandableText.module.scss'
 import type { Story } from '@storybook/react'
 
 export default {
@@ -25,7 +25,7 @@ const Template: Story<
 > = (args) => {
     const { children, clampedLines } = args
     return (
-        <GridContainer className="app-container-horizontal-pad">
+        <GridContainer className={styles.formContainer}>
             <ExpandableText clampedLines={clampedLines}>
                 {children}
             </ExpandableText>

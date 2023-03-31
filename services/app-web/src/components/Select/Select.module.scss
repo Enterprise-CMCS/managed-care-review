@@ -9,17 +9,17 @@
   }
   [class*='select__multi-value__label'] {
     background: $mcr-primary-lightest;
-    color: $mcr-ink;
+    color: $mcr-foundation-ink;
     border-radius: 99rem 0rem 0rem 99rem;
   }
   [class*='select__multi-value__remove'] {
     background: $mcr-primary-lightest;
-    color: $mcr-ink;
+    color: $mcr-foundation-ink;
     border-radius: 0rem 99rem 99rem 0rem;
 
     &:hover {
       background: darken($mcr-primary-lightest, 5%);
-      color: $mcr-ink;
+      color: $mcr-foundation-ink;
     }
   }
 }

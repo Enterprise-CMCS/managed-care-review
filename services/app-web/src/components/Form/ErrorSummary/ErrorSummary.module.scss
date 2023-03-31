@@ -1,4 +1,5 @@
 @use "uswds-core" as *;
+@use '../../../styles/custom.scss' as *;
 
 .message {
     a {
@@ -9,7 +10,7 @@
         font-weight: normal;
         text-align: left;
         &, &:visited {
-            color: $theme-link-color;
+            color: $mcr-foundation-link;
         }
     }
 }

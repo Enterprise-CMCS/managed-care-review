@@ -1,4 +1,4 @@
-import { GridContainer, Link } from '@trussworks/react-uswds'
+import { GridContainer, Grid, Link } from '@trussworks/react-uswds'
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { packageName } from '../../common-code/healthPlanFormDataType'
@@ -94,7 +94,7 @@ export const StateDashboard = (): React.ReactElement => {
                     data-testid="dashboard-page"
                 >
                     {programs.length ? (
-                        <section className={styles.panel}>
+                        <Grid className={styles.panel}>
                             {justSubmittedSubmissionName && (
                                 <SubmissionSuccessMessage
                                     submissionName={justSubmittedSubmissionName}
@@ -120,7 +120,7 @@ export const StateDashboard = (): React.ReactElement => {
                                 tableData={submissionRows}
                                 user={loggedInUser}
                             />
-                        </section>
+                        </Grid>
                     ) : (
                         <p>No programs exist</p>
                     )}

@@ -28,26 +28,26 @@
 
 .programTag {
     background: $mcr-primary-lightest;
-    color: $mcr-ink;
+    color: $mcr-foundation-ink;
     display: inline-block;
 }
 
 .submittedTag {
-    background: $mcr-success;
+    background: $mcr-success-base;
 }
 
 .draftTag {
     background: $mcr-gold-dark;
-    color: $mcr-ink;
+    color: $mcr-foundation-ink;
 }
 
 .unlockedTag {
     background: $mcr-cyan-light;
-    color: $mcr-ink;
+    color: $mcr-foundation-ink;
 }
 
 .filterCount {
     font-weight: font-weight('bold');
-    color: $mcr-ink;
+    color: $mcr-foundation-ink;
     padding-top: units(3);
 }

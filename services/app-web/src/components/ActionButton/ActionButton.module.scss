@@ -12,7 +12,7 @@
 }
 
 .successButton {
-    background: $mcr-success;
+    background: $mcr-success-base;
     &:hover {
         background-color: $mcr-success-hover !important;
     }

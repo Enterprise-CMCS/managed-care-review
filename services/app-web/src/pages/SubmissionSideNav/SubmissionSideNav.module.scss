@@ -2,8 +2,10 @@
 @use '../../styles/custom.scss' as *;
 
 .backgroundSidebar {
-  background-color: $mcr-white;
+  background-color: $mcr-foundation-white;
   width: 100%;
+  display: flex;
+  flex: 1 0 auto;
 }
 .backgroundForm {
   width: 100%;
@@ -11,14 +13,13 @@
 
 
 .container {
-  @include grid-container;
-  display: flex;
-  flex-direction: row;
+  @include default-page-container
 }
 
 .sideNavContainer {
   padding: 2rem 0;
   width: 20rem;
+  max-width: $mcr-container-max-width-fixed;
 }
 
 .backLinkContainer {

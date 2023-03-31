@@ -2,7 +2,7 @@
 @use '../../styles/custom.scss' as *;
 
 .modal {
-  max-width: 50rem;
+ @include form-page-container;
   div {
     div {
       margin: 0;

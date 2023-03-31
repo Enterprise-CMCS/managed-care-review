@@ -7,19 +7,19 @@
     padding-top: units(4);
     width: 100%;
     max-width: 100%;
-    background-color: $mcr-white;
+    background-color: $mcr-foundation-white;
 }
 
 .container {
     width: 100%;
-    max-width: 75rem;
+    max-width: $mcr-container-max-width-fixed;
     padding: 0 2rem 0 2rem;
 }
 
 .alertContainer {
     padding-top: units(4);
     margin: auto;
-    max-width: 75rem;
+    max-width: $mcr-container-max-width-fixed;
 }
 
 .panel {

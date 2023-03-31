@@ -2,18 +2,18 @@
 @use '../../styles/custom.scss' as *;
 
 .background {
-  background-color: $mcr-white;
+  background-color: $mcr-foundation-white;
   width: 100%;
 }
 
 .container {
-  max-width: $mcr-container-max-width-fixed;
+  max-width: $mcr-container-standard-width-fixed;
   padding: 2rem 0;
 }
 
 .questionSection {
   margin: units(2) auto;
-  background: $mcr-white;
+  background: $mcr-foundation-white;
   padding: units(4) units(4);
   border: 1px solid $mcr-gray-lighter;
   line-height: units(3);
@@ -38,7 +38,7 @@
         padding: units(4);
         margin-bottom: units(2);
         margin-top: units(2);
-        background: $mcr-white;
+        background: $mcr-foundation-white;
         border: 1px solid $mcr-gray-lighter;
         @include u-radius('md');
     }

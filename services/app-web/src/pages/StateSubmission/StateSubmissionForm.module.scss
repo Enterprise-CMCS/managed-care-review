@@ -10,7 +10,7 @@
 
     &[class^='usa-form'] {
         max-width: 100%;
-        width: 75rem;
+        width: $mcr-container-max-width-fixed;
     }
 }
 
@@ -35,7 +35,7 @@
         margin-bottom: units(2);
         margin-top: units(2);
         border: 1px solid $mcr-gray-lighter;
-        background: $mcr-white;
+        background: $mcr-foundation-white;
         @include u-radius('md');
     }
 
@@ -83,7 +83,7 @@
 .nestedOptions {
     padding-left: units(4);
     margin: units(2) 0;
-    border-left: 4px solid $mcr-primary;
+    border-left: 4px solid $mcr-primary-base;
 
     legend,
     label {
@@ -94,7 +94,7 @@
 .nestedOptionsError {
     padding-left: units(4);
     margin: units(2) 0;
-    border-left: 4px solid color($theme-color-error-darker);
+    border-left: 4px solid $mcr-error-base;
 }
 
 .stateContact,

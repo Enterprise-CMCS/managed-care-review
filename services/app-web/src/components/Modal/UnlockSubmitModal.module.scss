@@ -2,12 +2,12 @@
 @use '../../styles/custom.scss' as *;
 
 .reviewSectionWrapper {
-    max-width: $mcr-container-max-width-fixed;
+    max-width: $mcr-container-standard-width-fixed;
 }
 
 
 .submitButton {
-    background: $mcr-success;
+    background: $mcr-success-base;
     &:hover {
       background-color: $mcr-success-hover !important;
     }

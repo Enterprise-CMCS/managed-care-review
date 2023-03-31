@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link, SideNav, GridContainer } from '@trussworks/react-uswds'
+import { Link, SideNav, GridContainer, Icon } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import styles from './SubmissionSideNav.module.scss'
 import { useParams, useLocation, useNavigate, Outlet } from 'react-router-dom'
@@ -153,14 +153,7 @@ export const SubmissionSideNav = () => {
                                     pathname: '/dashboard',
                                 }}
                             >
-                                <svg
-                                    className="usa-icon"
-                                    aria-hidden="true"
-                                    focusable="false"
-                                    role="img"
-                                >
-                                    <use xlinkHref={`${sprite}#arrow_back`} />
-                                </svg>
+                                <Icon.ArrowBack />
                                 {loggedInUser?.__typename === 'StateUser' ? (
                                     <span>&nbsp;Back to state dashboard</span>
                                 ) : (

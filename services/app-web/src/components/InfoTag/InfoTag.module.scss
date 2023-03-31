@@ -2,20 +2,20 @@
 @use '../../styles/custom.scss' as *;
 
 .green {
-    @include u-bg('green-cool-50');
+    background-color: $mcr-success-dark
 }
 
 .gold {
-    @include u-bg('gold-20v');
-    color: $mcr-ink;
+    background-color: $mcr-gold-base;
+    color: $mcr-foundation-ink;
 }
 
 .cyan {
-    @include u-bg('cyan-40v');
-    color: $mcr-ink;
+    background-color: $mcr-cyan-dark;
+    color: $mcr-foundation-ink;
 }
 
 .blue {
-    @include u-bg('blue-cool-5v');
-    color: $mcr-ink;
+    background-color: $mcr-primary-lighter;
+    color: $mcr-foundation-ink;
 }

@@ -2,12 +2,12 @@
 @use '../../styles/custom.scss' as *;
 
 .background {
-    background-color: $mcr-white;
+    background-color: $mcr-foundation-white;
     width: 100%;
 }
 
 .container {
-    max-width: $mcr-container-max-width-fixed;
+    max-width: $mcr-container-standard-width-fixed;
     padding: 2rem 0;
 }
 
