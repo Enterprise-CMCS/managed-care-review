@@ -32,17 +32,19 @@ Note also that there is a specific color to be used for links (`$mcr-foundation-
 
 This is 101 but easy to forget. Please read [this section](https://github.com/trussworks/Engineering-Playbook/blob/main/docs/web/frontend/developing-ui.md#style-with-css-modules) of the Truss eng playbook for a good summary.
 
-TL;DR The preferred way to style React code is via a  `<component>.modules.scss` file stored close to the React component files. The use of [modules](https://github.com/css-modules/css-modules) helps ensure separation of concerns. The same can be said for use of CSS selectors inside scss files. These tools focus the impact of your changes and reduce tech debt. Less is more with styles.
+TL;DR Less is more with styles. In our application, the preferred way to style React code is via locally scoped [CSS module](https://github.com/css-modules/css-modules), written as a `<component>.module.scss` file and stored alongside React component files. We also use [CSS selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference#selectors) to further target styles. Tightly scoped styles and CSS [specificity](https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity) ensure separation of concerns.
 
-Here's a concrete example of scoped styles in action in the application:
+Example of scoped styles:
 
-- The `custom.scss` file is only used for global files  and overrides. We avoid adding code to this file unless absolutely necessary. When we do have to add styles here we either make a unique class or we use CSS selectors to contain the trickle effects of a change.
-- React files in  `/pages` may have self contained styles or they may share styles at the page level. Since this area of the codebase is organized by workflow it often makes sense to create a stylesheet at the root of that page folder that holds common styles for components used in that area of the application.
-- React files in  `/components` have self contained styles. This means named module file for each component. We avoid any cross components imports in this area of the codebase.
+- Global styles live in a single file (`custom.scss`) and are used sparingly.
+- Shared styles live close to the workflow they apply to. For example, directories in  `/pages` folder may share a `*.module.scss` stylesheet if needed for templates in that area of the application. CSS selectors should be used to further scope down styles.
+- Re-useable atomic components (see `/components` folder) have self contained styles. There is a named `*.module.scss` file for each component.
 
-### React components may compose together styles from different places using `classnames` package
+### React components may use conditional styles and compose together styles using the `classnames` package
 
-- Sometimes React components have complex conditional logic related to styles. To assist with this use `classnames`to compose together styles from different places. Example usage:
+- Sometimes React components have complex logic related to styles. To assist with this use [`classnames`](https://github.com/JedWatson/classnames) to compose together styles from different places.
+
+Example of conditional styles:
   
 ```react
       const combinedStyles = classNames(
@@ -72,6 +74,6 @@ The `styles/custom.scss` is also the main file imported into components to refer
 
 ### `USWDS` is the main design system in use
 
-See the `Use USWDS as the design system` ADR for the explanation of why.
+See the [`Use USWDS as the design system`](../architectural-decision-records/014-use-uswds-design-system.md).
 
 What this means for styling the application is that you will see some USWDS language and patterns. This can also be used a common language between design and engineering. For example, the names of our components follow [USWDS names for components](https://designsystem.digital.gov/components/overview/). And when you look at our application in the dev tool, every class with `usa-*` in front of it is coming from USWDS. USWDS has [design tokens](https://designsystem.digital.gov/design-tokens/) and mixins we can rely on as well.
