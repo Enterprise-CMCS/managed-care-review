@@ -59,6 +59,8 @@ export function createHealthPlanPackageResolver(
 
         const insertArgs: InsertHealthPlanPackageArgsType = {
             stateCode: stateFromCurrentUser,
+            populationCovered:
+                input.populationCovered as InsertHealthPlanPackageArgsType['populationCovered'],
             programIDs: input.programIDs,
             riskBasedContract:
                 input.riskBasedContract as InsertHealthPlanPackageArgsType['riskBasedContract'],

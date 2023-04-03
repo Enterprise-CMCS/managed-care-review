@@ -238,6 +238,8 @@ type Mutation {
 }
 
 input CreateHealthPlanPackageInput {
+    "Population that the contract covers"
+    populationCovered: PopulationCoveredType
     "An array of managed care program IDs this package covers"
     programIDs: [ID!]!
     "Whether or not this contract is risk based"
@@ -557,6 +559,12 @@ type HealthPlanRevision {
 
 type HealthPlanRevisionEdge {
     node: HealthPlanRevision!
+}
+
+enum PopulationCoveredType {
+    MEDICAID
+    CHIP
+    MEDICAID_AND_CHIP
 }
 
 enum SubmissionType {
