@@ -396,6 +396,7 @@ const toDomain = (
         submittedAt,
         stateCode,
         stateNumber,
+        populationCovered,
         programIds,
         submissionType,
         riskBasedContract,
@@ -422,6 +423,10 @@ const toDomain = (
         createdAt: protoDateToDomain(createdAt),
         updatedAt: protoTimestampToDomain(updatedAt),
         submittedAt: protoTimestampToDomain(submittedAt),
+        populationCovered: enumToDomain(
+            mcreviewproto.PopulationCovered,
+            populationCovered
+        ),
         submissionType: enumToDomain(
             mcreviewproto.SubmissionType,
             submissionType
