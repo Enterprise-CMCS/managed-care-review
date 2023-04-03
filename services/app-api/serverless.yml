@@ -96,7 +96,6 @@ provider:
           Action:
             - rds-db:connect
           Resource:
-            - ${self:custom.auroraArn}
             - ${self:custom.auroraV2Arn}
         - Effect: 'Allow'
           Action:
