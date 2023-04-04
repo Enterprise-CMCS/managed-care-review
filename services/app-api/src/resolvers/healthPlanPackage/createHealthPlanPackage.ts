@@ -13,6 +13,7 @@ import {
     setErrorAttributesOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
+import { GraphQLError } from 'graphql/index'
 
 export function createHealthPlanPackageResolver(
     store: Store
@@ -75,7 +76,12 @@ export function createHealthPlanPackageResolver(
             const errMessage = `Error creating a package of type ${pkgResult.code}. Message: ${pkgResult.message}`
             logError('createHealthPlanPackage', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         logSuccess('createHealthPlanPackage')
