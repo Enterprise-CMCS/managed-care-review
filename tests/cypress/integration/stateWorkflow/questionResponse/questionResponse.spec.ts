@@ -11,7 +11,8 @@ describe('Q&A', () => {
 
     it('can add questions and responses', () => {
         cy.interceptFeatureFlags({
-            'cms-questions': true
+            'cms-questions': true,
+            'chip-only-form': true
         })
         cy.logInAsStateUser()
 
