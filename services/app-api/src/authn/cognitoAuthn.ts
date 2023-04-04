@@ -138,6 +138,7 @@ export function userTypeFromAttributes(
             givenName: attributes.given_name,
             familyName: attributes.family_name,
             stateAssignments: [],
+            divisionAssignment: attributes.division,
         })
     }
 

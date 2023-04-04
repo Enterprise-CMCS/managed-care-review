@@ -8,7 +8,7 @@ and
 
 `toDomain(buff: Uint8Array): UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType | Error`
 
-These functions encode and decode our domain submission types to and from protobufs. Our proto schema is located in the [app-proto service](https://github.com/CMSgov/managed-care-review/tree/main/services/app-proto) where it is compiled as part of our build process into the /gen package as a pair of js and d.ts files that allow us to read and write conforming protobuf bytes.
+These functions encode and decode our domain submission types to and from protobufs. Our proto schema is located in the [app-proto service](https://github.com/Enterprise-CMCS/managed-care-review/tree/main/services/app-proto) where it is compiled as part of our build process into the /gen package as a pair of js and d.ts files that allow us to read and write conforming protobuf bytes.
 
 The work of this package then is in safely converting our domain UnlockedHealthPlanFormDataType and LockedHealthPlanFormDataType to and from the generated StateSubmissionInfo class that can be encoded and decoded to protobuf. This is not a simple mapping for a few reasons.
 

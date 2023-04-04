@@ -11,7 +11,7 @@ type Query {
     """
     fetchCurrentUser: User!
 
-  """
+    """
     fetchEmailSettings returns emailer config and settings
     """
     fetchEmailSettings: FetchEmailSettingsPayload!
@@ -205,36 +205,36 @@ type Mutation {
     """
     createQuestion(input: CreateQuestionInput!): CreateQuestionPayload!
 
-#    """
-#    updateQuestion updates a Question for the given HealthPlanPackage
-#    Only the due date can be changed
-#
-#    This can only be called by a CMSUser
-#
-#    Errors:
-#    - ForbiddenError:
-#        - A non CMSUser called this
-#    - UserInputError
-#        - A Question cannot be found given `questionID`
-#        - The due date is in the past
-#    """
-#    updateQuestion(input: UpdateQuestionInput!): UpdateQuestionPayload!
+    #    """
+    #    updateQuestion updates a Question for the given HealthPlanPackage
+    #    Only the due date can be changed
+    #
+    #    This can only be called by a CMSUser
+    #
+    #    Errors:
+    #    - ForbiddenError:
+    #        - A non CMSUser called this
+    #    - UserInputError
+    #        - A Question cannot be found given `questionID`
+    #        - The due date is in the past
+    #    """
+    #    updateQuestion(input: UpdateQuestionInput!): UpdateQuestionPayload!
 
-#    """
-#    createQuestionResponse creates a new QuestionResponse for the given Question
-#    A State User can add text to a note field and append a document to their response
-#
-#    This can only be called by a StateUser
-#
-#    Errors:
-#    - ForbiddenError:
-#        - A non StateUser called this
-#    - UserInputError
-#        - A Question cannot be found given `questionID`
-#    """
-   createQuestionResponse(
-       input: CreateQuestionResponseInput!
-   ): CreateQuestionResponsePayload!
+    #    """
+    #    createQuestionResponse creates a new QuestionResponse for the given Question
+    #    A State User can add text to a note field and append a document to their response
+    #
+    #    This can only be called by a StateUser
+    #
+    #    Errors:
+    #    - ForbiddenError:
+    #        - A non StateUser called this
+    #    - UserInputError
+    #        - A Question cannot be found given `questionID`
+    #    """
+    createQuestionResponse(
+        input: CreateQuestionResponseInput!
+    ): CreateQuestionResponsePayload!
 }
 
 input CreateHealthPlanPackageInput {
@@ -336,17 +336,17 @@ type CreateQuestionPayload {
 #}
 
 input CreateQuestionResponseInput {
-   "The ID of the question for which to create a response"
-   questionID: ID!
-   "A list of documents to attach to the response"
-   documents: [DocumentInput!]!
-   "A note to attach to the response"
-   noteText: String
+    "The ID of the question for which to create a response"
+    questionID: ID!
+    "A list of documents to attach to the response"
+    documents: [DocumentInput!]!
+    "A note to attach to the response"
+    noteText: String
 }
 
 type CreateQuestionResponsePayload {
-   "The newly created QuestionResponse"
-   response: QuestionResponse!
+    "The newly created QuestionResponse"
+    response: QuestionResponse!
 }
 
 type UserEdge {
@@ -393,10 +393,18 @@ type UpdateHealthPlanFormDataPayload {
     pkg: HealthPlanPackage!
 }
 
+enum Division {
+    DMCO
+    DMCP
+    OACT
+}
+
 input UpdateCMSUserInput {
     cmsUserID: ID!
     "stateAssignments is an array of stateCodes (e.g. ['CA', 'NM', 'TN'])"
     stateAssignments: [String!]!
+    "divisionAssignment is one of the CMS divisions to which a user is assigned: 'DMCO', 'DMCP', or 'OACT'"
+    divisionAssignment: Division
 }
 
 type UpdateCMSUserPayload {
@@ -430,6 +438,7 @@ type CMSUser {
     givenName: String!
     familyName: String!
     stateAssignments: [State!]!
+    divisionAssignment: Division
 }
 
 "AdminUser is a user that works on the MC Review app itself"
@@ -587,8 +596,8 @@ type Document {
 }
 
 """
-Question is a question sent by CMS to the States for a response, associated with a single package. 
-CMS may upload one or more documents full of questions to a single Question. States submit a 
+Question is a question sent by CMS to the States for a response, associated with a single package.
+CMS may upload one or more documents full of questions to a single Question. States submit a
 QuestionResponse with documents that answer the questions posed by CMS.
 """
 type Question {
@@ -597,11 +606,11 @@ type Question {
     createdAt: DateTime!
     addedBy: CMSUser!
     documents: [Document!]!
-#    noteText: String
-#    dueDate: Date
-#    rateIDs: [String!]
-#
-   responses: [QuestionResponse!]!
+    #    noteText: String
+    #    dueDate: Date
+    #    rateIDs: [String!]
+    #
+    responses: [QuestionResponse!]!
 }
 
 #"""
@@ -609,12 +618,12 @@ type Question {
 #more documents full of responses to a single QuestionResponse, in addition to a text note.
 #"""
 type QuestionResponse {
-   id: ID!
-   questionID: ID!
-   createdAt: DateTime!
-   addedBy: StateUser!
-   documents: [Document!]!
-#    noteText: String
+    id: ID!
+    questionID: ID!
+    createdAt: DateTime!
+    addedBy: StateUser!
+    documents: [Document!]!
+    #    noteText: String
 }
 
 type EmailConfiguration {
@@ -622,21 +631,20 @@ type EmailConfiguration {
     baseUrl: String!
     emailSource: String!
     devReviewTeamEmails: [String!]!
-    oactEmails: [String!]! 
-    dmcpEmails: [String!]! 
+    oactEmails: [String!]!
+    dmcpEmails: [String!]!
     dmcoEmails: [String!]!
     cmsReviewHelpEmailAddress: String!
     cmsRateHelpEmailAddress: String!
     cmsDevTeamHelpEmailAddress: String!
 }
 
-type StateAnalystsConfiguration{
+type StateAnalystsConfiguration {
     stateCode: String!
-    emails: [String!]! 
+    emails: [String!]!
 }
-type FetchEmailSettingsPayload{
+type FetchEmailSettingsPayload {
     "Email settings"
     config: EmailConfiguration
     stateAnalysts: [StateAnalystsConfiguration!]
 }
-
