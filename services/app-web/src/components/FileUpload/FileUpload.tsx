@@ -66,6 +66,7 @@ export const FileUpload = ({
     innerInputRef,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
+    console.info('nothing')
     const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
     const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
     const summaryRef = useRef<HTMLHeadingElement>(null) // reference to the heading that we will focus
