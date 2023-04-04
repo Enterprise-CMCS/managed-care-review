@@ -508,6 +508,10 @@ export const ContractDetails = ({
                                     error={documentsErrorMessage}
                                     hint={
                                         <>
+                                            <span>
+                                                Supporting documents will be
+                                                uploaded later
+                                            </span>
                                             <Link
                                                 aria-label="Document definitions and requirements (opens in new window)"
                                                 href={'/help#key-documents'}

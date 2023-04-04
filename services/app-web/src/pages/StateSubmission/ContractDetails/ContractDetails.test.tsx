@@ -128,20 +128,29 @@ describe('ContractDetails', () => {
                 }
             )
 
-            await waitFor(() => {
-                expect(screen.getByTestId('file-input')).toBeInTheDocument()
-                expect(screen.getByTestId('file-input')).toHaveClass(
-                    'usa-file-input'
-                )
-                expect(
-                    screen.getByRole('button', { name: 'Continue' })
-                ).not.toHaveAttribute('aria-disabled')
-                expect(
-                    within(
-                        screen.getByTestId('file-input-preview-list')
-                    ).queryAllByRole('listitem')
-                ).toHaveLength(0)
+            // check hint text
+            await screen.findByText(
+                'Supporting documents will be uploaded later'
+            )
+            await screen.findByRole('link', {
+                name: 'Document definitions and requirements',
             })
+
+            // check file input presences
+            await screen.findByTestId('file-input')
+
+            expect(screen.getByTestId('file-input')).toBeInTheDocument()
+            expect(screen.getByTestId('file-input')).toHaveClass(
+                'usa-file-input'
+            )
+            expect(
+                screen.getByRole('button', { name: 'Continue' })
+            ).not.toHaveAttribute('aria-disabled')
+            expect(
+                within(
+                    screen.getByTestId('file-input-preview-list')
+                ).queryAllByRole('listitem')
+            ).toHaveLength(0)
         })
 
         it('accepts a new document', async () => {
