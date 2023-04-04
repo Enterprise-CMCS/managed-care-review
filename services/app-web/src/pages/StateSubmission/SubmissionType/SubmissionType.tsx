@@ -19,8 +19,14 @@ import {
     FieldYesNo,
     PoliteErrorMessage,
 } from '../../../components'
-import { SubmissionTypeRecord } from '../../../constants/healthPlanPackages'
-import { ContractType } from '../../../common-code/healthPlanFormDataType'
+import {
+    PopulationCoveredRecord,
+    SubmissionTypeRecord,
+} from '../../../constants/healthPlanPackages'
+import {
+    ContractType,
+    PopulationCoveredType,
+} from '../../../common-code/healthPlanFormDataType'
 import {
     HealthPlanPackage,
     SubmissionType as SubmissionTypeT,
@@ -39,8 +45,11 @@ import {
     yesNoFormValueAsBoolean,
 } from '../../../components/Form/FieldYesNo/FieldYesNo'
 import { SubmissionTypeFormSchema } from './SubmissionTypeSchema'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../../common-code/featureFlags'
 
 export interface SubmissionTypeFormValues {
+    populationCovered?: PopulationCoveredType
     programIDs: string[]
     riskBasedContract: string
     submissionDescription: string
@@ -70,6 +79,12 @@ export const SubmissionType = ({
     const navigate = useNavigate()
     const location = useLocation()
     const isNewSubmission = location.pathname === '/submissions/new'
+
+    const ldClient = useLDClient()
+    const showCHIPOnlyForm = ldClient?.variation(
+        featureFlags.CHIP_ONLY_FORM.flag,
+        featureFlags.CHIP_ONLY_FORM.defaultValue
+    )
 
     const statePrograms = useStatePrograms()
 
@@ -131,6 +146,7 @@ export const SubmissionType = ({
         shouldValidate && Boolean(error)
 
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
+        populationCovered: draftSubmission?.populationCovered,
         programIDs: draftSubmission?.programIDs ?? [],
         riskBasedContract:
             booleanAsYesNoFormValue(draftSubmission?.riskBasedContract) ?? '',
@@ -175,6 +191,7 @@ export const SubmissionType = ({
                 }
 
                 const input: CreateHealthPlanPackageInput = {
+                    populationCovered: values.populationCovered,
                     programIDs: values.programIDs,
                     submissionType: values.submissionType,
                     riskBasedContract: yesNoFormValueAsBoolean(
@@ -214,6 +231,7 @@ export const SubmissionType = ({
             }
 
             // set new values
+            draftSubmission.populationCovered = values.populationCovered
             draftSubmission.programIDs = values.programIDs
             draftSubmission.submissionType =
                 values.submissionType as SubmissionTypeT
@@ -252,11 +270,28 @@ export const SubmissionType = ({
         return { ...errorObject, ...formikErrors }
     }
 
+    // Handles population covered click. CHIP-only can only have submission type of CONTRACT_ONLY. This function
+    // automatically resets the submission type radio selection when CONTRACT_ONLY is not selected and switching to
+    // CHIP-only population coverage.
+    const handlePopulationCoveredClick = (
+        value: PopulationCoveredType,
+        values: SubmissionTypeFormValues,
+        setFieldValue: FormikHelpers<SubmissionTypeFormValues>['setFieldValue']
+    ): void => {
+        const isSelectingChipOnly =
+            value === 'CHIP' && values.populationCovered !== value
+        if (isSelectingChipOnly && values.submissionType !== 'CONTRACT_ONLY') {
+            setFieldValue('submissionType', '', true)
+        }
+    }
+
     return (
         <Formik
             initialValues={submissionTypeInitialValues}
             onSubmit={handleFormSubmit}
-            validationSchema={SubmissionTypeFormSchema}
+            validationSchema={SubmissionTypeFormSchema({
+                'chip-only-form': showCHIPOnlyForm,
+            })}
         >
             {({
                 values,
@@ -264,6 +299,7 @@ export const SubmissionType = ({
                 handleSubmit,
                 isSubmitting,
                 setSubmitting,
+                setFieldValue,
             }) => (
                 <>
                     <UswdsForm
@@ -289,6 +325,78 @@ export const SubmissionType = ({
                                     errors={generateErrorSummaryErrors(errors)}
                                     headingRef={errorSummaryHeadingRef}
                                 />
+                            )}
+
+                            {showCHIPOnlyForm && (
+                                <FormGroup
+                                    error={showFieldErrors(
+                                        errors.populationCovered
+                                    )}
+                                >
+                                    <Fieldset
+                                        className={styles.radioGroup}
+                                        role="radiogroup"
+                                        aria-required
+                                        legend="Which populations does this contact action cover?"
+                                    >
+                                        {showFieldErrors(
+                                            errors.populationCovered
+                                        ) && (
+                                            <PoliteErrorMessage>
+                                                {errors.populationCovered}
+                                            </PoliteErrorMessage>
+                                        )}
+                                        <FieldRadio
+                                            id="medicaid"
+                                            name="populationCovered"
+                                            label={
+                                                PopulationCoveredRecord[
+                                                    'MEDICAID'
+                                                ]
+                                            }
+                                            value={'MEDICAID'}
+                                            onClick={() =>
+                                                handlePopulationCoveredClick(
+                                                    'MEDICAID',
+                                                    values,
+                                                    setFieldValue
+                                                )
+                                            }
+                                        />
+                                        <FieldRadio
+                                            id="chip"
+                                            name="populationCovered"
+                                            label={
+                                                PopulationCoveredRecord['CHIP']
+                                            }
+                                            value={'CHIP'}
+                                            onClick={() =>
+                                                handlePopulationCoveredClick(
+                                                    'CHIP',
+                                                    values,
+                                                    setFieldValue
+                                                )
+                                            }
+                                        />
+                                        <FieldRadio
+                                            id="medicaid-and-chip"
+                                            name="populationCovered"
+                                            label={
+                                                PopulationCoveredRecord[
+                                                    'MEDICAID_AND_CHIP'
+                                                ]
+                                            }
+                                            value={'MEDICAID_AND_CHIP'}
+                                            onClick={() =>
+                                                handlePopulationCoveredClick(
+                                                    'MEDICAID_AND_CHIP',
+                                                    values,
+                                                    setFieldValue
+                                                )
+                                            }
+                                        />
+                                    </Fieldset>
+                                </FormGroup>
                             )}
 
                             <FormGroup
@@ -333,7 +441,8 @@ export const SubmissionType = ({
                                     className={styles.radioGroup}
                                     role="radiogroup"
                                     aria-required
-                                    legend="Submission type"
+                                    legend="Choose a submission type"
+                                    id="submissionType"
                                 >
                                     {showFieldErrors(errors.submissionType) && (
                                         <PoliteErrorMessage>
@@ -359,7 +468,23 @@ export const SubmissionType = ({
                                             ]
                                         }
                                         value={'CONTRACT_AND_RATES'}
+                                        disabled={
+                                            showCHIPOnlyForm &&
+                                            values.populationCovered === 'CHIP'
+                                        }
                                     />
+                                    {showCHIPOnlyForm &&
+                                        values.populationCovered === 'CHIP' && (
+                                            <div
+                                                role="note"
+                                                aria-labelledby="submissionType"
+                                                className="usa-hint margin-top-1"
+                                            >
+                                                States are not required to
+                                                submit rates with CHIP-only
+                                                contracts.
+                                            </div>
+                                        )}
                                 </Fieldset>
                             </FormGroup>
                             <FormGroup
