@@ -77,11 +77,12 @@ export function updateCMSUserResolver(
                 argumentValues: invalidStateCodes,
             })
         }
-
         const result = await store.updateCmsUserProperties(
             cmsUserID,
             stateAssignmentCodes,
-            divisionAssignment
+            currentUser.id,
+            divisionAssignment,
+            'Updated user assignments'
         )
         if (isStoreError(result)) {
             if (result.code === 'INSERT_ERROR') {

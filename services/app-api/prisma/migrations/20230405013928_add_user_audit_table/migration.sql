@@ -9,7 +9,7 @@ CREATE TABLE "UserAudit" (
     "userId" TEXT NOT NULL,
     "updatedByUserId" TEXT NOT NULL,
     "action" "AuditAction" NOT NULL,
-    "description" TEXT NOT NULL,
+    "description" TEXT,
     "priorValue" JSONB,
 
     CONSTRAINT "UserAudit_pkey" PRIMARY KEY ("id")
