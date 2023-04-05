@@ -20,9 +20,6 @@ const webpackConfig = (config) => {
                 if (oo.use) {
                     oo.use.forEach((u) => {
                         if (u.loader && u.loader.includes('/sass-loader/')) {
-                            process.stdout.write(
-                                `RULE MATCH \n ${JSON.stringify(u)} \n`
-                            );
                             // Override to bring in uswds scss
                             u.options = sassLoaderOptions;
                                 process.stdout
