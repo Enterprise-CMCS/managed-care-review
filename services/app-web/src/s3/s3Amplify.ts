@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
-import { recordJSException } from '../otelHelpers'
+import { recordJSException, recordJSExceptionWithContext } from '../otelHelpers'
 
 // TYPES AND TYPE GUARDS
 type s3PutError = {
@@ -120,7 +120,11 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                         })
                     })
                 } catch (err) {
-                    recordJSException(err)
+                    recordJSExceptionWithContext(
+                        err,
+                        'serviceName',
+                        'scanFile.retryWithBackoff'
+                    )
                     throw err
                 }
                 return
