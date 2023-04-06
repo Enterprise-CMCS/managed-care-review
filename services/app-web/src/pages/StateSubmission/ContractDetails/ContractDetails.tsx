@@ -514,8 +514,8 @@ export const ContractDetails = ({
                                                 Upload one contract only.
                                             </span>
                                             <span className="text-ink">
-                                                Additional supporting documents
-                                                can be added later.
+                                                Supporting documents can be
+                                                added later.
                                             </span>
                                             <Link
                                                 aria-label="Document definitions and requirements (opens in new window)"

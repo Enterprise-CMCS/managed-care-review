@@ -129,12 +129,8 @@ describe('ContractDetails', () => {
             )
 
             // check hint text
-            await screen.findByText(
-                'Supporting documents will be uploaded later'
-            )
-            await screen.findByRole('link', {
-                name: 'Document definitions and requirements',
-            })
+            await screen.findByText('Supporting documents can be added later.')
+            await screen.findByRole('link', { name: /Document definitions/ })
 
             // check file input presences
             await screen.findByTestId('file-input')
