@@ -280,8 +280,11 @@ export const SubmissionType = ({
     ): void => {
         const isSelectingChipOnly =
             value === 'CHIP' && values.populationCovered !== value
-        if (isSelectingChipOnly && values.submissionType !== 'CONTRACT_ONLY') {
-            setFieldValue('submissionType', '', true)
+        if (
+            isSelectingChipOnly &&
+            values.submissionType === 'CONTRACT_AND_RATES'
+        ) {
+            setFieldValue('submissionType', 'CONTRACT_ONLY', true)
         }
     }
 

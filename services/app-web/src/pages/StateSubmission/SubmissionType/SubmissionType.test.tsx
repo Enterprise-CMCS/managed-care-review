@@ -22,6 +22,7 @@ describe('SubmissionType', () => {
         submissionDescription: '',
         submissionType: '',
         contractType: '',
+        populationCovered: undefined,
     }
     const updateDraftMock = jest.fn()
 
@@ -174,7 +175,7 @@ describe('SubmissionType', () => {
                 )
             ).toBeInTheDocument()
         })
-        it('clears contract and rates submission type radio when switching to CHIP-only population coverage', async () => {
+        it('switches submission type to contract only when changing existing population coverage to CHIP-only', async () => {
             renderWithProviders(
                 <Formik
                     initialValues={SubmissionTypeInitialValues}
@@ -213,6 +214,9 @@ describe('SubmissionType', () => {
             const chipOnlyRadio = await screen.getByRole('radio', {
                 name: 'CHIP-only',
             })
+            const contractOnlyRadio = await screen.getByRole('radio', {
+                name: 'Contract action only',
+            })
 
             // Change population coverage to Chip only
             await userEvent.click(chipOnlyRadio)
@@ -220,6 +224,68 @@ describe('SubmissionType', () => {
             // Contract and rates radio is unselected and disabled
             expect(contractAndRatesRadio).not.toBeChecked()
             expect(contractAndRatesRadio).toHaveAttribute('disabled')
+
+            // Contract only radio is selected
+            expect(contractOnlyRadio).toBeChecked()
+
+            // Shows hint for submission type
+            expect(
+                await screen.getByText(
+                    'States are not required to submit rates with CHIP-only contracts.'
+                )
+            ).toBeInTheDocument()
+        })
+        it('New submissions does not automatically select contract only submission type when selecting CHIP-only coverage', async () => {
+            renderWithProviders(
+                <Formik
+                    initialValues={SubmissionTypeInitialValues}
+                    onSubmit={jest.fn()}
+                >
+                    <SubmissionType updateDraft={updateDraftMock} />
+                </Formik>,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            expect(
+                await screen.getByText(
+                    'Which populations does this contact action cover?'
+                )
+            ).toBeInTheDocument()
+            const medicaidRadio = await screen.getByRole('radio', {
+                name: 'Medicaid',
+            })
+            const chipOnlyRadio = await screen.getByRole('radio', {
+                name: 'CHIP-only',
+            })
+            const medicaidAndChipRadio = await screen.getByRole('radio', {
+                name: 'Medicaid & CHIP',
+            })
+            const contractAndRatesRadio = await screen.getByRole('radio', {
+                name: 'Contract action and rate certification',
+            })
+            const contractOnlyRadio = await screen.getByRole('radio', {
+                name: 'Contract action only',
+            })
+
+            // Click on each of the population covered radios
+            await userEvent.click(medicaidRadio)
+            await userEvent.click(chipOnlyRadio)
+            await userEvent.click(medicaidAndChipRadio)
+
+            // Expect contract and rates radio to not be selected
+            expect(contractAndRatesRadio).not.toBeChecked()
+            expect(contractOnlyRadio).not.toBeChecked()
+
+            // Change population coverage to Chip only
+            await userEvent.click(chipOnlyRadio)
+
+            // Expect the submission type radios to still be unselected
+            expect(contractAndRatesRadio).not.toBeChecked()
+            expect(contractOnlyRadio).not.toBeChecked()
 
             // Shows hint for submission type
             expect(
