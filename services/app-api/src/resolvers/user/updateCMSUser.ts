@@ -30,7 +30,7 @@ export function updateCMSUserResolver(
                 span
             )
             throw new ForbiddenError(
-                'user not authorized to modify state assignments'
+                'user not authorized to modify assignments'
             )
         }
         const { cmsUserID, stateAssignments } = input
@@ -39,8 +39,16 @@ export function updateCMSUserResolver(
             divisionAssignment = undefined
         }
 
+        if (!stateAssignments && !divisionAssignment) {
+            const errMsg =
+                'No state assignments or division assignment provided'
+            logError('updateCmsUser', errMsg)
+            setErrorAttributesOnActiveSpan(errMsg, span)
+            throw new UserInputError(errMsg)
+        }
+
         // validate division assignment and throw an error if invalid
-        if (divisionAssignment !== undefined) {
+        if (divisionAssignment) {
             if (!isValidCmsDivison(divisionAssignment)) {
                 const errMsg = 'Invalid division assignment'
                 logError('updateCmsUser', errMsg)
@@ -54,35 +62,38 @@ export function updateCMSUserResolver(
 
         const stateAssignmentCodes: StateCodeType[] = []
         const invalidCodes = []
+        let invalidStateCodes
 
-        for (const assignment of stateAssignments) {
-            if (isValidStateCode(assignment)) {
-                stateAssignmentCodes.push(assignment)
-            } else {
-                invalidCodes.push(assignment)
+        if (stateAssignments) {
+            for (const assignment of stateAssignments) {
+                if (isValidStateCode(assignment)) {
+                    stateAssignmentCodes.push(assignment)
+                } else {
+                    invalidCodes.push(assignment)
+                }
             }
-        }
 
-        // check that the state codes are valid
-        if (invalidCodes.length > 0) {
-            const invalidStateCodes = stateAssignments.filter(
-                (assignment) => !isValidStateCode(assignment)
-            )
+            // check that the state codes are valid
+            if (invalidCodes.length > 0) {
+                invalidStateCodes = stateAssignments.filter(
+                    (assignment) => !isValidStateCode(assignment)
+                )
 
-            const errMsg = 'Invalid state codes'
-            logError('updateCmsUser', errMsg)
-            setErrorAttributesOnActiveSpan(errMsg, span)
-            throw new UserInputError(errMsg, {
-                argumentName: 'stateAssignments',
-                argumentValues: invalidStateCodes,
-            })
+                const errMsg = 'Invalid state codes'
+                logError('updateCmsUser', errMsg)
+                setErrorAttributesOnActiveSpan(errMsg, span)
+                throw new UserInputError(errMsg, {
+                    argumentName: 'stateAssignments',
+                    argumentValues: invalidStateCodes,
+                })
+            }
         }
         const result = await store.updateCmsUserProperties(
             cmsUserID,
             stateAssignmentCodes,
             currentUser.id,
             divisionAssignment,
-            'Updated user assignments'
+            'Updated user assignments' // someday might have a note field and make this a param
         )
         if (isStoreError(result)) {
             if (result.code === 'INSERT_ERROR') {
