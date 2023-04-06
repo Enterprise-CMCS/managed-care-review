@@ -235,7 +235,7 @@ describe('SubmissionType', () => {
                 )
             ).toBeInTheDocument()
         })
-        it('New submissions does not automatically select contract only submission type when selecting CHIP-only coverage', async () => {
+        it('new submissions does not automatically select contract only submission type when selecting CHIP-only coverage', async () => {
             renderWithProviders(
                 <Formik
                     initialValues={SubmissionTypeInitialValues}
