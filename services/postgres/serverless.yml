@@ -110,20 +110,6 @@ resources:
           PasswordLength: 30
           ExcludePunctuation: true
 
-    PostgresAurora:
-      Type: AWS::RDS::DBCluster
-      DeletionPolicy: ${self:custom.deletionPolicy.${opt:stage}, self:custom.deletionPolicy.other}
-      Properties:
-        Engine: aurora-postgresql
-        EngineMode: serverless
-        DatabaseName: '${self:custom.databaseName}'
-        MasterUsername: !Sub '{{resolve:secretsmanager:${PostgresSecret}::username}}'
-        MasterUserPassword: !Sub '{{resolve:secretsmanager:${PostgresSecret}::password}}'
-        DBSubnetGroupName: !Ref PostgresSubnetGroup
-        VpcSecurityGroupIds: ['${self:custom.sgId}']
-        ScalingConfiguration:
-          AutoPause: ${self:custom.pauseAurora.${opt:stage}, self:custom.pauseAurora.other}
-
     PostgresAuroraV2:
       Type: AWS::RDS::DBCluster
       DeletionPolicy: ${self:custom.deletionPolicy.${opt:stage}, self:custom.deletionPolicy.other}
@@ -185,7 +171,5 @@ resources:
         Principal: 'secretsmanager.amazonaws.com'
 
   Outputs:
-    PostgresAuroraArn:
-      Value: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAurora}'
     PostgresAuroraV2Arn:
       Value: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAuroraV2}'
