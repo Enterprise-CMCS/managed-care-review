@@ -30,7 +30,8 @@ export function updateCMSUserResolver(
                 span
             )
             throw new ForbiddenError(
-                'user not authorized to modify assignments'
+                'user not authorized to modify assignments',
+                { extensions: { code: 'FORBIDDEN', cause: 'USER_NOT_ADMIN' } }
             )
         }
         const { cmsUserID, stateAssignments } = input
@@ -44,7 +45,12 @@ export function updateCMSUserResolver(
                 'No state assignments or division assignment provided'
             logError('updateCmsUser', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
-            throw new UserInputError(errMsg)
+            throw new UserInputError(errMsg, {
+                extensions: {
+                    code: 'BAD_USER_INPUT',
+                    cause: 'NO_ASSIGNMENTS_PROVIDED',
+                },
+            })
         }
 
         // validate division assignment and throw an error if invalid
@@ -56,6 +62,10 @@ export function updateCMSUserResolver(
                 throw new UserInputError(errMsg, {
                     argumentName: 'divisionAssignment',
                     argumentValues: divisionAssignment,
+                    extensions: {
+                        code: 'BAD_USER_INPUT',
+                        cause: 'INVALID_DIVISION_ASSIGNMENT',
+                    },
                 })
             }
         }
@@ -85,6 +95,10 @@ export function updateCMSUserResolver(
                 throw new UserInputError(errMsg, {
                     argumentName: 'stateAssignments',
                     argumentValues: invalidStateCodes,
+                    extensions: {
+                        code: 'BAD_USER_INPUT',
+                        cause: 'INVALID_STATE_CODES',
+                    },
                 })
             }
         }
@@ -100,7 +114,13 @@ export function updateCMSUserResolver(
                 const errMsg = 'cmsUserID does not exist'
                 logError('updateCmsUser', errMsg)
                 setErrorAttributesOnActiveSpan(errMsg, span)
-                throw new UserInputError(errMsg, { argumentName: 'cmsUserID' })
+                throw new UserInputError(errMsg, {
+                    argumentName: 'cmsUserID',
+                    extensions: {
+                        code: 'BAD_USER_INPUT',
+                        cause: 'CMSUSERID_NOT_EXIST',
+                    },
+                })
             }
 
             const errMsg = `Issue assigning states to user. Message: ${result.message}`

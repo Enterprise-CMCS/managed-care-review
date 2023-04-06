@@ -62,7 +62,7 @@ model User {
 model UserAudit {
   id              String      @id @default(uuid())
   createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @default(now()) @updatedAt
+  updatedAt       DateTime    @updatedAt
   modifiedUserId  String      @map("userId")
   user            User        @relation(fields: [modifiedUserId], references: [id])
   updatedBy       User        @relation("UpdatedBy", fields: [updatedByUserId], references: [id])
