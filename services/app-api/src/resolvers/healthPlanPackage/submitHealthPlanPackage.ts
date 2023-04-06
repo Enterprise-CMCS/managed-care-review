@@ -280,8 +280,6 @@ export function submitHealthPlanPackageResolver(
             Object.assign(draftResult, removeRatesData(draftResult))
         }
 
-        console.info(draftResult)
-
         // attempt to parse into a StateSubmission
         const submissionResult = submit(draftResult, {
             'chip-only-form': chipOnlyFormFlag,
