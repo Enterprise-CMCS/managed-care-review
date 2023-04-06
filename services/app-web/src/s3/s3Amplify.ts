@@ -122,7 +122,6 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                 } catch (err) {
                     recordJSExceptionWithContext(
                         err,
-                        'serviceName',
                         'scanFile.retryWithBackoff'
                     )
                     throw err
