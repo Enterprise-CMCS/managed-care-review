@@ -112,12 +112,17 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
         ): Promise<void | S3Error> => {
             try {
                 await waitFor(20000)
-                await retryWithBackoff(async () => {
-                    await Storage.get(filename, {
-                        bucket: bucketConfig[bucket],
-                        download: true,
+                try {
+                    await retryWithBackoff(async () => {
+                        await Storage.get(filename, {
+                            bucket: bucketConfig[bucket],
+                            download: true,
+                        })
                     })
-                })
+                } catch (err) {
+                    recordJSException(err)
+                    throw err
+                }
                 return
             } catch (err) {
                 assertIsS3PutError(err)
