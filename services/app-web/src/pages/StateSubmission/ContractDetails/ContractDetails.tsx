@@ -507,10 +507,15 @@ export const ContractDetails = ({
                                     aria-required
                                     error={documentsErrorMessage}
                                     hint={
-                                        <>
-                                            <span>
-                                                Supporting documents will be
-                                                uploaded later
+                                        <span
+                                            className={styles.guidanceTextBlock}
+                                        >
+                                            <span className="text-ink">
+                                                Upload one contract only.
+                                            </span>
+                                            <span className="text-ink">
+                                                Additional supporting documents
+                                                can be added later.
                                             </span>
                                             <Link
                                                 aria-label="Document definitions and requirements (opens in new window)"
@@ -521,12 +526,12 @@ export const ContractDetails = ({
                                                 Document definitions and
                                                 requirements
                                             </Link>
-                                            <span>
+                                            <span className="padding-top-1">
                                                 This input only accepts PDF,
                                                 CSV, DOC, DOCX, XLS, XLSX, XLSM
                                                 files.
                                             </span>
-                                        </>
+                                        </span>
                                     }
                                     accept={ACCEPTED_SUBMISSION_FILE_TYPES}
                                     initialItems={fileItemsFromDraftSubmission}
