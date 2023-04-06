@@ -47,7 +47,7 @@ export async function updateCmsUserProperties(
         if (!userBeforeUpdate) {
             return {
                 code: 'UNEXPECTED_EXCEPTION',
-                message: 'Unable to retreive user to be updated',
+                message: 'Unable to retrieve user to be updated',
             }
         }
 
