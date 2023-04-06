@@ -23,15 +23,18 @@ export function updateCMSUserResolver(
         if (!isAdminUser(currentUser)) {
             logError(
                 'updateHealthPlanFormData',
-                'user not authorized to modify state data'
+                'user not authorized to modify assignments'
             )
             setErrorAttributesOnActiveSpan(
-                'user not authorized to modify state data',
+                'user not authorized to modify assignments',
                 span
             )
             throw new ForbiddenError(
                 'user not authorized to modify assignments',
-                { extensions: { code: 'FORBIDDEN', cause: 'USER_NOT_ADMIN' } }
+                {
+                    code: 'FORBIDDEN',
+                    cause: 'NOT_ADMIN',
+                }
             )
         }
         const { cmsUserID, stateAssignments } = input
@@ -46,10 +49,8 @@ export function updateCMSUserResolver(
             logError('updateCmsUser', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw new UserInputError(errMsg, {
-                extensions: {
-                    code: 'BAD_USER_INPUT',
-                    cause: 'NO_ASSIGNMENTS_PROVIDED',
-                },
+                code: 'BAD_USER_INPUT',
+                cause: 'NO_ASSIGNMENTS',
             })
         }
 
@@ -95,10 +96,8 @@ export function updateCMSUserResolver(
                 throw new UserInputError(errMsg, {
                     argumentName: 'stateAssignments',
                     argumentValues: invalidStateCodes,
-                    extensions: {
-                        code: 'BAD_USER_INPUT',
-                        cause: 'INVALID_STATE_CODES',
-                    },
+                    code: 'BAD_USER_INPUT',
+                    cause: 'INVALID_STATE_CODES',
                 })
             }
         }
@@ -116,10 +115,8 @@ export function updateCMSUserResolver(
                 setErrorAttributesOnActiveSpan(errMsg, span)
                 throw new UserInputError(errMsg, {
                     argumentName: 'cmsUserID',
-                    extensions: {
-                        code: 'BAD_USER_INPUT',
-                        cause: 'CMSUSERID_NOT_EXIST',
-                    },
+                    code: 'BAD_USER_INPUT',
+                    cause: 'CMSUSERID_NOT_EXIST',
                 })
             }
 

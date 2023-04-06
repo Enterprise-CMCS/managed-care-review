@@ -1,20 +1,21 @@
 # Error Handling
 
 ## Apollo Server Handling
+
 [Apollo v3 - Error Handling](https://www.apollographql.com/docs/apollo-server/v3/data/errors)
 
 When throwing errors from resolvers we should always throw `GraphQLError` or `ApolloError`. If a resolver throws an error that is not an `ApolloError` it gets converted to a generic `ApolloError` anyway. [Apollo Docs - Throwing errors](https://www.apollographql.com/docs/apollo-server/v3/data/errors#throwing-errors).
 
-We also want to be including details about our error when we throw, this allows our front end to handle returned errors more specifically. 
+We also want to be including details about our error when we throw, this allows our front end to handle returned errors more specifically.
 
-The example below, we pass our error message in the first argument of `GraphQLError` and our details in the `extension` object in the second argument. The `extension` object can take in any `key: value` pair that will be returned to the front end. Two fields in we should always include in the `extension` objet are `code` and `cause`. The `code` field should be error codes defined in the [Apollo docs - Error codes](https://www.apollographql.com/docs/apollo-server/v3/data/errors#error-codes) and the `cause` field is where we can specify what caused the error code.
+In the example below, we pass our error message in the first argument of `GraphQLError` and our details in the `extension` object in the second argument. The `extension` object can take in any `key: value` pair that will be returned to the front end. Two fields in we should always include in the `extension` object are `code` and `cause`. The `code` field should be error codes defined in the [Apollo docs - Error codes](https://www.apollographql.com/docs/apollo-server/v3/data/errors#error-codes) and the `cause` field is where we can specify what caused the error code.
 
 ```typescript
 throw new GraphQLError('Email failed.', {
     extensions: {
         code: 'INTERNAL_SERVER_ERROR',
         cause: 'DB_ERROR',
-    }
+    },
 })
 ```
 
@@ -35,7 +36,7 @@ if (planPackage.stateCode !== stateFromCurrentUser) {
     throw new ForbiddenError(
         'user not authorized to fetch data from a different state',
         {
-            cause: 'USER_STATE_INVALID'
+            cause: 'USER_STATE_INVALID',
         }
     )
 }
@@ -46,8 +47,7 @@ if (result === undefined) {
     setErrorAttributesOnActiveSpan(errMessage, span)
     throw new UserInputError(errMessage, {
         argumentName: 'pkgID',
-        cause: 'DRAFT_NOT_FOUND'
+        cause: 'DRAFT_NOT_FOUND',
     })
 }
-
 ```
