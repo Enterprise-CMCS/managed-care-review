@@ -1,4 +1,5 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
+import { GraphQLError } from 'graphql'
 import { isAdminUser, isValidCmsDivison } from '../../domain-models'
 import {
     isValidStateCode,
@@ -118,13 +119,23 @@ export function updateCMSUserResolver(
             const errMsg = `Issue assigning states to user. Message: ${result.message}`
             logError('updateCmsUser', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
-            throw new Error(errMsg)
+            throw new GraphQLError(errMsg, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
         if (!result) {
             const errMsg = 'Failed to update user'
             logError('updateCmsUser', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
-            throw new Error(errMsg)
+            throw new GraphQLError(errMsg, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         logSuccess('updateCmsUser')
