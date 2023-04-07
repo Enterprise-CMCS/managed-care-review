@@ -400,7 +400,7 @@ enum Division {
 input UpdateCMSUserInput {
     cmsUserID: ID!
     "stateAssignments is an array of stateCodes (e.g. ['CA', 'NM', 'TN'])"
-    stateAssignments: [String!]!
+    stateAssignments: [String!]
     "divisionAssignment is one of the CMS divisions to which a user is assigned: 'DMCO', 'DMCP', or 'OACT'"
     divisionAssignment: Division
 }
