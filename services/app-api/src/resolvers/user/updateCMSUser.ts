@@ -49,7 +49,6 @@ export function updateCMSUserResolver(
             logError('updateCmsUser', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw new UserInputError(errMsg, {
-                code: 'BAD_USER_INPUT',
                 cause: 'NO_ASSIGNMENTS',
             })
         }
@@ -63,10 +62,7 @@ export function updateCMSUserResolver(
                 throw new UserInputError(errMsg, {
                     argumentName: 'divisionAssignment',
                     argumentValues: divisionAssignment,
-                    extensions: {
-                        code: 'BAD_USER_INPUT',
-                        cause: 'INVALID_DIVISION_ASSIGNMENT',
-                    },
+                    cause: 'INVALID_DIVISION_ASSIGNMENT',
                 })
             }
         }
@@ -96,7 +92,6 @@ export function updateCMSUserResolver(
                 throw new UserInputError(errMsg, {
                     argumentName: 'stateAssignments',
                     argumentValues: invalidStateCodes,
-                    code: 'BAD_USER_INPUT',
                     cause: 'INVALID_STATE_CODES',
                 })
             }
@@ -115,7 +110,7 @@ export function updateCMSUserResolver(
                 setErrorAttributesOnActiveSpan(errMsg, span)
                 throw new UserInputError(errMsg, {
                     argumentName: 'cmsUserID',
-                    code: 'BAD_USER_INPUT',
+                    argumentValues: cmsUserID,
                     cause: 'CMSUSERID_NOT_EXIST',
                 })
             }
