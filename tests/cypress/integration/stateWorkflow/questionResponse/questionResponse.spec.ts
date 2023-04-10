@@ -84,7 +84,10 @@ describe('Q&A', () => {
                 initialURL: `/submissions/${submissionId}/question-and-answers`,
             })
 
-            cy.wait(2000)
+            cy.url({ timeout: 10_000 }).should(
+                'contain',
+                `${submissionId}/question-and-answers`
+            )
 
             cy.findByRole('heading', {
                 name: `CMS ${submissionName}`,

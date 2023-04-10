@@ -629,23 +629,19 @@ export const RateDetails = ({
                                                                     undefined
                                                                 }
                                                                 hint={
-                                                                    <>
-                                                                        <span
-                                                                            className={
-                                                                                styles.rateDirections
-                                                                            }
-                                                                        >
+                                                                    <span
+                                                                        className={
+                                                                            styles.guidanceTextBlock
+                                                                        }
+                                                                    >
+                                                                        <span className="text-ink">
                                                                             Upload
                                                                             one
                                                                             rate
                                                                             certification
                                                                             only.
                                                                         </span>
-                                                                        <span
-                                                                            className={
-                                                                                styles.rateDirections
-                                                                            }
-                                                                        >
+                                                                        <span className="text-ink">
                                                                             Additional
                                                                             rates
                                                                             and
@@ -669,7 +665,7 @@ export const RateDetails = ({
                                                                             and
                                                                             requirements
                                                                         </Link>
-                                                                        <span>
+                                                                        <span className="padding-top-1">
                                                                             This
                                                                             input
                                                                             only
@@ -683,7 +679,7 @@ export const RateDetails = ({
                                                                             XLSM
                                                                             files.
                                                                         </span>
-                                                                    </>
+                                                                    </span>
                                                                 }
                                                                 accept={
                                                                     ACCEPTED_SUBMISSION_FILE_TYPES
