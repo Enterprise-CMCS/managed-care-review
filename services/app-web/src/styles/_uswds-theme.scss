@@ -6,13 +6,15 @@
 */
 @use 'mcr-colors' as *;
 
+$compilePath: '~@uswds/uswds'; // dist folder path within @uswds/uswds
+
 @use "uswds-core" with (  
-    $theme-font-path:  '~@uswds/uswds/fonts',
-    $theme-image-path: '~@uswds/uswds/img',
-    $theme-hero-image: '~@uswds/uswds/img/hero.jpg',
+    $theme-font-path:  "#{$compilePath}/fonts",
+    $theme-image-path: "#{$compilePath}/img",
+    $theme-hero-image: "#{$compilePath}/img/hero.jpg",
 
     $theme-show-notifications: false,
-    $theme-show-compile-warnings: false,
+    $theme-show-compile-warnings: true,
 
     $theme-utility-breakpoints: (
         "card": false,
