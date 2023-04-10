@@ -20,6 +20,9 @@
         "*.{js,ts}": [
             "eslint --max-warnings=0",
             "prettier --write"
+        ],
+        "*.sql": [
+            "sh ../../scripts/validate_migration.sh"
         ]
     },
     "dependencies": {
