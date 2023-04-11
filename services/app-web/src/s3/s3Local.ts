@@ -29,6 +29,7 @@ export function newLocalS3Client(
     return {
         uploadFile: async (
             file: File,
+            fileHash: string,
             bucket: BucketShortName
         ): Promise<string | S3Error> => {
             const filename = `${Date.now()}-${file.name}`
