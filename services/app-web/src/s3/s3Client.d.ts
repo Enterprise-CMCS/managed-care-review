@@ -4,6 +4,7 @@ import type { S3Error } from './s3Error'
 export type S3ClientT = {
     uploadFile: (
         file: File,
+        fileHash: string,
         bucket: BucketShortName
     ) => Promise<string | S3Error>
     deleteFile: (

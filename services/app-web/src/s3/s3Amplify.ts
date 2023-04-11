@@ -45,6 +45,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
     return {
         uploadFile: async (
             file: File,
+            fileHash: string,
             bucket: BucketShortName
         ): Promise<string | S3Error> => {
             const uuid = uuidv4()
@@ -57,6 +58,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                     bucket: bucketConfig[bucket],
                     contentType: file.type,
                     contentDisposition: `attachment; filename=${fileName}`,
+                    tagging: `sha256=${fileHash}`,
                 })
 
                 assertIsS3PutResponse(stored)

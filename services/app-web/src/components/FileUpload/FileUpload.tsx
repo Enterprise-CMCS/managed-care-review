@@ -15,7 +15,8 @@ import { FileItemT } from './FileProcessor/FileProcessor'
 import { FileItemsList } from './FileItemList/FileItemsList'
 import { pluralize } from '../../common-code/formatters'
 
-import { recordJSException, recordUserInputException } from '../../otelHelpers'
+import { recordUserInputException } from '../../otelHelpers'
+import { calculateSHA256 } from '../../common-code/sha/generateSha'
 
 export type S3FileData = {
     key: string
@@ -31,7 +32,7 @@ export type FileUploadProps = {
     hint?: React.ReactNode
     initialItems?: FileItemT[]
     isLabelVisible?: boolean
-    uploadFile: (file: File) => Promise<S3FileData>
+    uploadFile: (file: File, fileHash: string) => Promise<S3FileData>
     scanFile?: (key: string) => Promise<void | Error> // optional function to be called after uploading (used for scanning)
     deleteFile: (key: string) => Promise<void>
     onFileItemsUpdate: ({ fileItems }: { fileItems: FileItemT[] }) => void
@@ -214,8 +215,15 @@ export const FileUpload = ({
     // Upload to S3 and update file items in component state with the async loading status
     // This includes moving from pending/loading UI to display success or errors
     const asyncS3Upload = (files: File[] | File) => {
-        const upload = (file: File) => {
-            uploadFile(file)
+        const upload = async (file: File) => {
+            let fileHash
+            try {
+                fileHash = await calculateSHA256(file)
+            } catch (error) {
+                console.error('Error generating file hash', error)
+                throw error
+            }
+            uploadFile(file, fileHash)
                 .then((data) => {
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
@@ -247,15 +255,6 @@ export const FileUpload = ({
                                 const newItems = [...prevItems]
                                 return newItems.map((item) => {
                                     if (item.key === data.key) {
-                                        if (
-                                            item.status ===
-                                            'DUPLICATE_NAME_ERROR'
-                                        ) {
-                                            const error = new Error(
-                                                `DUPLICATE_NAME_ERROR: ${item.status}`
-                                            )
-                                            recordJSException(error)
-                                        }
                                         return {
                                             ...item,
                                             file: undefined,
@@ -276,10 +275,6 @@ export const FileUpload = ({
                                 const newItems = [...prevItems]
                                 return newItems.map((item) => {
                                     if (item.key === data.key) {
-                                        const error = new Error(
-                                            `SCANNING_ERROR: ${item}`
-                                        )
-                                        recordJSException(error)
                                         return {
                                             ...item,
                                             S3URL: null,
@@ -291,13 +286,9 @@ export const FileUpload = ({
                                 })
                             })
                             // immediately delete this bad file
-                            deleteFile(data.key).catch(() => {
-                                const error = new Error(
-                                    'Error deleting from s3'
-                                )
-                                recordJSException(error)
-                                console.info(error)
-                            })
+                            deleteFile(data.key).catch(() =>
+                                console.info('Error deleting from s3')
+                            )
                         }
                     }
                 })
@@ -306,8 +297,6 @@ export const FileUpload = ({
                         const newItems = [...prevItems]
                         return newItems.map((item) => {
                             if (item.file === file) {
-                                const error = new Error(`UPLOAD_ERROR: ${item}`)
-                                recordJSException(error)
                                 return {
                                     ...item,
                                     status: 'UPLOAD_ERROR',
@@ -322,10 +311,10 @@ export const FileUpload = ({
 
         if (!(files instanceof File)) {
             files.forEach((file) => {
-                upload(file)
+                upload(file).catch((e) => console.error(e))
             })
         } else {
-            upload(files as File)
+            upload(files as File).catch((e) => console.error(e))
         }
     }
 
