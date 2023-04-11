@@ -326,7 +326,7 @@ export const RateDetails = ({
     }
 
     const handleUploadFile = async (file: File): Promise<S3FileData> => {
-        const s3Key = await uploadFile(file, 'HEALTH_PLAN_DOCS')
+        const s3Key = await uploadFile(file, '', 'HEALTH_PLAN_DOCS')
 
         if (isS3Error(s3Key)) {
             throw new Error(`Error in S3: ${file.name}`)
