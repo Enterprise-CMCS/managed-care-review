@@ -1,5 +1,8 @@
 import { screen } from '@testing-library/react'
-import { renderWithProviders } from '../../../testHelpers/jestHelpers'
+import {
+    ldUseClientSpy,
+    renderWithProviders,
+} from '../../../testHelpers/jestHelpers'
 import { SubmissionTypeSummarySection } from './SubmissionTypeSummarySection'
 import {
     mockContractAndRatesDraft,
@@ -66,6 +69,7 @@ describe('SubmissionTypeSummarySection', () => {
     })
 
     it('renders expected fields for draft package on review and submit', () => {
+        ldUseClientSpy({ 'chip-only-form': true })
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
@@ -92,6 +96,41 @@ describe('SubmissionTypeSummarySection', () => {
         expect(
             screen.getByRole('definition', { name: 'Submission description' })
         ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: /Which populations does this contact action cover\?/,
+            })
+        ).toBeInTheDocument()
+    })
+
+    it('renders missing field message for population coverage question when expected', () => {
+        ldUseClientSpy({ 'chip-only-form': true })
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                submission={
+                    {
+                        ...draftSubmission,
+                        populationCovered: undefined,
+                    } as unknown as HealthPlanFormDataType
+                } // allow type coercion to be able to test edge case
+                statePrograms={statePrograms}
+                navigateTo="submission-type"
+                submissionName="MN-PMAP-0001"
+            />
+        )
+
+        expect(
+            screen.getByRole('definition', {
+                name: /Which populations does this contact action cover\?/,
+            })
+        ).toBeInTheDocument()
+        const riskBasedDefinitionParentDiv = screen.getByRole('definition', {
+            name: /Which populations does this contact action cover\?/,
+        })
+        if (!riskBasedDefinitionParentDiv) throw Error('Testing error')
+        expect(riskBasedDefinitionParentDiv).toHaveTextContent(
+            /You must provide this information/
+        )
     })
 
     it('renders missing field message for risk based contract when expected', () => {
