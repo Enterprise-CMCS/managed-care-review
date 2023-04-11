@@ -62,6 +62,11 @@ jobs:
         run: |
           lerna run build:ci-scripts
 
+      - name: DangerJS
+        run: yarn danger ci
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: run get_changed_services
         id: changed-services-action
         uses: ./scripts/get-changed-services/
