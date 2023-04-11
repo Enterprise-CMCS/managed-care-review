@@ -219,6 +219,7 @@ export const FileUpload = ({
             let fileHash
             try {
                 fileHash = await calculateSHA256(file)
+                console.info('File hash generated', fileHash)
             } catch (error) {
                 console.error('Error generating file hash', error)
                 throw error
