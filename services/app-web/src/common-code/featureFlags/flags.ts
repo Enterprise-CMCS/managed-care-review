@@ -50,6 +50,13 @@ export const featureFlags = {
         defaultValue: false,
     },
     /**
+     * Enables packages with shared rates dropdown on rate details page. This was an early version of rates across subs functionality.
+     */
+    PACKAGES_WITH_SHARED_RATES: {
+        flag: 'packages-with-shared-rates',
+        defaultValue: false,
+    },
+    /**
      * Enables Chip-only form changes
      */
     CHIP_ONLY_FORM: {
