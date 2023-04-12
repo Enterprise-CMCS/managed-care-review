@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import * as readline from 'readline'
 import * as stream from 'stream'
-import { danger } from 'danger'
+import { danger, fail } from 'danger'
 
 // verifyMigrationTransactions() checks that all migrations are wrapped in a transaction
 const verifyMigrationTransactions = async () => {
@@ -18,7 +18,7 @@ const verifyMigrationTransactions = async () => {
         const lastLine = await readLastLine(file)
 
         if (firstLine !== 'BEGIN;' || lastLine !== 'COMMIT;') {
-            console.error(`Migration ${file} is not wrapped in a transaction`)
+            fail(`Migration ${file} is not wrapped in a transaction`)
         }
     }
 }
