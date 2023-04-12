@@ -5,9 +5,11 @@ import { danger, fail } from 'danger'
 
 // verifyMigrationTransactions() checks that all migrations are wrapped in a transaction
 const verifyMigrationTransactions = async () => {
-    const modified = danger.git.modified_files
-    console.info(modified)
-    const editedFiles = modified.concat(danger.git.created_files)
+    const editedFiles = [
+        ...danger.git.modified_files,
+        ...danger.git.created_files,
+    ]
+    console.info(editedFiles)
 
     const migrationFiles = editedFiles.filter(
         (file) =>
