@@ -73,6 +73,7 @@ jobs:
         with:
           branchName: ${{ steps.branch-name.outputs.branch-name}}
         env:
+          DANGER_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: test we have changed services output
