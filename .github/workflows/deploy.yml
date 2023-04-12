@@ -63,7 +63,7 @@ jobs:
           lerna run build:ci-scripts
 
       - name: DangerJS
-        run: yarn danger ci
+        run: yarn danger ci -b main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
