@@ -47,7 +47,18 @@ export async function scanFile(
     }
 
     const tags = generateVirusScanTagSet(tagResult)
-    const err = await s3Client.tagObject(key, bucket, tags)
+    // Get the current tags
+    const currentTagsResult = await s3Client.getObjectTags(key, bucket)
+    if (currentTagsResult instanceof Error) {
+        console.error('Failed to get object tags', currentTagsResult)
+        return currentTagsResult
+    }
+
+    // Update the tags
+    const updatedTags = { TagSet: currentTagsResult.concat(tags.TagSet) }
+
+    // Set the updated tags
+    const err = await s3Client.tagObject(key, bucket, updatedTags)
     if (err instanceof Error) {
         console.error('Failed to tag object', err)
         return err
