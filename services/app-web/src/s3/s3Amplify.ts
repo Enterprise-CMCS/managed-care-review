@@ -52,7 +52,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             const ext = file.name.split('.').pop()
             //encode file names and decoding done in bulk_downloads.ts
             const fileName = encodeURIComponent(file.name)
-            console.log('file hash before put', fileHash)
+            console.info('file hash before put', fileHash)
             try {
                 const stored = await Storage.put(`${uuid}.${ext}`, file, {
                     bucket: bucketConfig[bucket],
