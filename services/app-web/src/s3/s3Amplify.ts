@@ -1,7 +1,7 @@
 import { parseKey } from '../common-code/s3URLEncoding'
 import { Storage, API } from 'aws-amplify'
 import { v4 as uuidv4 } from 'uuid'
-
+import { calculateSHA256 } from '../common-code/sha/generateSha'
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
 import { recordJSException, recordJSExceptionWithContext } from '../otelHelpers'
@@ -45,9 +45,16 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
     return {
         uploadFile: async (
             file: File,
-            fileHash: string,
             bucket: BucketShortName
         ): Promise<string | S3Error> => {
+            let fileHash
+            try {
+                fileHash = await calculateSHA256(file)
+                console.info('File hash generated', fileHash)
+            } catch (error) {
+                console.error('Error generating file hash', error)
+                throw error
+            }
             const uuid = uuidv4()
             const ext = file.name.split('.').pop()
             //encode file names and decoding done in bulk_downloads.ts

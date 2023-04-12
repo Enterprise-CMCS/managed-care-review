@@ -42,7 +42,7 @@ const useS3 = (): S3ContextT => {
         file: File,
         bucket: BucketShortName
     ): Promise<S3FileData> => {
-        const s3Key = await uploadFile(file, '', bucket)
+        const s3Key = await uploadFile(file, bucket)
 
         if (isS3Error(s3Key)) {
             const error = new Error(`Error in S3: ${file.name}`)
