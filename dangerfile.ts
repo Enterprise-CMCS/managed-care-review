@@ -9,7 +9,6 @@ const verifyMigrationTransactions = async () => {
         ...danger.git.modified_files,
         ...danger.git.created_files,
     ]
-    console.info(editedFiles)
 
     const migrationFiles = editedFiles.filter(
         (file) =>
@@ -65,6 +64,4 @@ async function readLastLine(file: string, minLength: number = 1) {
     return line
 }
 
-;(async function () {
-    verifyMigrationTransactions()
-})()
+verifyMigrationTransactions()
