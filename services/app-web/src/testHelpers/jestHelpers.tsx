@@ -17,7 +17,11 @@ import { S3Provider } from '../contexts/S3Context'
 import { testS3Client } from './s3Helpers'
 import { S3ClientT } from '../s3'
 import * as LaunchDarkly from 'launchdarkly-react-client-sdk'
-import { FeatureFlagTypes, FlagValueTypes } from '../common-code/featureFlags'
+import {
+    FeatureFlagLDConstant,
+    FlagValue,
+    FeatureFlagSettings,
+} from '../common-code/featureFlags'
 
 /* Render */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -67,9 +71,7 @@ const WithLocation = ({
 }
 
 //WARNING: This required tests using this function to clear mocks afterwards.
-const ldUseClientSpy = (
-    featureFlags: Partial<Record<FeatureFlagTypes, FlagValueTypes>>
-) => {
+const ldUseClientSpy = (featureFlags: FeatureFlagSettings) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     jest.spyOn(LaunchDarkly, 'useLDClient').mockImplementation((): any => {
         return {
@@ -84,8 +86,8 @@ const ldUseClientSpy = (
             identify: jest.fn(),
             alias: jest.fn(),
             variation: (
-                flag: FeatureFlagTypes,
-                defaultValue: FlagValueTypes | undefined
+                flag: FeatureFlagLDConstant,
+                defaultValue: FlagValue | undefined
             ) => {
                 if (
                     featureFlags[flag] === undefined &&

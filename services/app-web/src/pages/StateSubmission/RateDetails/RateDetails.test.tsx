@@ -25,18 +25,22 @@ import {
     TEST_PNG_FILE,
     dragAndDrop,
     updateDateRange,
+    ldUseClientSpy,
 } from '../../../testHelpers'
 import { RateDetails } from './RateDetails'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import selectEvent from 'react-select-event'
 import * as useStatePrograms from '../../../hooks/useStatePrograms'
 import { unlockedWithALittleBitOfEverything } from '../../../common-code/healthPlanFormDataMocks'
+import { featureFlags } from '../../../common-code/featureFlags/flags'
 
 describe('RateDetails', () => {
     beforeAll(() => {
         jest.setTimeout(10000)
         // TODO: These tests are too long and need to be fully refactored. They are starting to flake in recent versions of RTL, particularly the multi-rate and contract amendment  ests
         // See this guidance for waitFor and getBy Role: https://github.com/testing-library/dom-testing-library/issues/820
+
+        ldUseClientSpy({ [featureFlags.PACKAGES_WITH_SHARED_RATES.flag]: true })
     })
 
     afterEach(() => {
