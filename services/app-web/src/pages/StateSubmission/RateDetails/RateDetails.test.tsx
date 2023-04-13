@@ -38,8 +38,6 @@ describe('RateDetails', () => {
         jest.setTimeout(10000)
         // TODO: These tests are too long and need to be fully refactored. They are starting to flake in recent versions of RTL, particularly the multi-rate and contract amendment  ests
         // See this guidance for waitFor and getBy Role: https://github.com/testing-library/dom-testing-library/issues/820
-
-        ldUseClientSpy({ 'packages-with-shared-rates': true })
     })
 
     afterEach(() => {
@@ -242,6 +240,7 @@ describe('RateDetails', () => {
         })
 
         it('progressively disclose new rate form fields as expected', async () => {
+            ldUseClientSpy({ 'packages-with-shared-rates': true })
             renderWithProviders(
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
@@ -671,6 +670,7 @@ describe('RateDetails', () => {
 
     describe('handles rates across submissions', () => {
         it('correctly checks shared rate certification radios and selects shared packages', async () => {
+            ldUseClientSpy({ 'packages-with-shared-rates': true })
             //Spy on useStatePrograms hook to get up-to-date state programs
             jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
                 mockMNState().programs
@@ -730,6 +730,7 @@ describe('RateDetails', () => {
                     },
                 }
             )
+
             const rateCertsOnLoad = rateCertifications(screen)
             expect(rateCertsOnLoad).toHaveLength(1)
 
@@ -901,6 +902,7 @@ describe('RateDetails', () => {
         })
 
         it('cannot continue when shared rate radio is unchecked', async () => {
+            ldUseClientSpy({ 'packages-with-shared-rates': true })
             //Spy on useStatePrograms hook to get up-to-date state programs
             jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
                 mockMNState().programs
@@ -936,10 +938,10 @@ describe('RateDetails', () => {
                     }),
                     id: 'test-id-125',
                 },
-                {
-                    ...mockUnlockedHealthPlanPackage(currentSubmission),
-                    id: 'test-shared-rate',
-                },
+                // {
+                //     ...mockUnlockedHealthPlanPackage(currentSubmission),
+                //     id: 'test-shared-rate',
+                // },
             ]
 
             renderWithProviders(
@@ -1030,6 +1032,7 @@ describe('RateDetails', () => {
         })
 
         it('cannot continue when shared rate radio is checked and no package is selected', async () => {
+            ldUseClientSpy({ 'packages-with-shared-rates': true })
             //Spy on useStatePrograms hook to get up-to-date state programs
             jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
                 mockMNState().programs
@@ -1692,6 +1695,7 @@ describe('RateDetails', () => {
 // Helper functions
 
 const fillOutIndexRate = async (screen: Screen, index: number) => {
+    ldUseClientSpy({ 'packages-with-shared-rates': true })
     const targetRateCert = rateCertifications(screen)[index]
     expect(targetRateCert).toBeDefined()
     const withinTargetRateCert = within(targetRateCert)

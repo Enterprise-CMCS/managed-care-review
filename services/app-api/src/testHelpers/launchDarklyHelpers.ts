@@ -4,14 +4,9 @@ import {
     FeatureFlagSettings,
 } from 'app-web/src/common-code/featureFlags'
 
-import {
-    defaultFeatureFlags,
-    FeatureFlagObject,
-} from '../launchDarkly/launchDarkly'
+import { defaultFeatureFlags } from '../launchDarkly/launchDarkly'
 
-function testLDService(
-    mockFeatureFlags?: Partial<FeatureFlagObject>
-): LDService {
+function testLDService(mockFeatureFlags?: FeatureFlagSettings): LDService {
     const featureFlags = defaultFeatureFlags
 
     //Update featureFlags with mock flag values.

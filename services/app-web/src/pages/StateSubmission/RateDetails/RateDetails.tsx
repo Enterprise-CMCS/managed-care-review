@@ -120,7 +120,7 @@ export const RateDetails = ({
 
     // Feature flags state management
     const ldClient = useLDClient()
-    const showPackagesWithSharedRatesDropdown = ldClient?.variation(
+    const showPackagesWithSharedRatesDropdown: boolean = ldClient?.variation(
         featureFlags.PACKAGES_WITH_SHARED_RATES.flag,
         featureFlags.PACKAGES_WITH_SHARED_RATES.defaultValue
     )
@@ -137,7 +137,9 @@ export const RateDetails = ({
         PackageOptionType[]
     >([])
 
-    const rateDetailsFormSchema = RateDetailsFormSchema()
+    const rateDetailsFormSchema = RateDetailsFormSchema({
+        'packages-with-shared-rates': showPackagesWithSharedRatesDropdown,
+    })
 
     const { loading, error } = useIndexHealthPlanPackagesQuery({
         onCompleted: async (data) => {

@@ -13,13 +13,15 @@ const SingleRateCertSchema = (activeFeatureFlags: FeatureFlagSettings) =>
         packagesWithSharedRateCerts: activeFeatureFlags[
             'packages-with-shared-rates'
         ]
-            ? Yup.array().when('hasSharedRateCert', {
-                  is: 'YES',
-                  then: Yup.array().min(
-                      1,
-                      'You must select at least one submission'
-                  ),
-              })
+            ? Yup.array()
+                  .when('hasSharedRateCert', {
+                      is: 'YES',
+                      then: Yup.array().min(
+                          1,
+                          'You must select at least one submission'
+                      ),
+                  })
+                  .required()
             : Yup.array(),
         rateProgramIDs: Yup.array().min(1, 'You must select a program'),
         rateType: Yup.string().defined(
@@ -135,7 +137,7 @@ const SingleRateCertSchema = (activeFeatureFlags: FeatureFlagSettings) =>
 const RateDetailsFormSchema = (activeFeatureFlags?: FeatureFlagSettings) => {
     return Yup.object().shape({
         rateInfos: Yup.array().of(
-            SingleRateCertSchema((activeFeatureFlags = {}))
+            SingleRateCertSchema(activeFeatureFlags || {})
         ),
     })
 }

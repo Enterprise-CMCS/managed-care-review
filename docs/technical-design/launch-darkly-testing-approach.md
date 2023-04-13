@@ -87,7 +87,7 @@ The unit testing implementation uses a test version of the `ldService` dependenc
 
 ```typescript
   function testLDService(
-      mockFeatureFlags?: Partial<FeatureFlagObject>
+      mockFeatureFlags?: FeatureFlagSettings
   ): LDService {
       const featureFlags = defaultFeatureFlags
 
