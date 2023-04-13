@@ -1,6 +1,9 @@
 name: Deploy
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - '*'
@@ -63,7 +66,8 @@ jobs:
           lerna run build:ci-scripts
 
       - name: DangerJS
-        run: yarn danger ci -v
+        if: ${{ github.event_name == 'pull_request' }}
+        run: yarn danger ci
         env:
           DANGER_GITHUB_API_TOKEN: ${{ secrets.DANGER_GITHUB_API_TOKEN}}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
