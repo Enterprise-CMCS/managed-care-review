@@ -94,10 +94,10 @@ The unit testing implementation uses a test version of the `ldService` dependenc
       //Update featureFlags with mock flag values.
       if (mockFeatureFlags) {
         for (const flag in mockFeatureFlags) {
-          const featureFlag = flag as FeatureFlagTypes
+          const featureFlag = flag
           featureFlags[featureFlag] = mockFeatureFlags[
                   featureFlag
-                  ] as FlagValueTypes
+                  ] as FeatureFlagSettings
         }
       }
 

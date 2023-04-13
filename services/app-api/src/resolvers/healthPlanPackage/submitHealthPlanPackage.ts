@@ -33,10 +33,7 @@ import { toDomain } from '../../../../app-web/src/common-code/proto/healthPlanFo
 import { EmailParameterStore } from '../../parameterStore'
 import { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql'
-import {
-    FeatureFlagTypes,
-    FlagValueTypes,
-} from 'app-web/src/common-code/featureFlags'
+import { FeatureFlagSettings } from 'app-web/src/common-code/featureFlags'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
@@ -71,7 +68,7 @@ export function isSubmissionError(err: unknown): err is SubmissionError {
 // "parse, don't validate" article: https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
 function submit(
     draft: UnlockedHealthPlanFormDataType,
-    featureFlags?: Partial<Record<FeatureFlagTypes, FlagValueTypes>>
+    featureFlags?: FeatureFlagSettings
 ): LockedHealthPlanFormDataType | SubmissionError {
     const maybeStateSubmission: Record<string, unknown> = {
         ...draft,

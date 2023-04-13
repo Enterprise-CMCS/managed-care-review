@@ -1,18 +1,18 @@
 import {
-    featureFlagEnums,
+    featureFlagKeys,
     featureFlags,
-    FeatureFlagTypes,
-    FlagValueTypes,
+    FlagValue,
+    FeatureFlagLDConstant,
 } from '../../../app-web/src/common-code/featureFlags'
 import { LDClient } from 'launchdarkly-node-server-sdk'
 import { Context } from '../handlers/apollo_gql'
 import { logError } from '../logger'
 import { setErrorAttributesOnActiveSpan } from '../resolvers/attributeHelper'
 
-type FeatureFlagObject = Record<FeatureFlagTypes, FlagValueTypes>
+type FeatureFlagObject = Record<FeatureFlagLDConstant, FlagValue>
 
 //Set up default feature flag values used to returned data
-const defaultFeatureFlags: FeatureFlagObject = featureFlagEnums.reduce(
+const defaultFeatureFlags: FeatureFlagObject = featureFlagKeys.reduce(
     (a, c) => {
         const flag = featureFlags[c].flag
         const defaultValue = featureFlags[c].defaultValue
@@ -24,8 +24,8 @@ const defaultFeatureFlags: FeatureFlagObject = featureFlagEnums.reduce(
 type LDService = {
     getFeatureFlag: (
         context: Context,
-        flag: FeatureFlagTypes
-    ) => Promise<FlagValueTypes>
+        flag: FeatureFlagLDConstant
+    ) => Promise<FlagValue>
 }
 
 function ldService(ldClient: LDClient): LDService {

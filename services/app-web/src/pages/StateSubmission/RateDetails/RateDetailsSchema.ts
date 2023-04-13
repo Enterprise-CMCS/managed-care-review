@@ -132,9 +132,7 @@ const SingleRateCertSchema = (activeFeatureFlags: FeatureFlagSettings) =>
         actuaryCommunicationPreference: Yup.string().optional(),
     })
 
-const RateDetailsFormSchema = (
-    activeFeatureFlags?: Partial<Record<FeatureFlagTypes, boolean>>
-) => {
+const RateDetailsFormSchema = (activeFeatureFlags?: FeatureFlagSettings) => {
     return Yup.object().shape({
         rateInfos: Yup.array().of(
             SingleRateCertSchema((activeFeatureFlags = {}))
