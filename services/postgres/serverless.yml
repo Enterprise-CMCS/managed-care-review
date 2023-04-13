@@ -68,6 +68,10 @@ custom:
     other: 'Delete'
     val: 'Retain'
     prod: 'Retain'
+  auroraMinCapacity:
+    other: 0.5
+    val: 1
+    prod: 1
 
 package:
   individually: true
@@ -125,7 +129,7 @@ resources:
         EnableCloudwatchLogsExports:
           - postgresql
         ServerlessV2ScalingConfiguration:
-          MinCapacity: 1
+          MinCapacity: ${self:custom.auroraMinCapacity.${opt:stage}, self:custom.auroraMinCapacity.other}
           MaxCapacity: 32
 
     PostgresAuroraV2Instance:
