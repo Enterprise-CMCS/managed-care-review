@@ -74,7 +74,13 @@ Cypress.Commands.add('stubFeatureFlags', () => {
         }
     ).as('LDClientStream')
 
-    cy.interceptFeatureFlags()
+    /**
+     * Setting default for chip-only-form to true, currently there is no way to sync API flags with cypress. So
+     * defaulting to true in order for CI to pass.
+     *
+     * Otherwise, this will default feature flags to values set in common-code featureFlags
+     **/
+    cy.interceptFeatureFlags({'chip-only-form': true})
 })
 
 //Command to get feature flag values from the featureFlagStore.json file.
