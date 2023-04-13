@@ -1,6 +1,5 @@
 import * as t from 'io-ts'
 import { DateFromISOString } from 'io-ts-types/lib/DateFromISOString'
-import { literal } from 'zod'
 
 const IORateAmendmentFormData = t.type({
     rateType: t.literal('AMENDMENT'),

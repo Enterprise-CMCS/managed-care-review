@@ -73,6 +73,24 @@ enum FederalAuthority {
   TITLE_XXI
 }
 
+model ContractDocumentTable {
+  id String @id
+  contractFormDataID String
+  contractFormData DraftContractFormDataTable @relation(fields: [contractFormDataID], references: [id])
+
+  s3url String
+  title String
+}
+
+model ContractAdditionalDocumentsTable {
+  id String @id
+  contractFormDataID String
+  contractFormData DraftContractFormDataTable @relation(fields: [contractFormDataID], references: [id])
+  
+  s3url String
+  title String
+}
+
 model DraftContractFormDataTable {
   id String @id
   revision ContractRevisionTable?
@@ -81,7 +99,13 @@ model DraftContractFormDataTable {
   startDate DateTime? @db.Date
   endDate DateTime? @db.Date
   submissionType SubmissionType?
-  
+  federalAuthorities FederalAuthority[]
+  modifiedGeoAreaServed Boolean?
+  modifiedRiskSharingStrategy Boolean?
+  modifiedPassThroughPayments Boolean?
+  contractDocuments ContractDocumentTable[]
+  additionalDocuments ContractAdditionalDocumentsTable[]
+
 }
 
 model RateRevisionTable {

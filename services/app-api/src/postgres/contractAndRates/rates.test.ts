@@ -7,6 +7,7 @@ import {
     ZodDraftContractFormData,
     ZodContractFormDataVAll, 
     ZodContractRevisionDraftType, 
+    ZodDraftContractFormDataType,
     ZodContractRevisionType, 
     ZodContractFormDataV0,
     ZodRateFormDataTypeV0,
@@ -15,10 +16,11 @@ import {
 } from "./zodDomainTypes"
 import { IORateFormDataTypeV0, IORateFormDataV0, IORateFormDataTypeV1, IORateFormDataV1 } from "./ioDomainTypes"
 import { PathReporter } from 'io-ts/PathReporter'
+import { ZodLockedContractFormData, ZodLockedContractFormDataType, ZodValidLockedContractFormData } from "./zodLimitedTypes"
 
 describe('contract and rates', () => {
 
-    it.only('can deal with zod rate versions', async () => {
+    it('can deal with zod rate versions', async () => {
 
         const rav0: ZodRateFormDataTypeV0 = {
             schemaName: 'rateFormData',
@@ -251,6 +253,7 @@ describe('contract and rates', () => {
 
         if ('federalAuthorities' in a) {
             console.log('VERSION IS 1', a.schemaVersion)
+            console.log(a.federalAuthorities)
         }
 
         if (a.schemaVersion === 1) {
@@ -307,6 +310,145 @@ describe('contract and rates', () => {
 
     })
 
+    it.only('can deal with some LIMITED versions', async () => {
+
+        const av0: ZodLockedContractFormDataType = {
+            contractDescription: 'The first version of a contract',
+            startDate: '2022-01-01',
+            endDate: '2023-01-01',
+            submissionType: 'CONTRACT_ONLY',
+            federalAuthorities: 'NOT_SET',
+            modifiedProvisions: 'NOT_SET',
+        }
+
+        console.log('av0', av0)
+
+
+        const av1: ZodLockedContractFormDataType = {
+            contractDescription: 'The first version of a contract',
+            startDate: '2022-01-01',
+            endDate: '2023-01-01',
+            submissionType: 'CONTRACT_ONLY',
+            federalAuthorities: ['WAIVER_1915B', 'STATE_PLAN'],
+            modifiedProvisions: 'NOT_SET',
+        }
+
+        console.log('av1', av1)
+
+        const av2: ZodLockedContractFormDataType = {
+            contractDescription: 'The first version of a contract',
+            startDate: '2022-01-01',
+            endDate: '2023-01-01',
+            submissionType: 'CONTRACT_ONLY',
+            federalAuthorities: ['WAIVER_1915B', 'STATE_PLAN'],
+            modifiedProvisions: {
+                modifiedGeoAreaServed: true,
+                modifiedRiskSharingStrategy: false,
+                modifiedPassThroughPayments: 'NOT_SET'
+            }
+        }
+
+        const av3: ZodLockedContractFormDataType = {
+            contractDescription: 'The first version of a contract',
+            startDate: '2022-01-01',
+            endDate: '2023-01-01',
+            submissionType: 'CONTRACT_ONLY',
+            federalAuthorities: ['WAIVER_1915B', 'STATE_PLAN'],
+            modifiedProvisions: {
+                modifiedGeoAreaServed: true,
+                modifiedRiskSharingStrategy: false,
+                modifiedPassThroughPayments: false,
+            }
+        }
+
+        console.log('av2', av2)
+
+        console.log('parse v0', ZodLockedContractFormData.safeParse(av0))
+
+        console.log('parse v1', ZodValidLockedContractFormData.safeParse(av1))
+
+        console.log('parse v2', ZodValidLockedContractFormData.safeParse(av2))
+
+        console.log('parse v3', ZodValidLockedContractFormData.safeParse(av3))
+        
+
+        // const avbad: any = {
+        //     contractDescription: 'The first version of a contract',
+        //     startDate: 1,
+        //     endDate: '2023-01-01',
+        //     submissionType: 'CONTRACT_ONLY',
+        // }
+
+        // const av0json = JSON.stringify(av2)
+
+        // const somea = ZodContractFormDataVAll.safeParse(JSON.parse(av0json))
+        // console.log("WHAT", somea)
+
+        // if (!somea.success) {
+        //     throw new Error('foobar')
+        // }
+
+        // const a = somea.data
+
+        // if ('federalAuthorities' in a) {
+        //     console.log('VERSION IS 1', a.schemaVersion)
+        //     console.log(a.federalAuthorities)
+        // }
+
+        // if (a.schemaVersion === 1) {
+        //     console.log('weve got feds', a.federalAuthorities)
+        // }
+
+
+        // const unlocked = ZodDraftContractFormData.safeParse(JSON.parse(av0json))
+        // console.log('unlocked!', unlocked)
+        // if (!unlocked.success) {
+        //     throw new Error("this should work.")
+        // }
+
+        // const unlockedFormData = unlocked.data
+
+        // const lockedBad = ZodContractFormDataVCurrent.safeParse(unlockedFormData)
+
+        // console.log("this better fail", lockedBad)
+        // if (lockedBad.success) {
+        //     throw new Error('dont work.')
+        // }
+
+        // if (!unlockedFormData.modifiedProvisions) {
+        //     throw new Error('huh, that changed...')
+        // }
+
+        // unlockedFormData.modifiedProvisions.modifiedPassThroughPayments = false
+
+        // const lockedGood = ZodContractFormDataVCurrent.safeParse(unlockedFormData)
+
+        // console.log('Submitted', lockedGood)
+
+
+        // // real dates
+
+        // // scenario 
+        // // make av1.draft
+        // // save av1.draft
+        // // submit av1 -> locked
+        // // save av1.locked
+        // // make new bv1.draft
+        // // save bv1.draft
+        // // make cv2.draft
+        // // save cv2.draft
+        // // load bv1.draft -> bv2.draft?  // everything is optional? So we just load it. // strip extra fields?
+        // // save bv2.draft
+        // // submit bv2 -> locked
+        // // submit cv2 -> locked
+        // // load av1.locked
+        // // load bv2.locked
+
+
+        expect(true).toBe(false)
+
+    })
+
 
     it('can insert some data into the tables', async () => {
         // this test attempts to create a number of drafts concurrently.
@@ -334,6 +476,33 @@ describe('contract and rates', () => {
                 draftFormData: {
                     create: {
                         id: uuidv4(),
+                        startDate: new Date(),
+                        endDate: new Date(),
+                        contractDescription: 'one contract',
+                        submissionType: 'CONTRACT_ONLY',
+                        federalAuthorities: ['WAIVER_1915B', 'VOLUNTARY'],
+                        modifiedGeoAreaServed: true,
+                        contractDocuments: {
+                            create: {
+                                id: uuidv4(),
+                                s3url: 'foo://bar',
+                                title: 'someDoc',
+                            }
+                        },
+                        additionalDocuments: {
+                            create: [
+                            {
+                                id: uuidv4(),
+                                s3url: 'foo://baz',
+                                title: 'adddoc',
+                            },
+                            {
+                                id: uuidv4(),
+                                s3url: 'foo://foo',
+                                title: 'addadddoc',
+                            }]
+                        }
+
                     }
                 }
             }
@@ -407,7 +576,12 @@ describe('contract and rates', () => {
                 createdAt: "desc"
             },
             include: {
-                draftFormData: true,
+                draftFormData: {
+                    include: {
+                        contractDocuments: true,
+                        additionalDocuments: true,
+                    }
+                },
                 rateRevisions: {
                     where: {
                         validUntil: null,
@@ -419,31 +593,31 @@ describe('contract and rates', () => {
             }
         })
 
+        console.log('FULL DRAFT', draftPackageRevisionTable)
+
         if (!draftPackageRevisionTable) {
             throw new Error('gotta have a draft.')
         }
 
 
-        const draftPackageReivision: ZodContractRevisionDraftType = {
-            id: draftPackageRevisionTable.id,
-            contractID: draftPackageRevisionTable.contractID,
+        const formDataTable = draftPackageRevisionTable.draftFormData
+        const formData: ZodDraftContractFormDataType = {
+            schemaName: 'contractFormData',
 
-            name: draftPackageRevisionTable.name,
-            contractDescription:  draftPackageRevisionTable.draftFormData.contractDescription || undefined,
+            contractDescription:  formDataTable.contractDescription || undefined,
+            submissionType: formDataTable.submissionType || undefined,
 
-            rateRevisions: draftPackageRevisionTable.rateRevisions.map((r) => {
-                return {
-                    id: r.rateRevision.id,
-                    rateID: r.rateRevision.rateID,
+            federalAuthorities: formDataTable.federalAuthorities,
+            modifiedProvisions: {
+                modifiedGeoAreaServed: formDataTable.modifiedGeoAreaServed || undefined,
+                modifiedPassThroughPayments: formDataTable.modifiedPassThroughPayments || undefined,
+                modifiedRiskSharingStrategy: formDataTable.modifiedRiskSharingStrategy || undefined,
+            }
 
-                    name: r.rateRevision.name,
-                    rateCertURL: r.rateRevision.rateCertURL || undefined,
-                }
-            })
         }
 
 
-        console.log('OUR DRAFT', JSON.stringify(draftPackageReivision, undefined, '  '))
+        console.log('OUR DRAFT', JSON.stringify(formData, undefined, '  '))
 
         // Submit
         // Should be able to get out complete data
