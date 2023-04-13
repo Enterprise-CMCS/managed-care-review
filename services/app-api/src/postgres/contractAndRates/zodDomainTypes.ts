@@ -52,7 +52,6 @@ const ZodContractFormDataV1 = ZodContractFormDataV0.merge(z.object({
 }))
 type ZodContractFormDataTypeV1 = z.infer<typeof ZodContractFormDataV1>
 
-
 const ModifiedProvisionsV0 = z.object({
     modifiedGeoAreaServed: z.boolean(),
     modifiedRiskSharingStrategy: z.boolean(),
@@ -64,7 +63,6 @@ const ZodContractFormDataV2 = ZodContractFormDataV1.merge(z.object({
     modifiedProvisions: ModifiedProvisionsV0,
 }))
 type ZodContractFormDataTypeV2 = z.infer<typeof ZodContractFormDataV2>
-
 
 
 const ModifiedProvisionsV1 = ModifiedProvisionsV0.merge(z.object({
@@ -93,8 +91,8 @@ const ZodContractFormDataVAll = z.discriminatedUnion('schemaVersion', [
     ZodContractFormDataV0, 
     ZodContractFormDataV1,
     ZodContractFormDataV2,
+    ZodContractFormDataV3,
 ])
-
 
 const ZodContractRevisionDraft = ZodContractRevision.merge(z.object({
     rateRevisions: z.optional(z.array(ZodRateRevisionDraft))
@@ -118,7 +116,6 @@ const ZodBaseRateFormData = z.object({
     rateDateEnd: z.string(),
 })
 
-
 const ZodRateAmendmentFormData = z.object({
     rateType: z.literal('AMENDMENT'),
 
@@ -137,7 +134,6 @@ const ZodNewRateAmendmentFormDataV1 = ZodNewRateAmendmentFormDataV0.merge(z.obje
     exactStartDate: z.date(),
 }))
 
-
 const ZodRateFormDataV1 = z.intersection(ZodBaseRateFormData, z.discriminatedUnion('rateType', [ZodRateAmendmentFormData, ZodNewRateAmendmentFormDataV1]))
 type ZodRateFormDataTypeV1 = z.infer<typeof ZodRateFormDataV1>
 
@@ -149,6 +145,7 @@ export type {
     ZodContractFormDataTypeV0,
     ZodContractFormDataTypeV1,
     ZodContractFormDataTypeV2,
+    ZodContractFormDataTypeV3,
 
     ZodRateFormDataTypeV0,
     ZodRateFormDataTypeV1,
