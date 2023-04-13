@@ -938,10 +938,10 @@ describe('RateDetails', () => {
                     }),
                     id: 'test-id-125',
                 },
-                // {
-                //     ...mockUnlockedHealthPlanPackage(currentSubmission),
-                //     id: 'test-shared-rate',
-                // },
+                {
+                    ...mockUnlockedHealthPlanPackage(currentSubmission),
+                    id: 'test-shared-rate',
+                },
             ]
 
             renderWithProviders(
