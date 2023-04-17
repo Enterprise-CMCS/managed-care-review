@@ -12,6 +12,7 @@ import {
     removeRatesData,
     hasValidRateCertAssurance,
     hasValidPopulationCoverage,
+    removeNonCHIPData,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     UpdateInfoType,
@@ -275,6 +276,14 @@ export function submitHealthPlanPackageResolver(
             hasAnyValidRateData(draftResult)
         ) {
             Object.assign(draftResult, removeRatesData(draftResult))
+        }
+
+        // CHIP submissions should not contain any provision relevant to other populations
+        if (
+            draftResult.contractType === 'AMENDMENT' &&
+            draftResult.populationCovered === 'CHIP'
+        ) {
+            Object.assign(draftResult, removeNonCHIPData(draftResult))
         }
 
         // attempt to parse into a StateSubmission

@@ -44,6 +44,7 @@ export {
     packageName,
     generateRateName,
     convertRateSupportingDocs,
+    removeNonCHIPData,
     removeRatesData,
     hasValidRateCertAssurance,
     hasValidPopulationCoverage,

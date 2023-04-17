@@ -360,6 +360,63 @@ describe('submitHealthPlanPackage', () => {
         )
     })
 
+    it('removes any risk related modified provisions from CHIP submission and submits successfully', async () => {
+        const server = await constructTestPostgresServer()
+
+        //Create and update a submission as if the user edited and changed population covered after filling out yes/nos
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {
+            contractType: 'AMENDMENT',
+            populationCovered: 'CHIP',
+            contractAmendmentInfo: {
+                modifiedProvisions: {
+                    modifiedBenefitsProvided: true,
+                    modifiedGeoAreaServed: false,
+                    modifiedMedicaidBeneficiaries: false,
+                    modifiedRiskSharingStrategy: true,
+                    modifiedIncentiveArrangements: true,
+                    modifiedWitholdAgreements: true,
+                    modifiedStateDirectedPayments: true,
+                    modifiedPassThroughPayments: true,
+                    modifiedPaymentsForMentalDiseaseInstitutions: true,
+                    modifiedMedicalLossRatioStandards: false,
+                    modifiedOtherFinancialPaymentIncentive: false,
+                    modifiedEnrollmentProcess: false,
+                    modifiedGrevienceAndAppeal: false,
+                    modifiedNetworkAdequacyStandards: false,
+                    modifiedLengthOfContract: false,
+                    modifiedNonRiskPaymentArrangements: false,
+                },
+            },
+        })
+
+        const submitResult = await submitTestHealthPlanPackage(server, draft.id)
+
+        const currentRevision = submitResult.revisions[0].node
+        const packageData = base64ToDomain(currentRevision.formDataProto)
+
+        if (packageData instanceof Error) {
+            throw new Error(packageData.message)
+        }
+        expect(packageData).toEqual(
+            expect.objectContaining({
+                contractAmendmentInfo: {
+                    modifiedProvisions: {
+                        modifiedBenefitsProvided: true,
+                        modifiedGeoAreaServed: false,
+                        modifiedMedicaidBeneficiaries: false,
+                        modifiedMedicalLossRatioStandards: false,
+                        modifiedOtherFinancialPaymentIncentive: false,
+                        modifiedEnrollmentProcess: false,
+                        modifiedGrevienceAndAppeal: false,
+                        modifiedNetworkAdequacyStandards: false,
+                        modifiedLengthOfContract: false,
+                        modifiedNonRiskPaymentArrangements: false,
+                    },
+                },
+            })
+        )
+    })
+
     it('sends two emails', async () => {
         const mockEmailer = testEmailer()
 
