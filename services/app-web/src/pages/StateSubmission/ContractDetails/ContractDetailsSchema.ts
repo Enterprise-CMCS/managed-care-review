@@ -1,24 +1,35 @@
 import * as Yup from 'yup'
 import dayjs from 'dayjs'
 import { validateDateFormat } from '../../../formHelpers'
-import { ContractType } from '../../../common-code/healthPlanFormDataType'
+import {
+    allowedProvisionsForCHIP,
+    ProvisionType,
+} from '../../../common-code/healthPlanFormDataType'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
-const yesNoError = (contractType: ContractType) => {
-    return Yup.string().test(
-        'yesORno',
-        'You must select yes or no',
-        (value) => {
-            // true means 'is valid' and no error is shown
-            return contractType === 'BASE' || value !== undefined
-        }
-    )
-}
+export const ContractDetailsFormSchema = (
+    isContractAmendment: boolean,
+    isCHIPOnly: boolean
+) => {
+    const ignoreFieldForCHIP = (string: ProvisionType) => {
+        return isCHIPOnly && !allowedProvisionsForCHIP.includes(string)
+    }
 
-// Formik setup
-export const ContractDetailsFormSchema = (contractType: ContractType) =>
-    Yup.object().shape({
+    const yesNoError = (provision: ProvisionType) => {
+        const noValidation = Yup.string().nullable()
+        if (!isContractAmendment) {
+            return noValidation
+        }
+
+        if (ignoreFieldForCHIP(provision)) {
+            return noValidation
+        }
+
+        return Yup.string().defined('You must select yes or no')
+    }
+
+    return Yup.object().shape({
         contractExecutionStatus: Yup.string().defined(
             'You must select a contract status'
         ),
@@ -64,20 +75,37 @@ export const ContractDetailsFormSchema = (contractType: ContractType) =>
             }
         ),
 
-        modifiedBenefitsProvided: yesNoError(contractType),
-        modifiedGeoAreaServed: yesNoError(contractType),
-        modifiedMedicaidBeneficiaries: yesNoError(contractType),
-        modifiedRiskSharingStrategy: yesNoError(contractType),
-        modifiedIncentiveArrangements: yesNoError(contractType),
-        modifiedWitholdAgreements: yesNoError(contractType),
-        modifiedStateDirectedPayments: yesNoError(contractType),
-        modifiedPassThroughPayments: yesNoError(contractType),
-        modifiedPaymentsForMentalDiseaseInstitutions: yesNoError(contractType),
-        modifiedMedicalLossRatioStandards: yesNoError(contractType),
-        modifiedOtherFinancialPaymentIncentive: yesNoError(contractType),
-        modifiedEnrollmentProcess: yesNoError(contractType),
-        modifiedGrevienceAndAppeal: yesNoError(contractType),
-        modifiedNetworkAdequacyStandards: yesNoError(contractType),
-        modifiedLengthOfContract: yesNoError(contractType),
-        modifiedNonRiskPaymentArrangements: yesNoError(contractType),
+        modifiedBenefitsProvided: yesNoError('modifiedBenefitsProvided'),
+        modifiedGeoAreaServed: yesNoError('modifiedGeoAreaServed'),
+        modifiedMedicaidBeneficiaries: yesNoError(
+            'modifiedMedicaidBeneficiaries'
+        ),
+        modifiedRiskSharingStrategy: yesNoError('modifiedRiskSharingStrategy'),
+        modifiedIncentiveArrangements: yesNoError(
+            'modifiedIncentiveArrangements'
+        ),
+        modifiedWitholdAgreements: yesNoError('modifiedWitholdAgreements'),
+        modifiedStateDirectedPayments: yesNoError(
+            'modifiedStateDirectedPayments'
+        ),
+        modifiedPassThroughPayments: yesNoError('modifiedPassThroughPayments'),
+        modifiedPaymentsForMentalDiseaseInstitutions: yesNoError(
+            'modifiedPaymentsForMentalDiseaseInstitutions'
+        ),
+        modifiedMedicalLossRatioStandards: yesNoError(
+            'modifiedMedicalLossRatioStandards'
+        ),
+        modifiedOtherFinancialPaymentIncentive: yesNoError(
+            'modifiedOtherFinancialPaymentIncentive'
+        ),
+        modifiedEnrollmentProcess: yesNoError('modifiedEnrollmentProcess'),
+        modifiedGrevienceAndAppeal: yesNoError('modifiedGrevienceAndAppeal'),
+        modifiedNetworkAdequacyStandards: yesNoError(
+            'modifiedNetworkAdequacyStandards'
+        ),
+        modifiedLengthOfContract: yesNoError('modifiedLengthOfContract'),
+        modifiedNonRiskPaymentArrangements: yesNoError(
+            'modifiedNonRiskPaymentArrangements'
+        ),
     })
+}
