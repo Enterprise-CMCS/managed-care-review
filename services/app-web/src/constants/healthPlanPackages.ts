@@ -19,7 +19,7 @@ const SubmissionTypeRecord: Record<SubmissionType, string> = {
 const PopulationCoveredRecord: Record<PopulationCoveredType, string> = {
     MEDICAID: 'Medicaid',
     CHIP: 'CHIP-only',
-    MEDICAID_AND_CHIP: 'Medicaid & CHIP',
+    MEDICAID_AND_CHIP: 'Medicaid and CHIP',
 }
 
 const ContractTypeRecord: Record<ContractType, string> = {
