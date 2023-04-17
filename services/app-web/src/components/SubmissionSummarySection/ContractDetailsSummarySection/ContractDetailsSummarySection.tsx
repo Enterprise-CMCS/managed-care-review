@@ -16,8 +16,10 @@ import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
+    allowedProvisionsForCHIP,
     HealthPlanFormDataType,
     ModifiedProvisions,
+    ProvisionType,
 } from '../../../common-code/healthPlanFormDataType'
 import { DataDetailCheckboxList } from '../../DataDetail/DataDetailCheckboxList'
 
@@ -30,11 +32,13 @@ export type ContractDetailsSummarySectionProps = {
 }
 
 // This function takes a ContractAmendmentInfo and returns two lists of keys sorted by whether they are set true/false
+// remove fields that not allowed for CHIP from unmodified list entirely
 export function sortModifiedProvisions(
-    amendmentInfo: ModifiedProvisions | undefined
-): [string[], string[]] {
-    const modifiedProvisions = []
-    const unmodifiedProvisions = []
+    amendmentInfo: ModifiedProvisions | undefined,
+    isCHIPOnly: boolean
+): [ProvisionType[], ProvisionType[]] {
+    const modifiedProvisions: ProvisionType[] = []
+    let unmodifiedProvisions: ProvisionType[] = []
 
     if (amendmentInfo) {
         // We type cast this to be the list of keys in the ContractAmendmentInfo
@@ -52,6 +56,11 @@ export function sortModifiedProvisions(
         }
     }
 
+    if (isCHIPOnly) {
+        unmodifiedProvisions = unmodifiedProvisions.filter((unmodified) =>
+            allowedProvisionsForCHIP.includes(unmodified)
+        )
+    }
     return [modifiedProvisions, unmodifiedProvisions]
 }
 
@@ -109,7 +118,8 @@ export const ContractDetailsSummarySection = ({
     ])
 
     const [modifiedProvisions, unmodifiedProvisions] = sortModifiedProvisions(
-        submission.contractAmendmentInfo?.modifiedProvisions
+        submission.contractAmendmentInfo?.modifiedProvisions,
+        submission.populationCovered === 'CHIP'
     )
 
     const amendmentProvisionsUnanswered =
