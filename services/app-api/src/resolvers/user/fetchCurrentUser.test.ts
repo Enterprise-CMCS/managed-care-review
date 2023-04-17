@@ -2,7 +2,7 @@ import { Context } from '../../handlers/apollo_gql'
 
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import FETCH_CURRENT_USER from '../../../../app-graphql/src/queries/fetchCurrentUser.graphql'
-import { StateUserType } from '../../domain-models'
+import { testStateUser } from '../../testHelpers/userHelpers'
 
 describe('currentUser', () => {
     it('returns the currentUser', async () => {
@@ -21,14 +21,12 @@ describe('currentUser', () => {
 
     it('returns programs for MI', async () => {
         const customContext: Context = {
-            user: {
-                id: 'c90b409d-73d1-4383-87af-fc9878cc144a',
+            user: testStateUser({
                 stateCode: 'MI',
-                role: 'STATE_USER',
                 email: 'james@example.com',
                 familyName: 'Brown',
                 givenName: 'James',
-            } as StateUserType,
+            }),
         }
 
         const server = await constructTestPostgresServer({

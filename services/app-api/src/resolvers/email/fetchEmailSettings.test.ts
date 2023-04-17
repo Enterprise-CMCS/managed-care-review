@@ -1,33 +1,15 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import FETCH_EMAIL_SETTINGS from '../../../../app-graphql/src/queries/fetchEmailSettings.graphql'
-import { UserType } from '../../domain-models'
+import {
+    testAdminUser,
+    testCMSUser,
+    testStateUser,
+} from '../../testHelpers/userHelpers'
 
 describe('fetchEmailSettings', () => {
-    const testUserCMS: UserType = {
-        id: 'f7571910-ef02-427d-bae3-3e945e20e59d',
-        role: 'CMS_USER',
-        email: 'zuko@example.com',
-        familyName: 'Zuko',
-        givenName: 'Prince',
-        stateAssignments: [],
-    }
-
-    const testUserState: UserType = {
-        id: '5ac0fe75-f932-4d76-984e-e99ffb31138d',
-        stateCode: 'FL',
-        role: 'STATE_USER',
-        email: 'aang@mn.gov',
-        familyName: 'Aang',
-        givenName: 'Aang',
-    }
-
-    const testUserAdmin: UserType = {
-        id: '5ac0fe75-f932-4d76-984e-e99ffb31144d',
-        role: 'ADMIN_USER',
-        email: 'iroh@admin.gov',
-        familyName: 'Iroh',
-        givenName: 'Uncle',
-    }
+    const testUserCMS = testCMSUser()
+    const testUserState = testStateUser()
+    const testUserAdmin = testAdminUser()
 
     it('returns email configuration', async () => {
         const server = await constructTestPostgresServer({

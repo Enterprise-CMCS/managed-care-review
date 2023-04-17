@@ -1,4 +1,3 @@
-import { UserType } from '../../domain-models'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import UPDATE_CMS_USER from '../../../../app-graphql/src/mutations/updateCMSUser.graphql'
 import {
@@ -14,23 +13,16 @@ import {
     assertAnErrorExtensions,
 } from '../../testHelpers'
 import { State } from '../../gen/gqlServer'
+import { testAdminUser, testCMSUser } from '../../testHelpers/userHelpers'
 
 describe('updateCMSUser', () => {
     it('updates a cms users state assignments', async () => {
-        const testAdminUser: UserType = {
-            id: 'd60e82de-13d7-459b-825e-61ce6ca2eb36',
-            role: 'ADMIN_USER',
-            email: 'iroh@example.com',
-            familyName: 'Iroh',
-            givenName: 'Uncle',
-        }
-
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
         const server = await constructTestPostgresServer({
             store: postgresStore,
             context: {
-                user: testAdminUser,
+                user: testAdminUser(),
             },
         })
 
@@ -98,20 +90,12 @@ describe('updateCMSUser', () => {
     })
 
     it('errors if the target is not a CMS user', async () => {
-        const testAdminUser: UserType = {
-            id: 'd60e82de-13d7-459b-825e-61ce6ca2eb36',
-            role: 'ADMIN_USER',
-            email: 'iroh@example.com',
-            familyName: 'Iroh',
-            givenName: 'Uncle',
-        }
-
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
         const server = await constructTestPostgresServer({
             store: postgresStore,
             context: {
-                user: testAdminUser,
+                user: testAdminUser(),
             },
         })
 
@@ -148,20 +132,12 @@ describe('updateCMSUser', () => {
     })
 
     it('errors if the userID doesnt exist', async () => {
-        const testAdminUser: UserType = {
-            id: 'd60e82de-13d7-459b-825e-61ce6ca2eb36',
-            role: 'ADMIN_USER',
-            email: 'iroh@example.com',
-            familyName: 'Iroh',
-            givenName: 'Uncle',
-        }
-
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
         const server = await constructTestPostgresServer({
             store: postgresStore,
             context: {
-                user: testAdminUser,
+                user: testAdminUser(),
             },
         })
 
@@ -185,21 +161,12 @@ describe('updateCMSUser', () => {
     })
 
     it('errors if called by a CMS user', async () => {
-        const testCMSUser: UserType = {
-            id: 'd60e82de-13d7-459b-825e-61ce6ca2eb36',
-            role: 'CMS_USER',
-            email: 'iroh@example.com',
-            familyName: 'Iroh',
-            givenName: 'Uncle',
-            stateAssignments: [],
-        }
-
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
         const server = await constructTestPostgresServer({
             store: postgresStore,
             context: {
-                user: testCMSUser,
+                user: testCMSUser(),
             },
         })
 
@@ -274,20 +241,12 @@ describe('updateCMSUser', () => {
     })
 
     it('returns an error with invalid state codes', async () => {
-        const testAdminUser: UserType = {
-            id: 'd60e82de-13d7-459b-825e-61ce6ca2eb36',
-            role: 'ADMIN_USER',
-            email: 'iroh@example.com',
-            familyName: 'Iroh',
-            givenName: 'Uncle',
-        }
-
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
         const server = await constructTestPostgresServer({
             store: postgresStore,
             context: {
-                user: testAdminUser,
+                user: testAdminUser(),
             },
         })
 

@@ -22,18 +22,11 @@ import {
     mockEmailParameterStoreError,
     getTestStateAnalystsEmails,
 } from '../../testHelpers/parameterStoreHelpers'
-import { UserType } from '../../domain-models'
 import * as awsSESHelpers from '../../testHelpers/awsSESHelpers'
+import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 
 describe('submitHealthPlanPackage', () => {
-    const testUserCMS: UserType = {
-        id: '62e10c5c-ddff-4f4f-addf-829e85f8094a',
-        role: 'CMS_USER',
-        email: 'zuko@example.com',
-        familyName: 'Zuko',
-        givenName: 'Prince',
-        stateAssignments: [],
-    }
+    const cmsUser = testCMSUser()
     it('returns a StateSubmission if complete', async () => {
         const server = await constructTestPostgresServer()
 
@@ -538,14 +531,9 @@ describe('submitHealthPlanPackage', () => {
         const server = await constructTestPostgresServer({
             emailer: mockEmailer,
             context: {
-                user: {
-                    id: 'PeterParker',
-                    stateCode: 'FL',
-                    role: 'STATE_USER',
+                user: testStateUser({
                     email: 'notspiderman@example.com',
-                    familyName: 'Parker',
-                    givenName: 'Peter',
-                },
+                }),
             },
         })
         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
@@ -596,7 +584,7 @@ describe('submitHealthPlanPackage', () => {
         )
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUserCMS,
+                user: cmsUser,
             },
         })
 
@@ -648,28 +636,18 @@ describe('submitHealthPlanPackage', () => {
         //mock invoke email submit lambda
         const stateServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    id: 'MilesMorales',
-                    stateCode: 'FL',
-                    role: 'STATE_USER',
+                user: testStateUser({
                     email: 'alsonotspiderman@example.com',
-                    familyName: 'Morales',
-                    givenName: 'Miles',
-                },
+                }),
             },
         })
 
         const stateServerTwo = await constructTestPostgresServer({
             emailer: mockEmailer,
             context: {
-                user: {
-                    id: 'PeterParker',
-                    stateCode: 'FL',
-                    role: 'STATE_USER',
+                user: testStateUser({
                     email: 'notspiderman@example.com',
-                    familyName: 'Parker',
-                    givenName: 'Peter',
-                },
+                }),
             },
         })
 
@@ -679,7 +657,7 @@ describe('submitHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUserCMS,
+                user: cmsUser,
             },
         })
 

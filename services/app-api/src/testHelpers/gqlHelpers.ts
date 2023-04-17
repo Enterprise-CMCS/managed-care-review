@@ -40,6 +40,7 @@ import statePrograms from 'app-web/src/common-code/data/statePrograms.json'
 import { testLDService } from './launchDarklyHelpers'
 import { LDService } from '../launchDarkly/launchDarkly'
 import { insertUserToLocalAurora } from '../authn'
+import { testStateUser } from './userHelpers'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -67,14 +68,7 @@ function getProgramsFromState(stateCode: StateCodeType): ProgramType[] {
 
 const defaultContext = (): Context => {
     return {
-        user: {
-            id: '1551628f-516a-467a-aaa4-49b789d20d9c',
-            stateCode: 'FL',
-            role: 'STATE_USER',
-            email: 'james@example.com',
-            familyName: 'Brown',
-            givenName: 'James',
-        },
+        user: testStateUser(),
     }
 }
 
