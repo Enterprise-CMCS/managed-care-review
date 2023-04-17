@@ -32,6 +32,7 @@ export async function insertQuestion(
                 documents: {
                     create: documents,
                 },
+                division: user.divisionAssignment,
             },
             include: {
                 documents: {
@@ -54,6 +55,7 @@ export async function insertQuestion(
         const createdQuestion: Question = {
             ...result,
             addedBy: user,
+            division: (result.division as Question['division']) || undefined,
             responses: result.responses.map((response) => ({
                 ...response,
                 addedBy: response.addedBy as StateUserType,
