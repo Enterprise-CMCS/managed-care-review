@@ -1,16 +1,12 @@
 import type { IndexQuestionsPayload, Question } from '../../domain-models'
 
-// Converts our prisma array of questions into object of questions by division.
 export const convertToIndexQuestionsPayload = (
     questions: Question[]
 ): IndexQuestionsPayload => {
-    //For now, we are throwing all questions into DMCO
-    return {
+    const questionsPayload: IndexQuestionsPayload = {
         DMCOQuestions: {
-            totalCount: questions.length,
-            edges: questions.map((question) => ({
-                node: question,
-            })),
+            totalCount: 0,
+            edges: [],
         },
         DMCPQuestions: {
             totalCount: 0,
@@ -21,4 +17,20 @@ export const convertToIndexQuestionsPayload = (
             edges: [],
         },
     }
+
+    questions.forEach((question) => {
+        if (question.division === 'DMCP') {
+            questionsPayload.DMCPQuestions.edges.push({ node: question })
+            questionsPayload.DMCPQuestions.totalCount++
+        } else if (question.division === 'OACT') {
+            questionsPayload.OACTQuestions.edges.push({ node: question })
+            questionsPayload.OACTQuestions.totalCount++
+        } else {
+            //Default unassigned division questions to DMCO.
+            questionsPayload.DMCOQuestions.edges.push({ node: question })
+            questionsPayload.DMCOQuestions.totalCount++
+        }
+    })
+
+    return questionsPayload
 }
