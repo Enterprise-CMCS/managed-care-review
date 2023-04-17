@@ -8,24 +8,24 @@ import {
     createTestQuestion,
     indexTestQuestions,
 } from '../../testHelpers/gqlHelpers'
-import { CMSUserType } from '../../domain-models'
 import { assertAnError, assertAnErrorCode } from '../../testHelpers'
+import {
+    createDBUsersWithFullData,
+    testCMSUser,
+} from '../../testHelpers/userHelpers'
 
 describe('createQuestion', () => {
-    const testUserCMS: CMSUserType = {
-        id: 'f7571910-ef02-427d-bae3-3e945e20e59d',
-        role: 'CMS_USER',
-        email: 'zuko@example.com',
-        familyName: 'Zuko',
-        givenName: 'Prince',
-        stateAssignments: [],
-    }
+    const cmsUser = testCMSUser()
+    beforeAll(async () => {
+        //Inserting a new CMS user, with division assigned, in postgres in order to create the question to user relationship.
+        await createDBUsersWithFullData([cmsUser])
+    })
 
     it('returns question data after creation', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUserCMS,
+                user: cmsUser,
             },
         })
 
@@ -42,13 +42,14 @@ describe('createQuestion', () => {
             expect.objectContaining({
                 id: expect.any(String),
                 pkgID: submittedPkg.id,
+                division: 'DMCO',
                 documents: [
                     {
                         name: 'Test Question',
                         s3URL: 'testS3Url',
                     },
                 ],
-                addedBy: testUserCMS,
+                addedBy: cmsUser,
             })
         )
     })
@@ -56,7 +57,7 @@ describe('createQuestion', () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUserCMS,
+                user: cmsUser,
             },
         })
 
@@ -104,13 +105,14 @@ describe('createQuestion', () => {
                                 id: expect.any(String),
                                 createdAt: expect.any(Date),
                                 pkgID: submittedPkg.id,
+                                division: 'DMCO',
                                 documents: [
                                     {
                                         name: 'Test Question',
                                         s3URL: 'testS3Url',
                                     },
                                 ],
-                                addedBy: testUserCMS,
+                                addedBy: cmsUser,
                             }),
                         },
                         {
@@ -118,13 +120,14 @@ describe('createQuestion', () => {
                                 id: expect.any(String),
                                 createdAt: expect.any(Date),
                                 pkgID: submittedPkg.id,
+                                division: 'DMCO',
                                 documents: [
                                     {
                                         name: 'Test Question 2',
                                         s3URL: 'testS3Url2',
                                     },
                                 ],
-                                addedBy: testUserCMS,
+                                addedBy: cmsUser,
                             }),
                         },
                     ]),
@@ -144,7 +147,7 @@ describe('createQuestion', () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUserCMS,
+                user: cmsUser,
             },
         })
 
@@ -202,7 +205,7 @@ describe('createQuestion', () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUserCMS,
+                user: cmsUser,
             },
         })
 
@@ -227,6 +230,41 @@ describe('createQuestion', () => {
         expect(assertAnErrorCode(createdQuestion)).toBe('NOT_FOUND')
         expect(assertAnError(createdQuestion).message).toBe(
             `Issue finding a package with id invalid-pkg-id. Message: Package with id invalid-pkg-id does not exist`
+        )
+    })
+    it('returns error when CMS user division is unassigned', async () => {
+        const cmsUserWithNoDivision = testCMSUser({
+            divisionAssignment: undefined,
+        })
+        await createDBUsersWithFullData([cmsUserWithNoDivision])
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUserWithNoDivision,
+            },
+        })
+
+        await createAndSubmitTestHealthPlanPackage(stateServer)
+
+        const createdQuestion = await cmsServer.executeOperation({
+            query: CREATE_QUESTION,
+            variables: {
+                input: {
+                    pkgID: 'invalid-pkg-id',
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 'testS3Url',
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(createdQuestion.errors).toBeDefined()
+        expect(assertAnErrorCode(createdQuestion)).toBe('FORBIDDEN')
+        expect(assertAnError(createdQuestion).message).toBe(
+            `users without an assigned division are not authorized to create a question`
         )
     })
 })
