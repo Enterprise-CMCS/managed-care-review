@@ -220,18 +220,18 @@ type Mutation {
     #    """
     #    updateQuestion(input: UpdateQuestionInput!): UpdateQuestionPayload!
 
-    #    """
-    #    createQuestionResponse creates a new QuestionResponse for the given Question
-    #    A State User can add text to a note field and append a document to their response
-    #
-    #    This can only be called by a StateUser
-    #
-    #    Errors:
-    #    - ForbiddenError:
-    #        - A non StateUser called this
-    #    - UserInputError
-    #        - A Question cannot be found given `questionID`
-    #    """
+    """
+    createQuestionResponse creates a new QuestionResponse for the given Question
+    A State User can add text to a note field and append a document to their response
+
+    This can only be called by a StateUser
+
+    Errors:
+    - ForbiddenError:
+        - A non StateUser called this
+    - UserInputError
+        - A Question cannot be found given `questionID`
+    """
     createQuestionResponse(
         input: CreateQuestionResponseInput!
     ): CreateQuestionResponsePayload!
@@ -598,6 +598,7 @@ type Question {
     createdAt: DateTime!
     addedBy: CMSUser!
     documents: [Document!]!
+    division: Division
     #    noteText: String
     #    dueDate: Date
     #    rateIDs: [String!]
