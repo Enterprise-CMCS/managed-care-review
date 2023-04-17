@@ -6,9 +6,13 @@ import { Loading, SectionHeader } from '../../components'
 import { NavLink, useLocation, useOutletContext } from 'react-router-dom'
 import { usePage } from '../../contexts/PageContext'
 import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
-import { QuestionResponseSubmitBanner } from '../../components/Banner/QuestionResponseSubmitBanner/QuestionResponseSubmitBanner'
+import {
+    QuestionResponseSubmitBanner,
+    UserAccountWarningBanner,
+} from '../../components/Banner'
 import { QATable, QuestionData, Division } from './QATable/QATable'
 import { CmsUser, QuestionEdge, StateUser } from '../../gen/gqlClient'
+import { CMSUserType } from 'app-api/src/domain-models'
 
 type QADivisionQuestions = {
     dmco: {
@@ -39,12 +43,16 @@ const extractQuestions = (edges?: QuestionEdge[]): QuestionData[] => {
     }))
 }
 
+const getDivision = (user: CMSUserType): Division | undefined =>
+    user.divisionAssignment
+
 export const QuestionResponse = () => {
     // router context
     const location = useLocation()
     const submitType = new URLSearchParams(location.search).get('submit')
     const { user, packageData, packageName, pkg } =
         useOutletContext<SideNavOutletContextType>()
+    let division: Division | undefined = undefined
 
     // page context
     const { updateHeading } = usePage()
@@ -60,6 +68,10 @@ export const QuestionResponse = () => {
                 <Loading />
             </GridContainer>
         )
+    }
+
+    if (isCMSUser) {
+        division = getDivision(user as CMSUserType)
     }
 
     const questions: QADivisionQuestions = {
@@ -101,17 +113,25 @@ export const QuestionResponse = () => {
     return (
         <div className={styles.background}>
             <GridContainer className={styles.container}>
+                {!division && (
+                    <UserAccountWarningBanner
+                        header={'Incomplete account setup'}
+                        message={
+                            'Your account is not fulling set up. Please contact your administrator to assign a division to your account.'
+                        }
+                    />
+                )}
                 {submitType && (
                     <QuestionResponseSubmitBanner submitType={submitType} />
                 )}
                 <section>
                     <SectionHeader header="Q&A" hideBorder>
-                        {isCMSUser && (
+                        {isCMSUser && division && (
                             <Link
                                 asCustom={NavLink}
                                 className="usa-button"
                                 variant="unstyled"
-                                to={'./dmco/upload-questions'}
+                                to={`./${division.toLowerCase()}/upload-questions`}
                             >
                                 Add questions
                             </Link>
@@ -129,14 +149,14 @@ export const QuestionResponse = () => {
                     className={styles.questionSection}
                     data-testid="dmcp-qa-section"
                 >
-                    <h3>Questions from OACT</h3>
+                    <h3>Questions from DMCP</h3>
                     {mapQuestionTable(questions.dmcp.questions, 'DMCP')}
                 </section>
                 <section
                     className={styles.questionSection}
                     data-testid="oact-qa-section"
                 >
-                    <h3>Questions from DMCP</h3>
+                    <h3>Questions from OACT</h3>
                     {mapQuestionTable(questions.oact.questions, 'OACT')}
                 </section>
             </GridContainer>
