@@ -244,6 +244,7 @@ message Document {
   optional string name = 1;
   optional string s3_url = 2;
   repeated DocumentCategory document_categories = 3;
+  optional string sha256 = 4;
 }
 
 enum StateCode {

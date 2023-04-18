@@ -16,6 +16,7 @@ import { FileItemsList } from './FileItemList/FileItemsList'
 import { pluralize } from '../../common-code/formatters'
 
 import { recordUserInputException } from '../../otelHelpers'
+import { calculateSHA256 } from '../../common-code/sha/generateSha'
 
 export type S3FileData = {
     key: string
@@ -215,6 +216,7 @@ export const FileUpload = ({
     // This includes moving from pending/loading UI to display success or errors
     const asyncS3Upload = (files: File[] | File) => {
         const upload = async (file: File) => {
+            const sha = (await calculateSHA256(file)) || ''
             uploadFile(file)
                 .then((data) => {
                     setFileItems((prevItems) => {
@@ -225,6 +227,7 @@ export const FileUpload = ({
                                     ...item,
                                     key: data.key,
                                     s3URL: data.s3URL,
+                                    sha256: sha,
                                     // In general, we update the UI status for file items as uploads and scans to S3 complete
                                     // Files with duplicate name errors are exceptional. This error takes priority. Duplicate files are still uploaded to s3 silently and scanned but will only display their duplicate name error.
                                     status:
@@ -306,7 +309,7 @@ export const FileUpload = ({
                 upload(file).catch((e) => console.error(e))
             })
         } else {
-            upload(files as File).catch((e) => console.error(e))
+            upload(files).catch((e) => console.error(e))
         }
     }
 
