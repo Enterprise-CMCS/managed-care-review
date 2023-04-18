@@ -185,20 +185,20 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
             cy.findByText('Yes').click()
         })
     cy.findByText(
-        'Withhold arrangements in accordance with 42 CFR § 438.6(b)(3)'
+        /Withhold arrangements/
     )
         .parent()
         .within(() => {
             cy.findByText('No').click()
         })
     cy.findByText(
-        'State directed payments in accordance with 42 CFR § 438.6(c)'
+        /State directed payments/
     )
         .parent()
         .within(() => {
             cy.findByText('No').click()
         })
-    cy.findByText('Pass-through payments in accordance with 42 CFR § 438.6(d)')
+    cy.findByText(/Pass-through payments/)
         .parent()
         .within(() => {
             cy.findByText('No').click()
@@ -211,7 +211,7 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
             cy.findByText('Yes').click()
         })
     cy.findByText(
-        'Medical loss ratio standards in accordance with 42 CFR § 438.8'
+        /Medical loss ratio standards/
     )
         .parent()
         .within(() => {
@@ -224,17 +224,17 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
         .within(() => {
             cy.findByText('Yes').click()
         })
-    cy.findByText('Enrollment/disenrollment process')
+    cy.findByText('Enrollment/disenrollment process 42 CFR § 457.1210 and 457.1212')
         .parent()
         .within(() => {
             cy.findByText('Yes').click()
         })
-    cy.findByText('Grievance and appeal system')
+    cy.findByText(/Grievance and appeal system/)
         .parent()
         .within(() => {
             cy.findByText('No').click()
         })
-    cy.findByText('Network adequacy standards')
+    cy.findByText(/Network adequacy standards/)
         .parent()
         .within(() => {
             cy.findByText('Yes').click()
