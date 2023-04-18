@@ -29,7 +29,6 @@ describe('templateHelpers', () => {
             expectedResult: [
                 ...testEmailConfig.devReviewTeamEmails,
                 ...testStateAnalystsEmails,
-                ...testEmailConfig.dmcoEmails,
                 ...testEmailConfig.dmcpEmails,
             ],
         },
@@ -41,7 +40,6 @@ describe('templateHelpers', () => {
             expectedResult: [
                 ...testEmailConfig.devReviewTeamEmails,
                 ...testStateAnalystsEmails,
-                ...testEmailConfig.dmcoEmails,
                 ...testEmailConfig.dmcpEmails,
                 ...testEmailConfig.oactEmails,
             ],
@@ -60,7 +58,6 @@ describe('templateHelpers', () => {
                 'devreview2@example.com',
                 '"State Analyst 1" <StateAnalyst1@example.com>',
                 '"State Analyst 2" <StateAnalyst2@example.com>',
-                ...testEmailConfig.dmcoEmails,
             ],
         },
         {
@@ -105,7 +102,6 @@ describe('templateHelpers', () => {
                 'devreview2@example.com',
                 '"State Analyst 1" <StateAnalyst1@example.com>',
                 '"State Analyst 2" <StateAnalyst2@example.com>',
-                ...testEmailConfig.dmcoEmails,
             ],
         },
         {
@@ -120,7 +116,6 @@ describe('templateHelpers', () => {
                 'devreview2@example.com',
                 '"State Analyst 1" <StateAnalyst1@example.com>',
                 '"State Analyst 2" <StateAnalyst2@example.com>',
-                ...testEmailConfig.dmcoEmails,
             ],
         },
         {
@@ -188,23 +183,6 @@ describe('templateHelpers', () => {
             expectedResult: [
                 'Bobloblaw@example.com',
                 'Lucille.Bluth@example.com',
-            ],
-        },
-        {
-            reviewers: [
-                'Bobloblaw@example.com',
-                'Lucille.Bluth@example.com',
-                testEmailConfig.dmcpEmails[0],
-                testEmailConfig.dmcoEmails[0],
-                testEmailConfig.oactEmails[0],
-            ],
-            config: testEmailConfig,
-            testDescription:
-                'does not remove dmco emails, they should get all emails',
-            expectedResult: [
-                'Bobloblaw@example.com',
-                'Lucille.Bluth@example.com',
-                testEmailConfig.dmcoEmails[0],
             ],
         },
     ])(

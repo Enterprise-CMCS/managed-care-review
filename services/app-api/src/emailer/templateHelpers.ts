@@ -83,9 +83,9 @@ const filterChipAndPRSubmissionReviewers = (
 /* 
     Determine reviewers for a given health plan package and state
     - devReviewTeamEmails added to all emails by default
-    - dmcoEmails added to all emails by default
     - dmcpEmails added in both CONTRACT_ONLY and CONTRACT_AND_RATES
     - oactEmails added for CONTRACT_AND_RATES
+    - dmco is added to emails via state analysts
     
     Return should be wrapped in pruneDuplicate to ensure even if config is added twice, we get unique list of reviewers
 */
@@ -103,7 +103,7 @@ const generateCMSReviewerEmails = (
         )
     }
 
-    const { oactEmails, dmcpEmails, dmcoEmails } = config
+    const { oactEmails, dmcpEmails } = config
 
     const programIDs = findAllPackageProgramIds(pkg)
     let reviewers: string[] = []
@@ -113,7 +113,6 @@ const generateCMSReviewerEmails = (
         reviewers = [
             ...config.devReviewTeamEmails,
             ...stateAnalystsEmails,
-            ...dmcoEmails,
             ...dmcpEmails,
         ]
     } else if (pkg.submissionType === 'CONTRACT_AND_RATES') {
@@ -121,7 +120,6 @@ const generateCMSReviewerEmails = (
         reviewers = [
             ...config.devReviewTeamEmails,
             ...stateAnalystsEmails,
-            ...dmcoEmails,
             ...dmcpEmails,
             ...oactEmails,
         ]
