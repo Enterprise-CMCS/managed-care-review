@@ -732,13 +732,19 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Medical loss ratio standards/)
+                    screen.getByText(
+                        'Medical loss ratio standards in accordance with 42 CFR § 457. 1203'
+                    )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Network adequacy standards/)
+                    screen.getByText(
+                        'Network adequacy standards 42 CFR § 457.1218'
+                    )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Non-risk payment arrangements/)
+                    screen.getByText(
+                        'Non-risk payment arrangements 42 CFR 457.10 and 457.1201(c)'
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {
@@ -761,7 +767,9 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Withhold arrangements/)
+                    screen.getByText(
+                        'Withhold arrangements in accordance with 42 CFR § 438.6(b)(3)'
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
@@ -774,7 +782,9 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Grievance and appeal system/)
+                    screen.getByText(
+                        'Grievance and appeal system 42 CFR § 457.1260'
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText('Length of the contract period')
@@ -1099,13 +1109,19 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Medical loss ratio standards/)
+                    screen.getByText(
+                        'Medical loss ratio standards in accordance with 42 CFR § 457. 1203'
+                    )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Network adequacy standards/)
+                    screen.getByText(
+                        'Network adequacy standards 42 CFR § 457.1218'
+                    )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Non-risk payment arrangements/)
+                    screen.getByText(
+                        'Non-risk payment arrangements 42 CFR 457.10 and 457.1201(c)'
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {
@@ -1143,7 +1159,7 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Grievance and appeal system/)
+                    'Grievance and appeal system 42 CFR § 457.1260'
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText('Length of the contract period')
@@ -1453,10 +1469,14 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/State directed payment/)
+                    screen.getByText(
+                        'State directed payments in accordance with 42 CFR § 438.6(c)'
+                    )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Pass-through payments /)
+                    screen.getByText(
+                        'Pass-through payments in accordance with 42 CFR § 438.6(d)'
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
@@ -1464,13 +1484,19 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Medical loss ratio standards/)
+                    screen.getByText(
+                        'Medical loss ratio standards in accordance with 42 CFR § 457. 1203'
+                    )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Network adequacy standards/)
+                    screen.getByText(
+                        'Network adequacy standards 42 CFR § 457.1218'
+                    )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Non-risk payment arrangements/)
+                    screen.getByText(
+                        'Non-risk payment arrangements 42 CFR 457.10 and 457.1201(c)'
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {
@@ -1488,10 +1514,14 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Incentive arrangements/)
+                    screen.getByText(
+                        'Incentive arrangements in accordance with 42 CFR § 438.6(b)(2)'
+                    )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Withhold arrangements/)
+                    screen.getByText(
+                        'Withhold arrangements in accordance with 42 CFR § 438.6(b)(3)'
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
@@ -1504,7 +1534,7 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Grievance and appeal system/)
+                    'Grievance and appeal system 42 CFR § 457.1260'
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(/Length of the contract period/)
@@ -1829,13 +1859,19 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Medical loss ratio standards/)
+                    screen.getByText(
+                        'Medical loss ratio standards in accordance with 42 CFR § 457. 1203'
+                    )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Network adequacy standards/)
+                    screen.getByText(
+                        'Network adequacy standards 42 CFR § 457.1218'
+                    )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Non-risk payment arrangements/)
+                    screen.getByText(
+                        'Non-risk payment arrangements 42 CFR 457.10 and 457.1201(c)'
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {
@@ -1853,10 +1889,14 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Incentive arrangement/)
+                    screen.getByText(
+                        'Incentive arrangements in accordance with 42 CFR § 438.6(b)(2)'
+                    )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Withhold arrangements/)
+                    screen.getByText(
+                        'Withhold arrangements in accordance with 42 CFR § 438.6(b)(3)'
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
@@ -1869,7 +1909,7 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(/Grievance and appeal system/)
+                    'Grievance and appeal system 42 CFR § 457.1260'
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText('Length of the contract period')

@@ -71,10 +71,9 @@ const ModifiedProvisionsRecord: Record<keyof ModifiedProvisions, string> = {
         'Other financial, payment, incentive or related contractual provisions',
     modifiedEnrollmentProcess:
         'Enrollment/disenrollment process 42 CFR § 457.1210 and 457.1212',
-    modifiedGrevienceAndAppeal:
-        'Grievance and appeal system 42 CFR  § 457.1260',
+    modifiedGrevienceAndAppeal: 'Grievance and appeal system 42 CFR § 457.1260',
     modifiedNetworkAdequacyStandards:
-        'Network adequacy standards 42 CFR  § 457.1218',
+        'Network adequacy standards 42 CFR § 457.1218',
     modifiedLengthOfContract: 'Length of the contract period',
     modifiedNonRiskPaymentArrangements:
         'Non-risk payment arrangements 42 CFR 457.10 and 457.1201(c)',

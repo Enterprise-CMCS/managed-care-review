@@ -12,6 +12,7 @@ export const ContractDetailsFormSchema = (
     isContractAmendment: boolean,
     isCHIPOnly: boolean
 ) => {
+    // There are certain validations we can just validate if the submission is CHIP. The CHIP supported provisions are a smaller subset.
     const ignoreFieldForCHIP = (string: ProvisionType) => {
         return isCHIPOnly && !allowedProvisionsForCHIP.includes(string)
     }
