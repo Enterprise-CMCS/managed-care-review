@@ -85,14 +85,21 @@ export const UploadedDocumentsTable = ({
     const shouldShowAsteriskExplainer = refreshedDocs.some((doc) =>
         isBothContractAndRateSupporting(doc)
     )
-    const shouldHaveNewTag = (doc: DocumentWithLink) => {
-        return (
-            isCMSUser &&
-            documentDateLookupTable &&
-            documentDateLookupTable[doc.name] >
-                documentDateLookupTable.previousSubmissionDate
-        )
+    const shouldHaveNewTag = (doc: DocumentWithLink): boolean => {
+        if (!isCMSUser || !doc.sha256 || !documentDateLookupTable) {
+            return false
+        }
+
+        if (
+            documentDateLookupTable[doc.sha256] >
+            documentDateLookupTable.previousSubmissionDate
+        ) {
+            return true
+        }
+
+        return false
     }
+
     const hasSharedRateCert =
         (packagesWithSharedRateCerts &&
             packagesWithSharedRateCerts.length > 0) ||
@@ -198,9 +205,9 @@ export const UploadedDocumentsTable = ({
                                 </td>
                             )}
                             <td>
-                                {documentDateLookupTable
+                                {documentDateLookupTable && doc.sha256
                                     ? dayjs(
-                                          documentDateLookupTable[doc.name]
+                                          documentDateLookupTable[doc.sha256]
                                       ).format('M/D/YY')
                                     : ''}
                             </td>

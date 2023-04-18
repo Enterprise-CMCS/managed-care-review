@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { usePrevious } from '../../hooks'
 import { v4 as uuidv4 } from 'uuid'
 import {
@@ -8,6 +8,9 @@ import {
     FileInputRef,
 } from '@trussworks/react-uswds'
 import { PoliteErrorMessage } from '../'
+
+import { Auth } from 'aws-amplify'
+import AWS from 'aws-sdk'
 
 import styles from './FileUpload.module.scss'
 
@@ -49,6 +52,27 @@ export type FileUploadProps = {
     for upload and display in our custom FileItemList.
 */
 
+async function getS3Client() {
+    const credentials = await Auth.currentCredentials()
+    const s3 = new AWS.S3({
+        apiVersion: '2006-03-01',
+        region: 'us-east-1',
+        credentials: Auth.essentialCredentials(credentials),
+    })
+    return s3
+}
+
+async function listBuckets() {
+    const s3 = await getS3Client()
+    s3.listBuckets((err, data) => {
+        if (err) {
+            console.error('Error', err)
+        } else {
+            console.info('Bucket List', data.Buckets)
+        }
+    })
+}
+
 export const FileUpload = ({
     id,
     name,
@@ -67,6 +91,16 @@ export const FileUpload = ({
     innerInputRef,
     ...inputProps
 }: FileUploadProps): React.ReactElement => {
+    useEffect(() => {
+        listBuckets()
+            .then(() => {
+                console.info('Successfully listed buckets')
+            })
+            .catch((error) => {
+                console.error('Error listing buckets:', error)
+            })
+    }, [])
+
     const [fileItems, setFileItems] = useState<FileItemT[]>(initialItems || [])
     const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
     const summaryRef = useRef<HTMLHeadingElement>(null) // reference to the heading that we will focus
