@@ -1159,7 +1159,9 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    'Grievance and appeal system 42 CFR § 457.1260'
+                    screen.getByText(
+                        'Grievance and appeal system 42 CFR § 457.1260'
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText('Length of the contract period')
@@ -1534,7 +1536,9 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    'Grievance and appeal system 42 CFR § 457.1260'
+                    screen.getByText(
+                        'Grievance and appeal system 42 CFR § 457.1260'
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(/Length of the contract period/)
@@ -1909,7 +1913,9 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    'Grievance and appeal system 42 CFR § 457.1260'
+                    screen.getByText(
+                        'Grievance and appeal system 42 CFR § 457.1260'
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText('Length of the contract period')
