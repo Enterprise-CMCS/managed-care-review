@@ -102,6 +102,7 @@ export const Documents = ({
                     name: doc.name,
                     key: 'INVALID_KEY',
                     s3URL: undefined,
+                    sha256: doc.sha256,
                     status: 'UPLOAD_ERROR',
                     documentCategories: doc.documentCategories,
                 }
@@ -111,6 +112,7 @@ export const Documents = ({
                 name: doc.name,
                 key: key,
                 s3URL: doc.s3URL,
+                sha256: doc.sha256,
                 status: 'UPLOAD_COMPLETE',
                 documentCategories: doc.documentCategories,
             }
@@ -220,6 +222,7 @@ export const Documents = ({
                         formDataDocuments.push({
                             name: fileItem.name,
                             s3URL: fileItem.s3URL,
+                            sha256: fileItem.sha256,
                             documentCategories:
                                 fileItem.documentCategories || [],
                         })
