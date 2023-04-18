@@ -158,7 +158,7 @@ describe('SubmissionSideNav', () => {
             )
             expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
             expect(
-                screen.queryByRole('heading', { name: 'Q&A' })
+                screen.queryByRole('heading', { name: 'Contract questions' })
             ).toBeInTheDocument()
         })
 
@@ -169,13 +169,13 @@ describe('SubmissionSideNav', () => {
 
         // Expect all three division sections
         expect(
-            screen.queryByRole('heading', { name: 'Questions from DMCO' })
+            screen.queryByRole('heading', { name: 'Asked by DMCO' })
         ).toBeInTheDocument()
         expect(
-            screen.queryByRole('heading', { name: 'Questions from OACT' })
+            screen.queryByRole('heading', { name: 'Asked by OACT' })
         ).toBeInTheDocument()
         expect(
-            screen.queryByRole('heading', { name: 'Questions from DMCP' })
+            screen.queryByRole('heading', { name: 'Asked by DMCP' })
         ).toBeInTheDocument()
 
         // Navigate back to Submission summary page by link.
