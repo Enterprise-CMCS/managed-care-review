@@ -224,7 +224,9 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
         .within(() => {
             cy.findByText('Yes').click()
         })
-    cy.findByText('Enrollment/disenrollment process 42 CFR § 457.1210 and 457.1212')
+    cy.findByText(
+        'Enrollment/disenrollment process 42 CFR § 457.1210 and 457.1212'
+    )
         .parent()
         .within(() => {
             cy.findByText('Yes').click()
@@ -244,7 +246,7 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
         .within(() => {
             cy.findByText('No').click()
         })
-    cy.findByText('Non-risk payment arrangements')
+    cy.findByText(/Non-risk payment arrangements/)
         .parent()
         .within(() => {
             cy.findByText('Yes').click()
