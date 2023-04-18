@@ -81,6 +81,38 @@ test('to addresses list includes OACT and DMCP group emails for contract and rat
     })
 })
 
+test('to addresses list  does not include OACT and DMCP group emails for CHIP submission', async () => {
+    const sub = mockContractOnlyFormData({ populationCovered: 'CHIP' })
+    const statePrograms = mockMNState().programs
+    const template = await newPackageCMSEmail(
+        sub,
+        testEmailConfig,
+        [],
+        statePrograms
+    )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
+    testEmailConfig.oactEmails.forEach((emailAddress) => {
+        expect(template).not.toEqual(
+            expect.objectContaining({
+                toAddresses: expect.arrayContaining([emailAddress]),
+            })
+        )
+    })
+
+    testEmailConfig.dmcpEmails.forEach((emailAddress) => {
+        expect(template).not.toEqual(
+            expect.objectContaining({
+                toAddresses: expect.arrayContaining([emailAddress]),
+            })
+        )
+    })
+})
+
 test('to addresses list does not include help addresses', async () => {
     const sub = mockContractOnlyFormData()
     const statePrograms = mockMNState().programs
@@ -129,6 +161,7 @@ test('to addresses list does not include duplicate review email addresses', asyn
 
     expect(template.toAddresses).toEqual(['duplicate@example.com'])
 })
+
 test('subject line is correct', async () => {
     const sub = mockContractOnlyFormData()
     const statePrograms = mockMNState().programs

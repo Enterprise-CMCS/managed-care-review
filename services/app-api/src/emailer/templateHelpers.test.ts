@@ -1,8 +1,7 @@
 import {
-    CHIP_PROGRAMS_UUID,
     filterChipAndPRSubmissionReviewers,
     generateCMSReviewerEmails,
-    includesChipPrograms,
+    handleAsCHIPSubmission,
 } from './templateHelpers'
 import { UnlockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 import {
@@ -145,19 +144,41 @@ describe('templateHelpers', () => {
 
     test.each([
         {
-            programIds: ['234-cfsdf-234324', CHIP_PROGRAMS_UUID['MS']],
-            testDescription: 'valid CHIP ids in list',
+            pkg: mockUnlockedContractAndRatesFormData({
+                populationCovered: 'CHIP',
+            }),
+            testDescription: 'for valid CHIP submission',
             expectedResult: true,
         },
         {
-            programIds: ['23432-df-123', 'not-chip'],
-            testDescription: 'without CHIP ids in list',
+            pkg: mockUnlockedContractAndRatesFormData({
+                stateCode: 'MS',
+                populationCovered: undefined,
+                programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
+            }),
+            testDescription:
+                'for MS submission with a CHIP associated ID for legacy reasons',
+            expectedResult: true,
+        },
+        {
+            pkg: mockUnlockedContractAndRatesFormData({
+                stateCode: 'AZ',
+                populationCovered: undefined,
+            }),
+            testDescription: 'for non MS submission with no population covered',
+            expectedResult: false,
+        },
+        {
+            pkg: mockUnlockedContractAndRatesFormData({
+                populationCovered: 'MEDICAID',
+            }),
+            testDescription: 'for non CHIP submission',
             expectedResult: false,
         },
     ])(
-        'includesChipPrograms: $testDescription',
-        ({ programIds, expectedResult }) => {
-            expect(includesChipPrograms(programIds)).toEqual(expectedResult)
+        'handleAsCHIPSubmission: $testDescription',
+        ({ pkg, expectedResult }) => {
+            expect(handleAsCHIPSubmission(pkg)).toEqual(expectedResult)
         }
     )
 

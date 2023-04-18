@@ -48,14 +48,6 @@ const renderTemplate = async <T extends object>(
 }
 
 // SHARED EMAIL LOGIC
-// Types
-
-// Constants
-// This should reference UUIDS in the statePrograms.json in src/data/
-const CHIP_PROGRAMS_UUID = {
-    MS: '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
-    AS: 'e112301b-72c7-4c8f-856a-2cf8c6a1465b',
-}
 
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_ONLY: 'Contract action only',
@@ -63,11 +55,26 @@ const SubmissionTypeRecord: Record<SubmissionType, string> = {
 }
 
 // Util Functions
-// Checks if at least one program is CHIP
-const includesChipPrograms = (programIDs: string[]): boolean => {
-    const chipProgramIds = Object.values(CHIP_PROGRAMS_UUID)
-    return programIDs.some((id: string) => chipProgramIds.includes(id))
+const handleAsCHIPSubmission = (
+    pkg: LockedHealthPlanFormDataType | UnlockedHealthPlanFormDataType
+): boolean => {
+    //  This const is deprecated. No longer in use once we added population covered question, code remains only for backwards compatibility for existing Mississippi submissions.
+    const LEGACY_CHIP_PROGRAMS_UUID = {
+        MS: '36c54daf-7611-4a15-8c3b-cdeb3fd7e25a',
+    }
+
+    if (pkg.populationCovered === 'CHIP') {
+        return true
+    } else if (!pkg.populationCovered && pkg.stateCode === 'MS') {
+        const programIDs = findAllPackageProgramIds(pkg)
+        return programIDs.some(
+            (id: string) => LEGACY_CHIP_PROGRAMS_UUID.MS === id
+        )
+    } else {
+        return false
+    }
 }
+
 // Filter reviewers email list to ensure CHIP programs and state of PR submission do not include OACT and DMCP emails.
 const filterChipAndPRSubmissionReviewers = (
     reviewers: string[],
@@ -104,8 +111,6 @@ const generateCMSReviewerEmails = (
     }
 
     const { oactEmails, dmcpEmails } = config
-
-    const programIDs = findAllPackageProgramIds(pkg)
     let reviewers: string[] = []
 
     if (pkg.submissionType === 'CONTRACT_ONLY') {
@@ -126,7 +131,7 @@ const generateCMSReviewerEmails = (
     }
 
     //Remove OACT and DMCP emails from CHIP or State of PR submissions
-    if (includesChipPrograms(programIDs) || pkg.stateCode === 'PR') {
+    if (handleAsCHIPSubmission(pkg) || pkg.stateCode === 'PR') {
         reviewers = filterChipAndPRSubmissionReviewers(reviewers, config)
     }
 
@@ -188,8 +193,7 @@ const stripHTMLFromTemplate = (template: string) => {
 
 export {
     stripHTMLFromTemplate,
-    CHIP_PROGRAMS_UUID,
-    includesChipPrograms,
+    handleAsCHIPSubmission,
     generateCMSReviewerEmails,
     renderTemplate,
     SubmissionTypeRecord,
