@@ -12,6 +12,12 @@ const submissionTypeSchema = z.union([
     z.literal('CONTRACT_AND_RATES'),
 ])
 
+const populationCoveredSchema = z.union([
+    z.literal('MEDICAID'),
+    z.literal('CHIP'),
+    z.literal('MEDICAID_AND_CHIP'),
+])
+
 export const capitationRatesAmendedReasonSchema = z.union([
     z.literal('ANNUAL'),
     z.literal('MIDYEAR'),
@@ -165,6 +171,7 @@ export const unlockedHealthPlanFormDataSchema = z.object({
     stateCode: z.string(),
     stateNumber: z.number(),
     programIDs: z.array(z.string()),
+    populationCovered: populationCoveredSchema.optional(),
     submissionType: submissionTypeSchema,
     submissionDescription: z.string(),
     riskBasedContract: z.boolean().optional(),

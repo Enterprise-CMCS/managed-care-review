@@ -19,6 +19,7 @@ export type {
     SubmissionDocument,
     SubmissionType,
     RateInfoType,
+    PopulationCoveredType,
 } from './UnlockedHealthPlanFormDataType'
 
 export type { ModifiedProvisions } from './ModifiedProvisions'
@@ -42,6 +43,7 @@ export {
     convertRateSupportingDocs,
     removeRatesData,
     hasValidRateCertAssurance,
+    hasValidPopulationCoverage,
 } from './healthPlanFormData'
 
 export type { HealthPlanFormDataType } from './HealthPlanFormDataType'

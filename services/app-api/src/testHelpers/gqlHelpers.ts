@@ -261,6 +261,7 @@ const createAndUpdateTestHealthPlanPackage = async (
     ]
     draft.managedCareEntities = ['MCO']
     draft.federalAuthorities = ['STATE_PLAN' as const]
+    draft.populationCovered = 'MEDICAID' as const
 
     Object.assign(draft, partialUpdates)
 

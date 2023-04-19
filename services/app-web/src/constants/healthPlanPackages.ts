@@ -7,12 +7,19 @@ import {
     ActuaryCommunicationType,
     ContractExecutionStatus,
     ModifiedProvisions,
+    PopulationCoveredType,
 } from '../common-code/healthPlanFormDataType'
 import { HealthPlanPackageStatus } from '../gen/gqlClient'
 
 const SubmissionTypeRecord: Record<SubmissionType, string> = {
     CONTRACT_ONLY: 'Contract action only',
     CONTRACT_AND_RATES: 'Contract action and rate certification',
+}
+
+const PopulationCoveredRecord: Record<PopulationCoveredType, string> = {
+    MEDICAID: 'Medicaid',
+    CHIP: 'CHIP-only',
+    MEDICAID_AND_CHIP: 'Medicaid and CHIP',
 }
 
 const ContractTypeRecord: Record<ContractType, string> = {
@@ -101,4 +108,5 @@ export {
     ActuaryCommunicationRecord,
     ContractExecutionStatusRecord,
     SubmissionStatusRecord,
+    PopulationCoveredRecord,
 }

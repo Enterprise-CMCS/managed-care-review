@@ -2,6 +2,8 @@
 
 type SubmissionType = 'CONTRACT_ONLY' | 'CONTRACT_AND_RATES'
 
+type PopulationCoveredType = 'MEDICAID' | 'CHIP' | 'MEDICAID_AND_CHIP'
+
 type DocumentCategoryType =
     | 'CONTRACT'
     | 'RATES'
@@ -97,6 +99,7 @@ type UnlockedHealthPlanFormDataType = {
     stateCode: string
     stateNumber: number
     programIDs: string[]
+    populationCovered?: PopulationCoveredType
     submissionType: SubmissionType
     riskBasedContract?: boolean
     submissionDescription: string
@@ -133,4 +136,5 @@ export type {
     RateCapitationType,
     RateInfoType,
     SharedRateCertDisplay,
+    PopulationCoveredType,
 }

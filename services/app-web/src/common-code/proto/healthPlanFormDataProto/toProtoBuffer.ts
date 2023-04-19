@@ -138,6 +138,12 @@ const toProtoBuffer = (
 
         createdAt: domainDateToProtoDate(domainData.createdAt),
         updatedAt: domainDateToProtoTimestamp(domainData.updatedAt),
+
+        populationCovered: domainEnumToProto(
+            domainData.populationCovered,
+            mcreviewproto.PopulationCovered
+        ),
+
         submissionType: domainEnumToProto(
             domainData.submissionType,
             mcreviewproto.SubmissionType

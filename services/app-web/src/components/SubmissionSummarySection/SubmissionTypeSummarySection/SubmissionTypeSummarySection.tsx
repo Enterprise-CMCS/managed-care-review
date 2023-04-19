@@ -7,11 +7,14 @@ import { SectionHeader } from '../../../components/SectionHeader'
 import {
     SubmissionTypeRecord,
     ContractTypeRecord,
+    PopulationCoveredRecord,
 } from '../../../constants/healthPlanPackages'
 import { Program } from '../../../gen/gqlClient'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import { booleanAsYesNoUserValue } from '../../../components/Form/FieldYesNo/FieldYesNo'
 import styles from '../SubmissionSummarySection.module.scss'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../../common-code/featureFlags'
 
 export type SubmissionTypeSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -35,6 +38,12 @@ export const SubmissionTypeSummarySection = ({
         .filter((p) => submission.programIDs.includes(p.id))
         .map((p) => p.name)
     const isSubmitted = submission.status === 'SUBMITTED'
+
+    const ldClient = useLDClient()
+    const showCHIPOnlyForm = ldClient?.variation(
+        featureFlags.CHIP_ONLY_FORM.flag,
+        featureFlags.CHIP_ONLY_FORM.defaultValue
+    )
 
     return (
         <section id="submissionTypeSection" className={styles.summarySection}>
@@ -96,6 +105,19 @@ export const SubmissionTypeSummarySection = ({
                             submission.riskBasedContract
                         )}
                     />
+                    {showCHIPOnlyForm && (
+                        <DataDetail
+                            id="populationCoverage"
+                            label="Which populations does this contact action cover?"
+                            explainMissingData={!isSubmitted}
+                            children={
+                                submission.populationCovered &&
+                                PopulationCoveredRecord[
+                                    submission.populationCovered
+                                ]
+                            }
+                        />
+                    )}
                 </DoubleColumnGrid>
 
                 <Grid row gap className={styles.reviewDataRow}>

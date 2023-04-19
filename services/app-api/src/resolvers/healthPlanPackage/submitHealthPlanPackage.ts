@@ -11,6 +11,7 @@ import {
     LockedHealthPlanFormDataType,
     removeRatesData,
     hasValidRateCertAssurance,
+    hasValidPopulationCoverage,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     UpdateInfoType,
@@ -32,6 +33,7 @@ import { toDomain } from '../../../../app-web/src/common-code/proto/healthPlanFo
 import { EmailParameterStore } from '../../parameterStore'
 import { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql'
+import { FeatureFlagSettings } from 'app-web/src/common-code/featureFlags'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
@@ -65,7 +67,8 @@ export function isSubmissionError(err: unknown): err is SubmissionError {
 // This strategy (returning a different type from validation) is taken from the
 // "parse, don't validate" article: https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
 function submit(
-    draft: UnlockedHealthPlanFormDataType
+    draft: UnlockedHealthPlanFormDataType,
+    featureFlags?: FeatureFlagSettings
 ): LockedHealthPlanFormDataType | SubmissionError {
     const maybeStateSubmission: Record<string, unknown> = {
         ...draft,
@@ -73,16 +76,25 @@ function submit(
         submittedAt: new Date(),
     }
 
+    const validPopulationCovered = featureFlags?.['chip-only-form']
+        ? hasValidPopulationCoverage(
+              maybeStateSubmission as LockedHealthPlanFormDataType
+          )
+        : true
+
     const validRateCertAssurance = hasValidRateCertAssurance(
         maybeStateSubmission as LockedHealthPlanFormDataType
     )
+
     if (
         isLockedHealthPlanFormData(maybeStateSubmission) &&
-        validRateCertAssurance
+        validRateCertAssurance &&
+        validPopulationCovered
     )
         return maybeStateSubmission
     else if (
         !validRateCertAssurance ||
+        !validPopulationCovered ||
         !hasValidContract(maybeStateSubmission as LockedHealthPlanFormDataType)
     ) {
         return {
@@ -137,6 +149,11 @@ export function submitHealthPlanPackageResolver(
         const { submittedReason, pkgID } = input
         setResolverDetailsOnActiveSpan('submitHealthPlanPackage', user, span)
         span?.setAttribute('mcreview.package_id', pkgID)
+
+        const chipOnlyFormFlag = await launchDarkly.getFeatureFlag(
+            context,
+            'chip-only-form'
+        )
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
@@ -261,7 +278,9 @@ export function submitHealthPlanPackageResolver(
         }
 
         // attempt to parse into a StateSubmission
-        const submissionResult = submit(draftResult)
+        const submissionResult = submit(draftResult, {
+            'chip-only-form': chipOnlyFormFlag,
+        })
 
         if (isSubmissionError(submissionResult)) {
             const errMessage = submissionResult.message
