@@ -65,7 +65,7 @@ model Question {
   pkg           HealthPlanPackageTable @relation(fields: [pkgID], references: [id])
   addedBy       User                   @relation(fields: [addedByUserID], references: [id])
   addedByUserID String
-  division      Division?
+  division      Division
   documents     QuestionDocument[]
   responses     QuestionResponse[]
 }
