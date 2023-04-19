@@ -20,14 +20,14 @@ export function makeDateTableFromFormData(
             if (bucket === 'rateDocuments') {
                 revisionData.rateInfos.forEach((rateInfo) => {
                     rateInfo.rateDocuments.forEach((doc) => {
-                        if (doc.sha256)
-                            lookupTable[doc.sha256] = revisionData.updatedAt
+                        const key = doc.sha256 ? doc.sha256 : doc.s3URL
+                        lookupTable[key] = revisionData.updatedAt
                     })
                 })
             } else {
                 revisionData[bucket].forEach((doc) => {
-                    if (doc.sha256)
-                        lookupTable[doc.sha256] = revisionData.updatedAt
+                    const key = doc.sha256 ? doc.sha256 : doc.s3URL
+                    lookupTable[key] = revisionData.updatedAt
                 })
             }
         })
