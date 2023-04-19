@@ -200,7 +200,7 @@ export const UploadedDocumentsTable = ({
                                 </td>
                             )}
                             <td>
-                                {documentDateLookupTable && doc.sha256
+                                {documentDateLookupTable
                                     ? dayjs(
                                           documentDateLookupTable[
                                               doc.sha256 || doc.s3URL
