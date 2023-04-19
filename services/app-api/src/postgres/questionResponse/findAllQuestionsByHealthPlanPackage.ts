@@ -39,7 +39,7 @@ export async function findAllQuestionsByHealthPlanPackage(
                 ...question.addedBy,
                 stateAssignments: [],
             } as CMSUserType,
-            division: (question.division as Question['division']) || undefined,
+            division: question.division,
             responses: question.responses.map((response) => ({
                 ...response,
                 addedBy: response.addedBy as StateUserType,

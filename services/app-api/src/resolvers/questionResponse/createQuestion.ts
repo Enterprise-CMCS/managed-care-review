@@ -49,7 +49,12 @@ export function createQuestionResolver(
             const errMessage = `Issue finding a package of type ${result.code}. Message: ${result.message}`
             logError('createQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         if (result === undefined) {

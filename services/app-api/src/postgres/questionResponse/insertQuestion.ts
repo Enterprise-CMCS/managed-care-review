@@ -1,7 +1,11 @@
 import { PrismaClient } from '@prisma/client'
 import { CMSUserType, StateUserType } from '../../domain-models'
 import { convertPrismaErrorToStoreError, StoreError } from '../storeError'
-import { Question, CreateQuestionInput } from '../../domain-models'
+import {
+    Question,
+    CreateQuestionInput,
+    DivisionType,
+} from '../../domain-models'
 import { v4 as uuidv4 } from 'uuid'
 
 export async function insertQuestion(
@@ -32,7 +36,7 @@ export async function insertQuestion(
                 documents: {
                     create: documents,
                 },
-                division: user.divisionAssignment,
+                division: user.divisionAssignment as DivisionType,
             },
             include: {
                 documents: {
@@ -55,7 +59,7 @@ export async function insertQuestion(
         const createdQuestion: Question = {
             ...result,
             addedBy: user,
-            division: (result.division as Question['division']) || undefined,
+            division: result.division,
             responses: result.responses.map((response) => ({
                 ...response,
                 addedBy: response.addedBy as StateUserType,

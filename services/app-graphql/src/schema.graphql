@@ -598,7 +598,7 @@ type Question {
     createdAt: DateTime!
     addedBy: CMSUser!
     documents: [Document!]!
-    division: Division
+    division: Division!
     #    noteText: String
     #    dueDate: Date
     #    rateIDs: [String!]

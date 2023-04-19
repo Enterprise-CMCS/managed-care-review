@@ -13,7 +13,7 @@ type Question = {
     createdAt: Date
     addedBy: CMSUserType
     documents: Document[]
-    division?: DivisionType
+    division: DivisionType
     responses: QuestionResponseType[]
 }
 

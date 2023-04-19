@@ -49,6 +49,7 @@ const createQuestionSuccess = (
                         pkgID: testInput.pkgID,
                         createdAt: new Date(),
                         addedBy: mockValidCMSUser(),
+                        division: 'DMCO',
                         documents: testInput.documents,
                     },
                 },
