@@ -16,7 +16,6 @@ import {
 } from '../../testHelpers/apolloMocks'
 import {
     ldUseClientSpy,
-    prettyDebug,
     renderWithProviders,
 } from '../../testHelpers/jestHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
@@ -409,7 +408,6 @@ describe('SubmissionSummary', () => {
             )
             await waitFor(() => {
                 const rows = screen.getAllByRole('row')
-                prettyDebug()
                 expect(rows).toHaveLength(10)
                 expect(
                     within(rows[0]).getByText('Date added')
