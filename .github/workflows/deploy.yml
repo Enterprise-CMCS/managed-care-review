@@ -40,7 +40,8 @@ jobs:
         uses: github/lock@v2.0.1
         id: action-lock
         with:
-          mode: lock
+          mode: 'lock'
+          environment: 'global'
 
       - name: set app version
         id: app-version
@@ -366,6 +367,7 @@ jobs:
         id: action-unlock
         with:
           mode: 'unlock'
+          environment: 'global'
 
   cypress:
     name: cypress-run
