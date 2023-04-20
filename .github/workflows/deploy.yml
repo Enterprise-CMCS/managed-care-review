@@ -37,7 +37,7 @@ jobs:
           expected-secret: ${{ secrets.REACT_APP_AUTH_MODE }}
 
       - name: Lock branch if deploy is happening
-        uses: github/lock@v2
+        uses: github/lock@v2.0.1
         id: action-lock
         with:
           mode: lock
@@ -362,7 +362,7 @@ jobs:
         with:
           environment: dev
 
-      - uses: github/lock@v2
+      - uses: github/lock@v2.0.1
         id: action-unlock
         with:
           mode: 'unlock'
