@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-20.04
     permissions:
       deployments: write
+      contents: write
     outputs:
       deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
       stage-name: ${{ steps.stage-name.outputs.stage-name-for-branch}}
@@ -336,6 +337,7 @@ jobs:
     runs-on: ubuntu-20.04
     permissions:
       deployments: write
+      contents: write
     steps:
       - uses: actions/checkout@v3
 
