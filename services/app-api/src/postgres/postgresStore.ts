@@ -98,7 +98,9 @@ type Store = {
     updateCmsUserProperties: (
         userID: string,
         states: StateCodeType[],
-        division?: Division
+        idOfUserPerformingUpdate: string,
+        divisionAssignment?: Division,
+        description?: string | null
     ) => Promise<CMSUserType | StoreError>
 
     insertQuestion: (
@@ -143,12 +145,20 @@ function NewPostgresStore(client: PrismaClient): Store {
         findUser: (id) => findUser(client, id),
         insertUser: (args) => insertUser(client, args),
         insertManyUsers: (args) => insertManyUsers(client, args),
-        updateCmsUserProperties: (userID, stateCodes, divisionAssignment) =>
+        updateCmsUserProperties: (
+            userID,
+            stateCodes,
+            idOfUserPerformingUpdate,
+            divisionAssignment,
+            description
+        ) =>
             updateCmsUserProperties(
                 client,
                 userID,
                 stateCodes,
-                divisionAssignment
+                idOfUserPerformingUpdate,
+                divisionAssignment,
+                description
             ),
         findStatePrograms: findStatePrograms,
         findAllSupportedStates: () => findAllSupportedStates(client),

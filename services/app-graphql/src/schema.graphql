@@ -238,6 +238,8 @@ type Mutation {
 }
 
 input CreateHealthPlanPackageInput {
+    "Population that the contract covers"
+    populationCovered: PopulationCoveredType
     "An array of managed care program IDs this package covers"
     programIDs: [ID!]!
     "Whether or not this contract is risk based"
@@ -400,7 +402,7 @@ enum Division {
 input UpdateCMSUserInput {
     cmsUserID: ID!
     "stateAssignments is an array of stateCodes (e.g. ['CA', 'NM', 'TN'])"
-    stateAssignments: [String!]!
+    stateAssignments: [String!]
     "divisionAssignment is one of the CMS divisions to which a user is assigned: 'DMCO', 'DMCP', or 'OACT'"
     divisionAssignment: Division
 }
@@ -566,6 +568,12 @@ type HealthPlanRevision {
 
 type HealthPlanRevisionEdge {
     node: HealthPlanRevision!
+}
+
+enum PopulationCoveredType {
+    MEDICAID
+    CHIP
+    MEDICAID_AND_CHIP
 }
 
 enum SubmissionType {

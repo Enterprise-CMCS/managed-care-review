@@ -20,8 +20,8 @@ import './questionResponseCommands'
 import './launchDarklyCommands'
 import './e2e'
 import {
-    FeatureFlagTypes,
-    FlagValueTypes,
+    FeatureFlagLDConstant,
+    FeatureFlagSettings,
 } from '../../../services/app-web/src/common-code/featureFlags'
 
 type FormButtonKey =
@@ -88,11 +88,11 @@ declare global {
             //Launch Darkly commands
             stubFeatureFlags(): void
             interceptFeatureFlags(
-                toggleFlags?: Partial<Record<FeatureFlagTypes, FlagValueTypes>>
+                toggleFlags?: FeatureFlagSettings
             ): void
             getFeatureFlagStore(
-                featureFlag?: FeatureFlagTypes[]
-            ): Promise<Partial<Record<FeatureFlagTypes, FlagValueTypes>>>
+                featureFlag?: FeatureFlagLDConstant[]
+            ): Promise<FeatureFlagSettings>
         }
     }
 }

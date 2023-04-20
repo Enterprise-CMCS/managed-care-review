@@ -3,6 +3,7 @@ import { isS3Error } from '../s3'
 import { S3FileData } from '../components'
 import type { S3ClientT } from '../s3'
 import { BucketShortName } from '../s3/s3Amplify'
+import { recordJSException } from '../otelHelpers'
 
 type S3ContextT = {
     handleUploadFile: (
@@ -30,7 +31,9 @@ function S3Provider({ client, children }: S3ProviderProps): React.ReactElement {
 const useS3 = (): S3ContextT => {
     const context = React.useContext(S3Context)
     if (context === undefined) {
-        throw new Error('useS3 can only be used within an S3Provider')
+        const error = new Error('useS3 can only be used within an S3Provider')
+        recordJSException(error)
+        throw error
     }
 
     const { deleteFile, uploadFile, scanFile, getS3URL } = context
@@ -42,7 +45,9 @@ const useS3 = (): S3ContextT => {
         const s3Key = await uploadFile(file, bucket)
 
         if (isS3Error(s3Key)) {
-            throw new Error(`Error in S3: ${file.name}`)
+            const error = new Error(`Error in S3: ${file.name}`)
+            recordJSException(error)
+            throw error
         }
 
         const s3URL = await getS3URL(s3Key, file.name, bucket)
@@ -57,9 +62,13 @@ const useS3 = (): S3ContextT => {
             await scanFile(key, bucket)
         } catch (e) {
             if (isS3Error(e)) {
-                throw new Error(`Error in S3: ${key}`)
+                const error = new Error(`Error in S3: ${key}`)
+                recordJSException(error)
+                throw error
             }
-            throw new Error('Scanning error: Scanning retry timed out')
+            const error = new Error('Scanning error: Scanning retry timed out')
+            recordJSException(error)
+            throw error
         }
     }
     // We often don't want to actually delete a resource from s3 and that's what permanentFileKeys is for
@@ -78,7 +87,9 @@ const useS3 = (): S3ContextT => {
         if (!shouldPreserveFile) {
             const result = await deleteFile(key, bucket)
             if (isS3Error(result)) {
-                throw new Error(`Error in S3 key: ${key}`)
+                const error = new Error(`Error in S3 key: ${key}`)
+                recordJSException(error)
+                throw error
             }
         }
     }

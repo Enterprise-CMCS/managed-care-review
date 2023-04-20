@@ -68,6 +68,10 @@ custom:
     other: 'Delete'
     val: 'Retain'
     prod: 'Retain'
+  auroraMinCapacity:
+    other: 0.5
+    val: 1
+    prod: 1
 
 package:
   individually: true
@@ -110,20 +114,6 @@ resources:
           PasswordLength: 30
           ExcludePunctuation: true
 
-    PostgresAurora:
-      Type: AWS::RDS::DBCluster
-      DeletionPolicy: ${self:custom.deletionPolicy.${opt:stage}, self:custom.deletionPolicy.other}
-      Properties:
-        Engine: aurora-postgresql
-        EngineMode: serverless
-        DatabaseName: '${self:custom.databaseName}'
-        MasterUsername: !Sub '{{resolve:secretsmanager:${PostgresSecret}::username}}'
-        MasterUserPassword: !Sub '{{resolve:secretsmanager:${PostgresSecret}::password}}'
-        DBSubnetGroupName: !Ref PostgresSubnetGroup
-        VpcSecurityGroupIds: ['${self:custom.sgId}']
-        ScalingConfiguration:
-          AutoPause: ${self:custom.pauseAurora.${opt:stage}, self:custom.pauseAurora.other}
-
     PostgresAuroraV2:
       Type: AWS::RDS::DBCluster
       DeletionPolicy: ${self:custom.deletionPolicy.${opt:stage}, self:custom.deletionPolicy.other}
@@ -139,7 +129,7 @@ resources:
         EnableCloudwatchLogsExports:
           - postgresql
         ServerlessV2ScalingConfiguration:
-          MinCapacity: 1
+          MinCapacity: ${self:custom.auroraMinCapacity.${opt:stage}, self:custom.auroraMinCapacity.other}
           MaxCapacity: 32
 
     PostgresAuroraV2Instance:
@@ -185,7 +175,5 @@ resources:
         Principal: 'secretsmanager.amazonaws.com'
 
   Outputs:
-    PostgresAuroraArn:
-      Value: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAurora}'
     PostgresAuroraV2Arn:
       Value: !Sub 'arn:aws:rds:${AWS::Region}:${AWS::AccountId}:cluster:${PostgresAuroraV2}'

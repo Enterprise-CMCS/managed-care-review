@@ -43,18 +43,33 @@ model State {
 }
 
 model User {
-  id                 String             @id
-  createdAt     DateTime               @default(now())
-  updatedAt     DateTime               @default(now()) @updatedAt
-  givenName          String
-  familyName         String
-  email              String
-  role               Role
-  divisionAssignment Division?
-  stateAssignments   State[]
-  stateCode          String?
-  questions          Question[]
-  responses          QuestionResponse[]
+  id                    String             @id
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @default(now()) @updatedAt
+  givenName             String
+  familyName            String
+  email                 String
+  role                  Role
+  divisionAssignment    Division?
+  stateAssignments      State[]
+  stateCode             String?
+  questions             Question[]
+  responses             QuestionResponse[]
+  audits                UserAudit[]
+  updatedByAuditEntries UserAudit[]        @relation("UpdatedBy")
+}
+
+model UserAudit {
+  id              String      @id @default(uuid())
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  modifiedUserId  String      @map("userId")
+  user            User        @relation(fields: [modifiedUserId], references: [id])
+  updatedBy       User        @relation("UpdatedBy", fields: [updatedByUserId], references: [id])
+  updatedByUserId String
+  action          AuditAction
+  description     String?
+  priorValue      Json?
 }
 
 model Question {
@@ -111,4 +126,9 @@ enum Role {
   CMS_USER
   STATE_USER
   ADMIN_USER
+}
+
+enum AuditAction {
+  CHANGED_STATE_ASSIGNMENT
+  CHANGED_DIVISION_ASSIGNMENT
 }
