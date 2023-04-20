@@ -168,11 +168,11 @@ describe('UploadedDocumentsTable', () => {
             },
         ]
         const dateLookupTable = {
-            'supporting docs test 1':
+            's3://foo/bar/test-1':
                 'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            'supporting docs test 2':
+            's3://foo/bar/test-2':
                 'Sat Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            'supporting docs test 3':
+            's3://foo/bar/test-3':
                 'Sun Mar 27 2022 16:13:20 GMT-0500 (Central Daylight Time)',
             previousSubmissionDate:
                 'Sun Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
@@ -228,11 +228,11 @@ describe('UploadedDocumentsTable', () => {
             },
         ]
         const dateLookupTable = {
-            'supporting docs test 1':
+            's3://foo/bar/test-1':
                 'Fri Mar 25 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            'supporting docs test 2':
+            's3://foo/bar/test-2':
                 'Sat Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',
-            'supporting docs test 3':
+            's3://foo/bar/test-3':
                 'Sun Mar 27 2022 16:13:20 GMT-0500 (Central Daylight Time)',
             previousSubmissionDate:
                 'Sun Mar 26 2022 16:13:20 GMT-0500 (Central Daylight Time)',

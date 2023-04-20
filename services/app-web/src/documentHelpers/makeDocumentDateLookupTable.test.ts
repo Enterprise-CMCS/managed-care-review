@@ -21,17 +21,16 @@ describe('makeDateTable', () => {
         const lookupTable = makeDateTable(submissions)
 
         expect(lookupTable).toEqual({
-            '529-10-0020-00003_Superior_Health Plan, Inc.pdf': new Date(
-                '2022-03-25T21:13:20.420Z'
-            ),
-            'Amerigroup Texas Inc copy.pdf': new Date(
-                '2022-03-25T21:13:20.420Z'
-            ),
-            'Amerigroup Texas, Inc.pdf': new Date('2022-03-25T21:13:20.420Z'),
-            'covid-ifc-2-flu-rsv-codes 5-5-2021.pdf': new Date(
-                '2022-03-25T21:13:20.420Z'
-            ),
-            'lifeofgalileo.pdf': new Date('2022-03-28T17:56:32.953Z'),
+            's3://bucket/1648242711421-529-10-0020-00003_Superior_Health Plan, Inc.pdf/529-10-0020-00003_Superior_Health Plan, Inc.pdf':
+                new Date('2022-03-25T21:13:20.420Z'),
+            's3://bucket/1648242711421-Amerigroup Texas Inc copy.pdf/Amerigroup Texas Inc copy.pdf':
+                new Date('2022-03-25T21:13:20.420Z'),
+            's3://bucket/1648242665634-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf':
+                new Date('2022-03-25T21:13:20.420Z'),
+            's3://bucket/1648242873229-covid-ifc-2-flu-rsv-codes 5-5-2021.pdf/covid-ifc-2-flu-rsv-codes 5-5-2021.pdf':
+                new Date('2022-03-25T21:13:20.420Z'),
+            's3://bucket/1648490162641-lifeofgalileo.pdf/lifeofgalileo.pdf':
+                new Date('2022-03-28T17:56:32.953Z'),
             previousSubmissionDate: new Date('2022-03-25T21:14:43.057Z'),
         })
     })
@@ -77,8 +76,10 @@ describe('makeDateTable', () => {
         const lookupTable = makeDateTable(submissions)
 
         expect(lookupTable).toEqual({
-            'contract doc': new Date('2022-01-10T00:00:00.000Z'),
-            'Test Date Doc': new Date('2022-01-10T00:00:00.000Z'),
+            's3://bucketname/key/foo.png': new Date('2022-01-10T00:00:00.000Z'),
+            's3://bucketname/testDateDoc/testDateDoc.png': new Date(
+                '2022-01-10T00:00:00.000Z'
+            ),
             previousSubmissionDate: new Date('2022-02-10T00:00:00.000Z'),
         })
     })
