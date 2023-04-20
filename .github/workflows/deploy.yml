@@ -20,7 +20,6 @@ jobs:
     runs-on: ubuntu-20.04
     permissions:
       deployments: write
-      contents: write
     outputs:
       deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
       stage-name: ${{ steps.stage-name.outputs.stage-name-for-branch}}
@@ -37,12 +36,10 @@ jobs:
         with:
           expected-secret: ${{ secrets.REACT_APP_AUTH_MODE }}
 
-      - name: Lock branch if deploy is happening
-        uses: github/lock@v2.0.1
-        id: action-lock
-        with:
-          mode: 'lock'
-          environment: 'global'
+      - name: lock this branch to prevent concurrent deploys
+        run: ./.github/github-lock.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: set app version
         id: app-version
@@ -337,7 +334,6 @@ jobs:
     runs-on: ubuntu-20.04
     permissions:
       deployments: write
-      contents: write
     steps:
       - uses: actions/checkout@v3
 
@@ -364,12 +360,6 @@ jobs:
         uses: ./.github/actions/clean_up_deployments
         with:
           environment: dev
-
-      - uses: github/lock@v2.0.1
-        id: action-unlock
-        with:
-          mode: 'unlock'
-          environment: 'global'
 
   cypress:
     name: cypress-run
