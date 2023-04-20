@@ -36,10 +36,11 @@ jobs:
         with:
           expected-secret: ${{ secrets.REACT_APP_AUTH_MODE }}
 
-      - name: lock this branch to prevent concurrent deploys
-        run: ./.github/github-lock.sh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Lock branch if deploy is happening
+        uses: github/lock@v2
+        id: action-lock
+        with:
+          mode: lock
 
       - name: set app version
         id: app-version
@@ -360,6 +361,11 @@ jobs:
         uses: ./.github/actions/clean_up_deployments
         with:
           environment: dev
+
+      - uses: github/lock@v2
+        id: action-unlock
+        with:
+          mode: 'unlock'
 
   cypress:
     name: cypress-run
