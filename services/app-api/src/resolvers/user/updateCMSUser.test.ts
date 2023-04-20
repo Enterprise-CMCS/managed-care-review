@@ -1,4 +1,3 @@
-import { UserType } from '../../domain-models'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import UPDATE_CMS_USER from '../../../../app-graphql/src/mutations/updateCMSUser.graphql'
 import {
@@ -94,21 +93,14 @@ describe('updateCMSUser', () => {
     it('changes CMS users division assignment and creates an audit log', async () => {
         const firstDivisionAssignment: Division = 'DMCO'
         const secondDivisionAssignment: Division = 'DMCP'
-
-        const testAdminUser: UserType = {
-            id: 'd60e82de-13d7-459b-825e-61ce6ca2eb36',
-            role: 'ADMIN_USER',
-            email: 'iroh@example.com',
-            familyName: 'Iroh',
-            givenName: 'Uncle',
-        }
+        const adminUser = testAdminUser()
 
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
         const server = await constructTestPostgresServer({
             store: postgresStore,
             context: {
-                user: testAdminUser,
+                user: adminUser,
             },
         })
 
@@ -186,7 +178,7 @@ describe('updateCMSUser', () => {
         )
         // we changed from null to a value, so priorValue should be null
         expect(auditLogs[0].priorValue).toBe(JSON.stringify(null))
-        expect(auditLogs[0].updatedByUserId).toBe(testAdminUser.id)
+        expect(auditLogs[0].updatedByUserId).toBe(adminUser.id)
 
         expect(auditLogs[1].action).toBe(
             AuditAction.CHANGED_DIVISION_ASSIGNMENT
@@ -194,7 +186,7 @@ describe('updateCMSUser', () => {
         expect(auditLogs[1].priorValue).toBe(
             JSON.stringify(firstDivisionAssignment)
         )
-        expect(auditLogs[1].updatedByUserId).toBe(testAdminUser.id)
+        expect(auditLogs[1].updatedByUserId).toBe(adminUser.id)
     })
 
     it('errors if the target is not a CMS user', async () => {
@@ -324,20 +316,12 @@ describe('updateCMSUser', () => {
     })
 
     it('returns an error with missing arguments', async () => {
-        const testAdminUser: UserType = {
-            id: 'd60e82de-13d7-459b-825e-61ce6ca2eb36',
-            role: 'ADMIN_USER',
-            email: 'iroh@example.com',
-            familyName: 'Iroh',
-            givenName: 'Uncle',
-        }
-
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
         const server = await constructTestPostgresServer({
             store: postgresStore,
             context: {
-                user: testAdminUser,
+                user: testAdminUser(),
             },
         })
 
