@@ -47,19 +47,11 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             file: File,
             bucket: BucketShortName
         ): Promise<string | S3Error> => {
-            let fileHash
-            try {
-                fileHash = await calculateSHA256(file)
-                console.info('File hash generated', fileHash)
-            } catch (error) {
-                console.error('Error generating file hash', error)
-                throw error
-            }
+            const fileHash = await calculateSHA256(file)
             const uuid = uuidv4()
             const ext = file.name.split('.').pop()
             //encode file names and decoding done in bulk_downloads.ts
             const fileName = encodeURIComponent(file.name)
-            console.info('file hash before put', fileHash)
             try {
                 const stored = await Storage.put(`${uuid}.${ext}`, file, {
                     bucket: bucketConfig[bucket],
@@ -67,7 +59,6 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                     contentDisposition: `attachment; filename=${fileName}`,
                     tagging: `sha256=${fileHash}`,
                 })
-
                 assertIsS3PutResponse(stored)
                 return stored.key
             } catch (err) {

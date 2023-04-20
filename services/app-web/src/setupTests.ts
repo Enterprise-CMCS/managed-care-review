@@ -10,8 +10,8 @@ import '@testing-library/jest-dom'
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 Element.prototype.scrollIntoView = () => {}
 
+// to make calculating the sha work in jest
 Object.assign(window, {
     crypto: crypto,
 })
-
 Object.assign(global, { TextDecoder, TextEncoder })
