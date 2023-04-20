@@ -35,13 +35,9 @@ type IndexQuestionDivisions =
     | 'OACTQuestions'
 
 const divisionToIndexQuestionDivision = (
-    division?: Division | null
-): IndexQuestionDivisions => {
-    if (division) {
-        return `${division.toUpperCase()}Questions` as IndexQuestionDivisions
-    }
-    return `'DMCOQuestions` as IndexQuestionDivisions
-}
+    division: Division
+): IndexQuestionDivisions =>
+    `${division.toUpperCase()}Questions` as IndexQuestionDivisions
 
 const handleApolloErrorsAndAddUserFacingMessages = (
     apolloError: ApolloError,
@@ -248,7 +244,7 @@ export const createResponseWrapper = async (
         questionID: string
         documents: Document[]
     },
-    division?: Division
+    division: Division
 ): Promise<CreateQuestionResponseMutation | GraphQLErrors | Error> => {
     try {
         const result = await createResponse({

@@ -215,7 +215,7 @@ export const RateDetailsSummarySection = ({
                 {submission.rateInfos.length > 0 ? (
                     submission.rateInfos.map((rateInfo) => {
                         return (
-                            <React.Fragment key={`${rateInfo.id}`}>
+                            <React.Fragment key={rateInfo.id}>
                                 <h3
                                     aria-label={`Rate ID: ${rateInfo.rateCertificationName}`}
                                     className={styles.rateName}
