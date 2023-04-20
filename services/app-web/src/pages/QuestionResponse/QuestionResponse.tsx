@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { GridContainer, Link } from '@trussworks/react-uswds'
 import styles from './QuestionResponse.module.scss'
 
-import { SectionHeader } from '../../components'
+import { Loading, SectionHeader } from '../../components'
 import { NavLink, useLocation, useOutletContext } from 'react-router-dom'
 import { usePage } from '../../contexts/PageContext'
 import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
@@ -51,17 +51,26 @@ export const QuestionResponse = () => {
     // router context
     const location = useLocation()
     const submitType = new URLSearchParams(location.search).get('submit')
-    const { user, packageName, pkg } =
+    const { user, packageData, packageName, pkg } =
         useOutletContext<SideNavOutletContextType>()
     let division: Division | undefined = undefined
 
     // page context
     const { updateHeading } = usePage()
-    const isCMSUser = user?.role === 'CMS_USER'
 
     useEffect(() => {
         updateHeading({ customHeading: packageName })
     }, [packageName, updateHeading])
+
+    if (!packageData || !user) {
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
+        )
+    }
+
+    const isCMSUser = user?.role === 'CMS_USER'
 
     if (isCMSUser) {
         division = getUserDivision(user as CMSUserType)
