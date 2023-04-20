@@ -25,8 +25,7 @@ export const convertToIndexQuestionsPayload = (
         } else if (question.division === 'OACT') {
             questionsPayload.OACTQuestions.edges.push({ node: question })
             questionsPayload.OACTQuestions.totalCount++
-        } else {
-            //Default unassigned division questions to DMCO.
+        } else if (question.division === 'DMCO') {
             questionsPayload.DMCOQuestions.edges.push({ node: question })
             questionsPayload.DMCOQuestions.totalCount++
         }

@@ -36,14 +36,16 @@ const extractQuestions = (edges?: QuestionEdge[]): QuestionData[] => {
 const getUserDivision = (user: CMSUserType): Division | undefined =>
     user.divisionAssignment
 
-const getDivisionOrder = (division?: Division): Division[] => {
-    const order = ['DMCO', 'DMCP', 'OACT'] as Division[]
-    if (division) {
-        order.splice(order.indexOf(division), 1)
-        order.unshift(division)
-    }
-    return order
-}
+const getDivisionOrder = (division?: Division): Division[] =>
+    ['DMCO', 'DMCP', 'OACT'].sort((a, b) => {
+        if (a === division) {
+            return -1
+        }
+        if (b === division) {
+            return 1
+        }
+        return 0
+    }) as Division[]
 
 export const QuestionResponse = () => {
     // router context

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { CMSUserType, StateUserType } from '../../domain-models'
+import { CMSUserType, QuestionResponseType } from '../../domain-models'
 import { convertPrismaErrorToStoreError, StoreError } from '../storeError'
 import {
     Question,
@@ -59,11 +59,9 @@ export async function insertQuestion(
         const createdQuestion: Question = {
             ...result,
             addedBy: user,
-            division: result.division,
-            responses: result.responses.map((response) => ({
-                ...response,
-                addedBy: response.addedBy as StateUserType,
-            })),
+            responses: result.responses.map(
+                (response) => response as QuestionResponseType
+            ),
         }
 
         return createdQuestion
