@@ -8,6 +8,7 @@ import {
     FileInputRef,
 } from '@trussworks/react-uswds'
 import { PoliteErrorMessage } from '../'
+import { recordJSException } from '../../otelHelpers'
 
 import styles from './FileUpload.module.scss'
 
@@ -250,6 +251,15 @@ export const FileUpload = ({
                                 const newItems = [...prevItems]
                                 return newItems.map((item) => {
                                     if (item.key === data.key) {
+                                        if (
+                                            item.status ===
+                                            'DUPLICATE_NAME_ERROR'
+                                        ) {
+                                            const error = new Error(
+                                                `DUPLICATE_NAME_ERROR: ${item.status}`
+                                            )
+                                            recordJSException(error)
+                                        }
                                         return {
                                             ...item,
                                             file: undefined,
@@ -270,6 +280,10 @@ export const FileUpload = ({
                                 const newItems = [...prevItems]
                                 return newItems.map((item) => {
                                     if (item.key === data.key) {
+                                        const error = new Error(
+                                            `SCANNING_ERROR: ${item}`
+                                        )
+                                        recordJSException(error)
                                         return {
                                             ...item,
                                             S3URL: null,
@@ -281,9 +295,13 @@ export const FileUpload = ({
                                 })
                             })
                             // immediately delete this bad file
-                            deleteFile(data.key).catch(() =>
-                                console.info('Error deleting from s3')
-                            )
+                            deleteFile(data.key).catch(() => {
+                                const error = new Error(
+                                    'Error deleting from s3'
+                                )
+                                recordJSException(error)
+                                console.info(error)
+                            })
                         }
                     }
                 })
@@ -292,6 +310,8 @@ export const FileUpload = ({
                         const newItems = [...prevItems]
                         return newItems.map((item) => {
                             if (item.file === file) {
+                                const error = new Error(`UPLOAD_ERROR: ${item}`)
+                                recordJSException(error)
                                 return {
                                     ...item,
                                     status: 'UPLOAD_ERROR',
