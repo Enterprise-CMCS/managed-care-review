@@ -135,12 +135,12 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
     const currentFiles: Partial<UnlockedHealthPlanFormDataType> = {
         contractDocuments: [
             {
-                s3URL: 's3://bucket/1648242632157-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf',
+                s3URL: 's3://bucketname/1648242632157-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf',
                 name: 'Amerigroup Texas, Inc.pdf',
                 documentCategories: ['CONTRACT'],
             },
             {
-                s3URL: 's3://bucket/1648490162641-lifeofgalileo.pdf/lifeofgalileo.pdf',
+                s3URL: 's3://bucketname/1648490162641-lifeofgalileo.pdf/lifeofgalileo.pdf',
                 name: 'lifeofgalileo.pdf',
                 documentCategories: ['CONTRACT'],
             },
@@ -149,12 +149,12 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
             {
                 rateDocuments: [
                     {
-                        s3URL: 's3://bucket/1648242665634-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf',
+                        s3URL: 's3://bucketname/1648242665634-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf',
                         name: 'Amerigroup Texas, Inc.pdf',
                         documentCategories: ['RATES_RELATED'],
                     },
                     {
-                        s3URL: 's3://bucket/1648242711421-Amerigroup Texas Inc copy.pdf/Amerigroup Texas Inc copy.pdf',
+                        s3URL: 's3://bucketname/1648242711421-Amerigroup Texas Inc copy.pdf/Amerigroup Texas Inc copy.pdf',
                         name: 'Amerigroup Texas Inc copy.pdf',
                         documentCategories: ['RATES_RELATED'],
                     },
@@ -165,12 +165,12 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
         ],
         documents: [
             {
-                s3URL: 's3://bucket/1648242711421-529-10-0020-00003_Superior_Health Plan, Inc.pdf/529-10-0020-00003_Superior_Health Plan, Inc.pdf',
+                s3URL: 's3://bucketname/1648242711421-529-10-0020-00003_Superior_Health Plan, Inc.pdf/529-10-0020-00003_Superior_Health Plan, Inc.pdf',
                 name: '529-10-0020-00003_Superior_Health Plan, Inc.pdf',
                 documentCategories: ['CONTRACT_RELATED'],
             },
             {
-                s3URL: 's3://bucket/1648242873229-covid-ifc-2-flu-rsv-codes 5-5-2021.pdf/covid-ifc-2-flu-rsv-codes 5-5-2021.pdf',
+                s3URL: 's3://bucketname/1648242873229-covid-ifc-2-flu-rsv-codes 5-5-2021.pdf/covid-ifc-2-flu-rsv-codes 5-5-2021.pdf',
                 name: 'covid-ifc-2-flu-rsv-codes 5-5-2021.pdf',
                 documentCategories: ['RATES_RELATED'],
             },
