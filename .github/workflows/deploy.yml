@@ -440,7 +440,7 @@ jobs:
         uses: paambaati/codeclimate-action@v3.2.0
         continue-on-error: true
         env:
-          CC_TEST_REPORTER_ID: cace182021fe88d327fa8d95355ac6081f420e094a214fe77feb5df2f0259e9d
+          CC_TEST_REPORTER_ID: f7474ffe9522492f5380eb86189480f352c841718c1fe6a63f169353c7cee243
         with:
           debug: true
           coverageLocations: |
