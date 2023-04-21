@@ -8,6 +8,9 @@ set -e -o xtrace -o errexit -o pipefail -o nounset -u
 ########################################################################################
 
 branch=${GITHUB_REF#refs/heads/}
+if [ -n "$1" ]; then branch=$1; fi
+echo "Branch name set to ${branch}"
+
 rest=()
 github_base_url="api.github.com"
 api_url="https://$github_base_url/repos/$GITHUB_REPOSITORY/actions/runs?status=in_progress&branch=$branch"
