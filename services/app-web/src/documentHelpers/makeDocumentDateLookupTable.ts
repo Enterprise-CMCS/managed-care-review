@@ -3,6 +3,7 @@ import { HealthPlanPackage } from '../gen/gqlClient'
 import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
 import { DocumentDateLookupTable } from '../pages/SubmissionSummary/SubmissionSummary'
 import { recordJSException } from '../otelHelpers/tracingHelper'
+import { getDocumentKey } from './getDocumentKey'
 
 const DocBuckets = ['contractDocuments', 'rateDocuments', 'documents'] as const
 
@@ -20,14 +21,14 @@ export function makeDateTableFromFormData(
             if (bucket === 'rateDocuments') {
                 revisionData.rateInfos.forEach((rateInfo) => {
                     rateInfo.rateDocuments.forEach((doc) => {
-                        const key = doc.sha256 ? doc.sha256 : doc.s3URL
-                        lookupTable[key] = revisionData.updatedAt
+                        const documentKey = getDocumentKey(doc)
+                        lookupTable[documentKey] = revisionData.updatedAt
                     })
                 })
             } else {
                 revisionData[bucket].forEach((doc) => {
-                    const key = doc.sha256 ? doc.sha256 : doc.s3URL
-                    lookupTable[key] = revisionData.updatedAt
+                    const documentKey = getDocumentKey(doc)
+                    lookupTable[documentKey] = revisionData.updatedAt
                 })
             }
         })

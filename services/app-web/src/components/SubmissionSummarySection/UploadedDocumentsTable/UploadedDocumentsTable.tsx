@@ -9,6 +9,7 @@ import { usePreviousSubmission } from '../../../hooks'
 import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { DocumentTag } from './DocumentTag'
 import { useDocument } from '../../../hooks/useDocument'
+import { getDocumentKey } from '../../../documentHelpers/getDocumentKey'
 export type UploadedDocumentsTableProps = {
     documents: SubmissionDocument[]
     caption: string | null
@@ -86,7 +87,7 @@ export const UploadedDocumentsTable = ({
         isBothContractAndRateSupporting(doc)
     )
     const shouldHaveNewTag = (doc: SubmissionDocument) => {
-        const documentKey = doc.sha256 ? doc.sha256 : doc.s3URL
+        const documentKey = getDocumentKey(doc)
         return (
             isCMSUser &&
             documentDateLookupTable &&
