@@ -100,7 +100,8 @@ jobs:
         env:
           REACT_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
-        run: ./dev test web --unit
+        working-directory: services/app-web
+        run: yarn test:once --coverage
 
       - name: upload unit test coverage
         uses: actions/upload-artifact@v3
@@ -143,12 +144,26 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Generate GraphQL
+        run: lerna run gqlgen
+
+      - name: Generate Protos
+        run: lerna run generate --scope=app-proto
+
+      - name: Generate Prisma
+        working-directory: services/app-api
+        run: |
+          lerna run generate --scope=app-api
+          npx prisma migrate reset --force
+
       - name: API Unit Tests
         env:
           NODE_OPTIONS: --max_old_space_size=6000
           REACT_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
-        run: ./dev test api --unit
+        working-directory: services/app-api
+        run: |
+          yarn test:once --coverage
 
       - name: upload api test coverage
         uses: actions/upload-artifact@v3
