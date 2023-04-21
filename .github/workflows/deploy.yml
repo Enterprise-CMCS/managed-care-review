@@ -96,6 +96,12 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Generate GraphQL
+        run: lerna run gqlgen
+
+      - name: Generate Protos
+        run: lerna run generate --scope=app-proto
+
       - name: Web Unit Tests
         env:
           REACT_APP_AUTH_MODE: AWS_COGNITO
