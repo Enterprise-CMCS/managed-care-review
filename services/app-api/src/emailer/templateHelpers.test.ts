@@ -1,8 +1,7 @@
 import {
-    CHIP_PROGRAMS_UUID,
     filterChipAndPRSubmissionReviewers,
     generateCMSReviewerEmails,
-    includesChipPrograms,
+    handleAsCHIPSubmission,
 } from './templateHelpers'
 import { UnlockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 import {
@@ -29,7 +28,6 @@ describe('templateHelpers', () => {
             expectedResult: [
                 ...testEmailConfig.devReviewTeamEmails,
                 ...testStateAnalystsEmails,
-                ...testEmailConfig.dmcoEmails,
                 ...testEmailConfig.dmcpEmails,
             ],
         },
@@ -41,7 +39,6 @@ describe('templateHelpers', () => {
             expectedResult: [
                 ...testEmailConfig.devReviewTeamEmails,
                 ...testStateAnalystsEmails,
-                ...testEmailConfig.dmcoEmails,
                 ...testEmailConfig.dmcpEmails,
                 ...testEmailConfig.oactEmails,
             ],
@@ -60,7 +57,6 @@ describe('templateHelpers', () => {
                 'devreview2@example.com',
                 '"State Analyst 1" <StateAnalyst1@example.com>',
                 '"State Analyst 2" <StateAnalyst2@example.com>',
-                ...testEmailConfig.dmcoEmails,
             ],
         },
         {
@@ -105,7 +101,6 @@ describe('templateHelpers', () => {
                 'devreview2@example.com',
                 '"State Analyst 1" <StateAnalyst1@example.com>',
                 '"State Analyst 2" <StateAnalyst2@example.com>',
-                ...testEmailConfig.dmcoEmails,
             ],
         },
         {
@@ -120,7 +115,6 @@ describe('templateHelpers', () => {
                 'devreview2@example.com',
                 '"State Analyst 1" <StateAnalyst1@example.com>',
                 '"State Analyst 2" <StateAnalyst2@example.com>',
-                ...testEmailConfig.dmcoEmails,
             ],
         },
         {
@@ -150,19 +144,41 @@ describe('templateHelpers', () => {
 
     test.each([
         {
-            programIds: ['234-cfsdf-234324', CHIP_PROGRAMS_UUID['MS']],
-            testDescription: 'valid CHIP ids in list',
+            pkg: mockUnlockedContractAndRatesFormData({
+                populationCovered: 'CHIP',
+            }),
+            testDescription: 'for valid CHIP submission',
             expectedResult: true,
         },
         {
-            programIds: ['23432-df-123', 'not-chip'],
-            testDescription: 'without CHIP ids in list',
+            pkg: mockUnlockedContractAndRatesFormData({
+                stateCode: 'MS',
+                populationCovered: undefined,
+                programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
+            }),
+            testDescription:
+                'for MS submission with a CHIP associated ID for legacy reasons',
+            expectedResult: true,
+        },
+        {
+            pkg: mockUnlockedContractAndRatesFormData({
+                stateCode: 'AZ',
+                populationCovered: undefined,
+            }),
+            testDescription: 'for non MS submission with no population covered',
+            expectedResult: false,
+        },
+        {
+            pkg: mockUnlockedContractAndRatesFormData({
+                populationCovered: 'MEDICAID',
+            }),
+            testDescription: 'for non CHIP submission',
             expectedResult: false,
         },
     ])(
-        'includesChipPrograms: $testDescription',
-        ({ programIds, expectedResult }) => {
-            expect(includesChipPrograms(programIds)).toEqual(expectedResult)
+        'handleAsCHIPSubmission: $testDescription',
+        ({ pkg, expectedResult }) => {
+            expect(handleAsCHIPSubmission(pkg)).toEqual(expectedResult)
         }
     )
 
@@ -188,23 +204,6 @@ describe('templateHelpers', () => {
             expectedResult: [
                 'Bobloblaw@example.com',
                 'Lucille.Bluth@example.com',
-            ],
-        },
-        {
-            reviewers: [
-                'Bobloblaw@example.com',
-                'Lucille.Bluth@example.com',
-                testEmailConfig.dmcpEmails[0],
-                testEmailConfig.dmcoEmails[0],
-                testEmailConfig.oactEmails[0],
-            ],
-            config: testEmailConfig,
-            testDescription:
-                'does not remove dmco emails, they should get all emails',
-            expectedResult: [
-                'Bobloblaw@example.com',
-                'Lucille.Bluth@example.com',
-                testEmailConfig.dmcoEmails[0],
             ],
         },
     ])(

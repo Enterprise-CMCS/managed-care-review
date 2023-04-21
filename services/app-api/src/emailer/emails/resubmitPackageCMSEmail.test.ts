@@ -297,7 +297,7 @@ describe('with rates', () => {
             })
         )
     })
-    test('to addresses list includes all division emails for contract and rate package', async () => {
+    test('to addresses list includes DMCP and OACT group emails for contract and rate package', async () => {
         const template = await resubmitPackageCMSEmail(
             submission,
             resubmitData,
@@ -311,14 +311,6 @@ describe('with rates', () => {
             return
         }
 
-        testEmailConfig.dmcoEmails.forEach((emailAddress) => {
-            expect(template).toEqual(
-                expect.objectContaining({
-                    toAddresses: expect.arrayContaining([emailAddress]),
-                })
-            )
-        })
-
         testEmailConfig.dmcpEmails.forEach((emailAddress) => {
             expect(template).toEqual(
                 expect.objectContaining({
@@ -329,6 +321,15 @@ describe('with rates', () => {
 
         testEmailConfig.oactEmails.forEach((emailAddress) => {
             expect(template).toEqual(
+                expect.objectContaining({
+                    toAddresses: expect.arrayContaining([emailAddress]),
+                })
+            )
+        })
+
+        // do not include dmco group emails - rely on state analysts instead
+        testEmailConfig.dmcoEmails.forEach((emailAddress) => {
+            expect(template).not.toEqual(
                 expect.objectContaining({
                     toAddresses: expect.arrayContaining([emailAddress]),
                 })

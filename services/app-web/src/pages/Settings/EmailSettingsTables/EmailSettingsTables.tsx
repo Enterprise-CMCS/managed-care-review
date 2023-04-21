@@ -61,7 +61,7 @@ const EmailsGeneralTable = ({ config }: { config: EmailConfiguration }) => {
                     <tr>
                         <td>{formatEmails(config?.dmcoEmails)}</td>
                         <td>DMCO division emails</td>
-                        <td>All submissions</td>
+                        <td>None</td>
                     </tr>
                     <tr>
                         <td>{formatEmails(config?.dmcpEmails)}</td>
