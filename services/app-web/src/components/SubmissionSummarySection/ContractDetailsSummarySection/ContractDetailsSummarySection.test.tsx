@@ -378,7 +378,7 @@ describe('ContractDetailsSummarySection', () => {
         ])
     })
 
-    it('shows missing field error on amended provisions when expected', () => {
+    it('shows missing field error on contract amendment when provisions list is empty', () => {
         const contractWithUnansweredProvisions: UnlockedHealthPlanFormDataType =
             {
                 ...mockContractAndRatesDraft(),
@@ -411,10 +411,104 @@ describe('ContractDetailsSummarySection', () => {
             )
         ).toBeInTheDocument()
     })
-    it('does not show missing field error on amended provisions when expected when valid fields present', () => {
+    it('shows missing field error on contract amendment when provisions list is is incomplete', () => {
+        const contractWithUnansweredProvisions: UnlockedHealthPlanFormDataType =
+            {
+                ...mockContractAndRatesDraft(),
+                populationCovered: 'MEDICAID',
+                contractAmendmentInfo: {
+                    // intentionally putting CHIP population provisions here which is more limited list than is required for Medicaid contrat
+                    modifiedProvisions: {
+                        modifiedBenefitsProvided: false,
+                        modifiedGeoAreaServed: false,
+                        modifiedMedicaidBeneficiaries: true,
+                        modifiedMedicalLossRatioStandards: false,
+                        modifiedOtherFinancialPaymentIncentive: false,
+                        modifiedEnrollmentProcess: false,
+                        modifiedGrevienceAndAppeal: false,
+                        modifiedNetworkAdequacyStandards: false,
+                        modifiedLengthOfContract: true,
+                        modifiedNonRiskPaymentArrangements: false,
+                    },
+                },
+            }
+        renderWithProviders(
+            <ContractDetailsSummarySection
+                submission={contractWithUnansweredProvisions}
+                submissionName="MN-PMAP-0001"
+            />
+        )
+
+        const modifiedProvisions = screen.getByLabelText(
+            'This contract action includes new or modified provisions related to the following'
+        )
+        expect(
+            within(modifiedProvisions).queryByText(
+                /You must provide this information/
+            )
+        ).toBeInTheDocument()
+
+        const unmodifiedProvisions = screen.getByLabelText(
+            'This contract action does NOT include new or modified provisions related to the following'
+        )
+        expect(
+            within(unmodifiedProvisions).queryByText(
+                /You must provide this information/
+            )
+        ).toBeInTheDocument()
+    })
+
+    it('does not show missing field error on contract amendment for CHIP when all provisions required are valid', () => {
         const contractWithAllUnmodifiedProvisions: UnlockedHealthPlanFormDataType =
             {
                 ...mockContractAndRatesDraft(),
+                populationCovered: 'CHIP',
+                contractAmendmentInfo: {
+                    modifiedProvisions: {
+                        modifiedBenefitsProvided: false,
+                        modifiedGeoAreaServed: false,
+                        modifiedMedicaidBeneficiaries: true,
+                        modifiedMedicalLossRatioStandards: false,
+                        modifiedOtherFinancialPaymentIncentive: false,
+                        modifiedEnrollmentProcess: false,
+                        modifiedGrevienceAndAppeal: false,
+                        modifiedNetworkAdequacyStandards: false,
+                        modifiedLengthOfContract: true,
+                        modifiedNonRiskPaymentArrangements: false,
+                    },
+                },
+            }
+        renderWithProviders(
+            <ContractDetailsSummarySection
+                submission={contractWithAllUnmodifiedProvisions}
+                submissionName="MN-PMAP-0001"
+            />
+        )
+
+        const modifiedProvisions = screen.getByLabelText(
+            'This contract action includes new or modified provisions related to the following'
+        )
+        expect(
+            within(modifiedProvisions).queryByText(
+                /You must provide this information/
+            )
+        ).toBeNull()
+
+        const unmodifiedProvisions = screen.getByLabelText(
+            'This contract action does NOT include new or modified provisions related to the following'
+        )
+        expect(
+            within(unmodifiedProvisions).queryByText(
+                /You must provide this information/
+            )
+        ).toBeNull()
+    })
+
+    it('does not show missing field error on contract amendment for Medicaid when all provisions required are valid', () => {
+        const contractWithAllUnmodifiedProvisions: UnlockedHealthPlanFormDataType =
+            {
+                ...mockContractAndRatesDraft(),
+                populationCovered: 'MEDICAID',
                 contractAmendmentInfo: {
                     modifiedProvisions: {
                         modifiedBenefitsProvided: false,
