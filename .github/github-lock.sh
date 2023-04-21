@@ -8,7 +8,9 @@ set -e -o xtrace -o errexit -o pipefail -o nounset -u
 ########################################################################################
 
 branch=${GITHUB_REF#refs/heads/}
-if [ -n "$1" ]; then branch=$1; fi
+if [ -n "${GITHUB_HEAD_REF}" ]; then 
+    branch=${GITHUB_HEAD_REF}; 
+fi
 echo "Branch name set to ${branch}"
 
 rest=()

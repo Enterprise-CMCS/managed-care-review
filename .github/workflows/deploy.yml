@@ -53,7 +53,7 @@ jobs:
         run: echo "::set-output name=branch-name::$(echo ${GITHUB_REF#refs/heads/})"
 
       - name: lock this branch to prevent concurrent deploys
-        run: ./.github/github-lock.sh ${{steps.branch-name.outputs.branch-name}}
+        run: ./.github/github-lock.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
