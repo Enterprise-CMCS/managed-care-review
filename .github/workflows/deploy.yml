@@ -151,6 +151,10 @@ jobs:
         run: lerna run generate --scope=app-proto
 
       - name: Generate Prisma
+        env:
+          NODE_OPTIONS: --max_old_space_size=6000
+          REACT_APP_AUTH_MODE: AWS_COGNITO
+          DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-api
         run: |
           lerna run generate --scope=app-api
