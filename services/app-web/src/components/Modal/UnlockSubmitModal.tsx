@@ -4,6 +4,7 @@ import { FormGroup, ModalRef, Textarea } from '@trussworks/react-uswds'
 import { useNavigate } from 'react-router-dom'
 import {
     FetchHealthPlanPackageWithQuestionsDocument,
+    FetchHealthPlanPackageDocument,
     HealthPlanPackage,
     useSubmitHealthPlanPackageMutation,
     useUnlockHealthPlanPackageMutation,
@@ -137,13 +138,41 @@ export const UnlockSubmitModal = ({
         //Allow submitting/unlocking to continue on EMAIL_ERROR.
         if (result instanceof Error && result.cause === 'EMAIL_ERROR') {
             modalRef.current?.toggleModal(undefined, false)
+
+            // We cannot update cache and re-fetch query inside the mutation because it returns an apollo
+            // error on failing emails. We have to manually update cache depending on unlock or submit
             if (modalType !== 'UNLOCK' && submissionName) {
+                // Updating the package status here so when redirected to the dashboard the status will be up-to-date
+                // without having to wait for the refetch.
+                client.cache.updateQuery(
+                    {
+                        query: FetchHealthPlanPackageDocument,
+                        variables: {
+                            input: {
+                                pkgID: healthPlanPackage.id,
+                            },
+                        },
+                    },
+                    (data) => {
+                        const pkg = data?.fetchHealthPlanPackage?.pkg
+
+                        if (pkg) {
+                            return {
+                                fetchHealthPlanPackage: {
+                                    __typename: 'FetchHealthPlanPackagePayload',
+                                    pkg: {
+                                        ...pkg,
+                                        status: 'SUBMITTED',
+                                    },
+                                },
+                            }
+                        }
+                    }
+                )
                 navigate(`/dashboard?justSubmitted=${submissionName}`)
             } else {
                 // Updating the cache here with unlockInfo before manually re-fetching query.
                 // This will prevent the loading animation to happen and have up-to-date unlock banner.
-                // We cannot update cache and re-fetch query inside the mutation because it returns an apollo
-                // error on failing emails.
                 const pkg = healthPlanPackage as HealthPlanPackage
                 client.cache.writeQuery({
                     query: FetchHealthPlanPackageWithQuestionsDocument,
