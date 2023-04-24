@@ -4,7 +4,12 @@ import {
     UnlockedHealthPlanFormDataType,
     ActuaryContact,
 } from './UnlockedHealthPlanFormDataType'
-import { ModifiedProvisions } from './ModifiedProvisions'
+import {
+    allowedProvisionsForCHIP,
+    excludedProvisionsForCHIP,
+    modifiedProvisionKeys,
+    ModifiedProvisions,
+} from './ModifiedProvisions'
 import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import { HealthPlanFormDataType } from './HealthPlanFormDataType'
 import { formatRateNameDate } from '../../common-code/dateHelpers'
@@ -24,25 +29,18 @@ const isRateAmendment = (rateInfo: RateInfoType): boolean =>
     rateInfo.rateType === 'AMENDMENT'
 
 const hasValidModifiedProvisions = (
-    provisions: ModifiedProvisions | undefined
+    provisions: ModifiedProvisions | undefined,
+    isCHIP: boolean
 ): boolean =>
-    provisions !== undefined &&
-    provisions.modifiedBenefitsProvided !== undefined &&
-    provisions.modifiedGeoAreaServed !== undefined &&
-    provisions.modifiedMedicaidBeneficiaries !== undefined &&
-    provisions.modifiedRiskSharingStrategy !== undefined &&
-    provisions.modifiedIncentiveArrangements !== undefined &&
-    provisions.modifiedWitholdAgreements !== undefined &&
-    provisions.modifiedStateDirectedPayments !== undefined &&
-    provisions.modifiedPassThroughPayments !== undefined &&
-    provisions.modifiedPaymentsForMentalDiseaseInstitutions !== undefined &&
-    provisions.modifiedMedicalLossRatioStandards !== undefined &&
-    provisions.modifiedOtherFinancialPaymentIncentive !== undefined &&
-    provisions.modifiedEnrollmentProcess !== undefined &&
-    provisions.modifiedGrevienceAndAppeal !== undefined &&
-    provisions.modifiedNetworkAdequacyStandards !== undefined &&
-    provisions.modifiedLengthOfContract !== undefined &&
-    provisions.modifiedNonRiskPaymentArrangements !== undefined
+    isCHIP
+        ? provisions !== undefined &&
+          allowedProvisionsForCHIP.every(
+              (provision) => provisions[provision] !== undefined
+          )
+        : provisions !== undefined &&
+          modifiedProvisionKeys.every(
+              (provision) => provisions[provision] !== undefined
+          )
 
 const hasValidContract = (sub: LockedHealthPlanFormDataType): boolean =>
     sub.contractType !== undefined &&
@@ -53,7 +51,8 @@ const hasValidContract = (sub: LockedHealthPlanFormDataType): boolean =>
     sub.federalAuthorities.length !== 0 &&
     (sub.contractType === 'BASE' || // If it's an amendment, then all the yes/nos must be set.
         hasValidModifiedProvisions(
-            sub.contractAmendmentInfo?.modifiedProvisions
+            sub.contractAmendmentInfo?.modifiedProvisions,
+            sub.populationCovered === 'CHIP'
         ))
 
 const hasValidRateCertAssurance = (
@@ -313,6 +312,18 @@ const removeRatesData = (
     return pkg
 }
 
+const removeNonCHIPData = (
+    pkg: UnlockedHealthPlanFormDataType
+): UnlockedHealthPlanFormDataType => {
+    excludedProvisionsForCHIP.forEach((provision) => {
+        if (pkg.contractAmendmentInfo?.modifiedProvisions[provision]) {
+            pkg.contractAmendmentInfo.modifiedProvisions[provision] = undefined
+        }
+    })
+
+    return pkg
+}
+
 export {
     hasValidContract,
     hasValidDocuments,
@@ -328,6 +339,7 @@ export {
     generateRateName,
     convertRateSupportingDocs,
     removeRatesData,
+    removeNonCHIPData,
     hasValidRateCertAssurance,
     hasValidPopulationCoverage,
 }

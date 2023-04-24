@@ -21,6 +21,25 @@ const modifiedProvisionKeys = [
     'modifiedNonRiskPaymentArrangements',
 ] as const
 
-export type { ModifiedProvisions }
+type ProvisionType = typeof modifiedProvisionKeys[number]
 
-export { modifiedProvisionKeys }
+const excludedProvisionsForCHIP: ProvisionType[] = [
+    'modifiedRiskSharingStrategy',
+    'modifiedIncentiveArrangements',
+    'modifiedWitholdAgreements',
+    'modifiedStateDirectedPayments',
+    'modifiedPassThroughPayments',
+    'modifiedPaymentsForMentalDiseaseInstitutions',
+]
+
+const allowedProvisionsForCHIP = modifiedProvisionKeys.filter(
+    (p) => !excludedProvisionsForCHIP.includes(p)
+)
+
+export type { ModifiedProvisions, ProvisionType }
+
+export {
+    modifiedProvisionKeys,
+    excludedProvisionsForCHIP,
+    allowedProvisionsForCHIP,
+}

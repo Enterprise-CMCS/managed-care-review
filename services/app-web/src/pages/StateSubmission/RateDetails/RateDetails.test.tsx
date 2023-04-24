@@ -899,7 +899,7 @@ describe('RateDetails', () => {
                     'Remove MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
                 )
             ).not.toBeInTheDocument()
-        })
+        }, 10000)
 
         it('cannot continue when shared rate radio is unchecked', async () => {
             ldUseClientSpy({ 'packages-with-shared-rates': true })

@@ -16,6 +16,10 @@ import {
 } from '../../../testHelpers/jestHelpers'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { ContractDetails } from './'
+import {
+    allowedProvisionsForCHIP,
+    modifiedProvisionKeys,
+} from '../../../common-code/healthPlanFormDataType'
 
 const scrollIntoViewMock = jest.fn()
 HTMLElement.prototype.scrollIntoView = scrollIntoViewMock
@@ -48,69 +52,6 @@ describe('ContractDetails', () => {
         )
 
         expect(screen.getByText(/All fields are required/)).toBeInTheDocument()
-    })
-
-    it('allows setting a yes/no modified provision', async () => {
-        const emptyDraft = mockDraft()
-        emptyDraft.contractType = 'AMENDMENT'
-        const mockUpdateDraftFn = jest.fn()
-        renderWithProviders(
-            <ContractDetails
-                draftSubmission={emptyDraft}
-                updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
-
-        // click "next"
-        const continueButton = screen.getByRole('button', { name: 'Continue' })
-        await userEvent.click(continueButton)
-
-        // check for yes/no errors
-        await waitFor(() => {
-            expect(
-                screen.getAllByText('You must select yes or no')
-            ).toHaveLength(32)
-        })
-
-        const benefitsGroup = screen.getByText(
-            'Benefits provided by the managed care plans'
-        ).parentElement
-        const geoGroup = screen.getByText(
-            'Geographic areas served by the managed care plans'
-        ).parentElement
-        const lengthGroup = screen.getByText(
-            'Length of the contract period'
-        ).parentElement
-
-        if (
-            benefitsGroup === null ||
-            geoGroup === null ||
-            lengthGroup === null
-        ) {
-            throw new Error('Benefits and Geo and Length must have parents.')
-        }
-
-        // choose yes and no
-        const benefitsYes = within(benefitsGroup).getByLabelText('Yes') //
-        const geoNo = within(geoGroup).getByLabelText('No')
-        const lengthYes = within(lengthGroup).getByLabelText('Yes')
-
-        await userEvent.click(benefitsYes)
-        await userEvent.click(geoNo)
-        await userEvent.click(lengthYes)
-
-        // error should be reduced by 3
-        await waitFor(() => {
-            expect(
-                screen.queryAllByText('You must select yes or no')
-            ).toHaveLength(26)
-        })
     })
 
     describe('Contract documents file upload', () => {
@@ -201,6 +142,263 @@ describe('ContractDetails', () => {
                 expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
                 expect(screen.getByText(TEST_PDF_FILE.name)).toBeInTheDocument()
                 expect(screen.getByText(TEST_XLS_FILE.name)).toBeInTheDocument()
+            })
+        })
+    })
+
+    describe('Modified provisions - yes/nos', () => {
+        it('allows setting all modified provisions for medicaid contract amendment', async () => {
+            const emptyDraft = mockDraft()
+            emptyDraft.contractType = 'AMENDMENT'
+            emptyDraft.populationCovered = 'MEDICAID'
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyDraft}
+                    updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            // click "next"
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+
+            // risk and payment related provisions should be visible
+            expect(
+                screen.queryByText(/Risk-sharing strategy/)
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(/Withhold arrangements in accordance/)
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(/Payments to MCOs and PIHPs/)
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(/State directed payments/)
+            ).toBeInTheDocument()
+
+            await userEvent.click(continueButton)
+
+            // check for yes/no errors  - each field shows up twice, once in error summary, one as inline error next to label
+            await waitFor(() => {
+                expect(
+                    screen.getAllByText('You must select yes or no')
+                ).toHaveLength(modifiedProvisionKeys.length * 2)
+            })
+
+            const benefitsGroup = screen.getByText(
+                'Benefits provided by the managed care plans'
+            ).parentElement
+            const geoGroup = screen.getByText(
+                'Geographic areas served by the managed care plans'
+            ).parentElement
+            const lengthGroup = screen.getByText(
+                'Length of the contract period'
+            ).parentElement
+
+            if (
+                benefitsGroup === null ||
+                geoGroup === null ||
+                lengthGroup === null
+            ) {
+                throw new Error(
+                    'Benefits and Geo and Length must have parents.'
+                )
+            }
+
+            // choose yes and no
+            const benefitsYes = within(benefitsGroup).getByLabelText('Yes') //
+            const geoNo = within(geoGroup).getByLabelText('No')
+            const lengthYes = within(lengthGroup).getByLabelText('Yes')
+
+            await userEvent.click(benefitsYes)
+            await userEvent.click(geoNo)
+            await userEvent.click(lengthYes)
+
+            await waitFor(() => {
+                expect(
+                    screen.queryAllByText('You must select yes or no')
+                ).toHaveLength(modifiedProvisionKeys.length * 2 - 6)
+            })
+        })
+
+        it('shows correct validations for medicaid contract amendment', async () => {
+            const emptyDraft = mockDraft()
+            emptyDraft.contractType = 'AMENDMENT'
+            emptyDraft.populationCovered = 'MEDICAID'
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyDraft}
+                    updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            // click "next"
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            await userEvent.click(continueButton)
+
+            // check for yes/no errors  - each field shows up twice, once in error summary, one as inline error next to lab
+            await waitFor(() => {
+                expect(
+                    screen.getAllByText('You must select yes or no')
+                ).toHaveLength(modifiedProvisionKeys.length * 2)
+            })
+
+            const benefitsGroup = screen.getByText(
+                'Benefits provided by the managed care plans'
+            ).parentElement
+            const geoGroup = screen.getByText(
+                'Geographic areas served by the managed care plans'
+            ).parentElement
+            const lengthGroup = screen.getByText(
+                'Length of the contract period'
+            ).parentElement
+
+            if (
+                benefitsGroup === null ||
+                geoGroup === null ||
+                lengthGroup === null
+            ) {
+                throw new Error(
+                    'Benefits and Geo and Length must have parents.'
+                )
+            }
+
+            // choose yes and no
+            const benefitsYes = within(benefitsGroup).getByLabelText('Yes') //
+            const geoNo = within(geoGroup).getByLabelText('No')
+            const lengthYes = within(lengthGroup).getByLabelText('Yes')
+
+            await userEvent.click(benefitsYes)
+            await userEvent.click(geoNo)
+            await userEvent.click(lengthYes)
+
+            await waitFor(() => {
+                expect(
+                    screen.queryAllByText('You must select yes or no')
+                ).toHaveLength(modifiedProvisionKeys.length * 2 - 6)
+            })
+        })
+
+        it('does not allow setting risk related or payments provisions for CHIP only submissions', async () => {
+            const emptyDraft = mockDraft()
+            emptyDraft.contractType = 'AMENDMENT'
+            emptyDraft.populationCovered = 'CHIP'
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyDraft}
+                    updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            // click "next"
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            await userEvent.click(continueButton)
+
+            // check for yes/no errors - each field shows up twice, once in error summary, one as inline error next to lab
+            await waitFor(() => {
+                expect(
+                    screen.getAllByText('You must select yes or no')
+                ).toHaveLength(allowedProvisionsForCHIP.length * 2)
+            })
+
+            expect(screen.queryByText(/Risk-sharing strategy/)).toBeNull()
+            expect(
+                screen.queryByText(/Withhold arrangements in accordance/)
+            ).toBeNull()
+            expect(screen.queryByText(/Payments to MCOs and PIHPs/)).toBeNull()
+            expect(screen.queryByText(/State directed payments/)).toBeNull()
+        })
+
+        it('shows correct validations for CHIP only submissions', async () => {
+            const emptyDraft = mockDraft()
+            emptyDraft.contractType = 'AMENDMENT'
+            emptyDraft.populationCovered = 'CHIP'
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyDraft}
+                    updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            // click "next"
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            await userEvent.click(continueButton)
+
+            // check for yes/no errors - each field shows up twice, once in error summary, one as inline error next to lab
+            await waitFor(() => {
+                expect(
+                    screen.getAllByText('You must select yes or no')
+                ).toHaveLength(allowedProvisionsForCHIP.length * 2)
+            })
+
+            const benefitsGroup = screen.getByText(
+                'Benefits provided by the managed care plans'
+            ).parentElement
+            const geoGroup = screen.getByText(
+                'Geographic areas served by the managed care plans'
+            ).parentElement
+            const lengthGroup = screen.getByText(
+                'Length of the contract period'
+            ).parentElement
+
+            if (
+                benefitsGroup === null ||
+                geoGroup === null ||
+                lengthGroup === null
+            ) {
+                throw new Error(
+                    'Benefits and Geo and Length must have parents.'
+                )
+            }
+
+            // choose yes and no
+            const benefitsYes = within(benefitsGroup).getByLabelText('Yes') //
+            const geoNo = within(geoGroup).getByLabelText('No')
+            const lengthYes = within(lengthGroup).getByLabelText('Yes')
+
+            await userEvent.click(benefitsYes)
+            await userEvent.click(geoNo)
+            await userEvent.click(lengthYes)
+
+            await waitFor(() => {
+                expect(
+                    screen.queryAllByText('You must select yes or no')
+                ).toHaveLength(allowedProvisionsForCHIP.length * 2 - 6)
             })
         })
     })
