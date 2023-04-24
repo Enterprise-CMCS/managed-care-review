@@ -367,21 +367,6 @@ export const SubmissionType = ({
                                             }
                                         />
                                         <FieldRadio
-                                            id="chip"
-                                            name="populationCovered"
-                                            label={
-                                                PopulationCoveredRecord['CHIP']
-                                            }
-                                            value={'CHIP'}
-                                            onClick={() =>
-                                                handlePopulationCoveredClick(
-                                                    'CHIP',
-                                                    values,
-                                                    setFieldValue
-                                                )
-                                            }
-                                        />
-                                        <FieldRadio
                                             id="medicaid-and-chip"
                                             name="populationCovered"
                                             label={
@@ -393,6 +378,21 @@ export const SubmissionType = ({
                                             onClick={() =>
                                                 handlePopulationCoveredClick(
                                                     'MEDICAID_AND_CHIP',
+                                                    values,
+                                                    setFieldValue
+                                                )
+                                            }
+                                        />
+                                        <FieldRadio
+                                            id="chip"
+                                            name="populationCovered"
+                                            label={
+                                                PopulationCoveredRecord['CHIP']
+                                            }
+                                            value={'CHIP'}
+                                            onClick={() =>
+                                                handlePopulationCoveredClick(
+                                                    'CHIP',
                                                     values,
                                                     setFieldValue
                                                 )
@@ -481,7 +481,7 @@ export const SubmissionType = ({
                                             <div
                                                 role="note"
                                                 aria-labelledby="submissionType"
-                                                className="usa-hint margin-top-1"
+                                                className="usa-hint padding-top-2"
                                             >
                                                 States are not required to
                                                 submit rates with CHIP-only

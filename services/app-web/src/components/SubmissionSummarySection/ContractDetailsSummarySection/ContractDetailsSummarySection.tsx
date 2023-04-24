@@ -16,8 +16,11 @@ import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
+    allowedProvisionsForCHIP,
     HealthPlanFormDataType,
+    modifiedProvisionKeys,
     ModifiedProvisions,
+    ProvisionType,
 } from '../../../common-code/healthPlanFormDataType'
 import { DataDetailCheckboxList } from '../../DataDetail/DataDetailCheckboxList'
 
@@ -31,10 +34,11 @@ export type ContractDetailsSummarySectionProps = {
 
 // This function takes a ContractAmendmentInfo and returns two lists of keys sorted by whether they are set true/false
 export function sortModifiedProvisions(
-    amendmentInfo: ModifiedProvisions | undefined
-): [string[], string[]] {
-    const modifiedProvisions = []
-    const unmodifiedProvisions = []
+    amendmentInfo: ModifiedProvisions | undefined,
+    isCHIPOnly: boolean
+): [ProvisionType[], ProvisionType[]] {
+    const modifiedProvisions: ProvisionType[] = []
+    let unmodifiedProvisions: ProvisionType[] = []
 
     if (amendmentInfo) {
         // We type cast this to be the list of keys in the ContractAmendmentInfo
@@ -51,7 +55,12 @@ export function sortModifiedProvisions(
             }
         }
     }
-
+    // remove any lingering fields that not allowed for CHIP from unmodified list entirely. They will be removed server side on submit.
+    if (isCHIPOnly) {
+        unmodifiedProvisions = unmodifiedProvisions.filter((unmodified) =>
+            allowedProvisionsForCHIP.includes(unmodified)
+        )
+    }
     return [modifiedProvisions, unmodifiedProvisions]
 }
 
@@ -109,11 +118,18 @@ export const ContractDetailsSummarySection = ({
     ])
 
     const [modifiedProvisions, unmodifiedProvisions] = sortModifiedProvisions(
-        submission.contractAmendmentInfo?.modifiedProvisions
+        submission.contractAmendmentInfo?.modifiedProvisions,
+        submission.populationCovered === 'CHIP'
     )
 
+    // Ensure that missing field validations for modified provisions works properly even though required provisions list shifts depending on submission
+    const requiredProvisions =
+        submission.populationCovered === 'CHIP'
+            ? allowedProvisionsForCHIP
+            : modifiedProvisionKeys
     const amendmentProvisionsUnanswered =
-        modifiedProvisions.length === 0 && unmodifiedProvisions.length === 0
+        modifiedProvisions.length + unmodifiedProvisions.length !==
+        requiredProvisions.length
 
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>

@@ -1,14 +1,12 @@
 import * as Yup from 'yup'
-import { FeatureFlagTypes } from '../../../common-code/featureFlags'
+import { FeatureFlagSettings } from '../../../common-code/featureFlags'
 import { validateDateFormat } from '../../../formHelpers'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
-type FeatureFlagsForYup = Partial<Record<FeatureFlagTypes, boolean>>
-
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
-const SubmissionTypeFormSchema = (flags: FeatureFlagsForYup = {}) =>
+const SubmissionTypeFormSchema = (flags: FeatureFlagSettings = {}) =>
     Yup.object().shape({
         populationCovered: flags['chip-only-form']
             ? Yup.string().required(

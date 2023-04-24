@@ -131,7 +131,7 @@ describe('SubmissionType', () => {
                 await screen.getByRole('radio', { name: 'CHIP-only' })
             ).toBeInTheDocument()
             expect(
-                await screen.getByRole('radio', { name: 'Medicaid & CHIP' })
+                await screen.getByRole('radio', { name: 'Medicaid and CHIP' })
             ).toBeInTheDocument()
         })
         it('disables contract and rates submission type radio and displays hint when CHIP only is selected', async () => {
@@ -262,7 +262,7 @@ describe('SubmissionType', () => {
                 name: 'CHIP-only',
             })
             const medicaidAndChipRadio = await screen.getByRole('radio', {
-                name: 'Medicaid & CHIP',
+                name: 'Medicaid and CHIP',
             })
             const contractAndRatesRadio = await screen.getByRole('radio', {
                 name: 'Contract action and rate certification',
@@ -368,7 +368,7 @@ describe('SubmissionType', () => {
                 await screen.getByRole('radio', { name: 'CHIP-only' })
             ).toBeInTheDocument()
             expect(
-                await screen.getByRole('radio', { name: 'Medicaid & CHIP' })
+                await screen.getByRole('radio', { name: 'Medicaid and CHIP' })
             ).toBeInTheDocument()
 
             // Test validations work.

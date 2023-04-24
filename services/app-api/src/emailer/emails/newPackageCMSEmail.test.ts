@@ -40,7 +40,7 @@ test('to addresses list includes review team email addresses', async () => {
     })
 })
 
-test('to addresses list includes all division emails for contract and rate package', async () => {
+test('to addresses list includes OACT and DMCP group emails for contract and rate package', async () => {
     const sub = mockContractAndRatesFormData()
     const statePrograms = mockMNState().programs
     const template = await newPackageCMSEmail(
@@ -63,7 +63,7 @@ test('to addresses list includes all division emails for contract and rate packa
         )
     })
 
-    testEmailConfig.dmcoEmails.forEach((emailAddress) => {
+    testEmailConfig.dmcpEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),
@@ -71,8 +71,41 @@ test('to addresses list includes all division emails for contract and rate packa
         )
     })
 
+    // do not include dmco group emails - rely on state analysts instead
+    testEmailConfig.dmcoEmails.forEach((emailAddress) => {
+        expect(template).not.toEqual(
+            expect.objectContaining({
+                toAddresses: expect.arrayContaining([emailAddress]),
+            })
+        )
+    })
+})
+
+test('to addresses list  does not include OACT and DMCP group emails for CHIP submission', async () => {
+    const sub = mockContractOnlyFormData({ populationCovered: 'CHIP' })
+    const statePrograms = mockMNState().programs
+    const template = await newPackageCMSEmail(
+        sub,
+        testEmailConfig,
+        [],
+        statePrograms
+    )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
+    testEmailConfig.oactEmails.forEach((emailAddress) => {
+        expect(template).not.toEqual(
+            expect.objectContaining({
+                toAddresses: expect.arrayContaining([emailAddress]),
+            })
+        )
+    })
+
     testEmailConfig.dmcpEmails.forEach((emailAddress) => {
-        expect(template).toEqual(
+        expect(template).not.toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),
             })
@@ -128,6 +161,7 @@ test('to addresses list does not include duplicate review email addresses', asyn
 
     expect(template.toAddresses).toEqual(['duplicate@example.com'])
 })
+
 test('subject line is correct', async () => {
     const sub = mockContractOnlyFormData()
     const statePrograms = mockMNState().programs

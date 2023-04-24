@@ -39,7 +39,7 @@ import {
     SubmissionDocument,
     ContractExecutionStatus,
     FederalAuthority,
-    HealthPlanFormDataType,
+    allowedProvisionsForCHIP,
 } from '../../../common-code/healthPlanFormDataType'
 import {
     ManagedCareEntityRecord,
@@ -112,6 +112,7 @@ export const ContractDetails = ({
 }: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const navigate = useNavigate()
+
     // Contract documents state management
     const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
@@ -217,6 +218,13 @@ export const ContractDetails = ({
         }
     }
 
+    // submission helpers
+    const isCHIPOnly = draftSubmission.populationCovered === 'CHIP'
+    const isContractAmendment = draftSubmission.contractType === 'AMENDMENT'
+    const applicableProvisions = isCHIPOnly
+        ? allowedProvisionsForCHIP
+        : modifiedProvisionKeys
+
     const contractDetailsInitialValues: ContractDetailsFormValues = {
         contractExecutionStatus:
             draftSubmission?.contractExecutionStatus ?? undefined,
@@ -301,10 +309,6 @@ export const ContractDetails = ({
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
-    const isContractAmendmentSelected = (
-        draftSubmission: HealthPlanFormDataType
-    ): boolean => draftSubmission.contractType === 'AMENDMENT'
-
     const handleFormSubmit = async (
         values: ContractDetailsFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
@@ -365,7 +369,7 @@ export const ContractDetails = ({
         draftSubmission.federalAuthorities = values.federalAuthorities
         draftSubmission.contractDocuments = contractDocuments
 
-        if (draftSubmission.contractType === 'AMENDMENT') {
+        if (isContractAmendment) {
             draftSubmission.contractAmendmentInfo = {
                 modifiedProvisions: {
                     modifiedBenefitsProvided: formatYesNoForProto(
@@ -452,9 +456,7 @@ export const ContractDetails = ({
                 })
             }}
             validationSchema={() =>
-                ContractDetailsFormSchema(
-                    draftSubmission.contractType ?? 'BASE'
-                )
+                ContractDetailsFormSchema(isContractAmendment, isCHIPOnly)
             }
         >
             {({
@@ -590,9 +592,7 @@ export const ContractDetails = ({
                                         <Fieldset
                                             aria-required
                                             legend={
-                                                isContractAmendmentSelected(
-                                                    draftSubmission
-                                                )
+                                                isContractAmendment
                                                     ? 'Amendment effective dates'
                                                     : 'Contract effective dates'
                                             }
@@ -815,15 +815,13 @@ export const ContractDetails = ({
                                             />
                                         </Fieldset>
                                     </FormGroup>
-                                    {isContractAmendmentSelected(
-                                        draftSubmission
-                                    ) && (
+                                    {isContractAmendment && (
                                         <FormGroup>
                                             <Fieldset
                                                 aria-required
                                                 legend="Does this contract action include new or modified provisions related to any of the following"
                                             >
-                                                {modifiedProvisionKeys.map(
+                                                {applicableProvisions.map(
                                                     (modifiedProvisionName) => (
                                                         <FieldYesNo
                                                             id={

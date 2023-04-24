@@ -25,6 +25,7 @@ import {
     TEST_PNG_FILE,
     dragAndDrop,
     updateDateRange,
+    ldUseClientSpy,
 } from '../../../testHelpers'
 import { RateDetails } from './RateDetails'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
@@ -239,6 +240,7 @@ describe('RateDetails', () => {
         })
 
         it('progressively disclose new rate form fields as expected', async () => {
+            ldUseClientSpy({ 'packages-with-shared-rates': true })
             renderWithProviders(
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft}
@@ -668,6 +670,7 @@ describe('RateDetails', () => {
 
     describe('handles rates across submissions', () => {
         it('correctly checks shared rate certification radios and selects shared packages', async () => {
+            ldUseClientSpy({ 'packages-with-shared-rates': true })
             //Spy on useStatePrograms hook to get up-to-date state programs
             jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
                 mockMNState().programs
@@ -727,6 +730,7 @@ describe('RateDetails', () => {
                     },
                 }
             )
+
             const rateCertsOnLoad = rateCertifications(screen)
             expect(rateCertsOnLoad).toHaveLength(1)
 
@@ -895,9 +899,10 @@ describe('RateDetails', () => {
                     'Remove MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
                 )
             ).not.toBeInTheDocument()
-        })
+        }, 10000)
 
         it('cannot continue when shared rate radio is unchecked', async () => {
+            ldUseClientSpy({ 'packages-with-shared-rates': true })
             //Spy on useStatePrograms hook to get up-to-date state programs
             jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
                 mockMNState().programs
@@ -1027,6 +1032,7 @@ describe('RateDetails', () => {
         })
 
         it('cannot continue when shared rate radio is checked and no package is selected', async () => {
+            ldUseClientSpy({ 'packages-with-shared-rates': true })
             //Spy on useStatePrograms hook to get up-to-date state programs
             jest.spyOn(useStatePrograms, 'useStatePrograms').mockReturnValue(
                 mockMNState().programs
@@ -1689,6 +1695,7 @@ describe('RateDetails', () => {
 // Helper functions
 
 const fillOutIndexRate = async (screen: Screen, index: number) => {
+    ldUseClientSpy({ 'packages-with-shared-rates': true })
     const targetRateCert = rateCertifications(screen)[index]
     expect(targetRateCert).toBeDefined()
     const withinTargetRateCert = within(targetRateCert)

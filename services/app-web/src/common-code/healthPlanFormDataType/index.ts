@@ -22,9 +22,12 @@ export type {
     PopulationCoveredType,
 } from './UnlockedHealthPlanFormDataType'
 
-export type { ModifiedProvisions } from './ModifiedProvisions'
+export type { ModifiedProvisions, ProvisionType } from './ModifiedProvisions'
 
-export { modifiedProvisionKeys } from './ModifiedProvisions'
+export {
+    modifiedProvisionKeys,
+    allowedProvisionsForCHIP,
+} from './ModifiedProvisions'
 
 export type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 export {
@@ -41,6 +44,7 @@ export {
     packageName,
     generateRateName,
     convertRateSupportingDocs,
+    removeNonCHIPData,
     removeRatesData,
     hasValidRateCertAssurance,
     hasValidPopulationCoverage,

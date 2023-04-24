@@ -12,6 +12,7 @@ import {
     removeRatesData,
     hasValidRateCertAssurance,
     hasValidPopulationCoverage,
+    removeNonCHIPData,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     UpdateInfoType,
@@ -33,10 +34,7 @@ import { toDomain } from '../../../../app-web/src/common-code/proto/healthPlanFo
 import { EmailParameterStore } from '../../parameterStore'
 import { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql'
-import {
-    FeatureFlagTypes,
-    FlagValueTypes,
-} from 'app-web/src/common-code/featureFlags'
+import { FeatureFlagSettings } from 'app-web/src/common-code/featureFlags'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
@@ -71,7 +69,7 @@ export function isSubmissionError(err: unknown): err is SubmissionError {
 // "parse, don't validate" article: https://lexi-lambda.github.io/blog/2019/11/05/parse-don-t-validate/
 function submit(
     draft: UnlockedHealthPlanFormDataType,
-    featureFlags?: Partial<Record<FeatureFlagTypes, FlagValueTypes>>
+    featureFlags?: FeatureFlagSettings
 ): LockedHealthPlanFormDataType | SubmissionError {
     const maybeStateSubmission: Record<string, unknown> = {
         ...draft,
@@ -278,6 +276,14 @@ export function submitHealthPlanPackageResolver(
             hasAnyValidRateData(draftResult)
         ) {
             Object.assign(draftResult, removeRatesData(draftResult))
+        }
+
+        // CHIP submissions should not contain any provision relevant to other populations
+        if (
+            draftResult.contractType === 'AMENDMENT' &&
+            draftResult.populationCovered === 'CHIP'
+        ) {
+            Object.assign(draftResult, removeNonCHIPData(draftResult))
         }
 
         // attempt to parse into a StateSubmission
