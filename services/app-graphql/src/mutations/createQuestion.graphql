@@ -10,11 +10,13 @@ mutation createQuestion($input: CreateQuestionInput!) {
                 email
                 givenName
                 familyName
+                divisionAssignment
                 stateAssignments {
                     code
                     name
                 }
             }
+            division
             documents {
                 name
                 s3URL

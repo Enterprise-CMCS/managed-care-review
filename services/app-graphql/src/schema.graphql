@@ -197,6 +197,7 @@ type Mutation {
     Errors:
     - ForbiddenError:
         - A non CMSUser called this
+        - A CMS user with unassigned division
     - UserInputError
         - A package cannot be found with the given `pkgID`
         - The package is in the DRAFT state
@@ -220,18 +221,18 @@ type Mutation {
     #    """
     #    updateQuestion(input: UpdateQuestionInput!): UpdateQuestionPayload!
 
-    #    """
-    #    createQuestionResponse creates a new QuestionResponse for the given Question
-    #    A State User can add text to a note field and append a document to their response
-    #
-    #    This can only be called by a StateUser
-    #
-    #    Errors:
-    #    - ForbiddenError:
-    #        - A non StateUser called this
-    #    - UserInputError
-    #        - A Question cannot be found given `questionID`
-    #    """
+    """
+    createQuestionResponse creates a new QuestionResponse for the given Question
+    A State User can add text to a note field and append a document to their response
+
+    This can only be called by a StateUser
+
+    Errors:
+    - ForbiddenError:
+        - A non StateUser called this
+    - UserInputError
+        - A Question cannot be found given `questionID`
+    """
     createQuestionResponse(
         input: CreateQuestionResponseInput!
     ): CreateQuestionResponsePayload!
@@ -606,6 +607,7 @@ type Question {
     createdAt: DateTime!
     addedBy: CMSUser!
     documents: [Document!]!
+    division: Division!
     #    noteText: String
     #    dueDate: Date
     #    rateIDs: [String!]

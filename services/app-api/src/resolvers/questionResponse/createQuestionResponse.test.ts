@@ -5,24 +5,24 @@ import {
     createTestQuestion,
     createTestQuestionResponse,
 } from '../../testHelpers/gqlHelpers'
-import { CMSUserType } from '../../domain-models'
 import { assertAnError, assertAnErrorCode } from '../../testHelpers'
+import {
+    createDBUsersWithFullData,
+    testCMSUser,
+} from '../../testHelpers/userHelpers'
 
 describe('createQuestionResponse', () => {
-    const testUserCMS: CMSUserType = {
-        id: 'f7571910-ef02-427d-bae3-3e945e20e59d',
-        role: 'CMS_USER',
-        email: 'zuko@example.com',
-        familyName: 'Zuko',
-        givenName: 'Prince',
-        stateAssignments: [],
-    }
+    const cmsUser = testCMSUser()
+    beforeAll(async () => {
+        //Inserting a new CMS user, with division assigned, in postgres in order to create the question to user relationship.
+        await createDBUsersWithFullData([cmsUser])
+    })
 
     it('returns question response data', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUserCMS,
+                user: cmsUser,
             },
         })
 
@@ -87,7 +87,7 @@ describe('createQuestionResponse', () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUserCMS,
+                user: cmsUser,
             },
         })
         const submittedPkg = await createAndSubmitTestHealthPlanPackage(

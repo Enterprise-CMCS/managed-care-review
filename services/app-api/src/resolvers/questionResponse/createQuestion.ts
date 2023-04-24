@@ -8,6 +8,7 @@ import {
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import { isStoreError, Store } from '../../postgres'
 import { GraphQLError } from 'graphql'
+import { isValidCmsDivison } from '../../domain-models'
 
 export function createQuestionResolver(
     store: Store
@@ -17,6 +18,18 @@ export function createQuestionResolver(
 
         if (!isCMSUser(user)) {
             const msg = 'user not authorized to create a question'
+            logError('createQuestion', msg)
+            setErrorAttributesOnActiveSpan(msg, span)
+            throw new ForbiddenError(msg)
+        }
+
+        if (
+            !user.divisionAssignment ||
+            (user.divisionAssignment &&
+                !isValidCmsDivison(user.divisionAssignment))
+        ) {
+            const msg =
+                'users without an assigned division are not authorized to create a question'
             logError('createQuestion', msg)
             setErrorAttributesOnActiveSpan(msg, span)
             throw new ForbiddenError(msg)
@@ -36,7 +49,12 @@ export function createQuestionResolver(
             const errMessage = `Issue finding a package of type ${result.code}. Message: ${result.message}`
             logError('createQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         if (result === undefined) {

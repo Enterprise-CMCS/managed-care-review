@@ -10,6 +10,8 @@ import {
     CreateQuestionMutation,
     CreateQuestionResponseMutationFn,
     CreateQuestionResponseMutation,
+    Question,
+    Division,
 } from '../gen/gqlClient'
 import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
@@ -26,6 +28,16 @@ type MutationType =
     | 'SUBMIT_HEALTH_PLAN_PACKAGE'
     | 'UNLOCK_HEALTH_PLAN_PACKAGE'
     | 'CREATE_QUESTION'
+
+type IndexQuestionDivisions =
+    | 'DMCOQuestions'
+    | 'DMCPQuestions'
+    | 'OACTQuestions'
+
+const divisionToIndexQuestionDivision = (
+    division: Division
+): IndexQuestionDivisions =>
+    `${division.toUpperCase()}Questions` as IndexQuestionDivisions
 
 const handleApolloErrorsAndAddUserFacingMessages = (
     apolloError: ApolloError,
@@ -151,7 +163,7 @@ export const createQuestionWrapper = async (
             variables: { input },
             update(cache, { data }) {
                 if (data) {
-                    const newQuestion = data.createQuestion.question
+                    const newQuestion = data.createQuestion.question as Question
                     const result =
                         cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
                             {
@@ -167,35 +179,42 @@ export const createQuestionWrapper = async (
                     const pkg = result?.fetchHealthPlanPackage.pkg
 
                     if (pkg) {
+                        const indexQuestionDivision =
+                            divisionToIndexQuestionDivision(
+                                newQuestion.division
+                            )
                         const questions = pkg.questions as IndexQuestionsPayload
-                        const updatedPkg = {
-                            ...pkg,
-                            questions: {
-                                ...pkg.questions,
-                                DMCOQuestions: {
-                                    totalCount: questions.DMCPQuestions
-                                        .totalCount
-                                        ? questions.DMCPQuestions.totalCount + 1
-                                        : 1,
-                                    edges: [
-                                        {
-                                            __typename: 'QuestionEdge',
-                                            node: {
-                                                ...newQuestion,
-                                                responses: [],
-                                            },
-                                        },
-                                        ...questions.DMCOQuestions.edges,
-                                    ],
-                                },
-                            },
-                        }
+                        const divisionQuestions =
+                            questions[indexQuestionDivision]
 
                         cache.writeQuery({
                             query: FetchHealthPlanPackageWithQuestionsDocument,
                             data: {
                                 fetchHealthPlanPackage: {
-                                    pkg: updatedPkg,
+                                    pkg: {
+                                        ...pkg,
+                                        questions: {
+                                            ...pkg.questions,
+                                            [indexQuestionDivision]: {
+                                                totalCount:
+                                                    divisionQuestions.totalCount
+                                                        ? divisionQuestions.totalCount +
+                                                          1
+                                                        : 1,
+                                                edges: [
+                                                    {
+                                                        __typename:
+                                                            'QuestionEdge',
+                                                        node: {
+                                                            ...newQuestion,
+                                                            responses: [],
+                                                        },
+                                                    },
+                                                    ...divisionQuestions.edges,
+                                                ],
+                                            },
+                                        },
+                                    },
                                 },
                             },
                         })
@@ -224,7 +243,8 @@ export const createResponseWrapper = async (
     input: {
         questionID: string
         documents: Document[]
-    }
+    },
+    division: Division
 ): Promise<CreateQuestionResponseMutation | GraphQLErrors | Error> => {
     try {
         const result = await createResponse({
@@ -243,34 +263,42 @@ export const createResponseWrapper = async (
                                 },
                             }
                         )
-
                     const pkg = result?.fetchHealthPlanPackage.pkg
 
                     if (pkg) {
-                        const updatedQuestionsEdge =
-                            pkg.questions?.DMCOQuestions.edges.map((edge) => {
-                                if (edge.node.id === newResponse.questionID) {
-                                    return {
-                                        __typename: 'QuestionEdge',
-                                        node: {
-                                            ...edge.node,
-                                            responses: [
-                                                newResponse,
-                                                ...edge.node.responses,
-                                            ],
-                                        },
-                                    }
-                                }
-                                return edge
-                            })
+                        const questions = pkg.questions as IndexQuestionsPayload
+                        const indexQuestionDivision =
+                            divisionToIndexQuestionDivision(division)
+                        const divisionQuestions =
+                            questions[indexQuestionDivision]
 
                         const updatedPkg = {
                             ...pkg,
                             questions: {
                                 ...pkg.questions,
-                                DMCOQuestions: {
-                                    ...pkg.questions?.DMCOQuestions,
-                                    edges: updatedQuestionsEdge,
+                                [indexQuestionDivision]: {
+                                    ...divisionQuestions,
+                                    edges: divisionQuestions.edges.map(
+                                        (edge) => {
+                                            if (
+                                                edge.node.id ===
+                                                newResponse.questionID
+                                            ) {
+                                                return {
+                                                    __typename: 'QuestionEdge',
+                                                    node: {
+                                                        ...edge.node,
+                                                        responses: [
+                                                            newResponse,
+                                                            ...edge.node
+                                                                .responses,
+                                                        ],
+                                                    },
+                                                }
+                                            }
+                                            return edge
+                                        }
+                                    ),
                                 },
                             },
                         }

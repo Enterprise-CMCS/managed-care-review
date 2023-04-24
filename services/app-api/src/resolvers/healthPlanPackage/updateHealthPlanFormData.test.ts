@@ -20,17 +20,10 @@ import {
     sharedTestPrismaClient,
 } from '../../testHelpers/storeHelpers'
 import { NewPostgresStore } from '../../postgres'
-import { UserType } from '../../domain-models'
+import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 
 describe('updateHealthPlanFormData', () => {
-    const testUserCMS: UserType = {
-        id: 'd60e82de-13d7-459b-825e-61ce6ca2eb36',
-        role: 'CMS_USER',
-        email: 'zuko@example.com',
-        familyName: 'Zuko',
-        givenName: 'Prince',
-        stateAssignments: [],
-    }
+    const cmsUser = testCMSUser()
 
     it('updates valid fields in the formData', async () => {
         const server = await constructTestPostgresServer()
@@ -81,7 +74,7 @@ describe('updateHealthPlanFormData', () => {
 
         const cmsUserServer = await constructTestPostgresServer({
             context: {
-                user: testUserCMS,
+                user: cmsUser,
             },
         })
 
@@ -120,14 +113,7 @@ describe('updateHealthPlanFormData', () => {
         // setup a server with a different user
         const otherUserServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    id: '918b9cc4-31a3-4100-b69f-3c4736867ce4',
-                    stateCode: 'VA',
-                    role: 'STATE_USER',
-                    email: 'aang@va.gov',
-                    familyName: 'Aang',
-                    givenName: 'Aang',
-                },
+                user: testStateUser({ stateCode: 'VA' }),
             },
         })
 
