@@ -27,7 +27,7 @@ export async function insertManyUsers(
             `Insert users completed, ${createResult.count} of ${users.length} users inserted.`
         )
 
-        const userIDs = users.reduce((a: string[], c) => a.concat(c.userID), [])
+        const userIDs = users.map((user) => user.userID)
 
         const usersResult = await client.user.findMany({
             where: {
