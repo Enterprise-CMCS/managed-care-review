@@ -18,6 +18,7 @@ import './dashboardCommands'
 import './navigateCommands'
 import './questionResponseCommands'
 import './launchDarklyCommands'
+import './userSettingCommands'
 import './e2e'
 import {
     FeatureFlagLDConstant,
@@ -85,7 +86,7 @@ declare global {
                 documentPath: string
             }): void
 
-            //Launch Darkly commands
+            // Launch Darkly commands
             stubFeatureFlags(): void
             interceptFeatureFlags(
                 toggleFlags?: FeatureFlagSettings
@@ -93,6 +94,15 @@ declare global {
             getFeatureFlagStore(
                 featureFlag?: FeatureFlagLDConstant[]
             ): Promise<FeatureFlagSettings>
+
+            // User settings commands
+            assignDivisionToCMSUser({
+                userEmail,
+                division
+            }: {
+                userEmail: string,
+                division: 'DMCO' | 'DMCP' | 'OACT'
+            }): void
         }
     }
 }

@@ -2,6 +2,7 @@ import { CreateHealthPlanPackageInput } from '../../gen/gqlServer'
 import CREATE_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/createHealthPlanPackage.graphql'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
+import { testCMSUser } from '../../testHelpers/userHelpers'
 
 describe('createHealthPlanPackage', () => {
     it('returns package with unlocked form data', async () => {
@@ -63,14 +64,7 @@ describe('createHealthPlanPackage', () => {
     it('returns an error if a CMS user attempts to create', async () => {
         const server = await constructTestPostgresServer({
             context: {
-                user: {
-                    id: 'foobar',
-                    role: 'CMS_USER',
-                    email: 'aang@va.gov',
-                    givenName: 'Prince',
-                    familyName: 'Zuko',
-                    stateAssignments: [],
-                },
+                user: testCMSUser(),
             },
         })
 

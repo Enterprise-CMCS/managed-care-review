@@ -96,11 +96,18 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Generate GraphQL
+        run: lerna run gqlgen
+
+      - name: Generate Protos
+        run: lerna run generate --scope=app-proto
+
       - name: Web Unit Tests
         env:
           REACT_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
-        run: ./dev test web --unit
+        working-directory: services/app-web
+        run: yarn test:once --coverage
 
       - name: upload unit test coverage
         uses: actions/upload-artifact@v3
@@ -109,7 +116,7 @@ jobs:
           path: ./services/app-web/coverage/coverage-final.json
 
       - name: publish code coverage
-        uses: paambaati/codeclimate-action@v3.2.0
+        uses: paambaati/codeclimate-action@v4.0.0
         continue-on-error: true
         env:
           CC_TEST_REPORTER_ID: f7474ffe9522492f5380eb86189480f352c841718c1fe6a63f169353c7cee243
@@ -143,12 +150,30 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Generate GraphQL
+        run: lerna run gqlgen
+
+      - name: Generate Protos
+        run: lerna run generate --scope=app-proto
+
+      - name: Generate Prisma
+        env:
+          NODE_OPTIONS: --max_old_space_size=6000
+          REACT_APP_AUTH_MODE: AWS_COGNITO
+          DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
+        working-directory: services/app-api
+        run: |
+          lerna run generate --scope=app-api
+          npx prisma migrate reset --force
+
       - name: API Unit Tests
         env:
           NODE_OPTIONS: --max_old_space_size=6000
           REACT_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
-        run: ./dev test api --unit
+        working-directory: services/app-api
+        run: |
+          yarn test:once --coverage
 
       - name: upload api test coverage
         uses: actions/upload-artifact@v3
@@ -157,7 +182,7 @@ jobs:
           path: ./services/app-api/coverage/coverage-final.json
 
       - name: publish code coverage
-        uses: paambaati/codeclimate-action@v3.2.0
+        uses: paambaati/codeclimate-action@v4.0.0
         continue-on-error: true
         env:
           CC_TEST_REPORTER_ID: f7474ffe9522492f5380eb86189480f352c841718c1fe6a63f169353c7cee243
@@ -422,10 +447,10 @@ jobs:
           path: ./coverage-cypress/coverage-final.json
 
       - name: publish code coverage
-        uses: paambaati/codeclimate-action@v3.2.0
+        uses: paambaati/codeclimate-action@v4.0.0
         continue-on-error: true
         env:
-          CC_TEST_REPORTER_ID: cace182021fe88d327fa8d95355ac6081f420e094a214fe77feb5df2f0259e9d
+          CC_TEST_REPORTER_ID: f7474ffe9522492f5380eb86189480f352c841718c1fe6a63f169353c7cee243
         with:
           debug: true
           coverageLocations: |

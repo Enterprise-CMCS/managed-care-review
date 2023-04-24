@@ -66,14 +66,17 @@ const ModifiedProvisionsRecord: Record<keyof ModifiedProvisions, string> = {
     modifiedPaymentsForMentalDiseaseInstitutions:
         'Payments to MCOs and PIHPs for enrollees that are a patient in an institution for mental disease in accordance with 42 CFR § 438.6(e)',
     modifiedMedicalLossRatioStandards:
-        'Medical loss ratio standards in accordance with 42 CFR § 438.8',
+        'Medical loss ratio standards in accordance with 42 CFR § 457. 1203',
     modifiedOtherFinancialPaymentIncentive:
         'Other financial, payment, incentive or related contractual provisions',
-    modifiedEnrollmentProcess: 'Enrollment/disenrollment process',
-    modifiedGrevienceAndAppeal: 'Grievance and appeal system',
-    modifiedNetworkAdequacyStandards: 'Network adequacy standards',
+    modifiedEnrollmentProcess:
+        'Enrollment/disenrollment process 42 CFR § 457.1210 and 457.1212',
+    modifiedGrevienceAndAppeal: 'Grievance and appeal system 42 CFR § 457.1260',
+    modifiedNetworkAdequacyStandards:
+        'Network adequacy standards 42 CFR § 457.1218',
     modifiedLengthOfContract: 'Length of the contract period',
-    modifiedNonRiskPaymentArrangements: 'Non-risk payment arrangements',
+    modifiedNonRiskPaymentArrangements:
+        'Non-risk payment arrangements 42 CFR 457.10 and 457.1201(c)',
 }
 
 const ActuaryFirmsRecord: Record<ActuarialFirmType, string> = {

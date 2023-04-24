@@ -17,7 +17,8 @@ type InsertQuestionResponseArgs = {
     questionID: string
     documents: QuestionResponseDocument[]
 }
-export {
+
+export type {
     InsertQuestionResponseArgs,
     QuestionResponseType,
     QuestionResponseDocument,

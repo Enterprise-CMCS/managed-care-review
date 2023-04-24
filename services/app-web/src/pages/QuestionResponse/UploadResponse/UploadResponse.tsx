@@ -21,6 +21,7 @@ import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import {
     CreateQuestionResponseInput,
     useCreateQuestionResponseMutation,
+    Division,
 } from '../../../gen/gqlClient'
 import { usePage } from '../../../contexts/PageContext'
 import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
@@ -89,7 +90,8 @@ export const UploadResponse = () => {
         const createResult = await createResponseWrapper(
             createResponse,
             id as string,
-            input
+            input,
+            division as Division
         )
 
         if (createResult instanceof Error) {

@@ -6,23 +6,42 @@ import {
     createTestQuestionResponse,
     indexTestQuestions,
 } from '../../testHelpers/gqlHelpers'
-import { UserType } from '../../domain-models'
 import { assertAnError, assertAnErrorCode } from '../../testHelpers'
+import {
+    createDBUsersWithFullData,
+    testCMSUser,
+} from '../../testHelpers/userHelpers'
 
 describe('indexQuestions', () => {
-    const testUserCMS: UserType = {
-        id: 'f7571910-ef02-427d-bae3-3e945e20e59d',
-        role: 'CMS_USER',
-        email: 'zuko@example.com',
-        familyName: 'Zuko',
-        givenName: 'Prince',
-        stateAssignments: [],
-    }
-    it('returns package with questions and responses', async () => {
+    const dmcoCMSUser = testCMSUser({
+        divisionAssignment: 'DMCO',
+    })
+    const dmcpCMSUser = testCMSUser({
+        divisionAssignment: 'DMCP',
+    })
+    const oactCMSUser = testCMSUser({
+        divisionAssignment: 'OACT',
+    })
+    beforeAll(async () => {
+        //Inserting a new CMS user, with division assigned, in postgres in order to create the question to user relationship.
+        await createDBUsersWithFullData([dmcoCMSUser, dmcpCMSUser, oactCMSUser])
+    })
+
+    it('returns package with questions and responses for each division', async () => {
         const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer({
+        const dmcoCMSServer = await constructTestPostgresServer({
             context: {
-                user: testUserCMS,
+                user: dmcoCMSUser,
+            },
+        })
+        const dmcpCMSServer = await constructTestPostgresServer({
+            context: {
+                user: dmcpCMSUser,
+            },
+        })
+        const oactCMServer = await constructTestPostgresServer({
+            context: {
+                user: oactCMSUser,
             },
         })
 
@@ -30,8 +49,8 @@ describe('indexQuestions', () => {
             stateServer
         )
 
-        const createdQuestion1 = await createTestQuestion(
-            cmsServer,
+        const createdDMCOQuestion = await createTestQuestion(
+            dmcoCMSServer,
             submittedPkg.id,
             {
                 documents: [
@@ -43,13 +62,13 @@ describe('indexQuestions', () => {
             }
         )
 
-        const response1 = await createTestQuestionResponse(
+        const responseToDMCO = await createTestQuestionResponse(
             stateServer,
-            createdQuestion1.question.id
+            createdDMCOQuestion.question.id
         )
 
-        const createdQuestion2 = await createTestQuestion(
-            cmsServer,
+        const createdDMCPQuestion = await createTestQuestion(
+            dmcpCMSServer,
             submittedPkg.id,
             {
                 documents: [
@@ -61,83 +80,98 @@ describe('indexQuestions', () => {
             }
         )
 
-        const response2 = await createTestQuestionResponse(
+        const responseToDMCP = await createTestQuestionResponse(
             stateServer,
-            createdQuestion2.question.id
+            createdDMCPQuestion.question.id
         )
 
-        await createTestQuestion(cmsServer, submittedPkg.id, {
-            documents: [
-                {
-                    name: 'Test Question 3',
-                    s3URL: 'testS3Url3',
-                },
-            ],
-        })
+        const createdOACTQuestion = await createTestQuestion(
+            oactCMServer,
+            submittedPkg.id,
+            {
+                documents: [
+                    {
+                        name: 'Test Question 3',
+                        s3URL: 'testS3Url3',
+                    },
+                ],
+            }
+        )
+
+        const responseToOACT = await createTestQuestionResponse(
+            stateServer,
+            createdOACTQuestion.question.id
+        )
 
         const indexQuestionsResult = await indexTestQuestions(
-            cmsServer,
+            stateServer,
             submittedPkg.id
         )
 
         expect(indexQuestionsResult).toEqual(
             expect.objectContaining({
                 DMCOQuestions: expect.objectContaining({
-                    totalCount: 3,
+                    totalCount: 1,
                     edges: expect.arrayContaining([
                         {
                             node: expect.objectContaining({
                                 id: expect.any(String),
                                 createdAt: expect.any(Date),
                                 pkgID: submittedPkg.id,
+                                division: 'DMCO',
                                 documents: [
                                     {
                                         name: 'Test Question 1',
                                         s3URL: 'testS3Url1',
                                     },
                                 ],
-                                addedBy: testUserCMS,
-                                responses: [response1.response],
+                                addedBy: dmcoCMSUser,
+                                responses: [responseToDMCO.response],
                             }),
                         },
+                    ]),
+                }),
+                DMCPQuestions: expect.objectContaining({
+                    totalCount: 1,
+                    edges: [
                         {
                             node: expect.objectContaining({
                                 id: expect.any(String),
                                 createdAt: expect.any(Date),
                                 pkgID: submittedPkg.id,
+                                division: 'DMCP',
                                 documents: [
                                     {
                                         name: 'Test Question 2',
                                         s3URL: 'testS3Url2',
                                     },
                                 ],
-                                addedBy: testUserCMS,
-                                responses: [response2.response],
+                                addedBy: dmcpCMSUser,
+                                responses: [responseToDMCP.response],
                             }),
                         },
+                    ],
+                }),
+                OACTQuestions: expect.objectContaining({
+                    totalCount: 1,
+                    edges: [
                         {
                             node: expect.objectContaining({
                                 id: expect.any(String),
                                 createdAt: expect.any(Date),
                                 pkgID: submittedPkg.id,
+                                division: 'OACT',
                                 documents: [
                                     {
                                         name: 'Test Question 3',
                                         s3URL: 'testS3Url3',
                                     },
                                 ],
-                                addedBy: testUserCMS,
+                                addedBy: oactCMSUser,
+                                responses: [responseToOACT.response],
                             }),
                         },
-                    ]),
-                }),
-                DMCPQuestions: expect.objectContaining({
-                    totalCount: 0,
-                    edges: [],
-                }),
-                OACTQuestions: expect.objectContaining({
-                    totalCount: 0,
-                    edges: [],
+                    ],
                 }),
             })
         )
@@ -158,7 +192,7 @@ describe('indexQuestions', () => {
         })
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUserCMS,
+                user: dmcoCMSUser,
             },
         })
 

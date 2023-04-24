@@ -6,6 +6,7 @@ import { isStoreError, Store } from '../../postgres'
 import { convertToIndexQuestionsPayload } from '../../postgres/questionResponse'
 import { logError } from '../../logger'
 import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
+import { GraphQLError } from 'graphql'
 
 export function healthPlanPackageResolver(
     store: Store
@@ -27,7 +28,12 @@ export function healthPlanPackageResolver(
         status(parent) {
             const status = packageStatus(parent)
             if (status instanceof Error) {
-                throw status
+                throw new GraphQLError(status.message, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'INVALID_PACKAGE_STATUS',
+                    },
+                })
             }
             return status
         },
@@ -41,7 +47,14 @@ export function healthPlanPackageResolver(
             )
 
             if (state === undefined) {
-                throw new Error('State not found in database: ' + packageState)
+                const errMessage =
+                    'State not found in database: ' + packageState
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
             }
             return state
         },
@@ -56,7 +69,12 @@ export function healthPlanPackageResolver(
                 const errMessage = `Issue finding questions of type ${result.code} for package with id: ${pkgID}. Message: ${result.message}`
                 logError('indexQuestions', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new Error(errMessage)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
             }
             return convertToIndexQuestionsPayload(result)
         },

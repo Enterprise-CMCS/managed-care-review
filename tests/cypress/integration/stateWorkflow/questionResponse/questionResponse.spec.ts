@@ -81,6 +81,46 @@ describe('Q&A', () => {
             cy.findByText(
                 'Medicaid and CHIP Managed Care Reporting and Review System'
             )
+
+            // As a precaution we logg in as the CMS user before logging in as the Admin user so that the CMS user is
+            // inserted into the database before trying to update its division
+            cy.logInAsCMSUser({
+                initialURL: `/submissions/${submissionId}/question-and-answers`,
+            })
+
+            cy.url({ timeout: 10_000 }).should(
+                'contain',
+                `${submissionId}/question-and-answers`
+            )
+
+            cy.findByRole('heading', {
+                name: `CMS ${submissionName}`,
+            }).should('exist')
+
+            // Log out
+            cy.findByRole('button', { name: 'Sign out' }).click()
+            cy.findByText(
+                'Medicaid and CHIP Managed Care Reporting and Review System'
+            )
+
+            // Log in as Admin to the settings page
+            cy.logInAsAdminUser({
+                initialURL: `/settings`,
+            })
+
+            // Update CMS user Zuko's division
+            cy.assignDivisionToCMSUser({
+                userEmail: 'zuko@example.com',
+                division: 'DMCO'
+            })
+
+            // Log out
+            cy.findByRole('button', { name: 'Sign out' }).click()
+            cy.findByText(
+                'Medicaid and CHIP Managed Care Reporting and Review System'
+            )
+
+            // Log back in as CMS user
             cy.logInAsCMSUser({
                 initialURL: `/submissions/${submissionId}/question-and-answers`,
             })

@@ -8,25 +8,17 @@ import { v4 as uuidv4 } from 'uuid'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { UserEdge, User } from '../../gen/gqlServer'
-import { UserType } from '../../domain-models'
 import { assertAnError } from '../../testHelpers'
+import { testAdminUser, testCMSUser } from '../../testHelpers/userHelpers'
 
 describe('indexUsers', () => {
     it('lists all known users', async () => {
-        const testAdminUser: UserType = {
-            id: 'd60e82de-13d7-459b-825e-61ce6ca2eb36',
-            role: 'ADMIN_USER',
-            email: 'iroh@example.com',
-            familyName: 'Iroh',
-            givenName: 'Uncle',
-        }
-
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
         const server = await constructTestPostgresServer({
             store: postgresStore,
             context: {
-                user: testAdminUser,
+                user: testAdminUser(),
             },
         })
 
@@ -71,11 +63,10 @@ describe('indexUsers', () => {
             },
         ]
 
-        for (const userToInsert of usersToInsert) {
-            const newUser = await postgresStore.insertUser(userToInsert)
-            if (isStoreError(newUser)) {
-                throw new Error(newUser.code)
-            }
+        const newUsers = await postgresStore.insertManyUsers(usersToInsert)
+
+        if (isStoreError(newUsers)) {
+            throw new Error(newUsers.code)
         }
 
         const updateRes = await server.executeOperation({
@@ -103,18 +94,9 @@ describe('indexUsers', () => {
     })
 
     it('returns an error if called by a State user', async () => {
-        const testCMSUser: UserType = {
-            id: 'd60e82de-13d7-459b-825e-61ce6ca2eb36',
-            role: 'CMS_USER',
-            email: 'iroh@example.com',
-            familyName: 'Iroh',
-            givenName: 'Uncle',
-            stateAssignments: [],
-        }
-
         const server = await constructTestPostgresServer({
             context: {
-                user: testCMSUser,
+                user: testCMSUser(),
             },
         })
 

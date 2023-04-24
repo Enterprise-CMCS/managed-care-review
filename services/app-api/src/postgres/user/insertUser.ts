@@ -1,11 +1,6 @@
 import { PrismaClient, Role } from '@prisma/client'
 import { StoreError, convertPrismaErrorToStoreError } from '../storeError'
-import {
-    AdminUserType,
-    CMSUserType,
-    StateUserType,
-    UserType,
-} from '../../domain-models'
+import { DivisionType, UserType, toDomainUser } from '../../domain-models'
 
 export type InsertUserArgsType = {
     userID: string
@@ -14,6 +9,7 @@ export type InsertUserArgsType = {
     email: string
     role: Role
     stateCode?: string
+    divisionAssignment?: DivisionType
 }
 
 export async function insertUser(
@@ -30,24 +26,11 @@ export async function insertUser(
                 email: user.email,
                 role: user.role,
                 stateCode: user.stateCode ?? null,
+                divisionAssignment: user.divisionAssignment ?? null,
             },
         })
         console.info('insert user return: ' + val)
-        switch (val.role) {
-            case 'ADMIN_USER':
-                return val as AdminUserType
-            case 'CMS_USER':
-                return {
-                    id: val.id,
-                    role: 'CMS_USER',
-                    email: val.email,
-                    givenName: val.givenName,
-                    familyName: val.familyName,
-                    stateAssignments: [],
-                } as CMSUserType
-            case 'STATE_USER':
-                return val as StateUserType
-        }
+        return toDomainUser(val)
     } catch (err) {
         return convertPrismaErrorToStoreError(err)
     }

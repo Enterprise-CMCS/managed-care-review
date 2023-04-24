@@ -9,6 +9,7 @@ fragment questionEdgeFragment on QuestionEdge {
             email
             givenName
             familyName
+            divisionAssignment
             stateAssignments {
                 code
                 name
@@ -19,6 +20,7 @@ fragment questionEdgeFragment on QuestionEdge {
                 }
             }
         }
+        division
         documents {
             s3URL
             name

@@ -35,6 +35,7 @@ import {
     InsertUserArgsType,
     updateCmsUserProperties,
     findAllUsers,
+    insertManyUsers,
 } from './user'
 import {
     findAllQuestionsByHealthPlanPackage,
@@ -90,6 +91,10 @@ type Store = {
 
     insertUser: (user: InsertUserArgsType) => Promise<UserType | StoreError>
 
+    insertManyUsers: (
+        users: InsertUserArgsType[]
+    ) => Promise<UserType[] | StoreError>
+
     updateCmsUserProperties: (
         userID: string,
         states: StateCodeType[],
@@ -139,6 +144,7 @@ function NewPostgresStore(client: PrismaClient): Store {
         findPrograms: findPrograms,
         findUser: (id) => findUser(client, id),
         insertUser: (args) => insertUser(client, args),
+        insertManyUsers: (args) => insertManyUsers(client, args),
         updateCmsUserProperties: (
             userID,
             stateCodes,
