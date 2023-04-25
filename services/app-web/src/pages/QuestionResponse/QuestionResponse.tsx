@@ -141,7 +141,7 @@ export const QuestionResponse = () => {
                 ) : (
                     <section key={division} className={styles.questionSection}>
                         <div>
-                            <p>No questions have been submitted yet</p>
+                            <p>No questions have been submitted yet.</p>
                         </div>
                     </section>
                 )}
