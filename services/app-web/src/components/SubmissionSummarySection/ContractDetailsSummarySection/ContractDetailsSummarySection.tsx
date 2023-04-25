@@ -37,7 +37,7 @@ export function sortModifiedProvisions(
     amendmentInfo: ModifiedProvisions | undefined,
     isCHIPOnly: boolean
 ): [ProvisionType[], ProvisionType[]] {
-    const modifiedProvisions: ProvisionType[] = []
+    let modifiedProvisions: ProvisionType[] = []
     let unmodifiedProvisions: ProvisionType[] = []
 
     if (amendmentInfo) {
@@ -55,12 +55,17 @@ export function sortModifiedProvisions(
             }
         }
     }
-    // remove any lingering fields that not allowed for CHIP from unmodified list entirely. They will be removed server side on submit.
+    // Remove any lingering fields that not allowed for CHIP entirely.
+    // These extra fields will be removed server side on submit but could be present on unlock before submit.
     if (isCHIPOnly) {
         unmodifiedProvisions = unmodifiedProvisions.filter((unmodified) =>
             allowedProvisionsForCHIP.includes(unmodified)
         )
+        modifiedProvisions = modifiedProvisions.filter((modified) =>
+            allowedProvisionsForCHIP.includes(modified)
+        )
     }
+
     return [modifiedProvisions, unmodifiedProvisions]
 }
 
@@ -128,7 +133,7 @@ export const ContractDetailsSummarySection = ({
             ? allowedProvisionsForCHIP
             : modifiedProvisionKeys
     const amendmentProvisionsUnanswered =
-        modifiedProvisions.length + unmodifiedProvisions.length !==
+        modifiedProvisions.length + unmodifiedProvisions.length <
         requiredProvisions.length
 
     return (
