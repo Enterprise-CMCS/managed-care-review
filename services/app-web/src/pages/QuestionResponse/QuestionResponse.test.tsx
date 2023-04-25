@@ -309,7 +309,7 @@ describe('QuestionResponse', () => {
 
         // Expect no questions text
         expect(
-            screen.getByText('No questions have been submitted yet')
+            screen.getByText('No questions have been submitted yet.')
         ).toBeInTheDocument()
     })
     it('renders with question submit banner after question submitted', async () => {
