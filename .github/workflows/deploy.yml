@@ -469,8 +469,8 @@ jobs:
           cp ./cypress-json-coverage-4/coverage-final.json ./cypress_temp/from-cypress-4.json
           cp ./cypress-json-coverage-5/coverage-final.json ./cypress_temp/from-cypress-5.json
           cp ./cypress-json-coverage-6/coverage-final.json ./cypress_temp/from-cypress-6.json
-          cp ./cypress-json-coverage-6/coverage-final.json ./cypress_temp/from-cypress-7.json
-          cp ./cypress-json-coverage-6/coverage-final.json ./cypress_temp/from-cypress-8.json
+          cp ./cypress-json-coverage-7/coverage-final.json ./cypress_temp/from-cypress-7.json
+          cp ./cypress-json-coverage-8/coverage-final.json ./cypress_temp/from-cypress-8.json
           echo "merge the collected cypress reports into one report"
           npx nyc merge cypress_temp ./reports/from-cypress.json
           echo "Temp merge done"
