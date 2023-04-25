@@ -70,7 +70,7 @@ The [USWDS United States Web Design System](https://designsystem.digital.gov/) i
 
 ## Testing
 
-More about the MC-Review testing approach can be found in [here](technical-design/testingApproach.md).
+More about the MC-Review testing approach can be found in [here](technical-design/testing-approach.md).
 
 ### Launch Darkly
 
@@ -98,4 +98,4 @@ More about the MC-Review testing approach can be found in [here](technical-desig
 
 
 ### Apollo Studio Explorer
-[Apollo Studio Explorer](https://www.apollographql.com/docs/graphos/explorer/explorer/) is a web-based IDE for writing and executing GraphQL operations on our deployed GraphQL API, with features such as schema referencing, query linting, autocomplete, and a jump-to-definition tool. The tool allows developers to write and test GraphQL operations without the need for front-end UI to execute the operations. For information on accessing the tool, refer to the [creating-endpoints.md](technical-design/creating-endpoints.md#apollo-studio-explorer) documentation.
+[Apollo Studio Explorer](https://www.apollographql.com/docs/graphos/explorer/explorer/) is a web-based IDE for writing and executing GraphQL operations on our deployed GraphQL API, with features such as schema referencing, query linting, autocomplete, and a jump-to-definition tool. The tool allows developers to write and test GraphQL operations without the need for front-end UI to execute the operations. For information on accessing the tool, refer to the [creating-and-testing-endpoints.md](technical-design/creating-and-testing-endpoints.md#apollo-studio-explorer) documentation.
