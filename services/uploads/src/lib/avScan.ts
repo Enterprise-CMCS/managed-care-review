@@ -15,9 +15,6 @@ export async function scanFile(
     //currently lambdas max out at 500MB storage.
     const fileSize = await s3Client.sizeOf(key, bucket)
     if (fileSize instanceof Error) {
-        if (fileSize.name === 'NotFound') {
-            console.error('Object not found with Key: ', key)
-        }
         return fileSize
     }
 
@@ -50,7 +47,6 @@ export async function scanFile(
     // tagObject replaces existing tags, so we get the tags, add the new ones, and then set them all back
     const currentTagsResult = await s3Client.getObjectTags(key, bucket)
     if (currentTagsResult instanceof Error) {
-        console.error('Failed to get object tags', currentTagsResult)
         return currentTagsResult
     }
 
@@ -58,7 +54,6 @@ export async function scanFile(
 
     const err = await s3Client.tagObject(key, bucket, updatedTags)
     if (err instanceof Error) {
-        console.error('Failed to tag object', err)
         return err
     }
 
