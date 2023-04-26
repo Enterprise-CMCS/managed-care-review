@@ -1,5 +1,5 @@
 type ModifiedProvisions = {
-    [K in typeof modifiedProvisionKeys[number]]: boolean
+    [K in (typeof modifiedProvisionKeys)[number]]: boolean
 } // constructs a type that requires all of the below keys
 
 const modifiedProvisionKeys = [
@@ -21,7 +21,7 @@ const modifiedProvisionKeys = [
     'modifiedNonRiskPaymentArrangements',
 ] as const
 
-type ProvisionType = typeof modifiedProvisionKeys[number]
+type ProvisionType = (typeof modifiedProvisionKeys)[number]
 
 const excludedProvisionsForCHIP: ProvisionType[] = [
     'modifiedRiskSharingStrategy',
@@ -30,6 +30,7 @@ const excludedProvisionsForCHIP: ProvisionType[] = [
     'modifiedStateDirectedPayments',
     'modifiedPassThroughPayments',
     'modifiedPaymentsForMentalDiseaseInstitutions',
+    'modifiedOtherFinancialPaymentIncentive',
 ]
 
 const allowedProvisionsForCHIP = modifiedProvisionKeys.filter(

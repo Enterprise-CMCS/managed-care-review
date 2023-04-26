@@ -373,7 +373,6 @@ describe('ContractDetailsSummarySection', () => {
         ])
         expect(unmod).toEqual([
             'modifiedGeoAreaServed',
-            'modifiedOtherFinancialPaymentIncentive',
             'modifiedLengthOfContract',
         ])
     })
