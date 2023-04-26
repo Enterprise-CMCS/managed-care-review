@@ -1,5 +1,4 @@
 import LabeledProcessRunner from '../runner.js'
-import { spawn } from 'child_process'
 
 import {
     compileGraphQLTypesWatchOnce,
@@ -17,17 +16,11 @@ export async function runWebTestsWatch(jestArgs: string[]) {
 
     await installWebDepsOnce(runner)
 
-    // because we are inheriting stdio for this process,
-    // we need to not run spawnSync or else all the output
-    // for the graphql compiler will be swallowed.
-    const proc = spawn('yarn', ['test'].concat(jestArgs), {
-        cwd: 'services/app-web',
-        stdio: 'inherit',
-    })
-
-    proc.on('close', (code) => {
-        process.exit(code ? code : 0)
-    })
+    return await runner.runCommandAndOutput(
+        'web - unit',
+        ['lerna', 'run', 'test', '--scope=app-web'],
+        ''
+    )
 }
 
 export async function runWebTests(
@@ -39,7 +32,7 @@ export async function runWebTests(
 
     return await runner.runCommandAndOutput(
         'web - unit',
-        ['yarn', 'test:once', '--coverage'],
-        'services/app-web'
+        ['lerna', 'run', 'test:once', '--scope=app-web'],
+        ''
     )
 }
