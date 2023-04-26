@@ -16,6 +16,10 @@
         "test:once": "TZ=UTC react-scripts test --watchAll=false --runInBand --ci",
         "test:update": "react-scripts test -u",
         "test:coverage": "yarn test --coverage --watchAll=false",
+<<<<<<< Updated upstream
+=======
+        "test:clean": "react-scripts test --clearCache",
+>>>>>>> Stashed changes
         "storybook": "start-storybook -p 6006 -s public --quiet",
         "build-storybook": "build-storybook -s public --quiet",
         "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""

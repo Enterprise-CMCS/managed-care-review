@@ -22,6 +22,10 @@ Clear yarn cache and reinstall.\
 
 Launches the test runner in the interactive watch mode.\
 
+### `yarn test:clean`
+
+Clears jest cache, this can resolve false negatives in unit tests.
+
 ## Organization and important files
 
 ### `/authn`

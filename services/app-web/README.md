@@ -38,8 +38,20 @@ See the section about [running tests](https://facebook.github.io/create-react-ap
 
 ### `yarn test:update`
 
+<<<<<<< Updated upstream
 Override failing snapshot tests with the new markup. Use sparingly - may be a valid failure.\
 See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+=======
+Override failing snapshot tests and update existing snapshot tests with new markup. Use sparingly - may be a valid failure.
+
+### `yarn test:coverage`
+
+Generate code coverage.
+
+### `yarn test:clean`
+
+Clears jest cache, this can resolve false negatives in unit tests.
+>>>>>>> Stashed changes
 
 ## `yarn storybook`
 
