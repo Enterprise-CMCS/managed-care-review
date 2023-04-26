@@ -86,7 +86,7 @@ export const QATable = ({
         const refreshDocuments = async () => {
             const newDocuments = await getDocumentsUrl(
                 tableDocuments,
-                'HEALTH_PLAN_DOCS'
+                'QUESTION_ANSWER_DOCS'
             )
             if (newDocuments.length) {
                 setRefreshedDocs(newDocuments)
