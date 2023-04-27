@@ -212,6 +212,7 @@ export const RateDetails = ({
                             name: doc.name,
                             key: 'INVALID_KEY',
                             s3URL: undefined,
+                            sha256: doc.sha256,
                             status: 'UPLOAD_ERROR',
                             documentCategories: doc.documentCategories,
                         }
@@ -221,6 +222,7 @@ export const RateDetails = ({
                         name: doc.name,
                         key: key,
                         s3URL: doc.s3URL,
+                        sha256: doc.sha256,
                         status: 'UPLOAD_COMPLETE',
                         documentCategories: doc.documentCategories,
                     }
@@ -333,7 +335,6 @@ export const RateDetails = ({
                 throw new Error(`Error in S3 key: ${key}`)
             }
         }
-        return
     }
 
     const handleUploadFile = async (file: File): Promise<S3FileData> => {
@@ -409,6 +410,7 @@ export const RateDetails = ({
                 formDataDocuments.push({
                     name: fileItem.name,
                     s3URL: fileItem.s3URL,
+                    sha256: fileItem.sha256,
                     documentCategories: ['RATES'],
                 })
             }

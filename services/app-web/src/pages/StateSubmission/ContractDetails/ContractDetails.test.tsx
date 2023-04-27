@@ -887,11 +887,13 @@ describe('ContractDetails', () => {
                             name: 'testFile.doc',
                             s3URL: expect.any(String),
                             documentCategories: ['CONTRACT'],
+                            sha256: 'da7d22ce886b5ab262cd7ab28901212a027630a5edf8e88c8488087b03ffd833', // pragma: allowlist secret
                         },
                         {
                             name: 'testFile.pdf',
                             s3URL: expect.any(String),
                             documentCategories: ['CONTRACT'],
+                            sha256: '6d50607f29187d5b185ffd9d46bc5ef75ce7abb53318690c73e55b6623e25ad5', // pragma: allowlist secret
                         },
                     ],
                 })

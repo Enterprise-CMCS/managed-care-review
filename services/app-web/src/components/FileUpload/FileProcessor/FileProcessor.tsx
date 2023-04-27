@@ -21,6 +21,7 @@ export type FileItemT = {
     file?: File // this becomes undefined after both uploading and scanning has completed with success
     key?: string // only items uploaded to s3 have this
     s3URL?: string // only items uploaded to s3 have this
+    sha256?: string
     status: FileStatus
     documentCategories: DocumentCategoryType[]
 }

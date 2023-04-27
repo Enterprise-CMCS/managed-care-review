@@ -9,6 +9,7 @@ import { usePreviousSubmission } from '../../../hooks'
 import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { DocumentTag } from './DocumentTag'
 import { useDocument } from '../../../hooks/useDocument'
+import { getDocumentKey } from '../../../documentHelpers/getDocumentKey'
 export type UploadedDocumentsTableProps = {
     documents: SubmissionDocument[]
     caption: string | null
@@ -42,17 +43,16 @@ const linkedPackagesList = ({
 
         if (linkedPackageIsDraft && unlinkDrafts) {
             return (
-                <span>
+                <span key={item.packageId}>
                     {maybeComma}
-                    <span key={index}>{item.packageName}</span>
+                    <span>{item.packageName}</span>
                 </span>
             )
         } else {
             return (
-                <span>
+                <span key={item.packageId}>
                     {maybeComma}
                     <Link
-                        key={index}
                         asCustom={NavLink}
                         to={`/submissions/${item.packageId}`}
                     >
@@ -85,14 +85,16 @@ export const UploadedDocumentsTable = ({
     const shouldShowAsteriskExplainer = refreshedDocs.some((doc) =>
         isBothContractAndRateSupporting(doc)
     )
-    const shouldHaveNewTag = (doc: DocumentWithLink) => {
+    const shouldHaveNewTag = (doc: SubmissionDocument) => {
+        const documentKey = getDocumentKey(doc)
         return (
             isCMSUser &&
             documentDateLookupTable &&
-            documentDateLookupTable[doc.name] >
+            documentDateLookupTable[documentKey] >
                 documentDateLookupTable.previousSubmissionDate
         )
     }
+
     const hasSharedRateCert =
         (packagesWithSharedRateCerts &&
             packagesWithSharedRateCerts.length > 0) ||
@@ -200,7 +202,9 @@ export const UploadedDocumentsTable = ({
                             <td>
                                 {documentDateLookupTable
                                     ? dayjs(
-                                          documentDateLookupTable[doc.name]
+                                          documentDateLookupTable[
+                                              getDocumentKey(doc)
+                                          ]
                                       ).format('M/D/YY')
                                     : ''}
                             </td>
