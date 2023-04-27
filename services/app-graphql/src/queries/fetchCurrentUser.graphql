@@ -15,6 +15,7 @@ query fetchCurrentUser {
                     fullName
                 }
             }
+            divisionAssignment
         }
         ... on StateUser {
             id

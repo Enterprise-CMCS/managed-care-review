@@ -188,6 +188,18 @@ async function main() {
             state: undefined,
         },
         {
+            name: 'Roku',
+            email: 'roku@example.com',
+            role: 'CMS_USER' as const,
+            state: undefined,
+        },
+        {
+            name: 'Izumi',
+            email: 'izumi@example.com',
+            role: 'CMS_USER' as const,
+            state: undefined,
+        },
+        {
             name: 'Cabbages',
             email: 'cabbages@example.com',
             role: 'UNKNOWN_USER' as const,

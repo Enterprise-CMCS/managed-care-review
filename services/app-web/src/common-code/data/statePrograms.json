@@ -588,13 +588,13 @@
             "programs": [
                 {
                     "id": "8499f762-0ba8-4653-b054-0156e4733741",
-                    "fullName": "Non-Emergency Medical Transportation",
-                    "name": "NEMT"
+                    "fullName": "MO HealthNet Managed Care – Specialty Plan",
+                    "name": "HealthNet Specialty"
                 },
                 {
                     "id": "08508600-0ce7-42fd-9e24-ceb11975a8c4",
-                    "fullName": "MO HealthNet Managed Care/1915b",
-                    "name": "MO HealthNet"
+                    "fullName": "MO HealthNet Managed Care – General Plan",
+                    "name": "HealthNet General"
                 }
             ],
             "code": "MO"

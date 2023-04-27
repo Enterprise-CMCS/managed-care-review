@@ -1,4 +1,5 @@
 import { StateUserType, CMSUserType, UserType, AdminUserType } from './UserType'
+import { User as PrismaUser } from '@prisma/client'
 
 function isUser(user: unknown): user is UserType {
     if (user && typeof user === 'object') {
@@ -30,4 +31,23 @@ function isAdminUser(user: UserType): user is AdminUserType {
     return user.role === 'ADMIN_USER'
 }
 
-export { isUser, isCMSUser, isStateUser, isAdminUser }
+function toDomainUser(user: PrismaUser): UserType {
+    switch (user.role) {
+        case 'ADMIN_USER':
+            return user as AdminUserType
+        case 'CMS_USER':
+            return {
+                id: user.id,
+                role: 'CMS_USER',
+                email: user.email,
+                givenName: user.givenName,
+                familyName: user.familyName,
+                divisionAssignment: user.divisionAssignment,
+                stateAssignments: [],
+            } as CMSUserType
+        case 'STATE_USER':
+            return user as StateUserType
+    }
+}
+
+export { isUser, isCMSUser, isStateUser, isAdminUser, toDomainUser }

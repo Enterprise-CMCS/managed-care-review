@@ -1,6 +1,5 @@
 import FETCH_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/queries/fetchHealthPlanPackage.graphql'
 import { base64ToDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import { UserType } from '../../domain-models'
 import { todaysDate } from '../../testHelpers/dateHelpers'
 import {
     constructTestPostgresServer,
@@ -9,25 +8,12 @@ import {
     unlockTestHealthPlanPackage,
     resubmitTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
+import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 
 describe('fetchHealthPlanPackage', () => {
-    const testUserCMS: UserType = {
-        id: 'f7571910-ef02-427d-bae3-3e945e20e59d',
-        role: 'CMS_USER',
-        email: 'zuko@example.com',
-        familyName: 'Zuko',
-        givenName: 'Prince',
-        stateAssignments: [],
-    }
+    const testUserCMS = testCMSUser()
 
-    const testUserState: UserType = {
-        id: '5ac0fe75-f932-4d76-984e-e99ffb31138d',
-        stateCode: 'FL',
-        role: 'STATE_USER',
-        email: 'aang@mn.gov',
-        familyName: 'Aang',
-        givenName: 'Aang',
-    }
+    const testUserState = testStateUser()
 
     it('returns package with one revision', async () => {
         const server = await constructTestPostgresServer()
@@ -263,14 +249,10 @@ describe('fetchHealthPlanPackage', () => {
         // setup a server with a different user
         const otherUserServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    id: '4fed22c0-6d05-4bae-9e9a-b2345073ccf8',
+                user: testStateUser({
                     stateCode: 'VA',
-                    role: 'STATE_USER',
                     email: 'aang@va.gov',
-                    familyName: 'Aang',
-                    givenName: 'Aang',
-                },
+                }),
             },
         })
 

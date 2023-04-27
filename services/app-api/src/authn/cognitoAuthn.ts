@@ -8,6 +8,7 @@ import {
 import { UserType } from '../domain-models'
 import { performance } from 'perf_hooks'
 import { Store, InsertUserArgsType, isStoreError } from '../postgres'
+import { isValidCmsDivison } from '../domain-models'
 
 export function parseAuthProvider(
     authProvider: string
@@ -138,7 +139,9 @@ export function userTypeFromAttributes(
             givenName: attributes.given_name,
             familyName: attributes.family_name,
             stateAssignments: [],
-            divisionAssignment: attributes.division,
+            divisionAssignment: isValidCmsDivison(attributes.division)
+                ? attributes.division
+                : undefined,
         })
     }
 

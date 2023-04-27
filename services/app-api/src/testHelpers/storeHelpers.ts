@@ -81,6 +81,9 @@ function mockStoreThatErrors(): Store {
         insertUser: async (_args) => {
             return genericStoreError
         },
+        insertManyUsers: async (_args) => {
+            return genericStoreError
+        },
         updateCmsUserProperties: async (_ID, _State) => {
             return genericStoreError
         },

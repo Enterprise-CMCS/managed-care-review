@@ -28,7 +28,7 @@ graph TD
 
 For an overview of what the data is like, and why it's being converted to and from protocol buffers, see [the serialization ADR](../architectural-decision-records/008-form-data-serialization.md).
 
-For a more detailed look at what's happening in code when we ask for data, see the [discussion of GraphQL endpoints](creating-endpoints.md#graphql).
+For a more detailed look at what's happening in code when we ask for data, see the [discussion of GraphQL endpoints](creating-and-testing-endpoints.md#graphql).
 
 For a look at the schemas, consult these files:
 

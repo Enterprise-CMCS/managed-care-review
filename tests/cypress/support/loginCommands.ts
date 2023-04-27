@@ -81,6 +81,7 @@ Cypress.Commands.add(
             aliasQuery(req, 'fetchCurrentUser')
             aliasQuery(req, 'fetchHealthPlanPackage')
             aliasQuery(req, 'indexHealthPlanPackages')
+            aliasQuery(req, 'indexUsers')
         })
 
         cy.visit(initialURL)
@@ -107,7 +108,9 @@ Cypress.Commands.add(
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
         }
         cy.wait('@fetchCurrentUserQuery', { timeout: 20000 })
-        if (initialURL !== '/') {
+        if (initialURL === '/settings') {
+            cy.wait('@indexUsersQuery', { timeout: 20000 })
+        } else if (initialURL !== '/') {
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 }) // for cases where Admin user goes to specific submission on login
         } else {
             cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80000 })

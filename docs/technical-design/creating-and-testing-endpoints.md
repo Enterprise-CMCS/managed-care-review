@@ -1,6 +1,6 @@
-# How to create a new endpoint
+# How to create or test an endpoint
 
-There are two ways that we create endpoints in our app. One uses GraphQL, the other creates AWS Lambda handlers.
+There are two types of endpoints in our app. One uses GraphQL, the other creates AWS Lambda handlers.
 
 **When we want to fetch or update information relevant to the app itself--think of submissions, or user info--we'll typically use GraphQL.**
 
@@ -10,21 +10,24 @@ The relative merits of each approach should become clear below.
 
 ## GraphQL
 
-The major mental shift in using GraphQL, in contrast to RESTful services, is that you have to _begin_ by thinking of the data you want returned. With REST, it's common to hit an endpoint, get back a large JSON, browse through it, and then, in the application code, whittle it down, or pluck the bits that you need. But we'll construct our GraphQL queries to return exactly what we need, before we hit the application code at all.
+The major mental shift in using GraphQL, in contrast to RESTful services, is that you have to _begin_ by thinking of the data you want returned. With REST, it's common to hit an endpoint, get back a large JSON, browse through it, and then, in the application code, whittle it down, or pluck the bits that you need. But we'll construct our [GraphQL operations (queries and mutations)](https://graphql.org/learn/queries/) to return exactly what we need, before we hit the application code at all.
 
 ### Apollo Studio Explorer
 [Apollo Explorer tool](https://www.apollographql.com/docs/graphos/explorer/) is a web-based IDE for writing and executing GraphQL operations on our deployed GraphQL API, with features such as schema referencing, query linting, autocomplete, and a jump-to-definition tool. With this tool we can test and write GraphQL operations without the need of front-end UI to execute the operation.
 
 We have two ways to access the Apollo Explorer tool:
 
-**Embedded Apollo Explorer Tool**:
+**Embedded GraphQL Explorer Tool**:
 >In all environments, except `prod`, we have embedded the Apollo Explorer Tool into the MC-Review app. We embedded the tool into the app to simplify authorization configuration for `dev` and `val` environments. By doing so, we can programmatically configure the tool's authorization, eliminating the need for manual configuration by the user.
 >
->Accessing the embedded tool:
->- Log into the MC-Review app
+>Accessing and using the embedded tool:
+>- Log into the MC-Review app with the user that can perform the operations you want to test
 >   - Depending on the user, performing certain GraphQL operations will be restricted. The operation authorization is done in the resolvers, `services/app-api/src/resolvers`.
 >   - For example, a state user will not be allowed to unlock a submission. The GraphQL operation will return an unauthorized error.
 >- Once logged in, input this url `[hostname]/dev/graphql-explorer` to access the tool.
+>- Create a new workspace in the operations editor to build a new request (`+` sign in main editor).
+>- Use the Documentation panel to create your request. Walk through the schema and select fields to add to your request. Add any input parameters in the `variables` section. For more on usage of the query builder see [video tutorial](https://www.youtube.com/watch?v=j8b0Bda_TIw).
+>- If you need to make quickly decode/encode and make changes to protos use [ProtobufPal](https://www.protobufpal.com/). This tool should be used only with test and anonymized data (don't feed any private data in here).
 
 **External Apollo Explorer Tool**:
 >Apollo Explorer is embedded in the local deployment, so there's no need to access it externally, except in rare cases like executing GraphQL operations as user role `ADMIN_USER` when no users with that role has been added.
