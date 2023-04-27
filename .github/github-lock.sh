@@ -16,7 +16,7 @@ echo "Branch name set to ${branch}"
 
 rest=()
 github_base_url="api.github.com"
-api_url="https://$github_base_url/repos/$GITHUB_REPOSITORY/actions/runs?status=in_progress&branch=$branch"
+api_url="https://$github_base_url/repos/$GITHUB_REPOSITORY/actions/runs?branch=$branch"
 
 jq_prog=".workflow_runs | .[] | select(.status == \"in_progress\") | .run_number"
 
