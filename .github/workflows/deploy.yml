@@ -13,26 +13,11 @@ on:
 
 permissions:
   id-token: write
-  actions: write
-  contents: read
 
 jobs:
-  pre-check:
-    runs-on: ubuntu-20.04
-    outputs:
-      should_skip: ${{ steps.skip_check.outputs.should_skip }}
-    steps:
-      - id: skip_check
-        uses: fkirc/skip-duplicate-actions@v5
-        with:
-          cancel_others: true
-          concurrent_skipping: 'same_content'
-          do_not_skip: '["pull_request", "workflow_dispatch", "schedule"]'
-
   begin-deployment:
     name: Begin Deployment
     needs: pre-check
-    if: needs.pre-check.outputs.should_skip != 'true'
     runs-on: ubuntu-20.04
     permissions:
       deployments: write
@@ -114,8 +99,6 @@ jobs:
 
   web-unit-tests:
     name: test - web unit tests
-    needs: pre-check
-    if: needs.pre-check.outputs.should_skip != 'true'
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
@@ -155,8 +138,6 @@ jobs:
 
   api-unit-tests:
     name: test - api unit tests
-    needs: pre-check
-    if: needs.pre-check.outputs.should_skip != 'true'
     runs-on: ubuntu-20.04
     services:
       postgres:
