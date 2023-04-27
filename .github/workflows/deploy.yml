@@ -17,7 +17,6 @@ permissions:
 jobs:
   begin-deployment:
     name: Begin Deployment
-    needs: pre-check
     runs-on: ubuntu-20.04
     permissions:
       deployments: write
