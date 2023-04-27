@@ -2,7 +2,7 @@ import * as Yup from 'yup'
 import dayjs from 'dayjs'
 import { validateDateFormat } from '../../../formHelpers'
 import {
-    allowedProvisionsForCHIP,
+    isCHIPProvision,
     ProvisionType,
 } from '../../../common-code/healthPlanFormDataType'
 
@@ -14,7 +14,7 @@ export const ContractDetailsFormSchema = (
 ) => {
     // There are certain validations we can just validate if the submission is CHIP. The CHIP supported provisions are a smaller subset.
     const ignoreFieldForCHIP = (string: ProvisionType) => {
-        return isCHIPOnly && !allowedProvisionsForCHIP.includes(string)
+        return isCHIPOnly && !isCHIPProvision(string)
     }
 
     const yesNoError = (provision: ProvisionType) => {

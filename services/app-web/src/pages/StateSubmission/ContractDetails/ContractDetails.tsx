@@ -39,12 +39,14 @@ import {
     SubmissionDocument,
     ContractExecutionStatus,
     FederalAuthority,
-    allowedProvisionsForCHIP,
+    allowedProvisionKeysForCHIP,
+    isCHIPProvision,
 } from '../../../common-code/healthPlanFormDataType'
 import {
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
     ModifiedProvisionsRecord,
+    CHIPModifiedProvisionsRecord,
 } from '../../../constants/healthPlanPackages'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
@@ -223,7 +225,7 @@ export const ContractDetails = ({
     const isCHIPOnly = draftSubmission.populationCovered === 'CHIP'
     const isContractAmendment = draftSubmission.contractType === 'AMENDMENT'
     const applicableProvisions = isCHIPOnly
-        ? allowedProvisionsForCHIP
+        ? allowedProvisionKeysForCHIP
         : modifiedProvisionKeys
 
     const contractDetailsInitialValues: ContractDetailsFormValues = {
@@ -836,9 +838,16 @@ export const ContractDetails = ({
                                                                 modifiedProvisionName
                                                             }
                                                             label={
-                                                                ModifiedProvisionsRecord[
+                                                                isCHIPOnly &&
+                                                                isCHIPProvision(
                                                                     modifiedProvisionName
-                                                                ]
+                                                                )
+                                                                    ? CHIPModifiedProvisionsRecord[
+                                                                          modifiedProvisionName
+                                                                      ]
+                                                                    : ModifiedProvisionsRecord[
+                                                                          modifiedProvisionName
+                                                                      ]
                                                             }
                                                             showError={showFieldErrors(
                                                                 errors[

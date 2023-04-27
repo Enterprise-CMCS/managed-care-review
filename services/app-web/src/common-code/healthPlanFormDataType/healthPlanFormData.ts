@@ -5,7 +5,7 @@ import {
     ActuaryContact,
 } from './UnlockedHealthPlanFormDataType'
 import {
-    allowedProvisionsForCHIP,
+    allowedProvisionKeysForCHIP,
     excludedProvisionsForCHIP,
     modifiedProvisionKeys,
     ModifiedProvisions,
@@ -34,7 +34,7 @@ const hasValidModifiedProvisions = (
 ): boolean =>
     isCHIP
         ? provisions !== undefined &&
-          allowedProvisionsForCHIP.every(
+          allowedProvisionKeysForCHIP.every(
               (provision) => provisions[provision] !== undefined
           )
         : provisions !== undefined &&
