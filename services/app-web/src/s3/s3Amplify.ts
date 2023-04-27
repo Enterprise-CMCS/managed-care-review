@@ -1,7 +1,6 @@
 import { parseKey } from '../common-code/s3URLEncoding'
 import { Storage, API } from 'aws-amplify'
 import { v4 as uuidv4 } from 'uuid'
-import { calculateSHA256 } from '../common-code/sha/generateSha'
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
 import { recordJSException, recordJSExceptionWithContext } from '../otelHelpers'
@@ -47,7 +46,6 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             file: File,
             bucket: BucketShortName
         ): Promise<string | S3Error> => {
-            const fileHash = await calculateSHA256(file)
             const uuid = uuidv4()
             const ext = file.name.split('.').pop()
             //encode file names and decoding done in bulk_downloads.ts
@@ -57,7 +55,6 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                     bucket: bucketConfig[bucket],
                     contentType: file.type,
                     contentDisposition: `attachment; filename=${fileName}`,
-                    tagging: `sha256=${fileHash}`,
                 })
                 assertIsS3PutResponse(stored)
                 return stored.key

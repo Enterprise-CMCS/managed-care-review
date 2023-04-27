@@ -43,17 +43,16 @@ const linkedPackagesList = ({
 
         if (linkedPackageIsDraft && unlinkDrafts) {
             return (
-                <span>
+                <span key={item.packageId}>
                     {maybeComma}
-                    <span key={index}>{item.packageName}</span>
+                    <span>{item.packageName}</span>
                 </span>
             )
         } else {
             return (
-                <span>
+                <span key={item.packageId}>
                     {maybeComma}
                     <Link
-                        key={index}
                         asCustom={NavLink}
                         to={`/submissions/${item.packageId}`}
                     >
@@ -204,7 +203,7 @@ export const UploadedDocumentsTable = ({
                                 {documentDateLookupTable
                                     ? dayjs(
                                           documentDateLookupTable[
-                                              doc.sha256 || doc.s3URL
+                                              getDocumentKey(doc)
                                           ]
                                       ).format('M/D/YY')
                                     : ''}
