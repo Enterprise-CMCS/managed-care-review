@@ -203,8 +203,6 @@ jobs:
 
   build-prisma-client-lambda-layer:
     name: build - postgres prisma layer
-    needs: pre-check
-    if: needs.pre-check.outputs.should_skip != 'true'
     runs-on: ubuntu-20.04
     steps:
       - name: Check out repository
