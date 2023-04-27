@@ -10,7 +10,6 @@ on:
       - 'dependabot/**'
       - '!skipci*'
       - '!main'
-    if: "!startsWith(github.head_ref, 'pull/')"
 
 permissions:
   id-token: write
