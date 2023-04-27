@@ -18,7 +18,7 @@ rest=()
 github_base_url="api.github.com"
 api_url="https://$github_base_url/repos/$GITHUB_REPOSITORY/actions/runs?branch=$branch"
 
-jq_prog=".workflow_runs | .[] | select(.status == \"in_progress\") | .run_number"
+jq_prog=".workflow_runs | .[] | select(.status == \"in_progress\") | select(.run_number < $GITHUB_RUN_NUMBER) | .run_number"
 
 echo "Checking for running builds..."
 
