@@ -17,7 +17,7 @@ import {
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { ContractDetails } from './'
 import {
-    allowedProvisionsForCHIP,
+    allowedProvisionKeysForCHIP,
     modifiedProvisionKeys,
 } from '../../../common-code/healthPlanFormDataType'
 
@@ -324,7 +324,7 @@ describe('ContractDetails', () => {
             await waitFor(() => {
                 expect(
                     screen.getAllByText('You must select yes or no')
-                ).toHaveLength(allowedProvisionsForCHIP.length * 2)
+                ).toHaveLength(allowedProvisionKeysForCHIP.length * 2)
             })
 
             expect(screen.queryByText(/Risk-sharing strategy/)).toBeNull()
@@ -363,7 +363,7 @@ describe('ContractDetails', () => {
             await waitFor(() => {
                 expect(
                     screen.getAllByText('You must select yes or no')
-                ).toHaveLength(allowedProvisionsForCHIP.length * 2)
+                ).toHaveLength(allowedProvisionKeysForCHIP.length * 2)
             })
 
             const benefitsGroup = screen.getByText(
@@ -398,7 +398,7 @@ describe('ContractDetails', () => {
             await waitFor(() => {
                 expect(
                     screen.queryAllByText('You must select yes or no')
-                ).toHaveLength(allowedProvisionsForCHIP.length * 2 - 6)
+                ).toHaveLength(allowedProvisionKeysForCHIP.length * 2 - 6)
             })
         })
     })

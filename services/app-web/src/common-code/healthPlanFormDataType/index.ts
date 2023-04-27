@@ -22,11 +22,16 @@ export type {
     PopulationCoveredType,
 } from './UnlockedHealthPlanFormDataType'
 
-export type { ModifiedProvisions, ProvisionType } from './ModifiedProvisions'
+export type {
+    ModifiedProvisions,
+    CHIPModifiedProvisions,
+    ProvisionType,
+} from './ModifiedProvisions'
 
 export {
     modifiedProvisionKeys,
-    allowedProvisionsForCHIP,
+    allowedProvisionKeysForCHIP,
+    isCHIPProvision,
 } from './ModifiedProvisions'
 
 export type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
