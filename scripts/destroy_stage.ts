@@ -60,6 +60,10 @@ async function main() {
     // AWS can rate limit us if we go too fast. Using a regular
     // for construct to wait on async to slow us down a bit.
     for (const stack of stacksToDestroy) {
+        if (stack instanceof Error) {
+            console.error(`Could not delete stack: ${stack}`)
+            process.exit(1)
+        }
         console.info(`Destroying stack: ${stack}`)
 
         const clearBucketOutput = await clearServerlessDeployBucket(stack)
@@ -79,7 +83,9 @@ async function main() {
     }
 }
 
-async function getStacksFromStage(stageName: string): Promise<string[]> {
+async function getStacksFromStage(
+    stageName: string
+): Promise<string[] | Error[]> {
     const stacks = await Promise.all(
         stackPrefixes.map(async (prefix) => {
             const stackName = `${prefix}-${stageName}`
@@ -107,12 +113,25 @@ async function getStacksFromStage(stageName: string): Promise<string[]> {
 
                 return types
             } catch (err) {
-                const error = new Error(`Could not remove stack: ${err}`)
-                throw error
+                return new Error(`Could not remove stack: ${err}`)
             }
         })
     )
-    return stacks.flat()
+
+    // type guard
+    const isError = (err: any): err is Error => {
+        if (err instanceof Error) {
+            return true
+        }
+        return false
+    }
+
+    //see if we have any errors returned
+    const errors = stacks.filter(isError)
+    if (errors.length > 1) {
+        return errors
+    }
+    return stacks.flat() as string[]
 }
 
 interface s3ObjectKey {
