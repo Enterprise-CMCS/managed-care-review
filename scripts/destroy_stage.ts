@@ -107,8 +107,8 @@ async function getStacksFromStage(stageName: string): Promise<string[]> {
 
                 return types
             } catch (err) {
-                console.info(`Stack ${stackName} does not exist. Skipping.`)
-                return []
+                const error = new Error(`Could not remove stack: ${err}`)
+                throw error
             }
         })
     )
