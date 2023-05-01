@@ -528,3 +528,4 @@ jobs:
           otlpEndpoint: grpc://gov-otlp.nr-data.net:4317/
           otlpHeaders: 'api-key: ${{ secrets.NR_LICENSE_KEY }}'
           githubToken: ${{ secrets.GITHUB_TOKEN }}
+          otelServiceName: 'mc-review-github'
