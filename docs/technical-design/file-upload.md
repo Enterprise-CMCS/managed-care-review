@@ -18,7 +18,7 @@ The file upload immediately adds files to AWS S3 when they are dropped. It also 
 
 - it coordinates between the input and the file list UI
 - it keeps the React state file list up to data from async AWS S3 requests
-- it communicates the overall state of file upload validation and errors to the user
+- it communicates the overall state of file upload validation and errors to parent form component (which can display to the user when form is in validation state)
 
 ## Expected behavior
 
