@@ -525,6 +525,6 @@ jobs:
       - name: Export Workflow Trace
         uses: inception-health/otel-export-trace-action@latest
         with:
-          otlpEndpoint: grpc://gov-otlp.nr-data.net:4317
+          otlpEndpoint: grpc://gov-otlp.nr-data.net:4317/
           otlpHeaders: 'api-key: ${{ secrets.NR_LICENSE_KEY }}'
           githubToken: ${{ secrets.GITHUB_TOKEN }}
