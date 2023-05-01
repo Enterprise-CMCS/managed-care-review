@@ -2,8 +2,10 @@ import { APIGatewayProxyHandler } from 'aws-lambda'
 import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { HealthPlanRevisionTable } from '@prisma/client'
-import { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { SubmissionDocument } from '../../../app-web/src/common-code/healthPlanFormDataType'
+import {
+    HealthPlanFormDataType,
+    SubmissionDocument,
+} from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { isStoreError, StoreError } from '../postgres/storeError'
 import { S3 } from 'aws-sdk'
@@ -40,7 +42,7 @@ const updateDocumentsSHA256 = async (
 }
 
 const processRevisions = async (
-    store: Store, // Use the store parameter
+    store: Store,
     pkgID: string,
     revisions: HealthPlanRevisionTable[]
 ): Promise<void> => {
