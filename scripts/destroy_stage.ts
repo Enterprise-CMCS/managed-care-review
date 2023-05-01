@@ -113,11 +113,13 @@ async function getStacksFromStage(
 
                 return types
             } catch (err) {
-                return new Error(`Could not remove stack: ${err}`)
+                return []
+                //return new Error(`Could not remove stack: ${err}`)
             }
         })
     )
 
+    /*
     // type guard
     const isError = (err: any): err is Error => {
         if (err instanceof Error) {
@@ -131,6 +133,7 @@ async function getStacksFromStage(
     if (errors.length > 1) {
         return errors
     }
+    */
     return stacks.flat() as string[]
 }
 
