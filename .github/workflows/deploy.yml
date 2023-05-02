@@ -1,9 +1,6 @@
 name: Deploy
 
 on:
-  pull_request:
-    branches:
-      - main
   push:
     branches:
       - '*'
@@ -64,13 +61,6 @@ jobs:
         shell: bash
         run: |
           lerna run build:ci-scripts
-
-      - name: DangerJS
-        if: ${{ github.event_name == 'pull_request' }}
-        run: yarn danger ci
-        env:
-          DANGER_GITHUB_API_TOKEN: ${{ secrets.DANGER_GITHUB_API_TOKEN}}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: run get_changed_services
         id: changed-services-action
