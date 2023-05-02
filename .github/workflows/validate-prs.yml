@@ -9,8 +9,6 @@ jobs:
   validate-pr:
     name: Validate PR
     runs-on: ubuntu-20.04
-    permissions:
-      deployments: write
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
