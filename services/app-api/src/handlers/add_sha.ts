@@ -37,7 +37,7 @@ const updateDocumentsSHA256 = async (
 ): Promise<SubmissionDocument[]> => {
     for (const document of documents) {
         const sha256 = await calculateSHA256(document.s3URL)
-        document.sha256 = sha256
+        document.sha256 = `${sha256}-test`
     }
     return documents
 }
