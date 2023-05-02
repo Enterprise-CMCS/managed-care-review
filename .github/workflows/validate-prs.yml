@@ -17,6 +17,14 @@ jobs:
         with:
           fetch-depth: 10
 
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: build scripts
+        shell: bash
+        run: |
+          lerna run build:ci-scripts
+
       - name: DangerJS
         run: yarn danger ci
         env:
