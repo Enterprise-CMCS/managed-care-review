@@ -1,4 +1,5 @@
 import { Handler } from 'aws-lambda'
+import { Readable } from 'stream'
 import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { HealthPlanRevisionTable } from '@prisma/client'
@@ -8,23 +9,34 @@ import {
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { isStoreError, StoreError } from '../postgres/storeError'
-import { S3 } from 'aws-sdk'
+import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
 import { createHash } from 'crypto'
 import { Store } from '../postgres'
 
-const s3 = new S3()
+const s3 = new S3Client({ region: 'us-east-1' })
+
+const streamToBuffer = async (stream: Readable): Promise<Buffer> => {
+    return new Promise((resolve, reject) => {
+        const chunks: Uint8Array[] = []
+        stream.on('data', (chunk) => chunks.push(chunk))
+        stream.on('error', reject)
+        stream.on('end', () => resolve(Buffer.concat(chunks)))
+    })
+}
 
 const calculateSHA256 = async (s3URL: string): Promise<string> => {
     try {
-        const s3Object = await s3
-            .getObject({
-                Bucket: 'uploads-ma3281shainproto-uploads-121499393294/allusers/' as string,
-                Key: s3URL,
-            })
-            .promise()
+        const getObjectCommand = new GetObjectCommand({
+            Bucket: 'uploads-ma3281shainproto-uploads-121499393294/allusers/' as string,
+            Key: s3URL,
+        })
+
+        const s3Object = await s3.send(getObjectCommand)
+
+        const buffer = await streamToBuffer(s3Object.Body as Readable)
 
         const hash = createHash('sha256')
-        hash.update(s3Object.Body as Buffer)
+        hash.update(buffer)
         return hash.digest('hex')
     } catch (err) {
         console.error(`Error calculating SHA256 for ${s3URL}: ${err}`)
