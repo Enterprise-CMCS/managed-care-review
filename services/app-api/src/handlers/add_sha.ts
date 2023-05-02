@@ -21,7 +21,7 @@ const s3 = new S3()
 const calculateSHA256 = async (s3URL: string): Promise<string> => {
     const s3Object = await s3
         .getObject({
-            Bucket: process.env.S3_BUCKET_NAME as string,
+            Bucket: 'uploads-ma3281shainproto-uploads-121499393294/allusers/' as string,
             Key: s3URL,
         })
         .promise()
