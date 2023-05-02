@@ -152,6 +152,9 @@ functions:
   email_submit:
     handler: src/handlers/email_submit.main
 
+  add_sha:
+    handler: src/handlers/add_sha.main
+
   health:
     handler: src/handlers/health_check.main
     events:
