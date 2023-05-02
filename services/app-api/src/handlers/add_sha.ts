@@ -65,7 +65,6 @@ const processRevisions = async (
 export const main: Handler = async (event, context) => {
     const dbURL = process.env.DATABASE_URL
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
-    const pkgID = event.pkgID
 
     if (!dbURL) {
         console.error('DATABASE_URL not set')
@@ -86,16 +85,18 @@ export const main: Handler = async (event, context) => {
     }
     const store = NewPostgresStore(pgResult)
 
-    if (!pkgID) {
-        console.error('Package ID is missing in event object')
-        throw new Error('Package ID is required')
-    }
-
     const result: HealthPlanRevisionTable[] | StoreError =
         await store.findAllRevisions()
     if (isStoreError(result)) {
         console.error('Error getting revisions from db')
         throw new Error('Error getting records; cannot generate report')
+    }
+
+    // Get the pkgID from the first revision in the list
+    const pkgID = result[0].pkgID
+    if (!pkgID) {
+        console.error('Package ID is missing in the revisions')
+        throw new Error('Package ID is required')
     }
 
     await processRevisions(store, pkgID, result)
