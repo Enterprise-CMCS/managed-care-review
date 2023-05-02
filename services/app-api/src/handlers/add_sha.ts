@@ -1,4 +1,4 @@
-import { APIGatewayProxyHandler } from 'aws-lambda'
+import { Handler } from 'aws-lambda'
 import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { HealthPlanRevisionTable } from '@prisma/client'
@@ -10,10 +10,6 @@ import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormD
 import { isStoreError, StoreError } from '../postgres/storeError'
 import { S3 } from 'aws-sdk'
 import { createHash } from 'crypto'
-import {
-    userFromCognitoAuthProvider,
-    userFromLocalAuthProvider,
-} from '../authn'
 import { Store } from '../postgres'
 
 const s3 = new S3()
@@ -66,11 +62,10 @@ const processRevisions = async (
     }
 }
 
-export const main: APIGatewayProxyHandler = async (event, context) => {
-    const authProvider =
-        event.requestContext.identity.cognitoAuthenticationProvider || ''
+export const main: Handler = async (event, context) => {
     const dbURL = process.env.DATABASE_URL
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
+    const pkgID = event.pkgID
 
     if (!dbURL) {
         console.error('DATABASE_URL not set')
@@ -91,32 +86,10 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
     }
     const store = NewPostgresStore(pgResult)
 
-    // Get the package ID from the event object
-    const pkgID = event.queryStringParameters?.pkgID
     if (!pkgID) {
-        console.error('Package ID is missing in query parameters')
+        console.error('Package ID is missing in event object')
         throw new Error('Package ID is required')
     }
-    const authMode = process.env.REACT_APP_AUTH_MODE
-
-    // reject the request if it's not from a CMS or ADMIN user
-    const userFetcher =
-        authMode === 'LOCAL'
-            ? userFromLocalAuthProvider
-            : userFromCognitoAuthProvider
-    const userResult = await userFetcher(authProvider, store)
-    if (userResult.isErr()) {
-        console.error('Error getting user from auth provider')
-        throw new Error('Error getting user from auth provider')
-    }
-    if (
-        userResult.value.role !== 'CMS_USER' &&
-        userResult.value.role !== 'ADMIN_USER'
-    ) {
-        console.error('User is not authorized to run reports')
-        throw new Error('User is not authorized to run reports')
-    }
-    console.info('User is authorized to run reports')
 
     const result: HealthPlanRevisionTable[] | StoreError =
         await store.findAllRevisions()
@@ -127,12 +100,5 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
 
     await processRevisions(store, pkgID, result)
 
-    return {
-        statusCode: 200,
-        body: JSON.stringify({ message: 'SHA256 update complete' }),
-        headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Credentials': true,
-        },
-    }
+    console.info('SHA256 update complete')
 }
