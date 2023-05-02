@@ -1,4 +1,4 @@
-Name: Validate PRs
+name: Validate PRs
 
 on:
   pull_request:
@@ -6,8 +6,8 @@ on:
       - main
 
 jobs:
-  check-pr:
-    name: Validate PRs
+  validate-pr:
+    name: Validate PR
     runs-on: ubuntu-20.04
     permissions:
       deployments: write
