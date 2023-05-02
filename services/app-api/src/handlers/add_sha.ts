@@ -15,16 +15,21 @@ import { Store } from '../postgres'
 const s3 = new S3()
 
 const calculateSHA256 = async (s3URL: string): Promise<string> => {
-    const s3Object = await s3
-        .getObject({
-            Bucket: 'uploads-ma3281shainproto-uploads-121499393294/allusers/' as string,
-            Key: s3URL,
-        })
-        .promise()
+    try {
+        const s3Object = await s3
+            .getObject({
+                Bucket: 'uploads-ma3281shainproto-uploads-121499393294/allusers/' as string,
+                Key: s3URL,
+            })
+            .promise()
 
-    const hash = createHash('sha256')
-    hash.update(s3Object.Body as Buffer)
-    return hash.digest('hex')
+        const hash = createHash('sha256')
+        hash.update(s3Object.Body as Buffer)
+        return hash.digest('hex')
+    } catch (err) {
+        console.error(`Error calculating SHA256 for ${s3URL}: ${err}`)
+        throw err
+    }
 }
 
 const updateDocumentsSHA256 = async (
@@ -56,8 +61,16 @@ const processRevisions = async (
                     rateInfo.rateDocuments
                 )
             }
-
-            await store.updateHealthPlanRevision(pkgID, revision.id, formData)
+            try {
+                await store.updateHealthPlanRevision(
+                    pkgID,
+                    revision.id,
+                    formData
+                )
+            } catch (err) {
+                console.error(`Error updating revision ${revision.id}: ${err}`)
+                throw err
+            }
         }
     }
 }
