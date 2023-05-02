@@ -113,7 +113,7 @@ export const main: Handler = async (event, context) => {
     const result: HealthPlanRevisionTable[] | StoreError =
         await store.findAllRevisions()
     if (isStoreError(result)) {
-        console.error('Error getting revisions from db')
+        console.error(`Error getting revisions from db ${result}`)
         throw new Error('Error getting records; cannot generate report')
     }
 
