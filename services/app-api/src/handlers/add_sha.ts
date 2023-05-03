@@ -12,6 +12,7 @@ import { isStoreError, StoreError } from '../postgres/storeError'
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
 import { createHash } from 'crypto'
 import { Store } from '../postgres'
+import { parseKey } from '../../../app-web/src/common-code/s3URLEncoding'
 
 const s3 = new S3Client({ region: 'us-east-1' })
 
@@ -24,8 +25,17 @@ const streamToBuffer = async (stream: Readable): Promise<Buffer> => {
     })
 }
 
+// const parseKey = (maybeS3URL: string): string | Error => {
+//     const url = new Url(maybeS3URL)
+//     if (!isValidS3URLFormat(url)) throw new Error('Not valid S3URL')
+//     return url.pathname.split('/')[1]
+// }
+
 const calculateSHA256 = async (s3URL: string): Promise<string> => {
-    const key = `allusers${s3URL}}`
+    const key = parseKey(s3URL)
+    if (key instanceof Error) {
+        throw key
+    }
     try {
         const getObjectCommand = new GetObjectCommand({
             Bucket: 'uploads-ma3281shainprotoretry-uploads-121499393294' as string,
