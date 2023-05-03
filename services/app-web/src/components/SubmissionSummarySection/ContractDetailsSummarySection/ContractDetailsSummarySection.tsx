@@ -4,6 +4,7 @@ import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import {
+    CHIPModifiedProvisionsRecord,
     ContractExecutionStatusRecord,
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
@@ -16,8 +17,9 @@ import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
-    allowedProvisionsForCHIP,
+    allowedProvisionKeysForCHIP,
     HealthPlanFormDataType,
+    isCHIPProvision,
     modifiedProvisionKeys,
     ModifiedProvisions,
     ProvisionType,
@@ -59,10 +61,10 @@ export function sortModifiedProvisions(
     // These extra fields will be removed server side on submit but could be present on unlock before submit.
     if (isCHIPOnly) {
         unmodifiedProvisions = unmodifiedProvisions.filter((unmodified) =>
-            allowedProvisionsForCHIP.includes(unmodified)
+            isCHIPProvision(unmodified)
         )
         modifiedProvisions = modifiedProvisions.filter((modified) =>
-            allowedProvisionsForCHIP.includes(modified)
+            isCHIPProvision(modified)
         )
     }
 
@@ -86,7 +88,7 @@ export const ContractDetailsSummarySection = ({
     )
     const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && navigateTo !== undefined
-
+    const isCHIPOnly = submission.populationCovered === 'CHIP'
     useEffect(() => {
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
@@ -124,14 +126,13 @@ export const ContractDetailsSummarySection = ({
 
     const [modifiedProvisions, unmodifiedProvisions] = sortModifiedProvisions(
         submission.contractAmendmentInfo?.modifiedProvisions,
-        submission.populationCovered === 'CHIP'
+        isCHIPOnly
     )
 
     // Ensure that missing field validations for modified provisions works properly even though required provisions list shifts depending on submission
-    const requiredProvisions =
-        submission.populationCovered === 'CHIP'
-            ? allowedProvisionsForCHIP
-            : modifiedProvisionKeys
+    const requiredProvisions = isCHIPOnly
+        ? allowedProvisionKeysForCHIP
+        : modifiedProvisionKeys
     const amendmentProvisionsUnanswered =
         modifiedProvisions.length + unmodifiedProvisions.length <
         requiredProvisions.length
@@ -214,7 +215,11 @@ export const ContractDetailsSummarySection = ({
                             {amendmentProvisionsUnanswered ? null : (
                                 <DataDetailCheckboxList
                                     list={modifiedProvisions}
-                                    dict={ModifiedProvisionsRecord}
+                                    dict={
+                                        isCHIPOnly
+                                            ? CHIPModifiedProvisionsRecord
+                                            : ModifiedProvisionsRecord
+                                    }
                                     displayEmptyList
                                 />
                             )}
@@ -230,7 +235,11 @@ export const ContractDetailsSummarySection = ({
                             {amendmentProvisionsUnanswered ? null : (
                                 <DataDetailCheckboxList
                                     list={unmodifiedProvisions}
-                                    dict={ModifiedProvisionsRecord}
+                                    dict={
+                                        isCHIPOnly
+                                            ? CHIPModifiedProvisionsRecord
+                                            : ModifiedProvisionsRecord
+                                    }
                                     displayEmptyList
                                 />
                             )}

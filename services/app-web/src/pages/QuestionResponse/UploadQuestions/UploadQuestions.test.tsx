@@ -319,11 +319,14 @@ describe('UploadQuestions', () => {
         const input = screen.getByLabelText('Upload questions')
 
         await userEvent.upload(input, [TEST_DOC_FILE])
+        await screen.findByText(TEST_DOC_FILE.name)
+        await screen.findByText(/1 complete/)
+
         createQuestionButton.click()
 
-        expect(await screen.findByText(TEST_DOC_FILE.name)).toBeInTheDocument()
+        await screen.findByTestId('error-alert')
         expect(
-            await screen.findByText("We're having trouble loading this page.")
+            screen.getByText("We're having trouble loading this page.")
         ).toBeDefined()
     })
 })

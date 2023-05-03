@@ -37,6 +37,7 @@ const submissionDocumentSchema = z.object({
             ])
             .optional()
     ),
+    sha256: z.string().optional(),
 })
 
 const contractAmendmentInfoSchema = z.object({

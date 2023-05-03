@@ -186,6 +186,7 @@ function parseProtoDocuments(
             mcreviewproto.DocumentCategory,
             doc.documentCategories
         ) as DocumentCategoryType[],
+        sha256: doc.sha256 || undefined,
     }))
 }
 

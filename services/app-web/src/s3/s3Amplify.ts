@@ -1,7 +1,6 @@
 import { parseKey } from '../common-code/s3URLEncoding'
 import { Storage, API } from 'aws-amplify'
 import { v4 as uuidv4 } from 'uuid'
-
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
 import { recordJSException, recordJSExceptionWithContext } from '../otelHelpers'
@@ -51,14 +50,12 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             const ext = file.name.split('.').pop()
             //encode file names and decoding done in bulk_downloads.ts
             const fileName = encodeURIComponent(file.name)
-
             try {
                 const stored = await Storage.put(`${uuid}.${ext}`, file, {
                     bucket: bucketConfig[bucket],
                     contentType: file.type,
                     contentDisposition: `attachment; filename=${fileName}`,
                 })
-
                 assertIsS3PutResponse(stored)
                 return stored.key
             } catch (err) {

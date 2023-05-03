@@ -39,12 +39,14 @@ import {
     SubmissionDocument,
     ContractExecutionStatus,
     FederalAuthority,
-    allowedProvisionsForCHIP,
+    allowedProvisionKeysForCHIP,
+    isCHIPProvision,
 } from '../../../common-code/healthPlanFormDataType'
 import {
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
     ModifiedProvisionsRecord,
+    CHIPModifiedProvisionsRecord,
 } from '../../../constants/healthPlanPackages'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
@@ -159,6 +161,7 @@ export const ContractDetails = ({
                     key: 'INVALID_KEY',
                     s3URL: undefined,
                     status: 'UPLOAD_ERROR',
+                    sha256: doc.sha256,
                     documentCategories: doc.documentCategories,
                 }
             }
@@ -168,6 +171,7 @@ export const ContractDetails = ({
                 key: key,
                 s3URL: doc.s3URL,
                 status: 'UPLOAD_COMPLETE',
+                sha256: doc.sha256,
                 documentCategories: doc.documentCategories,
             }
         })
@@ -193,7 +197,6 @@ export const ContractDetails = ({
                 throw new Error(`Error in S3 key: ${key}`)
             }
         }
-        return
     }
 
     const handleUploadFile = async (file: File): Promise<S3FileData> => {
@@ -222,7 +225,7 @@ export const ContractDetails = ({
     const isCHIPOnly = draftSubmission.populationCovered === 'CHIP'
     const isContractAmendment = draftSubmission.contractType === 'AMENDMENT'
     const applicableProvisions = isCHIPOnly
-        ? allowedProvisionsForCHIP
+        ? allowedProvisionKeysForCHIP
         : modifiedProvisionKeys
 
     const contractDetailsInitialValues: ContractDetailsFormValues = {
@@ -350,6 +353,7 @@ export const ContractDetails = ({
                     formDataDocuments.push({
                         name: fileItem.name,
                         s3URL: fileItem.s3URL,
+                        sha256: fileItem.sha256,
                         documentCategories: ['CONTRACT'],
                     })
                 }
@@ -834,9 +838,16 @@ export const ContractDetails = ({
                                                                 modifiedProvisionName
                                                             }
                                                             label={
-                                                                ModifiedProvisionsRecord[
+                                                                isCHIPOnly &&
+                                                                isCHIPProvision(
                                                                     modifiedProvisionName
-                                                                ]
+                                                                )
+                                                                    ? CHIPModifiedProvisionsRecord[
+                                                                          modifiedProvisionName
+                                                                      ]
+                                                                    : ModifiedProvisionsRecord[
+                                                                          modifiedProvisionName
+                                                                      ]
                                                             }
                                                             showError={showFieldErrors(
                                                                 errors[
