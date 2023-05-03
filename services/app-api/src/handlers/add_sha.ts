@@ -27,7 +27,7 @@ const streamToBuffer = async (stream: Readable): Promise<Buffer> => {
 const calculateSHA256 = async (s3URL: string): Promise<string> => {
     try {
         const getObjectCommand = new GetObjectCommand({
-            Bucket: 'uploads-ma3281shainproto-uploads-121499393294/allusers/' as string,
+            Bucket: 'uploads-ma3281shainprotoretry-uploads-121499393294' as string,
             Key: s3URL,
         })
 
