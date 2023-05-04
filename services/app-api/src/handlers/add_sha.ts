@@ -27,8 +27,6 @@ const streamToBuffer = async (stream: Readable): Promise<Buffer> => {
 
 const calculateSHA256 = async (s3URL: string): Promise<string> => {
     const key = `allusers/${parseKey(s3URL)}`
-    // console.info('s3URL: ', s3URL)
-    // console.info('key: ', key)
     try {
         const getObjectCommand = new GetObjectCommand({
             Bucket: 'uploads-ma3281shainprotoretry-uploads-121499393294' as string,
@@ -54,16 +52,19 @@ const updateDocumentsSHA256 = async (
     try {
         await Promise.all(
             documents.map(async (document) => {
-                try {
-                    const sha256 = await calculateSHA256(document.s3URL)
-                    document.sha256 = `${sha256}-testing`
-                } catch (error) {
-                    console.error('Error calculating SHA256:', error)
+                if (
+                    !Object.prototype.hasOwnProperty.call(document, 'sha256') ||
+                    !document.sha256
+                ) {
+                    try {
+                        const sha256 = await calculateSHA256(document.s3URL)
+                        document.sha256 = `${sha256}`
+                    } catch (error) {
+                        console.error('Error calculating SHA256:', error)
+                    }
                 }
             })
         )
-
-        console.info('modified documents: ', JSON.stringify(documents))
         return documents
     } catch (error) {
         console.error('Error in updateDocumentsSHA256:', error)
@@ -84,26 +85,11 @@ const processRevisions = async (
             formData.contractDocuments = await updateDocumentsSHA256(
                 formData.contractDocuments
             )
-            if (formData.documents.length > 0) {
-                console.info(
-                    'formData.documents after update: ',
-                    JSON.stringify(formData.documents)
-                )
-            }
-            // console.info(
-            //     'formData.contractDocuments: ',
-            //     JSON.stringify(formData.contractDocuments)
-            // )
             for (const rateInfo of formData.rateInfos) {
                 rateInfo.rateDocuments = await updateDocumentsSHA256(
                     rateInfo.rateDocuments
                 )
-                // console.info(
-                //     'rateInfo.rateDocuments: ',
-                //     JSON.stringify(rateInfo.rateDocuments)
-                // )
             }
-            // console.info('formData: ', JSON.stringify(formData))
             try {
                 const update = await store.updateHealthPlanRevision(
                     pkgID,
@@ -112,17 +98,12 @@ const processRevisions = async (
                 )
                 if (isStoreError(update)) {
                     console.error(
-                        `Error updating revision ${
+                        `StoreError updating revision ${
                             revision.id
                         }: ${JSON.stringify(update)}`
                     )
                     throw new Error('Error updating revision')
                 }
-                console.info(
-                    `Updated revision: formData: ${JSON.stringify(
-                        formData
-                    )} update: ${update}`
-                )
             } catch (err) {
                 console.error(`Error updating revision ${revision.id}: ${err}`)
                 throw err
