@@ -18,6 +18,7 @@ import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { ContractDetails } from './'
 import {
     allowedProvisionKeysForCHIP,
+    federalAuthorityKeys,
     modifiedProvisionKeys,
 } from '../../../common-code/healthPlanFormDataType'
 
@@ -26,16 +27,12 @@ HTMLElement.prototype.scrollIntoView = scrollIntoViewMock
 
 describe('ContractDetails', () => {
     afterEach(() => {
-        jest.resetAllMocks()
-    })
-    afterAll(() => {
         jest.clearAllMocks()
     })
 
     const emptyContractDetailsDraft = {
         ...mockDraft(),
     }
-    afterEach(() => jest.clearAllMocks())
 
     it('displays correct form guidance', async () => {
         renderWithProviders(
@@ -146,6 +143,33 @@ describe('ContractDetails', () => {
         })
     })
 
+    describe('Federal authorities', () => {
+        it('dislays correct fields in dropdown for medicaid contract', () => {
+            renderWithProviders(<ContractDetails
+                draftSubmission={{...mockDraft(), populationCovered: 'CHIP'}}
+                updateDraft={jest.fn()}
+                previousDocuments={[]}
+            />,
+            )
+            const fedAuthDropdown = await screen.findByRole('select', {name: 'Active federal operating authority'})
+            expect(fedAuthDropdown).toBeInTheDocument()
+            expect(within(fedAuthDropdown).getByRole('option')).toHaveLength(allowedProvisionKeysForCHIP.length)
+            expect(within(fedAuthDropdown).getByRole('option', {name: '1115 Waiver Authority'})).toBeInTheDocument() // authority disallowed for chip is not included in list
+        })
+
+        it('dislays correct fields in dropdown for CHIP only contract', async () => {
+            renderWithProviders(<ContractDetails
+                draftSubmission={{...mockDraft(), populationCovered: 'CHIP'}}
+                updateDraft={jest.fn()}
+                previousDocuments={[]}
+            />,
+            )
+            const fedAuthDropdown = await screen.findByRole('select', {name: 'Active federal operating authority'})
+            expect(fedAuthDropdown).toBeInTheDocument()
+            expect(within(fedAuthDropdown).getByRole('option')).toHaveLength(federalAuthorityKeys.length)
+            expect(within(fedAuthDropdown).getByRole('option', {name: '1115 Waiver Authority'})).toBeInTheDocument()  // medicaid only authority should be in the list
+
+    })
     describe('Modified provisions - yes/nos', () => {
         it('allows setting all modified provisions for medicaid contract amendment', async () => {
             const emptyDraft = mockDraft()

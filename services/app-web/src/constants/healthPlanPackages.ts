@@ -1,6 +1,7 @@
 import {
     SubmissionType,
     ContractType,
+    CHIPFederalAuthority,
     FederalAuthority,
     ManagedCareEntity,
     ActuarialFirmType,
@@ -33,7 +34,7 @@ const ContractExecutionStatusRecord: Record<ContractExecutionStatus, string> = {
     UNEXECUTED: 'Unexecuted by some or all parties',
 }
 
-const FederalAuthorityRecord: Record<FederalAuthority, string> = {
+const FederalAuthorityRecord: Record< FederalAuthority, string> = {
     STATE_PLAN: '1932(a) State Plan Authority',
     WAIVER_1915B: '1915(b) Waiver Authority',
     WAIVER_1115: '1115 Waiver Authority',
@@ -41,7 +42,6 @@ const FederalAuthorityRecord: Record<FederalAuthority, string> = {
     BENCHMARK: '1937 Benchmark Authority',
     TITLE_XXI: 'Title XXI Separate CHIP State Plan Authority',
 }
-
 const ManagedCareEntityRecord: Record<ManagedCareEntity, string> = {
     MCO: 'Managed Care Organization (MCO)',
     PIHP: 'Prepaid Inpatient Health Plan (PIHP)',
