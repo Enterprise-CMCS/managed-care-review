@@ -2,7 +2,7 @@
 
 ## Introduction
 
-MC-Review allows users to upload and save files through multiple workflows. FileUpload the main reusable component for file uploads in the application. It supports multiple files at a time via user select or drag and drop.
+MC-Review allows users to upload and save files through multiple workflows. FileUpload is the main reusable component for file uploads in the application. It supports multiple files at a time via user select or drag and drop.
 
 Currently, the component is embedded inside several larger forms in our application. The document files supported in MC-Review are text based documents (we support  PDF, CSV, DOC, DOCX, XLS, XLSX, XLSM).
 
@@ -12,12 +12,12 @@ Currently, the component is embedded inside several larger forms in our applicat
 
 - **A file input.** The input can be triggered by click or by drag and drop with a valid file.
 The look and feel of the file input [draws directly from USWDS](https://designsystem.digital.gov/components/file-input/) (via the [shared component exported by react-uswds](https://github.com/trussworks/react-uswds/tree/main/src/components/forms/FileInput)).
-- **A file list.** This is the UI that shows up below the input. It is custom built for MC-Review. There are currently two variations of the file list that are supported - a HTML table and an HTML unordered list.
+- **A file list.** This is the UI that shows up below the input. It is custom built for MC-Review. There are currently two variations of the file list that are supported - an HTML table and an HTML unordered list.
 
 ### FileUpload has three main functions
 
 - it coordinates between the input and the file list UI
-- it keeps the React state file list up to data from async AWS S3 requests
+- it keeps the file list stored in React state up to data with async AWS S3 requests
 - it communicates the overall state of files and any errors to the parent form component (which will display additional validation messages to the user when the form is in validation state)
 
 ## Expected behavior
@@ -47,9 +47,9 @@ A text summary of the expected behavior and the error states are below.
 ### Limitations
 
 - FileUpload UI is optimized for a small list of files. For a larger number of files (15+) we likely want to move to a different UI. 
-  - This was explored in design iteration during the first year of the project. Options considered included a pop up toast menu that handles file upload outside the form (similar to Google Docs experience) and a file management page (similar to Box) with a large table or card view where users upload file, address any issues, and organize files outside the form.
+  - This was explored in design iteration during the first year of the project. Options considered included a pop up toast menu that handles file upload outside the form (similar to Google Docs experience) and a file management page (similar to Box) with a large table or card view where users upload files, address any issues, and organize files outside the form.
 - Validations introduce complexity to the parent form component.  
-  - FileUpload related validations are hard to test and can overload form pages. The longest most complex tests in the codebase relate to forms where there are multiple file uploads (rates details- where multiple rate upload components may be loaded). This leads to performance issues and clunky UI since the user could be far scrolled down in the form but be blocked by async file error that just appeared higher up on the form outside the viewport.
+  - FileUpload related validations are hard to test and can overload form pages. The longest most complex tests in the codebase relate to forms where there are multiple file uploads (rates details- where multiple rate upload components may be loaded). This leads to performance issues and clunky UI since the user could be far scrolled down in the form but be blocked by an async file error that just appeared higher up on the form outside the viewport.
 - Difficult to load and performance test. We don’t currently have an easy way to see how the FileUpload would handle 20 large files on a low bandwidth connection, for example.
 - Slow overall upload/scan time (~30 seconds per file from user select to file complete). This impacts user experience as well as end to end and manual testing. Some of the slowness comes from our inherited tooling and could be addressed with tech effort.
 
@@ -63,12 +63,12 @@ There are likely many more files in S3 than what is viewable in MC-Review (for e
 
 ### Main entrypoint: `FileUpload/FileUpload.tsx`
 
-- This component is made up of a file input, file list, and some headings and hint text used to display messages to user.  The component accepts props that determine whether to display that list in a table or not and what actions should happen on scan, upload, delete etc.
+- This component is made up of a file input, file list, and some headings and hint text used to display messages to the user.  The component accepts props that determine whether to display that list in a table or not and what actions should happen on scan, upload, delete etc.
 - Responsible for tracking the overall list of file items in React state. As files change,  due to user interaction or async requests resolving, the display of files changes.
 - Responsible for async file upload to S3 and displaying inline errors per file.
 - Ideally this component is agnostic to file type and business logic related to the type of file being uploaded. This would keep the component re-usable for any type of file needed in the application (e.g. even something like uploading a staff photo for an user avatar could be handled by this same UI if we keep business logic isolated).
 - We don't really consider the file "complete" until its been uploaded and scanned. A file that is not complete will not be included in API requests to save a form with FileUpoad in use.
-- The underlying file input (HTML `<input type=file/>`) is a rare example in our codebase of a [controlled component](https://react.dev/learn/sharing-state-between-components#controlled-and-uncontrolled-components). We use a [`ref`](https://react.dev/learn/manipulating-the-dom-with-refs#when-react-attaches-the-refs) to access files in the input and clears the input's `value` after each change. This is not standard behavior for an HTML input (usually when you drop something in the input `value` it stays there). However, this allows us to takeover control handling of files for the file items list and the underlying form in relation input.
+- The underlying file input (HTML `<input type=file/>`) is a rare example in our codebase of a [controlled component](https://react.dev/learn/sharing-state-between-components#controlled-and-uncontrolled-components). We use a [`ref`](https://react.dev/learn/manipulating-the-dom-with-refs#when-react-attaches-the-refs) to access files in the input and clear the input's `value` after each change. This is not standard behavior for an HTML input (usually when you drop something in the input `value` it stays there). However, this allows us to takeover control of handling of files for the file items list and the underlying form in relation to input.
 
 ### Related files and subcomponents
 
@@ -76,17 +76,17 @@ There are likely many more files in S3 than what is viewable in MC-Review (for e
 
 - React hook. Can be used with FileUpload (but is not required).
 - Surfaces `fileItemsUpdate`  function -  this is used by parent components to attach validations and side effects
-- Surfaces `cleanFileItemsBeforeSave` function  - can be used parent components to double check the React state has not file items in invalid state and remove any mal-formatted items.
+- Surfaces `cleanFileItemsBeforeSave` function  - can be used by parent components to double check that the React state does not have file items in an invalid state and remove any mal-formatted items.
 - Responsible for determining form level error message in response to FileUpload state.
-- **Why use a hook with FileUpload?** Data binding in React in one way parent to child. In our case, the parent is a form ( something like `RateDetails.tsx` or `ContractDetails.tsx` which uses FileUpload and submits data from the component to the API when the form is complete). These parent components need to latch into the changing data to display form level validations if the user tries to continue or go back before file uploads are complete. A hook gives us a way to latch surface data back to the parent and re-use that behavior across the application. You could also achieve with adding state individually to each parent.
+- **Why use a hook with FileUpload?** Data binding in React is one way parent to child. In our case, the parent is a form ( something like `RateDetails.tsx` or `ContractDetails.tsx` which uses FileUpload and submits data from the component to the API when the form is complete). These parent components need to latch into the changing data to display form level validations if the user tries to continue or go back before file uploads are complete. A hook gives us a way to latch surface data back to the parent and re-use that behavior across the application. You could also achieve this by adding state individually to each parent.
 
 #### `ListWrapper.tsx` and `TableWrapper.tsx`
 
-- This is the first UI layer for the files list. UI for the list of file as a whole - this is attached right under the file input
+- This is the first UI layer for the files list. UI for the list of files as a whole - this is attached right under the file input
 
 #### `FileProcessor.tsx`
 
-- This file handles core logic around updating file items. Both the ListWrapper and the TableWrapper render this controller component It determines whether to display items  within a HTML list item element `<li>` or table row `<tr>`
+- This file handles core logic around updating file items. Both the ListWrapper and the TableWrapper render this controller component. It determines whether to display items within an HTML list item element `<li>` or table row `<tr>`
 
 #### `FileRow.tsx` and `FileListItem.tsx`
 
