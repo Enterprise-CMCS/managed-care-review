@@ -14,6 +14,7 @@ type SubmissionDocument = {
     name: string
     s3URL: string
     documentCategories: DocumentCategoryType[]
+    sha256?: string
 }
 
 type ContractAmendmentInfo = {

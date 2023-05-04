@@ -33,11 +33,6 @@ jobs:
         with:
           expected-secret: ${{ secrets.REACT_APP_AUTH_MODE }}
 
-      - name: lock this branch to prevent concurrent deploys
-        run: ./.github/github-lock.sh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: set app version
         id: app-version
         shell: bash
@@ -53,6 +48,11 @@ jobs:
         id: branch-name
         shell: bash
         run: echo "::set-output name=branch-name::$(echo ${GITHUB_REF#refs/heads/})"
+
+      - name: lock this branch to prevent concurrent deploys
+        run: ./.github/github-lock.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -391,7 +391,7 @@ jobs:
       fail-fast: true
       matrix:
         # run copies of the current job in parallel
-        containers: [1, 2, 3, 4, 5, 6]
+        containers: [1, 2, 3, 4, 5, 6, 7, 8 ]
     steps:
       - uses: actions/checkout@v3
 
@@ -494,6 +494,8 @@ jobs:
           cp ./cypress-json-coverage-4/coverage-final.json ./cypress_temp/from-cypress-4.json
           cp ./cypress-json-coverage-5/coverage-final.json ./cypress_temp/from-cypress-5.json
           cp ./cypress-json-coverage-6/coverage-final.json ./cypress_temp/from-cypress-6.json
+          cp ./cypress-json-coverage-7/coverage-final.json ./cypress_temp/from-cypress-7.json
+          cp ./cypress-json-coverage-8/coverage-final.json ./cypress_temp/from-cypress-8.json
           echo "merge the collected cypress reports into one report"
           npx nyc merge cypress_temp ./reports/from-cypress.json
           echo "Temp merge done"

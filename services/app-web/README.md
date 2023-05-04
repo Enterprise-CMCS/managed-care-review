@@ -36,10 +36,21 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 Launches the test runner in the interactive watch mode.\
 See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
+### `yarn test: once`
+
+Launches the test runner and runs through once,running all tests serially in the current process. Used in CI.
+
 ### `yarn test:update`
 
-Override failing snapshot tests with the new markup. Use sparingly - may be a valid failure.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Override failing snapshot tests and update existing snapshot tests with new markup. Use sparingly - may be a valid failure.
+
+### `yarn test:coverage`
+
+Generate code coverage.
+
+### `yarn test:clear`
+
+Clears jest cache, this can resolve false negatives in unit tests.
 
 ## `yarn storybook`
 

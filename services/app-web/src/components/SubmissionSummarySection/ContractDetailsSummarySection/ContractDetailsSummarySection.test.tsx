@@ -256,10 +256,105 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeNull()
     })
 
-    it('renders amended provisions', () => {
+    it('renders amended provisions and MLR references for a medicaid contract correctly', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
                 submission={mockContractAndRatesDraft()}
+                submissionName="MN-PMAP-0001"
+            />
+        )
+
+        expect(
+            screen.getByText('Benefits provided by the managed care plans')
+        ).toBeInTheDocument()
+
+        const modifiedProvisions = screen.getByLabelText(
+            'This contract action includes new or modified provisions related to the following'
+        )
+        expect(
+            within(modifiedProvisions).getByText(
+                'Benefits provided by the managed care plans'
+            )
+        ).toBeInTheDocument()
+        expect(
+            within(modifiedProvisions).getByText(
+                'Pass-through payments in accordance with 42 CFR § 438.6(d)'
+            )
+        ).toBeInTheDocument()
+
+        expect(
+            within(modifiedProvisions).getByText(
+                'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)'
+            )
+        ).toBeInTheDocument()
+        expect(
+            within(modifiedProvisions).getByText(
+                'State directed payments in accordance with 42 CFR § 438.6(c)'
+            )
+        ).toBeInTheDocument()
+
+        expect(
+            within(modifiedProvisions).getByText(
+                'Medical loss ratio standards in accordance with 42 CFR § 438.8'
+            )
+        ).toBeInTheDocument()
+        expect(
+            within(modifiedProvisions).getByText('Network adequacy standards')
+        ).toBeInTheDocument()
+        expect(
+            within(modifiedProvisions).getByText(
+                'Enrollment/disenrollment process'
+            )
+        ).toBeInTheDocument()
+        expect(
+            within(modifiedProvisions).getByText(
+                'Non-risk payment arrangements'
+            )
+        ).toBeInTheDocument()
+
+        const unmodifiedProvisions = screen.getByLabelText(
+            'This contract action does NOT include new or modified provisions related to the following'
+        )
+        expect(
+            within(unmodifiedProvisions).getByText(
+                'Geographic areas served by the managed care plans'
+            )
+        ).toBeInTheDocument()
+        expect(
+            within(unmodifiedProvisions).getByText(
+                'Payments to MCOs and PIHPs for enrollees that are a patient in an institution for mental disease in accordance with 42 CFR § 438.6(e)'
+            )
+        ).toBeInTheDocument()
+        expect(
+            within(unmodifiedProvisions).getByText(
+                'Incentive arrangements in accordance with 42 CFR § 438.6(b)(2)'
+            )
+        ).toBeInTheDocument()
+        expect(
+            within(unmodifiedProvisions).getByText(
+                'Grievance and appeal system'
+            )
+        ).toBeInTheDocument()
+
+        expect(
+            within(unmodifiedProvisions).getByText(
+                'Length of the contract period'
+            )
+        ).toBeInTheDocument()
+
+        expect(
+            within(unmodifiedProvisions).getByText(
+                'Other financial, payment, incentive or related contractual provisions'
+            )
+        ).toBeInTheDocument()
+    })
+    it('renders amended provisions with correct MLR references for CHIP contract', () => {
+        renderWithProviders(
+            <ContractDetailsSummarySection
+                submission={{
+                    ...mockContractAndRatesDraft(),
+                    populationCovered: 'CHIP',
+                }}
                 submissionName="MN-PMAP-0001"
             />
         )
@@ -276,7 +371,19 @@ describe('ContractDetailsSummarySection', () => {
             )
         ).toBeInTheDocument()
         expect(
-            within(modifiedProvisions).getByText(/Pass-through payment/)
+            within(modifiedProvisions).getByText(
+                'Network adequacy standards 42 CFR § 457.1218'
+            )
+        ).toBeInTheDocument()
+        expect(
+            within(modifiedProvisions).getByText(
+                'Enrollment/disenrollment process 42 CFR § 457.1210 and 457.1212'
+            )
+        ).toBeInTheDocument()
+        expect(
+            within(modifiedProvisions).getByText(
+                'Non-risk payment arrangements 42 CFR 457.10 and 457.1201(c)'
+            )
         ).toBeInTheDocument()
 
         const unmodifiedProvisions = screen.getByLabelText(
@@ -284,14 +391,28 @@ describe('ContractDetailsSummarySection', () => {
         )
         expect(
             within(unmodifiedProvisions).getByText(
-                'Geographic areas served by the managed care plans'
+                'Grievance and appeal system 42 CFR § 457.1260'
             )
         ).toBeInTheDocument()
+
         expect(
             within(unmodifiedProvisions).getByText(
-                'Other financial, payment, incentive or related contractual provisions'
+                'Grievance and appeal system 42 CFR § 457.1260'
             )
         ).toBeInTheDocument()
+
+        expect(
+            within(unmodifiedProvisions).getByText(
+                'Length of the contract period'
+            )
+        ).toBeInTheDocument()
+
+        // not a CHIP provision, even if saved from an unlock, it should not show up on summary page once population is CHIP
+        expect(
+            within(unmodifiedProvisions).queryByText(
+                'Other financial, payment, incentive or related contractual provisions'
+            )
+        ).toBeNull()
     })
 
     it('sorts amended provisions correctly for non-CHIP amendment', () => {
@@ -373,7 +494,6 @@ describe('ContractDetailsSummarySection', () => {
         ])
         expect(unmod).toEqual([
             'modifiedGeoAreaServed',
-            'modifiedOtherFinancialPaymentIncentive',
             'modifiedLengthOfContract',
         ])
     })
