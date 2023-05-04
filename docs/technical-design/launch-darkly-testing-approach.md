@@ -157,11 +157,11 @@ Our custom LaunchDarkly commands intercepts feature flag value requests and retu
 
 The approach here was to implement state management that could be accessed though Cypress. Integrating `cy.readFile` and `cy.writeFile` into the LaunchDarkly helper commands.
 
-The Cypress commands `cy.interceptFeatureFlags` and `cy.stubFeatureFlags` will generate a json file, using `Cy.writeFile`, in `tests/cypress/fixtures/stores/` named `featureFlagStore.json` using data and Types from `flag.ts` located in `app-web/src/common-code/featureFlags`. The `cy.getFeatureFlagStore()`, using `cy.write`, is used to read the `featureFlagStore.json` file and return the object of feature flags with values.
+The Cypress commands `cy.interceptFeatureFlags` and `cy.stubFeatureFlags` will generate a json file, using `Cy.writeFile`, in `services/cypress/fixtures/stores/` named `featureFlagStore.json` using data and Types from `flag.ts` located in `app-web/src/common-code/featureFlags`. The `cy.getFeatureFlagStore()`, using `cy.write`, is used to read the `featureFlagStore.json` file and return the object of feature flags with values.
 
 ### LaunchDarkly Cypress helper commands
 - #### interceptFeatureFlags
-  This command allows you to intercept LD calls and set flag values. It also generates a `featureFlagStore.json` file in `tests/cypress/fixtures/stores` with default feature flag values along with any specific values passed in.
+  This command allows you to intercept LD calls and set flag values. It also generates a `featureFlagStore.json` file in `services/cypress/fixtures/stores` with default feature flag values along with any specific values passed in.
   ```typescript
     //Intercept feature flag with flag values.
     cy.interceptFeatureFlags({

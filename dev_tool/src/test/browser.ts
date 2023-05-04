@@ -1,6 +1,7 @@
 import { spawnSync } from 'child_process'
 import LabeledProcessRunner from '../runner.js'
 import { checkDockerInstalledAndRunning, checkURLIsUp } from '../deps.js'
+import * as path from 'path'
 
 export async function runBrowserTests(cypressArgs: string[]) {
     let args = ['open']
@@ -10,8 +11,9 @@ export async function runBrowserTests(cypressArgs: string[]) {
 
     args = ['cypress'].concat(args)
 
-    console.info(`running: npx ${args.join(' ')}`)
-    spawnSync('npx', args, {
+    console.info(`running: yarn ${args.join(' ')}`)
+    spawnSync('yarn', args, {
+        cwd: 'services/cypress',
         stdio: 'inherit',
     })
 }
@@ -66,9 +68,9 @@ export async function runBrowserTestsInDocker(cypressArgs: string[]) {
             'docker',
             'run',
             '-v',
-            `${process.cwd()}:/mc-review`,
+            `${path.join(process.cwd(), 'services/cypress')}:/mc-review`,
             '--workdir',
-            '/mc-review',
+            '/mc-review/services/cypress',
             '--env',
             'REACT_APP_AUTH_MODE=LOCAL',
             'gha-cypress:latest',
