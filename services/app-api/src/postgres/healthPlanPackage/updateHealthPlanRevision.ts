@@ -67,7 +67,7 @@ export async function updateHealthPlanRevision(
     submitInfo?: UpdateInfoType
 ): Promise<HealthPlanPackageType | StoreError> {
     formData.updatedAt = new Date()
-    console.info('jjj formData in postgres update: ', JSON.stringify(formData))
+    console.info('jjj formData in postgres updates: ', JSON.stringify(formData))
     const proto = toProtoBuffer(formData)
     const buffer = Buffer.from(proto)
 
