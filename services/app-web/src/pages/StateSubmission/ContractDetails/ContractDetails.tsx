@@ -42,6 +42,7 @@ import {
     allowedProvisionKeysForCHIP,
     isCHIPProvision,
     federalAuthorityKeysForCHIP,
+    federalAuthorityKeys,
 } from '../../../common-code/healthPlanFormDataType'
 import {
     ManagedCareEntityRecord,
@@ -229,7 +230,7 @@ export const ContractDetails = ({
         ? allowedProvisionKeysForCHIP
         : modifiedProvisionKeys
     const applicableFederalAuthorities = isCHIPOnly? 
-    federalAuthorityKeysForCHIP : federalAuthorityKeysForCHIP;
+    federalAuthorityKeysForCHIP : federalAuthorityKeys;
 
     const contractDetailsInitialValues: ContractDetailsFormValues = {
         contractExecutionStatus:

@@ -19,6 +19,7 @@ import { ContractDetails } from './'
 import {
     allowedProvisionKeysForCHIP,
     federalAuthorityKeys,
+    federalAuthorityKeysForCHIP,
     modifiedProvisionKeys,
 } from '../../../common-code/healthPlanFormDataType'
 
@@ -143,18 +144,18 @@ describe('ContractDetails', () => {
         })
     })
 
-    describe('Federal authorities', () => {
+    describe('Federal authorities',  () => {
         it('dislays correct fields in dropdown for medicaid contract', () => {
             renderWithProviders(<ContractDetails
-                draftSubmission={{...mockDraft(), populationCovered: 'CHIP'}}
+                draftSubmission={{...mockDraft(), populationCovered: 'MEDICAID'}}
                 updateDraft={jest.fn()}
                 previousDocuments={[]}
             />,
             )
-            const fedAuthDropdown = await screen.findByRole('select', {name: 'Active federal operating authority'})
+            const fedAuthDropdown =  screen.getByRole('group', {name: 'Active federal operating authority'})
             expect(fedAuthDropdown).toBeInTheDocument()
-            expect(within(fedAuthDropdown).getByRole('option')).toHaveLength(allowedProvisionKeysForCHIP.length)
-            expect(within(fedAuthDropdown).getByRole('option', {name: '1115 Waiver Authority'})).toBeInTheDocument() // authority disallowed for chip is not included in list
+            expect(within(fedAuthDropdown).getAllByRole('checkbox')).toHaveLength(federalAuthorityKeys.length)
+            expect(within(fedAuthDropdown).getByRole('checkbox', {name: '1115 Waiver Authority'})).toBeInTheDocument() // authority disallowed for chip is not included in list
         })
 
         it('dislays correct fields in dropdown for CHIP only contract', async () => {
@@ -164,10 +165,10 @@ describe('ContractDetails', () => {
                 previousDocuments={[]}
             />,
             )
-            const fedAuthDropdown = await screen.findByRole('select', {name: 'Active federal operating authority'})
+            const fedAuthDropdown = await screen.findByRole('group', {name: 'Active federal operating authority'})
             expect(fedAuthDropdown).toBeInTheDocument()
-            expect(within(fedAuthDropdown).getByRole('option')).toHaveLength(federalAuthorityKeys.length)
-            expect(within(fedAuthDropdown).getByRole('option', {name: '1115 Waiver Authority'})).toBeInTheDocument()  // medicaid only authority should be in the list
+            expect(within(fedAuthDropdown).getAllByRole('checkbox')).toHaveLength(federalAuthorityKeysForCHIP.length)
+            expect(within(fedAuthDropdown).queryByRole('checkbox', {name: '1115 Waiver Authority'})).not.toBeInTheDocument()  // medicaid only authority should be in the list
 
     })
     describe('Modified provisions - yes/nos', () => {
@@ -924,4 +925,5 @@ describe('ContractDetails', () => {
             )
         })
     })
+})
 })

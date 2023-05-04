@@ -12,11 +12,10 @@ import {
 import {
     ModifiedProvisions,
     UnlockedHealthPlanFormDataType,
-    federalAuthorityKeys,
 } from '../../../common-code/healthPlanFormDataType'
 
 describe('ContractDetailsSummarySection', () => {
-    it('can render draft submission without errors (review and submit behavior)', () => {
+    it.only('can render draft submission without errors (review and submit behavior)', async () => {
         const testSubmission = {
             ...mockContractAndRatesDraft(),
             documents: [
@@ -41,11 +40,15 @@ describe('ContractDetailsSummarySection', () => {
                 submission={testSubmission}
                 navigateTo="contract-details"
                 submissionName="MN-PMAP-0001"
-            />
+            />,  {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
         )
 
-        expect(
-            screen.getByRole('heading', {
+        expect(await 
+            screen.findByRole('heading', {
                 level: 2,
                 name: 'Contract details',
             })
