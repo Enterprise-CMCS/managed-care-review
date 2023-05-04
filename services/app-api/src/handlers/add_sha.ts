@@ -25,17 +25,10 @@ const streamToBuffer = async (stream: Readable): Promise<Buffer> => {
     })
 }
 
-// const parseKey = (maybeS3URL: string): string | Error => {
-//     const url = new Url(maybeS3URL)
-//     if (!isValidS3URLFormat(url)) throw new Error('Not valid S3URL')
-//     return url.pathname.split('/')[1]
-// }
-
 const calculateSHA256 = async (s3URL: string): Promise<string> => {
-    const key = parseKey(s3URL)
-    if (key instanceof Error) {
-        throw key
-    }
+    const key = `allusers/${parseKey(s3URL)}`
+    // console.info('s3URL: ', s3URL)
+    // console.info('key: ', key)
     try {
         const getObjectCommand = new GetObjectCommand({
             Bucket: 'uploads-ma3281shainprotoretry-uploads-121499393294' as string,
@@ -58,37 +51,77 @@ const calculateSHA256 = async (s3URL: string): Promise<string> => {
 const updateDocumentsSHA256 = async (
     documents: SubmissionDocument[]
 ): Promise<SubmissionDocument[]> => {
-    for (const document of documents) {
-        const sha256 = await calculateSHA256(document.s3URL)
-        document.sha256 = `${sha256}-test`
+    try {
+        await Promise.all(
+            documents.map(async (document) => {
+                try {
+                    const sha256 = await calculateSHA256(document.s3URL)
+                    document.sha256 = `${sha256}-testing`
+                } catch (error) {
+                    console.error('Error calculating SHA256:', error)
+                }
+            })
+        )
+
+        console.info('modified documents: ', JSON.stringify(documents))
+        return documents
+    } catch (error) {
+        console.error('Error in updateDocumentsSHA256:', error)
+        throw error
     }
-    return documents
 }
 
 const processRevisions = async (
     store: Store,
-    pkgID: string,
     revisions: HealthPlanRevisionTable[]
 ): Promise<void> => {
     for (const revision of revisions) {
+        const pkgID = revision.pkgID
         const decodedFormDataProto = toDomain(revision.formDataProto)
         if (!(decodedFormDataProto instanceof Error)) {
             const formData = decodedFormDataProto as HealthPlanFormDataType
-
             formData.documents = await updateDocumentsSHA256(formData.documents)
             formData.contractDocuments = await updateDocumentsSHA256(
                 formData.contractDocuments
             )
+            if (formData.documents.length > 0) {
+                console.info(
+                    'formData.documents after update: ',
+                    JSON.stringify(formData.documents)
+                )
+            }
+            // console.info(
+            //     'formData.contractDocuments: ',
+            //     JSON.stringify(formData.contractDocuments)
+            // )
             for (const rateInfo of formData.rateInfos) {
                 rateInfo.rateDocuments = await updateDocumentsSHA256(
                     rateInfo.rateDocuments
                 )
+                // console.info(
+                //     'rateInfo.rateDocuments: ',
+                //     JSON.stringify(rateInfo.rateDocuments)
+                // )
             }
+            // console.info('formData: ', JSON.stringify(formData))
             try {
-                await store.updateHealthPlanRevision(
+                const update = await store.updateHealthPlanRevision(
                     pkgID,
                     revision.id,
                     formData
+                )
+                if (isStoreError(update)) {
+                    console.error(
+                        `Error updating revision ${
+                            revision.id
+                        }: ${JSON.stringify(update)}`
+                    )
+                    throw new Error('Error updating revision')
+                }
+                console.info(
+                    `Updated revision: formData: ${JSON.stringify(
+                        formData
+                    )} update: ${update}`
                 )
             } catch (err) {
                 console.error(`Error updating revision ${revision.id}: ${err}`)
@@ -135,7 +168,7 @@ export const main: Handler = async (event, context) => {
         throw new Error('Package ID is required')
     }
 
-    await processRevisions(store, pkgID, result)
+    await processRevisions(store, result)
 
     console.info('SHA256 update complete')
 }
