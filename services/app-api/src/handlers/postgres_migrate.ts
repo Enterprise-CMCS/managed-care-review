@@ -2,6 +2,7 @@ import { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
 import { RDSClient, CreateDBClusterSnapshotCommand } from '@aws-sdk/client-rds'
 import { execSync } from 'child_process'
 import { getDBClusterID, getPostgresURL } from './configuration'
+import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 
 export const main: APIGatewayProxyHandler =
     async (): Promise<APIGatewayProxyResult> => {
@@ -28,9 +29,20 @@ export const main: APIGatewayProxyHandler =
             throw new Error('Init Error: STAGE not set in environment')
         }
 
+        // setup otel tracing
+        const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
+        if (!otelCollectorURL || otelCollectorURL === '') {
+            throw new Error(
+                'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
+            )
+        }
+        const serviceName = 'postgres-migrate'
+        initTracer(serviceName, otelCollectorURL)
+
         const dbConnResult = await getPostgresURL(dbURL, secretsManagerSecret)
         if (dbConnResult instanceof Error) {
-            console.error('Init Error: failed to get pg URL', dbConnResult)
+            const errorMessage = `Init Error: failed to get pg URL: ${dbConnResult}`
+            recordException(errorMessage, serviceName, 'getPostgresURL')
             throw dbConnResult
         }
 
@@ -53,6 +65,7 @@ export const main: APIGatewayProxyHandler =
             )
         } catch (err) {
             const errorMessage = `Could not migrate the database schema: ${err}`
+            recordException(errorMessage, serviceName, 'prisma migrate deploy')
             return {
                 statusCode: 400,
                 body: JSON.stringify({
@@ -71,10 +84,8 @@ export const main: APIGatewayProxyHandler =
         if (['dev', 'val', 'prod', 'main'].includes(stage)) {
             const dbClusterId = await getDBClusterID(secretsManagerSecret)
             if (dbClusterId instanceof Error) {
-                console.error(
-                    'Init Error: failed to get db cluster ID, ',
-                    dbClusterId
-                )
+                const errorMessage = `Init Error: failed to get db cluster ID: ${dbClusterId}`
+                recordException(errorMessage, serviceName, 'getDBClusterID')
                 throw dbClusterId
             }
 
@@ -88,14 +99,17 @@ export const main: APIGatewayProxyHandler =
                 const command = new CreateDBClusterSnapshotCommand(params)
                 await rds.send(command)
             } catch (err) {
-                console.error(err)
+                const errorMessage = `Could not take RDS snapshot before migrating: ${err}`
+                recordException(
+                    errorMessage,
+                    serviceName,
+                    'CreateDBClusterSnapshotCommand'
+                )
                 return {
                     statusCode: 400,
                     body: JSON.stringify({
                         code: 'DB_SNAPSHOT_FAILED',
-                        message:
-                            'Could not create a snapshot of the DB before migration: ' +
-                            err,
+                        message: errorMessage,
                     }),
                     headers: {
                         'Access-Control-Allow-Origin': '*',
@@ -119,12 +133,13 @@ export const main: APIGatewayProxyHandler =
                 }
             )
         } catch (err) {
-            console.info(err)
+            const errorMessage = `Could not migrate the database protobufs: ${err}`
+            recordException(errorMessage, serviceName, 'migrate protos db')
             return {
                 statusCode: 400,
                 body: JSON.stringify({
                     code: 'DATA_MIGRATION_FAILED',
-                    message: 'Could not migrate the database protobufs: ' + err,
+                    message: errorMessage,
                 }),
                 headers: {
                     'Access-Control-Allow-Origin': '*',
