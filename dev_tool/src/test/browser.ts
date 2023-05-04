@@ -70,7 +70,7 @@ export async function runBrowserTestsInDocker(cypressArgs: string[]) {
             '-v',
             `${path.join(process.cwd(), 'services/cypress')}:/mc-review`,
             '--workdir',
-            '/mc-review/services/cypress',
+            '/mc-review/services',
             '--env',
             'REACT_APP_AUTH_MODE=LOCAL',
             'gha-cypress:latest',
