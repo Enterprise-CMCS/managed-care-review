@@ -8,6 +8,12 @@ set -e -o xtrace -o errexit -o pipefail -o nounset -u
 ########################################################################################
 
 branch=${GITHUB_REF#refs/heads/}
+# if we're in a pull_request we need to get the branch name we're merging from (that goes to main)
+if [ -n "${GITHUB_HEAD_REF}" ]; then 
+    branch=${GITHUB_HEAD_REF}; 
+fi
+echo "Branch name set to ${branch}"
+
 rest=()
 github_base_url="api.github.com"
 api_url="https://$github_base_url/repos/$GITHUB_REPOSITORY/actions/runs?branch=$branch"
