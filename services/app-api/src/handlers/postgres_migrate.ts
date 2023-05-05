@@ -94,7 +94,7 @@ export const main: APIGatewayProxyHandler =
             const errorMessage = `Could not migrate the database schema: ${err}`
             recordException(errorMessage, serviceName, 'prisma migrate deploy')
             return {
-                statusCode: 400,
+                statusCode: 500,
                 body: JSON.stringify({
                     code: 'SCHEMA_MIGRATION_FAILED',
                     message: errorMessage,
@@ -133,7 +133,7 @@ export const main: APIGatewayProxyHandler =
                     'CreateDBClusterSnapshotCommand'
                 )
                 return {
-                    statusCode: 400,
+                    statusCode: 500,
                     body: JSON.stringify({
                         code: 'DB_SNAPSHOT_FAILED',
                         message: errorMessage,
@@ -186,7 +186,7 @@ export const main: APIGatewayProxyHandler =
             const errorMessage = `Could not migrate the database protobufs: ${err}`
             recordException(errorMessage, serviceName, 'migrate protos db')
             return {
-                statusCode: 400,
+                statusCode: 500,
                 body: JSON.stringify({
                     code: 'DATA_MIGRATION_FAILED',
                     message: errorMessage,
@@ -197,6 +197,8 @@ export const main: APIGatewayProxyHandler =
                 },
             } as APIGatewayProxyResult
         }
+
+        console.info('remove me: ran the migration')
 
         return {
             statusCode: 200,
