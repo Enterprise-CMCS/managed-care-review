@@ -587,7 +587,7 @@ type ContractFormData {
     startDate: String
     endDate: String
     submissionType: SubmissionType
-    federalAuthorities: [FederalAuthorities!]! | "NOT_SET"
+    federalAuthorities: [FederalAuthorities!]!
     modifiedProvisions: ModifiedProvisions!
 
 }
