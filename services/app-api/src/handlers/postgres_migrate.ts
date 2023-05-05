@@ -63,7 +63,7 @@ export const main: APIGatewayProxyHandler =
                 `${process.execPath}`,
                 [
                     '/opt/nodejs/node_modules/prisma/build/index.js',
-                    'migrate',
+                    'break-it',
                     'deploy',
                     `--schema=${schemaPath}`,
                 ],
@@ -83,7 +83,6 @@ export const main: APIGatewayProxyHandler =
                 'stdout',
                 prismaResult.stdout && prismaResult.stdout.toString()
             )
-            console.info('err', prismaResult.error)
             if (prismaResult.status !== 0) {
                 const error = new Error(
                     `Could not run prisma migrate deploy: ${prismaResult.stderr.toString()}`
@@ -176,7 +175,6 @@ export const main: APIGatewayProxyHandler =
                 migrateProtosResult.stdout &&
                     migrateProtosResult.stdout.toString()
             )
-            console.info('err', migrateProtosResult.error)
             if (migrateProtosResult.status !== 0) {
                 const error = new Error(
                     `Could not run migrate_protos db: ${migrateProtosResult.stderr.toString()}`
