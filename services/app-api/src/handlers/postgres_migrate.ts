@@ -1,34 +1,11 @@
 import { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
 import { RDSClient, CreateDBClusterSnapshotCommand } from '@aws-sdk/client-rds'
-import { execSync } from 'child_process'
+import { execSync, spawnSync } from 'child_process'
 import { getDBClusterID, getPostgresURL } from './configuration'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 
 export const main: APIGatewayProxyHandler =
     async (): Promise<APIGatewayProxyResult> => {
-        // get the relevant env vars and check that they exist.
-        const dbURL = process.env.DATABASE_URL
-        const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
-        const connectTimeout = process.env.CONNECT_TIMEOUT ?? '60'
-        // stage is either set in lambda env or we can set to local for local dev
-        const stage = process.env.stage ?? 'local'
-
-        if (!dbURL) {
-            throw new Error(
-                'Init Error: DATABASE_URL is required to run app-api'
-            )
-        }
-
-        if (!secretsManagerSecret) {
-            throw new Error(
-                'Init Error: SECRETS_MANAGER_SECRET is required to run postgres migrate'
-            )
-        }
-
-        if (!stage) {
-            throw new Error('Init Error: STAGE not set in environment')
-        }
-
         // setup otel tracing
         const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
         if (!otelCollectorURL || otelCollectorURL === '') {
@@ -38,6 +15,35 @@ export const main: APIGatewayProxyHandler =
         }
         const serviceName = 'postgres-migrate'
         initTracer(serviceName, otelCollectorURL)
+
+        // get the relevant env vars and check that they exist.
+        const dbURL = process.env.DATABASE_URL
+        const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
+        const connectTimeout = process.env.CONNECT_TIMEOUT ?? '60'
+        // stage is either set in lambda env or we can set to local for local dev
+        const stage = process.env.stage ?? 'local'
+
+        if (!dbURL) {
+            const error = new Error(
+                'Init Error: DATABASE_URL is required to run app-api'
+            )
+            recordException(error, serviceName, 'dbURL')
+            throw error
+        }
+
+        if (!secretsManagerSecret) {
+            const error = new Error(
+                'Init Error: SECRETS_MANAGER_SECRET is required to run postgres migrate'
+            )
+            recordException(error, serviceName, 'secretsManagerSecret')
+            throw error
+        }
+
+        if (!stage) {
+            const error = new Error('Init Error: STAGE not set in environment')
+            recordException(error, serviceName, 'stage')
+            throw error
+        }
 
         const dbConnResult = await getPostgresURL(dbURL, secretsManagerSecret)
         if (dbConnResult instanceof Error) {
@@ -122,8 +128,13 @@ export const main: APIGatewayProxyHandler =
         // run the data migration. this will run any data changes to the protobufs stored in postgres
         try {
             const connectTimeout = process.env.CONNECT_TIMEOUT ?? '60'
-            execSync(
-                `${process.execPath} /opt/nodejs/protoMigrator/migrate_protos.js db '/opt/nodejs/protoMigrator/healthPlanFormDataMigrations'`,
+            const migrateProtosResult = spawnSync(
+                `${process.execPath}`,
+                [
+                    '/opt/nodejs/protoMigrator/migrate_protos.js',
+                    'db',
+                    '/opt/nodejs/protoMigrator/healthPlanFormDataMigrations',
+                ],
                 {
                     env: {
                         DATABASE_URL:
@@ -132,6 +143,18 @@ export const main: APIGatewayProxyHandler =
                     },
                 }
             )
+
+            console.info(
+                'stderror',
+                migrateProtosResult.stderr &&
+                    migrateProtosResult.stderr.toString()
+            )
+            console.info(
+                'stdout',
+                migrateProtosResult.stdout &&
+                    migrateProtosResult.stdout.toString()
+            )
+            console.info('err', migrateProtosResult.error)
         } catch (err) {
             const errorMessage = `Could not migrate the database protobufs: ${err}`
             recordException(errorMessage, serviceName, 'migrate protos db')
