@@ -409,7 +409,7 @@ jobs:
         id: cypress
         uses: cypress-io/github-action@v5
         with:
-          working-directory: services
+          working-directory: services/cypress
           config: baseUrl=${{ needs.finishing-prep.outputs.application-endpoint }}
           record: true
           parallel: true
