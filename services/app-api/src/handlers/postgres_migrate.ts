@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
 import { RDSClient, CreateDBClusterSnapshotCommand } from '@aws-sdk/client-rds'
-import { execSync, spawnSync } from 'child_process'
+import { spawnSync } from 'child_process'
 import { getDBClusterID, getPostgresURL } from './configuration'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 
@@ -59,8 +59,14 @@ export const main: APIGatewayProxyHandler =
             // Aurora can have long cold starts, so we extend connection timeout on migrates
             const schemaPath =
                 process.env.SCHEMA_PATH ?? '/opt/nodejs/prisma/schema.prisma'
-            execSync(
-                `${process.execPath} /opt/nodejs/node_modules/prisma/build/index.js migrate deploy --schema=${schemaPath}`,
+            const prismaResult = spawnSync(
+                `${process.execPath}`,
+                [
+                    '/opt/nodejs/node_modules/prisma/build/index.js',
+                    'migrate',
+                    'deploy',
+                    `--schema=${schemaPath}`,
+                ],
                 {
                     env: {
                         DATABASE_URL:
@@ -69,6 +75,22 @@ export const main: APIGatewayProxyHandler =
                     },
                 }
             )
+            console.info(
+                'stderror',
+                prismaResult.stderr && prismaResult.stderr.toString()
+            )
+            console.info(
+                'stdout',
+                prismaResult.stdout && prismaResult.stdout.toString()
+            )
+            console.info('err', prismaResult.error)
+            if (prismaResult.status !== 0) {
+                const error = new Error(
+                    `Could not run prisma migrate deploy: ${prismaResult.stderr.toString()}`
+                )
+                recordException(error, serviceName, 'prisma migrate deploy')
+                throw error
+            }
         } catch (err) {
             const errorMessage = `Could not migrate the database schema: ${err}`
             recordException(errorMessage, serviceName, 'prisma migrate deploy')
@@ -155,6 +177,13 @@ export const main: APIGatewayProxyHandler =
                     migrateProtosResult.stdout.toString()
             )
             console.info('err', migrateProtosResult.error)
+            if (migrateProtosResult.status !== 0) {
+                const error = new Error(
+                    `Could not run migrate_protos db: ${migrateProtosResult.stderr.toString()}`
+                )
+                recordException(error, serviceName, 'migrate_protos db')
+                throw error
+            }
         } catch (err) {
             const errorMessage = `Could not migrate the database protobufs: ${err}`
             recordException(errorMessage, serviceName, 'migrate protos db')
