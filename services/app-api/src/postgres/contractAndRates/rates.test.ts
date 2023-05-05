@@ -208,7 +208,7 @@ describe('contract and rates', () => {
             startDate: '2022-01-01',
             endDate: '2023-01-01',
             submissionType: 'CONTRACT_ONLY',
-            federalAuthorities: ['WAIVER_1915B', 'STATE_PLAN']
+            federalAuthorities: ['WAIVER_1915B', 'STATE_PLAN'],
         }
 
         console.log('av1', av1)
@@ -518,6 +518,7 @@ describe('contract and rates', () => {
                 contractRevisions: {
                     create: {
                         contractRevisionID: contractA_0.id,
+                        validAfter: new Date(),
                     }
                 }
             }
@@ -531,6 +532,7 @@ describe('contract and rates', () => {
                 contractRevisions: {
                     create: {
                         contractRevisionID: contractA_0.id,
+                        validAfter: new Date(),
                     }
                 }
             }
@@ -544,6 +546,7 @@ describe('contract and rates', () => {
                 contractRevisions: {
                     create: {
                         contractRevisionID: contractA_0.id,
+                        validAfter: new Date(),
                     }
                 }
             },

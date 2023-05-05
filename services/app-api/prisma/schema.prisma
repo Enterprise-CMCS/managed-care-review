@@ -45,18 +45,37 @@ model RateTable {
 }
 
 model ContractRevisionTable {
-  id         String        @id
-  contractID String
-  contract   ContractTable @relation(fields: [contractID], references: [id])
+  id            String                                  @id
+  contractID    String
+  contract      ContractTable                           @relation(fields: [contractID], references: [id])
   rateRevisions RateRevisionsOnContractRevisionsTable[]
+  invalidatedRevisions RateRevisionsOnContractRevisionsTable[] @relation("invalidatedByContract")
+
+  unlockInfoID String?
+  unlockInfo   UpdateInfoTable? @relation("unlockContractInfo", fields: [unlockInfoID], references: [id])
+  submitInfoID String?
+  submitInfo   UpdateInfoTable? @relation("submitContractInfo", fields: [submitInfoID], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  name                String
-  
-  draftFormData DraftContractFormDataTable @relation(fields: [draftFormDataID], references: [id])
-  draftFormDataID String @unique
+  name String
+
+  draftFormData   DraftContractFormDataTable @relation(fields: [draftFormDataID], references: [id])
+  draftFormDataID String                     @unique
+}
+
+model UpdateInfoTable {
+  id String @id
+
+  updateAt     DateTime
+  updateBy     String
+  updateReason String
+
+  unlockedContracts ContractRevisionTable[] @relation("unlockContractInfo")
+  submitedContracts ContractRevisionTable[] @relation("submitContractInfo")
+  unlockedRates RateRevisionTable[] @relation("unlockRateInfo")
+  submitedRates RateRevisionTable[] @relation("submitRateInfo")
 }
 
 enum SubmissionType {
@@ -74,65 +93,75 @@ enum FederalAuthority {
 }
 
 model ContractDocumentTable {
-  id String @id
+  id                 String                     @id
   contractFormDataID String
-  contractFormData DraftContractFormDataTable @relation(fields: [contractFormDataID], references: [id])
+  contractFormData   DraftContractFormDataTable @relation(fields: [contractFormDataID], references: [id])
 
   s3url String
   title String
 }
 
 model ContractAdditionalDocumentsTable {
-  id String @id
+  id                 String                     @id
   contractFormDataID String
-  contractFormData DraftContractFormDataTable @relation(fields: [contractFormDataID], references: [id])
-  
+  contractFormData   DraftContractFormDataTable @relation(fields: [contractFormDataID], references: [id])
+
   s3url String
   title String
 }
 
 model DraftContractFormDataTable {
-  id String @id
+  id       String                 @id
   revision ContractRevisionTable?
 
-  contractDescription String?
-  startDate DateTime? @db.Date
-  endDate DateTime? @db.Date
-  submissionType SubmissionType?
-  federalAuthorities FederalAuthority[]
-  modifiedGeoAreaServed Boolean?
+  contractDescription         String?
+  startDate                   DateTime?                          @db.Date
+  endDate                     DateTime?                          @db.Date
+  submissionType              SubmissionType?
+  federalAuthorities          FederalAuthority[]
+  modifiedGeoAreaServed       Boolean?
   modifiedRiskSharingStrategy Boolean?
   modifiedPassThroughPayments Boolean?
-  contractDocuments ContractDocumentTable[]
-  additionalDocuments ContractAdditionalDocumentsTable[]
-
+  contractDocuments           ContractDocumentTable[]
+  additionalDocuments         ContractAdditionalDocumentsTable[]
 }
 
 model RateRevisionTable {
-  id     String    @id
-  rateID String
-  rate   RateTable @relation(fields: [rateID], references: [id])
+  id                String                                  @id
+  rateID            String
+  rate              RateTable                               @relation(fields: [rateID], references: [id])
   contractRevisions RateRevisionsOnContractRevisionsTable[]
+  invalidatedRevisions RateRevisionsOnContractRevisionsTable[] @relation("invalidatedByRate")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
+
+  unlockInfoID String?
+  unlockInfo   UpdateInfoTable? @relation("unlockRateInfo", fields: [unlockInfoID], references: [id])
+  submitInfoID String?
+  submitInfo   UpdateInfoTable? @relation("submitRateInfo", fields: [submitInfoID], references: [id])
 
   name        String
   rateCertURL String?
 }
 
 model RateRevisionsOnContractRevisionsTable {
-  rateRevisionID String
-  rateRevision   RateRevisionTable @relation(fields: [rateRevisionID], references: [id])
+  rateRevisionID     String
+  rateRevision       RateRevisionTable     @relation(fields: [rateRevisionID], references: [id])
   contractRevisionID String
-  contractRevision ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
+  contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
 
-  validAfter DateTime @default(now())
+  validAfter DateTime
   validUntil DateTime?
-  updatedAt DateTime @default(now()) @updatedAt
+  updatedAt  DateTime  @default(now()) @updatedAt
+
+  invalidatedByContractRevisionID String?
+  invalidatedByContractRevision ContractRevisionTable? @relation("invalidatedByContract", fields: [invalidatedByContractRevisionID], references: [id])
+
+  invalidatedByRateRevisionID String?
+  invalidatedByRateRevision RateRevisionTable? @relation("invalidatedByRate", fields: [invalidatedByRateRevisionID], references: [id])
 
   @@id([rateRevisionID, contractRevisionID, validAfter])
-
 }
 
 model State {
