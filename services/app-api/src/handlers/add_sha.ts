@@ -19,7 +19,7 @@ import {
 
 const s3 = new S3Client({ region: 'us-east-1' })
 
-const streamToBuffer = async (stream: Readable): Promise<Buffer> => {
+export const streamToBuffer = async (stream: Readable): Promise<Buffer> => {
     return new Promise((resolve, reject) => {
         const chunks: Uint8Array[] = []
         stream.on('data', (chunk) => chunks.push(chunk))
@@ -28,7 +28,7 @@ const streamToBuffer = async (stream: Readable): Promise<Buffer> => {
     })
 }
 
-const calculateSHA256 = async (s3URL: string): Promise<string> => {
+export const calculateSHA256 = async (s3URL: string): Promise<string> => {
     try {
         const getObjectCommand = new GetObjectCommand({
             Bucket: parseBucketName(s3URL) as string,
@@ -48,7 +48,7 @@ const calculateSHA256 = async (s3URL: string): Promise<string> => {
     }
 }
 
-const updateDocumentsSHA256 = async (
+export const updateDocumentsSHA256 = async (
     documents: SubmissionDocument[]
 ): Promise<SubmissionDocument[]> => {
     try {
@@ -74,7 +74,7 @@ const updateDocumentsSHA256 = async (
     }
 }
 
-const processRevisions = async (
+export const processRevisions = async (
     store: Store,
     revisions: HealthPlanRevisionTable[]
 ): Promise<void> => {
@@ -114,7 +114,7 @@ const processRevisions = async (
     }
 }
 
-export const main: Handler = async (event, context) => {
+export const getDatabaseConnection = async (): Promise<Store> => {
     const dbURL = process.env.DATABASE_URL
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
 
@@ -137,6 +137,12 @@ export const main: Handler = async (event, context) => {
     }
     const store = NewPostgresStore(pgResult)
 
+    return store
+}
+
+export const getRevisions = async (
+    store: Store
+): Promise<HealthPlanRevisionTable[]> => {
     const result: HealthPlanRevisionTable[] | StoreError =
         await store.findAllRevisions()
     if (isStoreError(result)) {
@@ -144,14 +150,22 @@ export const main: Handler = async (event, context) => {
         throw new Error('Error getting records; cannot generate report')
     }
 
+    return result
+}
+
+export const main: Handler = async (event, context) => {
+    const store = await getDatabaseConnection()
+
+    const revisions = await getRevisions(store)
+
     // Get the pkgID from the first revision in the list
-    const pkgID = result[0].pkgID
+    const pkgID = revisions[0].pkgID
     if (!pkgID) {
         console.error('Package ID is missing in the revisions')
         throw new Error('Package ID is required')
     }
 
-    await processRevisions(store, result)
+    await processRevisions(store, revisions)
 
     console.info('SHA256 update complete')
 }
