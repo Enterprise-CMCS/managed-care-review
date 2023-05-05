@@ -67,6 +67,7 @@ export async function updateHealthPlanRevision(
     submitInfo?: UpdateInfoType
 ): Promise<HealthPlanPackageType | StoreError> {
     formData.updatedAt = new Date()
+
     const proto = toProtoBuffer(formData)
     const buffer = Buffer.from(proto)
 
