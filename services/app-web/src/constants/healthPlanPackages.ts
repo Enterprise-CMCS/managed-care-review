@@ -1,7 +1,6 @@
 import {
     SubmissionType,
     ContractType,
-    CHIPFederalAuthority,
     FederalAuthority,
     ManagedCareEntity,
     ActuarialFirmType,

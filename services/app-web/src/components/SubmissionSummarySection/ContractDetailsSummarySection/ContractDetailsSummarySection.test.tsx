@@ -15,7 +15,7 @@ import {
 } from '../../../common-code/healthPlanFormDataType'
 
 describe('ContractDetailsSummarySection', () => {
-    it.only('can render draft submission without errors (review and submit behavior)', async () => {
+    it('can render draft submission without errors (review and submit behavior)', async () => {
         const testSubmission = {
             ...mockContractAndRatesDraft(),
             documents: [

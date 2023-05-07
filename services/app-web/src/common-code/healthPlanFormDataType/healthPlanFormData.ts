@@ -13,7 +13,7 @@ import {
 import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import { HealthPlanFormDataType } from './HealthPlanFormDataType'
 import { formatRateNameDate } from '../../common-code/dateHelpers'
-import { FederalAuthority, ProgramArgType, federalAuthorityKeysForCHIP } from '.'
+import { ProgramArgType, federalAuthorityKeysForCHIP } from '.'
 
 // TODO: Refactor into multiple files and add unit tests to these functions
 

@@ -18,7 +18,6 @@ import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
     allowedProvisionKeysForCHIP,
-    FederalAuthority,
     federalAuthorityKeysForCHIP,
     HealthPlanFormDataType,
     isCHIPProvision,
