@@ -84,7 +84,7 @@ const CHIPModifiedProvisionsRecord: Record<
     modifiedBenefitsProvided: ModifiedProvisionsRecord.modifiedBenefitsProvided,
     modifiedGeoAreaServed: ModifiedProvisionsRecord.modifiedGeoAreaServed,
     modifiedMedicaidBeneficiaries:
-        ModifiedProvisionsRecord.modifiedMedicaidBeneficiaries,
+        'CHIP beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)',
     modifiedMedicalLossRatioStandards:
         'Medical loss ratio standards in accordance with 42 CFR § 457. 1203',
     modifiedEnrollmentProcess:
