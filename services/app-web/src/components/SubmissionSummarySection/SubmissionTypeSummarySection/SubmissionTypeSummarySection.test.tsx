@@ -98,7 +98,7 @@ describe('SubmissionTypeSummarySection', () => {
         ).toBeInTheDocument()
         expect(
             screen.getByRole('definition', {
-                name: /Which populations does this contact action cover\?/,
+                name: /Which populations does this contract action cover\?/,
             })
         ).toBeInTheDocument()
     })
@@ -121,11 +121,11 @@ describe('SubmissionTypeSummarySection', () => {
 
         expect(
             screen.getByRole('definition', {
-                name: /Which populations does this contact action cover\?/,
+                name: /Which populations does this contract action cover\?/,
             })
         ).toBeInTheDocument()
         const riskBasedDefinitionParentDiv = screen.getByRole('definition', {
-            name: /Which populations does this contact action cover\?/,
+            name: /Which populations does this contract action cover\?/,
         })
         if (!riskBasedDefinitionParentDiv) throw Error('Testing error')
         expect(riskBasedDefinitionParentDiv).toHaveTextContent(

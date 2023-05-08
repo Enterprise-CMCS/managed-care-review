@@ -108,7 +108,7 @@ export const SubmissionTypeSummarySection = ({
                     {showCHIPOnlyForm && (
                         <DataDetail
                             id="populationCoverage"
-                            label="Which populations does this contact action cover?"
+                            label="Which populations does this contract action cover?"
                             explainMissingData={!isSubmitted}
                             children={
                                 submission.populationCovered &&
