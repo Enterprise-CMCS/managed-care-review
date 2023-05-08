@@ -394,6 +394,8 @@ jobs:
         containers: [1, 2, 3, 4, 5, 6, 7, 8 ]
     steps:
       - uses: actions/checkout@v3
+      - name: Install root dependencies
+        uses: bahmutov/npm-install@v1
 
       - name: check ip
         id: check-ip
