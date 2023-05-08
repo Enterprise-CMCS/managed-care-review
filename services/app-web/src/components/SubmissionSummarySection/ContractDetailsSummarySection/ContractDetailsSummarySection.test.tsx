@@ -40,15 +40,16 @@ describe('ContractDetailsSummarySection', () => {
                 submission={testSubmission}
                 navigateTo="contract-details"
                 submissionName="MN-PMAP-0001"
-            />,  {
+            />,
+            {
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             }
         )
 
-        expect(await 
-            screen.findByRole('heading', {
+        expect(
+            await screen.findByRole('heading', {
                 level: 2,
                 name: 'Contract details',
             })
@@ -268,12 +269,13 @@ describe('ContractDetailsSummarySection', () => {
                     ...mockContractAndRatesDraft(),
                     // Add all medicaid federal authorities, as if medicaid contract being unlocked
                     federalAuthorities: [
-                     'STATE_PLAN'
-                    ,'WAIVER_1915B'
-                    ,'WAIVER_1115'
-                    ,'VOLUNTARY'
-                    ,'BENCHMARK'
-                    ,'TITLE_XXI'],
+                        'STATE_PLAN',
+                        'WAIVER_1915B',
+                        'WAIVER_1115',
+                        'VOLUNTARY',
+                        'BENCHMARK',
+                        'TITLE_XXI',
+                    ],
                 }}
                 submissionName="MN-PMAP-0001"
             />,
@@ -282,13 +284,22 @@ describe('ContractDetailsSummarySection', () => {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             }
-
         )
-        
-        expect(await screen.findByText('Title XXI Separate CHIP State Plan Authority')).toBeInTheDocument()
-        expect(await screen.findByText('1115 Waiver Authority')).toBeInTheDocument()
-        expect(await screen.findByText('1932(a) State Plan Authority')).toBeInTheDocument()
-        expect(await screen.findByText('1937 Benchmark Authority')).toBeInTheDocument()
+
+        expect(
+            await screen.findByText(
+                'Title XXI Separate CHIP State Plan Authority'
+            )
+        ).toBeInTheDocument()
+        expect(
+            await screen.findByText('1115 Waiver Authority')
+        ).toBeInTheDocument()
+        expect(
+            await screen.findByText('1932(a) State Plan Authority')
+        ).toBeInTheDocument()
+        expect(
+            await screen.findByText('1937 Benchmark Authority')
+        ).toBeInTheDocument()
     })
 
     it('renders federal authorities for a CHIP contract as expected, removing invalid authorities', async () => {
@@ -299,12 +310,13 @@ describe('ContractDetailsSummarySection', () => {
                     populationCovered: 'CHIP',
                     // Add all medicaid federal authorities, as if medicaid contract being unlocked
                     federalAuthorities: [
-                     'STATE_PLAN'
-                    ,'WAIVER_1915B'
-                    ,'WAIVER_1115'
-                    ,'VOLUNTARY'
-                    ,'BENCHMARK'
-                    ,'TITLE_XXI'],
+                        'STATE_PLAN',
+                        'WAIVER_1915B',
+                        'WAIVER_1115',
+                        'VOLUNTARY',
+                        'BENCHMARK',
+                        'TITLE_XXI',
+                    ],
                 }}
                 submissionName="MN-PMAP-0001"
             />,
@@ -313,17 +325,25 @@ describe('ContractDetailsSummarySection', () => {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             }
-
         )
-        
-        expect(await screen.queryByText('Title XXI Separate CHIP State Plan Authority')).not.toBeInTheDocument()
-        expect(await screen.queryByText('1115 Waiver Authority')).not.toBeInTheDocument()
-        expect(await screen.findByText('1932(a) State Plan Authority')).toBeInTheDocument()
-        expect(await screen.findByText('1937 Benchmark Authority')).toBeInTheDocument()
 
+        expect(
+            await screen.findByText(
+                'Title XXI Separate CHIP State Plan Authority'
+            )
+        ).toBeInTheDocument()
+        expect(
+            await screen.findByText('1115 Waiver Authority')
+        ).toBeInTheDocument()
+        expect(
+            await screen.queryByText('1932(a) State Plan Authority')
+        ).not.toBeInTheDocument()
+        expect(
+            await screen.queryByText('1937 Benchmark Authority')
+        ).not.toBeInTheDocument()
     })
 
-    it('renders amended provisions and MLR references for a medicaid contract correctly',  () => {
+    it('renders amended provisions and MLR references for a medicaid contract correctly', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
                 submission={mockContractAndRatesDraft()}
@@ -429,7 +449,6 @@ describe('ContractDetailsSummarySection', () => {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             }
-
         )
         expect(
             screen.getByText('Benefits provided by the managed care plans')
@@ -589,7 +608,6 @@ describe('ContractDetailsSummarySection', () => {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             }
-
         )
 
         const modifiedProvisions = screen.getByLabelText(
@@ -641,7 +659,6 @@ describe('ContractDetailsSummarySection', () => {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             }
-
         )
 
         const modifiedProvisions = screen.getByLabelText(
@@ -693,7 +710,6 @@ describe('ContractDetailsSummarySection', () => {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             }
-
         )
 
         const modifiedProvisions = screen.getByLabelText(
@@ -751,7 +767,6 @@ describe('ContractDetailsSummarySection', () => {
                     mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             }
-
         )
 
         const modifiedProvisions = screen.getByLabelText(
