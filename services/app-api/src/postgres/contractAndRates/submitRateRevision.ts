@@ -16,6 +16,34 @@ async function submitRateRevision(
 
     try {
 
+        // get the latest contractRevisions based on our draft ones
+        const currentRev = await client.rateRevisionTable.findUnique({
+            where: {
+                id: revisionID,
+            },
+            include: {
+                draftContracts: {
+                    include: {
+                        revisions: {
+                            where: {
+                                submitInfoID: { not: null },
+                            },
+                            take: 1,
+                            orderBy: {
+                                createdAt: 'desc',
+                            }
+                        },
+                    }
+                }
+            }
+        })
+        if (!currentRev) {
+            return new Error('cant find the current rev to submit')
+        }
+
+        const freshContractRevs = currentRev.draftContracts.map((c) => c.revisions[0])
+        console.log('looking at the current set of revs: ', freshContractRevs)
+
         const updated = await client.rateRevisionTable.update({
             where: {
                 id: revisionID,
@@ -30,13 +58,11 @@ async function submitRateRevision(
                     }
                 },
                 contractRevisions: {
-                    updateMany: {
-                        where: {
-                            rateRevisionID: revisionID, // This seems unnecessary but it compiles
-                        },
-                        data: {
+                    createMany: {
+                        data: freshContractRevs.map((rev) => ({
+                            contractRevisionID: rev.id,
                             validAfter: groupTime,
-                        }
+                        }))
                     }
                 }
             },

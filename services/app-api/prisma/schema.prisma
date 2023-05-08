@@ -37,11 +37,15 @@ model HealthPlanRevisionTable {
 model ContractTable {
   id        String                  @id
   revisions ContractRevisionTable[]
+
+  draftRateRevisions RateRevisionTable[]
 }
 
 model RateTable {
   id        String              @id
   revisions RateRevisionTable[]
+
+  draftContractRevisions ContractRevisionTable[]
 }
 
 model ContractRevisionTable {
@@ -50,6 +54,8 @@ model ContractRevisionTable {
   contract      ContractTable                           @relation(fields: [contractID], references: [id])
   rateRevisions RateRevisionsOnContractRevisionsTable[]
   invalidatedRevisions RateRevisionsOnContractRevisionsTable[] @relation("invalidatedByContract")
+
+  draftRates RateTable[]
 
   unlockInfoID String?
   unlockInfo   UpdateInfoTable? @relation("unlockContractInfo", fields: [unlockInfoID], references: [id])
@@ -132,6 +138,8 @@ model RateRevisionTable {
   rate              RateTable                               @relation(fields: [rateID], references: [id])
   contractRevisions RateRevisionsOnContractRevisionsTable[]
   invalidatedRevisions RateRevisionsOnContractRevisionsTable[] @relation("invalidatedByRate")
+
+  draftContracts ContractTable[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
