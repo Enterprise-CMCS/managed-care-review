@@ -123,4 +123,3 @@ jobs:
           STAGE_NAME: ${{ inputs.stage_name }}
         run: |
           ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_NAME-migrate
-          cat lambda_migrate.json
