@@ -11,8 +11,8 @@ export async function runBrowserTests(cypressArgs: string[]) {
 
     args = ['cypress'].concat(args)
 
-    console.info(`running: yarn ${args.join(' ')}`)
-    spawnSync('yarn', args, {
+    console.info(`running: npx ${args.join(' ')}`)
+    spawnSync('npx', args, {
         cwd: 'services/cypress',
         stdio: 'inherit',
     })
