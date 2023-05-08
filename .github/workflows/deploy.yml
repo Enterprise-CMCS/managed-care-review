@@ -394,6 +394,8 @@ jobs:
         containers: [1, 2, 3, 4, 5, 6, 7, 8 ]
     steps:
       - uses: actions/checkout@v3
+      - name: Install root dependencies
+        uses: bahmutov/npm-install@v1
 
       - name: check ip
         id: check-ip
@@ -417,8 +419,6 @@ jobs:
           group: 'Chrome'
           ci-build-id: ${{ needs.finishing-prep.outputs.cypress-uuid }}
           config-file: cypress/cypress.config.ts
-          install-command: yarn install
-          command: yarn dlx cypress run
         env:
           REACT_APP_AUTH_MODE: AWS_COGNITO
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
