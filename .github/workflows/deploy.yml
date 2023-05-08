@@ -418,6 +418,7 @@ jobs:
           ci-build-id: ${{ needs.finishing-prep.outputs.cypress-uuid }}
           config-file: cypress/cypress.config.ts
           install-command: yarn install
+          command: yarn dlx cypress run
         env:
           REACT_APP_AUTH_MODE: AWS_COGNITO
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
