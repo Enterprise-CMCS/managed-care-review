@@ -8,30 +8,11 @@ async function insertDraftContractRevision(
                                                                 client: PrismaClient, 
                                                                 contractID: string,
                                                                 formData: string,
-                                                                rateRevisionIds: string[],
+                                                                draftRateRevisionIDs: string[],
                                                                 unlockInfo?: UpdateInfoType 
                                                             ): Promise<ContractRevision | Error> {
 
     try {
-        // const groupTime = new Date()
-
-        // const oldRev = await client.contractRevisionTable.findFirst({
-        //     where: {
-        //         contractID: contractID
-        //     }
-        // })
-
-        // // invalidate all joins on the old revision
-        // if (oldRev) {
-        //     await client.rateRevisionsOnContractRevisionsTable.updateMany({
-        //         where: {
-        //             rateRevisionID: oldRev.id,
-        //         },
-        //         data: {
-        //             validUntil: groupTime,
-        //         }
-        //     })
-        // }
 
         const contractRev = await client.contractRevisionTable.create({ 
             data: { 
@@ -50,10 +31,10 @@ async function insertDraftContractRevision(
                         updateReason: unlockInfo.updatedReason,
                     }
                 } : undefined,
-                rateRevisions: {
-                    createMany: {
-                        data: rateRevisionIds.map( (id) => ({ rateRevisionID: id, validAfter: DraftValidAfterDate })),
-                    },
+                draftRates: {
+                    connect: draftRateRevisionIDs.map( (cID) => ({
+                        id: cID,
+                    }))
                 },
                 draftFormData: {
                     create: {

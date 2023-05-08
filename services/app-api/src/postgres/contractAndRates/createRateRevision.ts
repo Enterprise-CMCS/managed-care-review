@@ -8,31 +8,12 @@ async function createRateRevision(
                                                                 client: PrismaClient, 
                                                                 rateID: string,
                                                                 rateURL: string,
-                                                                contractRevisionIDs: string[],
+                                                                draftContractIDs: string[],
                                                                 unlockInfo?: UpdateInfoType,
                                                             ): Promise<RateRevision | Error> {
 
     try {
-        // const groupTime = new Date()
-
-        // const oldRev = await client.rateRevisionTable.findFirst({
-        //     where: {
-        //         rateID: rateID
-        //     }
-        // })
-
-        // // invalidate all joins on the old revision
-        // if (oldRev) {
-        //     await client.rateRevisionsOnContractRevisionsTable.updateMany({
-        //         where: {
-        //             rateRevisionID: oldRev.id,
-        //         },
-        //         data: {
-        //             validUntil: groupTime,
-        //         }
-        //     })
-        // }
-
+ 
         const rateRev = await client.rateRevisionTable.create({
             data: {
                 id: uuidv4(), 
@@ -51,13 +32,10 @@ async function createRateRevision(
                 } : undefined,
                 name: '1.0', 
                 rateCertURL: rateURL,
-                contractRevisions: {
-                    createMany: {
-                        data: contractRevisionIDs.map( (cID) => ({
-                            contractRevisionID: cID,
-                            validAfter: DraftValidAfterDate,
-                        }))
-                    }
+                draftContracts: {
+                    connect: draftContractIDs.map( (cID) => ({
+                        id: cID,
+                    }))
                 }
             },
             include: {
