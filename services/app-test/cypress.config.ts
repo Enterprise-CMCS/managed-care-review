@@ -4,11 +4,11 @@ const { pa11y, prepareAudit } = require('@cypress-audit/pa11y')
 const defineConfig = ({
   e2e: {
     baseUrl: 'http://localhost:3000',
-    supportFile: 'support/index.ts',
-    fixturesFolder: 'fixtures',
-    specPattern: 'integration/**/*.spec.ts',
-    screenshotsFolder: 'screenshots',
-    videosFolder: 'videos',
+    supportFile: 'cypress/support/index.ts',
+    fixturesFolder: 'cypress/fixtures',
+    specPattern: 'cypress/integration/**/*.spec.ts',
+    screenshotsFolder: 'cypress/screenshots',
+    videosFolder: 'cypress/videos',
     viewportHeight: 1080,
     viewportWidth: 1440,
     setupNodeEvents(on, config) {

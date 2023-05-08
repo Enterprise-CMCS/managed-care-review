@@ -7,11 +7,11 @@
   "author": "",
   "license": "CC0-1.0",
   "scripts": {
-    "clean": "lerna clean",
-    "format": "yarn prettier --write",
-    "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
-    "cypress:open": "cypress open --env AUTH_MODE=LOCAL",
-    "cypress:run": "rm -rf ../../.nyc_output && ./node_modules/.bin/cypress run --env AUTH_MODE=LOCAL --headless --browser chrome"
+    "clean": "node_modules/.bin/lerna clean",
+    "format": "yarn node_modules/.bin/prettier --write",
+    "prettier": "node_modules/.bin/prettier --ignore-path .gitignore \\\\\\\"**/*.+(ts|tsx|json)\\\\\\\"",
+    "cypress:open": "node_modules/.bin/cypress open --env AUTH_MODE=LOCAL",
+    "cypress:run": "rm -rf ../../.nyc_output && node_modules/.bin/cypress run --env AUTH_MODE=LOCAL --headless --browser chrome"
   },
   "nyc": {
     "report-dir": "../../coverage-cypress",

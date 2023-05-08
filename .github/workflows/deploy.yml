@@ -394,8 +394,6 @@ jobs:
         containers: [1, 2, 3, 4, 5, 6, 7, 8 ]
     steps:
       - uses: actions/checkout@v3
-      - name: Install root dependencies
-        uses: bahmutov/npm-install@v1
 
       - name: check ip
         id: check-ip
@@ -411,14 +409,13 @@ jobs:
         id: cypress
         uses: cypress-io/github-action@v5
         with:
-          working-directory: services/cypress
+          working-directory: services/app-test
           config: baseUrl=${{ needs.finishing-prep.outputs.application-endpoint }}
           record: true
           parallel: true
           browser: chrome
           group: 'Chrome'
           ci-build-id: ${{ needs.finishing-prep.outputs.cypress-uuid }}
-          config-file: cypress/cypress.config.ts
         env:
           REACT_APP_AUTH_MODE: AWS_COGNITO
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -430,14 +427,14 @@ jobs:
         if: failure() && steps.cypress.outcome == 'failure'
         with:
           name: cypress-screenshots
-          path: services/cypress/screenshots
+          path: services/app-test/cypress/screenshots
 
       - name: Upload cypress video
         uses: actions/upload-artifact@v3
         if: always() && steps.cypress.outcome != 'skipped'
         with:
           name: cypress-videos
-          path: services/cypress/videos
+          path: services/app-test/cypress/videos
       - name: upload partial cypress coverage
         uses: actions/upload-artifact@v3
         with:
