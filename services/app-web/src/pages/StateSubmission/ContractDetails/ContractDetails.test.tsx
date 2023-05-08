@@ -145,7 +145,7 @@ describe('ContractDetails', () => {
     })
 
     describe('Federal authorities', () => {
-        it('dislays correct fields in dropdown for medicaid contract', () => {
+        it('displays correct form fields for federal authorities with medicaid contract', () => {
             renderWithProviders(
                 <ContractDetails
                     draftSubmission={{
@@ -156,21 +156,21 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />
             )
-            const fedAuthDropdown = screen.getByRole('group', {
+            const fedAuthQuestion = screen.getByRole('group', {
                 name: 'Active federal operating authority',
             })
-            expect(fedAuthDropdown).toBeInTheDocument()
+            expect(fedAuthQuestion).toBeInTheDocument()
             expect(
-                within(fedAuthDropdown).getAllByRole('checkbox')
+                within(fedAuthQuestion).getAllByRole('checkbox')
             ).toHaveLength(federalAuthorityKeys.length)
             expect(
-                within(fedAuthDropdown).getByRole('checkbox', {
+                within(fedAuthQuestion).getByRole('checkbox', {
                     name: '1915(b) Waiver Authority',
                 })
             ).toBeInTheDocument() // authority disallowed for chip is not included in list
         })
 
-        it('dislays correct fields in dropdown for CHIP only contract', async () => {
+        it('displays correct form fields for federal authorities with CHIP only contract', async () => {
             renderWithProviders(
                 <ContractDetails
                     draftSubmission={{
@@ -181,15 +181,15 @@ describe('ContractDetails', () => {
                     previousDocuments={[]}
                 />
             )
-            const fedAuthDropdown = await screen.findByRole('group', {
+            const fedAuthQuestion = await screen.findByRole('group', {
                 name: 'Active federal operating authority',
             })
-            expect(fedAuthDropdown).toBeInTheDocument()
+            expect(fedAuthQuestion).toBeInTheDocument()
             expect(
-                within(fedAuthDropdown).getAllByRole('checkbox')
+                within(fedAuthQuestion).getAllByRole('checkbox')
             ).toHaveLength(federalAuthorityKeysForCHIP.length)
             expect(
-                within(fedAuthDropdown).queryByRole('checkbox', {
+                within(fedAuthQuestion).queryByRole('checkbox', {
                     name: '1915(b) Waiver Authority',
                 })
             ).not.toBeInTheDocument() // medicaid only authority should be in the list
