@@ -17,8 +17,6 @@ Cypress.Commands.add('addQuestion', ({
     // Submit question
     cy.findByRole('button', { name: 'Add questions'}).should('exist').click()
 
-    cy.wait('@createQuestionMutation', { timeout: 20000 })
-
     // Wait for re-fetching of health plan package.
     cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20000})
 })
@@ -41,11 +39,10 @@ Cypress.Commands.add('addResponse', ({
         documentPath
     )
     cy.waitForDocumentsToLoad()
-    
+
     // Submit question
     cy.findByRole('button', { name: 'Send response'}).should('exist').click()
-    cy.wait('@createQuestionResponseMutation', { timeout: 20000 })
-    
+
     // Wait for re-fetching of health plan package.
     cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20000})
 })
