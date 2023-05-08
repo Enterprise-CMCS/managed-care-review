@@ -28,7 +28,6 @@ const isContractAndRates = (
 const isRateAmendment = (rateInfo: RateInfoType): boolean =>
     rateInfo.rateType === 'AMENDMENT'
 
-
 const hasValidModifiedProvisions = (
     provisions: ModifiedProvisions | undefined,
     isCHIP: boolean
@@ -316,16 +315,20 @@ const removeRatesData = (
 const removeNonCHIPData = (
     pkg: UnlockedHealthPlanFormDataType
 ): UnlockedHealthPlanFormDataType => {
-
     // remove any provisions that aren't valid for CHIP (this can happen on unlock when populationCovered changes)
-    excludedProvisionsForCHIP.forEach((provision) => {
-        if (pkg.contractAmendmentInfo?.modifiedProvisions[provision]) {
-            pkg.contractAmendmentInfo.modifiedProvisions[provision] = undefined
-        }
-    })
+    if (pkg.contractType === 'AMENDMENT') {
+        excludedProvisionsForCHIP.forEach((provision) => {
+            if (pkg.contractAmendmentInfo?.modifiedProvisions[provision]) {
+                pkg.contractAmendmentInfo.modifiedProvisions[provision] =
+                    undefined
+            }
+        })
+    }
 
-     // remove any authorities that aren't valid for CHIP (this can happen on unlock when populationCovered changes)
-    pkg.federalAuthorities = pkg.federalAuthorities.filter((authority) =>   federalAuthorityKeysForCHIP.includes(authority))   
+    // remove any authorities that aren't valid for CHIP (this can happen on unlock when populationCovered changes)
+    pkg.federalAuthorities = pkg.federalAuthorities.filter((authority) =>
+        federalAuthorityKeysForCHIP.includes(authority)
+    )
 
     return pkg
 }
