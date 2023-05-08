@@ -409,13 +409,14 @@ jobs:
         id: cypress
         uses: cypress-io/github-action@v5
         with:
+          working-directory: services/cypress
           config: baseUrl=${{ needs.finishing-prep.outputs.application-endpoint }}
           record: true
           parallel: true
           browser: chrome
           group: 'Chrome'
           ci-build-id: ${{ needs.finishing-prep.outputs.cypress-uuid }}
-          config-file: services/cypress/cypress.config.ts
+          config-file: cypress/cypress.config.ts
         env:
           REACT_APP_AUTH_MODE: AWS_COGNITO
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
