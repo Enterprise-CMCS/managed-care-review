@@ -417,6 +417,7 @@ jobs:
           group: 'Chrome'
           ci-build-id: ${{ needs.finishing-prep.outputs.cypress-uuid }}
           config-file: cypress/cypress.config.ts
+          install-command: yarn install
         env:
           REACT_APP_AUTH_MODE: AWS_COGNITO
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
