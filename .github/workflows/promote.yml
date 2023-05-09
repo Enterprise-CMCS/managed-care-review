@@ -93,7 +93,7 @@ jobs:
 
       - name: Install packages
         working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --prefer-offline --immutable --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
 
       - name: Generate protos
         run: lerna run generate --scope=app-proto && lerna run build --scope=app-proto
