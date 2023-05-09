@@ -1,10 +1,14 @@
-import { Handler } from 'aws-lambda'
+import { Handler, Context } from 'aws-lambda'
 import { RDSClient, CreateDBClusterSnapshotCommand } from '@aws-sdk/client-rds'
 import { spawnSync } from 'child_process'
 import { getDBClusterID, getPostgresURL } from './configuration'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 
-export const main: Handler = async (): Promise<string | Error> => {
+export const main: Handler = async (
+    event,
+    context: Context,
+    callback
+): Promise<string | Error> => {
     // setup otel tracing
     const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
     if (!otelCollectorURL || otelCollectorURL === '') {
@@ -28,7 +32,8 @@ export const main: Handler = async (): Promise<string | Error> => {
             'Init Error: DATABASE_URL is required to run app-api'
         )
         recordException(error, serviceName, 'dbURL')
-        throw error
+        callback(error)
+        return error
     }
 
     if (!secretsManagerSecret) {
@@ -36,13 +41,15 @@ export const main: Handler = async (): Promise<string | Error> => {
             'Init Error: SECRETS_MANAGER_SECRET is required to run postgres migrate'
         )
         recordException(error, serviceName, 'secretsManagerSecret')
-        throw error
+        callback(error)
+        return error
     }
 
     if (!stage) {
         const error = new Error('Init Error: STAGE not set in environment')
         recordException(error, serviceName, 'stage')
-        throw error
+        callback(error)
+        return error
     }
 
     const dbConnResult = await getPostgresURL(dbURL, secretsManagerSecret)
@@ -51,7 +58,8 @@ export const main: Handler = async (): Promise<string | Error> => {
             `Init Error: failed to get pg URL: ${dbConnResult}`
         )
         recordException(error, serviceName, 'getPostgresURL')
-        throw dbConnResult
+        callback(dbConnResult)
+        return dbConnResult
     }
 
     const dbConnectionURL: string = dbConnResult
@@ -89,12 +97,14 @@ export const main: Handler = async (): Promise<string | Error> => {
                 `Could not run prisma migrate deploy: ${prismaResult.stderr.toString()}`
             )
             recordException(error, serviceName, 'prisma migrate deploy')
-            throw error
+            callback(error)
+            return error
         }
     } catch (err) {
         const error = new Error(`Could not migrate the database schema: ${err}`)
         recordException(error, serviceName, 'prisma migrate deploy')
-        throw error
+        callback(error)
+        return error
     }
 
     // take a snapshot of the DB before running data migration.
@@ -106,7 +116,8 @@ export const main: Handler = async (): Promise<string | Error> => {
                 `Init Error: failed to get db cluster ID: ${dbClusterId}`
             )
             recordException(error, serviceName, 'getDBClusterID')
-            throw error
+            callback(error)
+            return error
         }
 
         const snapshotID = stage + '-' + Date.now()
@@ -127,7 +138,8 @@ export const main: Handler = async (): Promise<string | Error> => {
                 serviceName,
                 'CreateDBClusterSnapshotCommand'
             )
-            throw error
+            callback(error)
+            return error
         }
     }
 
@@ -162,14 +174,16 @@ export const main: Handler = async (): Promise<string | Error> => {
                 `Could not run migrate_protos db: ${migrateProtosResult.stderr.toString()}`
             )
             recordException(error, serviceName, 'migrate_protos db')
-            throw error
+            callback(error)
+            return error
         }
     } catch (err) {
         const error = new Error(
             `Could not migrate the database protobufs: ${err}`
         )
         recordException(error, serviceName, 'migrate protos db')
-        throw error
+        callback(error)
+        return error
     }
 
     return 'Successfully migrated Postgres'
