@@ -5,6 +5,7 @@ import { createContractRevision } from "./createContractRevision"
 import { createRateRevision } from "./createRateRevision"
 import { submitContractRevision } from "./submitContractRevision"
 import { submitRateRevision } from "./submitRateRevision"
+import { insertDraftContract } from "./insertContract"
 
 async function delay(ms: number) {
     return new Promise( resolve => setTimeout(resolve, ms) );
@@ -16,12 +17,13 @@ describe('findContract', () => {
 
         const client = await sharedTestPrismaClient()
 
-        const contractA = await client.contractTable.create({ data: { id: uuidv4() }})
-        const contractA_0Draft = await createContractRevision(client, contractA.id, 'one contract', [])
-        if (contractA_0Draft instanceof Error) {
-            throw contractA_0Draft
+        const contractADraft = await insertDraftContract(client, 'one contract', [])
+        if (contractADraft instanceof Error) {
+            throw contractADraft
         }
-        const contractA_0 = await submitContractRevision(client, contractA_0Draft.id, { updatedAt: new Date(), updatedBy: 'foo user', updatedReason: 'initial submit' })
+        const contractA_0ID = contractADraft.revisions[0].id
+
+        const contractA_0 = await submitContractRevision(client, contractA_0ID, { updatedAt: new Date(), updatedBy: 'foo user', updatedReason: 'initial submit' })
         if (contractA_0 instanceof Error) {
             throw contractA_0
         }
@@ -32,7 +34,7 @@ describe('findContract', () => {
 
         // Add 3 rates 1, 2, 3
         const rate1 = await client.rateTable.create({ data: { id: uuidv4()}})
-        const rate1_0Draft = await createRateRevision(client, rate1.id, 'someurle.en', [contractA.id])
+        const rate1_0Draft = await createRateRevision(client, rate1.id, 'someurle.en', [contractADraft.id])
         if (rate1_0Draft instanceof Error) {
             throw rate1_0Draft
         }
@@ -44,7 +46,7 @@ describe('findContract', () => {
         await delay(100)
 
         const rate2 = await client.rateTable.create({ data: { id: uuidv4()}})
-        const rate2_0Draft = await createRateRevision(client, rate2.id, 'twopointo', [contractA.id])
+        const rate2_0Draft = await createRateRevision(client, rate2.id, 'twopointo', [contractADraft.id])
         if (rate2_0Draft instanceof Error) {
             throw rate2_0Draft
         }
@@ -56,7 +58,7 @@ describe('findContract', () => {
         await delay(100)
 
         const rate3 = await client.rateTable.create({ data: { id: uuidv4()}})
-        const rate3_0Draft = await createRateRevision(client, rate3.id, 'threepointo', [contractA.id])
+        const rate3_0Draft = await createRateRevision(client, rate3.id, 'threepointo', [contractADraft.id])
         if (rate3_0Draft instanceof Error) {
             throw rate3_0Draft
         }
@@ -82,7 +84,7 @@ describe('findContract', () => {
         await delay(100)
 
         // update rate 1 to have a new version, should make one new rev.
-        const rate1_1Draft = await createRateRevision(client, rate1.id, 'onepointone', [contractA.id])
+        const rate1_1Draft = await createRateRevision(client, rate1.id, 'onepointone', [contractADraft.id])
         if (rate1_1Draft instanceof Error) {
             throw rate1_1Draft
         }
@@ -94,7 +96,7 @@ describe('findContract', () => {
         await delay(100)
 
         // Make a new Contract Revision, should show up as a single new rev.
-        const contractA_1Draft = await createContractRevision(client, contractA.id, 'one contract dot one', [rate1.id, rate3.id])
+        const contractA_1Draft = await createContractRevision(client, contractADraft.id, 'one contract dot one', [rate1.id, rate3.id])
         if (contractA_1Draft instanceof Error) {
             throw contractA_1Draft
         }
@@ -103,7 +105,7 @@ describe('findContract', () => {
             throw contractA_1
         }
 
-        const res = await findContractRevisions(client, contractA.id)
+        const res = await findContractRevisions(client, contractADraft.id)
 
         if (res instanceof Error) {
             throw res

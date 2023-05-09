@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from 'uuid'
 import { UpdateInfoType } from "../../domain-models";
-import { DraftValidAfterDate } from "./dbConstants";
 import { RateRevision } from "./findContract";
 
 async function createRateRevision(
@@ -41,11 +40,7 @@ async function createRateRevision(
             include: {
                 contractRevisions: {
                     include: {
-                        contractRevision: {
-                            include: {
-                                draftFormData: true
-                            }
-                        }
+                        contractRevision: true,
                     }
                 }
             }
@@ -56,7 +51,7 @@ async function createRateRevision(
             revisionFormData: rateRev.rateCertURL || 'NOTHINGS',
             contractRevisions: rateRev.contractRevisions.map ( (cRev) => ({
                 id: cRev.contractRevisionID,
-                contractFormData: cRev.contractRevision.draftFormData.contractDescription || 'NOPEs',
+                contractFormData: cRev.contractRevision.name,
                 rateRevisions: [],
             }))
         }

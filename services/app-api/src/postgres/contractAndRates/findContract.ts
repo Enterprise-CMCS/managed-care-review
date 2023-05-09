@@ -1,9 +1,10 @@
 import { PrismaClient, UpdateInfoTable } from "@prisma/client"
 import { UpdateInfoType } from "../../domain-models"
 
-// interface Contract {
-//     // revisions []
-// }
+interface Contract {
+    id: string
+    revisions: ContractRevision[]
+}
 
 // there needs to be a new contract revision after every set, even though the revision is the same?
 
@@ -54,12 +55,6 @@ async function findContractRevisions(client: PrismaClient, contractID: string): 
             include: {
                 submitInfo: true,
                 unlockInfo: true,
-                draftFormData: {
-                    include: {
-                        contractDocuments: true,
-                        additionalDocuments: true,
-                    }
-                },
                 rateRevisions: {
                     include: {
                         rateRevision: {
@@ -169,7 +164,7 @@ async function findContractRevisions(client: PrismaClient, contractID: string): 
 
                 const rev: ContractRevision = {
                     id: contractRev.id,
-                    contractFormData: contractRev.draftFormData.contractDescription || 'foo',
+                    contractFormData: contractRev.name,
                     submitInfo: changedUpdateInfo,
                     rateRevisions: [...lastRevisions].map( (rt) => {
                         return {
@@ -198,6 +193,7 @@ async function findContractRevisions(client: PrismaClient, contractID: string): 
 }
 
 export type {
+    Contract,
     ContractRevision,
     RateRevision,
 }

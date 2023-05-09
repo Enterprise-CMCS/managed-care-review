@@ -66,9 +66,6 @@ model ContractRevisionTable {
   updatedAt DateTime @default(now()) @updatedAt
 
   name String
-
-  draftFormData   DraftContractFormDataTable @relation(fields: [draftFormDataID], references: [id])
-  draftFormDataID String                     @unique
 }
 
 model UpdateInfoTable {
@@ -82,54 +79,6 @@ model UpdateInfoTable {
   submitedContracts ContractRevisionTable[] @relation("submitContractInfo")
   unlockedRates RateRevisionTable[] @relation("unlockRateInfo")
   submitedRates RateRevisionTable[] @relation("submitRateInfo")
-}
-
-enum SubmissionType {
-  CONTRACT_ONLY
-  CONTRACT_AND_RATES
-}
-
-enum FederalAuthority {
-  STATE_PLAN
-  WAIVER_1915B
-  WAIVER_1115
-  VOLUNTARY
-  BENCHMARK
-  TITLE_XXI
-}
-
-model ContractDocumentTable {
-  id                 String                     @id
-  contractFormDataID String
-  contractFormData   DraftContractFormDataTable @relation(fields: [contractFormDataID], references: [id])
-
-  s3url String
-  title String
-}
-
-model ContractAdditionalDocumentsTable {
-  id                 String                     @id
-  contractFormDataID String
-  contractFormData   DraftContractFormDataTable @relation(fields: [contractFormDataID], references: [id])
-
-  s3url String
-  title String
-}
-
-model DraftContractFormDataTable {
-  id       String                 @id
-  revision ContractRevisionTable?
-
-  contractDescription         String?
-  startDate                   DateTime?                          @db.Date
-  endDate                     DateTime?                          @db.Date
-  submissionType              SubmissionType?
-  federalAuthorities          FederalAuthority[]
-  modifiedGeoAreaServed       Boolean?
-  modifiedRiskSharingStrategy Boolean?
-  modifiedPassThroughPayments Boolean?
-  contractDocuments           ContractDocumentTable[]
-  additionalDocuments         ContractAdditionalDocumentsTable[]
 }
 
 model RateRevisionTable {
