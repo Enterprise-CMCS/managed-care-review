@@ -1,4 +1,4 @@
-// Order matters- we iterate through the list to generate questions and stakeholders want questions in specific order
+// Order matters- we iterate through the list to generate yes/no provision radio buttons.  Stakeholders want questions in specific order
 const modifiedProvisionKeys = [
     'modifiedBenefitsProvided',
     'modifiedGeoAreaServed',
