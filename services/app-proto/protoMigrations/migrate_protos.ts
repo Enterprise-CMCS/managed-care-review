@@ -47,7 +47,7 @@ export function newDBMigrator(dbConnString: string): MigratorType {
             const listMigrationsThatHaveRunTable =
                 await prismaClient.protoMigrationsTable.findMany()
             const migrations = listMigrationsThatHaveRunTable.map(
-                (m) => m.migrationName
+                (m: any) => m.migrationName
             )
 
             return migrations
