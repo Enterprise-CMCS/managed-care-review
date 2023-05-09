@@ -198,19 +198,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v3
-        with:
-          node-version-file: '.nvmrc'
-          cache: yarn
-
-      - name: Get yarn cache directory path
-        shell: bash
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - name: Install packages
-        working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --immutable --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
+      - name: Setup env
+        uses: ./.github/actions/setup_env
 
       - name: Generate protos
         run: lerna run generate --scope=app-proto && lerna run build --scope=app-proto
