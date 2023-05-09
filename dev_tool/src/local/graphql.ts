@@ -11,11 +11,7 @@ async function compileGraphQLTypesWatch(runner: LabeledProcessRunner) {
 export const compileGraphQLTypesWatchOnce = once(compileGraphQLTypesWatch)
 
 async function compileGraphQLTypes(runner: LabeledProcessRunner) {
-    await runner.runCommandAndOutput(
-        'gql deps',
-        ['yarn', 'install', '--prefer-offline'],
-        ''
-    )
+    await runner.runCommandAndOutput('gql deps', ['yarn', 'install'], '')
 
     return runner.runCommandAndOutput('gqlgen', ['lerna', 'run', 'gqlgen'], '')
 }
