@@ -69,11 +69,7 @@ async function submitRateRevision(
             include: {
                 contractRevisions: {
                     include: {
-                        contractRevision: {
-                            include: {
-                                draftFormData: true
-                            }
-                        }
+                        contractRevision: true,
                     }
                 }
             }
@@ -112,7 +108,7 @@ async function submitRateRevision(
             revisionFormData: updated.rateCertURL || 'NOTHINGS',
             contractRevisions: updated.contractRevisions.map ( (cRev) => ({
                 id: cRev.contractRevisionID,
-                contractFormData: cRev.contractRevision.draftFormData.contractDescription || 'NOPEs',
+                contractFormData: cRev.contractRevision.name,
                 rateRevisions: [],
             }))
         }

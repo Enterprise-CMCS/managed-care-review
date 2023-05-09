@@ -73,7 +73,6 @@ async function submitContractRevision(
                         rateRevision: true,
                     }
                 },
-                draftFormData: true,
             }
         })
 
@@ -102,7 +101,7 @@ async function submitContractRevision(
 
         return {
             id: updated.id,
-            contractFormData: updated.draftFormData.contractDescription || 'NOTHING',
+            contractFormData: updated.name,
             rateRevisions: updated.rateRevisions.map( (rr) => ({
                 id: rr.rateRevisionID,
                 revisionFormData: rr.rateRevision.rateCertURL || 'NO URL',

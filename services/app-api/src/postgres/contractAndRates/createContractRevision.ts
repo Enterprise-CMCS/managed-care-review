@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from 'uuid'
 import { UpdateInfoType } from "../../domain-models";
-import { DraftValidAfterDate } from "./dbConstants";
 import { ContractRevision } from "./findContract";
 
 async function insertDraftContractRevision(
@@ -22,7 +21,7 @@ async function insertDraftContractRevision(
                         id: contractID,
                     }
                 }, 
-                name: 'A.0',
+                name: formData,
                 unlockInfo: unlockInfo ? {
                     create: {
                         id: uuidv4(),
@@ -36,37 +35,6 @@ async function insertDraftContractRevision(
                         id: cID,
                     }))
                 },
-                draftFormData: {
-                    create: {
-                        id: uuidv4(),
-                        startDate: new Date(),
-                        endDate: new Date(),
-                        contractDescription: formData,
-                        submissionType: 'CONTRACT_ONLY',
-                        federalAuthorities: ['WAIVER_1915B', 'VOLUNTARY'],
-                        modifiedGeoAreaServed: true,
-                        contractDocuments: {
-                            create: {
-                                id: uuidv4(),
-                                s3url: 'foo://bar',
-                                title: 'someDoc',
-                            }
-                        },
-                        additionalDocuments: {
-                            create: [
-                            {
-                                id: uuidv4(),
-                                s3url: 'foo://baz',
-                                title: 'adddoc',
-                            },
-                            {
-                                id: uuidv4(),
-                                s3url: 'foo://foo',
-                                title: 'addadddoc',
-                            }]
-                        }
-                    },
-                }
             }, 
             include: {
                 rateRevisions: {
@@ -74,7 +42,6 @@ async function insertDraftContractRevision(
                         rateRevision: true,
                     }
                 },
-                draftFormData: true,
             }
         })
 
@@ -82,7 +49,7 @@ async function insertDraftContractRevision(
 
         return {
             id: contractRev.id,
-            contractFormData: contractRev.draftFormData.contractDescription || 'NOTHING',
+            contractFormData: contractRev.name,
             rateRevisions: contractRev.rateRevisions.map( (rr) => ({
                 id: rr.rateRevisionID,
                 revisionFormData: rr.rateRevision.rateCertURL || 'NO URL',
