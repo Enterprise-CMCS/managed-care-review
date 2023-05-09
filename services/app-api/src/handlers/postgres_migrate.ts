@@ -73,7 +73,7 @@ export const main: Handler = async (
             `${process.execPath}`,
             [
                 '/opt/nodejs/node_modules/prisma/build/index.js',
-                'break-it',
+                'migrate',
                 'deploy',
                 `--schema=${schemaPath}`,
             ],
