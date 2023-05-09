@@ -28,9 +28,9 @@ notes/
 /reports
 .nyc_output
 
-/services/app-test/cypress/screenshots
-/services/app-test/cypress/videos
-/services/app-test/cypress/fixtures/stores/featureFlagStore.json
+/services/cypress/screenshots
+/services/cypress/videos
+/services/cypress/fixtures/stores/featureFlagStore.json
 
 /scripts/add_cypress_test_users.js*
 /scripts/collect_ci_runtime_stats.js*

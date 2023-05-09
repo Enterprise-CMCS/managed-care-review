@@ -409,8 +409,6 @@ jobs:
         id: cypress
         uses: cypress-io/github-action@v5
         with:
-          working-directory: services/app-test
-          install-command: yarn install
           config: baseUrl=${{ needs.finishing-prep.outputs.application-endpoint }}
           record: true
           parallel: true
@@ -428,14 +426,14 @@ jobs:
         if: failure() && steps.cypress.outcome == 'failure'
         with:
           name: cypress-screenshots
-          path: services/app-test/cypress/screenshots
+          path: services/cypress/screenshots
 
       - name: Upload cypress video
         uses: actions/upload-artifact@v3
         if: always() && steps.cypress.outcome != 'skipped'
         with:
           name: cypress-videos
-          path: services/app-test/cypress/videos
+          path: services/cypress/videos
       - name: upload partial cypress coverage
         uses: actions/upload-artifact@v3
         with:

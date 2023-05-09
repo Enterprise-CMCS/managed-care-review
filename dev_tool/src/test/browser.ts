@@ -13,7 +13,7 @@ export async function runBrowserTests(cypressArgs: string[]) {
 
     console.info(`running: npx ${args.join(' ')}`)
     spawnSync('npx', args, {
-        cwd: 'services/app-test',
+        cwd: 'services/cypress',
         stdio: 'inherit',
     })
 }
@@ -68,9 +68,9 @@ export async function runBrowserTestsInDocker(cypressArgs: string[]) {
             'docker',
             'run',
             '-v',
-            `${path.join(process.cwd(), 'services/app-test')}:/mc-review`,
+            `${path.join(process.cwd(), 'services/cypress')}:/mc-review`,
             '--workdir',
-            '/mc-review/services/app-test',
+            '/mc-review/services',
             '--env',
             'REACT_APP_AUTH_MODE=LOCAL',
             'gha-cypress:latest',
