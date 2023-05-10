@@ -12,9 +12,6 @@ async function updateContractDraft(
                                                 rateIDs: string[],
                                             ): Promise<Contract | Error> {
 
-    const groupTime = new Date()
-    console.log('Console Grouptime', groupTime)
-
     try {
         // Given all the Rates associated with this draft, find the most recent submitted 
         // rateRevision to attach to this contract on submit.
@@ -25,16 +22,9 @@ async function updateContractDraft(
             },
         })
         if (!currentRev) {
-            console.log('No Draft Rev!')
+            console.error('No Draft Rev!')
             return new Error('cant find a draft rev to submit')
         }
-
-        const rates = await client.rateTable.findMany({
-            where: {
-                id: { in: rateIDs}
-            }
-        })
-        console.log("trying to set", rateIDs, rates)
 
         await client.contractRevisionTable.update({
             where: {
@@ -61,10 +51,10 @@ async function updateContractDraft(
 
     }
     catch (err) {
-        console.log("SUBMIT PRISMA CONTRACT ERR", err)
+        console.error("SUBMIT PRISMA CONTRACT ERR", err)
+        return err
     }
 
-    return new Error('nope')
 }
 
 export {

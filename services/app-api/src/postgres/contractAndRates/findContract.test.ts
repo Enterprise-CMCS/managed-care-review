@@ -104,7 +104,7 @@ describe('findContract', () => {
 
         const revisions = resultingContract.revisions
 
-        console.log('ALL First REvisions: ', JSON.stringify(revisions, null, '  '))
+        console.info('ALL First REvisions: ', JSON.stringify(revisions, null, '  '))
 
         // Each Revision needs a Reason, one of the contracts or revisions associated with it should have changed and why.
 
@@ -131,8 +131,6 @@ describe('findContract', () => {
         expect(revisions[7].rateRevisions).toHaveLength(1)
         expect(revisions[7].contractFormData).toBe('a.2 body')
         expect(revisions[7].submitInfo?.updatedReason).toBe('Submitting A.2')
-
-        console.log('RES', revisions)
 
     })
 
@@ -209,11 +207,9 @@ describe('findContract', () => {
             throw res
         }
 
-        console.log(JSON.stringify(res, undefined, '  '))
-
-        // Each Revision needs a Reason, one of the contracts or revisions associated with it should have changed and why.
-
         const revisions = res.revisions
+
+        console.info('ALL First REvisions: ', JSON.stringify(revisions, null, '  '))
 
         expect(revisions).toHaveLength(3)
         expect(revisions[0].rateRevisions).toHaveLength(2)
@@ -226,8 +222,6 @@ describe('findContract', () => {
         expect(revisions[2].submitInfo?.updatedReason).toBe('third submit')
 
         expect(revisions[2].rateRevisions.map(rr => rr.revisionFormData)).toStrictEqual(['onepoint0', 'twopointone'])
-
-        console.log('RES', revisions)
 
     })
 
