@@ -38,20 +38,18 @@ async function unlockContract(
             }
         })
         if (!currentRev) {
-            console.log('No Rev! Contracts should always have revisions.')
+            console.error('No Rev! Contracts should always have revisions.')
             return new Error('cant find the current rev to submit')
         }
 
         if (!currentRev.submitInfoID) {
-            console.log('this contract already has an unsubmitted revision')
+            console.error('this contract already has an unsubmitted revision')
             return new Error('cant unlock an alreday unlocked submission')
         }
 
         const previouslySubmittedRateIDs = currentRev.rateRevisions.map((c) => c.rateRevision.rateID)
-        console.log('looking at the current set of raterevs: ', currentRev.rateRevisions)
 
-
-        const updated = await client.contractRevisionTable.create({
+        await client.contractRevisionTable.create({
             data: {
                 id: uuidv4(),
                 contract: {
@@ -87,10 +85,9 @@ async function unlockContract(
 
     }
     catch (err) {
-        console.log("SUBMIT PRISMA CONTRACT ERR", err)
+        console.error("SUBMIT PRISMA CONTRACT ERR", err)
+        return err
     }
-
-    return new Error('nope')
 }
 
 export {

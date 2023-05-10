@@ -41,12 +41,11 @@ async function submitContract(
             }
         })
         if (!currentRev) {
-            console.log('No Unsubmitted Rev!')
+            console.error('No Unsubmitted Rev!')
             return new Error('cant find the current rev to submit')
         }
 
         const submittedRateRevisions = currentRev.draftRates.map((c) => c.revisions[0])
-        console.log('looking at the current set of revs: ', submittedRateRevisions)
 
         const updated = await client.contractRevisionTable.update({
             where: {
@@ -106,10 +105,10 @@ async function submitContract(
 
     }
     catch (err) {
-        console.log("SUBMITeeee PRISMA CONTRACT ERR", err)
+        console.error("SUBMITeeee PRISMA CONTRACT ERR", err)
+        return err
     }
 
-    return new Error('nope')
 }
 
 export {

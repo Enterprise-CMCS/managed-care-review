@@ -40,12 +40,11 @@ async function submitRateRevision(
             }
         })
         if (!currentRev) {
-            console.log('No Unsubmitted Rate Rev!')
+            console.error('No Unsubmitted Rate Rev!')
             return new Error('cant find the current rev to submit')
         }
 
         const freshContractRevs = currentRev.draftContracts.map((c) => c.revisions[0])
-        console.log('looking at the current set of revs: ', freshContractRevs)
 
         const updated = await client.rateRevisionTable.update({
             where: {
@@ -92,8 +91,7 @@ async function submitRateRevision(
 
         // invalidate all joins on the old revision
         if (oldRev) {
-            console.log('OLD REV', oldRev)
-            const updatedJoins = await client.rateRevisionsOnContractRevisionsTable.updateMany({
+            await client.rateRevisionsOnContractRevisionsTable.updateMany({
                 where: {
                     rateRevisionID: oldRev.id,
                     validUntil: null,
@@ -103,7 +101,6 @@ async function submitRateRevision(
                     invalidatedByRateRevisionID: updated.id,
                 }
             })
-            console.log('UPDATED OLD REVS', updatedJoins)
         }
 
         return {
@@ -117,11 +114,9 @@ async function submitRateRevision(
         }
     }
     catch (err) {
-        console.log("SUBMIT PRISMA CONTRACT ERR", err)
+        console.error("SUBMIT PRISMA CONTRACT ERR", err)
         return err
     }
-
-    return new Error('nope')
 }
 
 export {
