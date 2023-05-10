@@ -24,8 +24,8 @@ async function updateContractDraft(
             },
         })
         if (!currentRev) {
-            console.log('No Unsubmitted Rev!')
-            return new Error('cant find the current rev to submit')
+            console.log('No Draft Rev!')
+            return new Error('cant find a draft rev to submit')
         }
 
         const rates = await client.rateTable.findMany({
