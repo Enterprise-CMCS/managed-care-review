@@ -31,10 +31,6 @@ type Query {
         input: FetchHealthPlanPackageInput!
     ): FetchHealthPlanPackagePayload!
 
-    fetchContractPackage(
-        input: FetchContractPackageInput!
-    ): FetchContractPackagePayload!
-
     """
     indexHealthPlanPackages returns all of the HealthPlanPackages the current user can see.
 
@@ -269,16 +265,6 @@ input FetchHealthPlanPackageInput {
 type FetchHealthPlanPackagePayload {
     "A single HealthPlanPackage"
     pkg: HealthPlanPackage
-}
-
-input FetchContractPackageInput {
-    "The ID of the package to fetch"
-    pkgID: ID!
-}
-
-type FetchContractPackagePayload {
-    "A single HealthPlanPackage"
-    pkg: ContractPackage
 }
 
 type HealthPlanPackageEdge {
@@ -539,31 +525,6 @@ type HealthPlanPackage {
     questions: IndexQuestionsPayload
 }
 
-"""
-HealthPlanPackage is the core type for a single package submission. All the
-submission data is contained in the HealthPlanRevision type, allowing us to store
-the full history of packages previously submitted.
-
-HealthPlanPackages are submitted by state users and reviewed by CMS users.
-Initally created in DRAFT state, they are submitted using the submitHealthPlanPackage mutation.
-CMS users are able to use the unlockHealthPlanPackage mutation to return it to the state user in
-the UNLOCKED state for corrections. State users can then resubmit.
-"""
-type ContractPackage {
-    "uuid"
-    id: ID!
-    """
-    Where the package is in the submission flow.
-    SUBMITTED and RESUBMITTED packages cannot be modified
-    """
-    status: HealthPlanPackageStatus!
-    
-    "The state code (e.g. CA or TN) for the submitting state"
-    stateCode: String!
-    
-    contractFormData: ContractFormData
-}
-
 enum FederalAuthorities {
     STATE_PLAN
     WAIVER_1915B
@@ -579,18 +540,6 @@ type ModifiedProvisions {
     modifiedPassThroughPayments: Boolean
 }
 
-type ContractFormData {
-    schemaName: String!
-    schemaVersion: Int!
-
-    contractDescription: String
-    startDate: String
-    endDate: String
-    submissionType: SubmissionType
-    federalAuthorities: [FederalAuthorities!]!
-    modifiedProvisions: ModifiedProvisions!
-
-}
 
 """
 UpdateInformation is used for the unlockInfo and the submitInfo on HealthPlanRevision.
