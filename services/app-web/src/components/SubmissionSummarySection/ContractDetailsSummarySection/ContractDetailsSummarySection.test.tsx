@@ -5,6 +5,7 @@ import {
     sortModifiedProvisions,
 } from './ContractDetailsSummarySection'
 import {
+    fetchCurrentUserMock,
     mockContractAndRatesDraft,
     mockStateSubmission,
 } from '../../../testHelpers/apolloMocks'
@@ -14,7 +15,7 @@ import {
 } from '../../../common-code/healthPlanFormDataType'
 
 describe('ContractDetailsSummarySection', () => {
-    it('can render draft submission without errors (review and submit behavior)', () => {
+    it('can render draft submission without errors (review and submit behavior)', async () => {
         const testSubmission = {
             ...mockContractAndRatesDraft(),
             documents: [
@@ -39,11 +40,16 @@ describe('ContractDetailsSummarySection', () => {
                 submission={testSubmission}
                 navigateTo="contract-details"
                 submissionName="MN-PMAP-0001"
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
         )
 
         expect(
-            screen.getByRole('heading', {
+            await screen.findByRole('heading', {
                 level: 2,
                 name: 'Contract details',
             })
@@ -256,6 +262,87 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeNull()
     })
 
+    it('renders federal authorities for a medicaid contract', async () => {
+        renderWithProviders(
+            <ContractDetailsSummarySection
+                submission={{
+                    ...mockContractAndRatesDraft(),
+                    // Add all medicaid federal authorities, as if medicaid contract being unlocked
+                    federalAuthorities: [
+                        'STATE_PLAN',
+                        'WAIVER_1915B',
+                        'WAIVER_1115',
+                        'VOLUNTARY',
+                        'BENCHMARK',
+                        'TITLE_XXI',
+                    ],
+                }}
+                submissionName="MN-PMAP-0001"
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        expect(
+            await screen.findByText(
+                'Title XXI Separate CHIP State Plan Authority'
+            )
+        ).toBeInTheDocument()
+        expect(
+            await screen.findByText('1115 Waiver Authority')
+        ).toBeInTheDocument()
+        expect(
+            await screen.findByText('1932(a) State Plan Authority')
+        ).toBeInTheDocument()
+        expect(
+            await screen.findByText('1937 Benchmark Authority')
+        ).toBeInTheDocument()
+    })
+
+    it('renders federal authorities for a CHIP contract as expected, removing invalid authorities', async () => {
+        renderWithProviders(
+            <ContractDetailsSummarySection
+                submission={{
+                    ...mockContractAndRatesDraft(),
+                    populationCovered: 'CHIP',
+                    // Add all medicaid federal authorities, as if medicaid contract being unlocked
+                    federalAuthorities: [
+                        'STATE_PLAN',
+                        'WAIVER_1915B',
+                        'WAIVER_1115',
+                        'VOLUNTARY',
+                        'BENCHMARK',
+                        'TITLE_XXI',
+                    ],
+                }}
+                submissionName="MN-PMAP-0001"
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
+        )
+
+        expect(
+            await screen.findByText(
+                'Title XXI Separate CHIP State Plan Authority'
+            )
+        ).toBeInTheDocument()
+        expect(
+            await screen.findByText('1115 Waiver Authority')
+        ).toBeInTheDocument()
+        expect(
+            await screen.queryByText('1932(a) State Plan Authority')
+        ).not.toBeInTheDocument()
+        expect(
+            await screen.queryByText('1937 Benchmark Authority')
+        ).not.toBeInTheDocument()
+    })
+
     it('renders amended provisions and MLR references for a medicaid contract correctly', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
@@ -356,7 +443,12 @@ describe('ContractDetailsSummarySection', () => {
                     populationCovered: 'CHIP',
                 }}
                 submissionName="MN-PMAP-0001"
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
         )
         expect(
             screen.getByText('Benefits provided by the managed care plans')
@@ -510,7 +602,12 @@ describe('ContractDetailsSummarySection', () => {
             <ContractDetailsSummarySection
                 submission={contractWithUnansweredProvisions}
                 submissionName="MN-PMAP-0001"
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
         )
 
         const modifiedProvisions = screen.getByLabelText(
@@ -556,7 +653,12 @@ describe('ContractDetailsSummarySection', () => {
             <ContractDetailsSummarySection
                 submission={contractWithUnansweredProvisions}
                 submissionName="MN-PMAP-0001"
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
         )
 
         const modifiedProvisions = screen.getByLabelText(
@@ -602,7 +704,12 @@ describe('ContractDetailsSummarySection', () => {
             <ContractDetailsSummarySection
                 submission={contractWithAllUnmodifiedProvisions}
                 submissionName="MN-PMAP-0001"
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
         )
 
         const modifiedProvisions = screen.getByLabelText(
@@ -654,7 +761,12 @@ describe('ContractDetailsSummarySection', () => {
             <ContractDetailsSummarySection
                 submission={contractWithAllUnmodifiedProvisions}
                 submissionName="MN-PMAP-0001"
-            />
+            />,
+            {
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                },
+            }
         )
 
         const modifiedProvisions = screen.getByLabelText(

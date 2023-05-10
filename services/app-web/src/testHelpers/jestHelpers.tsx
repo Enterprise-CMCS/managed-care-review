@@ -26,13 +26,13 @@ import {
 /* Render */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const renderWithProviders = (
-    ui: React.ReactNode,
+    ui: React.ReactNode, // actual test UI - the JSX to render
     options?: {
-        routerProvider?: { route?: string }
-        apolloProvider?: MockedProviderProps
-        authProvider?: Partial<AuthProviderProps>
-        s3Provider?: S3ClientT
-        location?: (location: Location) => Location
+        routerProvider?: { route?: string } // used to pass react router related data
+        apolloProvider?: MockedProviderProps // used to pass GraphQL related data via apollo client
+        authProvider?: Partial<AuthProviderProps> // used to pass user authentication state via AuthContext
+        s3Provider?: S3ClientT // used to pass AWS S3 related state via  S3Context
+        location?: (location: Location) => Location // used to pass a location url for react-router
     }
 ) => {
     const {

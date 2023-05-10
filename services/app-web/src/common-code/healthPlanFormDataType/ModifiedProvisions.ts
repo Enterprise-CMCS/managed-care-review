@@ -1,7 +1,9 @@
+// Order matters- we iterate through the list to generate yes/no provision radio buttons.  Stakeholders want questions in specific order
 const modifiedProvisionKeys = [
     'modifiedBenefitsProvided',
     'modifiedGeoAreaServed',
     'modifiedMedicaidBeneficiaries',
+    'modifiedEnrollmentProcess',
     'modifiedRiskSharingStrategy',
     'modifiedIncentiveArrangements',
     'modifiedWitholdAgreements',
@@ -10,7 +12,6 @@ const modifiedProvisionKeys = [
     'modifiedPaymentsForMentalDiseaseInstitutions',
     'modifiedMedicalLossRatioStandards',
     'modifiedOtherFinancialPaymentIncentive',
-    'modifiedEnrollmentProcess',
     'modifiedGrevienceAndAppeal',
     'modifiedNetworkAdequacyStandards',
     'modifiedLengthOfContract',

@@ -13,7 +13,7 @@ import {
 import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import { HealthPlanFormDataType } from './HealthPlanFormDataType'
 import { formatRateNameDate } from '../../common-code/dateHelpers'
-import { ProgramArgType } from '.'
+import { ProgramArgType, federalAuthorityKeysForCHIP } from '.'
 
 // TODO: Refactor into multiple files and add unit tests to these functions
 
@@ -315,11 +315,20 @@ const removeRatesData = (
 const removeNonCHIPData = (
     pkg: UnlockedHealthPlanFormDataType
 ): UnlockedHealthPlanFormDataType => {
-    excludedProvisionsForCHIP.forEach((provision) => {
-        if (pkg.contractAmendmentInfo?.modifiedProvisions[provision]) {
-            pkg.contractAmendmentInfo.modifiedProvisions[provision] = undefined
-        }
-    })
+    // remove any provisions that aren't valid for CHIP (this can happen on unlock when populationCovered changes)
+    if (pkg.contractType === 'AMENDMENT') {
+        excludedProvisionsForCHIP.forEach((provision) => {
+            if (pkg.contractAmendmentInfo?.modifiedProvisions[provision]) {
+                pkg.contractAmendmentInfo.modifiedProvisions[provision] =
+                    undefined
+            }
+        })
+    }
+
+    // remove any authorities that aren't valid for CHIP (this can happen on unlock when populationCovered changes)
+    pkg.federalAuthorities = pkg.federalAuthorities.filter((authority) =>
+        federalAuthorityKeysForCHIP.includes(authority)
+    )
 
     return pkg
 }
