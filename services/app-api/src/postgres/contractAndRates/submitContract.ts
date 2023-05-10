@@ -14,7 +14,6 @@ async function submitContract(
                                             ): Promise<Contract | Error> {
 
     const groupTime = new Date()
-    console.log('Console Grouptime', groupTime)
 
     try {
 
@@ -41,7 +40,6 @@ async function submitContract(
                 }
             }
         })
-        console.log("FOUND FIRST", currentRev)
         if (!currentRev) {
             console.log('No Unsubmitted Rev!')
             return new Error('cant find the current rev to submit')

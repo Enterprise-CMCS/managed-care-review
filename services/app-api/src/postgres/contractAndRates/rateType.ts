@@ -1,5 +1,5 @@
 import { UpdateInfoType } from "../../domain-models"
-import { ContractRevision } from "./ContractType"
+import { ContractRevision } from "./contractType"
 
 interface Rate {
     id: string

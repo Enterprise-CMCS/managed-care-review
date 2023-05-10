@@ -1,25 +1,27 @@
 import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from 'uuid'
-import { UpdateInfoType } from "../../domain-models";
 import { RateRevision } from "./rateType";
 
 // Update the given revision
 // * invalidate relationships of previous revision
 // * set the ActionInfo
 async function submitRateRevision(
-                                                                client: PrismaClient, 
-                                                                revisionID: string,
-                                                                submitInfo: UpdateInfoType,
-                                                            ): Promise<RateRevision | Error> {
+                                                    client: PrismaClient, 
+                                                    rateID: string,
+                                                    submittedByUserID: string, 
+                                                    submitReason: string,
+                                                ): Promise<RateRevision | Error> {
 
     const groupTime = new Date()
 
     try {
 
-        // get the latest contractRevisions based on our draft ones
-        const currentRev = await client.rateRevisionTable.findUnique({
+        // Given all the Contracts associated with this draft, find the most recent submitted 
+        // contractRevision to attach to this rate on submit.
+        const currentRev = await client.rateRevisionTable.findFirst({
             where: {
-                id: revisionID,
+                rateID: rateID,
+                submitInfoID: null,
             },
             include: {
                 draftContracts: {
@@ -38,6 +40,7 @@ async function submitRateRevision(
             }
         })
         if (!currentRev) {
+            console.log('No Unsubmitted Rate Rev!')
             return new Error('cant find the current rev to submit')
         }
 
@@ -46,15 +49,15 @@ async function submitRateRevision(
 
         const updated = await client.rateRevisionTable.update({
             where: {
-                id: revisionID,
+                id: currentRev.id,
             },
             data: {
                 submitInfo: {
                     create: {
                         id: uuidv4(),
-                        updateAt: submitInfo.updatedAt,
-                        updateByID: submitInfo.updatedBy,
-                        updateReason: submitInfo.updatedReason,
+                        updateAt: groupTime,
+                        updateByID: submittedByUserID,
+                        updateReason: submitReason,
                     }
                 },
                 contractRevisions: {
