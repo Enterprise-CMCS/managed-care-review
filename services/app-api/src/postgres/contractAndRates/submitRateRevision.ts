@@ -1,22 +1,20 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
-import { RateRevision } from "./rateType";
+import { RateRevision } from './rateType'
 
 // Update the given revision
 // * invalidate relationships of previous revision
 // * set the ActionInfo
 async function submitRateRevision(
-                                                    client: PrismaClient, 
-                                                    rateID: string,
-                                                    submittedByUserID: string, 
-                                                    submitReason: string,
-                                                ): Promise<RateRevision | Error> {
-
+    client: PrismaClient,
+    rateID: string,
+    submittedByUserID: string,
+    submitReason: string
+): Promise<RateRevision | Error> {
     const groupTime = new Date()
 
     try {
-
-        // Given all the Contracts associated with this draft, find the most recent submitted 
+        // Given all the Contracts associated with this draft, find the most recent submitted
         // contractRevision to attach to this rate on submit.
         const currentRev = await client.rateRevisionTable.findFirst({
             where: {
@@ -33,18 +31,20 @@ async function submitRateRevision(
                             take: 1,
                             orderBy: {
                                 createdAt: 'desc',
-                            }
+                            },
                         },
-                    }
-                }
-            }
+                    },
+                },
+            },
         })
         if (!currentRev) {
             console.error('No Unsubmitted Rate Rev!')
             return new Error('cant find the current rev to submit')
         }
 
-        const freshContractRevs = currentRev.draftContracts.map((c) => c.revisions[0])
+        const freshContractRevs = currentRev.draftContracts.map(
+            (c) => c.revisions[0]
+        )
 
         const updated = await client.rateRevisionTable.update({
             where: {
@@ -54,27 +54,27 @@ async function submitRateRevision(
                 submitInfo: {
                     create: {
                         id: uuidv4(),
-                        updateAt: groupTime,
-                        updateByID: submittedByUserID,
-                        updateReason: submitReason,
-                    }
+                        updatedAt: groupTime,
+                        updatedByID: submittedByUserID,
+                        updatedReason: submitReason,
+                    },
                 },
                 contractRevisions: {
                     createMany: {
                         data: freshContractRevs.map((rev) => ({
                             contractRevisionID: rev.id,
                             validAfter: groupTime,
-                        }))
-                    }
-                }
+                        })),
+                    },
+                },
             },
             include: {
                 contractRevisions: {
                     include: {
                         contractRevision: true,
-                    }
-                }
-            }
+                    },
+                },
+            },
         })
 
         const oldRev = await client.rateRevisionTable.findFirst({
@@ -82,14 +82,14 @@ async function submitRateRevision(
                 rateID: updated.rateID,
                 NOT: {
                     id: updated.id,
-                }
+                },
             },
             orderBy: {
                 createdAt: 'desc',
             },
             include: {
-                contractRevisions: true
-            }
+                contractRevisions: true,
+            },
         })
 
         // invalidate all joins on the old revision
@@ -102,26 +102,23 @@ async function submitRateRevision(
                 data: {
                     validUntil: groupTime,
                     invalidatedByRateRevisionID: updated.id,
-                }
+                },
             })
         }
 
         return {
             id: updated.id,
-            revisionFormData: updated.rateCertURL || 'NOTHINGS',
-            contractRevisions: updated.contractRevisions.map ( (cRev) => ({
+            revisionFormData: updated.name,
+            contractRevisions: updated.contractRevisions.map((cRev) => ({
                 id: cRev.contractRevisionID,
                 contractFormData: cRev.contractRevision.name,
                 rateRevisions: [],
-            }))
+            })),
         }
-    }
-    catch (err) {
-        console.error("SUBMIT PRISMA CONTRACT ERR", err)
+    } catch (err) {
+        console.error('SUBMIT PRISMA CONTRACT ERR', err)
         return err
     }
 }
 
-export {
-    submitRateRevision,
-}
+export { submitRateRevision }

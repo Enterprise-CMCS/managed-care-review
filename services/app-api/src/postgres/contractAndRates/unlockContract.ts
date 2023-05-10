@@ -1,23 +1,21 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
-import { Contract } from "./contractType";
-import { findContract } from "./findContract";
+import { Contract } from './contractType'
+import { findContract } from './findContract'
 
 // Unlock the given contract
 // * copy form data
 // * set relationships based on last submission
 async function unlockContract(
-                                                client: PrismaClient, 
-                                                contractID: string,
-                                                unlockedByUserID: string, 
-                                                unlockReason: string,
-                                            ): Promise<Contract | Error> {
-
+    client: PrismaClient,
+    contractID: string,
+    unlockedByUserID: string,
+    unlockReason: string
+): Promise<Contract | Error> {
     const groupTime = new Date()
 
     try {
-
-        // Given all the Rates associated with this draft, find the most recent submitted 
+        // Given all the Rates associated with this draft, find the most recent submitted
         // rateRevision to attach to this contract on submit.
         const currentRev = await client.contractRevisionTable.findFirst({
             where: {
@@ -33,9 +31,9 @@ async function unlockContract(
                     },
                     include: {
                         rateRevision: true,
-                    }
-                }
-            }
+                    },
+                },
+            },
         })
         if (!currentRev) {
             console.error('No Rev! Contracts should always have revisions.')
@@ -47,7 +45,9 @@ async function unlockContract(
             return new Error('cant unlock an alreday unlocked submission')
         }
 
-        const previouslySubmittedRateIDs = currentRev.rateRevisions.map((c) => c.rateRevision.rateID)
+        const previouslySubmittedRateIDs = currentRev.rateRevisions.map(
+            (c) => c.rateRevision.rateID
+        )
 
         await client.contractRevisionTable.create({
             data: {
@@ -55,41 +55,37 @@ async function unlockContract(
                 contract: {
                     connect: {
                         id: contractID,
-                    }
+                    },
                 },
                 name: currentRev.name,
                 unlockInfo: {
                     create: {
                         id: uuidv4(),
-                        updateAt: groupTime,
-                        updateByID: unlockedByUserID,
-                        updateReason: unlockReason,
-                    }
+                        updatedAt: groupTime,
+                        updatedByID: unlockedByUserID,
+                        updatedReason: unlockReason,
+                    },
                 },
                 draftRates: {
-                    connect: previouslySubmittedRateIDs.map( (cID) => ({
+                    connect: previouslySubmittedRateIDs.map((cID) => ({
                         id: cID,
-                    }))
+                    })),
                 },
             },
             include: {
                 rateRevisions: {
                     include: {
                         rateRevision: true,
-                    }
+                    },
                 },
-            }
+            },
         })
 
         return findContract(client, contractID)
-
-    }
-    catch (err) {
-        console.error("SUBMIT PRISMA CONTRACT ERR", err)
+    } catch (err) {
+        console.error('SUBMIT PRISMA CONTRACT ERR', err)
         return err
     }
 }
 
-export {
-    unlockContract,
-}
+export { unlockContract }

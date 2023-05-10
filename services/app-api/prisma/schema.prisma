@@ -68,20 +68,6 @@ model ContractRevisionTable {
   name String
 }
 
-model UpdateInfoTable {
-  id String @id
-
-  updateAt     DateTime
-  updateByID String 
-  updateBy     User @relation(fields: [updateByID], references: [id])
-  updateReason String
-
-  unlockedContracts ContractRevisionTable[] @relation("unlockContractInfo")
-  submitedContracts ContractRevisionTable[] @relation("submitContractInfo")
-  unlockedRates RateRevisionTable[] @relation("unlockRateInfo")
-  submitedRates RateRevisionTable[] @relation("submitRateInfo")
-}
-
 model RateRevisionTable {
   id                String                                  @id
   rateID            String
@@ -100,7 +86,6 @@ model RateRevisionTable {
   submitInfo   UpdateInfoTable? @relation("submitRateInfo", fields: [submitInfoID], references: [id])
 
   name        String
-  rateCertURL String?
 }
 
 model RateRevisionsOnContractRevisionsTable {
@@ -120,6 +105,20 @@ model RateRevisionsOnContractRevisionsTable {
   invalidatedByRateRevision RateRevisionTable? @relation("invalidatedByRate", fields: [invalidatedByRateRevisionID], references: [id])
 
   @@id([rateRevisionID, contractRevisionID, validAfter])
+}
+
+model UpdateInfoTable {
+  id String @id
+
+  updatedAt     DateTime
+  updatedByID String 
+  updatedBy     User @relation(fields: [updatedByID], references: [id])
+  updatedReason String
+
+  unlockedContracts ContractRevisionTable[] @relation("unlockContractInfo")
+  submitedContracts ContractRevisionTable[] @relation("submitContractInfo")
+  unlockedRates RateRevisionTable[] @relation("unlockRateInfo")
+  submitedRates RateRevisionTable[] @relation("submitRateInfo")
 }
 
 model State {
