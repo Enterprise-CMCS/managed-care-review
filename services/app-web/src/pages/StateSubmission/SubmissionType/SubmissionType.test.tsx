@@ -121,7 +121,7 @@ describe('SubmissionType', () => {
 
             expect(
                 await screen.getByText(
-                    'Which populations does this contact action cover?'
+                    'Which populations does this contract action cover?'
                 )
             ).toBeInTheDocument()
             expect(
@@ -151,7 +151,7 @@ describe('SubmissionType', () => {
 
             expect(
                 await screen.getByText(
-                    'Which populations does this contact action cover?'
+                    'Which populations does this contract action cover?'
                 )
             ).toBeInTheDocument()
             const chipOnlyRadio = await screen.getByRole('radio', {
@@ -192,7 +192,7 @@ describe('SubmissionType', () => {
 
             expect(
                 await screen.getByText(
-                    'Which populations does this contact action cover?'
+                    'Which populations does this contract action cover?'
                 )
             ).toBeInTheDocument()
             const medicaidRadio = await screen.getByRole('radio', {
@@ -252,7 +252,7 @@ describe('SubmissionType', () => {
 
             expect(
                 await screen.getByText(
-                    'Which populations does this contact action cover?'
+                    'Which populations does this contract action cover?'
                 )
             ).toBeInTheDocument()
             const medicaidRadio = await screen.getByRole('radio', {
@@ -311,7 +311,7 @@ describe('SubmissionType', () => {
 
             expect(
                 await screen.getByText(
-                    'Which populations does this contact action cover?'
+                    'Which populations does this contract action cover?'
                 )
             ).toBeInTheDocument()
             const medicaidRadio = await screen.getByRole('radio', {
@@ -358,7 +358,7 @@ describe('SubmissionType', () => {
             // Expect population coverage question and radios
             expect(
                 await screen.getByText(
-                    'Which populations does this contact action cover?'
+                    'Which populations does this contract action cover?'
                 )
             ).toBeInTheDocument()
             expect(
