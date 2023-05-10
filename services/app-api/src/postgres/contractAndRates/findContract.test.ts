@@ -269,6 +269,11 @@ describe('findContract', () => {
             throw contractA_1
         }
 
+        const contractA_1_Error = await submitContract(client, contractA.id, stateUser.id, 'third submit' )
+        if (!(contractA_1_Error instanceof Error)) {
+            throw new Error('Should be impossible to submit twice in a row.')
+        }
+
         const res = await findContract(client, contractA.id)
 
         if (res instanceof Error) {
@@ -299,11 +304,7 @@ describe('findContract', () => {
 
     // get the current thing only, maybe ignoring the current draft
 
-    // go from the other direction. find rate
-
-    // Have a draft pointing to a draft and save both in serial. 
-
-    // have a draft pointing to a real, create a draft on the real, save the second draft
+    // go from the other direction. find rate 
 
     // can't submit an already submitted rev.
 
