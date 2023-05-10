@@ -26,7 +26,7 @@ async function insertDraftContractRevision(
                     create: {
                         id: uuidv4(),
                         updateAt: unlockInfo.updatedAt,
-                        updateBy: unlockInfo.updatedBy,
+                        updateByID: unlockInfo.updatedBy,
                         updateReason: unlockInfo.updatedReason,
                     }
                 } : undefined,

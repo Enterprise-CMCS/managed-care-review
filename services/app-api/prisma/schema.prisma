@@ -72,7 +72,8 @@ model UpdateInfoTable {
   id String @id
 
   updateAt     DateTime
-  updateBy     String
+  updateByID String 
+  updateBy     User @relation(fields: [updateByID], references: [id])
   updateReason String
 
   unlockedContracts ContractRevisionTable[] @relation("unlockContractInfo")
@@ -135,10 +136,12 @@ model User {
   familyName       String
   email            String
   role             Role
-  stateAssignments State[]
   stateCode        String?
+  
+  stateAssignments State[]
   questions        Question[]
   responses        QuestionResponse[]
+  updateInfos UpdateInfoTable[]
 }
 
 model Question {

@@ -1,26 +1,28 @@
 import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from 'uuid'
-import { UpdateInfoType } from "../../domain-models";
-import { ContractRevision } from "./findContract";
+import { Contract, findContract } from "./findContract";
 
 // Update the given revision
 // * invalidate relationships of previous revision
 // * set the ActionInfo
-async function submitContractRevision(
-                                                                client: PrismaClient, 
-                                                                revisionID: string,
-                                                                submitInfo: UpdateInfoType,
-                                                            ): Promise<ContractRevision | Error> {
+async function submitContract(
+                                                client: PrismaClient, 
+                                                contractID: string,
+                                                submittedByUserID: string, 
+                                                submitReason: string,
+                                            ): Promise<Contract | Error> {
 
     const groupTime = new Date()
     console.log('Console Grouptime', groupTime)
 
     try {
 
-        // get the latest rateRevisions based on our draft ones
-        const currentRev = await client.contractRevisionTable.findUnique({
+        // Given all the Rates associated with this draft, find the most recent submitted 
+        // rateRevision to attach to this contract on submit.
+        const currentRev = await client.contractRevisionTable.findFirst({
             where: {
-                id: revisionID,
+                contractID: contractID,
+                submitInfoID: null,
             },
             include: {
                 draftRates: {
@@ -38,29 +40,31 @@ async function submitContractRevision(
                 }
             }
         })
+        console.log("FOUND FIRST", currentRev)
         if (!currentRev) {
+            console.log('No Unsubmitted Rev!')
             return new Error('cant find the current rev to submit')
         }
 
-        const freshRateRevs = currentRev.draftRates.map((c) => c.revisions[0])
-        console.log('looking at the current set of revs: ', freshRateRevs)
+        const submittedRateRevisions = currentRev.draftRates.map((c) => c.revisions[0])
+        console.log('looking at the current set of revs: ', submittedRateRevisions)
 
         const updated = await client.contractRevisionTable.update({
             where: {
-                id: revisionID,
+                id: currentRev.id,
             },
             data: {
                 submitInfo: {
                     create: {
                         id: uuidv4(),
                         updateAt: groupTime,
-                        updateBy: submitInfo.updatedBy,
-                        updateReason: submitInfo.updatedReason,
+                        updateByID: submittedByUserID,
+                        updateReason: submitReason,
                     }
                 },
                 rateRevisions: {
                     createMany: {
-                        data: freshRateRevs.map((rev) => ({
+                        data: submittedRateRevisions.map((rev) => ({
                             rateRevisionID: rev.id,
                             validAfter: groupTime,
                         }))
@@ -85,7 +89,7 @@ async function submitContractRevision(
             }
         })
 
-        // invalidate all joins on the old revision
+        // invalidate all joins on the old revision // maybe should just invalidate ALL where?
         if (oldRev) {
             await client.rateRevisionsOnContractRevisionsTable.updateMany({
                 where: {
@@ -99,22 +103,16 @@ async function submitContractRevision(
             })
         }
 
-        return {
-            id: updated.id,
-            contractFormData: updated.name,
-            rateRevisions: updated.rateRevisions.map( (rr) => ({
-                id: rr.rateRevisionID,
-                revisionFormData: rr.rateRevision.rateCertURL || 'NO URL',
-            }))
-        }
+        return findContract(client, contractID)
+
     }
     catch (err) {
-        console.log("SUBMIT PRISMA CONTRACT ERR", err)
+        console.log("SUBMITeeee PRISMA CONTRACT ERR", err)
     }
 
     return new Error('nope')
 }
 
 export {
-    submitContractRevision,
+    submitContract,
 }
