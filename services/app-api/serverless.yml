@@ -42,6 +42,7 @@ custom:
         - '@prisma/client'
       nodeModulesRelativeDir: '../../'
     packagerOptions:
+      noInstall: true
       lockFile: '../../yarn.lock'
     excludeRegex: 'darwin|debian'
   serverlessTerminationProtection:
