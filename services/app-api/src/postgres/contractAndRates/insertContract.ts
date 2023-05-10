@@ -6,7 +6,6 @@ import { Contract } from "./findContract";
 async function insertDraftContract(
                                                         client: PrismaClient, 
                                                         formData: string,
-                                                        draftRateRevisionIDs: string[],
                                                     ): Promise<Contract | Error> {
 
     try {

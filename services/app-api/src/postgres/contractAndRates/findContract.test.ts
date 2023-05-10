@@ -1,7 +1,6 @@
 import { sharedTestPrismaClient } from "../../testHelpers/storeHelpers"
 import { v4 as uuidv4 } from 'uuid'
 import { findContract } from "./findContract"
-import { createContractRevision } from "./createContractRevision"
 import { createRateRevision } from "./createRateRevision"
 import { submitContract } from "./submitContract"
 import { submitRateRevision } from "./submitRateRevision"
@@ -40,7 +39,7 @@ describe('findContract', () => {
             }
         })
 
-        const contractADraft = await insertDraftContract(client, 'one contract', [])
+        const contractADraft = await insertDraftContract(client, 'one contract')
         if (contractADraft instanceof Error) {
             throw contractADraft
         }
@@ -198,6 +197,16 @@ describe('findContract', () => {
             }
         })
 
+        const cmsUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Zuko',
+                familyName: 'Hotman',
+                email: 'zuko@example.com',
+                role: 'CMS_USER',
+            }
+        })
+
         // Add 3 rates 1, 2
         const rate1 = await client.rateTable.create({ data: { id: uuidv4()}})
         const rate1_0Draft = await createRateRevision(client, rate1.id, 'onepoint0', [])
@@ -223,23 +232,23 @@ describe('findContract', () => {
 
         await delay(100)
 
-        const contractA = await client.contractTable.create({ data: { id: uuidv4() }})
-        const contractA_0Draft = await createContractRevision(client, contractA.id, 'one contract', [rate1.id, rate2.id])
-        if (contractA_0Draft instanceof Error) {
-            throw contractA_0Draft
-        }
-        const contractA_0 = await submitContract(client, contractA.id, stateUser.id, 'initial submit')
-        if (contractA_0 instanceof Error) {
-            throw contractA_0
+        const contractADraft = await insertDraftContract(client, 'one contract')
+        if (contractADraft instanceof Error) {
+            throw contractADraft
         }
 
-        console.log('first contact', contractA_0)
+        const updatedADraft = await updateContractDraft(client, contractADraft.id, 'one contract', [rate1.id, rate2.id])
 
-        // make new draft for contract and one rate
+        const contractA = await submitContract(client, contractADraft.id, stateUser.id, 'initial submit' )
+        if (contractA instanceof Error) {
+            throw contractA
+        }
+
         await delay(100)
-        const contractA_1Draft = await createContractRevision(client, contractA.id, 'one contract dot one', [rate1.id, rate2.id])
-        if (contractA_1Draft instanceof Error) {
-            throw contractA_1Draft
+
+        const unlockedA = await unlockContract(client, contractA.id, cmsUser.id, 'unlock A Open')
+        if (unlockedA instanceof Error) {
+            throw unlockedA
         }
 
         await delay(100)
