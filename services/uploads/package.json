@@ -46,7 +46,7 @@
         "serverless-stack-termination-protection": "^2.0.2",
         "serverless-webpack": "^5.11.0",
         "ts-jest": "^27.1.4",
-        "ts-loader": "^9.2.8",
+        "ts-loader": "^9.4.2",
         "tsconfig-paths-webpack-plugin": "^4.0.1"
     }
 }
