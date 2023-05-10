@@ -36,13 +36,13 @@ function convertUpdateInfo(info: UpdateInfoTable | null ): UpdateInfoType | unde
 
     return {
         updatedAt: info.updateAt,
-        updatedBy: info.updateBy,
+        updatedBy: info.updateByID,
         updatedReason: info.updateReason,
     }
 
 } 
 
-async function findContractRevisions(client: PrismaClient, contractID: string): Promise<ContractRevision[] | Error> {
+async function findContract(client: PrismaClient, contractID: string): Promise<Contract | Error> {
 
     try {
         const contractRevisions = await client.contractRevisionTable.findMany({
@@ -180,7 +180,10 @@ async function findContractRevisions(client: PrismaClient, contractID: string): 
         }
 
         console.log("revisions", allContractRevisions)
-        return allContractRevisions
+        return {
+            id: contractID,
+            revisions: allContractRevisions,
+        }
 
     } catch(err) {
         console.log("PRISMA ERROR", err)
@@ -199,5 +202,5 @@ export type {
 }
 
 export {
-    findContractRevisions
+    findContract
 }

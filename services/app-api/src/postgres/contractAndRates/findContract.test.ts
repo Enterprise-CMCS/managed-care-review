@@ -1,11 +1,13 @@
 import { sharedTestPrismaClient } from "../../testHelpers/storeHelpers"
 import { v4 as uuidv4 } from 'uuid'
-import { findContractRevisions } from "./findContract"
+import { findContract } from "./findContract"
 import { createContractRevision } from "./createContractRevision"
 import { createRateRevision } from "./createRateRevision"
-import { submitContractRevision } from "./submitContractRevision"
+import { submitContract } from "./submitContract"
 import { submitRateRevision } from "./submitRateRevision"
 import { insertDraftContract } from "./insertContract"
+import { unlockContract } from "./unlockContract"
+import { updateContractDraft } from "./updateContractDraft"
 
 async function delay(ms: number) {
     return new Promise( resolve => setTimeout(resolve, ms) );
@@ -17,28 +19,47 @@ describe('findContract', () => {
 
         const client = await sharedTestPrismaClient()
 
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                stateCode: 'NM',
+            }
+        })
+
+        const cmsUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Zuko',
+                familyName: 'Hotman',
+                email: 'zuko@example.com',
+                role: 'CMS_USER',
+            }
+        })
+
         const contractADraft = await insertDraftContract(client, 'one contract', [])
         if (contractADraft instanceof Error) {
             throw contractADraft
         }
-        const contractA_0ID = contractADraft.revisions[0].id
-
-        const contractA_0 = await submitContractRevision(client, contractA_0ID, { updatedAt: new Date(), updatedBy: 'foo user', updatedReason: 'initial submit' })
-        if (contractA_0 instanceof Error) {
-            throw contractA_0
+        const contractA = await submitContract(client, contractADraft.id, stateUser.id, 'initial submit' )
+        if (contractA instanceof Error) {
+            throw contractA
         }
 
-        console.log('first contact', contractA_0)
+        console.log('first contact', contractA)
 
         console.log('PAST FIRST CONTRACT')
 
         // Add 3 rates 1, 2, 3
         const rate1 = await client.rateTable.create({ data: { id: uuidv4()}})
-        const rate1_0Draft = await createRateRevision(client, rate1.id, 'someurle.en', [contractADraft.id])
+        const rate1_0Draft = await createRateRevision(client, rate1.id, 'someurle.en', [contractA.id])
         if (rate1_0Draft instanceof Error) {
             throw rate1_0Draft
         }
-        const rate1_0 = await submitRateRevision(client, rate1_0Draft.id, { updatedAt: new Date(), updatedBy: 'foo user', updatedReason: 'Rate Submit' })
+        const rate1_0 = await submitRateRevision(client, rate1_0Draft.id, { updatedAt: new Date(), updatedBy: stateUser.id, updatedReason: 'Rate Submit' })
         if (rate1_0 instanceof Error) {
             throw rate1_0
         }
@@ -46,11 +67,11 @@ describe('findContract', () => {
         await delay(100)
 
         const rate2 = await client.rateTable.create({ data: { id: uuidv4()}})
-        const rate2_0Draft = await createRateRevision(client, rate2.id, 'twopointo', [contractADraft.id])
+        const rate2_0Draft = await createRateRevision(client, rate2.id, 'twopointo', [contractA.id])
         if (rate2_0Draft instanceof Error) {
             throw rate2_0Draft
         }
-        const rate2_0 = await submitRateRevision(client, rate2_0Draft.id, { updatedAt: new Date(), updatedBy: 'foo user', updatedReason: 'RateSubmit 2' })
+        const rate2_0 = await submitRateRevision(client, rate2_0Draft.id, { updatedAt: new Date(), updatedBy: stateUser.id, updatedReason: 'RateSubmit 2' })
         if (rate2_0 instanceof Error) {
             throw rate2_0
         }
@@ -58,11 +79,11 @@ describe('findContract', () => {
         await delay(100)
 
         const rate3 = await client.rateTable.create({ data: { id: uuidv4()}})
-        const rate3_0Draft = await createRateRevision(client, rate3.id, 'threepointo', [contractADraft.id])
+        const rate3_0Draft = await createRateRevision(client, rate3.id, 'threepointo', [contractA.id])
         if (rate3_0Draft instanceof Error) {
             throw rate3_0Draft
         }
-        const rate3_0 = await submitRateRevision(client, rate3_0Draft.id, { updatedAt: new Date(), updatedBy: 'foo user', updatedReason: '3.0 create' })
+        const rate3_0 = await submitRateRevision(client, rate3_0Draft.id, { updatedAt: new Date(), updatedBy: stateUser.id, updatedReason: '3.0 create' })
         if (rate3_0 instanceof Error) {
             throw rate3_0
         }
@@ -76,7 +97,7 @@ describe('findContract', () => {
         if (rate2_1Draft instanceof Error) {
             throw rate2_1Draft
         }
-        const rate2_1 = await submitRateRevision(client, rate2_1Draft.id, { updatedAt: new Date(), updatedBy: 'foo user', updatedReason: '2.1 remove' })
+        const rate2_1 = await submitRateRevision(client, rate2_1Draft.id, { updatedAt: new Date(), updatedBy: stateUser.id, updatedReason: '2.1 remove' })
         if (rate2_1 instanceof Error) {
             throw rate2_1
         }
@@ -84,62 +105,98 @@ describe('findContract', () => {
         await delay(100)
 
         // update rate 1 to have a new version, should make one new rev.
-        const rate1_1Draft = await createRateRevision(client, rate1.id, 'onepointone', [contractADraft.id])
+        const rate1_1Draft = await createRateRevision(client, rate1.id, 'onepointone', [contractA.id])
         if (rate1_1Draft instanceof Error) {
             throw rate1_1Draft
         }
-        const rate1_1 = await submitRateRevision(client, rate1_1Draft.id, { updatedAt: new Date(), updatedBy: 'foo user', updatedReason: '1.1 new name' })
+        const rate1_1 = await submitRateRevision(client, rate1_1Draft.id, { updatedAt: new Date(), updatedBy: stateUser.id, updatedReason: '1.1 new name' })
         if (rate1_1 instanceof Error) {
             throw rate1_1
         }
 
         await delay(100)
 
-        // Make a new Contract Revision, should show up as a single new rev.
-        const contractA_1Draft = await createContractRevision(client, contractADraft.id, 'one contract dot one', [rate1.id, rate3.id])
+        // Make a new Contract Revision, should show up as a single new rev with all the old info
+        const contractA_1Draft = await unlockContract(client, contractA.id, cmsUser.id, 'unlocking A.0')
         if (contractA_1Draft instanceof Error) {
             throw contractA_1Draft
         }
-        const contractA_1 = await submitContractRevision(client, contractA_1Draft.id, { updatedAt: new Date(), updatedBy: 'foo user', updatedReason: 'third submit' })
+
+        const contractA_1 = await submitContract(client, contractA.id, stateUser.id, 'Submitting A.1')
         if (contractA_1 instanceof Error) {
             throw contractA_1
         }
 
-        const res = await findContractRevisions(client, contractADraft.id)
-
-        if (res instanceof Error) {
-            throw res
+        // Make a new Contract Revision, changing the connections should show up as a single new rev.
+        const contractA_2Draft = await unlockContract(client, contractA.id, cmsUser.id, 'unlocking A.1')
+        if (contractA_2Draft instanceof Error) {
+            throw contractA_2Draft
         }
+
+        const updatedA_2Draft = await updateContractDraft(client, contractA.id, 'a.2 body', [rate3.id])
+        if (updatedA_2Draft instanceof Error) {
+            throw updatedA_2Draft
+        }
+
+        const contractA_2 = await submitContract(client, contractA.id, stateUser.id, 'Submitting A.2')
+        if (contractA_2 instanceof Error) {
+            throw contractA_2
+        }
+
+        const resultingContract = await findContract(client, contractA.id)
+
+        if (resultingContract instanceof Error) {
+            throw resultingContract
+        }
+
+        const revisions = resultingContract.revisions
+
+        console.log('ALL First REvisions: ', JSON.stringify(revisions, null, '  '))
 
         // Each Revision needs a Reason, one of the contracts or revisions associated with it should have changed and why.
 
-        expect(res).toHaveLength(7)
-        expect(res[0].rateRevisions).toHaveLength(0)
-        expect(res[0].submitInfo?.updatedReason).toBe('initial submit')
+        expect(revisions).toHaveLength(8)
+        expect(revisions[0].rateRevisions).toHaveLength(0)
+        expect(revisions[0].submitInfo?.updatedReason).toBe('initial submit')
 
-        expect(res[1].rateRevisions).toHaveLength(1)
-        expect(res[1].submitInfo?.updatedReason).toBe('Rate Submit')
+        expect(revisions[1].rateRevisions).toHaveLength(1)
+        expect(revisions[1].submitInfo?.updatedReason).toBe('Rate Submit')
 
-        expect(res[2].rateRevisions).toHaveLength(2)
-        expect(res[2].submitInfo?.updatedReason).toBe('RateSubmit 2')
+        expect(revisions[2].rateRevisions).toHaveLength(2)
+        expect(revisions[2].submitInfo?.updatedReason).toBe('RateSubmit 2')
 
-        expect(res[3].rateRevisions).toHaveLength(3)
-        expect(res[4].rateRevisions).toHaveLength(2)
+        expect(revisions[3].rateRevisions).toHaveLength(3)
+        expect(revisions[4].rateRevisions).toHaveLength(2)
 
-        expect(res[5].rateRevisions).toHaveLength(2)
-        expect(res[5].rateRevisions[1].revisionFormData).toBe('onepointone')
-        expect(res[5].submitInfo?.updatedReason).toBe('1.1 new name')
+        expect(revisions[5].rateRevisions).toHaveLength(2)
+        expect(revisions[5].rateRevisions[1].revisionFormData).toBe('onepointone')
+        expect(revisions[5].submitInfo?.updatedReason).toBe('1.1 new name')
 
-        expect(res[6].rateRevisions).toHaveLength(2)
-        expect(res[6].submitInfo?.updatedReason).toBe('third submit')
+        expect(revisions[6].rateRevisions).toHaveLength(2)
+        expect(revisions[6].submitInfo?.updatedReason).toBe('Submitting A.1')
 
-        console.log('RES', res)
+        expect(revisions[7].rateRevisions).toHaveLength(1)
+        expect(revisions[7].contractFormData).toBe('a.2 body')
+        expect(revisions[7].submitInfo?.updatedReason).toBe('Submitting A.2')
+
+        console.log('RES', revisions)
 
     })
 
     it('handles drafts correctly', async () =>  {
-
+        
         const client = await sharedTestPrismaClient()
+
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                stateCode: 'NM',
+            }
+        })
 
         // Add 3 rates 1, 2
         const rate1 = await client.rateTable.create({ data: { id: uuidv4()}})
@@ -147,7 +204,7 @@ describe('findContract', () => {
         if (rate1_0Draft instanceof Error) {
             throw rate1_0Draft
         }
-        const rate1_0 = await submitRateRevision(client, rate1_0Draft.id, { updatedAt: new Date(), updatedBy: 'foo user', updatedReason: 'Rate Submit' })
+        const rate1_0 = await submitRateRevision(client, rate1_0Draft.id, { updatedAt: new Date(), updatedBy: stateUser.id, updatedReason: 'Rate Submit' })
         if (rate1_0 instanceof Error) {
             throw rate1_0
         }
@@ -159,7 +216,7 @@ describe('findContract', () => {
         if (rate2_0Draft instanceof Error) {
             throw rate2_0Draft
         }
-        const rate2_0 = await submitRateRevision(client, rate2_0Draft.id, { updatedAt: new Date(), updatedBy: 'foo user', updatedReason: 'RateSubmit 2' })
+        const rate2_0 = await submitRateRevision(client, rate2_0Draft.id, { updatedAt: new Date(), updatedBy: stateUser.id, updatedReason: 'RateSubmit 2' })
         if (rate2_0 instanceof Error) {
             throw rate2_0
         }
@@ -171,7 +228,7 @@ describe('findContract', () => {
         if (contractA_0Draft instanceof Error) {
             throw contractA_0Draft
         }
-        const contractA_0 = await submitContractRevision(client, contractA_0Draft.id, { updatedAt: new Date(), updatedBy: 'foo user', updatedReason: 'initial submit' })
+        const contractA_0 = await submitContract(client, contractA.id, stateUser.id, 'initial submit')
         if (contractA_0 instanceof Error) {
             throw contractA_0
         }
@@ -191,19 +248,19 @@ describe('findContract', () => {
         if (rate2_1Draft instanceof Error) {
             throw rate2_1Draft
         }
-        const rate2_1 = await submitRateRevision(client, rate2_1Draft.id, { updatedAt: new Date(), updatedBy: 'foo user', updatedReason: '2.1 update' })
+        const rate2_1 = await submitRateRevision(client, rate2_1Draft.id, { updatedAt: new Date(), updatedBy: stateUser.id, updatedReason: '2.1 update' })
         if (rate2_1 instanceof Error) {
             throw rate2_1
         }
 
         await delay(100)
         // submit A1, should show up as a single new rev.
-        const contractA_1 = await submitContractRevision(client, contractA_1Draft.id, { updatedAt: new Date(), updatedBy: 'foo user', updatedReason: 'third submit' })
+        const contractA_1 = await submitContract(client, contractA.id, stateUser.id, 'third submit' )
         if (contractA_1 instanceof Error) {
             throw contractA_1
         }
 
-        const res = await findContractRevisions(client, contractA.id)
+        const res = await findContract(client, contractA.id)
 
         if (res instanceof Error) {
             throw res
@@ -213,19 +270,21 @@ describe('findContract', () => {
 
         // Each Revision needs a Reason, one of the contracts or revisions associated with it should have changed and why.
 
-        expect(res).toHaveLength(3)
-        expect(res[0].rateRevisions).toHaveLength(2)
-        expect(res[0].submitInfo?.updatedReason).toBe('initial submit')
+        const revisions = res.revisions
 
-        expect(res[1].rateRevisions).toHaveLength(2)
-        expect(res[1].submitInfo?.updatedReason).toBe('2.1 update')
+        expect(revisions).toHaveLength(3)
+        expect(revisions[0].rateRevisions).toHaveLength(2)
+        expect(revisions[0].submitInfo?.updatedReason).toBe('initial submit')
 
-        expect(res[2].rateRevisions).toHaveLength(2)
-        expect(res[2].submitInfo?.updatedReason).toBe('third submit')
+        expect(revisions[1].rateRevisions).toHaveLength(2)
+        expect(revisions[1].submitInfo?.updatedReason).toBe('2.1 update')
 
-        expect(res[2].rateRevisions.map(rr => rr.revisionFormData)).toStrictEqual(['onepoint0', 'twopointone'])
+        expect(revisions[2].rateRevisions).toHaveLength(2)
+        expect(revisions[2].submitInfo?.updatedReason).toBe('third submit')
 
-        console.log('RES', res)
+        expect(revisions[2].rateRevisions.map(rr => rr.revisionFormData)).toStrictEqual(['onepoint0', 'twopointone'])
+
+        console.log('RES', revisions)
 
     })
 

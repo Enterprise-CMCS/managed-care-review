@@ -53,7 +53,7 @@ async function submitRateRevision(
                     create: {
                         id: uuidv4(),
                         updateAt: submitInfo.updatedAt,
-                        updateBy: submitInfo.updatedBy,
+                        updateByID: submitInfo.updatedBy,
                         updateReason: submitInfo.updatedReason,
                     }
                 },
@@ -115,6 +115,7 @@ async function submitRateRevision(
     }
     catch (err) {
         console.log("SUBMIT PRISMA CONTRACT ERR", err)
+        return err
     }
 
     return new Error('nope')
