@@ -52,6 +52,7 @@ async function main() {
     }
 
     const stacksToDestroy = await getStacksFromStage(stage)
+    console.info(`debug: ${stacksToDestroy}`)
     if (stacksToDestroy.length === 0) {
         console.info(`No stacks to destroy. Skipping destroy.`)
         process.exit(0)
