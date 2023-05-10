@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from 'uuid'
-import { Contract, findContract } from "./findContract";
+import { Contract } from "./contractType";
+import { findContract } from "./findContract";
 
 // Unlock the given contract
 // * copy form data

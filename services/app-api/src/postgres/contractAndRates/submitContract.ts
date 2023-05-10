@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from 'uuid'
-import { Contract, findContract } from "./findContract";
+import { Contract } from "./contractType";
+import { findContract } from "./findContract";
 
 // Update the given revision
 // * invalidate relationships of previous revision

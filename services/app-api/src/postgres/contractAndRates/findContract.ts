@@ -1,34 +1,6 @@
 import { PrismaClient, UpdateInfoTable } from "@prisma/client"
 import { UpdateInfoType } from "../../domain-models"
-
-interface Contract {
-    id: string
-    revisions: ContractRevision[]
-}
-
-// there needs to be a new contract revision after every set, even though the revision is the same?
-
-// Revisions have descriptions by/when/reason ... maybe this pulls the rate revision if that made the change?
-interface ContractRevision {
-    // by/when/reason
-    // contractFormData // this can be the same on different ones
-    // rateRevisions, rateFormDatas?
-    id: string
-    unlockInfo?: UpdateInfoType,
-    submitInfo?: UpdateInfoType,
-
-    contractFormData: string
-    rateRevisions: RateRevision[]
-}
-
-interface RateRevision {
-    id: string
-    unlockInfo?: UpdateInfoType,
-    submitInfo?: UpdateInfoType,
-
-    revisionFormData: string
-    contractRevisions?: ContractRevision[]
-}
+import { Contract, ContractRevision } from "./contractType"
 
 
 function convertUpdateInfo(info: UpdateInfoTable | null ): UpdateInfoType | undefined {
@@ -193,12 +165,6 @@ async function findContract(client: PrismaClient, contractID: string): Promise<C
 
     return new Error('no nothing')
 
-}
-
-export type {
-    Contract,
-    ContractRevision,
-    RateRevision,
 }
 
 export {

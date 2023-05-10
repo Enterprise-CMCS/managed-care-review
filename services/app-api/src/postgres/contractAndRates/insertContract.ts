@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from 'uuid'
-import { Contract } from "./findContract";
+import { Contract } from "./contractType";
 
 // creates a new contract, with a new revision
 async function insertDraftContract(

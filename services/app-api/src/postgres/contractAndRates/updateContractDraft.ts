@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { Contract, findContract } from "./findContract";
+import { Contract } from "./contractType";
+import { findContract } from "./findContract";
 
 // Update the given draft
 // * can change the set of draftRates
