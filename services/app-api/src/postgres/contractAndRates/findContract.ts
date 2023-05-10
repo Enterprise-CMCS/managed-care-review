@@ -141,7 +141,7 @@ async function findContract(client: PrismaClient, contractID: string): Promise<C
                     rateRevisions: [...lastRevisions].map( (rt) => {
                         return {
                             id: rt.rateRevisionID,
-                            revisionFormData: rt.rateRevision.rateCertURL || 'something blue',
+                            revisionFormData: rt.rateRevision.name,
                         }
                     })
                 }

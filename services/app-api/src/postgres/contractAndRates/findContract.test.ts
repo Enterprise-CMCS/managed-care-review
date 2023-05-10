@@ -1,15 +1,24 @@
 import { sharedTestPrismaClient } from "../../testHelpers/storeHelpers"
 import { v4 as uuidv4 } from 'uuid'
 import { findContract } from "./findContract"
-import { createRateRevision } from "./createRateRevision"
 import { submitContract } from "./submitContract"
 import { submitRateRevision } from "./submitRateRevision"
 import { insertDraftContract } from "./insertContract"
 import { unlockContract } from "./unlockContract"
 import { updateContractDraft } from "./updateContractDraft"
+import { insertDraftRate } from "./insertRate"
+import { updateRateDraft } from "./updateRateDraft"
+import { unlockRate } from "./unlockRate"
 
 async function delay(ms: number) {
     return new Promise( resolve => setTimeout(resolve, ms) );
+}
+
+function must<T>(maybeErr: T | Error): T {
+    if (maybeErr instanceof Error) {
+        throw maybeErr
+    }
+    return maybeErr
 }
 
 describe('findContract', () => {
@@ -53,65 +62,36 @@ describe('findContract', () => {
         console.log('PAST FIRST CONTRACT')
 
         // Add 3 rates 1, 2, 3
-        const rate1 = await client.rateTable.create({ data: { id: uuidv4()}})
-        const rate1_0Draft = await createRateRevision(client, rate1.id, 'someurle.en', [contractA.id])
-        if (rate1_0Draft instanceof Error) {
-            throw rate1_0Draft
-        }
-        const rate1_0 = await submitRateRevision(client, rate1_0Draft.id, { updatedAt: new Date(), updatedBy: stateUser.id, updatedReason: 'Rate Submit' })
-        if (rate1_0 instanceof Error) {
-            throw rate1_0
-        }
+        const rate1 = must(await insertDraftRate(client, 'someurle.en'))
+        must(await updateRateDraft(client, rate1.id, 'someurle.en', [contractA.id]))
+        must(await submitRateRevision(client, rate1.id, stateUser.id, 'Rate Submit'))
+        
+        await delay(100)
+
+        const rate2 = must(await insertDraftRate(client, 'twopointo'))
+        must(await updateRateDraft(client, rate2.id, 'twopointo', [contractA.id]))
+        must(await submitRateRevision(client, rate2.id, stateUser.id, 'RateSubmit 2'))
 
         await delay(100)
 
-        const rate2 = await client.rateTable.create({ data: { id: uuidv4()}})
-        const rate2_0Draft = await createRateRevision(client, rate2.id, 'twopointo', [contractA.id])
-        if (rate2_0Draft instanceof Error) {
-            throw rate2_0Draft
-        }
-        const rate2_0 = await submitRateRevision(client, rate2_0Draft.id, { updatedAt: new Date(), updatedBy: stateUser.id, updatedReason: 'RateSubmit 2' })
-        if (rate2_0 instanceof Error) {
-            throw rate2_0
-        }
+        const rate3 = must(await insertDraftRate(client, 'threepointo'))
+        must(await updateRateDraft(client, rate3.id, 'threepointo', [contractA.id]))
+        must(await submitRateRevision(client, rate3.id, stateUser.id, '3.0 create'))
+
 
         await delay(100)
 
-        const rate3 = await client.rateTable.create({ data: { id: uuidv4()}})
-        const rate3_0Draft = await createRateRevision(client, rate3.id, 'threepointo', [contractA.id])
-        if (rate3_0Draft instanceof Error) {
-            throw rate3_0Draft
-        }
-        const rate3_0 = await submitRateRevision(client, rate3_0Draft.id, { updatedAt: new Date(), updatedBy: stateUser.id, updatedReason: '3.0 create' })
-        if (rate3_0 instanceof Error) {
-            throw rate3_0
-        }
-
-        console.log('RATE REV 3', rate3_0)
-        // Remove 1 rate (2)
-
-        await delay(100)
-
-        const rate2_1Draft = await createRateRevision(client, rate2.id, 'twopointone', [])
-        if (rate2_1Draft instanceof Error) {
-            throw rate2_1Draft
-        }
-        const rate2_1 = await submitRateRevision(client, rate2_1Draft.id, { updatedAt: new Date(), updatedBy: stateUser.id, updatedReason: '2.1 remove' })
-        if (rate2_1 instanceof Error) {
-            throw rate2_1
-        }
+        // remove the connection from rate 2
+        must(await unlockRate(client, rate2.id, cmsUser.id, 'unlock for 2.1 remove'))
+        must(await updateRateDraft(client, rate2.id, 'twopointone', []))
+        must(await submitRateRevision(client, rate2.id, stateUser.id, '2.1 remove'))
 
         await delay(100)
 
         // update rate 1 to have a new version, should make one new rev.
-        const rate1_1Draft = await createRateRevision(client, rate1.id, 'onepointone', [contractA.id])
-        if (rate1_1Draft instanceof Error) {
-            throw rate1_1Draft
-        }
-        const rate1_1 = await submitRateRevision(client, rate1_1Draft.id, { updatedAt: new Date(), updatedBy: stateUser.id, updatedReason: '1.1 new name' })
-        if (rate1_1 instanceof Error) {
-            throw rate1_1
-        }
+        must(await unlockRate(client, rate1.id, cmsUser.id, 'unlock for 1.1'))
+        must(await updateRateDraft(client, rate1.id, 'onepointone', [contractA.id]))
+        must(await submitRateRevision(client, rate1.id, stateUser.id, '1.1 new name'))
 
         await delay(100)
 
@@ -207,68 +187,49 @@ describe('findContract', () => {
             }
         })
 
-        // Add 3 rates 1, 2
-        const rate1 = await client.rateTable.create({ data: { id: uuidv4()}})
-        const rate1_0Draft = await createRateRevision(client, rate1.id, 'onepoint0', [])
-        if (rate1_0Draft instanceof Error) {
-            throw rate1_0Draft
-        }
-        const rate1_0 = await submitRateRevision(client, rate1_0Draft.id, { updatedAt: new Date(), updatedBy: stateUser.id, updatedReason: 'Rate Submit' })
-        if (rate1_0 instanceof Error) {
-            throw rate1_0
-        }
+        // Add 2 rates 1, 2
+        const rate1 = must(await insertDraftRate(client, 'onepoint0'))
+        must(await updateRateDraft(client, rate1.id, 'onepoint0', []))
+        must(await submitRateRevision(client, rate1.id, stateUser.id, 'Rate Submit'))
+
 
         await delay(100)
 
-        const rate2 = await client.rateTable.create({ data: { id: uuidv4()}})
-        const rate2_0Draft = await createRateRevision(client, rate2.id, 'twopointo', [])
-        if (rate2_0Draft instanceof Error) {
-            throw rate2_0Draft
-        }
-        const rate2_0 = await submitRateRevision(client, rate2_0Draft.id, { updatedAt: new Date(), updatedBy: stateUser.id, updatedReason: 'RateSubmit 2' })
-        if (rate2_0 instanceof Error) {
-            throw rate2_0
-        }
+        const rate2 = must(await insertDraftRate(client, 'twopointo'))
+        must(await updateRateDraft(client, rate2.id, 'twopointo', []))
+        must(await submitRateRevision(client, rate2.id, stateUser.id, 'Rate Submit 2'))
 
         await delay(100)
 
-        const contractADraft = await insertDraftContract(client, 'one contract')
-        if (contractADraft instanceof Error) {
-            throw contractADraft
-        }
-
-        const updatedADraft = await updateContractDraft(client, contractADraft.id, 'one contract', [rate1.id, rate2.id])
-
-        const contractA = await submitContract(client, contractADraft.id, stateUser.id, 'initial submit' )
-        if (contractA instanceof Error) {
-            throw contractA
-        }
+        // add a contract that has both of them. 
+        const contractA = must(await insertDraftContract(client, 'one contract'))
+        must(await updateContractDraft(client, contractA.id, 'one contract', [rate1.id, rate2.id]))
+        must(await submitContract(client, contractA.id, stateUser.id, 'initial submit' ))
 
         await delay(100)
 
+        // Unlock A, but don't resubmit it yet. 
         const unlockedA = await unlockContract(client, contractA.id, cmsUser.id, 'unlock A Open')
         if (unlockedA instanceof Error) {
             throw unlockedA
         }
 
         await delay(100)
-        // submit second rate rev
-        const rate2_1Draft = await createRateRevision(client, rate2.id, 'twopointone', [contractA.id])
-        if (rate2_1Draft instanceof Error) {
-            throw rate2_1Draft
-        }
-        const rate2_1 = await submitRateRevision(client, rate2_1Draft.id, { updatedAt: new Date(), updatedBy: stateUser.id, updatedReason: '2.1 update' })
-        if (rate2_1 instanceof Error) {
-            throw rate2_1
-        }
+        
+        // unlock and submit second rate rev
+        must(await unlockRate(client, rate2.id, cmsUser.id, 'unlock for 2.1'))
+        must(await updateRateDraft(client, rate2.id, 'twopointone', [contractA.id]))
+        must(await submitRateRevision(client, rate2.id, stateUser.id, '2.1 update'))
+
 
         await delay(100)
-        // submit A1, should show up as a single new rev.
+        // submit A1, now, should show up as a single new rev and have the latest rates
         const contractA_1 = await submitContract(client, contractA.id, stateUser.id, 'third submit' )
         if (contractA_1 instanceof Error) {
             throw contractA_1
         }
 
+        // attempt a second submission, should result in an error.
         const contractA_1_Error = await submitContract(client, contractA.id, stateUser.id, 'third submit' )
         if (!(contractA_1_Error instanceof Error)) {
             throw new Error('Should be impossible to submit twice in a row.')
@@ -306,6 +267,6 @@ describe('findContract', () => {
 
     // go from the other direction. find rate 
 
-    // can't submit an already submitted rev.
+    // get draft?
 
 })
