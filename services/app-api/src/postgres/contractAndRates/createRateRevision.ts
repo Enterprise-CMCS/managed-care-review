@@ -1,7 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { v4 as uuidv4 } from 'uuid'
 import { UpdateInfoType } from "../../domain-models";
-import { RateRevision } from "./findContract";
+import { RateRevision } from "./rateType";
 
 async function createRateRevision(
                                                                 client: PrismaClient, 
