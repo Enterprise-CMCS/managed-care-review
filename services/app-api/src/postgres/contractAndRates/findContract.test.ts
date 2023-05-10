@@ -14,6 +14,7 @@ async function delay(ms: number) {
     return new Promise( resolve => setTimeout(resolve, ms) );
 }
 
+// For use in TESTS only. Throws a returned error
 function must<T>(maybeErr: T | Error): T {
     if (maybeErr instanceof Error) {
         throw maybeErr
@@ -48,20 +49,11 @@ describe('findContract', () => {
             }
         })
 
-        const contractADraft = await insertDraftContract(client, 'one contract')
-        if (contractADraft instanceof Error) {
-            throw contractADraft
-        }
-        const contractA = await submitContract(client, contractADraft.id, stateUser.id, 'initial submit' )
-        if (contractA instanceof Error) {
-            throw contractA
-        }
+        // setup a single test contract
+        const contractA = must(await insertDraftContract(client, 'one contract'))
+        must(await submitContract(client, contractA.id, stateUser.id, 'initial submit' ))
 
-        console.log('first contact', contractA)
-
-        console.log('PAST FIRST CONTRACT')
-
-        // Add 3 rates 1, 2, 3
+        // Add 3 rates 1, 2, 3 pointing to contract A
         const rate1 = must(await insertDraftRate(client, 'someurle.en'))
         must(await updateRateDraft(client, rate1.id, 'someurle.en', [contractA.id]))
         must(await submitRateRevision(client, rate1.id, stateUser.id, 'Rate Submit'))
@@ -96,34 +88,16 @@ describe('findContract', () => {
         await delay(100)
 
         // Make a new Contract Revision, should show up as a single new rev with all the old info
-        const contractA_1Draft = await unlockContract(client, contractA.id, cmsUser.id, 'unlocking A.0')
-        if (contractA_1Draft instanceof Error) {
-            throw contractA_1Draft
-        }
-
-        const contractA_1 = await submitContract(client, contractA.id, stateUser.id, 'Submitting A.1')
-        if (contractA_1 instanceof Error) {
-            throw contractA_1
-        }
+        must(await unlockContract(client, contractA.id, cmsUser.id, 'unlocking A.0'))
+        must(await submitContract(client, contractA.id, stateUser.id, 'Submitting A.1'))
 
         // Make a new Contract Revision, changing the connections should show up as a single new rev.
-        const contractA_2Draft = await unlockContract(client, contractA.id, cmsUser.id, 'unlocking A.1')
-        if (contractA_2Draft instanceof Error) {
-            throw contractA_2Draft
-        }
+        must(await unlockContract(client, contractA.id, cmsUser.id, 'unlocking A.1'))
+        must(await updateContractDraft(client, contractA.id, 'a.2 body', [rate3.id]))
+        must(await submitContract(client, contractA.id, stateUser.id, 'Submitting A.2'))
 
-        const updatedA_2Draft = await updateContractDraft(client, contractA.id, 'a.2 body', [rate3.id])
-        if (updatedA_2Draft instanceof Error) {
-            throw updatedA_2Draft
-        }
-
-        const contractA_2 = await submitContract(client, contractA.id, stateUser.id, 'Submitting A.2')
-        if (contractA_2 instanceof Error) {
-            throw contractA_2
-        }
-
+        // Now, find that contract and assert the history is what we expected
         const resultingContract = await findContract(client, contractA.id)
-
         if (resultingContract instanceof Error) {
             throw resultingContract
         }
@@ -209,10 +183,7 @@ describe('findContract', () => {
         await delay(100)
 
         // Unlock A, but don't resubmit it yet. 
-        const unlockedA = await unlockContract(client, contractA.id, cmsUser.id, 'unlock A Open')
-        if (unlockedA instanceof Error) {
-            throw unlockedA
-        }
+        must(await unlockContract(client, contractA.id, cmsUser.id, 'unlock A Open'))
 
         await delay(100)
         
@@ -224,10 +195,7 @@ describe('findContract', () => {
 
         await delay(100)
         // submit A1, now, should show up as a single new rev and have the latest rates
-        const contractA_1 = await submitContract(client, contractA.id, stateUser.id, 'third submit' )
-        if (contractA_1 instanceof Error) {
-            throw contractA_1
-        }
+        must (await submitContract(client, contractA.id, stateUser.id, 'third submit' ))
 
         // attempt a second submission, should result in an error.
         const contractA_1_Error = await submitContract(client, contractA.id, stateUser.id, 'third submit' )
