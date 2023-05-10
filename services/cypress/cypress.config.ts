@@ -8,7 +8,7 @@ const defineConfig = ({
         fixturesFolder: 'services/cypress/fixtures',
         specPattern: 'services/cypress/integration/**/*.spec.ts',
         screenshotsFolder: 'services/cypress/screenshots',
-        videosFolder: 'videos',
+        videosFolder: 'services/cypress/videos',
         viewportHeight: 1080,
         viewportWidth: 1440,
         setupNodeEvents(on, config) {

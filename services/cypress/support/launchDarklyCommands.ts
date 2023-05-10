@@ -31,7 +31,7 @@ Cypress.Commands.add(
 
         //Writing feature flags and values to store.
         cy.writeFile(
-            'cypress/fixtures/stores/featureFlagStore.json',
+            'fixtures/stores/featureFlagStore.json',
             JSON.stringify(featureFlagObject)
         )
 
@@ -87,7 +87,7 @@ Cypress.Commands.add('stubFeatureFlags', () => {
 Cypress.Commands.add(
     'getFeatureFlagStore',
     (featureFlags?: FeatureFlagLDConstant[]) => {
-        cy.readFile('cypress/fixtures/stores/featureFlagStore.json').then(
+        cy.readFile('fixtures/stores/featureFlagStore.json').then(
             (
                 store: Record<
                     FeatureFlagLDConstant,
