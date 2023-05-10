@@ -120,21 +120,6 @@ async function getStacksFromStage(
         })
     )
 
-    /*
-    // type guard
-    const isError = (err: any): err is Error => {
-        if (err instanceof Error) {
-            return true
-        }
-        return false
-    }
-
-    //see if we have any errors returned
-    const errors = stacks.filter(isError)
-    if (errors.length > 1) {
-        return errors
-    }
-    */
     return stacks.flat() as string[]
 }
 
