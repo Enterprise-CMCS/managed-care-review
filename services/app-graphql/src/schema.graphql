@@ -525,22 +525,6 @@ type HealthPlanPackage {
     questions: IndexQuestionsPayload
 }
 
-enum FederalAuthorities {
-    STATE_PLAN
-    WAIVER_1915B
-    WAIVER_1115
-    VOLUNTARY
-    BENCHMARK
-    TITLE_XXI
-}
-
-type ModifiedProvisions {
-    modifiedGeoAreaServed: Boolean
-    modifiedRiskSharingStrategy: Boolean
-    modifiedPassThroughPayments: Boolean
-}
-
-
 """
 UpdateInformation is used for the unlockInfo and the submitInfo on HealthPlanRevision.
 It tracks who, when, and why the submission or unlock was performed.
