@@ -13,7 +13,7 @@ async function updateRateDraft(
 
     try {
         // Given all the Rates associated with this draft, find the most recent submitted 
-        // rateRevision to attach to this contract on submit.
+        // rateRevision to update.
         const currentRev = await client.rateRevisionTable.findFirst({
             where: {
                 rateID: rateID,

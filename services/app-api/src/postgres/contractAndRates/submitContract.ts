@@ -84,6 +84,9 @@ async function submitContract(
                 NOT: {
                     id: updated.id,
                 }
+            },
+            orderBy: {
+                createdAt: 'desc',
             }
         })
 

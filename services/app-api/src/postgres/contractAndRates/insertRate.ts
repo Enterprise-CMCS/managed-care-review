@@ -49,10 +49,10 @@ async function insertDraftRate(
         }
 
     } catch (err) {
-        console.log("CONTRACT PRISMA ERR", err)
+        console.error("CONTRACT PRISMA ERR", err)
+        return err
     }
 
-    return new Error('nope')
 }
 
 export {
