@@ -94,6 +94,9 @@ ContractRevisionTable {
    DateTime createdAt
    DateTime updatedAt
 
+   String unlockInfoID
+   String submitInfoID
+
    String name
 }
 
@@ -105,6 +108,9 @@ RateRevisionTable {
    String rateID
    DateTime createdAt
    DateTime updatedAt
+
+   String unlockInfoID
+   String submitInfoID
 
    String name
 }
@@ -129,13 +135,12 @@ UpdateInfoTable {
 }
 
 ContractTable ||--|{ ContractRevisionTable : contract
+ContractTable ||--|{ RateRevisionTable: draftContracts
 RateTable ||--|{ RateRevisionTable : rate
-
 ContractRevisionTable }|--|{ RateRevisionsOnContractRevisionsTable : contractRevisions
+RateTable ||--|{ ContractRevisionTable: draftRates
 RateRevisionTable }|--|{ RateRevisionsOnContractRevisionsTable : rateRevisions
 
-ContractTable ||--|{ RateRevisionTable: draftContracts
-RateTable ||--|{ ContractRevisionTable: draftRates
 
 ContractRevisionTable ||--|{ UpdateInfoTable: unlock-submit
 RateRevisionTable ||--|{ UpdateInfoTable: unlock-submit
