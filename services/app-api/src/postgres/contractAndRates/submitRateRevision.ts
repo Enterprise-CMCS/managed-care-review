@@ -84,6 +84,9 @@ async function submitRateRevision(
                     id: updated.id,
                 }
             },
+            orderBy: {
+                createdAt: 'desc',
+            },
             include: {
                 contractRevisions: true
             }
