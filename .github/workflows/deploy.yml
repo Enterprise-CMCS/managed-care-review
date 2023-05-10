@@ -524,7 +524,9 @@ jobs:
     steps:
       - name: Export Workflow Trace
         uses: inception-health/otel-export-trace-action@latest
+        env:
+          NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}}
         with:
-          otlpEndpoint: https://gov-otlp.nr-data.net:443/
-          otlpHeaders: 'api-key: ${{ secrets.NR_LICENSE_KEY }}'
+          otlpEndpoint: https://gov-otlp.nr-data.net:4317
+          otlpHeaders: 'api-key: $NR_LICENSE_KEY'
           githubToken: ${{ secrets.GITHUB_TOKEN }}
