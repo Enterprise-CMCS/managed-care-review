@@ -156,7 +156,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
                         healthPlanFormData: base64Draft,
                     },
                 },
-                fetchPolicy: 'network-only',
             })
             const updatedSubmission: HealthPlanPackage | undefined =
                 updateResult?.data?.updateHealthPlanFormData.pkg
