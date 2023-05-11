@@ -26,9 +26,12 @@ module.exports = {
         hints: false,
     },
     externals: [
+        nodeExternals(),
         nodeExternals({
             modulesDir: path.resolve(__dirname, '../../node_modules'),
         }),
+        'prisma',
+        '@prisma/client',
     ],
     devtool: 'source-map',
     resolve: {
