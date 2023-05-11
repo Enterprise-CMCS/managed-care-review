@@ -409,7 +409,7 @@ jobs:
         id: cypress
         uses: cypress-io/github-action@v5
         with:
-          config: baseUrl=${{ needs.finishing-prep.outputs.application-endpoint }},supportFile=services/cypress/support/index.ts,fixturesFolder=services/cypress/fixtures,specPattern=services/cypress/integration/**/*.spec.ts,screenshotsFolder=services/cypress/screenshots,videosFolder=services/cypress/videos
+          config: baseUrl=${{ needs.finishing-prep.outputs.application-endpoint }}
           record: true
           parallel: true
           browser: chrome
@@ -421,6 +421,11 @@ jobs:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
+          CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
+          CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures
+          CYPRESS_SPEC_PATTERN: services/cypress/integration/**/*.spec.ts
+          CYPRESS_SCREEN_SHOTS_FOLDER: services/cypress/screenshots
+          CYPRESS_VIDEOS_FOLDER: services/cypress/videos
 
       - name: Upload cypress screenshots
         uses: actions/upload-artifact@v3
