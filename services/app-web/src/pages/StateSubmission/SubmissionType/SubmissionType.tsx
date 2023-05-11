@@ -340,7 +340,7 @@ export const SubmissionType = ({
                                         className={styles.radioGroup}
                                         role="radiogroup"
                                         aria-required
-                                        legend="Which populations does this contact action cover?"
+                                        legend="Which populations does this contract action cover?"
                                     >
                                         {showFieldErrors(
                                             errors.populationCovered

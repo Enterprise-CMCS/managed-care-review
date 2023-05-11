@@ -41,6 +41,8 @@ import {
     FederalAuthority,
     allowedProvisionKeysForCHIP,
     isCHIPProvision,
+    federalAuthorityKeysForCHIP,
+    federalAuthorityKeys,
 } from '../../../common-code/healthPlanFormDataType'
 import {
     ManagedCareEntityRecord,
@@ -227,6 +229,8 @@ export const ContractDetails = ({
     const applicableProvisions = isCHIPOnly
         ? allowedProvisionKeysForCHIP
         : modifiedProvisionKeys
+    const applicableFederalAuthorities = isCHIPOnly? 
+    federalAuthorityKeysForCHIP : federalAuthorityKeys;
 
     const contractDetailsInitialValues: ContractDetailsFormValues = {
         contractExecutionStatus:
@@ -769,54 +773,18 @@ export const ContractDetails = ({
                                                     {errors.federalAuthorities}
                                                 </PoliteErrorMessage>
                                             )}
-                                            <FieldCheckbox
-                                                id="1932aStatePlanAuthority"
-                                                name="federalAuthorities"
-                                                label={
-                                                    FederalAuthorityRecord.STATE_PLAN
-                                                }
-                                                value={'STATE_PLAN'}
-                                            />
-                                            <FieldCheckbox
-                                                id="1915bWaiverAuthority"
-                                                name="federalAuthorities"
-                                                label={
-                                                    FederalAuthorityRecord.WAIVER_1915B
-                                                }
-                                                value={'WAIVER_1915B'}
-                                            />
-                                            <FieldCheckbox
-                                                id="1115WaiverAuthority"
-                                                name="federalAuthorities"
-                                                label={
-                                                    FederalAuthorityRecord.WAIVER_1115
-                                                }
-                                                value={'WAIVER_1115'}
-                                            />
-                                            <FieldCheckbox
-                                                id="1915aVoluntaryAuthority"
-                                                name="federalAuthorities"
-                                                label={
-                                                    FederalAuthorityRecord.VOLUNTARY
-                                                }
-                                                value={'VOLUNTARY'}
-                                            />
-                                            <FieldCheckbox
-                                                id="1937BenchmarkAuthority"
-                                                name="federalAuthorities"
-                                                label={
-                                                    FederalAuthorityRecord.BENCHMARK
-                                                }
-                                                value={'BENCHMARK'}
-                                            />
-                                            <FieldCheckbox
-                                                id="titleXXISeparateChipStatePlanAuthority"
-                                                name="federalAuthorities"
-                                                label={
-                                                    FederalAuthorityRecord.TITLE_XXI
-                                                }
-                                                value={'TITLE_XXI'}
-                                            />
+                                            {applicableFederalAuthorities.map((federalAuthority) => (
+                                                    <FieldCheckbox
+                                                    id={federalAuthority.toLowerCase()}
+                                                    key={federalAuthority.toLowerCase()}
+                                                    name="federalAuthorities"
+                                                    label={
+                                                        FederalAuthorityRecord[federalAuthority]
+                                                    }
+                                                    value={federalAuthority}
+                                                />
+                                            ))}
+                                        
                                         </Fieldset>
                                     </FormGroup>
                                     {isContractAmendment && (

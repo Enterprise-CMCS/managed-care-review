@@ -42,12 +42,11 @@ export type FileUploadProps = {
     innerInputRef?: (el: HTMLInputElement) => void
 } & JSX.IntrinsicElements['input']
 
-/*  FileUpload handles async file upload to S3 and displays inline errors per file.
-    Tracks files as they are uploaded. Once files are no longer processing passes to parent with onFileItemsUpdate.
+/*  
+    FileUpload handles async file upload to S3 and displays inline errors per file.
+    Tracks files as they are uploaded. Once files are no longer processing passes data back up to parent with onFileItemsUpdate.
 
-    Note: This component uses a ref to access files in the input. It also clears its own value after each change.
-    This is not standard behavior for an HTML input. However, rendering quickly allows us to take over handling of files
-    for upload and display in our custom FileItemList.
+    For more detail on this component and the related sub-components see docs/technical-design/file-upload.md
 */
 
 export const FileUpload = ({
