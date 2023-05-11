@@ -231,7 +231,7 @@ jobs:
         with:
           install: false
           config: baseUrl=https://mc-review.onemac.cms.gov
-          spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
+          spec: services/cypress/integration/promoteWorkflow/promote.spec.ts
           record: true
           parallel: false
           browser: chrome
@@ -247,7 +247,7 @@ jobs:
         if: failure() && steps.cypress.outcome == 'failure'
         with:
           name: cypress-videos
-          path: tests/cypress/videos
+          path: services/cypress/videos
 
   slack:
     name: Slack notification on failure
