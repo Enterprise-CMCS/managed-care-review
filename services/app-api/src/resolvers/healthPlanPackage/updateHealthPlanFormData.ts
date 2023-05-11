@@ -3,6 +3,7 @@ import {
     UnlockedHealthPlanFormDataType,
     convertRateSupportingDocs,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { debounce } from '../debounce'
 import {
     base64ToDomain,
     toDomain,
@@ -21,7 +22,16 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 
-export function updateHealthPlanFormDataResolver(
+export function updateHealthPlanFormDataResolver(store: Store) {
+    const debouncedUpdateHealthPlanFormDataResolverImplementation = debounce(
+        updateHealthPlanFormDataResolverImplementation,
+        200
+    )
+
+    return debouncedUpdateHealthPlanFormDataResolverImplementation(store)
+}
+
+function updateHealthPlanFormDataResolverImplementation(
     store: Store
 ): MutationResolvers['updateHealthPlanFormData'] {
     return async (_parent, { input }, context) => {

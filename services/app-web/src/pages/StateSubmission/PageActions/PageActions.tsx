@@ -24,7 +24,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
         saveAsDraftOnClick,
         continueOnClick,
         disableContinue = false,
-        actionInProgress = false,
+        actionInProgress,
         pageVariant,
     } = props
     const isFirstPage = pageVariant === 'FIRST'
@@ -52,7 +52,7 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                 Save as draft
             </ActionButton>
         )
-
+    console.log('actionInProgress', actionInProgress)
     return (
         <PageActionsContainer left={leftElement}>
             <ButtonGroup type="default">
