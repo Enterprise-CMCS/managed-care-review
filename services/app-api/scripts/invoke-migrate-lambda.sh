@@ -7,7 +7,6 @@ lambda_version="${2:-\$LATEST}"
 cli_read_timeout=240
 
 if (set -x ; aws lambda invoke --qualifier "$lambda_version" --cli-read-timeout "$cli_read_timeout" --function "$function_name" lambda_response.json) ; then
-  echo "remove me, gha broken"
   cat lambda_response.json
   exitCode="$(jq '.statusCode' < lambda_response.json)"
   if [[ "$exitCode" != 200 ]] ; then
