@@ -360,6 +360,7 @@ describe('submitHealthPlanPackage', () => {
         const draft = await createAndUpdateTestHealthPlanPackage(server, {
             contractType: 'AMENDMENT',
             populationCovered: 'CHIP',
+            federalAuthorities: ['TITLE_XXI'],
             contractAmendmentInfo: {
                 modifiedProvisions: {
                     modifiedBenefitsProvided: true,
@@ -406,6 +407,37 @@ describe('submitHealthPlanPackage', () => {
                         modifiedNonRiskPaymentArrangements: false,
                     },
                 },
+            })
+        )
+    })
+
+    it('removes any invalid federal authorities from CHIP submission and submits successfully', async () => {
+        const server = await constructTestPostgresServer()
+
+        //Create and update a submission as if the user edited and changed population covered after filling out yes/nos
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {
+            populationCovered: 'CHIP',
+            federalAuthorities: [
+                'STATE_PLAN',
+                'WAIVER_1915B',
+                'WAIVER_1115',
+                'VOLUNTARY',
+                'BENCHMARK',
+                'TITLE_XXI',
+            ],
+        })
+
+        const submitResult = await submitTestHealthPlanPackage(server, draft.id)
+
+        const currentRevision = submitResult.revisions[0].node
+        const packageData = base64ToDomain(currentRevision.formDataProto)
+
+        if (packageData instanceof Error) {
+            throw new Error(packageData.message)
+        }
+        expect(packageData).toEqual(
+            expect.objectContaining({
+                federalAuthorities: ['WAIVER_1115', 'TITLE_XXI'],
             })
         )
     })

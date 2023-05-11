@@ -37,7 +37,7 @@ import { GraphQLError } from 'graphql'
 import { FeatureFlagSettings } from 'app-web/src/common-code/featureFlags'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
-type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
+type SubmissionErrorCode = (typeof SubmissionErrorCodes)[number] // iterable union type
 
 type SubmissionError = {
     code: SubmissionErrorCode
@@ -278,11 +278,8 @@ export function submitHealthPlanPackageResolver(
             Object.assign(draftResult, removeRatesData(draftResult))
         }
 
-        // CHIP submissions should not contain any provision relevant to other populations
-        if (
-            draftResult.contractType === 'AMENDMENT' &&
-            draftResult.populationCovered === 'CHIP'
-        ) {
+        // CHIP submissions should not contain any provision or authority relevant to other populations
+        if (draftResult.populationCovered === 'CHIP') {
             Object.assign(draftResult, removeNonCHIPData(draftResult))
         }
 
