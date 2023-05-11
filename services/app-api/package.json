@@ -85,7 +85,7 @@
         "lint-staged": "^13.0.1",
         "prettier": "^2.4.1",
         "prisma": "4.6.1",
-        "serverless": "^3.27.0",
+        "serverless": "^3.26.0",
         "serverless-associate-waf": "^1.2.1",
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
         "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",

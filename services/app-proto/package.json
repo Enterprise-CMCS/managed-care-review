@@ -25,6 +25,6 @@
     },
     "devDependencies": {
         "lint-staged": "^13.0.1",
-        "serverless": "^3.27.0"
+        "serverless": "^3.26.0"
     }
 }
