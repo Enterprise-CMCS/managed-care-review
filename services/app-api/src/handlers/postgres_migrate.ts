@@ -1,4 +1,4 @@
-import { Handler, Context } from 'aws-lambda'
+import { Handler, Context, APIGatewayProxyResultV2 } from 'aws-lambda'
 import { RDSClient, CreateDBClusterSnapshotCommand } from '@aws-sdk/client-rds'
 import { spawnSync } from 'child_process'
 import { getDBClusterID, getPostgresURL } from './configuration'
@@ -8,7 +8,7 @@ export const main: Handler = async (
     event,
     context: Context,
     callback
-): Promise<string | Error> => {
+): Promise<APIGatewayProxyResultV2 | Error> => {
     // setup otel tracing
     const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
     if (!otelCollectorURL || otelCollectorURL === '') {
@@ -186,5 +186,13 @@ export const main: Handler = async (
         return error
     }
 
-    return 'Successfully migrated Postgres'
+    const success: APIGatewayProxyResultV2 = {
+        statusCode: 200,
+        body: JSON.stringify('successfully migrated postgres'),
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Credentials': true,
+        },
+    }
+    return success
 }
