@@ -8,10 +8,9 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // setup otel tracing
     const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
     if (!otelCollectorURL || otelCollectorURL === '') {
-        const error = new Error(
+        const errMsg =
             'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
-        )
-        throw error
+        return fmtMigrateError(errMsg)
     }
     const serviceName = 'postgres-migrate'
     initTracer(serviceName, otelCollectorURL)
@@ -24,25 +23,22 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     const stage = process.env.stage ?? 'local'
 
     if (!dbURL) {
-        const error = new Error(
-            'Init Error: DATABASE_URL is required to run app-api'
-        )
-        recordException(error, serviceName, 'dbURL')
-        return fmtMigrateError(error)
+        const errMsg = 'Init Error: DATABASE_URL is required to run app-api'
+        recordException(errMsg, serviceName, 'dbURL')
+        return fmtMigrateError(errMsg)
     }
 
     if (!secretsManagerSecret) {
-        const error = new Error(
+        const errMsg =
             'Init Error: SECRETS_MANAGER_SECRET is required to run postgres migrate'
-        )
-        recordException(error, serviceName, 'secretsManagerSecret')
-        return fmtMigrateError(error)
+        recordException(errMsg, serviceName, 'secretsManagerSecret')
+        return fmtMigrateError(errMsg)
     }
 
     if (!stage) {
-        const error = new Error('Init Error: STAGE not set in environment')
-        recordException(error, serviceName, 'stage')
-        return fmtMigrateError(error)
+        const errMsg = 'Init Error: STAGE not set in environment'
+        recordException(errMsg, serviceName, 'stage')
+        return fmtMigrateError(errMsg)
     }
 
     const dbConnResult = await getPostgresURL(dbURL, secretsManagerSecret)
@@ -85,16 +81,14 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
             prismaResult.stdout && prismaResult.stdout.toString()
         )
         if (prismaResult.status !== 0) {
-            const error = new Error(
-                `Could not run prisma migrate deploy: ${prismaResult.stderr.toString()}`
-            )
-            recordException(error, serviceName, 'prisma migrate deploy')
-            return fmtMigrateError(error)
+            const errMsg = `Could not run prisma migrate deploy: ${prismaResult.stderr.toString()}`
+            recordException(errMsg, serviceName, 'prisma migrate deploy')
+            return fmtMigrateError(errMsg)
         }
     } catch (err) {
-        const error = new Error(`Could not migrate the database schema: ${err}`)
-        recordException(error, serviceName, 'prisma migrate deploy')
-        return fmtMigrateError(error)
+        const errMsg = `Could not migrate the database schema: ${err}`
+        recordException(errMsg, serviceName, 'prisma migrate deploy')
+        return fmtMigrateError(errMsg)
     }
 
     // take a snapshot of the DB before running data migration.
@@ -102,11 +96,9 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     if (['dev', 'val', 'prod', 'main'].includes(stage)) {
         const dbClusterId = await getDBClusterID(secretsManagerSecret)
         if (dbClusterId instanceof Error) {
-            const error = new Error(
-                `Init Error: failed to get db cluster ID: ${dbClusterId}`
-            )
-            recordException(error, serviceName, 'getDBClusterID')
-            return fmtMigrateError(error)
+            const errMsg = `Init Error: failed to get db cluster ID: ${dbClusterId}`
+            recordException(errMsg, serviceName, 'getDBClusterID')
+            return fmtMigrateError(errMsg)
         }
 
         const snapshotID = stage + '-' + Date.now()
@@ -119,15 +111,13 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
             const command = new CreateDBClusterSnapshotCommand(params)
             await rds.send(command)
         } catch (err) {
-            const error = new Error(
-                `Could not take RDS snapshot before migrating: ${err}`
-            )
+            const errMsg = `Could not take RDS snapshot before migrating: ${err}`
             recordException(
-                error,
+                errMsg,
                 serviceName,
                 'CreateDBClusterSnapshotCommand'
             )
-            return fmtMigrateError(error)
+            return fmtMigrateError(errMsg)
         }
     }
 
@@ -158,18 +148,14 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
             migrateProtosResult.stdout && migrateProtosResult.stdout.toString()
         )
         if (migrateProtosResult.status !== 0) {
-            const error = new Error(
-                `Could not run migrate_protos db: ${migrateProtosResult.stderr.toString()}`
-            )
-            recordException(error, serviceName, 'migrate_protos db')
-            return fmtMigrateError(error)
+            const errMsg = `Could not run migrate_protos db: ${migrateProtosResult.stderr.toString()}`
+            recordException(errMsg, serviceName, 'migrate_protos db')
+            return fmtMigrateError(errMsg)
         }
     } catch (err) {
-        const error = new Error(
-            `Could not migrate the database protobufs: ${err}`
-        )
-        recordException(error, serviceName, 'migrate protos db')
-        return fmtMigrateError(error)
+        const errMsg = `Could not migrate the database protobufs: ${err}`
+        recordException(errMsg, serviceName, 'migrate protos db')
+        return fmtMigrateError(errMsg)
     }
 
     const success: APIGatewayProxyResultV2 = {
@@ -183,7 +169,7 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     return success
 }
 
-function fmtMigrateError(error: Error): APIGatewayProxyResultV2 {
+function fmtMigrateError(error: string): APIGatewayProxyResultV2 {
     return {
         statusCode: 500,
         body: JSON.stringify(error),
