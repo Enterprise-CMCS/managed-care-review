@@ -126,7 +126,7 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
             `${process.execPath}`,
             [
                 '/opt/nodejs/protoMigrator/migrate_protos.js',
-                'break-it',
+                'db',
                 '/opt/nodejs/protoMigrator/healthPlanFormDataMigrations',
             ],
             {
