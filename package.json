@@ -13,15 +13,13 @@
         ]
     },
     "directories": {
-        "test": "tests"
+        "test": "services/cypress"
     },
     "scripts": {
         "clean": "lerna clean",
         "format": "yarn prettier --write",
         "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
-        "cypress:open": "cypress open --env AUTH_MODE=LOCAL",
-        "cypress:run": "rm -rf .nyc_output && ./node_modules/.bin/cypress run --env AUTH_MODE=LOCAL --headless --browser chrome",
-        "test:coverage": "lerna run test:coverage --scope=app-web --scope=app-api && yarn run cypress:run",
+        "test:coverage": "lerna run test:coverage --scope=app-web --scope=app-api && cd services/cypress lerna run cypress:run",
         "pretest:coverage": "rm -rf .nyc_output",
         "posttest:coverage": "yarn run report:combined",
         "mkdir:reports": "mkdir -p reports",
@@ -35,30 +33,6 @@
     "repository": {
         "type": "git",
         "url": "git+https://github.com/Enterprise-CMCS/managed-care-review.git"
-    },
-    "nyc": {
-        "report-dir": "coverage-cypress",
-        "exclude": [
-            "/*.stories.tsx",
-            "**/src/s3",
-            "**/src/api",
-            "**/src/constants",
-            "**/src/testHelpers",
-            "**/src/localAuth",
-            "**/src/gen",
-            "**/src/contexts/TraceContext.tsx",
-            "**/src/hooks/useTealium.ts",
-            "**/src/parameterStore/awsParameterStore.ts",
-            "**/src/components/Header/StateIcon/StateIcon.tsx",
-            "**/src/pages/Auth/CheckAuth.tsx",
-            "**/src/pages/Auth/CognitoLogin.tsx",
-            "**/src/pages/Auth/Signup",
-            "**/src/pages/Auth/ConfirmSignUp",
-            "**/src/pages/Help/Help.tsx",
-            "**/App.tsx",
-            "**/index.ts",
-            "**/reportWebVitals.ts"
-        ]
     },
     "jest": {
         "coveragePathIgnorePatterns": [

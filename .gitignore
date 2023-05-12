@@ -28,10 +28,6 @@ notes/
 /reports
 .nyc_output
 
-/tests/cypress/screenshots
-/tests/cypress/videos
-/tests/cypress/fixtures/stores/featureFlagStore.json
-
 /scripts/add_cypress_test_users.js*
 /scripts/collect_ci_runtime_stats.js*
 /scripts/recent_actions_cache.json
