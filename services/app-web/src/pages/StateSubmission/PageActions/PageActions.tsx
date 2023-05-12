@@ -52,7 +52,6 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                 Save as draft
             </ActionButton>
         )
-    console.log('actionInProgress', actionInProgress)
     return (
         <PageActionsContainer left={leftElement}>
             <ButtonGroup type="default">

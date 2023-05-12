@@ -3,7 +3,6 @@ import {
     UnlockedHealthPlanFormDataType,
     convertRateSupportingDocs,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { debounce } from '../debounce'
 import {
     base64ToDomain,
     toDomain,
@@ -22,16 +21,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 
-export function updateHealthPlanFormDataResolver(store: Store) {
-    const debouncedUpdateHealthPlanFormDataResolverImplementation = debounce(
-        updateHealthPlanFormDataResolverImplementation,
-        200
-    )
-
-    return debouncedUpdateHealthPlanFormDataResolverImplementation(store)
-}
-
-function updateHealthPlanFormDataResolverImplementation(
+export function updateHealthPlanFormDataResolver(
     store: Store
 ): MutationResolvers['updateHealthPlanFormData'] {
     return async (_parent, { input }, context) => {
@@ -192,9 +182,9 @@ function updateHealthPlanFormDataResolverImplementation(
         }
 
         if (unfixedFields.length !== 0) {
-            const errMessage = `Transient server error: attempted to modify un-modifiable field(s): ${unfixedFields.join(
+            const errMessage = `Attempted to modify un-modifiable field(s): ${unfixedFields.join(
                 ','
-            )}.  Please refresh the page to continue.`
+            )}`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
