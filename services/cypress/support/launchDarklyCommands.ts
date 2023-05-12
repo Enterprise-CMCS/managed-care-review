@@ -74,8 +74,8 @@ Cypress.Commands.add('stubFeatureFlags', () => {
     ).as('LDClientStream')
 
     /**
-     * Setting default values for flags for Cypress E2E _tests. Only call `interceptFeatureFlags` once.
-     * Useful if you want default feature flags for _tests that are different than default values set in common-code featureFlags
+     * Setting default values for flags for Cypress E2E tests. Only call `interceptFeatureFlags` once.
+     * Useful if you want default feature flags for tests that are different than default values set in common-code featureFlags
      **/
     cy.interceptFeatureFlags(
         { 'chip-only-form': true, 'packages-with-shared-rates': true }
