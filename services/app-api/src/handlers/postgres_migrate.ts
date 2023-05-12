@@ -43,11 +43,9 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
 
     const dbConnResult = await getPostgresURL(dbURL, secretsManagerSecret)
     if (dbConnResult instanceof Error) {
-        const error = new Error(
-            `Init Error: failed to get pg URL: ${dbConnResult}`
-        )
-        recordException(error, serviceName, 'getPostgresURL')
-        return fmtMigrateError(error)
+        const errMsg = `Init Error: failed to get pg URL: ${dbConnResult}`
+        recordException(errMsg, serviceName, 'getPostgresURL')
+        return fmtMigrateError(errMsg)
     }
 
     const dbConnectionURL: string = dbConnResult
