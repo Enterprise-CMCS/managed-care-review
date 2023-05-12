@@ -1,14 +1,10 @@
-import { Handler, Context, APIGatewayProxyResultV2 } from 'aws-lambda'
+import { Handler, APIGatewayProxyResultV2 } from 'aws-lambda'
 import { RDSClient, CreateDBClusterSnapshotCommand } from '@aws-sdk/client-rds'
 import { spawnSync } from 'child_process'
 import { getDBClusterID, getPostgresURL } from './configuration'
 import { initTracer, recordException } from '../../../uploads/src/lib/otel'
 
-export const main: Handler = async (
-    event,
-    context: Context,
-    callback
-): Promise<APIGatewayProxyResultV2 | Error> => {
+export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     // setup otel tracing
     const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
     if (!otelCollectorURL || otelCollectorURL === '') {
@@ -32,8 +28,7 @@ export const main: Handler = async (
             'Init Error: DATABASE_URL is required to run app-api'
         )
         recordException(error, serviceName, 'dbURL')
-        callback(error)
-        return error
+        return fmtMigrateError(error)
     }
 
     if (!secretsManagerSecret) {
@@ -41,15 +36,13 @@ export const main: Handler = async (
             'Init Error: SECRETS_MANAGER_SECRET is required to run postgres migrate'
         )
         recordException(error, serviceName, 'secretsManagerSecret')
-        callback(error)
-        return error
+        return fmtMigrateError(error)
     }
 
     if (!stage) {
         const error = new Error('Init Error: STAGE not set in environment')
         recordException(error, serviceName, 'stage')
-        callback(error)
-        return error
+        return fmtMigrateError(error)
     }
 
     const dbConnResult = await getPostgresURL(dbURL, secretsManagerSecret)
@@ -58,8 +51,7 @@ export const main: Handler = async (
             `Init Error: failed to get pg URL: ${dbConnResult}`
         )
         recordException(error, serviceName, 'getPostgresURL')
-        callback(dbConnResult)
-        return dbConnResult
+        return fmtMigrateError(error)
     }
 
     const dbConnectionURL: string = dbConnResult
@@ -97,14 +89,12 @@ export const main: Handler = async (
                 `Could not run prisma migrate deploy: ${prismaResult.stderr.toString()}`
             )
             recordException(error, serviceName, 'prisma migrate deploy')
-            callback(error)
-            return error
+            return fmtMigrateError(error)
         }
     } catch (err) {
         const error = new Error(`Could not migrate the database schema: ${err}`)
         recordException(error, serviceName, 'prisma migrate deploy')
-        callback(error)
-        return error
+        return fmtMigrateError(error)
     }
 
     // take a snapshot of the DB before running data migration.
@@ -116,8 +106,7 @@ export const main: Handler = async (
                 `Init Error: failed to get db cluster ID: ${dbClusterId}`
             )
             recordException(error, serviceName, 'getDBClusterID')
-            callback(error)
-            return error
+            return fmtMigrateError(error)
         }
 
         const snapshotID = stage + '-' + Date.now()
@@ -138,8 +127,7 @@ export const main: Handler = async (
                 serviceName,
                 'CreateDBClusterSnapshotCommand'
             )
-            callback(error)
-            return error
+            return fmtMigrateError(error)
         }
     }
 
@@ -174,16 +162,14 @@ export const main: Handler = async (
                 `Could not run migrate_protos db: ${migrateProtosResult.stderr.toString()}`
             )
             recordException(error, serviceName, 'migrate_protos db')
-            callback(error)
-            return error
+            return fmtMigrateError(error)
         }
     } catch (err) {
         const error = new Error(
             `Could not migrate the database protobufs: ${err}`
         )
         recordException(error, serviceName, 'migrate protos db')
-        callback(error)
-        return error
+        return fmtMigrateError(error)
     }
 
     const success: APIGatewayProxyResultV2 = {
@@ -195,4 +181,15 @@ export const main: Handler = async (
         },
     }
     return success
+}
+
+function fmtMigrateError(error: Error): APIGatewayProxyResultV2 {
+    return {
+        statusCode: 500,
+        body: JSON.stringify(error),
+        headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Credentials': true,
+        },
+    }
 }
