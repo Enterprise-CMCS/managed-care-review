@@ -4,12 +4,12 @@ import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import {
-    CHIPModifiedProvisionsRecord,
+    ModifiedProvisionsCHIPRecord,
     ContractExecutionStatusRecord,
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
-    ModifiedProvisionsRecord,
-} from '../../../constants/healthPlanPackages'
+    ModifiedProvisionsAmendmentRecord,
+} from '../../../constants/index'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
@@ -90,7 +90,11 @@ export const ContractDetailsSummarySection = ({
     const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && navigateTo !== undefined
     const isCHIPOnly = submission.populationCovered === 'CHIP'
-    const applicableFederalAuthorities = isCHIPOnly ? submission.federalAuthorities.filter( (authority) => federalAuthorityKeysForCHIP.includes(authority)) : submission.federalAuthorities
+    const applicableFederalAuthorities = isCHIPOnly
+        ? submission.federalAuthorities.filter((authority) =>
+              federalAuthorityKeysForCHIP.includes(authority)
+          )
+        : submission.federalAuthorities
 
     useEffect(() => {
         // get all the keys for the documents we want to zip
@@ -220,8 +224,8 @@ export const ContractDetailsSummarySection = ({
                                     list={modifiedProvisions}
                                     dict={
                                         isCHIPOnly
-                                            ? CHIPModifiedProvisionsRecord
-                                            : ModifiedProvisionsRecord
+                                            ? ModifiedProvisionsCHIPRecord
+                                            : ModifiedProvisionsAmendmentRecord
                                     }
                                     displayEmptyList
                                 />
@@ -240,8 +244,8 @@ export const ContractDetailsSummarySection = ({
                                     list={unmodifiedProvisions}
                                     dict={
                                         isCHIPOnly
-                                            ? CHIPModifiedProvisionsRecord
-                                            : ModifiedProvisionsRecord
+                                            ? ModifiedProvisionsCHIPRecord
+                                            : ModifiedProvisionsAmendmentRecord
                                     }
                                     displayEmptyList
                                 />

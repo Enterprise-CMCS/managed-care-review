@@ -23,24 +23,30 @@ export type {
 
 export type {
     FederalAuthority,
-    CHIPFederalAuthority
+    CHIPFederalAuthority,
 } from './FederalAuthorities'
 
 export type {
-    ModifiedProvisions,
+    ModifiedProvisionsMedicaidAmendment,
+    ModifiedProvisionsMedicaidBase,
     CHIPModifiedProvisions,
     ProvisionType,
+    ProvisionTypeMedicaidAmendment,
 } from './ModifiedProvisions'
 
 export {
     federalAuthorityKeys,
-    federalAuthorityKeysForCHIP
+    federalAuthorityKeysForCHIP,
 } from './FederalAuthorities'
 
 export {
     modifiedProvisionKeys,
+    modifiedProvisionMedicaidBaseKeys,
+    modifiedProvisionMedicaidAmendmentKeys,
+    excludedProvisionsForCHIP,
     allowedProvisionKeysForCHIP,
     isCHIPProvision,
+    isMedicaidAmendmentProvision,
 } from './ModifiedProvisions'
 
 export type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'

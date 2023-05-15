@@ -75,7 +75,7 @@ export const ContractDetailsFormSchema = (
                 return Boolean(value && value.length > 0)
             }
         ),
-
+        // inLieuServicesAndSettings: yesNoError('inLieuServicesAndSettings'),
         modifiedBenefitsProvided: yesNoError('modifiedBenefitsProvided'),
         modifiedGeoAreaServed: yesNoError('modifiedGeoAreaServed'),
         modifiedMedicaidBeneficiaries: yesNoError(

@@ -43,17 +43,20 @@ import {
     isCHIPProvision,
     federalAuthorityKeysForCHIP,
     federalAuthorityKeys,
+    isMedicaidAmendmentProvision,
 } from '../../../common-code/healthPlanFormDataType'
 import {
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
-    ModifiedProvisionsRecord,
-    CHIPModifiedProvisionsRecord,
 } from '../../../constants/healthPlanPackages'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { formatYesNoForProto } from '../../../formHelpers/formatters'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
+import {
+    ModifiedProvisionsAmendmentRecord,
+    ModifiedProvisionsCHIPRecord,
+} from '../../../constants'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -226,11 +229,14 @@ export const ContractDetails = ({
     // submission helpers
     const isCHIPOnly = draftSubmission.populationCovered === 'CHIP'
     const isContractAmendment = draftSubmission.contractType === 'AMENDMENT'
+    const shouldShowContractProvisions =
+        isContractAmendment || (!isContractAmendment && !isCHIPOnly)
     const applicableProvisions = isCHIPOnly
         ? allowedProvisionKeysForCHIP
         : modifiedProvisionKeys
-    const applicableFederalAuthorities = isCHIPOnly? 
-    federalAuthorityKeysForCHIP : federalAuthorityKeys;
+    const applicableFederalAuthorities = isCHIPOnly
+        ? federalAuthorityKeysForCHIP
+        : federalAuthorityKeys
 
     const contractDetailsInitialValues: ContractDetailsFormValues = {
         contractExecutionStatus:
@@ -773,21 +779,24 @@ export const ContractDetails = ({
                                                     {errors.federalAuthorities}
                                                 </PoliteErrorMessage>
                                             )}
-                                            {applicableFederalAuthorities.map((federalAuthority) => (
+                                            {applicableFederalAuthorities.map(
+                                                (federalAuthority) => (
                                                     <FieldCheckbox
-                                                    id={federalAuthority.toLowerCase()}
-                                                    key={federalAuthority.toLowerCase()}
-                                                    name="federalAuthorities"
-                                                    label={
-                                                        FederalAuthorityRecord[federalAuthority]
-                                                    }
-                                                    value={federalAuthority}
-                                                />
-                                            ))}
-                                        
+                                                        id={federalAuthority.toLowerCase()}
+                                                        key={federalAuthority.toLowerCase()}
+                                                        name="federalAuthorities"
+                                                        label={
+                                                            FederalAuthorityRecord[
+                                                                federalAuthority
+                                                            ]
+                                                        }
+                                                        value={federalAuthority}
+                                                    />
+                                                )
+                                            )}
                                         </Fieldset>
                                     </FormGroup>
-                                    {isContractAmendment && (
+                                    {shouldShowContractProvisions && (
                                         <FormGroup>
                                             <Fieldset
                                                 aria-required
@@ -810,12 +819,17 @@ export const ContractDetails = ({
                                                                 isCHIPProvision(
                                                                     modifiedProvisionName
                                                                 )
-                                                                    ? CHIPModifiedProvisionsRecord[
+                                                                    ? ModifiedProvisionsCHIPRecord[
                                                                           modifiedProvisionName
                                                                       ]
-                                                                    : ModifiedProvisionsRecord[
+                                                                    : isContractAmendment &&
+                                                                      isMedicaidAmendmentProvision(
+                                                                          modifiedProvisionName
+                                                                      )
+                                                                    ? ModifiedProvisionsAmendmentRecord[
                                                                           modifiedProvisionName
                                                                       ]
+                                                                    : 'Base contract provisions are not implemented yet'
                                                             }
                                                             showError={showFieldErrors(
                                                                 errors[
