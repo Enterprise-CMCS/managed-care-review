@@ -1262,7 +1262,7 @@ describe('SubmissionSummary', () => {
             })
         })
         it('loads outdated health plan packages with old protos as expected - 2', async () => {
-            const proto = fs.readFileSync(`${protoTestDir}/${oldProtoFiles[1]}`)
+            const proto = fs.readFileSync(`${protoTestDir}/${oldProtoFiles[2]}`)
             // pass in the old protos and make sure the UI hasn't changed
             renderWithProviders(
                 <Routes>
@@ -1629,9 +1629,7 @@ describe('SubmissionSummary', () => {
             })
         })
         it('loads outdated health plan packages with old protos as expected - 3', async () => {
-            const proto = fs.readFileSync(
-                `src/common-code/proto/healthPlanFormDataProto/testData/${oldProtoFiles[3]}`
-            )
+            const proto = fs.readFileSync(`${protoTestDir}/${oldProtoFiles[3]}`)
             // pass in the old protos and make sure the UI hasn't changed
             renderWithProviders(
                 <Routes>
