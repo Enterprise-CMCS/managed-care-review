@@ -1,25 +1,24 @@
-import { defineConfig } from 'cypress'
-import task from '@cypress/code-coverage/task'
-import { pa11y, prepareAudit, Browser } from '@cypress-audit/pa11y'
+const defineConfig = require('cypress')
+const { pa11y, prepareAudit } = require('@cypress-audit/pa11y')
 
-export default defineConfig({
+const defineConfig = ({
     e2e: {
         baseUrl: 'http://localhost:3000',
-        supportFile: 'tests/cypress/support/index.ts',
-        fixturesFolder: 'tests/cypress/fixtures',
-        specPattern: 'tests/cypress/integration/**/*.spec.ts',
-        screenshotsFolder: 'tests/cypress/screenshots',
-        videosFolder: 'tests/cypress/videos',
+        supportFile: 'support/index.ts',
+        fixturesFolder: 'fixtures',
+        specPattern: 'integration/**/*.spec.ts',
+        screenshotsFolder: 'screenshots',
+        videosFolder: 'videos',
         viewportHeight: 1080,
         viewportWidth: 1440,
         setupNodeEvents(on, config) {
-            task(on, config)
+            require('@cypress/code-coverage/task')(on, config)
             const newConfig = config
             newConfig.env.AUTH_MODE = process.env.REACT_APP_AUTH_MODE
             newConfig.env.TEST_USERS_PASS = process.env.TEST_USERS_PASS
             on(
                 'before:browser:launch',
-                (browser: Browser = {}, launchOptions) => {
+                (browser, launchOptions) => {
                     prepareAudit(launchOptions)
                 }
             )
@@ -37,3 +36,5 @@ export default defineConfig({
         openMode: 0,
     },
 })
+
+module.exports = defineConfig

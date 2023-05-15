@@ -18,6 +18,7 @@ import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
     allowedProvisionKeysForCHIP,
+    federalAuthorityKeysForCHIP,
     HealthPlanFormDataType,
     isCHIPProvision,
     modifiedProvisionKeys,
@@ -89,6 +90,8 @@ export const ContractDetailsSummarySection = ({
     const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && navigateTo !== undefined
     const isCHIPOnly = submission.populationCovered === 'CHIP'
+    const applicableFederalAuthorities = isCHIPOnly ? submission.federalAuthorities.filter( (authority) => federalAuthorityKeysForCHIP.includes(authority)) : submission.federalAuthorities
+
     useEffect(() => {
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
@@ -197,7 +200,7 @@ export const ContractDetailsSummarySection = ({
                         explainMissingData={!isSubmitted}
                         children={
                             <DataDetailCheckboxList
-                                list={submission.federalAuthorities}
+                                list={applicableFederalAuthorities}
                                 dict={FederalAuthorityRecord}
                             />
                         }

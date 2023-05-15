@@ -158,7 +158,7 @@ We've had a number of issues only reproduce in cypress being run in Github Actio
 ./dev test browser --in-docker
 ```
 
-And since this has to run headless b/c it's in docker, you can see how the test actually worked by opening the video that Cypress records in ./tests/cypress/videos
+And since this has to run headless b/c it's in docker, you can see how the test actually worked by opening the video that Cypress records in ./services/cypress/videos
 
 ## Updating the Database
 

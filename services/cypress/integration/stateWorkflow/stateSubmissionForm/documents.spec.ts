@@ -98,8 +98,8 @@ describe('documents', () => {
     })
 
     /*
-         We test much of the same behavior for the file selector in our jest component tests,
-         however drag and drop functionality is only working well in Cypress so we must re-implement many of those tests here
+         We test much of the same behavior for the file selector in our jest component _tests,
+         however drag and drop functionality is only working well in Cypress so we must re-implement many of those _tests here
     */
     it('can drag and drop and navigate to review and submit', () => {
         cy.logInAsStateUser()
