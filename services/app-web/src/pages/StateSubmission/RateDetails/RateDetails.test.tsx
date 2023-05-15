@@ -31,7 +31,7 @@ import { RateDetails } from './RateDetails'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import selectEvent from 'react-select-event'
 import * as useStatePrograms from '../../../hooks/useStatePrograms'
-import { unlockedWithALittleBitOfEverything } from '@managed-care-review/common-code/healthPlanFormDataMocks'
+import { unlockedWithALittleBitOfEverything } from '@managed-care-review/common-code/healthPlanFormDataMocks/index'
 
 describe('RateDetails', () => {
     beforeAll(() => {

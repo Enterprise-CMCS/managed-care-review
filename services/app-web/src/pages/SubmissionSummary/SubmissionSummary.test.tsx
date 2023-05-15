@@ -1,8 +1,8 @@
 import fs from 'fs'
 import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router'
-import { basicLockedHealthPlanFormData } from '@managed-care-review/common-code/healthPlanFormDataMocks'
-import { domainToBase64 } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+import { basicLockedHealthPlanFormData } from '@managed-care-review/common-code/healthPlanFormDataMocks/index'
+import { domainToBase64 } from '@managed-care-review/common-code/proto/healthPlanFormDataProto/index'
 import { RoutesRecord } from '../../constants/routes'
 import {
     fetchCurrentUserMock,
@@ -21,6 +21,9 @@ import {
 import { SubmissionSummary } from './SubmissionSummary'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import React from 'react'
+
+const protoTestDir =
+    '../../lib/common-code/proto/healthPlanFormDataProto/testData/'
 
 describe('SubmissionSummary', () => {
     beforeEach(() => {
@@ -519,17 +522,13 @@ describe('SubmissionSummary', () => {
         })
 
         const oldProtoFiles = fs
-            .readdirSync(
-                'src/common-code/proto/healthPlanFormDataProto/testData/'
-            )
+            .readdirSync(`${protoTestDir}`)
             .filter((f) => f.endsWith('.proto'))
         /* as much as we'd like to loop over all the proto files here, looping and async tests, 
         which this one is (document loading) produces inconsistent results.  We have to copy/paste
         the test for each proto file. */
         it('loads outdated health plan packages with old protos as expected - 0', async () => {
-            const proto = fs.readFileSync(
-                `src/common-code/proto/healthPlanFormDataProto/testData/${oldProtoFiles[0]}`
-            )
+            const proto = fs.readFileSync(`${protoTestDir}/${oldProtoFiles[0]}`)
             // pass in the old protos and make sure the UI hasn't changed
             renderWithProviders(
                 <Routes>
@@ -896,9 +895,7 @@ describe('SubmissionSummary', () => {
             })
         })
         it('loads outdated health plan packages with old protos as expected - 1', async () => {
-            const proto = fs.readFileSync(
-                `src/common-code/proto/healthPlanFormDataProto/testData/${oldProtoFiles[1]}`
-            )
+            const proto = fs.readFileSync(`${protoTestDir}/${oldProtoFiles[1]}`)
             // pass in the old protos and make sure the UI hasn't changed
             renderWithProviders(
                 <Routes>
@@ -1265,9 +1262,7 @@ describe('SubmissionSummary', () => {
             })
         })
         it('loads outdated health plan packages with old protos as expected - 2', async () => {
-            const proto = fs.readFileSync(
-                `src/common-code/proto/healthPlanFormDataProto/testData/${oldProtoFiles[2]}`
-            )
+            const proto = fs.readFileSync(`${protoTestDir}/${oldProtoFiles[1]}`)
             // pass in the old protos and make sure the UI hasn't changed
             renderWithProviders(
                 <Routes>
