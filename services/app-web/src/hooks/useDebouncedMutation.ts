@@ -11,7 +11,10 @@ import {
 
 import { debounce } from '../common-code/debounce/debounce'
 
-// mostly from https://stackoverflow.com/a/74109414/5351022
+/* mostly from https://stackoverflow.com/a/74109414/5351022
+given potential multi-clicks as well as the possibility that mutations might
+be fired off multiple times programmatically, wrapping a mutation with this hook
+will debounce it and prevent multiple overlapping updates */
 export const useDebouncedMutation = <
     TData,
     TVariables,
