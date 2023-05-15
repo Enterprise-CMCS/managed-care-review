@@ -72,7 +72,7 @@ message Contact {
   optional string email = 3;
 }
 
-/// ContractInfo subtypes
+// ContractInfo subtypes
 message ContractInfo {
   optional ContractType contract_type = 1;
   optional Date contract_date_start = 2;
@@ -82,14 +82,17 @@ message ContractInfo {
   repeated Document contract_documents = 6;
   optional ContractExecutionStatus contract_execution_status = 7;
 
+  // Rates Refactor: No need for nested contract amendment info
   optional ContractAmendmentInfo contract_amendment_info  = 50;
 
-  message ContractAmendmentInfo  {
+
+  message ContractAmendmentInfo  { 
+    // Rates Refactor: CapitationRatesAmendedInfo is dead code. Please remove.
     message CapitationRatesAmendedInfo {
       optional CapitationRateAmendmentReason reason = 1;
       optional string other_reason = 2;
     }
-
+    
     message ModifiedProvisions {
       optional bool modified_benefits_provided = 1;
       optional bool modified_geo_area_served = 2;
@@ -137,6 +140,7 @@ enum AmendedItem {
   AMENDED_ITEM_OTHER=14;
 }
 
+// Rates Refactor: CapitationRatesAmendmentReason is dead code. 
 enum CapitationRateAmendmentReason{
   CAPITATION_RATE_AMENDMENT_REASON_UNSPECIFIED = 0;
   CAPITATION_RATE_AMENDMENT_REASON_ANNUAL = 1;
@@ -202,7 +206,7 @@ message RateInfo {
     optional Date effective_date_end = 2;
   }
 }
-/// Rate related enums
+// Rate related enums
 enum RateType {
   RATE_TYPE_UNSPECIFIED = 0;
   RATE_TYPE_NEW = 1;

@@ -22,7 +22,7 @@ import {
     HealthPlanFormDataType,
     isCHIPProvision,
     modifiedProvisionKeys,
-    ModifiedProvisions,
+    ModifiedProvisionsMedicaidAmendment,
     ProvisionType,
 } from '../../../common-code/healthPlanFormDataType'
 import { DataDetailCheckboxList } from '../../DataDetail/DataDetailCheckboxList'
@@ -37,7 +37,7 @@ export type ContractDetailsSummarySectionProps = {
 
 // This function takes a ContractAmendmentInfo and returns two lists of keys sorted by whether they are set true/false
 export function sortModifiedProvisions(
-    amendmentInfo: ModifiedProvisions | undefined,
+    amendmentInfo: ModifiedProvisionsMedicaidAmendment | undefined,
     isCHIPOnly: boolean
 ): [ProvisionType[], ProvisionType[]] {
     let modifiedProvisions: ProvisionType[] = []
@@ -46,7 +46,7 @@ export function sortModifiedProvisions(
     if (amendmentInfo) {
         // We type cast this to be the list of keys in the ContractAmendmentInfo
         const provisions = Object.keys(amendmentInfo) as Array<
-            keyof ModifiedProvisions
+            keyof ModifiedProvisionsMedicaidAmendment
         >
 
         for (const provisionKey of provisions) {

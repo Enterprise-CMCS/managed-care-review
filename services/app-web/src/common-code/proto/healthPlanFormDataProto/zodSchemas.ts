@@ -139,31 +139,7 @@ const rateInfosTypeSchema = z.object({
     packagesWithSharedRateCerts: z.array(sharedRateCertDisplay),
 })
 
-// Commenting out because this wasn't being used but was raising lint warning -hw
-// const managedCareEntitySchema = z.union([
-//     z.literal('MCO'),
-//     z.literal('PIHP'),
-//     z.literal('PAHP'),
-//     z.literal('PCCM'),
-// ])
-
-// const amendableItemsSchema = z.union([
-//     z.literal('BENEFITS_PROVIDED'),
-//     z.literal('CAPITATION_RATES'),
-//     z.literal('ENCOUNTER_DATA'),
-//     z.literal('ENROLLE_ACCESS'),
-//     z.literal('ENROLLMENT_PROCESS'),
-//     z.literal('FINANCIAL_INCENTIVES'),
-//     z.literal('GEO_AREA_SERVED'),
-//     z.literal('GRIEVANCES_AND_APPEALS_SYSTEM'),
-//     z.literal('LENGTH_OF_CONTRACT_PERIOD'),
-//     z.literal('NON_RISK_PAYMENT'),
-//     z.literal('PROGRAM_INTEGRITY'),
-//     z.literal('QUALITY_STANDARDS'),
-//     z.literal('RISK_SHARING_MECHANISM'),
-// ])
-
-export const unlockedHealthPlanFormDataSchema = z.object({
+const unlockedHealthPlanFormDataZodSchema = z.object({
     id: z.string(),
     createdAt: z.date(),
     updatedAt: z.date(),
@@ -190,3 +166,29 @@ export const unlockedHealthPlanFormDataSchema = z.object({
     contractAmendmentInfo: contractAmendmentInfoSchema.optional(),
     rateInfos: z.array(rateInfosTypeSchema),
 })
+
+/*  
+      This locked Zod schema exists as a light correctness check for the proto decode step (which otherwise does no significant type checking)
+      
+      This is not the primary validation for user entered data in the app. It does NOT represent the latest valid state of all fields on the form.
+      Look at the formik schemas (client side) and functions like isValidContract isValidRate functions (server side) if you are looking for the latest schemas for locked subs. 
+*/
+const lockedHealthPlanFormDataZodSchema = z.object({
+    id: z.string(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+    status: z.literal('SUBMITTED'),
+    stateCode: z.string(),
+    stateNumber: z.number(),
+    programIDs: z.array(z.string()),
+    submissionType: submissionTypeSchema,
+    submissionDescription: z.string(),
+    contractDocuments: z.array(submissionDocumentSchema),
+    managedCareEntities: z.array(z.string()),
+    federalAuthorities: z.array(federalAuthoritySchema),
+})
+
+export {
+    unlockedHealthPlanFormDataZodSchema,
+    lockedHealthPlanFormDataZodSchema,
+}

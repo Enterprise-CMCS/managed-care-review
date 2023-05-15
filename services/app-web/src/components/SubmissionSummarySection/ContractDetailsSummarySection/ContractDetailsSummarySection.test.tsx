@@ -10,7 +10,7 @@ import {
     mockStateSubmission,
 } from '../../../testHelpers/apolloMocks'
 import {
-    ModifiedProvisions,
+    ModifiedProvisionsMedicaidAmendment,
     UnlockedHealthPlanFormDataType,
 } from '../../../common-code/healthPlanFormDataType'
 
@@ -508,7 +508,7 @@ describe('ContractDetailsSummarySection', () => {
     })
 
     it('sorts amended provisions correctly for non-CHIP amendment', () => {
-        const amendedItems: ModifiedProvisions = {
+        const amendedItems: ModifiedProvisionsMedicaidAmendment = {
             modifiedBenefitsProvided: true,
             modifiedGeoAreaServed: false,
             modifiedMedicaidBeneficiaries: true,
@@ -554,7 +554,7 @@ describe('ContractDetailsSummarySection', () => {
     it('sorts amended provisions correctly and removes risk provisions from unmodified list for CHIP amendment', () => {
         // removing provisions from modified list is not necessary because we remove that data at the API level on submit.
         // Thi is to ensure we don't improperly display undefined provisions as not assigned when actually they are not applicable for CHIP cases
-        const amendedItems: ModifiedProvisions = {
+        const amendedItems: ModifiedProvisionsMedicaidAmendment = {
             modifiedBenefitsProvided: true,
             modifiedGeoAreaServed: false,
             modifiedMedicaidBeneficiaries: true,

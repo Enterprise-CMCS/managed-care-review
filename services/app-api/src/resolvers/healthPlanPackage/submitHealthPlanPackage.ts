@@ -5,14 +5,13 @@ import {
     hasValidDocuments,
     hasValidRates,
     hasAnyValidRateData,
-    hasValidSupportingDocumentCategories,
     isContractAndRates,
-    isLockedHealthPlanFormData,
     LockedHealthPlanFormDataType,
     removeRatesData,
-    hasValidRateCertAssurance,
     hasValidPopulationCoverage,
     removeNonCHIPData,
+    isValidAndCurrentLockedHealthPlanFormData,
+    hasValidSupportingDocumentCategories,
 } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     UpdateInfoType,
@@ -77,24 +76,19 @@ function submit(
         submittedAt: new Date(),
     }
 
+    // move this check into isValidContract when feature flag is removed
     const validPopulationCovered = featureFlags?.['chip-only-form']
         ? hasValidPopulationCoverage(
               maybeStateSubmission as LockedHealthPlanFormDataType
           )
         : true
 
-    const validRateCertAssurance = hasValidRateCertAssurance(
-        maybeStateSubmission as LockedHealthPlanFormDataType
-    )
-
     if (
-        isLockedHealthPlanFormData(maybeStateSubmission) &&
-        validRateCertAssurance &&
+        isValidAndCurrentLockedHealthPlanFormData(maybeStateSubmission) &&
         validPopulationCovered
     )
         return maybeStateSubmission
     else if (
-        !validRateCertAssurance ||
         !validPopulationCovered ||
         !hasValidContract(maybeStateSubmission as LockedHealthPlanFormDataType)
     ) {

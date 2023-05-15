@@ -224,7 +224,17 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
         ],
         contractDateStart: new Date(),
         contractDateEnd: new Date(),
-        contractAmendmentInfo: undefined,
+        contractAmendmentInfo: {
+            modifiedProvisions: {
+                modifiedRiskSharingStrategy: false,
+                modifiedIncentiveArrangements: false,
+                modifiedWitholdAgreements: false,
+                modifiedStateDirectedPayments: true,
+                modifiedPassThroughPayments: false,
+                modifiedPaymentsForMentalDiseaseInstitutions: false,
+                modifiedNonRiskPaymentArrangements: true,
+            },
+        },
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [

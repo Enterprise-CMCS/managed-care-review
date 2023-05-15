@@ -39,8 +39,7 @@ const ModifiedProvisionsBaseContractRecord: Record<
     keyof ModifiedProvisionsMedicaidBase,
     string
 > = {
-    inLieuServicesAndSettings:
-        'In Lieu-of Services and Settings (ILOSs) in accordance with 42 CFR § 438.3(e)(2)',
+    // inLieuServicesAndSettings: 'In Lieu-of Services and Settings (ILOSs) in accordance with 42 CFR § 438.3(e)(2)',
     modifiedRiskSharingStrategy:
         'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)',
     modifiedIncentiveArrangements:

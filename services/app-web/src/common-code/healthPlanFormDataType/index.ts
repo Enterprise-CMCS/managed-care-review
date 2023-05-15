@@ -66,8 +66,8 @@ export {
     convertRateSupportingDocs,
     removeNonCHIPData,
     removeRatesData,
-    hasValidRateCertAssurance,
     hasValidPopulationCoverage,
+    isValidAndCurrentLockedHealthPlanFormData,
 } from './healthPlanFormData'
 
 export type { HealthPlanFormDataType } from './HealthPlanFormDataType'

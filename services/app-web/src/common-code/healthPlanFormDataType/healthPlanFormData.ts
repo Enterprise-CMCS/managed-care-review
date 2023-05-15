@@ -7,8 +7,8 @@ import {
 import {
     allowedProvisionKeysForCHIP,
     excludedProvisionsForCHIP,
-    modifiedProvisionKeys,
-    ModifiedProvisions,
+    modifiedProvisionMedicaidAmendmentKeys,
+    modifiedProvisionMedicaidBaseKeys,
 } from './ModifiedProvisions'
 import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import { HealthPlanFormDataType } from './HealthPlanFormDataType'
@@ -21,27 +21,50 @@ const isContractOnly = (
     sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
 ): boolean => sub.submissionType === 'CONTRACT_ONLY'
 
-const isContractAndRates = (
+const isBaseContract = (
     sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
-): boolean => sub.submissionType === 'CONTRACT_AND_RATES'
+): boolean => sub.contractType === 'BASE'
+
+const isContractAmendment = (
+    sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
+): boolean => sub.contractType === 'AMENDMENT'
 
 const isRateAmendment = (rateInfo: RateInfoType): boolean =>
     rateInfo.rateType === 'AMENDMENT'
 
-const hasValidModifiedProvisions = (
-    provisions: ModifiedProvisions | undefined,
-    isCHIP: boolean
-): boolean =>
-    isCHIP
-        ? provisions !== undefined &&
-          allowedProvisionKeysForCHIP.every(
-              (provision) => provisions[provision] !== undefined
-          )
-        : provisions !== undefined &&
-          modifiedProvisionKeys.every(
-              (provision) => provisions[provision] !== undefined
-          )
+const isCHIPOnly = (
+    sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
+): boolean => sub.populationCovered === 'CHIP'
 
+const isContractAndRates = (
+    sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
+): boolean => sub.submissionType === 'CONTRACT_AND_RATES'
+
+const isContractWithProvisions = (
+    sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
+): boolean =>
+    isContractAmendment(sub) || (isBaseContract(sub) && !isCHIPOnly(sub))
+
+const hasValidModifiedProvisions = (
+    sub: LockedHealthPlanFormDataType
+): boolean => {
+    const provisions = sub.contractAmendmentInfo?.modifiedProvisions
+
+    if (!isContractWithProvisions(sub)) return true // if the contract doesn't require any provision yes/nos, it is already valid
+    if (provisions === undefined) return false
+
+    return isCHIPOnly(sub)
+        ? allowedProvisionKeysForCHIP.every(
+              (provision) => provisions[provision] !== undefined
+          )
+        : isBaseContract(sub)
+        ? modifiedProvisionMedicaidBaseKeys.every(
+              (provision) => provisions[provision] !== undefined
+          )
+        : modifiedProvisionMedicaidAmendmentKeys.every(
+              (provision) => provisions[provision] !== undefined
+          )
+}
 const hasValidContract = (sub: LockedHealthPlanFormDataType): boolean =>
     sub.contractType !== undefined &&
     sub.contractExecutionStatus !== undefined &&
@@ -49,15 +72,8 @@ const hasValidContract = (sub: LockedHealthPlanFormDataType): boolean =>
     sub.contractDateEnd !== undefined &&
     sub.managedCareEntities.length !== 0 &&
     sub.federalAuthorities.length !== 0 &&
-    (sub.contractType === 'BASE' || // If it's an amendment, then all the yes/nos must be set.
-        hasValidModifiedProvisions(
-            sub.contractAmendmentInfo?.modifiedProvisions,
-            sub.populationCovered === 'CHIP'
-        ))
-
-const hasValidRateCertAssurance = (
-    sub: LockedHealthPlanFormDataType
-): boolean => sub.riskBasedContract !== undefined
+    sub.riskBasedContract !== undefined &&
+    hasValidModifiedProvisions(sub)
 
 const hasValidPopulationCoverage = (
     sub: LockedHealthPlanFormDataType
@@ -165,12 +181,23 @@ const isLockedHealthPlanFormData = (
         const maybeStateSub = sub as LockedHealthPlanFormDataType
         return (
             maybeStateSub.status === 'SUBMITTED' &&
-            hasValidContract(maybeStateSub) &&
-            hasValidRates(maybeStateSub) &&
-            hasValidDocuments(maybeStateSub)
+            'submittedAt' in maybeStateSub
         )
     }
     return false
+}
+
+const isValidAndCurrentLockedHealthPlanFormData = (
+    sub: unknown
+): sub is LockedHealthPlanFormDataType => {
+    const maybeSubmitted = sub as LockedHealthPlanFormDataType
+
+    return (
+        isLockedHealthPlanFormData(maybeSubmitted) &&
+        hasValidContract(maybeSubmitted) &&
+        hasValidRates(maybeSubmitted) &&
+        hasValidDocuments(maybeSubmitted)
+    )
 }
 
 const isUnlockedHealthPlanFormData = (
@@ -334,21 +361,26 @@ const removeNonCHIPData = (
 }
 
 export {
+    isContractWithProvisions,
+    hasValidModifiedProvisions,
     hasValidContract,
     hasValidDocuments,
     hasValidSupportingDocumentCategories,
     hasValidRates,
     hasAnyValidRateData,
+    isBaseContract,
+    isContractAmendment,
+    isCHIPOnly,
     isContractOnly,
     isContractAndRates,
     isLockedHealthPlanFormData,
     isUnlockedHealthPlanFormData,
+    isValidAndCurrentLockedHealthPlanFormData,
     programNames,
     packageName,
     generateRateName,
     convertRateSupportingDocs,
     removeRatesData,
     removeNonCHIPData,
-    hasValidRateCertAssurance,
     hasValidPopulationCoverage,
 }
