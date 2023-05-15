@@ -110,6 +110,11 @@ export const processRevisions = async (
                 console.error(`Error updating revision ${revision.id}: ${err}`)
                 throw err
             }
+        } else {
+            console.error(
+                `Error decoding formDataProto for revision ${revision.id} in sha migration: ${decodedFormDataProto}`
+            )
+            throw new Error('Error decoding formDataProto in sha migration')
         }
     }
 }
