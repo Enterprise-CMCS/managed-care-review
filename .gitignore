@@ -54,3 +54,4 @@ services/app-api/healthPlanFormDataMigrations
 
 services/app-proto/build
 
+tests/cypress/fixtures/stores/featureFlagStore.json
