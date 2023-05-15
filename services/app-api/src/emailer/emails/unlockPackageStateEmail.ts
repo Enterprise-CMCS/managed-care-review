@@ -1,8 +1,8 @@
 import {
     UnlockedHealthPlanFormDataType,
     packageName as generatePackageName,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
+import { formatCalendarDate } from '@managed-care-review/common-code/dateHelpers'
 import {
     renderTemplate,
     stripHTMLFromTemplate,

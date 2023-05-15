@@ -11,7 +11,7 @@ import {
     generateRateName,
     LockedHealthPlanFormDataType,
     packageName,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 
 describe('with rates', () => {
     const resubmitData = {

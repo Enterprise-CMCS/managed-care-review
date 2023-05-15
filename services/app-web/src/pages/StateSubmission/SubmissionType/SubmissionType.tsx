@@ -26,7 +26,7 @@ import {
 import {
     ContractType,
     PopulationCoveredType,
-} from '../../../common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 import {
     HealthPlanPackage,
     SubmissionType as SubmissionTypeT,
@@ -46,7 +46,7 @@ import {
 } from '../../../components/Form/FieldYesNo/FieldYesNo'
 import { SubmissionTypeFormSchema } from './SubmissionTypeSchema'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
+import { featureFlags } from '@managed-care-review/common-code/featureFlags'
 
 export interface SubmissionTypeFormValues {
     populationCovered?: PopulationCoveredType

@@ -14,7 +14,7 @@ import {
 } from '../../../components/SubmissionSummarySection'
 import { PageActionsContainer } from '../PageActions'
 import styles from './ReviewSubmit.module.scss'
-import { UnlockedHealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import { UnlockedHealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { ActionButton } from '../../../components/ActionButton'
 import { DocumentDateLookupTable } from '../../SubmissionSummary/SubmissionSummary'
 import { UnlockSubmitModal } from '../../../components/Modal/UnlockSubmitModal'

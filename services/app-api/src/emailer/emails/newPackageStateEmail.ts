@@ -1,8 +1,8 @@
 import {
     LockedHealthPlanFormDataType,
     packageName as generatePackageName,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { formatCalendarDate } from '../../../../app-web/src/common-code/dateHelpers'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
+import { formatCalendarDate } from '@managed-care-review/common-code/dateHelpers'
 import { formatEmailAddresses, pruneDuplicateEmails } from '../formatters'
 import { EmailConfiguration, EmailData } from '..'
 import { ProgramType } from '../../domain-models'

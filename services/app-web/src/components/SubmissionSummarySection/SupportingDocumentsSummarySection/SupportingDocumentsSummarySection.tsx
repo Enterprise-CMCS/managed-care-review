@@ -7,7 +7,7 @@ import { useS3 } from '../../../contexts/S3Context'
 import {
     HealthPlanFormDataType,
     SubmissionDocument,
-} from '../../../common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 
 type DocumentWithLink = { url: string | null } & SubmissionDocument
 

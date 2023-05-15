@@ -3,7 +3,7 @@ import {
     isStoreError,
     StoreError,
 } from '../storeError'
-import { StateCodeType } from 'app-web/src/common-code/healthPlanFormDataType'
+import { StateCodeType } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { Division, PrismaClient, AuditAction } from '@prisma/client'
 import { CMSUserType } from '../../domain-models'
 import { domainUserFromPrismaUser } from './prismaDomainUser'

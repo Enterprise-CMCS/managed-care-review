@@ -1,7 +1,7 @@
 import { GridContainer, Link } from '@trussworks/react-uswds'
 import React from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { packageName } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { useAuth } from '../../contexts/AuthContext'
 import { useIndexHealthPlanPackagesQuery } from '../../gen/gqlClient'
 import styles from './StateDashboard.module.scss'

@@ -21,7 +21,7 @@ import {
     FeatureFlagLDConstant,
     FlagValue,
     FeatureFlagSettings,
-} from '../common-code/featureFlags'
+} from '@managed-care-review/common-code/featureFlags'
 
 /* Render */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types

@@ -7,7 +7,7 @@ import {
     isStoreError,
     Store,
 } from '../../postgres'
-import { pluralize } from '../../../../app-web/src/common-code/formatters'
+import { pluralize } from '@managed-care-review/common-code/formatters'
 import {
     setResolverDetailsOnActiveSpan,
     setErrorAttributesOnActiveSpan,

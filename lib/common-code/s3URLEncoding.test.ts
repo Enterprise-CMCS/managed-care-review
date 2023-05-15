@@ -1,4 +1,5 @@
 import { parseBucketName, parseKey } from './s3URLEncoding'
+import { test, expect } from '@jest/globals'
 
 describe('s3URLEncoding', () => {
     const invalidURLs = [

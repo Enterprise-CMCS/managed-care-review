@@ -12,11 +12,11 @@ import {
     submitTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { base64ToDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import { base64ToDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
 import {
     generateRateName,
     packageName,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import {
     mockEmailParameterStoreError,

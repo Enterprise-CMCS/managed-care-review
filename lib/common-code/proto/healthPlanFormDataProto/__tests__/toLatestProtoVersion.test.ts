@@ -1,6 +1,7 @@
 import fs from 'fs'
 import { toLatestProtoVersion } from '../toLatestVersion'
 import { decodeOrError } from '../toDomain'
+import { expect } from '@jest/globals'
 
 describe('v2 to v3', () => {
     it('should convert actuary contacts after the first to addtlActuaryContacts and communication preference as expected', () => {

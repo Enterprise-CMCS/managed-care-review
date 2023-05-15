@@ -1,5 +1,7 @@
 import { assertNever, assertIsAuthMode } from './'
 
+import { expect } from '@jest/globals'
+
 describe('auth type assertions', () => {
     it('assertNever returns as expected', () => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment

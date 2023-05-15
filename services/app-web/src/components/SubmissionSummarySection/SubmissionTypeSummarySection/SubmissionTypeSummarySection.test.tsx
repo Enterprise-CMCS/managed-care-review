@@ -9,7 +9,7 @@ import {
     mockStateSubmission,
     mockMNState,
 } from '../../../testHelpers/apolloMocks'
-import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import { HealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
 
 describe('SubmissionTypeSummarySection', () => {
     afterEach(() => {

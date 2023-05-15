@@ -12,7 +12,7 @@ import {
     HealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
     StateCodeType,
-} from 'app-web/src/common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 import {
     CreateQuestionInput,
     InsertQuestionResponseArgs,
@@ -31,12 +31,12 @@ import { NewPostgresStore, Store } from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { latestFormData } from './healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from './storeHelpers'
-import { domainToBase64 } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
+import { domainToBase64 } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
 import {
     newLocalEmailParameterStore,
     EmailParameterStore,
 } from '../parameterStore'
-import statePrograms from 'app-web/src/common-code/data/statePrograms.json'
+import statePrograms from '@managed-care-review/common-code/data/statePrograms.json'
 import { testLDService } from './launchDarklyHelpers'
 import { LDService } from '../launchDarkly/launchDarkly'
 import { insertUserToLocalAurora } from '../authn'

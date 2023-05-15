@@ -1,5 +1,5 @@
 import React from 'react'
-import { ActuaryContact } from '../../../common-code/healthPlanFormDataType'
+import { ActuaryContact } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { Field, FormikErrors, FormikValues, getIn } from 'formik'
 import { Fieldset, FormGroup } from '@trussworks/react-uswds'
 import { FieldRadio, FieldTextInput } from '../../../components/Form'

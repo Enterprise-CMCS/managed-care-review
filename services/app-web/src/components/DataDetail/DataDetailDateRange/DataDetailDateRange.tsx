@@ -1,4 +1,4 @@
-import { formatCalendarDate } from '../../../common-code/dateHelpers'
+import { formatCalendarDate } from '@managed-care-review/common-code/dateHelpers'
 import { DataDetailMissingField } from '../DataDetailMissingField'
 
 // Intended for use as children passed to DataDetail

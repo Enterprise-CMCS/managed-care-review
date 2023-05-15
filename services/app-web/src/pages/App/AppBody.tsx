@@ -7,10 +7,10 @@ import { Header } from '../../components/Header'
 import { Loading } from '../../components/Loading'
 import { useOTEL } from '../../hooks/useOTEL'
 import { useTealium } from '../../hooks/useTealium'
-import { AuthModeType } from '../../common-code/config'
+import { AuthModeType } from '@managed-care-review/common-code/config'
 import { useAuth } from '../../contexts/AuthContext'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
+import { featureFlags } from '@managed-care-review/common-code/featureFlags'
 import { Landing } from '../Landing/Landing'
 
 export function AppBody({

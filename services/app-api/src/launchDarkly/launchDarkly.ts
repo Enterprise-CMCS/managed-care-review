@@ -4,7 +4,7 @@ import {
     FlagValue,
     FeatureFlagLDConstant,
     FeatureFlagSettings,
-} from '../../../app-web/src/common-code/featureFlags'
+} from '@managed-care-review/common-code/featureFlags'
 import { LDClient } from 'launchdarkly-node-server-sdk'
 import { Context } from '../handlers/apollo_gql'
 import { logError } from '../logger'

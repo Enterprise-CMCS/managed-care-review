@@ -9,7 +9,7 @@ import {
 } from '../../../testHelpers/jestHelpers'
 import { SubmissionType, SubmissionTypeFormValues } from './'
 import { Formik } from 'formik'
-import { contractOnly } from '../../../common-code/healthPlanFormDataMocks'
+import { contractOnly } from '@managed-care-review/common-code/healthPlanFormDataMocks'
 
 describe('SubmissionType', () => {
     afterEach(() => {

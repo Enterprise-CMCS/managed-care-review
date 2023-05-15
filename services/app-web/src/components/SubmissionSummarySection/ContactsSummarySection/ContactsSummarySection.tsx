@@ -5,8 +5,8 @@ import {
     ActuaryFirmsRecord,
     ActuaryCommunicationRecord,
 } from '../../../constants/healthPlanPackages'
-import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
-import { ActuaryContact } from '../../../common-code/healthPlanFormDataType'
+import { HealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
+import { ActuaryContact } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { DataDetail, DataDetailContactField } from '../../DataDetail'
 
 export type ContactsSummarySectionProps = {

@@ -1,6 +1,6 @@
 import { Grid } from '@trussworks/react-uswds'
 import dayjs from 'dayjs'
-import { HealthPlanFormDataType } from '../../../common-code/healthPlanFormDataType'
+import { HealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { DataDetail } from '../../../components/DataDetail'
 import { DoubleColumnGrid } from '../../../components/DoubleColumnGrid'
 import { SectionHeader } from '../../../components/SectionHeader'
@@ -14,7 +14,7 @@ import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import { booleanAsYesNoUserValue } from '../../../components/Form/FieldYesNo/FieldYesNo'
 import styles from '../SubmissionSummarySection.module.scss'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
+import { featureFlags } from '@managed-care-review/common-code/featureFlags'
 
 export type SubmissionTypeSummarySectionProps = {
     submission: HealthPlanFormDataType

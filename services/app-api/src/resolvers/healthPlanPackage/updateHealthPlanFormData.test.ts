@@ -8,12 +8,12 @@ import UPDATE_HEALTH_PLAN_FORM_DATA from '../../../../app-graphql/src/mutations/
 import {
     base64ToDomain,
     domainToBase64,
-} from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+} from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import {
     basicLockedHealthPlanFormData,
     basicHealthPlanFormData,
-} from '../../../../app-web/src/common-code/healthPlanFormDataMocks'
+} from '@managed-care-review/common-code/healthPlanFormDataMocks'
 import { v4 as uuidv4 } from 'uuid'
 import {
     mockStoreThatErrors,

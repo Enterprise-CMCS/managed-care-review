@@ -5,7 +5,7 @@ import { NavLink } from 'react-router-dom'
 import { LoginStatusType } from '../../../contexts/AuthContext'
 import { User } from '../../../gen/gqlClient'
 import { idmRedirectURL } from '../../../pages/Auth/cognitoAuth'
-import { AuthModeType } from '../../../common-code/config'
+import { AuthModeType } from '@managed-care-review/common-code/config'
 
 import styles from '../Header.module.scss'
 

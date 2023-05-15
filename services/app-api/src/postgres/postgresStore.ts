@@ -3,7 +3,7 @@ import {
     UnlockedHealthPlanFormDataType,
     HealthPlanFormDataType,
     StateCodeType,
-} from '../../../app-web/src/common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 import {
     ProgramType,
     HealthPlanPackageType,

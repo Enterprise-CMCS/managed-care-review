@@ -5,9 +5,9 @@ import {
     UnlockedHealthPlanFormDataType,
     SubmissionType,
     ContractType,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 import { HealthPlanPackageType } from '../../domain-models'
-import { toProtoBuffer } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import { toProtoBuffer } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
 import {
     convertPrismaErrorToStoreError,
     isStoreError,

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
 import styles from '../StateSubmissionForm.module.scss'
-import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
+import { SubmissionDocument } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { useS3 } from '../../../contexts/S3Context'
 import { isS3Error } from '../../../s3'
 import {

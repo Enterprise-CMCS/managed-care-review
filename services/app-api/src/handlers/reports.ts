@@ -3,14 +3,14 @@ import { configurePostgres } from './configuration'
 import { NewPostgresStore } from '../postgres/postgresStore'
 import { Parser, transforms } from 'json2csv'
 import { HealthPlanRevisionTable } from '@prisma/client'
-import { ProgramArgType } from '../../../app-web/src/common-code/healthPlanFormDataType/State'
+import { ProgramArgType } from '@managed-care-review/common-code/healthPlanFormDataType/State'
 import {
     HealthPlanFormDataType,
     RateInfoType,
     packageName,
-} from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
-import statePrograms from '../../../app-web/src/common-code/data/statePrograms.json'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
+import { toDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+import statePrograms from '@managed-care-review/common-code/data/statePrograms.json'
 import { isStoreError, StoreError } from '../postgres/storeError'
 import { HealthPlanPackageStatusType } from '../domain-models'
 import {

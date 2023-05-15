@@ -1,6 +1,6 @@
 import * as Yup from 'yup'
-import { dayjs } from '../../../common-code/dateHelpers'
-import { FeatureFlagSettings } from '../../../common-code/featureFlags'
+import { dayjs } from '@managed-care-review/common-code/dateHelpers'
+import { FeatureFlagSettings } from '@managed-care-review/common-code/featureFlags'
 import { validateDateFormat } from '../../../formHelpers'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)

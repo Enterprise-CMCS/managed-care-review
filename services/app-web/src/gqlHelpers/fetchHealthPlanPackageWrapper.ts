@@ -3,8 +3,8 @@ import {
     FetchHealthPlanPackageQuery,
     useFetchHealthPlanPackageWithQuestionsQuery,
 } from '../gen/gqlClient'
-import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
-import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto'
+import { HealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
+import { base64ToDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
 import {
     wrapApolloResult,
     ApolloResultType,

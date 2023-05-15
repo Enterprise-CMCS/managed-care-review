@@ -1,4 +1,4 @@
-import { StateType } from '../common-code/healthPlanFormDataType'
+import { StateType } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { Division } from '../pages/QuestionResponse/QATable/QATable'
 
 type LocalUserType = LocalStateUserType | LocalCMSUserType | LocalAdminUserType

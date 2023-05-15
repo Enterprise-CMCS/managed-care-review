@@ -1,4 +1,4 @@
-import { parseKey } from '../common-code/s3URLEncoding'
+import { parseKey } from '@managed-care-review/common-code/s3URLEncoding'
 import { Storage, API } from 'aws-amplify'
 import { v4 as uuidv4 } from 'uuid'
 import type { S3ClientT } from './s3Client'

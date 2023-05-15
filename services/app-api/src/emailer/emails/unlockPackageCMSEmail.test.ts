@@ -11,7 +11,7 @@ import {
     generateRateName,
     packageName,
     UnlockedHealthPlanFormDataType,
-} from 'app-web/src/common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 
 const unlockData = {
     updatedBy: 'leslie@example.com',

@@ -5,7 +5,7 @@ import { FileListItem } from '../FileListItem/FileListItem'
 import * as path from 'path-browserify'
 
 import styles from '../FileUpload.module.scss'
-import { DocumentCategoryType } from '../../../common-code/healthPlanFormDataType'
+import { DocumentCategoryType } from '@managed-care-review/common-code/healthPlanFormDataType'
 
 export type FileStatus =
     | 'DUPLICATE_NAME_ERROR'

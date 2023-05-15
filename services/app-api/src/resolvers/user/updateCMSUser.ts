@@ -4,7 +4,7 @@ import { isAdminUser, isValidCmsDivison } from '../../domain-models'
 import {
     isValidStateCode,
     StateCodeType,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 import { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import { isStoreError, Store } from '../../postgres'

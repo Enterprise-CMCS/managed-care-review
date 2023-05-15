@@ -1,6 +1,6 @@
 import { HealthPlanRevisionTable, PrismaClient } from '@prisma/client'
-import { HealthPlanFormDataType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
-import { toProtoBuffer } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import { HealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
+import { toProtoBuffer } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
 import { UpdateInfoType, HealthPlanPackageType } from '../../domain-models'
 import {
     convertPrismaErrorToStoreError,

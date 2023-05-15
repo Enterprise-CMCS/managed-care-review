@@ -1,8 +1,8 @@
 import fs from 'fs'
 import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router'
-import { basicLockedHealthPlanFormData } from '../../common-code/healthPlanFormDataMocks'
-import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
+import { basicLockedHealthPlanFormData } from '@managed-care-review/common-code/healthPlanFormDataMocks'
+import { domainToBase64 } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
 import { RoutesRecord } from '../../constants/routes'
 import {
     fetchCurrentUserMock,

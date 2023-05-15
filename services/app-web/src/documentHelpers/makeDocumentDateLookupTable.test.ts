@@ -1,6 +1,6 @@
 import { makeDateTable } from './makeDocumentDateLookupTable'
 import { mockSubmittedHealthPlanPackageWithRevision } from '../testHelpers/apolloMocks'
-import { UnlockedHealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
+import { UnlockedHealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { TextEncoder, TextDecoder } from 'util'
 
 Object.assign(global, { TextDecoder, TextEncoder })

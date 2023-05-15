@@ -8,6 +8,7 @@
         "proto:compile": "rm -rf gen && mkdir gen && pbjs -t static-module -w commonjs -o ./gen/healthPlanFormDataProto.js src/health_plan_form_data.proto",
         "proto:ts": "pbts -o ./gen/healthPlanFormDataProto.d.ts ./gen/healthPlanFormDataProto.js",
         "proto:copy-web": "rsync -av ./gen/ ../app-web/src/gen",
+        "proto:copy-common": "rsync -av ./gen/ ../../lib/common-code/gen",
         "precommit": "lint-staged",
         "lint": "protolint lint .",
         "build": "tsc"

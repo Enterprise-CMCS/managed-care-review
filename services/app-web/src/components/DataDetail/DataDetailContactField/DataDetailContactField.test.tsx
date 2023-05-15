@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import {
     ActuaryContact,
     StateContact,
-} from '../../../common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 
 import { DataDetailContactField } from './DataDetailContactField'
 

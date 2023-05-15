@@ -1,0 +1,29 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "target": "es2017",
+        "lib": ["dom", "dom.iterable", "esnext"],
+        "allowJs": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "module": "esnext",
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "jsx": "react-jsx",
+        "types": ["cypress", "node", "jest"]
+    },
+    "include": [
+        "config",
+        "data",
+        "dateHelpers",
+        "featureFlags",
+        "formatters",
+        "healthPlanFormDataMocks",
+        "healthPlanFormDataType",
+        "proto",
+        "sha"
+    ],
+    "exclude": ["s3URLEncoding.test.ts"]
+}

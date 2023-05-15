@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { SubmissionUnlockedBanner } from './SubmissionUnlockedBanner'
-import { dayjs } from '../../../common-code/dateHelpers'
+import { dayjs } from '@managed-care-review/common-code/dateHelpers'
 
 describe('SubmissionUnlockBanner', () => {
     it('renders without errors and correct background color for CMS User', () => {

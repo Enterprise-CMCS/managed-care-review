@@ -13,7 +13,7 @@ import {
     hasValidRateCertAssurance,
     hasValidPopulationCoverage,
     removeNonCHIPData,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 import {
     UpdateInfoType,
     isStateUser,
@@ -30,14 +30,14 @@ import {
     setErrorAttributesOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import { toDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import { toDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
 import { EmailParameterStore } from '../../parameterStore'
 import { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql'
-import { FeatureFlagSettings } from 'app-web/src/common-code/featureFlags'
+import { FeatureFlagSettings } from '@managed-care-review/common-code/featureFlags'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
-type SubmissionErrorCode = typeof SubmissionErrorCodes[number] // iterable union type
+type SubmissionErrorCode = (typeof SubmissionErrorCodes)[number] // iterable union type
 
 type SubmissionError = {
     code: SubmissionErrorCode

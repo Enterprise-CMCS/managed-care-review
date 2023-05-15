@@ -12,7 +12,7 @@ import {
     Handler,
 } from 'aws-lambda'
 import typeDefs from '../../../app-graphql/src/schema.graphql'
-import { assertIsAuthMode } from '../../../app-web/src/common-code/config'
+import { assertIsAuthMode } from '@managed-care-review/common-code/config'
 import { UserType } from '../domain-models'
 import {
     userFromAuthProvider,

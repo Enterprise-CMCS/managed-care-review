@@ -1,6 +1,6 @@
-import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto'
+import { base64ToDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
 import { HealthPlanPackage } from '../gen/gqlClient'
-import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
+import { HealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { DocumentDateLookupTable } from '../pages/SubmissionSummary/SubmissionSummary'
 import { recordJSException } from '../otelHelpers/tracingHelper'
 import { getDocumentKey } from './getDocumentKey'

@@ -2,11 +2,11 @@ import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
     UnlockedHealthPlanFormDataType,
     convertRateSupportingDocs,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 import {
     base64ToDomain,
     toDomain,
-} from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+} from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
 import {
     isStateUser,
     HealthPlanPackageType,

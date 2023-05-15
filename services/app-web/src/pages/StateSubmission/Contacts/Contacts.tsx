@@ -21,7 +21,7 @@ import styles from '../StateSubmissionForm.module.scss'
 import {
     ActuarialFirmType,
     ActuaryCommunicationType,
-} from '../../../common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 
 import {
     ErrorSummary,

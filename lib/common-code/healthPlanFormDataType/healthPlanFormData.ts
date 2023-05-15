@@ -12,7 +12,7 @@ import {
 } from './ModifiedProvisions'
 import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 import { HealthPlanFormDataType } from './HealthPlanFormDataType'
-import { formatRateNameDate } from '../../common-code/dateHelpers'
+import { formatRateNameDate } from '../dateHelpers'
 import { ProgramArgType } from '.'
 
 // TODO: Refactor into multiple files and add unit tests to these functions

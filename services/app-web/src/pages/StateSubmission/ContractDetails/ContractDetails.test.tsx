@@ -19,7 +19,7 @@ import { ContractDetails } from './'
 import {
     allowedProvisionKeysForCHIP,
     modifiedProvisionKeys,
-} from '../../../common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 
 const scrollIntoViewMock = jest.fn()
 HTMLElement.prototype.scrollIntoView = scrollIntoViewMock

@@ -5,7 +5,7 @@ import {
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
     SubmissionType,
-} from '../../../app-web/src/common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 import { EmailConfiguration, StateAnalystsEmails } from '.'
 import { ProgramType } from '../domain-models'
 import { logError } from '../logger'

@@ -11,7 +11,7 @@ import {
     ModifiedProvisionsRecord,
 } from '../../../constants/healthPlanPackages'
 import { useS3 } from '../../../contexts/S3Context'
-import { formatCalendarDate } from '../../../common-code/dateHelpers'
+import { formatCalendarDate } from '@managed-care-review/common-code/dateHelpers'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
 import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
@@ -23,7 +23,7 @@ import {
     modifiedProvisionKeys,
     ModifiedProvisions,
     ProvisionType,
-} from '../../../common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 import { DataDetailCheckboxList } from '../../DataDetail/DataDetailCheckboxList'
 
 export type ContractDetailsSummarySectionProps = {

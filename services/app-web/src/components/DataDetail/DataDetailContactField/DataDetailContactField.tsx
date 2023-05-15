@@ -2,7 +2,7 @@ import { Link } from '@trussworks/react-uswds'
 import {
     ActuaryContact,
     StateContact,
-} from '../../../common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 import { getActuaryFirm } from '../../SubmissionSummarySection'
 import { DataDetailMissingField } from '../DataDetailMissingField'
 

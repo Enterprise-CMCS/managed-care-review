@@ -9,7 +9,7 @@ import {
     LockedHealthPlanFormDataType,
     generateRateName,
     packageName,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 import { newPackageStateEmail } from './index'
 
 const defaultSubmitters = ['submitter1@example.com', 'submitter2@example.com']

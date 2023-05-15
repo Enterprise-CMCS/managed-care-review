@@ -1,4 +1,4 @@
-import { UnlockedHealthPlanFormDataType } from '../../common-code/healthPlanFormDataType'
+import { UnlockedHealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
 import React, { useEffect, useState } from 'react'
 import { FormGroup, ModalRef, Textarea } from '@trussworks/react-uswds'
 import { useNavigate } from 'react-router-dom'

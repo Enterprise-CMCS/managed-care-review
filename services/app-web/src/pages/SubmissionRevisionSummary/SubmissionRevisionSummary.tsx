@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
 import { useParams } from 'react-router-dom'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { packageName } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { Loading } from '../../components/Loading'
 import {
     ContactsSummarySection,
@@ -13,7 +13,7 @@ import {
 import { usePage } from '../../contexts/PageContext'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Error404 } from '../Errors/Error404Page'
-import { dayjs } from '../../common-code/dateHelpers'
+import { dayjs } from '@managed-care-review/common-code/dateHelpers'
 import styles from './SubmissionRevisionSummary.module.scss'
 import { PreviousSubmissionBanner } from '../../components'
 import { recordJSException } from '../../otelHelpers/tracingHelper'

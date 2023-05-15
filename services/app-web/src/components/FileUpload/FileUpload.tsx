@@ -14,10 +14,10 @@ import styles from './FileUpload.module.scss'
 
 import { FileItemT } from './FileProcessor/FileProcessor'
 import { FileItemsList } from './FileItemList/FileItemsList'
-import { pluralize } from '../../common-code/formatters'
+import { pluralize } from '@managed-care-review/common-code/formatters'
 
 import { recordUserInputException } from '../../otelHelpers'
-import { calculateSHA256 } from '../../common-code/sha/generateSha'
+import { calculateSHA256 } from '@managed-care-review/common-code/sha/generateSha'
 
 export type S3FileData = {
     key: string

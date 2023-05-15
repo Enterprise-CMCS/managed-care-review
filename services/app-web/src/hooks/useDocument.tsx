@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import { Document } from '../gen/gqlClient'
 import { useS3 } from '../contexts/S3Context'
 import { BucketShortName } from '../s3/s3Amplify'
-import { SubmissionDocument } from '../common-code/healthPlanFormDataType'
+import { SubmissionDocument } from '@managed-care-review/common-code/healthPlanFormDataType'
 
 type UnionDocumentType = Document | SubmissionDocument
 type ParsedDocumentWithLinkType =

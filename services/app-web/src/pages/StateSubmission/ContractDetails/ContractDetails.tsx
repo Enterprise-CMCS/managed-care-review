@@ -41,7 +41,7 @@ import {
     FederalAuthority,
     allowedProvisionKeysForCHIP,
     isCHIPProvision,
-} from '../../../common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 import {
     ManagedCareEntityRecord,
     FederalAuthorityRecord,

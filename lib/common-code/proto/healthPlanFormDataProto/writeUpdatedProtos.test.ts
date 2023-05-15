@@ -7,6 +7,8 @@ import { toProtoBuffer } from './toProtoBuffer'
 import fs from 'fs'
 import path from 'path'
 
+import { test, expect } from '@jest/globals'
+
 // this is relative to app-web since that's where tests are run from
 const TEST_DATA_PATH = 'src/common-code/proto/healthPlanFormDataProto/testData/'
 
@@ -20,7 +22,7 @@ describe('If our test domain models have changed, write a new .proto to testData
             | LockedHealthPlanFormDataType
     }
 
-    test.each<testType>([
+    test.each([
         { unlockedWithALittleBitOfEverything },
         // { basicLockedHealthPlanFormData },
     ])('write proto %j to disk if changed)', (testCase: testType) => {

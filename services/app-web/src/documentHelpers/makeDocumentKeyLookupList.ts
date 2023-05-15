@@ -1,7 +1,7 @@
-import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto'
+import { base64ToDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
 import { HealthPlanPackage } from '../gen/gqlClient'
-import { parseKey } from '../common-code/s3URLEncoding'
-import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
+import { parseKey } from '@managed-care-review/common-code/s3URLEncoding'
+import { HealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
 
 export type LookupListType = {
     currentDocuments: string[]

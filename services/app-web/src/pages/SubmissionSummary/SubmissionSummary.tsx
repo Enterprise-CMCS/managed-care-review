@@ -7,7 +7,7 @@ import {
 import React, { useEffect, useRef, useState } from 'react'
 import { NavLink, useOutletContext } from 'react-router-dom'
 import sprite from 'uswds/src/img/sprite.svg'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+import { packageName } from '@managed-care-review/common-code/healthPlanFormDataType'
 import {
     ContactsSummarySection,
     ContractDetailsSummarySection,
@@ -25,7 +25,7 @@ import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory/ChangeHistory'
 import { UnlockSubmitModal } from '../../components/Modal/UnlockSubmitModal'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
+import { featureFlags } from '@managed-care-review/common-code/featureFlags'
 import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
 
 export type DocumentDateLookupTable = {

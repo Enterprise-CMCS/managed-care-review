@@ -23,7 +23,7 @@ import {
     ActuaryContact,
     ActuaryCommunicationType,
     packageName,
-} from '../../../common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 
 import {
     FileUpload,
@@ -53,10 +53,10 @@ import { useStatePrograms, useFocus } from '../../../hooks'
 import { ActuaryContactFields } from '../Contacts'
 import { useIndexHealthPlanPackagesQuery } from '../../../gen/gqlClient'
 import { recordJSException } from '../../../otelHelpers'
-import { dayjs } from '../../../common-code/dateHelpers'
-import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
+import { dayjs } from '@managed-care-review/common-code/dateHelpers'
+import { SharedRateCertDisplay } from '@managed-care-review/common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { getCurrentRevisionFromHealthPlanPackage } from '../../../gqlHelpers'
-import { featureFlags } from '../../../common-code/featureFlags'
+import { featureFlags } from '@managed-care-review/common-code/featureFlags'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 
 const RateDatesErrorMessage = ({

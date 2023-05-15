@@ -4,7 +4,7 @@ import { validateDateFormat } from '../../../formHelpers'
 import {
     isCHIPProvision,
     ProvisionType,
-} from '../../../common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 

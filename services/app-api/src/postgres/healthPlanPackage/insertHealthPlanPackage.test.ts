@@ -1,5 +1,5 @@
 import { HealthPlanPackageType } from '../../domain-models'
-import { toDomain } from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import { toDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { insertHealthPlanPackage } from './insertHealthPlanPackage'
 import { isStoreError } from '../storeError'

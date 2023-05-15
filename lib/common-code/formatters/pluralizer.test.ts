@@ -1,4 +1,5 @@
 import { pluralize } from './'
+import { expect } from '@jest/globals'
 
 describe('pluralize', () => {
     it("pluralizes 'do' and 'does'", () => {
@@ -10,8 +11,8 @@ describe('pluralize', () => {
         expect(pluralize('goat', 1)).toBe('goat')
         expect(pluralize('goat', 2)).toBe('goats')
     })
-      it('pluralizes zero correctly', () => {
+    it('pluralizes zero correctly', () => {
         expect(`I have no ${pluralize('goat', 0)}`).toBe('I have no goats')
         expect(`0 ${pluralize('file', 0)} added`).toBe('0 files added')
-      })
+    })
 })

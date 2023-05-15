@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react'
 import { Route, Routes } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
-import { SubmissionDocument } from '../../common-code/healthPlanFormDataType'
+import { SubmissionDocument } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { RoutesRecord } from '../../constants/routes'
 import {
     fetchCurrentUserMock,
@@ -21,7 +21,7 @@ import { StateSubmissionForm } from './StateSubmissionForm'
 import {
     base64ToDomain,
     domainToBase64,
-} from '../../common-code/proto/healthPlanFormDataProto'
+} from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
 import { testS3Client } from '../../testHelpers/s3Helpers'
 import { getYesNoFieldValue } from '../../testHelpers/fieldHelpers'
 

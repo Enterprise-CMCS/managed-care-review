@@ -12,7 +12,7 @@ import {
 import {
     LockedHealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,
-} from '../../../app-web/src/common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 import { UpdateInfoType, ProgramType } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
 

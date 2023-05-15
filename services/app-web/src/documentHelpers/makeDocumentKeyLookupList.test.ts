@@ -1,6 +1,6 @@
 import { makeDocumentList } from './makeDocumentKeyLookupList'
 import { mockSubmittedHealthPlanPackageWithRevision } from '../testHelpers/apolloMocks'
-import { UnlockedHealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
+import { UnlockedHealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
 
 describe('makeDocumentList', () => {
     const noSubmissionDocuments: Partial<UnlockedHealthPlanFormDataType> = {

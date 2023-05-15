@@ -9,7 +9,7 @@ import {
     ModifiedProvisions,
     PopulationCoveredType,
     CHIPModifiedProvisions,
-} from '../common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 import { HealthPlanPackageStatus } from '../gen/gqlClient'
 
 const SubmissionTypeRecord: Record<SubmissionType, string> = {

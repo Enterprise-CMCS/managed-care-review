@@ -37,11 +37,7 @@ module.exports = {
     resolve: {
         symlinks: false,
         extensions: extensions,
-        modules: [
-            path.resolve(__dirname, 'node_modules'),
-            'node_modules',
-            path.resolve(__dirname, '../app-web/src/common-code'),
-        ],
+        modules: [path.resolve(__dirname, 'node_modules'), 'node_modules'],
         plugins: [
             new TsconfigPathsPlugin({
                 configFile: tsConfigPath,

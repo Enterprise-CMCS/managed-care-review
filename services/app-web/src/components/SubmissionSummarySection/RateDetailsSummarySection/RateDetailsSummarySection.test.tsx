@@ -7,7 +7,7 @@ import {
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import * as usePreviousSubmission from '../../../hooks/usePreviousSubmission'
 import { RateDetailsSummarySection } from './RateDetailsSummarySection'
-import { RateInfoType } from '../../../common-code/healthPlanFormDataType'
+import { RateInfoType } from '@managed-care-review/common-code/healthPlanFormDataType'
 
 describe('RateDetailsSummarySection', () => {
     const draftSubmission = mockContractAndRatesDraft()

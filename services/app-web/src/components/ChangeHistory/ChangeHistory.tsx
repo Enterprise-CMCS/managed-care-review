@@ -1,5 +1,5 @@
 import React from 'react'
-import { dayjs } from '../../common-code/dateHelpers/dayjs'
+import { dayjs } from '@managed-care-review/common-code/dateHelpers/dayjs'
 import { SectionHeader } from '../SectionHeader'
 import { Accordion, Link } from '@trussworks/react-uswds'
 import type { AccordionItemProps } from '@trussworks/react-uswds/lib/components/Accordion/Accordion'

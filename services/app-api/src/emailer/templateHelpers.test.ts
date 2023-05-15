@@ -3,7 +3,7 @@ import {
     generateCMSReviewerEmails,
     handleAsCHIPSubmission,
 } from './templateHelpers'
-import { UnlockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
+import { UnlockedHealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
 import {
     mockUnlockedContractAndRatesFormData,
     mockUnlockedContractOnlyFormData,

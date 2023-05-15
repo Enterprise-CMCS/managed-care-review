@@ -2,7 +2,7 @@ import { LDService } from '../launchDarkly/launchDarkly'
 import {
     FeatureFlagLDConstant,
     FeatureFlagSettings,
-} from 'app-web/src/common-code/featureFlags'
+} from '@managed-care-review/common-code/featureFlags'
 
 import { defaultFeatureFlags } from '../launchDarkly/launchDarkly'
 

@@ -13,7 +13,7 @@ import { ErrorBoundaryRoot } from '../Errors/ErrorBoundaryRoot'
 import { PageProvider } from '../../contexts/PageContext'
 import TraceProvider from '../../contexts/TraceContext'
 
-import { AuthModeType } from '../../common-code/config'
+import { AuthModeType } from '@managed-care-review/common-code/config'
 import { S3Provider } from '../../contexts/S3Context'
 import type { S3ClientT } from '../../s3'
 

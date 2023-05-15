@@ -1,4 +1,4 @@
-import { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
+import { StateCodeType } from '@managed-care-review/common-code/healthPlanFormDataType'
 import {
     getStateAnalystsEmails,
     getStateAnalystsEmailsLocal,

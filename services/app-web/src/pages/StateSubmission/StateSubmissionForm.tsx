@@ -40,8 +40,8 @@ import { GenericApiErrorBanner } from '../../components/Banner/GenericApiErrorBa
 import {
     UnlockedHealthPlanFormDataType,
     packageName,
-} from '../../common-code/healthPlanFormDataType'
-import { domainToBase64 } from '../../common-code/proto/healthPlanFormDataProto'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
+import { domainToBase64 } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
 import { useStatePrograms } from '../../hooks/useStatePrograms'
 import { ApolloError } from '@apollo/client'

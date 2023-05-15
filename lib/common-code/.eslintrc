@@ -1,0 +1,68 @@
+{
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": "./tsconfig.json",
+        "sourceType": "module"
+    },
+    "plugins": ["@typescript-eslint", "jest"],
+    "extends": [
+        "eslint:recommended",
+        "plugin:jest/recommended",
+        "plugin:jest/style",
+        "plugin:@typescript-eslint/recommended",
+        "prettier"
+    ],
+    "env": {
+        "jest/globals": true
+    },
+    "ignorePatterns": [
+        "gen/*",
+        "coverage/*",
+        "jest.config.ts",
+        "webpack.config.js",
+        "s3URLEncoding.test.ts",
+        "s3URLEncoding.ts"
+    ],
+    "rules": {
+        "array-callback-return": "error",
+        "prefer-promise-reject-errors": "error",
+        "no-throw-literal": "error",
+        "jest/no-focused-tests": "error",
+        "jest/no-identical-title": "error",
+        "@typescript-eslint/no-floating-promises": "error",
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": [
+            "warn",
+            { "argsIgnorePattern": "^_*" }
+        ],
+        "no-console": [
+            "warn",
+            {
+                "allow": [
+                    "assert",
+                    "clear",
+                    "count",
+                    "countReset",
+                    "debug",
+                    "dir",
+                    "dirxml",
+                    "error",
+                    "group",
+                    "groupCollapsed",
+                    "groupEnd",
+                    "info",
+                    "profile",
+                    "profileEnd",
+                    "table",
+                    "time",
+                    "timeEnd",
+                    "timeLog",
+                    "timeStamp",
+                    "trace",
+                    "warn"
+                ]
+            }
+        ]
+    },
+    "overrides": []
+}

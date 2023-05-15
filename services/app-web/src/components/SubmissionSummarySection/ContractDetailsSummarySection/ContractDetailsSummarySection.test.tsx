@@ -11,7 +11,7 @@ import {
 import {
     ModifiedProvisions,
     UnlockedHealthPlanFormDataType,
-} from '../../../common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 
 describe('ContractDetailsSummarySection', () => {
     it('can render draft submission without errors (review and submit behavior)', () => {

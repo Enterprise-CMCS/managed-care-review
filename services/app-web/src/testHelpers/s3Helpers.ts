@@ -1,5 +1,5 @@
 import { S3ClientT } from '../s3'
-import { parseKey } from '../common-code/s3URLEncoding'
+import { parseKey } from '@managed-care-review/common-code/s3URLEncoding'
 
 export const testS3Client: () => S3ClientT = () => {
     return {
