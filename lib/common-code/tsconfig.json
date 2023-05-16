@@ -12,18 +12,8 @@
         "isolatedModules": true,
         "noEmit": true,
         "jsx": "react-jsx",
-        "types": ["cypress", "node", "jest"]
+        "types": ["cypress", "node"]
     },
-    "include": [
-        "config",
-        "data",
-        "dateHelpers",
-        "featureFlags",
-        "formatters",
-        "healthPlanFormDataMocks",
-        "healthPlanFormDataType",
-        "proto",
-        "sha"
-    ],
+    "include": ["."],
     "exclude": ["s3URLEncoding.test.ts"]
 }

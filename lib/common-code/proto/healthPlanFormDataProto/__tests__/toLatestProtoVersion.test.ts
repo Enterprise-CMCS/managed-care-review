@@ -3,11 +3,12 @@ import { toLatestProtoVersion } from '../toLatestVersion'
 import { decodeOrError } from '../toDomain'
 import { expect } from '@jest/globals'
 
+const pathToProtoData20220819 =
+    './proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-08-19.proto'
+
 describe('v2 to v3', () => {
     it('should convert actuary contacts after the first to addtlActuaryContacts and communication preference as expected', () => {
-        const protoBytes = fs.readFileSync(
-            'src/common-code/proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-08-19.proto'
-        )
+        const protoBytes = fs.readFileSync(`${pathToProtoData20220819}`)
         const oldProto = decodeOrError(protoBytes)
 
         if (oldProto instanceof Error) {
@@ -64,9 +65,7 @@ describe('v2 to v3', () => {
     })
 
     it('should return empty array for addtlActuaryContacts when only a single actuary contact exists', () => {
-        const protoBytes = fs.readFileSync(
-            'src/common-code/proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-08-19.proto'
-        )
+        const protoBytes = fs.readFileSync(`${pathToProtoData20220819}`)
         const oldProto = decodeOrError(protoBytes)
 
         if (oldProto instanceof Error) {

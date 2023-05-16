@@ -19,13 +19,17 @@ const decodeOrError = (
     }
 }
 
+const pathToProtoData20220819 =
+    './proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-08-19.proto'
+
+const pathToProtoData20221107 =
+    './proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-11-07.proto'
+
 describe('0000_initial_migration', () => {
     it('version 2022-08-19 matches the expected values', async () => {
         // read the file from the filesystem
         console.info('directory: ', fs.readdirSync('.'))
-        const oldProtoBytes = fs.readFileSync(
-            'src/common-code/proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-08-19.proto'
-        )
+        const oldProtoBytes = fs.readFileSync(`${pathToProtoData20220819}`)
 
         // Decode proto
         const oldProto = decodeOrError(oldProtoBytes)
@@ -93,9 +97,7 @@ describe('0000_initial_migration', () => {
 describe('0001_rate_id_migration', () => {
     it('correctly generates rate ids for old contract and rates submissions', () => {
         //Get old proto
-        const oldProtoBytes = fs.readFileSync(
-            'src/common-code/proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-08-19.proto'
-        )
+        const oldProtoBytes = fs.readFileSync(`${pathToProtoData20220819}`)
         const oldFormData = toDomain(oldProtoBytes)
 
         if (oldFormData instanceof Error) {
@@ -134,9 +136,7 @@ describe('0001_rate_id_migration', () => {
 
     it('does not override existing rate ids', () => {
         //Get proto with rate ids
-        const oldProtoBytes = fs.readFileSync(
-            'src/common-code/proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-11-07.proto'
-        )
+        const oldProtoBytes = fs.readFileSync(`${pathToProtoData20221107}`)
 
         const oldFormData = toDomain(oldProtoBytes)
 
@@ -177,9 +177,7 @@ describe('0001_rate_id_migration', () => {
 describe('0002_rate_programs_migration', () => {
     it('correctly copies package programs to rate programs for old contract and rates submissions', () => {
         //Get old proto
-        const oldProtoBytes = fs.readFileSync(
-            'src/common-code/proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-08-19.proto'
-        )
+        const oldProtoBytes = fs.readFileSync(`${pathToProtoData20220819}`)
         const oldProto = decodeOrError(oldProtoBytes)
 
         if (oldProto instanceof Error) {
@@ -244,9 +242,7 @@ describe('0002_rate_programs_migration', () => {
 
     it('does not override existing rate programs', () => {
         //Get proto with rate ids
-        const oldProtoBytes = fs.readFileSync(
-            'src/common-code/proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-11-07.proto'
-        )
+        const oldProtoBytes = fs.readFileSync(`${pathToProtoData20221107}`)
 
         const oldProto = decodeOrError(oldProtoBytes)
 
