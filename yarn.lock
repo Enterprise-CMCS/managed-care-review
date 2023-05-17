@@ -6107,6 +6107,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@craco/craco@npm:^7.1.0":
+  version: 7.1.0
+  resolution: "@craco/craco@npm:7.1.0"
+  dependencies:
+    autoprefixer: ^10.4.12
+    cosmiconfig: ^7.0.1
+    cosmiconfig-typescript-loader: ^1.0.0
+    cross-spawn: ^7.0.3
+    lodash: ^4.17.21
+    semver: ^7.3.7
+    webpack-merge: ^5.8.0
+  peerDependencies:
+    react-scripts: ^5.0.0
+  bin:
+    craco: dist/bin/craco.js
+  checksum: d534d1ea7814e7bd9f2e2aef17821fcdb1d9cac8308e8eb04809f8f3371180086b8f673dedce1ffbefba9ded566e91e4c9663464e488bf6291461091cbd95c4e
+  languageName: node
+  linkType: hard
+
 "@cspotcode/source-map-support@npm:^0.8.0":
   version: 0.8.1
   resolution: "@cspotcode/source-map-support@npm:0.8.1"
@@ -8402,7 +8421,7 @@ __metadata:
     jest-launchdarkly-mock: ^1.0.6
     lint-staged: ^13.0.1
     ts-jest: ^27.1.4
-    typescript: ^4.4.4
+    typescript: 4.8.4
     url-parse: ^1.5.2
     zod: ^3.10.1
   languageName: unknown
@@ -14874,6 +14893,7 @@ __metadata:
     "@aws-sdk/client-ses": ^3.226.0
     "@aws-sdk/client-ssm": ^3.226.0
     "@aws-sdk/lib-storage": ^3.226.0
+    "@managed-care-review/common-code": "workspace:^"
     "@opentelemetry/api": ^1.3.0
     "@opentelemetry/core": ^1.9.1
     "@opentelemetry/exporter-trace-otlp-http": ^0.35.1
@@ -14982,6 +15002,7 @@ __metadata:
     "@aws-sdk/client-amplify": ^3.294.0
     "@aws-sdk/client-s3": ^3.294.0
     "@aws-sdk/s3-request-presigner": ^3.294.0
+    "@craco/craco": ^7.1.0
     "@cypress/code-coverage": ^3.10.0
     "@cypress/instrument-cra": ^1.4.0
     "@managed-care-review/common-code": "workspace:^"
@@ -15572,7 +15593,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"autoprefixer@npm:^10.4.13":
+"autoprefixer@npm:^10.4.12, autoprefixer@npm:^10.4.13":
   version: 10.4.14
   resolution: "autoprefixer@npm:10.4.14"
   dependencies:
@@ -18251,6 +18272,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cosmiconfig-typescript-loader@npm:^1.0.0":
+  version: 1.0.9
+  resolution: "cosmiconfig-typescript-loader@npm:1.0.9"
+  dependencies:
+    cosmiconfig: ^7
+    ts-node: ^10.7.0
+  peerDependencies:
+    "@types/node": "*"
+    cosmiconfig: ">=7"
+    typescript: ">=3"
+  checksum: 26a0198e03e81a9e7e1a6ce880d7309fdd056c7a3a23b587253e6d1d1224154d3f9edf727d9c0310628e89752353211b75de151b705298b4d0741fa1740c661e
+  languageName: node
+  linkType: hard
+
 "cosmiconfig-typescript-loader@npm:^4.3.0":
   version: 4.3.0
   resolution: "cosmiconfig-typescript-loader@npm:4.3.0"
@@ -18301,7 +18336,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cosmiconfig@npm:^7.0.0":
+"cosmiconfig@npm:^7, cosmiconfig@npm:^7.0.0, cosmiconfig@npm:^7.0.1":
   version: 7.1.0
   resolution: "cosmiconfig@npm:7.1.0"
   dependencies:
@@ -36600,7 +36635,7 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"ts-node@npm:>= 8.3.0, ts-node@npm:^10.9.1":
+"ts-node@npm:>= 8.3.0, ts-node@npm:^10.7.0, ts-node@npm:^10.9.1":
   version: 10.9.1
   resolution: "ts-node@npm:10.9.1"
   dependencies:
@@ -38106,6 +38141,16 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
+"webpack-merge@npm:^5.8.0":
+  version: 5.8.0
+  resolution: "webpack-merge@npm:5.8.0"
+  dependencies:
+    clone-deep: ^4.0.1
+    wildcard: ^2.0.0
+  checksum: 88786ab91013f1bd2a683834ff381be81c245a4b0f63304a5103e90f6653f44dab496a0768287f8531761f8ad957d1f9f3ccb2cb55df0de1bd9ee343e079da26
+  languageName: node
+  linkType: hard
+
 "webpack-node-externals@npm:^3.0.0":
   version: 3.0.0
   resolution: "webpack-node-externals@npm:3.0.0"
@@ -38425,6 +38470,13 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   dependencies:
     string-width: ^5.0.1
   checksum: 64c48cf27171221be5f86fc54b94dd29879165bdff1a7aa92dde723d9a8c99fb108312768a5d62c8c2b80b701fa27bbd36a1ddc58367585cd45c0db7920a0cba
+  languageName: node
+  linkType: hard
+
+"wildcard@npm:^2.0.0":
+  version: 2.0.1
+  resolution: "wildcard@npm:2.0.1"
+  checksum: e0c60a12a219e4b12065d1199802d81c27b841ed6ad6d9d28240980c73ceec6f856771d575af367cbec2982d9ae7838759168b551776577f155044f5a5ba843c
   languageName: node
   linkType: hard
 

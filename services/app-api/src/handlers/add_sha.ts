@@ -6,8 +6,8 @@ import { HealthPlanRevisionTable } from '@prisma/client'
 import {
     HealthPlanFormDataType,
     SubmissionDocument,
-} from '../../../app-web/src/common-code/healthPlanFormDataType'
-import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
+} from '@managed-care-review/common-code/healthPlanFormDataType'
+import { toDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
 import { isStoreError, StoreError } from '../postgres/storeError'
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
 import { createHash } from 'crypto'
@@ -15,7 +15,7 @@ import { Store } from '../postgres'
 import {
     parseKey,
     parseBucketName,
-} from '../../../app-web/src/common-code/s3URLEncoding'
+} from '@managed-care-review/common-code/s3URLEncoding'
 
 const s3 = new S3Client({ region: 'us-east-1' })
 

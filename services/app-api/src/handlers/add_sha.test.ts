@@ -1,12 +1,12 @@
 import { main } from './add_sha'
 import * as add_sha from './add_sha'
-import { SubmissionDocument } from 'app-web/src/common-code/healthPlanFormDataType'
-import { unlockedWithALittleBitOfEverything } from 'app-web/src/common-code/healthPlanFormDataMocks'
+import { SubmissionDocument } from '@managed-care-review/common-code/healthPlanFormDataType'
+import { unlockedWithALittleBitOfEverything } from '@managed-care-review/common-code/healthPlanFormDataMocks'
 import { Context } from 'aws-lambda'
 import { HealthPlanRevisionTable } from '@prisma/client'
 import { Store } from '../postgres'
 import { Event } from '@aws-sdk/client-s3'
-import { toProtoBuffer } from 'app-web/src/common-code/proto/healthPlanFormDataProto'
+import { toProtoBuffer } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
 
 const mockStore: Store = {
     findAllRevisions: jest.fn(),
