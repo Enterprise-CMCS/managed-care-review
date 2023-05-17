@@ -1,7 +1,7 @@
 export {
     mockContractAndRatesDraft,
     mockStateSubmission,
-    mockCompleteDraft,
+    mockBaseContract,
     mockDraft,
     mockStateSubmissionContractAmendment,
     mockDraftHealthPlanPackage,

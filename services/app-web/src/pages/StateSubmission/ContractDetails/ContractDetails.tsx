@@ -35,15 +35,13 @@ import { isS3Error } from '../../../s3'
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
 import {
     ManagedCareEntity,
-    modifiedProvisionKeys,
     SubmissionDocument,
     ContractExecutionStatus,
     FederalAuthority,
-    allowedProvisionKeysForCHIP,
-    isCHIPProvision,
     federalAuthorityKeysForCHIP,
     federalAuthorityKeys,
-    isMedicaidAmendmentProvision,
+    generateProvisionLabel,
+    generateApplicableProvisionsList,
 } from '../../../common-code/healthPlanFormDataType'
 import {
     ManagedCareEntityRecord,
@@ -53,10 +51,7 @@ import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { formatYesNoForProto } from '../../../formHelpers/formatters'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
-import {
-    ModifiedProvisionsAmendmentRecord,
-    ModifiedProvisionsCHIPRecord,
-} from '../../../constants'
+import { isCHIPOnly, isContractAmendment, isContractWithProvisions } from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -226,15 +221,9 @@ export const ContractDetails = ({
         }
     }
 
-    // submission helpers
-    const isCHIPOnly = draftSubmission.populationCovered === 'CHIP'
-    const isContractAmendment = draftSubmission.contractType === 'AMENDMENT'
-    const shouldShowContractProvisions =
-        isContractAmendment || (!isContractAmendment && !isCHIPOnly)
-    const applicableProvisions = isCHIPOnly
-        ? allowedProvisionKeysForCHIP
-        : modifiedProvisionKeys
-    const applicableFederalAuthorities = isCHIPOnly
+    const applicableProvisions = generateApplicableProvisionsList(draftSubmission)
+
+    const applicableFederalAuthorities = isCHIPOnly(draftSubmission)
         ? federalAuthorityKeysForCHIP
         : federalAuthorityKeys
 
@@ -383,7 +372,7 @@ export const ContractDetails = ({
         draftSubmission.federalAuthorities = values.federalAuthorities
         draftSubmission.contractDocuments = contractDocuments
 
-        if (isContractAmendment) {
+        if (isContractWithProvisions(draftSubmission)) {
             draftSubmission.contractAmendmentInfo = {
                 modifiedProvisions: {
                     modifiedBenefitsProvided: formatYesNoForProto(
@@ -470,7 +459,7 @@ export const ContractDetails = ({
                 })
             }}
             validationSchema={() =>
-                ContractDetailsFormSchema(isContractAmendment, isCHIPOnly)
+                ContractDetailsFormSchema(draftSubmission)
             }
         >
             {({
@@ -606,7 +595,7 @@ export const ContractDetails = ({
                                         <Fieldset
                                             aria-required
                                             legend={
-                                                isContractAmendment
+                                                isContractAmendment(draftSubmission)
                                                     ? 'Amendment effective dates'
                                                     : 'Contract effective dates'
                                             }
@@ -796,8 +785,8 @@ export const ContractDetails = ({
                                             )}
                                         </Fieldset>
                                     </FormGroup>
-                                    {shouldShowContractProvisions && (
-                                        <FormGroup>
+                                    {isContractWithProvisions(draftSubmission)  && (
+                                        <FormGroup data-testid='yes-no-group'>
                                             <Fieldset
                                                 aria-required
                                                 legend="Does this contract action include new or modified provisions related to any of the following"
@@ -814,23 +803,7 @@ export const ContractDetails = ({
                                                             name={
                                                                 modifiedProvisionName
                                                             }
-                                                            label={
-                                                                isCHIPOnly &&
-                                                                isCHIPProvision(
-                                                                    modifiedProvisionName
-                                                                )
-                                                                    ? ModifiedProvisionsCHIPRecord[
-                                                                          modifiedProvisionName
-                                                                      ]
-                                                                    : isContractAmendment &&
-                                                                      isMedicaidAmendmentProvision(
-                                                                          modifiedProvisionName
-                                                                      )
-                                                                    ? ModifiedProvisionsAmendmentRecord[
-                                                                          modifiedProvisionName
-                                                                      ]
-                                                                    : 'Base contract provisions are not implemented yet'
-                                                            }
+                                                            label={generateProvisionLabel(draftSubmission, modifiedProvisionName)}
                                                             showError={showFieldErrors(
                                                                 errors[
                                                                     modifiedProvisionName

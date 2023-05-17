@@ -30,8 +30,9 @@ export type {
     ModifiedProvisionsMedicaidAmendment,
     ModifiedProvisionsMedicaidBase,
     CHIPModifiedProvisions,
-    ProvisionType,
+    GeneralizedProvisionType,
     ProvisionTypeMedicaidAmendment,
+    GeneralizedModifiedProvisions 
 } from './ModifiedProvisions'
 
 export {
@@ -40,13 +41,16 @@ export {
 } from './FederalAuthorities'
 
 export {
-    modifiedProvisionKeys,
+    generalizedProvisionKeys,
     modifiedProvisionMedicaidBaseKeys,
     modifiedProvisionMedicaidAmendmentKeys,
     excludedProvisionsForCHIP,
     allowedProvisionKeysForCHIP,
     isCHIPProvision,
     isMedicaidAmendmentProvision,
+    generateProvisionLabel,
+    generateApplicableProvisionsList,
+    sortModifiedProvisions
 } from './ModifiedProvisions'
 
 export type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'

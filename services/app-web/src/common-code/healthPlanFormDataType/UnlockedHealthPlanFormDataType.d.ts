@@ -20,7 +20,7 @@ type SubmissionDocument = {
 }
 
 type ContractAmendmentInfo = {
-    modifiedProvisions: ModifiedProvisions
+    modifiedProvisions: GeneralizedModifiedProvisions
 }
 
 type RateAmendmentInfo = {

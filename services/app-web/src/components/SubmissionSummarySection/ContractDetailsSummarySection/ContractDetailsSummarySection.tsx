@@ -20,10 +20,8 @@ import {
     allowedProvisionKeysForCHIP,
     federalAuthorityKeysForCHIP,
     HealthPlanFormDataType,
-    isCHIPProvision,
-    modifiedProvisionKeys,
-    ModifiedProvisionsMedicaidAmendment,
-    ProvisionType,
+    generalizedProvisionKeys,
+    sortModifiedProvisions
 } from '../../../common-code/healthPlanFormDataType'
 import { DataDetailCheckboxList } from '../../DataDetail/DataDetailCheckboxList'
 
@@ -33,43 +31,6 @@ export type ContractDetailsSummarySectionProps = {
     documentDateLookupTable?: DocumentDateLookupTable
     isCMSUser?: boolean
     submissionName: string
-}
-
-// This function takes a ContractAmendmentInfo and returns two lists of keys sorted by whether they are set true/false
-export function sortModifiedProvisions(
-    amendmentInfo: ModifiedProvisionsMedicaidAmendment | undefined,
-    isCHIPOnly: boolean
-): [ProvisionType[], ProvisionType[]] {
-    let modifiedProvisions: ProvisionType[] = []
-    let unmodifiedProvisions: ProvisionType[] = []
-
-    if (amendmentInfo) {
-        // We type cast this to be the list of keys in the ContractAmendmentInfo
-        const provisions = Object.keys(amendmentInfo) as Array<
-            keyof ModifiedProvisionsMedicaidAmendment
-        >
-
-        for (const provisionKey of provisions) {
-            const value = amendmentInfo[provisionKey]
-            if (value === true) {
-                modifiedProvisions.push(provisionKey)
-            } else if (value === false) {
-                unmodifiedProvisions.push(provisionKey)
-            }
-        }
-    }
-    // Remove any lingering fields that not allowed for CHIP entirely.
-    // These extra fields will be removed server side on submit but could be present on unlock before submit.
-    if (isCHIPOnly) {
-        unmodifiedProvisions = unmodifiedProvisions.filter((unmodified) =>
-            isCHIPProvision(unmodified)
-        )
-        modifiedProvisions = modifiedProvisions.filter((modified) =>
-            isCHIPProvision(modified)
-        )
-    }
-
-    return [modifiedProvisions, unmodifiedProvisions]
 }
 
 export const ContractDetailsSummarySection = ({
@@ -132,14 +93,13 @@ export const ContractDetailsSummarySection = ({
     ])
 
     const [modifiedProvisions, unmodifiedProvisions] = sortModifiedProvisions(
-        submission.contractAmendmentInfo?.modifiedProvisions,
-        isCHIPOnly
+        submission
     )
 
     // Ensure that missing field validations for modified provisions works properly even though required provisions list shifts depending on submission
     const requiredProvisions = isCHIPOnly
         ? allowedProvisionKeysForCHIP
-        : modifiedProvisionKeys
+        : generalizedProvisionKeys
     const amendmentProvisionsUnanswered =
         modifiedProvisions.length + unmodifiedProvisions.length <
         requiredProvisions.length

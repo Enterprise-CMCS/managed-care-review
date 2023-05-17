@@ -26,8 +26,8 @@ import {
 import { HealthPlanPackage, UpdateInformation } from '../../gen/gqlClient'
 import { mockMNState } from './stateMock'
 
-function mockDraft(): UnlockedHealthPlanFormDataType {
-    return {
+function mockDraft(partial?: Partial<UnlockedHealthPlanFormDataType>): UnlockedHealthPlanFormDataType {
+   return {
         status: 'DRAFT',
         stateNumber: 5,
         createdAt: new Date(),
@@ -52,10 +52,11 @@ function mockDraft(): UnlockedHealthPlanFormDataType {
         stateContacts: [],
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
+        ...partial
     }
 }
 
-function mockCompleteDraft(): UnlockedHealthPlanFormDataType {
+function mockBaseContract(partial?: Partial<UnlockedHealthPlanFormDataType>): UnlockedHealthPlanFormDataType {
     return {
         status: 'DRAFT',
         stateNumber: 5,
@@ -74,7 +75,17 @@ function mockCompleteDraft(): UnlockedHealthPlanFormDataType {
         contractDocuments: [],
         contractDateStart: new Date(),
         contractDateEnd: new Date(),
-        contractAmendmentInfo: undefined,
+        contractAmendmentInfo: {
+            modifiedProvisions: {
+                modifiedRiskSharingStrategy: true,
+                modifiedIncentiveArrangements: false,
+                modifiedWitholdAgreements: false,
+                modifiedStateDirectedPayments: true,
+                modifiedPassThroughPayments: true,
+                modifiedPaymentsForMentalDiseaseInstitutions: false,
+                modifiedNonRiskPaymentArrangements: true,
+            },
+        },
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [
@@ -99,10 +110,11 @@ function mockCompleteDraft(): UnlockedHealthPlanFormDataType {
         ],
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
+        ...partial
     }
 }
 
-function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
+function mockContractAndRatesDraft( partial?: Partial<UnlockedHealthPlanFormDataType>): UnlockedHealthPlanFormDataType {
     return {
         status: 'DRAFT',
         stateNumber: 5,
@@ -189,6 +201,7 @@ function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        ...partial
     }
 }
 
@@ -705,7 +718,7 @@ function mockUnlockedHealthPlanPackageWithDocuments(): HealthPlanPackage {
 export {
     mockContractAndRatesDraft,
     mockStateSubmission,
-    mockCompleteDraft,
+    mockBaseContract,
     mockDraft,
     mockStateSubmissionContractAmendment,
     mockDraftHealthPlanPackage,

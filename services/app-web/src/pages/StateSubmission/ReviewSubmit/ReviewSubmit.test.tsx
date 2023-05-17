@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react'
 import {
     fetchCurrentUserMock,
-    mockCompleteDraft,
+    mockBaseContract,
 } from '../../../testHelpers/apolloMocks'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { ReviewSubmit } from './ReviewSubmit'
@@ -10,7 +10,7 @@ describe('ReviewSubmit', () => {
     it('renders without errors', async () => {
         renderWithProviders(
             <ReviewSubmit
-                draftSubmission={mockCompleteDraft()}
+                draftSubmission={mockBaseContract()}
                 unlocked={false}
                 submissionName="MN-PMAP-0001"
             />,
@@ -28,7 +28,7 @@ describe('ReviewSubmit', () => {
     it('displays edit buttons for every section', async () => {
         renderWithProviders(
             <ReviewSubmit
-                draftSubmission={mockCompleteDraft()}
+                draftSubmission={mockBaseContract()}
                 unlocked={false}
                 submissionName="MN-PMAP-0001"
             />,
@@ -55,7 +55,7 @@ describe('ReviewSubmit', () => {
     it('does not display zip download buttons', async () => {
         renderWithProviders(
             <ReviewSubmit
-                draftSubmission={mockCompleteDraft()}
+                draftSubmission={mockBaseContract()}
                 unlocked={false}
                 submissionName="MN-PMAP-0001"
             />,
@@ -77,7 +77,7 @@ describe('ReviewSubmit', () => {
     it('renders info from a DraftSubmission', async () => {
         renderWithProviders(
             <ReviewSubmit
-                draftSubmission={mockCompleteDraft()}
+                draftSubmission={mockBaseContract()}
                 unlocked={false}
                 submissionName="MN-PMAP-0001"
             />,
@@ -116,7 +116,7 @@ describe('ReviewSubmit', () => {
     it('displays back and save as draft buttons', async () => {
         renderWithProviders(
             <ReviewSubmit
-                draftSubmission={mockCompleteDraft()}
+                draftSubmission={mockBaseContract()}
                 unlocked={false}
                 submissionName="MN-PMAP-0001"
             />,
@@ -146,7 +146,7 @@ describe('ReviewSubmit', () => {
     it('displays submit button', async () => {
         renderWithProviders(
             <ReviewSubmit
-                draftSubmission={mockCompleteDraft()}
+                draftSubmission={mockBaseContract()}
                 unlocked={false}
                 submissionName="MN-PMAP-0001"
             />,

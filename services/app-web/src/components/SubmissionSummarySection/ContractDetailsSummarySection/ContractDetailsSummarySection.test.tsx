@@ -2,7 +2,6 @@ import { screen, waitFor, within } from '@testing-library/react'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import {
     ContractDetailsSummarySection,
-    sortModifiedProvisions,
 } from './ContractDetailsSummarySection'
 import {
     fetchCurrentUserMock,
@@ -10,7 +9,6 @@ import {
     mockStateSubmission,
 } from '../../../testHelpers/apolloMocks'
 import {
-    ModifiedProvisionsMedicaidAmendment,
     UnlockedHealthPlanFormDataType,
 } from '../../../common-code/healthPlanFormDataType'
 
@@ -342,8 +340,27 @@ describe('ContractDetailsSummarySection', () => {
             await screen.queryByText('1937 Benchmark Authority')
         ).not.toBeInTheDocument()
     })
+    describe('contract provisions', () => { 
+        // const medicaidAmendmentPackage = mockContractAndRatesDraft({
+        //     populationCovered: 'MEDICAID',
+        //     contractType: 'AMENDMENT'
+        // })
+        // const medicaidBasePackage = mockDraft({
+        //     populationCovered: 'MEDICAID',
+        //     contractType: 'BASE'
+        // })
 
-    it('renders amended provisions and MLR references for a medicaid contract correctly', () => {
+        // const chipAmendmentPackage = mockDraft({
+        //     populationCovered: 'CHIP',
+        //     contractType: 'AMENDMENT'
+        // })
+        // const chipBasePackage = mockDraft({
+        //     populationCovered: 'CHIP',
+        //     contractType: 'BASE'
+        // })
+        
+
+    it('renders provisions and MLR references for a medicaid amendment', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
                 submission={mockContractAndRatesDraft()}
@@ -435,7 +452,7 @@ describe('ContractDetailsSummarySection', () => {
             )
         ).toBeInTheDocument()
     })
-    it('renders amended provisions with correct MLR references for CHIP contract', () => {
+    it('renders provisions with correct MLR references for CHIP amenddment', () => {
         renderWithProviders(
             <ContractDetailsSummarySection
                 submission={{
@@ -507,88 +524,6 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeNull()
     })
 
-    it('sorts amended provisions correctly for non-CHIP amendment', () => {
-        const amendedItems: ModifiedProvisionsMedicaidAmendment = {
-            modifiedBenefitsProvided: true,
-            modifiedGeoAreaServed: false,
-            modifiedMedicaidBeneficiaries: true,
-            modifiedRiskSharingStrategy: true,
-            modifiedIncentiveArrangements: false,
-            modifiedWitholdAgreements: false,
-            modifiedStateDirectedPayments: false,
-            modifiedPassThroughPayments: true,
-            modifiedPaymentsForMentalDiseaseInstitutions: true,
-            modifiedMedicalLossRatioStandards: true,
-            modifiedOtherFinancialPaymentIncentive: false,
-            modifiedEnrollmentProcess: true,
-            modifiedGrevienceAndAppeal: true,
-            modifiedNetworkAdequacyStandards: true,
-            modifiedLengthOfContract: false,
-            modifiedNonRiskPaymentArrangements: true,
-        }
-
-        const [mod, unmod] = sortModifiedProvisions(amendedItems, false)
-
-        expect(mod).toEqual([
-            'modifiedBenefitsProvided',
-            'modifiedMedicaidBeneficiaries',
-            'modifiedRiskSharingStrategy',
-            'modifiedPassThroughPayments',
-            'modifiedPaymentsForMentalDiseaseInstitutions',
-            'modifiedMedicalLossRatioStandards',
-            'modifiedEnrollmentProcess',
-            'modifiedGrevienceAndAppeal',
-            'modifiedNetworkAdequacyStandards',
-            'modifiedNonRiskPaymentArrangements',
-        ])
-        expect(unmod).toEqual([
-            'modifiedGeoAreaServed',
-            'modifiedIncentiveArrangements',
-            'modifiedWitholdAgreements',
-            'modifiedStateDirectedPayments',
-            'modifiedOtherFinancialPaymentIncentive',
-            'modifiedLengthOfContract',
-        ])
-    })
-
-    it('sorts amended provisions correctly and removes risk provisions from unmodified list for CHIP amendment', () => {
-        // removing provisions from modified list is not necessary because we remove that data at the API level on submit.
-        // Thi is to ensure we don't improperly display undefined provisions as not assigned when actually they are not applicable for CHIP cases
-        const amendedItems: ModifiedProvisionsMedicaidAmendment = {
-            modifiedBenefitsProvided: true,
-            modifiedGeoAreaServed: false,
-            modifiedMedicaidBeneficiaries: true,
-            modifiedRiskSharingStrategy: false,
-            modifiedIncentiveArrangements: false,
-            modifiedWitholdAgreements: false,
-            modifiedStateDirectedPayments: false,
-            modifiedPassThroughPayments: false,
-            modifiedPaymentsForMentalDiseaseInstitutions: false,
-            modifiedMedicalLossRatioStandards: true,
-            modifiedOtherFinancialPaymentIncentive: false,
-            modifiedEnrollmentProcess: true,
-            modifiedGrevienceAndAppeal: true,
-            modifiedNetworkAdequacyStandards: true,
-            modifiedLengthOfContract: false,
-            modifiedNonRiskPaymentArrangements: true,
-        }
-
-        const [mod, unmod] = sortModifiedProvisions(amendedItems, true)
-
-        expect(mod).toEqual([
-            'modifiedBenefitsProvided',
-            'modifiedMedicaidBeneficiaries',
-            'modifiedMedicalLossRatioStandards',
-            'modifiedEnrollmentProcess',
-            'modifiedGrevienceAndAppeal',
-            'modifiedNetworkAdequacyStandards',
-            'modifiedNonRiskPaymentArrangements',
-        ])
-        expect(unmod).toEqual([
-            'modifiedGeoAreaServed',
-            'modifiedLengthOfContract',
-        ])
-    })
 
     it('shows missing field error on contract amendment when provisions list is empty', () => {
         const contractWithUnansweredProvisions: UnlockedHealthPlanFormDataType =
@@ -680,7 +615,7 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeInTheDocument()
     })
 
-    it('does not show missing field error on contract amendment for CHIP when all provisions required are valid', () => {
+    it('does not show missing field error for CHIP amendment when all provisions required are valid', () => {
         const contractWithAllUnmodifiedProvisions: UnlockedHealthPlanFormDataType =
             {
                 ...mockContractAndRatesDraft(),
@@ -731,7 +666,7 @@ describe('ContractDetailsSummarySection', () => {
         ).toBeNull()
     })
 
-    it('does not show missing field error on contract amendment for Medicaid when all provisions required are valid', () => {
+    it('does not show missing field error for medicaide when all provisions required are valid', () => {
         const contractWithAllUnmodifiedProvisions: UnlockedHealthPlanFormDataType =
             {
                 ...mockContractAndRatesDraft(),
@@ -787,4 +722,5 @@ describe('ContractDetailsSummarySection', () => {
             )
         ).toBeNull()
     })
+})
 })

@@ -3,31 +3,34 @@ import dayjs from 'dayjs'
 import { validateDateFormat } from '../../../formHelpers'
 import {
     isCHIPProvision,
-    ProvisionType,
+    GeneralizedProvisionType,
+    UnlockedHealthPlanFormDataType,
 } from '../../../common-code/healthPlanFormDataType'
+import { isBaseContract, isCHIPOnly, isContractAmendment, isContractWithProvisions } from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
+import { isMedicaidAmendmentProvision, isMedicaidBaseProvision } from '../../../common-code/healthPlanFormDataType/ModifiedProvisions'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 export const ContractDetailsFormSchema = (
-    isContractAmendment: boolean,
-    isCHIPOnly: boolean
+   draftSubmission: UnlockedHealthPlanFormDataType
 ) => {
-    // There are certain validations we can just validate if the submission is CHIP. The CHIP supported provisions are a smaller subset.
-    const ignoreFieldForCHIP = (string: ProvisionType) => {
-        return isCHIPOnly && !isCHIPProvision(string)
-    }
-
-    const yesNoError = (provision: ProvisionType) => {
+   
+    const yesNoError = (provision: GeneralizedProvisionType) => {
         const noValidation = Yup.string().nullable()
-        if (!isContractAmendment) {
+        const provisionValdiation = Yup.string().defined('You must select yes or no')
+        if (!isContractWithProvisions(draftSubmission)) {
             return noValidation
         }
-
-        if (ignoreFieldForCHIP(provision)) {
+        if (isCHIPOnly(draftSubmission)) {
+            return isCHIPProvision(provision)? provisionValdiation: noValidation
+    
+         } else if (isBaseContract(draftSubmission) && isMedicaidBaseProvision(provision)) {
+            return provisionValdiation 
+         } else if (isContractAmendment(draftSubmission) && isMedicaidAmendmentProvision(provision)){
+            return provisionValdiation 
+         } else {
             return noValidation
-        }
-
-        return Yup.string().defined('You must select yes or no')
+         }
     }
 
     return Yup.object().shape({
