@@ -278,11 +278,8 @@ export function submitHealthPlanPackageResolver(
             Object.assign(draftResult, removeRatesData(draftResult))
         }
 
-        // CHIP submissions should not contain any provision relevant to other populations
-        if (
-            draftResult.contractType === 'AMENDMENT' &&
-            draftResult.populationCovered === 'CHIP'
-        ) {
+        // CHIP submissions should not contain any provision or authority relevant to other populations
+        if (draftResult.populationCovered === 'CHIP') {
             Object.assign(draftResult, removeNonCHIPData(draftResult))
         }
 

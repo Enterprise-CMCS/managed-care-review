@@ -222,23 +222,31 @@ jobs:
         with:
           install: false
           config: baseUrl=https://mc-review.onemac.cms.gov
-          spec: tests/cypress/integration/promoteWorkflow/promote.spec.ts
+          spec: services/cypress/integration/promoteWorkflow/promote.spec.ts
           record: true
           parallel: false
           browser: chrome
           group: 'Chrome - prod'
           ci-build-id: ${{ steps.uuid.outputs.value }}
+          # Point to the cypress config file from root
+          config-file: services/cypress/cypress.config.ts
         env:
           REACT_APP_AUTH_MODE: IDM
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Overwrites folder directories in cypress config because in CI we run from root
+          CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
+          CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures
+          CYPRESS_SPEC_PATTERN: services/cypress/integration/**/*.spec.ts
+          CYPRESS_SCREEN_SHOTS_FOLDER: services/cypress/screenshots
+          CYPRESS_VIDEOS_FOLDER: services/cypress/videos
 
       - name: Upload cypress video
         uses: actions/upload-artifact@v3
         if: failure() && steps.cypress.outcome == 'failure'
         with:
           name: cypress-videos
-          path: tests/cypress/videos
+          path: services/cypress/videos
 
   slack:
     name: Slack notification on failure

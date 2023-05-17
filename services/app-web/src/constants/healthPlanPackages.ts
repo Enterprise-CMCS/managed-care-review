@@ -41,7 +41,6 @@ const FederalAuthorityRecord: Record<FederalAuthority, string> = {
     BENCHMARK: '1937 Benchmark Authority',
     TITLE_XXI: 'Title XXI Separate CHIP State Plan Authority',
 }
-
 const ManagedCareEntityRecord: Record<ManagedCareEntity, string> = {
     MCO: 'Managed Care Organization (MCO)',
     PIHP: 'Prepaid Inpatient Health Plan (PIHP)',
@@ -84,7 +83,7 @@ const CHIPModifiedProvisionsRecord: Record<
     modifiedBenefitsProvided: ModifiedProvisionsRecord.modifiedBenefitsProvided,
     modifiedGeoAreaServed: ModifiedProvisionsRecord.modifiedGeoAreaServed,
     modifiedMedicaidBeneficiaries:
-        ModifiedProvisionsRecord.modifiedMedicaidBeneficiaries,
+        'CHIP beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)',
     modifiedMedicalLossRatioStandards:
         'Medical loss ratio standards in accordance with 42 CFR § 457. 1203',
     modifiedEnrollmentProcess:

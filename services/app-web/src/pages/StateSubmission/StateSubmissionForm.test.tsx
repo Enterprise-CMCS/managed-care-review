@@ -3,18 +3,23 @@ import { Route, Routes } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { SubmissionDocument } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { RoutesRecord } from '../../constants/routes'
+import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks/userGQLMock'
 import {
-    fetchCurrentUserMock,
+    mockDraftHealthPlanPackage,
+    mockUnlockedHealthPlanPackage,
+    mockUnlockedHealthPlanPackageWithDocuments,
+} from '../../testHelpers/apolloMocks/healthPlanFormDataMock'
+import {
     fetchHealthPlanPackageMockSuccess,
     fetchHealthPlanPackageMockNotFound,
     fetchHealthPlanPackageMockNetworkFailure,
     fetchHealthPlanPackageMockAuthFailure,
-    mockDraftHealthPlanPackage,
-    mockUnlockedHealthPlanPackage,
-    mockUnlockedHealthPlanPackageWithDocuments,
     updateHealthPlanFormDataMockSuccess,
     updateHealthPlanFormDataMockAuthFailure,
-} from '../../testHelpers/apolloMocks'
+} from '../../testHelpers/apolloMocks/healthPlanPackageGQLMock'
+// some spies will not work with indexed exports, so I refactored to import them directly from their files
+import * as useDebounce from '../../hooks/useDebouncedMutation'
+import * as apolloMocks from '../../testHelpers/apolloMocks/healthPlanPackageGQLMock'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 import { StateSubmissionForm } from './StateSubmissionForm'
@@ -564,6 +569,80 @@ describe('StateSubmissionForm', () => {
             // When deleting a file that exists in a previous revision, we should not see its key
             // in the deleteCallKeys array.
             expect(deleteCallKeys).toEqual(['three-one'])
+        })
+    })
+
+    describe('debounced form update', () => {
+        it('calls debounce when it calls the update', async () => {
+            const mockSubmission = mockDraftHealthPlanPackage({
+                id: '15',
+                submissionDescription: 'A real submission',
+            })
+            const debouncedSpy = jest.spyOn(useDebounce, 'useDebouncedMutation')
+            const mockUpdateSpy = jest.spyOn(
+                apolloMocks,
+                'updateHealthPlanFormDataMockSuccess'
+            )
+            const formData = base64ToDomain(
+                mockSubmission.revisions[0].node.formDataProto
+            )
+            if (formData instanceof Error) throw Error
+
+            const updatedFormData = domainToBase64(formData)
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_FORM}
+                        element={<StateSubmissionForm />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchHealthPlanPackageMockSuccess({
+                                id: '15',
+                                submission: mockSubmission,
+                            }),
+                            updateHealthPlanFormDataMockSuccess({
+                                id: '15',
+                                pkg: mockSubmission,
+                                updatedFormData,
+                            }),
+                            fetchHealthPlanPackageMockSuccess({
+                                id: '15',
+                            }),
+                        ],
+                    },
+                    routerProvider: { route: '/submissions/15/edit/type' },
+                }
+            )
+
+            await waitFor(() =>
+                expect(
+                    screen.getByRole('form', { name: 'Submission Type Form' })
+                ).toBeInTheDocument()
+            )
+
+            const textarea = await screen.findByRole('textbox', {
+                name: 'Submission description',
+            })
+
+            const continueButton = await screen.findByRole('button', {
+                name: 'Continue',
+            })
+
+            void userEvent.type(textarea, 'updated something')
+
+            continueButton.click()
+            // looking for Step 2 of 6, which is a way to make sure the update has gone through and we're on the next page
+            await waitFor(() => {
+                expect(screen.getByText('2')).toBeInTheDocument()
+            })
+            expect(debouncedSpy).toHaveBeenCalled()
+            expect(mockUpdateSpy).toHaveBeenCalled()
+            jest.clearAllMocks()
         })
     })
 })

@@ -182,9 +182,9 @@ export function updateHealthPlanFormDataResolver(
         }
 
         if (unfixedFields.length !== 0) {
-            const errMessage = `Attempted to modify un-modifiable field(s): ${unfixedFields.join(
+            const errMessage = `Transient server error: attempted to modify un-modifiable field(s): ${unfixedFields.join(
                 ','
-            )}`
+            )}.  Please refresh the page to continue.`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {

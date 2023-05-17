@@ -1,3 +1,5 @@
+import { FederalAuthority } from 'FederalAuthority'
+
 // Draft state submission is a health plan that a state user is still working on
 
 type SubmissionType = 'CONTRACT_ONLY' | 'CONTRACT_AND_RATES'
@@ -40,14 +42,6 @@ type ActuarialFirmType =
     | 'OTHER'
 
 type ActuaryCommunicationType = 'OACT_TO_ACTUARY' | 'OACT_TO_STATE'
-
-type FederalAuthority =
-    | 'STATE_PLAN'
-    | 'WAIVER_1915B'
-    | 'WAIVER_1115'
-    | 'VOLUNTARY'
-    | 'BENCHMARK'
-    | 'TITLE_XXI'
 
 type StateContact = {
     name: string
@@ -128,7 +122,6 @@ export type {
     ActuarialFirmType,
     ActuaryCommunicationType,
     ContractType,
-    FederalAuthority,
     ManagedCareEntity,
     UnlockedHealthPlanFormDataType,
     ContractAmendmentInfo,

@@ -35,10 +35,8 @@ notes/
 /coverage-cypress
 /reports
 .nyc_output
-
-/tests/cypress/screenshots
-/tests/cypress/videos
-/tests/cypress/fixtures/stores/featureFlagStore.json
+tests/cypress/videos/
+tests/cypress/screenshots/
 
 /scripts/add_cypress_test_users.js*
 /scripts/collect_ci_runtime_stats.js*
@@ -65,3 +63,4 @@ services/app-api/healthPlanFormDataMigrations
 services/app-proto/build
 
 lib/common-code/gen
+tests/cypress/fixtures/stores/featureFlagStore.json

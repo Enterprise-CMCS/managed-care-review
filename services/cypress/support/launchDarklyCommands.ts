@@ -1,6 +1,6 @@
 import '@testing-library/cypress/add-commands'
 
-import { FeatureFlagLDConstant, FeatureFlagSettings, featureFlags, FlagValue, featureFlagKeys } from '../../../services/app-web/src/common-code/featureFlags/flags'
+import { FeatureFlagLDConstant, FeatureFlagSettings, featureFlags, FlagValue, featureFlagKeys } from 'app-web/src/common-code/featureFlags/flags'
 
 /**
  * interceptFeatureFlags sets the flag to what is passed into it and sets other flags to default values. 
@@ -31,7 +31,7 @@ Cypress.Commands.add(
 
         //Writing feature flags and values to store.
         cy.writeFile(
-            'tests/cypress/fixtures/stores/featureFlagStore.json',
+            'fixtures/stores/featureFlagStore.json',
             JSON.stringify(featureFlagObject)
         )
 
@@ -87,7 +87,7 @@ Cypress.Commands.add('stubFeatureFlags', () => {
 Cypress.Commands.add(
     'getFeatureFlagStore',
     (featureFlags?: FeatureFlagLDConstant[]) => {
-        cy.readFile('tests/cypress/fixtures/stores/featureFlagStore.json').then(
+        cy.readFile('fixtures/stores/featureFlagStore.json').then(
             (
                 store: Record<
                     FeatureFlagLDConstant,

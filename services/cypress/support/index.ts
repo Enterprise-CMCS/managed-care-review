@@ -23,7 +23,7 @@ import './e2e'
 import {
     FeatureFlagLDConstant,
     FeatureFlagSettings,
-} from '../../../services/app-web/src/common-code/featureFlags'
+} from 'app-web/src/common-code/featureFlags'
 
 type FormButtonKey =
     | 'CONTINUE_FROM_START_NEW'

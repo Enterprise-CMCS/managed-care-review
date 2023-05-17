@@ -11,7 +11,6 @@ export type {
     ContractType,
     DocumentCategoryType,
     UnlockedHealthPlanFormDataType,
-    FederalAuthority,
     ManagedCareEntity,
     RateType,
     RateCapitationType,
@@ -23,10 +22,20 @@ export type {
 } from './UnlockedHealthPlanFormDataType'
 
 export type {
+    FederalAuthority,
+    CHIPFederalAuthority,
+} from './FederalAuthorities'
+
+export type {
     ModifiedProvisions,
     CHIPModifiedProvisions,
     ProvisionType,
 } from './ModifiedProvisions'
+
+export {
+    federalAuthorityKeys,
+    federalAuthorityKeysForCHIP,
+} from './FederalAuthorities'
 
 export {
     modifiedProvisionKeys,
