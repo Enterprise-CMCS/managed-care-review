@@ -21,4 +21,13 @@ module.exports = {
     core: {
         builder: 'webpack5',
     },
+    webpackFinal: async (config, { configType }) => {
+        config.module.rules.push({
+            test: /\.ts$/,
+            use: ['ts-loader'],
+            include: path.resolve(__dirname, '../../lib/common-code'),
+        });
+
+        return config;
+    },
 };

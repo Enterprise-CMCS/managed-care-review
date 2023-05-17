@@ -21,6 +21,7 @@
     "dependencies": {
         "dayjs": "^1.10.5",
         "url-parse": "^1.5.2",
+        "uuid": "^9.0.0",
         "zod": "^3.10.1"
     },
     "devDependencies": {

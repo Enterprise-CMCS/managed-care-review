@@ -5,6 +5,9 @@
     "main": "index.js",
     "author": "",
     "license": "CC0-1.0",
+    "dependencies": {
+        "@managed-care-review/common-code": "workspace:^"
+    },
     "devDependencies": {
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^2.0.2"

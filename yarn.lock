@@ -8423,6 +8423,7 @@ __metadata:
     ts-jest: ^27.1.4
     typescript: 4.8.4
     url-parse: ^1.5.2
+    uuid: ^9.0.0
     zod: ^3.10.1
   languageName: unknown
   linkType: soft
@@ -35181,6 +35182,7 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   version: 0.0.0-use.local
   resolution: "storybook@workspace:services/storybook"
   dependencies:
+    "@managed-care-review/common-code": "workspace:^"
     serverless-s3-bucket-helper: CMSgov/serverless-s3-bucket-helper
     serverless-stack-termination-protection: ^2.0.2
   languageName: unknown
