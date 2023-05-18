@@ -3,6 +3,17 @@
     "private": true,
     "version": "1.0.0",
     "license": "MIT",
+    "type": "module",
+    "exports": {
+        "./config": "./src/config/index.ts",
+        "./dateHelpers": "./src/dateHelpers/index.ts",
+        "./featureFlags": "./src/featureFlags/index.ts",
+        "./formatters": "./src/formatters/index.ts",
+        "./healthPlanFormDataMocks": "./src/healthPlanFormDataMocks/index.ts",
+        "./healthPlanFormDataType": "./src/healthPlanFormDataType/index.ts",
+        "./healthPlanFormDataProto": "./src/proto/healthPlanFormDataProto/index.ts",
+        "./sha": "./src/sha/index.ts"
+    },
     "scripts": {
         "precommit": "lint-staged",
         "test": "jest --watch",

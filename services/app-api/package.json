@@ -86,7 +86,7 @@
         "lint-staged": "^13.0.1",
         "prettier": "^2.4.1",
         "prisma": "^4.6.1",
-        "serverless": "^3.27.0",
+        "serverless": "^3.31.0",
         "serverless-associate-waf": "^1.2.1",
         "serverless-iam-helper": "CMSgov/serverless-iam-helper",
         "serverless-idempotency-helper": "CMSgov/serverless-idempotency-helper",
@@ -96,11 +96,11 @@
         "serverless-stack-termination-protection": "^2.0.2",
         "serverless-webpack": "^5.11.0",
         "slugify": "^1.6.5",
-        "ts-jest": "^27.1.4",
-        "ts-loader": "^9.2.8",
-        "tsconfig-paths-webpack-plugin": "^4.0.0",
-        "typescript": "4.8.4",
-        "webpack": "^5.75.0",
+        "ts-jest": "^27.1.5",
+        "ts-loader": "^9.4.2",
+        "tsconfig-paths-webpack-plugin": "^4.0.1",
+        "typescript": "4.9.5",
+        "webpack": "^5.83.1",
         "webpack-node-externals": "^3.0.0"
     }
 }

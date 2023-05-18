@@ -1,10 +1,10 @@
 import fs from 'fs'
 import { toDomain, toProtoBuffer } from '.'
-import { migrateProto as initialMigration } from '../../../../services/app-proto/protoMigrations/healthPlanFormDataMigrations/0000_initial_migration'
-import { migrateProto as rateIDMigration } from '../../../../services/app-proto/protoMigrations/healthPlanFormDataMigrations/0001_rate_id_migration'
-import { migrateProto as rateProgramsMigration } from '../../../../services/app-proto/protoMigrations/healthPlanFormDataMigrations/0002_rate_programs_migration'
-import { mcreviewproto } from '../../gen/healthPlanFormDataProto'
-import * as genproto from '../../gen/healthPlanFormDataProto'
+import { migrateProto as initialMigration } from '../../../../../services/app-proto/protoMigrations/healthPlanFormDataMigrations/0000_initial_migration'
+import { migrateProto as rateIDMigration } from '../../../../../services/app-proto/protoMigrations/healthPlanFormDataMigrations/0001_rate_id_migration'
+import { migrateProto as rateProgramsMigration } from '../../../../../services/app-proto/protoMigrations/healthPlanFormDataMigrations/0002_rate_programs_migration'
+import { mcreviewproto } from '../../../gen/healthPlanFormDataProto'
+import * as genproto from '../../../gen/healthPlanFormDataProto'
 
 import { expect } from '@jest/globals'
 
@@ -20,10 +20,10 @@ const decodeOrError = (
 }
 
 const pathToProtoData20220819 =
-    './proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-08-19.proto'
+    './src/proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-08-19.proto'
 
 const pathToProtoData20221107 =
-    './proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-11-07.proto'
+    './src/proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-11-07.proto'
 
 describe('0000_initial_migration', () => {
     it('version 2022-08-19 matches the expected values', async () => {

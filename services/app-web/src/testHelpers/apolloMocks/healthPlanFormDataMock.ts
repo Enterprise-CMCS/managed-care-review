@@ -12,17 +12,17 @@ import {
     basicLockedHealthPlanFormData,
     basicHealthPlanFormData,
     unlockedWithALittleBitOfEverything,
-} from '@managed-care-review/common-code/healthPlanFormDataMocks'
+} from '@managed-care-review/common-code/src/healthPlanFormDataMocks'
 
 import {
     LockedHealthPlanFormDataType,
     SubmissionDocument,
     UnlockedHealthPlanFormDataType,
-} from '@managed-care-review/common-code/healthPlanFormDataType'
+} from '@managed-care-review/common-code/src/healthPlanFormDataType'
 import {
     domainToBase64,
     protoToBase64,
-} from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+} from '@managed-care-review/common-code/src/proto/healthPlanFormDataProto'
 import { HealthPlanPackage, UpdateInformation } from '../../gen/gqlClient'
 import { mockMNState } from './stateMock'
 

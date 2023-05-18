@@ -4,7 +4,7 @@ import {
     mockContractAndRatesDraft,
     mockMNState,
     mockStateSubmissionContractAmendment,
-} from '../../../services/app-web/src/testHelpers/apolloMocks'
+} from '../../../../services/app-web/src/testHelpers/apolloMocks'
 import {
     convertRateSupportingDocs,
     generateRateName,

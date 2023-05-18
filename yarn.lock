@@ -14941,7 +14941,7 @@ __metadata:
     prisma: ^4.6.1
     protobufjs: ^6.11.2
     request: ^2.88.2
-    serverless: ^3.27.0
+    serverless: ^3.31.0
     serverless-associate-waf: ^1.2.1
     serverless-iam-helper: CMSgov/serverless-iam-helper
     serverless-idempotency-helper: CMSgov/serverless-idempotency-helper
@@ -14951,12 +14951,12 @@ __metadata:
     serverless-stack-termination-protection: ^2.0.2
     serverless-webpack: ^5.11.0
     slugify: ^1.6.5
-    ts-jest: ^27.1.4
-    ts-loader: ^9.2.8
-    tsconfig-paths-webpack-plugin: ^4.0.0
-    typescript: 4.8.4
+    ts-jest: ^27.1.5
+    ts-loader: ^9.4.2
+    tsconfig-paths-webpack-plugin: ^4.0.1
+    typescript: 4.9.5
     uuid: ^9.0.0
-    webpack: ^5.75.0
+    webpack: ^5.83.1
     webpack-node-externals: ^3.0.0
     zod: ^3.11.6
   languageName: unknown
@@ -14982,7 +14982,7 @@ __metadata:
   dependencies:
     lint-staged: ^13.0.1
     protobufjs: ^6.11.2
-    serverless: ^3.26.0
+    serverless: ^3.31.0
     uuid: ^9.0.0
   languageName: unknown
   linkType: soft
@@ -15073,17 +15073,17 @@ __metadata:
     react-select-event: ^5.5.0
     react-test-renderer: ^18.2.0
     sass: ^1.49.11
-    serverless: ^3.26.0
+    serverless: ^3.31.0
     serverless-cloudfront-invalidate: ^1.12.2
     serverless-s3-sync: ^3.1.0
     serverless-stack-termination-protection: ^2.0.2
-    typescript: ^4.4.4
+    typescript: ^4.9.5
     url-parse: ^1.5.2
     use-deep-compare-effect: ^1.8.1
     uswds: ^2.13.1
     uuid: ^9.0.0
     web-vitals: ^3.0.1
-    webpack: ^5.75.0
+    webpack: ^5.83.1
     yup: ^0.32.9
     zod: ^3.10.1
   languageName: unknown
@@ -19592,7 +19592,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "dev_tool@workspace:dev_tool"
   dependencies:
-    typescript: ^4.4.4
+    typescript: ^4.9.5
     yargs: ^17.2.1
   languageName: unknown
   linkType: soft
@@ -22625,7 +22625,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "github-oidc@workspace:services/github-oidc"
   dependencies:
-    serverless: ^3.26.0
+    serverless: ^3.31.0
     serverless-stack-termination-protection: ^2.0.2
   languageName: unknown
   linkType: soft
@@ -24086,7 +24086,7 @@ __metadata:
   resolution: "infra-api@workspace:services/infra-api"
   dependencies:
     "@enterprise-cmcs/serverless-waf-plugin": ^1.3.0
-    serverless: ^3.26.0
+    serverless: ^3.31.0
     serverless-iam-helper: CMSgov/serverless-iam-helper
     serverless-s3-bucket-helper: CMSgov/serverless-s3-bucket-helper
     serverless-stack-termination-protection: ^2.0.2
@@ -31629,7 +31629,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "postgres@workspace:services/postgres"
   dependencies:
-    serverless: ^3.26.0
+    serverless: ^3.31.0
     serverless-iam-helper: CMSgov/serverless-iam-helper
     serverless-s3-bucket-helper: CMSgov/serverless-s3-bucket-helper
     serverless-stack-termination-protection: ^2.0.2
@@ -33993,7 +33993,7 @@ __metadata:
     "@octokit/action": ^5.0.2
     csv-parser: ^3.0.0
     octokit: ^2.0.4
-    typescript: ^4.5.4
+    typescript: ^4.9.5
     uuid: ^9.0.0
   languageName: unknown
   linkType: soft
@@ -34353,7 +34353,7 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"serverless@npm:^3.26.0, serverless@npm:^3.27.0":
+"serverless@npm:^3.31.0":
   version: 3.31.0
   resolution: "serverless@npm:3.31.0"
   dependencies:
@@ -36582,7 +36582,7 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"ts-jest@npm:^27.1.4":
+"ts-jest@npm:^27.1.4, ts-jest@npm:^27.1.5":
   version: 27.1.5
   resolution: "ts-jest@npm:27.1.5"
   dependencies:
@@ -36615,7 +36615,7 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"ts-loader@npm:^9.2.8":
+"ts-loader@npm:^9.4.2":
   version: 9.4.2
   resolution: "ts-loader@npm:9.4.2"
   dependencies:
@@ -36685,7 +36685,7 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"tsconfig-paths-webpack-plugin@npm:^4.0.0, tsconfig-paths-webpack-plugin@npm:^4.0.1":
+"tsconfig-paths-webpack-plugin@npm:^4.0.1":
   version: 4.0.1
   resolution: "tsconfig-paths-webpack-plugin@npm:4.0.1"
   dependencies:
@@ -36950,7 +36950,7 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"typescript@npm:^3 || ^4, typescript@npm:^4.4.4, typescript@npm:^4.5.4":
+"typescript@npm:4.9.5, typescript@npm:^3 || ^4, typescript@npm:^4.9.5":
   version: 4.9.5
   resolution: "typescript@npm:4.9.5"
   bin:
@@ -36970,7 +36970,7 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^3 || ^4#~builtin<compat/typescript>, typescript@patch:typescript@^4.4.4#~builtin<compat/typescript>, typescript@patch:typescript@^4.5.4#~builtin<compat/typescript>":
+"typescript@patch:typescript@4.9.5#~builtin<compat/typescript>, typescript@patch:typescript@^3 || ^4#~builtin<compat/typescript>, typescript@patch:typescript@^4.9.5#~builtin<compat/typescript>":
   version: 4.9.5
   resolution: "typescript@patch:typescript@npm%3A4.9.5#~builtin<compat/typescript>::version=4.9.5&hash=289587"
   bin:
@@ -37011,7 +37011,7 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   version: 0.0.0-use.local
   resolution: "ui@workspace:services/ui"
   dependencies:
-    serverless: ^3.26.0
+    serverless: ^3.31.0
     serverless-s3-bucket-helper: CMSgov/serverless-s3-bucket-helper
     serverless-stack-termination-protection: ^2.0.2
   languageName: unknown
@@ -37420,7 +37420,7 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
     "@opentelemetry/sdk-trace-node": ^1.9.1
     "@opentelemetry/semantic-conventions": ^1.9.1
     copy-webpack-plugin: ^11.0.0
-    serverless: ^3.26.0
+    serverless: ^3.31.0
     serverless-iam-helper: CMSgov/serverless-iam-helper
     serverless-idempotency-helper: CMSgov/serverless-idempotency-helper
     serverless-offline: ^12.0.4
@@ -37430,9 +37430,10 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
     serverless-s3-local: ^0.7.2
     serverless-stack-termination-protection: ^2.0.2
     serverless-webpack: ^5.11.0
-    ts-jest: ^27.1.4
-    ts-loader: ^9.2.8
+    ts-jest: ^27.1.5
+    ts-loader: ^9.4.2
     tsconfig-paths-webpack-plugin: ^4.0.1
+    typescript: 4.9.5
   languageName: unknown
   linkType: soft
 
@@ -38241,7 +38242,7 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"webpack@npm:>=4.43.0 <6.0.0, webpack@npm:^5.64.4, webpack@npm:^5.75.0, webpack@npm:^5.9.0":
+"webpack@npm:>=4.43.0 <6.0.0, webpack@npm:^5.64.4, webpack@npm:^5.9.0":
   version: 5.83.0
   resolution: "webpack@npm:5.83.0"
   dependencies:
@@ -38275,6 +38276,43 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   bin:
     webpack: bin/webpack.js
   checksum: cc611ab2db1fa60ec3f9b1aeb62998aafb8def4d3dd9b78d1314e01483d7e2dfafa66e1ba0aabc684164837713041c68a127994ae38eda42db933796fbb43067
+  languageName: node
+  linkType: hard
+
+"webpack@npm:^5.83.1":
+  version: 5.83.1
+  resolution: "webpack@npm:5.83.1"
+  dependencies:
+    "@types/eslint-scope": ^3.7.3
+    "@types/estree": ^1.0.0
+    "@webassemblyjs/ast": ^1.11.5
+    "@webassemblyjs/wasm-edit": ^1.11.5
+    "@webassemblyjs/wasm-parser": ^1.11.5
+    acorn: ^8.7.1
+    acorn-import-assertions: ^1.7.6
+    browserslist: ^4.14.5
+    chrome-trace-event: ^1.0.2
+    enhanced-resolve: ^5.14.0
+    es-module-lexer: ^1.2.1
+    eslint-scope: 5.1.1
+    events: ^3.2.0
+    glob-to-regexp: ^0.4.1
+    graceful-fs: ^4.2.9
+    json-parse-even-better-errors: ^2.3.1
+    loader-runner: ^4.2.0
+    mime-types: ^2.1.27
+    neo-async: ^2.6.2
+    schema-utils: ^3.1.2
+    tapable: ^2.1.1
+    terser-webpack-plugin: ^5.3.7
+    watchpack: ^2.4.0
+    webpack-sources: ^3.2.3
+  peerDependenciesMeta:
+    webpack-cli:
+      optional: true
+  bin:
+    webpack: bin/webpack.js
+  checksum: 219d5ef50380bc0fd3702ed17feddf13819d8173b78f7a5b857dc74ac177e63d1f79c050792754411cc088bbc02e0971b989efddadbb8e393cf27d64c0ad9ff8
   languageName: node
   linkType: hard
 
