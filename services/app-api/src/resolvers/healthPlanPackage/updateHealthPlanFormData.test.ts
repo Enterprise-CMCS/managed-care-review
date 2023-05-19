@@ -258,7 +258,7 @@ describe('updateHealthPlanFormData', () => {
 
         expect(updateResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(updateResult.errors[0].message).toBe(
-            'Attempted to modify un-modifiable field(s): id'
+            'Transient server error: attempted to modify un-modifiable field(s): id.  Please refresh the page to continue.'
         )
     })
 
@@ -292,7 +292,7 @@ describe('updateHealthPlanFormData', () => {
 
         expect(updateResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(updateResult.errors[0].message).toBe(
-            'Attempted to modify un-modifiable field(s): stateCode,stateNumber,createdAt,updatedAt'
+            'Transient server error: attempted to modify un-modifiable field(s): stateCode,stateNumber,createdAt,updatedAt.  Please refresh the page to continue.'
         )
     })
 

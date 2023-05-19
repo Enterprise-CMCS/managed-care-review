@@ -218,6 +218,7 @@ const toProtoBuffer = (
                                   mcreviewproto.DocumentCategory,
                                   doc.documentCategories
                               ),
+                              sha256: doc.sha256,
                           })),
                           rateCertificationName: generateRateName(
                               domainData,
@@ -290,6 +291,7 @@ const toProtoBuffer = (
                 mcreviewproto.DocumentCategory,
                 doc.documentCategories
             ),
+            sha256: doc.sha256,
         })),
     }
 

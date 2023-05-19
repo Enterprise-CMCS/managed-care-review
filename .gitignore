@@ -53,3 +53,5 @@ services/app-api/lambda-layers-prisma-client-engine
 services/app-api/healthPlanFormDataMigrations
 
 services/app-proto/build
+
+tests/cypress/fixtures/stores/featureFlagStore.json
