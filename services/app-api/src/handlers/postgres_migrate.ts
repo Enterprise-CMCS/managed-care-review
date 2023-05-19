@@ -84,7 +84,7 @@ export const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
             return fmtMigrateError(errMsg)
         }
     } catch (err) {
-        const errMsg = `Could not migrate the database schema: ${err}`
+        const errMsg = `Could not migrate the prisma database schema: ${err}`
         recordException(errMsg, serviceName, 'prisma migrate deploy')
         return fmtMigrateError(errMsg)
     }
