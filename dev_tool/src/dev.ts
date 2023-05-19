@@ -441,7 +441,7 @@ function main() {
                                         'run all the cypress tests once in a CI-like docker container',
                                     ],
                                     [
-                                        '$0 test browser --in-docker -- run --spec tests/cypress/integration/stateSubmission.spec.ts',
+                                        '$0 test browser --in-docker -- run --spec services/cypress/integration/stateSubmission.spec.ts',
                                         'run the stateSubmission cypress tests once in a CI-like docker container',
                                     ],
                                 ])

@@ -57,7 +57,7 @@ exclude_patterns:
   - 'config/'
   - 'db/'
   - 'dist/'
-  - 'tests/cypress/*'
+  - 'services/cypress/*'
   - 'features/'
   - '**/node_modules/'
   - 'script/'
