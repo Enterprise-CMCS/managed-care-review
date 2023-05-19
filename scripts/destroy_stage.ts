@@ -53,6 +53,12 @@ async function main() {
 
     const stacksToDestroy = await getStacksFromStage(stage)
     console.info(`debug: ${stacksToDestroy}`)
+    if (process.env.CI === 'true' && stacksToDestroy.length === 0) {
+        console.warn(
+            `We're in CI and there are no stacks to destroy. Alerting.`
+        )
+        process.exit(1)
+    }
     if (stacksToDestroy.length === 0) {
         console.info(`No stacks to destroy. Skipping destroy.`)
         process.exit(0)
