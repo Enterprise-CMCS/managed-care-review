@@ -120,8 +120,7 @@ async function getStacksFromStage(
 
                 return types
             } catch (err) {
-                return []
-                //return new Error(`Could not remove stack: ${err}`)
+                return new Error(`Could not remove stack: ${err}`)
             }
         })
     )
