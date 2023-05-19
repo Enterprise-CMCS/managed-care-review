@@ -32,7 +32,7 @@ export type {
     CHIPModifiedProvisions,
     GeneralizedProvisionType,
     ProvisionTypeMedicaidAmendment,
-    GeneralizedModifiedProvisions 
+    GeneralizedModifiedProvisions,
 } from './ModifiedProvisions'
 
 export {
@@ -48,9 +48,11 @@ export {
     allowedProvisionKeysForCHIP,
     isCHIPProvision,
     isMedicaidAmendmentProvision,
+    isMissingProvisions,
     generateProvisionLabel,
     generateApplicableProvisionsList,
-    sortModifiedProvisions
+    getProvisionDictionary,
+    sortModifiedProvisions,
 } from './ModifiedProvisions'
 
 export type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
@@ -64,6 +66,7 @@ export {
     isContractOnly,
     isUnlockedHealthPlanFormData,
     isLockedHealthPlanFormData,
+    isSubmitted,
     programNames,
     packageName,
     generateRateName,

@@ -17,33 +17,29 @@ import { ProgramArgType, federalAuthorityKeysForCHIP } from '.'
 
 // TODO: Refactor into multiple files and add unit tests to these functions
 
-const isContractOnly = (
-    sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
-): boolean => sub.submissionType === 'CONTRACT_ONLY'
+const isContractOnly = (sub: HealthPlanFormDataType): boolean =>
+    sub.submissionType === 'CONTRACT_ONLY'
 
-const isBaseContract = (
-    sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
-): boolean => sub.contractType === 'BASE'
+const isBaseContract = (sub: HealthPlanFormDataType): boolean =>
+    sub.contractType === 'BASE'
 
-const isContractAmendment = (
-    sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
-): boolean => sub.contractType === 'AMENDMENT'
+const isContractAmendment = (sub: HealthPlanFormDataType): boolean =>
+    sub.contractType === 'AMENDMENT'
 
 const isRateAmendment = (rateInfo: RateInfoType): boolean =>
     rateInfo.rateType === 'AMENDMENT'
 
-const isCHIPOnly = (
-    sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
-): boolean => sub.populationCovered === 'CHIP'
+const isCHIPOnly = (sub: HealthPlanFormDataType): boolean =>
+    sub.populationCovered === 'CHIP'
 
-const isContractAndRates = (
-    sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
-): boolean => sub.submissionType === 'CONTRACT_AND_RATES'
+const isContractAndRates = (sub: HealthPlanFormDataType): boolean =>
+    sub.submissionType === 'CONTRACT_AND_RATES'
 
-const isContractWithProvisions = (
-    sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
-): boolean =>
+const isContractWithProvisions = (sub: HealthPlanFormDataType): boolean =>
     isContractAmendment(sub) || (isBaseContract(sub) && !isCHIPOnly(sub))
+
+const isSubmitted = (sub: HealthPlanFormDataType): boolean =>
+    sub.status === 'SUBMITTED'
 
 const hasValidModifiedProvisions = (
     sub: LockedHealthPlanFormDataType
@@ -375,6 +371,7 @@ export {
     isContractAndRates,
     isLockedHealthPlanFormData,
     isUnlockedHealthPlanFormData,
+    isSubmitted,
     isValidAndCurrentLockedHealthPlanFormData,
     programNames,
     packageName,

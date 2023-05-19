@@ -42,6 +42,7 @@ const submissionDocumentSchema = z.object({
 
 const contractAmendmentInfoSchema = z.object({
     modifiedProvisions: z.object({
+        inLieuServicesAndSettings: z.boolean().optional(),
         modifiedBenefitsProvided: z.boolean().optional(),
         modifiedGeoAreaServed: z.boolean().optional(),
         modifiedMedicaidBeneficiaries: z.boolean().optional(),

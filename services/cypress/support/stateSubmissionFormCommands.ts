@@ -130,6 +130,57 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
         'documents/trussel-guide.pdf'
     )
 
+    cy.findByText('In Lieu-of Services and Settings (ILOSs) in accordance with 42 CFR § 438.3(e)(2)')
+    .parent()
+    .within(() => {
+        cy.findByText('No').click()
+    })
+    cy.findByText(
+        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)'
+    )
+        .parent()
+        .within(() => {
+            cy.findByText('Yes').click()
+        })
+    cy.findByText(
+        'Incentive arrangements in accordance with 42 CFR § 438.6(b)(2)'
+    )
+        .parent()
+        .within(() => {
+            cy.findByText('Yes').click()
+        })
+    cy.findByText(
+        'Withhold arrangements in accordance with 42 CFR § 438.6(b)(3)'
+    )
+        .parent()
+        .within(() => {
+            cy.findByText('No').click()
+        })
+    cy.findByText(
+        'State directed payments in accordance with 42 CFR § 438.6(c)'
+    )
+        .parent()
+        .within(() => {
+            cy.findByText('No').click()
+        })
+    cy.findByText('Pass-through payments in accordance with 42 CFR § 438.6(d)')
+        .parent()
+        .within(() => {
+            cy.findByText('No').click()
+        })
+    cy.findByText(
+        'Payments to MCOs and PIHPs for enrollees that are a patient in an institution for mental disease in accordance with 42 CFR § 438.6(e)'
+    )
+        .parent()
+        .within(() => {
+            cy.findByText('Yes').click()
+        })
+    cy.findByText('Non-risk payment arrangements that do not exceed the upper payment limits specified in § 447.362')
+        .parent()
+        .within(() => {
+            cy.findByText('Yes').click()
+        })
+
     cy.verifyDocumentsHaveNoErrors()
     cy.waitForDocumentsToLoad()
     cy.findAllByTestId('errorMessage').should('have.length', 0)
@@ -152,6 +203,12 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     cy.findByLabelText('1932(a) State Plan Authority').safeClick()
 
     // fill out the yes/nos
+    cy.findByText('In Lieu-of Services and Settings (ILOSs) in accordance with 42 CFR § 438.3(e)(2)')
+    .parent()
+    .within(() => {
+        cy.findByText('No').click()
+    })
+
     cy.findByText('Benefits provided by the managed care plans')
         .parent()
         .within(() => {
@@ -246,7 +303,7 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
         .within(() => {
             cy.findByText('No').click()
         })
-    cy.findByText('Non-risk payment arrangements')
+    cy.findByText('Non-risk payment arrangements that do not exceed the upper payment limits specified in § 447.362')
         .parent()
         .within(() => {
             cy.findByText('Yes').click()

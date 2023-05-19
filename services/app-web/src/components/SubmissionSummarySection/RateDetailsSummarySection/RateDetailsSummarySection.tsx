@@ -21,6 +21,7 @@ import { getCurrentRevisionFromHealthPlanPackage } from '../../../gqlHelpers'
 import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 import { DataDetailContactField } from '../../DataDetail/DataDetailContactField/DataDetailContactField'
+import { v4 as uuidv4 } from 'uuid'
 
 // Used for refreshed packages names keyed by their package id
 // package name includes (Draft) for draft packages.
@@ -215,7 +216,8 @@ export const RateDetailsSummarySection = ({
                 {submission.rateInfos.length > 0 ? (
                     submission.rateInfos.map((rateInfo) => {
                         return (
-                            <React.Fragment key={rateInfo.id}>
+                            // When we complete rates refactor we can remove workaround for the react key
+                            <React.Fragment key={rateInfo.id || uuidv4()}>
                                 <h3
                                     aria-label={`Rate ID: ${rateInfo.rateCertificationName}`}
                                     className={styles.rateName}

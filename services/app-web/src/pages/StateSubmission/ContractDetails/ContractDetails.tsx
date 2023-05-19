@@ -51,7 +51,11 @@ import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { formatYesNoForProto } from '../../../formHelpers/formatters'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
-import { isCHIPOnly, isContractAmendment, isContractWithProvisions } from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
+import {
+    isCHIPOnly,
+    isContractAmendment,
+    isContractWithProvisions,
+} from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -86,6 +90,7 @@ export interface ContractDetailsFormValues {
     contractDateEnd: string
     managedCareEntities: ManagedCareEntity[]
     federalAuthorities: FederalAuthority[]
+    inLieuServicesAndSettings: string | undefined
     modifiedBenefitsProvided: string | undefined
     modifiedGeoAreaServed: string | undefined
     modifiedMedicaidBeneficiaries: string | undefined
@@ -221,7 +226,8 @@ export const ContractDetails = ({
         }
     }
 
-    const applicableProvisions = generateApplicableProvisionsList(draftSubmission)
+    const applicableProvisions =
+        generateApplicableProvisionsList(draftSubmission)
 
     const applicableFederalAuthorities = isCHIPOnly(draftSubmission)
         ? federalAuthorityKeysForCHIP
@@ -241,6 +247,10 @@ export const ContractDetails = ({
         managedCareEntities:
             (draftSubmission?.managedCareEntities as ManagedCareEntity[]) ?? [],
         federalAuthorities: draftSubmission?.federalAuthorities ?? [],
+        inLieuServicesAndSettings: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .inLieuServicesAndSettings
+        ),
 
         modifiedBenefitsProvided: formatForForm(
             draftSubmission?.contractAmendmentInfo?.modifiedProvisions
@@ -445,7 +455,6 @@ export const ContractDetails = ({
             setSubmitting(false)
         }
     }
-
     return (
         <Formik
             initialValues={contractDetailsInitialValues}
@@ -458,9 +467,7 @@ export const ContractDetails = ({
                             : `../rate-details`,
                 })
             }}
-            validationSchema={() =>
-                ContractDetailsFormSchema(draftSubmission)
-            }
+            validationSchema={() => ContractDetailsFormSchema(draftSubmission)}
         >
             {({
                 values,
@@ -595,7 +602,9 @@ export const ContractDetails = ({
                                         <Fieldset
                                             aria-required
                                             legend={
-                                                isContractAmendment(draftSubmission)
+                                                isContractAmendment(
+                                                    draftSubmission
+                                                )
                                                     ? 'Amendment effective dates'
                                                     : 'Contract effective dates'
                                             }
@@ -785,8 +794,10 @@ export const ContractDetails = ({
                                             )}
                                         </Fieldset>
                                     </FormGroup>
-                                    {isContractWithProvisions(draftSubmission)  && (
-                                        <FormGroup data-testid='yes-no-group'>
+                                    {isContractWithProvisions(
+                                        draftSubmission
+                                    ) && (
+                                        <FormGroup data-testid="yes-no-group">
                                             <Fieldset
                                                 aria-required
                                                 legend="Does this contract action include new or modified provisions related to any of the following"
@@ -803,7 +814,10 @@ export const ContractDetails = ({
                                                             name={
                                                                 modifiedProvisionName
                                                             }
-                                                            label={generateProvisionLabel(draftSubmission, modifiedProvisionName)}
+                                                            label={generateProvisionLabel(
+                                                                draftSubmission,
+                                                                modifiedProvisionName
+                                                            )}
                                                             showError={showFieldErrors(
                                                                 errors[
                                                                     modifiedProvisionName

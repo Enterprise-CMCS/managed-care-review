@@ -26,8 +26,10 @@ import {
 import { HealthPlanPackage, UpdateInformation } from '../../gen/gqlClient'
 import { mockMNState } from './stateMock'
 
-function mockDraft(partial?: Partial<UnlockedHealthPlanFormDataType>): UnlockedHealthPlanFormDataType {
-   return {
+function mockDraft(
+    partial?: Partial<UnlockedHealthPlanFormDataType>
+): UnlockedHealthPlanFormDataType {
+    return {
         status: 'DRAFT',
         stateNumber: 5,
         createdAt: new Date(),
@@ -52,11 +54,13 @@ function mockDraft(partial?: Partial<UnlockedHealthPlanFormDataType>): UnlockedH
         stateContacts: [],
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
-        ...partial
+        ...partial,
     }
 }
 
-function mockBaseContract(partial?: Partial<UnlockedHealthPlanFormDataType>): UnlockedHealthPlanFormDataType {
+function mockBaseContract(
+    partial?: Partial<UnlockedHealthPlanFormDataType>
+): UnlockedHealthPlanFormDataType {
     return {
         status: 'DRAFT',
         stateNumber: 5,
@@ -110,11 +114,13 @@ function mockBaseContract(partial?: Partial<UnlockedHealthPlanFormDataType>): Un
         ],
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
-        ...partial
+        ...partial,
     }
 }
 
-function mockContractAndRatesDraft( partial?: Partial<UnlockedHealthPlanFormDataType>): UnlockedHealthPlanFormDataType {
+function mockContractAndRatesDraft(
+    partial?: Partial<UnlockedHealthPlanFormDataType>
+): UnlockedHealthPlanFormDataType {
     return {
         status: 'DRAFT',
         stateNumber: 5,
@@ -135,6 +141,7 @@ function mockContractAndRatesDraft( partial?: Partial<UnlockedHealthPlanFormData
         contractDateEnd: new Date(),
         contractAmendmentInfo: {
             modifiedProvisions: {
+                inLieuServicesAndSettings: true,
                 modifiedBenefitsProvided: true,
                 modifiedGeoAreaServed: false,
                 modifiedMedicaidBeneficiaries: true,
@@ -201,7 +208,7 @@ function mockContractAndRatesDraft( partial?: Partial<UnlockedHealthPlanFormData
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-        ...partial
+        ...partial,
     }
 }
 
@@ -239,6 +246,7 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
         contractDateEnd: new Date(),
         contractAmendmentInfo: {
             modifiedProvisions: {
+                inLieuServicesAndSettings: true,
                 modifiedRiskSharingStrategy: false,
                 modifiedIncentiveArrangements: false,
                 modifiedWitholdAgreements: false,
@@ -324,6 +332,7 @@ function mockStateSubmissionContractAmendment(): LockedHealthPlanFormDataType {
         contractDateEnd: new Date(),
         contractAmendmentInfo: {
             modifiedProvisions: {
+                inLieuServicesAndSettings: false,
                 modifiedBenefitsProvided: true,
                 modifiedGeoAreaServed: false,
                 modifiedMedicaidBeneficiaries: true,

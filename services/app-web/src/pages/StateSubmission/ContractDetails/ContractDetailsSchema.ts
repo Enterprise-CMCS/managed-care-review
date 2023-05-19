@@ -6,31 +6,47 @@ import {
     GeneralizedProvisionType,
     UnlockedHealthPlanFormDataType,
 } from '../../../common-code/healthPlanFormDataType'
-import { isBaseContract, isCHIPOnly, isContractAmendment, isContractWithProvisions } from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
-import { isMedicaidAmendmentProvision, isMedicaidBaseProvision } from '../../../common-code/healthPlanFormDataType/ModifiedProvisions'
+import {
+    isBaseContract,
+    isCHIPOnly,
+    isContractAmendment,
+    isContractWithProvisions,
+} from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
+import {
+    isMedicaidAmendmentProvision,
+    isMedicaidBaseProvision,
+} from '../../../common-code/healthPlanFormDataType/ModifiedProvisions'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 export const ContractDetailsFormSchema = (
-   draftSubmission: UnlockedHealthPlanFormDataType
+    draftSubmission: UnlockedHealthPlanFormDataType
 ) => {
-   
     const yesNoError = (provision: GeneralizedProvisionType) => {
         const noValidation = Yup.string().nullable()
-        const provisionValdiation = Yup.string().defined('You must select yes or no')
+        const provisionValdiation = Yup.string().defined(
+            'You must select yes or no'
+        )
         if (!isContractWithProvisions(draftSubmission)) {
             return noValidation
         }
         if (isCHIPOnly(draftSubmission)) {
-            return isCHIPProvision(provision)? provisionValdiation: noValidation
-    
-         } else if (isBaseContract(draftSubmission) && isMedicaidBaseProvision(provision)) {
-            return provisionValdiation 
-         } else if (isContractAmendment(draftSubmission) && isMedicaidAmendmentProvision(provision)){
-            return provisionValdiation 
-         } else {
+            return isCHIPProvision(provision)
+                ? provisionValdiation
+                : noValidation
+        } else if (
+            isBaseContract(draftSubmission) &&
+            isMedicaidBaseProvision(provision)
+        ) {
+            return provisionValdiation
+        } else if (
+            isContractAmendment(draftSubmission) &&
+            isMedicaidAmendmentProvision(provision)
+        ) {
+            return provisionValdiation
+        } else {
             return noValidation
-         }
+        }
     }
 
     return Yup.object().shape({
@@ -78,7 +94,7 @@ export const ContractDetailsFormSchema = (
                 return Boolean(value && value.length > 0)
             }
         ),
-        // inLieuServicesAndSettings: yesNoError('inLieuServicesAndSettings'),
+        inLieuServicesAndSettings: yesNoError('inLieuServicesAndSettings'),
         modifiedBenefitsProvided: yesNoError('modifiedBenefitsProvided'),
         modifiedGeoAreaServed: yesNoError('modifiedGeoAreaServed'),
         modifiedMedicaidBeneficiaries: yesNoError(

@@ -1,6 +1,15 @@
-import { ModifiedProvisionsAmendmentRecord, ModifiedProvisionsBaseContractRecord, ModifiedProvisionsCHIPRecord } from "../../constants"
-import { HealthPlanFormDataType } from "./HealthPlanFormDataType"
-import { isBaseContract, isCHIPOnly, isContractAmendment, isContractWithProvisions } from "./healthPlanFormData"
+import {
+    ModifiedProvisionsAmendmentRecord,
+    ModifiedProvisionsBaseContractRecord,
+    ModifiedProvisionsCHIPRecord,
+} from '../../constants'
+import { HealthPlanFormDataType } from './HealthPlanFormDataType'
+import {
+    isBaseContract,
+    isCHIPOnly,
+    isContractAmendment,
+    isContractWithProvisions,
+} from './healthPlanFormData'
 
 /*
     Each provision key represents a Yes/No question asked on Contract Details.
@@ -20,8 +29,8 @@ import { isBaseContract, isCHIPOnly, isContractAmendment, isContractWithProvisio
     Stakeholders want questions in specific order.
 */
 
-const  generalizedProvisionKeys = [
-    // 'inLieuServicesAndSettings',
+const generalizedProvisionKeys = [
+    'inLieuServicesAndSettings',
     'modifiedBenefitsProvided',
     'modifiedGeoAreaServed',
     'modifiedMedicaidBeneficiaries',
@@ -40,17 +49,17 @@ const  generalizedProvisionKeys = [
     'modifiedNonRiskPaymentArrangements',
 ] as const
 
-type GeneralizedProvisionType = (typeof  generalizedProvisionKeys)[number]
+type GeneralizedProvisionType = (typeof generalizedProvisionKeys)[number]
 type GeneralizedModifiedProvisions = {
     [K in (typeof generalizedProvisionKeys)[number]]: boolean
-} 
+}
 
 /*
     CHIP only logic
     Relevant for amendments that have population covered of CHIP.
 */
 const excludedProvisionsForCHIP = [
-    // 'inLieuServicesAndSettings',
+    'inLieuServicesAndSettings',
     'modifiedRiskSharingStrategy',
     'modifiedIncentiveArrangements',
     'modifiedWitholdAgreements',
@@ -61,7 +70,10 @@ const excludedProvisionsForCHIP = [
 ] as const
 
 type CHIPExcludedProvisionType = (typeof excludedProvisionsForCHIP)[number]
-type CHIPValidProvisionType = Exclude<GeneralizedProvisionType, CHIPExcludedProvisionType>
+type CHIPValidProvisionType = Exclude<
+    GeneralizedProvisionType,
+    CHIPExcludedProvisionType
+>
 
 type CHIPModifiedProvisions = Omit<
     GeneralizedModifiedProvisions,
@@ -75,7 +87,7 @@ function isCHIPProvision(
         provision as CHIPExcludedProvisionType
     )
 }
-const allowedProvisionKeysForCHIP =  generalizedProvisionKeys.filter((p) =>
+const allowedProvisionKeysForCHIP = generalizedProvisionKeys.filter((p) =>
     isCHIPProvision(p)
 ) as CHIPValidProvisionType[] // type coercion to narrow return type, we already used a type guard earlier so feel can feel confident
 
@@ -85,7 +97,7 @@ const allowedProvisionKeysForCHIP =  generalizedProvisionKeys.filter((p) =>
 */
 
 const modifiedProvisionMedicaidBaseKeys = [
-    // 'inLieuServicesAndSettings',
+    'inLieuServicesAndSettings',
     'modifiedRiskSharingStrategy',
     'modifiedIncentiveArrangements',
     'modifiedWitholdAgreements',
@@ -95,7 +107,8 @@ const modifiedProvisionMedicaidBaseKeys = [
     'modifiedNonRiskPaymentArrangements',
 ] as const
 
-type MedicaidBaseProvisionType = (typeof modifiedProvisionMedicaidBaseKeys)[number]
+type MedicaidBaseProvisionType =
+    (typeof modifiedProvisionMedicaidBaseKeys)[number]
 
 type ModifiedProvisionsMedicaidBase = {
     [K in MedicaidBaseProvisionType]: boolean
@@ -105,7 +118,7 @@ function isMedicaidBaseProvision(
     provision: MedicaidBaseProvisionType | GeneralizedProvisionType
 ): provision is MedicaidBaseProvisionType {
     return generalizedProvisionKeys.includes(
-        provision as MedicaidBaseProvisionType 
+        provision as MedicaidBaseProvisionType
     )
 }
 
@@ -114,6 +127,7 @@ function isMedicaidBaseProvision(
    Relevant for amendments that have population covered of Medicaid or Medicaid and CHIP.
 */
 const modifiedProvisionMedicaidAmendmentKeys = [
+    'inLieuServicesAndSettings',
     'modifiedBenefitsProvided',
     'modifiedGeoAreaServed',
     'modifiedMedicaidBeneficiaries',
@@ -147,73 +161,115 @@ function isMedicaidAmendmentProvision(
     )
 }
 
-
 /*
     Helper functions
-
-    These functions all take in a submission (which could be in any state) and return data relevant for specific varianst. 
+    
+    These functions all take in a submission and return data relevant for a specific variant. 
 */
 
-// Returns sublist of provisions that apply for given submission variant
-const generateApplicableProvisionsList = (draftSubmission: HealthPlanFormDataType): CHIPValidProvisionType[]|  MedicaidBaseProvisionType[]|ProvisionTypeMedicaidAmendment[] => {
+// Returns the list of provision keys that apply for given submission variant
+const generateApplicableProvisionsList = (
+    draftSubmission: HealthPlanFormDataType
+):
+    | CHIPValidProvisionType[]
+    | MedicaidBaseProvisionType[]
+    | ProvisionTypeMedicaidAmendment[] => {
     if (isCHIPOnly(draftSubmission)) {
-       return isContractAmendment(draftSubmission)? allowedProvisionKeysForCHIP: []
-    } else if (isBaseContract(draftSubmission)){
-       return  modifiedProvisionMedicaidBaseKeys  as unknown as MedicaidBaseProvisionType[]
+        return isContractAmendment(draftSubmission)
+            ? allowedProvisionKeysForCHIP
+            : [] // there are no applicable provisions for CHIP base contract, this variant does not require
+    } else if (isBaseContract(draftSubmission)) {
+        return modifiedProvisionMedicaidBaseKeys as unknown as MedicaidBaseProvisionType[]
     } else {
-     return  modifiedProvisionMedicaidAmendmentKeys as  unknown as ProvisionTypeMedicaidAmendment[]
+        return modifiedProvisionMedicaidAmendmentKeys as unknown as ProvisionTypeMedicaidAmendment[]
     }
 }
 
-// Returns specific label text for the provision based on the given submission variant
-const generateProvisionLabel = (draftSubmission: HealthPlanFormDataType, provision: GeneralizedProvisionType): string => {
-           if (isCHIPOnly(draftSubmission) && isCHIPProvision(provision)) {
-               return ModifiedProvisionsCHIPRecord[
-                   provision
-               ]
-
-           } else if (isBaseContract(draftSubmission) && isMedicaidBaseProvision(provision)) {
-               return ModifiedProvisionsBaseContractRecord[
-                   provision
-               ]
-           } else if (isContractAmendment(draftSubmission) && isMedicaidAmendmentProvision(provision)) {
-               return ModifiedProvisionsAmendmentRecord[
-                   provision
-               ]
-           } else { 
-           console.warn('Coding Error: This is a fallback case and is unexpected.')
-           return 'Invalid Provision' 
-   }
-       
+// Returns user-friendly label text for the provision based on the given submission variant
+const generateProvisionLabel = (
+    draftSubmission: HealthPlanFormDataType,
+    provision: GeneralizedProvisionType
+): string => {
+    if (isCHIPOnly(draftSubmission) && isCHIPProvision(provision)) {
+        return ModifiedProvisionsCHIPRecord[provision]
+    } else if (
+        isBaseContract(draftSubmission) &&
+        isMedicaidBaseProvision(provision)
+    ) {
+        return ModifiedProvisionsBaseContractRecord[provision]
+    } else if (
+        isContractAmendment(draftSubmission) &&
+        isMedicaidAmendmentProvision(provision)
+    ) {
+        return ModifiedProvisionsAmendmentRecord[provision]
+    } else {
+        console.warn('Coding Error: This is a fallback case and is unexpected.')
+        return 'Invalid Provision'
+    }
 }
 
-// Returns two lists of provisions keys sorted by whether they are set true/false for display on contract details
-// Discards keys from submission (initialProvisions) that are not valid for variant (applicableProvisions)
+/* 
+    Returns two lists of provisions keys sorted by whether they are set true/false
+    This function also quietly discard keys from the submission's own provisions list that are not valid for the current variant. 
+    That functionality needed for unlocked contracts which can be edited in a non-linear fashion)
+*/
 const sortModifiedProvisions = (
-   submission: HealthPlanFormDataType
+    submission: HealthPlanFormDataType
 ): [GeneralizedProvisionType[], GeneralizedProvisionType[]] => {
-   const initialProvisions = submission.contractAmendmentInfo?.modifiedProvisions
-   const modifiedProvisions: GeneralizedProvisionType[] = []
-   const unmodifiedProvisions: GeneralizedProvisionType[] = []
+    const initialProvisions =
+        submission.contractAmendmentInfo?.modifiedProvisions
+    const modifiedProvisions: GeneralizedProvisionType[] = []
+    const unmodifiedProvisions: GeneralizedProvisionType[] = []
 
-   if (initialProvisions && isContractWithProvisions(submission)) {
-       const applicableProvisions = generateApplicableProvisionsList(submission)
-  
-       for (const provisionKey of applicableProvisions) {
-           const value = initialProvisions[provisionKey]
-           if (value === true) {
-               modifiedProvisions.push(provisionKey)
-           } else if (value === false) {
-               unmodifiedProvisions.push(provisionKey)
-           } else {
-               break;
-           }
-       }
-   }
+    if (initialProvisions && isContractWithProvisions(submission)) {
+        const applicableProvisions =
+            generateApplicableProvisionsList(submission)
 
-   return [modifiedProvisions, unmodifiedProvisions]
+        for (const provisionKey of applicableProvisions) {
+            const value = initialProvisions[provisionKey]
+            if (value === true) {
+                modifiedProvisions.push(provisionKey)
+            } else if (value === false) {
+                unmodifiedProvisions.push(provisionKey)
+            }
+        }
+    }
+
+    return [modifiedProvisions, unmodifiedProvisions]
 }
 
+/*
+    Returns boolean for weher a submission variant is missing required provisions 
+    This is used to determine if we display the missing data warning on review and submit  
+*/
+const isMissingProvisions = (submission: HealthPlanFormDataType): boolean => {
+    const requiredProvisions = generateApplicableProvisionsList(submission)
+    const [modifiedProvisions, unmodifiedProvisions] =
+        sortModifiedProvisions(submission)
+
+    return (
+        modifiedProvisions.length + unmodifiedProvisions.length <
+        requiredProvisions.length
+    )
+}
+
+/*
+    Returns lang string dictionary for variant
+*/
+const getProvisionDictionary = (
+    submission: HealthPlanFormDataType
+):
+    | typeof ModifiedProvisionsCHIPRecord
+    | typeof ModifiedProvisionsBaseContractRecord
+    | typeof ModifiedProvisionsAmendmentRecord => {
+    if (isCHIPOnly(submission)) {
+        return ModifiedProvisionsCHIPRecord
+    } else if (isBaseContract(submission)) {
+        return ModifiedProvisionsBaseContractRecord
+    } else {
+        return ModifiedProvisionsAmendmentRecord
+    }
+}
 export type {
     ModifiedProvisionsMedicaidAmendment,
     ModifiedProvisionsMedicaidBase,
@@ -232,7 +288,9 @@ export {
     isCHIPProvision,
     isMedicaidAmendmentProvision,
     isMedicaidBaseProvision,
+    isMissingProvisions,
     generateProvisionLabel,
     generateApplicableProvisionsList,
-    sortModifiedProvisions
+    getProvisionDictionary,
+    sortModifiedProvisions,
 }

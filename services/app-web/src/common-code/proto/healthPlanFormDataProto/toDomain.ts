@@ -216,6 +216,8 @@ function parseContractAmendment(
 
     return {
         modifiedProvisions: {
+            inLieuServicesAndSettings:
+                cleanProvisions.inLieuServicesAndSettings,
             modifiedBenefitsProvided: cleanProvisions.modifiedBenefitsProvided,
             modifiedGeoAreaServed: cleanProvisions.modifiedGeoAreaServed,
             modifiedMedicaidBeneficiaries:

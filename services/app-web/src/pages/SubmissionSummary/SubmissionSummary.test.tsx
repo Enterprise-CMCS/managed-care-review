@@ -568,6 +568,7 @@ describe('SubmissionSummary', () => {
             await waitFor(() => {
                 expect(document.body).toHaveTextContent(/LOADING/)
             })
+
             // now check all the page content
             await waitFor(() => {
                 const rows = screen.getAllByRole('row')
@@ -706,6 +707,7 @@ describe('SubmissionSummary', () => {
                         name: 'This contract action includes new or modified provisions related to the following',
                     })
                 ).toBeInTheDocument()
+
                 expect(
                     screen.getByText(
                         'Medicaid beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)'
@@ -740,7 +742,9 @@ describe('SubmissionSummary', () => {
                     screen.getByText('Network adequacy standards')
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText('Non-risk payment arrangements')
+                    screen.getByText(
+                        'Non-risk payment arrangements that do not exceed the upper payment limits specified in § 447.362'
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {
@@ -895,6 +899,7 @@ describe('SubmissionSummary', () => {
                 name: 'Reason for unlocking submission',
             })
         })
+
         it('loads outdated health plan packages with old protos as expected - 1', async () => {
             const proto = fs.readFileSync(
                 `src/common-code/proto/healthPlanFormDataProto/testData/${oldProtoFiles[1]}`
@@ -1109,7 +1114,9 @@ describe('SubmissionSummary', () => {
                     screen.getByText('Network adequacy standards')
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText('Non-risk payment arrangements')
+                    screen.getByText(
+                        'Non-risk payment arrangements that do not exceed the upper payment limits specified in § 447.362'
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {
@@ -1264,6 +1271,7 @@ describe('SubmissionSummary', () => {
                 name: 'Reason for unlocking submission',
             })
         })
+
         it('loads outdated health plan packages with old protos as expected - 2', async () => {
             const proto = fs.readFileSync(
                 `src/common-code/proto/healthPlanFormDataProto/testData/${oldProtoFiles[2]}`
@@ -1478,7 +1486,9 @@ describe('SubmissionSummary', () => {
                     screen.getByText('Network adequacy standards')
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText('Non-risk payment arrangements')
+                    screen.getByText(
+                        'Non-risk payment arrangements that do not exceed the upper payment limits specified in § 447.362'
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {
@@ -1847,7 +1857,9 @@ describe('SubmissionSummary', () => {
                     screen.getByText('Network adequacy standards')
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText('Non-risk payment arrangements')
+                    screen.getByText(
+                        'Non-risk payment arrangements that do not exceed the upper payment limits specified in § 447.362'
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {

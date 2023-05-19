@@ -8,6 +8,8 @@ const ModifiedProvisionsAmendmentRecord: Record<
     keyof ModifiedProvisionsMedicaidAmendment,
     string
 > = {
+    inLieuServicesAndSettings:
+        'In Lieu-of Services and Settings (ILOSs) in accordance with 42 CFR § 438.3(e)(2)',
     modifiedBenefitsProvided: 'Benefits provided by the managed care plans',
     modifiedGeoAreaServed: 'Geographic areas served by the managed care plans',
     modifiedMedicaidBeneficiaries:
@@ -32,14 +34,16 @@ const ModifiedProvisionsAmendmentRecord: Record<
     modifiedGrevienceAndAppeal: 'Grievance and appeal system',
     modifiedNetworkAdequacyStandards: 'Network adequacy standards',
     modifiedLengthOfContract: 'Length of the contract period',
-    modifiedNonRiskPaymentArrangements: 'Non-risk payment arrangements',
+    modifiedNonRiskPaymentArrangements:
+        'Non-risk payment arrangements that do not exceed the upper payment limits specified in § 447.362',
 }
 
 const ModifiedProvisionsBaseContractRecord: Record<
     keyof ModifiedProvisionsMedicaidBase,
     string
 > = {
-    // inLieuServicesAndSettings: 'In Lieu-of Services and Settings (ILOSs) in accordance with 42 CFR § 438.3(e)(2)',
+    inLieuServicesAndSettings:
+        'In Lieu-of Services and Settings (ILOSs) in accordance with 42 CFR § 438.3(e)(2)',
     modifiedRiskSharingStrategy:
         'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)',
     modifiedIncentiveArrangements:

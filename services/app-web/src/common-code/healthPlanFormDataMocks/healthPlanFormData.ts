@@ -137,6 +137,7 @@ function contractAmendedOnly(): UnlockedHealthPlanFormDataType {
         addtlActuaryContacts: [],
         contractAmendmentInfo: {
             modifiedProvisions: {
+                inLieuServicesAndSettings: false,
                 modifiedBenefitsProvided: true,
                 modifiedGeoAreaServed: false,
                 modifiedMedicaidBeneficiaries: true,
@@ -493,6 +494,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
         ],
         contractAmendmentInfo: {
             modifiedProvisions: {
+                inLieuServicesAndSettings: true,
                 modifiedBenefitsProvided: true,
                 modifiedGeoAreaServed: true,
                 modifiedMedicaidBeneficiaries: true,
@@ -621,6 +623,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
         ],
         contractAmendmentInfo: {
             modifiedProvisions: {
+                inLieuServicesAndSettings: false,
                 modifiedBenefitsProvided: false,
                 modifiedGeoAreaServed: false,
                 modifiedMedicaidBeneficiaries: true,
