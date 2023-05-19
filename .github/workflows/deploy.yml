@@ -523,18 +523,3 @@ jobs:
         with:
           name: combined-test-coverage
           path: ./coverage-all/
-
-  otel-export-trace:
-    if: always()
-    name: OpenTelemetry Export Trace
-    runs-on: ubuntu-latest
-    needs: [coverage] # must run when all jobs are complete
-    steps:
-      - name: Export Workflow Trace
-        uses: inception-health/otel-export-trace-action@latest
-        env:
-          NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}}
-        with:
-          otlpEndpoint: https://gov-otlp.nr-data.net:4317
-          otlpHeaders: 'api-key: $NR_LICENSE_KEY'
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
