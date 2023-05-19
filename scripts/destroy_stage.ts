@@ -25,8 +25,6 @@ const stackPrefixes = [
     'storybook',
     'infra-api',
     'ui',
-    'database',
-    'stream-functions',
     'github-oidc',
 ]
 
@@ -93,8 +91,8 @@ async function main() {
 async function getStacksFromStage(
     stageName: string
 ): Promise<string[] | Error[]> {
-    let errors!: Error[]
-    let stacksToDestroy!: string[]
+    let errors: Error[] = []
+    let stacksToDestroy: string[] = []
     for (const prefix of stackPrefixes) {
         const stackName = `${prefix}-${stageName}`
         try {
@@ -119,8 +117,7 @@ async function getStacksFromStage(
 
             stacksToDestroy.push(...types)
         } catch (err) {
-            console.error(err)
-            const error = new Error(`Could not remove stack: ${err}`)
+            const error = new Error(err)
             errors.push(error)
         }
     }
@@ -129,47 +126,6 @@ async function getStacksFromStage(
     }
     return stacksToDestroy
 }
-/*
-async function getStacksFromStage(
-    stageName: string
-): Promise<string[] | Error[]> {
-    let errors: Error[]
-    const stacks = await Promise.all(
-        stackPrefixes.map(async (prefix) => {
-            const stackName = `${prefix}-${stageName}`
-            try {
-                const commandDescribeStacks = new DescribeStacksCommand({
-                    StackName: stackName,
-                })
-                const stacks = await cf.send(commandDescribeStacks)
-
-                if (!stacks.Stacks) {
-                    console.info(`Stack ${stackName} does not exist. Skipping.`)
-                    return []
-                }
-
-                // type guard
-                const isStack = (
-                    stack: string | undefined
-                ): stack is string => {
-                    return !!stack
-                }
-
-                const types = stacks?.Stacks?.map((stack) => {
-                    return stack.StackName
-                }).filter(isStack)
-
-                return types
-            } catch (err) {
-                console.error(err)
-                errors.push(new Error(`Could not remove stack: ${err}`))
-            }
-        })
-    )
-    return stacks.flat() as string[]
-
-}
-*/
 
 interface s3ObjectKey {
     Key: string
