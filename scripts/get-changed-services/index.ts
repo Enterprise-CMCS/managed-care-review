@@ -28,7 +28,6 @@ async function main() {
     // get the latest commit in the branch to see if we are forcing a run
     const latestCommit = await getLatestCommitSHA()
     const commitMessage = await getLatestCommitMessage(latestCommit)
-    console.info(commitMessage)
     if (commitMessage.includes('ci-force-run')) {
         core.setOutput('changed-services', deployAllServices)
         return
