@@ -73,6 +73,8 @@ Next we copy the unit test reports into the same directory, and run `npx nyc mer
 
 These reports are then uploaded as [workflow artifacts](https://docs.github.com/en/actions/managing-workflow-runs/downloading-workflow-artifacts) under `Upload combined test coverage`. This zip file can be downloaded from the github action summary for the `deploy` workflow (scroll to bottom of page).
 
+One additional step in CI is to publish the coverage reports to CodeClimate. In deploy.yml, there are three "publish code coverage" steps, which specify the location of the reports for web, api, and cypress, as well as our CodeClimate reporter ID. We can access the CodeClimate report by clicking the "test coverage" button at the top of the README at the root of the repo.
+
 ### notes
 
 [^1]: This is trivial to do in Jest by passing a `--coverage` flag, and more involved in Cypress, as implemented in parts of [this pull request](https://github.com/Enterprise-CMCS/managed-care-review/pull/1119/files).
