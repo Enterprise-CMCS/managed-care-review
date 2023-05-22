@@ -6,6 +6,6 @@
         "noFallthroughCasesInSwitch": true,
         "strict": true,
         "useUnknownInCatchVariables": false,
-        "noErrorTruncation": true,
+        "noErrorTruncation": true
     }
 }

@@ -4,7 +4,7 @@ import {
     mockContractAndRatesDraft,
     mockMNState,
     mockStateSubmissionContractAmendment,
-} from '../../../../services/app-web/src/testHelpers/apolloMocks'
+} from '@managed-care-review/app-web/src/testHelpers/apolloMocks/index'
 import {
     convertRateSupportingDocs,
     generateRateName,
@@ -859,7 +859,9 @@ describe('submission type assertions', () => {
         'Remove rates data on CONTRACT_ONLY submission: $testDescription',
         ({ submission, expectedResult }) => {
             expect(removeRatesData(submission)).toEqual(
-                expect.objectContaining(expectedResult)
+                expect.objectContaining(
+                    expectedResult as UnlockedHealthPlanFormDataType
+                )
             )
         }
     )

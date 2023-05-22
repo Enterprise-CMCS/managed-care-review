@@ -1,5 +1,5 @@
 {
-    "name": "app-proto",
+    "name": "@managed-care-review/app-proto",
     "version": "1.0.0",
     "description": "app-proto Typescript definitions and helpers",
     "scripts": {

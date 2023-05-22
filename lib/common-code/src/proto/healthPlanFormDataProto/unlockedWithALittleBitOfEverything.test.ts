@@ -1,8 +1,8 @@
 import fs from 'fs'
 import { toDomain, toProtoBuffer } from '.'
-import { migrateProto as initialMigration } from '../../../../../services/app-proto/protoMigrations/healthPlanFormDataMigrations/0000_initial_migration'
-import { migrateProto as rateIDMigration } from '../../../../../services/app-proto/protoMigrations/healthPlanFormDataMigrations/0001_rate_id_migration'
-import { migrateProto as rateProgramsMigration } from '../../../../../services/app-proto/protoMigrations/healthPlanFormDataMigrations/0002_rate_programs_migration'
+import { migrateProto as initialMigration } from '@managed-care-review/app-proto/protoMigrations/healthPlanFormDataMigrations/0000_initial_migration'
+import { migrateProto as rateIDMigration } from '@managed-care-review/app-proto/protoMigrations/healthPlanFormDataMigrations/0001_rate_id_migration'
+import { migrateProto as rateProgramsMigration } from '@managed-care-review/app-proto/protoMigrations/healthPlanFormDataMigrations/0002_rate_programs_migration'
 import { mcreviewproto } from '../../gen/healthPlanFormDataProto'
 import * as genproto from '../../gen/healthPlanFormDataProto'
 

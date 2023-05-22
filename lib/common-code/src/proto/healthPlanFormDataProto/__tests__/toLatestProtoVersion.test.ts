@@ -4,7 +4,7 @@ import { decodeOrError } from '../toDomain'
 import { expect } from '@jest/globals'
 
 const pathToProtoData20220819 =
-    './proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-08-19.proto'
+    './src/proto/healthPlanFormDataProto/testData/unlockedWithALittleBitOfEverything-2022-08-19.proto'
 
 describe('v2 to v3', () => {
     it('should convert actuary contacts after the first to addtlActuaryContacts and communication preference as expected', () => {

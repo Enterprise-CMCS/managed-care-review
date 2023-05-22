@@ -10,7 +10,7 @@ import path from 'path'
 import { test, expect } from '@jest/globals'
 
 // this is relative to app-web since that's where tests are run from
-const TEST_DATA_PATH = './proto/healthPlanFormDataProto/testData'
+const TEST_DATA_PATH = './src/proto/healthPlanFormDataProto/testData'
 
 // This "test" makes no assertions, instead it monitors our mock protos (unlockedWithALittleBitOfEverything
 // at the time of this writing) and if it's serialized protobuf representation changes, it writes that to a new .proto
