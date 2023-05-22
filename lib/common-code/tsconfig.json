@@ -1,8 +1,8 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "rootDir": "src",
-        "outDir": "dist",
+        "rootDir": "./src",
+        "outDir": "./dist",
 
         "target": "es2017",
         "lib": ["dom", "dom.iterable", "esnext"],
@@ -13,10 +13,14 @@
         "module": "esnext",
         "resolveJsonModule": true,
         "isolatedModules": true,
-        "noEmit": true,
         "jsx": "react-jsx",
         "types": ["cypress", "node"]
     },
-    "include": ["src/"],
-    "exclude": ["src/s3URLEncoding.test.ts", "src/s3URLEncoding.ts"]
+    "exclude": [
+        "gen/*",
+        "dist/*",
+        "jest.config.ts",
+        "src/s3URLEncoding.test.ts",
+        "src/s3URLEncoding.ts"
+    ]
 }
