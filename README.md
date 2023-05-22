@@ -184,6 +184,8 @@ This application is deployed into three different AWS accounts: Dev, Val, and Pr
 
 In the Dev account, in addition to deploying the main branch, we deploy a full version of the app on every branch that is pushed that is not the main branch. We call these deployments "review apps" since they host all the changes for a PR in a full deployment. These review apps are differentiated by their Serverless "stack" name. This is set to the branch name and all infra ends up being prefixed with it to keep from there being any overlapping.
 
+We have a script (`getChangedServices`) that runs in CI to check if a service needs to be re-deployed due to your most recent commit or if a service can be skipped in order to save CI deploy time. For example, if you're just making changes to `app-web`, it's likely that you won't need to re-deploy any infra services, such as postgres, after an initial branch deploy. However, if you do need your branch to be fully re-deployed, you can add the string `force-ci-run` to your commit message and the entire deploy workflow will be run.
+
 You can see the deploys for review apps [here](https://github.com/Enterprise-CMCS/managed-care-review/actions/workflows/deploy.yml)
 
 ### Building scripts

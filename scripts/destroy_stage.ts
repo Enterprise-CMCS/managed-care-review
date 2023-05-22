@@ -25,8 +25,6 @@ const stackPrefixes = [
     'storybook',
     'infra-api',
     'ui',
-    'database',
-    'stream-functions',
     'github-oidc',
 ]
 
@@ -53,6 +51,12 @@ async function main() {
 
     const stacksToDestroy = await getStacksFromStage(stage)
     console.info(`debug: ${stacksToDestroy}`)
+    if (process.env.CI === 'true' && stacksToDestroy.length === 0) {
+        console.warn(
+            `We're in CI and there are no stacks to destroy. Alerting.`
+        )
+        process.exit(1)
+    }
     if (stacksToDestroy.length === 0) {
         console.info(`No stacks to destroy. Skipping destroy.`)
         process.exit(0)
@@ -61,6 +65,10 @@ async function main() {
     // AWS can rate limit us if we go too fast. Using a regular
     // for construct to wait on async to slow us down a bit.
     for (const stack of stacksToDestroy) {
+        if (stack instanceof Error) {
+            console.error(`Could not delete stack: ${stack}`)
+            process.exit(1)
+        }
         console.info(`Destroying stack: ${stack}`)
 
         const clearBucketOutput = await clearServerlessDeployBucket(stack)
@@ -80,40 +88,43 @@ async function main() {
     }
 }
 
-async function getStacksFromStage(stageName: string): Promise<string[]> {
-    const stacks = await Promise.all(
-        stackPrefixes.map(async (prefix) => {
-            const stackName = `${prefix}-${stageName}`
-            try {
-                const commandDescribeStacks = new DescribeStacksCommand({
-                    StackName: stackName,
-                })
-                const stacks = await cf.send(commandDescribeStacks)
+async function getStacksFromStage(
+    stageName: string
+): Promise<string[] | Error[]> {
+    let errors: Error[] = []
+    let stacksToDestroy: string[] = []
+    for (const prefix of stackPrefixes) {
+        const stackName = `${prefix}-${stageName}`
+        try {
+            const commandDescribeStacks = new DescribeStacksCommand({
+                StackName: stackName,
+            })
+            const stacks = await cf.send(commandDescribeStacks)
 
-                if (!stacks.Stacks) {
-                    console.info(`Stack ${stackName} does not exist. Skipping.`)
-                    return []
-                }
-
-                // type guard
-                const isStack = (
-                    stack: string | undefined
-                ): stack is string => {
-                    return !!stack
-                }
-
-                const types = stacks?.Stacks?.map((stack) => {
-                    return stack.StackName
-                }).filter(isStack)
-
-                return types
-            } catch (err) {
+            if (!stacks.Stacks) {
                 console.info(`Stack ${stackName} does not exist. Skipping.`)
                 return []
             }
-        })
-    )
-    return stacks.flat()
+
+            // type guard
+            const isStack = (stack: string | undefined): stack is string => {
+                return !!stack
+            }
+
+            const types = stacks?.Stacks?.map((stack) => {
+                return stack.StackName
+            }).filter(isStack)
+
+            stacksToDestroy.push(...types)
+        } catch (err) {
+            const error = new Error(err)
+            errors.push(error)
+        }
+    }
+    if (errors.length != 0) {
+        return errors
+    }
+    return stacksToDestroy
 }
 
 interface s3ObjectKey {
