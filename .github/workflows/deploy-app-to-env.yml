@@ -78,7 +78,6 @@ jobs:
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
 
-
       - name: Generate Code
         run: lerna run generate
 
@@ -119,7 +118,8 @@ jobs:
 
       - name: run migrations
         id: run-migrations
+        working-directory: services/app-api
         env:
           STAGE_NAME: ${{ inputs.stage_name }}
         run: |
-          pushd services/app-api && ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_NAME-migrate
+          ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_NAME-migrate
