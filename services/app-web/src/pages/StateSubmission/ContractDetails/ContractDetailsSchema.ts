@@ -5,6 +5,7 @@ import {
     isCHIPProvision,
     GeneralizedProvisionType,
     UnlockedHealthPlanFormDataType,
+    federalAuthorityKeysForCHIP,
 } from '../../../common-code/healthPlanFormDataType'
 import {
     isBaseContract,
@@ -91,7 +92,11 @@ export const ContractDetailsFormSchema = (
             'authoritySelection',
             'You must select at least one authority',
             (value) => {
-                return Boolean(value && value.length > 0)
+                return isCHIPOnly(draftSubmission)
+                    ? federalAuthorityKeysForCHIP.some((requiredAuthority) =>
+                          value?.includes(requiredAuthority)
+                      )
+                    : Boolean(value && value.length > 0)
             }
         ),
         inLieuServicesAndSettings: yesNoError('inLieuServicesAndSettings'),
