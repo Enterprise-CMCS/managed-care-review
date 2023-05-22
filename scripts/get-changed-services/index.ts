@@ -31,6 +31,7 @@ async function main() {
     console.info(commitMessage)
     if (commitMessage.includes('ci-force-run')) {
         core.setOutput('changed-services', deployAllServices)
+        return
     }
 
     // if we haven't had a run on this branch, we need to deploy everything
