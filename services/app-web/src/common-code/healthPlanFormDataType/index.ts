@@ -31,7 +31,7 @@ export type {
     ModifiedProvisionsMedicaidBase,
     CHIPModifiedProvisions,
     GeneralizedProvisionType,
-    ProvisionTypeMedicaidAmendment,
+    MedicaidAmendmentProvisionType,
     GeneralizedModifiedProvisions,
 } from './ModifiedProvisions'
 
@@ -44,15 +44,9 @@ export {
     generalizedProvisionKeys,
     modifiedProvisionMedicaidBaseKeys,
     modifiedProvisionMedicaidAmendmentKeys,
-    excludedProvisionsForCHIP,
-    allowedProvisionKeysForCHIP,
+    provisionCHIPKeys,
     isCHIPProvision,
     isMedicaidAmendmentProvision,
-    isMissingProvisions,
-    generateProvisionLabel,
-    generateApplicableProvisionsList,
-    getProvisionDictionary,
-    sortModifiedProvisions,
 } from './ModifiedProvisions'
 
 export type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
@@ -71,7 +65,7 @@ export {
     packageName,
     generateRateName,
     convertRateSupportingDocs,
-    removeNonCHIPData,
+    removeInvalidProvisionsAndAuthorities,
     removeRatesData,
     hasValidPopulationCoverage,
     isValidAndCurrentLockedHealthPlanFormData,

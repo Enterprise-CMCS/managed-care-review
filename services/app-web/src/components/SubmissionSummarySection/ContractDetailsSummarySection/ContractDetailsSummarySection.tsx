@@ -18,12 +18,10 @@ import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
-    federalAuthorityKeysForCHIP,
-    HealthPlanFormDataType,
     sortModifiedProvisions,
     isMissingProvisions,
     getProvisionDictionary,
-} from '../../../common-code/healthPlanFormDataType'
+} from '../../../common-code/healthPlanSubmissionHelpers/provisions'
 import { DataDetailCheckboxList } from '../../DataDetail/DataDetailCheckboxList'
 import {
     isBaseContract,
@@ -31,6 +29,10 @@ import {
     isContractWithProvisions,
     isSubmitted,
 } from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
+import {
+    HealthPlanFormDataType,
+    federalAuthorityKeysForCHIP,
+} from '../../../common-code/healthPlanFormDataType'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType

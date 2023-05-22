@@ -14,11 +14,12 @@ import {
     TEST_XLS_FILE,
     TEST_PNG_FILE,
     dragAndDrop,
+    selectYesNoRadio,
 } from '../../../testHelpers/jestHelpers'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { ContractDetails } from './'
 import {
-    allowedProvisionKeysForCHIP,
+    provisionCHIPKeys,
     federalAuthorityKeys,
     federalAuthorityKeysForCHIP,
     modifiedProvisionMedicaidAmendmentKeys,
@@ -146,881 +147,902 @@ describe('ContractDetails', () => {
         })
     })
 
-        describe('Federal authorities', () => {
-            it('displays correct form fields for federal authorities with medicaid contract', () => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={{
-                            ...mockDraft(),
-                            populationCovered: 'MEDICAID',
-                        }}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
-                    />
-                )
-                const fedAuthQuestion = screen.getByRole('group', {
-                    name: 'Active federal operating authority',
-                })
-                expect(fedAuthQuestion).toBeInTheDocument()
-                expect(
-                    within(fedAuthQuestion).getAllByRole('checkbox')
-                ).toHaveLength(federalAuthorityKeys.length)
-                expect(
-                    within(fedAuthQuestion).getByRole('checkbox', {
-                        name: '1915(b) Waiver Authority',
-                    })
-                ).toBeInTheDocument() // authority disallowed for chip is not included in list
+    describe('Federal authorities', () => {
+        it('displays correct form fields for federal authorities with medicaid contract', () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={{
+                        ...mockDraft(),
+                        populationCovered: 'MEDICAID',
+                    }}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />
+            )
+            const fedAuthQuestion = screen.getByRole('group', {
+                name: 'Active federal operating authority',
             })
-
-            it('displays correct form fields for federal authorities with CHIP only contract', async () => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={{
-                            ...mockDraft(),
-                            populationCovered: 'CHIP',
-                        }}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
-                    />
-                )
-                const fedAuthQuestion = await screen.findByRole('group', {
-                    name: 'Active federal operating authority',
+            expect(fedAuthQuestion).toBeInTheDocument()
+            expect(
+                within(fedAuthQuestion).getAllByRole('checkbox')
+            ).toHaveLength(federalAuthorityKeys.length)
+            expect(
+                within(fedAuthQuestion).getByRole('checkbox', {
+                    name: '1915(b) Waiver Authority',
                 })
-                expect(fedAuthQuestion).toBeInTheDocument()
-                expect(
-                    within(fedAuthQuestion).getAllByRole('checkbox')
-                ).toHaveLength(federalAuthorityKeysForCHIP.length)
-                expect(
-                    within(fedAuthQuestion).queryByRole('checkbox', {
-                        name: '1915(b) Waiver Authority',
-                    })
-                ).not.toBeInTheDocument() // medicaid only authority should be in the list
-            })
+            ).toBeInTheDocument() // authority disallowed for chip is not included in list
         })
-        
-        describe('Contract provisions - yes/nos', () => {
-            const medicaidAmendmentPackage = mockDraft({
-                populationCovered: 'MEDICAID',
-                contractType: 'AMENDMENT'
-            })
-            const medicaidBasePackage = mockDraft({
-                populationCovered: 'MEDICAID',
-                contractType: 'BASE'
-            })
 
-            const chipAmendmentPackage = mockDraft({
-                populationCovered: 'CHIP',
-                contractType: 'AMENDMENT'
+        it('displays correct form fields for federal authorities with CHIP only contract', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={{
+                        ...mockDraft(),
+                        populationCovered: 'CHIP',
+                    }}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />
+            )
+            const fedAuthQuestion = await screen.findByRole('group', {
+                name: 'Active federal operating authority',
             })
-            const chipBasePackage = mockDraft({
-                populationCovered: 'CHIP',
-                contractType: 'BASE'
-            })
-            
-            it('can set provisions for medicaid contract amendment', async () => {
-             renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={medicaidAmendmentPackage}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
+            expect(fedAuthQuestion).toBeInTheDocument()
+            expect(
+                within(fedAuthQuestion).getAllByRole('checkbox')
+            ).toHaveLength(federalAuthorityKeysForCHIP.length)
+            expect(
+                within(fedAuthQuestion).queryByRole('checkbox', {
+                    name: '1915(b) Waiver Authority',
+                })
+            ).not.toBeInTheDocument() // medicaid only authority should be in the list
+        })
+    })
+
+    describe('Contract provisions - yes/nos', () => {
+        const medicaidAmendmentPackage = mockDraft({
+            populationCovered: 'MEDICAID',
+            contractType: 'AMENDMENT',
+        })
+        const medicaidBasePackage = mockDraft({
+            populationCovered: 'MEDICAID',
+            contractType: 'BASE',
+        })
+
+        const chipAmendmentPackage = mockDraft({
+            populationCovered: 'CHIP',
+            contractType: 'AMENDMENT',
+        })
+        const chipBasePackage = mockDraft({
+            populationCovered: 'CHIP',
+            contractType: 'BASE',
+        })
+
+        it('can set provisions for medicaid contract amendment', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={medicaidAmendmentPackage}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            await screen.findByRole('form')
+            // amendment specific copy is used
+            expect(
+                screen.queryByText(
+                    'Medicaid beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)'
                 )
-                await screen.findByRole('form')
-                // amendment specific copy is used
-                expect(
-                    screen.queryByText('Medicaid beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)')
-                ).toBeInTheDocument()
+            ).toBeInTheDocument()
 
-                expect(
-                    screen.queryByText('Network adequacy standards')
-                ).toBeInTheDocument()
-                expect(
-                    screen.queryByText('Grievance and appeal system')
-                ).toBeInTheDocument()
+            expect(
+                screen.queryByText('Network adequacy standards')
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText('Grievance and appeal system')
+            ).toBeInTheDocument()
 
+            // risk and payment related provisions should be visible
+            expect(
+                screen.queryByText(/Risk-sharing strategy/)
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(/Withhold arrangements in accordance/)
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(/Payments to MCOs and PIHPs/)
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(/State directed payments/)
+            ).toBeInTheDocument()
 
-                // risk and payment related provisions should be visible
-                expect(
-                    screen.queryByText(/Risk-sharing strategy/)
-                ).toBeInTheDocument()
-                expect(
-                    screen.queryByText(/Withhold arrangements in accordance/)
-                ).toBeInTheDocument()
-                expect(
-                    screen.queryByText(/Payments to MCOs and PIHPs/)
-                ).toBeInTheDocument()
-                expect(
-                    screen.queryByText(/State directed payments/)
-                ).toBeInTheDocument()
+            // overall number of provisions should be correct
+            expect(screen.getAllByTestId('yes-no-radio-fieldset')).toHaveLength(
+                modifiedProvisionMedicaidAmendmentKeys.length
+            )
+        })
 
-                // overall number of provisions should be correct
-                expect(screen.getAllByTestId('yes-no-radio-fieldset')).toHaveLength(modifiedProvisionMedicaidAmendmentKeys.length )
-            })
-
-            it('shows correct validations for medicaid contract amendment', async () => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={medicaidAmendmentPackage}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
-                // trigger validations
-                await userEvent.click(screen.getByRole('button', {
+        it('shows correct validations for medicaid contract amendment', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={medicaidAmendmentPackage}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            // trigger validations
+            await userEvent.click(
+                screen.getByRole('button', {
                     name: 'Continue',
-                }))
-
-              // check for overall list of yes/no errors in form
-                const formGroup = screen.getByText('Does this contract action include new or modified provisions related to any of the following').parentElement
-                await waitFor(() => {
-                    expect(within(formGroup!).getAllByText('You must select yes or no')).toHaveLength(modifiedProvisionMedicaidAmendmentKeys.length)
                 })
+            )
 
-                // select responses for a few provisions
-                const benefitsYes = within(screen.getByText(
-                    'Benefits provided by the managed care plans'
-                ).parentElement!).getByLabelText('Yes') //
-                const geoNo = within(screen.getByText(
-                    'Geographic areas served by the managed care plans'
-                ).parentElement!).getByLabelText('No')
-                const lengthYes = within(screen.getByText(
-                    'Length of the contract period'
-                ).parentElement!).getByLabelText('Yes')
-                
-              
-                await userEvent.click(benefitsYes)
-                await userEvent.click(geoNo)
-                await userEvent.click(lengthYes)
-        
-
-                // overall list of yes/no errors should update as expected
-                await waitFor(() => {
-                    expect(
-                        (within(formGroup!).getAllByText('You must select yes or no')
-                    )).toHaveLength(modifiedProvisionMedicaidAmendmentKeys.length - 3)
-                })
+            // check for overall list of yes/no errors in form
+            const formGroup = screen.getByText(
+                'Does this contract action include new or modified provisions related to any of the following'
+            ).parentElement
+            await waitFor(() => {
+                expect(
+                    formGroup &&
+                        within(formGroup).getAllByText(
+                            'You must select yes or no'
+                        )
+                ).toHaveLength(modifiedProvisionMedicaidAmendmentKeys.length)
             })
 
-            it('can set provisions for medicaid base contract', async () =>{
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={medicaidBasePackage}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
+            await selectYesNoRadio(
+                screen,
+                'Benefits provided by the managed care plans',
+                'Yes'
+            )
+            await selectYesNoRadio(
+                screen,
+                'Geographic areas served by the managed care plans',
+                'No'
+            )
+            await selectYesNoRadio(
+                screen,
+                'Length of the contract period',
+                'Yes'
+            )
+
+            // overall list of yes/no errors should update as expected
+            await waitFor(() => {
+                expect(
+                    formGroup &&
+                        within(formGroup).getAllByText(
+                            'You must select yes or no'
+                        )
+                ).toHaveLength(
+                    modifiedProvisionMedicaidAmendmentKeys.length - 3
                 )
-                await screen.findByRole('form')
-
-                // risk and payment related provisions should be visible
-                expect(
-                    screen.queryByText(/Risk-sharing strategy/)
-                ).toBeInTheDocument()
-                expect(
-                    screen.queryByText(/Withhold arrangements in accordance/)
-                ).toBeInTheDocument()
-                expect(
-                    screen.queryByText(/Payments to MCOs and PIHPs/)
-                ).toBeInTheDocument()
-                expect(
-                    screen.queryByText(/State directed payments/)
-                ).toBeInTheDocument()
-
-                // overall number of provisions should be correct
-                expect(screen.getAllByTestId('yes-no-radio-fieldset')).toHaveLength(modifiedProvisionMedicaidBaseKeys.length)
-            })
-
-
-            it('shows correct validations for medicaid base contract', async() => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={medicaidBasePackage}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
-                
-                // trigger validations
-               await  userEvent.click(screen.getByRole('button', {
-                    name: 'Continue',
-                }))
-
-                // check for overall list of yes/no errors in form
-                const formGroup = screen.getByText('Does this contract action include new or modified provisions related to any of the following').parentElement
-                
-                await waitFor(() => {
-                    expect(
-                        within(formGroup!).getAllByText('You must select yes or no')
-                    ).toHaveLength(modifiedProvisionMedicaidBaseKeys.length)
-                })
-
-                // select responses for a few provisions
-                const benefitsYes = within(screen.getByText(
-                    /Non-risk payment arrangements/
-                ).parentElement!).getByLabelText('Yes') //
-                const withholdNo = within(screen.getByText(
-                    /Withhold arrangements/
-                ).parentElement!).getByLabelText('No')
-
-            
-                await userEvent.click(benefitsYes)
-                await userEvent.click(withholdNo)
-               
-                //overall list of yes/no errors should update as expected
-                await waitFor(() => {
-                    expect(
-                        within(formGroup!).queryAllByText('You must select yes or no')
-                    ).toHaveLength(modifiedProvisionMedicaidBaseKeys.length - 2)
-                })
-            })
-
-            it('cannot set provisions for CHIP only base contract',async  () => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={chipBasePackage}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
-                await screen.findByRole('form')
-                expect(screen.queryByText('Does this contract action include new or modified provisions related to any of the following')).toBeNull()
-                expect(screen.queryAllByTestId('yes-no-radio-fieldset')).toHaveLength(0)
-            })
-
-            it('can set provisions for CHIP only amendment', async() => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={chipAmendmentPackage}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
-                await screen.findByRole('form')
-
-                // CHIP specific copy is used
-                expect(
-                    screen.queryByText('CHIP beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)')
-                ).toBeInTheDocument()
-
-                expect(
-                    screen.queryByText('Network adequacy standards 42 CFR § 457.1218')
-                ).toBeInTheDocument()
-                expect(
-                    screen.queryByText('Grievance and appeal system 42 CFR § 457.1260')
-                ).toBeInTheDocument()
-
-
-                // risk and payment related provisions should not be visible
-                expect(
-                    screen.queryByText(/Risk-sharing strategy/)
-                ).toBeNull()
-                expect(
-                    screen.queryByText(/Payments to MCOs and PIHPs/)
-                ).toBeNull()
-                expect(
-                    screen.queryByText(/State directed payments/)
-                ).toBeNull()
-
-                // overall number of provisions should be correct
-                expect(screen.getAllByTestId('yes-no-radio-fieldset')).toHaveLength(allowedProvisionKeysForCHIP.length )
-            })
-
-
-
-            it('shows correct validations for CHIP only amendment', async () => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={chipAmendmentPackage}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
-
-                // trigger validations
-                await userEvent.click(screen.getByRole('button', {
-                    name: 'Continue',
-                }))
-                
-                 // check for overall list of yes/no errors in form
-                 const formGroup = screen.getByText('Does this contract action include new or modified provisions related to any of the following').parentElement
-                
-                 await waitFor(() => {
-                     expect(
-                         within(formGroup!).getAllByText('You must select yes or no')
-                     ).toHaveLength(allowedProvisionKeysForCHIP.length)
-                 })
-
-        
-                // choose yes and no
-                const benefitsYes = within(screen.getByText(
-                    'Benefits provided by the managed care plans'
-                ).parentElement!).getByLabelText('Yes') //
-                const geoNo = within(screen.getByText(
-                    'Geographic areas served by the managed care plans'
-                ).parentElement!).getByLabelText('No')
-                const lengthYes = within(screen.getByText(
-                    'Length of the contract period'
-                ).parentElement!).getByLabelText('Yes')
-                
-                
-                await userEvent.click(benefitsYes)
-                await userEvent.click(geoNo)
-                await userEvent.click(lengthYes)
-                
-            
-                await waitFor(() => {
-                    expect(
-                        within(formGroup!).queryAllByText('You must select yes or no')
-                    ).toHaveLength(allowedProvisionKeysForCHIP.length - 3)
-                })
             })
         })
 
-        describe('Continue button', () => {
-            it('enabled when valid files are present', async () => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={emptyContractDetailsDraft}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
+        it('can set provisions for medicaid base contract', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={medicaidBasePackage}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            await screen.findByRole('form')
 
-                const continueButton = screen.getByRole('button', {
+            // risk and payment related provisions should be visible
+            expect(
+                screen.queryByText(/Risk-sharing strategy/)
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(/Withhold arrangements in accordance/)
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(/Payments to MCOs and PIHPs/)
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(/State directed payments/)
+            ).toBeInTheDocument()
+
+            // overall number of provisions should be correct
+            expect(screen.getAllByTestId('yes-no-radio-fieldset')).toHaveLength(
+                modifiedProvisionMedicaidBaseKeys.length
+            )
+        })
+
+        it('shows correct validations for medicaid base contract', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={medicaidBasePackage}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            // trigger validations
+            await userEvent.click(
+                screen.getByRole('button', {
                     name: 'Continue',
                 })
-                const input = screen.getByLabelText('Upload contract')
+            )
 
-                await userEvent.upload(input, [TEST_DOC_FILE])
+            // check for overall list of yes/no errors in form
+            const formGroup = screen.getByText(
+                'Does this contract action include new or modified provisions related to any of the following'
+            ).parentElement
 
-                await waitFor(() => {
-                    expect(continueButton).not.toHaveAttribute('aria-disabled')
-                })
-            })
-
-            it('enabled when invalid files have been dropped but valid files are present', async () => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={emptyContractDetailsDraft}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
-
-                const continueButton = screen.getByRole('button', {
-                    name: 'Continue',
-                })
-                const input = screen.getByLabelText('Upload contract')
-                const targetEl = screen.getByTestId('file-input-droptarget')
-
-                await userEvent.upload(input, [TEST_DOC_FILE])
-                dragAndDrop(targetEl, [TEST_PNG_FILE])
-
-                await waitFor(() => {
-                    expect(
-                        screen.getByText('This is not a valid file type.')
-                    ).toBeInTheDocument()
-                    expect(continueButton).not.toHaveAttribute('aria-disabled')
-                })
-            })
-
-            it('disabled with alert after first attempt to continue with zero files', async () => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={emptyContractDetailsDraft}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
-
-                const continueButton = screen.getByRole('button', {
-                    name: 'Continue',
-                })
-                expect(continueButton).not.toHaveAttribute('aria-disabled')
-
-                continueButton.click()
-
-                await waitFor(() => {
-                    expect(
-                        screen.getAllByText(
-                            'You must upload at least one document'
-                        )
-                    ).toHaveLength(2)
-
-                    expect(continueButton).toHaveAttribute(
-                        'aria-disabled',
-                        'true'
-                    )
-                })
-            })
-
-            it('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={emptyContractDetailsDraft}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
-
-                const input = screen.getByLabelText('Upload contract')
-                const continueButton = screen.getByRole('button', {
-                    name: 'Continue',
-                })
-
-                await userEvent.upload(input, [TEST_DOC_FILE])
-                await userEvent.upload(input, []) // clear input and ensure we add same file twice
-                await userEvent.upload(input, [TEST_DOC_FILE])
-                expect(continueButton).not.toHaveAttribute('aria-disabled')
-
-                continueButton.click()
-                await waitFor(() => {
-                    expect(
-                        screen.getAllByText(
-                            'You must remove all documents with error messages before continuing'
-                        )
-                    ).toHaveLength(2)
-
-                    expect(continueButton).toHaveAttribute(
-                        'aria-disabled',
-                        'true'
-                    )
-                })
-            })
-
-            it('disabled with alert after first attempt to continue with invalid files', async () => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={emptyContractDetailsDraft}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
-                const continueButton = screen.getByRole('button', {
-                    name: 'Continue',
-                })
-
-                const targetEl = screen.getByTestId('file-input-droptarget')
-                dragAndDrop(targetEl, [TEST_PNG_FILE])
-
+            await waitFor(() => {
                 expect(
-                    await screen.findByText('This is not a valid file type.')
+                    formGroup &&
+                        within(formGroup).getAllByText(
+                            'You must select yes or no'
+                        )
+                ).toHaveLength(modifiedProvisionMedicaidBaseKeys.length)
+            })
+
+            // select responses for a few provisions
+
+            await selectYesNoRadio(
+                screen,
+                /Non-risk payment arrangements/,
+                'Yes'
+            )
+            await selectYesNoRadio(screen, /Withhold arrangements/, 'No')
+
+            //overall list of yes/no errors should update as expected
+            await waitFor(() => {
+                expect(
+                    formGroup &&
+                        within(formGroup).queryAllByText(
+                            'You must select yes or no'
+                        )
+                ).toHaveLength(modifiedProvisionMedicaidBaseKeys.length - 2)
+            })
+        })
+
+        it('cannot set provisions for CHIP only base contract', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={chipBasePackage}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            await screen.findByRole('form')
+            expect(
+                screen.queryByText(
+                    'Does this contract action include new or modified provisions related to any of the following'
+                )
+            ).toBeNull()
+            expect(
+                screen.queryAllByTestId('yes-no-radio-fieldset')
+            ).toHaveLength(0)
+        })
+
+        it('can set provisions for CHIP only amendment', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={chipAmendmentPackage}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            await screen.findByRole('form')
+
+            // CHIP specific copy is used
+            expect(
+                screen.queryByText(
+                    'CHIP beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)'
+                )
+            ).toBeInTheDocument()
+
+            expect(
+                screen.queryByText(
+                    'Network adequacy standards 42 CFR § 457.1218'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(
+                    'Grievance and appeal system 42 CFR § 457.1260'
+                )
+            ).toBeInTheDocument()
+
+            // risk and payment related provisions should not be visible
+            expect(screen.queryByText(/Risk-sharing strategy/)).toBeNull()
+            expect(screen.queryByText(/Payments to MCOs and PIHPs/)).toBeNull()
+            expect(screen.queryByText(/State directed payments/)).toBeNull()
+
+            // overall number of provisions should be correct
+            expect(screen.getAllByTestId('yes-no-radio-fieldset')).toHaveLength(
+                provisionCHIPKeys.length
+            )
+        })
+
+        it('shows correct validations for CHIP only amendment', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={chipAmendmentPackage}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            // trigger validations
+            await userEvent.click(
+                screen.getByRole('button', {
+                    name: 'Continue',
+                })
+            )
+
+            // check for overall list of yes/no errors in form
+            const formGroup = screen.getByText(
+                'Does this contract action include new or modified provisions related to any of the following'
+            ).parentElement
+
+            await waitFor(() => {
+                expect(
+                    formGroup &&
+                        within(formGroup).getAllByText(
+                            'You must select yes or no'
+                        )
+                ).toHaveLength(provisionCHIPKeys.length)
+            })
+
+            await selectYesNoRadio(
+                screen,
+                'Benefits provided by the managed care plans',
+                'Yes'
+            )
+            await selectYesNoRadio(
+                screen,
+                'Geographic areas served by the managed care plans',
+                'No'
+            )
+            await selectYesNoRadio(
+                screen,
+                'Length of the contract period',
+                'Yes'
+            )
+
+            await waitFor(() => {
+                expect(
+                    formGroup &&
+                        within(formGroup).queryAllByText(
+                            'You must select yes or no'
+                        )
+                ).toHaveLength(provisionCHIPKeys.length - 3)
+            })
+        })
+    })
+
+    describe('Continue button', () => {
+        it('enabled when valid files are present', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyContractDetailsDraft}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            const input = screen.getByLabelText('Upload contract')
+
+            await userEvent.upload(input, [TEST_DOC_FILE])
+
+            await waitFor(() => {
+                expect(continueButton).not.toHaveAttribute('aria-disabled')
+            })
+        })
+
+        it('enabled when invalid files have been dropped but valid files are present', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyContractDetailsDraft}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            const input = screen.getByLabelText('Upload contract')
+            const targetEl = screen.getByTestId('file-input-droptarget')
+
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            dragAndDrop(targetEl, [TEST_PNG_FILE])
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText('This is not a valid file type.')
                 ).toBeInTheDocument()
-
                 expect(continueButton).not.toHaveAttribute('aria-disabled')
-                continueButton.click()
+            })
+        })
 
+        it('disabled with alert after first attempt to continue with zero files', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyContractDetailsDraft}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            expect(continueButton).not.toHaveAttribute('aria-disabled')
+
+            continueButton.click()
+
+            await waitFor(() => {
                 expect(
-                    await screen.findAllByText(
-                        'You must upload at least one document'
-                    )
+                    screen.getAllByText('You must upload at least one document')
                 ).toHaveLength(2)
 
                 expect(continueButton).toHaveAttribute('aria-disabled', 'true')
             })
-            it('disabled with alert when trying to continue while a file is still uploading', async () => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={emptyContractDetailsDraft}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
-                const continueButton = screen.getByRole('button', {
-                    name: 'Continue',
-                })
-                const targetEl = screen.getByTestId('file-input-droptarget')
+        })
 
-                // upload one file
-                dragAndDrop(targetEl, [TEST_PDF_FILE])
-                const imageElFile1 = screen.getByTestId(
-                    'file-input-preview-image'
-                )
-                expect(imageElFile1).toHaveClass('is-loading')
-                await waitFor(() =>
-                    expect(imageElFile1).not.toHaveClass('is-loading')
-                )
+        it('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyContractDetailsDraft}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
 
-                // upload second file
-                dragAndDrop(targetEl, [TEST_DOC_FILE])
+            const input = screen.getByLabelText('Upload contract')
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
 
-                const imageElFile2 = screen.getAllByTestId(
-                    'file-input-preview-image'
-                )[1]
-                expect(imageElFile2).toHaveClass('is-loading')
-                fireEvent.click(continueButton)
-                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, []) // clear input and ensure we add same file twice
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            expect(continueButton).not.toHaveAttribute('aria-disabled')
 
+            continueButton.click()
+            await waitFor(() => {
                 expect(
                     screen.getAllByText(
-                        'You must wait for all documents to finish uploading before continuing'
+                        'You must remove all documents with error messages before continuing'
+                    )
+                ).toHaveLength(2)
+
+                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
+            })
+        })
+
+        it('disabled with alert after first attempt to continue with invalid files', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyContractDetailsDraft}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+
+            const targetEl = screen.getByTestId('file-input-droptarget')
+            dragAndDrop(targetEl, [TEST_PNG_FILE])
+
+            expect(
+                await screen.findByText('This is not a valid file type.')
+            ).toBeInTheDocument()
+
+            expect(continueButton).not.toHaveAttribute('aria-disabled')
+            continueButton.click()
+
+            expect(
+                await screen.findAllByText(
+                    'You must upload at least one document'
+                )
+            ).toHaveLength(2)
+
+            expect(continueButton).toHaveAttribute('aria-disabled', 'true')
+        })
+        it('disabled with alert when trying to continue while a file is still uploading', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyContractDetailsDraft}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            const targetEl = screen.getByTestId('file-input-droptarget')
+
+            // upload one file
+            dragAndDrop(targetEl, [TEST_PDF_FILE])
+            const imageElFile1 = screen.getByTestId('file-input-preview-image')
+            expect(imageElFile1).toHaveClass('is-loading')
+            await waitFor(() =>
+                expect(imageElFile1).not.toHaveClass('is-loading')
+            )
+
+            // upload second file
+            dragAndDrop(targetEl, [TEST_DOC_FILE])
+
+            const imageElFile2 = screen.getAllByTestId(
+                'file-input-preview-image'
+            )[1]
+            expect(imageElFile2).toHaveClass('is-loading')
+            fireEvent.click(continueButton)
+            expect(continueButton).toHaveAttribute('aria-disabled', 'true')
+
+            expect(
+                screen.getAllByText(
+                    'You must wait for all documents to finish uploading before continuing'
+                )
+            ).toHaveLength(2)
+        })
+    })
+
+    describe('Save as draft button', () => {
+        it('enabled when valid files are present', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyContractDetailsDraft}
+                    updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const saveAsDraftButton = screen.getByRole('button', {
+                name: 'Save as draft',
+            })
+            const input = screen.getByLabelText('Upload contract')
+
+            await userEvent.upload(input, [TEST_DOC_FILE])
+
+            await waitFor(() => {
+                expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
+            })
+        })
+
+        it('enabled when invalid files have been dropped but valid files are present', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyContractDetailsDraft}
+                    updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const saveAsDraftButton = screen.getByRole('button', {
+                name: 'Save as draft',
+            })
+            const input = screen.getByLabelText('Upload contract')
+            const targetEl = screen.getByTestId('file-input-droptarget')
+
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            dragAndDrop(targetEl, [TEST_PNG_FILE])
+
+            await waitFor(() => {
+                expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
+            })
+        })
+
+        it('when zero files present, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyContractDetailsDraft}
+                    updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const saveAsDraftButton = screen.getByRole('button', {
+                name: 'Save as draft',
+            })
+            expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
+
+            await userEvent.click(saveAsDraftButton)
+            expect(mockUpdateDraftFn).toHaveBeenCalled()
+            expect(
+                screen.queryByText('You must upload at least one document')
+            ).toBeNull()
+        })
+
+        it('when existing file is removed, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            const hasDocsDetailsDraft = {
+                ...mockDraft(),
+                contractDocuments: [
+                    {
+                        name: 'aasdf3423af',
+                        s3URL: 's3://bucketname/key/fileName',
+                        documentCategories: ['CONTRACT' as const],
+                    },
+                ],
+            }
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={hasDocsDetailsDraft}
+                    updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const saveAsDraftButton = screen.getByRole('button', {
+                name: 'Save as draft',
+            })
+            expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
+
+            await userEvent.click(saveAsDraftButton)
+            expect(mockUpdateDraftFn).toHaveBeenCalled()
+            expect(
+                screen.queryByText('You must upload at least one document')
+            ).toBeNull()
+        })
+
+        it('when duplicate files present, triggers error alert on click', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyContractDetailsDraft}
+                    updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            const input = screen.getByLabelText('Upload contract')
+            const saveAsDraftButton = screen.getByRole('button', {
+                name: 'Save as draft',
+            })
+
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_PDF_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
+
+            await waitFor(() => {
+                expect(
+                    screen.queryAllByText('Duplicate file, please remove')
+                ).toHaveLength(1)
+            })
+            await userEvent.click(saveAsDraftButton)
+            await waitFor(() => {
+                expect(mockUpdateDraftFn).not.toHaveBeenCalled()
+                expect(
+                    screen.queryAllByText(
+                        'You must remove all documents with error messages before continuing'
                     )
                 ).toHaveLength(2)
             })
         })
+    })
 
-        describe('Save as draft button', () => {
-            it('enabled when valid files are present', async () => {
-                const mockUpdateDraftFn = jest.fn()
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={emptyContractDetailsDraft}
-                        updateDraft={mockUpdateDraftFn}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
+    describe('Back button', () => {
+        it('enabled when valid files are present', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyContractDetailsDraft}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
 
-                const saveAsDraftButton = screen.getByRole('button', {
-                    name: 'Save as draft',
-                })
-                const input = screen.getByLabelText('Upload contract')
+            const backButton = screen.getByRole('button', {
+                name: 'Back',
+            })
+            const input = screen.getByLabelText('Upload contract')
 
-                await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
 
-                await waitFor(() => {
-                    expect(saveAsDraftButton).not.toHaveAttribute(
-                        'aria-disabled'
-                    )
-                })
+            await waitFor(() => {
+                expect(backButton).not.toHaveAttribute('aria-disabled')
+            })
+        })
+
+        it('enabled when invalid files have been dropped but valid files are present', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyContractDetailsDraft}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const backButton = screen.getByRole('button', {
+                name: 'Back',
+            })
+            const input = screen.getByLabelText('Upload contract')
+            const targetEl = screen.getByTestId('file-input-droptarget')
+
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            dragAndDrop(targetEl, [TEST_PNG_FILE])
+
+            await waitFor(() => {
+                expect(backButton).not.toHaveAttribute('aria-disabled')
+            })
+        })
+
+        it('when zero files present, does not trigger missing documents alert on click', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyContractDetailsDraft}
+                    updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const backButton = screen.getByRole('button', {
+                name: 'Back',
+            })
+            expect(backButton).not.toHaveAttribute('aria-disabled')
+
+            await userEvent.click(backButton)
+            expect(
+                screen.queryByText('You must upload at least one document')
+            ).toBeNull()
+            expect(mockUpdateDraftFn).not.toHaveBeenCalled()
+        })
+
+        it('when duplicate files present, does not trigger duplicate documents alert on click and silently updates submission without the duplicate', async () => {
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={emptyContractDetailsDraft}
+                    updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const input = screen.getByLabelText('Upload contract')
+            const backButton = screen.getByRole('button', {
+                name: 'Back',
             })
 
-            it('enabled when invalid files have been dropped but valid files are present', async () => {
-                const mockUpdateDraftFn = jest.fn()
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={emptyContractDetailsDraft}
-                        updateDraft={mockUpdateDraftFn}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
-
-                const saveAsDraftButton = screen.getByRole('button', {
-                    name: 'Save as draft',
-                })
-                const input = screen.getByLabelText('Upload contract')
-                const targetEl = screen.getByTestId('file-input-droptarget')
-
-                await userEvent.upload(input, [TEST_DOC_FILE])
-                dragAndDrop(targetEl, [TEST_PNG_FILE])
-
-                await waitFor(() => {
-                    expect(saveAsDraftButton).not.toHaveAttribute(
-                        'aria-disabled'
-                    )
-                })
-            })
-
-            it('when zero files present, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
-                const mockUpdateDraftFn = jest.fn()
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={emptyContractDetailsDraft}
-                        updateDraft={mockUpdateDraftFn}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
-
-                const saveAsDraftButton = screen.getByRole('button', {
-                    name: 'Save as draft',
-                })
-                expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
-
-                await userEvent.click(saveAsDraftButton)
-                expect(mockUpdateDraftFn).toHaveBeenCalled()
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, [TEST_PDF_FILE])
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            await waitFor(() => {
+                expect(backButton).not.toHaveAttribute('aria-disabled')
                 expect(
-                    screen.queryByText('You must upload at least one document')
-                ).toBeNull()
+                    screen.queryAllByText('Duplicate file, please remove')
+                ).toHaveLength(1)
             })
-
-            it('when existing file is removed, does not trigger missing documents alert on click but still saves the in progress draft', async () => {
-                const mockUpdateDraftFn = jest.fn()
-                const hasDocsDetailsDraft = {
-                    ...mockDraft(),
+            await userEvent.click(backButton)
+            expect(screen.queryByText('Remove files with errors')).toBeNull()
+            expect(mockUpdateDraftFn).toHaveBeenCalledWith(
+                expect.objectContaining({
                     contractDocuments: [
                         {
-                            name: 'aasdf3423af',
-                            s3URL: 's3://bucketname/key/fileName',
-                            documentCategories: ['CONTRACT' as const],
+                            name: 'testFile.doc',
+                            s3URL: expect.any(String),
+                            documentCategories: ['CONTRACT'],
+                            sha256: 'da7d22ce886b5ab262cd7ab28901212a027630a5edf8e88c8488087b03ffd833', // pragma: allowlist secret
+                        },
+                        {
+                            name: 'testFile.pdf',
+                            s3URL: expect.any(String),
+                            documentCategories: ['CONTRACT'],
+                            sha256: '6d50607f29187d5b185ffd9d46bc5ef75ce7abb53318690c73e55b6623e25ad5', // pragma: allowlist secret
                         },
                     ],
-                }
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={hasDocsDetailsDraft}
-                        updateDraft={mockUpdateDraftFn}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
-
-                const saveAsDraftButton = screen.getByRole('button', {
-                    name: 'Save as draft',
                 })
-                expect(saveAsDraftButton).not.toHaveAttribute('aria-disabled')
-
-                await userEvent.click(saveAsDraftButton)
-                expect(mockUpdateDraftFn).toHaveBeenCalled()
-                expect(
-                    screen.queryByText('You must upload at least one document')
-                ).toBeNull()
-            })
-
-            it('when duplicate files present, triggers error alert on click', async () => {
-                const mockUpdateDraftFn = jest.fn()
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={emptyContractDetailsDraft}
-                        updateDraft={mockUpdateDraftFn}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
-                const input = screen.getByLabelText('Upload contract')
-                const saveAsDraftButton = screen.getByRole('button', {
-                    name: 'Save as draft',
-                })
-
-                await userEvent.upload(input, [TEST_DOC_FILE])
-                await userEvent.upload(input, [TEST_PDF_FILE])
-                await userEvent.upload(input, [TEST_DOC_FILE])
-
-                await waitFor(() => {
-                    expect(
-                        screen.queryAllByText('Duplicate file, please remove')
-                    ).toHaveLength(1)
-                })
-                await userEvent.click(saveAsDraftButton)
-                await waitFor(() => {
-                    expect(mockUpdateDraftFn).not.toHaveBeenCalled()
-                    expect(
-                        screen.queryAllByText(
-                            'You must remove all documents with error messages before continuing'
-                        )
-                    ).toHaveLength(2)
-                })
-            })
+            )
         })
-
-        describe('Back button', () => {
-            it('enabled when valid files are present', async () => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={emptyContractDetailsDraft}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
-
-                const backButton = screen.getByRole('button', {
-                    name: 'Back',
-                })
-                const input = screen.getByLabelText('Upload contract')
-
-                await userEvent.upload(input, [TEST_DOC_FILE])
-
-                await waitFor(() => {
-                    expect(backButton).not.toHaveAttribute('aria-disabled')
-                })
-            })
-
-            it('enabled when invalid files have been dropped but valid files are present', async () => {
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={emptyContractDetailsDraft}
-                        updateDraft={jest.fn()}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
-
-                const backButton = screen.getByRole('button', {
-                    name: 'Back',
-                })
-                const input = screen.getByLabelText('Upload contract')
-                const targetEl = screen.getByTestId('file-input-droptarget')
-
-                await userEvent.upload(input, [TEST_DOC_FILE])
-                dragAndDrop(targetEl, [TEST_PNG_FILE])
-
-                await waitFor(() => {
-                    expect(backButton).not.toHaveAttribute('aria-disabled')
-                })
-            })
-
-            it('when zero files present, does not trigger missing documents alert on click', async () => {
-                const mockUpdateDraftFn = jest.fn()
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={emptyContractDetailsDraft}
-                        updateDraft={mockUpdateDraftFn}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
-
-                const backButton = screen.getByRole('button', {
-                    name: 'Back',
-                })
-                expect(backButton).not.toHaveAttribute('aria-disabled')
-
-                await userEvent.click(backButton)
-                expect(
-                    screen.queryByText('You must upload at least one document')
-                ).toBeNull()
-                expect(mockUpdateDraftFn).not.toHaveBeenCalled()
-            })
-
-            it('when duplicate files present, does not trigger duplicate documents alert on click and silently updates submission without the duplicate', async () => {
-                const mockUpdateDraftFn = jest.fn()
-                renderWithProviders(
-                    <ContractDetails
-                        draftSubmission={emptyContractDetailsDraft}
-                        updateDraft={mockUpdateDraftFn}
-                        previousDocuments={[]}
-                    />,
-                    {
-                        apolloProvider: {
-                            mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                        },
-                    }
-                )
-
-                const input = screen.getByLabelText('Upload contract')
-                const backButton = screen.getByRole('button', {
-                    name: 'Back',
-                })
-
-                await userEvent.upload(input, [TEST_DOC_FILE])
-                await userEvent.upload(input, [TEST_PDF_FILE])
-                await userEvent.upload(input, [TEST_DOC_FILE])
-                await waitFor(() => {
-                    expect(backButton).not.toHaveAttribute('aria-disabled')
-                    expect(
-                        screen.queryAllByText('Duplicate file, please remove')
-                    ).toHaveLength(1)
-                })
-                await userEvent.click(backButton)
-                expect(
-                    screen.queryByText('Remove files with errors')
-                ).toBeNull()
-                expect(mockUpdateDraftFn).toHaveBeenCalledWith(
-                    expect.objectContaining({
-                        contractDocuments: [
-                            {
-                                name: 'testFile.doc',
-                                s3URL: expect.any(String),
-                                documentCategories: ['CONTRACT'],
-                                sha256: 'da7d22ce886b5ab262cd7ab28901212a027630a5edf8e88c8488087b03ffd833', // pragma: allowlist secret
-                            },
-                            {
-                                name: 'testFile.pdf',
-                                s3URL: expect.any(String),
-                                documentCategories: ['CONTRACT'],
-                                sha256: '6d50607f29187d5b185ffd9d46bc5ef75ce7abb53318690c73e55b6623e25ad5', // pragma: allowlist secret
-                            },
-                        ],
-                    })
-                )
-            })
-        })
+    })
 })

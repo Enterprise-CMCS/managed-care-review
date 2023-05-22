@@ -2,7 +2,7 @@ import {
     CHIPModifiedProvisions,
     ModifiedProvisionsMedicaidAmendment,
     ModifiedProvisionsMedicaidBase,
-} from '../common-code/healthPlanFormDataType'
+} from '../common-code/healthPlanFormDataType/ModifiedProvisions'
 
 const ModifiedProvisionsAmendmentRecord: Record<
     keyof ModifiedProvisionsMedicaidAmendment,

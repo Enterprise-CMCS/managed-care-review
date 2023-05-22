@@ -7,6 +7,8 @@ import {
     queries,
     ByRoleMatcher,
     prettyDOM,
+    within,
+    Matcher,
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
@@ -115,6 +117,15 @@ const prettyDebug = (label?: string, element?: HTMLElement): void => {
 }
 
 /* User Events */
+const selectYesNoRadio = async (
+    screen: Screen<typeof queries>,
+    label: Matcher,
+    value: 'Yes' | 'No'
+) => {
+    const radio = screen.getByLabelText(label)
+    const radioOption = within(radio).getByLabelText(value)
+    await userEvent.click(radioOption)
+}
 
 const userClickByTestId = async (
     screen: Screen<typeof queries>,
@@ -203,6 +214,7 @@ export {
     userClickByTestId,
     userClickSignIn,
     ldUseClientSpy,
+    selectYesNoRadio,
     TEST_DOC_FILE,
     TEST_PDF_FILE,
     TEST_PNG_FILE,

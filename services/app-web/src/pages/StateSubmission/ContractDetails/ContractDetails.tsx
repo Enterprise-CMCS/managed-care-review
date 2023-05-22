@@ -34,16 +34,6 @@ import { isS3Error } from '../../../s3'
 
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
 import {
-    ManagedCareEntity,
-    SubmissionDocument,
-    ContractExecutionStatus,
-    FederalAuthority,
-    federalAuthorityKeysForCHIP,
-    federalAuthorityKeys,
-    generateProvisionLabel,
-    generateApplicableProvisionsList,
-} from '../../../common-code/healthPlanFormDataType'
-import {
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
 } from '../../../constants/healthPlanPackages'
@@ -51,6 +41,20 @@ import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { formatYesNoForProto } from '../../../formHelpers/formatters'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
+import {
+    federalAuthorityKeysForCHIP,
+    federalAuthorityKeys,
+} from '../../../common-code/healthPlanFormDataType'
+import {
+    generateProvisionLabel,
+    generateApplicableProvisionsList,
+} from '../../../common-code/healthPlanSubmissionHelpers/provisions'
+import type {
+    ManagedCareEntity,
+    SubmissionDocument,
+    ContractExecutionStatus,
+    FederalAuthority,
+} from '../../../common-code/healthPlanFormDataType'
 import {
     isCHIPOnly,
     isContractAmendment,

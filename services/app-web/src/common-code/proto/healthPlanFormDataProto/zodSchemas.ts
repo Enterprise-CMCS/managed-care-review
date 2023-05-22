@@ -185,8 +185,6 @@ const lockedHealthPlanFormDataZodSchema = z.object({
     submissionType: submissionTypeSchema,
     submissionDescription: z.string(),
     contractDocuments: z.array(submissionDocumentSchema),
-    managedCareEntities: z.array(z.string()),
-    federalAuthorities: z.array(federalAuthoritySchema),
 })
 
 export {

@@ -4,8 +4,53 @@ import {
 } from '../../testHelpers/apolloMocks'
 import {
     GeneralizedModifiedProvisions,
+    GeneralizedProvisionType,
+    modifiedProvisionMedicaidAmendmentKeys,
+    modifiedProvisionMedicaidBaseKeys,
+    provisionCHIPKeys,
+} from '../healthPlanFormDataType/ModifiedProvisions'
+
+import { UnlockedHealthPlanFormDataType } from '../healthPlanFormDataType/UnlockedHealthPlanFormDataType'
+import {
+    generateApplicableProvisionsList,
     sortModifiedProvisions,
-} from './ModifiedProvisions'
+} from './provisions'
+
+describe('generateApplicableProvisionsList', () => {
+    const baseContractCHIP = mockBaseContract({ populationCovered: 'CHIP' })
+    const amendmentContractCHIP = mockContractAndRatesDraft({
+        populationCovered: 'CHIP',
+    })
+    const baseContractMedicaid = mockBaseContract()
+    const amendmentContractMedicaid = mockContractAndRatesDraft()
+
+    const submissionsAndSupportedProvisions: [
+        UnlockedHealthPlanFormDataType,
+        GeneralizedProvisionType[]
+    ][] = [
+        [baseContractCHIP, []],
+        [
+            amendmentContractCHIP,
+            provisionCHIPKeys as unknown as GeneralizedProvisionType[],
+        ],
+        [
+            baseContractMedicaid,
+            modifiedProvisionMedicaidBaseKeys as unknown as GeneralizedProvisionType[],
+        ],
+        [
+            amendmentContractMedicaid,
+            modifiedProvisionMedicaidAmendmentKeys as unknown as GeneralizedProvisionType[],
+        ],
+    ]
+
+    test.each(submissionsAndSupportedProvisions)(
+        'given %o as a submission, returns %p as the list of supported provisions',
+        (firstArg, expectedResult) => {
+            const result = generateApplicableProvisionsList(firstArg)
+            expect(result).toEqual(expectedResult)
+        }
+    )
+})
 
 describe('sortModifiedProvisions', () => {
     it('sorts amended provisions correctly for medicaid amendment', () => {

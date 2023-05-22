@@ -1,18 +1,16 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
-    UnlockedHealthPlanFormDataType,
     hasValidContract,
     hasValidDocuments,
     hasValidRates,
     hasAnyValidRateData,
     isContractAndRates,
-    LockedHealthPlanFormDataType,
     removeRatesData,
     hasValidPopulationCoverage,
-    removeNonCHIPData,
+    removeInvalidProvisionsAndAuthorities,
     isValidAndCurrentLockedHealthPlanFormData,
     hasValidSupportingDocumentCategories,
-} from '../../../../app-web/src/common-code/healthPlanFormDataType'
+} from '../../../../app-web/src/common-code/healthPlanFormDataType/healthPlanFormData'
 import {
     UpdateInfoType,
     isStateUser,
@@ -34,6 +32,11 @@ import { EmailParameterStore } from '../../parameterStore'
 import { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql'
 import { FeatureFlagSettings } from 'app-web/src/common-code/featureFlags'
+
+import type {
+    UnlockedHealthPlanFormDataType,
+    LockedHealthPlanFormDataType,
+} from '../../../../app-web/src/common-code/healthPlanFormDataType'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = (typeof SubmissionErrorCodes)[number] // iterable union type
@@ -274,7 +277,10 @@ export function submitHealthPlanPackageResolver(
 
         // CHIP submissions should not contain any provision or authority relevant to other populations
         if (draftResult.populationCovered === 'CHIP') {
-            Object.assign(draftResult, removeNonCHIPData(draftResult))
+            Object.assign(
+                draftResult,
+                removeInvalidProvisionsAndAuthorities(draftResult)
+            )
         }
 
         // attempt to parse into a StateSubmission

@@ -5,15 +5,17 @@ import {
     ActuaryContact,
 } from './UnlockedHealthPlanFormDataType'
 import {
-    allowedProvisionKeysForCHIP,
-    excludedProvisionsForCHIP,
+    provisionCHIPKeys,
     modifiedProvisionMedicaidAmendmentKeys,
     modifiedProvisionMedicaidBaseKeys,
+    GeneralizedModifiedProvisions,
 } from './ModifiedProvisions'
-import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
-import { HealthPlanFormDataType } from './HealthPlanFormDataType'
+import { generateApplicableProvisionsList } from '../healthPlanSubmissionHelpers/provisions'
 import { formatRateNameDate } from '../../common-code/dateHelpers'
-import { ProgramArgType, federalAuthorityKeysForCHIP } from '.'
+import type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
+import type { HealthPlanFormDataType } from './HealthPlanFormDataType'
+import type { ProgramArgType } from '.'
+import { federalAuthorityKeysForCHIP } from './FederalAuthorities'
 
 // TODO: Refactor into multiple files and add unit tests to these functions
 
@@ -50,7 +52,7 @@ const hasValidModifiedProvisions = (
     if (provisions === undefined) return false
 
     return isCHIPOnly(sub)
-        ? allowedProvisionKeysForCHIP.every(
+        ? provisionCHIPKeys.every(
               (provision) => provisions[provision] !== undefined
           )
         : isBaseContract(sub)
@@ -335,23 +337,28 @@ const removeRatesData = (
     return pkg
 }
 
-const removeNonCHIPData = (
+// Remove any provisions and federal authorities that aren't valid for population type (e.g. CHIP)
+// since user can change theses submission type fields on unlock and not necesarily update the contract details
+const removeInvalidProvisionsAndAuthorities = (
     pkg: UnlockedHealthPlanFormDataType
 ): UnlockedHealthPlanFormDataType => {
-    // remove any provisions that aren't valid for CHIP (this can happen on unlock when populationCovered changes)
-    if (pkg.contractType === 'AMENDMENT') {
-        excludedProvisionsForCHIP.forEach((provision) => {
-            if (pkg.contractAmendmentInfo?.modifiedProvisions[provision]) {
-                pkg.contractAmendmentInfo.modifiedProvisions[provision] =
-                    undefined
-            }
+    // remove invalid provisions
+    if (isContractWithProvisions(pkg) && pkg.contractAmendmentInfo) {
+        const validProvisionsKeys = generateApplicableProvisionsList(pkg)
+        const validProvisionsData: Partial<GeneralizedModifiedProvisions> = {}
+        validProvisionsKeys.forEach((provision) => {
+            validProvisionsData[provision] =
+                pkg.contractAmendmentInfo?.modifiedProvisions[provision]
         })
+        pkg.contractAmendmentInfo.modifiedProvisions = validProvisionsData
     }
 
-    // remove any authorities that aren't valid for CHIP (this can happen on unlock when populationCovered changes)
-    pkg.federalAuthorities = pkg.federalAuthorities.filter((authority) =>
-        federalAuthorityKeysForCHIP.includes(authority)
-    )
+    // remove invalid authorities if CHIP
+    if (isCHIPOnly(pkg)) {
+        pkg.federalAuthorities = pkg.federalAuthorities.filter((authority) =>
+            federalAuthorityKeysForCHIP.includes(authority)
+        )
+    }
 
     return pkg
 }
@@ -378,6 +385,6 @@ export {
     generateRateName,
     convertRateSupportingDocs,
     removeRatesData,
-    removeNonCHIPData,
+    removeInvalidProvisionsAndAuthorities,
     hasValidPopulationCoverage,
 }
