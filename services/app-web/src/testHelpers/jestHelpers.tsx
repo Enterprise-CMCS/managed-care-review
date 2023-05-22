@@ -119,11 +119,13 @@ const prettyDebug = (label?: string, element?: HTMLElement): void => {
 /* User Events */
 const selectYesNoRadio = async (
     screen: Screen<typeof queries>,
-    label: Matcher,
+    legend: Matcher,
     value: 'Yes' | 'No'
 ) => {
-    const radio = screen.getByLabelText(label)
-    const radioOption = within(radio).getByLabelText(value)
+    const radioFieldset = screen.getByText(legend).parentElement
+    if (!radioFieldset)
+        throw new Error(`${legend} yes no radio field legend does not exist`)
+    const radioOption = within(radioFieldset).getByLabelText(value)
     await userEvent.click(radioOption)
 }
 

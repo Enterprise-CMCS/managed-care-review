@@ -537,6 +537,8 @@ describe('ContractDetails', () => {
                 'Yes'
             )
 
+            await screen.findByTestId('error-summary')
+
             await waitFor(() => {
                 expect(
                     formGroup &&

@@ -93,7 +93,7 @@ type ModifiedProvisionsMedicaidBase = {
 function isMedicaidBaseProvision(
     provision: MedicaidBaseProvisionType | GeneralizedProvisionType
 ): provision is MedicaidBaseProvisionType {
-    return generalizedProvisionKeys.includes(
+    return modifiedProvisionMedicaidBaseKeys.includes(
         provision as MedicaidBaseProvisionType
     )
 }
@@ -132,7 +132,7 @@ type ModifiedProvisionsMedicaidAmendment = {
 function isMedicaidAmendmentProvision(
     provision: MedicaidAmendmentProvisionType | GeneralizedProvisionType
 ): provision is MedicaidAmendmentProvisionType {
-    return generalizedProvisionKeys.includes(
+    return modifiedProvisionMedicaidAmendmentKeys.includes(
         provision as MedicaidAmendmentProvisionType
     )
 }

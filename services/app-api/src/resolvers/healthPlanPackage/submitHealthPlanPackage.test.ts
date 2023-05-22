@@ -400,7 +400,6 @@ describe('submitHealthPlanPackage', () => {
                         modifiedGeoAreaServed: false,
                         modifiedMedicaidBeneficiaries: false,
                         modifiedMedicalLossRatioStandards: false,
-                        modifiedOtherFinancialPaymentIncentive: false,
                         modifiedEnrollmentProcess: false,
                         modifiedGrevienceAndAppeal: false,
                         modifiedNetworkAdequacyStandards: false,

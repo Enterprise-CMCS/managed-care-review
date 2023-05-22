@@ -24,7 +24,7 @@ export const ContractDetailsFormSchema = (
 ) => {
     const yesNoError = (provision: GeneralizedProvisionType) => {
         const noValidation = Yup.string().nullable()
-        const provisionValdiation = Yup.string().defined(
+        const provisionValidiation = Yup.string().defined(
             'You must select yes or no'
         )
         if (!isContractWithProvisions(draftSubmission)) {
@@ -32,18 +32,18 @@ export const ContractDetailsFormSchema = (
         }
         if (isCHIPOnly(draftSubmission)) {
             return isCHIPProvision(provision)
-                ? provisionValdiation
+                ? provisionValidiation
                 : noValidation
         } else if (
             isBaseContract(draftSubmission) &&
             isMedicaidBaseProvision(provision)
         ) {
-            return provisionValdiation
+            return provisionValidiation
         } else if (
             isContractAmendment(draftSubmission) &&
             isMedicaidAmendmentProvision(provision)
         ) {
-            return provisionValdiation
+            return provisionValidiation
         } else {
             return noValidation
         }
