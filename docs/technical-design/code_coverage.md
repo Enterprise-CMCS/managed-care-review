@@ -71,7 +71,7 @@ Under the `Create combined test coverage report` key in deploy.yml, after some m
 
 Next we copy the unit test reports into the same directory, and run `npx nyc merge` again. Then, as in our package.json, we generate the reports.
 
-These reports are then uploaded as artifacts (under the `Upload combined test coverage` key), which can be downloaded from the github action summary for the deployment.
+These reports are then uploaded as [workflow artifacts](https://docs.github.com/en/actions/managing-workflow-runs/downloading-workflow-artifacts) under `Upload combined test coverage`. This zip file can be downloaded from the github action summary for the `deploy` workflow (scroll to bottom of page).
 
 ### notes
 
