@@ -56,6 +56,7 @@ import type {
     FederalAuthority,
 } from '../../../common-code/healthPlanFormDataType'
 import {
+    isBaseContract,
     isCHIPOnly,
     isContractAmendment,
     isContractWithProvisions,
@@ -389,6 +390,9 @@ export const ContractDetails = ({
         if (isContractWithProvisions(draftSubmission)) {
             draftSubmission.contractAmendmentInfo = {
                 modifiedProvisions: {
+                    inLieuServicesAndSettings: formatYesNoForProto(
+                        values.inLieuServicesAndSettings
+                    ),
                     modifiedBenefitsProvided: formatYesNoForProto(
                         values.modifiedBenefitsProvided
                     ),
@@ -804,7 +808,7 @@ export const ContractDetails = ({
                                         <FormGroup data-testid="yes-no-group">
                                             <Fieldset
                                                 aria-required
-                                                legend="Does this contract action include new or modified provisions related to any of the following"
+                                                legend={isBaseContract(draftSubmission)? "Does this contract action include provisions related to any of the following" : "Does this contract action include new or modified provisions related to any of the following"}
                                             >
                                                 {applicableProvisions.map(
                                                     (modifiedProvisionName) => (

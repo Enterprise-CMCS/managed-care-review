@@ -171,7 +171,7 @@ export const ContractDetailsSummarySection = ({
                     <DoubleColumnGrid>
                         <DataDetail
                             id="modifiedProvisions"
-                            label="This contract action includes new or modified provisions related to the following"
+                            label={isBaseContract(submission)? "This contract action includes provisions related to the following" : "This contract action includes new or modified provisions related to the following"}
                             explainMissingData={
                                 provisionsAreInvalid && !isSubmitted(submission)
                             }
@@ -193,7 +193,7 @@ export const ContractDetailsSummarySection = ({
 
                         <DataDetail
                             id="unmodifiedProvisions"
-                            label="This contract action does NOT include new or modified provisions related to the following"
+                            label={isBaseContract(submission)? "This contract action does NOT include provisions related to the following": "This contract action does NOT include new or modified provisions related to the following"}
                             explainMissingData={
                                 provisionsAreInvalid && !isSubmitted(submission)
                             }

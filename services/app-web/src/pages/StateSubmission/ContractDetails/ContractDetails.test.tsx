@@ -386,7 +386,7 @@ describe('ContractDetails', () => {
 
             // check for overall list of yes/no errors in form
             const formGroup = screen.getByText(
-                'Does this contract action include new or modified provisions related to any of the following'
+                'Does this contract action include provisions related to any of the following'
             ).parentElement
 
             await waitFor(() => {
@@ -434,7 +434,7 @@ describe('ContractDetails', () => {
             await screen.findByRole('form')
             expect(
                 screen.queryByText(
-                    'Does this contract action include new or modified provisions related to any of the following'
+                    'Does this contract action include provisions related to any of the following'
                 )
             ).toBeNull()
             expect(

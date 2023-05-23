@@ -715,7 +715,7 @@ describe('SubmissionSummary', () => {
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
-                        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)'
+                        /Risk-sharing strategy/
                     )
                 ).toBeInTheDocument()
                 expect(
@@ -743,7 +743,7 @@ describe('SubmissionSummary', () => {
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
-                        'Non-risk payment arrangements that do not exceed the upper payment limits specified in § 447.362'
+                        /Non-risk payment arrangements/
                     )
                 ).toBeInTheDocument()
                 expect(
@@ -1087,7 +1087,7 @@ describe('SubmissionSummary', () => {
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
-                        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)'
+                        /Risk-sharing strategy/
                     )
                 ).toBeInTheDocument()
                 expect(
@@ -1115,7 +1115,7 @@ describe('SubmissionSummary', () => {
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
-                        'Non-risk payment arrangements that do not exceed the upper payment limits specified in § 447.362'
+                        /Non-risk payment arrangements/
                     )
                 ).toBeInTheDocument()
                 expect(
@@ -1459,7 +1459,7 @@ describe('SubmissionSummary', () => {
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
-                        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)'
+                        /Risk-sharing strategy/
                     )
                 ).toBeInTheDocument()
                 expect(
@@ -1487,7 +1487,7 @@ describe('SubmissionSummary', () => {
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
-                        'Non-risk payment arrangements that do not exceed the upper payment limits specified in § 447.362'
+                        /Non-risk payment arrangements/
                     )
                 ).toBeInTheDocument()
                 expect(
@@ -1830,7 +1830,7 @@ describe('SubmissionSummary', () => {
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
-                        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)'
+                        /Risk-sharing strategy/
                     )
                 ).toBeInTheDocument()
                 expect(
@@ -1858,7 +1858,7 @@ describe('SubmissionSummary', () => {
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
-                        'Non-risk payment arrangements that do not exceed the upper payment limits specified in § 447.362'
+                        /Non-risk payment arrangements/
                     )
                 ).toBeInTheDocument()
                 expect(

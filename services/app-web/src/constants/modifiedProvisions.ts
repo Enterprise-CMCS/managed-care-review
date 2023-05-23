@@ -15,7 +15,7 @@ const ModifiedProvisionsAmendmentRecord: Record<
     modifiedMedicaidBeneficiaries:
         'Medicaid beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)',
     modifiedRiskSharingStrategy:
-        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)',
+        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.) in accordance with 42 CFR § 438.6(b)(1)',
     modifiedIncentiveArrangements:
         'Incentive arrangements in accordance with 42 CFR § 438.6(b)(2)',
     modifiedWitholdAgreements:
@@ -35,7 +35,7 @@ const ModifiedProvisionsAmendmentRecord: Record<
     modifiedNetworkAdequacyStandards: 'Network adequacy standards',
     modifiedLengthOfContract: 'Length of the contract period',
     modifiedNonRiskPaymentArrangements:
-        'Non-risk payment arrangements that do not exceed the upper payment limits specified in § 447.362',
+        'Non-risk payment arrangements that do not exceed the upper payment limits specified in 42 CFR § 447.362',
 }
 
 const ModifiedProvisionsBaseContractRecord: Record<
@@ -45,7 +45,7 @@ const ModifiedProvisionsBaseContractRecord: Record<
     inLieuServicesAndSettings:
         'In Lieu-of Services and Settings (ILOSs) in accordance with 42 CFR § 438.3(e)(2)',
     modifiedRiskSharingStrategy:
-        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)',
+        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.) in accordance with 42 CFR § 438.6(b)(1)',
     modifiedIncentiveArrangements:
         'Incentive arrangements in accordance with 42 CFR § 438.6(b)(2)',
     modifiedWitholdAgreements:
@@ -57,7 +57,7 @@ const ModifiedProvisionsBaseContractRecord: Record<
     modifiedPaymentsForMentalDiseaseInstitutions:
         'Payments to MCOs and PIHPs for enrollees that are a patient in an institution for mental disease in accordance with 42 CFR § 438.6(e)',
     modifiedNonRiskPaymentArrangements:
-        'Non-risk payment arrangements that do not exceed the upper payment limits specified in § 447.362',
+        'Non-risk payment arrangements that do not exceed the upper payment limits specified in 42 CFR § 447.362',
 }
 
 const ModifiedProvisionsCHIPRecord: Record<

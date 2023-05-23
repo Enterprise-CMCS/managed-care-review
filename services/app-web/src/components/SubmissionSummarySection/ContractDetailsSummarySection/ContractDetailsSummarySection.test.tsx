@@ -355,7 +355,7 @@ describe('ContractDetailsSummarySection', () => {
 
             expect(
                 within(modifiedProvisions).getByText(
-                    'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)'
+                    /Risk-sharing strategy/
                 )
             ).toBeInTheDocument()
             expect(
@@ -381,7 +381,7 @@ describe('ContractDetailsSummarySection', () => {
             ).toBeInTheDocument()
             expect(
                 within(modifiedProvisions).getByText(
-                    'Non-risk payment arrangements that do not exceed the upper payment limits specified in § 447.362'
+                    /Non-risk payment arrangements/
                 )
             ).toBeInTheDocument()
 
@@ -433,7 +433,7 @@ describe('ContractDetailsSummarySection', () => {
             )
 
             const modifiedProvisions = screen.getByLabelText(
-                'This contract action includes new or modified provisions related to the following'
+                'This contract action includes provisions related to the following'
             )
             expect(
                 within(modifiedProvisions).getByText(
@@ -448,7 +448,7 @@ describe('ContractDetailsSummarySection', () => {
 
             expect(
                 within(modifiedProvisions).getByText(
-                    'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)'
+                    /Risk-sharing strategy/
                 )
             ).toBeInTheDocument()
             expect(
@@ -458,7 +458,7 @@ describe('ContractDetailsSummarySection', () => {
             ).toBeInTheDocument()
 
             const unmodifiedProvisions = screen.getByLabelText(
-                'This contract action does NOT include new or modified provisions related to the following'
+                'This contract action does NOT include provisions related to the following'
             )
             expect(
                 within(unmodifiedProvisions).getByText(
@@ -472,7 +472,7 @@ describe('ContractDetailsSummarySection', () => {
             ).toBeInTheDocument()
         })
 
-        it('renders provisions with correct MLR references for CHIP amenddment', () => {
+        it('renders provisions with correct MLR references for CHIP amendment', () => {
             renderWithProviders(
                 <ContractDetailsSummarySection
                     submission={{
