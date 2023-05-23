@@ -2,8 +2,18 @@
     "name": "@managed-care-review/common-code",
     "private": true,
     "version": "1.0.0",
-    "main": "dist/index.js",
     "license": "MIT",
+    "main": "dist/index",
+    "exports": {
+        "./config": "./dist/config/index",
+        "./dateHelpers": "./dist/dateHelpers/index",
+        "./featureFlags": "./dist/featureFlags/index",
+        "./formatters": "./dist/formatters/index",
+        "./healthPlanFormDataMocks": "./dist/healthPlanFormDataMocks/index",
+        "./healthPlanFormDataType": "./dist/healthPlanFormDataType/index",
+        "./healthPlanFormDataProto": "./dist/proto/healthPlanFormDataProto/index",
+        "./sha": "./dist/sha/index"
+    },
     "scripts": {
         "precommit": "lint-staged",
         "test": "jest --watch",
@@ -11,7 +21,7 @@
         "test:coverage": "yarn test --coverage --watchAll=false",
         "lint": "tsc --noEmit && eslint . --max-warnings=0",
         "clean": "rm -rf node_modules && yarn cache clean",
-        "build": "tsc --noEmit"
+        "build": "tsc"
     },
     "lint-staged": {
         "*.{js,ts}": [

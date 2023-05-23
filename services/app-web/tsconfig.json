@@ -1,13 +1,15 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
+        "rootDir": "src",
+        "outDir": "dist",
         "target": "es2017",
         "lib": ["dom", "dom.iterable", "esnext"],
         "allowJs": true,
         "skipLibCheck": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
-        "module": "esnext",
+        "module": "Node16",
         "resolveJsonModule": true,
         "isolatedModules": true,
         "noEmit": true,

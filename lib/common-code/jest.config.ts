@@ -6,4 +6,5 @@
 export default {
     setupFiles: ['jest-launchdarkly-mock'],
     preset: 'ts-jest',
+    modulePathIgnorePatterns: ['dist'],
 }

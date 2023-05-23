@@ -1,5 +1,11 @@
 {
     "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@managed-care-review/common-code/*": ["lib/common-code/src"],
+            "@managed-care-review/app-web/*": ["services/app-web/src"],
+            "@managed-care-review/app-api/*": ["services/app-api/src"]
+        },
         "module": "esnext",
         "forceConsistentCasingInFileNames": true,
         "moduleResolution": "node",

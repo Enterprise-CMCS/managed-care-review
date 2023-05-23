@@ -10,7 +10,7 @@
         "skipLibCheck": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
-        "module": "esnext",
+        "module": "Node16",
         "resolveJsonModule": true,
         "isolatedModules": true,
         "jsx": "react-jsx",

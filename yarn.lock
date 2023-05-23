@@ -8733,7 +8733,7 @@ __metadata:
     serverless-cloudfront-invalidate: ^1.12.2
     serverless-s3-sync: ^3.1.0
     serverless-stack-termination-protection: ^2.0.2
-    typescript: ^4.9.5
+    typescript: ^5.0.4
     url-parse: ^1.5.2
     use-deep-compare-effect: ^1.8.1
     uswds: ^2.13.1
@@ -8780,6 +8780,7 @@ __metadata:
     lint-staged: ^13.0.1
     path-browserify: ^1.0.1
     prettier: ^2.4.1
+    typescript: ^5.0.4
   languageName: unknown
   linkType: soft
 
@@ -15312,7 +15313,7 @@ __metadata:
     ts-jest: ^29.1.0
     ts-loader: ^9.4.2
     tsconfig-paths-webpack-plugin: ^4.0.1
-    typescript: 4.9.5
+    typescript: 5.0.4
     uuid: ^9.0.0
     webpack: ^5.83.1
     webpack-node-externals: ^3.0.0
@@ -19893,7 +19894,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "dev_tool@workspace:dev_tool"
   dependencies:
-    typescript: ^4.9.5
+    typescript: ^5.0.4
     yargs: ^17.2.1
   languageName: unknown
   linkType: soft
@@ -34739,7 +34740,7 @@ __metadata:
     "@octokit/action": ^5.0.2
     csv-parser: ^3.0.0
     octokit: ^2.0.4
-    typescript: ^4.9.5
+    typescript: ^5.0.4
     uuid: ^9.0.0
   languageName: unknown
   linkType: soft
@@ -37696,7 +37697,7 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"typescript@npm:4.9.5, typescript@npm:^3 || ^4, typescript@npm:^4.9.5":
+"typescript@npm:4.9.5, typescript@npm:^3 || ^4":
   version: 4.9.5
   resolution: "typescript@npm:4.9.5"
   bin:
@@ -37706,13 +37707,33 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@4.9.5#~builtin<compat/typescript>, typescript@patch:typescript@^3 || ^4#~builtin<compat/typescript>, typescript@patch:typescript@^4.9.5#~builtin<compat/typescript>":
+"typescript@npm:5.0.4, typescript@npm:^5.0.4":
+  version: 5.0.4
+  resolution: "typescript@npm:5.0.4"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 82b94da3f4604a8946da585f7d6c3025fff8410779e5bde2855ab130d05e4fd08938b9e593b6ebed165bda6ad9292b230984f10952cf82f0a0ca07bbeaa08172
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@4.9.5#~builtin<compat/typescript>, typescript@patch:typescript@^3 || ^4#~builtin<compat/typescript>":
   version: 4.9.5
   resolution: "typescript@patch:typescript@npm%3A4.9.5#~builtin<compat/typescript>::version=4.9.5&hash=289587"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 1f8f3b6aaea19f0f67cba79057674ba580438a7db55057eb89cc06950483c5d632115c14077f6663ea76fd09fce3c190e6414bb98582ec80aa5a4eaf345d5b68
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@5.0.4#~builtin<compat/typescript>, typescript@patch:typescript@^5.0.4#~builtin<compat/typescript>":
+  version: 5.0.4
+  resolution: "typescript@patch:typescript@npm%3A5.0.4#~builtin<compat/typescript>::version=5.0.4&hash=b5f058"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: d26b6ba97b6d163c55dbdffd9bbb4c211667ebebc743accfeb2c8c0154aace7afd097b51165a72a5bad2cf65a4612259344ff60f8e642362aa1695c760d303ac
   languageName: node
   linkType: hard
 
@@ -38170,7 +38191,7 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
     ts-jest: ^29.1.0
     ts-loader: ^9.4.2
     tsconfig-paths-webpack-plugin: ^4.0.1
-    typescript: 4.9.5
+    typescript: 5.0.4
     webpack: ^5.83.1
   languageName: unknown
   linkType: soft
