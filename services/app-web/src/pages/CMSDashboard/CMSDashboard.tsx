@@ -2,10 +2,11 @@ import { GridContainer } from '@trussworks/react-uswds'
 import React from 'react'
 import { packageName } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { base64ToDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+import { mostRecentDate } from '@managed-care-review/common-code/dateHelpers'
+
 import { SubmissionTypeRecord } from '../../constants/healthPlanPackages'
 import { useAuth } from '../../contexts/AuthContext'
 import { useIndexHealthPlanPackagesQuery } from '../../gen/gqlClient'
-import { mostRecentDate } from '@managed-care-review/common-code/dateHelpers'
 import styles from '../StateDashboard/StateDashboard.module.scss'
 import { recordJSException } from '../../otelHelpers/tracingHelper'
 import {
