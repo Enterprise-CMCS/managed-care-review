@@ -136,7 +136,7 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
         cy.findByText('No').click()
     })
     cy.findByText(
-        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)'
+        /Risk-sharing strategy/
     )
         .parent()
         .within(() => {
@@ -175,7 +175,7 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
         .within(() => {
             cy.findByText('Yes').click()
         })
-    cy.findByText('Non-risk payment arrangements that do not exceed the upper payment limits specified in § 447.362')
+    cy.findByText(/Non-risk payment arrangements/)
         .parent()
         .within(() => {
             cy.findByText('Yes').click()
@@ -228,7 +228,7 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
             cy.findByText('Yes').click()
         })
     cy.findByText(
-        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)'
+        /Risk-sharing strategy/
     )
         .parent()
         .within(() => {
@@ -303,7 +303,7 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
         .within(() => {
             cy.findByText('No').click()
         })
-    cy.findByText('Non-risk payment arrangements that do not exceed the upper payment limits specified in § 447.362')
+    cy.findByText(/Non-risk payment arrangements/)
         .parent()
         .within(() => {
             cy.findByText('Yes').click()
