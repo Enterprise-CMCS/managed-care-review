@@ -23,7 +23,7 @@ import { SubmissionSideNav } from '../SubmissionSideNav'
 import React from 'react'
 
 const protoTestDir =
-    '../../lib/common-code/proto/healthPlanFormDataProto/testData/'
+    '../../lib/common-code/src/proto/healthPlanFormDataProto/testData/'
 
 describe('SubmissionSummary', () => {
     beforeEach(() => {

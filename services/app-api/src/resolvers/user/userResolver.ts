@@ -1,5 +1,5 @@
 import { Resolvers } from '../../gen/gqlServer'
-import statePrograms from '@managed-care-review/common-code/data/statePrograms.json'
+import { statePrograms } from '@managed-care-review/common-code/data'
 
 export const stateUserResolver: Resolvers['StateUser'] = {
     state(parent) {

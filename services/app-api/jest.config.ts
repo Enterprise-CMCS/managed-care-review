@@ -1,16 +1,12 @@
-module.exports = {
+import type { JestConfigWithTsJest } from 'ts-jest'
+
+const jestConfig: JestConfigWithTsJest = {
     preset: 'ts-jest',
     testEnvironment: 'node',
     transform: {
         '\\.graphql$': 'jest-raw-loader',
     },
     coverageReporters: [
-        [
-            'json',
-            {
-                projectRoot: '../../',
-            },
-        ],
         [
             'lcov',
             {
@@ -20,6 +16,10 @@ module.exports = {
         'text',
     ],
     moduleFileExtensions: ['js', 'json', 'jsx', 'd.ts', 'ts', 'tsx', 'node'],
+    moduleNameMapper: {
+        '^@managed-care-review/common-code/(.*)$':
+            '<rootDir>/lib/common-code/src/$1',
+    },
     coveragePathIgnorePatterns: [
         'testHelpers',
         'index.ts',
@@ -28,3 +28,5 @@ module.exports = {
         'postgresStore.ts',
     ],
 }
+
+export default jestConfig

@@ -1,3 +1,1 @@
-import { pluralize } from './pluralizer'
-
-export { pluralize }
+export { pluralize } from './pluralizer'

@@ -10,7 +10,7 @@ import {
     packageName,
 } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { toDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
-import statePrograms from '@managed-care-review/common-code/data/statePrograms.json'
+import { statePrograms } from '@managed-care-review/common-code/data'
 import { isStoreError, StoreError } from '../postgres/storeError'
 import { HealthPlanPackageStatusType } from '../domain-models'
 import {

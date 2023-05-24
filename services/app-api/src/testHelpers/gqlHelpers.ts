@@ -36,7 +36,7 @@ import {
     newLocalEmailParameterStore,
     EmailParameterStore,
 } from '../parameterStore'
-import statePrograms from '@managed-care-review/common-code/data/statePrograms.json'
+import { statePrograms } from '@managed-care-review/common-code/data'
 import { testLDService } from './launchDarklyHelpers'
 import { LDService } from '../launchDarkly/launchDarkly'
 import { insertUserToLocalAurora } from '../authn'

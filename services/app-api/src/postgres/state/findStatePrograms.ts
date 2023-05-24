@@ -1,4 +1,4 @@
-import statePrograms from '@managed-care-review/common-code/data/statePrograms.json'
+import { statePrograms } from '@managed-care-review/common-code/data'
 import { ProgramType } from '../../domain-models'
 
 // Currently relies on state programs json; does not query postgres

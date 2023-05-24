@@ -16,11 +16,5 @@
         "jsx": "react-jsx",
         "types": ["cypress", "node"]
     },
-    "exclude": [
-        "gen/*",
-        "dist/*",
-        "jest.config.ts",
-        "src/s3URLEncoding.test.ts",
-        "src/s3URLEncoding.ts"
-    ]
+    "exclude": ["gen/*", "dist/*", "jest.config.ts"]
 }

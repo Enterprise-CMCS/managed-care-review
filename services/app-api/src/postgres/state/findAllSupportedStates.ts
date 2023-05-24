@@ -1,5 +1,5 @@
 import { StateType } from '../../domain-models'
-import statePrograms from '@managed-care-review/common-code/data/statePrograms.json'
+import { statePrograms } from '@managed-care-review/common-code/data'
 import { convertPrismaErrorToStoreError, StoreError } from '../storeError'
 import { PrismaClient } from '@prisma/client'
 

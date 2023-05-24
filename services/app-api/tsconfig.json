@@ -1,12 +1,11 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "module": "commonjs",
+        "module": "Node16",
         "lib": ["es2021", "DOM"],
         "target": "es2021",
         "moduleResolution": "node",
 
-        "baseUrl": "/",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "preserveConstEnums": true,

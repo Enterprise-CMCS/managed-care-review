@@ -12,7 +12,8 @@
         "./healthPlanFormDataMocks": "./dist/healthPlanFormDataMocks/index",
         "./healthPlanFormDataType": "./dist/healthPlanFormDataType/index",
         "./healthPlanFormDataProto": "./dist/proto/healthPlanFormDataProto/index",
-        "./sha": "./dist/sha/index"
+        "./sha": "./dist/sha/index",
+        "./s3URLEncoding": "./dist/s3URLEncoding/index"
     },
     "scripts": {
         "precommit": "lint-staged",
