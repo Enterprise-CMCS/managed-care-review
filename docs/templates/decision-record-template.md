@@ -6,9 +6,7 @@ title: Architectural Decision Record Template
 - Status: [In progress or Decided]
 - Date: [Date created]
 
-## Assumptions
-
-A brief listing of any underlying assumptions specific to this decision: cost, timeline, technologies, compliance, etc.
+## Decision Drivers
 
 ## Constraints
 
