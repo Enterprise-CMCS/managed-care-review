@@ -28,9 +28,7 @@ This entails no change to the current health plan form data APIs. We continue to
 
 This entails a second wave of focused refactors to rewrite existing health plan APIs and frontend components. We move towards data fields directly from API instead of handling serialized health plan form data.
 
-## Chosen Solution
-
-Remove protocol buffers from  the application 
+## Chosen Solution: Remove protocol buffers from  the application 
 
 ### Pros and Cons of the Alternatives
 ​

@@ -31,8 +31,7 @@ This entails a single field database migration where we switch from the health p
 
 This entails rewriting the postgres database tables for health plan package related data and performing a significant migration.
 
-## Chosen Solution
-
+## Chosen Solution: Move health plan data out of a single table and into contract and rates tables
 ### Pros and Cons of the Alternatives
 ​
 #### Option 1 No change 
