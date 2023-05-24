@@ -1,7 +1,8 @@
 # 008 — Seralize form data in a single health plan package
 
-## This document is now outdated. This ADR superceded by [ADR 0023](./023-seperate-contract-rates-tables-postgres)
+## This document is now outdated. This ADR is now superceded by [ADR 0023](./023-seperate-contract-rates-tables-postgres)
 
+---
 Our submissions form model is complicated, not fully standardized, and ever-changing as we continue design and research and bring more states onboard to MC Review. We currently track answers to various questions about state managed care submissions in our DraftSubmission model. This includes top level fields like submission type, description, and contract details, as well as nested or conditional fields like presence of rates, presence of amendments, rate details, and a list of categorized documents.
 
 This entire form data model is represented in the following places in the app
