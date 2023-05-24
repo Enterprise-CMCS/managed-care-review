@@ -5,7 +5,7 @@ import {
     isLockedHealthPlanFormData,
     generateRateName,
 } from '../../healthPlanFormDataType'
-import statePrograms from '../../data/statePrograms.json'
+import { statePrograms } from '../../data/statePrograms'
 import { ProgramArgType } from '../../healthPlanFormDataType/State'
 import { CURRENT_PROTO_VERSION } from './toLatestVersion'
 import { v4 as uuidv4 } from 'uuid'
