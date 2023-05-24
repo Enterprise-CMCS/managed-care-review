@@ -4,12 +4,9 @@ import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import {
-    ModifiedProvisionsCHIPRecord,
     ContractExecutionStatusRecord,
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
-    ModifiedProvisionsAmendmentRecord,
-    ModifiedProvisionsBaseContractRecord,
 } from '../../../constants/index'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
@@ -179,13 +176,7 @@ export const ContractDetailsSummarySection = ({
                             {provisionsAreInvalid ? null : (
                                 <DataDetailCheckboxList
                                     list={modifiedProvisions}
-                                    dict={
-                                        isCHIPOnly(submission)
-                                            ? ModifiedProvisionsCHIPRecord
-                                            : isBaseContract(submission)
-                                            ? ModifiedProvisionsBaseContractRecord
-                                            : ModifiedProvisionsAmendmentRecord
-                                    }
+                                    dict={getProvisionDictionary(submission) }
                                     displayEmptyList
                                 />
                             )}

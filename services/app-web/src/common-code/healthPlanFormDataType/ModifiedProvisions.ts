@@ -15,29 +15,9 @@
     See also provisions.ts
 */
 
-const generalizedProvisionKeys = [
-    'inLieuServicesAndSettings',
-    'modifiedBenefitsProvided',
-    'modifiedGeoAreaServed',
-    'modifiedMedicaidBeneficiaries',
-    'modifiedEnrollmentProcess',
-    'modifiedRiskSharingStrategy',
-    'modifiedIncentiveArrangements',
-    'modifiedWitholdAgreements',
-    'modifiedStateDirectedPayments',
-    'modifiedPassThroughPayments',
-    'modifiedPaymentsForMentalDiseaseInstitutions',
-    'modifiedMedicalLossRatioStandards',
-    'modifiedOtherFinancialPaymentIncentive',
-    'modifiedGrevienceAndAppeal',
-    'modifiedNetworkAdequacyStandards',
-    'modifiedLengthOfContract',
-    'modifiedNonRiskPaymentArrangements',
-] as const
-
-type GeneralizedProvisionType = (typeof generalizedProvisionKeys)[number]
+type GeneralizedProvisionType = CHIPProvisionType | MedicaidBaseProvisionType | MedicaidAmendmentProvisionType
 type GeneralizedModifiedProvisions = {
-    [K in (typeof generalizedProvisionKeys)[number]]: boolean
+    [K in GeneralizedProvisionType ]: boolean
 }
 
 /*
@@ -149,7 +129,6 @@ export type {
 }
 
 export {
-    generalizedProvisionKeys,
     modifiedProvisionMedicaidBaseKeys,
     modifiedProvisionMedicaidAmendmentKeys,
     provisionCHIPKeys,
