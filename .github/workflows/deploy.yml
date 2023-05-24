@@ -100,7 +100,7 @@ jobs:
         run: lerna run gqlgen
 
       - name: Generate Protos
-        run: lerna run generate --scope=app-proto
+        run: lerna run generate
 
       - name: Web Unit Tests
         env:
@@ -154,7 +154,7 @@ jobs:
         run: lerna run gqlgen
 
       - name: Generate Protos
-        run: lerna run generate --scope=app-proto
+        run: lerna run generate
 
       - name: Generate Prisma
         env:
@@ -202,7 +202,7 @@ jobs:
         uses: ./.github/actions/setup_env
 
       - name: Generate protos
-        run: lerna run generate --scope=app-proto && lerna run build --scope=app-proto
+        run: lerna run generate && lerna run build --scope=@managed-care-review/app-proto
 
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client
