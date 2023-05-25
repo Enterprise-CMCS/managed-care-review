@@ -42,9 +42,10 @@ Cypress.Commands.add('fillOutContractActionOnlyWithBaseContract', () => {
             cy.get('label[for="medicaid"]').click()
         }
     })
-    cy.wait(2000)
+
     cy.findByRole('combobox', {
         name: 'Programs this contract action covers (required)',
+        timeout: 2000
     }).click({
         force: true,
     })
@@ -62,14 +63,13 @@ Cypress.Commands.add('fillOutContractActionOnlyWithBaseContract', () => {
 
 Cypress.Commands.add('fillOutContractActionOnlyWithAmendment', () => {
     // Must be on '/submissions/new'
-    cy.wait(2000)
     cy.getFeatureFlagStore(['chip-only-form']).then((store) => {
         if (store['chip-only-form']) {
             cy.get('label[for="medicaid"]').click()
         }
     })
     cy.findByRole('combobox', {
-        name: 'Programs this contract action covers (required)',
+        name: 'Programs this contract action covers (required)', timeout: 2000
     }).click({
         force: true,
     })
@@ -87,14 +87,13 @@ Cypress.Commands.add('fillOutContractActionOnlyWithAmendment', () => {
 
 Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
     // Must be on '/submissions/new'
-    cy.wait(2000)
     cy.getFeatureFlagStore(['chip-only-form']).then((store) => {
         if (store['chip-only-form']) {
             cy.get('label[for="medicaid"]').click()
         }
     })
     cy.findByRole('combobox', {
-        name: 'Programs this contract action covers (required)',
+        name: 'Programs this contract action covers (required)', timeout: 2000
     }).click({
         force: true,
     })
@@ -113,8 +112,7 @@ Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
 Cypress.Commands.add('fillOutBaseContractDetails', () => {
     // Must be on '/submissions/:id/edit/contract-details'
     cy.findByText('Fully executed').click()
-    cy.wait(2000)
-    cy.findAllByLabelText('Start date')
+    cy.findAllByLabelText('Start date', {timeout: 2000})
         .parents()
         .findByTestId('date-picker-external-input')
         .type('04/01/2024')
@@ -138,8 +136,8 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
 Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     // Must be on '/submissions/:id/edit/contract-details'
     cy.findByText('Unexecuted by some or all parties').click()
-    cy.wait(2000)
-    cy.findAllByLabelText('Start date')
+
+    cy.findAllByLabelText('Start date', {timeout: 2000})
         .parents()
         .findByTestId('date-picker-external-input')
         .type('04/01/2024')
@@ -276,8 +274,8 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     cy.findByText(
         'Certification of capitation rates specific to each rate cell'
     ).click()
-    cy.wait(2000)
-    cy.findAllByLabelText('Start date')
+
+    cy.findAllByLabelText('Start date', {timeout: 2000})
         .parents()
         .findByTestId('date-picker-external-input')
         .type('02/29/2024')
@@ -324,15 +322,13 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
         'Certification of capitation rates specific to each rate cell'
     ).click()
 
-    cy.wait(2000)
-
     /* 
     There are currently multiple date range pickers on the page with the same label names (start date, end date) and different headings
     Preferred approach would be targeting by via findBy* or a custom data-cyid attribute
     However, surfacing custom attributes on the nested inputs in third party component DateRangePicker not possible in current react-uswds version 
     For now using targeting by html id (anti-pattern)
 */
-    cy.get(`[id="rateInfos.${id}.rateDateStart"]`).type('02/01/2023')
+    cy.get(`[id="rateInfos.${id}.rateDateStart"]`, {timeout: 2000}).type('02/01/2023')
     cy.get(`[id="rateInfos.${id}.rateDateEnd"]`).type('03/01/2025')
     cy.get(`[id="rateInfos.${id}.effectiveDateStart"]`).type('03/01/2024')
     cy.get(`[id="rateInfos.${id}.effectiveDateEnd"]`).type('03/01/2025')
@@ -423,13 +419,8 @@ Cypress.Commands.add('fillOutSupportingDocuments', () => {
 })
 
 Cypress.Commands.add('waitForDocumentsToLoad', () => {
-    const authMode = Cypress.env('AUTH_MODE')
-    if (authMode !== 'LOCAL') {
-        // Must wait for scanning to complete in AWS environments
-        cy.wait(20000)
-    }
     cy.findAllByTestId('file-input-preview-image', {
-        timeout: 40000,
+        timeout: 80000,
     }).should('not.have.class', 'is-loading')
 })
 

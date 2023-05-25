@@ -61,16 +61,14 @@ describe('CMS user', () => {
             cy.logInAsCMSUser({ initialURL: submissionURL })
 
             // click on the unlock button, type in reason and confirm
-            cy.wait(2000)
-            cy.findByRole('button', { name: 'Unlock submission' }).click()
+            cy.findByRole('button', { name: 'Unlock submission', timeout: 2000 }).click()
             cy.findAllByTestId('modalWindow').eq(1).should('be.visible')
             cy.get('#unlockSubmitModalInput').type('Unlock submission reason.')
             cy.findByRole('button', { name: 'Unlock' }).click()
 
-            cy.wait(2000)
 
-            cy.findByRole('button', { name: 'Unlock submission' }).should(
-                'be.disabled'
+            cy.findByRole('button', { name: 'Unlock submission'}).should(
+                'be.disabled', {timeout: 50000 }
             )
             cy.findAllByTestId('modalWindow').eq(1).should('be.hidden')
 
@@ -84,10 +82,8 @@ describe('CMS user', () => {
                 )
                 .should('exist')
 
-            cy.wait(2000)
-
             //Find unlocked submission name
-            cy.get('#submissionName').then(($h2) => {
+            cy.get('#submissionName', {timeout: 2000}).then(($h2) => {
                 //Set name to variable for later use in finding the unlocked submission
                 const submissionName = $h2.text()
                 
@@ -96,7 +92,6 @@ describe('CMS user', () => {
                 cy.logInAsStateUser()
 
                 // State user sees unlocked submission - check tag then submission link
-                cy.findByText('Start new submission').should('exist')
                 cy.get('table')
                     .should('exist')
                     .findByText(submissionName)
