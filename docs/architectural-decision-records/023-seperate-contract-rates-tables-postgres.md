@@ -7,13 +7,13 @@ title: Store health plan data in separate Contract and Rates postgres tables
 - Status: Decided (scheduled for implementation)
 - Date: 5/23/2023
 
-This ADR overrides our previous decision from [ADR 008](./008-form-data-serialization.md) to store health plan data as a single binary. We had previously assumed that health plan data was primarily handled as package and that fields were unlikely to be queried directly.
+This ADR overrides our previous decision from [ADR 008](./008-form-data-serialization.md) to store health plan data as a single binary. We had previously assumed that health plan data was primarily handled as a package and that fields were unlikely to be queried directly.
 
 ## Decision Drivers
 - An individual rate certification can be shared across multiple contracts. CMS wants ways to identify those shared rates to avoid repetitive reviews. This means rates cross the package boundary assumed by our previous data model. 
 - There are CMS users who additionally need the ability to query and review standalone rates data, regardless if they are shared or not. 
-- Features with relational rates data include Rates Across Submission, Q&A for Rates. 
-- Features with rates queried and handled independently of the contract include Rates Dashboard, rates reporting, rate only submissions.
+- Features with relational rates data include Rates Across Submissions, Q&A for Rates. 
+- Features with rates queried and handled independently of the contract include Rates Dashboard, rates reporting, rate-only submissions.
 
 ## Constraints
 - Out of scope: the full database diagram for our new tables or technical discussion of the migration. This is a high-level ADR focused on how we approach health plan data in the application.
@@ -26,7 +26,7 @@ This entails continuing our current workarounds in business logic to emulate rel
 
 ### Option 2 Store health plan packages as JSON.
 
-This entails a single field database migration where we switch from the health plan storage format from protobuf to JSON (which can be queried in Postgres)
+This entails a single field database migration where we switch the health plan storage format from protobuf to JSON (which can be queried in Postgres)
 ### Option 3 Move health plan data out of a single table and into contract and rates tables
 
 This entails rewriting the postgres database tables for health plan package related data and performing a significant migration.
@@ -57,6 +57,6 @@ This entails rewriting the postgres database tables for health plan package rela
 - `+` We unlock true rates across submissions features and make it easier to surface and identify duplicate rates.
 - `+` The shape of the data in the database reflects more closely how it is used.
 - `±` We rethink our mental model for the application and start to interrogate the relationship between the package, the contract, and the rate cert.
- lean on postgres approach fully/ 
+ lean on postgres approach fully 
 - `-` We have to rewrite how health plan data is handled in database and rewrite postgres handlers
 - `-` We invest significant eng time in a migration

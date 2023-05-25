@@ -12,7 +12,7 @@ This ADR overrides our previous decision from [ADR 009](./009-data-serialization
 ## Decision Drivers
 - The reason protobuf was introduced to the application was for data storage reasons. We no longer have that technical requirement and plan to remove protobuf from our postgres tables (see [ADR 023](./023-seperate-contract-rates-tables-postgres)). 
 - Protocol buffers have some associated tooling in the application we need to maintain as long as this format is in use. This is tech maintenance load. 
-- Eng team feels the protocol buffer tooling and documentation is immature and creates a mental load for developers. å
+- Eng team feels the protocol buffer tooling and documentation is immature and creates a mental load for developers.
 
 ## Constraints
 
@@ -35,7 +35,7 @@ This entails a second wave of focused refactors to rewrite existing health plan 
 #### Option 1 No change 
 ​
 - `+` Familiar.
-- `±` Simplicity of the backend, we don't need to break out all the contract data into it's own API or graphql schema if it's not needed.
+- `±` Simplicity of the backend, we don't need to break out all the contract data into its own API or graphql schema if it's not needed.
 - `-` We keep an unnecessary schema in the application (`.proto` file) that has no type safety or guarantees 
 - `-` Complexity on frontend and in the API.  We maintain two types of APIs in the application - new APIs (fetchRate, indexRates) will not use this format, old APIs will. Frontend components similarly will have data serialization steps in some cases, and not in others.
 - `-` We still need to stay up to date with changes to proto spec and dependencies 
