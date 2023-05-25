@@ -1,10 +1,12 @@
 import type { JestConfigWithTsJest } from 'ts-jest'
+import { pathsToModuleNameMapper } from 'ts-jest'
+import { compilerOptions } from '../../tsconfig.json'
 
 const jestConfig: JestConfigWithTsJest = {
     preset: 'ts-jest',
     testEnvironment: 'node',
     transform: {
-        '\\.graphql$': 'jest-raw-loader',
+        '\\.graphql$': '@glen/jest-raw-loader',
     },
     coverageReporters: [
         [
@@ -16,10 +18,9 @@ const jestConfig: JestConfigWithTsJest = {
         'text',
     ],
     moduleFileExtensions: ['js', 'json', 'jsx', 'd.ts', 'ts', 'tsx', 'node'],
-    moduleNameMapper: {
-        '^@managed-care-review/common-code/(.*)$':
-            '<rootDir>/lib/common-code/src/$1',
-    },
+    moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, {
+        prefix: '<rootDir>/../../',
+    }),
     coveragePathIgnorePatterns: [
         'testHelpers',
         'index.ts',
