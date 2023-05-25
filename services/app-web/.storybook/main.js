@@ -1,4 +1,4 @@
-const path = require('path');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 module.exports = {
     stories: ['../src/**/*.stories.@(ts|tsx)'],
@@ -13,6 +13,7 @@ module.exports = {
         checkOptions: {},
         reactDocgen: 'react-docgen-typescript',
         reactDocgenTypescriptOptions: {
+            extends: '../tsconfig.json',
             shouldExtractLiteralValuesFromEnum: true,
             compilerOptions: {
                 allowSyntheticDefaultImports: false,
@@ -21,15 +22,10 @@ module.exports = {
         },
     },
     core: {
-        builder: 'webpack5',
+        builder: '@storybook/builder-webpack5',
     },
     webpackFinal: async (config, { configType }) => {
-        config.module.rules.push({
-            test: /\.ts$/,
-            use: ['ts-loader'],
-            include: path.resolve(__dirname, '../../lib/common-code'),
-        });
-
+        config.resolve.plugins = [new TsconfigPathsPlugin()];
         return config;
     },
 };

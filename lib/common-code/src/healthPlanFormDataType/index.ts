@@ -15,6 +15,7 @@ export type {
     RateType,
     RateCapitationType,
     StateContact,
+    SharedRateCertDisplay,
     SubmissionDocument,
     SubmissionType,
     RateInfoType,
