@@ -74,8 +74,6 @@ describe('dashboard', () => {
 
         // Submit, sent to dashboard
         cy.submitStateSubmissionForm()
-        cy.findByText('Dashboard').should('exist')
-        cy.findByText('Programs').should('exist')
 
         // View submission summary
         cy.location().then((loc) => {

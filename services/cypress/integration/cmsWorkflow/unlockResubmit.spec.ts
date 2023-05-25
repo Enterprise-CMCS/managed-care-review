@@ -56,14 +56,8 @@ describe('CMS user', () => {
             // Submit, sent to dashboard
             cy.submitStateSubmissionForm()
 
-            cy.findByText('Dashboard').should('exist')
-            cy.findByText('Programs').should('exist')
-
             // Login as CMS User
-            cy.findByRole('button', { name: 'Sign out' }).click()
-            cy.findByText(
-                'Medicaid and CHIP Managed Care Reporting and Review System'
-            )
+            cy.logOut()
             cy.logInAsCMSUser({ initialURL: submissionURL })
 
             // click on the unlock button, type in reason and confirm
@@ -96,13 +90,9 @@ describe('CMS user', () => {
             cy.get('#submissionName').then(($h2) => {
                 //Set name to variable for later use in finding the unlocked submission
                 const submissionName = $h2.text()
+                
                 // Login as state user
-                cy.findByRole('button', { name: 'Sign out' }).click()
-
-                cy.findByText(
-                    'Medicaid and CHIP Managed Care Reporting and Review System'
-                )
-
+                cy.logOut()
                 cy.logInAsStateUser()
 
                 // State user sees unlocked submission - check tag then submission link
@@ -141,8 +131,6 @@ describe('CMS user', () => {
 
                 cy.submitStateSubmissionForm(true, true)
 
-                cy.findByText('Dashboard').should('exist')
-
                 cy.get('table')
                     .should('exist')
                     .findByText(submissionName)
@@ -165,16 +153,8 @@ describe('CMS user', () => {
                 cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
                 cy.findByTestId('updatedSubmissionBanner').should('exist')
 
-                //Sign out
-                cy.findByRole('button', { name: 'Sign out' }).click()
-
-                cy.wait(5000)
-
-                cy.findByText(
-                    'Medicaid and CHIP Managed Care Reporting and Review System'
-                )
-
                 // Login as CMS User
+                cy.logOut()
                 cy.logInAsCMSUser({ initialURL: submissionURL })
 
                 //  CMS user sees resubmitted submission and active unlock button

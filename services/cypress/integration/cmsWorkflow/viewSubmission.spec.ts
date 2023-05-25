@@ -42,8 +42,6 @@ describe('CMS user can view submission', () => {
         // submit package
         cy.findByRole('heading', { level: 2, name: /Review and submit/ })
         cy.submitStateSubmissionForm()
-        cy.findByText('Dashboard').should('exist')
-        cy.findByText('Programs').should('exist')
 
         // store submission name for later
         cy.location().then((loc) => {
@@ -54,15 +52,7 @@ describe('CMS user can view submission', () => {
             }
 
             // sign out state user
-            cy.findByRole('button', {
-                name: 'Sign out',
-            })
-                .should('exist')
-                .click()
-            cy.findByText(
-                'Medicaid and CHIP Managed Care Reporting and Review System'
-            )
-
+            cy.logOut()
             //  sign in CMS user
             cy.logInAsCMSUser()
             cy.findByTestId('cms-dashboard-page').should('exist')
@@ -106,18 +96,7 @@ describe('CMS user can view submission', () => {
             cy.findByTestId('submission-summary').should('exist')
 
             // log out CMS user, log in Admin user, and recheck that submission can be retrieved
-
-            // sign out CMS user
-            cy.findByRole('button', {
-                name: 'Sign out',
-            })
-                .should('exist')
-                .click()
-            cy.findByText(
-                'Medicaid and CHIP Managed Care Reporting and Review System'
-            )
-
-            //  sign in Admin user
+            cy.logOut()
             cy.logInAsAdminUser()
             cy.findByTestId('cms-dashboard-page').should('exist')
             cy.findByRole('table').should('exist')

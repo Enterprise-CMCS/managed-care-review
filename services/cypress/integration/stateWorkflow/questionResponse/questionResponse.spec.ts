@@ -43,8 +43,6 @@ describe('Q&A', () => {
 
         // Submit, sent to dashboard
         cy.submitStateSubmissionForm()
-        cy.findByText('Dashboard').should('exist')
-        cy.findByText('Programs').should('exist')
 
         // View submission summary
         cy.location().then((loc) => {
@@ -76,12 +74,7 @@ describe('Q&A', () => {
                 name: `Minnesota ${submissionName}`,
             }).should('exist')
 
-            // Log out and log back in as cms user, visiting submission summary page,
-            cy.findByRole('button', { name: 'Sign out' }).click()
-            cy.findByText(
-                'Medicaid and CHIP Managed Care Reporting and Review System'
-            )
-
+            cy.logOut()
             // As a precaution we logg in as the CMS user before logging in as the Admin user so that the CMS user is
             // inserted into the database before trying to update its division
             cy.logInAsCMSUser({
@@ -97,13 +90,8 @@ describe('Q&A', () => {
                 name: `CMS ${submissionName}`,
             }).should('exist')
 
-            // Log out
-            cy.findByRole('button', { name: 'Sign out' }).click()
-            cy.findByText(
-                'Medicaid and CHIP Managed Care Reporting and Review System'
-            )
-
             // Log in as Admin to the settings page
+            cy.logOut()
             cy.logInAsAdminUser({
                 initialURL: `/settings`,
             })
@@ -114,21 +102,12 @@ describe('Q&A', () => {
                 division: 'DMCO'
             })
 
-            // Log out
-            cy.findByRole('button', { name: 'Sign out' }).click()
-            cy.findByText(
-                'Medicaid and CHIP Managed Care Reporting and Review System'
-            )
 
             // Log back in as CMS user
+            cy.logOut()
             cy.logInAsCMSUser({
                 initialURL: `/submissions/${submissionId}/question-and-answers`,
             })
-
-            cy.url({ timeout: 10_000 }).should(
-                'contain',
-                `${submissionId}/question-and-answers`
-            )
 
             cy.findByRole('heading', {
                 name: `CMS ${submissionName}`,
@@ -146,10 +125,7 @@ describe('Q&A', () => {
             })
 
             // Log out and log back in as cms user, visiting submission summary page,
-            cy.findByRole('button', { name: 'Sign out' }).click()
-            cy.findByText(
-                'Medicaid and CHIP Managed Care Reporting and Review System'
-            )
+            cy.logOut()
             cy.logInAsStateUser()
 
             //Find submission on table and click

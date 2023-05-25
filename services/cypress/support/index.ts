@@ -41,6 +41,7 @@ declare global {
             logInAsStateUser(): void
             logInAsCMSUser(args?: { initialURL?: string }): void
             logInAsAdminUser(args?: { initialURL?: string }): void
+            logOut(): void
 
             // state submission form commands
             waitForDocumentsToLoad(): void

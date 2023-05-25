@@ -31,6 +31,8 @@ Cypress.Commands.add('logInAsStateUser', () => {
     cy.wait(['@fetchCurrentUserQuery', '@indexHealthPlanPackagesQuery'], {
         timeout: 80000,
     })
+    cy.findByTestId('dashboard-page').should('exist')
+    cy.findByText('Start new submission').should('exist')
 })
 
 Cypress.Commands.add(
@@ -67,9 +69,15 @@ Cypress.Commands.add(
         }
         cy.wait('@fetchCurrentUserQuery', { timeout: 20000 })
         if (initialURL !== '/') {
-            cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20000 }) // for cases where CMs user goes to specific submission on login
+            cy.url({ timeout: 10_000 }).should(
+                'contain',
+                initialURL
+            )
         } else {
+            // Default behavior on login is to go to CMS dashboard
             cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80000 })
+            cy.findByTestId('dashboard-page').should('exist')
+            cy.findByRole('heading', {name: 'Submissions'}).should('exist')
         }
     }
 )
@@ -85,7 +93,6 @@ Cypress.Commands.add(
         })
 
         cy.visit(initialURL)
-        //Add assertion looking for test on the page before findByRole
         cy.findByText(
             'Medicaid and CHIP Managed Care Reporting and Review System'
         )
@@ -111,9 +118,14 @@ Cypress.Commands.add(
         if (initialURL === '/settings') {
             cy.wait('@indexUsersQuery', { timeout: 20000 })
         } else if (initialURL !== '/') {
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 }) // for cases where Admin user goes to specific submission on login
+            cy.url({ timeout: 10_000 }).should(
+                'contain',
+                initialURL
+            )
         } else {
             cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80000 })
+            cy.findByTestId('dashboard-page').should('exist')
+            cy.findByRole('heading', {name: 'Submissions'}).should('exist')
         }
     }
 )
