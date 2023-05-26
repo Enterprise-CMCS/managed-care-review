@@ -40,16 +40,16 @@ This entails rewriting the postgres database tables for health plan package rela
 - `±` Simplicity of mental model at first blush - we get to continue thinking of health plan data as a single standalone "package"
 - `-` Continued scope creep around features with relational rates data.
   `-` Continued scope creep around features that seem to presume rates are easy to handle independently. 
-- `-` Shape of the data in the database does not reflect how it is used (rates seem very much to be relational). 
-- `-` The eng team would either continue emulating SQL relationships between contracts and rates in the health plan binary (as we did when we started encoding rates with manual UUIDs and referencing them across packages ) or start to duplicate data across packages and commit to maintaining those duplicates (more of a noSQL approach).
+- `-` Shape of the data in the database does not reflect how it is used. The form data is stored in a single postgres field (as a binary) even though eng team now knows we have significant relational data related to subsets of this data.
+- `-` Eng team continues to emulate relationships between contracts and rates stored as a binary without the guarantees of postgres columns/tables 
 
 #### Option 2 Store health plan packages as JSON.
 
 - `+` Simple change to data storage that would also unlock ability to query rates independently 
-- `+` We can query rates independently in postgres and deliver features like rates dashboard and rates reporting.
+- `+` We can query rates independently in postgres and deliver features like rates dashboard and rates reporting
 - `±` Simplicity of mental model at first blush - we get to continue thinking of health plan data as a single standalone "package"
-- `-` Features that require relational rates data are still difficult.
-- `-` Similar cons to Option 1 related to data shape. 
+- `-` Does not solve how to we create, edit, delete relationships between individual rates and other resources in the db (e.g. relationships between rates and contracts or between rates and questions still difficult to manage)
+- `-` Shape of the data in the database does not reflect how it is used. The form data is stored in a single postgres field (as JSON) even though eng team now knows we have significant relational data related to subsets of this data.
 
 #### Option 3 Move health plan data out of a single table and into contract and rates tables
 
