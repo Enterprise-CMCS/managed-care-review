@@ -10,9 +10,12 @@ title: Remove protocol buffers from the application
 This ADR overrides our previous decision from [ADR 009](./009-data-serialization-framework.md) to handle serialized data in the application via protocol buffers. 
 
 ## Decision Drivers
-- The reason protobuf was introduced to the application was for data storage reasons. We no longer have that technical requirement and plan to remove protobuf from our postgres tables (see [ADR 023](./023-seperate-contract-rates-tables-postgres)). 
-- Protocol buffers have some associated tooling in the application we need to maintain as long as this format is in use. This is tech maintenance load. 
-- Eng team feels the protocol buffer tooling and documentation is immature and creates a mental load for developers.
+- Protocol buffers have associated tooling in the application we need to maintain as long as this format is in use. This is tech maintenance load. 
+- Eng team feels the protocol buffer tooling and documentation is immature and creates uneeded complexity in the application.
+- The original reasons for using protobufs in the application are no longer relevant. 
+    - Protocol buffers were introduced to the application as an optimization that would make MVP development more efficient by storing form data as a blob (rather than breaking it out into tables). This took advantage of our NoSQL database ecosystem. 
+    - MC-Review no longer use MongoDB [ADR 007](./007-move-to-postgres.md). We also no longer want to store health plan data as a blob (see [ADR 023](./023-seperate-contract-rates-tables-postgres)).
+
 
 ## Constraints
 
