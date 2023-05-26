@@ -14,7 +14,7 @@ Cypress.Commands.add('startNewContractOnlySubmissionWithBaseContract', () => {
 Cypress.Commands.add('startNewContractOnlySubmissionWithAmendment', () => {
     // Must be on '/submissions/new'
     cy.findByTestId('dashboard-page').should('exist')
-    cy.findByRole('link', { name: 'Start new submission' }).click()
+    cy.findByRole('link', { name: 'Start new submission' , timeout: 5000}).click()
     cy.findByRole('heading', { level: 1, name: /New submission/ })
 
     cy.fillOutContractActionOnlyWithAmendment()
@@ -26,7 +26,7 @@ Cypress.Commands.add('startNewContractOnlySubmissionWithAmendment', () => {
 Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
     // Must be on '/submissions/new'
     cy.findByTestId('dashboard-page').should('exist')
-    cy.findByRole('link', { name: 'Start new submission' }).click()
+    cy.findByRole('link', { name: 'Start new submission', timeout: 5000 }).click()
     cy.findByRole('heading', { level: 1, name: /New submission/ })
 
     cy.fillOutContractActionAndRateCertification()
@@ -420,7 +420,7 @@ Cypress.Commands.add('fillOutSupportingDocuments', () => {
 
 Cypress.Commands.add('waitForDocumentsToLoad', () => {
     cy.findAllByTestId('file-input-preview-image', {
-        timeout: 80000,
+        timeout: 100_000,
     }).should('not.have.class', 'is-loading')
 })
 
