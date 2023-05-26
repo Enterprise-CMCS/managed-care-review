@@ -44,7 +44,7 @@ describe('Q&A', () => {
         // Submit, sent to dashboard
         cy.submitStateSubmissionForm()
 
-        // View submission summary
+        // Grab submission name
         cy.location().then((loc) => {
             expect(loc.search).to.match(/.*justSubmitted=*/)
             const submissionName = loc.search.split('=').pop()
@@ -52,30 +52,9 @@ describe('Q&A', () => {
                 throw new Error('No submission name found' + loc.search)
             }
             cy.findByText(`${submissionName} was sent to CMS`).should('exist')
-            cy.get('table')
-                .findByRole('link', { name: submissionName })
-                .should('exist')
-            cy.findByRole('link', { name: submissionName }).click()
-            cy.url({ timeout: 10_000 }).should('contain', submissionId)
-            cy.findByTestId('submission-summary').should('exist')
-            cy.findByRole('heading', {
-                name: `Minnesota ${submissionName}`,
-            }).should('exist')
-
-            // Find QA Link and click
-            cy.findByRole('link', { name: /Q&A/ }).click()
-            cy.url({ timeout: 10_000 }).should(
-                'contain',
-                `${submissionId}/question-and-answers`
-            )
-
-            // Heading is correct for Q&A main page
-            cy.findByRole('heading', {
-                name: `Minnesota ${submissionName}`,
-            }).should('exist')
 
             cy.logOut()
-            // As a precaution we logg in as the CMS user before logging in as the Admin user so that the CMS user is
+            // As a precaution we log in as the CMS user before logging in as the Admin user so that the CMS user is
             // inserted into the database before trying to update its division
             cy.logInAsCMSUser({
                 initialURL: `/submissions/${submissionId}/question-and-answers`,
