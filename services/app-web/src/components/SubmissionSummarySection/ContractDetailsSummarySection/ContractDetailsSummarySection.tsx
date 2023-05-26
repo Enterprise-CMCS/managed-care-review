@@ -4,12 +4,10 @@ import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
 import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import {
-    CHIPModifiedProvisionsRecord,
     ContractExecutionStatusRecord,
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
-    ModifiedProvisionsRecord,
-} from '../../../constants/healthPlanPackages'
+} from '../../../constants/index'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '../../../common-code/dateHelpers'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'
@@ -17,15 +15,21 @@ import { DownloadButton } from '../../DownloadButton'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
-    allowedProvisionKeysForCHIP,
-    federalAuthorityKeysForCHIP,
-    HealthPlanFormDataType,
-    isCHIPProvision,
-    modifiedProvisionKeys,
-    ModifiedProvisions,
-    ProvisionType,
-} from '../../../common-code/healthPlanFormDataType'
+    sortModifiedProvisions,
+    isMissingProvisions,
+    getProvisionDictionary,
+} from '../../../common-code/healthPlanSubmissionHelpers/provisions'
 import { DataDetailCheckboxList } from '../../DataDetail/DataDetailCheckboxList'
+import {
+    isBaseContract,
+    isCHIPOnly,
+    isContractWithProvisions,
+    isSubmitted,
+} from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
+import {
+    HealthPlanFormDataType,
+    federalAuthorityKeysForCHIP,
+} from '../../../common-code/healthPlanFormDataType'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
@@ -35,51 +39,14 @@ export type ContractDetailsSummarySectionProps = {
     submissionName: string
 }
 
-// This function takes a ContractAmendmentInfo and returns two lists of keys sorted by whether they are set true/false
-export function sortModifiedProvisions(
-    amendmentInfo: ModifiedProvisions | undefined,
-    isCHIPOnly: boolean
-): [ProvisionType[], ProvisionType[]] {
-    let modifiedProvisions: ProvisionType[] = []
-    let unmodifiedProvisions: ProvisionType[] = []
-
-    if (amendmentInfo) {
-        // We type cast this to be the list of keys in the ContractAmendmentInfo
-        const provisions = Object.keys(amendmentInfo) as Array<
-            keyof ModifiedProvisions
-        >
-
-        for (const provisionKey of provisions) {
-            const value = amendmentInfo[provisionKey]
-            if (value === true) {
-                modifiedProvisions.push(provisionKey)
-            } else if (value === false) {
-                unmodifiedProvisions.push(provisionKey)
-            }
-        }
-    }
-    // Remove any lingering fields that not allowed for CHIP entirely.
-    // These extra fields will be removed server side on submit but could be present on unlock before submit.
-    if (isCHIPOnly) {
-        unmodifiedProvisions = unmodifiedProvisions.filter((unmodified) =>
-            isCHIPProvision(unmodified)
-        )
-        modifiedProvisions = modifiedProvisions.filter((modified) =>
-            isCHIPProvision(modified)
-        )
-    }
-
-    return [modifiedProvisions, unmodifiedProvisions]
-}
-
 export const ContractDetailsSummarySection = ({
     submission,
-    navigateTo,
+    navigateTo, // this is the edit link for the section. When this prop exists, summary section is loaded in edit mode
     documentDateLookupTable,
     isCMSUser,
     submissionName,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
-    //Checks if submission is a previous submission
+    // Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
     // Get the zip file for the contract
     const { getKey, getBulkDlURL } = useS3()
@@ -87,10 +54,15 @@ export const ContractDetailsSummarySection = ({
     const contractSupportingDocuments = submission.documents.filter((doc) =>
         doc.documentCategories.includes('CONTRACT_RELATED' as const)
     )
-    const isSubmitted = submission.status === 'SUBMITTED'
-    const isEditing = !isSubmitted && navigateTo !== undefined
-    const isCHIPOnly = submission.populationCovered === 'CHIP'
-    const applicableFederalAuthorities = isCHIPOnly ? submission.federalAuthorities.filter( (authority) => federalAuthorityKeysForCHIP.includes(authority)) : submission.federalAuthorities
+    const isEditing = !isSubmitted(submission) && navigateTo !== undefined
+    const applicableFederalAuthorities = isCHIPOnly(submission)
+        ? submission.federalAuthorities.filter((authority) =>
+              federalAuthorityKeysForCHIP.includes(authority)
+          )
+        : submission.federalAuthorities
+    const [modifiedProvisions, unmodifiedProvisions] =
+        sortModifiedProvisions(submission)
+    const provisionsAreInvalid = isMissingProvisions(submission) && isEditing
 
     useEffect(() => {
         // get all the keys for the documents we want to zip
@@ -126,24 +98,10 @@ export const ContractDetailsSummarySection = ({
         contractSupportingDocuments,
         submissionName,
     ])
-
-    const [modifiedProvisions, unmodifiedProvisions] = sortModifiedProvisions(
-        submission.contractAmendmentInfo?.modifiedProvisions,
-        isCHIPOnly
-    )
-
-    // Ensure that missing field validations for modified provisions works properly even though required provisions list shifts depending on submission
-    const requiredProvisions = isCHIPOnly
-        ? allowedProvisionKeysForCHIP
-        : modifiedProvisionKeys
-    const amendmentProvisionsUnanswered =
-        modifiedProvisions.length + unmodifiedProvisions.length <
-        requiredProvisions.length
-
     return (
         <section id="contractDetailsSection" className={styles.summarySection}>
             <SectionHeader header="Contract details" navigateTo={navigateTo}>
-                {isSubmitted && !isPreviousSubmission && (
+                {isSubmitted(submission) && !isPreviousSubmission && (
                     <DownloadButton
                         text="Download all contract documents"
                         zippedFilesURL={zippedFilesURL}
@@ -155,7 +113,7 @@ export const ContractDetailsSummarySection = ({
                     <DataDetail
                         id="contractExecutionStatus"
                         label="Contract status"
-                        explainMissingData={!isSubmitted}
+                        explainMissingData={!isSubmitted(submission)}
                         children={
                             submission.contractExecutionStatus
                                 ? ContractExecutionStatusRecord[
@@ -171,7 +129,7 @@ export const ContractDetailsSummarySection = ({
                                 ? 'Contract amendment effective dates'
                                 : 'Contract effective dates'
                         }
-                        explainMissingData={!isSubmitted}
+                        explainMissingData={!isSubmitted(submission)}
                         children={
                             submission.contractDateStart &&
                             submission.contractDateEnd
@@ -186,7 +144,7 @@ export const ContractDetailsSummarySection = ({
                     <DataDetail
                         id="managedCareEntities"
                         label="Managed care entities"
-                        explainMissingData={!isSubmitted}
+                        explainMissingData={!isSubmitted(submission)}
                         children={
                             <DataDetailCheckboxList
                                 list={submission.managedCareEntities}
@@ -197,7 +155,7 @@ export const ContractDetailsSummarySection = ({
                     <DataDetail
                         id="federalAuthorities"
                         label="Active federal operating authority"
-                        explainMissingData={!isSubmitted}
+                        explainMissingData={!isSubmitted(submission)}
                         children={
                             <DataDetailCheckboxList
                                 list={applicableFederalAuthorities}
@@ -206,23 +164,19 @@ export const ContractDetailsSummarySection = ({
                         }
                     />
                 </DoubleColumnGrid>
-                {submission.contractType === 'AMENDMENT' && (
+                {isContractWithProvisions(submission) && (
                     <DoubleColumnGrid>
                         <DataDetail
                             id="modifiedProvisions"
-                            label="This contract action includes new or modified provisions related to the following"
+                            label={isBaseContract(submission)? "This contract action includes provisions related to the following" : "This contract action includes new or modified provisions related to the following"}
                             explainMissingData={
-                                amendmentProvisionsUnanswered && !isSubmitted
+                                provisionsAreInvalid && !isSubmitted(submission)
                             }
                         >
-                            {amendmentProvisionsUnanswered ? null : (
+                            {provisionsAreInvalid ? null : (
                                 <DataDetailCheckboxList
                                     list={modifiedProvisions}
-                                    dict={
-                                        isCHIPOnly
-                                            ? CHIPModifiedProvisionsRecord
-                                            : ModifiedProvisionsRecord
-                                    }
+                                    dict={getProvisionDictionary(submission) }
                                     displayEmptyList
                                 />
                             )}
@@ -230,19 +184,15 @@ export const ContractDetailsSummarySection = ({
 
                         <DataDetail
                             id="unmodifiedProvisions"
-                            label="This contract action does NOT include new or modified provisions related to the following"
+                            label={isBaseContract(submission)? "This contract action does NOT include provisions related to the following": "This contract action does NOT include new or modified provisions related to the following"}
                             explainMissingData={
-                                amendmentProvisionsUnanswered && !isSubmitted
+                                provisionsAreInvalid && !isSubmitted(submission)
                             }
                         >
-                            {amendmentProvisionsUnanswered ? null : (
+                            {provisionsAreInvalid ? null : (
                                 <DataDetailCheckboxList
                                     list={unmodifiedProvisions}
-                                    dict={
-                                        isCHIPOnly
-                                            ? CHIPModifiedProvisionsRecord
-                                            : ModifiedProvisionsRecord
-                                    }
+                                    dict={getProvisionDictionary(submission)}
                                     displayEmptyList
                                 />
                             )}

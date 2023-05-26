@@ -10,6 +10,7 @@ import {
     generateRateName,
     hasValidSupportingDocumentCategories,
     HealthPlanFormDataType,
+    isValidAndCurrentLockedHealthPlanFormData,
     LockedHealthPlanFormDataType,
     packageName,
     removeRatesData,
@@ -412,6 +413,40 @@ describe('submission type assertions', () => {
             )
         }
     )
+    test.each([
+        [{ ...mockStateSubmission(), status: 'SUBMITTED' }, true],
+        [
+            {
+                ...mockStateSubmission(),
+                status: 'SUBMITTED',
+            },
+            true,
+        ],
+        [
+            {
+                ...mockStateSubmission(),
+                status: 'SUBMITTED',
+                submissionType: 'CONTRACT_ONLY',
+            },
+            true,
+        ],
+
+        [{ ...mockStateSubmission(), contractType: undefined }, true],
+        [
+            { ...mockStateSubmission(), contractExecutionStatus: undefined },
+            true,
+        ],
+        [mockDraft(), false],
+        [mockContractAndRatesDraft(), false],
+    ])(
+        'isValidAndCurrentLockedHealthPlanFormData evaluates as expected',
+        (submission, expectedResponse) => {
+            // type coercion to allow us to test
+            expect(isLockedHealthPlanFormData(submission)).toEqual(
+                expectedResponse
+            )
+        }
+    )
 
     test.each([
         [{ ...mockStateSubmission(), status: 'SUBMITTED' }, true],
@@ -428,6 +463,14 @@ describe('submission type assertions', () => {
                 ...mockStateSubmission(),
                 status: 'SUBMITTED',
                 submissionType: 'CONTRACT_ONLY',
+            },
+            false,
+        ],
+        [
+            {
+                ...mockStateSubmission(),
+                status: 'SUBMITTED',
+                riskBasedContract: undefined,
             },
             false,
         ],
@@ -452,12 +495,12 @@ describe('submission type assertions', () => {
         [mockDraft(), false],
         [mockContractAndRatesDraft(), false],
     ])(
-        'isLockedHealthPlanFormData evaluates as expected',
+        'isValidAndCurrentLockedHealthPlanFormData evaluates as expected',
         (submission, expectedResponse) => {
             // type coercion to allow us to test
-            expect(isLockedHealthPlanFormData(submission)).toEqual(
-                expectedResponse
-            )
+            expect(
+                isValidAndCurrentLockedHealthPlanFormData(submission)
+            ).toEqual(expectedResponse)
         }
     )
 
@@ -959,9 +1002,12 @@ describe('submission type assertions', () => {
                 ],
             },
         ]
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        jest.spyOn(console, 'error').mockImplementation(() => {})
 
         expect(() => convertRateSupportingDocs(contractDocument)).toThrow()
         expect(() => convertRateSupportingDocs(rateDocument)).toThrow()
         expect(() => convertRateSupportingDocs(mixedDocuments)).toThrow()
+        jest.clearAllMocks()
     })
 })

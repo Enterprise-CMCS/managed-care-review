@@ -3,31 +3,51 @@ import dayjs from 'dayjs'
 import { validateDateFormat } from '../../../formHelpers'
 import {
     isCHIPProvision,
-    ProvisionType,
+    GeneralizedProvisionType,
+    UnlockedHealthPlanFormDataType,
+    federalAuthorityKeysForCHIP,
 } from '../../../common-code/healthPlanFormDataType'
+import {
+    isBaseContract,
+    isCHIPOnly,
+    isContractAmendment,
+    isContractWithProvisions,
+} from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
+import {
+    isMedicaidAmendmentProvision,
+    isMedicaidBaseProvision,
+} from '../../../common-code/healthPlanFormDataType/ModifiedProvisions'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 export const ContractDetailsFormSchema = (
-    isContractAmendment: boolean,
-    isCHIPOnly: boolean
+    draftSubmission: UnlockedHealthPlanFormDataType
 ) => {
-    // There are certain validations we can just validate if the submission is CHIP. The CHIP supported provisions are a smaller subset.
-    const ignoreFieldForCHIP = (string: ProvisionType) => {
-        return isCHIPOnly && !isCHIPProvision(string)
-    }
-
-    const yesNoError = (provision: ProvisionType) => {
+    const yesNoError = (provision: GeneralizedProvisionType) => {
         const noValidation = Yup.string().nullable()
-        if (!isContractAmendment) {
+        const provisionValidiation = Yup.string().defined(
+            'You must select yes or no'
+        )
+        if (!isContractWithProvisions(draftSubmission)) {
             return noValidation
         }
-
-        if (ignoreFieldForCHIP(provision)) {
+        if (isCHIPOnly(draftSubmission)) {
+            return isCHIPProvision(provision)
+                ? provisionValidiation
+                : noValidation
+        } else if (
+            isBaseContract(draftSubmission) &&
+            isMedicaidBaseProvision(provision)
+        ) {
+            return provisionValidiation
+        } else if (
+            isContractAmendment(draftSubmission) &&
+            isMedicaidAmendmentProvision(provision)
+        ) {
+            return provisionValidiation
+        } else {
             return noValidation
         }
-
-        return Yup.string().defined('You must select yes or no')
     }
 
     return Yup.object().shape({
@@ -72,10 +92,14 @@ export const ContractDetailsFormSchema = (
             'authoritySelection',
             'You must select at least one authority',
             (value) => {
-                return Boolean(value && value.length > 0)
+                return isCHIPOnly(draftSubmission)
+                    ? federalAuthorityKeysForCHIP.some((requiredAuthority) =>
+                          value?.includes(requiredAuthority)
+                      )
+                    : Boolean(value && value.length > 0)
             }
         ),
-
+        inLieuServicesAndSettings: yesNoError('inLieuServicesAndSettings'),
         modifiedBenefitsProvided: yesNoError('modifiedBenefitsProvided'),
         modifiedGeoAreaServed: yesNoError('modifiedGeoAreaServed'),
         modifiedMedicaidBeneficiaries: yesNoError(

@@ -5,43 +5,64 @@ import {
     ActuaryContact,
 } from './UnlockedHealthPlanFormDataType'
 import {
-    allowedProvisionKeysForCHIP,
-    excludedProvisionsForCHIP,
-    modifiedProvisionKeys,
-    ModifiedProvisions,
+    provisionCHIPKeys,
+    modifiedProvisionMedicaidAmendmentKeys,
+    modifiedProvisionMedicaidBaseKeys,
+    GeneralizedModifiedProvisions,
 } from './ModifiedProvisions'
-import { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
-import { HealthPlanFormDataType } from './HealthPlanFormDataType'
+import { generateApplicableProvisionsList } from '../healthPlanSubmissionHelpers/provisions'
 import { formatRateNameDate } from '../../common-code/dateHelpers'
-import { ProgramArgType, federalAuthorityKeysForCHIP } from '.'
+import type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
+import type { HealthPlanFormDataType } from './HealthPlanFormDataType'
+import type { ProgramArgType } from '.'
+import { federalAuthorityKeysForCHIP } from './FederalAuthorities'
 
 // TODO: Refactor into multiple files and add unit tests to these functions
 
-const isContractOnly = (
-    sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
-): boolean => sub.submissionType === 'CONTRACT_ONLY'
+const isContractOnly = (sub: HealthPlanFormDataType): boolean =>
+    sub.submissionType === 'CONTRACT_ONLY'
 
-const isContractAndRates = (
-    sub: UnlockedHealthPlanFormDataType | LockedHealthPlanFormDataType
-): boolean => sub.submissionType === 'CONTRACT_AND_RATES'
+const isBaseContract = (sub: HealthPlanFormDataType): boolean =>
+    sub.contractType === 'BASE'
+
+const isContractAmendment = (sub: HealthPlanFormDataType): boolean =>
+    sub.contractType === 'AMENDMENT'
 
 const isRateAmendment = (rateInfo: RateInfoType): boolean =>
     rateInfo.rateType === 'AMENDMENT'
 
-const hasValidModifiedProvisions = (
-    provisions: ModifiedProvisions | undefined,
-    isCHIP: boolean
-): boolean =>
-    isCHIP
-        ? provisions !== undefined &&
-          allowedProvisionKeysForCHIP.every(
-              (provision) => provisions[provision] !== undefined
-          )
-        : provisions !== undefined &&
-          modifiedProvisionKeys.every(
-              (provision) => provisions[provision] !== undefined
-          )
+const isCHIPOnly = (sub: HealthPlanFormDataType): boolean =>
+    sub.populationCovered === 'CHIP'
 
+const isContractAndRates = (sub: HealthPlanFormDataType): boolean =>
+    sub.submissionType === 'CONTRACT_AND_RATES'
+
+const isContractWithProvisions = (sub: HealthPlanFormDataType): boolean =>
+    isContractAmendment(sub) || (isBaseContract(sub) && !isCHIPOnly(sub))
+
+const isSubmitted = (sub: HealthPlanFormDataType): boolean =>
+    sub.status === 'SUBMITTED'
+
+const hasValidModifiedProvisions = (
+    sub: LockedHealthPlanFormDataType
+): boolean => {
+    const provisions = sub.contractAmendmentInfo?.modifiedProvisions
+
+    if (!isContractWithProvisions(sub)) return true // if the contract doesn't require any provision yes/nos, it is already valid
+    if (provisions === undefined) return false
+
+    return isCHIPOnly(sub)
+        ? provisionCHIPKeys.every(
+              (provision) => provisions[provision] !== undefined
+          )
+        : isBaseContract(sub)
+        ? modifiedProvisionMedicaidBaseKeys.every(
+              (provision) => provisions[provision] !== undefined
+          )
+        : modifiedProvisionMedicaidAmendmentKeys.every(
+              (provision) => provisions[provision] !== undefined
+          )
+}
 const hasValidContract = (sub: LockedHealthPlanFormDataType): boolean =>
     sub.contractType !== undefined &&
     sub.contractExecutionStatus !== undefined &&
@@ -49,15 +70,8 @@ const hasValidContract = (sub: LockedHealthPlanFormDataType): boolean =>
     sub.contractDateEnd !== undefined &&
     sub.managedCareEntities.length !== 0 &&
     sub.federalAuthorities.length !== 0 &&
-    (sub.contractType === 'BASE' || // If it's an amendment, then all the yes/nos must be set.
-        hasValidModifiedProvisions(
-            sub.contractAmendmentInfo?.modifiedProvisions,
-            sub.populationCovered === 'CHIP'
-        ))
-
-const hasValidRateCertAssurance = (
-    sub: LockedHealthPlanFormDataType
-): boolean => sub.riskBasedContract !== undefined
+    sub.riskBasedContract !== undefined &&
+    hasValidModifiedProvisions(sub)
 
 const hasValidPopulationCoverage = (
     sub: LockedHealthPlanFormDataType
@@ -165,12 +179,23 @@ const isLockedHealthPlanFormData = (
         const maybeStateSub = sub as LockedHealthPlanFormDataType
         return (
             maybeStateSub.status === 'SUBMITTED' &&
-            hasValidContract(maybeStateSub) &&
-            hasValidRates(maybeStateSub) &&
-            hasValidDocuments(maybeStateSub)
+            'submittedAt' in maybeStateSub
         )
     }
     return false
+}
+
+const isValidAndCurrentLockedHealthPlanFormData = (
+    sub: unknown
+): sub is LockedHealthPlanFormDataType => {
+    const maybeSubmitted = sub as LockedHealthPlanFormDataType
+
+    return (
+        isLockedHealthPlanFormData(maybeSubmitted) &&
+        hasValidContract(maybeSubmitted) &&
+        hasValidRates(maybeSubmitted) &&
+        hasValidDocuments(maybeSubmitted)
+    )
 }
 
 const isUnlockedHealthPlanFormData = (
@@ -312,43 +337,54 @@ const removeRatesData = (
     return pkg
 }
 
-const removeNonCHIPData = (
+// Remove any provisions and federal authorities that aren't valid for population type (e.g. CHIP)
+// since user can change theses submission type fields on unlock and not necesarily update the contract details
+const removeInvalidProvisionsAndAuthorities = (
     pkg: UnlockedHealthPlanFormDataType
 ): UnlockedHealthPlanFormDataType => {
-    // remove any provisions that aren't valid for CHIP (this can happen on unlock when populationCovered changes)
-    if (pkg.contractType === 'AMENDMENT') {
-        excludedProvisionsForCHIP.forEach((provision) => {
-            if (pkg.contractAmendmentInfo?.modifiedProvisions[provision]) {
-                pkg.contractAmendmentInfo.modifiedProvisions[provision] =
-                    undefined
-            }
+    // remove invalid provisions
+    if (isContractWithProvisions(pkg) && pkg.contractAmendmentInfo) {
+        const validProvisionsKeys = generateApplicableProvisionsList(pkg)
+        const validProvisionsData: Partial<GeneralizedModifiedProvisions> = {}
+        validProvisionsKeys.forEach((provision) => {
+            validProvisionsData[provision] =
+                pkg.contractAmendmentInfo?.modifiedProvisions[provision]
         })
+        pkg.contractAmendmentInfo.modifiedProvisions = validProvisionsData
     }
 
-    // remove any authorities that aren't valid for CHIP (this can happen on unlock when populationCovered changes)
-    pkg.federalAuthorities = pkg.federalAuthorities.filter((authority) =>
-        federalAuthorityKeysForCHIP.includes(authority)
-    )
+    // remove invalid authorities if CHIP
+    if (isCHIPOnly(pkg)) {
+        pkg.federalAuthorities = pkg.federalAuthorities.filter((authority) =>
+            federalAuthorityKeysForCHIP.includes(authority)
+        )
+    }
 
     return pkg
 }
 
 export {
+    isContractWithProvisions,
+    hasValidModifiedProvisions,
     hasValidContract,
     hasValidDocuments,
     hasValidSupportingDocumentCategories,
     hasValidRates,
     hasAnyValidRateData,
+    isBaseContract,
+    isContractAmendment,
+    isCHIPOnly,
     isContractOnly,
     isContractAndRates,
     isLockedHealthPlanFormData,
     isUnlockedHealthPlanFormData,
+    isSubmitted,
+    isValidAndCurrentLockedHealthPlanFormData,
     programNames,
     packageName,
     generateRateName,
     convertRateSupportingDocs,
     removeRatesData,
-    removeNonCHIPData,
-    hasValidRateCertAssurance,
+    removeInvalidProvisionsAndAuthorities,
     hasValidPopulationCoverage,
 }

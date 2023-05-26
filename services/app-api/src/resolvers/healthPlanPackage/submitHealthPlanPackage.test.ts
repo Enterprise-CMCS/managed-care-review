@@ -353,7 +353,7 @@ describe('submitHealthPlanPackage', () => {
         )
     })
 
-    it('removes any risk related modified provisions from CHIP submission and submits successfully', async () => {
+    it('removes any invalid modified provisions from CHIP submission and submits successfully', async () => {
         const server = await constructTestPostgresServer()
 
         //Create and update a submission as if the user edited and changed population covered after filling out yes/nos
@@ -363,6 +363,7 @@ describe('submitHealthPlanPackage', () => {
             federalAuthorities: ['TITLE_XXI'],
             contractAmendmentInfo: {
                 modifiedProvisions: {
+                    inLieuServicesAndSettings: true,
                     modifiedBenefitsProvided: true,
                     modifiedGeoAreaServed: false,
                     modifiedMedicaidBeneficiaries: false,
@@ -399,7 +400,6 @@ describe('submitHealthPlanPackage', () => {
                         modifiedGeoAreaServed: false,
                         modifiedMedicaidBeneficiaries: false,
                         modifiedMedicalLossRatioStandards: false,
-                        modifiedOtherFinancialPaymentIncentive: false,
                         modifiedEnrollmentProcess: false,
                         modifiedGrevienceAndAppeal: false,
                         modifiedNetworkAdequacyStandards: false,

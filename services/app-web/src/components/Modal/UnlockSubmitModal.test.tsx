@@ -4,7 +4,7 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import {
-    mockCompleteDraft,
+    mockBaseContract,
     mockSubmittedHealthPlanPackage,
     mockSubmittedHealthPlanPackageWithRevisions,
     submitHealthPlanPackageMockError,
@@ -27,7 +27,7 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockCompleteDraft()}
+                    healthPlanPackage={mockBaseContract()}
                     submissionName="Test-Submission"
                     modalType="SUBMIT"
                     modalRef={modalRef}
@@ -54,7 +54,7 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockCompleteDraft()}
+                    healthPlanPackage={mockBaseContract()}
                     submissionName="Test-Submission"
                     modalType="SUBMIT"
                     modalRef={modalRef}
@@ -64,13 +64,13 @@ describe('UnlockSubmitModal', () => {
                     apolloProvider: {
                         mocks: [
                             submitHealthPlanPackageMockSuccess({
-                                id: mockCompleteDraft().id,
+                                id: mockBaseContract().id,
                             }),
                         ],
                     },
                     routerProvider: {
                         route: `draftSubmission/${
-                            mockCompleteDraft().id
+                            mockBaseContract().id
                         }/review-and-submit`,
                     },
                     location: (location) => (testLocation = location),
@@ -99,7 +99,7 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockCompleteDraft()}
+                    healthPlanPackage={mockBaseContract()}
                     submissionName="Test-Submission"
                     modalType="SUBMIT"
                     modalRef={modalRef}
@@ -109,7 +109,7 @@ describe('UnlockSubmitModal', () => {
                     apolloProvider: {
                         mocks: [
                             submitHealthPlanPackageMockError({
-                                id: mockCompleteDraft().id,
+                                id: mockBaseContract().id,
                                 error: {
                                     code: 'INTERNAL_SERVER_ERROR',
                                     cause: 'EMAIL_ERROR',
@@ -119,7 +119,7 @@ describe('UnlockSubmitModal', () => {
                     },
                     routerProvider: {
                         route: `draftSubmission/${
-                            mockCompleteDraft().id
+                            mockBaseContract().id
                         }/review-and-submit`,
                     },
                     location: (location) => (testLocation = location),
@@ -147,7 +147,7 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockCompleteDraft()}
+                    healthPlanPackage={mockBaseContract()}
                     submissionName="Test-Submission"
                     modalType="SUBMIT"
                     modalRef={modalRef}
@@ -157,7 +157,7 @@ describe('UnlockSubmitModal', () => {
                     apolloProvider: {
                         mocks: [
                             submitHealthPlanPackageMockError({
-                                id: mockCompleteDraft().id,
+                                id: mockBaseContract().id,
                             }),
                         ],
                     },
@@ -420,7 +420,7 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockCompleteDraft()}
+                    healthPlanPackage={mockBaseContract()}
                     submissionName="Test-Submission"
                     modalType="RESUBMIT"
                     modalRef={modalRef}
@@ -455,7 +455,7 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockCompleteDraft()}
+                    healthPlanPackage={mockBaseContract()}
                     submissionName="Test-Submission"
                     modalType="RESUBMIT"
                     modalRef={modalRef}
@@ -481,7 +481,7 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockCompleteDraft()}
+                    healthPlanPackage={mockBaseContract()}
                     submissionName="Test-Submission"
                     modalType="RESUBMIT"
                     modalRef={modalRef}
@@ -516,13 +516,13 @@ describe('UnlockSubmitModal', () => {
                 <UnlockSubmitModal
                     modalRef={modalRef}
                     modalType="RESUBMIT"
-                    healthPlanPackage={mockCompleteDraft()}
+                    healthPlanPackage={mockBaseContract()}
                 />,
                 {
                     apolloProvider: {
                         mocks: [
                             submitHealthPlanPackageMockError({
-                                id: mockCompleteDraft().id,
+                                id: mockBaseContract().id,
                             }),
                         ],
                     },
@@ -556,7 +556,7 @@ describe('UnlockSubmitModal', () => {
 
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockCompleteDraft()}
+                    healthPlanPackage={mockBaseContract()}
                     submissionName="Test-Submission"
                     modalType="RESUBMIT"
                     modalRef={modalRef}
@@ -566,14 +566,14 @@ describe('UnlockSubmitModal', () => {
                     apolloProvider: {
                         mocks: [
                             submitHealthPlanPackageMockSuccess({
-                                id: mockCompleteDraft().id,
+                                id: mockBaseContract().id,
                                 submittedReason: 'Test submission summary',
                             }),
                         ],
                     },
                     routerProvider: {
                         route: `draftSubmission/${
-                            mockCompleteDraft().id
+                            mockBaseContract().id
                         }/review-and-submit`,
                     },
                     location: (location) => (testLocation = location),
