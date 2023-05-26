@@ -8,7 +8,7 @@ import UPDATE_HEALTH_PLAN_FORM_DATA from '../../../../app-graphql/src/mutations/
 import {
     base64ToDomain,
     domainToBase64,
-} from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+} from '@managed-care-review/common-code/proto'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import {
     basicLockedHealthPlanFormData,

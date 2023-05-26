@@ -17,7 +17,7 @@ import {
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { mockStoreThatErrors } from '../../testHelpers/storeHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { base64ToDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+import { base64ToDomain } from '@managed-care-review/common-code/proto'
 import {
     generateRateName,
     packageName,

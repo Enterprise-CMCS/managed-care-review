@@ -6,7 +6,7 @@ import { Context } from 'aws-lambda'
 import { HealthPlanRevisionTable } from '@prisma/client'
 import { Store } from '../postgres'
 import { Event } from '@aws-sdk/client-s3'
-import { toProtoBuffer } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+import { toProtoBuffer } from '@managed-care-review/common-code/proto'
 
 const mockStore: Store = {
     findAllRevisions: jest.fn(),

@@ -31,7 +31,7 @@ import { NewPostgresStore, Store } from '../postgres'
 import { configureResolvers } from '../resolvers'
 import { latestFormData } from './healthPlanPackageHelpers'
 import { sharedTestPrismaClient } from './storeHelpers'
-import { domainToBase64 } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+import { domainToBase64 } from '@managed-care-review/common-code/proto'
 import {
     newLocalEmailParameterStore,
     EmailParameterStore,

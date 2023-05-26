@@ -1,7 +1,7 @@
 import { GridContainer } from '@trussworks/react-uswds'
 import React from 'react'
 import { packageName } from '@managed-care-review/common-code/healthPlanFormDataType'
-import { base64ToDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+import { base64ToDomain } from '@managed-care-review/common-code/proto'
 import { mostRecentDate } from '@managed-care-review/common-code/dateHelpers'
 
 import { SubmissionTypeRecord } from '../../constants/healthPlanPackages'

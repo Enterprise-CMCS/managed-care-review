@@ -7,7 +7,7 @@ import {
     HealthPlanFormDataType,
     SubmissionDocument,
 } from '@managed-care-review/common-code/healthPlanFormDataType'
-import { toDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+import { toDomain } from '@managed-care-review/common-code/proto'
 import { isStoreError, StoreError } from '../postgres/storeError'
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
 import { createHash } from 'crypto'

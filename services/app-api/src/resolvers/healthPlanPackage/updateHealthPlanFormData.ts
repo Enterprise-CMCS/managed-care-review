@@ -6,7 +6,7 @@ import {
 import {
     base64ToDomain,
     toDomain,
-} from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+} from '@managed-care-review/common-code/proto'
 import {
     isStateUser,
     HealthPlanPackageType,

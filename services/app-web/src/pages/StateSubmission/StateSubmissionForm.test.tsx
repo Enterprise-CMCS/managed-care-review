@@ -26,7 +26,7 @@ import { StateSubmissionForm } from './StateSubmissionForm'
 import {
     base64ToDomain,
     domainToBase64,
-} from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+} from '@managed-care-review/common-code/proto'
 import { testS3Client } from '../../testHelpers/s3Helpers'
 import { getYesNoFieldValue } from '../../testHelpers/fieldHelpers'
 

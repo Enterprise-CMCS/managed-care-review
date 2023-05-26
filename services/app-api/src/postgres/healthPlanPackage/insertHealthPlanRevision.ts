@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
 import { UnlockedHealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { HealthPlanPackageType, UpdateInfoType } from '../../domain-models'
-import { toProtoBuffer } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+import { toProtoBuffer } from '@managed-care-review/common-code/proto'
 import { convertPrismaErrorToStoreError, StoreError } from '../storeError'
 import { convertToHealthPlanPackageType } from './healthPlanPackageHelpers'
 

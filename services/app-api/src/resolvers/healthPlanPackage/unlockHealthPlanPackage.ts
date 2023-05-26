@@ -3,7 +3,7 @@ import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
 } from '@managed-care-review/common-code/healthPlanFormDataType'
-import { toDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+import { toDomain } from '@managed-care-review/common-code/proto'
 import {
     isCMSUser,
     UpdateInfoType,

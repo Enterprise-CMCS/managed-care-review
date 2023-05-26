@@ -11,7 +11,7 @@
         "./formatters": "./dist/formatters/index",
         "./healthPlanFormDataMocks": "./dist/healthPlanFormDataMocks/index",
         "./healthPlanFormDataType": "./dist/healthPlanFormDataType/index",
-        "./healthPlanFormDataProto": "./dist/proto/healthPlanFormDataProto/index",
+        "./proto": "./dist/proto/index",
         "./sha": "./dist/sha/index",
         "./s3URLEncoding": "./dist/s3URLEncoding/index"
     },

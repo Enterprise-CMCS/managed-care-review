@@ -7,7 +7,7 @@ import { useFetchCurrentUserQuery, User as UserType } from '../gen/gqlClient'
 import { logoutLocalUser } from '../localAuth'
 import { signOut as cognitoSignOut } from '../pages/Auth/cognitoAuth'
 import { featureFlags } from '@managed-care-review/common-code/featureFlags'
-import { dayjs } from '@managed-care-review/common-code/dateHelpers/dayjs'
+import { dayjs } from '@managed-care-review/common-code/dateHelpers'
 import { recordJSException } from '../otelHelpers/tracingHelper'
 import { handleApolloError } from '../gqlHelpers/apolloErrors'
 

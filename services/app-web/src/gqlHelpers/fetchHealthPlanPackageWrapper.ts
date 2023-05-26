@@ -4,7 +4,7 @@ import {
     useFetchHealthPlanPackageWithQuestionsQuery,
 } from '../gen/gqlClient'
 import { HealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
-import { base64ToDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+import { base64ToDomain } from '@managed-care-review/common-code/proto'
 import {
     wrapApolloResult,
     ApolloResultType,

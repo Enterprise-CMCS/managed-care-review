@@ -12,7 +12,7 @@ import {
     submitTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { base64ToDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+import { base64ToDomain } from '@managed-care-review/common-code/proto'
 import {
     generateRateName,
     packageName,

@@ -17,7 +17,7 @@ import { FileItemsList } from './FileItemList/FileItemsList'
 import { pluralize } from '@managed-care-review/common-code/formatters'
 
 import { recordUserInputException } from '../../otelHelpers'
-import { calculateSHA256 } from '@managed-care-review/common-code/sha/generateSha'
+import { calculateSHA256 } from '@managed-care-review/common-code/sha'
 
 export type S3FileData = {
     key: string

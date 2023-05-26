@@ -30,7 +30,7 @@ import {
     setErrorAttributesOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import { toDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+import { toDomain } from '@managed-care-review/common-code/proto'
 import { EmailParameterStore } from '../../parameterStore'
 import { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql'

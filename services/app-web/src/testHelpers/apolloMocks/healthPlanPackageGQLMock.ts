@@ -2,7 +2,7 @@ import { MockedResponse } from '@apollo/client/testing'
 import { GraphQLError } from 'graphql'
 import { unlockedWithALittleBitOfEverything } from '@managed-care-review/common-code/healthPlanFormDataMocks'
 import { UnlockedHealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
-import { domainToBase64 } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+import { domainToBase64 } from '@managed-care-review/common-code/proto'
 
 import {
     FetchHealthPlanPackageDocument,

@@ -1,4 +1,4 @@
-import { base64ToDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+import { base64ToDomain } from '@managed-care-review/common-code/proto'
 import { HealthPlanPackage } from '../gen/gqlClient'
 import { parseKey } from '@managed-care-review/common-code/s3URLEncoding'
 import { HealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'

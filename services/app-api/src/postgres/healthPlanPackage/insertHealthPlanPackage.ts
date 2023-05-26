@@ -7,7 +7,7 @@ import {
     ContractType,
 } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { HealthPlanPackageType } from '../../domain-models'
-import { toProtoBuffer } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+import { toProtoBuffer } from '@managed-care-review/common-code/proto'
 import {
     convertPrismaErrorToStoreError,
     isStoreError,

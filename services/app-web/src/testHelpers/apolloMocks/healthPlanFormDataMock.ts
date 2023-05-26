@@ -22,7 +22,7 @@ import {
 import {
     domainToBase64,
     protoToBase64,
-} from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+} from '@managed-care-review/common-code/proto'
 import { HealthPlanPackage, UpdateInformation } from '../../gen/gqlClient'
 import { mockMNState } from './stateMock'
 

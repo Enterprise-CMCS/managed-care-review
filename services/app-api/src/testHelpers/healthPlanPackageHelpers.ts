@@ -1,5 +1,5 @@
 import { HealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
-import { base64ToDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+import { base64ToDomain } from '@managed-care-review/common-code/proto'
 import { HealthPlanPackage } from '../gen/gqlServer'
 
 // returns the latest form data for this package, will throw an error if unwrapping fails

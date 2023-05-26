@@ -1,5 +1,5 @@
 import { HealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
-import { base64ToDomain } from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
+import { base64ToDomain } from '@managed-care-review/common-code/proto'
 
 import { HealthPlanRevision, HealthPlanPackage } from '../gen/gqlClient'
 import { recordJSException } from '../otelHelpers/tracingHelper'
