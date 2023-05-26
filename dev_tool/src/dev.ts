@@ -28,7 +28,13 @@ async function runAllClean() {
     const runner = new LabeledProcessRunner()
     runner.runCommandAndOutput(
         'clean',
-        ['lerna', 'run', 'clean', '--scope=app-api', '--scope=app-web'],
+        [
+            'lerna',
+            'run',
+            'clean',
+            '--scope=app-api',
+            '--scope=@managed-care-review/app-web',
+        ],
         ''
     )
 }

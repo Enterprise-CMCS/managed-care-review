@@ -26,6 +26,13 @@ module.exports = {
     },
     webpackFinal: async (config, { configType }) => {
         config.resolve.plugins = [new TsconfigPathsPlugin()];
+        config.module.rules.push({
+            test: /\.tsx?$/,
+            exclude: /node_modules/,
+            use: 'ts-loader',
+        });
+
+        config.resolve.extensions.push('.ts', '.tsx');
         return config;
     },
 };

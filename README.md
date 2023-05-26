@@ -142,7 +142,7 @@ Run web app locally, but configured to run against a deployed backend
 
 All of the tasks in `./dev` are for the most part just wrappers around [Lerna](https://github.com/lerna/lerna) commands. Lerna allows us to define scripts in each service's `package.json` file and will then run any script that matches that script's name across the monorepo. For example, if we run `lerna run build`, Lerna will look at every `package.json` in the monorepo for a task called `build` and then execute the script associated with that `build` command.
 
-If we want to run a task scoped to only one or two services, we could instead run something like `lerna run build --scope=app-api --scope=app-web` to only run the build scripts found in `app-api` and `app-web`.
+If we want to run a task scoped to only one or two services, we could instead run something like `lerna run build --scope=app-api --scope=@managed-care-review/app-web` to only run the build scripts found in `app-api` and `app-web`.
 
 Any script that is added to a `package.json` scripts section can be invoked with `lerna run $scriptName`.
 
