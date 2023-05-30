@@ -30,7 +30,7 @@ generates:
       - 'typescript-react-apollo'
     config:
       enumsAsTypes: true
-  ../cypress/gen/gqlClient.tsx:
+  ../cypress/gen/gqlClient.ts:
     documents:
       - src/queries/*.graphql
       - src/mutations/*.graphql
