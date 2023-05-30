@@ -9,7 +9,7 @@ Cypress.Commands.add('logInAsStateUser', () => {
 
     cy.visit('/')
     cy.findByText('Medicaid and CHIP Managed Care Reporting and Review System')
-    cy.findByRole('link', { name: 'Sign In', timeout: 20000 }).click()
+    cy.findByRole('link', { name: 'Sign In', timeout: 20_000 }).click()
     const authMode = Cypress.env('AUTH_MODE')
     console.info(authMode, 'authmode')
 
@@ -51,7 +51,6 @@ Cypress.Commands.add(
         )
         cy.findByRole('link', { name: 'Sign In' }).click()
         const authMode = Cypress.env('AUTH_MODE')
-        console.info(authMode, 'authmode')
 
         if (authMode === 'LOCAL') {
             cy.findByTestId('ZukoButton').click()
@@ -67,15 +66,16 @@ Cypress.Commands.add(
         } else {
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
         }
-        cy.wait('@fetchCurrentUserQuery', { timeout: 20000 })
-        if (initialURL !== '/') {
-            cy.url({ timeout: 10_000 }).should(
-                'contain',
-                initialURL
-            )
+        cy.url({ timeout: 20_000 }).should(
+            'contain',
+            initialURL
+        )
+        cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
+        if (initialURL?.includes('submissions')) {
+            cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20000 }) // for cases where CMs user goes to specific submission on login, likly from email link
         } else {
             // Default behavior on login is to go to CMS dashboard
-            cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80000 })
+            cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
             cy.findByTestId('dashboard-page').should('exist')
             cy.findByRole('heading', {name: 'Submissions'}).should('exist')
         }
@@ -93,12 +93,12 @@ Cypress.Commands.add(
         })
 
         cy.visit(initialURL)
+        
         cy.findByText(
             'Medicaid and CHIP Managed Care Reporting and Review System'
         )
         cy.findByRole('link', { name: 'Sign In' }).click()
         const authMode = Cypress.env('AUTH_MODE')
-        console.info(authMode, 'authmode')
 
         if (authMode === 'LOCAL') {
             cy.findByTestId('IrohButton').click()
@@ -114,16 +114,18 @@ Cypress.Commands.add(
         } else {
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
         }
-        cy.wait('@fetchCurrentUserQuery', { timeout: 20000 })
+        cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
+        cy.url({ timeout: 20_000 }).should(
+            'contain',
+            initialURL
+        )
+
         if (initialURL === '/settings') {
-            cy.wait('@indexUsersQuery', { timeout: 20000 })
-        } else if (initialURL !== '/') {
-            cy.url({ timeout: 10_000 }).should(
-                'contain',
-                initialURL
-            )
+            cy.wait('@indexUsersQuery', { timeout: 20_000 })
+        } else if (initialURL?.includes('submissions')){
+            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 }) 
         } else {
-            cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80000 })
+            cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
             cy.findByTestId('dashboard-page').should('exist')
             cy.findByRole('heading', {name: 'Submissions'}).should('exist')
         }
