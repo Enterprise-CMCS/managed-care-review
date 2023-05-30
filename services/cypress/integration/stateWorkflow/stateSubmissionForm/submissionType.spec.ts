@@ -14,23 +14,23 @@ describe('submission type', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/type`
             )
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
+            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50_000 })
             cy.findByRole('heading', {
                 level: 2,
                 name: /Submission type/,
-                timeout: 10000,
+                timeout: 10_000,
             })
 
             // Navigate to dashboard page by clicking cancel
-            cy.findByRole('button', { name: /Cancel/, timeout: 5000}).click()
-            cy.wait('@indexHealthPlanPackagesQuery', { timeout: 50000 })
+            cy.findByRole('button', { name: /Cancel/, timeout: 5_000}).click()
+            cy.wait('@indexHealthPlanPackagesQuery', { timeout: 50_000 })
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to type page
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/type`
             )
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
+            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50_000 })
 
              //Edit some stuff here
              cy.findByRole('combobox', {
@@ -50,7 +50,7 @@ describe('submission type', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/type`
             )
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
+            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50_000 })
 
             // Navigate to contract details page by clicking continue for contract only submission
             cy.navigateFormByButtonClick('CONTINUE')
@@ -70,7 +70,7 @@ describe('submission type', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/type`
             )
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
+            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50_000 })
 
             cy.findByText('Contract action and rate certification').click()
 
@@ -82,7 +82,7 @@ describe('submission type', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/type`
             )
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
+            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50_000 })
 
             cy.findByLabelText('Contract action and rate certification').should(
                 'be.checked'

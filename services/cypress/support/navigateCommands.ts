@@ -31,11 +31,12 @@ Cypress.Commands.add(
         }).safeClick()
 
         if (buttonKey === 'SAVE_DRAFT') {
+            cy.wait('@updateHealthPlanFormDataMutation')
             cy.findByTestId('dashboard-page').should('exist')
-            cy.findByText('Submissions').should('exist')
+            cy.findByRole('heading',{name:'Submissions'}).should('exist')
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
             if (waitForLoad) {
-                cy.wait('@createHealthPlanPackageMutation', { timeout: 50000 })
+                cy.wait('@createHealthPlanPackageMutation', { timeout: 50_000 })
                 cy.wait('@fetchHealthPlanPackageQuery')
             }
             cy.findByTestId('state-submission-form-page').should('exist')
@@ -62,14 +63,14 @@ Cypress.Commands.add(
             aliasQuery(req, 'fetchHealthPlanPackage')
         })
     cy.visit(url)
-    if (waitForLoad)  cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 })
+    if (waitForLoad)  cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20_000 })
     cy.findByTestId('state-submission-form-page').should('exist')
     })
 
 Cypress.Commands.add('logOut', () => {
     cy.findByRole('button', { name: 'Sign out' }).click()
     cy.findByText(
-        'Medicaid and CHIP Managed Care Reporting and Review System', {timeout: 5000}
+        'Medicaid and CHIP Managed Care Reporting and Review System', {timeout: 5_000}
     )
 })
     

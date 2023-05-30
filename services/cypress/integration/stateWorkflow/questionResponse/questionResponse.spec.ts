@@ -100,7 +100,7 @@ describe('Q&A', () => {
             // Newly uploaded questions document should exist within DMCO section
             cy.findByTestId('dmco-qa-section').should('exist').within(() => {
                 // Add timeout to findByText to allow time for generating document urls
-                cy.findByText('questions_for_submission.pdf',  { timeout: 5000 }).should('exist')
+                cy.findByText('questions_for_submission.pdf',  { timeout: 5_000 }).should('exist')
             })
 
             // Log out and log back in as cms user, visiting submission summary page,
@@ -129,7 +129,7 @@ describe('Q&A', () => {
             // Make sure question by CMS exists
             cy.findByTestId('dmco-qa-section').should('exist').within(() => {
                 // Add timeout to findByText to allow time for generating document urls
-                cy.findByText('questions_for_submission.pdf',  { timeout: 5000 }).should('exist')
+                cy.findByText('questions_for_submission.pdf',  { timeout: 5_000 }).should('exist')
             })
 
             //Upload response
@@ -138,7 +138,7 @@ describe('Q&A', () => {
             // Newly uploaded response document should exist within DMCO section
             cy.findByTestId('dmco-qa-section').should('exist').within(() => {
                 // Add timeout to findByText to allow time for generating document urls
-                cy.findByText('response_to_questions_for_submission.pdf',  { timeout: 5000 }).should('exist')
+                cy.findByText('response_to_questions_for_submission.pdf',  { timeout: 5_000 }).should('exist')
             })
         })
     })

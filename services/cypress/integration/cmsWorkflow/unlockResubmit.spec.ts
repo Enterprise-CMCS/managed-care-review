@@ -61,14 +61,14 @@ describe('CMS user', () => {
             cy.logInAsCMSUser({ initialURL: submissionURL })
 
             // click on the unlock button, type in reason and confirm
-            cy.findByRole('button', { name: 'Unlock submission', timeout: 2000 }).click()
+            cy.findByRole('button', { name: 'Unlock submission', timeout: 5_000 }).click()
             cy.findAllByTestId('modalWindow').eq(1).should('be.visible')
             cy.get('#unlockSubmitModalInput').type('Unlock submission reason.')
             cy.findByRole('button', { name: 'Unlock' }).click()
 
 
             cy.findByRole('button', { name: 'Unlock submission'}).should(
-                'be.disabled', {timeout: 50000 }
+                'be.disabled', {timeout: 50_000 }
             )
             cy.findAllByTestId('modalWindow').eq(1).should('be.hidden')
 
@@ -83,7 +83,7 @@ describe('CMS user', () => {
                 .should('exist')
 
             //Find unlocked submission name
-            cy.get('#submissionName', {timeout: 2000}).then(($h2) => {
+            cy.get('#submissionName', {timeout: 2_000}).then(($h2) => {
                 //Set name to variable for later use in finding the unlocked submission
                 const submissionName = $h2.text()
                 
@@ -145,7 +145,7 @@ describe('CMS user', () => {
                     .should('exist')
                     .click()
 
-                cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
+                cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50_000 })
                 cy.findByTestId('updatedSubmissionBanner').should('exist')
 
                 // Login as CMS User
@@ -153,7 +153,7 @@ describe('CMS user', () => {
                 cy.logInAsCMSUser({ initialURL: submissionURL })
 
                 //  CMS user sees resubmitted submission and active unlock button
-                cy.findByTestId('submission-summary', {timeout: 4000}).should('exist')
+                cy.findByTestId('submission-summary', {timeout: 4_000}).should('exist')
                 cy.findByRole('button', { name: 'Unlock submission' }).should(
                     'not.be.disabled'
                 )

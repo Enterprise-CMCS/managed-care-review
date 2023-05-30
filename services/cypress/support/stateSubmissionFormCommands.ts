@@ -457,6 +457,6 @@ Cypress.Commands.add(
             })
         cy.wait('@submitHealthPlanPackageMutation', { timeout: 50000 })
         cy.findByTestId('dashboard-page').should('exist')
-        cy.findByText('Submissions').should('exist')
+        cy.findByRole('heading',{name:'Submissions'}).should('exist')
     }
 )
