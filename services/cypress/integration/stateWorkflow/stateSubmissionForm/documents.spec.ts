@@ -2,7 +2,7 @@ describe('documents', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
     })
-    it('can navigate to and from the documents page, saving documents each time', () => {
+    it(' navigate back and save as draft on the documents page, saving documents each time', () => {
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
@@ -33,7 +33,7 @@ describe('documents', () => {
             cy.findByText(/0 complete, 1 error, 1 pending/).should('exist')
             // give the page time to load (wait) then let cypress wait for the spinner to go away
             cy.findAllByTestId('upload-finished-indicator', {
-                timeout: 120_000,
+                timeout: 80_000,
             }).should('have.length', 2)
             cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.findByText(/1 complete, 1 error, 0 pending/).should('exist')
@@ -70,7 +70,7 @@ describe('documents', () => {
 
             // give the page time to load (wait) then let cypress wait for the spinner to go away
             cy.findAllByTestId('upload-finished-indicator', {
-                timeout: 120_000,
+                timeout: 80_000,
             }).should('have.length', 3)
             cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.findByText('Duplicate file, please remove').should('exist')
@@ -141,7 +141,7 @@ describe('documents', () => {
             cy.findAllByRole('row').should('have.length', 3)
             // give the page time to load (wait) then let cypress wait for the spinner to go away
             cy.findAllByTestId('upload-finished-indicator', {
-                timeout: 120_000,
+                timeout: 80_000,
             }).should('have.length', 2)
             cy.findByTestId('file-input-loading-image').should('not.exist')
             cy.verifyDocumentsHaveNoErrors()

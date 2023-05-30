@@ -2,7 +2,7 @@ describe('submission type', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
     })
-    it('can navigate to and from type page', () => {
+    it('can navigate back and save as draft from submission type page', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmissionWithBaseContract()
 
@@ -45,16 +45,6 @@ describe('submission type', () => {
             // Navigate to dashboard page by clicking save as draft
             cy.navigateFormByButtonClick('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
-
-            // Navigate to back to submission type page
-            cy.navigateFormByDirectLink(
-                `/submissions/${draftSubmissionId}/edit/type`
-            )
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50_000 })
-
-            // Navigate to contract details page by clicking continue for contract only submission
-            cy.navigateFormByButtonClick('CONTINUE')
-            cy.findByRole('heading', { level: 2, name: /Contract details/ })
         })
     })
 

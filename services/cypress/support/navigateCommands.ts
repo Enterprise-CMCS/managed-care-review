@@ -73,4 +73,4 @@ Cypress.Commands.add('logOut', () => {
         'Medicaid and CHIP Managed Care Reporting and Review System', {timeout: 5_000}
     )
 })
-    
+  
