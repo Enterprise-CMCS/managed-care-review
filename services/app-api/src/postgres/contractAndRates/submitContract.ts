@@ -77,7 +77,7 @@ async function submitContract(
                 },
             },
         })
-
+        // oldRev is the previously submitted revision of this contract (the one just superseded by the update)
         const oldRev = await client.contractRevisionTable.findFirst({
             where: {
                 contractID: updated.contractID,
@@ -91,6 +91,8 @@ async function submitContract(
         })
 
         // invalidate all joins on the old revision // maybe should just invalidate ALL where?
+        // on an initial submission, there won't be an oldRev
+        // validUntil: null means it's current.  we invalidate the joins on the old revision by giving it a validUntil value
         if (oldRev) {
             await client.rateRevisionsOnContractRevisionsTable.updateMany({
                 where: {
