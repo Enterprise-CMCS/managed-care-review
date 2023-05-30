@@ -10,7 +10,7 @@ describe('Q&A', () => {
     it('can add questions and responses', () => {
         //NOTE: Record test time
         //  Local run
-        //      - Before intercepton: 01:06
+        //      - Before interception: 01:06
         //      - After interception: 00:32
         //  Deployed run
         //      - Before interception: 02:51

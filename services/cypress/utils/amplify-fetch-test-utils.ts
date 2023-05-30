@@ -113,27 +113,3 @@ export async function fakeAmplifyFetch(
             })
     })
 }
-
-//TODO: Modify this for local usage, right now every graphql request locally will be made by a state user.
-// This function should take the user in as a argument.
-export async function localGQLFetch(
-    uri: string,
-    options: RequestInit
-): Promise<Response> {
-    const currentUser = {
-        id: 'user1',
-        email: 'aang@example.com',
-        givenName: 'Aang',
-        familyName: 'Avatar',
-        role: 'STATE_USER',
-        stateCode: 'MN',
-    }
-
-    options.headers = Object.assign({}, options.headers, {
-        'cognito-authentication-provider': currentUser
-            ? JSON.stringify(currentUser)
-            : 'NO_USER',
-    })
-
-    return fakeAmplifyFetch(uri, options)
-}
