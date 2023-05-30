@@ -2,7 +2,7 @@ describe('rate details', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
     })
-    it('can navigate to and from rate details page', () => {0
+    it('can navigate to and from rate details page', () => {
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
@@ -80,13 +80,11 @@ describe('rate details', () => {
             cy.navigateFormByButtonClick('CONTINUE')
             cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
-
             cy.fillOutStateContact()
             cy.fillOutAdditionalActuaryContact()
             cy.navigateFormByButtonClick('CONTINUE')
 
             cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
-
         })
     })
 
@@ -110,14 +108,14 @@ describe('rate details', () => {
         cy.findAllByTestId('rate-certification-form').should('have.length', 3)
         //Fill out every rate certification form
         cy.findAllByTestId('rate-certification-form').each((form, index, arr) => {
-                cy.wrap(form).within(() => {
-                    //Fill out last rate certification as new rate
-                    if (index === arr.length - 1) {
-                        cy.fillOutNewRateCertification()
-                    } else {
-                        cy.fillOutAmendmentToPriorRateCertification(index)
-                    }
-                })
+            cy.wrap(form).within(() => {
+                //Fill out last rate certification as new rate
+                if (index === arr.length - 1) {
+                    cy.fillOutNewRateCertification()
+                } else {
+                    cy.fillOutAmendmentToPriorRateCertification(index)
+                }
+            })
         })
 
         // Navigate to contacts page by clicking continue
@@ -136,10 +134,9 @@ describe('rate details', () => {
 
         //Remove last rate certification, total two
         cy.findAllByTestId('rate-certification-form').each((form, index, arr) => {
-                if (index === arr.length - 1) {
-                cy.wrap(form).within(() => cy.findByRole('button', { name: 'Remove rate certification'}).click())
-            }
-                            })
+            if (index === arr.length - 1) {
+            cy.wrap(form).within(() => cy.findByRole('button', { name: 'Remove rate certification'}).click())}
+        })
         cy.findAllByTestId('rate-certification-form').should('have.length', 2)
 
         // Navigate to contacts page by clicking continue
