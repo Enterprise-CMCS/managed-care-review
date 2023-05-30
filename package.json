@@ -19,7 +19,7 @@
         "clean": "lerna clean",
         "format": "yarn prettier --write",
         "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
-        "test:coverage": "lerna run test:coverage --scope=app-web --scope=app-api && cd services/cypress lerna run cypress:run",
+        "test:coverage": "lerna run test:coverage --scope=app-web --scope=app-api --scope=cypress",
         "pretest:coverage": "rm -rf .nyc_output",
         "posttest:coverage": "yarn run report:combined",
         "mkdir:reports": "mkdir -p reports",
