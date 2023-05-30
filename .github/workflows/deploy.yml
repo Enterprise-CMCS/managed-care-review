@@ -451,9 +451,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup env
-        uses: ./.github/actions/setup_env
-
       - name: Generate GraphQL
         run: lerna run gqlgen
 
