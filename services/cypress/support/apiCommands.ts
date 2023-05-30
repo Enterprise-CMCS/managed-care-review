@@ -9,7 +9,7 @@ import {
     UpdateHealthPlanFormDataDocument
 } from '../gen/gqlClient';
 import { domainToBase64, base64ToDomain } from 'app-web/src/common-code/proto/healthPlanFormDataProto';
-import { fakeAmplifyFetch, localGQLFetch } from '../utils/amplify-fetch-test-utils';
+import { fakeAmplifyFetch } from '../utils/amplify-fetch-test-utils';
 
 // Configure Amplify using envs set in cypress.config.ts
 Amplify.configure({
@@ -68,14 +68,33 @@ const newSubmissionInput = {
 const createAndSubmitPackage = async (schema: string): Promise<HealthPlanPackage> => {
     const authMode = Cypress.env('AUTH_MODE')
 
+    const currentUser = {
+        id: 'user1',
+        email: 'aang@example.com',
+        givenName: 'Aang',
+        familyName: 'Avatar',
+        role: 'STATE_USER',
+        stateCode: 'MN',
+    }
+
+    const httpLinkConfig= {
+        uri: '/graphql',
+        headers: authMode === 'LOCAL' ? {
+            'cognito-authentication-provider': JSON.stringify(currentUser)
+        } : undefined,
+        fetch: fakeAmplifyFetch,
+        fetchOptions: {
+            mode: 'no-cors'
+        }
+    }
+
+    // If using cognito auth, then log in as a state user before graphql requests. Otherwise, configure apollo for local api requests
+    if (authMode !== 'LOCAL') {
+        await AmplifyAuth.signIn('aang@example.com', Cypress.env('TEST_USERS_PASS'))
+    }
+
     const apolloClient = new ApolloClient({
-        link: new HttpLink({
-            uri: '/graphql',
-            fetch: authMode === 'LOCAL' ? localGQLFetch : fakeAmplifyFetch,
-            fetchOptions: {
-                mode: 'no-cors'
-            }
-        }),
+        link: new HttpLink(httpLinkConfig),
         cache: new InMemoryCache({
             possibleTypes: {
                 Submission: ['DraftSubmission', 'StateSubmission'],
@@ -83,11 +102,6 @@ const createAndSubmitPackage = async (schema: string): Promise<HealthPlanPackage
         }),
         typeDefs: schema as string,
     })
-
-    // If using cognito auth, then log in as a state user before graphql requests
-    if (authMode !== 'LOCAL') {
-        await AmplifyAuth.signIn('aang@example.com', Cypress.env('TEST_USERS_PASS'))
-    }
 
     const newSubmission = await apolloClient.mutate({
         mutation: CreateHealthPlanPackageDocument,
