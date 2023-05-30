@@ -2,7 +2,7 @@ describe('documents', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
     })
-    it(' navigate back and save as draft on the documents page, saving documents each time', () => {
+    it('can navigate back and save as draft on the documents page, saving documents each time', () => {
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
