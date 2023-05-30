@@ -450,6 +450,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate GraphQL
+        run: lerna run gqlgen
+
+      - name: Generate Protos
+        run: lerna run generate --scope=app-proto
+
       - name: check ip
         id: check-ip
         shell: bash
@@ -459,12 +468,6 @@ jobs:
         run: |
           export DISPLAY=:1
           Xvfb :1 -screen 0 1024x768x16 2>/dev/null &
-
-      - name: Generate GraphQL
-        run: lerna run gqlgen
-
-      - name: Generate Protos
-        run: lerna run generate --scope=app-proto
 
       - name: Cypress -- Chrome
         id: cypress
