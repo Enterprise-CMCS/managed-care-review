@@ -23,7 +23,7 @@ import './e2e'
 import {
     FeatureFlagLDConstant,
     FeatureFlagSettings,
-} from 'app-web/src/common-code/featureFlags'
+} from '../../app-web/src/common-code/featureFlags'
 import './apiCommands'
 import { HealthPlanPackage } from '../gen/gqlClient';
 

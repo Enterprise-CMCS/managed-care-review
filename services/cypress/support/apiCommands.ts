@@ -2,13 +2,13 @@ import {Amplify, Auth as AmplifyAuth} from 'aws-amplify'
 import {ApolloClient, HttpLink, InMemoryCache} from '@apollo/client';
 import {
     UnlockedHealthPlanFormDataType
-} from 'app-web/src/common-code/healthPlanFormDataType';
+} from '../../app-web/src/common-code/healthPlanFormDataType';
 import {
     CreateHealthPlanPackageDocument, HealthPlanPackage,
     SubmitHealthPlanPackageDocument,
     UpdateHealthPlanFormDataDocument
 } from '../gen/gqlClient';
-import { domainToBase64, base64ToDomain } from 'app-web/src/common-code/proto/healthPlanFormDataProto';
+import { domainToBase64, base64ToDomain } from '../../app-web/src/common-code/proto/healthPlanFormDataProto';
 import { fakeAmplifyFetch } from '../utils/amplify-fetch-test-utils';
 
 // Configure Amplify using envs set in cypress.config.ts
