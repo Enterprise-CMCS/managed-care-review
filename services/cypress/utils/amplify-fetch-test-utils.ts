@@ -1,6 +1,5 @@
 import {AxiosResponse} from 'axios';
 import {API} from 'aws-amplify';
-import {ApolloClient, HttpLink, InMemoryCache} from '@apollo/client';
 
 export function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
     const fakeFetchResponse: Response = {
@@ -115,7 +114,7 @@ export async function fakeAmplifyFetch(
     })
 }
 
-//TODO: Modify this for local usage, right now every grapqhl request locally will be made by a state user.
+//TODO: Modify this for local usage, right now every graphql request locally will be made by a state user.
 // This function should take the user in as a argument.
 export async function localGQLFetch(
     uri: string,
