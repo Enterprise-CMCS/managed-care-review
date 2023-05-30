@@ -40,10 +40,7 @@ Cypress.Commands.add(
             cy.findByTestId('state-submission-form-page').should('exist')
         } else if (buttonKey === 'CONTINUE') {
             if (waitForLoad) {
-                cy.findAllByTestId('errorMessage').should(
-                    'have.length',
-                    0
-                )
+                cy.findAllByTestId('errorMessage').should('have.length', 0)
                 cy.wait('@updateHealthPlanFormDataMutation')
             }
             cy.findByTestId('state-submission-form-page').should('exist')
@@ -53,13 +50,14 @@ Cypress.Commands.add(
     }
 )
 
-
 Cypress.Commands.add(
     'navigateFormByDirectLink',
     (url: string, waitForLoad = true) => {
         cy.intercept('POST', '*/graphql', (req) => {
             aliasQuery(req, 'fetchHealthPlanPackage')
         })
-    cy.visit(url)
-    if (waitForLoad)  cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 })
-    })
+        cy.visit(url)
+        if (waitForLoad)
+            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 })
+    }
+)
