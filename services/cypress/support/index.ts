@@ -24,6 +24,8 @@ import {
     FeatureFlagLDConstant,
     FeatureFlagSettings,
 } from 'app-web/src/common-code/featureFlags'
+import './apiCommands'
+import { HealthPlanPackage } from '../gen/gqlClient';
 
 type FormButtonKey =
     | 'CONTINUE_FROM_START_NEW'
@@ -75,22 +77,12 @@ declare global {
             clickSubmissionLink(testId: string): void
 
             // question response commands
-            addQuestion({
-                documentPath
-            }: {
-                documentPath: string
-            }): void
-            addResponse({
-                            documentPath
-                        }: {
-                documentPath: string
-            }): void
+            addQuestion({ documentPath }: { documentPath: string }): void
+            addResponse({ documentPath }: { documentPath: string }): void
 
             // Launch Darkly commands
             stubFeatureFlags(): void
-            interceptFeatureFlags(
-                toggleFlags?: FeatureFlagSettings
-            ): void
+            interceptFeatureFlags(toggleFlags?: FeatureFlagSettings): void
             getFeatureFlagStore(
                 featureFlag?: FeatureFlagLDConstant[]
             ): Promise<FeatureFlagSettings>
@@ -98,11 +90,13 @@ declare global {
             // User settings commands
             assignDivisionToCMSUser({
                 userEmail,
-                division
+                division,
             }: {
-                userEmail: string,
+                userEmail: string
                 division: 'DMCO' | 'DMCP' | 'OACT'
             }): void
+
+            apiCreateAndSubmitContractOnlySubmission(): Cypress.Chainable<HealthPlanPackage>
         }
     }
 }
