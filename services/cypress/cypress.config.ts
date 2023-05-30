@@ -1,12 +1,8 @@
-import {Amplify} from 'aws-amplify';
-
 const defineConfig = require('cypress')
 const { pa11y, prepareAudit } = require('@cypress-audit/pa11y')
-const { loader } = require('graphql.macro')
-const fs = require('fs');
+const fs = require('fs')
 const path = require('path')
-import { printSchema } from 'graphql';
-import {gql} from '@apollo/client';
+const { gql } = require('@apollo/client')
 
 const defineConfig = {
     e2e: {
@@ -41,7 +37,6 @@ const defineConfig = {
                 readGraphQLSchema() {
                     // const gqlSchema = loader('./gen/schema.graphql')
                     const gqlSchema = fs.readFileSync(path.resolve(__dirname, './gen/schema.graphql'), 'utf-8')
-                    console.log('GQL SCHEMA')
                     return gql(`${gqlSchema}`)
                 }
             })
