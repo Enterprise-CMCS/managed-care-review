@@ -24,8 +24,8 @@ const defineConfig = {
             // Configure env for Amplify authorization
             newConfig.env.API_URL = process.env.REACT_APP_API_URL
             newConfig.env.COGNITO_REGION = process.env.COGNITO_REGION
-            newConfig.env.USER_POOL_ID = process.env.REACT_USER_POOL_ID
-            newConfig.env.IDENTITY_POOL_ID = process.env.REACT_IDENTITY_POOL_ID
+            newConfig.env.USER_POOL_ID = process.env.USER_POOL_ID
+            newConfig.env.IDENTITY_POOL_ID = process.env.IDENTITY_POOL_ID
             newConfig.env.USER_POOL_WEB_CLIENT_ID = process.env.USER_POOL_WEB_CLIENT_ID
 
             on('before:browser:launch', (browser, launchOptions) => {

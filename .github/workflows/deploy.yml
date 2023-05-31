@@ -472,14 +472,6 @@ jobs:
           name: cypress-gen
           path: ./services/cypress/gen
 
-#      - name: Setup graphql
-#        working-directory: services/app-graphql
-#        run: yarn run gqlgen
-#
-#      - name: Setup Protos
-#        working-directory: services/app-proto
-#        run: yarn run generate
-
       - name: check ip
         id: check-ip
         shell: bash
@@ -505,10 +497,10 @@ jobs:
         env:
           REACT_APP_AUTH_MODE: AWS_COGNITO
           REACT_API_URL: ${{ needs.finishing-prep.outputs.api-endpoint }}
-          REACT_USER_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-user-identity-pool-id }}
-          REACT_COGNITO_REGION: ${{ needs.finishing-prep.outputs.cognito-region }}
-          REACT_IDENTITY_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-identity-pool-id }}
-          REACT_USER_POOL_WEB_CLIENT_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-web-client-id }}
+          USER_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-user-identity-pool-id }}
+          COGNITO_REGION: ${{ needs.finishing-prep.outputs.cognito-region }}
+          IDENTITY_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-identity-pool-id }}
+          USER_POOL_WEB_CLIENT_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-web-client-id }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
