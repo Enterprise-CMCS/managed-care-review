@@ -3,7 +3,7 @@ import { screen, waitFor } from '@testing-library/react'
 import {
     mockDraft,
     mockContractAndRatesDraft,
-    mockCompleteDraft,
+    mockBaseContract,
     fetchCurrentUserMock,
 } from '../../../testHelpers/apolloMocks'
 
@@ -112,7 +112,7 @@ describe('Contacts', () => {
 
         renderWithProviders(
             <Contacts
-                draftSubmission={mockCompleteDraft()}
+                draftSubmission={mockBaseContract()}
                 updateDraft={mockUpdateDraftFn}
             />,
             {

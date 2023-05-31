@@ -7,10 +7,12 @@
     "exports": {
         "./config": "./dist/config/index",
         "./dateHelpers": "./dist/dateHelpers/index",
+        "./debounce": "./dist/debounce/index",
         "./featureFlags": "./dist/featureFlags/index",
         "./formatters": "./dist/formatters/index",
         "./healthPlanFormDataMocks": "./dist/healthPlanFormDataMocks/index",
         "./healthPlanFormDataType": "./dist/healthPlanFormDataType/index",
+        "./healthPlanSubmissionHelpers": "./dist/healthPlanSubmissionHelpers/index",
         "./proto": "./dist/proto/index",
         "./sha": "./dist/sha/index",
         "./s3URLEncoding": "./dist/s3URLEncoding/index"

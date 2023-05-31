@@ -1,18 +1,15 @@
 import { ForbiddenError, UserInputError } from 'apollo-server-lambda'
 import {
-    UnlockedHealthPlanFormDataType,
     hasValidContract,
     hasValidDocuments,
     hasValidRates,
     hasAnyValidRateData,
-    hasValidSupportingDocumentCategories,
     isContractAndRates,
-    isLockedHealthPlanFormData,
-    LockedHealthPlanFormDataType,
     removeRatesData,
-    hasValidRateCertAssurance,
     hasValidPopulationCoverage,
-    removeNonCHIPData,
+    removeInvalidProvisionsAndAuthorities,
+    isValidAndCurrentLockedHealthPlanFormData,
+    hasValidSupportingDocumentCategories,
 } from '@managed-care-review/common-code/healthPlanFormDataType'
 import {
     UpdateInfoType,
@@ -35,6 +32,11 @@ import { EmailParameterStore } from '../../parameterStore'
 import { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql'
 import { FeatureFlagSettings } from '@managed-care-review/common-code/featureFlags'
+
+import type {
+    UnlockedHealthPlanFormDataType,
+    LockedHealthPlanFormDataType,
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 
 export const SubmissionErrorCodes = ['INCOMPLETE', 'INVALID'] as const
 type SubmissionErrorCode = (typeof SubmissionErrorCodes)[number] // iterable union type
@@ -77,24 +79,19 @@ function submit(
         submittedAt: new Date(),
     }
 
+    // move this check into isValidContract when feature flag is removed
     const validPopulationCovered = featureFlags?.['chip-only-form']
         ? hasValidPopulationCoverage(
               maybeStateSubmission as LockedHealthPlanFormDataType
           )
         : true
 
-    const validRateCertAssurance = hasValidRateCertAssurance(
-        maybeStateSubmission as LockedHealthPlanFormDataType
-    )
-
     if (
-        isLockedHealthPlanFormData(maybeStateSubmission) &&
-        validRateCertAssurance &&
+        isValidAndCurrentLockedHealthPlanFormData(maybeStateSubmission) &&
         validPopulationCovered
     )
         return maybeStateSubmission
     else if (
-        !validRateCertAssurance ||
         !validPopulationCovered ||
         !hasValidContract(maybeStateSubmission as LockedHealthPlanFormDataType)
     ) {
@@ -280,7 +277,10 @@ export function submitHealthPlanPackageResolver(
 
         // CHIP submissions should not contain any provision or authority relevant to other populations
         if (draftResult.populationCovered === 'CHIP') {
-            Object.assign(draftResult, removeNonCHIPData(draftResult))
+            Object.assign(
+                draftResult,
+                removeInvalidProvisionsAndAuthorities(draftResult)
+            )
         }
 
         // attempt to parse into a StateSubmission

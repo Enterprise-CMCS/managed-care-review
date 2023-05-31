@@ -9,7 +9,7 @@ import {
     useMutation,
 } from '@apollo/client'
 
-import { debounce } from '../common-code/debounce/debounce'
+import { debounce } from '@managed-care-review/common-code/debounce'
 
 /* mostly from https://stackoverflow.com/a/74109414/5351022
 given potential multi-clicks as well as the possibility that mutations might

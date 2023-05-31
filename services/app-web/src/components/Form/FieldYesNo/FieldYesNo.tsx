@@ -55,6 +55,7 @@ export const FieldYesNo = ({
             id={id}
             legend={label}
             className={classes}
+            data-testid="yes-no-radio-fieldset"
         >
             {showError && meta.error && (
                 <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>

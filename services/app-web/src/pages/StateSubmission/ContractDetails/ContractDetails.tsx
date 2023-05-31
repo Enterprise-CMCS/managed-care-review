@@ -34,26 +34,33 @@ import { isS3Error } from '../../../s3'
 
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
 import {
-    ManagedCareEntity,
-    modifiedProvisionKeys,
-    SubmissionDocument,
-    ContractExecutionStatus,
-    FederalAuthority,
-    allowedProvisionKeysForCHIP,
-    isCHIPProvision,
-    federalAuthorityKeysForCHIP,
-    federalAuthorityKeys,
-} from '@managed-care-review/common-code/healthPlanFormDataType'
-import {
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
-    ModifiedProvisionsRecord,
-    CHIPModifiedProvisionsRecord,
 } from '../../../constants/healthPlanPackages'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { formatYesNoForProto } from '../../../formHelpers/formatters'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
+import {
+    federalAuthorityKeysForCHIP,
+    federalAuthorityKeys,
+} from '@managed-care-review/common-code/healthPlanFormDataType'
+import {
+    generateProvisionLabel,
+    generateApplicableProvisionsList,
+} from '@managed-care-review/common-code/healthPlanSubmissionHelpers'
+import type {
+    ManagedCareEntity,
+    SubmissionDocument,
+    ContractExecutionStatus,
+    FederalAuthority,
+} from '@managed-care-review/common-code/healthPlanFormDataType'
+import {
+    isBaseContract,
+    isCHIPOnly,
+    isContractAmendment,
+    isContractWithProvisions,
+} from '@managed-care-review/common-code/healthPlanFormDataType'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -88,6 +95,7 @@ export interface ContractDetailsFormValues {
     contractDateEnd: string
     managedCareEntities: ManagedCareEntity[]
     federalAuthorities: FederalAuthority[]
+    inLieuServicesAndSettings: string | undefined
     modifiedBenefitsProvided: string | undefined
     modifiedGeoAreaServed: string | undefined
     modifiedMedicaidBeneficiaries: string | undefined
@@ -223,13 +231,10 @@ export const ContractDetails = ({
         }
     }
 
-    // submission helpers
-    const isCHIPOnly = draftSubmission.populationCovered === 'CHIP'
-    const isContractAmendment = draftSubmission.contractType === 'AMENDMENT'
-    const applicableProvisions = isCHIPOnly
-        ? allowedProvisionKeysForCHIP
-        : modifiedProvisionKeys
-    const applicableFederalAuthorities = isCHIPOnly
+    const applicableProvisions =
+        generateApplicableProvisionsList(draftSubmission)
+
+    const applicableFederalAuthorities = isCHIPOnly(draftSubmission)
         ? federalAuthorityKeysForCHIP
         : federalAuthorityKeys
 
@@ -247,6 +252,10 @@ export const ContractDetails = ({
         managedCareEntities:
             (draftSubmission?.managedCareEntities as ManagedCareEntity[]) ?? [],
         federalAuthorities: draftSubmission?.federalAuthorities ?? [],
+        inLieuServicesAndSettings: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .inLieuServicesAndSettings
+        ),
 
         modifiedBenefitsProvided: formatForForm(
             draftSubmission?.contractAmendmentInfo?.modifiedProvisions
@@ -378,9 +387,12 @@ export const ContractDetails = ({
         draftSubmission.federalAuthorities = values.federalAuthorities
         draftSubmission.contractDocuments = contractDocuments
 
-        if (isContractAmendment) {
+        if (isContractWithProvisions(draftSubmission)) {
             draftSubmission.contractAmendmentInfo = {
                 modifiedProvisions: {
+                    inLieuServicesAndSettings: formatYesNoForProto(
+                        values.inLieuServicesAndSettings
+                    ),
                     modifiedBenefitsProvided: formatYesNoForProto(
                         values.modifiedBenefitsProvided
                     ),
@@ -451,7 +463,6 @@ export const ContractDetails = ({
             setSubmitting(false)
         }
     }
-
     return (
         <Formik
             initialValues={contractDetailsInitialValues}
@@ -464,9 +475,7 @@ export const ContractDetails = ({
                             : `../rate-details`,
                 })
             }}
-            validationSchema={() =>
-                ContractDetailsFormSchema(isContractAmendment, isCHIPOnly)
-            }
+            validationSchema={() => ContractDetailsFormSchema(draftSubmission)}
         >
             {({
                 values,
@@ -601,7 +610,9 @@ export const ContractDetails = ({
                                         <Fieldset
                                             aria-required
                                             legend={
-                                                isContractAmendment
+                                                isContractAmendment(
+                                                    draftSubmission
+                                                )
                                                     ? 'Amendment effective dates'
                                                     : 'Contract effective dates'
                                             }
@@ -791,11 +802,19 @@ export const ContractDetails = ({
                                             )}
                                         </Fieldset>
                                     </FormGroup>
-                                    {isContractAmendment && (
-                                        <FormGroup>
+                                    {isContractWithProvisions(
+                                        draftSubmission
+                                    ) && (
+                                        <FormGroup data-testid="yes-no-group">
                                             <Fieldset
                                                 aria-required
-                                                legend="Does this contract action include new or modified provisions related to any of the following"
+                                                legend={
+                                                    isBaseContract(
+                                                        draftSubmission
+                                                    )
+                                                        ? 'Does this contract action include provisions related to any of the following'
+                                                        : 'Does this contract action include new or modified provisions related to any of the following'
+                                                }
                                             >
                                                 {applicableProvisions.map(
                                                     (modifiedProvisionName) => (
@@ -809,18 +828,10 @@ export const ContractDetails = ({
                                                             name={
                                                                 modifiedProvisionName
                                                             }
-                                                            label={
-                                                                isCHIPOnly &&
-                                                                isCHIPProvision(
-                                                                    modifiedProvisionName
-                                                                )
-                                                                    ? CHIPModifiedProvisionsRecord[
-                                                                          modifiedProvisionName
-                                                                      ]
-                                                                    : ModifiedProvisionsRecord[
-                                                                          modifiedProvisionName
-                                                                      ]
-                                                            }
+                                                            label={generateProvisionLabel(
+                                                                draftSubmission,
+                                                                modifiedProvisionName
+                                                            )}
                                                             showError={showFieldErrors(
                                                                 errors[
                                                                     modifiedProvisionName

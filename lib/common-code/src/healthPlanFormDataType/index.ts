@@ -28,9 +28,14 @@ export type {
 } from './FederalAuthorities'
 
 export type {
-    ModifiedProvisions,
+    ModifiedProvisionsMedicaidAmendment,
+    ModifiedProvisionsMedicaidBase,
     CHIPModifiedProvisions,
-    ProvisionType,
+    CHIPProvisionType,
+    GeneralizedProvisionType,
+    MedicaidAmendmentProvisionType,
+    MedicaidBaseProvisionType,
+    GeneralizedModifiedProvisions,
 } from './ModifiedProvisions'
 
 export {
@@ -39,9 +44,12 @@ export {
 } from './FederalAuthorities'
 
 export {
-    modifiedProvisionKeys,
-    allowedProvisionKeysForCHIP,
+    modifiedProvisionMedicaidBaseKeys,
+    modifiedProvisionMedicaidAmendmentKeys,
+    provisionCHIPKeys,
     isCHIPProvision,
+    isMedicaidAmendmentProvision,
+    isMedicaidBaseProvision,
 } from './ModifiedProvisions'
 
 export type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
@@ -55,14 +63,19 @@ export {
     isContractOnly,
     isUnlockedHealthPlanFormData,
     isLockedHealthPlanFormData,
+    isSubmitted,
     programNames,
     packageName,
     generateRateName,
     convertRateSupportingDocs,
-    removeNonCHIPData,
+    removeInvalidProvisionsAndAuthorities,
     removeRatesData,
-    hasValidRateCertAssurance,
     hasValidPopulationCoverage,
+    isValidAndCurrentLockedHealthPlanFormData,
+    isContractWithProvisions,
+    isCHIPOnly,
+    isBaseContract,
+    isContractAmendment,
 } from './healthPlanFormData'
 
 export type { HealthPlanFormDataType } from './HealthPlanFormDataType'

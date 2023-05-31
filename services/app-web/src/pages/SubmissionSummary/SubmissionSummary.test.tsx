@@ -567,6 +567,7 @@ describe('SubmissionSummary', () => {
             await waitFor(() => {
                 expect(document.body).toHaveTextContent(/LOADING/)
             })
+
             // now check all the page content
             await waitFor(() => {
                 const rows = screen.getAllByRole('row')
@@ -705,15 +706,14 @@ describe('SubmissionSummary', () => {
                         name: 'This contract action includes new or modified provisions related to the following',
                     })
                 ).toBeInTheDocument()
+
                 expect(
                     screen.getByText(
                         'Medicaid beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)'
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(
-                        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)'
-                    )
+                    screen.getByText(/Risk-sharing strategy/)
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
@@ -739,7 +739,7 @@ describe('SubmissionSummary', () => {
                     screen.getByText('Network adequacy standards')
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText('Non-risk payment arrangements')
+                    screen.getByText(/Non-risk payment arrangements/)
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {
@@ -894,6 +894,7 @@ describe('SubmissionSummary', () => {
                 name: 'Reason for unlocking submission',
             })
         })
+
         it('loads outdated health plan packages with old protos as expected - 1', async () => {
             const proto = fs.readFileSync(`${protoTestDir}/${oldProtoFiles[1]}`)
             // pass in the old protos and make sure the UI hasn't changed
@@ -1078,9 +1079,7 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(
-                        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)'
-                    )
+                    screen.getByText(/Risk-sharing strategy/)
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
@@ -1106,7 +1105,7 @@ describe('SubmissionSummary', () => {
                     screen.getByText('Network adequacy standards')
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText('Non-risk payment arrangements')
+                    screen.getByText(/Non-risk payment arrangements/)
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {
@@ -1261,6 +1260,7 @@ describe('SubmissionSummary', () => {
                 name: 'Reason for unlocking submission',
             })
         })
+
         it('loads outdated health plan packages with old protos as expected - 2', async () => {
             const proto = fs.readFileSync(`${protoTestDir}/${oldProtoFiles[2]}`)
             // pass in the old protos and make sure the UI hasn't changed
@@ -1445,9 +1445,7 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(
-                        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)'
-                    )
+                    screen.getByText(/Risk-sharing strategy/)
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
@@ -1473,7 +1471,7 @@ describe('SubmissionSummary', () => {
                     screen.getByText('Network adequacy standards')
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText('Non-risk payment arrangements')
+                    screen.getByText(/Non-risk payment arrangements/)
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {
@@ -1812,9 +1810,7 @@ describe('SubmissionSummary', () => {
                     )
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText(
-                        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)'
-                    )
+                    screen.getByText(/Risk-sharing strategy/)
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
@@ -1840,7 +1836,7 @@ describe('SubmissionSummary', () => {
                     screen.getByText('Network adequacy standards')
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText('Non-risk payment arrangements')
+                    screen.getByText(/Non-risk payment arrangements/)
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {
