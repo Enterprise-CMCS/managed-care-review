@@ -11,25 +11,6 @@ import {
 import { domainToBase64, base64ToDomain } from '../../app-web/src/common-code/proto/healthPlanFormDataProto';
 import { fakeAmplifyFetch } from '../utils/amplify-fetch-test-utils';
 
-// Configure Amplify using envs set in cypress.config.ts
-Amplify.configure({
-    Auth: {
-        mandatorySignIn: true,
-        region: Cypress.env('COGNITO_REGION'),
-        userPoolId:  Cypress.env('USER_POOL_ID'),
-        identityPoolId:  Cypress.env('IDENTITY_POOL_ID'),
-        userPoolWebClientId:  Cypress.env('USER_POOL_WEB_CLIENT_ID'),
-    },
-    API: {
-        endpoints: [
-            {
-                name: 'api',
-                endpoint: Cypress.env('API_URL')
-            },
-        ],
-    },
-})
-
 const contractOnlyData: Partial<UnlockedHealthPlanFormDataType> = {
     stateContacts: [
         {
@@ -66,6 +47,26 @@ const newSubmissionInput = {
 }
 
 const createAndSubmitPackage = async (schema: string): Promise<HealthPlanPackage> => {
+
+    // Configure Amplify using envs set in cypress.config.ts
+    Amplify.configure({
+        Auth: {
+            mandatorySignIn: true,
+            region: Cypress.env('COGNITO_REGION'),
+            userPoolId:  Cypress.env('USER_POOL_ID'),
+            identityPoolId:  Cypress.env('IDENTITY_POOL_ID'),
+            userPoolWebClientId:  Cypress.env('USER_POOL_WEB_CLIENT_ID'),
+        },
+        API: {
+            endpoints: [
+                {
+                    name: 'api',
+                    endpoint: Cypress.env('API_URL')
+                },
+            ],
+        },
+    })
+
     const authMode = Cypress.env('AUTH_MODE')
 
     const currentUser = {
