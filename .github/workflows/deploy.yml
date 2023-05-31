@@ -354,7 +354,7 @@ jobs:
           cd services
           endpoint=$(./output.sh infra-api ApiGatewayRestApiUrl $STAGE_NAME)
           echo $endpoint
-          echo "::set-output name=api-endpoint::$endpoint"
+          echo "::set-output name=value::$endpoint"
 
       - name: get cognito user pool id
         id: save-cognito-user-pool-id
