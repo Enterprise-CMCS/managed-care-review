@@ -7,13 +7,13 @@ exports[`renders overall email as expected 1`] = `
 <b>Unlocked on:</b> 02/01/2022<br />
 <b>Reason for unlock:</b> Adding rate certification.<br />
 <b>Rate names</b>:
-<ul style=\\"margin-top: 0px;\\">
+<ul style="margin-top: 0px;">
 <li>MCR-MN-0003-MSHO-RATE-20210101-20220101-CERTIFICATION-20210102</li>
 <li>MCR-MN-0003-SNBC-RATE-20220201-20230201-CERTIFICATION-20220202</li>
 </ul>
 <br />
 <b>You must revise the submission before CMS can continue reviewing it.<br />
 <br />
-<a href=\\"http://localhost/submissions/test-abc-125/edit/review-and-submit\\">Open the submission in MC-Review to make edits.</a>
+<a href="http://localhost/submissions/test-abc-125/edit/review-and-submit">Open the submission in MC-Review to make edits.</a>
 "
 `;
