@@ -465,7 +465,7 @@ jobs:
 
       - name: Log api endpoint
         run: |
-          echo ${{ needs.finishing-prep.outputs.api-endpoint }}
+          echo "${{ needs.finishing-prep.outputs.api-endpoint }}"
 
       - name: Log cognito user pool id
         run: |
@@ -474,6 +474,10 @@ jobs:
       - name: Log cognito region
         run: |
           echo ${{ needs.finishing-prep.outputs.cognito-region }}
+
+      - name: Log cognito web client id
+        run: |
+          echo ${{ needs.finishing-prep.outputs.cognito-user-pool-web-client-id }}
 
       - uses: actions/download-artifact@v3
         with:
