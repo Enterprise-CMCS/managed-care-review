@@ -454,8 +454,13 @@ jobs:
       - name: Generate GraphQL
         run: lerna run gqlgen
 
-      - name: Generate Protos
-        run: lerna run generate --scope=app-proto
+      - name: Setup graphql
+        working-directory: services/app-graphql
+        run: yarn run gqlgen
+
+      - name: Setup Protos
+        working-directory: services/app-proto
+        run: yarn run generate
 
       - name: check ip
         id: check-ip
