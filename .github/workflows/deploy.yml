@@ -450,9 +450,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Generate GraphQL
-        run: lerna run gqlgen
-
       - name: Setup graphql
         working-directory: services/app-graphql
         run: yarn run gqlgen
