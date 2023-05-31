@@ -17,9 +17,13 @@ const defineConfig = {
         setupNodeEvents(on, config) {
             require('@cypress/code-coverage/task')(on, config)
             const newConfig = config
-            const authMode = process.env.REACT_APP_AUTH_MODE
-            newConfig.env.AUTH_MODE = authMode
+            newConfig.env.AUTH_MODE = process.env.REACT_APP_AUTH_MODE
             newConfig.env.TEST_USERS_PASS = process.env.TEST_USERS_PASS
+
+            console.log('-----------')
+            console.log('USER_POOL_ID')
+            console.log(process.env.USER_POOL_ID)
+            console.log('-----------')
 
             // Configure env for Amplify authorization
             newConfig.env.API_URL = process.env.REACT_APP_API_URL
