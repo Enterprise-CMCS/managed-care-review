@@ -23,6 +23,10 @@ const defineConfig = {
             console.log('-----------')
             console.log('USER_POOL_ID')
             console.log(process.env.USER_POOL_ID)
+            console.log('REACT_APP_API_URL')
+            console.log(process.env.REACT_APP_API_URL)
+            console.log('CYPRESS_USER_POOL_ID')
+            console.log(process.env.CYPRESS_USER_POOL_ID)
             console.log('-----------')
 
             // Configure env for Amplify authorization
