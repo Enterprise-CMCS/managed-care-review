@@ -24,15 +24,14 @@ const defineConfig = {
             console.log('USER_POOL_ID')
             console.log(process.env.USER_POOL_ID)
             console.log('REACT_APP_API_URL')
-            console.log(process.env.REACT_APP_API_URL)
+            console.log(process.env.REACT_API_URL)
             console.log('CYPRESS_USER_POOL_ID')
             console.log(process.env.CYPRESS_USER_POOL_ID)
             console.log('-----------')
 
             // Configure env for Amplify authorization
-            newConfig.env.API_URL = process.env.REACT_APP_API_URL
+            newConfig.env.API_URL = process.env.REACT_API_URL
             newConfig.env.COGNITO_REGION = process.env.COGNITO_REGION
-            newConfig.env.USER_POOL_ID = process.env.USER_POOL_ID
             newConfig.env.IDENTITY_POOL_ID = process.env.IDENTITY_POOL_ID
             newConfig.env.USER_POOL_WEB_CLIENT_ID = process.env.USER_POOL_WEB_CLIENT_ID
 
