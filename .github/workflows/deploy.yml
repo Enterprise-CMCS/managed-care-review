@@ -109,6 +109,12 @@ jobs:
         working-directory: services/app-web
         run: yarn test:once --coverage
 
+      - name: upload app web gen directory
+        uses: actions/upload-artifact@v3
+        with:
+          name: api-web-gen
+          path: ./services/app-web/src/gen
+
       - name: upload unit test coverage
         uses: actions/upload-artifact@v3
         with:
@@ -451,13 +457,18 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Setup graphql
-        working-directory: services/app-graphql
-        run: yarn run gqlgen
+      - uses: actions/download-artifact@v3
+        with:
+          name: app-web-gen
+          path: ./services/app-web/src/gen
 
-      - name: Setup Protos
-        working-directory: services/app-proto
-        run: yarn run generate
+#      - name: Setup graphql
+#        working-directory: services/app-graphql
+#        run: yarn run gqlgen
+#
+#      - name: Setup Protos
+#        working-directory: services/app-proto
+#        run: yarn run generate
 
       - name: check ip
         id: check-ip
