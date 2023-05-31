@@ -459,6 +459,15 @@ jobs:
       matrix:
         # run copies of the current job in parallel
         containers: [1, 2, 3, 4, 5, 6, 7, 8 ]
+    env:
+      REACT_API_URL: ${{ needs.finishing-prep.outputs.api-endpoint }}
+      REACT_APP_ENDPOINT: ${{ needs.finishing-prep.outputs.application-endpoint }}
+      USER_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-id }}
+      CYPRESS_USER_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-id }}
+      COGNITO_REGION: ${{ needs.finishing-prep.outputs.cognito-region }}
+      IDENTITY_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-identity-pool-id }}
+      USER_POOL_WEB_CLIENT_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-web-client-id }}
+
     steps:
       - uses: actions/checkout@v3
 
@@ -497,6 +506,7 @@ jobs:
         env:
           REACT_APP_AUTH_MODE: AWS_COGNITO
           REACT_API_URL: ${{ needs.finishing-prep.outputs.api-endpoint }}
+          REACT_APP_ENDPOINT: ${{ needs.finishing-prep.outputs.application-endpoint }}
           USER_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-id }}
           CYPRESS_USER_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-id }}
           COGNITO_REGION: ${{ needs.finishing-prep.outputs.cognito-region }}
