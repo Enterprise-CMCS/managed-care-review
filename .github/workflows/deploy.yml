@@ -115,6 +115,12 @@ jobs:
           name: app-web-gen
           path: ./services/app-web/src/gen
 
+      - name: upload cypress gen directory
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-gen
+          path: ./services/cypress/gen
+
       - name: upload unit test coverage
         uses: actions/upload-artifact@v3
         with:
@@ -460,6 +466,11 @@ jobs:
         with:
           name: app-web-gen
           path: ./services/app-web/src/gen
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: cypress-gen
+          path: ./services/cypress/gen
 
 #      - name: Setup graphql
 #        working-directory: services/app-graphql
