@@ -112,7 +112,7 @@ jobs:
       - name: upload app web gen directory
         uses: actions/upload-artifact@v3
         with:
-          name: api-web-gen
+          name: app-web-gen
           path: ./services/app-web/src/gen
 
       - name: upload unit test coverage
