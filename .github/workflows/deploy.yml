@@ -300,7 +300,7 @@ jobs:
       application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
       api-endpoint: ${{ steps.save-api-endpoint.outputs.api-endpoint }}
       cypress-uuid: ${{ steps.uuid.outputs.value }}
-      cognito-user-identity-pool-id: ${{ steps.save-cognito-user-identity-pool-id.outputs.cognito-user-identity-pool-id }}
+      cognito-user-pool-id: ${{ steps.save-cognito-user-pool-id.outputs.cognito-user-pool-id }}
       cognito-region: ${{ steps.save-cognito-region.outputs.cognito-region }}
       cognito-identity-pool-id: ${{ steps.save-cognito-identity-pool-id.outputs.cognito-identity-pool-id }}
       cognito-user-pool-web-client-id: ${{ steps.save-cognito-user-pool-web-client-id.outputs.cognito-user-pool-web-client-id }}
@@ -356,14 +356,14 @@ jobs:
           echo "::set-output name=api-endpoint::$endpoint"
 
       - name: get cognito user identity pool id
-        id: save-cognito-user-identity-pool-id
+        id: save-cognito-user-pool-id
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           cd services
           endpoint=$(./output.sh ui-auth UserPoolId $STAGE_NAME)
           echo $endpoint
-          echo "::set-output name=cognito-user-identity-pool-id::$endpoint"
+          echo "::set-output name=cognito-user-pool-id::$endpoint"
 
       - name: get cognito region
         id: save-cognito-region
@@ -497,7 +497,7 @@ jobs:
         env:
           REACT_APP_AUTH_MODE: AWS_COGNITO
           REACT_API_URL: ${{ needs.finishing-prep.outputs.api-endpoint }}
-          USER_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-user-identity-pool-id }}
+          USER_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-id }}
           COGNITO_REGION: ${{ needs.finishing-prep.outputs.cognito-region }}
           IDENTITY_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-identity-pool-id }}
           USER_POOL_WEB_CLIENT_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-web-client-id }}
