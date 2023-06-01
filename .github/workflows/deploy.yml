@@ -300,11 +300,10 @@ jobs:
       application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
       api-endpoint: ${{ steps.save-api-endpoint.outputs.api-endpoint }}
       cypress-uuid: ${{ steps.uuid.outputs.value }}
+      cognito-user-pool-id: ${{ steps.save-cognito-user-pool-id.outputs.value }}
       cognito-region: ${{ steps.save-cognito-region.outputs.value }}
       cognito-identity-pool-id: ${{ steps.save-cognito-identity-pool-id.outputs.value }}
       cognito-user-pool-web-client-id: ${{ steps.save-cognito-user-pool-web-client-id.outputs.value }}
-    env:
-      GITHUB_ENV: output.env
 
     steps:
       - uses: actions/checkout@v3
@@ -319,6 +318,7 @@ jobs:
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
           changed-services: ${{ needs.begin-deployment.outputs.changed-services }}
+          mask-aws-account-id: false
 
       - name: Create Test Users
         env:
@@ -353,8 +353,8 @@ jobs:
         run: |
           cd services
           endpoint=$(./output.sh infra-api ApiGatewayRestApiUrl $STAGE_NAME)
-          echo "api-endpoint=$endpoint" >> $GITHUB_ENV
-          echo "::add-mask::$endpoint"
+          echo $endpoint
+          echo "api-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
 
       - name: get cognito user pool id
         id: save-cognito-user-pool-id
@@ -363,8 +363,8 @@ jobs:
         run: |
           cd services
           endpoint=$(./output.sh ui-auth UserPoolId $STAGE_NAME)
-          echo "cognito-user-pool-id=$endpoint" >> $GITHUB_ENV
-          echo "::add-mask::$endpoint"
+          echo $endpoint
+          echo "::set-output name=value::$endpoint"
 
       - name: get cognito region
         id: save-cognito-region
@@ -394,7 +394,7 @@ jobs:
           cd services
           endpoint=$(./output.sh ui-auth UserPoolClientId $STAGE_NAME)
           echo $endpoint
-          echo "user-pool-web-client-id=$endpoint" >> $GITHUB_ENV
+          echo "::set-output name=value::$endpoint"
 
       - name: get storybook endpoint
         id: save-storybook-endpoint
@@ -466,11 +466,11 @@ jobs:
 
       - name: Log api endpoint
         run: |
-          echo ${{ env.api-endpoint }}
+          echo ${{ needs.finishing-prep.outputs.api-endpoint }}
 
       - name: Log cognito user pool id
         run: |
-          echo ${{ env.cognito-user-pool-id }}
+          echo ${{ needs.finishing-prep.outputs.cognito-user-pool-id }}
 
       - name: Log cognito region
         run: |
@@ -478,7 +478,7 @@ jobs:
 
       - name: Log cognito web client id
         run: |
-          echo ${{ env.user-pool-web-client-id }}
+          echo ${{ needs.finishing-prep.outputs.cognito-user-pool-web-client-id }}
 
       - uses: actions/download-artifact@v3
         with:
@@ -517,12 +517,6 @@ jobs:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
-          REACT_API_URL: ${{ needs.finishing-prep.outputs.api-endpoint }}
-          REACT_APP_ENDPOINT: ${{ needs.finishing-prep.outputs.application-endpoint }}
-          USER_POOL_ID: ${{ env.cognito-user-pool-id }}
-          COGNITO_REGION: ${{ needs.finishing-prep.outputs.cognito-region }}
-          IDENTITY_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-identity-pool-id }}
-          USER_POOL_WEB_CLIENT_ID: ${{ env.user-pool-web-client-id }}
           # Overwrites folder directories in cypress config because in CI we run from root
           CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
           CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures
