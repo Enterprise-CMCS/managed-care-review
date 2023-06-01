@@ -334,6 +334,7 @@ export const ContractDetails = ({
             redirectPath: string
         }
     ) => {
+        // setSubmitting(true)
         // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
         // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
         if (options.shouldValidateDocuments) {
@@ -466,14 +467,8 @@ export const ContractDetails = ({
     return (
         <Formik
             initialValues={contractDetailsInitialValues}
-            onSubmit={(values, { setSubmitting }) => {
-                return handleFormSubmit(values, setSubmitting, {
-                    shouldValidateDocuments: true,
-                    redirectPath:
-                        draftSubmission.submissionType === 'CONTRACT_ONLY'
-                            ? `../contacts`
-                            : `../rate-details`,
-                })
+            onSubmit={() => {
+                return
             }}
             validationSchema={() => ContractDetailsFormSchema(draftSubmission)}
         >
@@ -808,7 +803,13 @@ export const ContractDetails = ({
                                         <FormGroup data-testid="yes-no-group">
                                             <Fieldset
                                                 aria-required
-                                                legend={isBaseContract(draftSubmission)? "Does this contract action include provisions related to any of the following" : "Does this contract action include new or modified provisions related to any of the following"}
+                                                legend={
+                                                    isBaseContract(
+                                                        draftSubmission
+                                                    )
+                                                        ? 'Does this contract action include provisions related to any of the following'
+                                                        : 'Does this contract action include new or modified provisions related to any of the following'
+                                                }
                                             >
                                                 {applicableProvisions.map(
                                                     (modifiedProvisionName) => (
@@ -879,6 +880,16 @@ export const ContractDetails = ({
                                         }
                                     )
                                 }
+                            }}
+                            continueOnClick={async () => {
+                                await handleFormSubmit(values, setSubmitting, {
+                                    shouldValidateDocuments: true,
+                                    redirectPath:
+                                        draftSubmission.submissionType ===
+                                        'CONTRACT_ONLY'
+                                            ? `../contacts`
+                                            : `../rate-details`,
+                                })
                             }}
                             disableContinue={showFileUploadError}
                             actionInProgress={isSubmitting}
