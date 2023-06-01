@@ -394,7 +394,7 @@ jobs:
           cd services
           endpoint=$(./output.sh ui-auth UserPoolClientId $STAGE_NAME)
           echo $endpoint
-          echo "::set-output name=value::$endpoint"
+          echo "user-pool-web-client-id=$endpoint" >> $GITHUB_ENV
 
       - name: get storybook endpoint
         id: save-storybook-endpoint
@@ -478,7 +478,7 @@ jobs:
 
       - name: Log cognito web client id
         run: |
-          echo ${{ needs.finishing-prep.outputs.cognito-user-pool-web-client-id }}
+          echo ${{ env.user-pool-web-client-id }}
 
       - uses: actions/download-artifact@v3
         with:
@@ -522,7 +522,7 @@ jobs:
           USER_POOL_ID: ${{ env.cognito-user-pool-id }}
           COGNITO_REGION: ${{ needs.finishing-prep.outputs.cognito-region }}
           IDENTITY_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-identity-pool-id }}
-          USER_POOL_WEB_CLIENT_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-web-client-id }}
+          USER_POOL_WEB_CLIENT_ID: ${{ env.user-pool-web-client-id }}
           # Overwrites folder directories in cypress config because in CI we run from root
           CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
           CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures
