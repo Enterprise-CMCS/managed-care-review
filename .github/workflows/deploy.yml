@@ -463,9 +463,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ secrets.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
+          changed-services: ${{ needs.begin-deployment.outputs.changed-services }}
+
       - name: Log api endpoint
         run: |
-          echo "${{ needs.finishing-prep.outputs.api-endpoint }}"
+          echo ${{ needs.finishing-prep.outputs.api-endpoint }}
 
       - name: Log cognito user pool id
         run: |
