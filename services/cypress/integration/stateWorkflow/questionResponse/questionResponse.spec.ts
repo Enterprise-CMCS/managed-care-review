@@ -12,9 +12,12 @@ describe('Q&A', () => {
         //  Local run
         //      - Before interception: 01:06
         //      - After interception: 00:32
-        //  Deployed run
+        //  Deployed local run using review app
         //      - Before interception: 02:51
         //      - After interception: 01:54
+        //  Deployed CI run
+        //      - Before interception:
+        //      - After interception:
 
         // Then do Q&A stuff
         cy.interceptFeatureFlags({
