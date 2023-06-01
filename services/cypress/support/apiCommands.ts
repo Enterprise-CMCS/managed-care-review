@@ -48,6 +48,11 @@ const newSubmissionInput = {
 
 const createAndSubmitPackage = async (schema: string): Promise<HealthPlanPackage> => {
 
+    cy.log(Cypress.env('COGNITO_REGION'))
+    cy.log(Cypress.env('USER_POOL_ID'))
+    cy.log(Cypress.env('IDENTITY_POOL_ID'))
+    cy.log(Cypress.env('USER_POOL_WEB_CLIENT_ID'))
+
     // Configure Amplify using envs set in cypress.config.ts
     Amplify.configure({
         Auth: {
