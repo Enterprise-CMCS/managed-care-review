@@ -300,7 +300,6 @@ jobs:
       application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
       api-endpoint: ${{ steps.save-api-endpoint.outputs.api-endpoint }}
       cypress-uuid: ${{ steps.uuid.outputs.value }}
-      cognito-user-pool-id: ${{ steps.save-cognito-user-pool-id.outputs.value }}
       cognito-region: ${{ steps.save-cognito-region.outputs.value }}
       cognito-identity-pool-id: ${{ steps.save-cognito-identity-pool-id.outputs.value }}
       cognito-user-pool-web-client-id: ${{ steps.save-cognito-user-pool-web-client-id.outputs.value }}
@@ -354,7 +353,7 @@ jobs:
         run: |
           cd services
           endpoint=$(./output.sh infra-api ApiGatewayRestApiUrl $STAGE_NAME)
-          echo "api-endpoint=$endpoint" >> "$GITHUB_ENV"
+          echo "api-endpoint=$endpoint" >> $GITHUB_ENV
           echo "::add-mask::$endpoint"
 
       - name: get cognito user pool id
@@ -364,8 +363,8 @@ jobs:
         run: |
           cd services
           endpoint=$(./output.sh ui-auth UserPoolId $STAGE_NAME)
-          echo $endpoint
-          echo "::set-output name=value::$endpoint"
+          echo "cognito-user-pool-id=$endpoint" >> $GITHUB_ENV
+          echo "::add-mask::$endpoint"
 
       - name: get cognito region
         id: save-cognito-region
@@ -471,7 +470,7 @@ jobs:
 
       - name: Log cognito user pool id
         run: |
-          echo ${{ needs.finishing-prep.outputs.cognito-user-pool-id }}
+          echo ${{ env.cognito-user-pool-id }}
 
       - name: Log cognito region
         run: |
@@ -520,7 +519,7 @@ jobs:
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
           REACT_API_URL: ${{ needs.finishing-prep.outputs.api-endpoint }}
           REACT_APP_ENDPOINT: ${{ needs.finishing-prep.outputs.application-endpoint }}
-          USER_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-id }}
+          USER_POOL_ID: ${{ env.cognito-user-pool-id }}
           COGNITO_REGION: ${{ needs.finishing-prep.outputs.cognito-region }}
           IDENTITY_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-identity-pool-id }}
           USER_POOL_WEB_CLIENT_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-web-client-id }}
