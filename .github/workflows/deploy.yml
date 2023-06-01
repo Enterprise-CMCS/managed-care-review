@@ -463,12 +463,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - env:
-          API_URL: ${{ needs.finishing-prep.outputs.api-endpoint }}
-
       - name: Log api endpoint
         run: |
-          echo "$API_URL"
+          echo ${{ needs.finishing-prep.outputs.api-endpoint }}
 
       - name: Log cognito user pool id
         run: |
