@@ -468,7 +468,7 @@ jobs:
 
       - name: Log api endpoint
         run: |
-          echo "API_URL"
+          echo "$API_URL"
 
       - name: Log cognito user pool id
         run: |
