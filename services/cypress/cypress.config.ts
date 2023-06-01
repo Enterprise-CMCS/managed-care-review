@@ -24,8 +24,6 @@ const defineConfig = {
             console.log('-----------')
             console.log('USER_POOL_ID')
             console.log(process.env.USER_POOL_ID)
-            console.log('REACT_APP_ENDPOINT')
-            console.log(process.env.REACT_APP_ENDPOINT)
             console.log('REACT_APP_API_URL')
             console.log(process.env.REACT_API_URL)
             console.log('USER_POOL_WEB_CLIENT_ID')

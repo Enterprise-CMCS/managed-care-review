@@ -22,6 +22,12 @@ describe('Q&A', () => {
             'chip-only-form': true,
         })
 
+        cy.log('AWS INFO')
+        cy.log(Cypress.env('COGNITO_REGION'))
+        cy.log(Cypress.env('USER_POOL_ID'))
+        cy.log(Cypress.env('IDENTITY_POOL_ID'))
+        cy.log(Cypress.env('USER_POOL_WEB_CLIENT_ID'))
+
         cy.apiCreateAndSubmitContractOnlySubmission().then(pkg => {
             cy.log(pkg.id)
 
