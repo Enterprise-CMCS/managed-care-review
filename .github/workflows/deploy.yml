@@ -354,7 +354,7 @@ jobs:
           cd services
           endpoint=$(./output.sh infra-api ApiGatewayRestApiUrl $STAGE_NAME)
           echo $endpoint
-          echo "::set-output name=value::$endpoint"
+          echo "::set-output name=api-endpoint::$endpoint"
 
       - name: get cognito user pool id
         id: save-cognito-user-pool-id
@@ -497,15 +497,14 @@ jobs:
           config-file: services/cypress/cypress.config.ts
         env:
           REACT_APP_AUTH_MODE: AWS_COGNITO
-          REACT_API_URL: ${{ needs.finishing-prep.outputs.api-endpoint }}
-          USER_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-id }}
-          CYPRESS_USER_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-id }}
-          COGNITO_REGION: ${{ needs.finishing-prep.outputs.cognito-region }}
-          IDENTITY_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-identity-pool-id }}
-          USER_POOL_WEB_CLIENT_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-web-client-id }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
+          REACT_API_URL: ${{ needs.finishing-prep.outputs.api-endpoint }}
+          USER_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-id }}
+          COGNITO_REGION: ${{ needs.finishing-prep.outputs.cognito-region }}
+          IDENTITY_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-identity-pool-id }}
+          USER_POOL_WEB_CLIENT_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-web-client-id }}
           # Overwrites folder directories in cypress config because in CI we run from root
           CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
           CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures
