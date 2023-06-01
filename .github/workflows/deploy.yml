@@ -304,6 +304,8 @@ jobs:
       cognito-region: ${{ steps.save-cognito-region.outputs.value }}
       cognito-identity-pool-id: ${{ steps.save-cognito-identity-pool-id.outputs.value }}
       cognito-user-pool-web-client-id: ${{ steps.save-cognito-user-pool-web-client-id.outputs.value }}
+    env:
+      GITHUB_ENV: output.env
 
     steps:
       - uses: actions/checkout@v3
@@ -352,8 +354,7 @@ jobs:
         run: |
           cd services
           endpoint=$(./output.sh infra-api ApiGatewayRestApiUrl $STAGE_NAME)
-          echo $endpoint
-          echo "api-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
+          echo "api-endpoint=$endpoint" >> "$GITHUB_ENV"
           echo "::add-mask::$endpoint"
 
       - name: get cognito user pool id
@@ -466,7 +467,7 @@ jobs:
 
       - name: Log api endpoint
         run: |
-          echo ${{ needs.finishing-prep.outputs.api-endpoint }}
+          echo ${{ env.api-endpoint }}
 
       - name: Log cognito user pool id
         run: |
