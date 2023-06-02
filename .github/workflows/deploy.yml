@@ -363,7 +363,6 @@ jobs:
         run: |
           cd services
           endpoint=$(./output.sh ui-auth UserPoolId $STAGE_NAME)
-          echo $endpoint
           echo "::set-output name=value::$endpoint"
 
       - name: get cognito region
@@ -373,7 +372,6 @@ jobs:
         run: |
           cd services
           endpoint=$(./output.sh ui-auth Region $STAGE_NAME)
-          echo $endpoint
           echo "::set-output name=value::$endpoint"
 
       - name: get cognito identity pool id
@@ -383,7 +381,6 @@ jobs:
         run: |
           cd services
           endpoint=$(./output.sh ui-auth IdentityPoolId $STAGE_NAME)
-          echo $endpoint
           echo "::set-output name=value::$endpoint"
 
       - name: get cognito user pool web client id
@@ -393,7 +390,6 @@ jobs:
         run: |
           cd services
           endpoint=$(./output.sh ui-auth UserPoolClientId $STAGE_NAME)
-          echo $endpoint
           echo "::set-output name=value::$endpoint"
 
       - name: get storybook endpoint
@@ -500,11 +496,11 @@ jobs:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
-          REACT_API_URL: ${{ needs.finishing-prep.outputs.api-endpoint }}
-          USER_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-id }}
+          REACT_APP_API_URL: ${{ needs.finishing-prep.outputs.api-endpoint }}
+          COGNITO_USER_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-id }}
           COGNITO_REGION: ${{ needs.finishing-prep.outputs.cognito-region }}
-          IDENTITY_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-identity-pool-id }}
-          USER_POOL_WEB_CLIENT_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-web-client-id }}
+          COGNITO_IDENTITY_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-identity-pool-id }}
+          COGNITO_USER_POOL_WEB_CLIENT_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-web-client-id }}
           # Overwrites folder directories in cypress config because in CI we run from root
           CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
           CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures

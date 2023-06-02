@@ -53,9 +53,9 @@ const createAndSubmitPackage = async (schema: string): Promise<HealthPlanPackage
         Auth: {
             mandatorySignIn: true,
             region: Cypress.env('COGNITO_REGION'),
-            userPoolId:  Cypress.env('USER_POOL_ID'),
-            identityPoolId:  Cypress.env('IDENTITY_POOL_ID'),
-            userPoolWebClientId:  Cypress.env('USER_POOL_WEB_CLIENT_ID'),
+            userPoolId:  Cypress.env('COGNITO_USER_POOL_ID'),
+            identityPoolId:  Cypress.env('COGNITO_IDENTITY_POOL_ID'),
+            userPoolWebClientId:  Cypress.env('COGNITO_USER_POOL_WEB_CLIENT_ID'),
         },
         API: {
             endpoints: [

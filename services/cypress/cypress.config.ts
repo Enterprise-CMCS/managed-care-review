@@ -22,20 +22,28 @@ const defineConfig = {
             newConfig.env.TEST_USERS_PASS = process.env.TEST_USERS_PASS
 
             console.log('-----------')
-            console.log('USER_POOL_ID')
-            console.log(process.env.USER_POOL_ID)
             console.log('REACT_APP_API_URL')
-            console.log(process.env.REACT_API_URL)
+            console.log(process.env.REACT_APP_API_URL)
+
+            console.log('USER_POOL_ID')
+            console.log(process.env.COGNITO_USER_POOL_ID)
+
+            console.log('COGNITO_REGION')
+            console.log(process.env.COGNITO_REGION)
+
+            console.log('COGNITO_IDENTITY_POOL_ID')
+            console.log(process.env.COGNITO_IDENTITY_POOL_ID)
+
             console.log('USER_POOL_WEB_CLIENT_ID')
-            console.log(process.env.USER_POOL_WEB_CLIENT_ID)
+            console.log(process.env.COGNITO_USER_POOL_WEB_CLIENT_ID)
             console.log('-----------')
 
             // Configure env for Amplify authorization
-            newConfig.env.API_URL = process.env.REACT_API_URL
-            newConfig.env.USER_POOL_ID = process.env.USER_POOL_ID
+            newConfig.env.API_URL = process.env.REACT_APP_API_URL
+            newConfig.env.COGNITO_USER_POOL_ID = process.env.COGNITO_USER_POOL_ID
             newConfig.env.COGNITO_REGION = process.env.COGNITO_REGION
-            newConfig.env.IDENTITY_POOL_ID = process.env.IDENTITY_POOL_ID
-            newConfig.env.USER_POOL_WEB_CLIENT_ID = process.env.USER_POOL_WEB_CLIENT_ID
+            newConfig.env.COGNITO_IDENTITY_POOL_ID = process.env.COGNITO_IDENTITY_POOL_ID
+            newConfig.env.COGNITO_USER_POOL_WEB_CLIENT_ID = process.env.COGNITO_USER_POOL_WEB_CLIENT_ID
 
             on('before:browser:launch', (browser, launchOptions) => {
                 prepareAudit(launchOptions)
