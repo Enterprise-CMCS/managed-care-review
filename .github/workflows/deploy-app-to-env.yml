@@ -15,9 +15,10 @@ on:
       changed_services:
         required: true
         type: string
-    secrets:
       aws_default_region:
         required: true
+        type: string
+    secrets:
       aws_account_id:
         required: true
       react_app_auth_mode:
@@ -43,7 +44,7 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ secrets.aws_default_region }}
+          region: ${{ inputs.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
@@ -73,7 +74,7 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ secrets.aws_default_region }}
+          region: ${{ inputs.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
