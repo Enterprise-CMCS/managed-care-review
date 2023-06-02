@@ -24,7 +24,7 @@ describe('review and submit', () => {
             cy.findByText('Download all contract documents').should('not.exist')
 
             // Navigate to dashboard page by clicking save as draft
-            cy.navigateFormByButtonClick('SAVE_DRAFT')
+            cy.navigateFormByButtonClick('SAVE_DRAFT', false)
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
         })
     })

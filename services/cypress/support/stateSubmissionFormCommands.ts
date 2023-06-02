@@ -433,7 +433,7 @@ Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
 
 Cypress.Commands.add(
     'submitStateSubmissionForm',
-    (_success = true, resubmission = false) => {
+    (success = true, resubmission = false) => {
         cy.intercept('POST', '*/graphql', (req) => {
             aliasMutation(req, 'submitHealthPlanPackage')
         })
@@ -456,7 +456,10 @@ Cypress.Commands.add(
                 }
             })
         cy.wait('@submitHealthPlanPackageMutation', { timeout: 50000 })
-        cy.findByTestId('dashboard-page').should('exist')
-        cy.findByRole('heading',{name:'Submissions'}).should('exist')
+        if (success) {
+            cy.findByTestId('dashboard-page').should('exist')
+            cy.findByRole('heading',{name:'Submissions'}).should('exist')
+        }
+    
     }
 )

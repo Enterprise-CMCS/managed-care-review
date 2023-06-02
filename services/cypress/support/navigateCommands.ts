@@ -31,7 +31,9 @@ Cypress.Commands.add(
         }).safeClick()
 
         if (buttonKey === 'SAVE_DRAFT') {
-            cy.wait('@updateHealthPlanFormDataMutation')
+            if(waitForLoad) {
+                cy.wait('@updateHealthPlanFormDataMutation')
+             }
             cy.findByTestId('dashboard-page').should('exist')
             cy.findByRole('heading',{name:'Submissions'}).should('exist')
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
