@@ -1,5 +1,8 @@
-# 009 — Decide on data serialization approach for submission data
+# 009 — Use protobufs as the data storage approach for submission data
 
+## This document is now outdated. This ADR is now superceded by [ADR 0024](./024-remove-protobufs)
+
+---
 Data for managed care submission forms is central to our application. A pain point in the project has been determining ‘what is a submission’ and how this data should be structured. As we add more and more states to our system, as we continue design and research, and as CMS policy changes we expect our data model will continue to be highly unstable. Knowing this, we will use a data serialization tool to encode our data using a schema that can be stored alongside the data record. The background behind this approach is described in [ADR 008](./008-form-data-serialization.md).
 
 There are a few approaches we could take to encoding our data and creating a schema. This ADR compares two approaches - Google Protobufs and Apache Avro.
@@ -11,19 +14,19 @@ There are a few approaches we could take to encoding our data and creating a sch
 -   Availability of tooling and docs for Node/JS/TS ecosystems
 -   Ease of usage and setup
 
-## Considered Options
+### Considered Options
 
-### Google Protobufs
+#### Google Protobufs
 
-### Apache Avro
+#### Apache Avro
 
-## Decision Outcome: Use Protobufs
+### Decision Outcome: Use Protobufs
 
 Use Protobufs. Not having adequate docs, supporting tools for Typescript in Avro is a red flag. The [protobufjs](https://github.com/protobufjs/protobuf.js/) is good library to begin with. It has a clear api, ample documentation, and should integrate well with our existing tooling. We have some experience with protobufs already on the team.
 
-### Pro/Cons
+#### Pro/Cons
 
-#### Google Protobufs
+##### Google Protobufs
 
 -   `+` Typescript support built in and well documented, particularly within protobufjs
 -   `+` Clear path to compile schema created object to also reference its own types.
@@ -32,7 +35,7 @@ Use Protobufs. Not having adequate docs, supporting tools for Typescript in Avro
 -   `-` Protobuf has its own syntax for declaring types - similar to Typescript conceptually, but different enough that there may be a learning curve.
 -   `-` We will need to build out some custom functionality for schema comparison and serialization to start using protobufs that come for free with Avro. We will also need to write tests to maintain this boilerplate code.
 
-#### Apache Avro
+##### Apache Avro
 
 -   `+` Clear patterns for resolving incompatible schemas (built in methods - createResolver) and clearly defined rules for schema resolution.
 -   `+` Schema is more “human readable”.
