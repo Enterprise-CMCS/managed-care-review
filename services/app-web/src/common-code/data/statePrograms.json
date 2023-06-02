@@ -108,11 +108,6 @@
                     "name": "GMC"
                 },
                 {
-                    "id": "a4118400-1352-4330-b972-3ba3d5d3ae59",
-                    "fullName": "Senior Care Action Network ",
-                    "name": "SCAN"
-                },
-                {
                     "id": "20cbf01d-f07e-4205-b9b2-77fd7d448040",
                     "fullName": "County Organized Health Systems",
                     "name": "COHS"
@@ -121,11 +116,6 @@
                     "id": "4308b4a7-2f2d-4b5e-a8ef-504a01f342d4",
                     "fullName": "Two-Plan Model ",
                     "name": "Two-Plan"
-                },
-                {
-                    "id": "073d8c66-bfce-4f6a-a4a1-4107c53f7941",
-                    "fullName": "Family Mosaic Program/San Francisco",
-                    "name": "FMP"
                 },
                 {
                     "id": "d902af57-b57b-4702-a492-3276bbf923e4",
@@ -1009,41 +999,6 @@
                     "id": "6b6afeaf-aeff-45f7-a14c-992a03fa372f",
                     "fullName": "Children's CHIP Dental Services",
                     "name": "CHIP Dental "
-                },
-                {
-                    "id": "",
-                    "fullName": "",
-                    "name": ""
-                },
-                {
-                    "id": "",
-                    "fullName": "",
-                    "name": ""
-                },
-                {
-                    "id": "",
-                    "fullName": "",
-                    "name": ""
-                },
-                {
-                    "id": "",
-                    "fullName": "",
-                    "name": ""
-                },
-                {
-                    "id": "",
-                    "fullName": "",
-                    "name": ""
-                },
-                {
-                    "id": "",
-                    "fullName": "",
-                    "name": ""
-                },
-                {
-                    "id": "",
-                    "fullName": "",
-                    "name": ""
                 }
             ],
             "code": "TX"
