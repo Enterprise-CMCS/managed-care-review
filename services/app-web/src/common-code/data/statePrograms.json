@@ -100,7 +100,7 @@
                 {
                     "id": "5904a736-4422-4b78-abef-f3df3d0ae21d",
                     "fullName": "Regional Model",
-                    "name": "Regional Model"
+                    "name": "Regional"
                 },
                 {
                     "id": "78a70c07-3fe0-41df-a80c-9eab6ae34fa4",
@@ -120,7 +120,7 @@
                 {
                     "id": "4308b4a7-2f2d-4b5e-a8ef-504a01f342d4",
                     "fullName": "Two-Plan Model ",
-                    "name": "Two Plans "
+                    "name": "Two-Plan"
                 },
                 {
                     "id": "073d8c66-bfce-4f6a-a4a1-4107c53f7941",
@@ -140,7 +140,7 @@
                 {
                     "id": "14a5d2f4-d4ff-49cf-93b6-7d2f7c2b89e5",
                     "fullName": "Coordinated Care Initiative Duals",
-                    "name": "CCI Full Duals"
+                    "name": "CCI Duals"
                 },
                 {
                     "id": "46680d23-ce69-49ec-a5f8-e2b3f0173578",
@@ -156,6 +156,21 @@
                     "id": "7cec9b0c-3833-4933-bc05-a9287a76d3ec",
                     "fullName": "Health Homes",
                     "name": "HHP"
+                },
+                {
+                    "id": "",
+                    "fullName": "Specialty Mental Health Services",
+                    "name": "SMHS"
+                },
+                {
+                    "id": "",
+                    "fullName": "Drug Medi-Cal Organized Delivery System",
+                    "name": "DMC-ODS"
+                },
+                {
+                    "id": "",
+                    "fullName": "Single Plan Model",
+                    "name": "Single Plan"
                 }
             ],
             "code": "CA"
@@ -994,6 +1009,41 @@
                     "id": "6b6afeaf-aeff-45f7-a14c-992a03fa372f",
                     "fullName": "Children's CHIP Dental Services",
                     "name": "CHIP Dental "
+                },
+                {
+                    "id": "",
+                    "fullName": "",
+                    "name": ""
+                },
+                {
+                    "id": "",
+                    "fullName": "",
+                    "name": ""
+                },
+                {
+                    "id": "",
+                    "fullName": "",
+                    "name": ""
+                },
+                {
+                    "id": "",
+                    "fullName": "",
+                    "name": ""
+                },
+                {
+                    "id": "",
+                    "fullName": "",
+                    "name": ""
+                },
+                {
+                    "id": "",
+                    "fullName": "",
+                    "name": ""
+                },
+                {
+                    "id": "",
+                    "fullName": "",
+                    "name": ""
                 }
             ],
             "code": "TX"
