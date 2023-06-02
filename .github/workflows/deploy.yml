@@ -354,7 +354,7 @@ jobs:
           cd services
           endpoint=$(./output.sh infra-api ApiGatewayRestApiUrl $STAGE_NAME)
           echo $endpoint
-          echo "::set-output name=api-endpoint::$endpoint"
+          echo "api-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
 
       - name: get cognito user pool id
         id: save-cognito-user-pool-id
@@ -363,6 +363,7 @@ jobs:
         run: |
           cd services
           endpoint=$(./output.sh ui-auth UserPoolId $STAGE_NAME)
+          echo $endpoint
           echo "::set-output name=value::$endpoint"
 
       - name: get cognito region
@@ -372,6 +373,7 @@ jobs:
         run: |
           cd services
           endpoint=$(./output.sh ui-auth Region $STAGE_NAME)
+          echo $endpoint
           echo "::set-output name=value::$endpoint"
 
       - name: get cognito identity pool id
@@ -381,6 +383,7 @@ jobs:
         run: |
           cd services
           endpoint=$(./output.sh ui-auth IdentityPoolId $STAGE_NAME)
+          echo $endpoint
           echo "::set-output name=value::$endpoint"
 
       - name: get cognito user pool web client id
@@ -390,6 +393,7 @@ jobs:
         run: |
           cd services
           endpoint=$(./output.sh ui-auth UserPoolClientId $STAGE_NAME)
+          echo $endpoint
           echo "::set-output name=value::$endpoint"
 
       - name: get storybook endpoint
@@ -458,6 +462,32 @@ jobs:
         containers: [1, 2, 3, 4, 5, 6, 7, 8]
     steps:
       - uses: actions/checkout@v3
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: app-web-gen
+          path: ./services/app-web/src/gen
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: cypress-gen
+          path: ./services/cypress/gen
+
+      - name: Log api endpoint
+        run: |
+          echo ${{ needs.finishing-prep.outputs.api-endpoint }}
+
+      - name: Log cognito user pool id
+        run: |
+          echo ${{ needs.finishing-prep.outputs.cognito-user-pool-id }}
+
+      - name: Log cognito region
+        run: |
+          echo ${{ needs.finishing-prep.outputs.cognito-region }}
+
+      - name: Log cognito web client id
+        run: |
+          echo ${{ needs.finishing-prep.outputs.cognito-user-pool-web-client-id }}
 
       - uses: actions/download-artifact@v3
         with:
