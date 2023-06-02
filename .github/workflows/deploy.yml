@@ -242,7 +242,7 @@ jobs:
       stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
       changed_services: ${{ needs.begin-deployment.outputs.changed-services }}
     secrets:
-      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
@@ -269,7 +269,7 @@ jobs:
       app_version: ${{ needs.begin-deployment.outputs.app-version }}
       changed_services: ${{ needs.begin-deployment.outputs.changed-services }}
     secrets:
-      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       react_app_auth_mode: AWS_COGNITO
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
@@ -297,7 +297,7 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ secrets.AWS_DEFAULT_REGION }}
+          region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
           changed-services: ${{ needs.begin-deployment.outputs.changed-services }}
