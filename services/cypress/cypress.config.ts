@@ -21,23 +21,6 @@ const defineConfig = {
             newConfig.env.AUTH_MODE = process.env.REACT_APP_AUTH_MODE
             newConfig.env.TEST_USERS_PASS = process.env.TEST_USERS_PASS
 
-            console.log('-----------')
-            console.log('REACT_APP_API_URL')
-            console.log(process.env.REACT_APP_API_URL)
-
-            console.log('USER_POOL_ID')
-            console.log(process.env.COGNITO_USER_POOL_ID)
-
-            console.log('COGNITO_REGION')
-            console.log(process.env.COGNITO_REGION)
-
-            console.log('COGNITO_IDENTITY_POOL_ID')
-            console.log(process.env.COGNITO_IDENTITY_POOL_ID)
-
-            console.log('USER_POOL_WEB_CLIENT_ID')
-            console.log(process.env.COGNITO_USER_POOL_WEB_CLIENT_ID)
-            console.log('-----------')
-
             // Configure env for Amplify authorization
             newConfig.env.API_URL = process.env.REACT_APP_API_URL
             newConfig.env.COGNITO_USER_POOL_ID = process.env.COGNITO_USER_POOL_ID
