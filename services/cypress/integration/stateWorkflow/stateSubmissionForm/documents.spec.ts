@@ -31,7 +31,7 @@ describe('documents', () => {
                 .eq(0)
                 .click({ force: true })
             cy.findByText(/0 complete, 1 error, 1 pending/).should('exist')
-            cy.waitForDocumentsToLoad()
+            cy.waitForDocumentsToLoad({tableView: true})
             cy.findByText(/1 complete, 1 error, 0 pending/).should('exist')
             cy.findByText('Duplicate file, please remove').should('exist')
             cy.navigateFormByDirectLink(
@@ -64,7 +64,7 @@ describe('documents', () => {
                 .click({ force: true })
             cy.findByText(/0 complete, 1 error, 2 pending/).should('exist')
 
-            cy.waitForDocumentsToLoad()
+            cy.waitForDocumentsToLoad({tableView: true})
             cy.findByText('Duplicate file, please remove').should('exist')
             cy.findAllByRole('row').should('have.length', 4)
             cy.findByText(/2 complete, 1 error, 0 pending/)
@@ -131,7 +131,7 @@ describe('documents', () => {
                     }
                 )
             cy.findAllByRole('row').should('have.length', 3)
-            cy.waitForDocumentsToLoad()
+            cy.waitForDocumentsToLoad({tableView: true})
             cy.verifyDocumentsHaveNoErrors()
 
             cy.navigateFormByButtonClick('CONTINUE')

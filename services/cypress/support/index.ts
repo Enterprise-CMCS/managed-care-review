@@ -58,7 +58,7 @@ declare global {
             fillOutStateContact(): void
             fillOutAdditionalActuaryContact(): void
             fillOutSupportingDocuments(): void
-            waitForDocumentsToLoad(): void
+            waitForDocumentsToLoad( args?: {tableView?: boolean}): void
             verifyDocumentsHaveNoErrors(): void
             submitStateSubmissionForm(
                 success?: boolean,

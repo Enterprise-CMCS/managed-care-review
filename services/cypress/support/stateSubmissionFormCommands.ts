@@ -475,11 +475,11 @@ Cypress.Commands.add('fillOutSupportingDocuments', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('waitForDocumentsToLoad', (tableView = false) => {
+Cypress.Commands.add('waitForDocumentsToLoad', ({ tableView } = { tableView: false}) => {
     if (tableView) {
-        cy.findByTestId('file-input-loading-image').should('not.exist')
+        cy.findAllByTestId('file-input-loading-image').should('have.length', 0)
     } else {
-        // we know we are in list view, this is the default behavior
+        // list view is the default behavior
         cy.findAllByTestId('file-input-preview-image', {
             timeout: 100_000,
         }).should('not.have.class', 'is-loading')
