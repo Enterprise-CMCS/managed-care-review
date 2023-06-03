@@ -170,7 +170,7 @@ describe('RateDetails', () => {
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
-            await continueButton.click()
+            continueButton.click()
             await waitFor(() => {
                 expect(
                     screen.getAllByText(
@@ -199,7 +199,7 @@ describe('RateDetails', () => {
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
-            await continueButton.click()
+            continueButton.click()
             await waitFor(() => {
                 expect(
                     screen.getAllByText(
@@ -230,7 +230,7 @@ describe('RateDetails', () => {
 
             screen.getByLabelText('New rate certification').click()
 
-            await continueButton.click()
+            continueButton.click()
             await waitFor(() => {
                 expect(
                     screen.getAllByText('You must upload at least one document')
@@ -388,14 +388,14 @@ describe('RateDetails', () => {
             )
             const combobox = await screen.findByRole('combobox')
 
-            await selectEvent.openMenu(combobox)
+            selectEvent.openMenu(combobox)
 
             await waitFor(() => {
                 expect(screen.getByText('Program 3')).toBeInTheDocument()
             })
 
             await selectEvent.select(combobox, 'Program 1')
-            await selectEvent.openMenu(combobox)
+            selectEvent.openMenu(combobox)
             await selectEvent.select(combobox, 'Program 3')
 
             // in react-select, only items that are selected have a "remove item" label
@@ -614,7 +614,7 @@ describe('RateDetails', () => {
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
-            await continueButton.click()
+            continueButton.click()
             await waitFor(() => {
                 expect(
                     screen.getAllByText(
@@ -658,7 +658,7 @@ describe('RateDetails', () => {
 
             within(rateInfo2).getByLabelText('New rate certification').click()
 
-            await continueButton.click()
+            continueButton.click()
             await waitFor(() => {
                 expect(
                     screen.getAllByText('You must upload at least one document')
@@ -758,7 +758,7 @@ describe('RateDetails', () => {
 
             //Expect the two packages we know to exist.
             const firstRatePackageCombobox = comboBoxes[0]
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
             await waitFor(() => {
                 expect(
                     firstRateCert.getByText(
@@ -778,22 +778,22 @@ describe('RateDetails', () => {
             })
 
             //Select two packages that have a shared rate cert with this rate cert.
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
             await selectEvent.select(
                 firstRatePackageCombobox,
                 'MCR-MN-0004-MSC+-PMAP-SNBC (Submitted 01/02/21)'
             )
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
             await selectEvent.select(
                 firstRatePackageCombobox,
                 'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
             )
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
             await selectEvent.select(
                 firstRatePackageCombobox,
                 'MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
             )
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
 
             //Expect the three packages to have been selected and 'No options' are left to be selected.
             expect(firstRateCert.getByText('No options')).toBeInTheDocument()
@@ -865,7 +865,7 @@ describe('RateDetails', () => {
             await userEvent.click(firstRateYesSharedRate)
             const secondRatePackageCombobox =
                 secondRateCert.getAllByRole('combobox')[0]
-            await selectEvent.openMenu(secondRatePackageCombobox)
+            selectEvent.openMenu(secondRatePackageCombobox)
             await selectEvent.select(
                 secondRatePackageCombobox,
                 'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
@@ -1001,7 +1001,7 @@ describe('RateDetails', () => {
 
             //Expect the two packages we know to exist.
             const firstRatePackageCombobox = comboBoxes[0]
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
             await waitFor(() => {
                 expect(
                     firstRateCert.getByText(
@@ -1020,12 +1020,12 @@ describe('RateDetails', () => {
                 firstRatePackageCombobox,
                 'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
             )
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
             await selectEvent.select(
                 firstRatePackageCombobox,
                 'MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
             )
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
 
             //Expect submission selection error to clear and continue button is not disabled
             expect(continueButton).not.toHaveAttribute('aria-disabled')
@@ -1118,7 +1118,7 @@ describe('RateDetails', () => {
 
             //Expect the two packages we know to exist.
             const firstRatePackageCombobox = comboBoxes[0]
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
             await waitFor(() => {
                 expect(
                     firstRateCert.getByText(
@@ -1153,12 +1153,12 @@ describe('RateDetails', () => {
                 firstRatePackageCombobox,
                 'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
             )
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
             await selectEvent.select(
                 firstRatePackageCombobox,
                 'MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
             )
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
 
             //Expect submission selection error to clear and continue button is not disabled
             await waitFor(() => {
@@ -1738,9 +1738,9 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
 
     // add programs
     const combobox = await withinTargetRateCert.findByRole('combobox')
-    await selectEvent.openMenu(combobox)
+    selectEvent.openMenu(combobox)
     await selectEvent.select(combobox, 'SNBC')
-    await selectEvent.openMenu(combobox)
+    selectEvent.openMenu(combobox)
     await selectEvent.select(combobox, 'PMAP')
     expect(
         withinTargetRateCert.getByLabelText('Remove SNBC')
