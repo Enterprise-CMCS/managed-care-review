@@ -11,6 +11,25 @@ import {
 import { domainToBase64, base64ToDomain } from '../../app-web/src/common-code/proto/healthPlanFormDataProto';
 import { fakeAmplifyFetch } from '../utils/amplify-fetch-test-utils';
 
+// Configure Amplify using envs set in cypress.config.ts
+Amplify.configure({
+    Auth: {
+        mandatorySignIn: true,
+        region: Cypress.env('COGNITO_REGION'),
+        userPoolId:  Cypress.env('COGNITO_USER_POOL_ID'),
+        identityPoolId:  Cypress.env('COGNITO_IDENTITY_POOL_ID'),
+        userPoolWebClientId:  Cypress.env('COGNITO_USER_POOL_WEB_CLIENT_ID'),
+    },
+    API: {
+        endpoints: [
+            {
+                name: 'api',
+                endpoint: Cypress.env('API_URL')
+            },
+        ],
+    },
+})
+
 const contractOnlyData: Partial<UnlockedHealthPlanFormDataType> = {
     stateContacts: [
         {
@@ -32,6 +51,18 @@ const contractOnlyData: Partial<UnlockedHealthPlanFormDataType> = {
     ],
     contractDateStart: new Date('2023-05-01T00:00:00.000Z'),
     contractDateEnd: new Date('2023-05-31T00:00:00.000Z'),
+    contractAmendmentInfo: {
+        modifiedProvisions: {
+            inLieuServicesAndSettings: false,
+            modifiedRiskSharingStrategy: false,
+            modifiedIncentiveArrangements: false,
+            modifiedWitholdAgreements: false,
+            modifiedStateDirectedPayments: false,
+            modifiedPassThroughPayments: false,
+            modifiedPaymentsForMentalDiseaseInstitutions: false,
+            modifiedNonRiskPaymentArrangements: false,
+        },
+    },
     managedCareEntities: ['MCO'],
     federalAuthorities: ['STATE_PLAN'],
     rateInfos: [],
@@ -47,25 +78,6 @@ const newSubmissionInput = {
 }
 
 const createAndSubmitPackage = async (schema: string): Promise<HealthPlanPackage> => {
-
-    // Configure Amplify using envs set in cypress.config.ts
-    Amplify.configure({
-        Auth: {
-            mandatorySignIn: true,
-            region: Cypress.env('COGNITO_REGION'),
-            userPoolId:  Cypress.env('COGNITO_USER_POOL_ID'),
-            identityPoolId:  Cypress.env('COGNITO_IDENTITY_POOL_ID'),
-            userPoolWebClientId:  Cypress.env('COGNITO_USER_POOL_WEB_CLIENT_ID'),
-        },
-        API: {
-            endpoints: [
-                {
-                    name: 'api',
-                    endpoint: Cypress.env('API_URL')
-                },
-            ],
-        },
-    })
 
     const authMode = Cypress.env('AUTH_MODE')
 
@@ -104,6 +116,7 @@ const createAndSubmitPackage = async (schema: string): Promise<HealthPlanPackage
         typeDefs: schema as string,
     })
 
+    cy.log('CREATING NEW SUBMISSION')
     const newSubmission = await apolloClient.mutate({
         mutation: CreateHealthPlanPackageDocument,
         variables: {
@@ -111,10 +124,12 @@ const createAndSubmitPackage = async (schema: string): Promise<HealthPlanPackage
         },
         fetchPolicy: 'no-cache'
     })
+    cy.log('CREATING NEW SUBMISSION - SUCCESS')
 
     const pkg = newSubmission.data.createHealthPlanPackage.pkg
     const revision = pkg.revisions[0].node
 
+    cy.log('FORM FULL CONTRACT ONLY FORM DATA')
     const formData = base64ToDomain(revision.formDataProto)
     if (formData instanceof Error) {
         throw new Error(formData.message)
@@ -126,7 +141,9 @@ const createAndSubmitPackage = async (schema: string): Promise<HealthPlanPackage
     }
 
     const formDataProto = domainToBase64(fullFormData)
+    cy.log('FULL CONTRACT ONLY FORM DATA ENCODED')
 
+    cy.log('UPDATE HEALTH PLAN WITH FULL DATA')
     await apolloClient.mutate({
         mutation: UpdateHealthPlanFormDataDocument,
         variables: {
@@ -137,7 +154,9 @@ const createAndSubmitPackage = async (schema: string): Promise<HealthPlanPackage
         },
         fetchPolicy: 'no-cache'
     })
+    cy.log('UPDATE HEALTH PLAN WITH FULL DATA - SUCCESS')
 
+    cy.log('SUBMIT HEALTH PLAN')
     const submission = await apolloClient.mutate({
         mutation: SubmitHealthPlanPackageDocument,
         variables: {
@@ -148,6 +167,7 @@ const createAndSubmitPackage = async (schema: string): Promise<HealthPlanPackage
         },
         fetchPolicy: 'no-cache'
     })
+    cy.log('SUBMISSION SUCCESSFUL')
 
     const submittedPkg: HealthPlanPackage = submission.data.submitHealthPlanPackage.pkg
 
