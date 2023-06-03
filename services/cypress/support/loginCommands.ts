@@ -126,7 +126,7 @@ Cypress.Commands.add(
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 }) 
         } else {
             cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
-            cy.findByTestId('dashboard-page').should('exist')
+            cy.findByTestId('cms-dashboard-page').should('exist')
             cy.findByRole('heading', {name: 'Submissions'}).should('exist')
         }
     }
