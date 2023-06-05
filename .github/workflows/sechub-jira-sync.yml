@@ -20,7 +20,7 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ secrets.AWS_DEFAULT_REGION }}
+          region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
           stage-name: prod
 
@@ -48,5 +48,3 @@ jobs:
           SLACK_FOOTER: ''
           SLACK_MESSAGE: 'Failure syncing Security Hub findings and Jira issues'
           MSG_MINIMAL: actions url
-
-
