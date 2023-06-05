@@ -26,7 +26,8 @@ import {
 } from '../../app-web/src/common-code/featureFlags'
 import './apiCommands'
 import { HealthPlanPackage } from '../gen/gqlClient';
-import { DivisionType } from '../utils/apollo-test-utils';
+import { CMSUserType, DivisionType } from '../utils/apollo-test-utils';
+import { StateUserType } from 'app-api/src/domain-models';
 
 type FormButtonKey =
     | 'CONTINUE_FROM_START_NEW'
@@ -97,8 +98,8 @@ declare global {
                 division: DivisionType
             }): void
 
-            apiCreateAndSubmitContractOnlySubmission(): Cypress.Chainable<HealthPlanPackage>
-            apiAssignDivisionToCMSUser(cmsUserEmail: string, division: DivisionType): Cypress.Chainable<void>
+            apiCreateAndSubmitContractOnlySubmission(stateUser: StateUserType): Cypress.Chainable<HealthPlanPackage>
+            apiAssignDivisionToCMSUser(cmsUser: CMSUserType, division: DivisionType): Cypress.Chainable<void>
         }
     }
 }

@@ -1,7 +1,4 @@
 import {
-    UnlockedHealthPlanFormDataType
-} from '../../app-web/src/common-code/healthPlanFormDataType';
-import {
     CreateHealthPlanPackageDocument, HealthPlanPackage,
     SubmitHealthPlanPackageDocument,
     UpdateHealthPlanFormDataDocument,
@@ -10,85 +7,13 @@ import {
 import { domainToBase64, base64ToDomain } from '../../app-web/src/common-code/proto/healthPlanFormDataProto';
 import {
     apolloClientWrapper,
-    StatUserType,
-    CMSUserType,
-    AdminUserType,
     DivisionType,
-    UserType
+    UserType,
+    stateUser,
+    adminUser,
+    contractOnlyData,
+    newSubmissionInput, CMSUserType
 } from '../utils/apollo-test-utils';
-
-const contractOnlyData: Partial<UnlockedHealthPlanFormDataType> = {
-    stateContacts: [
-        {
-            name: 'Name',
-            titleRole: 'Title',
-            email: 'example@example.com',
-        },
-    ],
-    addtlActuaryContacts: [],
-    documents: [],
-    contractExecutionStatus: 'EXECUTED' as const,
-    contractDocuments: [
-        {
-            name: 'Contract Cert.pdf',
-            s3URL: 's3://local-uploads/1684382956834-Contract Cert.pdf/Contract Cert.pdf',
-            documentCategories: ['CONTRACT'],
-            sha256: 'abc123',
-        },
-    ],
-    contractDateStart: new Date('2023-05-01T00:00:00.000Z'),
-    contractDateEnd: new Date('2023-05-31T00:00:00.000Z'),
-    contractAmendmentInfo: {
-        modifiedProvisions: {
-            inLieuServicesAndSettings: false,
-            modifiedRiskSharingStrategy: false,
-            modifiedIncentiveArrangements: false,
-            modifiedWitholdAgreements: false,
-            modifiedStateDirectedPayments: false,
-            modifiedPassThroughPayments: false,
-            modifiedPaymentsForMentalDiseaseInstitutions: false,
-            modifiedNonRiskPaymentArrangements: false,
-        },
-    },
-    managedCareEntities: ['MCO'],
-    federalAuthorities: ['STATE_PLAN'],
-    rateInfos: [],
-}
-
-const newSubmissionInput = {
-    populationCovered: 'MEDICAID',
-    programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-    submissionType: 'CONTRACT_ONLY',
-    riskBasedContract: false,
-    submissionDescription: 'Test Q&A',
-    contractType: 'BASE',
-}
-
-const stateUser: StatUserType = {
-    id: 'user1',
-    email: 'aang@example.com',
-    givenName: 'Aang',
-    familyName: 'Avatar',
-    role: 'STATE_USER',
-    stateCode: 'MN',
-}
-
-const cmsUser: CMSUserType = {
-    id: 'user3',
-    email: 'zuko@example.com',
-    givenName: 'Zuko',
-    familyName: 'Hotman',
-    role: 'CMS_USER',
-    stateAssignments: []
-}
-
-const adminUser: AdminUserType = {
-    id: 'user4',
-    email: 'iroh@example.com',
-    givenName: 'Iroh',
-    familyName: 'Coldstart',
-    role: 'ADMIN_USER'
-}
 
 const createAndSubmitPackage = async (schema: string)=> await apolloClientWrapper(schema, stateUser,async (apolloClient): Promise<HealthPlanPackage> => {
     const newSubmission = await apolloClient.mutate({
@@ -136,10 +61,7 @@ const createAndSubmitPackage = async (schema: string)=> await apolloClientWrappe
     return submission.data.submitHealthPlanPackage.pkg
 })
 
-const assignCmsDivision = async (schema: string, cmsUserEmail: string, division: DivisionType) => await apolloClientWrapper(schema, adminUser, async (apolloClient): Promise<void> => {
-    // Seed cms user into db before assigning division
-    await seedUserIntoDB(schema, cmsUser)
-
+const assignCmsDivision = async (schema: string,cmsUser: CMSUserType, division: DivisionType) => await apolloClientWrapper(schema, adminUser, async (apolloClient): Promise<void> => {
     // get all users query
     const result = await apolloClient.query({
         query: IndexUsersDocument,
@@ -147,10 +69,10 @@ const assignCmsDivision = async (schema: string, cmsUserEmail: string, division:
 
     // find zuko
     const users = result.data.indexUsers.edges.map((edge: UserEdge) => edge.node)
-    const user = users.find((user: User) => user.email === cmsUserEmail)
+    const user = users.find((user: User) => user.email === cmsUser.email)
 
     if (!user) {
-        throw new Error(`assignCmsDivision: CMS user ${cmsUserEmail} not found`)
+        throw new Error(`assignCmsDivision: CMS user ${cmsUser.email} not found`)
     }
 
     // assign division mutation
@@ -163,8 +85,6 @@ const assignCmsDivision = async (schema: string, cmsUserEmail: string, division:
             }
         }
     })
-
-    cy.log(JSON.stringify(updatedCMSUser.data.updateCMSUser.user))
 })
 
 const seedUserIntoDB = async (schema: string, user: UserType) => await apolloClientWrapper(schema, user,async (apolloClient): Promise<void> => {
@@ -178,6 +98,10 @@ Cypress.Commands.add('apiCreateAndSubmitContractOnlySubmission', (): Cypress.Cha
     return cy.task('readGraphQLSchema').then(schema => createAndSubmitPackage(schema as string))
 })
 
-Cypress.Commands.add('apiAssignDivisionToCMSUser', (cmsUserEmail, division): Cypress.Chainable<void> => {
-    return cy.task('readGraphQLSchema').then(schema => assignCmsDivision(schema as string, cmsUserEmail, division))
+Cypress.Commands.add('apiAssignDivisionToCMSUser', (cmsUser, division): Cypress.Chainable<void> => {
+    return cy.task('readGraphQLSchema').then(schema =>
+        cy.wrap(seedUserIntoDB(schema as string, cmsUser)).then(() =>
+            cy.wrap(assignCmsDivision(schema as string, cmsUser, division))
+        )
+    )
 })

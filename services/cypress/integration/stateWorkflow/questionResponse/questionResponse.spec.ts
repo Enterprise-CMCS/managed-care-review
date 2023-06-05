@@ -1,4 +1,5 @@
 import { aliasQuery } from '../../../utils/graphql-test-utils'
+import { stateUser, cmsUser } from '../../../utils/apollo-test-utils';
 describe('Q&A', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
@@ -25,7 +26,7 @@ describe('Q&A', () => {
             'chip-only-form': true,
         })
 
-        cy.apiCreateAndSubmitContractOnlySubmission().then(pkg => {
+        cy.apiCreateAndSubmitContractOnlySubmission(stateUser).then(pkg => {
             cy.logInAsStateUser()
             cy.visit(`/submissions/${pkg.id}`)
 
@@ -53,30 +54,8 @@ describe('Q&A', () => {
                 'Medicaid and CHIP Managed Care Reporting and Review System'
             )
 
-            // // As a precaution we logg in as the CMS user before logging in as the Admin user so that the CMS user is
-            // // inserted into the database before trying to update its division
-            // cy.logInAsCMSUser({
-            //     initialURL: `/submissions/${pkg.id}/question-and-answers`,
-            // })
-            // cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20000 })
-            //
-            // cy.url({ timeout: 10_000 }).should(
-            //     'contain',
-            //     `${pkg.id}/question-and-answers`
-            // )
-            //
-            // cy.findByRole('link', {
-            //     name: `Submission summary`,
-            // }).should('exist')
-            //
-            // // Log out
-            // cy.findByRole('button', { name: 'Sign out' }).click()
-            // cy.findByText(
-            //     'Medicaid and CHIP Managed Care Reporting and Review System'
-            // )
-
             //Assign Division to CMS user zuko
-            cy.apiAssignDivisionToCMSUser('zuko@example.com', 'DMCO').then(() => {
+            cy.apiAssignDivisionToCMSUser(cmsUser, 'DMCO').then(() => {
                 // Log back in as CMS user
                 cy.logInAsCMSUser({
                     initialURL: `/submissions/${pkg.id}/question-and-answers`,

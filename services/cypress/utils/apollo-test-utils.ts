@@ -2,6 +2,7 @@ import {AxiosResponse} from 'axios';
 import {API} from 'aws-amplify';
 import {ApolloClient, HttpLink, InMemoryCache, NormalizedCacheObject} from '@apollo/client';
 import {Amplify, Auth as AmplifyAuth} from 'aws-amplify';
+import {UnlockedHealthPlanFormDataType} from '../../app-web/src/common-code/healthPlanFormDataType';
 
 type StatUserType = {
     id: string,
@@ -32,6 +33,79 @@ type AdminUserType = {
 type DivisionType = 'DMCO' | 'DMCP' | 'OACT'
 
 type UserType = StatUserType | AdminUserType | CMSUserType
+
+const contractOnlyData: Partial<UnlockedHealthPlanFormDataType> = {
+    stateContacts: [
+        {
+            name: 'Name',
+            titleRole: 'Title',
+            email: 'example@example.com',
+        },
+    ],
+    addtlActuaryContacts: [],
+    documents: [],
+    contractExecutionStatus: 'EXECUTED' as const,
+    contractDocuments: [
+        {
+            name: 'Contract Cert.pdf',
+            s3URL: 's3://local-uploads/1684382956834-Contract Cert.pdf/Contract Cert.pdf',
+            documentCategories: ['CONTRACT'],
+            sha256: 'abc123',
+        },
+    ],
+    contractDateStart: new Date('2023-05-01T00:00:00.000Z'),
+    contractDateEnd: new Date('2023-05-31T00:00:00.000Z'),
+    contractAmendmentInfo: {
+        modifiedProvisions: {
+            inLieuServicesAndSettings: false,
+            modifiedRiskSharingStrategy: false,
+            modifiedIncentiveArrangements: false,
+            modifiedWitholdAgreements: false,
+            modifiedStateDirectedPayments: false,
+            modifiedPassThroughPayments: false,
+            modifiedPaymentsForMentalDiseaseInstitutions: false,
+            modifiedNonRiskPaymentArrangements: false,
+        },
+    },
+    managedCareEntities: ['MCO'],
+    federalAuthorities: ['STATE_PLAN'],
+    rateInfos: [],
+}
+
+const newSubmissionInput = {
+    populationCovered: 'MEDICAID',
+    programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+    submissionType: 'CONTRACT_ONLY',
+    riskBasedContract: false,
+    submissionDescription: 'Test Q&A',
+    contractType: 'BASE',
+}
+
+const stateUser: StatUserType = {
+    id: 'user1',
+    email: 'aang@example.com',
+    givenName: 'Aang',
+    familyName: 'Avatar',
+    role: 'STATE_USER',
+    stateCode: 'MN',
+}
+
+const cmsUser: CMSUserType = {
+    id: 'user3',
+    email: 'zuko@example.com',
+    givenName: 'Zuko',
+    familyName: 'Hotman',
+    role: 'CMS_USER',
+    stateAssignments: []
+}
+
+const adminUser: AdminUserType = {
+    id: 'user4',
+    email: 'iroh@example.com',
+    givenName: 'Iroh',
+    familyName: 'Coldstart',
+    role: 'ADMIN_USER'
+}
 
 // Configure Amplify using envs set in cypress.config.ts
 Amplify.configure({
@@ -207,5 +281,5 @@ const apolloClientWrapper = async <T>(schema: string, user: UserType, callBack: 
     return result
 }
 
-export { apolloClientWrapper }
+export { apolloClientWrapper, contractOnlyData, newSubmissionInput, cmsUser, adminUser, stateUser }
 export type {StatUserType, CMSUserType, AdminUserType, UserType, DivisionType}
