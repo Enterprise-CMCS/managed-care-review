@@ -1,34 +1,13 @@
-import {Amplify, Auth as AmplifyAuth} from 'aws-amplify'
-import {ApolloClient, HttpLink, InMemoryCache} from '@apollo/client';
 import {
     UnlockedHealthPlanFormDataType
 } from '../../app-web/src/common-code/healthPlanFormDataType';
 import {
-    CreateHealthPlanPackageDocument, HealthPlanPackage,
+    CreateHealthPlanPackageDocument, HealthPlanPackage, StateUser,
     SubmitHealthPlanPackageDocument,
-    UpdateHealthPlanFormDataDocument
+    UpdateHealthPlanFormDataDocument,
 } from '../gen/gqlClient';
 import { domainToBase64, base64ToDomain } from '../../app-web/src/common-code/proto/healthPlanFormDataProto';
-import { fakeAmplifyFetch } from '../utils/amplify-fetch-test-utils';
-
-// Configure Amplify using envs set in cypress.config.ts
-Amplify.configure({
-    Auth: {
-        mandatorySignIn: true,
-        region: Cypress.env('COGNITO_REGION'),
-        userPoolId:  Cypress.env('COGNITO_USER_POOL_ID'),
-        identityPoolId:  Cypress.env('COGNITO_IDENTITY_POOL_ID'),
-        userPoolWebClientId:  Cypress.env('COGNITO_USER_POOL_WEB_CLIENT_ID'),
-    },
-    API: {
-        endpoints: [
-            {
-                name: 'api',
-                endpoint: Cypress.env('API_URL')
-            },
-        ],
-    },
-})
+import { apolloClientWrapper } from '../utils/apollo-test-utils';
 
 const contractOnlyData: Partial<UnlockedHealthPlanFormDataType> = {
     stateContacts: [
@@ -77,59 +56,30 @@ const newSubmissionInput = {
     contractType: 'BASE',
 }
 
-const createAndSubmitPackage = async (schema: string): Promise<HealthPlanPackage> => {
+const stateUser: StateUser = {
+    id: 'user1',
+    email: 'aang@example.com',
+    givenName: 'Aang',
+    familyName: 'Avatar',
+    role: 'STATE_USER',
+    state: {
+        code: 'MN',
+        name: 'Minnesota',
+        programs: []
+    },
+}
 
-    const authMode = Cypress.env('AUTH_MODE')
-
-    const currentUser = {
-        id: 'user1',
-        email: 'aang@example.com',
-        givenName: 'Aang',
-        familyName: 'Avatar',
-        role: 'STATE_USER',
-        stateCode: 'MN',
-    }
-
-    const httpLinkConfig= {
-        uri: '/graphql',
-        headers: authMode === 'LOCAL' ? {
-            'cognito-authentication-provider': JSON.stringify(currentUser)
-        } : undefined,
-        fetch: fakeAmplifyFetch,
-        fetchOptions: {
-            mode: 'no-cors'
-        }
-    }
-
-    // If using cognito auth, then log in as a state user before graphql requests. Otherwise, configure apollo for local api requests
-    if (authMode !== 'LOCAL') {
-        await AmplifyAuth.signIn('aang@example.com', Cypress.env('TEST_USERS_PASS'))
-    }
-
-    const apolloClient = new ApolloClient({
-        link: new HttpLink(httpLinkConfig),
-        cache: new InMemoryCache({
-            possibleTypes: {
-                Submission: ['DraftSubmission', 'StateSubmission'],
-            },
-        }),
-        typeDefs: schema as string,
-    })
-
-    cy.log('CREATING NEW SUBMISSION')
+const createAndSubmitPackage = async (schema: string)=> await apolloClientWrapper(schema, stateUser,async (apolloClient): Promise<HealthPlanPackage> => {
     const newSubmission = await apolloClient.mutate({
         mutation: CreateHealthPlanPackageDocument,
         variables: {
             input: newSubmissionInput
         },
-        fetchPolicy: 'no-cache'
     })
-    cy.log('CREATING NEW SUBMISSION - SUCCESS')
 
     const pkg = newSubmission.data.createHealthPlanPackage.pkg
     const revision = pkg.revisions[0].node
 
-    cy.log('FORM FULL CONTRACT ONLY FORM DATA')
     const formData = base64ToDomain(revision.formDataProto)
     if (formData instanceof Error) {
         throw new Error(formData.message)
@@ -141,9 +91,7 @@ const createAndSubmitPackage = async (schema: string): Promise<HealthPlanPackage
     }
 
     const formDataProto = domainToBase64(fullFormData)
-    cy.log('FULL CONTRACT ONLY FORM DATA ENCODED')
 
-    cy.log('UPDATE HEALTH PLAN WITH FULL DATA')
     await apolloClient.mutate({
         mutation: UpdateHealthPlanFormDataDocument,
         variables: {
@@ -152,11 +100,8 @@ const createAndSubmitPackage = async (schema: string): Promise<HealthPlanPackage
                 pkgID: pkg.id
             }
         },
-        fetchPolicy: 'no-cache'
     })
-    cy.log('UPDATE HEALTH PLAN WITH FULL DATA - SUCCESS')
 
-    cy.log('SUBMIT HEALTH PLAN')
     const submission = await apolloClient.mutate({
         mutation: SubmitHealthPlanPackageDocument,
         variables: {
@@ -165,18 +110,10 @@ const createAndSubmitPackage = async (schema: string): Promise<HealthPlanPackage
                 submittedReason: 'Submit package for Q&A Tests'
             }
         },
-        fetchPolicy: 'no-cache'
     })
-    cy.log('SUBMISSION SUCCESSFUL')
 
-    const submittedPkg: HealthPlanPackage = submission.data.submitHealthPlanPackage.pkg
-
-    if (authMode !== 'LOCAL') {
-        AmplifyAuth.signOut()
-    }
-
-    return submittedPkg
-}
+    return submission.data.submitHealthPlanPackage.pkg
+})
 
 Cypress.Commands.add('apiCreateAndSubmitContractOnlySubmission', (): Cypress.Chainable<HealthPlanPackage> => {
     // Call readGraphQLSchema to get gql schema

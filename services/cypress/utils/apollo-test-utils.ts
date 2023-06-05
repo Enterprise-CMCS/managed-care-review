@@ -1,5 +1,27 @@
 import {AxiosResponse} from 'axios';
 import {API} from 'aws-amplify';
+import {ApolloClient, HttpLink, InMemoryCache, NormalizedCacheObject} from '@apollo/client';
+import {Amplify, Auth as AmplifyAuth} from 'aws-amplify';
+import { User } from '../gen/gqlClient';
+
+// Configure Amplify using envs set in cypress.config.ts
+Amplify.configure({
+    Auth: {
+        mandatorySignIn: true,
+        region: Cypress.env('COGNITO_REGION'),
+        userPoolId:  Cypress.env('COGNITO_USER_POOL_ID'),
+        identityPoolId:  Cypress.env('COGNITO_IDENTITY_POOL_ID'),
+        userPoolWebClientId:  Cypress.env('COGNITO_USER_POOL_WEB_CLIENT_ID'),
+    },
+    API: {
+        endpoints: [
+            {
+                name: 'api',
+                endpoint: Cypress.env('API_URL')
+            },
+        ],
+    },
+})
 
 export function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
     const fakeFetchResponse: Response = {
@@ -112,4 +134,46 @@ export async function fakeAmplifyFetch(
                 }
             })
     })
+}
+
+// Provides Amplify auth and apollo client to callback function.
+export const apolloClientWrapper = async <T>(schema: string, user: User, callBack: (apolloClient: ApolloClient<NormalizedCacheObject>) => Promise<T>): Promise<T> => {
+    const authMode = Cypress.env('AUTH_MODE')
+
+    const httpLinkConfig= {
+        uri: '/graphql',
+        headers: authMode === 'LOCAL' ? {
+            'cognito-authentication-provider': JSON.stringify(user)
+        } : undefined,
+        fetch: fakeAmplifyFetch,
+        fetchOptions: {
+            mode: 'no-cors'
+        },
+    }
+
+    const apolloClient: ApolloClient<NormalizedCacheObject> = new ApolloClient({
+        link: new HttpLink(httpLinkConfig),
+        cache: new InMemoryCache({
+            possibleTypes: {
+                Submission: ['DraftSubmission', 'StateSubmission'],
+            },
+        }),
+        typeDefs: schema as string,
+        defaultOptions: {
+            watchQuery: {
+                nextFetchPolicy: 'no-cache'
+            }
+        }
+    })
+
+    if (authMode !== 'LOCAL') {
+        await AmplifyAuth.signIn(user.email, Cypress.env('TEST_USERS_PASS'))
+    }
+    const result = await callBack(apolloClient)
+
+    if (authMode !== 'LOCAL') {
+        AmplifyAuth.signOut()
+    }
+
+    return result
 }
