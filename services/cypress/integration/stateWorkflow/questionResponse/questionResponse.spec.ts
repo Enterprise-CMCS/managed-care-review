@@ -10,14 +10,14 @@ describe('Q&A', () => {
     it('can add questions and responses', () => {
         //NOTE: Record test time
         //  Local run
-        //      - Before interception: 01:06
-        //      - After interception: 00:32
+        //      - Before direct api request: 01:06
+        //      - After direct api request: 00:29
         //  Deployed local run using review app
-        //      - Before interception: 02:51
-        //      - After interception: 01:54
+        //      - Before direct api request: 02:51
+        //      - After direct api request: 01:54
         //  Deployed CI run
-        //      - Before interception:
-        //      - After interception:
+        //      - Before direct api request: 3:52
+        //      - After direct api request: 2:35
 
         // Then do Q&A stuff
         cy.interceptFeatureFlags({
@@ -53,132 +53,117 @@ describe('Q&A', () => {
                 'Medicaid and CHIP Managed Care Reporting and Review System'
             )
 
-            // As a precaution we logg in as the CMS user before logging in as the Admin user so that the CMS user is
-            // inserted into the database before trying to update its division
-            cy.logInAsCMSUser({
-                initialURL: `/submissions/${pkg.id}/question-and-answers`,
-            })
-            cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20000 })
+            // // As a precaution we logg in as the CMS user before logging in as the Admin user so that the CMS user is
+            // // inserted into the database before trying to update its division
+            // cy.logInAsCMSUser({
+            //     initialURL: `/submissions/${pkg.id}/question-and-answers`,
+            // })
+            // cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20000 })
+            //
+            // cy.url({ timeout: 10_000 }).should(
+            //     'contain',
+            //     `${pkg.id}/question-and-answers`
+            // )
+            //
+            // cy.findByRole('link', {
+            //     name: `Submission summary`,
+            // }).should('exist')
+            //
+            // // Log out
+            // cy.findByRole('button', { name: 'Sign out' }).click()
+            // cy.findByText(
+            //     'Medicaid and CHIP Managed Care Reporting and Review System'
+            // )
 
-            cy.url({ timeout: 10_000 }).should(
-                'contain',
-                `${pkg.id}/question-and-answers`
-            )
+            //Assign Division to CMS user zuko
+            cy.apiAssignDivisionToCMSUser('zuko@example.com', 'DMCO').then(() => {
+                // Log back in as CMS user
+                cy.logInAsCMSUser({
+                    initialURL: `/submissions/${pkg.id}/question-and-answers`,
+                })
+                cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20000 })
 
-            cy.findByRole('link', {
-                name: `Submission summary`,
-            }).should('exist')
+                cy.url({ timeout: 10_000 }).should(
+                    'contain',
+                    `${pkg.id}/question-and-answers`
+                )
 
-            // Log out
-            cy.findByRole('button', { name: 'Sign out' }).click()
-            cy.findByText(
-                'Medicaid and CHIP Managed Care Reporting and Review System'
-            )
+                cy.findByRole('link', {
+                    name: `Submission summary`,
+                }).should('exist')
 
-            //TODO: Make assigning divisions a direct API request
-            //Log in as Admin to the settings page
-            cy.logInAsAdminUser({
-                initialURL: `/settings`,
-            })
-
-            // Update CMS user Zuko's division
-            cy.assignDivisionToCMSUser({
-                userEmail: 'zuko@example.com',
-                division: 'DMCO',
-            })
-
-            // Log out
-            cy.findByRole('button', { name: 'Sign out' }).click()
-            cy.findByText(
-                'Medicaid and CHIP Managed Care Reporting and Review System'
-            )
-
-            // Log back in as CMS user
-            cy.logInAsCMSUser({
-                initialURL: `/submissions/${pkg.id}/question-and-answers`,
-            })
-            cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20000 })
-
-            cy.url({ timeout: 10_000 }).should(
-                'contain',
-                `${pkg.id}/question-and-answers`
-            )
-
-            cy.findByRole('link', {
-                name: `Submission summary`,
-            }).should('exist')
-
-            // Add a question
-            cy.addQuestion({
-                documentPath:
-                    'documents/questions_for_submission.pdf',
-            })
-
-            // Newly uploaded questions document should exist within DMCO section
-            cy.findByTestId('dmco-qa-section')
-                .should('exist')
-                .within(() => {
-                    // Add timeout to findByText to allow time for generating document urls
-                    cy.findByText('questions_for_submission.pdf', {
-                        timeout: 5000,
-                    }).should('exist')
+                // Add a question
+                cy.addQuestion({
+                    documentPath:
+                        'documents/questions_for_submission.pdf',
                 })
 
-            // Log out and log back in as cms user, visiting submission summary page,
-            cy.findByRole('button', { name: 'Sign out' }).click()
-            cy.findByText(
-                'Medicaid and CHIP Managed Care Reporting and Review System'
-            )
+                // Newly uploaded questions document should exist within DMCO section
+                cy.findByTestId('dmco-qa-section')
+                    .should('exist')
+                    .within(() => {
+                        // Add timeout to findByText to allow time for generating document urls
+                        cy.findByText('questions_for_submission.pdf', {
+                            timeout: 5000,
+                        }).should('exist')
+                    })
 
-            cy.logInAsStateUser()
-            cy.wait(1500)
+                // Log out and log back in as cms user, visiting submission summary page,
+                cy.findByRole('button', { name: 'Sign out' }).click()
+                cy.findByText(
+                    'Medicaid and CHIP Managed Care Reporting and Review System'
+                )
 
-            cy.visit(`/submissions/${pkg.id}`)
+                cy.logInAsStateUser()
+                cy.wait(1500)
 
-            cy.url({ timeout: 10_000 }).should('contain', pkg.id)
-            cy.findByTestId('submission-summary').should('exist')
-            cy.findByRole('link', {
-                name: `Submission summary`,
-            }).should('exist')
+                cy.visit(`/submissions/${pkg.id}`)
 
-            // Find QA Link and click
-            cy.findByRole('link', { name: /Q&A/ }).click()
-            cy.url({ timeout: 10_000 }).should(
-                'contain',
-                `${pkg.id}/question-and-answers`
-            )
+                cy.url({ timeout: 10_000 }).should('contain', pkg.id)
+                cy.findByTestId('submission-summary').should('exist')
+                cy.findByRole('link', {
+                    name: `Submission summary`,
+                }).should('exist')
 
-            // Make sure Heading is correct with 'Upload questions' in addition to submission name
-            cy.findByRole('link', {
-                name: `Submission summary`,
-            }).should('exist')
+                // Find QA Link and click
+                cy.findByRole('link', { name: /Q&A/ }).click()
+                cy.url({ timeout: 10_000 }).should(
+                    'contain',
+                    `${pkg.id}/question-and-answers`
+                )
 
-            // Make sure question by CMS exists
-            cy.findByTestId('dmco-qa-section')
-                .should('exist')
-                .within(() => {
-                    // Add timeout to findByText to allow time for generating document urls
-                    cy.findByText('questions_for_submission.pdf', {
-                        timeout: 5000,
-                    }).should('exist')
+                // Make sure Heading is correct with 'Upload questions' in addition to submission name
+                cy.findByRole('link', {
+                    name: `Submission summary`,
+                }).should('exist')
+
+                // Make sure question by CMS exists
+                cy.findByTestId('dmco-qa-section')
+                    .should('exist')
+                    .within(() => {
+                        // Add timeout to findByText to allow time for generating document urls
+                        cy.findByText('questions_for_submission.pdf', {
+                            timeout: 5000,
+                        }).should('exist')
+                    })
+
+                //Upload response
+                cy.addResponse({
+                    documentPath:
+                        'documents/response_to_questions_for_submission.pdf',
                 })
 
-            //Upload response
-            cy.addResponse({
-                documentPath:
-                    'documents/response_to_questions_for_submission.pdf',
+                // Newly uploaded response document should exist within DMCO section
+                cy.findByTestId('dmco-qa-section')
+                    .should('exist')
+                    .within(() => {
+                        // Add timeout to findByText to allow time for generating document urls
+                        cy.findByText(
+                            'response_to_questions_for_submission.pdf',
+                            { timeout: 5000 }
+                        ).should('exist')
+                    })
             })
-
-            // Newly uploaded response document should exist within DMCO section
-            cy.findByTestId('dmco-qa-section')
-                .should('exist')
-                .within(() => {
-                    // Add timeout to findByText to allow time for generating document urls
-                    cy.findByText(
-                        'response_to_questions_for_submission.pdf',
-                        { timeout: 5000 }
-                    ).should('exist')
-                })
         })
     })
 })

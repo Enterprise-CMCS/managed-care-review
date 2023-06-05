@@ -2,12 +2,20 @@ import {
     UnlockedHealthPlanFormDataType
 } from '../../app-web/src/common-code/healthPlanFormDataType';
 import {
-    CreateHealthPlanPackageDocument, HealthPlanPackage, StateUser,
+    CreateHealthPlanPackageDocument, HealthPlanPackage,
     SubmitHealthPlanPackageDocument,
     UpdateHealthPlanFormDataDocument,
+    IndexUsersDocument, UserEdge, User, UpdateCmsUserDocument, FetchCurrentUserDocument
 } from '../gen/gqlClient';
 import { domainToBase64, base64ToDomain } from '../../app-web/src/common-code/proto/healthPlanFormDataProto';
-import { apolloClientWrapper } from '../utils/apollo-test-utils';
+import {
+    apolloClientWrapper,
+    StatUserType,
+    CMSUserType,
+    AdminUserType,
+    DivisionType,
+    UserType
+} from '../utils/apollo-test-utils';
 
 const contractOnlyData: Partial<UnlockedHealthPlanFormDataType> = {
     stateContacts: [
@@ -56,17 +64,30 @@ const newSubmissionInput = {
     contractType: 'BASE',
 }
 
-const stateUser: StateUser = {
+const stateUser: StatUserType = {
     id: 'user1',
     email: 'aang@example.com',
     givenName: 'Aang',
     familyName: 'Avatar',
     role: 'STATE_USER',
-    state: {
-        code: 'MN',
-        name: 'Minnesota',
-        programs: []
-    },
+    stateCode: 'MN',
+}
+
+const cmsUser: CMSUserType = {
+    id: 'user3',
+    email: 'zuko@example.com',
+    givenName: 'Zuko',
+    familyName: 'Hotman',
+    role: 'CMS_USER',
+    stateAssignments: []
+}
+
+const adminUser: AdminUserType = {
+    id: 'user4',
+    email: 'iroh@example.com',
+    givenName: 'Iroh',
+    familyName: 'Coldstart',
+    role: 'ADMIN_USER'
 }
 
 const createAndSubmitPackage = async (schema: string)=> await apolloClientWrapper(schema, stateUser,async (apolloClient): Promise<HealthPlanPackage> => {
@@ -115,7 +136,48 @@ const createAndSubmitPackage = async (schema: string)=> await apolloClientWrappe
     return submission.data.submitHealthPlanPackage.pkg
 })
 
+const assignCmsDivision = async (schema: string, cmsUserEmail: string, division: DivisionType) => await apolloClientWrapper(schema, adminUser, async (apolloClient): Promise<void> => {
+    // Seed cms user into db before assigning division
+    await seedUserIntoDB(schema, cmsUser)
+
+    // get all users query
+    const result = await apolloClient.query({
+        query: IndexUsersDocument,
+    })
+
+    // find zuko
+    const users = result.data.indexUsers.edges.map((edge: UserEdge) => edge.node)
+    const user = users.find((user: User) => user.email === cmsUserEmail)
+
+    if (!user) {
+        throw new Error(`assignCmsDivision: CMS user ${cmsUserEmail} not found`)
+    }
+
+    // assign division mutation
+    const updatedCMSUser = await apolloClient.mutate({
+        mutation: UpdateCmsUserDocument,
+        variables: {
+            input: {
+                cmsUserID: user.id,
+                divisionAssignment: division
+            }
+        }
+    })
+
+    cy.log(JSON.stringify(updatedCMSUser.data.updateCMSUser.user))
+})
+
+const seedUserIntoDB = async (schema: string, user: UserType) => await apolloClientWrapper(schema, user,async (apolloClient): Promise<void> => {
+    // To seed, we just need to perform a graphql query and the api will add the user to the db
+    await apolloClient.query({
+        query: FetchCurrentUserDocument
+    })
+})
+
 Cypress.Commands.add('apiCreateAndSubmitContractOnlySubmission', (): Cypress.Chainable<HealthPlanPackage> => {
-    // Call readGraphQLSchema to get gql schema
     return cy.task('readGraphQLSchema').then(schema => createAndSubmitPackage(schema as string))
+})
+
+Cypress.Commands.add('apiAssignDivisionToCMSUser', (cmsUserEmail, division): Cypress.Chainable<void> => {
+    return cy.task('readGraphQLSchema').then(schema => assignCmsDivision(schema as string, cmsUserEmail, division))
 })

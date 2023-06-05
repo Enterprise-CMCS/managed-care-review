@@ -2,7 +2,36 @@ import {AxiosResponse} from 'axios';
 import {API} from 'aws-amplify';
 import {ApolloClient, HttpLink, InMemoryCache, NormalizedCacheObject} from '@apollo/client';
 import {Amplify, Auth as AmplifyAuth} from 'aws-amplify';
-import { User } from '../gen/gqlClient';
+
+type StatUserType = {
+    id: string,
+    email: string,
+    givenName: string,
+    familyName: string,
+    role: 'STATE_USER',
+    stateCode: string,
+}
+
+type CMSUserType = {
+    id: string,
+    email: string,
+    givenName: string,
+    familyName: string,
+    role: 'CMS_USER',
+    stateAssignments: [],
+}
+
+type AdminUserType = {
+    id: string,
+    email: string,
+    givenName: string,
+    familyName: string,
+    role: 'ADMIN_USER',
+}
+
+type DivisionType = 'DMCO' | 'DMCP' | 'OACT'
+
+type UserType = StatUserType | AdminUserType | CMSUserType
 
 // Configure Amplify using envs set in cypress.config.ts
 Amplify.configure({
@@ -23,7 +52,7 @@ Amplify.configure({
     },
 })
 
-export function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
+function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
     const fakeFetchResponse: Response = {
         headers: new Headers({
             ok: axiosResponse.headers['ok'] || '',
@@ -82,7 +111,7 @@ export function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
 // fakeAmplify Fetch looks like the API for fetch, but is secretly making an amplify request
 // Apollo Link uses the ~fetch api for it's client-side middleware.
 // Amplify.API uses axios undeneath and does its own transformation of the body, so we wrap that up here.
-export async function fakeAmplifyFetch(
+async function fakeAmplifyFetch(
     uri: string,
     options: RequestInit
 ): Promise<Response> {
@@ -137,7 +166,7 @@ export async function fakeAmplifyFetch(
 }
 
 // Provides Amplify auth and apollo client to callback function.
-export const apolloClientWrapper = async <T>(schema: string, user: User, callBack: (apolloClient: ApolloClient<NormalizedCacheObject>) => Promise<T>): Promise<T> => {
+const apolloClientWrapper = async <T>(schema: string, user: UserType, callBack: (apolloClient: ApolloClient<NormalizedCacheObject>) => Promise<T>): Promise<T> => {
     const authMode = Cypress.env('AUTH_MODE')
 
     const httpLinkConfig= {
@@ -161,7 +190,7 @@ export const apolloClientWrapper = async <T>(schema: string, user: User, callBac
         typeDefs: schema as string,
         defaultOptions: {
             watchQuery: {
-                nextFetchPolicy: 'no-cache'
+                fetchPolicy: 'no-cache',
             }
         }
     })
@@ -177,3 +206,6 @@ export const apolloClientWrapper = async <T>(schema: string, user: User, callBac
 
     return result
 }
+
+export { apolloClientWrapper }
+export type {StatUserType, CMSUserType, AdminUserType, UserType, DivisionType}
