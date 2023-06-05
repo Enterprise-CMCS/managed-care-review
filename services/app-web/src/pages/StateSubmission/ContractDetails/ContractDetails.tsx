@@ -334,7 +334,6 @@ export const ContractDetails = ({
             redirectPath: string
         }
     ) => {
-        // setSubmitting(true)
         // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
         // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
         if (options.shouldValidateDocuments) {
