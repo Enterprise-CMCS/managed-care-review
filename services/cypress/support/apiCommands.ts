@@ -1,79 +1,35 @@
 import {
-    UnlockedHealthPlanFormDataType
-} from '../../app-web/src/common-code/healthPlanFormDataType';
-import {
-    CreateHealthPlanPackageDocument, HealthPlanPackage, StateUser,
+    CreateHealthPlanPackageDocument,
+    HealthPlanPackage,
     SubmitHealthPlanPackageDocument,
     UpdateHealthPlanFormDataDocument,
-} from '../gen/gqlClient';
-import { domainToBase64, base64ToDomain } from '../../app-web/src/common-code/proto/healthPlanFormDataProto';
-import { apolloClientWrapper } from '../utils/apollo-test-utils';
+    IndexUsersDocument,
+    UserEdge,
+    User,
+    UpdateCmsUserDocument,
+    FetchCurrentUserDocument,
+} from '../gen/gqlClient'
+import {
+    domainToBase64,
+    base64ToDomain,
+} from '../../app-web/src/common-code/proto/healthPlanFormDataProto'
+import {
+    apolloClientWrapper,
+    DivisionType,
+    adminUser,
+    contractOnlyData,
+    newSubmissionInput,
+    CMSUserType,
+} from '../utils/apollo-test-utils'
+import {ApolloClient, DocumentNode, NormalizedCacheObject} from '@apollo/client'
 
-const contractOnlyData: Partial<UnlockedHealthPlanFormDataType> = {
-    stateContacts: [
-        {
-            name: 'Name',
-            titleRole: 'Title',
-            email: 'example@example.com',
-        },
-    ],
-    addtlActuaryContacts: [],
-    documents: [],
-    contractExecutionStatus: 'EXECUTED' as const,
-    contractDocuments: [
-        {
-            name: 'Contract Cert.pdf',
-            s3URL: 's3://local-uploads/1684382956834-Contract Cert.pdf/Contract Cert.pdf',
-            documentCategories: ['CONTRACT'],
-            sha256: 'abc123',
-        },
-    ],
-    contractDateStart: new Date('2023-05-01T00:00:00.000Z'),
-    contractDateEnd: new Date('2023-05-31T00:00:00.000Z'),
-    contractAmendmentInfo: {
-        modifiedProvisions: {
-            inLieuServicesAndSettings: false,
-            modifiedRiskSharingStrategy: false,
-            modifiedIncentiveArrangements: false,
-            modifiedWitholdAgreements: false,
-            modifiedStateDirectedPayments: false,
-            modifiedPassThroughPayments: false,
-            modifiedPaymentsForMentalDiseaseInstitutions: false,
-            modifiedNonRiskPaymentArrangements: false,
-        },
-    },
-    managedCareEntities: ['MCO'],
-    federalAuthorities: ['STATE_PLAN'],
-    rateInfos: [],
-}
-
-const newSubmissionInput = {
-    populationCovered: 'MEDICAID',
-    programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
-    submissionType: 'CONTRACT_ONLY',
-    riskBasedContract: false,
-    submissionDescription: 'Test Q&A',
-    contractType: 'BASE',
-}
-
-const stateUser: StateUser = {
-    id: 'user1',
-    email: 'aang@example.com',
-    givenName: 'Aang',
-    familyName: 'Avatar',
-    role: 'STATE_USER',
-    state: {
-        code: 'MN',
-        name: 'Minnesota',
-        programs: []
-    },
-}
-
-const createAndSubmitPackage = async (schema: string)=> await apolloClientWrapper(schema, stateUser,async (apolloClient): Promise<HealthPlanPackage> => {
+const createAndSubmitContractOnlyPackage = async (
+    apolloClient: ApolloClient<NormalizedCacheObject>
+): Promise<HealthPlanPackage> => {
     const newSubmission = await apolloClient.mutate({
         mutation: CreateHealthPlanPackageDocument,
         variables: {
-            input: newSubmissionInput
+            input: newSubmissionInput,
         },
     })
 
@@ -97,8 +53,8 @@ const createAndSubmitPackage = async (schema: string)=> await apolloClientWrappe
         variables: {
             input: {
                 healthPlanFormData: formDataProto,
-                pkgID: pkg.id
-            }
+                pkgID: pkg.id,
+            },
         },
     })
 
@@ -107,15 +63,79 @@ const createAndSubmitPackage = async (schema: string)=> await apolloClientWrappe
         variables: {
             input: {
                 pkgID: pkg.id,
-                submittedReason: 'Submit package for Q&A Tests'
-            }
+                submittedReason: 'Submit package for Q&A Tests',
+            },
         },
     })
 
     return submission.data.submitHealthPlanPackage.pkg
-})
+}
 
-Cypress.Commands.add('apiCreateAndSubmitContractOnlySubmission', (): Cypress.Chainable<HealthPlanPackage> => {
-    // Call readGraphQLSchema to get gql schema
-    return cy.task('readGraphQLSchema').then(schema => createAndSubmitPackage(schema as string))
-})
+const assignCmsDivision = async (
+    apolloClient: ApolloClient<NormalizedCacheObject>,
+    cmsUser: CMSUserType,
+    division: DivisionType
+): Promise<void> => {
+    // get all users query
+    const result = await apolloClient.query({
+        query: IndexUsersDocument,
+    })
+
+    // find zuko
+    const users = result.data.indexUsers.edges.map(
+        (edge: UserEdge) => edge.node
+    )
+    const user = users.find((user: User) => user.email === cmsUser.email)
+
+    if (!user) {
+        throw new Error(
+            `assignCmsDivision: CMS user ${cmsUser.email} not found`
+        )
+    }
+
+    // assign division mutation
+    await apolloClient.mutate({
+        mutation: UpdateCmsUserDocument,
+        variables: {
+            input: {
+                cmsUserID: user.id,
+                divisionAssignment: division,
+            },
+        },
+    })
+}
+
+const seedUserIntoDB = async (
+    apolloClient: ApolloClient<NormalizedCacheObject>
+): Promise<void> => {
+    // To seed, we just need to perform a graphql query and the api will add the user to the db
+    await apolloClient.query({
+        query: FetchCurrentUserDocument,
+    })
+}
+
+Cypress.Commands.add(
+    'apiCreateAndSubmitContractOnlySubmission',
+    (stateUser): Cypress.Chainable<HealthPlanPackage> =>
+        cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
+            apolloClientWrapper(
+                schema,
+                stateUser,
+                createAndSubmitContractOnlyPackage
+            )
+        )
+)
+
+Cypress.Commands.add(
+    'apiAssignDivisionToCMSUser',
+    (cmsUser, division): Cypress.Chainable<void> => {
+        return cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
+            cy.wrap(apolloClientWrapper(schema, cmsUser, seedUserIntoDB)).then(() =>
+                cy.wrap(apolloClientWrapper(schema, adminUser, (apolloClient) =>
+                        assignCmsDivision(apolloClient, cmsUser, division)
+                    )
+                )
+            )
+        )
+    }
+)

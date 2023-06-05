@@ -467,16 +467,6 @@ jobs:
           name: cypress-gen
           path: ./services/cypress/gen
 
-      - uses: actions/download-artifact@v3
-        with:
-          name: app-web-gen
-          path: ./services/app-web/src/gen
-
-      - uses: actions/download-artifact@v3
-        with:
-          name: cypress-gen
-          path: ./services/cypress/gen
-
       - name: check ip
         id: check-ip
         shell: bash

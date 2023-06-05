@@ -1,29 +1,138 @@
-import {AxiosResponse} from 'axios';
-import {API} from 'aws-amplify';
-import {ApolloClient, HttpLink, InMemoryCache, NormalizedCacheObject} from '@apollo/client';
-import {Amplify, Auth as AmplifyAuth} from 'aws-amplify';
-import { User } from '../gen/gqlClient';
+import { AxiosResponse } from 'axios'
+import { API } from 'aws-amplify'
+import {
+    ApolloClient,
+    DocumentNode,
+    HttpLink,
+    InMemoryCache,
+    NormalizedCacheObject,
+} from '@apollo/client'
+import { Amplify, Auth as AmplifyAuth } from 'aws-amplify'
+import { UnlockedHealthPlanFormDataType } from '../../app-web/src/common-code/healthPlanFormDataType'
+
+type StateUserType = {
+    id: string
+    email: string
+    givenName: string
+    familyName: string
+    role: 'STATE_USER'
+    stateCode: string
+}
+
+type CMSUserType = {
+    id: string
+    email: string
+    givenName: string
+    familyName: string
+    role: 'CMS_USER'
+    stateAssignments: []
+}
+
+type AdminUserType = {
+    id: string
+    email: string
+    givenName: string
+    familyName: string
+    role: 'ADMIN_USER'
+}
+
+type DivisionType = 'DMCO' | 'DMCP' | 'OACT'
+
+type UserType = StateUserType | AdminUserType | CMSUserType
+
+const contractOnlyData: Partial<UnlockedHealthPlanFormDataType> = {
+    stateContacts: [
+        {
+            name: 'Name',
+            titleRole: 'Title',
+            email: 'example@example.com',
+        },
+    ],
+    addtlActuaryContacts: [],
+    documents: [],
+    contractExecutionStatus: 'EXECUTED' as const,
+    contractDocuments: [
+        {
+            name: 'Contract Cert.pdf',
+            s3URL: 's3://local-uploads/1684382956834-Contract Cert.pdf/Contract Cert.pdf',
+            documentCategories: ['CONTRACT'],
+            sha256: 'abc123',
+        },
+    ],
+    contractDateStart: new Date('2023-05-01T00:00:00.000Z'),
+    contractDateEnd: new Date('2023-05-31T00:00:00.000Z'),
+    contractAmendmentInfo: {
+        modifiedProvisions: {
+            inLieuServicesAndSettings: false,
+            modifiedRiskSharingStrategy: false,
+            modifiedIncentiveArrangements: false,
+            modifiedWitholdAgreements: false,
+            modifiedStateDirectedPayments: false,
+            modifiedPassThroughPayments: false,
+            modifiedPaymentsForMentalDiseaseInstitutions: false,
+            modifiedNonRiskPaymentArrangements: false,
+        },
+    },
+    managedCareEntities: ['MCO'],
+    federalAuthorities: ['STATE_PLAN'],
+    rateInfos: [],
+}
+
+const newSubmissionInput = {
+    populationCovered: 'MEDICAID',
+    programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+    submissionType: 'CONTRACT_ONLY',
+    riskBasedContract: false,
+    submissionDescription: 'Test Q&A',
+    contractType: 'BASE',
+}
+
+const stateUser: StateUserType = {
+    id: 'user1',
+    email: 'aang@example.com',
+    givenName: 'Aang',
+    familyName: 'Avatar',
+    role: 'STATE_USER',
+    stateCode: 'MN',
+}
+
+const cmsUser: CMSUserType = {
+    id: 'user3',
+    email: 'zuko@example.com',
+    givenName: 'Zuko',
+    familyName: 'Hotman',
+    role: 'CMS_USER',
+    stateAssignments: [],
+}
+
+const adminUser: AdminUserType = {
+    id: 'user4',
+    email: 'iroh@example.com',
+    givenName: 'Iroh',
+    familyName: 'Coldstart',
+    role: 'ADMIN_USER',
+}
 
 // Configure Amplify using envs set in cypress.config.ts
 Amplify.configure({
     Auth: {
         mandatorySignIn: true,
         region: Cypress.env('COGNITO_REGION'),
-        userPoolId:  Cypress.env('COGNITO_USER_POOL_ID'),
-        identityPoolId:  Cypress.env('COGNITO_IDENTITY_POOL_ID'),
-        userPoolWebClientId:  Cypress.env('COGNITO_USER_POOL_WEB_CLIENT_ID'),
+        userPoolId: Cypress.env('COGNITO_USER_POOL_ID'),
+        identityPoolId: Cypress.env('COGNITO_IDENTITY_POOL_ID'),
+        userPoolWebClientId: Cypress.env('COGNITO_USER_POOL_WEB_CLIENT_ID'),
     },
     API: {
         endpoints: [
             {
                 name: 'api',
-                endpoint: Cypress.env('API_URL')
+                endpoint: Cypress.env('API_URL'),
             },
         ],
     },
 })
 
-export function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
+function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
     const fakeFetchResponse: Response = {
         headers: new Headers({
             ok: axiosResponse.headers['ok'] || '',
@@ -82,7 +191,7 @@ export function fetchResponseFromAxios(axiosResponse: AxiosResponse): Response {
 // fakeAmplify Fetch looks like the API for fetch, but is secretly making an amplify request
 // Apollo Link uses the ~fetch api for it's client-side middleware.
 // Amplify.API uses axios undeneath and does its own transformation of the body, so we wrap that up here.
-export async function fakeAmplifyFetch(
+async function fakeAmplifyFetch(
     uri: string,
     options: RequestInit
 ): Promise<Response> {
@@ -137,17 +246,25 @@ export async function fakeAmplifyFetch(
 }
 
 // Provides Amplify auth and apollo client to callback function.
-export const apolloClientWrapper = async <T>(schema: string, user: User, callBack: (apolloClient: ApolloClient<NormalizedCacheObject>) => Promise<T>): Promise<T> => {
+const apolloClientWrapper = async <T>(
+    schema: DocumentNode,
+    authUser: UserType,
+    callback: (apolloClient: ApolloClient<NormalizedCacheObject>) => Promise<T>
+): Promise<T> => {
     const authMode = Cypress.env('AUTH_MODE')
 
-    const httpLinkConfig= {
+    const httpLinkConfig = {
         uri: '/graphql',
-        headers: authMode === 'LOCAL' ? {
-            'cognito-authentication-provider': JSON.stringify(user)
-        } : undefined,
+        headers:
+            authMode === 'LOCAL'
+                ? {
+                      'cognito-authentication-provider':
+                          JSON.stringify(authUser),
+                  }
+                : undefined,
         fetch: fakeAmplifyFetch,
         fetchOptions: {
-            mode: 'no-cors'
+            mode: 'no-cors',
         },
     }
 
@@ -158,22 +275,39 @@ export const apolloClientWrapper = async <T>(schema: string, user: User, callBac
                 Submission: ['DraftSubmission', 'StateSubmission'],
             },
         }),
-        typeDefs: schema as string,
+        typeDefs: schema,
         defaultOptions: {
             watchQuery: {
-                nextFetchPolicy: 'no-cache'
-            }
-        }
+                fetchPolicy: 'no-cache',
+            },
+        },
     })
 
     if (authMode !== 'LOCAL') {
-        await AmplifyAuth.signIn(user.email, Cypress.env('TEST_USERS_PASS'))
+        await AmplifyAuth.signIn(authUser.email, Cypress.env('TEST_USERS_PASS'))
     }
-    const result = await callBack(apolloClient)
+
+    const result = await callback(apolloClient)
 
     if (authMode !== 'LOCAL') {
-        AmplifyAuth.signOut()
+        await AmplifyAuth.signOut()
     }
 
     return result
+}
+
+export {
+    apolloClientWrapper,
+    contractOnlyData,
+    newSubmissionInput,
+    cmsUser,
+    adminUser,
+    stateUser,
+}
+export type {
+    StateUserType,
+    CMSUserType,
+    AdminUserType,
+    UserType,
+    DivisionType,
 }

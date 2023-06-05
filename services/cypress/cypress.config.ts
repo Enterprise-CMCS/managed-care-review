@@ -1,10 +1,10 @@
-const defineConfig = require('cypress')
+const { defineConfig } = require('cypress')
+const { gql } = require('@apollo/client')
 const { pa11y, prepareAudit } = require('@cypress-audit/pa11y')
 const fs = require('fs')
 const path = require('path')
-const { gql } = require('@apollo/client')
 
-const defineConfig = {
+export default defineConfig({
     e2e: {
         baseUrl: 'http://localhost:3000',
         supportFile: 'support/index.ts',
@@ -16,6 +16,7 @@ const defineConfig = {
         viewportWidth: 1440,
         setupNodeEvents(on, config) {
             require('@cypress/code-coverage/task')(on, config)
+
             const newConfig = config
             newConfig.env.AUTH_MODE = process.env.REACT_APP_AUTH_MODE
             newConfig.env.TEST_USERS_PASS = process.env.TEST_USERS_PASS
@@ -49,6 +50,4 @@ const defineConfig = {
         openMode: 0,
     },
     chromeWebSecurity: false
-}
-
-module.exports = defineConfig
+})
