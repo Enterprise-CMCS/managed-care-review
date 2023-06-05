@@ -17,7 +17,7 @@ import { PoliteErrorMessage } from '../PoliteErrorMessage'
 import * as Yup from 'yup'
 import styles from './UnlockSubmitModal.module.scss'
 import { GenericApiErrorProps } from '../Banner/GenericApiErrorBanner/GenericApiErrorBanner'
-import { ERROR_MESSAGES } from '../../constants/errors'
+import { ERROR_MESSAGES } from '@managed-care-review/common-code/constants'
 import { useAuth } from '../../contexts/AuthContext'
 
 type ModalType = 'SUBMIT' | 'RESUBMIT' | 'UNLOCK'

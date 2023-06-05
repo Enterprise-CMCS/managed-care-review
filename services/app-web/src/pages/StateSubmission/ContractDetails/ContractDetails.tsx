@@ -36,7 +36,7 @@ import { ContractDetailsFormSchema } from './ContractDetailsSchema'
 import {
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
-} from '../../../constants/healthPlanPackages'
+} from '@managed-care-review/common-code/constants'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { formatYesNoForProto } from '../../../formHelpers/formatters'

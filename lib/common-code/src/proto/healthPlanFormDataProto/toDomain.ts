@@ -1,4 +1,4 @@
-import { mcreviewproto } from '../../../gen/healthPlanFormDataProto'
+import { mcreviewproto } from '../../gen/healthPlanFormDataProto'
 import {
     unlockedHealthPlanFormDataZodSchema,
     lockedHealthPlanFormDataZodSchema,

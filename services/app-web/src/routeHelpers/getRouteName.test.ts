@@ -1,5 +1,5 @@
 import { getRouteName } from './'
-import { RouteT } from '../constants/routes'
+import { RouteT } from '@managed-care-review/common-code/constants'
 
 describe('getRouteName', () => {
     describe('calculates valid routes properly', () => {

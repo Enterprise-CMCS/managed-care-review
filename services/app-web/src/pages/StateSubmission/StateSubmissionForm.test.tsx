@@ -2,7 +2,7 @@ import { screen, waitFor } from '@testing-library/react'
 import { Route, Routes } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { SubmissionDocument } from '@managed-care-review/common-code/healthPlanFormDataType'
-import { RoutesRecord } from '../../constants/routes'
+import { RoutesRecord } from '@managed-care-review/common-code/constants'
 import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks/userGQLMock'
 import {
     mockDraftHealthPlanPackage,

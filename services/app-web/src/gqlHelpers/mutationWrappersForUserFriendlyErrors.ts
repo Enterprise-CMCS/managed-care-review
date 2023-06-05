@@ -17,7 +17,7 @@ import { ApolloError, GraphQLErrors } from '@apollo/client/errors'
 
 import { recordJSException } from '../otelHelpers'
 import { handleGQLErrors as handleGQLErrorLogging } from './apolloErrors'
-import { ERROR_MESSAGES } from '../constants/errors'
+import { ERROR_MESSAGES } from '@managed-care-review/common-code/constants'
 /*
 Adds user friendly/facing error messages to health plan package mutations.
 - Reminder, we handle graphql requests via apollo client in our web app.

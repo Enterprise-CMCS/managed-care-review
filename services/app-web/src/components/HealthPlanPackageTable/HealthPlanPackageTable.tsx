@@ -19,7 +19,7 @@ import { Table, Tag, Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
 import qs from 'qs'
-import { SubmissionStatusRecord } from '../../constants/healthPlanPackages'
+import { SubmissionStatusRecord } from '@managed-care-review/common-code/constants'
 import {
     FilterAccordion,
     FilterSelect,

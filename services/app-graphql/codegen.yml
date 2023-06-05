@@ -32,3 +32,13 @@ generates:
   # ./src/common-code/graphql/generated/graphql.schema.json:
   #   plugins:
   #     - 'introspection'
+  ../../lib/common-code/src/gen/gqlClient.tsx:
+    documents:
+      - src/queries/*.graphql
+      - src/mutations/*.graphql
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-react-apollo'
+    config:
+      enumsAsTypes: true

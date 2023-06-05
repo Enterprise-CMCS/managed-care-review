@@ -1,5 +1,5 @@
 import { getRelativePath } from './'
-import { RoutesRecord } from '../constants/routes'
+import { RoutesRecord } from '@managed-care-review/common-code/constants'
 
 describe('getRelativePath', () => {
     describe('can calculate relative routes used within the health plan submission form', () => {

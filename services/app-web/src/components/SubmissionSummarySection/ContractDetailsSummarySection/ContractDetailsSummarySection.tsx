@@ -7,7 +7,7 @@ import {
     ContractExecutionStatusRecord,
     FederalAuthorityRecord,
     ManagedCareEntityRecord,
-} from '../../../constants/index'
+} from '@managed-care-review/common-code/constants'
 import { useS3 } from '../../../contexts/S3Context'
 import { formatCalendarDate } from '@managed-care-review/common-code/dateHelpers'
 import { DoubleColumnGrid } from '../../DoubleColumnGrid'

@@ -2,7 +2,7 @@ import {
     ModifiedProvisionsAmendmentRecord,
     ModifiedProvisionsBaseContractRecord,
     ModifiedProvisionsCHIPRecord,
-} from '@managed-care-review/app-web/src/constants/modifiedProvisions'
+} from '@managed-care-review/common-code/constants'
 
 import type { HealthPlanFormDataType } from '../healthPlanFormDataType'
 import {

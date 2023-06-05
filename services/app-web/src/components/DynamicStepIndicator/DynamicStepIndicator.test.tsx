@@ -1,7 +1,7 @@
 import { screen, render } from '@testing-library/react'
 import { DynamicStepIndicator } from './DynamicStepIndicator'
 
-import { STATE_SUBMISSION_FORM_ROUTES } from '../../constants/routes'
+import { STATE_SUBMISSION_FORM_ROUTES } from '@managed-care-review/common-code/constants'
 
 describe('DynamicStepIndicator', () => {
     it('renders without errors', () => {

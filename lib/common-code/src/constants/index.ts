@@ -40,3 +40,6 @@ export type {
 } from './tealium'
 
 export { MAIL_TO_SUPPORT, ERROR_MESSAGES } from './errors'
+
+export type { LocalStorageKeyType } from './localStorage'
+export { LocalStorageKeys } from './localStorage'

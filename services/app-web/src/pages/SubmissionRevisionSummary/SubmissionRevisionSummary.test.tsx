@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router'
-import { RoutesRecord } from '../../constants/routes'
+import { RoutesRecord } from '@managed-care-review/common-code/constants'
 import {
     fetchCurrentUserMock,
     fetchStateHealthPlanPackageMockSuccess,

@@ -61,6 +61,6 @@ services/app-api/healthPlanFormDataMigrations
 
 services/app-proto/build
 
-lib/common-code/gen
+lib/common-code/src/gen
 lib/common-code/dist
 tests/cypress/fixtures/stores/featureFlagStore.json

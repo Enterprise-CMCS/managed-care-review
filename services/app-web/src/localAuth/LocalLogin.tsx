@@ -11,7 +11,7 @@ import {
     GridContainer,
 } from '@trussworks/react-uswds'
 import { useNavigate } from 'react-router-dom'
-import { RoutesRecord } from '../constants/routes'
+import { RoutesRecord } from '@managed-care-review/common-code/constants'
 import { loginLocalUser } from '.'
 
 import aangAvatar from '../assets/images/aang.png'

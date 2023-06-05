@@ -4,7 +4,7 @@ import { Route, Routes } from 'react-router-dom'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { QuestionResponse } from './QuestionResponse'
 import { ldUseClientSpy, renderWithProviders } from '../../testHelpers'
-import { RoutesRecord } from '../../constants/routes'
+import { RoutesRecord } from '@managed-care-review/common-code/constants'
 
 import {
     fetchCurrentUserMock,

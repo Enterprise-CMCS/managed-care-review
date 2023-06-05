@@ -4,7 +4,7 @@ import { SectionHeader } from '../../SectionHeader'
 import {
     ActuaryFirmsRecord,
     ActuaryCommunicationRecord,
-} from '../../../constants/healthPlanPackages'
+} from '@managed-care-review/common-code/constants'
 import { HealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { ActuaryContact } from '@managed-care-review/common-code/healthPlanFormDataType'
 import { DataDetail, DataDetailContactField } from '../../DataDetail'

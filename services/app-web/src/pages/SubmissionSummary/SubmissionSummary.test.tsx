@@ -3,7 +3,7 @@ import { screen, waitFor, within } from '@testing-library/react'
 import { Route, Routes } from 'react-router'
 import { basicLockedHealthPlanFormData } from '@managed-care-review/common-code/healthPlanFormDataMocks'
 import { domainToBase64 } from '@managed-care-review/common-code/proto'
-import { RoutesRecord } from '../../constants/routes'
+import { RoutesRecord } from '@managed-care-review/common-code/constants'
 import {
     fetchCurrentUserMock,
     fetchStateHealthPlanPackageWithQuestionsMockSuccess,

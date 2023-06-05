@@ -2,18 +2,18 @@ import { useEffect } from 'react'
 import { usePage } from '../contexts/PageContext'
 import { useCurrentRoute } from './useCurrentRoute'
 import { createScript } from './useScript'
-import { PageTitlesRecord } from '../constants/routes'
+import { PageTitlesRecord } from '@managed-care-review/common-code/constants'
 import { useAuth } from '../contexts/AuthContext'
 import {
     CONTENT_TYPE_BY_ROUTE,
     getTealiumEnv,
     getTealiumPageName,
-} from '../constants/tealium'
+} from '@managed-care-review/common-code/constants'
 import type {
     TealiumLinkDataObject,
     TealiumViewDataObject,
     TealiumEvent,
-} from '../constants/tealium'
+} from '@managed-care-review/common-code/constants'
 
 /*
 Tealium is the data layer for Google Analytics and other data tracking at CMS

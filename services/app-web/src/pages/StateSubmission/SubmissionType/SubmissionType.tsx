@@ -22,7 +22,7 @@ import {
 import {
     PopulationCoveredRecord,
     SubmissionTypeRecord,
-} from '../../../constants/healthPlanPackages'
+} from '@managed-care-review/common-code/constants'
 import {
     ContractType,
     PopulationCoveredType,

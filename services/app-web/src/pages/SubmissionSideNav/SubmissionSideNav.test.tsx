@@ -5,7 +5,7 @@ import { SubmissionSideNav } from './SubmissionSideNav'
 import { SubmissionSummary } from '../SubmissionSummary'
 import { QuestionResponse } from '../QuestionResponse'
 import { renderWithProviders } from '../../testHelpers'
-import { RoutesRecord } from '../../constants/routes'
+import { RoutesRecord } from '@managed-care-review/common-code/constants'
 import React from 'react'
 import {
     fetchCurrentUserMock,

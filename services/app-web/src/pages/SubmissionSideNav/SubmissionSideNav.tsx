@@ -8,7 +8,7 @@ import sprite from 'uswds/src/img/sprite.svg'
 import {
     QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES,
     RouteT,
-} from '../../constants/routes'
+} from '@managed-care-review/common-code/constants'
 import { getRouteName } from '../../routeHelpers'
 import { useFetchHealthPlanPackageWithQuestionsWrapper } from '../../gqlHelpers'
 import { Loading } from '../../components'

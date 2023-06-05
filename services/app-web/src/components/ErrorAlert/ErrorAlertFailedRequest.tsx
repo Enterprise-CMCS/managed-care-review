@@ -1,7 +1,7 @@
 import React from 'react'
 import styles from './ErrorAlert.module.scss'
 import { Alert, Link } from '@trussworks/react-uswds'
-import { MAIL_TO_SUPPORT } from '../../constants/errors'
+import { MAIL_TO_SUPPORT } from '@managed-care-review/common-code/constants'
 
 export type ErrorAlertFailedRequestProps = {
     message?: string

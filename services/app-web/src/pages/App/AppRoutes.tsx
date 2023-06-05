@@ -7,7 +7,11 @@ import {
     assertNever,
     AuthModeType,
 } from '@managed-care-review/common-code/config'
-import { PageTitlesRecord, RoutesRecord, RouteT } from '../../constants/routes'
+import {
+    PageTitlesRecord,
+    RoutesRecord,
+    RouteT,
+} from '@managed-care-review/common-code/constants'
 import { getRouteName } from '../../routeHelpers'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'

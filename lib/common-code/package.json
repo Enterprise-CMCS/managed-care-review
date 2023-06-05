@@ -6,6 +6,7 @@
     "main": "dist/index.js",
     "exports": {
         "./config": "./dist/config/index.js",
+        "./constants": "./dist/constants/index.js",
         "./dateHelpers": "./dist/dateHelpers/index.js",
         "./data": "./dist/data/index.js",
         "./debounce": "./dist/debounce/index.js",

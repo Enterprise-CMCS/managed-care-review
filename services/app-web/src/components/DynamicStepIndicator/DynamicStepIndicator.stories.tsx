@@ -8,7 +8,7 @@ import {
     DynamicStepIndicator,
 } from './DynamicStepIndicator'
 
-import { STATE_SUBMISSION_FORM_ROUTES } from '../../constants/routes'
+import { STATE_SUBMISSION_FORM_ROUTES } from '@managed-care-review/common-code/constants'
 
 export default {
     title: 'Components/DynamicStepIndicator',

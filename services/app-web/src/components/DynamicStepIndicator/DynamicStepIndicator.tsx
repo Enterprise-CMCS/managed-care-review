@@ -1,6 +1,9 @@
 import { StepIndicator, StepIndicatorStep } from '@trussworks/react-uswds'
 
-import { PageTitlesRecord, RouteTWithUnknown } from '../../constants/routes'
+import {
+    PageTitlesRecord,
+    RouteTWithUnknown,
+} from '@managed-care-review/common-code/constants'
 
 export type DynamicStepIndicatorProps = {
     formPages: RouteTWithUnknown[]

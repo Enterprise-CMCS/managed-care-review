@@ -25,7 +25,7 @@ const ROUTES = [
     'SUBMISSIONS_UPLOAD_QUESTION',
     'SUBMISSIONS_UPLOAD_RESPONSE',
 ] as const // iterable union type
-type RouteT = typeof ROUTES[number]
+type RouteT = (typeof ROUTES)[number]
 type RouteTWithUnknown = RouteT | 'UNKNOWN_ROUTE'
 /*
     Every application url (excluding query parameters) is found in the RoutesRecord.

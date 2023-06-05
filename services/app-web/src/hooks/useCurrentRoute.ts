@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router-dom'
-import { RouteT } from '../constants/routes'
+import { RouteT } from '@managed-care-review/common-code/constants'
 import { getRouteName } from '../routeHelpers'
 
 // Determine current route name type (e.g. SUBMISSION_TYPE) using the getRouteName utility

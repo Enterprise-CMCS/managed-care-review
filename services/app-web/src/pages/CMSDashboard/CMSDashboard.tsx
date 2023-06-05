@@ -4,7 +4,7 @@ import { packageName } from '@managed-care-review/common-code/healthPlanFormData
 import { base64ToDomain } from '@managed-care-review/common-code/proto'
 import { mostRecentDate } from '@managed-care-review/common-code/dateHelpers'
 
-import { SubmissionTypeRecord } from '../../constants/healthPlanPackages'
+import { SubmissionTypeRecord } from '@managed-care-review/common-code/constants'
 import { useAuth } from '../../contexts/AuthContext'
 import { useIndexHealthPlanPackagesQuery } from '../../gen/gqlClient'
 import styles from '../StateDashboard/StateDashboard.module.scss'

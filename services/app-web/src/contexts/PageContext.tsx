@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { PageHeadingsRecord } from '../constants/routes'
+import { PageHeadingsRecord } from '@managed-care-review/common-code/constants'
 import { useCurrentRoute } from '../hooks/useCurrentRoute'
 
 /*

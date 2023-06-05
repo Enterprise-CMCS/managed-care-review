@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { LocalStorageKeyType } from '../constants/localStorage'
+import type { LocalStorageKeyType } from '@managed-care-review/common-code/constants'
 import { recordJSException } from '../otelHelpers'
 type LocalStorage = {
     key: LocalStorageKeyType

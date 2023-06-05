@@ -23,7 +23,7 @@ import {
     RouteT,
     RouteTWithUnknown,
     RoutesRecord,
-} from '../../constants/routes'
+} from '@managed-care-review/common-code/constants'
 import { getRelativePath } from '../../routeHelpers'
 import { useFetchHealthPlanPackageWrapper } from '../../gqlHelpers'
 import { StateSubmissionContainer } from './StateSubmissionContainer'

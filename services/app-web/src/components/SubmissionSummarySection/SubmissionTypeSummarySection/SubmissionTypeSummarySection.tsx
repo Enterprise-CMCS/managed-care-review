@@ -8,7 +8,7 @@ import {
     SubmissionTypeRecord,
     ContractTypeRecord,
     PopulationCoveredRecord,
-} from '../../../constants/healthPlanPackages'
+} from '@managed-care-review/common-code/constants'
 import { Program } from '../../../gen/gqlClient'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
 import { booleanAsYesNoUserValue } from '../../../components/Form/FieldYesNo/FieldYesNo'
