@@ -100,17 +100,12 @@
                 {
                     "id": "5904a736-4422-4b78-abef-f3df3d0ae21d",
                     "fullName": "Regional Model",
-                    "name": "Regional Model"
+                    "name": "Regional"
                 },
                 {
                     "id": "78a70c07-3fe0-41df-a80c-9eab6ae34fa4",
                     "fullName": "Geographic Managed Care",
                     "name": "GMC"
-                },
-                {
-                    "id": "a4118400-1352-4330-b972-3ba3d5d3ae59",
-                    "fullName": "Senior Care Action Network ",
-                    "name": "SCAN"
                 },
                 {
                     "id": "20cbf01d-f07e-4205-b9b2-77fd7d448040",
@@ -120,12 +115,7 @@
                 {
                     "id": "4308b4a7-2f2d-4b5e-a8ef-504a01f342d4",
                     "fullName": "Two-Plan Model ",
-                    "name": "Two Plans "
-                },
-                {
-                    "id": "073d8c66-bfce-4f6a-a4a1-4107c53f7941",
-                    "fullName": "Family Mosaic Program/San Francisco",
-                    "name": "FMP"
+                    "name": "Two-Plan"
                 },
                 {
                     "id": "d902af57-b57b-4702-a492-3276bbf923e4",
@@ -140,7 +130,7 @@
                 {
                     "id": "14a5d2f4-d4ff-49cf-93b6-7d2f7c2b89e5",
                     "fullName": "Coordinated Care Initiative Duals",
-                    "name": "CCI Full Duals"
+                    "name": "CCI Duals"
                 },
                 {
                     "id": "46680d23-ce69-49ec-a5f8-e2b3f0173578",
@@ -156,6 +146,21 @@
                     "id": "7cec9b0c-3833-4933-bc05-a9287a76d3ec",
                     "fullName": "Health Homes",
                     "name": "HHP"
+                },
+                {
+                    "id": "40ca8541-3f42-45e7-8baa-835337c299c6",
+                    "fullName": "Specialty Mental Health Services",
+                    "name": "SMHS"
+                },
+                {
+                    "id": "3aa176c3-9caa-4b9e-97b4-c12f4f579667",
+                    "fullName": "Drug Medi-Cal Organized Delivery System",
+                    "name": "DMC-ODS"
+                },
+                {
+                    "id": "2ba334c5-8001-4bf4-9e06-34e3850389fa",
+                    "fullName": "Single Plan Model",
+                    "name": "Single Plan"
                 }
             ],
             "code": "CA"

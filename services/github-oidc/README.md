@@ -87,7 +87,7 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ secrets.AWS_DEFAULT_REGION }}
+          region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.{DEV,VAL,PROD}_AWS_ACCOUNT_ID }}
           stage-name: {your stage name}
      ...
