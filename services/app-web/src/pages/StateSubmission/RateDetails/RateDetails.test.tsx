@@ -45,7 +45,7 @@ describe('RateDetails', () => {
         jest.spyOn(useStatePrograms, 'useStatePrograms').mockRestore()
     })
 
-    const emptyRateDetailsDraft = {
+    const emptyRateDetailsDraft = () => ({
         ...mockDraft(),
         rateInfos: [],
         rateType: undefined,
@@ -53,7 +53,7 @@ describe('RateDetails', () => {
         rateDateEnd: undefined,
         rateDateCertified: undefined,
         actuaryContacts: [],
-    }
+    })
     describe('handles a single rate', () => {
         afterEach(() => {
             jest.clearAllMocks()
@@ -63,7 +63,7 @@ describe('RateDetails', () => {
 
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -88,7 +88,7 @@ describe('RateDetails', () => {
         it('displays correct form guidance', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -108,7 +108,7 @@ describe('RateDetails', () => {
 
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -157,7 +157,7 @@ describe('RateDetails', () => {
 
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -186,7 +186,7 @@ describe('RateDetails', () => {
 
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -214,7 +214,7 @@ describe('RateDetails', () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -243,7 +243,7 @@ describe('RateDetails', () => {
             ldUseClientSpy({ 'packages-with-shared-rates': true })
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -371,7 +371,7 @@ describe('RateDetails', () => {
 
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -412,7 +412,7 @@ describe('RateDetails', () => {
         it('renders file upload', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -438,11 +438,10 @@ describe('RateDetails', () => {
                 ).toHaveLength(0)
             })
         })
-
         it('accepts documents on new rate', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -465,7 +464,7 @@ describe('RateDetails', () => {
         it('accepts multiple pdf, word, excel documents', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -499,7 +498,7 @@ describe('RateDetails', () => {
         it('renders add another rate button, which adds another set of rate certification fields to the form', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -529,7 +528,7 @@ describe('RateDetails', () => {
         it('renders remove rate certification button, which removes set of rate certification fields from the form', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -564,7 +563,7 @@ describe('RateDetails', () => {
         it('accepts documents on second rate', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -598,7 +597,7 @@ describe('RateDetails', () => {
 
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -629,7 +628,7 @@ describe('RateDetails', () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -679,7 +678,7 @@ describe('RateDetails', () => {
             //First submission is 'CONTRACT_ONLY' and last submission is the current one. Both should be excluded from
             // package combobox options.
             const currentSubmission = {
-                ...emptyRateDetailsDraft,
+                ...emptyRateDetailsDraft(),
                 stateNumber: 3,
                 id: 'test-shared-rate',
             }
@@ -911,7 +910,7 @@ describe('RateDetails', () => {
             //First submission is 'CONTRACT_ONLY' and last submission is the current one. Both should be excluded from
             // package combobox options.
             const currentSubmission = {
-                ...emptyRateDetailsDraft,
+                ...emptyRateDetailsDraft(),
                 stateNumber: 3,
                 id: 'test-shared-rate',
             }
@@ -1041,7 +1040,7 @@ describe('RateDetails', () => {
             //First submission is 'CONTRACT_ONLY' and last submission is the current one. Both should be excluded from
             // package combobox options.
             const currentSubmission = {
-                ...emptyRateDetailsDraft,
+                ...emptyRateDetailsDraft(),
                 stateNumber: 3,
                 id: 'test-shared-rate',
             }
@@ -1171,7 +1170,7 @@ describe('RateDetails', () => {
         it('enabled when valid files are present', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -1197,7 +1196,7 @@ describe('RateDetails', () => {
         it('enabled when invalid files have been dropped but valid files are present', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -1228,7 +1227,7 @@ describe('RateDetails', () => {
         it('disabled with alert after first attempt to continue with zero files', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -1258,7 +1257,7 @@ describe('RateDetails', () => {
         it('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -1295,7 +1294,7 @@ describe('RateDetails', () => {
         it('disabled with alert after first attempt to continue with invalid files', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -1330,7 +1329,7 @@ describe('RateDetails', () => {
         it('disabled with alert when trying to continue while a file is still uploading', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -1378,7 +1377,7 @@ describe('RateDetails', () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -1405,7 +1404,7 @@ describe('RateDetails', () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -1434,7 +1433,7 @@ describe('RateDetails', () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -1502,7 +1501,7 @@ describe('RateDetails', () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -1542,7 +1541,7 @@ describe('RateDetails', () => {
         it('enabled when valid files are present', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -1568,7 +1567,7 @@ describe('RateDetails', () => {
         it('enabled when invalid files have been dropped but valid files are present', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -1597,7 +1596,7 @@ describe('RateDetails', () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -1624,7 +1623,7 @@ describe('RateDetails', () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
