@@ -12,9 +12,10 @@ on:
       changed_services:
         required: true
         type: string
-    secrets:
       aws_default_region:
         required: true
+        type: string
+    secrets:
       aws_account_id:
         required: true
       nr_license_key:
@@ -61,7 +62,7 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ secrets.aws_default_region }}
+          region: ${{ inputs.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           # use the manually bootstrapped OIDC role to solve the chicken-and-egg problem of deploying the OIDC service via OIDC
           stage-name: ${{ steps.set-oidc-stage-name.outputs.stage-name }}
@@ -87,7 +88,7 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ secrets.aws_default_region }}
+          region: ${{ inputs.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
@@ -112,7 +113,7 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ secrets.aws_default_region }}
+          region: ${{ inputs.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
@@ -137,7 +138,7 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ secrets.aws_default_region }}
+          region: ${{ inputs.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
@@ -162,7 +163,7 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ secrets.aws_default_region }}
+          region: ${{ inputs.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
@@ -189,7 +190,7 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ secrets.aws_default_region }}
+          region: ${{ inputs.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
@@ -214,7 +215,7 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ secrets.aws_default_region }}
+          region: ${{ inputs.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
