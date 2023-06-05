@@ -9,8 +9,7 @@ const defineConfig = {
         baseUrl: 'http://localhost:3000',
         supportFile: 'support/index.ts',
         fixturesFolder: 'fixtures',
-        // specPattern: 'integration/**/*.spec.ts',
-        specPattern: 'integration/stateWorkflow/questionResponse/*.spec.ts',
+        specPattern: 'integration/**/*.spec.ts',
         screenshotsFolder: 'screenshots',
         videosFolder: 'videos',
         viewportHeight: 1080,
@@ -32,10 +31,10 @@ const defineConfig = {
                 prepareAudit(launchOptions)
             })
 
+            // Reads graphql schema and converts it to gql for apollo client.
             on('task', {
                 pa11y: pa11y(),
                 readGraphQLSchema() {
-                    // const gqlSchema = loader('./gen/schema.graphql')
                     const gqlSchema = fs.readFileSync(path.resolve(__dirname, './gen/schema.graphql'), 'utf-8')
                     return gql(`${gqlSchema}`)
                 }
