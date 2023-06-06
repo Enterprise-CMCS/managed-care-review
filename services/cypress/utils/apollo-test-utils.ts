@@ -1,7 +1,7 @@
 import { AxiosResponse } from 'axios'
 import { API } from 'aws-amplify'
 import {
-    ApolloClient,
+    ApolloClient, DocumentNode,
     HttpLink,
     InMemoryCache,
     NormalizedCacheObject,
@@ -246,7 +246,7 @@ async function fakeAmplifyFetch(
 
 // Provides Amplify auth and apollo client to callback function.
 const apolloClientWrapper = async <T>(
-    schema: string,
+    schema: DocumentNode,
     authUser: UserType,
     callback: (apolloClient: ApolloClient<NormalizedCacheObject>) => Promise<T>
 ): Promise<T> => {
