@@ -4,7 +4,7 @@ const { pa11y, prepareAudit } = require('@cypress-audit/pa11y')
 const fs = require('fs')
 const path = require('path')
 
-export default defineConfig({
+module.exports = defineConfig({
     e2e: {
         baseUrl: 'http://localhost:3000',
         supportFile: 'support/index.ts',
