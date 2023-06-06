@@ -9,18 +9,6 @@ describe('Q&A', () => {
     })
 
     it('can add questions and responses', () => {
-        //NOTE: Record test time
-        //  Local run
-        //      - Before direct api request: 01:06
-        //      - After direct api request: 00:29
-        //  Deployed local run using review app
-        //      - Before direct api request: 02:51
-        //      - After direct api request: 01:54
-        //  Deployed CI run
-        //      - Before direct api request: 3:52
-        //      - After direct api request: 2:35
-
-        // Then do Q&A stuff
         cy.interceptFeatureFlags({
             'cms-questions': true,
             'chip-only-form': true,
