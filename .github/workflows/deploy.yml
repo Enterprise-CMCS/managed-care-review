@@ -440,7 +440,7 @@ jobs:
 
   cypress:
     name: cypress-run
-    timeout-minutes: 20
+    timeout-minutes: 25
     needs: [deploy-app, finishing-prep]
     if: always() && needs.finishing-prep.result == 'success'
     runs-on: ubuntu-20.04
