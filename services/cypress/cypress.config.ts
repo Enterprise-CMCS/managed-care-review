@@ -1,10 +1,7 @@
-const defineConfig = require('cypress')
-const { pa11y, prepareAudit } = require('@cypress-audit/pa11y')
-const fs = require('fs')
-const path = require('path')
-const { gql } = require('@apollo/client')
+import { defineConfig } from 'cypress';
+import { DocumentNode, gql } from '@apollo/client';
 
-const defineConfig = {
+export default defineConfig({
     e2e: {
         baseUrl: 'http://localhost:3000',
         supportFile: 'support/index.ts',
@@ -15,7 +12,12 @@ const defineConfig = {
         viewportHeight: 1080,
         viewportWidth: 1440,
         setupNodeEvents(on, config) {
+            const { pa11y, prepareAudit } = require('@cypress-audit/pa11y')
+            const fs = require('fs')
+            const path = require('path')
+
             require('@cypress/code-coverage/task')(on, config)
+
             const newConfig = config
             newConfig.env.AUTH_MODE = process.env.REACT_APP_AUTH_MODE
             newConfig.env.TEST_USERS_PASS = process.env.TEST_USERS_PASS
@@ -34,9 +36,9 @@ const defineConfig = {
             // Reads graphql schema and converts it to gql for apollo client.
             on('task', {
                 pa11y: pa11y(),
-                readGraphQLSchema(): string {
+                readGraphQLSchema(): DocumentNode {
                     const gqlSchema = fs.readFileSync(path.resolve(__dirname, './gen/schema.graphql'), 'utf-8')
-                    return gql(`${gqlSchema}`) as string
+                    return gql(`${gqlSchema}`)
                 }
             })
             return newConfig
@@ -49,6 +51,4 @@ const defineConfig = {
         openMode: 0,
     },
     chromeWebSecurity: false
-}
-
-module.exports = defineConfig
+})
