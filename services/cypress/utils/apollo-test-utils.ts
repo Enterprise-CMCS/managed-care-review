@@ -274,7 +274,7 @@ const apolloClientWrapper = async <T>(
                 Submission: ['DraftSubmission', 'StateSubmission'],
             },
         }),
-        typeDefs: schema as string,
+        typeDefs: schema,
         defaultOptions: {
             watchQuery: {
                 fetchPolicy: 'no-cache',

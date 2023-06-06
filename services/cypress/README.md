@@ -81,7 +81,7 @@ We mimicked the same setup in the application in Cypress to make graphql request
     - The `readGraphQLSchema` task is used in our API Cypress commands to get the `GraphQL` schema before passing it to the `Apollo` client configuration. The `Apollo` client configuration is done in `apolloClientWrapper` function.
       ```ts
       Cypress.Commands.add('apiCreateAndSubmitContractOnlySubmission', (): Cypress.Chainable<HealthPlanPackage> => {
-          return cy.task('readGraphQLSchema').then(schema => createAndSubmitPackage(schema as string))
+          return cy.task<string>('readGraphQLSchema').then(schema => createAndSubmitPackage(schema))
       })
       ```
       
@@ -119,10 +119,10 @@ We mimicked the same setup in the application in Cypress to make graphql request
       Cypress.Commands.add(
           'apiCreateAndSubmitContractOnlySubmission',
           (stateUser): Cypress.Chainable<HealthPlanPackage> => {
-              cy.task('readGraphQLSchema')
+              cy.task<string>('readGraphQLSchema')
                   .then((schema) =>
                       apolloClientWrapper(
-                          schema as string,
+                          schema,
                           stateUser,
                           callback
                       )
@@ -182,7 +182,7 @@ We can use the `apiCreateAndSubmitContractOnlySubmission` cypress command as an 
 3. Now we can go back to the command we made in `cypress/support/apiCommands.ts` and get the `GraphQL` schema for configuring our `Apollo` client by running the `readGraphQLSchema` task in `cypress.config.ts`
     ```ts
     Cypress.Commands.add('apiCreateAndSubmitContractOnlySubmission', (stateUser): Cypress.Chainable<HealthPlanPackage> => {
-      return cy.task('readGraphQLSchema').then(schema => `our function for the api requests will go here in the next step`)
+      return cy.task<string>('readGraphQLSchema').then(schema => `our function for the api requests will go here in the next step`)
     })
     ```
 4. Once we have the `schema` we first call `apolloClientWrapper` that handles the `Amplify` authentication, configuring the `Apollo` client, and passing client to the callback function. 
@@ -194,10 +194,10 @@ We can use the `apiCreateAndSubmitContractOnlySubmission` cypress command as an 
        Cypress.Commands.add(
            'apiCreateAndSubmitContractOnlySubmission',
            (stateUser): Cypress.Chainable<HealthPlanPackage> => {
-               cy.task('readGraphQLSchema')
+               cy.task<string>('readGraphQLSchema')
                    .then((schema) =>
                        apolloClientWrapper(
-                           schema as string,
+                           schema,
                            stateUser,
                            callback
                        )
@@ -261,9 +261,9 @@ We can use the `apiCreateAndSubmitContractOnlySubmission` cypress command as an 
     Cypress.Commands.add(
         'apiCreateAndSubmitContractOnlySubmission',
         (stateUser): Cypress.Chainable<HealthPlanPackage> =>
-            cy.task('readGraphQLSchema').then((schema) =>
+            cy.task<string>('readGraphQLSchema').then((schema) =>
                 apolloClientWrapper(
-                    schema as string,
+                    schema,
                     stateUser,
                     createAndSubmitPackage
                 )

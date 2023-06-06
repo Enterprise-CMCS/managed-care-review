@@ -119,45 +119,25 @@ const seedUserIntoDB = async (
 Cypress.Commands.add(
     'apiCreateAndSubmitContractOnlySubmission',
     (stateUser): Cypress.Chainable<HealthPlanPackage> =>
-        cy
-            .task('readGraphQLSchema')
-            .then((schema) =>
-                apolloClientWrapper(
-                    schema as string,
-                    stateUser,
-                    createAndSubmitPackage
-                )
+        cy.task<string>('readGraphQLSchema').then((schema) =>
+            apolloClientWrapper(
+                schema,
+                stateUser,
+                createAndSubmitPackage
             )
+        )
 )
 
 Cypress.Commands.add(
     'apiAssignDivisionToCMSUser',
     (cmsUser, division): Cypress.Chainable<void> => {
-        return cy
-            .task('readGraphQLSchema')
-            .then((schema) =>
-                cy
-                    .wrap(
-                        apolloClientWrapper(
-                            schema as string,
-                            cmsUser,
-                            seedUserIntoDB
-                        )
+        return cy.task<string>('readGraphQLSchema').then((schema) =>
+            cy.wrap(apolloClientWrapper(schema, cmsUser, seedUserIntoDB)).then(() =>
+                cy.wrap(apolloClientWrapper(schema, adminUser, (apolloClient) =>
+                        assignCmsDivision(apolloClient, cmsUser, division)
                     )
-                    .then(() =>
-                        cy.wrap(
-                            apolloClientWrapper(
-                                schema as string,
-                                adminUser,
-                                (apolloClient) =>
-                                    assignCmsDivision(
-                                        apolloClient,
-                                        cmsUser,
-                                        division
-                                    )
-                            )
-                        )
-                    )
+                )
             )
+        )
     }
 )

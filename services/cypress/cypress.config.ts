@@ -34,9 +34,9 @@ const defineConfig = {
             // Reads graphql schema and converts it to gql for apollo client.
             on('task', {
                 pa11y: pa11y(),
-                readGraphQLSchema() {
+                readGraphQLSchema(): string {
                     const gqlSchema = fs.readFileSync(path.resolve(__dirname, './gen/schema.graphql'), 'utf-8')
-                    return gql(`${gqlSchema}`)
+                    return gql(`${gqlSchema}`) as string
                 }
             })
             return newConfig
