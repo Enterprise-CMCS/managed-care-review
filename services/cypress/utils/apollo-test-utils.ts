@@ -1,38 +1,43 @@
-import {AxiosResponse} from 'axios';
-import {API} from 'aws-amplify';
-import {ApolloClient, HttpLink, InMemoryCache, NormalizedCacheObject} from '@apollo/client';
-import {Amplify, Auth as AmplifyAuth} from 'aws-amplify';
-import {UnlockedHealthPlanFormDataType} from '../../app-web/src/common-code/healthPlanFormDataType';
+import { AxiosResponse } from 'axios'
+import { API } from 'aws-amplify'
+import {
+    ApolloClient,
+    HttpLink,
+    InMemoryCache,
+    NormalizedCacheObject,
+} from '@apollo/client'
+import { Amplify, Auth as AmplifyAuth } from 'aws-amplify'
+import { UnlockedHealthPlanFormDataType } from '../../app-web/src/common-code/healthPlanFormDataType'
 
-type StatUserType = {
-    id: string,
-    email: string,
-    givenName: string,
-    familyName: string,
-    role: 'STATE_USER',
-    stateCode: string,
+type StateUserType = {
+    id: string
+    email: string
+    givenName: string
+    familyName: string
+    role: 'STATE_USER'
+    stateCode: string
 }
 
 type CMSUserType = {
-    id: string,
-    email: string,
-    givenName: string,
-    familyName: string,
-    role: 'CMS_USER',
-    stateAssignments: [],
+    id: string
+    email: string
+    givenName: string
+    familyName: string
+    role: 'CMS_USER'
+    stateAssignments: []
 }
 
 type AdminUserType = {
-    id: string,
-    email: string,
-    givenName: string,
-    familyName: string,
-    role: 'ADMIN_USER',
+    id: string
+    email: string
+    givenName: string
+    familyName: string
+    role: 'ADMIN_USER'
 }
 
 type DivisionType = 'DMCO' | 'DMCP' | 'OACT'
 
-type UserType = StatUserType | AdminUserType | CMSUserType
+type UserType = StateUserType | AdminUserType | CMSUserType
 
 const contractOnlyData: Partial<UnlockedHealthPlanFormDataType> = {
     stateContacts: [
@@ -81,7 +86,7 @@ const newSubmissionInput = {
     contractType: 'BASE',
 }
 
-const stateUser: StatUserType = {
+const stateUser: StateUserType = {
     id: 'user1',
     email: 'aang@example.com',
     givenName: 'Aang',
@@ -96,7 +101,7 @@ const cmsUser: CMSUserType = {
     givenName: 'Zuko',
     familyName: 'Hotman',
     role: 'CMS_USER',
-    stateAssignments: []
+    stateAssignments: [],
 }
 
 const adminUser: AdminUserType = {
@@ -104,7 +109,7 @@ const adminUser: AdminUserType = {
     email: 'iroh@example.com',
     givenName: 'Iroh',
     familyName: 'Coldstart',
-    role: 'ADMIN_USER'
+    role: 'ADMIN_USER',
 }
 
 // Configure Amplify using envs set in cypress.config.ts
@@ -112,15 +117,15 @@ Amplify.configure({
     Auth: {
         mandatorySignIn: true,
         region: Cypress.env('COGNITO_REGION'),
-        userPoolId:  Cypress.env('COGNITO_USER_POOL_ID'),
-        identityPoolId:  Cypress.env('COGNITO_IDENTITY_POOL_ID'),
-        userPoolWebClientId:  Cypress.env('COGNITO_USER_POOL_WEB_CLIENT_ID'),
+        userPoolId: Cypress.env('COGNITO_USER_POOL_ID'),
+        identityPoolId: Cypress.env('COGNITO_IDENTITY_POOL_ID'),
+        userPoolWebClientId: Cypress.env('COGNITO_USER_POOL_WEB_CLIENT_ID'),
     },
     API: {
         endpoints: [
             {
                 name: 'api',
-                endpoint: Cypress.env('API_URL')
+                endpoint: Cypress.env('API_URL'),
             },
         ],
     },
@@ -240,17 +245,25 @@ async function fakeAmplifyFetch(
 }
 
 // Provides Amplify auth and apollo client to callback function.
-const apolloClientWrapper = async <T>(schema: string, user: UserType, callBack: (apolloClient: ApolloClient<NormalizedCacheObject>) => Promise<T>): Promise<T> => {
+const apolloClientWrapper = async <T>(
+    schema: string,
+    authUser: UserType,
+    callback: (apolloClient: ApolloClient<NormalizedCacheObject>) => Promise<T>
+): Promise<T> => {
     const authMode = Cypress.env('AUTH_MODE')
 
-    const httpLinkConfig= {
+    const httpLinkConfig = {
         uri: '/graphql',
-        headers: authMode === 'LOCAL' ? {
-            'cognito-authentication-provider': JSON.stringify(user)
-        } : undefined,
+        headers:
+            authMode === 'LOCAL'
+                ? {
+                      'cognito-authentication-provider':
+                          JSON.stringify(authUser),
+                  }
+                : undefined,
         fetch: fakeAmplifyFetch,
         fetchOptions: {
-            mode: 'no-cors'
+            mode: 'no-cors',
         },
     }
 
@@ -265,14 +278,14 @@ const apolloClientWrapper = async <T>(schema: string, user: UserType, callBack: 
         defaultOptions: {
             watchQuery: {
                 fetchPolicy: 'no-cache',
-            }
-        }
+            },
+        },
     })
 
     if (authMode !== 'LOCAL') {
-        await AmplifyAuth.signIn(user.email, Cypress.env('TEST_USERS_PASS'))
+        await AmplifyAuth.signIn(authUser.email, Cypress.env('TEST_USERS_PASS'))
     }
-    const result = await callBack(apolloClient)
+    const result = await callback(apolloClient)
 
     if (authMode !== 'LOCAL') {
         AmplifyAuth.signOut()
@@ -281,5 +294,18 @@ const apolloClientWrapper = async <T>(schema: string, user: UserType, callBack: 
     return result
 }
 
-export { apolloClientWrapper, contractOnlyData, newSubmissionInput, cmsUser, adminUser, stateUser }
-export type {StatUserType, CMSUserType, AdminUserType, UserType, DivisionType}
+export {
+    apolloClientWrapper,
+    contractOnlyData,
+    newSubmissionInput,
+    cmsUser,
+    adminUser,
+    stateUser,
+}
+export type {
+    StateUserType,
+    CMSUserType,
+    AdminUserType,
+    UserType,
+    DivisionType,
+}

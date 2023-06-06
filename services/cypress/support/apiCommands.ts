@@ -1,25 +1,37 @@
 import {
-    CreateHealthPlanPackageDocument, HealthPlanPackage,
+    CreateHealthPlanPackageDocument,
+    HealthPlanPackage,
     SubmitHealthPlanPackageDocument,
     UpdateHealthPlanFormDataDocument,
-    IndexUsersDocument, UserEdge, User, UpdateCmsUserDocument, FetchCurrentUserDocument
-} from '../gen/gqlClient';
-import { domainToBase64, base64ToDomain } from '../../app-web/src/common-code/proto/healthPlanFormDataProto';
+    IndexUsersDocument,
+    UserEdge,
+    User,
+    UpdateCmsUserDocument,
+    FetchCurrentUserDocument,
+} from '../gen/gqlClient'
+import {
+    domainToBase64,
+    base64ToDomain,
+} from '../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import {
     apolloClientWrapper,
     DivisionType,
     UserType,
-    stateUser,
     adminUser,
     contractOnlyData,
-    newSubmissionInput, CMSUserType
-} from '../utils/apollo-test-utils';
+    newSubmissionInput,
+    CMSUserType,
+    StateUserType,
+} from '../utils/apollo-test-utils'
+import { ApolloClient, NormalizedCacheObject } from '@apollo/client'
 
-const createAndSubmitPackage = async (schema: string)=> await apolloClientWrapper(schema, stateUser,async (apolloClient): Promise<HealthPlanPackage> => {
+const createAndSubmitPackage = async (
+    apolloClient: ApolloClient<NormalizedCacheObject>
+): Promise<HealthPlanPackage> => {
     const newSubmission = await apolloClient.mutate({
         mutation: CreateHealthPlanPackageDocument,
         variables: {
-            input: newSubmissionInput
+            input: newSubmissionInput,
         },
     })
 
@@ -43,8 +55,8 @@ const createAndSubmitPackage = async (schema: string)=> await apolloClientWrappe
         variables: {
             input: {
                 healthPlanFormData: formDataProto,
-                pkgID: pkg.id
-            }
+                pkgID: pkg.id,
+            },
         },
     })
 
@@ -53,55 +65,99 @@ const createAndSubmitPackage = async (schema: string)=> await apolloClientWrappe
         variables: {
             input: {
                 pkgID: pkg.id,
-                submittedReason: 'Submit package for Q&A Tests'
-            }
+                submittedReason: 'Submit package for Q&A Tests',
+            },
         },
     })
 
     return submission.data.submitHealthPlanPackage.pkg
-})
+}
 
-const assignCmsDivision = async (schema: string,cmsUser: CMSUserType, division: DivisionType) => await apolloClientWrapper(schema, adminUser, async (apolloClient): Promise<void> => {
+const assignCmsDivision = async (
+    apolloClient: ApolloClient<NormalizedCacheObject>,
+    cmsUser: CMSUserType,
+    division: DivisionType
+): Promise<void> => {
     // get all users query
     const result = await apolloClient.query({
         query: IndexUsersDocument,
     })
 
     // find zuko
-    const users = result.data.indexUsers.edges.map((edge: UserEdge) => edge.node)
+    const users = result.data.indexUsers.edges.map(
+        (edge: UserEdge) => edge.node
+    )
     const user = users.find((user: User) => user.email === cmsUser.email)
 
     if (!user) {
-        throw new Error(`assignCmsDivision: CMS user ${cmsUser.email} not found`)
+        throw new Error(
+            `assignCmsDivision: CMS user ${cmsUser.email} not found`
+        )
     }
 
     // assign division mutation
-    const updatedCMSUser = await apolloClient.mutate({
+    await apolloClient.mutate({
         mutation: UpdateCmsUserDocument,
         variables: {
             input: {
                 cmsUserID: user.id,
-                divisionAssignment: division
-            }
-        }
+                divisionAssignment: division,
+            },
+        },
     })
-})
+}
 
-const seedUserIntoDB = async (schema: string, user: UserType) => await apolloClientWrapper(schema, user,async (apolloClient): Promise<void> => {
+const seedUserIntoDB = async (
+    apolloClient: ApolloClient<NormalizedCacheObject>
+): Promise<void> => {
     // To seed, we just need to perform a graphql query and the api will add the user to the db
     await apolloClient.query({
-        query: FetchCurrentUserDocument
+        query: FetchCurrentUserDocument,
     })
-})
+}
 
-Cypress.Commands.add('apiCreateAndSubmitContractOnlySubmission', (): Cypress.Chainable<HealthPlanPackage> => {
-    return cy.task('readGraphQLSchema').then(schema => createAndSubmitPackage(schema as string))
-})
+Cypress.Commands.add(
+    'apiCreateAndSubmitContractOnlySubmission',
+    (stateUser): Cypress.Chainable<HealthPlanPackage> =>
+        cy
+            .task('readGraphQLSchema')
+            .then((schema) =>
+                apolloClientWrapper(
+                    schema as string,
+                    stateUser,
+                    createAndSubmitPackage
+                )
+            )
+)
 
-Cypress.Commands.add('apiAssignDivisionToCMSUser', (cmsUser, division): Cypress.Chainable<void> => {
-    return cy.task('readGraphQLSchema').then(schema =>
-        cy.wrap(seedUserIntoDB(schema as string, cmsUser)).then(() =>
-            cy.wrap(assignCmsDivision(schema as string, cmsUser, division))
-        )
-    )
-})
+Cypress.Commands.add(
+    'apiAssignDivisionToCMSUser',
+    (cmsUser, division): Cypress.Chainable<void> => {
+        return cy
+            .task('readGraphQLSchema')
+            .then((schema) =>
+                cy
+                    .wrap(
+                        apolloClientWrapper(
+                            schema as string,
+                            cmsUser,
+                            seedUserIntoDB
+                        )
+                    )
+                    .then(() =>
+                        cy.wrap(
+                            apolloClientWrapper(
+                                schema as string,
+                                adminUser,
+                                (apolloClient) =>
+                                    assignCmsDivision(
+                                        apolloClient,
+                                        cmsUser,
+                                        division
+                                    )
+                            )
+                        )
+                    )
+            )
+    }
+)
