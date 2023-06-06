@@ -477,8 +477,9 @@ Cypress.Commands.add('fillOutSupportingDocuments', () => {
 
 Cypress.Commands.add('waitForDocumentsToLoad', ({ tableView } = { tableView: false}) => {
     if (tableView) {
-        cy.findAllByTestId('file-input-loading-image').should('have.length', 0, {
-            timeout: 100_000,
+        cy.findAllByTestId('upload-finished-indicator').should('exist', {timeout: 120_000}) // for whatever reason the table uploads on documents page seems to take extra long in Cypress
+        cy.findByTestId('file-input-loading-image').should('not.exist', {
+            timeout: 2000,
         })
     } else {
         // list view is the default behavior
