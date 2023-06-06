@@ -475,12 +475,12 @@ Cypress.Commands.add('fillOutSupportingDocuments', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('waitForDocumentsToLoad', ({ tableView } = { tableView: false}) => {
+// for fileupload with the table view and checkboxes- tableView can be assigned to a number that representes how many items in the list should be preses
+Cypress.Commands.add('waitForDocumentsToLoad', ({ tableView } = {tableView: false}) => {
     if (tableView) {
-        cy.findAllByTestId('upload-finished-indicator').should('exist', {timeout: 120_000}) // for whatever reason the table uploads on documents page seems to take extra long in Cypress
-        cy.findByTestId('file-input-loading-image').should('not.exist', {
-            timeout: 2000,
-        })
+        cy.findAllByTestId('file-input-loading-image', {
+            timeout: 100_000,
+        }).should('not.exist')
     } else {
         // list view is the default behavior
         cy.findAllByTestId('file-input-preview-image', {
