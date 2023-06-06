@@ -124,8 +124,8 @@ jobs:
       environment: dev
       stage_name: main
       changed_services: ${{ needs.unit-tests.outputs.changed-services}}
-    secrets:
       aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
+    secrets:
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
@@ -137,8 +137,8 @@ jobs:
       stage_name: main
       app_version: ${{ needs.unit-tests.outputs.app-version }}
       changed_services: ${{ needs.unit-tests.outputs.changed-services}}
-    secrets:
       aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
+    secrets:
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       react_app_auth_mode: IDM
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
@@ -150,9 +150,9 @@ jobs:
       environment: val
       stage_name: val
       changed_services: ${{ needs.unit-tests.outputs.changed-services}}
+      aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
     secrets:
       aws_account_id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
-      aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   promote-app-val:
@@ -163,9 +163,9 @@ jobs:
       stage_name: val
       app_version: ${{ needs.unit-tests.outputs.app-version }}
       changed_services: ${{ needs.unit-tests.outputs.changed-services}}
+      aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
     secrets:
       aws_account_id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
-      aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
       react_app_auth_mode: IDM
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
@@ -176,9 +176,9 @@ jobs:
       environment: prod
       stage_name: prod
       changed_services: ${{ needs.unit-tests.outputs.changed-services}}
+      aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
     secrets:
       aws_account_id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
-      aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   promote-app-prod:
@@ -189,9 +189,9 @@ jobs:
       stage_name: prod
       app_version: ${{ needs.unit-tests.outputs.app-version }}
       changed_services: ${{ needs.unit-tests.outputs.changed-services}}
+      aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
     secrets:
       aws_account_id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
-      aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
       react_app_auth_mode: IDM
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
