@@ -13,8 +13,8 @@
         "module": "Node16",
         "resolveJsonModule": true,
         "isolatedModules": true,
-        "jsx": "react-jsx",
+        "jsx": "react",
         "types": ["cypress", "node"]
     },
-    "exclude": ["gen/*", "dist/*", "jest.config.ts"]
+    "exclude": ["src/gen/*", "dist/*", "jest.config.ts"]
 }
