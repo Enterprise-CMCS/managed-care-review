@@ -1,7 +1,8 @@
 import { AxiosResponse } from 'axios'
 import { API } from 'aws-amplify'
 import {
-    ApolloClient, DocumentNode,
+    ApolloClient,
+    DocumentNode,
     HttpLink,
     InMemoryCache,
     NormalizedCacheObject,
