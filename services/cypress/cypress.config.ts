@@ -1,5 +1,8 @@
-import { defineConfig } from 'cypress';
-import { DocumentNode, gql } from '@apollo/client';
+const { defineConfig } = require('cypress')
+const { gql } = require('@apollo/client')
+const { pa11y, prepareAudit } = require('@cypress-audit/pa11y')
+const fs = require('fs')
+const path = require('path')
 
 export default defineConfig({
     e2e: {
@@ -12,10 +15,6 @@ export default defineConfig({
         viewportHeight: 1080,
         viewportWidth: 1440,
         setupNodeEvents(on, config) {
-            const { pa11y, prepareAudit } = require('@cypress-audit/pa11y')
-            const fs = require('fs')
-            const path = require('path')
-
             require('@cypress/code-coverage/task')(on, config)
 
             const newConfig = config
@@ -36,7 +35,7 @@ export default defineConfig({
             // Reads graphql schema and converts it to gql for apollo client.
             on('task', {
                 pa11y: pa11y(),
-                readGraphQLSchema(): DocumentNode {
+                readGraphQLSchema() {
                     const gqlSchema = fs.readFileSync(path.resolve(__dirname, './gen/schema.graphql'), 'utf-8')
                     return gql(`${gqlSchema}`)
                 }
