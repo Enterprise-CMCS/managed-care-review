@@ -36,7 +36,7 @@ import { unlockedWithALittleBitOfEverything } from '../../../common-code/healthP
 describe('RateDetails', () => {
     beforeAll(() => {
         jest.setTimeout(10000)
-        // TODO: These tests are too long and need to be fully refactored. They are starting to flake in recent versions of RTL, particularly the multi-rate and contract amendment  ests
+        // TODO: These tests are too long and need to be fully refactored. They are starting to flake in recent versions of RTL, particularly the multi-rate and contract amendment tests
         // See this guidance for waitFor and getBy Role: https://github.com/testing-library/dom-testing-library/issues/820
     })
 
