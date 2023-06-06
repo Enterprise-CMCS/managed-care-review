@@ -1,8 +1,7 @@
-import type { JestConfigWithTsJest } from 'ts-jest'
 import { pathsToModuleNameMapper } from 'ts-jest'
 import { compilerOptions } from '../../tsconfig.json'
 
-const jestConfig: JestConfigWithTsJest = {
+const jestConfig = {
     preset: 'ts-jest',
     testEnvironment: 'node',
     transform: {
