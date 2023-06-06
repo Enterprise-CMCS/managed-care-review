@@ -125,7 +125,7 @@ jobs:
       stage_name: main
       changed_services: ${{ needs.unit-tests.outputs.changed-services}}
     secrets:
-      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
@@ -138,7 +138,7 @@ jobs:
       app_version: ${{ needs.unit-tests.outputs.app-version }}
       changed_services: ${{ needs.unit-tests.outputs.changed-services}}
     secrets:
-      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
       aws_account_id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
       react_app_auth_mode: IDM
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
@@ -152,7 +152,7 @@ jobs:
       changed_services: ${{ needs.unit-tests.outputs.changed-services}}
     secrets:
       aws_account_id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
-      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   promote-app-val:
@@ -165,7 +165,7 @@ jobs:
       changed_services: ${{ needs.unit-tests.outputs.changed-services}}
     secrets:
       aws_account_id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
-      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
       react_app_auth_mode: IDM
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
@@ -178,7 +178,7 @@ jobs:
       changed_services: ${{ needs.unit-tests.outputs.changed-services}}
     secrets:
       aws_account_id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
-      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
   promote-app-prod:
@@ -191,7 +191,7 @@ jobs:
       changed_services: ${{ needs.unit-tests.outputs.changed-services}}
     secrets:
       aws_account_id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
-      aws_default_region: ${{ secrets.AWS_DEFAULT_REGION }}
+      aws_default_region: ${{ vars.AWS_DEFAULT_REGION }}
       react_app_auth_mode: IDM
       nr_license_key: ${{ secrets.NR_LICENSE_KEY }}
 
