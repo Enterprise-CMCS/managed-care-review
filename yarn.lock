@@ -8513,7 +8513,7 @@ __metadata:
     eslint-plugin-prettier: ^4.0.0
     eslint-plugin-react: ^7.26.1
     eslint-plugin-react-hooks: ^4.3.0
-    formik: ^2.2.9
+    formik: 2.2.9
     graphql: ^16.2.0
     graphql.macro: ^1.4.2
     jest-launchdarkly-mock: ^1.0.6
@@ -22142,9 +22142,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"formik@npm:^2.2.9":
-  version: 2.4.1
-  resolution: "formik@npm:2.4.1"
+"formik@npm:2.2.9":
+  version: 2.2.9
+  resolution: "formik@npm:2.2.9"
   dependencies:
     deepmerge: ^2.1.1
     hoist-non-react-statics: ^3.3.0
@@ -22155,7 +22155,7 @@ __metadata:
     tslib: ^1.10.0
   peerDependencies:
     react: ">=16.8.0"
-  checksum: c4238b81c7780b3772f2ef2a439f676822f5c4a944de45505fd15eaf8dd84051420c91ce2ccc72da047d89e2ab630a76c992719de643fe3f302fb4af948d4bbc
+  checksum: f07f80eee8423b4c5560546c48c4093c47530dae7d931a4e0d947d68ae1aab94291b1bf2e99ecaa5854ee50593b415fb5724c624c787338f0577f066009e8812
   languageName: node
   linkType: hard
 
