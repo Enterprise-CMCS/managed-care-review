@@ -285,10 +285,11 @@ const apolloClientWrapper = async <T>(
     if (authMode !== 'LOCAL') {
         await AmplifyAuth.signIn(authUser.email, Cypress.env('TEST_USERS_PASS'))
     }
+
     const result = await callback(apolloClient)
 
     if (authMode !== 'LOCAL') {
-        AmplifyAuth.signOut()
+        await AmplifyAuth.signOut()
     }
 
     return result

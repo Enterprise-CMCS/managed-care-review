@@ -16,12 +16,10 @@ import {
 import {
     apolloClientWrapper,
     DivisionType,
-    UserType,
     adminUser,
     contractOnlyData,
     newSubmissionInput,
     CMSUserType,
-    StateUserType,
 } from '../utils/apollo-test-utils'
 import { ApolloClient, NormalizedCacheObject } from '@apollo/client'
 

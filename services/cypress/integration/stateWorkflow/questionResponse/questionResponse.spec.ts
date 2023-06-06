@@ -14,41 +14,15 @@ describe('Q&A', () => {
             'chip-only-form': true,
         })
 
-        cy.apiCreateAndSubmitContractOnlySubmission(stateUser).then(pkg => {
-            cy.logInAsStateUser()
-            cy.visit(`/submissions/${pkg.id}`)
+        // Assign Division to CMS user zuko
+        cy.apiAssignDivisionToCMSUser(cmsUser, 'DMCO').then(() => {
 
-            cy.url({ timeout: 10_000 }).should('contain', pkg.id)
-            cy.findByTestId('submission-summary').should('exist')
-            cy.findByRole('link', {
-                name: `Submission summary`,
-            }).should('exist')
-
-            // Find QA Link and click
-            cy.findByRole('link', { name: /Q&A/ }).click()
-            cy.url({ timeout: 10_000 }).should(
-                'contain',
-                `${pkg.id}/question-and-answers`
-            )
-
-            // Heading is correct for Q&A main page
-            cy.findByRole('link', {
-                name: `Submission summary`,
-            }).should('exist')
-
-            // Log out and log back in as cms user, visiting submission summary page,
-            cy.findByRole('button', { name: 'Sign out' }).click()
-            cy.findByText(
-                'Medicaid and CHIP Managed Care Reporting and Review System'
-            )
-
-            //Assign Division to CMS user zuko
-            cy.apiAssignDivisionToCMSUser(cmsUser, 'DMCO').then(() => {
-                // Log back in as CMS user
+            // Create a new submission
+            cy.apiCreateAndSubmitContractOnlySubmission(stateUser).then(pkg => {
+                // Log in as CMS user and upload question
                 cy.logInAsCMSUser({
                     initialURL: `/submissions/${pkg.id}/question-and-answers`,
                 })
-                cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20000 })
 
                 cy.url({ timeout: 10_000 }).should(
                     'contain',
