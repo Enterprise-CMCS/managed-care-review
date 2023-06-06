@@ -4,7 +4,7 @@ import {
     mockContractAndRatesDraft,
     mockMNState,
     mockStateSubmissionContractAmendment,
-} from '@managed-care-review/app-web/src/testHelpers/apolloMocks/index'
+} from '@managed-care-review/app-web/src/testHelpers/apolloMocks'
 import {
     convertRateSupportingDocs,
     generateRateName,
@@ -28,7 +28,6 @@ import {
 import { basicHealthPlanFormData } from '../healthPlanFormDataMocks'
 
 import { test, expect } from '@jest/globals'
-import * as jest from 'jest'
 
 describe('submission type assertions', () => {
     test.each([
@@ -1008,11 +1007,11 @@ describe('submission type assertions', () => {
             },
         ]
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        jest.spyOn(console, 'error').mockImplementation(() => {})
+        //jest.spyOn(console, 'error').mockImplementation(() => {})
 
         expect(() => convertRateSupportingDocs(contractDocument)).toThrow()
         expect(() => convertRateSupportingDocs(rateDocument)).toThrow()
         expect(() => convertRateSupportingDocs(mixedDocuments)).toThrow()
-        jest.clearAllMocks()
+        //jest.clearAllMocks()
     })
 })
