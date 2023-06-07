@@ -100,6 +100,8 @@ declare global {
 
             apiCreateAndSubmitContractOnlySubmission(stateUser: StateUserType): Cypress.Chainable<HealthPlanPackage>
             apiAssignDivisionToCMSUser(cmsUser: CMSUserType, division: DivisionType): Cypress.Chainable<void>
+
+            interceptGraphQL(): void
         }
     }
 }

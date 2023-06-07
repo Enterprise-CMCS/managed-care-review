@@ -500,9 +500,6 @@ Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
 Cypress.Commands.add(
     'submitStateSubmissionForm',
     (_success = true, resubmission = false) => {
-        cy.intercept('POST', '*/graphql', (req) => {
-            aliasMutation(req, 'submitHealthPlanPackage')
-        })
         cy.findByRole('heading', { level: 2, name: /Review and submit/ })
         cy.findByRole('button', {
             name: 'Submit',

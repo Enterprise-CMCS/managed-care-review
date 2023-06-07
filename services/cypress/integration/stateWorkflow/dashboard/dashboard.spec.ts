@@ -1,6 +1,7 @@
 describe('dashboard', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
+        cy.interceptGraphQL()
     })
     it('can navigate to and from dashboard page', () => {
         cy.logInAsStateUser()

@@ -3,10 +3,6 @@ import {aliasMutation, aliasQuery} from '../utils/graphql-test-utils';
 Cypress.Commands.add(
     'addQuestion',
     ({ documentPath }: { documentPath: string }) => {
-    cy.intercept('POST', '*/graphql', (req) => {
-            aliasQuery(req, 'fetchHealthPlanPackageWithQuestions')
-            aliasMutation(req, 'createQuestion')
-    })
         // Find Add questions button and click
         cy.findByRole('link', { name: /Add questions/ })
             .should('exist')
@@ -56,6 +52,7 @@ Cypress.Commands.add(
             .click()
 
         // Wait for re-fetching of health plan package.
+        cy.wait('@createQuestionResponseMutation', { timeout: 20000 })
         cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20000 })
     }
 )

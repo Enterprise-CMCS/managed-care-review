@@ -29,7 +29,7 @@ const createAndSubmitContractOnlyPackage = async (
     const newSubmission = await apolloClient.mutate({
         mutation: CreateHealthPlanPackageDocument,
         variables: {
-            input: newSubmissionInput,
+            input: newSubmissionInput(),
         },
     })
 
@@ -43,7 +43,7 @@ const createAndSubmitContractOnlyPackage = async (
 
     const fullFormData = {
         ...formData,
-        ...contractOnlyData,
+        ...contractOnlyData(),
     }
 
     const formDataProto = domainToBase64(fullFormData)
@@ -81,10 +81,11 @@ const assignCmsDivision = async (
         query: IndexUsersDocument,
     })
 
-    // find zuko
     const users = result.data.indexUsers.edges.map(
         (edge: UserEdge) => edge.node
     )
+
+    // Find user
     const user = users.find((user: User) => user.email === cmsUser.email)
 
     if (!user) {
@@ -131,7 +132,7 @@ Cypress.Commands.add(
     (cmsUser, division): Cypress.Chainable<void> => {
         return cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
             cy.wrap(apolloClientWrapper(schema, cmsUser, seedUserIntoDB)).then(() =>
-                cy.wrap(apolloClientWrapper(schema, adminUser, (apolloClient) =>
+                cy.wrap(apolloClientWrapper(schema, adminUser(), (apolloClient) =>
                         assignCmsDivision(apolloClient, cmsUser, division)
                     )
                 )

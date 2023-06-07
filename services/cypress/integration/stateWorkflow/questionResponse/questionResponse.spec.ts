@@ -1,11 +1,8 @@
-import { aliasQuery } from '../../../utils/graphql-test-utils'
 import { stateUser, cmsUser } from '../../../utils/apollo-test-utils';
 describe('Q&A', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
-        cy.intercept('POST', '*/graphql', (req) => {
-            aliasQuery(req, 'fetchHealthPlanPackageWithQuestions')
-        })
+        cy.interceptGraphQL()
     })
 
     it('can add questions and responses', () => {
@@ -15,10 +12,10 @@ describe('Q&A', () => {
         })
 
         // Assign Division to CMS user zuko
-        cy.apiAssignDivisionToCMSUser(cmsUser, 'DMCO').then(() => {
+        cy.apiAssignDivisionToCMSUser(cmsUser(), 'DMCO').then(() => {
 
             // Create a new submission
-            cy.apiCreateAndSubmitContractOnlySubmission(stateUser).then(pkg => {
+            cy.apiCreateAndSubmitContractOnlySubmission(stateUser()).then(pkg => {
                 // Log in as CMS user and upload question
                 cy.logInAsCMSUser({
                     initialURL: `/submissions/${pkg.id}/question-and-answers`,
@@ -56,11 +53,13 @@ describe('Q&A', () => {
                 )
 
                 cy.logInAsStateUser()
-                cy.wait(1500)
+
+                cy.findByText('Start new submission').should('exist')
 
                 cy.visit(`/submissions/${pkg.id}`)
+                cy.wait('@fetchHealthPlanPackageWithQuestionsQuery')
+                // cy.url({ timeout: 10_000 }).should('contain', pkg.id)
 
-                cy.url({ timeout: 10_000 }).should('contain', pkg.id)
                 cy.findByTestId('submission-summary').should('exist')
                 cy.findByRole('link', {
                     name: `Submission summary`,

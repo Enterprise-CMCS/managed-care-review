@@ -39,7 +39,7 @@ type DivisionType = 'DMCO' | 'DMCP' | 'OACT'
 
 type UserType = StateUserType | AdminUserType | CMSUserType
 
-const contractOnlyData: Partial<UnlockedHealthPlanFormDataType> = {
+const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
     stateContacts: [
         {
             name: 'Name',
@@ -75,42 +75,42 @@ const contractOnlyData: Partial<UnlockedHealthPlanFormDataType> = {
     managedCareEntities: ['MCO'],
     federalAuthorities: ['STATE_PLAN'],
     rateInfos: [],
-}
+})
 
-const newSubmissionInput = {
+const newSubmissionInput = (): Partial<UnlockedHealthPlanFormDataType> => ({
     populationCovered: 'MEDICAID',
     programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
     submissionType: 'CONTRACT_ONLY',
     riskBasedContract: false,
     submissionDescription: 'Test Q&A',
     contractType: 'BASE',
-}
+})
 
-const stateUser: StateUserType = {
+const stateUser = ():StateUserType => ({
     id: 'user1',
     email: 'aang@example.com',
     givenName: 'Aang',
     familyName: 'Avatar',
     role: 'STATE_USER',
     stateCode: 'MN',
-}
+})
 
-const cmsUser: CMSUserType = {
+const cmsUser = (): CMSUserType => ({
     id: 'user3',
     email: 'zuko@example.com',
     givenName: 'Zuko',
     familyName: 'Hotman',
     role: 'CMS_USER',
     stateAssignments: [],
-}
+})
 
-const adminUser: AdminUserType = {
+const adminUser = (): AdminUserType => ({
     id: 'user4',
     email: 'iroh@example.com',
     givenName: 'Iroh',
     familyName: 'Coldstart',
     role: 'ADMIN_USER',
-}
+})
 
 // Configure Amplify using envs set in cypress.config.ts
 Amplify.configure({

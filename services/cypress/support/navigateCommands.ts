@@ -17,12 +17,6 @@ const buttonsWithLabels: FormButtons = {
 Cypress.Commands.add(
     'navigateFormByButtonClick',
     (buttonKey: FormButtonKey, waitForLoad = true) => {
-        cy.intercept('POST', '*/graphql', (req) => {
-            aliasQuery(req, 'indexHealthPlanPackages')
-            aliasQuery(req, 'fetchHealthPlanPackage')
-            aliasMutation(req, 'createHealthPlanPackage')
-            aliasMutation(req, 'updateHealthPlanFormData')
-        })
         cy.findByRole('button', {
             name: buttonsWithLabels[buttonKey],
         }).should('not.have.attr', 'aria-disabled')
@@ -53,9 +47,6 @@ Cypress.Commands.add(
 Cypress.Commands.add(
     'navigateFormByDirectLink',
     (url: string, waitForLoad = true) => {
-        cy.intercept('POST', '*/graphql', (req) => {
-            aliasQuery(req, 'fetchHealthPlanPackage')
-        })
         cy.visit(url)
         if (waitForLoad)
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 })
