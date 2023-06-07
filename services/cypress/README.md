@@ -6,7 +6,7 @@ This service deploys our Cypress app for e2e testing locally and CI. An importan
     - `./dev test browser`
   - We can also run the local Cypress app against a review app deployment.
     - ```
-      REACT_APP_AUTH_MODE='AWS_COGNITO' TEST_USERS_PASS='<Test user pass here>' API_URL='<api url here>' COGNITO_USER_POOL_ID='<user pool id here>' COGNITO_REGION='<region here>' COGNITO_IDENTITY_POOL_ID='<identity pool id here>' COGNITO_USER_POOL_WEB_CLIENT_ID='<web client id here>' ./dev test browser --open --config 'baseUrl=<insert your branch deployment url here>' 
+      REACT_APP_AUTH_MODE='AWS_COGNITO' TEST_USERS_PASS='<Test user pass here>' API_URL='<api url here>' COGNITO_USER_POOL_ID='<user pool id here>' COGNITO_REGION='<region here>' COGNITO_IDENTITY_POOL_ID='<identity pool id here>' COGNITO_USER_POOL_WEB_CLIENT_ID='<web client id here>' ./dev test browser -- open --config 'baseUrl=<insert your branch deployment url here>' 
       ```
 
 ### Deploying in CI

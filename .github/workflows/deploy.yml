@@ -343,6 +343,7 @@ jobs:
         run: |
           cd services
           endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_NAME)
+          echo $endpoint
           echo "::set-output name=app-endpoint::$endpoint"
 
       - name: get api endpoint

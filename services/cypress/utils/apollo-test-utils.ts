@@ -1,5 +1,4 @@
 import { AxiosResponse } from 'axios'
-import { API } from 'aws-amplify'
 import {
     ApolloClient,
     DocumentNode,
@@ -7,7 +6,7 @@ import {
     InMemoryCache,
     NormalizedCacheObject,
 } from '@apollo/client'
-import { Amplify, Auth as AmplifyAuth } from 'aws-amplify'
+import { Amplify, Auth as AmplifyAuth, API } from 'aws-amplify'
 import { UnlockedHealthPlanFormDataType } from '../../app-web/src/common-code/healthPlanFormDataType'
 
 type StateUserType = {
