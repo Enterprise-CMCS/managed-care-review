@@ -100,7 +100,7 @@ jobs:
         run: lerna run gqlgen
 
       - name: Generate Protos
-        run: lerna run generate
+        run: lerna run generate --scope=@managed-care-review/app-proto
 
       - name: Web Unit Tests
         env:
