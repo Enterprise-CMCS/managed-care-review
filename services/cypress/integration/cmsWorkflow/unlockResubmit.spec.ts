@@ -1,5 +1,3 @@
-import * as path from 'path'
-
 describe('CMS user', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
@@ -51,7 +49,6 @@ describe('CMS user', () => {
                 'edit/review-and-submit',
                 ''
             )
-            fullUrl.pathname = path.dirname(fullUrl)
 
             // Submit, sent to dashboard
             cy.submitStateSubmissionForm()
