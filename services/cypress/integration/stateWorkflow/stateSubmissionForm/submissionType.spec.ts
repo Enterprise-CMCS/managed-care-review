@@ -1,6 +1,7 @@
 describe('submission type', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
+        cy.interceptGraphQL()
     })
     it('can navigate to and from type page', () => {
         cy.logInAsStateUser()

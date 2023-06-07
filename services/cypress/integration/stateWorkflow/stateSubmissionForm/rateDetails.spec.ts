@@ -1,6 +1,7 @@
 describe('rate details', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
+        cy.interceptGraphQL()
     })
     it('can navigate to and from rate details page', () => {
         cy.logInAsStateUser()
