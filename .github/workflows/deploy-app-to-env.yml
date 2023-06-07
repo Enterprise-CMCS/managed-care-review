@@ -83,7 +83,7 @@ jobs:
         run: lerna run generate
 
       - name: Compile proto migration files
-        run: lerna run build --scope=app-proto
+        run: lerna run build --scope=@managed-care-review/app-proto
 
       - uses: actions/download-artifact@v3
         with:

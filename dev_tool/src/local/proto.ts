@@ -17,7 +17,12 @@ export async function compileProtoWatch(runner: LabeledProcessRunner) {
 
     runner.runCommandAndOutput(
         'protogen',
-        ['lerna', 'run', 'generate:watch', '--scope=app-proto'],
+        [
+            'lerna',
+            'run',
+            'generate:watch',
+            '--scope=@managed-care-review/app-proto',
+        ],
         ''
     )
 }
@@ -27,7 +32,7 @@ export async function compileProto(runner: LabeledProcessRunner) {
 
     return runner.runCommandAndOutput(
         'protogen',
-        ['lerna', 'run', 'generate', '--scope=app-proto'],
+        ['lerna', 'run', 'generate', '--scope=@managed-care-review/app-proto'],
         ''
     )
 }
