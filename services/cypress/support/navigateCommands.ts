@@ -68,11 +68,3 @@ Cypress.Commands.add(
     if (waitForLoad)  cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20_000 })
     cy.findByTestId('state-submission-form-page').should('exist')
     })
-
-Cypress.Commands.add('logOut', () => {
-    cy.findByRole('button', { name: 'Sign out' }).click()
-    cy.findByText(
-        'Medicaid and CHIP Managed Care Reporting and Review System', {timeout: 5_000}
-    )
-})
-  

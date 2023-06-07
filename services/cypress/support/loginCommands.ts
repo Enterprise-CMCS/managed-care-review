@@ -131,3 +131,12 @@ Cypress.Commands.add(
         }
     }
 )
+
+
+Cypress.Commands.add('logOut', () => {
+    cy.findByRole('button', { name: 'Sign out' }).should('exist').click()
+    cy.findByText(
+        'Medicaid and CHIP Managed Care Reporting and Review System', {timeout: 20_000}
+    )
+})
+  

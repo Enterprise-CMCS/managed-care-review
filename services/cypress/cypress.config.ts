@@ -32,7 +32,7 @@ const defineConfig = ({
     projectId: 'tt5hbz',
     defaultCommandTimeout: 10000,
     retries: {
-        runMode: 1,
+        runMode: 2,
         openMode: 0,
     },
 })
