@@ -42,7 +42,7 @@ jobs:
         id: stage-name
         shell: bash
         run: |
-          echo "tage-name-for-branch=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> "$GITHUB_OUTPUT"
+          echo "stage-name-for-branch=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> "$GITHUB_OUTPUT"
 
       - name: set branch name
         id: branch-name
