@@ -29,9 +29,9 @@ Cypress.Commands.add('logInAsStateUser', () => {
     }
     //Wait for both queries to finish.
     cy.wait(['@fetchCurrentUserQuery', '@indexHealthPlanPackagesQuery'], {
-        timeout: 80000,
+        timeout: 80_000,
     })
-    cy.findByTestId('dashboard-page').should('exist')
+    cy.findByTestId('dashboard-page', {timeout: 5_000 }).should('exist')
     cy.findByText('Start new submission').should('exist')
 })
 
@@ -72,11 +72,11 @@ Cypress.Commands.add(
         )
         cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
         if (initialURL?.includes('submissions')) {
-            cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20000 }) // for cases where CMs user goes to specific submission on login, likly from email link
+            cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20_000 }) // for cases where CMs user goes to specific submission on login, likly from email link
         } else {
             // Default behavior on login is to go to CMS dashboard
             cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
-            cy.findByTestId('cms-dashboard-page').should('exist')
+            cy.findByTestId('cms-dashboard-page',{timeout: 5_000 }).should('exist')
             cy.findByRole('heading', {name: 'Submissions'}).should('exist')
         }
     }
@@ -93,7 +93,7 @@ Cypress.Commands.add(
         })
 
         cy.visit(initialURL)
-        
+
         cy.findByText(
             'Medicaid and CHIP Managed Care Reporting and Review System'
         )
@@ -123,10 +123,10 @@ Cypress.Commands.add(
         if (initialURL === '/settings') {
             cy.wait('@indexUsersQuery', { timeout: 20_000 })
         } else if (initialURL?.includes('submissions')){
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 }) 
+            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20_000 })
         } else {
             cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
-            cy.findByTestId('cms-dashboard-page').should('exist')
+            cy.findByTestId('cms-dashboard-page', {timeout: 5_000 }).should('exist')
             cy.findByRole('heading', {name: 'Submissions'}).should('exist')
         }
     }
@@ -139,4 +139,3 @@ Cypress.Commands.add('logOut', () => {
         'Medicaid and CHIP Managed Care Reporting and Review System', {timeout: 20_000}
     )
 })
-  

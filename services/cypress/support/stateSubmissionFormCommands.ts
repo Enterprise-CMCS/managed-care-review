@@ -379,10 +379,10 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
         'Certification of capitation rates specific to each rate cell'
     ).click()
 
-    /* 
+    /*
     There are currently multiple date range pickers on the page with the same label names (start date, end date) and different headings
     Preferred approach would be targeting by via findBy* or a custom data-cyid attribute
-    However, surfacing custom attributes on the nested inputs in third party component DateRangePicker not possible in current react-uswds version 
+    However, surfacing custom attributes on the nested inputs in third party component DateRangePicker not possible in current react-uswds version
     For now using targeting by html id (anti-pattern)
 */
     cy.get(`[id="rateInfos.${id}.rateDateStart"]`, {timeout: 2000}).type('02/01/2023')
@@ -479,12 +479,12 @@ Cypress.Commands.add('fillOutSupportingDocuments', () => {
 Cypress.Commands.add('waitForDocumentsToLoad', ({ tableView } = {tableView: false}) => {
     if (tableView) {
         cy.findAllByTestId('file-input-loading-image', {
-            timeout: 100_000,
+            timeout: 120_000,
         }).should('not.exist')
     } else {
         // list view is the default behavior
         cy.findAllByTestId('file-input-preview-image', {
-            timeout: 100_000,
+            timeout: 120_000,
         }).should('not.have.class', 'is-loading')
     }
 })
@@ -525,6 +525,6 @@ Cypress.Commands.add(
             cy.findByTestId('dashboard-page').should('exist')
             cy.findByRole('heading',{name:'Submissions'}).should('exist')
         }
-    
+
     }
 )
