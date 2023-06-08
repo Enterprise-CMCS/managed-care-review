@@ -18117,9 +18117,9 @@ cypress-pipe@^2.0.0:
   integrity sha512-KW9s+bz4tFLucH3rBGfjW+Q12n7S4QpUSSyxiGrgPOfoHlbYWzAGB3H26MO0VTojqf9NVvfd5Kt0MH5XMgbfyg==
 
 cypress@^12.1.0:
-  version "12.13.0"
-  resolved "https://registry.yarnpkg.com/cypress/-/cypress-12.13.0.tgz#725b6617ea19e41e5c59cc509fc3e08097142b01"
-  integrity sha512-QJlSmdPk+53Zhy69woJMySZQJoWfEWun3X5OOenGsXjRPVfByVTHorxNehbzhZrEzH9RDUDqVcck0ahtlS+N/Q==
+  version "12.14.0"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-12.14.0.tgz#37a19b85f5e9d881995e9fee1ddf41b3d3a623dd"
+  integrity sha512-HiLIXKXZaIT1RT7sw1sVPt+qKtis3uYNm6KwC4qoYjabwLKaqZlyS/P+uVvvlBNcHIwL/BC6nQZajpbUd7hOgQ==
   dependencies:
     "@cypress/request" "^2.88.10"
     "@cypress/xvfb" "^1.2.4"
@@ -28531,9 +28531,9 @@ react-select-event@^5.5.0:
     "@testing-library/dom" ">=7"
 
 react-select@^5.7.0:
-  version "5.7.0"
-  resolved "https://registry.yarnpkg.com/react-select/-/react-select-5.7.0.tgz#82921b38f1fcf1471a0b62304da01f2896cd8ce6"
-  integrity sha512-lJGiMxCa3cqnUr2Jjtg9YHsaytiZqeNOKeibv6WF5zbK/fPegZ1hg3y/9P1RZVLhqBTs0PfqQLKuAACednYGhQ==
+  version "5.7.3"
+  resolved "https://registry.yarnpkg.com/react-select/-/react-select-5.7.3.tgz#fa0dc9a23cad6ff3871ad3829f6083a4b54961a2"
+  integrity sha512-z8i3NCuFFWL3w27xq92rBkVI2onT0jzIIPe480HlBjXJ3b5o6Q+Clp4ydyeKrj9DZZ3lrjawwLC5NGl0FSvUDg==
   dependencies:
     "@babel/runtime" "^7.12.0"
     "@emotion/cache" "^11.4.0"
