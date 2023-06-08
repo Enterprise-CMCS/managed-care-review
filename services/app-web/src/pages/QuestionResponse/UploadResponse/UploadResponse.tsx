@@ -117,7 +117,6 @@ export const UploadResponse = () => {
                 aria-label="Add Response"
                 aria-describedby="form-guidance"
                 onSubmit={async (e) => {
-                    e.preventDefault()
                     await handleFormSubmit()
                 }}
             >
@@ -176,11 +175,9 @@ export const UploadResponse = () => {
                             data-testid="page-actions-left-secondary"
                             disabled={apiLoading}
                             onClick={() => {
-                                if (!apiLoading) {
-                                    navigate(
-                                        `/submissions/${id}/question-and-answers`
-                                    )
-                                }
+                                navigate(
+                                    `/submissions/${id}/question-and-answers`
+                                )
                             }}
                         >
                             Cancel

@@ -169,11 +169,9 @@ export const UploadQuestions = () => {
                             data-testid="page-actions-left-secondary"
                             disabled={apiLoading}
                             onClick={() => {
-                                if (!apiLoading) {
-                                    navigate(
-                                        `/submissions/${id}/question-and-answers`
-                                    )
-                                }
+                                navigate(
+                                    `/submissions/${id}/question-and-answers`
+                                )
                             }}
                         >
                             Cancel
