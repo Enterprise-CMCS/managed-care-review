@@ -6,7 +6,8 @@ if [ "$REACT_APP_STAGE_NAME" == "prod" ] || [ "$REACT_APP_STAGE_NAME" == "val" ]
         echo "building for prod or val without instrumentation"
         lerna run build:prod --scope=@managed-care-review/app-web
     else
-        echo "instrumenting for cypress"
-        lerna run build:instrumented --scope=@managed-care-review/app-web
+        echo "skipping for now"
+        #echo "instrumenting for cypress"
+        #lerna run build:instrumented --scope=@managed-care-review/app-web
 fi
 
