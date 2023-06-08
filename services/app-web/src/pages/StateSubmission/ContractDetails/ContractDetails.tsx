@@ -466,8 +466,14 @@ export const ContractDetails = ({
     return (
         <Formik
             initialValues={contractDetailsInitialValues}
-            onSubmit={() => {
-                return
+            onSubmit={(values, { setSubmitting }) => {
+                return handleFormSubmit(values, setSubmitting, {
+                    shouldValidateDocuments: true,
+                    redirectPath:
+                        draftSubmission.submissionType === 'CONTRACT_ONLY'
+                            ? `../contacts`
+                            : `../rate-details`,
+                })
             }}
             validationSchema={() => ContractDetailsFormSchema(draftSubmission)}
         >
@@ -879,16 +885,6 @@ export const ContractDetails = ({
                                         }
                                     )
                                 }
-                            }}
-                            continueOnClick={async () => {
-                                await handleFormSubmit(values, setSubmitting, {
-                                    shouldValidateDocuments: true,
-                                    redirectPath:
-                                        draftSubmission.submissionType ===
-                                        'CONTRACT_ONLY'
-                                            ? `../contacts`
-                                            : `../rate-details`,
-                                })
                             }}
                             disableContinue={showFileUploadError}
                             actionInProgress={isSubmitting}

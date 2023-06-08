@@ -554,8 +554,11 @@ export const RateDetails = ({
     return (
         <Formik
             initialValues={rateInfosInitialValues}
-            onSubmit={() => {
-                return
+            onSubmit={(values, { setSubmitting }) => {
+                return handleFormSubmit(values.rateInfos, setSubmitting, {
+                    shouldValidateDocuments: true,
+                    redirectPath: `../contacts`,
+                })
             }}
             validationSchema={rateDetailsFormSchema}
         >
@@ -1536,16 +1539,6 @@ export const RateDetails = ({
                                             }
                                         )
                                     }
-                                }}
-                                continueOnClick={async () => {
-                                    await handleFormSubmit(
-                                        rateInfos,
-                                        setSubmitting,
-                                        {
-                                            shouldValidateDocuments: true,
-                                            redirectPath: `../contacts`,
-                                        }
-                                    )
                                 }}
                                 disableContinue={
                                     (shouldValidate &&

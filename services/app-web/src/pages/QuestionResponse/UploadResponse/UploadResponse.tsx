@@ -116,8 +116,9 @@ export const UploadResponse = () => {
                 id="AddQuestionResponseForm"
                 aria-label="Add Response"
                 aria-describedby="form-guidance"
-                onSubmit={() => {
-                    return
+                onSubmit={async (e) => {
+                    e.preventDefault()
+                    await handleFormSubmit()
                 }}
             >
                 {apiError && <GenericApiErrorBanner />}
@@ -174,12 +175,12 @@ export const UploadResponse = () => {
                             variant="outline"
                             data-testid="page-actions-left-secondary"
                             disabled={apiLoading}
-                            onClick={async () => {
-                                return apiLoading
-                                    ? undefined
-                                    : navigate(
-                                          `/submissions/${id}/question-and-answers`
-                                      )
+                            onClick={() => {
+                                if (!apiLoading) {
+                                    navigate(
+                                        `/submissions/${id}/question-and-answers`
+                                    )
+                                }
                             }}
                         >
                             Cancel
@@ -190,10 +191,6 @@ export const UploadResponse = () => {
                             variant="default"
                             data-testid="page-actions-right-primary"
                             disabled={showFileUploadError}
-                            onClick={async (e) => {
-                                e.preventDefault()
-                                await handleFormSubmit()
-                            }}
                             animationTimeout={1000}
                             loading={apiLoading}
                         >
