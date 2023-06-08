@@ -15,7 +15,6 @@ describe('submission type', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/type`
             )
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
             cy.findByRole('heading', {
                 level: 2,
                 name: /Submission type/,
@@ -32,7 +31,6 @@ describe('submission type', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/type`
             )
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             // Navigate to dashboard page by clicking save as draft
             cy.navigateFormByButtonClick('SAVE_DRAFT')
@@ -42,7 +40,6 @@ describe('submission type', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/type`
             )
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             // Navigate to contract details page by clicking continue for contract only submission
             cy.navigateFormByButtonClick('CONTINUE')
@@ -62,7 +59,6 @@ describe('submission type', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/type`
             )
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             cy.findByText('Contract action and rate certification').click()
 
@@ -74,7 +70,6 @@ describe('submission type', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/type`
             )
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             cy.findByLabelText('Contract action and rate certification').should(
                 'be.checked'
@@ -94,7 +89,6 @@ describe('submission type', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/type`
             )
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
             cy.findByRole('heading', {
                 level: 2,
                 name: /Submission type/,
@@ -111,7 +105,6 @@ describe('submission type', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/type`
             )
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             //Edit some stuff here
             cy.findByRole('combobox', {
@@ -137,7 +130,6 @@ describe('submission type', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/type`
             )
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
 
             //Check to make sure edited stuff was saved
             cy.get('[aria-label="Remove PMAP"]').should('exist')
