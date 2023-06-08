@@ -8540,6 +8540,7 @@ __metadata:
     serverless-s3-sync: ^3.1.0
     serverless-stack-termination-protection: ^2.0.2
     ts-jest: ^27.1.4
+    ts-loader: ^9.4.2
     tsconfig-paths-webpack-plugin: ^4.0.1
     typescript: ^5.0.4
     url-parse: ^1.5.2
