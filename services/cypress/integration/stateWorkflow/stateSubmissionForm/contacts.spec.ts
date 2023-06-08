@@ -1,6 +1,7 @@
 describe('contacts', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
+        cy.interceptGraphQL()
     })
     it('can navigate to and from contacts page with contract only submission', () => {
         cy.logInAsStateUser()

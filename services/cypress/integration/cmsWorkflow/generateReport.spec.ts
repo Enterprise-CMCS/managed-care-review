@@ -1,6 +1,7 @@
 describe('Generate reports', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
+        cy.interceptGraphQL()
     })
     it('CMS user sees option to create report', () => {
         cy.logInAsCMSUser()
