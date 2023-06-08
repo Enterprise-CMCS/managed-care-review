@@ -41,73 +41,73 @@ Cypress.Commands.add('fillOutContractActionOnlyWithBaseContract', () => {
         if (store['chip-only-form']) {
             cy.get('label[for="medicaid"]').click()
         }
-    })
-    cy.wait(2000)
-    cy.findByRole('combobox', {
-        name: 'Programs this contract action covers (required)',
-    }).click({
-        force: true,
-    })
-    cy.findByText('PMAP').click()
-    cy.findByText('Contract action only').click()
-    cy.findByText('Base contract').click()
 
-    //rate-cert-assurance
-    cy.get('label[for="riskBasedContractNo"]').click()
+        cy.findByRole('combobox', {
+            name: 'Programs this contract action covers (required)',
+        }).click({
+            force: true,
+        })
+        cy.findByText('PMAP').click()
+        cy.findByText('Contract action only').click()
+        cy.findByText('Base contract').click()
 
-    cy.findByRole('textbox', { name: 'Submission description' }).type(
-        'description of contract only submission'
-    )
+        //rate-cert-assurance
+        cy.get('label[for="riskBasedContractNo"]').click()
+
+        cy.findByRole('textbox', { name: 'Submission description' }).type(
+            'description of contract only submission'
+        )
+    })
 })
 
 Cypress.Commands.add('fillOutContractActionOnlyWithAmendment', () => {
     // Must be on '/submissions/new'
-    cy.wait(2000)
     cy.getFeatureFlagStore(['chip-only-form']).then((store) => {
         if (store['chip-only-form']) {
             cy.get('label[for="medicaid"]').click()
         }
-    })
-    cy.findByRole('combobox', {
-        name: 'Programs this contract action covers (required)',
-    }).click({
-        force: true,
-    })
-    cy.findByText('PMAP').click()
-    cy.findByText('Contract action only').click()
 
-    //rate-cert-assurance
-    cy.get('label[for="riskBasedContractNo"]').click()
+        cy.findByRole('combobox', {
+            name: 'Programs this contract action covers (required)',
+        }).click({
+            force: true,
+        })
+        cy.findByText('PMAP').click()
+        cy.findByText('Contract action only').click()
 
-    cy.findByText('Amendment to base contract').click()
-    cy.findByRole('textbox', { name: 'Submission description' }).type(
-        'description of contract only submission'
-    )
+        //rate-cert-assurance
+        cy.get('label[for="riskBasedContractNo"]').click()
+
+        cy.findByText('Amendment to base contract').click()
+        cy.findByRole('textbox', { name: 'Submission description' }).type(
+            'description of contract only submission'
+        )
+    })
 })
 
 Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
     // Must be on '/submissions/new'
-    cy.wait(2000)
     cy.getFeatureFlagStore(['chip-only-form']).then((store) => {
         if (store['chip-only-form']) {
             cy.get('label[for="medicaid"]').click()
         }
-    })
-    cy.findByRole('combobox', {
-        name: 'Programs this contract action covers (required)',
-    }).click({
-        force: true,
-    })
-    cy.findByText('PMAP').click()
-    cy.findByText('Contract action and rate certification').click()
 
-    //rate-cert-assurance
-    cy.get('label[for="riskBasedContractNo"]').click()
+        cy.findByRole('combobox', {
+            name: 'Programs this contract action covers (required)',
+        }).click({
+            force: true,
+        })
+        cy.findByText('PMAP').click()
+        cy.findByText('Contract action and rate certification').click()
 
-    cy.findByText('Base contract').click()
-    cy.findByRole('textbox', { name: 'Submission description' }).type(
-        'description of contract and rates submission'
-    )
+        //rate-cert-assurance
+        cy.get('label[for="riskBasedContractNo"]').click()
+
+        cy.findByText('Base contract').click()
+        cy.findByRole('textbox', { name: 'Submission description' }).type(
+            'description of contract and rates submission'
+        )
+    })
 })
 
 Cypress.Commands.add('fillOutBaseContractDetails', () => {
