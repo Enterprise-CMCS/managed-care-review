@@ -22,8 +22,7 @@ module.exports = defineConfig({
                 }
             }))
             require('@cypress/code-coverage/task')(on, config)
-
-            const gqlSchema = fs.readFileSync(path.resolve(__dirname, './gen/schema.graphql'), 'utf-8')
+          
             const newConfig = config
 
             newConfig.env.AUTH_MODE = process.env.REACT_APP_AUTH_MODE
@@ -44,6 +43,7 @@ module.exports = defineConfig({
             on('task', {
                 pa11y: pa11y(),
                 readGraphQLSchema() {
+                    const gqlSchema = fs.readFileSync(path.resolve(__dirname, './gen/schema.graphql'), 'utf-8')
                     return gql(`${gqlSchema}`)
                 }
             })
