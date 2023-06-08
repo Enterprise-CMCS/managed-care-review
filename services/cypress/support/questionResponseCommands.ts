@@ -22,8 +22,7 @@ Cypress.Commands.add(
             .click()
 
         // Wait for re-fetching of health plan package.
-        cy.wait('@createQuestionMutation', { timeout: 20000 })
-        cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20000 })
+        cy.wait(['@createQuestionMutation', '@fetchHealthPlanPackageWithQuestionsQuery'], { timeout: 20000 })
     }
 )
 
@@ -52,7 +51,6 @@ Cypress.Commands.add(
             .click()
 
         // Wait for re-fetching of health plan package.
-        cy.wait('@createQuestionResponseMutation', { timeout: 20000 })
-        cy.wait('@fetchHealthPlanPackageWithQuestionsQuery', { timeout: 20000 })
+        cy.wait(['@createQuestionResponseMutation', '@fetchHealthPlanPackageWithQuestionsQuery'], { timeout: 20000 })
     }
 )

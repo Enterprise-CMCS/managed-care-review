@@ -250,12 +250,12 @@ const apolloClientWrapper = async <T>(
     authUser: UserType,
     callback: (apolloClient: ApolloClient<NormalizedCacheObject>) => Promise<T>
 ): Promise<T> => {
-    const authMode = Cypress.env('AUTH_MODE')
+    const isLocalAuth = Cypress.env('AUTH_MODE') === 'LOCAL'
 
     const httpLinkConfig = {
         uri: '/graphql',
         headers:
-            authMode === 'LOCAL'
+            isLocalAuth
                 ? {
                       'cognito-authentication-provider':
                           JSON.stringify(authUser),
@@ -282,13 +282,13 @@ const apolloClientWrapper = async <T>(
         },
     })
 
-    if (authMode !== 'LOCAL') {
+    if (!isLocalAuth) {
         await AmplifyAuth.signIn(authUser.email, Cypress.env('TEST_USERS_PASS'))
     }
 
     const result = await callback(apolloClient)
 
-    if (authMode !== 'LOCAL') {
+    if (!isLocalAuth) {
         await AmplifyAuth.signOut()
     }
 

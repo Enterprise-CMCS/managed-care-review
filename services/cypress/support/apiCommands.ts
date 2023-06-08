@@ -21,7 +21,7 @@ import {
     newSubmissionInput,
     CMSUserType,
 } from '../utils/apollo-test-utils'
-import {ApolloClient, DocumentNode, NormalizedCacheObject} from '@apollo/client'
+import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
 
 const createAndSubmitContractOnlyPackage = async (
     apolloClient: ApolloClient<NormalizedCacheObject>
@@ -129,8 +129,8 @@ Cypress.Commands.add(
 
 Cypress.Commands.add(
     'apiAssignDivisionToCMSUser',
-    (cmsUser, division): Cypress.Chainable<void> => {
-        return cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
+    (cmsUser, division): Cypress.Chainable<void> =>
+        cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
             cy.wrap(apolloClientWrapper(schema, cmsUser, seedUserIntoDB)).then(() =>
                 cy.wrap(apolloClientWrapper(schema, adminUser(), (apolloClient) =>
                         assignCmsDivision(apolloClient, cmsUser, division)
@@ -138,5 +138,4 @@ Cypress.Commands.add(
                 )
             )
         )
-    }
 )
