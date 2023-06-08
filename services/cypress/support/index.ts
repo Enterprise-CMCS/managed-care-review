@@ -23,7 +23,11 @@ import './e2e'
 import {
     FeatureFlagLDConstant,
     FeatureFlagSettings,
-} from 'app-web/src/common-code/featureFlags'
+} from '../../app-web/src/common-code/featureFlags'
+import './apiCommands'
+import { HealthPlanPackage } from '../gen/gqlClient';
+import { CMSUserType, DivisionType } from '../utils/apollo-test-utils';
+import { StateUserType } from 'app-api/src/domain-models';
 
 type FormButtonKey =
     | 'CONTINUE_FROM_START_NEW'
@@ -75,22 +79,12 @@ declare global {
             clickSubmissionLink(testId: string): void
 
             // question response commands
-            addQuestion({
-                documentPath
-            }: {
-                documentPath: string
-            }): void
-            addResponse({
-                            documentPath
-                        }: {
-                documentPath: string
-            }): void
+            addQuestion({ documentPath }: { documentPath: string }): void
+            addResponse({ documentPath }: { documentPath: string }): void
 
             // Launch Darkly commands
             stubFeatureFlags(): void
-            interceptFeatureFlags(
-                toggleFlags?: FeatureFlagSettings
-            ): void
+            interceptFeatureFlags(toggleFlags?: FeatureFlagSettings): void
             getFeatureFlagStore(
                 featureFlag?: FeatureFlagLDConstant[]
             ): Promise<FeatureFlagSettings>
@@ -98,11 +92,16 @@ declare global {
             // User settings commands
             assignDivisionToCMSUser({
                 userEmail,
-                division
+                division,
             }: {
-                userEmail: string,
-                division: 'DMCO' | 'DMCP' | 'OACT'
+                userEmail: string
+                division: DivisionType
             }): void
+
+            apiCreateAndSubmitContractOnlySubmission(stateUser: StateUserType): Cypress.Chainable<HealthPlanPackage>
+            apiAssignDivisionToCMSUser(cmsUser: CMSUserType, division: DivisionType): Cypress.Chainable<void>
+
+            interceptGraphQL(): void
         }
     }
 }

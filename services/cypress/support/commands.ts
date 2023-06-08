@@ -7,6 +7,7 @@ import '@cypress-audit/pa11y/commands'
 import '@testing-library/cypress/add-commands'
 import 'cypress-file-upload'
 import 'cypress-pipe'
+import {aliasMutation, aliasQuery} from '../utils/graphql-test-utils';
 
 
 const LOCAL_STORAGE_MEMORY = {}
@@ -40,5 +41,21 @@ Cypress.Commands.add('restoreLocalStorage', () => {
 Cypress.Commands.add('safeClick', { prevSubject: 'element' }, ($element) => {
     const click = ($el) => $el.click()
     return cy.wrap($element).should('exist').should('be.visible').wait(500).pipe(click)
+})
+
+Cypress.Commands.add('interceptGraphQL', () => {
+    cy.intercept('POST', '*/graphql', (req) => {
+        aliasQuery(req, 'fetchCurrentUser')
+        aliasQuery(req, 'indexUsers')
+        aliasQuery(req, 'fetchHealthPlanPackage')
+        aliasQuery(req, 'fetchHealthPlanPackageWithQuestions')
+        aliasQuery(req, 'indexHealthPlanPackages')
+        aliasMutation(req, 'createHealthPlanPackage')
+        aliasMutation(req, 'updateHealthPlanFormData')
+        aliasMutation(req, 'submitHealthPlanPackage')
+        aliasMutation(req, 'updateCMSUser')
+        aliasMutation(req, 'createQuestion')
+        aliasMutation(req, 'createQuestionResponse')
+    }).as('GraphQL')
 })
 
