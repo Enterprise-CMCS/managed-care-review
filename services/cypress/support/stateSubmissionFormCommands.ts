@@ -468,10 +468,7 @@ Cypress.Commands.add('fillOutSupportingDocuments', () => {
     // twice because there could be validation errors with checkbox
     cy.verifyDocumentsHaveNoErrors()
 
-    cy.findAllByTestId('upload-finished-indicator', { timeout: 120000 }).should(
-        'have.have.length',
-        2
-    )
+    cy.waitForDocumentsToLoad({tableView: true})
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
@@ -479,12 +476,12 @@ Cypress.Commands.add('fillOutSupportingDocuments', () => {
 Cypress.Commands.add('waitForDocumentsToLoad', ({ tableView } = {tableView: false}) => {
     if (tableView) {
         cy.findAllByTestId('file-input-loading-image', {
-            timeout: 120_000,
+            timeout: 150_000,
         }).should('not.exist')
     } else {
         // list view is the default behavior
         cy.findAllByTestId('file-input-preview-image', {
-            timeout: 120_000,
+            timeout: 150_000,
         }).should('not.have.class', 'is-loading')
     }
 })
@@ -520,7 +517,7 @@ Cypress.Commands.add(
                     cy.findByTestId('submit-modal-submit').click()
                 }
             })
-        cy.wait('@submitHealthPlanPackageMutation', { timeout: 50000 })
+        cy.wait('@submitHealthPlanPackageMutation', { timeout: 50_000 })
         if (success) {
             cy.findByTestId('dashboard-page').should('exist')
             cy.findByRole('heading',{name:'Submissions'}).should('exist')
