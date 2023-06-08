@@ -220,15 +220,8 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - uses: actions/download-artifact@v3
-        with:
-          name: app-web-gen
-          path: ./services/app-web/src/gen
-
-      - uses: actions/download-artifact@v3
-        with:
-          name: cypress-gen
-          path: ./services/cypress/gen
+      - name: Generate Code
+        run: lerna run generate
 
       - name: Cypress chrome fix
         run: |

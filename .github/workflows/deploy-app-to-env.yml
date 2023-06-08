@@ -52,18 +52,6 @@ jobs:
       - name: Generate Code
         run: lerna run generate
 
-      - name: upload app web gen directory
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-web-gen
-          path: ./services/app-web/src/gen
-
-      - name: upload cypress gen directory
-        uses: actions/upload-artifact@v3
-        with:
-          name: cypress-gen
-          path: ./services/cypress/gen
-
       - name: deploy app-web
         id: deploy-app-web
         env:
