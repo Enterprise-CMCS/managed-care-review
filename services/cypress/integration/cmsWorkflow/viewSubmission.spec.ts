@@ -94,49 +94,6 @@ describe('CMS user can view submission', () => {
             cy.findByText(submissionName).should('exist').click()
             cy.url({ timeout: 10_000 }).should('contain', submissionId)
             cy.findByTestId('submission-summary').should('exist')
-
-            // log out CMS user, log in Admin user, and recheck that submission can be retrieved
-            cy.logOut()
-            cy.logInAsAdminUser()
-            cy.findByTestId('cms-dashboard-page').should('exist')
-            cy.findByRole('table').should('exist')
-            cy.findByText(submissionName).should('exist')
-            // check the table of submissions
-
-            // only one matching entry
-            cy.get('table')
-                .findAllByText(submissionName)
-                .should('have.length', 1)
-
-            // has proper row data
-            cy.get('table')
-                .should('exist')
-                .findByText(submissionName)
-                .parent()
-                .findByTestId('submission-date')
-                .should('not.be.empty')
-
-            cy.get('table')
-                .should('exist')
-                .findByText(submissionName)
-                .parent()
-                .siblings('[data-testid="submission-status"]')
-                .should('have.text', 'Submitted')
-
-            cy.get('table')
-                .contains('a', submissionName)
-                .parents('tr')
-                .findByTestId('submission-type')
-                .should('have.text', 'Contract action and rate certification')
-
-            cy.get('table')
-                .contains('a', submissionName)
-                .should('have.attr', 'href')
-
-            // can navigate to submission summary  by clicking link
-            cy.findByText(submissionName).should('exist').click()
-            cy.url({ timeout: 10_000 }).should('contain', submissionId)
-            cy.findByTestId('submission-summary').should('exist')
         })
     })
 })

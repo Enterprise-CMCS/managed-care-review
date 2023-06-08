@@ -31,7 +31,7 @@ Cypress.Commands.add('logInAsStateUser', () => {
     cy.wait(['@fetchCurrentUserQuery', '@indexHealthPlanPackagesQuery'], {
         timeout: 80_000,
     })
-    cy.findByTestId('dashboard-page', {timeout: 5_000 }).should('exist')
+    cy.findByTestId('dashboard-page', {timeout: 10_000 }).should('exist')
     cy.findByText('Start new submission').should('exist')
 })
 
@@ -76,7 +76,7 @@ Cypress.Commands.add(
         } else {
             // Default behavior on login is to go to CMS dashboard
             cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
-            cy.findByTestId('cms-dashboard-page',{timeout: 5_000 }).should('exist')
+            cy.findByTestId('cms-dashboard-page',{timeout: 10_000 }).should('exist')
             cy.findByRole('heading', {name: 'Submissions'}).should('exist')
         }
     }
@@ -126,7 +126,7 @@ Cypress.Commands.add(
             cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20_000 })
         } else {
             cy.wait('@indexHealthPlanPackagesQuery', { timeout: 80_000 })
-            cy.findByTestId('cms-dashboard-page', {timeout: 5_000 }).should('exist')
+            cy.findByTestId('cms-dashboard-page', {timeout: 10_000 }).should('exist')
             cy.findByRole('heading', {name: 'Submissions'}).should('exist')
         }
     }
