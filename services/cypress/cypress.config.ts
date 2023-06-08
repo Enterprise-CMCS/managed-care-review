@@ -35,6 +35,7 @@ const defineConfig = ({
         runMode: 1,
         openMode: 0,
     },
+    videoUploadOnPasses: false
 })
 
 module.exports = defineConfig
