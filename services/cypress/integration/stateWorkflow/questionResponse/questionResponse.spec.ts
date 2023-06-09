@@ -42,23 +42,18 @@ describe('Q&A', () => {
                     .within(() => {
                         // Add timeout to findByText to allow time for generating document urls
                         cy.findByText('questions_for_submission.pdf', {
-                            timeout: 5000,
+                            timeout: 5_000,
                         }).should('exist')
                     })
 
                 // Log out and log back in as cms user, visiting submission summary page,
-                cy.findByRole('button', { name: 'Sign out' }).click()
-                cy.findByText(
-                    'Medicaid and CHIP Managed Care Reporting and Review System'
-                )
+                cy.logOut()
 
                 cy.logInAsStateUser()
 
                 cy.findByText('Start new submission').should('exist')
 
                 cy.visit(`/submissions/${pkg.id}`)
-                cy.wait('@fetchHealthPlanPackageWithQuestionsQuery')
-                // cy.url({ timeout: 10_000 }).should('contain', pkg.id)
 
                 cy.findByTestId('submission-summary').should('exist')
                 cy.findByRole('link', {
@@ -83,7 +78,7 @@ describe('Q&A', () => {
                     .within(() => {
                         // Add timeout to findByText to allow time for generating document urls
                         cy.findByText('questions_for_submission.pdf', {
-                            timeout: 5000,
+                            timeout: 5_000,
                         }).should('exist')
                     })
 
@@ -100,7 +95,7 @@ describe('Q&A', () => {
                         // Add timeout to findByText to allow time for generating document urls
                         cy.findByText(
                             'response_to_questions_for_submission.pdf',
-                            { timeout: 5000 }
+                            { timeout: 5_000 }
                         ).should('exist')
                     })
             })

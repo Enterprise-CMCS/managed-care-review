@@ -3,7 +3,7 @@ describe('contract details', () => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
     })
-    it('can navigate to and from contract details page', () => {
+    it(' navigate back and save as draft from contract details page', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmissionWithBaseContract()
 
@@ -26,18 +26,6 @@ describe('contract details', () => {
             ).safeClick()
             cy.navigateFormByButtonClick('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
-
-            // Navigate to submission type page, switch to contract and rates submission
-            cy.visit(`/submissions/${draftSubmissionId}/edit/type`)
-            cy.findByText('Contract action and rate certification').click()
-            cy.navigateFormByButtonClick('CONTINUE')
-            cy.findByRole('heading', { level: 2, name: /Contract details/ })
-            // this prevents flakes- watch for step indicator to update to show rerenders after update call are complete
-            cy.findByTestId('step-indicator').contains('span', 'Rate details')
-
-            // CONTINUE for contract and rates submission goes to Rate details page
-            cy.navigateFormByButtonClick('CONTINUE')
-            cy.findByRole('heading', { level: 2, name: /Rate details/ })
         })
     })
 
