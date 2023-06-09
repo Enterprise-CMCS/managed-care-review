@@ -129,6 +129,7 @@ const rateInfosTypeSchema = z.object({
     rateType: rateTypeSchema.optional(),
     rateCapitationType: rateCapitationTypeSchema.optional(),
     rateDocuments: z.array(submissionDocumentSchema).optional(),
+    supportingDocuments: z.array(submissionDocumentSchema).optional(),
     rateDateStart: z.date().optional(),
     rateDateEnd: z.date().optional(),
     rateDateCertified: z.date().optional(),
@@ -168,11 +169,11 @@ const unlockedHealthPlanFormDataZodSchema = z.object({
     rateInfos: z.array(rateInfosTypeSchema),
 })
 
-/*  
+/*
       This locked Zod schema exists as a light correctness check for the proto decode step (which otherwise does no significant type checking)
-      
+
       This is not the primary validation for user entered data in the app. It does NOT represent the latest valid state of all fields on the form.
-      Look at the formik schemas (client side) and functions like isValidContract isValidRate functions (server side) if you are looking for the latest schemas for locked subs. 
+      Look at the formik schemas (client side) and functions like isValidContract isValidRate functions (server side) if you are looking for the latest schemas for locked subs.
 */
 const lockedHealthPlanFormDataZodSchema = z.object({
     id: z.string(),

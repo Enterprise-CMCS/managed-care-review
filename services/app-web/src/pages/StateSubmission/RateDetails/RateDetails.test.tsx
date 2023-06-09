@@ -1468,6 +1468,7 @@ describe('RateDetails', () => {
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                supportingDocuments:  [],
                 rateType: undefined,
                 rateDateStart: undefined,
                 rateDateEnd: undefined,
@@ -1685,6 +1686,7 @@ describe('RateDetails', () => {
                                     sha256: '6d50607f29187d5b185ffd9d46bc5ef75ce7abb53318690c73e55b6623e25ad5', // pragma: allowlist secret
                                 },
                             ],
+                            supportingDocuments: [],
                             packagesWithSharedRateCerts: [],
                         },
                     ],

@@ -158,6 +158,8 @@ const updateTestHealthPlanFormData = async (
     server: ApolloServer,
     updatedFormData: HealthPlanFormDataType
 ): Promise<HealthPlanPackage> => {
+    console.log('1')
+    console.log(updatedFormData)
     const updatedB64 = domainToBase64(updatedFormData)
     const updateResult = await server.executeOperation({
         query: UPDATE_HEALTH_PLAN_FORM_DATA,
@@ -168,9 +170,9 @@ const updateTestHealthPlanFormData = async (
             },
         },
     })
-
+    console.log('2')
     if (updateResult.errors) {
-        console.info('errors', updateResult.errors)
+        console.info('errors', JSON.stringify(updateResult.errors))
         throw new Error(
             `updateTestHealthPlanFormData mutation failed with errors ${updateResult.errors}`
         )
@@ -179,7 +181,7 @@ const updateTestHealthPlanFormData = async (
     if (!updateResult.data) {
         throw new Error('updateTestHealthPlanFormData returned nothing')
     }
-
+    console.log('3')
     return updateResult.data.updateHealthPlanFormData.pkg
 }
 
@@ -217,6 +219,7 @@ const createAndUpdateTestHealthPlanPackage = async (
                     documentCategories: ['RATES' as const],
                 },
             ],
+            supportingDocuments: [],
             //We only want one rate ID and use last program in list to differentiate from programID if possible.
             rateProgramIDs: [ratePrograms.reverse()[0].id],
             actuaryContacts: [

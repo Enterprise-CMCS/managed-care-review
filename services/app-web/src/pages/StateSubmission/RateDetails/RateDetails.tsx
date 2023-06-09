@@ -448,6 +448,7 @@ export const RateDetails = ({
                 rateType: rateInfo.rateType,
                 rateCapitationType: rateInfo.rateCapitationType,
                 rateDocuments: processFileItems(fileItemsMatrix[index]),
+                supportingDocuments: [],
                 rateDateStart: formatFormDateForDomain(rateInfo.rateDateStart),
                 rateDateEnd: formatFormDateForDomain(rateInfo.rateDateEnd),
                 rateDateCertified: formatFormDateForDomain(
@@ -476,6 +477,7 @@ export const RateDetails = ({
         })
 
         try {
+            console.log(draftSubmission)
             const updatedSubmission = await updateDraft(draftSubmission)
             if (updatedSubmission instanceof Error) {
                 setSubmitting(false)

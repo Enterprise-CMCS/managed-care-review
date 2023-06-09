@@ -305,6 +305,7 @@ const generateRateName = (
     return rateName
 }
 
+ // This logic is no longer needed once SUPPORTING_DOCS_BY_RATE flag is on in production
 const convertRateSupportingDocs = (
     documents: SubmissionDocument[]
 ): SubmissionDocument[] => {
