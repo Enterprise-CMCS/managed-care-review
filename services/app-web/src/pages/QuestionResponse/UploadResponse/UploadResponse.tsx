@@ -117,6 +117,7 @@ export const UploadResponse = () => {
                 aria-label="Add Response"
                 aria-describedby="form-guidance"
                 onSubmit={async (e) => {
+                    e.preventDefault()
                     await handleFormSubmit()
                 }}
             >
