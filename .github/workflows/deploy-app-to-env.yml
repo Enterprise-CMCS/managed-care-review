@@ -85,6 +85,18 @@ jobs:
       - name: Compile proto migration files
         run: lerna run build --scope=app-proto
 
+      - name: upload app web gen directory
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-web-gen
+          path: ./services/app-web/src/gen
+
+      - name: upload cypress gen directory
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-gen
+          path: ./services/cypress/gen
+
       - uses: actions/download-artifact@v3
         with:
           name: lambda-layers-prisma-client-migration
