@@ -45,7 +45,7 @@ describe('Q&A', () => {
                             }).should('exist')
                         })
 
-                    // Log out and log back in as State user, visiting submission summary page,
+                    // Log out and log back in as State user, visiting submission summary page
                     cy.logOut()
 
                     cy.logInAsStateUser()
