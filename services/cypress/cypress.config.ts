@@ -15,6 +15,7 @@ module.exports = defineConfig({
         videosFolder: 'videos',
         viewportHeight: 1080,
         viewportWidth: 1440,
+        experimentalRunAllSpecs: true,
         setupNodeEvents(on, config) {
             on('file:preprocessor', createBundler({
                 define: {
@@ -56,5 +57,7 @@ module.exports = defineConfig({
         runMode: 1,
         openMode: 0,
     },
-    videoUploadOnPasses: false
+    videoUploadOnPasses: false,
+    experimentalMemoryManagement: true,
+    numTestsKeptInMemory: 30
 })
