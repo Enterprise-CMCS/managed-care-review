@@ -23,7 +23,7 @@ module.exports = defineConfig({
                 }
             }))
             require('@cypress/code-coverage/task')(on, config)
-
+          
             const newConfig = config
 
             newConfig.env.AUTH_MODE = process.env.REACT_APP_AUTH_MODE
