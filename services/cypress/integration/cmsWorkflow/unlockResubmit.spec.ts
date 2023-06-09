@@ -1,8 +1,9 @@
-import * as path from 'path'
+import {aliasMutation, aliasQuery} from '../../utils/graphql-test-utils';
 
 describe('CMS user', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
+        cy.interceptGraphQL()
     })
     it('can unlock and resubmit', () => {
         cy.logInAsStateUser()
@@ -51,7 +52,6 @@ describe('CMS user', () => {
                 'edit/review-and-submit',
                 ''
             )
-            fullUrl.pathname = path.dirname(fullUrl)
 
             // Submit, sent to dashboard
             cy.submitStateSubmissionForm()
@@ -67,13 +67,11 @@ describe('CMS user', () => {
             cy.logInAsCMSUser({ initialURL: submissionURL })
 
             // click on the unlock button, type in reason and confirm
-            cy.wait(2000)
             cy.findByRole('button', { name: 'Unlock submission' }).click()
             cy.findAllByTestId('modalWindow').eq(1).should('be.visible')
             cy.get('#unlockSubmitModalInput').type('Unlock submission reason.')
             cy.findByRole('button', { name: 'Unlock' }).click()
 
-            cy.wait(2000)
 
             cy.findByRole('button', { name: 'Unlock submission' }).should(
                 'be.disabled'
@@ -89,8 +87,6 @@ describe('CMS user', () => {
                     /Unlocked on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
                 )
                 .should('exist')
-
-            cy.wait(2000)
 
             //Find unlocked submission name
             cy.get('#submissionName').then(($h2) => {
@@ -156,19 +152,15 @@ describe('CMS user', () => {
                     .and('not.include', 'review-and-submit')
 
                 // Navigate to resubmitted submission and check for submission updated banner
-
                 cy.get('table')
                     .findByRole('link', { name: submissionName })
                     .should('exist')
                     .click()
 
-                cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50000 })
                 cy.findByTestId('updatedSubmissionBanner').should('exist')
 
                 //Sign out
                 cy.findByRole('button', { name: 'Sign out' }).click()
-
-                cy.wait(5000)
 
                 cy.findByText(
                     'Medicaid and CHIP Managed Care Reporting and Review System'

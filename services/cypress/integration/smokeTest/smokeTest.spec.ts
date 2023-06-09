@@ -1,6 +1,7 @@
 describe('smoke test', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
+        cy.interceptGraphQL()
     })
     it('can log in as a state user', () => {
         cy.logInAsStateUser()

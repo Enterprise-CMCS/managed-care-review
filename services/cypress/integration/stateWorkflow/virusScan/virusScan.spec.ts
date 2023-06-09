@@ -1,6 +1,7 @@
 describe.only('documents', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
+        cy.interceptGraphQL()
     })
     if (Cypress.env('AUTH_MODE') !== 'LOCAL') {
         it('will error in CI when a virus is uploaded', () => {
