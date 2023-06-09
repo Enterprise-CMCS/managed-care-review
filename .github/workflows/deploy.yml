@@ -36,18 +36,18 @@ jobs:
       - name: set app version
         id: app-version
         shell: bash
-        run: echo "::set-output name=app-version::$(scripts/app_version.sh)"
+        run: echo "app-version=$(scripts/app_version.sh)" >> "$GITHUB_OUTPUT"
 
       - name: set stage name
         id: stage-name
         shell: bash
         run: |
-          echo "::set-output name=stage-name-for-branch::$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})"
+          echo "stage-name-for-branch=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> "$GITHUB_OUTPUT"
 
       - name: set branch name
         id: branch-name
         shell: bash
-        run: echo "::set-output name=branch-name::$(echo ${GITHUB_REF#refs/heads/})"
+        run: echo "branch-name=$(echo ${GITHUB_REF#refs/heads/})" >> "$GITHUB_OUTPUT"
 
       - name: lock this branch to prevent concurrent deploys
         run: ./.github/github-lock.sh
@@ -108,6 +108,18 @@ jobs:
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-web
         run: yarn test:once --coverage
+
+      - name: upload app web gen directory
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-web-gen
+          path: ./services/app-web/src/gen
+
+      - name: upload cypress gen directory
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-gen
+          path: ./services/cypress/gen
 
       - name: upload unit test coverage
         uses: actions/upload-artifact@v3
@@ -277,7 +289,12 @@ jobs:
     runs-on: ubuntu-20.04
     outputs:
       application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
+      api-endpoint: ${{ steps.save-api-endpoint.outputs.api-endpoint }}
       cypress-uuid: ${{ steps.uuid.outputs.value }}
+      cognito-user-pool-id: ${{ steps.save-cognito-user-pool-id.outputs.value }}
+      cognito-region: ${{ steps.save-cognito-region.outputs.value }}
+      cognito-identity-pool-id: ${{ steps.save-cognito-identity-pool-id.outputs.value }}
+      cognito-user-pool-web-client-id: ${{ steps.save-cognito-user-pool-web-client-id.outputs.value }}
 
     steps:
       - uses: actions/checkout@v3
@@ -318,7 +335,52 @@ jobs:
           cd services
           endpoint=$(./output.sh ui CloudFrontEndpointUrl $STAGE_NAME)
           echo $endpoint
-          echo "::set-output name=app-endpoint::$endpoint"
+          echo "app-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
+
+      - name: get api endpoint
+        id: save-api-endpoint
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          cd services
+          endpoint=$(./output.sh infra-api ApiGatewayRestApiUrl $STAGE_NAME)
+          echo "api-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
+
+      - name: get cognito user pool id
+        id: save-cognito-user-pool-id
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          cd services
+          endpoint=$(./output.sh ui-auth UserPoolId $STAGE_NAME)
+          echo "value=$endpoint" >> "$GITHUB_OUTPUT"
+
+      - name: get cognito region
+        id: save-cognito-region
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          cd services
+          endpoint=$(./output.sh ui-auth Region $STAGE_NAME)
+          echo "value=$endpoint" >> "$GITHUB_OUTPUT"
+
+      - name: get cognito identity pool id
+        id: save-cognito-identity-pool-id
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          cd services
+          endpoint=$(./output.sh ui-auth IdentityPoolId $STAGE_NAME)
+          echo "value=$endpoint" >> "$GITHUB_OUTPUT"
+
+      - name: get cognito user pool web client id
+        id: save-cognito-user-pool-web-client-id
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          cd services
+          endpoint=$(./output.sh ui-auth UserPoolClientId $STAGE_NAME)
+          echo "value=$endpoint" >> "$GITHUB_OUTPUT"
 
       - name: get storybook endpoint
         id: save-storybook-endpoint
@@ -328,11 +390,11 @@ jobs:
           cd services
           endpoint=$(./output.sh storybook CloudFrontEndpointUrl $STAGE_NAME)
           echo $endpoint
-          echo "::set-output name=storybook-endpoint::$endpoint"
+          echo "storybook-endpoint=$endpoint" >> "$GITHUB_OUTPUT"
 
       - name: Generate unique ID for Cypress
         id: uuid
-        run: echo "::set-output name=value::sha-$GITHUB_SHA-time-$(date +"%s")"
+        run: echo "value=sha-$GITHUB_SHA-time-$(date +"%s")" >> "$GITHUB_OUTPUT"
 
   end-deployment:
     needs: [begin-deployment, deploy-app, finishing-prep]
@@ -387,6 +449,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - uses: actions/download-artifact@v3
+        with:
+          name: app-web-gen
+          path: ./services/app-web/src/gen
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: cypress-gen
+          path: ./services/cypress/gen
+
       - name: check ip
         id: check-ip
         shell: bash
@@ -414,6 +486,11 @@ jobs:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TEST_USERS_PASS: ${{ secrets.TEST_USERS_PASS }}
+          REACT_APP_API_URL: ${{ needs.finishing-prep.outputs.api-endpoint }}
+          COGNITO_USER_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-id }}
+          COGNITO_REGION: ${{ needs.finishing-prep.outputs.cognito-region }}
+          COGNITO_IDENTITY_POOL_ID: ${{ needs.finishing-prep.outputs.cognito-identity-pool-id }}
+          COGNITO_USER_POOL_WEB_CLIENT_ID: ${{ needs.finishing-prep.outputs.cognito-user-pool-web-client-id }}
           # Overwrites folder directories in cypress config because in CI we run from root
           CYPRESS_SUPPORT_FILE: services/cypress/support/index.ts
           CYPRESS_FIXTURES_FOLDER: services/cypress/fixtures

@@ -1,6 +1,7 @@
 describe('login', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
+        cy.interceptGraphQL()
     })
     it('can log in and log out as expected', () => {
         cy.logInAsStateUser()

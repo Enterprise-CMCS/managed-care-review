@@ -4,6 +4,7 @@ hooks:
   afterAllFileWrite:
     # Forgive me. This hook passes the edited files in as argv, so we && echo to make them harmless
     - cp src/schema.graphql ../app-web/src/gen/ && echo "HI"
+    - cp src/schema.graphql ../cypress/gen/ && echo "HI"
 generates:
   ../app-api/src/gen/gqlServer.d.ts:
     plugins:
@@ -20,6 +21,16 @@ generates:
         CMSUser: ../domain-models#CMSUserType
         HealthPlanPackage: ../domain-models#HealthPlanPackageType
   ../app-web/src/gen/gqlClient.tsx:
+    documents:
+      - src/queries/*.graphql
+      - src/mutations/*.graphql
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-react-apollo'
+    config:
+      enumsAsTypes: true
+  ../cypress/gen/gqlClient.ts:
     documents:
       - src/queries/*.graphql
       - src/mutations/*.graphql

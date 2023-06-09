@@ -1,6 +1,7 @@
 describe('contract details', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
+        cy.interceptGraphQL()
     })
     it('can navigate to and from contract details page', () => {
         cy.logInAsStateUser()
