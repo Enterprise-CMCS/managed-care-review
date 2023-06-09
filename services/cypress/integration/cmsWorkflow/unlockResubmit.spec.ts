@@ -1,8 +1,9 @@
-import * as path from 'path'
+import {aliasMutation, aliasQuery} from '../../utils/graphql-test-utils';
 
 describe('CMS user', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
+        cy.interceptGraphQL()
     })
     it('can unlock and resubmit', () => {
         cy.logInAsStateUser()
@@ -51,7 +52,6 @@ describe('CMS user', () => {
                 'edit/review-and-submit',
                 ''
             )
-            fullUrl.pathname = path.dirname(fullUrl)
 
             // Submit, sent to dashboard
             cy.submitStateSubmissionForm()
@@ -86,7 +86,7 @@ describe('CMS user', () => {
             cy.get('#submissionName', {timeout: 2_000}).then(($h2) => {
                 //Set name to variable for later use in finding the unlocked submission
                 const submissionName = $h2.text()
-                
+
                 // Login as state user
                 cy.logOut()
                 cy.logInAsStateUser()
@@ -124,7 +124,7 @@ describe('CMS user', () => {
                     )
                     .should('exist')
 
-                cy.submitStateSubmissionForm(true, true)
+                cy.submitStateSubmissionForm({success: true, resubmission: true})
 
                 cy.get('table')
                     .should('exist')
@@ -139,13 +139,11 @@ describe('CMS user', () => {
                     .and('not.include', 'review-and-submit')
 
                 // Navigate to resubmitted submission and check for submission updated banner
-
                 cy.get('table')
                     .findByRole('link', { name: submissionName })
                     .should('exist')
                     .click()
 
-                cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50_000 })
                 cy.findByTestId('updatedSubmissionBanner').should('exist')
 
                 // Login as CMS User

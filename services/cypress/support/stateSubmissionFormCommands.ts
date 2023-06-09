@@ -45,7 +45,7 @@ Cypress.Commands.add('fillOutContractActionOnlyWithBaseContract', () => {
 
     cy.findByRole('combobox', {
         name: 'Programs this contract action covers (required)',
-        timeout: 2000
+        timeout: 2_000
     }).click({
         force: true,
     })
@@ -53,12 +53,12 @@ Cypress.Commands.add('fillOutContractActionOnlyWithBaseContract', () => {
     cy.findByText('Contract action only').click()
     cy.findByText('Base contract').click()
 
-    //rate-cert-assurance
-    cy.get('label[for="riskBasedContractNo"]').click()
+        //rate-cert-assurance
+        cy.get('label[for="riskBasedContractNo"]').click()
 
-    cy.findByRole('textbox', { name: 'Submission description' }).type(
-        'description of contract only submission'
-    )
+        cy.findByRole('textbox', { name: 'Submission description' }).type(
+            'description of contract only submission'
+        )
 })
 
 Cypress.Commands.add('fillOutContractActionOnlyWithAmendment', () => {
@@ -69,21 +69,23 @@ Cypress.Commands.add('fillOutContractActionOnlyWithAmendment', () => {
         }
     })
     cy.findByRole('combobox', {
-        name: 'Programs this contract action covers (required)', timeout: 2000
+        name: 'Programs this contract action covers (required)', timeout: 2_000
     }).click({
         force: true,
     })
     cy.findByText('PMAP').click()
     cy.findByText('Contract action only').click()
 
-    //rate-cert-assurance
-    cy.get('label[for="riskBasedContractNo"]').click()
+        cy.findByText('Contract action only').click()
 
-    cy.findByText('Amendment to base contract').click()
-    cy.findByRole('textbox', { name: 'Submission description' }).type(
-        'description of contract only submission'
-    )
-})
+        //rate-cert-assurance
+        cy.get('label[for="riskBasedContractNo"]').click()
+
+        cy.findByText('Amendment to base contract').click()
+        cy.findByRole('textbox', { name: 'Submission description' }).type(
+            'description of contract only submission'
+        )
+    })
 
 Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
     // Must be on '/submissions/new'
@@ -93,22 +95,21 @@ Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
         }
     })
     cy.findByRole('combobox', {
-        name: 'Programs this contract action covers (required)', timeout: 2000
+        name: 'Programs this contract action covers (required)', timeout: 2_000
     }).click({
         force: true,
     })
     cy.findByText('PMAP').click()
     cy.findByText('Contract action and rate certification').click()
 
-    //rate-cert-assurance
-    cy.get('label[for="riskBasedContractNo"]').click()
+        //rate-cert-assurance
+        cy.get('label[for="riskBasedContractNo"]').click()
 
-    cy.findByText('Base contract').click()
-    cy.findByRole('textbox', { name: 'Submission description' }).type(
-        'description of contract and rates submission'
-    )
-})
-
+        cy.findByText('Base contract').click()
+        cy.findByRole('textbox', { name: 'Submission description' }).type(
+            'description of contract and rates submission'
+        )
+    })
 Cypress.Commands.add('fillOutBaseContractDetails', () => {
     // Must be on '/submissions/:id/edit/contract-details'
     cy.findByText('Fully executed').click()
@@ -495,10 +496,7 @@ Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
 
 Cypress.Commands.add(
     'submitStateSubmissionForm',
-    (success = true, resubmission = false) => {
-        cy.intercept('POST', '*/graphql', (req) => {
-            aliasMutation(req, 'submitHealthPlanPackage')
-        })
+    ({success, resubmission}=  {success: true, resubmission: false}) => {
         cy.findByRole('heading', { level: 2, name: /Review and submit/ })
         cy.findByRole('button', {
             name: 'Submit',

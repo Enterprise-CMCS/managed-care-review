@@ -2,10 +2,6 @@ import { aliasQuery } from '../utils/graphql-test-utils'
 
 Cypress.Commands.add('logInAsStateUser', () => {
     // Set up gql intercept for requests on app load
-    cy.intercept('POST', '*/graphql', (req) => {
-        aliasQuery(req, 'fetchCurrentUser')
-        aliasQuery(req, 'indexHealthPlanPackages')
-    })
 
     cy.visit('/')
     cy.findByText('Medicaid and CHIP Managed Care Reporting and Review System')
@@ -38,11 +34,6 @@ Cypress.Commands.add('logInAsStateUser', () => {
 Cypress.Commands.add(
     'logInAsCMSUser',
     ({ initialURL } = { initialURL: '/' }) => {
-        cy.intercept('POST', '*/graphql', (req) => {
-            aliasQuery(req, 'fetchCurrentUser')
-            aliasQuery(req, 'fetchHealthPlanPackageWithQuestions')
-            aliasQuery(req, 'indexHealthPlanPackages')
-        })
 
         cy.visit(initialURL)
         //Add assertion looking for test on the page before findByRole
@@ -85,13 +76,6 @@ Cypress.Commands.add(
 Cypress.Commands.add(
     'logInAsAdminUser',
     ({ initialURL } = { initialURL: '/' }) => {
-        cy.intercept('POST', '*/graphql', (req) => {
-            aliasQuery(req, 'fetchCurrentUser')
-            aliasQuery(req, 'fetchHealthPlanPackage')
-            aliasQuery(req, 'indexHealthPlanPackages')
-            aliasQuery(req, 'indexUsers')
-        })
-
         cy.visit(initialURL)
 
         cy.findByText(

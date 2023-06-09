@@ -1,6 +1,7 @@
 describe('documents', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
+        cy.interceptGraphQL()
     })
     it('can navigate back and save as draft on the documents page, saving documents each time', () => {
         cy.logInAsStateUser()

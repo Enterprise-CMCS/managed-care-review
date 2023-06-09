@@ -1,6 +1,7 @@
 describe('submission type', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
+        cy.interceptGraphQL()
     })
     it('can navigate back and save as draft from submission type page', () => {
         cy.logInAsStateUser()
@@ -14,7 +15,6 @@ describe('submission type', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/type`
             )
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50_000 })
             cy.findByRole('heading', {
                 level: 2,
                 name: /Submission type/,
@@ -23,14 +23,12 @@ describe('submission type', () => {
 
             // Navigate to dashboard page by clicking cancel
             cy.findByRole('button', { name: /Cancel/, timeout: 5_000}).click()
-            cy.wait('@indexHealthPlanPackagesQuery', { timeout: 50_000 })
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to type page
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/type`
             )
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50_000 })
 
              //Edit some stuff here
              cy.findByRole('combobox', {
@@ -60,7 +58,6 @@ describe('submission type', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/type`
             )
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50_000 })
 
             cy.findByText('Contract action and rate certification').click()
 
@@ -72,7 +69,6 @@ describe('submission type', () => {
             cy.navigateFormByDirectLink(
                 `/submissions/${draftSubmissionId}/edit/type`
             )
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50_000 })
 
             cy.findByLabelText('Contract action and rate certification').should(
                 'be.checked'

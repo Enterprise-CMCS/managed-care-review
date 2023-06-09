@@ -1,6 +1,7 @@
 describe('CMS user can view submission', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
+        cy.interceptGraphQL()
     })
     it('in the CMS dashboard', () => {
         // state user adds a new package

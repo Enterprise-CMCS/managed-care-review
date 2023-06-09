@@ -1,6 +1,7 @@
 describe('contract details', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
+        cy.interceptGraphQL()
     })
     it(' navigate back and save as draft from contract details page', () => {
         cy.logInAsStateUser()

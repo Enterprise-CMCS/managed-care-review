@@ -7,10 +7,6 @@ Cypress.Commands.add('assignDivisionToCMSUser', ({
     userEmail: string,
     division: 'DMCO' | 'DMCP' | 'OACT'
 }) => {
-    cy.intercept('POST', '*/graphql', (req) => {
-        aliasMutation(req, 'updateCMSUser')
-    })
-
     // Find the table row for the user
     cy.findByText(userEmail).parent().then(row => {
         // Do all the things inside the row element
@@ -27,7 +23,7 @@ Cypress.Commands.add('assignDivisionToCMSUser', ({
                 })
             })
 
-            cy.wait('@updateCMSUserMutation', { timeout: 20000 })
+            cy.wait('@updateCMSUserMutation', { timeout: 20_000 })
 
             // Assigned division to CMS user should now match the one passed into the command.
             cy.findByText(division).should('exist')

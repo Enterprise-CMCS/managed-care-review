@@ -1,6 +1,7 @@
 describe('review and submit', () => {
     beforeEach(() => {
         cy.stubFeatureFlags()
+        cy.interceptGraphQL()
     })
     it(' navigate back and save as draft from review and submit page', () => {
         cy.logInAsStateUser()
@@ -40,7 +41,7 @@ describe('review and submit', () => {
             const draftSubmissionId = pathnameArray[2]
             cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/review-and-submit`)
 
-            cy.submitStateSubmissionForm(false)
+            cy.submitStateSubmissionForm({success: false})
             cy.findByRole('heading', { level: 4, name: /Submission error/ })
         })
     })
