@@ -45,14 +45,10 @@ describe('Q&A', () => {
                             }).should('exist')
                         })
 
-                    // Log out and log back in as cms user, visiting submission summary page,
+                    // Log out and log back in as State user, visiting submission summary page,
                     cy.logOut()
 
-                    cy.findByRole('link', {
-                        name: `Submission summary`,
-                    }).should('exist')
-
-                    cy.findByText('Start new submission').should('exist')
+                    cy.logInAsStateUser()
 
                     cy.visit(`/submissions/${pkg.id}`)
 
@@ -73,7 +69,7 @@ describe('Q&A', () => {
                         name: `Submission summary`,
                     }).should('exist')
 
-                    // Make sure question by CMS exists
+                    // Newly uploaded questions document should exist within DMCO section
                     cy.findByTestId('dmco-qa-section')
                         .should('exist')
                         .within(() => {
@@ -83,15 +79,10 @@ describe('Q&A', () => {
                             }).should('exist')
                         })
 
-                    // Newly uploaded questions document should exist within DMCO section
-                    cy.findByTestId('dmco-qa-section')
-                        .should('exist')
-                        .within(() => {
-                            // Add timeout to findByText to allow time for generating document urls
-                            cy.findByText('questions_for_submission.pdf', {
-                                timeout: 5000,
-                            }).should('exist')
-                        })
+                    cy.addResponse({
+                        documentPath:
+                            'documents/response_to_questions_for_submission.pdf',
+                    })
 
                     // Newly uploaded response document should exist within DMCO section
                     cy.findByTestId('dmco-qa-section')
@@ -101,17 +92,6 @@ describe('Q&A', () => {
                             cy.findByText(
                                 'response_to_questions_for_submission.pdf',
                                 { timeout: 5_000 }
-                            ).should('exist')
-                        })
-
-                    // Newly uploaded response document should exist within DMCO section
-                    cy.findByTestId('dmco-qa-section')
-                        .should('exist')
-                        .within(() => {
-                            // Add timeout to findByText to allow time for generating document urls
-                            cy.findByText(
-                                'response_to_questions_for_submission.pdf',
-                                { timeout: 5000 }
                             ).should('exist')
                         })
                 }
