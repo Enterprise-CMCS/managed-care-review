@@ -158,8 +158,6 @@ const updateTestHealthPlanFormData = async (
     server: ApolloServer,
     updatedFormData: HealthPlanFormDataType
 ): Promise<HealthPlanPackage> => {
-    console.log('1')
-    console.log(updatedFormData)
     const updatedB64 = domainToBase64(updatedFormData)
     const updateResult = await server.executeOperation({
         query: UPDATE_HEALTH_PLAN_FORM_DATA,
@@ -170,7 +168,6 @@ const updateTestHealthPlanFormData = async (
             },
         },
     })
-    console.log('2')
     if (updateResult.errors) {
         console.info('errors', JSON.stringify(updateResult.errors))
         throw new Error(
@@ -181,7 +178,6 @@ const updateTestHealthPlanFormData = async (
     if (!updateResult.data) {
         throw new Error('updateTestHealthPlanFormData returned nothing')
     }
-    console.log('3')
     return updateResult.data.updateHealthPlanFormData.pkg
 }
 
