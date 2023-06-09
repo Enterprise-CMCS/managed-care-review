@@ -1,6 +1,6 @@
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
-//const nodeExternals = require('webpack-node-externals');
+const nodeExternals = require('webpack-node-externals');
 const path = require('path');
 const slsw = require('serverless-webpack');
 const isLocal = slsw.lib.webpack.isLocal;
@@ -19,19 +19,23 @@ const extensions = [
 
 module.exports = {
     entry: slsw.lib.entries,
-    //externalsPresets: { node: true },
+    externalsPresets: { node: true },
     context: __dirname,
     mode: isLocal ? 'development' : 'production',
     performance: {
         hints: false,
     },
     externals: [
+        nodeExternals({
+            allowlist: [/^@managed-care-review/],
+        }),
+        nodeExternals({
+            allowlist: [/^@managed-care-review/],
+            modulesDir: path.resolve(__dirname, '../../node_modules'),
+        }),
         'prisma',
         '@prisma/client',
-        '@aws-sdk',
         'aws-sdk',
-        'aws-crt',
-        '@aws-sdk/signature-v4-crt',
     ],
     devtool: 'source-map',
     resolve: {
