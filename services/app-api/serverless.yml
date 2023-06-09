@@ -43,6 +43,7 @@ custom:
       nodeModulesRelativeDir: '../../'
     packagerOptions:
       lockFile: '../../yarn.lock'
+      noInstall: true
     excludeRegex: 'darwin|debian'
   serverlessTerminationProtection:
     stages:

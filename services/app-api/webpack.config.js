@@ -26,8 +26,11 @@ module.exports = {
         hints: false,
     },
     externals: [
-        nodeExternals(),
         nodeExternals({
+            allowlist: [/^@managed-care-review/],
+        }),
+        nodeExternals({
+            allowlist: [/^@managed-care-review/],
             modulesDir: path.resolve(__dirname, '../../node_modules'),
         }),
         'prisma',
@@ -37,7 +40,10 @@ module.exports = {
     resolve: {
         symlinks: false,
         extensions: extensions,
-        modules: [path.resolve(__dirname, 'node_modules'), 'node_modules'],
+        modules: [
+            path.resolve(__dirname, '../../node_modules'),
+            'node_modules',
+        ],
         plugins: [
             new TsconfigPathsPlugin({
                 configFile: tsConfigPath,
