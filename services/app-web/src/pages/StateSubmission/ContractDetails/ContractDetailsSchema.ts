@@ -1,6 +1,6 @@
 import * as Yup from 'yup'
 import dayjs from 'dayjs'
-import { validateDateFormat } from '../../../formHelpers'
+import { validateDateFormat, validateFileUpload } from '../../../formHelpers'
 import {
     isCHIPProvision,
     GeneralizedProvisionType,
@@ -54,6 +54,7 @@ export const ContractDetailsFormSchema = (
         contractExecutionStatus: Yup.string().defined(
             'You must select a contract status'
         ),
+        // contractDocuments:  validateFileUpload({required: true}),
         contractDateStart: Yup.date()
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore-next-line
