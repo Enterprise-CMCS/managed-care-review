@@ -88,7 +88,7 @@ describe('Q&A', () => {
                 initialURL: `/submissions/${submissionId}/question-and-answers`,
             })
 
-            cy.url({ timeout: 20_001 }).should(
+            cy.url({ timeout: 20_00 }).should(
                 'contain',
                 `${submissionId}/question-and-answers`
             )
