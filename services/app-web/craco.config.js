@@ -26,6 +26,25 @@ module.exports = {
                     : [match.loader.include];
 
                 match.loader.include = include.concat(packages);
+
+                // Disable React Refresh Babel plugin in production or CI mode
+                if (process.env.CI || process.env.NODE_ENV === 'production') {
+                    match.loader.options.plugins =
+                        match.loader.options.plugins.filter((plugin) => {
+                            console.log(plugin);
+                            if (Array.isArray(plugin)) {
+                                return (
+                                    plugin[0] !==
+                                    require.resolve('react-refresh/babel')
+                                );
+                            } else {
+                                return (
+                                    plugin !==
+                                    require.resolve('react-refresh/babel')
+                                );
+                            }
+                        });
+                }
             }
             return webpackConfig;
         },
