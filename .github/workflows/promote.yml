@@ -221,7 +221,7 @@ jobs:
         uses: ./.github/actions/setup_env
 
       - name: Generate Code
-        run: npx lerna run generate
+        run: lerna run generate
 
       - name: Cypress chrome fix
         run: |
