@@ -20,7 +20,7 @@ describe.only('documents', () => {
                     encoding: 'binary',
                 })
                 cy.findAllByTestId('upload-finished-indicator', {
-                    timeout: 200000,
+                    timeout: 200_000,
                 })
                 cy.findByText('Failed security scan, please remove').should(
                     'exist'

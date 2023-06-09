@@ -15,6 +15,7 @@ module.exports = defineConfig({
         videosFolder: 'videos',
         viewportHeight: 1080,
         viewportWidth: 1440,
+        experimentalRunAllSpecs: true,
         setupNodeEvents(on, config) {
             on('file:preprocessor', createBundler({
                 define: {
@@ -53,7 +54,10 @@ module.exports = defineConfig({
     projectId: 'tt5hbz',
     defaultCommandTimeout: 10000,
     retries: {
-        runMode: 2,
+        runMode: 1,
         openMode: 0,
     },
+    videoUploadOnPasses: false,
+    experimentalMemoryManagement: true,
+    numTestsKeptInMemory: 30
 })

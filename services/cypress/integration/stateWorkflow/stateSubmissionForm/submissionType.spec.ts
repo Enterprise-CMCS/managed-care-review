@@ -3,7 +3,7 @@ describe('submission type', () => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
     })
-    it('can navigate to and from type page', () => {
+    it('can navigate back and save as draft from submission type page', () => {
         cy.logInAsStateUser()
         cy.startNewContractOnlySubmissionWithBaseContract()
 
@@ -18,12 +18,11 @@ describe('submission type', () => {
             cy.findByRole('heading', {
                 level: 2,
                 name: /Submission type/,
-                timeout: 10000,
+                timeout: 10_000,
             })
 
             // Navigate to dashboard page by clicking cancel
-            cy.findByRole('button', { name: /Cancel/ }).click()
-            cy.wait('@indexHealthPlanPackagesQuery', { timeout: 50000 })
+            cy.findByRole('button', { name: /Cancel/, timeout: 5_000}).click()
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to type page
