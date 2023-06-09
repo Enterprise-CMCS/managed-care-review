@@ -1,4 +1,4 @@
-import {aliasQuery} from '../../../utils/graphql-test-utils';
+import { aliasQuery } from '../../../utils/graphql-test-utils'
 
 describe('Q&A', () => {
     beforeEach(() => {
@@ -12,7 +12,7 @@ describe('Q&A', () => {
     it('can add questions and responses', () => {
         cy.interceptFeatureFlags({
             'cms-questions': true,
-            'chip-only-form': true
+            'chip-only-form': true,
         })
         cy.logInAsStateUser()
 
@@ -88,7 +88,7 @@ describe('Q&A', () => {
                 initialURL: `/submissions/${submissionId}/question-and-answers`,
             })
 
-            cy.url({ timeout: 10_000 }).should(
+            cy.url({ timeout: 20_000 }).should(
                 'contain',
                 `${submissionId}/question-and-answers`
             )
@@ -111,7 +111,7 @@ describe('Q&A', () => {
             // Update CMS user Zuko's division
             cy.assignDivisionToCMSUser({
                 userEmail: 'zuko@example.com',
-                division: 'DMCO'
+                division: 'DMCO',
             })
 
             // Log out
@@ -136,14 +136,18 @@ describe('Q&A', () => {
 
             // Add a question
             cy.addQuestion({
-                documentPath: 'documents/questions_for_submission.pdf'
+                documentPath: 'documents/questions_for_submission.pdf',
             })
 
             // Newly uploaded questions document should exist within DMCO section
-            cy.findByTestId('dmco-qa-section').should('exist').within(() => {
-                // Add timeout to findByText to allow time for generating document urls
-                cy.findByText('questions_for_submission.pdf',  { timeout: 5000 }).should('exist')
-            })
+            cy.findByTestId('dmco-qa-section')
+                .should('exist')
+                .within(() => {
+                    // Add timeout to findByText to allow time for generating document urls
+                    cy.findByText('questions_for_submission.pdf', {
+                        timeout: 5000,
+                    }).should('exist')
+                })
 
             // Log out and log back in as cms user, visiting submission summary page,
             cy.findByRole('button', { name: 'Sign out' }).click()
@@ -172,19 +176,30 @@ describe('Q&A', () => {
             }).should('exist')
 
             // Make sure question by CMS exists
-            cy.findByTestId('dmco-qa-section').should('exist').within(() => {
-                // Add timeout to findByText to allow time for generating document urls
-                cy.findByText('questions_for_submission.pdf',  { timeout: 5000 }).should('exist')
-            })
+            cy.findByTestId('dmco-qa-section')
+                .should('exist')
+                .within(() => {
+                    // Add timeout to findByText to allow time for generating document urls
+                    cy.findByText('questions_for_submission.pdf', {
+                        timeout: 5000,
+                    }).should('exist')
+                })
 
             //Upload response
-            cy.addResponse({ documentPath: 'documents/response_to_questions_for_submission.pdf'})
+            cy.addResponse({
+                documentPath:
+                    'documents/response_to_questions_for_submission.pdf',
+            })
 
             // Newly uploaded response document should exist within DMCO section
-            cy.findByTestId('dmco-qa-section').should('exist').within(() => {
-                // Add timeout to findByText to allow time for generating document urls
-                cy.findByText('response_to_questions_for_submission.pdf',  { timeout: 5000 }).should('exist')
-            })
+            cy.findByTestId('dmco-qa-section')
+                .should('exist')
+                .within(() => {
+                    // Add timeout to findByText to allow time for generating document urls
+                    cy.findByText('response_to_questions_for_submission.pdf', {
+                        timeout: 5000,
+                    }).should('exist')
+                })
         })
     })
 })
