@@ -6,13 +6,11 @@ import styles from './StateSubmissionForm.module.scss'
 
 import { Error404 } from '../Errors/Error404Page'
 import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionStatusPage'
-import { useDebouncedMutation } from '../../hooks/useDebouncedMutation'
 import {
-    UpdateHealthPlanFormDataDocument,
-    UpdateHealthPlanFormDataMutation,
     User,
     HealthPlanPackage,
     UpdateInformation,
+    useUpdateHealthPlanFormDataMutation,
 } from '../../gen/gqlClient'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Loading } from '../../components/Loading'
@@ -139,10 +137,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
 
     const { result: fetchResult } = useFetchHealthPlanPackageWrapper(id)
 
-    const [updateFormData] = useDebouncedMutation<
-        UpdateHealthPlanFormDataMutation,
-        object
-    >(UpdateHealthPlanFormDataDocument, undefined, 200)
+    const [updateFormData] = useUpdateHealthPlanFormDataMutation()
 
     // When the new API is done, we'll call the new API here
     const updateDraftHealthPlanPackage = async (

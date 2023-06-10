@@ -275,8 +275,11 @@ export const Documents = ({
                 )}
                 id="DocumentsForm"
                 aria-label="Documents Form"
-                onSubmit={() => {
-                    return
+                onSubmit={async (e) => {
+                    await handleFormSubmit({
+                        shouldValidateDocuments: true,
+                        redirectPath: `../review-and-submit`,
+                    })(e)
                 }}
             >
                 <fieldset className="usa-fieldset">
@@ -346,12 +349,6 @@ export const Documents = ({
                         showFileUploadError && fileItems.length > 0
                     }
                     actionInProgress={isSubmitting}
-                    continueOnClick={async (e) => {
-                        await handleFormSubmit({
-                            shouldValidateDocuments: true,
-                            redirectPath: `../review-and-submit`,
-                        })(e)
-                    }}
                 />
             </UswdsForm>
         </>

@@ -36,7 +36,7 @@ import { unlockedWithALittleBitOfEverything } from '../../../common-code/healthP
 describe('RateDetails', () => {
     beforeAll(() => {
         jest.setTimeout(10000)
-        // TODO: These tests are too long and need to be fully refactored. They are starting to flake in recent versions of RTL, particularly the multi-rate and contract amendment  ests
+        // TODO: These tests are too long and need to be fully refactored. They are starting to flake in recent versions of RTL, particularly the multi-rate and contract amendment tests
         // See this guidance for waitFor and getBy Role: https://github.com/testing-library/dom-testing-library/issues/820
     })
 
@@ -45,7 +45,7 @@ describe('RateDetails', () => {
         jest.spyOn(useStatePrograms, 'useStatePrograms').mockRestore()
     })
 
-    const emptyRateDetailsDraft = {
+    const emptyRateDetailsDraft = () => ({
         ...mockDraft(),
         rateInfos: [],
         rateType: undefined,
@@ -53,7 +53,7 @@ describe('RateDetails', () => {
         rateDateEnd: undefined,
         rateDateCertified: undefined,
         actuaryContacts: [],
-    }
+    })
     describe('handles a single rate', () => {
         afterEach(() => {
             jest.clearAllMocks()
@@ -63,7 +63,7 @@ describe('RateDetails', () => {
 
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -88,7 +88,7 @@ describe('RateDetails', () => {
         it('displays correct form guidance', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -108,7 +108,7 @@ describe('RateDetails', () => {
 
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -157,7 +157,7 @@ describe('RateDetails', () => {
 
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -170,7 +170,7 @@ describe('RateDetails', () => {
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
-            await continueButton.click()
+            continueButton.click()
             await waitFor(() => {
                 expect(
                     screen.getAllByText(
@@ -186,7 +186,7 @@ describe('RateDetails', () => {
 
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -199,7 +199,7 @@ describe('RateDetails', () => {
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
-            await continueButton.click()
+            continueButton.click()
             await waitFor(() => {
                 expect(
                     screen.getAllByText(
@@ -214,7 +214,7 @@ describe('RateDetails', () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -230,7 +230,7 @@ describe('RateDetails', () => {
 
             screen.getByLabelText('New rate certification').click()
 
-            await continueButton.click()
+            continueButton.click()
             await waitFor(() => {
                 expect(
                     screen.getAllByText('You must upload at least one document')
@@ -243,7 +243,7 @@ describe('RateDetails', () => {
             ldUseClientSpy({ 'packages-with-shared-rates': true })
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -371,7 +371,7 @@ describe('RateDetails', () => {
 
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -388,14 +388,14 @@ describe('RateDetails', () => {
             )
             const combobox = await screen.findByRole('combobox')
 
-            await selectEvent.openMenu(combobox)
+            selectEvent.openMenu(combobox)
 
             await waitFor(() => {
                 expect(screen.getByText('Program 3')).toBeInTheDocument()
             })
 
             await selectEvent.select(combobox, 'Program 1')
-            await selectEvent.openMenu(combobox)
+            selectEvent.openMenu(combobox)
             await selectEvent.select(combobox, 'Program 3')
 
             // in react-select, only items that are selected have a "remove item" label
@@ -412,7 +412,7 @@ describe('RateDetails', () => {
         it('renders file upload', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -438,11 +438,10 @@ describe('RateDetails', () => {
                 ).toHaveLength(0)
             })
         })
-
         it('accepts documents on new rate', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -465,7 +464,7 @@ describe('RateDetails', () => {
         it('accepts multiple pdf, word, excel documents', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -499,7 +498,7 @@ describe('RateDetails', () => {
         it('renders add another rate button, which adds another set of rate certification fields to the form', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -529,7 +528,7 @@ describe('RateDetails', () => {
         it('renders remove rate certification button, which removes set of rate certification fields from the form', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -564,7 +563,7 @@ describe('RateDetails', () => {
         it('accepts documents on second rate', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -598,7 +597,7 @@ describe('RateDetails', () => {
 
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -614,7 +613,7 @@ describe('RateDetails', () => {
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
-            await continueButton.click()
+            continueButton.click()
             await waitFor(() => {
                 expect(
                     screen.getAllByText(
@@ -629,7 +628,7 @@ describe('RateDetails', () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -658,7 +657,7 @@ describe('RateDetails', () => {
 
             within(rateInfo2).getByLabelText('New rate certification').click()
 
-            await continueButton.click()
+            continueButton.click()
             await waitFor(() => {
                 expect(
                     screen.getAllByText('You must upload at least one document')
@@ -679,7 +678,7 @@ describe('RateDetails', () => {
             //First submission is 'CONTRACT_ONLY' and last submission is the current one. Both should be excluded from
             // package combobox options.
             const currentSubmission = {
-                ...emptyRateDetailsDraft,
+                ...emptyRateDetailsDraft(),
                 stateNumber: 3,
                 id: 'test-shared-rate',
             }
@@ -758,7 +757,7 @@ describe('RateDetails', () => {
 
             //Expect the two packages we know to exist.
             const firstRatePackageCombobox = comboBoxes[0]
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
             await waitFor(() => {
                 expect(
                     firstRateCert.getByText(
@@ -778,22 +777,22 @@ describe('RateDetails', () => {
             })
 
             //Select two packages that have a shared rate cert with this rate cert.
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
             await selectEvent.select(
                 firstRatePackageCombobox,
                 'MCR-MN-0004-MSC+-PMAP-SNBC (Submitted 01/02/21)'
             )
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
             await selectEvent.select(
                 firstRatePackageCombobox,
                 'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
             )
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
             await selectEvent.select(
                 firstRatePackageCombobox,
                 'MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
             )
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
 
             //Expect the three packages to have been selected and 'No options' are left to be selected.
             expect(firstRateCert.getByText('No options')).toBeInTheDocument()
@@ -865,7 +864,7 @@ describe('RateDetails', () => {
             await userEvent.click(firstRateYesSharedRate)
             const secondRatePackageCombobox =
                 secondRateCert.getAllByRole('combobox')[0]
-            await selectEvent.openMenu(secondRatePackageCombobox)
+            selectEvent.openMenu(secondRatePackageCombobox)
             await selectEvent.select(
                 secondRatePackageCombobox,
                 'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
@@ -911,7 +910,7 @@ describe('RateDetails', () => {
             //First submission is 'CONTRACT_ONLY' and last submission is the current one. Both should be excluded from
             // package combobox options.
             const currentSubmission = {
-                ...emptyRateDetailsDraft,
+                ...emptyRateDetailsDraft(),
                 stateNumber: 3,
                 id: 'test-shared-rate',
             }
@@ -1001,7 +1000,7 @@ describe('RateDetails', () => {
 
             //Expect the two packages we know to exist.
             const firstRatePackageCombobox = comboBoxes[0]
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
             await waitFor(() => {
                 expect(
                     firstRateCert.getByText(
@@ -1020,12 +1019,12 @@ describe('RateDetails', () => {
                 firstRatePackageCombobox,
                 'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
             )
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
             await selectEvent.select(
                 firstRatePackageCombobox,
                 'MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
             )
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
 
             //Expect submission selection error to clear and continue button is not disabled
             expect(continueButton).not.toHaveAttribute('aria-disabled')
@@ -1041,7 +1040,7 @@ describe('RateDetails', () => {
             //First submission is 'CONTRACT_ONLY' and last submission is the current one. Both should be excluded from
             // package combobox options.
             const currentSubmission = {
-                ...emptyRateDetailsDraft,
+                ...emptyRateDetailsDraft(),
                 stateNumber: 3,
                 id: 'test-shared-rate',
             }
@@ -1118,7 +1117,7 @@ describe('RateDetails', () => {
 
             //Expect the two packages we know to exist.
             const firstRatePackageCombobox = comboBoxes[0]
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
             await waitFor(() => {
                 expect(
                     firstRateCert.getByText(
@@ -1153,12 +1152,12 @@ describe('RateDetails', () => {
                 firstRatePackageCombobox,
                 'MCR-MN-0005-MSC+-PMAP-SNBC (Draft)'
             )
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
             await selectEvent.select(
                 firstRatePackageCombobox,
                 'MCR-MN-0006-MSC+-PMAP-SNBC (Draft)'
             )
-            await selectEvent.openMenu(firstRatePackageCombobox)
+            selectEvent.openMenu(firstRatePackageCombobox)
 
             //Expect submission selection error to clear and continue button is not disabled
             await waitFor(() => {
@@ -1171,7 +1170,7 @@ describe('RateDetails', () => {
         it('enabled when valid files are present', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -1197,7 +1196,7 @@ describe('RateDetails', () => {
         it('enabled when invalid files have been dropped but valid files are present', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -1228,7 +1227,7 @@ describe('RateDetails', () => {
         it('disabled with alert after first attempt to continue with zero files', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -1258,7 +1257,7 @@ describe('RateDetails', () => {
         it('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -1295,7 +1294,7 @@ describe('RateDetails', () => {
         it('disabled with alert after first attempt to continue with invalid files', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -1330,7 +1329,7 @@ describe('RateDetails', () => {
         it('disabled with alert when trying to continue while a file is still uploading', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -1378,7 +1377,7 @@ describe('RateDetails', () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -1405,7 +1404,7 @@ describe('RateDetails', () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -1434,7 +1433,7 @@ describe('RateDetails', () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -1502,7 +1501,7 @@ describe('RateDetails', () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -1542,7 +1541,7 @@ describe('RateDetails', () => {
         it('enabled when valid files are present', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -1568,7 +1567,7 @@ describe('RateDetails', () => {
         it('enabled when invalid files have been dropped but valid files are present', async () => {
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={jest.fn()}
                     previousDocuments={[]}
                 />,
@@ -1597,7 +1596,7 @@ describe('RateDetails', () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -1624,7 +1623,7 @@ describe('RateDetails', () => {
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
-                    draftSubmission={emptyRateDetailsDraft}
+                    draftSubmission={emptyRateDetailsDraft()}
                     updateDraft={mockUpdateDraftFn}
                     previousDocuments={[]}
                 />,
@@ -1738,9 +1737,9 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
 
     // add programs
     const combobox = await withinTargetRateCert.findByRole('combobox')
-    await selectEvent.openMenu(combobox)
+    selectEvent.openMenu(combobox)
     await selectEvent.select(combobox, 'SNBC')
-    await selectEvent.openMenu(combobox)
+    selectEvent.openMenu(combobox)
     await selectEvent.select(combobox, 'PMAP')
     expect(
         withinTargetRateCert.getByLabelText('Remove SNBC')

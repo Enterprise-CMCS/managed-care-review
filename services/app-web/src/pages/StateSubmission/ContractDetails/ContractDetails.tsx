@@ -808,7 +808,13 @@ export const ContractDetails = ({
                                         <FormGroup data-testid="yes-no-group">
                                             <Fieldset
                                                 aria-required
-                                                legend={isBaseContract(draftSubmission)? "Does this contract action include provisions related to any of the following" : "Does this contract action include new or modified provisions related to any of the following"}
+                                                legend={
+                                                    isBaseContract(
+                                                        draftSubmission
+                                                    )
+                                                        ? 'Does this contract action include provisions related to any of the following'
+                                                        : 'Does this contract action include new or modified provisions related to any of the following'
+                                                }
                                             >
                                                 {applicableProvisions.map(
                                                     (modifiedProvisionName) => (
