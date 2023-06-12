@@ -1,3 +1,4 @@
+BEGIN;
 /*
   Warnings:
 
@@ -14,3 +15,4 @@ ALTER TABLE "RateRevisionsOnContractRevisionsTable" DROP CONSTRAINT "RateRevisio
 -- AlterTable
 ALTER TABLE "RateRevisionsOnContractRevisionsTable" DROP COLUMN "invalidatedByContractRevisionID",
 DROP COLUMN "invalidatedByRateRevisionID";
+COMMIT;

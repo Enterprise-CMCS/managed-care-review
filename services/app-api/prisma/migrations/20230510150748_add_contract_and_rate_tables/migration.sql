@@ -1,3 +1,4 @@
+BEGIN;
 -- CreateTable
 CREATE TABLE "ContractTable" (
     "id" TEXT NOT NULL,
@@ -129,3 +130,4 @@ ALTER TABLE "_ContractRevisionTableToRateTable" ADD CONSTRAINT "_ContractRevisio
 
 -- AddForeignKey
 ALTER TABLE "_ContractRevisionTableToRateTable" ADD CONSTRAINT "_ContractRevisionTableToRateTable_B_fkey" FOREIGN KEY ("B") REFERENCES "RateTable"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+COMMIT;
