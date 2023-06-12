@@ -19,27 +19,17 @@ const extensions = [
 
 module.exports = {
     entry: slsw.lib.entries,
-    externalsPresets: { node: true },
-    context: __dirname,
     mode: isLocal ? 'development' : 'production',
-    performance: {
-        hints: false,
-    },
     externals: [
+        nodeExternals(),
         nodeExternals({
-            allowlist: [/^@managed-care-review/],
-        }),
-        nodeExternals({
-            allowlist: [/^@managed-care-review/],
             modulesDir: path.resolve(__dirname, '../../node_modules'),
         }),
         'prisma',
         '@prisma/client',
         'aws-sdk',
     ],
-    devtool: 'source-map',
     resolve: {
-        symlinks: false,
         extensions: extensions,
         modules: [
             path.resolve(__dirname, '../../node_modules'),
