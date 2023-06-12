@@ -9,18 +9,7 @@ import { insertDraftRate } from './insertRate'
 import { updateRateDraft } from './updateRateDraft'
 import { unlockRate } from './unlockRate'
 import { findRate } from './findRate'
-
-async function delay(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms))
-}
-
-// For use in TESTS only. Throws a returned error
-function must<T>(maybeErr: T | Error): T {
-    if (maybeErr instanceof Error) {
-        throw maybeErr
-    }
-    return maybeErr
-}
+import { must } from '../../testHelpers'
 
 describe('findContract', () => {
     it('finds a full contract', async () => {
@@ -76,8 +65,6 @@ describe('findContract', () => {
             )
         )
 
-        await delay(100)
-
         const rate2 = must(await insertDraftRate(client, 'twopointo'))
         must(
             await updateRateDraft(client, rate2.id, 'twopointo', [contractA.id])
@@ -90,8 +77,6 @@ describe('findContract', () => {
                 'RateSubmit 2'
             )
         )
-
-        await delay(100)
 
         const rate3 = must(await insertDraftRate(client, 'threepointo'))
         must(
@@ -107,8 +92,6 @@ describe('findContract', () => {
                 '3.0 create'
             )
         )
-
-        await delay(100)
 
         // remove the connection from rate 2
         must(
@@ -129,8 +112,6 @@ describe('findContract', () => {
             )
         )
 
-        await delay(100)
-
         // update rate 1 to have a new version, should make one new rev.
         must(await unlockRate(client, rate1.id, cmsUser.id, 'unlock for 1.1'))
         must(
@@ -146,8 +127,6 @@ describe('findContract', () => {
                 '1.1 new name'
             )
         )
-
-        await delay(100)
 
         // Make a new Contract Revision, should show up as a single new rev with all the old info
         must(
@@ -172,8 +151,6 @@ describe('findContract', () => {
                 'Submitting A.1'
             )
         )
-
-        await delay(100)
 
         // Make a new Contract Revision, changing the connections should show up as a single new rev.
         must(

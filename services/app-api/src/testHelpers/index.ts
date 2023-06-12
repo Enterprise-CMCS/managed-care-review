@@ -3,3 +3,5 @@ export {
     assertAnErrorExtensions,
     assertAnErrorCode,
 } from './gqlAssertions'
+
+export { must } from './errorHelpers'

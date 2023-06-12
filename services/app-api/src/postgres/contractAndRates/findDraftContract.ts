@@ -1,8 +1,7 @@
-import { PrismaClient, UpdateInfoTable } from '@prisma/client'
-import { UpdateInfoType } from '../../domain-models'
-import { Contract, ContractRevision } from './contractType'
+import { PrismaClient } from '@prisma/client'
+import { ContractRevision } from './contractType'
 
-// findDraftContract returns a draft (if any) for the given contract. 
+// findDraftContract returns a draft (if any) for the given contract.
 async function findDraftContract(
     client: PrismaClient,
     contractID: string
@@ -30,8 +29,8 @@ async function findDraftContract(
                             orderBy: {
                                 createdAt: 'desc',
                             },
-                        }
-                    }
+                        },
+                    },
                 },
             },
         })
@@ -44,10 +43,10 @@ async function findDraftContract(
             id: draftContract.id,
             contractFormData: draftContract.name,
 
-            rateRevisions: draftContract.draftRates.map( (dr) => ({
+            rateRevisions: draftContract.draftRates.map((dr) => ({
                 id: dr.revisions[0].id,
-                revisionFormData: dr.revisions[0].name
-            }))
+                revisionFormData: dr.revisions[0].name,
+            })),
         }
 
         return draft
