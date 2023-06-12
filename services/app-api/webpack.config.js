@@ -25,7 +25,6 @@ module.exports = {
             allowlist: [/^@managed-care-review/],
         }),
         nodeExternals({
-            allowlist: [/^@managed-care-review/],
             modulesDir: path.resolve(__dirname, '../../node_modules'),
         }),
         'prisma',
