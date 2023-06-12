@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
     GridContainer,
     Form as UswdsForm,
@@ -6,7 +6,7 @@ import {
     ButtonGroup,
 } from '@trussworks/react-uswds'
 import styles from '../QuestionResponse.module.scss'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { useS3 } from '../../../contexts/S3Context'
 import {
     ActionButton,
@@ -21,14 +21,17 @@ import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import {
     CreateQuestionInput,
     useCreateQuestionMutation,
-    FetchHealthPlanPackageWithQuestionsDocument,
-    FetchHealthPlanPackageWithQuestionsQuery,
 } from '../../../gen/gqlClient'
+import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
+import { usePage } from '../../../contexts/PageContext'
+import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
+import { createQuestionWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 
 export const UploadQuestions = () => {
-    // third party
+    // router context
     const { division, id } = useParams<{ division: string; id: string }>()
     const navigate = useNavigate()
+    const { packageName } = useOutletContext<SideNavOutletContextType>()
 
     // api
     const [createQuestion, { loading: apiLoading, error: apiError }] =
@@ -36,6 +39,10 @@ export const UploadQuestions = () => {
 
     // page level state
     const [shouldValidate, setShouldValidate] = React.useState(false)
+    const { updateHeading } = usePage()
+    useEffect(() => {
+        updateHeading({ customHeading: `${packageName} Add questions` })
+    }, [packageName, updateHeading])
 
     // component specific support
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
@@ -62,64 +69,49 @@ export const UploadQuestions = () => {
             return
         }
 
-        try {
-            const cleaned = cleanFileItemsBeforeSave()
-            const questionDocs = cleaned.map((item) => {
-                return {
-                    name: item.name,
-                    s3URL: item.s3URL as string,
-                }
-            })
-
-            const input: CreateQuestionInput = {
-                pkgID: id as string,
-                documents: questionDocs,
+        const cleaned = cleanFileItemsBeforeSave()
+        const questionDocs = cleaned.map((item) => {
+            return {
+                name: item.name,
+                s3URL: item.s3URL as string,
             }
+        })
 
-            const createResult = await createQuestion({
-                variables: { input },
-                update(cache, { data }) {
-                    if (data) {
-                        const newQuestion = data.createQuestion.question
-                        const result =
-                            cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
-                                {
-                                    query: FetchHealthPlanPackageWithQuestionsDocument,
-                                    variables: {
-                                        input: {
-                                            pkgID: newQuestion.pkgID,
-                                        },
-                                    },
-                                }
-                            )
+        const input: CreateQuestionInput = {
+            pkgID: id as string,
+            documents: questionDocs,
+        }
 
-                        const pkg = result?.fetchHealthPlanPackage.pkg
+        const createResult = await createQuestionWrapper(createQuestion, input)
 
-                        if (pkg) {
-                            cache.evict({ id: cache.identify(pkg) })
-                            cache.gc()
-                        }
-                    }
-                },
-            })
-
-            if (createResult) {
-                navigate(`/submissions/${id}/question-and-answers`)
-            }
-        } catch (serverError) {
-            console.info(serverError)
+        if (createResult instanceof Error) {
+            console.info(createResult.message)
+        } else {
+            navigate(`/submissions/${id}/question-and-answers?submit=question`)
         }
     }
 
     return (
         <GridContainer>
+            <Breadcrumbs
+                items={[
+                    {
+                        link: `/dashboard`,
+                        text: 'Dashboard',
+                    },
+                    { link: `/submissions/${id}`, text: packageName },
+                    { text: 'Add questions' },
+                ]}
+            />
+
             <UswdsForm
                 className={styles.formContainer}
                 id="AddQuestionsForm"
                 aria-label="Add Questions Form"
                 aria-describedby="form-guidance"
-                onSubmit={() => {
-                    return
+                onSubmit={async (e) => {
+                    e.preventDefault()
+                    await handleFormSubmit()
                 }}
             >
                 {apiError && <GenericApiErrorBanner />}
@@ -176,12 +168,10 @@ export const UploadQuestions = () => {
                             variant="outline"
                             data-testid="page-actions-left-secondary"
                             disabled={apiLoading}
-                            onClick={async () => {
-                                return apiLoading
-                                    ? undefined
-                                    : navigate(
-                                          `/submissions/${id}/question-and-answers`
-                                      )
+                            onClick={() => {
+                                navigate(
+                                    `/submissions/${id}/question-and-answers`
+                                )
                             }}
                         >
                             Cancel
@@ -192,10 +182,6 @@ export const UploadQuestions = () => {
                             variant="default"
                             data-testid="page-actions-right-primary"
                             disabled={showFileUploadError}
-                            onClick={async (e) => {
-                                e.preventDefault()
-                                await handleFormSubmit()
-                            }}
                             animationTimeout={1000}
                             loading={apiLoading}
                         >

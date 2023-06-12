@@ -70,7 +70,7 @@ The [USWDS United States Web Design System](https://designsystem.digital.gov/) i
 
 ## Testing
 
-More about the MC-Review testing approach can be found in [here](technical-design/testingApproach.md).
+More about the MC-Review testing approach can be found in [here](technical-design/testing-approach.md).
 
 ### Launch Darkly
 
@@ -95,3 +95,7 @@ More about the MC-Review testing approach can be found in [here](technical-desig
 ### Storybook
 
 [Storybook](https://storybook.js.org/docs/react/get-started/introduction) is a tool for building and deploying UI components in a isolated sandbox. It is often used for testing and reviewing components in a design library. Any shared component of interest in MC-Review is built with a storybook file for easy reference and testing by the design team.
+
+
+### Apollo Studio Explorer
+[Apollo Studio Explorer](https://www.apollographql.com/docs/graphos/explorer/explorer/) is a web-based IDE for writing and executing GraphQL operations on our deployed GraphQL API, with features such as schema referencing, query linting, autocomplete, and a jump-to-definition tool. The tool allows developers to write and test GraphQL operations without the need for front-end UI to execute the operations. For information on accessing the tool, refer to the [creating-and-testing-endpoints.md](technical-design/creating-and-testing-endpoints.md#apollo-studio-explorer) documentation.

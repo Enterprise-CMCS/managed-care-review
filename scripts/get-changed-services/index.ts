@@ -4,6 +4,8 @@ import * as core from '@actions/core'
 import { spawnSync } from 'child_process'
 
 const octokit = new Octokit()
+const owner = 'Enterprise-CMCS'
+const repo = 'managed-care-review'
 
 async function main() {
     // get our service names from lerna
@@ -16,13 +18,21 @@ async function main() {
     // get the workflow runs for this branch
     // we pass in branchName as input from the action
     const allWorkflowRuns = await octokit.actions.listWorkflowRuns({
-        owner: 'CMSgov',
-        repo: 'managed-care-review',
+        owner: owner,
+        repo: repo,
         workflow_id: 'deploy.yml',
         branch: core.getInput('branchName', { required: true }),
     })
 
     const deployAllServices = listOfServices
+    // get the latest commit in the branch to see if we are forcing a run
+    const latestCommit = await getLatestCommitSHA()
+    const commitMessage = await getLatestCommitMessage(latestCommit)
+    if (commitMessage.includes('ci-force-run')) {
+        core.setOutput('changed-services', deployAllServices)
+        return
+    }
+
     // if we haven't had a run on this branch, we need to deploy everything
     if (allWorkflowRuns.data.total_count === 0) {
         core.setOutput('changed-services', deployAllServices)
@@ -81,7 +91,7 @@ async function getJobsToSkip(
     // look for jobs in the last non-skipped GHA run that we might be able to skip
     const jobsFromLastRun = await octokit.actions.listJobsForWorkflowRunAttempt(
         {
-            owner: 'CMSgov',
+            owner: 'Enterprise-CMCS',
             repo: 'managed-care-review',
             run_id: lastCompletedRunId,
             attempt_number: runAttempt,
@@ -117,7 +127,11 @@ interface LernaListItem {
 
 // a list of all of our deployable service names from lerna
 function getAllServicesFromLerna(): string[] | Error {
-    const { stdout, stderr, error, status } = spawnSync('lerna', ['ls', '-a', '--json'])
+    const { stdout, stderr, error, status } = spawnSync('lerna', [
+        'ls',
+        '-a',
+        '--json',
+    ])
 
     if (error || status !== 0) {
         console.error('Error: ', error, stderr.toString())
@@ -129,12 +143,14 @@ function getAllServicesFromLerna(): string[] | Error {
 }
 
 // uses lerna to find services that have changed since the passed sha
-function getChangedServicesSinceSha(
-    sha: string
-): string[] | Error {
-    const { stdout, stderr, error, status } = spawnSync(
-        'lerna', [ 'ls', '--since', sha, '-all', '--json']
-    )
+function getChangedServicesSinceSha(sha: string): string[] | Error {
+    const { stdout, stderr, error, status } = spawnSync('lerna', [
+        'ls',
+        '--since',
+        sha,
+        '-all',
+        '--json',
+    ])
 
     if (error || status !== 0) {
         console.error(error, stderr.toString())
@@ -144,6 +160,26 @@ function getChangedServicesSinceSha(
     const lernaList: LernaListItem[] = JSON.parse(stdout.toString())
 
     return lernaList.map((i) => i.name)
+}
+
+async function getLatestCommitSHA(): Promise<string> {
+    const commits = await octokit.repos.listCommits({
+        owner: owner,
+        repo: repo,
+        sha: core.getInput('branchName', { required: true }),
+    })
+    const latestCommitSHA = commits.data[0].sha
+    return latestCommitSHA
+}
+
+async function getLatestCommitMessage(sha: string): Promise<string> {
+    const commit = await octokit.git.getCommit({
+        owner: owner,
+        repo: repo,
+        commit_sha: sha,
+    })
+    const commitMessage = commit.data.message
+    return commitMessage
 }
 
 main()

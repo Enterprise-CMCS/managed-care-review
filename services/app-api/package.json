@@ -20,6 +20,9 @@
         "*.{js,ts}": [
             "eslint --max-warnings=0",
             "prettier --write"
+        ],
+        "*.sql": [
+            "sh ../../scripts/validate_migration.sh"
         ]
     },
     "dependencies": {
@@ -52,8 +55,8 @@
         "graphql": "^16.2.0",
         "graphql-scalars": "^1.11.1",
         "json2csv": "^5.0.7",
-        "launchdarkly-node-server-sdk": "7.0.0",
-        "neverthrow": "^4.2.2",
+        "launchdarkly-node-server-sdk": "7.0.1",
+        "neverthrow": "^6.0.0",
         "path-to-regexp": "^6.2.1",
         "protobufjs": "^6.11.2",
         "request": "^2.88.2",

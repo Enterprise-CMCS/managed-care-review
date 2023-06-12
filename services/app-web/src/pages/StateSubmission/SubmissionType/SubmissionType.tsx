@@ -19,13 +19,21 @@ import {
     FieldYesNo,
     PoliteErrorMessage,
 } from '../../../components'
-import { SubmissionTypeRecord } from '../../../constants/healthPlanPackages'
-import { ContractType } from '../../../common-code/healthPlanFormDataType'
+import {
+    PopulationCoveredRecord,
+    SubmissionTypeRecord,
+} from '../../../constants/healthPlanPackages'
+import {
+    ContractType,
+    PopulationCoveredType,
+} from '../../../common-code/healthPlanFormDataType'
 import {
     HealthPlanPackage,
     SubmissionType as SubmissionTypeT,
     useCreateHealthPlanPackageMutation,
     CreateHealthPlanPackageInput,
+    IndexHealthPlanPackagesDocument,
+    IndexHealthPlanPackagesQuery,
 } from '../../../gen/gqlClient'
 import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
@@ -36,11 +44,12 @@ import {
     booleanAsYesNoFormValue,
     yesNoFormValueAsBoolean,
 } from '../../../components/Form/FieldYesNo/FieldYesNo'
-import { featureFlags } from '../../../common-code/featureFlags'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { SubmissionTypeFormSchema } from './SubmissionTypeSchema'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../../common-code/featureFlags'
 
 export interface SubmissionTypeFormValues {
+    populationCovered?: PopulationCoveredType
     programIDs: string[]
     riskBasedContract: string
     submissionDescription: string
@@ -71,14 +80,13 @@ export const SubmissionType = ({
     const location = useLocation()
     const isNewSubmission = location.pathname === '/submissions/new'
 
-    const statePrograms = useStatePrograms()
-
-    // Launch Darkly
     const ldClient = useLDClient()
-    const showRateCertAssurance = ldClient?.variation(
-        featureFlags.RATE_CERT_ASSURANCE.flag,
-        featureFlags.RATE_CERT_ASSURANCE.defaultValue
+    const showCHIPOnlyForm = ldClient?.variation(
+        featureFlags.CHIP_ONLY_FORM.flag,
+        featureFlags.CHIP_ONLY_FORM.defaultValue
     )
+
+    const statePrograms = useStatePrograms()
 
     const [createHealthPlanPackage, { error }] =
         useCreateHealthPlanPackageMutation({
@@ -87,28 +95,33 @@ export const SubmissionType = ({
             // without a refresh. Anytime a mutation does more than "modify an existing object"
             // you'll need to handle the cache.
             update(cache, { data }) {
-                if (data) {
-                    cache.modify({
-                        fields: {
-                            indexHealthPlanPackages(
-                                index = { totalCount: 0, edges: [] }
-                            ) {
-                                const newID = cache.identify(
-                                    data.createHealthPlanPackage.pkg
-                                )
-                                // This isn't quite what is documented, but it's clear this
-                                // is how things work from looking at the dev-tools
-                                const newRef = { __ref: newID }
+                const pkg = data?.createHealthPlanPackage.pkg
+                if (pkg) {
+                    const result =
+                        cache.readQuery<IndexHealthPlanPackagesQuery>({
+                            query: IndexHealthPlanPackagesDocument,
+                        })
 
-                                return {
-                                    totalCount: index.totalCount + 1,
-                                    edges: [
-                                        {
-                                            node: newRef,
-                                        },
-                                        ...index.edges,
-                                    ],
-                                }
+                    const indexHealthPlanPackages = {
+                        totalCount:
+                            result?.indexHealthPlanPackages.totalCount || 0,
+                        edges: result?.indexHealthPlanPackages.edges || [],
+                    }
+
+                    cache.writeQuery({
+                        query: IndexHealthPlanPackagesDocument,
+                        data: {
+                            indexHealthPlanPackages: {
+                                __typename: 'IndexHealthPlanPackagesPayload',
+                                totalCount:
+                                    indexHealthPlanPackages.totalCount + 1,
+                                edges: [
+                                    {
+                                        __typename: 'HealthPlanPackageEdge',
+                                        node: pkg,
+                                    },
+                                    ...indexHealthPlanPackages.edges,
+                                ],
                             },
                         },
                     })
@@ -133,6 +146,7 @@ export const SubmissionType = ({
         shouldValidate && Boolean(error)
 
     const submissionTypeInitialValues: SubmissionTypeFormValues = {
+        populationCovered: draftSubmission?.populationCovered,
         programIDs: draftSubmission?.programIDs ?? [],
         riskBasedContract:
             booleanAsYesNoFormValue(draftSubmission?.riskBasedContract) ?? '',
@@ -177,11 +191,12 @@ export const SubmissionType = ({
                 }
 
                 const input: CreateHealthPlanPackageInput = {
+                    populationCovered: values.populationCovered,
                     programIDs: values.programIDs,
                     submissionType: values.submissionType,
-                    riskBasedContract: showRateCertAssurance
-                        ? yesNoFormValueAsBoolean(values.riskBasedContract)
-                        : undefined,
+                    riskBasedContract: yesNoFormValueAsBoolean(
+                        values.riskBasedContract
+                    ),
                     submissionDescription: values.submissionDescription,
                     contractType: values.contractType,
                 }
@@ -216,12 +231,13 @@ export const SubmissionType = ({
             }
 
             // set new values
+            draftSubmission.populationCovered = values.populationCovered
             draftSubmission.programIDs = values.programIDs
             draftSubmission.submissionType =
                 values.submissionType as SubmissionTypeT
-            draftSubmission.riskBasedContract = showRateCertAssurance
-                ? yesNoFormValueAsBoolean(values.riskBasedContract)
-                : undefined
+            draftSubmission.riskBasedContract = yesNoFormValueAsBoolean(
+                values.riskBasedContract
+            )
             draftSubmission.submissionDescription = values.submissionDescription
             draftSubmission.contractType = values.contractType as ContractType
 
@@ -254,12 +270,30 @@ export const SubmissionType = ({
         return { ...errorObject, ...formikErrors }
     }
 
+    // Handles population covered click. CHIP-only can only have submission type of CONTRACT_ONLY. This function
+    // automatically resets the submission type radio selection when CONTRACT_ONLY is not selected and switching to
+    // CHIP-only population coverage.
+    const handlePopulationCoveredClick = (
+        value: PopulationCoveredType,
+        values: SubmissionTypeFormValues,
+        setFieldValue: FormikHelpers<SubmissionTypeFormValues>['setFieldValue']
+    ): void => {
+        const isSelectingChipOnly =
+            value === 'CHIP' && values.populationCovered !== value
+        if (
+            isSelectingChipOnly &&
+            values.submissionType === 'CONTRACT_AND_RATES'
+        ) {
+            setFieldValue('submissionType', 'CONTRACT_ONLY', true)
+        }
+    }
+
     return (
         <Formik
             initialValues={submissionTypeInitialValues}
             onSubmit={handleFormSubmit}
             validationSchema={SubmissionTypeFormSchema({
-                'rate-cert-assurance': showRateCertAssurance,
+                'chip-only-form': showCHIPOnlyForm,
             })}
         >
             {({
@@ -268,6 +302,7 @@ export const SubmissionType = ({
                 handleSubmit,
                 isSubmitting,
                 setSubmitting,
+                setFieldValue,
             }) => (
                 <>
                     <UswdsForm
@@ -293,6 +328,78 @@ export const SubmissionType = ({
                                     errors={generateErrorSummaryErrors(errors)}
                                     headingRef={errorSummaryHeadingRef}
                                 />
+                            )}
+
+                            {showCHIPOnlyForm && (
+                                <FormGroup
+                                    error={showFieldErrors(
+                                        errors.populationCovered
+                                    )}
+                                >
+                                    <Fieldset
+                                        className={styles.radioGroup}
+                                        role="radiogroup"
+                                        aria-required
+                                        legend="Which populations does this contract action cover?"
+                                    >
+                                        {showFieldErrors(
+                                            errors.populationCovered
+                                        ) && (
+                                            <PoliteErrorMessage>
+                                                {errors.populationCovered}
+                                            </PoliteErrorMessage>
+                                        )}
+                                        <FieldRadio
+                                            id="medicaid"
+                                            name="populationCovered"
+                                            label={
+                                                PopulationCoveredRecord[
+                                                    'MEDICAID'
+                                                ]
+                                            }
+                                            value={'MEDICAID'}
+                                            onClick={() =>
+                                                handlePopulationCoveredClick(
+                                                    'MEDICAID',
+                                                    values,
+                                                    setFieldValue
+                                                )
+                                            }
+                                        />
+                                        <FieldRadio
+                                            id="medicaid-and-chip"
+                                            name="populationCovered"
+                                            label={
+                                                PopulationCoveredRecord[
+                                                    'MEDICAID_AND_CHIP'
+                                                ]
+                                            }
+                                            value={'MEDICAID_AND_CHIP'}
+                                            onClick={() =>
+                                                handlePopulationCoveredClick(
+                                                    'MEDICAID_AND_CHIP',
+                                                    values,
+                                                    setFieldValue
+                                                )
+                                            }
+                                        />
+                                        <FieldRadio
+                                            id="chip"
+                                            name="populationCovered"
+                                            label={
+                                                PopulationCoveredRecord['CHIP']
+                                            }
+                                            value={'CHIP'}
+                                            onClick={() =>
+                                                handlePopulationCoveredClick(
+                                                    'CHIP',
+                                                    values,
+                                                    setFieldValue
+                                                )
+                                            }
+                                        />
+                                    </Fieldset>
+                                </FormGroup>
                             )}
 
                             <FormGroup
@@ -337,7 +444,8 @@ export const SubmissionType = ({
                                     className={styles.radioGroup}
                                     role="radiogroup"
                                     aria-required
-                                    legend="Submission type"
+                                    legend="Choose a submission type"
+                                    id="submissionType"
                                 >
                                     {showFieldErrors(errors.submissionType) && (
                                         <PoliteErrorMessage>
@@ -363,7 +471,23 @@ export const SubmissionType = ({
                                             ]
                                         }
                                         value={'CONTRACT_AND_RATES'}
+                                        disabled={
+                                            showCHIPOnlyForm &&
+                                            values.populationCovered === 'CHIP'
+                                        }
                                     />
+                                    {showCHIPOnlyForm &&
+                                        values.populationCovered === 'CHIP' && (
+                                            <div
+                                                role="note"
+                                                aria-labelledby="submissionType"
+                                                className="usa-hint padding-top-2"
+                                            >
+                                                States are not required to
+                                                submit rates with CHIP-only
+                                                contracts.
+                                            </div>
+                                        )}
                                 </Fieldset>
                             </FormGroup>
                             <FormGroup
@@ -402,17 +526,15 @@ export const SubmissionType = ({
                                     errors.riskBasedContract
                                 )}
                             >
-                                {showRateCertAssurance && (
-                                    <FieldYesNo
-                                        id="riskBasedContract"
-                                        name="riskBasedContract"
-                                        label="Is this a risk-based contract?"
-                                        hint="See 42 CFR § 438.2"
-                                        showError={showFieldErrors(
-                                            errors.riskBasedContract
-                                        )}
-                                    />
-                                )}
+                                <FieldYesNo
+                                    id="riskBasedContract"
+                                    name="riskBasedContract"
+                                    label="Is this a risk-based contract?"
+                                    hint="See 42 CFR § 438.2"
+                                    showError={showFieldErrors(
+                                        errors.riskBasedContract
+                                    )}
+                                />
                             </FormGroup>
                             <FieldTextarea
                                 label="Submission description"

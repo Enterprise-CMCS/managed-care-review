@@ -12,6 +12,11 @@ type Query {
     fetchCurrentUser: User!
 
     """
+    fetchEmailSettings returns emailer config and settings
+    """
+    fetchEmailSettings: FetchEmailSettingsPayload!
+
+    """
     fetchHealthPlanPackage returns a specific HealthPlanPackage by id
 
     If a package with the given ID cannot be found, this query returns undefined
@@ -23,21 +28,6 @@ type Query {
         - A CMSUser attempted to fetch a DRAFT HealthPlanPackage
     """
     fetchHealthPlanPackage(
-        input: FetchHealthPlanPackageInput!
-    ): FetchHealthPlanPackagePayload!
-
-    """
-    fetchHealthPlanPackage returns a specific HealthPlanPackage with Q&A questions by id
-
-    If a package with the given ID cannot be found, this query returns undefined
-    CMS users cannot fetch a DRAFT HealthPlanPackage
-
-    Errors:
-    - ForbiddenError:
-    - A state user from a different state called this.
-    - A CMSUser attempted to fetch a DRAFT HealthPlanPackage
-    """
-    fetchHealthPlanPackageWithQuestions(
         input: FetchHealthPlanPackageInput!
     ): FetchHealthPlanPackagePayload!
 
@@ -136,8 +126,18 @@ type Mutation {
         - A state user from a different state called this.
     - UserInputError
         - A package cannot be found with the given `pkgID`
-        - Attempted to submit a package in the SUBMITTED or RESUBMITTED state
         - The healthPlanFormData does not have all required field filled out
+    - INTERNAL_SERVER_ERROR
+        - DB_ERROR
+            - Postgres returns error when attempting to find a package
+            - Postgres returns error when attempting to update a package
+            - Attempt to find state programs from json file returns an error
+        - INVALID_PACKAGE_STATUS
+            - Attempted to submit a package in the SUBMITTED or RESUBMITTED state
+        - PROTO_DECODE_ERROR
+            - Failed to decode draft proto
+        - EMAIL_ERROR
+            - Sending state or CMS email failed.
     """
     submitHealthPlanPackage(
         input: SubmitHealthPlanPackageInput!
@@ -156,7 +156,16 @@ type Mutation {
         - A non CMSuser called this
     - UserInputError
         - A package cannot be found with the given `pkgID`
-        - Attempted to submit a package in the DRAFT or UNLOCKED state
+    - INTERNAL_SERVER_ERROR
+        - DB_ERROR
+            - Postgres returns error when attempting to finding a package
+            - Postgres returns error when attempting to update a package
+        - INVALID_PACKAGE_STATUS
+            - Attempted to unlock a package in the DRAFT or UNLOCKED state
+        - PROTO_DECODE_ERROR
+            - Failed to decode draft proto
+        - EMAIL_ERROR
+            - Sending state or CMS email failed.
     """
     unlockHealthPlanPackage(
         input: UnlockHealthPlanPackageInput!
@@ -188,6 +197,7 @@ type Mutation {
     Errors:
     - ForbiddenError:
         - A non CMSUser called this
+        - A CMS user with unassigned division
     - UserInputError
         - A package cannot be found with the given `pkgID`
         - The package is in the DRAFT state
@@ -196,39 +206,41 @@ type Mutation {
     """
     createQuestion(input: CreateQuestionInput!): CreateQuestionPayload!
 
-#    """
-#    updateQuestion updates a Question for the given HealthPlanPackage
-#    Only the due date can be changed
-#
-#    This can only be called by a CMSUser
-#
-#    Errors:
-#    - ForbiddenError:
-#        - A non CMSUser called this
-#    - UserInputError
-#        - A Question cannot be found given `questionID`
-#        - The due date is in the past
-#    """
-#    updateQuestion(input: UpdateQuestionInput!): UpdateQuestionPayload!
+    #    """
+    #    updateQuestion updates a Question for the given HealthPlanPackage
+    #    Only the due date can be changed
+    #
+    #    This can only be called by a CMSUser
+    #
+    #    Errors:
+    #    - ForbiddenError:
+    #        - A non CMSUser called this
+    #    - UserInputError
+    #        - A Question cannot be found given `questionID`
+    #        - The due date is in the past
+    #    """
+    #    updateQuestion(input: UpdateQuestionInput!): UpdateQuestionPayload!
 
-#    """
-#    createQuestionResponse creates a new QuestionResponse for the given Question
-#    A State User can add text to a note field and append a document to their response
-#
-#    This can only be called by a StateUser
-#
-#    Errors:
-#    - ForbiddenError:
-#        - A non StateUser called this
-#    - UserInputError
-#        - A Question cannot be found given `questionID`
-#    """
-   createQuestionResponse(
-       input: CreateQuestionResponseInput!
-   ): CreateQuestionResponsePayload!
+    """
+    createQuestionResponse creates a new QuestionResponse for the given Question
+    A State User can add text to a note field and append a document to their response
+
+    This can only be called by a StateUser
+
+    Errors:
+    - ForbiddenError:
+        - A non StateUser called this
+    - UserInputError
+        - A Question cannot be found given `questionID`
+    """
+    createQuestionResponse(
+        input: CreateQuestionResponseInput!
+    ): CreateQuestionResponsePayload!
 }
 
 input CreateHealthPlanPackageInput {
+    "Population that the contract covers"
+    populationCovered: PopulationCoveredType
     "An array of managed care program IDs this package covers"
     programIDs: [ID!]!
     "Whether or not this contract is risk based"
@@ -325,17 +337,17 @@ type CreateQuestionPayload {
 #}
 
 input CreateQuestionResponseInput {
-   "The ID of the question for which to create a response"
-   questionID: ID!
-   "A list of documents to attach to the response"
-   documents: [DocumentInput!]!
-   "A note to attach to the response"
-   noteText: String
+    "The ID of the question for which to create a response"
+    questionID: ID!
+    "A list of documents to attach to the response"
+    documents: [DocumentInput!]!
+    "A note to attach to the response"
+    noteText: String
 }
 
 type CreateQuestionResponsePayload {
-   "The newly created QuestionResponse"
-   response: QuestionResponse!
+    "The newly created QuestionResponse"
+    response: QuestionResponse!
 }
 
 type UserEdge {
@@ -382,10 +394,18 @@ type UpdateHealthPlanFormDataPayload {
     pkg: HealthPlanPackage!
 }
 
+enum Division {
+    DMCO
+    DMCP
+    OACT
+}
+
 input UpdateCMSUserInput {
     cmsUserID: ID!
     "stateAssignments is an array of stateCodes (e.g. ['CA', 'NM', 'TN'])"
-    stateAssignments: [String!]!
+    stateAssignments: [String!]
+    "divisionAssignment is one of the CMS divisions to which a user is assigned: 'DMCO', 'DMCP', or 'OACT'"
+    divisionAssignment: Division
 }
 
 type UpdateCMSUserPayload {
@@ -419,6 +439,7 @@ type CMSUser {
     givenName: String!
     familyName: String!
     stateAssignments: [State!]!
+    divisionAssignment: Division
 }
 
 "AdminUser is a user that works on the MC Review app itself"
@@ -550,6 +571,12 @@ type HealthPlanRevisionEdge {
     node: HealthPlanRevision!
 }
 
+enum PopulationCoveredType {
+    MEDICAID
+    CHIP
+    MEDICAID_AND_CHIP
+}
+
 enum SubmissionType {
     CONTRACT_ONLY
     CONTRACT_AND_RATES
@@ -570,8 +597,8 @@ type Document {
 }
 
 """
-Question is a question sent by CMS to the States for a response, associated with a single package. 
-CMS may upload one or more documents full of questions to a single Question. States submit a 
+Question is a question sent by CMS to the States for a response, associated with a single package.
+CMS may upload one or more documents full of questions to a single Question. States submit a
 QuestionResponse with documents that answer the questions posed by CMS.
 """
 type Question {
@@ -580,11 +607,12 @@ type Question {
     createdAt: DateTime!
     addedBy: CMSUser!
     documents: [Document!]!
-#    noteText: String
-#    dueDate: Date
-#    rateIDs: [String!]
-#
-   responses: [QuestionResponse!]!
+    division: Division!
+    #    noteText: String
+    #    dueDate: Date
+    #    rateIDs: [String!]
+    #
+    responses: [QuestionResponse!]!
 }
 
 #"""
@@ -592,10 +620,33 @@ type Question {
 #more documents full of responses to a single QuestionResponse, in addition to a text note.
 #"""
 type QuestionResponse {
-   id: ID!
-   questionID: ID!
-   createdAt: DateTime!
-   addedBy: StateUser!
-   documents: [Document!]!
-#    noteText: String
+    id: ID!
+    questionID: ID!
+    createdAt: DateTime!
+    addedBy: StateUser!
+    documents: [Document!]!
+    #    noteText: String
+}
+
+type EmailConfiguration {
+    stage: String!
+    baseUrl: String!
+    emailSource: String!
+    devReviewTeamEmails: [String!]!
+    oactEmails: [String!]!
+    dmcpEmails: [String!]!
+    dmcoEmails: [String!]!
+    cmsReviewHelpEmailAddress: String!
+    cmsRateHelpEmailAddress: String!
+    cmsDevTeamHelpEmailAddress: String!
+}
+
+type StateAnalystsConfiguration {
+    stateCode: String!
+    emails: [String!]!
+}
+type FetchEmailSettingsPayload {
+    "Email settings"
+    config: EmailConfiguration
+    stateAnalysts: [StateAnalystsConfiguration!]
 }

@@ -1,6 +1,10 @@
+import {FederalAuthority} from 'FederalAuthority'
+
 // Draft state submission is a health plan that a state user is still working on
 
 type SubmissionType = 'CONTRACT_ONLY' | 'CONTRACT_AND_RATES'
+
+type PopulationCoveredType = 'MEDICAID' | 'CHIP' | 'MEDICAID_AND_CHIP'
 
 type DocumentCategoryType =
     | 'CONTRACT'
@@ -12,10 +16,11 @@ type SubmissionDocument = {
     name: string
     s3URL: string
     documentCategories: DocumentCategoryType[]
+    sha256?: string
 }
 
 type ContractAmendmentInfo = {
-    modifiedProvisions: ModifiedProvisions
+    modifiedProvisions: GeneralizedModifiedProvisions
 }
 
 type RateAmendmentInfo = {
@@ -37,14 +42,6 @@ type ActuarialFirmType =
     | 'OTHER'
 
 type ActuaryCommunicationType = 'OACT_TO_ACTUARY' | 'OACT_TO_STATE'
-
-type FederalAuthority =
-    | 'STATE_PLAN'
-    | 'WAIVER_1915B'
-    | 'WAIVER_1115'
-    | 'VOLUNTARY'
-    | 'BENCHMARK'
-    | 'TITLE_XXI'
 
 type StateContact = {
     name: string
@@ -76,6 +73,7 @@ type RateInfoType = {
     rateType?: RateType
     rateCapitationType?: RateCapitationType
     rateDocuments: SubmissionDocument[]
+    supportingDocuments: SubmissionDocument[]
     rateDateStart?: Date
     rateDateEnd?: Date
     rateDateCertified?: Date
@@ -96,6 +94,7 @@ type UnlockedHealthPlanFormDataType = {
     stateCode: string
     stateNumber: number
     programIDs: string[]
+    populationCovered?: PopulationCoveredType
     submissionType: SubmissionType
     riskBasedContract?: boolean
     submissionDescription: string
@@ -124,7 +123,6 @@ export type {
     ActuarialFirmType,
     ActuaryCommunicationType,
     ContractType,
-    FederalAuthority,
     ManagedCareEntity,
     UnlockedHealthPlanFormDataType,
     ContractAmendmentInfo,
@@ -132,4 +130,5 @@ export type {
     RateCapitationType,
     RateInfoType,
     SharedRateCertDisplay,
+    PopulationCoveredType,
 }

@@ -5,9 +5,9 @@ import {
     getCmsReviewHelpEmail,
     getCmsRateHelpEmail,
     getCmsDevTeamHelpEmail,
-    getCmsReviewSharedEmails,
+    getDevReviewTeamEmails,
 } from './'
-import * as ParameterStore from '../awsParameterStore'
+import { ParameterStore } from '../awsParameterStore'
 
 describe('emailParameterStore', () => {
     afterEach(() => {
@@ -18,7 +18,7 @@ describe('emailParameterStore', () => {
     })
     describe('getSourceEmail', () => {
         it('returns source email as string', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue({
                 value: '"CMS Source Email" <local@example.com>',
                 type: 'String',
@@ -27,13 +27,13 @@ describe('emailParameterStore', () => {
             expect(result).toBe('"CMS Source Email" <local@example.com>')
         })
         it('returns error when fetching store value fails', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue(new Error('No store found'))
             const result = await getSourceEmail()
             expect(result).toBeInstanceOf(Error)
         })
         it('returns error when Type of parameter store value is incompatible', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue({
                 value: '"CMS Source Email" <local@example.com>',
                 type: 'StringList',
@@ -46,14 +46,14 @@ describe('emailParameterStore', () => {
             )
         })
     })
-    describe('getCmsReviewSharedEmails', () => {
+    describe('getDevReviewTeamEmails', () => {
         it('returns review shared emails email as array of strings', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue({
                 value: `"CMS Reviewer 1" <CMS.reviewer.1@example.com>,"CMS Reviewer 2" <CMS.reviewer.2@example.com>,"CMS Reviewer 3" <CMS.reviewer.3@example.com>`,
                 type: 'StringList',
             })
-            const result = await getCmsReviewSharedEmails()
+            const result = await getDevReviewTeamEmails()
             expect(result).toStrictEqual([
                 `"CMS Reviewer 1" <CMS.reviewer.1@example.com>`,
                 `"CMS Reviewer 2" <CMS.reviewer.2@example.com>`,
@@ -61,18 +61,18 @@ describe('emailParameterStore', () => {
             ])
         })
         it('returns error when fetching store value fails', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue(new Error('No store found'))
-            const result = await getCmsReviewSharedEmails()
+            const result = await getDevReviewTeamEmails()
             expect(result).toBeInstanceOf(Error)
         })
         it('returns error when Type of parameter store value is incompatible', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue({
                 value: '"CMS Source Email" <local@example.com>',
                 type: 'String',
             })
-            const result = await getCmsReviewSharedEmails()
+            const result = await getDevReviewTeamEmails()
             expect(result).toEqual(
                 new Error(
                     'Parameter store /configuration/email/reviewTeamAddresses value of Type String is not supported'
@@ -82,7 +82,7 @@ describe('emailParameterStore', () => {
     })
     describe('getStateAnalystEmails', () => {
         it('returns state analysts emails as array of strings', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue({
                 value: '"FL Analyst 1" <testFLStateAnalyst1@email.com>, "FL Analyst 2" <testFLStateAnalyst2@email.com>',
                 type: 'StringList',
@@ -94,13 +94,13 @@ describe('emailParameterStore', () => {
             ])
         })
         it('returns error when fetching store value fails', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue(new Error('No store found'))
             const result = await getStateAnalystsEmails('FL')
             expect(result).toBeInstanceOf(Error)
         })
         it('returns error when Type of parameter store value is incompatible', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue({
                 value: '"FL Analyst 1" <testFLStateAnalyst1@email.com>, "FL Analyst 2" <testFLStateAnalyst2@email.com>',
                 type: 'String',
@@ -116,7 +116,7 @@ describe('emailParameterStore', () => {
 
     describe('getCmsReviewHelpEmail', () => {
         it('returns review help email as string', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue({
                 value: `"Contract Related Help" <contract.help@example.com>`,
                 type: 'String',
@@ -127,13 +127,13 @@ describe('emailParameterStore', () => {
             )
         })
         it('returns error when fetching store value fails', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue(new Error('No store found'))
             const result = await getCmsReviewHelpEmail()
             expect(result).toBeInstanceOf(Error)
         })
         it('returns error when Type of parameter store value is incompatible', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue({
                 value: '"CMS Source Email" <local@example.com>',
                 type: 'StringList',
@@ -148,7 +148,7 @@ describe('emailParameterStore', () => {
     })
     describe('getCmsRateHelpEmail', () => {
         it('returns rate help email as string', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue({
                 value: `"Rate Related Help" <rate.help@example.com>`,
                 type: 'String',
@@ -157,13 +157,13 @@ describe('emailParameterStore', () => {
             expect(result).toBe(`"Rate Related Help" <rate.help@example.com>`)
         })
         it('returns error when fetching store value fails', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue(new Error('No store found'))
             const result = await getCmsRateHelpEmail()
             expect(result).toBeInstanceOf(Error)
         })
         it('returns error when Type of parameter store value is incompatible', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue({
                 value: '"CMS Source Email" <local@example.com>',
                 type: 'StringList',
@@ -179,7 +179,7 @@ describe('emailParameterStore', () => {
 
     describe('getCmsDevTeamHelpEmail', () => {
         it('returns dev team help email as string', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue({
                 value: `"MC-Review Support" <mc-review@example.com>`,
                 type: 'String',
@@ -188,13 +188,13 @@ describe('emailParameterStore', () => {
             expect(result).toBe(`"MC-Review Support" <mc-review@example.com>`)
         })
         it('returns error when fetching store value fails', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue(new Error('No store found'))
             const result = await getCmsDevTeamHelpEmail()
             expect(result).toBeInstanceOf(Error)
         })
         it('returns error when Type of parameter store value is incompatible', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue({
                 value: '"CMS Source Email" <local@example.com>',
                 type: 'StringList',
@@ -210,7 +210,7 @@ describe('emailParameterStore', () => {
 
     describe('getOACTEmails', () => {
         it('returns oact emails as array of string', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue({
                 value: '"Rate Submission Reviewer 1" <rate.reviewer.1@example.com>,"Rate Submission Reviewer 2" <rate.reviewer.2@example.com>,"Rate Submission Reviewer 3" <rate.reviewer.3@example.com>',
                 type: 'StringList',
@@ -223,13 +223,13 @@ describe('emailParameterStore', () => {
             ])
         })
         it('returns error when fetching store value fails', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue(new Error('No store found'))
             const result = await getOACTEmails()
             expect(result).toBeInstanceOf(Error)
         })
         it('returns error when Type of parameter store value is incompatible', async () => {
-            const spy = jest.spyOn(ParameterStore, 'getParameterStore')
+            const spy = jest.spyOn(ParameterStore, 'getParameter')
             spy.mockResolvedValue({
                 value: '"CMS Source Email" <local@example.com>',
                 type: 'String',

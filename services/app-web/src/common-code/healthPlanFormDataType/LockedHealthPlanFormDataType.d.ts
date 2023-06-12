@@ -10,6 +10,7 @@ import type {
     ContractType,
     ContractExecutionStatus,
     RateInfoType,
+    PopulationCoveredType,
 } from './UnlockedHealthPlanFormDataType'
 
 export type LockedHealthPlanFormDataType = {
@@ -21,6 +22,7 @@ export type LockedHealthPlanFormDataType = {
     programIDs: string[]
     submissionDescription: string
     riskBasedContract: boolean
+    populationCovered?: PopulationCoveredType
     submissionType: SubmissionType
     createdAt: Date
     updatedAt: DateTime

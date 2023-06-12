@@ -1,5 +1,8 @@
 import { mcreviewproto } from '../../../gen/healthPlanFormDataProto'
-import { unlockedHealthPlanFormDataSchema } from './unlockedHealthPlanFormDataSchema'
+import {
+    unlockedHealthPlanFormDataZodSchema,
+    lockedHealthPlanFormDataZodSchema,
+} from './zodSchemas'
 import {
     UnlockedHealthPlanFormDataType,
     LockedHealthPlanFormDataType,
@@ -186,6 +189,7 @@ function parseProtoDocuments(
             mcreviewproto.DocumentCategory,
             doc.documentCategories
         ) as DocumentCategoryType[],
+        sha256: doc.sha256 || undefined,
     }))
 }
 
@@ -212,6 +216,8 @@ function parseContractAmendment(
 
     return {
         modifiedProvisions: {
+            inLieuServicesAndSettings:
+                cleanProvisions.inLieuServicesAndSettings,
             modifiedBenefitsProvided: cleanProvisions.modifiedBenefitsProvided,
             modifiedGeoAreaServed: cleanProvisions.modifiedGeoAreaServed,
             modifiedMedicaidBeneficiaries:
@@ -347,6 +353,7 @@ function parseRateInfos(
                     rateInfo?.rateCapitationType
                 ),
                 rateDocuments: parseProtoDocuments(rateInfo?.rateDocuments),
+                supportingDocuments: parseProtoDocuments(rateInfo?.supportingDocuments),
                 rateDateStart: protoDateToDomain(rateInfo?.rateDateStart),
                 rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
                 rateDateCertified: protoDateToDomain(
@@ -396,6 +403,7 @@ const toDomain = (
         submittedAt,
         stateCode,
         stateNumber,
+        populationCovered,
         programIds,
         submissionType,
         riskBasedContract,
@@ -422,6 +430,10 @@ const toDomain = (
         createdAt: protoDateToDomain(createdAt),
         updatedAt: protoTimestampToDomain(updatedAt),
         submittedAt: protoTimestampToDomain(submittedAt),
+        populationCovered: enumToDomain(
+            mcreviewproto.PopulationCovered,
+            populationCovered
+        ),
         submissionType: enumToDomain(
             mcreviewproto.SubmissionType,
             submissionType
@@ -483,7 +495,7 @@ const toDomain = (
         maybeDraft.status = 'DRAFT'
         // This parse returns an actual UnlockedHealthPlanFormDataType, so all our partial & casting is put to rest
         const parseResult =
-            unlockedHealthPlanFormDataSchema.safeParse(maybeDraft)
+            unlockedHealthPlanFormDataZodSchema.safeParse(maybeDraft)
         if (parseResult.success === false) {
             return parseResult.error
         }
@@ -498,13 +510,23 @@ const toDomain = (
             maybeUnlockedFormData as RecursivePartial<LockedHealthPlanFormDataType>
         maybeLockedFormData.status = 'SUBMITTED'
 
+        const parseResult =
+            lockedHealthPlanFormDataZodSchema.safeParse(maybeLockedFormData)
+        if (parseResult.success === false) {
+            console.warn(
+                'ERROR: attempting to parse state submission proto failed.'
+            )
+            return new Error(
+                'ERROR: attempting to parse state submission proto failed'
+            )
+        }
         if (isLockedHealthPlanFormData(maybeLockedFormData)) {
             /* We need a one-off modification here because some older submissions don't have a populated
         rateCertificationName field.  If it's missing, we'll generate it and add it to the form data.
         We do it for locked or unlocked submissions. */
             return updateRateCertificationNames(maybeLockedFormData)
         } else {
-            console.info(
+            console.warn(
                 'ERROR: attempting to parse state submission proto failed.',
                 id
             )
@@ -515,7 +537,7 @@ const toDomain = (
     }
 
     // unknown or missing status means we've got a parse error.
-    console.info('ERROR: Unknown or missing status on this proto.', id, status)
+    console.warn('ERROR: Unknown or missing status on this proto.', id, status)
     return new Error('Unknown or missing status on this proto. Cannot decode.')
 }
 

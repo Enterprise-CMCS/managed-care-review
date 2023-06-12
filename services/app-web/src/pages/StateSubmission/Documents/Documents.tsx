@@ -17,6 +17,8 @@ import { PageActions } from '../PageActions'
 import classNames from 'classnames'
 import { ErrorSummary } from '../../../components/Form'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../../common-code/featureFlags'
 
 export const Documents = ({
     draftSubmission,
@@ -26,6 +28,12 @@ export const Documents = ({
     const [shouldValidate, setShouldValidate] = useState(false)
     const isContractOnly = draftSubmission.submissionType === 'CONTRACT_ONLY'
     const navigate = useNavigate()
+    const ldClient = useLDClient()
+
+    const supportingDocsByRate = ldClient?.variation(
+        featureFlags.SUPPORTING_DOCS_BY_RATE.flag,
+        featureFlags.SUPPORTING_DOCS_BY_RATE.defaultValue
+    )
 
     // Documents state management
     const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
@@ -102,6 +110,7 @@ export const Documents = ({
                     name: doc.name,
                     key: 'INVALID_KEY',
                     s3URL: undefined,
+                    sha256: doc.sha256,
                     status: 'UPLOAD_ERROR',
                     documentCategories: doc.documentCategories,
                 }
@@ -111,6 +120,7 @@ export const Documents = ({
                 name: doc.name,
                 key: key,
                 s3URL: doc.s3URL,
+                sha256: doc.sha256,
                 status: 'UPLOAD_COMPLETE',
                 documentCategories: doc.documentCategories,
             }
@@ -127,6 +137,15 @@ export const Documents = ({
     }: {
         fileItems: FileItemT[]
     }) => {
+        // When supportingDocsByRate flag is on, all documents on the supporting documents page are CONTRACT_RELATED.
+        // If the files documentCategories contains a category we skip as to not overwrite existing documents.
+        if (supportingDocsByRate) {
+            fileItems = fileItems.map((file) =>
+                file.documentCategories.length
+                    ? file
+                    : { ...file, documentCategories: ['CONTRACT_RELATED'] }
+            )
+        }
         setFileItems(fileItems)
     }
 
@@ -143,7 +162,6 @@ export const Documents = ({
                 throw new Error(`Error in S3 key: ${key}`)
             }
         }
-        return
     }
 
     const handleUploadFile = async (file: File): Promise<S3FileData> => {
@@ -220,6 +238,7 @@ export const Documents = ({
                         formDataDocuments.push({
                             name: fileItem.name,
                             s3URL: fileItem.s3URL,
+                            sha256: fileItem.sha256,
                             documentCategories:
                                 fileItem.documentCategories || [],
                         })
@@ -256,8 +275,11 @@ export const Documents = ({
                 )}
                 id="DocumentsForm"
                 aria-label="Documents Form"
-                onSubmit={() => {
-                    return
+                onSubmit={async (e) => {
+                    await handleFormSubmit({
+                        shouldValidateDocuments: true,
+                        redirectPath: `../review-and-submit`,
+                    })(e)
                 }}
             >
                 <fieldset className="usa-fieldset">
@@ -278,7 +300,7 @@ export const Documents = ({
                         id="documents"
                         name="documents"
                         label="Upload any additional supporting documents"
-                        renderMode="table"
+                        renderMode={supportingDocsByRate ? 'list' : 'table'}
                         hint={
                             <>
                                 <Link
@@ -327,12 +349,6 @@ export const Documents = ({
                         showFileUploadError && fileItems.length > 0
                     }
                     actionInProgress={isSubmitting}
-                    continueOnClick={async (e) => {
-                        await handleFormSubmit({
-                            shouldValidateDocuments: true,
-                            redirectPath: `../review-and-submit`,
-                        })(e)
-                    }}
                 />
             </UswdsForm>
         </>

@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 
 import {
     fetchCurrentUserMock,
@@ -53,6 +53,16 @@ describe('NewStateSubmissionForm', () => {
 
         const contractType = await screen.findByText('Base contract')
         await userEvent.click(contractType)
+
+        const riskBasedContractFieldSet = screen.getByText(
+            /Is this a risk-based contract/
+        ).parentElement
+        expect(riskBasedContractFieldSet).toBeDefined()
+
+        await userEvent.click(
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            within(riskBasedContractFieldSet!).getByLabelText('No')
+        )
 
         const textarea = await screen.findByRole('textbox', {
             name: 'Submission description',

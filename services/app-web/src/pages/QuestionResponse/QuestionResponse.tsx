@@ -1,92 +1,150 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { GridContainer, Link } from '@trussworks/react-uswds'
 import styles from './QuestionResponse.module.scss'
-import { SectionHeader } from '../../components'
-import { NavLink, useOutletContext } from 'react-router-dom'
-import { packageName } from '../../common-code/healthPlanFormDataType'
+
+import { Loading, SectionHeader } from '../../components'
+import { NavLink, useLocation, useOutletContext } from 'react-router-dom'
 import { usePage } from '../../contexts/PageContext'
 import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
+import {
+    QuestionResponseSubmitBanner,
+    UserAccountWarningBanner,
+} from '../../components/Banner'
 import { QATable, QuestionData, Division } from './QATable/QATable'
+import { CmsUser, QuestionEdge, StateUser } from '../../gen/gqlClient'
+import { CMSUserType } from 'app-api/src/domain-models'
+
+type divisionQuestionDataType = {
+    division: Division
+    questions: QuestionData[]
+}
+
+const extractQuestions = (edges?: QuestionEdge[]): QuestionData[] => {
+    if (!edges) {
+        return []
+    }
+    return edges.map(({ node }) => ({
+        ...node,
+        addedBy: node.addedBy as CmsUser,
+        responses: node.responses.map((response) => ({
+            ...response,
+            addedBy: response.addedBy as StateUser,
+        })),
+    }))
+}
+
+const getUserDivision = (user: CMSUserType): Division | undefined =>
+    user.divisionAssignment
+
+const getDivisionOrder = (division?: Division): Division[] =>
+    ['DMCO', 'DMCP', 'OACT'].sort((a, b) => {
+        if (a === division) {
+            return -1
+        }
+        if (b === division) {
+            return 1
+        }
+        return 0
+    }) as Division[]
 
 export const QuestionResponse = () => {
-    const outletContext = useOutletContext<SideNavOutletContextType>()
+    // router context
+    const location = useLocation()
+    const submitType = new URLSearchParams(location.search).get('submit')
+    const { user, packageData, packageName, pkg } =
+        useOutletContext<SideNavOutletContextType>()
+    let division: Division | undefined = undefined
+
+    // page context
     const { updateHeading } = usePage()
-    const [pkgName, setPkgName] = useState<string | undefined>(undefined)
-    const questions = outletContext.parsedQuestions
 
     useEffect(() => {
-        updateHeading({ customHeading: `${pkgName} Upload questions` })
-    }, [pkgName, updateHeading])
+        updateHeading({ customHeading: packageName })
+    }, [packageName, updateHeading])
 
-    const isCMSUser = outletContext.user.role === 'CMS_USER'
-
-    // set the page heading
-    const name = packageName(
-        outletContext.packageData,
-        outletContext.pkg.state.programs
-    )
-    if (pkgName !== name) {
-        setPkgName(name)
-    }
-
-    const mapQuestionTable = (
-        divisionQuestions: QuestionData[],
-        division: Division
-    ) => {
-        return divisionQuestions.length ? (
-            divisionQuestions.map((question) => (
-                <QATable
-                    key={question.id}
-                    question={question}
-                    division={division}
-                    user={outletContext.user}
-                />
-            ))
-        ) : (
-            <div>
-                <p>This division has not submitted questions yet.</p>
-            </div>
+    if (!packageData || !user) {
+        return (
+            <GridContainer>
+                <Loading />
+            </GridContainer>
         )
     }
+
+    const isCMSUser = user?.role === 'CMS_USER'
+
+    if (isCMSUser) {
+        division = getUserDivision(user as CMSUserType)
+    }
+
+    const divisionOrder = getDivisionOrder(division)
+    const questions: divisionQuestionDataType[] = []
+
+    divisionOrder.forEach(
+        (division) =>
+            pkg.questions?.[`${division}Questions`].totalCount &&
+            questions.push({
+                division: division,
+                questions: extractQuestions(
+                    pkg.questions?.[`${division}Questions`].edges
+                ),
+            })
+    )
+
+    const mapQASections = () =>
+        questions.map((divisionQuestions) => (
+            <section
+                key={divisionQuestions.division}
+                className={styles.questionSection}
+                data-testid={`${divisionQuestions.division.toLowerCase()}-qa-section`}
+            >
+                <h4>{`Asked by ${divisionQuestions.division}`}</h4>
+                {divisionQuestions.questions.map((question, index) => (
+                    <QATable
+                        key={question.id}
+                        question={question}
+                        division={divisionQuestions.division}
+                        round={divisionQuestions.questions.length - index}
+                        user={user}
+                    />
+                ))}
+            </section>
+        ))
 
     return (
         <div className={styles.background}>
             <GridContainer className={styles.container}>
+                {isCMSUser && !division && (
+                    <UserAccountWarningBanner
+                        header={'Missing division'}
+                        message={`You must be assigned to a division in order to ask questions about a submission. Contact mc-review@cms.hhs.gov to add your division.`}
+                    />
+                )}
+                {submitType && (
+                    <QuestionResponseSubmitBanner submitType={submitType} />
+                )}
                 <section>
-                    <SectionHeader header="Q&A" hideBorder>
-                        {isCMSUser && (
+                    <SectionHeader header="Contract questions" hideBorder>
+                        {isCMSUser && division && (
                             <Link
                                 asCustom={NavLink}
                                 className="usa-button"
                                 variant="unstyled"
-                                to={'./dmco/upload-questions'}
+                                to={`./${division.toLowerCase()}/upload-questions`}
                             >
                                 Add questions
                             </Link>
                         )}
                     </SectionHeader>
                 </section>
-                <section
-                    className={styles.questionSection}
-                    data-testid="dmco-qa-section"
-                >
-                    <h3>Questions from DMCO</h3>
-                    {mapQuestionTable(questions.dmco.questions, 'DMCO')}
-                </section>
-                <section
-                    className={styles.questionSection}
-                    data-testid="dmcp-qa-section"
-                >
-                    <h3>Questions from OACT</h3>
-                    {mapQuestionTable(questions.dmcp.questions, 'DMCP')}
-                </section>
-                <section
-                    className={styles.questionSection}
-                    data-testid="oact-qa-section"
-                >
-                    <h3>Questions from DMCP</h3>
-                    {mapQuestionTable(questions.oact.questions, 'OACT')}
-                </section>
+                {questions.length ? (
+                    mapQASections()
+                ) : (
+                    <section key={division} className={styles.questionSection}>
+                        <div>
+                            <p>No questions have been submitted yet.</p>
+                        </div>
+                    </section>
+                )}
             </GridContainer>
         </div>
     )

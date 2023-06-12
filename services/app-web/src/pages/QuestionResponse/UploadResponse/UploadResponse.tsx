@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
     GridContainer,
     Form as UswdsForm,
@@ -6,7 +6,7 @@ import {
     ButtonGroup,
 } from '@trussworks/react-uswds'
 import styles from '../QuestionResponse.module.scss'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { useS3 } from '../../../contexts/S3Context'
 import {
     ActionButton,
@@ -20,13 +20,16 @@ import { PageActionsContainer } from '../../StateSubmission/PageActions'
 import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import {
     CreateQuestionResponseInput,
-    FetchHealthPlanPackageWithQuestionsDocument,
-    FetchHealthPlanPackageWithQuestionsQuery,
     useCreateQuestionResponseMutation,
+    Division,
 } from '../../../gen/gqlClient'
+import { usePage } from '../../../contexts/PageContext'
+import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
+import { Breadcrumbs } from '../../../components/Breadcrumbs/Breadcrumbs'
+import { createResponseWrapper } from '../../../gqlHelpers/mutationWrappersForUserFriendlyErrors'
 
 export const UploadResponse = () => {
-    // third party
+    // router context
     const { division, id, questionID } = useParams<{
         division: string
         id: string
@@ -40,6 +43,11 @@ export const UploadResponse = () => {
 
     // page level state
     const [shouldValidate, setShouldValidate] = React.useState(false)
+    const { updateHeading } = usePage()
+    const { packageName } = useOutletContext<SideNavOutletContextType>()
+    useEffect(() => {
+        updateHeading({ customHeading: packageName })
+    }, [packageName, updateHeading])
 
     // component specific support
     const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
@@ -54,7 +62,7 @@ export const UploadResponse = () => {
         useErrorSummary()
     const showFileUploadError = Boolean(shouldValidate && fileUploadError)
     const fileUploadErrorFocusKey = hasNoFiles
-        ? 'questions-upload'
+        ? 'response-upload'
         : '#file-items-list'
 
     const handleFormSubmit = async () => {
@@ -66,63 +74,51 @@ export const UploadResponse = () => {
             return
         }
 
-        try {
-            const cleaned = cleanFileItemsBeforeSave()
-            const questionDocs = cleaned.map((item) => {
-                return {
-                    name: item.name,
-                    s3URL: item.s3URL as string,
-                }
-            })
-
-            const input: CreateQuestionResponseInput = {
-                questionID: questionID as string,
-                documents: questionDocs,
+        const cleaned = cleanFileItemsBeforeSave()
+        const responseDocs = cleaned.map((item) => {
+            return {
+                name: item.name,
+                s3URL: item.s3URL as string,
             }
+        })
 
-            const createResult = await createResponse({
-                variables: { input },
-                update(cache, { data }) {
-                    if (data) {
-                        const result =
-                            cache.readQuery<FetchHealthPlanPackageWithQuestionsQuery>(
-                                {
-                                    query: FetchHealthPlanPackageWithQuestionsDocument,
-                                    variables: {
-                                        input: {
-                                            pkgID: id,
-                                        },
-                                    },
-                                }
-                            )
+        const input: CreateQuestionResponseInput = {
+            questionID: questionID as string,
+            documents: responseDocs,
+        }
 
-                        const pkg = result?.fetchHealthPlanPackage.pkg
+        const createResult = await createResponseWrapper(
+            createResponse,
+            id as string,
+            input,
+            division as Division
+        )
 
-                        if (pkg) {
-                            cache.evict({ id: cache.identify(pkg) })
-                            cache.gc()
-                        }
-                    }
-                },
-            })
-
-            if (createResult) {
-                navigate(`/submissions/${id}/question-and-answers`)
-            }
-        } catch (serverError) {
-            console.info(serverError)
+        if (createResult instanceof Error) {
+            console.info(createResult.message)
+        } else {
+            navigate(`/submissions/${id}/question-and-answers?submit=response`)
         }
     }
 
     return (
         <GridContainer>
+            <Breadcrumbs
+                items={[
+                    { link: `/dashboard`, text: 'Dashboard' },
+                    { link: `/submissions/${id}`, text: packageName },
+                    { text: 'Add response' },
+                ]}
+            />
+
             <UswdsForm
                 className={styles.formContainer}
                 id="AddQuestionResponseForm"
                 aria-label="Add Response"
                 aria-describedby="form-guidance"
-                onSubmit={() => {
-                    return
+                onSubmit={async (e) => {
+                    e.preventDefault()
+                    await handleFormSubmit()
                 }}
             >
                 {apiError && <GenericApiErrorBanner />}
@@ -179,12 +175,10 @@ export const UploadResponse = () => {
                             variant="outline"
                             data-testid="page-actions-left-secondary"
                             disabled={apiLoading}
-                            onClick={async () => {
-                                return apiLoading
-                                    ? undefined
-                                    : navigate(
-                                          `/submissions/${id}/question-and-answers`
-                                      )
+                            onClick={() => {
+                                navigate(
+                                    `/submissions/${id}/question-and-answers`
+                                )
                             }}
                         >
                             Cancel
@@ -195,10 +189,6 @@ export const UploadResponse = () => {
                             variant="default"
                             data-testid="page-actions-right-primary"
                             disabled={showFileUploadError}
-                            onClick={async (e) => {
-                                e.preventDefault()
-                                await handleFormSubmit()
-                            }}
                             animationTimeout={1000}
                             loading={apiLoading}
                         >

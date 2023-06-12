@@ -18,6 +18,8 @@ import aangAvatar from '../assets/images/aang.png'
 import tophAvatar from '../assets/images/toph.png'
 import zukoAvatar from '../assets/images/zuko.png'
 import irohAvatar from '../assets/images/iroh.png'
+import rokuAvatar from '../assets/images/roku.png'
+import izumiAvatar from '../assets/images/izumi.jpg'
 
 import { useAuth } from '../contexts/AuthContext'
 import { LocalUserType } from './LocalUserType'
@@ -48,6 +50,22 @@ const localUsers: LocalUserType[] = [
         stateAssignments: [],
     },
     {
+        id: 'user5',
+        email: 'roku@example.com',
+        givenName: 'Roku',
+        familyName: 'Hotman',
+        role: 'CMS_USER',
+        stateAssignments: [],
+    },
+    {
+        id: 'user6',
+        email: 'izumi@example.com',
+        givenName: 'Izumi',
+        familyName: 'Hotman',
+        role: 'CMS_USER',
+        stateAssignments: [],
+    },
+    {
         id: 'user4',
         email: 'iroh@example.com',
         givenName: 'Iroh',
@@ -61,6 +79,8 @@ const userAvatars: { [key: string]: string } = {
     'toph@example.com': tophAvatar,
     'zuko@example.com': zukoAvatar,
     'iroh@example.com': irohAvatar,
+    'roku@example.com': rokuAvatar,
+    'izumi@example.com': izumiAvatar,
 }
 
 export function LocalLogin(): React.ReactElement {

@@ -7,6 +7,8 @@ import {
     queries,
     ByRoleMatcher,
     prettyDOM,
+    within,
+    Matcher,
 } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
@@ -17,18 +19,22 @@ import { S3Provider } from '../contexts/S3Context'
 import { testS3Client } from './s3Helpers'
 import { S3ClientT } from '../s3'
 import * as LaunchDarkly from 'launchdarkly-react-client-sdk'
-import { FeatureFlagTypes, FlagValueTypes } from '../common-code/featureFlags'
+import {
+    FeatureFlagLDConstant,
+    FlagValue,
+    FeatureFlagSettings,
+} from '../common-code/featureFlags'
 
 /* Render */
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const renderWithProviders = (
-    ui: React.ReactNode,
+    ui: React.ReactNode, // actual test UI - the JSX to render
     options?: {
-        routerProvider?: { route?: string }
-        apolloProvider?: MockedProviderProps
-        authProvider?: Partial<AuthProviderProps>
-        s3Provider?: S3ClientT
-        location?: (location: Location) => Location
+        routerProvider?: { route?: string } // used to pass react router related data
+        apolloProvider?: MockedProviderProps // used to pass GraphQL related data via apollo client
+        authProvider?: Partial<AuthProviderProps> // used to pass user authentication state via AuthContext
+        s3Provider?: S3ClientT // used to pass AWS S3 related state via  S3Context
+        location?: (location: Location) => Location // used to pass a location url for react-router
     }
 ) => {
     const {
@@ -67,9 +73,7 @@ const WithLocation = ({
 }
 
 //WARNING: This required tests using this function to clear mocks afterwards.
-const ldUseClientSpy = (
-    featureFlags: Partial<Record<FeatureFlagTypes, FlagValueTypes>>
-) => {
+const ldUseClientSpy = (featureFlags: FeatureFlagSettings) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     jest.spyOn(LaunchDarkly, 'useLDClient').mockImplementation((): any => {
         return {
@@ -84,8 +88,8 @@ const ldUseClientSpy = (
             identify: jest.fn(),
             alias: jest.fn(),
             variation: (
-                flag: FeatureFlagTypes,
-                defaultValue: FlagValueTypes | undefined
+                flag: FeatureFlagLDConstant,
+                defaultValue: FlagValue | undefined
             ) => {
                 if (
                     featureFlags[flag] === undefined &&
@@ -113,6 +117,17 @@ const prettyDebug = (label?: string, element?: HTMLElement): void => {
 }
 
 /* User Events */
+const selectYesNoRadio = async (
+    screen: Screen<typeof queries>,
+    legend: Matcher,
+    value: 'Yes' | 'No'
+) => {
+    const radioFieldset = screen.getByText(legend).parentElement
+    if (!radioFieldset)
+        throw new Error(`${legend} yes no radio field legend does not exist`)
+    const radioOption = within(radioFieldset).getByLabelText(value)
+    await userEvent.click(radioOption)
+}
 
 const userClickByTestId = async (
     screen: Screen<typeof queries>,
@@ -201,6 +216,7 @@ export {
     userClickByTestId,
     userClickSignIn,
     ldUseClientSpy,
+    selectYesNoRadio,
     TEST_DOC_FILE,
     TEST_PDF_FILE,
     TEST_PNG_FILE,

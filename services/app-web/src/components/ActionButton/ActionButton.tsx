@@ -24,6 +24,7 @@ export const ActionButton = ({
     variant = 'default',
     loading = false,
     animationTimeout = 750,
+    onClick,
     ...inheritedProps
 }: ActionButtonProps): React.ReactElement => {
     const [showLoading, setShowLoading] = useState(false)
@@ -77,6 +78,9 @@ export const ActionButton = ({
 
     return (
         <UswdsButton
+            onClick={
+                isDisabled || isLoading ? (e) => e.preventDefault() : onClick
+            }
             {...inheritedProps}
             {...variantProps}
             {...accessibilityProps}

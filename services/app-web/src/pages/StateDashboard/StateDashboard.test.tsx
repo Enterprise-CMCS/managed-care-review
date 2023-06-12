@@ -8,10 +8,7 @@ import {
     mockSubmittedHealthPlanPackage,
     mockUnlockedHealthPlanPackage,
 } from '../../testHelpers/apolloMocks'
-import {
-    ldUseClientSpy,
-    renderWithProviders,
-} from '../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 describe('StateDashboard', () => {
     it('display submission heading', async () => {
@@ -128,7 +125,6 @@ describe('StateDashboard', () => {
         expect(link3).toHaveAttribute('href', '/submissions/test-abc-submitted')
     })
     it('should not display filters on state dashboard page', async () => {
-        ldUseClientSpy({ 'cms-dashboard-filter': true })
         renderWithProviders(<StateDashboard />, {
             apolloProvider: {
                 mocks: [

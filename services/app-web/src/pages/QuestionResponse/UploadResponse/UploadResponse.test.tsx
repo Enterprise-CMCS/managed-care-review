@@ -4,6 +4,7 @@ import { Route, Routes } from 'react-router-dom'
 import { UploadResponse } from './UploadResponse'
 import {
     dragAndDrop,
+    ldUseClientSpy,
     renderWithProviders,
     TEST_DOC_FILE,
     TEST_PDF_FILE,
@@ -12,40 +13,61 @@ import {
 } from '../../../testHelpers'
 import { RoutesRecord } from '../../../constants/routes'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
-import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
-import { createQuestionNetworkFailure } from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
+import {
+    fetchCurrentUserMock,
+    mockValidUser,
+} from '../../../testHelpers/apolloMocks'
+import {
+    createQuestionResponseNetworkFailure,
+    fetchStateHealthPlanPackageWithQuestionsMockSuccess,
+} from '../../../testHelpers/apolloMocks/questionResponseGQLMock'
+import { SubmissionSideNav } from '../../SubmissionSideNav'
 
 describe('UploadResponse', () => {
+    beforeEach(() => {
+        ldUseClientSpy({ 'cms-questions': true })
+    })
+    afterEach(() => {
+        jest.resetAllMocks()
+    })
+
     const division = 'testDivision'
     const questionID = 'testQuestion'
 
     it('displays file upload for correct cms division', async () => {
         renderWithProviders(
             <Routes>
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
-                    element={<UploadResponse />}
-                />
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                        element={<UploadResponse />}
+                    />
+                </Route>
             </Routes>,
             {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: '15',
+                        }),
+                    ],
+                },
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/${division}/${questionID}/upload-response`,
                 },
             }
         )
 
-        // Expect text to display correct division from url parameters.
-        await waitFor(() => {
-            expect(
-                screen.queryByRole('heading', {
-                    name: /New response/,
-                    level: 2,
-                })
-            ).toBeInTheDocument()
-            expect(
-                screen.queryByText(`Questions from ${division.toUpperCase()}`)
-            ).toBeInTheDocument()
+        await screen.findByRole('heading', {
+            name: /New response/,
+            level: 2,
         })
+        // Expect text to display correct division from url parameters.
+        await screen.queryByText(`Questions from ${division.toUpperCase()}`)
         // Expect file upload input on page
         expect(await screen.findByTestId('file-input')).toBeInTheDocument()
         expect(screen.getByLabelText('Upload response')).toBeInTheDocument()
@@ -54,18 +76,35 @@ describe('UploadResponse', () => {
     it('file upload accepts multiple pdf, word, excel documents', async () => {
         renderWithProviders(
             <Routes>
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
-                    element={<UploadResponse />}
-                />
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                        element={<UploadResponse />}
+                    />
+                </Route>
             </Routes>,
             {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: '15',
+                        }),
+                    ],
+                },
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
                 },
             }
         )
 
+        await screen.findByRole('heading', {
+            name: /New response/,
+            level: 2,
+        })
         const input = screen.getByLabelText('Upload response')
         expect(input).toBeInTheDocument()
         expect(input).toHaveAttribute('accept', ACCEPTED_SUBMISSION_FILE_TYPES)
@@ -84,21 +123,35 @@ describe('UploadResponse', () => {
     it('displays form validation error if attempting to add question with zero files', async () => {
         renderWithProviders(
             <Routes>
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
-                    element={<UploadResponse />}
-                />
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                        element={<UploadResponse />}
+                    />
+                </Route>
             </Routes>,
             {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: '15',
+                        }),
+                    ],
+                },
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
-                },
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
                 },
             }
         )
 
+        await screen.findByRole('heading', {
+            name: /New response/,
+            level: 2,
+        })
         const continueButton = screen.getByRole('button', {
             name: 'Send response',
         })
@@ -116,20 +169,34 @@ describe('UploadResponse', () => {
     it('displays file upload alert if attempting to add question with all invalid files', async () => {
         renderWithProviders(
             <Routes>
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
-                    element={<UploadResponse />}
-                />
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                        element={<UploadResponse />}
+                    />
+                </Route>
             </Routes>,
             {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: '15',
+                        }),
+                    ],
+                },
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
                 },
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
             }
         )
+        await screen.findByRole('heading', {
+            name: /New response/,
+            level: 2,
+        })
         const continueButton = screen.getByRole('button', {
             name: 'Send response',
         })
@@ -152,20 +219,34 @@ describe('UploadResponse', () => {
     it('displays file upload error alert if attempting to add question while a file is still uploading', async () => {
         renderWithProviders(
             <Routes>
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
-                    element={<UploadResponse />}
-                />
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                        element={<UploadResponse />}
+                    />
+                </Route>
             </Routes>,
             {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: '15',
+                        }),
+                    ],
+                },
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
                 },
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
             }
         )
+        await screen.findByRole('heading', {
+            name: /New response/,
+            level: 2,
+        })
         const continueButton = screen.getByRole('button', {
             name: 'Send response',
         })
@@ -196,38 +277,52 @@ describe('UploadResponse', () => {
         ).toHaveLength(2)
     })
 
-    it('displays api error if createQuestion fails', async () => {
+    it('displays api error if createQuestionResponse fails', async () => {
         renderWithProviders(
             <Routes>
-                <Route
-                    path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
-                    element={<UploadResponse />}
-                />
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_UPLOAD_RESPONSE}
+                        element={<UploadResponse />}
+                    />
+                </Route>
             </Routes>,
             {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidUser(),
+                            statusCode: 200,
+                        }),
+                        fetchStateHealthPlanPackageWithQuestionsMockSuccess({
+                            id: '15',
+                        }),
+                        createQuestionResponseNetworkFailure(),
+                    ],
+                },
                 routerProvider: {
                     route: `/submissions/15/question-and-answers/dmco/${questionID}/upload-response`,
                 },
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({ statusCode: 200 }),
-                        createQuestionNetworkFailure(),
-                    ],
-                },
             }
         )
-
+        await screen.findByRole('heading', {
+            name: /New response/,
+            level: 2,
+        })
         const createQuestionButton = screen.getByRole('button', {
             name: 'Send response',
         })
         const input = screen.getByLabelText('Upload response')
 
         await userEvent.upload(input, [TEST_DOC_FILE])
+        await screen.findByText(TEST_DOC_FILE.name)
+        await screen.findByText(/1 complete/)
+
         createQuestionButton.click()
 
-        expect(await screen.findByText(TEST_DOC_FILE.name)).toBeInTheDocument()
+        await screen.findByTestId('error-alert')
         expect(
-            await screen.findByText("We're having trouble loading this page.")
+            await screen.getByText("We're having trouble loading this page.")
         ).toBeDefined()
     })
 })

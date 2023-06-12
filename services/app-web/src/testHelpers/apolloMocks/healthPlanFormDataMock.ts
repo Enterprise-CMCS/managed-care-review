@@ -1,9 +1,9 @@
-/* 
-    Mock different health plan form data that match frontend types. 
+/*
+    Mock different health plan form data that match frontend types.
     These helper functions allow us to compose together different proto form data to serialize and then attach in our health plan package GQL queries/ mutations
     See HealthPlanPackageGQLMock` file for usage
 
-    Future refactors - it seems like we are starting to also add these types of mocks in common-code/healthPlanFormDataMocks. 
+    Future refactors - it seems like we are starting to also add these types of mocks in common-code/healthPlanFormDataMocks.
     We may be able to move these mocks in that file as well.
 */
 
@@ -26,7 +26,9 @@ import {
 import { HealthPlanPackage, UpdateInformation } from '../../gen/gqlClient'
 import { mockMNState } from './stateMock'
 
-function mockDraft(): UnlockedHealthPlanFormDataType {
+function mockDraft(
+    partial?: Partial<UnlockedHealthPlanFormDataType>
+): UnlockedHealthPlanFormDataType {
     return {
         status: 'DRAFT',
         stateNumber: 5,
@@ -35,6 +37,7 @@ function mockDraft(): UnlockedHealthPlanFormDataType {
         id: 'test-abc-123',
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+        populationCovered: 'MEDICAID',
         submissionType: 'CONTRACT_ONLY',
         riskBasedContract: false,
         submissionDescription: 'A real submission',
@@ -51,10 +54,13 @@ function mockDraft(): UnlockedHealthPlanFormDataType {
         stateContacts: [],
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
+        ...partial,
     }
 }
 
-function mockCompleteDraft(): UnlockedHealthPlanFormDataType {
+function mockBaseContract(
+    partial?: Partial<UnlockedHealthPlanFormDataType>
+): UnlockedHealthPlanFormDataType {
     return {
         status: 'DRAFT',
         stateNumber: 5,
@@ -63,6 +69,7 @@ function mockCompleteDraft(): UnlockedHealthPlanFormDataType {
         id: 'test-abc-123',
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+        populationCovered: 'MEDICAID',
         submissionType: 'CONTRACT_ONLY',
         riskBasedContract: true,
         submissionDescription: 'A real submission',
@@ -72,7 +79,17 @@ function mockCompleteDraft(): UnlockedHealthPlanFormDataType {
         contractDocuments: [],
         contractDateStart: new Date(),
         contractDateEnd: new Date(),
-        contractAmendmentInfo: undefined,
+        contractAmendmentInfo: {
+            modifiedProvisions: {
+                modifiedRiskSharingStrategy: true,
+                modifiedIncentiveArrangements: false,
+                modifiedWitholdAgreements: false,
+                modifiedStateDirectedPayments: true,
+                modifiedPassThroughPayments: true,
+                modifiedPaymentsForMentalDiseaseInstitutions: false,
+                modifiedNonRiskPaymentArrangements: true,
+            },
+        },
         managedCareEntities: [],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [
@@ -80,6 +97,7 @@ function mockCompleteDraft(): UnlockedHealthPlanFormDataType {
                 rateType: 'NEW',
                 rateCapitationType: 'RATE_CELL',
                 rateDocuments: [],
+                supportingDocuments: [],
                 rateDateStart: new Date(),
                 rateDateEnd: new Date(),
                 rateDateCertified: new Date(),
@@ -97,10 +115,13 @@ function mockCompleteDraft(): UnlockedHealthPlanFormDataType {
         ],
         addtlActuaryContacts: [],
         addtlActuaryCommunicationPreference: undefined,
+        ...partial,
     }
 }
 
-function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
+function mockContractAndRatesDraft(
+    partial?: Partial<UnlockedHealthPlanFormDataType>
+): UnlockedHealthPlanFormDataType {
     return {
         status: 'DRAFT',
         stateNumber: 5,
@@ -109,6 +130,7 @@ function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
         id: 'test-abc-123',
         stateCode: 'MN',
         programIDs: ['pmap'],
+        populationCovered: 'MEDICAID',
         submissionType: 'CONTRACT_AND_RATES',
         riskBasedContract: true,
         submissionDescription: 'A real submission',
@@ -120,6 +142,7 @@ function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
         contractDateEnd: new Date(),
         contractAmendmentInfo: {
             modifiedProvisions: {
+                inLieuServicesAndSettings: true,
                 modifiedBenefitsProvided: true,
                 modifiedGeoAreaServed: false,
                 modifiedMedicaidBeneficiaries: true,
@@ -145,6 +168,7 @@ function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
                 rateType: 'AMENDMENT',
                 rateCapitationType: 'RATE_CELL',
                 rateDocuments: [],
+                supportingDocuments: [],
                 rateDateStart: new Date(),
                 rateDateEnd: new Date(),
                 rateDateCertified: new Date(),
@@ -186,6 +210,7 @@ function mockContractAndRatesDraft(): UnlockedHealthPlanFormDataType {
             },
         ],
         addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
+        ...partial,
     }
 }
 
@@ -198,6 +223,7 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
         id: 'test-abc-125',
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+        populationCovered: 'MEDICAID',
         submissionType: 'CONTRACT_AND_RATES',
         riskBasedContract: true,
         submissionDescription: 'A submitted submission',
@@ -220,7 +246,18 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
         ],
         contractDateStart: new Date(),
         contractDateEnd: new Date(),
-        contractAmendmentInfo: undefined,
+        contractAmendmentInfo: {
+            modifiedProvisions: {
+                inLieuServicesAndSettings: true,
+                modifiedRiskSharingStrategy: false,
+                modifiedIncentiveArrangements: false,
+                modifiedWitholdAgreements: false,
+                modifiedStateDirectedPayments: true,
+                modifiedPassThroughPayments: false,
+                modifiedPaymentsForMentalDiseaseInstitutions: false,
+                modifiedNonRiskPaymentArrangements: true,
+            },
+        },
         managedCareEntities: ['ENROLLMENT_PROCESS'],
         federalAuthorities: ['VOLUNTARY', 'BENCHMARK'],
         rateInfos: [
@@ -234,6 +271,7 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                supportingDocuments: [],
                 rateDateStart: new Date(),
                 rateDateEnd: new Date(),
                 rateDateCertified: new Date(),
@@ -272,6 +310,7 @@ function mockStateSubmissionContractAmendment(): LockedHealthPlanFormDataType {
         id: 'test-abc-125',
         stateCode: 'MN',
         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+        populationCovered: 'MEDICAID',
         submissionType: 'CONTRACT_AND_RATES',
         riskBasedContract: true,
         submissionDescription: 'A submitted submission',
@@ -296,6 +335,7 @@ function mockStateSubmissionContractAmendment(): LockedHealthPlanFormDataType {
         contractDateEnd: new Date(),
         contractAmendmentInfo: {
             modifiedProvisions: {
+                inLieuServicesAndSettings: false,
                 modifiedBenefitsProvided: true,
                 modifiedGeoAreaServed: false,
                 modifiedMedicaidBeneficiaries: true,
@@ -327,6 +367,7 @@ function mockStateSubmissionContractAmendment(): LockedHealthPlanFormDataType {
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                supportingDocuments: [],
                 rateDateStart: new Date(),
                 rateDateEnd: new Date(),
                 rateDateCertified: new Date(),
@@ -690,7 +731,7 @@ function mockUnlockedHealthPlanPackageWithDocuments(): HealthPlanPackage {
 export {
     mockContractAndRatesDraft,
     mockStateSubmission,
-    mockCompleteDraft,
+    mockBaseContract,
     mockDraft,
     mockStateSubmissionContractAmendment,
     mockDraftHealthPlanPackage,

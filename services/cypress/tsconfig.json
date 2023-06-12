@@ -1,0 +1,9 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "target": "ES2017",
+        "lib": ["ES2017", "dom"],
+        "types": ["cypress", "@testing-library/cypress", "cypress-file-upload", "node"]
+    },
+    "include": ["**/*.ts"]
+}

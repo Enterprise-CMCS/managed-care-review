@@ -52,7 +52,6 @@ export function updateHealthPlanFormDataResolver(
                 argumentName: 'healthPlanFormData',
             })
         }
-
         // don't send a LockedFormData to the update endpoint
         if (formDataResult.status === 'SUBMITTED') {
             const errMessage = `Attempted to update with a StateSubmission: ${input.pkgID}`
@@ -182,9 +181,9 @@ export function updateHealthPlanFormDataResolver(
         }
 
         if (unfixedFields.length !== 0) {
-            const errMessage = `Attempted to modify un-modifiable field(s): ${unfixedFields.join(
+            const errMessage = `Transient server error: attempted to modify un-modifiable field(s): ${unfixedFields.join(
                 ','
-            )}`
+            )}.  Please refresh the page to continue.`
             logError('updateHealthPlanFormData', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new UserInputError(errMessage, {
@@ -194,11 +193,8 @@ export function updateHealthPlanFormDataResolver(
 
         const editableRevision = planPackage.revisions[0]
 
-        // If CONTRACT_ONLY submission has supporting documents with RATES_RELATED category we convert this to CONTRACT_RELATED.
-        // This was done on the front end in FileUpload.tsx, but we are doing this here to convert these documents when
-        // the submission type has changed in order to save this across the forms because specifically the review and
-        // submit page, will not display documents that are RATE_RELATED under Contract Details sections when changing
-        // submission type to CONTRACT_ONLY.
+
+        // This logic is no longer needed once SUPPORTING_DOCS_BY_RATE flag is on in production - it was used to remove rate supporting docs form contract only submisisons
         if (
             unlockedFormData.submissionType === 'CONTRACT_ONLY' &&
             unlockedFormData.documents.some((document) =>

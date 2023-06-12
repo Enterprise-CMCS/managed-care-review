@@ -12,10 +12,13 @@ on:
       changed_services:
         required: true
         type: string
-    secrets:
       aws_default_region:
         required: true
+        type: string
+    secrets:
       aws_account_id:
+        required: true
+      nr_license_key:
         required: true
 
 permissions:
@@ -24,50 +27,50 @@ permissions:
 jobs:
   # deploy the OIDC service first, as subsequent deploys may depend on updated OIDC permissions
   github-oidc:
-      if: ${{ contains(inputs.changed_services, 'github-oidc') }}
-      environment: ${{ inputs.environment }}
-      runs-on: ubuntu-20.04
-      steps:
-        - name: Check out repository
-          uses: actions/checkout@v3
+    if: ${{ contains(inputs.changed_services, 'github-oidc') }}
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
 
-        - name: Setup env
-          uses: ./.github/actions/setup_env
+      - name: Setup env
+        uses: ./.github/actions/setup_env
 
-        - name: build scripts
-          shell: bash
-          run: |
-            lerna run build:ci-scripts
+      - name: build scripts
+        shell: bash
+        run: |
+          lerna run build:ci-scripts
 
-        - name: Set the correct stage name for the bootstrapped OIDC role based on the environment
-          id: set-oidc-stage-name
-          shell: bash
-          # the dev environment uses 'main' as the stage name; otherwise the stage name is same as the environment name
-          # if the environment isn't one of [dev, val, prod], fail the job
-          run: |
-            echo "stage-name=$(
-              if [[ "${{ inputs.environment }}" == "val" || "${{ inputs.environment }}" == "prod" ]]; then
-                echo "${{ inputs.environment }}";
-              elif [[ ${{ inputs.environment }} == "dev" ]]; then
-                echo "main";
-              else
-                echo "Invalid environment: ${{ inputs.environment }}" >&2;
-                kill -HUP $$
-              fi
-            )" >> $GITHUB_OUTPUT
+      - name: Set the correct stage name for the bootstrapped OIDC role based on the environment
+        id: set-oidc-stage-name
+        shell: bash
+        # the dev environment uses 'main' as the stage name; otherwise the stage name is same as the environment name
+        # if the environment isn't one of [dev, val, prod], fail the job
+        run: |
+          echo "stage-name=$(
+            if [[ "${{ inputs.environment }}" == "val" || "${{ inputs.environment }}" == "prod" ]]; then
+              echo "${{ inputs.environment }}";
+            elif [[ ${{ inputs.environment }} == "dev" ]]; then
+              echo "main";
+            else
+              echo "Invalid environment: ${{ inputs.environment }}" >&2;
+              kill -HUP $$
+            fi
+          )" >> $GITHUB_OUTPUT
 
-        - name: Get AWS credentials
-          uses: ./.github/actions/get_aws_credentials
-          with:
-            region: ${{ secrets.aws_default_region }}
-            account-id: ${{ secrets.aws_account_id }}
-            # use the manually bootstrapped OIDC role to solve the chicken-and-egg problem of deploying the OIDC service via OIDC
-            stage-name: ${{ steps.set-oidc-stage-name.outputs.stage-name }}
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ inputs.aws_default_region }}
+          account-id: ${{ secrets.aws_account_id }}
+          # use the manually bootstrapped OIDC role to solve the chicken-and-egg problem of deploying the OIDC service via OIDC
+          stage-name: ${{ steps.set-oidc-stage-name.outputs.stage-name }}
 
-        - name: deploy github-oidc
-          id: deploy-github-oidc
-          run: |
-            pushd services/github-oidc && npx serverless deploy --stage ${{ inputs.stage_name }}
+      - name: deploy github-oidc
+        id: deploy-github-oidc
+        run: |
+          pushd services/github-oidc && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   postgres:
     # for this and subsequent jobs, wait for the OIDC service to deploy (unless it was skipped)
@@ -85,7 +88,7 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ secrets.aws_default_region }}
+          region: ${{ inputs.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
@@ -110,7 +113,7 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ secrets.aws_default_region }}
+          region: ${{ inputs.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
@@ -135,7 +138,7 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ secrets.aws_default_region }}
+          region: ${{ inputs.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
@@ -160,13 +163,15 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ secrets.aws_default_region }}
+          region: ${{ inputs.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
 
       - name: deploy uploads
         id: deploy-uploads
+        env:
+          NR_LICENSE_KEY: ${{ secrets.nr_license_key }}
         run: |
           pushd services/uploads && npx serverless deploy --stage ${{ inputs.stage_name }}
 
@@ -185,7 +190,7 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ secrets.aws_default_region }}
+          region: ${{ inputs.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
@@ -210,7 +215,7 @@ jobs:
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
         with:
-          region: ${{ secrets.aws_default_region }}
+          region: ${{ inputs.aws_default_region }}
           account-id: ${{ secrets.aws_account_id }}
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}

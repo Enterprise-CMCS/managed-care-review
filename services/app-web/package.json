@@ -8,14 +8,15 @@
         "build": "sh ../../run_build.sh",
         "build:prod": "react scripts build",
         "build:instrumented": "CYPRESS_INSTRUMENT_PRODUCTION=true react-scripts -r @cypress/instrument-cra build",
-        "test": "TZ=UTC react-scripts test",
         "eject": "react-scripts eject",
         "clean": "rm -rf node_modules && yarn cache clean",
         "format": "prettier --write src/**/*.ts{,x}",
         "lint": "tsc --noEmit && eslint src/ --max-warnings=0",
+        "test": "TZ=UTC react-scripts test",
         "test:once": "TZ=UTC react-scripts test --watchAll=false --runInBand --ci",
         "test:update": "react-scripts test -u",
         "test:coverage": "yarn test --coverage --watchAll=false",
+        "test:clear": "react-scripts test --clearCache",
         "storybook": "start-storybook -p 6006 -s public --quiet",
         "build-storybook": "build-storybook -s public --quiet",
         "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""
@@ -88,7 +89,7 @@
         "@opentelemetry/resources": "^1.9.1",
         "@opentelemetry/sdk-trace-web": "^1.9.1",
         "@opentelemetry/semantic-conventions": "^1.9.1",
-        "@tanstack/react-table": "^8.7.0",
+        "@tanstack/react-table": "^8.8.5",
         "@trussworks/react-uswds": "^3.2.0",
         "@types/path-browserify": "^1.0.0",
         "aws-amplify": "^5.0.10",
@@ -118,9 +119,9 @@
         "zod": "^3.10.1"
     },
     "devDependencies": {
-        "@aws-sdk/client-amplify": "^3.204.0",
-        "@aws-sdk/client-s3": "^3.204.0",
-        "@aws-sdk/s3-request-presigner": "^3.204.0",
+        "@aws-sdk/client-amplify": "^3.294.0",
+        "@aws-sdk/client-s3": "^3.294.0",
+        "@aws-sdk/s3-request-presigner": "^3.294.0",
         "@storybook/addon-a11y": "^6.5.15",
         "@storybook/addon-essentials": "^6.5.15",
         "@storybook/addon-links": "^6.5.15",
@@ -130,7 +131,7 @@
         "@storybook/react": "^6.5.15",
         "@testing-library/cypress": "^9.0.0",
         "@testing-library/jest-dom": "^5.16.5",
-        "@testing-library/react": "^13.4.0",
+        "@testing-library/react": "^14.0.0",
         "@testing-library/user-event": "^14.4.3",
         "@types/classnames": "^2.2.11",
         "@types/jest": "^27.0.1",
@@ -141,8 +142,9 @@
         "@types/uuid": "^9.0.0",
         "@typescript-eslint/eslint-plugin": "^5.6.0",
         "@typescript-eslint/parser": "^5.6.0",
+        "add": "^2.0.6",
         "classnames": "^2.2.6",
-        "eslint-config-prettier": "^7.2.0",
+        "eslint-config-prettier": "^8.7.0",
         "eslint-plugin-jest": "^27.0.1",
         "eslint-plugin-jsx-a11y": "^6.5.1",
         "eslint-plugin-prettier": "^4.0.0",
@@ -159,6 +161,7 @@
         "serverless-cloudfront-invalidate": "^1.11.0",
         "serverless-s3-sync": "^3.0.0",
         "serverless-stack-termination-protection": "^2.0.2",
-        "webpack": "^5.72.0"
+        "webpack": "^5.72.0",
+        "yarn": "^1.22.19"
     }
 }

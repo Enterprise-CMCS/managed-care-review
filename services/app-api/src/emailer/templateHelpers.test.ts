@@ -1,8 +1,7 @@
 import {
-    CHIP_PROGRAMS_UUID,
     filterChipAndPRSubmissionReviewers,
     generateCMSReviewerEmails,
-    includesChipPrograms,
+    handleAsCHIPSubmission,
 } from './templateHelpers'
 import { UnlockedHealthPlanFormDataType } from 'app-web/src/common-code/healthPlanFormDataType'
 import {
@@ -27,9 +26,9 @@ describe('templateHelpers', () => {
             stateAnalystsEmails: testStateAnalystsEmails,
             testDescription: 'Contract only submission',
             expectedResult: [
-                ...testEmailConfig.cmsReviewSharedEmails,
+                ...testEmailConfig.devReviewTeamEmails,
                 ...testStateAnalystsEmails,
-                ...testEmailConfig.dmcoEmails,
+                ...testEmailConfig.dmcpEmails,
             ],
         },
         {
@@ -38,9 +37,8 @@ describe('templateHelpers', () => {
             stateAnalystsEmails: testStateAnalystsEmails,
             testDescription: 'Contract and rates submission',
             expectedResult: [
-                ...testEmailConfig.cmsReviewSharedEmails,
+                ...testEmailConfig.devReviewTeamEmails,
                 ...testStateAnalystsEmails,
-                ...testEmailConfig.dmcoEmails,
                 ...testEmailConfig.dmcpEmails,
                 ...testEmailConfig.oactEmails,
             ],
@@ -55,11 +53,10 @@ describe('templateHelpers', () => {
             testDescription:
                 'Submission with CHIP program specified for contract certification',
             expectedResult: [
-                'cmsreview1@example.com',
-                'cmsreview2@example.com',
+                'devreview1@example.com',
+                'devreview2@example.com',
                 '"State Analyst 1" <StateAnalyst1@example.com>',
                 '"State Analyst 2" <StateAnalyst2@example.com>',
-                ...testEmailConfig.dmcoEmails,
             ],
         },
         {
@@ -75,6 +72,7 @@ describe('templateHelpers', () => {
                                 documentCategories: ['RATES' as const],
                             },
                         ],
+                        supportingDocuments: [],
                         rateDateStart: new Date(),
                         rateDateEnd: new Date(),
                         rateDateCertified: new Date(),
@@ -100,11 +98,10 @@ describe('templateHelpers', () => {
             testDescription:
                 'Submission with CHIP program specified for rate certification',
             expectedResult: [
-                'cmsreview1@example.com',
-                'cmsreview2@example.com',
+                'devreview1@example.com',
+                'devreview2@example.com',
                 '"State Analyst 1" <StateAnalyst1@example.com>',
                 '"State Analyst 2" <StateAnalyst2@example.com>',
-                ...testEmailConfig.dmcoEmails,
             ],
         },
         {
@@ -115,11 +112,10 @@ describe('templateHelpers', () => {
             stateAnalystsEmails: testStateAnalystsEmails,
             testDescription: 'Puerto Rico submission',
             expectedResult: [
-                'cmsreview1@example.com',
-                'cmsreview2@example.com',
+                'devreview1@example.com',
+                'devreview2@example.com',
                 '"State Analyst 1" <StateAnalyst1@example.com>',
                 '"State Analyst 2" <StateAnalyst2@example.com>',
-                ...testEmailConfig.dmcoEmails,
             ],
         },
         {
@@ -149,19 +145,41 @@ describe('templateHelpers', () => {
 
     test.each([
         {
-            programIds: ['234-cfsdf-234324', CHIP_PROGRAMS_UUID['MS']],
-            testDescription: 'valid CHIP ids in list',
+            pkg: mockUnlockedContractAndRatesFormData({
+                populationCovered: 'CHIP',
+            }),
+            testDescription: 'for valid CHIP submission',
             expectedResult: true,
         },
         {
-            programIds: ['23432-df-123', 'not-chip'],
-            testDescription: 'without CHIP ids in list',
+            pkg: mockUnlockedContractAndRatesFormData({
+                stateCode: 'MS',
+                populationCovered: undefined,
+                programIDs: ['36c54daf-7611-4a15-8c3b-cdeb3fd7e25a'],
+            }),
+            testDescription:
+                'for MS submission with a CHIP associated ID for legacy reasons',
+            expectedResult: true,
+        },
+        {
+            pkg: mockUnlockedContractAndRatesFormData({
+                stateCode: 'AZ',
+                populationCovered: undefined,
+            }),
+            testDescription: 'for non MS submission with no population covered',
+            expectedResult: false,
+        },
+        {
+            pkg: mockUnlockedContractAndRatesFormData({
+                populationCovered: 'MEDICAID',
+            }),
+            testDescription: 'for non CHIP submission',
             expectedResult: false,
         },
     ])(
-        'includesChipPrograms: $testDescription',
-        ({ programIds, expectedResult }) => {
-            expect(includesChipPrograms(programIds)).toEqual(expectedResult)
+        'handleAsCHIPSubmission: $testDescription',
+        ({ pkg, expectedResult }) => {
+            expect(handleAsCHIPSubmission(pkg)).toEqual(expectedResult)
         }
     )
 
@@ -187,23 +205,6 @@ describe('templateHelpers', () => {
             expectedResult: [
                 'Bobloblaw@example.com',
                 'Lucille.Bluth@example.com',
-            ],
-        },
-        {
-            reviewers: [
-                'Bobloblaw@example.com',
-                'Lucille.Bluth@example.com',
-                testEmailConfig.dmcpEmails[0],
-                testEmailConfig.dmcoEmails[0],
-                testEmailConfig.oactEmails[0],
-            ],
-            config: testEmailConfig,
-            testDescription:
-                'does not remove dmco emails, they should get all emails',
-            expectedResult: [
-                'Bobloblaw@example.com',
-                'Lucille.Bluth@example.com',
-                testEmailConfig.dmcoEmails[0],
             ],
         },
     ])(

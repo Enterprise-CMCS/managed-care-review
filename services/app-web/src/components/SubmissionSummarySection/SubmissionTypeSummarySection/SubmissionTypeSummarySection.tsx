@@ -7,6 +7,7 @@ import { SectionHeader } from '../../../components/SectionHeader'
 import {
     SubmissionTypeRecord,
     ContractTypeRecord,
+    PopulationCoveredRecord,
 } from '../../../constants/healthPlanPackages'
 import { Program } from '../../../gen/gqlClient'
 import { usePreviousSubmission } from '../../../hooks/usePreviousSubmission'
@@ -38,11 +39,10 @@ export const SubmissionTypeSummarySection = ({
         .map((p) => p.name)
     const isSubmitted = submission.status === 'SUBMITTED'
 
-    // Launch Darkly
     const ldClient = useLDClient()
-    const showRateCertAssurance = ldClient?.variation(
-        featureFlags.RATE_CERT_ASSURANCE.flag,
-        featureFlags.RATE_CERT_ASSURANCE.defaultValue
+    const showCHIPOnlyForm = ldClient?.variation(
+        featureFlags.CHIP_ONLY_FORM.flag,
+        featureFlags.CHIP_ONLY_FORM.defaultValue
     )
 
     return (
@@ -97,14 +97,25 @@ export const SubmissionTypeSummarySection = ({
                                 : ''
                         }
                     />
-                    {showRateCertAssurance && (
+                    <DataDetail
+                        id="riskBasedContract"
+                        label="Is this a risk based contract"
+                        explainMissingData={!isSubmitted}
+                        children={booleanAsYesNoUserValue(
+                            submission.riskBasedContract
+                        )}
+                    />
+                    {showCHIPOnlyForm && (
                         <DataDetail
-                            id="riskBasedContract"
-                            label="Is this a risk based contract"
+                            id="populationCoverage"
+                            label="Which populations does this contract action cover?"
                             explainMissingData={!isSubmitted}
-                            children={booleanAsYesNoUserValue(
-                                submission.riskBasedContract
-                            )}
+                            children={
+                                submission.populationCovered &&
+                                PopulationCoveredRecord[
+                                    submission.populationCovered
+                                ]
+                            }
                         />
                     )}
                 </DoubleColumnGrid>

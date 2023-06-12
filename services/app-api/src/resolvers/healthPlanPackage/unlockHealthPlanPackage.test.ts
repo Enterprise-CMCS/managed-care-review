@@ -26,17 +26,10 @@ import {
     getTestStateAnalystsEmails,
     mockEmailParameterStoreError,
 } from '../../testHelpers/parameterStoreHelpers'
-import { UserType } from '../../domain-models'
+import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 
 describe('unlockHealthPlanPackage', () => {
-    const testCMSUser: UserType = {
-        id: '9b146a8e-796f-4305-a7d9-dcbef88607f8',
-        role: 'CMS_USER',
-        email: 'zuko@example.com',
-        familyName: 'Zuko',
-        givenName: 'Prince',
-        stateAssignments: [],
-    }
+    const cmsUser = testCMSUser()
     it('returns a HealthPlanPackage with all revisions', async () => {
         const stateServer = await constructTestPostgresServer()
 
@@ -47,7 +40,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser,
+                user: cmsUser,
             },
         })
 
@@ -112,7 +105,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser,
+                user: cmsUser,
             },
         })
 
@@ -185,7 +178,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser,
+                user: cmsUser,
             },
         })
 
@@ -260,11 +253,11 @@ describe('unlockHealthPlanPackage', () => {
         expect(err.message).toBe('user not authorized to unlock package')
     })
 
-    it('returns errors if unlocked from the wrong state', async () => {
+    it('returns errors if trying to unlock package with wrong package status', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser,
+                user: cmsUser,
             },
         })
 
@@ -287,7 +280,17 @@ describe('unlockHealthPlanPackage', () => {
         expect(unlockDraftResult.errors).toBeDefined()
         const err = (unlockDraftResult.errors as GraphQLError[])[0]
 
-        expect(err.extensions['code']).toBe('BAD_USER_INPUT')
+        expect(err.extensions).toEqual(
+            expect.objectContaining({
+                code: 'INTERNAL_SERVER_ERROR',
+                cause: 'INVALID_PACKAGE_STATUS',
+                exception: {
+                    locations: undefined,
+                    message: 'Attempted to unlock package with wrong status',
+                    path: undefined,
+                },
+            })
+        )
         expect(err.message).toBe(
             'Attempted to unlock package with wrong status'
         )
@@ -315,7 +318,17 @@ describe('unlockHealthPlanPackage', () => {
         expect(unlockUnlockedResult.errors).toBeDefined()
         const unlockErr = (unlockUnlockedResult.errors as GraphQLError[])[0]
 
-        expect(unlockErr.extensions['code']).toBe('BAD_USER_INPUT')
+        expect(unlockErr.extensions).toEqual(
+            expect.objectContaining({
+                code: 'INTERNAL_SERVER_ERROR',
+                cause: 'INVALID_PACKAGE_STATUS',
+                exception: {
+                    locations: undefined,
+                    message: 'Attempted to unlock package with wrong status',
+                    path: undefined,
+                },
+            })
+        )
         expect(unlockErr.message).toBe(
             'Attempted to unlock package with wrong status'
         )
@@ -324,7 +337,7 @@ describe('unlockHealthPlanPackage', () => {
     it('returns an error if the submission does not exit', async () => {
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser,
+                user: cmsUser,
             },
         })
 
@@ -355,7 +368,7 @@ describe('unlockHealthPlanPackage', () => {
         const cmsServer = await constructTestPostgresServer({
             store: errorStore,
             context: {
-                user: testCMSUser,
+                user: cmsUser,
             },
         })
 
@@ -389,7 +402,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser,
+                user: cmsUser,
             },
         })
 
@@ -426,7 +439,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser,
+                user: cmsUser,
             },
             emailer: mockEmailer,
         })
@@ -452,7 +465,7 @@ describe('unlockHealthPlanPackage', () => {
         const stateAnalystsEmails = getTestStateAnalystsEmails(sub.stateCode)
 
         const cmsEmails = [
-            ...config.cmsReviewSharedEmails,
+            ...config.devReviewTeamEmails,
             ...stateAnalystsEmails,
             ...config.oactEmails,
         ]
@@ -475,14 +488,9 @@ describe('unlockHealthPlanPackage', () => {
         const stateServer = await constructTestPostgresServer()
         const stateServerTwo = await constructTestPostgresServer({
             context: {
-                user: {
-                    id: 'PeterParker',
-                    stateCode: 'FL',
-                    role: 'STATE_USER',
+                user: testStateUser({
                     email: 'notspiderman@example.com',
-                    familyName: 'Parker',
-                    givenName: 'Peter',
-                },
+                }),
             },
         })
 
@@ -493,7 +501,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser,
+                user: cmsUser,
             },
             emailer: mockEmailer,
         })
@@ -567,7 +575,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser,
+                user: cmsUser,
             },
             emailer: mockEmailer,
             emailParameterStore: mockEmailParameterStore,
@@ -587,7 +595,7 @@ describe('unlockHealthPlanPackage', () => {
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining(
-                    Array.from(config.cmsReviewSharedEmails)
+                    Array.from(config.devReviewTeamEmails)
                 ),
             })
         )
@@ -610,7 +618,7 @@ describe('unlockHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testCMSUser,
+                user: cmsUser,
             },
             emailParameterStore: mockEmailParameterStore,
         })

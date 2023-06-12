@@ -11,7 +11,6 @@ export type {
     ContractType,
     DocumentCategoryType,
     UnlockedHealthPlanFormDataType,
-    FederalAuthority,
     ManagedCareEntity,
     RateType,
     RateCapitationType,
@@ -19,11 +18,35 @@ export type {
     SubmissionDocument,
     SubmissionType,
     RateInfoType,
+    PopulationCoveredType,
 } from './UnlockedHealthPlanFormDataType'
 
-export type { ModifiedProvisions } from './ModifiedProvisions'
+export type {
+    FederalAuthority,
+    CHIPFederalAuthority,
+} from './FederalAuthorities'
 
-export { modifiedProvisionKeys } from './ModifiedProvisions'
+export type {
+    ModifiedProvisionsMedicaidAmendment,
+    ModifiedProvisionsMedicaidBase,
+    CHIPModifiedProvisions,
+    GeneralizedProvisionType,
+    MedicaidAmendmentProvisionType,
+    GeneralizedModifiedProvisions,
+} from './ModifiedProvisions'
+
+export {
+    federalAuthorityKeys,
+    federalAuthorityKeysForCHIP,
+} from './FederalAuthorities'
+
+export {
+    modifiedProvisionMedicaidBaseKeys,
+    modifiedProvisionMedicaidAmendmentKeys,
+    provisionCHIPKeys,
+    isCHIPProvision,
+    isMedicaidAmendmentProvision,
+} from './ModifiedProvisions'
 
 export type { LockedHealthPlanFormDataType } from './LockedHealthPlanFormDataType'
 export {
@@ -36,12 +59,15 @@ export {
     isContractOnly,
     isUnlockedHealthPlanFormData,
     isLockedHealthPlanFormData,
+    isSubmitted,
     programNames,
     packageName,
     generateRateName,
     convertRateSupportingDocs,
+    removeInvalidProvisionsAndAuthorities,
     removeRatesData,
-    hasValidRateCertAssurance,
+    hasValidPopulationCoverage,
+    isValidAndCurrentLockedHealthPlanFormData,
 } from './healthPlanFormData'
 
 export type { HealthPlanFormDataType } from './HealthPlanFormDataType'

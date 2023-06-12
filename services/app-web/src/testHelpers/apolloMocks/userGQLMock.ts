@@ -3,10 +3,14 @@ import {
     CmsUser,
     FetchCurrentUserDocument,
     User as UserType,
+    AdminUser,
+    IndexUsersDocument,
+    IndexUsersQuery,
+    StateUser,
 } from '../../gen/gqlClient'
 
 import { mockMNState } from './stateMock'
-function mockValidUser(): UserType {
+function mockValidUser(userData?: Partial<StateUser>): StateUser {
     return {
         __typename: 'StateUser' as const,
         id: 'foo-id',
@@ -15,10 +19,11 @@ function mockValidUser(): UserType {
         givenName: 'bob',
         familyName: 'ddmas',
         email: 'bob@dmas.mn.gov',
+        ...userData,
     }
 }
 
-function mockValidCMSUser(): CmsUser {
+function mockValidCMSUser(userData?: Partial<CmsUser>): CmsUser {
     return {
         __typename: 'CMSUser' as const,
         id: 'bar-id',
@@ -26,7 +31,21 @@ function mockValidCMSUser(): CmsUser {
         givenName: 'bob',
         familyName: 'ddmas',
         email: 'bob@dmas.mn.gov',
+        divisionAssignment: 'DMCO',
         stateAssignments: [],
+        ...userData,
+    }
+}
+
+function mockValidAdminUser(userData?: Partial<AdminUser>): AdminUser {
+    return {
+        __typename: 'AdminUser' as const,
+        id: 'bar-id',
+        role: 'ADMIN_USER',
+        givenName: 'bob',
+        familyName: 'ddmas',
+        email: 'bob@dmas.mn.gov',
+        ...userData,
     }
 }
 
@@ -62,4 +81,39 @@ fetchCurrentUserMockProps): MockedResponse<Record<string, any>> => {
     }
 }
 
-export { fetchCurrentUserMock, mockValidCMSUser, mockValidUser }
+const indexUsersQueryMock = (): MockedResponse<IndexUsersQuery> => {
+    return {
+        request: {
+            query: IndexUsersDocument,
+        },
+        result: {
+            data: {
+                indexUsers: {
+                    totalCount: 1,
+                    edges: [
+                        {
+                            node: {
+                                __typename: 'CMSUser',
+                                role: 'CMS_USER',
+                                id: '1',
+                                familyName: 'Hotman',
+                                givenName: 'Zuko',
+                                divisionAssignment: null,
+                                email: 'zuko@example.com',
+                                stateAssignments: [],
+                            },
+                        },
+                    ],
+                },
+            },
+        },
+    }
+}
+
+export {
+    fetchCurrentUserMock,
+    mockValidCMSUser,
+    mockValidUser,
+    mockValidAdminUser,
+    indexUsersQueryMock,
+}

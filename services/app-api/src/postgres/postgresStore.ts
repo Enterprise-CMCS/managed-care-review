@@ -1,4 +1,4 @@
-import { PrismaClient, HealthPlanRevisionTable } from '@prisma/client'
+import { PrismaClient, HealthPlanRevisionTable, Division } from '@prisma/client'
 import {
     UnlockedHealthPlanFormDataType,
     HealthPlanFormDataType,
@@ -15,6 +15,7 @@ import {
     CreateQuestionInput,
     QuestionResponseType,
     InsertQuestionResponseArgs,
+    StateType,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from '../postgres'
 import { StoreError } from './storeError'
@@ -32,14 +33,16 @@ import {
     findUser,
     insertUser,
     InsertUserArgsType,
-    updateUserAssignedState,
+    updateCmsUserProperties,
     findAllUsers,
+    insertManyUsers,
 } from './user'
 import {
     findAllQuestionsByHealthPlanPackage,
     insertQuestion,
     insertQuestionResponse,
 } from './questionResponse'
+import { findAllSupportedStates } from './state'
 
 type Store = {
     findPrograms: (
@@ -48,6 +51,8 @@ type Store = {
     ) => ProgramType[] | Error
 
     findStatePrograms: (stateCode: string) => ProgramType[] | Error
+
+    findAllSupportedStates: () => Promise<StateType[] | StoreError>
 
     findAllRevisions: () => Promise<HealthPlanRevisionTable[] | StoreError>
 
@@ -86,9 +91,16 @@ type Store = {
 
     insertUser: (user: InsertUserArgsType) => Promise<UserType | StoreError>
 
-    updateUserAssignedState: (
+    insertManyUsers: (
+        users: InsertUserArgsType[]
+    ) => Promise<UserType[] | StoreError>
+
+    updateCmsUserProperties: (
         userID: string,
-        states: StateCodeType[]
+        states: StateCodeType[],
+        idOfUserPerformingUpdate: string,
+        divisionAssignment?: Division,
+        description?: string | null
     ) => Promise<CMSUserType | StoreError>
 
     insertQuestion: (
@@ -132,9 +144,24 @@ function NewPostgresStore(client: PrismaClient): Store {
         findPrograms: findPrograms,
         findUser: (id) => findUser(client, id),
         insertUser: (args) => insertUser(client, args),
-        updateUserAssignedState: (userID, stateCodes) =>
-            updateUserAssignedState(client, userID, stateCodes),
+        insertManyUsers: (args) => insertManyUsers(client, args),
+        updateCmsUserProperties: (
+            userID,
+            stateCodes,
+            idOfUserPerformingUpdate,
+            divisionAssignment,
+            description
+        ) =>
+            updateCmsUserProperties(
+                client,
+                userID,
+                stateCodes,
+                idOfUserPerformingUpdate,
+                divisionAssignment,
+                description
+            ),
         findStatePrograms: findStatePrograms,
+        findAllSupportedStates: () => findAllSupportedStates(client),
         findAllRevisions: () => findAllRevisions(client),
         findAllUsers: () => findAllUsers(client),
         insertQuestion: (questionInput, user) =>

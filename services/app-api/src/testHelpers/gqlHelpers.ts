@@ -40,6 +40,7 @@ import statePrograms from 'app-web/src/common-code/data/statePrograms.json'
 import { testLDService } from './launchDarklyHelpers'
 import { LDService } from '../launchDarkly/launchDarkly'
 import { insertUserToLocalAurora } from '../authn'
+import { testStateUser } from './userHelpers'
 
 // Since our programs are checked into source code, we have a program we
 // use as our default
@@ -67,14 +68,7 @@ function getProgramsFromState(stateCode: StateCodeType): ProgramType[] {
 
 const defaultContext = (): Context => {
     return {
-        user: {
-            id: '1551628f-516a-467a-aaa4-49b789d20d9c',
-            stateCode: 'FL',
-            role: 'STATE_USER',
-            email: 'james@example.com',
-            familyName: 'Brown',
-            givenName: 'James',
-        },
+        user: testStateUser(),
     }
 }
 
@@ -116,7 +110,7 @@ const constructTestEmailer = (): Emailer => {
         emailSource: 'local@example.com',
         stage: 'localtest',
         baseUrl: 'http://localtest',
-        cmsReviewSharedEmails: ['test@example.com'],
+        devReviewTeamEmails: ['test@example.com'],
         cmsReviewHelpEmailAddress: 'mcog@example.com',
         cmsRateHelpEmailAddress: 'rates@example.com',
         cmsDevTeamHelpEmailAddress: 'mc-review@example.com',
@@ -174,9 +168,8 @@ const updateTestHealthPlanFormData = async (
             },
         },
     })
-
     if (updateResult.errors) {
-        console.info('errors', updateResult.errors)
+        console.info('errors', JSON.stringify(updateResult.errors))
         throw new Error(
             `updateTestHealthPlanFormData mutation failed with errors ${updateResult.errors}`
         )
@@ -185,7 +178,6 @@ const updateTestHealthPlanFormData = async (
     if (!updateResult.data) {
         throw new Error('updateTestHealthPlanFormData returned nothing')
     }
-
     return updateResult.data.updateHealthPlanFormData.pkg
 }
 
@@ -223,6 +215,7 @@ const createAndUpdateTestHealthPlanPackage = async (
                     documentCategories: ['RATES' as const],
                 },
             ],
+            supportingDocuments: [],
             //We only want one rate ID and use last program in list to differentiate from programID if possible.
             rateProgramIDs: [ratePrograms.reverse()[0].id],
             actuaryContacts: [
@@ -261,6 +254,19 @@ const createAndUpdateTestHealthPlanPackage = async (
     ]
     draft.managedCareEntities = ['MCO']
     draft.federalAuthorities = ['STATE_PLAN' as const]
+    draft.populationCovered = 'MEDICAID' as const
+    draft.contractAmendmentInfo = {
+        modifiedProvisions: {
+            inLieuServicesAndSettings: true,
+            modifiedRiskSharingStrategy: false,
+            modifiedIncentiveArrangements: false,
+            modifiedWitholdAgreements: false,
+            modifiedStateDirectedPayments: true,
+            modifiedPassThroughPayments: true,
+            modifiedPaymentsForMentalDiseaseInstitutions: true,
+            modifiedNonRiskPaymentArrangements: true,
+        },
+    }
 
     Object.assign(draft, partialUpdates)
 

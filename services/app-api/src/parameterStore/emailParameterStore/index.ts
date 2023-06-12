@@ -1,11 +1,13 @@
 export {
     getStateAnalystsEmails,
     getStateAnalystsEmailsLocal,
-} from './stateAnalystsEmails/getStateAnalystsEmails'
+    getStateAnalystsSettings,
+    getStateAnalystsSettingsLocal,
+} from './stateAnalystsEmails'
 export {
-    getCmsReviewSharedEmails,
-    getCmsReviewSharedEmailsLocal,
-} from './reviewSharedEmails/getCmsReviewSharedEmails'
+    getDevReviewTeamEmails,
+    getDevReviewTeamEmailsLocal,
+} from './reviewSharedEmails/getDevReviewTeamEmails'
 export {
     getCmsReviewHelpEmail,
     getCmsReviewHelpEmailLocal,

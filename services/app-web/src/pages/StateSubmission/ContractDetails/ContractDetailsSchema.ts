@@ -1,24 +1,56 @@
 import * as Yup from 'yup'
 import dayjs from 'dayjs'
 import { validateDateFormat } from '../../../formHelpers'
-import { ContractType } from '../../../common-code/healthPlanFormDataType'
+import {
+    isCHIPProvision,
+    GeneralizedProvisionType,
+    UnlockedHealthPlanFormDataType,
+    federalAuthorityKeysForCHIP,
+} from '../../../common-code/healthPlanFormDataType'
+import {
+    isBaseContract,
+    isCHIPOnly,
+    isContractAmendment,
+    isContractWithProvisions,
+} from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
+import {
+    isMedicaidAmendmentProvision,
+    isMedicaidBaseProvision,
+} from '../../../common-code/healthPlanFormDataType/ModifiedProvisions'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
-const yesNoError = (contractType: ContractType) => {
-    return Yup.string().test(
-        'yesORno',
-        'You must select yes or no',
-        (value) => {
-            // true means 'is valid' and no error is shown
-            return contractType === 'BASE' || value !== undefined
+export const ContractDetailsFormSchema = (
+    draftSubmission: UnlockedHealthPlanFormDataType
+) => {
+    const yesNoError = (provision: GeneralizedProvisionType) => {
+        const noValidation = Yup.string().nullable()
+        const provisionValidiation = Yup.string().defined(
+            'You must select yes or no'
+        )
+        if (!isContractWithProvisions(draftSubmission)) {
+            return noValidation
         }
-    )
-}
+        if (isCHIPOnly(draftSubmission)) {
+            return isCHIPProvision(provision)
+                ? provisionValidiation
+                : noValidation
+        } else if (
+            isBaseContract(draftSubmission) &&
+            isMedicaidBaseProvision(provision)
+        ) {
+            return provisionValidiation
+        } else if (
+            isContractAmendment(draftSubmission) &&
+            isMedicaidAmendmentProvision(provision)
+        ) {
+            return provisionValidiation
+        } else {
+            return noValidation
+        }
+    }
 
-// Formik setup
-export const ContractDetailsFormSchema = (contractType: ContractType) =>
-    Yup.object().shape({
+    return Yup.object().shape({
         contractExecutionStatus: Yup.string().defined(
             'You must select a contract status'
         ),
@@ -60,24 +92,45 @@ export const ContractDetailsFormSchema = (contractType: ContractType) =>
             'authoritySelection',
             'You must select at least one authority',
             (value) => {
-                return Boolean(value && value.length > 0)
+                return isCHIPOnly(draftSubmission)
+                    ? federalAuthorityKeysForCHIP.some((requiredAuthority) =>
+                          value?.includes(requiredAuthority)
+                      )
+                    : Boolean(value && value.length > 0)
             }
         ),
-
-        modifiedBenefitsProvided: yesNoError(contractType),
-        modifiedGeoAreaServed: yesNoError(contractType),
-        modifiedMedicaidBeneficiaries: yesNoError(contractType),
-        modifiedRiskSharingStrategy: yesNoError(contractType),
-        modifiedIncentiveArrangements: yesNoError(contractType),
-        modifiedWitholdAgreements: yesNoError(contractType),
-        modifiedStateDirectedPayments: yesNoError(contractType),
-        modifiedPassThroughPayments: yesNoError(contractType),
-        modifiedPaymentsForMentalDiseaseInstitutions: yesNoError(contractType),
-        modifiedMedicalLossRatioStandards: yesNoError(contractType),
-        modifiedOtherFinancialPaymentIncentive: yesNoError(contractType),
-        modifiedEnrollmentProcess: yesNoError(contractType),
-        modifiedGrevienceAndAppeal: yesNoError(contractType),
-        modifiedNetworkAdequacyStandards: yesNoError(contractType),
-        modifiedLengthOfContract: yesNoError(contractType),
-        modifiedNonRiskPaymentArrangements: yesNoError(contractType),
+        inLieuServicesAndSettings: yesNoError('inLieuServicesAndSettings'),
+        modifiedBenefitsProvided: yesNoError('modifiedBenefitsProvided'),
+        modifiedGeoAreaServed: yesNoError('modifiedGeoAreaServed'),
+        modifiedMedicaidBeneficiaries: yesNoError(
+            'modifiedMedicaidBeneficiaries'
+        ),
+        modifiedRiskSharingStrategy: yesNoError('modifiedRiskSharingStrategy'),
+        modifiedIncentiveArrangements: yesNoError(
+            'modifiedIncentiveArrangements'
+        ),
+        modifiedWitholdAgreements: yesNoError('modifiedWitholdAgreements'),
+        modifiedStateDirectedPayments: yesNoError(
+            'modifiedStateDirectedPayments'
+        ),
+        modifiedPassThroughPayments: yesNoError('modifiedPassThroughPayments'),
+        modifiedPaymentsForMentalDiseaseInstitutions: yesNoError(
+            'modifiedPaymentsForMentalDiseaseInstitutions'
+        ),
+        modifiedMedicalLossRatioStandards: yesNoError(
+            'modifiedMedicalLossRatioStandards'
+        ),
+        modifiedOtherFinancialPaymentIncentive: yesNoError(
+            'modifiedOtherFinancialPaymentIncentive'
+        ),
+        modifiedEnrollmentProcess: yesNoError('modifiedEnrollmentProcess'),
+        modifiedGrevienceAndAppeal: yesNoError('modifiedGrevienceAndAppeal'),
+        modifiedNetworkAdequacyStandards: yesNoError(
+            'modifiedNetworkAdequacyStandards'
+        ),
+        modifiedLengthOfContract: yesNoError('modifiedLengthOfContract'),
+        modifiedNonRiskPaymentArrangements: yesNoError(
+            'modifiedNonRiskPaymentArrangements'
+        ),
     })
+}

@@ -1,9 +1,9 @@
 import { parseKey } from '../common-code/s3URLEncoding'
 import { Storage, API } from 'aws-amplify'
 import { v4 as uuidv4 } from 'uuid'
-
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
+import { recordJSException, recordJSExceptionWithContext } from '../otelHelpers'
 
 // TYPES AND TYPE GUARDS
 type s3PutError = {
@@ -19,7 +19,6 @@ type BucketShortName = 'HEALTH_PLAN_DOCS' | 'QUESTION_ANSWER_DOCS'
 type S3BucketConfigType = {
     [K in BucketShortName]: string
 }
-
 
 function assertIsS3PutResponse(val: unknown): asserts val is s3PutResponse {
     if (typeof val === 'object' && val && !('key' in val)) {
@@ -41,7 +40,6 @@ function assertIsS3PutError(val: unknown): asserts val is s3PutError {
 // MAIN
 // TODO clarify what gets3URL versus getURL are doing
 
-
 function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
     return {
         uploadFile: async (
@@ -52,17 +50,16 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             const ext = file.name.split('.').pop()
             //encode file names and decoding done in bulk_downloads.ts
             const fileName = encodeURIComponent(file.name)
-
             try {
                 const stored = await Storage.put(`${uuid}.${ext}`, file, {
                     bucket: bucketConfig[bucket],
                     contentType: file.type,
                     contentDisposition: `attachment; filename=${fileName}`,
                 })
-
                 assertIsS3PutResponse(stored)
                 return stored.key
             } catch (err) {
+                recordJSException(err)
                 assertIsS3PutError(err)
                 if (err.name === 'Error' && err.message === 'Network Error') {
                     console.info('Error uploading file', err)
@@ -88,6 +85,7 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                 return
             } catch (err) {
                 assertIsS3PutError(err)
+                recordJSException(err)
                 if (err.name === 'Error' && err.message === 'Network Error') {
                     console.info('Error deleting file', err)
                     return {
@@ -95,7 +93,6 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                         message: 'Error deleting file from the cloud.',
                     }
                 }
-
                 console.info('Unexpected Error deleting file from S3', err)
                 throw err
             }
@@ -112,15 +109,24 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
         ): Promise<void | S3Error> => {
             try {
                 await waitFor(20000)
-                await retryWithBackoff(async () => {
-                    await Storage.get(filename, {
-                        bucket: bucketConfig[bucket],
-                        download: true,
+                try {
+                    await retryWithBackoff(async () => {
+                        await Storage.get(filename, {
+                            bucket: bucketConfig[bucket],
+                            download: true,
+                        })
                     })
-                })
+                } catch (err) {
+                    recordJSExceptionWithContext(
+                        err,
+                        'scanFile.retryWithBackoff'
+                    )
+                    throw err
+                }
                 return
             } catch (err) {
                 assertIsS3PutError(err)
+                recordJSException(err)
                 if (err.name === 'Error' && err.message === 'Network Error') {
                     return {
                         code: 'NETWORK_ERROR',
@@ -151,9 +157,11 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
             if (typeof result === 'string') {
                 return result
             } else {
-                throw new Error(
+                const error = new Error(
                     `Didn't get a string back from s3.get. We should have to use a different config for that.`
                 )
+                recordJSException(error)
+                throw error
             }
         },
         getBulkDlURL: async (
@@ -176,7 +184,9 @@ function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
                     body: zipRequestParams,
                 })
             } catch (err) {
-                return new Error('Could not get a bulk DL URL: ' + err)
+                const error = new Error('Could not get a bulk DL URL: ' + err)
+                recordJSException(error)
+                return error
             }
 
             return await Storage.get(filename)

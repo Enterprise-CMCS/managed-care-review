@@ -6,7 +6,12 @@ import styles from './StateSubmissionForm.module.scss'
 
 import { Error404 } from '../Errors/Error404Page'
 import { ErrorInvalidSubmissionStatus } from '../Errors/ErrorInvalidSubmissionStatusPage'
-
+import {
+    User,
+    HealthPlanPackage,
+    UpdateInformation,
+    useUpdateHealthPlanFormDataMutation,
+} from '../../gen/gqlClient'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { Loading } from '../../components/Loading'
 import { DynamicStepIndicator } from '../../components/DynamicStepIndicator'
@@ -26,13 +31,6 @@ import { Contacts } from './Contacts'
 import { Documents } from './Documents'
 import { ReviewSubmit } from './ReviewSubmit'
 import { SubmissionType } from './SubmissionType'
-
-import {
-    User,
-    useUpdateHealthPlanFormDataMutation,
-    HealthPlanPackage,
-    UpdateInformation,
-} from '../../gen/gqlClient'
 import { SubmissionUnlockedBanner } from '../../components/Banner'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCurrentRoute } from '../../hooks/useCurrentRoute'

@@ -34,22 +34,33 @@ import { isS3Error } from '../../../s3'
 
 import { ContractDetailsFormSchema } from './ContractDetailsSchema'
 import {
-    ManagedCareEntity,
-    modifiedProvisionKeys,
-    SubmissionDocument,
-    ContractExecutionStatus,
-    FederalAuthority,
-    HealthPlanFormDataType,
-} from '../../../common-code/healthPlanFormDataType'
-import {
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
-    ModifiedProvisionsRecord,
 } from '../../../constants/healthPlanPackages'
 import { PageActions } from '../PageActions'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { formatYesNoForProto } from '../../../formHelpers/formatters'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
+import {
+    federalAuthorityKeysForCHIP,
+    federalAuthorityKeys,
+} from '../../../common-code/healthPlanFormDataType'
+import {
+    generateProvisionLabel,
+    generateApplicableProvisionsList,
+} from '../../../common-code/healthPlanSubmissionHelpers/provisions'
+import type {
+    ManagedCareEntity,
+    SubmissionDocument,
+    ContractExecutionStatus,
+    FederalAuthority,
+} from '../../../common-code/healthPlanFormDataType'
+import {
+    isBaseContract,
+    isCHIPOnly,
+    isContractAmendment,
+    isContractWithProvisions,
+} from '../../../common-code/healthPlanFormDataType/healthPlanFormData'
 
 function formattedDatePlusOneDay(initialValue: string): string {
     const dayjsValue = dayjs(initialValue)
@@ -84,6 +95,7 @@ export interface ContractDetailsFormValues {
     contractDateEnd: string
     managedCareEntities: ManagedCareEntity[]
     federalAuthorities: FederalAuthority[]
+    inLieuServicesAndSettings: string | undefined
     modifiedBenefitsProvided: string | undefined
     modifiedGeoAreaServed: string | undefined
     modifiedMedicaidBeneficiaries: string | undefined
@@ -112,6 +124,7 @@ export const ContractDetails = ({
 }: HealthPlanFormPageProps): React.ReactElement => {
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
     const navigate = useNavigate()
+
     // Contract documents state management
     const { deleteFile, uploadFile, scanFile, getKey, getS3URL } = useS3()
     const [fileItems, setFileItems] = useState<FileItemT[]>([]) // eventually this will include files from api
@@ -158,6 +171,7 @@ export const ContractDetails = ({
                     key: 'INVALID_KEY',
                     s3URL: undefined,
                     status: 'UPLOAD_ERROR',
+                    sha256: doc.sha256,
                     documentCategories: doc.documentCategories,
                 }
             }
@@ -167,6 +181,7 @@ export const ContractDetails = ({
                 key: key,
                 s3URL: doc.s3URL,
                 status: 'UPLOAD_COMPLETE',
+                sha256: doc.sha256,
                 documentCategories: doc.documentCategories,
             }
         })
@@ -192,7 +207,6 @@ export const ContractDetails = ({
                 throw new Error(`Error in S3 key: ${key}`)
             }
         }
-        return
     }
 
     const handleUploadFile = async (file: File): Promise<S3FileData> => {
@@ -217,6 +231,13 @@ export const ContractDetails = ({
         }
     }
 
+    const applicableProvisions =
+        generateApplicableProvisionsList(draftSubmission)
+
+    const applicableFederalAuthorities = isCHIPOnly(draftSubmission)
+        ? federalAuthorityKeysForCHIP
+        : federalAuthorityKeys
+
     const contractDetailsInitialValues: ContractDetailsFormValues = {
         contractExecutionStatus:
             draftSubmission?.contractExecutionStatus ?? undefined,
@@ -231,6 +252,10 @@ export const ContractDetails = ({
         managedCareEntities:
             (draftSubmission?.managedCareEntities as ManagedCareEntity[]) ?? [],
         federalAuthorities: draftSubmission?.federalAuthorities ?? [],
+        inLieuServicesAndSettings: formatForForm(
+            draftSubmission?.contractAmendmentInfo?.modifiedProvisions
+                .inLieuServicesAndSettings
+        ),
 
         modifiedBenefitsProvided: formatForForm(
             draftSubmission?.contractAmendmentInfo?.modifiedProvisions
@@ -301,10 +326,6 @@ export const ContractDetails = ({
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
 
-    const isContractAmendmentSelected = (
-        draftSubmission: HealthPlanFormDataType
-    ): boolean => draftSubmission.contractType === 'AMENDMENT'
-
     const handleFormSubmit = async (
         values: ContractDetailsFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
@@ -346,6 +367,7 @@ export const ContractDetails = ({
                     formDataDocuments.push({
                         name: fileItem.name,
                         s3URL: fileItem.s3URL,
+                        sha256: fileItem.sha256,
                         documentCategories: ['CONTRACT'],
                     })
                 }
@@ -365,9 +387,12 @@ export const ContractDetails = ({
         draftSubmission.federalAuthorities = values.federalAuthorities
         draftSubmission.contractDocuments = contractDocuments
 
-        if (draftSubmission.contractType === 'AMENDMENT') {
+        if (isContractWithProvisions(draftSubmission)) {
             draftSubmission.contractAmendmentInfo = {
                 modifiedProvisions: {
+                    inLieuServicesAndSettings: formatYesNoForProto(
+                        values.inLieuServicesAndSettings
+                    ),
                     modifiedBenefitsProvided: formatYesNoForProto(
                         values.modifiedBenefitsProvided
                     ),
@@ -438,7 +463,6 @@ export const ContractDetails = ({
             setSubmitting(false)
         }
     }
-
     return (
         <Formik
             initialValues={contractDetailsInitialValues}
@@ -451,11 +475,7 @@ export const ContractDetails = ({
                             : `../rate-details`,
                 })
             }}
-            validationSchema={() =>
-                ContractDetailsFormSchema(
-                    draftSubmission.contractType ?? 'BASE'
-                )
-            }
+            validationSchema={() => ContractDetailsFormSchema(draftSubmission)}
         >
             {({
                 values,
@@ -507,7 +527,16 @@ export const ContractDetails = ({
                                     aria-required
                                     error={documentsErrorMessage}
                                     hint={
-                                        <>
+                                        <span
+                                            className={styles.guidanceTextBlock}
+                                        >
+                                            <span className="text-ink">
+                                                Upload one contract only.
+                                            </span>
+                                            <span className="text-ink">
+                                                Supporting documents can be
+                                                added later.
+                                            </span>
                                             <Link
                                                 aria-label="Document definitions and requirements (opens in new window)"
                                                 href={'/help#key-documents'}
@@ -517,12 +546,12 @@ export const ContractDetails = ({
                                                 Document definitions and
                                                 requirements
                                             </Link>
-                                            <span>
+                                            <span className="padding-top-1">
                                                 This input only accepts PDF,
                                                 CSV, DOC, DOCX, XLS, XLSX, XLSM
                                                 files.
                                             </span>
-                                        </>
+                                        </span>
                                     }
                                     accept={ACCEPTED_SUBMISSION_FILE_TYPES}
                                     initialItems={fileItemsFromDraftSubmission}
@@ -581,7 +610,7 @@ export const ContractDetails = ({
                                         <Fieldset
                                             aria-required
                                             legend={
-                                                isContractAmendmentSelected(
+                                                isContractAmendment(
                                                     draftSubmission
                                                 )
                                                     ? 'Amendment effective dates'
@@ -756,65 +785,38 @@ export const ContractDetails = ({
                                                     {errors.federalAuthorities}
                                                 </PoliteErrorMessage>
                                             )}
-                                            <FieldCheckbox
-                                                id="1932aStatePlanAuthority"
-                                                name="federalAuthorities"
-                                                label={
-                                                    FederalAuthorityRecord.STATE_PLAN
-                                                }
-                                                value={'STATE_PLAN'}
-                                            />
-                                            <FieldCheckbox
-                                                id="1915bWaiverAuthority"
-                                                name="federalAuthorities"
-                                                label={
-                                                    FederalAuthorityRecord.WAIVER_1915B
-                                                }
-                                                value={'WAIVER_1915B'}
-                                            />
-                                            <FieldCheckbox
-                                                id="1115WaiverAuthority"
-                                                name="federalAuthorities"
-                                                label={
-                                                    FederalAuthorityRecord.WAIVER_1115
-                                                }
-                                                value={'WAIVER_1115'}
-                                            />
-                                            <FieldCheckbox
-                                                id="1915aVoluntaryAuthority"
-                                                name="federalAuthorities"
-                                                label={
-                                                    FederalAuthorityRecord.VOLUNTARY
-                                                }
-                                                value={'VOLUNTARY'}
-                                            />
-                                            <FieldCheckbox
-                                                id="1937BenchmarkAuthority"
-                                                name="federalAuthorities"
-                                                label={
-                                                    FederalAuthorityRecord.BENCHMARK
-                                                }
-                                                value={'BENCHMARK'}
-                                            />
-                                            <FieldCheckbox
-                                                id="titleXXISeparateChipStatePlanAuthority"
-                                                name="federalAuthorities"
-                                                label={
-                                                    FederalAuthorityRecord.TITLE_XXI
-                                                }
-                                                value={'TITLE_XXI'}
-                                            />
+                                            {applicableFederalAuthorities.map(
+                                                (federalAuthority) => (
+                                                    <FieldCheckbox
+                                                        id={federalAuthority.toLowerCase()}
+                                                        key={federalAuthority.toLowerCase()}
+                                                        name="federalAuthorities"
+                                                        label={
+                                                            FederalAuthorityRecord[
+                                                                federalAuthority
+                                                            ]
+                                                        }
+                                                        value={federalAuthority}
+                                                    />
+                                                )
+                                            )}
                                         </Fieldset>
                                     </FormGroup>
-                                    {isContractAmendmentSelected(
+                                    {isContractWithProvisions(
                                         draftSubmission
                                     ) && (
-                                        <FormGroup>
+                                        <FormGroup data-testid="yes-no-group">
                                             <Fieldset
                                                 aria-required
-                                                legend="Does this contract action include new or modified provisions related to any of the following"
+                                                legend={
+                                                    isBaseContract(
+                                                        draftSubmission
+                                                    )
+                                                        ? 'Does this contract action include provisions related to any of the following'
+                                                        : 'Does this contract action include new or modified provisions related to any of the following'
+                                                }
                                             >
-                                                {modifiedProvisionKeys.map(
+                                                {applicableProvisions.map(
                                                     (modifiedProvisionName) => (
                                                         <FieldYesNo
                                                             id={
@@ -826,11 +828,10 @@ export const ContractDetails = ({
                                                             name={
                                                                 modifiedProvisionName
                                                             }
-                                                            label={
-                                                                ModifiedProvisionsRecord[
-                                                                    modifiedProvisionName
-                                                                ]
-                                                            }
+                                                            label={generateProvisionLabel(
+                                                                draftSubmission,
+                                                                modifiedProvisionName
+                                                            )}
                                                             showError={showFieldErrors(
                                                                 errors[
                                                                     modifiedProvisionName

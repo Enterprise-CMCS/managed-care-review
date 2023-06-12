@@ -3,18 +3,21 @@ import { Route, Routes } from 'react-router-dom'
 import userEvent from '@testing-library/user-event'
 import { SubmissionDocument } from '../../common-code/healthPlanFormDataType'
 import { RoutesRecord } from '../../constants/routes'
+import { fetchCurrentUserMock } from '../../testHelpers/apolloMocks/userGQLMock'
 import {
-    fetchCurrentUserMock,
+    mockDraftHealthPlanPackage,
+    mockUnlockedHealthPlanPackage,
+    mockUnlockedHealthPlanPackageWithDocuments,
+} from '../../testHelpers/apolloMocks/healthPlanFormDataMock'
+import {
     fetchHealthPlanPackageMockSuccess,
     fetchHealthPlanPackageMockNotFound,
     fetchHealthPlanPackageMockNetworkFailure,
     fetchHealthPlanPackageMockAuthFailure,
-    mockDraftHealthPlanPackage,
-    mockUnlockedHealthPlanPackage,
-    mockUnlockedHealthPlanPackageWithDocuments,
     updateHealthPlanFormDataMockSuccess,
     updateHealthPlanFormDataMockAuthFailure,
-} from '../../testHelpers/apolloMocks'
+} from '../../testHelpers/apolloMocks/healthPlanPackageGQLMock'
+// some spies will not work with indexed exports, so I refactored to import them directly from their files
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 import { StateSubmissionForm } from './StateSubmissionForm'

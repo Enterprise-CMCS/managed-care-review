@@ -10,27 +10,30 @@ function mockQuestionsPayload(pkgID: string): IndexQuestionsPayload {
                     __typename: 'QuestionEdge' as const,
                     node: {
                         __typename: 'Question' as const,
-                        id: 'question-1-id',
+                        id: 'dmco-question-1-id',
                         pkgID,
                         createdAt: new Date('2022-12-15'),
-                        addedBy: mockValidCMSUser() as CmsUser,
+                        addedBy: mockValidCMSUser({
+                            divisionAssignment: 'DMCO',
+                        }) as CmsUser,
                         documents: [
                             {
-                                s3URL: 's3://bucketname/key/question-1-document-1',
-                                name: 'question-1-document-1',
+                                s3URL: 's3://bucketname/key/dmco-question-1-document-1',
+                                name: 'dmco-question-1-document-1',
                             },
                         ],
+                        division: 'DMCO',
                         responses: [
                             {
                                 __typename: 'QuestionResponse' as const,
-                                id: 'response-1-id',
-                                questionID: 'question-1-id',
+                                id: 'response-to-dmco-1-id',
+                                questionID: 'dmco-question-1-id',
                                 addedBy: mockValidUser() as StateUser,
                                 createdAt: new Date('2022-12-16'),
                                 documents: [
                                     {
-                                        s3URL: 's3://bucketname/key/response-1-document-1',
-                                        name: 'response-1-document-1',
+                                        s3URL: 's3://bucketname/key/response-to-dmco-1-document-1',
+                                        name: 'response-to-dmco-1-document-1',
                                     },
                                 ],
                             },
@@ -41,31 +44,32 @@ function mockQuestionsPayload(pkgID: string): IndexQuestionsPayload {
                     __typename: 'QuestionEdge' as const,
                     node: {
                         __typename: 'Question' as const,
-                        id: 'question-2-id',
+                        id: 'dmco-question-2-id',
                         pkgID,
                         createdAt: new Date('2022-12-18'),
                         addedBy: mockValidCMSUser() as CmsUser,
                         documents: [
                             {
-                                s3URL: 's3://bucketname/key/question-2-document-1',
-                                name: 'question-2-document-1',
+                                s3URL: 's3://bucketname/key/dmco-question-2-document-1',
+                                name: 'dmco-question-2-document-1',
                             },
                             {
                                 s3URL: 's3://bucketname/key/question-2-document-2',
-                                name: 'question-2-document-2',
+                                name: 'dmco-question-2-document-2',
                             },
                         ],
+                        division: 'DMCO',
                         responses: [
                             {
                                 __typename: 'QuestionResponse' as const,
-                                id: 'response-2-id',
-                                questionID: 'question-2-id',
+                                id: 'response-to-dmco-2-id',
+                                questionID: 'dmco-question-2-id',
                                 addedBy: mockValidUser() as StateUser,
                                 createdAt: new Date('2022-12-20'),
                                 documents: [
                                     {
-                                        s3URL: 's3://bucketname/key/response-2-document-1',
-                                        name: 'response-2-document-1',
+                                        s3URL: 's3://bucketname/key/response-to-dmco-2-document-1',
+                                        name: 'response-to-dmco-2-document-1',
                                     },
                                 ],
                             },
@@ -75,12 +79,82 @@ function mockQuestionsPayload(pkgID: string): IndexQuestionsPayload {
             ],
         },
         DMCPQuestions: {
-            totalCount: 0,
-            edges: [],
+            totalCount: 1,
+            edges: [
+                {
+                    __typename: 'QuestionEdge' as const,
+                    node: {
+                        __typename: 'Question' as const,
+                        id: 'dmcp-question-1-id',
+                        pkgID,
+                        createdAt: new Date('2022-12-15'),
+                        addedBy: mockValidCMSUser({
+                            divisionAssignment: 'DMCP',
+                        }) as CmsUser,
+                        documents: [
+                            {
+                                s3URL: 's3://bucketname/key/dmcp-question-1-document-1',
+                                name: 'dmcp-question-1-document-1',
+                            },
+                        ],
+                        division: 'DMCP',
+                        responses: [
+                            {
+                                __typename: 'QuestionResponse' as const,
+                                id: 'response-to-dmcp-1-id',
+                                questionID: 'dmcp-question-1-id',
+                                addedBy: mockValidUser() as StateUser,
+                                createdAt: new Date('2022-12-16'),
+                                documents: [
+                                    {
+                                        s3URL: 's3://bucketname/key/response-to-dmcp-1-document-1',
+                                        name: 'response-to-dmcp-1-document-1',
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                },
+            ],
         },
         OACTQuestions: {
-            totalCount: 0,
-            edges: [],
+            totalCount: 1,
+            edges: [
+                {
+                    __typename: 'QuestionEdge' as const,
+                    node: {
+                        __typename: 'Question' as const,
+                        id: 'oact-question-1-id',
+                        pkgID,
+                        createdAt: new Date('2022-12-15'),
+                        addedBy: mockValidCMSUser({
+                            divisionAssignment: 'OACT',
+                        }) as CmsUser,
+                        documents: [
+                            {
+                                s3URL: 's3://bucketname/key/oact-question-1-document-1',
+                                name: 'oact-question-1-document-1',
+                            },
+                        ],
+                        division: 'OACT',
+                        responses: [
+                            {
+                                __typename: 'QuestionResponse' as const,
+                                id: 'response-to-oact-1-id',
+                                questionID: 'oact-question-1-id',
+                                addedBy: mockValidUser() as StateUser,
+                                createdAt: new Date('2022-12-16'),
+                                documents: [
+                                    {
+                                        s3URL: 's3://bucketname/key/response-to-oact-1-document-1',
+                                        name: 'response-to-oact-1-document-1',
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                },
+            ],
         },
     }
 }

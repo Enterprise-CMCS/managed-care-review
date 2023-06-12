@@ -17,12 +17,10 @@ export const main = async () => {
     // find snapshots older than 30 days, filter them out
     const timestamp = new Date().getTime() - 30 * 24 * 60 * 60 * 1000 // d * hr * min * s * ms
     const oldSnapshots = snapshots.DBClusterSnapshots?.filter((snapshot) => {
-        if (
+        return (
             snapshot.SnapshotCreateTime != undefined &&
             timestamp > snapshot.SnapshotCreateTime.getTime()
-        ) {
-            return snapshot
-        }
+        )
     })
 
     // delete the older snapshots

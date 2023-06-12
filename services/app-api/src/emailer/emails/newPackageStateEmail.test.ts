@@ -106,6 +106,7 @@ test('to addresses list does not include duplicate state receiver emails on subm
     expect(template.toAddresses).toEqual([
         'test1@example.com',
         ...defaultSubmitters,
+        ...testEmailConfig.devReviewTeamEmails,
     ])
 })
 
@@ -247,6 +248,7 @@ test('includes expected data summary for a contract and rates submission State e
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                supportingDocuments: [],
                 rateDateCertified: new Date('01/02/2021'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                 rateCertificationName:
@@ -333,6 +335,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                  supportingDocuments: [],
                 rateDateCertified: new Date('01/02/2021'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                 rateCertificationName:
@@ -360,6 +363,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                  supportingDocuments: [],
                 rateDateCertified: new Date('02/02/2022'),
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                 rateCertificationName:
@@ -387,6 +391,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                  supportingDocuments: [],
                 rateDateCertified: new Date('01/02/2021'),
                 rateProgramIDs: [
                     'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
@@ -497,6 +502,7 @@ test('includes expected data summary for a rate amendment submission State email
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                  supportingDocuments: [],
                 rateDateCertified: new Date('10/19/2022'),
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                 rateCertificationName:
@@ -578,6 +584,7 @@ test('renders overall email for a new package with a rate amendment as expected'
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                  supportingDocuments: [],
                 rateDateCertified: new Date('01/02/2021'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                 rateCertificationName:

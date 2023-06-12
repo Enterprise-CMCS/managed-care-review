@@ -12,8 +12,8 @@ Before testing locally, make sure to have the following prerequisites.
 export REACT_APP_LD_CLIENT_ID='Place Launch Darkly ID here'
 export LD_SDK_KEY='Place Launch Darkly SDK key here'
 ```
-- **Getting LaunchDarkly Client-side ID and SDK keys**: 
-  - Log into [LaunchDarkly](https://app.launchdarkly.com/login). 
+- **Getting LaunchDarkly Client-side ID and SDK keys**:
+  - Log into [LaunchDarkly](https://app.launchdarkly.com/login).
   - On the dashboard page click on `Account settings` tab form the side navigation.
   - Then, on the `Account settings` page, click on the `Projects` tab.
   - You should see a `Projects` table. Select the project 'MC Review' from the table.
@@ -34,7 +34,7 @@ ldUseClientSpy({
 })
 ```
 
-To configure feature flags for a single test place `ldUseClientSpy` at the beginning of your test. 
+To configure feature flags for a single test place `ldUseClientSpy` at the beginning of your test.
 
 ```javascript
 it('cannot continue if no documents are added to the second rate', async () => {
@@ -52,12 +52,12 @@ it('cannot continue if no documents are added to the second rate', async () => {
             },
         }
     )
-  
+
     ...
 })
 ```
 
-To configure multiple tests inside a `describe` block you can: 
+To configure multiple tests inside a `describe` block you can:
 - Follow the method for single test on each test inside the `describe`.
 - If all the tests require the same flag configuration place `ldUseClientSpy` at the top of the block in `beforeEach()`.
 
@@ -71,7 +71,7 @@ describe('rates across submissions', () => {
     afterEach(() => {
         jest.clearAllMocks()
     })
-  
+
     ...
 })
 ```
@@ -81,23 +81,23 @@ It's always best to `jest.clearAllMocks()` after each test with either one of th
 ### Server side unit testing
 LaunchDarkly server side implementation is done by configuring our resolvers with `ldService` dependency. In our resolver we then can use the method `getFeatureFlag` from `ldService` to get the flag value from LaunchDarkly.
 
-The unit testing implementation uses a test version of the `ldService` dependency called `testLDService` located in `app-api/src/testHelpers/launchDarklyHelpers.ts`. 
+The unit testing implementation uses a test version of the `ldService` dependency called `testLDService` located in `app-api/src/testHelpers/launchDarklyHelpers.ts`.
 
 `testLDService` takes in an object of feature flags and values as an argument which is used to return the flag value when `getFeatureFlag` is called in a resolver. If no feature flag object is passed in, then the function will return default values generated from `flags.ts` located in `app-web/src/common-code/featureFlags`.
 
 ```typescript
   function testLDService(
-      mockFeatureFlags?: Partial<FeatureFlagObject>
+      mockFeatureFlags?: FeatureFlagSettings
   ): LDService {
       const featureFlags = defaultFeatureFlags
 
       //Update featureFlags with mock flag values.
       if (mockFeatureFlags) {
         for (const flag in mockFeatureFlags) {
-          const featureFlag = flag as FeatureFlagTypes
+          const featureFlag = flag
           featureFlags[featureFlag] = mockFeatureFlags[
                   featureFlag
-                  ] as FlagValueTypes
+                  ] as FeatureFlagSettings
         }
       }
 
@@ -112,7 +112,7 @@ We then pass `testLDService` with our defined flag values into `constructTestPos
 ```javascript
 it('does not error when risk based question is undefined and rate-cert-assurance feature flag is off', async () => {
     const mockLDService = testLDService({'rate-cert-assurance': false})
-    const server = await constructTestPostgresServer({ 
+    const server = await constructTestPostgresServer({
       ldService: mockLDService,
     })
 
@@ -120,7 +120,7 @@ it('does not error when risk based question is undefined and rate-cert-assurance
     const initialPkg = await createAndUpdateTestHealthPlanPackage(server, {
       riskBasedContract: undefined,
     })
-  
+
     ...
 })
 ```
@@ -129,13 +129,13 @@ it('does not error when risk based question is undefined and rate-cert-assurance
 Currently, there is no out of the box Cypress integration with LaunchDarkly. Our implementation approach enables the testing of multiple flag values independent of what is set in LaunchDarkly by intercepting api calls and returning our own generated flag values. This allows us to dynamically tests UI in Cypress with different flag values without having to modify flag values in the LaunchDarkly dashboard.
 
 ### Limitations
-There is one major limitation to this implementation: server and client side flag value syncing in Cypress runs. Since we are not reaching out to LaunchDarkly to either retrieve or set a flag value the server side does not know we have changed a flag's value. In this scenario the same flag would be in different states between client and server. 
+There is one major limitation to this implementation: server and client side flag value syncing in Cypress runs. Since we are not reaching out to LaunchDarkly to either retrieve or set a flag value the server side does not know we have changed a flag's value. In this scenario the same flag would be in different states between client and server.
 
 For example, we have some logic on the server side that checks a submission for completion on a new field. This check is behind a feature flag. So if the flag is off, then the check does not happen. Simultaneously on the client side this same flag controls the display of the UI that allows users to fill out this new field. The issue now lies in our Cypress test, we can test client side with this UI disabled for a specific user, but on server side it may be enabled by default for that user. The test fails because client side expects the server not to check for this field since this feature flag is off and UI is hidden.
 
 There are a few solutions for this:
 - We default all tests that use the flag to have the flag on. In the example above, all tests that will hit the server side check will have the UI enabled.
-  - This is already being done for the time being. 
+  - This is already being done for the time being.
   - Drawbacks:
     - I could see issues in the future when dealing with complex features behind a flag.
     - We cannot test the app with this feature flag off without manually turning off this flag in LaunchDarkly dashboard.
@@ -157,18 +157,18 @@ Our custom LaunchDarkly commands intercepts feature flag value requests and retu
 
 The approach here was to implement state management that could be accessed though Cypress. Integrating `cy.readFile` and `cy.writeFile` into the LaunchDarkly helper commands.
 
-The Cypress commands `cy.interceptFeatureFlags` and `cy.stubFeatureFlags` will generate a json file, using `Cy.writeFile`, in `tests/cypress/fixtures/stores/` named `featureFlagStore.json` using data and Types from `flag.ts` located in `app-web/src/common-code/featureFlags`. The `cy.getFeatureFlagStore()`, using `cy.write`, is used to read the `featureFlagStore.json` file and return the object of feature flags with values.
+The Cypress commands `cy.interceptFeatureFlags` and `cy.stubFeatureFlags` will generate a json file, using `Cy.writeFile`, in `services/cypress/fixtures/stores/` named `featureFlagStore.json` using data and Types from `flag.ts` located in `app-web/src/common-code/featureFlags`. The `cy.getFeatureFlagStore()`, using `cy.write`, is used to read the `featureFlagStore.json` file and return the object of feature flags with values.
 
 ### LaunchDarkly Cypress helper commands
 - #### interceptFeatureFlags
-  This command allows you to intercept LD calls and set flag values. It also generates a `featureFlagStore.json` file in `tests/cypress/fixtures/stores` with default feature flag values along with any specific values passed in.
+  This command allows you to intercept LD calls and set flag values. It also generates a `featureFlagStore.json` file in `services/cypress/fixtures/stores` with default feature flag values along with any specific values passed in.
   ```typescript
     //Intercept feature flag with flag values.
     cy.interceptFeatureFlags({
         'rate-certification-programs': true,
         'modal-countdown-duration': 3
     })
-  
+
     //Intercept feature flag with default flag values.
     cy.interceptFeatureFlags()
   ```
@@ -184,7 +184,7 @@ The Cypress commands `cy.interceptFeatureFlags` and `cy.stubFeatureFlags` will g
         it('some tests', () => {
             cy.interceptFeatureFlags({
                 'rate-certification-programs': true,
-            })      
+            })
         })
     })
   ```
@@ -195,12 +195,10 @@ The Cypress commands `cy.interceptFeatureFlags` and `cy.stubFeatureFlags` will g
   This command reads the `featureFlagStore.json` and returns an object of the feature flag values. You can pass in an array of specific feature flags to return those values instead of the entire set of flags. It's important this command is only called after `stubFeatureFlags` or `interceptFeatureFlags` is called or Cypress will error trying finding the `featureFlagStore.json` file.
   ```typescript
     Cypress.Commands.add('fillOutNewRateCertification', () => {
-        cy.wait(2000)
         cy.findByText('New rate certification').click()
         cy.findByText(
             'Certification of capitation rates specific to each rate cell'
         ).click()
-        cy.wait(2000)
         cy.findByLabelText('Start date').type('02/29/2024')
         cy.findByLabelText('End date').type('02/28/2025')
         cy.findByLabelText('Date certified').type('03/01/2024')
@@ -225,7 +223,7 @@ The Cypress commands `cy.interceptFeatureFlags` and `cy.stubFeatureFlags` will g
   ```
 
 ## Adding and removing feature flags
-Adding a new feature flag for testing is automatically done once you add the flag into list of flags in the `flags.ts` constants file located in `app-web/src/common-code/featureFlags`. Removing the flag from `flags.ts` can be done by removing it from the list. 
+Adding a new feature flag for testing is automatically done once you add the flag into list of flags in the `flags.ts` constants file located in `app-web/src/common-code/featureFlags`. Removing the flag from `flags.ts` can be done by removing it from the list.
 
 **We should not be editing the `flag`s and `defaultValues` contained in `flags.ts` specifically for testing feature flags.** Because configuration of all the LaunchDarkly testing implementation heavily rely on these values, any change would cause many tests to fail. **Ideally we would only add, remove or edit them when application code relating to those flags changes.**
 

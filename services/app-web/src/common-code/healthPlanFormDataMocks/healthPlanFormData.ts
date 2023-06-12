@@ -137,6 +137,7 @@ function contractAmendedOnly(): UnlockedHealthPlanFormDataType {
         addtlActuaryContacts: [],
         contractAmendmentInfo: {
             modifiedProvisions: {
+                inLieuServicesAndSettings: false,
                 modifiedBenefitsProvided: true,
                 modifiedGeoAreaServed: false,
                 modifiedMedicaidBeneficiaries: true,
@@ -192,6 +193,7 @@ function unlockedWithContacts(): UnlockedHealthPlanFormDataType {
                 rateCertificationName:
                     'MCR-MN-0005-SNBC-RATE-20220621-20221021-AMENDMENT-20210523',
                 rateDocuments: [],
+                supportingDocuments: [],
                 actuaryContacts: [
                     {
                         name: 'foo bar',
@@ -301,6 +303,7 @@ function unlockedWithDocuments(): UnlockedHealthPlanFormDataType {
                         documentCategories: ['RATES'],
                     },
                 ],
+                supportingDocuments: [],
                 actuaryContacts: [
                     {
                         name: 'foo bar',
@@ -406,6 +409,7 @@ function unlockedWithFullRates(): UnlockedHealthPlanFormDataType {
                         documentCategories: ['RATES'],
                     },
                 ],
+                  supportingDocuments: [],
                 actuaryContacts: [
                     {
                         name: 'foo bar',
@@ -493,6 +497,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
         ],
         contractAmendmentInfo: {
             modifiedProvisions: {
+                inLieuServicesAndSettings: true,
                 modifiedBenefitsProvided: true,
                 modifiedGeoAreaServed: true,
                 modifiedMedicaidBeneficiaries: true,
@@ -535,6 +540,7 @@ function unlockedWithFullContracts(): UnlockedHealthPlanFormDataType {
                         documentCategories: ['RATES'],
                     },
                 ],
+                  supportingDocuments: [],
                 actuaryContacts: [
                     {
                         name: 'foo bar',
@@ -621,6 +627,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
         ],
         contractAmendmentInfo: {
             modifiedProvisions: {
+                inLieuServicesAndSettings: false,
                 modifiedBenefitsProvided: false,
                 modifiedGeoAreaServed: false,
                 modifiedMedicaidBeneficiaries: true,
@@ -658,6 +665,7 @@ function unlockedWithALittleBitOfEverything(): UnlockedHealthPlanFormDataType {
                         documentCategories: ['RATES_RELATED'],
                     },
                 ],
+                supportingDocuments: [],
                 rateDateStart: new Date(Date.UTC(2021, 4, 22)),
                 rateDateEnd: new Date(Date.UTC(2022, 3, 29)),
                 rateDateCertified: new Date(Date.UTC(2021, 4, 23)),

@@ -18,6 +18,7 @@ query indexUsers {
                             fullName
                         }
                     }
+                    divisionAssignment
                 }
                 ... on StateUser {
                     id

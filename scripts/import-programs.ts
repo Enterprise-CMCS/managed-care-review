@@ -1,12 +1,19 @@
-// To run:
-//   yarn tsc && node ./import-programs.js path/to/data.cav
-//
-// The input file is expected to be a valid CSV with at least the following columns:
-//   1 State (two-character state code, uppercase)
-//   2 Program (full program name)
-//   3 Nickname (acronym or abbreviation e.g. "CME")
-//
-// Additional columns aren't used and should be ignored.
+/*  
+This script is used to generate a list of MC-Review state programs. To read more about this script and why it's used see "How to update state programs" technical design docs.
+
+To run:
+ yarn tsc && node ./import-programs.js path/to/data.csv
+
+The input file is expected to be a valid CSV with at least the following columns:
+   1 State (two-character state code, uppercase)
+   2 Program (full program name)
+   3 Nickname (acronym or abbreviation e.g. "CME")
+
+ Additional columns aren't used and should be ignored.
+ */
+
+
+
 
 import csv from 'csv-parser'
 import fs from 'fs'

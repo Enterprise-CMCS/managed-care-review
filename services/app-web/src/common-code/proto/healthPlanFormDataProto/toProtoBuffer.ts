@@ -4,6 +4,7 @@ import {
     LockedHealthPlanFormDataType,
     isLockedHealthPlanFormData,
     generateRateName,
+    SubmissionDocument,
 } from '../../healthPlanFormDataType'
 import statePrograms from '../../data/statePrograms.json'
 import { ProgramArgType } from '../../healthPlanFormDataType/State'
@@ -63,6 +64,18 @@ function domainEnumStringToProtoString(
 
     const protoEnumString = `${prefix}_${domainEnum}`
     return protoEnumString
+}
+
+const domainDocsToProtoDocs = (domainDocs:SubmissionDocument[]): mcreviewproto.IDocument[] | null | undefined => {
+    return domainDocs.map((doc) => ({
+        s3Url: doc.s3URL,
+        name: doc.name,
+        documentCategories: domainEnumArrayToProto(
+            mcreviewproto.DocumentCategory,
+            doc.documentCategories
+        ),
+        sha256: doc.sha256,
+    }))
 }
 
 type StandardEnum<T> = {
@@ -138,6 +151,12 @@ const toProtoBuffer = (
 
         createdAt: domainDateToProtoDate(domainData.createdAt),
         updatedAt: domainDateToProtoTimestamp(domainData.updatedAt),
+
+        populationCovered: domainEnumToProto(
+            domainData.populationCovered,
+            mcreviewproto.PopulationCovered
+        ),
+
         submissionType: domainEnumToProto(
             domainData.submissionType,
             mcreviewproto.SubmissionType
@@ -172,14 +191,7 @@ const toProtoBuffer = (
                 mcreviewproto.FederalAuthority,
                 domainData.federalAuthorities
             ),
-            contractDocuments: domainData.contractDocuments.map((doc) => ({
-                s3Url: doc.s3URL,
-                name: doc.name,
-                documentCategories: domainEnumArrayToProto(
-                    mcreviewproto.DocumentCategory,
-                    doc.documentCategories
-                ),
-            })),
+            contractDocuments: domainDocsToProtoDocs(domainData.contractDocuments),
             contractAmendmentInfo: contractAmendmentInfo,
         },
         rateInfos:
@@ -204,14 +216,8 @@ const toProtoBuffer = (
                           rateDateCertified: domainDateToProtoDate(
                               rateInfo.rateDateCertified
                           ),
-                          rateDocuments: rateInfo.rateDocuments.map((doc) => ({
-                              s3Url: doc.s3URL,
-                              name: doc.name,
-                              documentCategories: domainEnumArrayToProto(
-                                  mcreviewproto.DocumentCategory,
-                                  doc.documentCategories
-                              ),
-                          })),
+                          rateDocuments: domainDocsToProtoDocs(rateInfo.rateDocuments),
+                          supportingDocuments: domainDocsToProtoDocs(rateInfo.supportingDocuments),
                           rateCertificationName: generateRateName(
                               domainData,
                               rateInfo,
@@ -283,6 +289,7 @@ const toProtoBuffer = (
                 mcreviewproto.DocumentCategory,
                 doc.documentCategories
             ),
+            sha256: doc.sha256,
         })),
     }
 

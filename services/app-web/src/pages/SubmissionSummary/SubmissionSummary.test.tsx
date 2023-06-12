@@ -12,6 +12,7 @@ import {
     mockSubmittedHealthPlanPackageWithRevision,
     mockUnlockedHealthPlanPackageWithOldProtos,
     indexHealthPlanPackagesMockSuccess,
+    mockValidUser,
 } from '../../testHelpers/apolloMocks'
 import {
     ldUseClientSpy,
@@ -140,20 +141,21 @@ describe('SubmissionSummary', () => {
                 },
             }
         )
-
-        expect(await screen.findByTestId('unlockedBanner')).toBeInTheDocument()
-        expect(await screen.findByTestId('unlockedBanner')).toHaveClass(
-            'usa-alert--warning'
-        )
-        expect(await screen.findByTestId('unlockedBanner')).toHaveTextContent(
-            /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
-        )
-        expect(await screen.findByTestId('unlockedBanner')).toHaveTextContent(
-            'by: bob@dmas.mn.gov'
-        )
-        expect(await screen.findByTestId('unlockedBanner')).toHaveTextContent(
-            'Reason for unlock: Test unlock reason'
-        )
+        await waitFor(() => {
+            expect(screen.getByTestId('unlockedBanner')).toBeInTheDocument()
+            expect(screen.getByTestId('unlockedBanner')).toHaveClass(
+                'usa-alert--warning'
+            )
+            expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
+                /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+            )
+            expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
+                'by: bob@dmas.mn.gov'
+            )
+            expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
+                'Reason for unlock: Test unlock reason'
+            )
+        })
     })
 
     it('renders submission unlocked banner for State user', async () => {
@@ -171,6 +173,7 @@ describe('SubmissionSummary', () => {
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
+                            user: mockValidUser(),
                             statusCode: 200,
                         }),
                         fetchStateHealthPlanPackageWithQuestionsMockSuccess({
@@ -184,20 +187,21 @@ describe('SubmissionSummary', () => {
                 },
             }
         )
-
-        expect(await screen.findByTestId('unlockedBanner')).toBeInTheDocument()
-        expect(await screen.findByTestId('unlockedBanner')).toHaveClass(
-            'usa-alert--info'
-        )
-        expect(await screen.findByTestId('unlockedBanner')).toHaveTextContent(
-            /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
-        )
-        expect(await screen.findByTestId('unlockedBanner')).toHaveTextContent(
-            'by: bob@dmas.mn.gov'
-        )
-        expect(await screen.findByTestId('unlockedBanner')).toHaveTextContent(
-            'Reason for unlock: Test unlock reason'
-        )
+        await waitFor(() => {
+            expect(screen.getByTestId('unlockedBanner')).toBeInTheDocument()
+            expect(screen.getByTestId('unlockedBanner')).toHaveClass(
+                'usa-alert--info'
+            )
+            expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
+                /on: (0?[1-9]|[12][0-9]|3[01])\/[0-9]+\/[0-9]+\s[0-9]+:[0-9]+[a-zA-Z]+ ET/i
+            )
+            expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
+                'by: bob@dmas.mn.gov'
+            )
+            expect(screen.getByTestId('unlockedBanner')).toHaveTextContent(
+                'Reason for unlock: Test unlock reason'
+            )
+        })
     })
 
     it('renders back to dashboard link for state users', async () => {
@@ -564,6 +568,7 @@ describe('SubmissionSummary', () => {
             await waitFor(() => {
                 expect(document.body).toHaveTextContent(/LOADING/)
             })
+
             // now check all the page content
             await waitFor(() => {
                 const rows = screen.getAllByRole('row')
@@ -702,6 +707,7 @@ describe('SubmissionSummary', () => {
                         name: 'This contract action includes new or modified provisions related to the following',
                     })
                 ).toBeInTheDocument()
+
                 expect(
                     screen.getByText(
                         'Medicaid beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)'
@@ -709,7 +715,7 @@ describe('SubmissionSummary', () => {
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
-                        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)'
+                        /Risk-sharing strategy/
                     )
                 ).toBeInTheDocument()
                 expect(
@@ -736,7 +742,9 @@ describe('SubmissionSummary', () => {
                     screen.getByText('Network adequacy standards')
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText('Non-risk payment arrangements')
+                    screen.getByText(
+                        /Non-risk payment arrangements/
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {
@@ -891,6 +899,7 @@ describe('SubmissionSummary', () => {
                 name: 'Reason for unlocking submission',
             })
         })
+
         it('loads outdated health plan packages with old protos as expected - 1', async () => {
             const proto = fs.readFileSync(
                 `src/common-code/proto/healthPlanFormDataProto/testData/${oldProtoFiles[1]}`
@@ -1078,7 +1087,7 @@ describe('SubmissionSummary', () => {
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
-                        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)'
+                        /Risk-sharing strategy/
                     )
                 ).toBeInTheDocument()
                 expect(
@@ -1105,7 +1114,9 @@ describe('SubmissionSummary', () => {
                     screen.getByText('Network adequacy standards')
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText('Non-risk payment arrangements')
+                    screen.getByText(
+                        /Non-risk payment arrangements/
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {
@@ -1260,6 +1271,7 @@ describe('SubmissionSummary', () => {
                 name: 'Reason for unlocking submission',
             })
         })
+
         it('loads outdated health plan packages with old protos as expected - 2', async () => {
             const proto = fs.readFileSync(
                 `src/common-code/proto/healthPlanFormDataProto/testData/${oldProtoFiles[2]}`
@@ -1447,7 +1459,7 @@ describe('SubmissionSummary', () => {
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
-                        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)'
+                        /Risk-sharing strategy/
                     )
                 ).toBeInTheDocument()
                 expect(
@@ -1474,7 +1486,9 @@ describe('SubmissionSummary', () => {
                     screen.getByText('Network adequacy standards')
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText('Non-risk payment arrangements')
+                    screen.getByText(
+                        /Non-risk payment arrangements/
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {
@@ -1513,7 +1527,7 @@ describe('SubmissionSummary', () => {
                     screen.getByText('Grievance and appeal system')
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText('Length of the contract period')
+                    screen.getByText(/Length of the contract period/)
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText('Contract supporting documents')
@@ -1816,7 +1830,7 @@ describe('SubmissionSummary', () => {
                 ).toBeInTheDocument()
                 expect(
                     screen.getByText(
-                        'Risk-sharing strategy (e.g., risk corridor, minimum medical loss ratio with a remittance, stop loss limits, reinsurance, etc.in accordance with 42 CFR § 438.6(b)(1)'
+                        /Risk-sharing strategy/
                     )
                 ).toBeInTheDocument()
                 expect(
@@ -1843,7 +1857,9 @@ describe('SubmissionSummary', () => {
                     screen.getByText('Network adequacy standards')
                 ).toBeInTheDocument()
                 expect(
-                    screen.getByText('Non-risk payment arrangements')
+                    screen.getByText(
+                        /Non-risk payment arrangements/
+                    )
                 ).toBeInTheDocument()
                 expect(
                     screen.getByRole('definition', {

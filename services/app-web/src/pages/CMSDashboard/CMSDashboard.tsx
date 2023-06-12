@@ -19,8 +19,6 @@ import {
     HealthPlanPackageTable,
     PackageInDashboardType,
 } from '../../components'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../common-code/featureFlags'
 
 /**
  * We only pull a subset of data out of the submission and revisions for display in Dashboard
@@ -29,15 +27,10 @@ import { featureFlags } from '../../common-code/featureFlags'
 
 export const CMSDashboard = (): React.ReactElement => {
     const { loginStatus, loggedInUser } = useAuth()
-    const ldClient = useLDClient()
     const { loading, data, error } = useIndexHealthPlanPackagesQuery({
         fetchPolicy: 'network-only',
     })
     const isAuthenticated = loginStatus === 'LOGGED_IN'
-    const showDashboardFilter = ldClient?.variation(
-        featureFlags.CMS_DASHBOARD_FILTER.flag,
-        featureFlags.CMS_DASHBOARD_FILTER.defaultValue
-    )
 
     if (error) {
         handleApolloError(error, isAuthenticated)
@@ -180,7 +173,7 @@ export const CMSDashboard = (): React.ReactElement => {
                         <HealthPlanPackageTable
                             tableData={submissionRows}
                             user={loggedInUser}
-                            showFilters={showDashboardFilter}
+                            showFilters
                         />
                     </section>
                 </GridContainer>

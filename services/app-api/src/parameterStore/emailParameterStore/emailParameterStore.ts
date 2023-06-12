@@ -1,8 +1,9 @@
+import { StateCodeType } from '../../../../app-web/src/common-code/healthPlanFormDataType'
 import {
     getStateAnalystsEmails,
     getStateAnalystsEmailsLocal,
-    getCmsReviewSharedEmails,
-    getCmsReviewSharedEmailsLocal,
+    getDevReviewTeamEmails,
+    getDevReviewTeamEmailsLocal,
     getCmsReviewHelpEmail,
     getCmsReviewHelpEmailLocal,
     getCmsRateHelpEmail,
@@ -17,11 +18,17 @@ import {
     getDMCOEmailsLocal,
     getSourceEmailLocal,
     getSourceEmail,
+    getStateAnalystsSettings,
+    getStateAnalystsSettingsLocal,
 } from './'
+import type { StateAnalystsWithState } from './stateAnalystsEmails/getStateAnalystsSettings'
 
 export type EmailParameterStore = {
+    getStateAnalystsSettings: (
+        stateCodes: StateCodeType[]
+    ) => Promise<StateAnalystsWithState | Error>
     getStateAnalystsEmails: (stateCode: string) => Promise<string[] | Error>
-    getCmsReviewSharedEmails: () => Promise<string[] | Error>
+    getDevReviewTeamEmails: () => Promise<string[] | Error>
     getCmsReviewHelpEmail: () => Promise<string | Error>
     getCmsRateHelpEmail: () => Promise<string | Error>
     getCmsDevTeamHelpEmail: () => Promise<string | Error>
@@ -33,8 +40,9 @@ export type EmailParameterStore = {
 
 function newLocalEmailParameterStore(): EmailParameterStore {
     return {
+        getStateAnalystsSettings: getStateAnalystsSettingsLocal,
         getStateAnalystsEmails: getStateAnalystsEmailsLocal,
-        getCmsReviewSharedEmails: getCmsReviewSharedEmailsLocal,
+        getDevReviewTeamEmails: getDevReviewTeamEmailsLocal,
         getCmsReviewHelpEmail: getCmsReviewHelpEmailLocal,
         getCmsRateHelpEmail: getCmsRateHelpEmailLocal,
         getCmsDevTeamHelpEmail: getCmsDevTeamHelpEmailLocal,
@@ -47,8 +55,9 @@ function newLocalEmailParameterStore(): EmailParameterStore {
 
 function newAWSEmailParameterStore(): EmailParameterStore {
     return {
+        getStateAnalystsSettings: getStateAnalystsSettings,
         getStateAnalystsEmails: getStateAnalystsEmails,
-        getCmsReviewSharedEmails: getCmsReviewSharedEmails,
+        getDevReviewTeamEmails: getDevReviewTeamEmails,
         getCmsReviewHelpEmail: getCmsReviewHelpEmail,
         getCmsRateHelpEmail: getCmsRateHelpEmail,
         getCmsDevTeamHelpEmail: getCmsDevTeamHelpEmail,

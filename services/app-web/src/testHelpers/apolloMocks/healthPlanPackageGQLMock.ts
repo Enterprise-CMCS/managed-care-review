@@ -26,6 +26,12 @@ import {
     mockUnlockedHealthPlanPackageWithDocuments,
     mockUnlockedHealthPlanPackage,
 } from './healthPlanFormDataMock'
+import { ApolloError } from '@apollo/client'
+import {
+    GRAPHQL_ERROR_CAUSE_MESSAGES,
+    GraphQLErrorCauseTypes,
+    GraphQLErrorCodeTypes,
+} from './apolloErrorCodeMocks'
 
 type fetchHealthPlanPackageMockProps = {
     submission?: HealthPlanPackage
@@ -129,12 +135,12 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
     const currentFiles: Partial<UnlockedHealthPlanFormDataType> = {
         contractDocuments: [
             {
-                s3URL: 's3://bucket/1648242632157-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf',
+                s3URL: 's3://bucketname/1648242632157-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf',
                 name: 'Amerigroup Texas, Inc.pdf',
                 documentCategories: ['CONTRACT'],
             },
             {
-                s3URL: 's3://bucket/1648490162641-lifeofgalileo.pdf/lifeofgalileo.pdf',
+                s3URL: 's3://bucketname/1648490162641-lifeofgalileo.pdf/lifeofgalileo.pdf',
                 name: 'lifeofgalileo.pdf',
                 documentCategories: ['CONTRACT'],
             },
@@ -143,28 +149,29 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
             {
                 rateDocuments: [
                     {
-                        s3URL: 's3://bucket/1648242665634-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf',
+                        s3URL: 's3://bucketname/1648242665634-Amerigroup Texas, Inc.pdf/Amerigroup Texas, Inc.pdf',
                         name: 'Amerigroup Texas, Inc.pdf',
                         documentCategories: ['RATES_RELATED'],
                     },
                     {
-                        s3URL: 's3://bucket/1648242711421-Amerigroup Texas Inc copy.pdf/Amerigroup Texas Inc copy.pdf',
+                        s3URL: 's3://bucketname/1648242711421-Amerigroup Texas Inc copy.pdf/Amerigroup Texas Inc copy.pdf',
                         name: 'Amerigroup Texas Inc copy.pdf',
                         documentCategories: ['RATES_RELATED'],
                     },
                 ],
+                supportingDocuments: [],
                 actuaryContacts: [],
                 packagesWithSharedRateCerts: [],
             },
         ],
         documents: [
             {
-                s3URL: 's3://bucket/1648242711421-529-10-0020-00003_Superior_Health Plan, Inc.pdf/529-10-0020-00003_Superior_Health Plan, Inc.pdf',
+                s3URL: 's3://bucketname/1648242711421-529-10-0020-00003_Superior_Health Plan, Inc.pdf/529-10-0020-00003_Superior_Health Plan, Inc.pdf',
                 name: '529-10-0020-00003_Superior_Health Plan, Inc.pdf',
                 documentCategories: ['CONTRACT_RELATED'],
             },
             {
-                s3URL: 's3://bucket/1648242873229-covid-ifc-2-flu-rsv-codes 5-5-2021.pdf/covid-ifc-2-flu-rsv-codes 5-5-2021.pdf',
+                s3URL: 's3://bucketname/1648242873229-covid-ifc-2-flu-rsv-codes 5-5-2021.pdf/covid-ifc-2-flu-rsv-codes 5-5-2021.pdf',
                 name: 'covid-ifc-2-flu-rsv-codes 5-5-2021.pdf',
                 documentCategories: ['RATES_RELATED'],
             },
@@ -207,6 +214,7 @@ const mockSubmittedHealthPlanPackageWithRevision = ({
                         documentCategories: ['RATES'],
                     },
                 ],
+                supportingDocuments: [],
                 actuaryContacts: [],
                 packagesWithSharedRateCerts: [],
             },
@@ -416,21 +424,37 @@ const submitHealthPlanPackageMockSuccess = ({
 
 const submitHealthPlanPackageMockError = ({
     id,
+    error,
 }: {
     id: string
-}): MockedResponse<SubmitHealthPlanPackageMutation> => {
+    error?: {
+        code: GraphQLErrorCodeTypes
+        cause: GraphQLErrorCauseTypes
+    }
+}): MockedResponse<SubmitHealthPlanPackageMutation | ApolloError> => {
+    const graphQLError = new GraphQLError(
+        error
+            ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
+            : 'Error attempting to submit.',
+        {
+            extensions: {
+                code: error?.code,
+                cause: error?.cause,
+            },
+        }
+    )
+
     return {
         request: {
             query: SubmitHealthPlanPackageDocument,
-            variables: { input: { submissionID: id } },
+            variables: { input: { pkgID: id } },
         },
+        error: new ApolloError({
+            graphQLErrors: [graphQLError],
+        }),
         result: {
-            errors: [
-                new GraphQLError(
-                    'Incomplete submission cannot be submitted',
-                    {}
-                ),
-            ],
+            data: null,
+            errors: [graphQLError],
         },
     }
 }
@@ -458,22 +482,38 @@ const unlockHealthPlanPackageMockSuccess = ({
 const unlockHealthPlanPackageMockError = ({
     id,
     reason,
+    error,
 }: {
     id: string
     reason: string
+    error?: {
+        code: GraphQLErrorCodeTypes
+        cause: GraphQLErrorCauseTypes
+    }
 }): MockedResponse<UnlockHealthPlanPackageMutation> => {
+    const graphQLError = new GraphQLError(
+        error
+            ? GRAPHQL_ERROR_CAUSE_MESSAGES[error.cause]
+            : 'Error attempting to submit.',
+        {
+            extensions: {
+                code: error?.code,
+                cause: error?.cause,
+            },
+        }
+    )
+
     return {
         request: {
             query: UnlockHealthPlanPackageDocument,
             variables: { input: { pkgID: id, unlockedReason: reason } },
         },
+        error: new ApolloError({
+            graphQLErrors: [graphQLError],
+        }),
         result: {
-            errors: [
-                new GraphQLError(
-                    'Incomplete submission cannot be submitted',
-                    {}
-                ),
-            ],
+            data: null,
+            errors: [graphQLError],
         },
     }
 }

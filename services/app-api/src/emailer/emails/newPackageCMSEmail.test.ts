@@ -31,7 +31,7 @@ test('to addresses list includes review team email addresses', async () => {
         return
     }
 
-    testEmailConfig.cmsReviewSharedEmails.forEach((emailAddress) => {
+    testEmailConfig.devReviewTeamEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),
@@ -40,7 +40,7 @@ test('to addresses list includes review team email addresses', async () => {
     })
 })
 
-test('to addresses list includes all division emails for contract and rate package', async () => {
+test('to addresses list includes OACT and DMCP group emails for contract and rate package', async () => {
     const sub = mockContractAndRatesFormData()
     const statePrograms = mockMNState().programs
     const template = await newPackageCMSEmail(
@@ -63,7 +63,7 @@ test('to addresses list includes all division emails for contract and rate packa
         )
     })
 
-    testEmailConfig.dmcoEmails.forEach((emailAddress) => {
+    testEmailConfig.dmcpEmails.forEach((emailAddress) => {
         expect(template).toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),
@@ -71,8 +71,41 @@ test('to addresses list includes all division emails for contract and rate packa
         )
     })
 
+    // do not include dmco group emails - rely on state analysts instead
+    testEmailConfig.dmcoEmails.forEach((emailAddress) => {
+        expect(template).not.toEqual(
+            expect.objectContaining({
+                toAddresses: expect.arrayContaining([emailAddress]),
+            })
+        )
+    })
+})
+
+test('to addresses list  does not include OACT and DMCP group emails for CHIP submission', async () => {
+    const sub = mockContractOnlyFormData({ populationCovered: 'CHIP' })
+    const statePrograms = mockMNState().programs
+    const template = await newPackageCMSEmail(
+        sub,
+        testEmailConfig,
+        [],
+        statePrograms
+    )
+
+    if (template instanceof Error) {
+        console.error(template)
+        return
+    }
+
+    testEmailConfig.oactEmails.forEach((emailAddress) => {
+        expect(template).not.toEqual(
+            expect.objectContaining({
+                toAddresses: expect.arrayContaining([emailAddress]),
+            })
+        )
+    })
+
     testEmailConfig.dmcpEmails.forEach((emailAddress) => {
-        expect(template).toEqual(
+        expect(template).not.toEqual(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining([emailAddress]),
             })
@@ -128,6 +161,7 @@ test('to addresses list does not include duplicate review email addresses', asyn
 
     expect(template.toAddresses).toEqual(['duplicate@example.com'])
 })
+
 test('subject line is correct', async () => {
     const sub = mockContractOnlyFormData()
     const statePrograms = mockMNState().programs
@@ -210,6 +244,7 @@ test('includes expected data summary for a contract and rates submission CMS ema
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                supportingDocuments: [],
                 rateDateCertified: new Date('10/17/2022'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                 rateCertificationName:
@@ -296,6 +331,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                  supportingDocuments: [],
                 rateDateCertified: new Date('10/17/2022'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                 rateCertificationName:
@@ -323,6 +359,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                  supportingDocuments: [],
                 rateDateCertified: new Date('10/17/2022'),
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                 rateCertificationName:
@@ -350,6 +387,7 @@ test('includes expected data summary for a multi-rate contract and rates submiss
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                  supportingDocuments: [],
                 rateDateCertified: new Date('10/17/2022'),
                 rateProgramIDs: [
                     'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
@@ -472,6 +510,7 @@ test('includes expected data summary for a contract amendment submission', async
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                  supportingDocuments: [],
                 rateDateCertified: new Date('10/17/2022'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                 rateCertificationName:
@@ -552,6 +591,7 @@ test('includes expected data summary for a rate amendment submission CMS email',
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                  supportingDocuments: [],
                 rateDateCertified: new Date('10/17/2022'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                 rateCertificationName:
@@ -653,7 +693,7 @@ test('includes state specific analyst on contract only submission', async () => 
     }
 
     const reviewerEmails = [
-        ...testEmailConfig.cmsReviewSharedEmails,
+        ...testEmailConfig.devReviewTeamEmails,
         ...testStateAnalystEmails,
     ]
     reviewerEmails.forEach((emailAddress) => {
@@ -682,7 +722,7 @@ test('includes state specific analyst on contract and rate submission', async ()
     }
 
     const reviewerEmails = [
-        ...testEmailConfig.cmsReviewSharedEmails,
+        ...testEmailConfig.devReviewTeamEmails,
         ...testEmailConfig.oactEmails,
         ...testStateAnalystEmails,
     ]
@@ -736,7 +776,7 @@ test('includes oactEmails on contract and rate submission', async () => {
     }
 
     const reviewerEmails = [
-        ...testEmailConfig.cmsReviewSharedEmails,
+        ...testEmailConfig.devReviewTeamEmails,
         ...testEmailConfig.oactEmails,
     ]
     reviewerEmails.forEach((emailAddress) => {
@@ -815,6 +855,7 @@ test('CHIP contract and rate submission does include state specific analysts ema
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                  supportingDocuments: [],
                 rateDateStart: new Date(),
                 rateDateEnd: new Date(),
                 rateDateCertified: new Date(),
@@ -899,6 +940,7 @@ test('CHIP contract and rate submission does not include oactEmails', async () =
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                  supportingDocuments: [],
                 rateDateStart: new Date('2021-02-02'),
                 rateDateEnd: new Date('2021-11-31'),
                 rateDateCertified: new Date('2020-12-01'),
@@ -977,6 +1019,7 @@ test('renders overall email as expected', async () => {
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                  supportingDocuments: [],
                 rateDateCertified: new Date('01/02/2021'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                 rateCertificationName:
@@ -1004,6 +1047,7 @@ test('renders overall email as expected', async () => {
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                  supportingDocuments: [],
                 rateDateCertified: new Date('02/02/2022'),
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                 rateCertificationName:

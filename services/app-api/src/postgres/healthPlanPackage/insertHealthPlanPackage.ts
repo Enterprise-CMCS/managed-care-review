@@ -14,9 +14,11 @@ import {
     StoreError,
 } from '../storeError'
 import { convertToHealthPlanPackageType } from './healthPlanPackageHelpers'
+import { PopulationCoveredType } from '../../gen/gqlServer'
 
 export type InsertHealthPlanPackageArgsType = {
     stateCode: string
+    populationCovered?: PopulationCoveredType
     programIDs: string[]
     riskBasedContract?: boolean
     submissionType: SubmissionType
@@ -71,6 +73,7 @@ export async function insertHealthPlanPackage(
         updatedAt: new Date(),
         stateNumber,
         status: 'DRAFT',
+        populationCovered: args.populationCovered,
         submissionType: args.submissionType,
         riskBasedContract: args.riskBasedContract,
         programIDs: args.programIDs,

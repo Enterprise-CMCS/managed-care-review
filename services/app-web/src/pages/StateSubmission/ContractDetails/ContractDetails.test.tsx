@@ -1,4 +1,5 @@
 import { screen, waitFor, within, fireEvent } from '@testing-library/react'
+
 import userEvent from '@testing-library/user-event'
 
 import {
@@ -13,25 +14,29 @@ import {
     TEST_XLS_FILE,
     TEST_PNG_FILE,
     dragAndDrop,
+    selectYesNoRadio,
 } from '../../../testHelpers/jestHelpers'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
 import { ContractDetails } from './'
+import {
+    provisionCHIPKeys,
+    federalAuthorityKeys,
+    federalAuthorityKeysForCHIP,
+    modifiedProvisionMedicaidAmendmentKeys,
+    modifiedProvisionMedicaidBaseKeys,
+} from '../../../common-code/healthPlanFormDataType'
 
 const scrollIntoViewMock = jest.fn()
 HTMLElement.prototype.scrollIntoView = scrollIntoViewMock
 
 describe('ContractDetails', () => {
     afterEach(() => {
-        jest.resetAllMocks()
-    })
-    afterAll(() => {
         jest.clearAllMocks()
     })
 
     const emptyContractDetailsDraft = {
         ...mockDraft(),
     }
-    afterEach(() => jest.clearAllMocks())
 
     it('displays correct form guidance', async () => {
         renderWithProviders(
@@ -50,69 +55,6 @@ describe('ContractDetails', () => {
         expect(screen.getByText(/All fields are required/)).toBeInTheDocument()
     })
 
-    it('allows setting a yes/no modified provision', async () => {
-        const emptyDraft = mockDraft()
-        emptyDraft.contractType = 'AMENDMENT'
-        const mockUpdateDraftFn = jest.fn()
-        renderWithProviders(
-            <ContractDetails
-                draftSubmission={emptyDraft}
-                updateDraft={mockUpdateDraftFn}
-                previousDocuments={[]}
-            />,
-            {
-                apolloProvider: {
-                    mocks: [fetchCurrentUserMock({ statusCode: 200 })],
-                },
-            }
-        )
-
-        // click "next"
-        const continueButton = screen.getByRole('button', { name: 'Continue' })
-        await userEvent.click(continueButton)
-
-        // check for yes/no errors
-        await waitFor(() => {
-            expect(
-                screen.getAllByText('You must select yes or no')
-            ).toHaveLength(32)
-        })
-
-        const benefitsGroup = screen.getByText(
-            'Benefits provided by the managed care plans'
-        ).parentElement
-        const geoGroup = screen.getByText(
-            'Geographic areas served by the managed care plans'
-        ).parentElement
-        const lengthGroup = screen.getByText(
-            'Length of the contract period'
-        ).parentElement
-
-        if (
-            benefitsGroup === null ||
-            geoGroup === null ||
-            lengthGroup === null
-        ) {
-            throw new Error('Benefits and Geo and Length must have parents.')
-        }
-
-        // choose yes and no
-        const benefitsYes = within(benefitsGroup).getByLabelText('Yes') //
-        const geoNo = within(geoGroup).getByLabelText('No')
-        const lengthYes = within(lengthGroup).getByLabelText('Yes')
-
-        await userEvent.click(benefitsYes)
-        await userEvent.click(geoNo)
-        await userEvent.click(lengthYes)
-
-        // error should be reduced by 3
-        await waitFor(() => {
-            expect(
-                screen.queryAllByText('You must select yes or no')
-            ).toHaveLength(26)
-        })
-    })
-
     describe('Contract documents file upload', () => {
         it('renders without errors', async () => {
             renderWithProviders(
@@ -128,20 +70,25 @@ describe('ContractDetails', () => {
                 }
             )
 
-            await waitFor(() => {
-                expect(screen.getByTestId('file-input')).toBeInTheDocument()
-                expect(screen.getByTestId('file-input')).toHaveClass(
-                    'usa-file-input'
-                )
-                expect(
-                    screen.getByRole('button', { name: 'Continue' })
-                ).not.toHaveAttribute('aria-disabled')
-                expect(
-                    within(
-                        screen.getByTestId('file-input-preview-list')
-                    ).queryAllByRole('listitem')
-                ).toHaveLength(0)
-            })
+            // check hint text
+            await screen.findByText('Supporting documents can be added later.')
+            await screen.findByRole('link', { name: /Document definitions/ })
+
+            // check file input presences
+            await screen.findByTestId('file-input')
+
+            expect(screen.getByTestId('file-input')).toBeInTheDocument()
+            expect(screen.getByTestId('file-input')).toHaveClass(
+                'usa-file-input'
+            )
+            expect(
+                screen.getByRole('button', { name: 'Continue' })
+            ).not.toHaveAttribute('aria-disabled')
+            expect(
+                within(
+                    screen.getByTestId('file-input-preview-list')
+                ).queryAllByRole('listitem')
+            ).toHaveLength(0)
         })
 
         it('accepts a new document', async () => {
@@ -196,6 +143,409 @@ describe('ContractDetails', () => {
                 expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
                 expect(screen.getByText(TEST_PDF_FILE.name)).toBeInTheDocument()
                 expect(screen.getByText(TEST_XLS_FILE.name)).toBeInTheDocument()
+            })
+        })
+    })
+
+    describe('Federal authorities', () => {
+        it('displays correct form fields for federal authorities with medicaid contract', () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={{
+                        ...mockDraft(),
+                        populationCovered: 'MEDICAID',
+                    }}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />
+            )
+            const fedAuthQuestion = screen.getByRole('group', {
+                name: 'Active federal operating authority',
+            })
+            expect(fedAuthQuestion).toBeInTheDocument()
+            expect(
+                within(fedAuthQuestion).getAllByRole('checkbox')
+            ).toHaveLength(federalAuthorityKeys.length)
+            expect(
+                within(fedAuthQuestion).getByRole('checkbox', {
+                    name: '1915(b) Waiver Authority',
+                })
+            ).toBeInTheDocument() // authority disallowed for chip is not included in list
+        })
+
+        it('displays correct form fields for federal authorities with CHIP only contract', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={{
+                        ...mockDraft(),
+                        populationCovered: 'CHIP',
+                    }}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />
+            )
+            const fedAuthQuestion = await screen.findByRole('group', {
+                name: 'Active federal operating authority',
+            })
+            expect(fedAuthQuestion).toBeInTheDocument()
+            expect(
+                within(fedAuthQuestion).getAllByRole('checkbox')
+            ).toHaveLength(federalAuthorityKeysForCHIP.length)
+            expect(
+                within(fedAuthQuestion).queryByRole('checkbox', {
+                    name: '1915(b) Waiver Authority',
+                })
+            ).not.toBeInTheDocument() // medicaid only authority should be in the list
+        })
+    })
+
+    describe('Contract provisions - yes/nos', () => {
+        const medicaidAmendmentPackage = mockDraft({
+            populationCovered: 'MEDICAID',
+            contractType: 'AMENDMENT',
+        })
+        const medicaidBasePackage = mockDraft({
+            populationCovered: 'MEDICAID',
+            contractType: 'BASE',
+        })
+
+        const chipAmendmentPackage = mockDraft({
+            populationCovered: 'CHIP',
+            contractType: 'AMENDMENT',
+        })
+        const chipBasePackage = mockDraft({
+            populationCovered: 'CHIP',
+            contractType: 'BASE',
+        })
+
+        it('can set provisions for medicaid contract amendment', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={medicaidAmendmentPackage}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            await screen.findByRole('form')
+            // amendment specific copy is used
+            expect(
+                screen.queryByText(
+                    'Medicaid beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)'
+                )
+            ).toBeInTheDocument()
+
+            expect(
+                screen.queryByText('Network adequacy standards')
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText('Grievance and appeal system')
+            ).toBeInTheDocument()
+
+            // risk and payment related provisions should be visible
+            expect(
+                screen.queryByText(/Risk-sharing strategy/)
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(/Withhold arrangements in accordance/)
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(/Payments to MCOs and PIHPs/)
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(/State directed payments/)
+            ).toBeInTheDocument()
+
+            // overall number of provisions should be correct
+            expect(screen.getAllByTestId('yes-no-radio-fieldset')).toHaveLength(
+                modifiedProvisionMedicaidAmendmentKeys.length
+            )
+        })
+
+        it('shows correct validations for medicaid contract amendment', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={medicaidAmendmentPackage}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            // trigger validations
+            await userEvent.click(
+                screen.getByRole('button', {
+                    name: 'Continue',
+                })
+            )
+
+            // check for overall list of yes/no errors in form
+            const formGroup = screen.getByText(
+                'Does this contract action include new or modified provisions related to any of the following'
+            ).parentElement
+            await waitFor(() => {
+                expect(
+                    formGroup &&
+                        within(formGroup).getAllByText(
+                            'You must select yes or no'
+                        )
+                ).toHaveLength(modifiedProvisionMedicaidAmendmentKeys.length)
+            })
+
+            await selectYesNoRadio(
+                screen,
+                'Benefits provided by the managed care plans',
+                'Yes'
+            )
+            await selectYesNoRadio(
+                screen,
+                'Geographic areas served by the managed care plans',
+                'No'
+            )
+            await selectYesNoRadio(
+                screen,
+                'Length of the contract period',
+                'Yes'
+            )
+
+            // overall list of yes/no errors should update as expected
+            await waitFor(() => {
+                expect(
+                    formGroup &&
+                        within(formGroup).getAllByText(
+                            'You must select yes or no'
+                        )
+                ).toHaveLength(
+                    modifiedProvisionMedicaidAmendmentKeys.length - 3
+                )
+            })
+        })
+
+        it('can set provisions for medicaid base contract', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={medicaidBasePackage}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            await screen.findByRole('form')
+
+            // risk and payment related provisions should be visible
+            expect(
+                screen.queryByText(/Risk-sharing strategy/)
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(/Withhold arrangements in accordance/)
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(/Payments to MCOs and PIHPs/)
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(/State directed payments/)
+            ).toBeInTheDocument()
+
+            // overall number of provisions should be correct
+            expect(screen.getAllByTestId('yes-no-radio-fieldset')).toHaveLength(
+                modifiedProvisionMedicaidBaseKeys.length
+            )
+        })
+
+        it('shows correct validations for medicaid base contract', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={medicaidBasePackage}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            // trigger validations
+            await userEvent.click(
+                screen.getByRole('button', {
+                    name: 'Continue',
+                })
+            )
+
+            // check for overall list of yes/no errors in form
+            const formGroup = screen.getByText(
+                'Does this contract action include provisions related to any of the following'
+            ).parentElement
+
+            await waitFor(() => {
+                expect(
+                    formGroup &&
+                        within(formGroup).getAllByText(
+                            'You must select yes or no'
+                        )
+                ).toHaveLength(modifiedProvisionMedicaidBaseKeys.length)
+            })
+
+            // select responses for a few provisions
+
+            await selectYesNoRadio(
+                screen,
+                /Non-risk payment arrangements/,
+                'Yes'
+            )
+            await selectYesNoRadio(screen, /Withhold arrangements/, 'No')
+
+            //overall list of yes/no errors should update as expected
+            await waitFor(() => {
+                expect(
+                    formGroup &&
+                        within(formGroup).queryAllByText(
+                            'You must select yes or no'
+                        )
+                ).toHaveLength(modifiedProvisionMedicaidBaseKeys.length - 2)
+            })
+        })
+
+        it('cannot set provisions for CHIP only base contract', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={chipBasePackage}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            await screen.findByRole('form')
+            expect(
+                screen.queryByText(
+                    'Does this contract action include provisions related to any of the following'
+                )
+            ).toBeNull()
+            expect(
+                screen.queryAllByTestId('yes-no-radio-fieldset')
+            ).toHaveLength(0)
+        })
+
+        it('can set provisions for CHIP only amendment', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={chipAmendmentPackage}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            await screen.findByRole('form')
+
+            // CHIP specific copy is used
+            expect(
+                screen.queryByText(
+                    'CHIP beneficiaries served by the managed care plans (e.g. eligibility or enrollment criteria)'
+                )
+            ).toBeInTheDocument()
+
+            expect(
+                screen.queryByText(
+                    'Network adequacy standards 42 CFR § 457.1218'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(
+                    'Grievance and appeal system 42 CFR § 457.1260'
+                )
+            ).toBeInTheDocument()
+
+            // risk and payment related provisions should not be visible
+            expect(screen.queryByText(/Risk-sharing strategy/)).toBeNull()
+            expect(screen.queryByText(/Payments to MCOs and PIHPs/)).toBeNull()
+            expect(screen.queryByText(/State directed payments/)).toBeNull()
+
+            // overall number of provisions should be correct
+            expect(screen.getAllByTestId('yes-no-radio-fieldset')).toHaveLength(
+                provisionCHIPKeys.length
+            )
+        })
+
+        it('shows correct validations for CHIP only amendment', async () => {
+            renderWithProviders(
+                <ContractDetails
+                    draftSubmission={chipAmendmentPackage}
+                    updateDraft={jest.fn()}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            // trigger validations
+            await userEvent.click(
+                screen.getByRole('button', {
+                    name: 'Continue',
+                })
+            )
+
+            // check for overall list of yes/no errors in form
+            const formGroup = screen.getByText(
+                'Does this contract action include new or modified provisions related to any of the following'
+            ).parentElement
+
+            await waitFor(() => {
+                expect(
+                    formGroup &&
+                        within(formGroup).getAllByText(
+                            'You must select yes or no'
+                        )
+                ).toHaveLength(provisionCHIPKeys.length)
+            })
+
+            await selectYesNoRadio(
+                screen,
+                'Benefits provided by the managed care plans',
+                'Yes'
+            )
+            await selectYesNoRadio(
+                screen,
+                'Geographic areas served by the managed care plans',
+                'No'
+            )
+            await selectYesNoRadio(
+                screen,
+                'Length of the contract period',
+                'Yes'
+            )
+
+            await screen.findByTestId('error-summary')
+
+            await waitFor(() => {
+                expect(
+                    formGroup &&
+                        within(formGroup).queryAllByText(
+                            'You must select yes or no'
+                        )
+                ).toHaveLength(provisionCHIPKeys.length - 3)
             })
         })
     })
@@ -684,11 +1034,13 @@ describe('ContractDetails', () => {
                             name: 'testFile.doc',
                             s3URL: expect.any(String),
                             documentCategories: ['CONTRACT'],
+                            sha256: 'da7d22ce886b5ab262cd7ab28901212a027630a5edf8e88c8488087b03ffd833', // pragma: allowlist secret
                         },
                         {
                             name: 'testFile.pdf',
                             s3URL: expect.any(String),
                             documentCategories: ['CONTRACT'],
+                            sha256: '6d50607f29187d5b185ffd9d46bc5ef75ce7abb53318690c73e55b6623e25ad5', // pragma: allowlist secret
                         },
                     ],
                 })

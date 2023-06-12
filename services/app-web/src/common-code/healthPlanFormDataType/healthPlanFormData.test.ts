@@ -10,6 +10,7 @@ import {
     generateRateName,
     hasValidSupportingDocumentCategories,
     HealthPlanFormDataType,
+    isValidAndCurrentLockedHealthPlanFormData,
     LockedHealthPlanFormDataType,
     packageName,
     removeRatesData,
@@ -203,9 +204,11 @@ describe('submission type assertions', () => {
                 rateInfos: [
                     {
                         rateDocuments: [],
+                          supportingDocuments: [],
                     },
                 ],
                 rateDocuments: [],
+                  supportingDocuments: [],
             },
             false,
         ],
@@ -412,6 +415,40 @@ describe('submission type assertions', () => {
             )
         }
     )
+    test.each([
+        [{ ...mockStateSubmission(), status: 'SUBMITTED' }, true],
+        [
+            {
+                ...mockStateSubmission(),
+                status: 'SUBMITTED',
+            },
+            true,
+        ],
+        [
+            {
+                ...mockStateSubmission(),
+                status: 'SUBMITTED',
+                submissionType: 'CONTRACT_ONLY',
+            },
+            true,
+        ],
+
+        [{ ...mockStateSubmission(), contractType: undefined }, true],
+        [
+            { ...mockStateSubmission(), contractExecutionStatus: undefined },
+            true,
+        ],
+        [mockDraft(), false],
+        [mockContractAndRatesDraft(), false],
+    ])(
+        'isValidAndCurrentLockedHealthPlanFormData evaluates as expected',
+        (submission, expectedResponse) => {
+            // type coercion to allow us to test
+            expect(isLockedHealthPlanFormData(submission)).toEqual(
+                expectedResponse
+            )
+        }
+    )
 
     test.each([
         [{ ...mockStateSubmission(), status: 'SUBMITTED' }, true],
@@ -435,10 +472,19 @@ describe('submission type assertions', () => {
             {
                 ...mockStateSubmission(),
                 status: 'SUBMITTED',
+                riskBasedContract: undefined,
+            },
+            false,
+        ],
+        [
+            {
+                ...mockStateSubmission(),
+                status: 'SUBMITTED',
                 submissionType: 'CONTRACT_AND_RATES',
                 rateInfos: [
                     {
                         rateDocuments: [],
+                        supportingDocuments: [],
                     },
                 ],
             },
@@ -452,12 +498,12 @@ describe('submission type assertions', () => {
         [mockDraft(), false],
         [mockContractAndRatesDraft(), false],
     ])(
-        'isLockedHealthPlanFormData evaluates as expected',
+        'isValidAndCurrentLockedHealthPlanFormData evaluates as expected',
         (submission, expectedResponse) => {
             // type coercion to allow us to test
-            expect(isLockedHealthPlanFormData(submission)).toEqual(
-                expectedResponse
-            )
+            expect(
+                isValidAndCurrentLockedHealthPlanFormData(submission)
+            ).toEqual(expectedResponse)
         }
     )
 
@@ -519,6 +565,7 @@ describe('submission type assertions', () => {
                             effectiveDateEnd: new Date('2022/09/21'),
                         },
                         rateDocuments: [],
+                          supportingDocuments: [],
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
@@ -541,6 +588,7 @@ describe('submission type assertions', () => {
                         rateDateEnd: new Date('2022/03/29'),
                         rateDateCertified: new Date('2021/04/22'),
                         rateDocuments: [],
+                          supportingDocuments: [],
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
@@ -570,6 +618,7 @@ describe('submission type assertions', () => {
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
                         rateDocuments: [],
+                          supportingDocuments: [],
                         actuaryContacts: [],
                         packagesWithSharedRateCerts: [],
                     },
@@ -596,6 +645,7 @@ describe('submission type assertions', () => {
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
                         rateDocuments: [],
+                          supportingDocuments: [],
                         actuaryContacts: [],
                         packagesWithSharedRateCerts: [],
                     },
@@ -615,6 +665,7 @@ describe('submission type assertions', () => {
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
                         rateDocuments: [],
+                          supportingDocuments: [],
                         actuaryContacts: [],
                         packagesWithSharedRateCerts: [],
                     },
@@ -640,6 +691,7 @@ describe('submission type assertions', () => {
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
                         rateDocuments: [],
+                          supportingDocuments: [],
                         actuaryContacts: [],
                         packagesWithSharedRateCerts: [],
                     },
@@ -660,6 +712,7 @@ describe('submission type assertions', () => {
                             effectiveDateStart: new Date('2022/05/21'),
                         },
                         rateDocuments: [],
+                          supportingDocuments: [],
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
@@ -685,6 +738,7 @@ describe('submission type assertions', () => {
                             effectiveDateEnd: new Date('2022/09/21'),
                         },
                         rateDocuments: [],
+                          supportingDocuments: [],
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
@@ -714,6 +768,7 @@ describe('submission type assertions', () => {
                             effectiveDateEnd: new Date('2022/09/21'),
                         },
                         rateDocuments: [],
+                          supportingDocuments: [],
                         rateProgramIDs: [],
                         actuaryContacts: [],
                         packagesWithSharedRateCerts: [],
@@ -959,9 +1014,12 @@ describe('submission type assertions', () => {
                 ],
             },
         ]
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        jest.spyOn(console, 'error').mockImplementation(() => {})
 
         expect(() => convertRateSupportingDocs(contractDocument)).toThrow()
         expect(() => convertRateSupportingDocs(rateDocument)).toThrow()
         expect(() => convertRateSupportingDocs(mixedDocuments)).toThrow()
+        jest.clearAllMocks()
     })
 })

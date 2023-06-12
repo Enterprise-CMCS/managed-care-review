@@ -1,9 +1,11 @@
 import { MockedResponse } from '@apollo/client/testing'
 import {
     CreateQuestionDocument,
+    CreateQuestionResponseDocument,
     CreateQuestionInput,
     CreateQuestionMutation,
     Question as QuestionType,
+    QuestionResponse as QuestionResponseType,
     FetchHealthPlanPackageWithQuestionsDocument,
     FetchHealthPlanPackageWithQuestionsQuery,
     HealthPlanPackage,
@@ -47,6 +49,7 @@ const createQuestionSuccess = (
                         pkgID: testInput.pkgID,
                         createdAt: new Date(),
                         addedBy: mockValidCMSUser(),
+                        division: 'DMCO',
                         documents: testInput.documents,
                     },
                 },
@@ -60,6 +63,14 @@ const createQuestionNetworkFailure = (
 ): MockedResponse<CreateQuestionMutation> => {
     return {
         request: { query: CreateQuestionDocument },
+        error: new Error('A network error occurred'),
+    }
+}
+const createQuestionResponseNetworkFailure = (
+    question?: QuestionResponseType | Partial<QuestionResponseType>
+): MockedResponse<CreateQuestionMutation> => {
+    return {
+        request: { query: CreateQuestionResponseDocument },
         error: new Error('A network error occurred'),
     }
 }
@@ -115,6 +126,7 @@ const fetchStateHealthPlanPackageWithQuestionsMockNotFound = ({
 
 export {
     createQuestionNetworkFailure,
+    createQuestionResponseNetworkFailure,
     createQuestionSuccess,
     fetchStateHealthPlanPackageWithQuestionsMockSuccess,
     fetchStateHealthPlanPackageWithQuestionsMockNotFound,

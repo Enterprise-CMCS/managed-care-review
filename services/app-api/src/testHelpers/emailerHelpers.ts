@@ -15,12 +15,14 @@ import {
     UnlockedHealthPlanFormDataType,
 } from '../../../app-web/src/common-code/healthPlanFormDataType'
 import { StateUserType } from '../domain-models'
+import { SESServiceException } from '@aws-sdk/client-ses'
+import { testSendSESEmail } from './awsSESHelpers'
 
 const testEmailConfig: EmailConfiguration = {
     stage: 'LOCAL',
     baseUrl: 'http://localhost',
     emailSource: 'emailSource@example.com',
-    cmsReviewSharedEmails: ['cmsreview1@example.com', 'cmsreview2@example.com'],
+    devReviewTeamEmails: ['devreview1@example.com', 'devreview2@example.com'],
     cmsReviewHelpEmailAddress: '"MCOG Example" <mcog@example.com>',
     cmsRateHelpEmailAddress: '"Rates Example" <rates@example.com>',
     cmsDevTeamHelpEmailAddress: '"MC-Review Example" <mc-review@example.com>',
@@ -33,7 +35,7 @@ const testDuplicateEmailConfig: EmailConfiguration = {
     stage: 'LOCAL',
     baseUrl: 'http://localhost',
     emailSource: 'emailSource@example.com',
-    cmsReviewSharedEmails: [
+    devReviewTeamEmails: [
         'duplicate@example.com',
         'duplicate@example.com',
         'duplicate@example.com',
@@ -59,9 +61,21 @@ const testDuplicateStateAnalystsEmails: string[] = [
 function testEmailer(customConfig?: EmailConfiguration): Emailer {
     const config = customConfig || testEmailConfig
     return {
+        config,
         sendEmail: jest.fn(
             async (emailData: EmailData): Promise<void | Error> => {
-                console.info('Email content' + JSON.stringify(emailData))
+                try {
+                    await testSendSESEmail(emailData)
+                } catch (err) {
+                    if (err instanceof SESServiceException) {
+                        return new Error(
+                            'SES email send failed. Error is from Amazon SES. Error: ' +
+                                JSON.stringify(err)
+                        )
+                    }
+
+                    return new Error('SES email send failed. Error: ' + err)
+                }
             }
         ),
         sendCMSNewPackage: async function (
@@ -288,6 +302,7 @@ const mockContractAndRatesFormData = (
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                supportingDocuments: [],
                 rateDateCertified: new Date('01/02/2021'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                 rateAmendmentInfo: undefined,
@@ -369,6 +384,7 @@ const mockUnlockedContractAndRatesFormData = (
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                supportingDocuments: [],
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
                 rateDateCertified: new Date('01/02/2021'),
@@ -546,6 +562,7 @@ const mockContractAmendmentFormData = (
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                supportingDocuments: [],
                 rateDateStart: new Date('01/01/2021'),
                 rateDateEnd: new Date('01/01/2022'),
                 rateDateCertified: new Date('01/02/2021'),

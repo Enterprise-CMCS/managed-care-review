@@ -4,7 +4,7 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import {
-    mockCompleteDraft,
+    mockBaseContract,
     mockSubmittedHealthPlanPackage,
     mockSubmittedHealthPlanPackageWithRevisions,
     submitHealthPlanPackageMockError,
@@ -27,7 +27,7 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockCompleteDraft()}
+                    healthPlanPackage={mockBaseContract()}
                     submissionName="Test-Submission"
                     modalType="SUBMIT"
                     modalRef={modalRef}
@@ -54,7 +54,7 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockCompleteDraft()}
+                    healthPlanPackage={mockBaseContract()}
                     submissionName="Test-Submission"
                     modalType="SUBMIT"
                     modalRef={modalRef}
@@ -64,13 +64,62 @@ describe('UnlockSubmitModal', () => {
                     apolloProvider: {
                         mocks: [
                             submitHealthPlanPackageMockSuccess({
-                                id: mockCompleteDraft().id,
+                                id: mockBaseContract().id,
                             }),
                         ],
                     },
                     routerProvider: {
                         route: `draftSubmission/${
-                            mockCompleteDraft().id
+                            mockBaseContract().id
+                        }/review-and-submit`,
+                    },
+                    location: (location) => (testLocation = location),
+                }
+            )
+
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            await userEvent.click(screen.getByTestId('submit-modal-submit'))
+
+            await waitFor(() =>
+                expect(testLocation.pathname).toBe(`/dashboard`)
+            )
+            await waitFor(() =>
+                expect(testLocation.search).toBe(
+                    `?justSubmitted=Test-Submission`
+                )
+            )
+        })
+        it('redirects if submission succeeds, but failed sending emails', async () => {
+            let testLocation: Location
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    healthPlanPackage={mockBaseContract()}
+                    submissionName="Test-Submission"
+                    modalType="SUBMIT"
+                    modalRef={modalRef}
+                    setIsSubmitting={mockSetIsSubmitting}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            submitHealthPlanPackageMockError({
+                                id: mockBaseContract().id,
+                                error: {
+                                    code: 'INTERNAL_SERVER_ERROR',
+                                    cause: 'EMAIL_ERROR',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `draftSubmission/${
+                            mockBaseContract().id
                         }/review-and-submit`,
                     },
                     location: (location) => (testLocation = location),
@@ -98,7 +147,7 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockCompleteDraft()}
+                    healthPlanPackage={mockBaseContract()}
                     submissionName="Test-Submission"
                     modalType="SUBMIT"
                     modalRef={modalRef}
@@ -108,7 +157,7 @@ describe('UnlockSubmitModal', () => {
                     apolloProvider: {
                         mocks: [
                             submitHealthPlanPackageMockError({
-                                id: mockCompleteDraft().id,
+                                id: mockBaseContract().id,
                             }),
                         ],
                     },
@@ -313,6 +362,55 @@ describe('UnlockSubmitModal', () => {
                 expect(errorMessage).toBeInTheDocument()
             })
         })
+        it('does not display modal alert banner error if unlock succeeds, but fails sending emails', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    modalRef={modalRef}
+                    modalType="UNLOCK"
+                    healthPlanPackage={mockSubmittedHealthPlanPackage()}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            unlockHealthPlanPackageMockError({
+                                id: mockUnlockedHealthPlanPackage().id,
+                                reason: 'Test unlock summary',
+                                error: {
+                                    code: 'INTERNAL_SERVER_ERROR',
+                                    cause: 'EMAIL_ERROR',
+                                },
+                            }),
+                        ],
+                    },
+                }
+            )
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            await userEvent.type(
+                screen.getByTestId('unlockSubmitModalInput'),
+                'Test unlock summary'
+            )
+
+            await userEvent.click(screen.getByTestId('unlock-modal-submit'))
+
+            await waitFor(() => {
+                const errorHeading = screen.queryByRole('heading', {
+                    name: 'Unlock error',
+                })
+                const errorMessage = screen.queryByText(
+                    'Error attempting to unlock.'
+                )
+                expect(errorHeading).not.toBeInTheDocument()
+                expect(errorMessage).not.toBeInTheDocument()
+            })
+
+            await waitFor(() => expect(dialog).toHaveClass('is-hidden'))
+        })
     })
 
     describe('resubmit unlocked submission modal', () => {
@@ -322,7 +420,7 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockCompleteDraft()}
+                    healthPlanPackage={mockBaseContract()}
                     submissionName="Test-Submission"
                     modalType="RESUBMIT"
                     modalRef={modalRef}
@@ -357,7 +455,7 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockCompleteDraft()}
+                    healthPlanPackage={mockBaseContract()}
                     submissionName="Test-Submission"
                     modalType="RESUBMIT"
                     modalRef={modalRef}
@@ -383,7 +481,7 @@ describe('UnlockSubmitModal', () => {
                 modalRef.current?.toggleModal(undefined, true)
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockCompleteDraft()}
+                    healthPlanPackage={mockBaseContract()}
                     submissionName="Test-Submission"
                     modalType="RESUBMIT"
                     modalRef={modalRef}
@@ -418,13 +516,13 @@ describe('UnlockSubmitModal', () => {
                 <UnlockSubmitModal
                     modalRef={modalRef}
                     modalType="RESUBMIT"
-                    healthPlanPackage={mockCompleteDraft()}
+                    healthPlanPackage={mockBaseContract()}
                 />,
                 {
                     apolloProvider: {
                         mocks: [
                             submitHealthPlanPackageMockError({
-                                id: mockCompleteDraft().id,
+                                id: mockBaseContract().id,
                             }),
                         ],
                     },
@@ -458,7 +556,7 @@ describe('UnlockSubmitModal', () => {
 
             renderWithProviders(
                 <UnlockSubmitModal
-                    healthPlanPackage={mockCompleteDraft()}
+                    healthPlanPackage={mockBaseContract()}
                     submissionName="Test-Submission"
                     modalType="RESUBMIT"
                     modalRef={modalRef}
@@ -468,14 +566,14 @@ describe('UnlockSubmitModal', () => {
                     apolloProvider: {
                         mocks: [
                             submitHealthPlanPackageMockSuccess({
-                                id: mockCompleteDraft().id,
+                                id: mockBaseContract().id,
                                 submittedReason: 'Test submission summary',
                             }),
                         ],
                     },
                     routerProvider: {
                         route: `draftSubmission/${
-                            mockCompleteDraft().id
+                            mockBaseContract().id
                         }/review-and-submit`,
                     },
                     location: (location) => (testLocation = location),

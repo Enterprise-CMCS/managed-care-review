@@ -47,6 +47,16 @@ function recordJSException(error: string | Error): void {
     span.end()
 }
 
+export function recordJSExceptionWithContext(
+    error: string | Error,
+    spanName: string
+) {
+    const tracer = getTracer()
+    const span = tracer.startSpan(spanName)
+    span.recordException(error)
+    console.error(error)
+}
+
 function recordUserInputException(error: string | Error): void {
     const tracer = getTracer()
     const span = tracer.startSpan('UserInputException')

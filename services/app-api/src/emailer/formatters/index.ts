@@ -1,5 +1,5 @@
 export {
-    isEmailAddress,
+    hasAlias,
     includesEmailAddress,
     formatEmailAddresses,
     pruneDuplicateEmails,

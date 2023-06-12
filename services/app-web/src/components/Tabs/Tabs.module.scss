@@ -14,7 +14,6 @@
         position: relative;
         max-width: 75rem;
         margin: 0 auto;
-        padding: 0 2rem;
     }
 
     &__tab-list {
@@ -25,7 +24,6 @@
         white-space: nowrap;
         background-color: $cms-color-background;
     }
-
     &__tab {
         display: inline-flex;
         align-items: center;
@@ -80,8 +78,10 @@
     &__tab-panel {
         overflow: auto;
         border: 1px solid $theme-color-base-lighter;
-        border-top: none;
         height: 100%;
         background-color: #fff;
+        padding: 1.5em;
+        min-height: 500px;
     }
+
 }

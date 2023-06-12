@@ -3,7 +3,7 @@ package mcreviewproto;
 import "google/protobuf/timestamp.proto";
 
 // HealthPlanFormData represents the form data for MC Review
-// It has all the fields for both Locked and Unlocked HealthPlanFormDataType, 
+// It has all the fields for both Locked and Unlocked HealthPlanFormDataType,
 // differentiated by the value of the `status` field.
 message HealthPlanFormData {
   optional string proto_name = 1;
@@ -24,15 +24,16 @@ message HealthPlanFormData {
   repeated Document documents = 16;
   repeated ActuaryContact addtl_actuary_contacts = 17;
   optional ActuaryCommunicationType addtl_actuary_communication_preference = 18;
-  optional bool risk_based_contract = 19; 
+  optional bool risk_based_contract = 19;
+  optional PopulationCovered population_covered = 20;
 
   repeated RateInfo rate_infos = 50;
 }
 
 /// Submission related enums
 enum SubmissionType {
-  SUBMISSION_TYPE_UNSPECIFIED = 0; 
-  SUBMISSION_TYPE_CONTRACT_ONLY = 1; 
+  SUBMISSION_TYPE_UNSPECIFIED = 0;
+  SUBMISSION_TYPE_CONTRACT_ONLY = 1;
   SUBMISSION_TYPE_CONTRACT_AND_RATES = 3;
 }
 
@@ -52,9 +53,16 @@ message Date {
 }
 
 enum SubmissionStatus{
-  SUBMISSION_STATUS_UNSPECIFIED = 0; 
-  SUBMISSION_STATUS_DRAFT = 1; 
+  SUBMISSION_STATUS_UNSPECIFIED = 0;
+  SUBMISSION_STATUS_DRAFT = 1;
   SUBMISSION_STATUS_SUBMITTED = 2;
+}
+
+enum PopulationCovered{
+  POPULATION_COVERED_UNSPECIFIED = 0;
+  POPULATION_COVERED_MEDICAID = 1;
+  POPULATION_COVERED_CHIP = 2;
+  POPULATION_COVERED_MEDICAID_AND_CHIP = 3;
 }
 
 
@@ -64,7 +72,7 @@ message Contact {
   optional string email = 3;
 }
 
-/// ContractInfo subtypes
+// ContractInfo subtypes
 message ContractInfo {
   optional ContractType contract_type = 1;
   optional Date contract_date_start = 2;
@@ -74,9 +82,12 @@ message ContractInfo {
   repeated Document contract_documents = 6;
   optional ContractExecutionStatus contract_execution_status = 7;
 
+  // Rates Refactor: No need for nested contract amendment info
   optional ContractAmendmentInfo contract_amendment_info  = 50;
 
+
   message ContractAmendmentInfo  {
+    // Rates Refactor: CapitationRatesAmendedInfo is dead code. Please remove.
     message CapitationRatesAmendedInfo {
       optional CapitationRateAmendmentReason reason = 1;
       optional string other_reason = 2;
@@ -99,8 +110,9 @@ message ContractInfo {
       optional bool modified_network_adequacy_standards = 14;
       optional bool modified_length_of_contract = 15;
       optional bool modified_non_risk_payment_arrangements = 16;
+      optional bool in_lieu_services_and_settings = 17;
     }
-    
+
     repeated AmendedItem amendable_items = 1;
     optional string other_amendable_item = 2;
     optional CapitationRatesAmendedInfo capitation_rates_amended_info = 3;
@@ -129,6 +141,7 @@ enum AmendedItem {
   AMENDED_ITEM_OTHER=14;
 }
 
+// Rates Refactor: CapitationRatesAmendmentReason is dead code.
 enum CapitationRateAmendmentReason{
   CAPITATION_RATE_AMENDMENT_REASON_UNSPECIFIED = 0;
   CAPITATION_RATE_AMENDMENT_REASON_ANNUAL = 1;
@@ -162,7 +175,7 @@ enum ManagedCareEntity {
   MANAGED_CARE_ENTITY_UNSPECIFIED = 0;
   MANAGED_CARE_ENTITY_MCO = 1;
   MANAGED_CARE_ENTITY_PIHP = 2;
-  MANAGED_CARE_ENTITY_PAHP= 3; 
+  MANAGED_CARE_ENTITY_PAHP= 3;
   MANAGED_CARE_ENTITY_PCCM = 4;
 }
 
@@ -186,6 +199,7 @@ message RateInfo {
   repeated string rate_program_ids = 10;
   optional string rate_certification_name = 11;
   repeated SharedRateCertDisplay packages_with_shared_rate_certs = 12;
+  repeated Document supporting_documents = 13;
 
   optional RateAmendmentInfo rate_amendment_info = 50;
 
@@ -194,7 +208,7 @@ message RateInfo {
     optional Date effective_date_end = 2;
   }
 }
-/// Rate related enums
+// Rate related enums
 enum RateType {
   RATE_TYPE_UNSPECIFIED = 0;
   RATE_TYPE_NEW = 1;
@@ -224,7 +238,7 @@ enum ActuarialFirmType {
   ACTUARIAL_FIRM_TYPE_OTHER = 7;
 }
 
-    
+
 /// Generic sub types
 enum DocumentCategory {
   DOCUMENT_CATEGORY_UNSPECIFIED = 0;
@@ -244,6 +258,7 @@ message Document {
   optional string name = 1;
   optional string s3_url = 2;
   repeated DocumentCategory document_categories = 3;
+  optional string sha256 = 4;
 }
 
 enum StateCode {

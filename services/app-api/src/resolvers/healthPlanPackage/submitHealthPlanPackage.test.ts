@@ -22,18 +22,12 @@ import {
     mockEmailParameterStoreError,
     getTestStateAnalystsEmails,
 } from '../../testHelpers/parameterStoreHelpers'
-import { UserType } from '../../domain-models'
+import * as awsSESHelpers from '../../testHelpers/awsSESHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 
 describe('submitHealthPlanPackage', () => {
-    const testUserCMS: UserType = {
-        id: '62e10c5c-ddff-4f4f-addf-829e85f8094a',
-        role: 'CMS_USER',
-        email: 'zuko@example.com',
-        familyName: 'Zuko',
-        givenName: 'Prince',
-        stateAssignments: [],
-    }
+    const cmsUser = testCMSUser()
     it('returns a StateSubmission if complete', async () => {
         const server = await constructTestPostgresServer()
 
@@ -148,7 +142,19 @@ describe('submitHealthPlanPackage', () => {
 
         expect(submitResult.errors).toBeDefined()
 
-        expect(submitResult.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(submitResult.errors?.[0].extensions).toEqual(
+            expect.objectContaining({
+                code: 'INTERNAL_SERVER_ERROR',
+                cause: 'INVALID_PACKAGE_STATUS',
+                exception: {
+                    locations: undefined,
+                    message:
+                        'Attempted to submit an already submitted package.',
+                    path: undefined,
+                },
+            })
+        )
+
         expect(submitResult.errors?.[0].message).toBe(
             'Attempted to submit an already submitted package.'
         )
@@ -200,6 +206,7 @@ describe('submitHealthPlanPackage', () => {
                             documentCategories: ['RATES' as const],
                         },
                     ],
+                    supportingDocuments: [],
                     rateProgramIDs: ['3b8d8fa1-1fa6-4504-9c5b-ef522877fe1e'],
                     actuaryContacts: [
                         {
@@ -347,6 +354,95 @@ describe('submitHealthPlanPackage', () => {
         )
     })
 
+    it('removes any invalid modified provisions from CHIP submission and submits successfully', async () => {
+        const server = await constructTestPostgresServer()
+
+        //Create and update a submission as if the user edited and changed population covered after filling out yes/nos
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {
+            contractType: 'AMENDMENT',
+            populationCovered: 'CHIP',
+            federalAuthorities: ['TITLE_XXI'],
+            contractAmendmentInfo: {
+                modifiedProvisions: {
+                    inLieuServicesAndSettings: true,
+                    modifiedBenefitsProvided: true,
+                    modifiedGeoAreaServed: false,
+                    modifiedMedicaidBeneficiaries: false,
+                    modifiedRiskSharingStrategy: true,
+                    modifiedIncentiveArrangements: true,
+                    modifiedWitholdAgreements: true,
+                    modifiedStateDirectedPayments: true,
+                    modifiedPassThroughPayments: true,
+                    modifiedPaymentsForMentalDiseaseInstitutions: true,
+                    modifiedMedicalLossRatioStandards: false,
+                    modifiedOtherFinancialPaymentIncentive: false,
+                    modifiedEnrollmentProcess: false,
+                    modifiedGrevienceAndAppeal: false,
+                    modifiedNetworkAdequacyStandards: false,
+                    modifiedLengthOfContract: false,
+                    modifiedNonRiskPaymentArrangements: false,
+                },
+            },
+        })
+
+        const submitResult = await submitTestHealthPlanPackage(server, draft.id)
+
+        const currentRevision = submitResult.revisions[0].node
+        const packageData = base64ToDomain(currentRevision.formDataProto)
+
+        if (packageData instanceof Error) {
+            throw new Error(packageData.message)
+        }
+        expect(packageData).toEqual(
+            expect.objectContaining({
+                contractAmendmentInfo: {
+                    modifiedProvisions: {
+                        modifiedBenefitsProvided: true,
+                        modifiedGeoAreaServed: false,
+                        modifiedMedicaidBeneficiaries: false,
+                        modifiedMedicalLossRatioStandards: false,
+                        modifiedEnrollmentProcess: false,
+                        modifiedGrevienceAndAppeal: false,
+                        modifiedNetworkAdequacyStandards: false,
+                        modifiedLengthOfContract: false,
+                        modifiedNonRiskPaymentArrangements: false,
+                    },
+                },
+            })
+        )
+    })
+
+    it('removes any invalid federal authorities from CHIP submission and submits successfully', async () => {
+        const server = await constructTestPostgresServer()
+
+        //Create and update a submission as if the user edited and changed population covered after filling out yes/nos
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {
+            populationCovered: 'CHIP',
+            federalAuthorities: [
+                'STATE_PLAN',
+                'WAIVER_1915B',
+                'WAIVER_1115',
+                'VOLUNTARY',
+                'BENCHMARK',
+                'TITLE_XXI',
+            ],
+        })
+
+        const submitResult = await submitTestHealthPlanPackage(server, draft.id)
+
+        const currentRevision = submitResult.revisions[0].node
+        const packageData = base64ToDomain(currentRevision.formDataProto)
+
+        if (packageData instanceof Error) {
+            throw new Error(packageData.message)
+        }
+        expect(packageData).toEqual(
+            expect.objectContaining({
+                federalAuthorities: ['WAIVER_1115', 'TITLE_XXI'],
+            })
+        )
+    })
+
     it('sends two emails', async () => {
         const mockEmailer = testEmailer()
 
@@ -402,7 +498,7 @@ describe('submitHealthPlanPackage', () => {
         const stateAnalystsEmails = getTestStateAnalystsEmails(sub.stateCode)
 
         const cmsEmails = [
-            ...config.cmsReviewSharedEmails,
+            ...config.devReviewTeamEmails,
             ...stateAnalystsEmails,
         ]
 
@@ -442,7 +538,7 @@ describe('submitHealthPlanPackage', () => {
         expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
             expect.objectContaining({
                 toAddresses: expect.arrayContaining(
-                    Array.from(config.cmsReviewSharedEmails)
+                    Array.from(config.devReviewTeamEmails)
                 ),
             })
         )
@@ -526,14 +622,9 @@ describe('submitHealthPlanPackage', () => {
         const server = await constructTestPostgresServer({
             emailer: mockEmailer,
             context: {
-                user: {
-                    id: 'PeterParker',
-                    stateCode: 'FL',
-                    role: 'STATE_USER',
+                user: testStateUser({
                     email: 'notspiderman@example.com',
-                    familyName: 'Parker',
-                    givenName: 'Peter',
-                },
+                }),
             },
         })
         const draft = await createAndUpdateTestHealthPlanPackage(server, {})
@@ -584,7 +675,7 @@ describe('submitHealthPlanPackage', () => {
         )
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUserCMS,
+                user: cmsUser,
             },
         })
 
@@ -624,7 +715,7 @@ describe('submitHealthPlanPackage', () => {
                     `The state completed their edits on submission ${name}`
                 ),
                 toAddresses: expect.arrayContaining(
-                    Array.from(config.cmsReviewSharedEmails)
+                    Array.from(config.devReviewTeamEmails)
                 ),
             })
         )
@@ -636,28 +727,18 @@ describe('submitHealthPlanPackage', () => {
         //mock invoke email submit lambda
         const stateServer = await constructTestPostgresServer({
             context: {
-                user: {
-                    id: 'MilesMorales',
-                    stateCode: 'FL',
-                    role: 'STATE_USER',
+                user: testStateUser({
                     email: 'alsonotspiderman@example.com',
-                    familyName: 'Morales',
-                    givenName: 'Miles',
-                },
+                }),
             },
         })
 
         const stateServerTwo = await constructTestPostgresServer({
             emailer: mockEmailer,
             context: {
-                user: {
-                    id: 'PeterParker',
-                    stateCode: 'FL',
-                    role: 'STATE_USER',
+                user: testStateUser({
                     email: 'notspiderman@example.com',
-                    familyName: 'Parker',
-                    givenName: 'Peter',
-                },
+                }),
             },
         })
 
@@ -667,7 +748,7 @@ describe('submitHealthPlanPackage', () => {
 
         const cmsServer = await constructTestPostgresServer({
             context: {
-                user: testUserCMS,
+                user: cmsUser,
             },
         })
 
@@ -720,6 +801,7 @@ describe('submitHealthPlanPackage', () => {
                     rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
                     rateDateCertified: undefined,
                     rateDocuments: [],
+                    supportingDocuments: [],
                     actuaryContacts: [],
                     packagesWithSharedRateCerts: [],
                 },
@@ -739,14 +821,59 @@ describe('submitHealthPlanPackage', () => {
         expect(submitResult.errors).toBeDefined()
         expect(mockEmailer.sendEmail).not.toHaveBeenCalled()
     })
-})
 
-describe('submitHealthPlanPackage with feature flags', () => {
-    it('errors when risk based question is undefined and rate-cert-assurance feature flag is on', async () => {
-        const mockLDService = testLDService({ 'rate-cert-assurance': true })
+    it('errors when SES email has failed.', async () => {
+        const mockEmailer = testEmailer()
+
+        jest.spyOn(awsSESHelpers, 'testSendSESEmail').mockImplementation(
+            async () => {
+                throw new Error('Network error occurred')
+            }
+        )
+
+        //mock invoke email submit lambda
         const server = await constructTestPostgresServer({
-            ldService: mockLDService,
+            emailer: mockEmailer,
         })
+        const draft = await createAndUpdateTestHealthPlanPackage(server, {})
+        const draftID = draft.id
+
+        const submitResult = await server.executeOperation({
+            query: SUBMIT_HEALTH_PLAN_PACKAGE,
+            variables: {
+                input: {
+                    pkgID: draftID,
+                },
+            },
+        })
+
+        // expect errors from submission
+        expect(submitResult.errors).toBeDefined()
+
+        // expect sendEmail to have been called, so we know it did not error earlier
+        expect(mockEmailer.sendEmail).toHaveBeenCalled()
+
+        // expect correct graphql error.
+        expect(submitResult.errors?.[0]).toEqual(
+            expect.objectContaining({
+                message: 'Email failed',
+                locations: [{ line: 2, column: 5 }],
+                path: ['submitHealthPlanPackage'],
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'EMAIL_ERROR',
+                    exception: {
+                        message: 'Email failed',
+                        path: undefined,
+                        locations: undefined,
+                    },
+                },
+            })
+        )
+    })
+
+    it('errors when risk based question is undefined', async () => {
+        const server = await constructTestPostgresServer()
 
         // setup
         const initialPkg = await createAndUpdateTestHealthPlanPackage(server, {
@@ -772,16 +899,18 @@ describe('submitHealthPlanPackage with feature flags', () => {
             'formData is missing required contract fields'
         )
     }, 20000)
+})
 
-    it('does not error when risk based question is undefined and rate-cert-assurance feature flag is off', async () => {
-        const mockLDService = testLDService({ 'rate-cert-assurance': false })
+describe('Feature flagged population coverage question test', () => {
+    it('errors when population coverage question is undefined', async () => {
+        const mockLDService = testLDService({ 'chip-only-form': true })
         const server = await constructTestPostgresServer({
             ldService: mockLDService,
         })
 
         // setup
         const initialPkg = await createAndUpdateTestHealthPlanPackage(server, {
-            riskBasedContract: undefined,
+            populationCovered: undefined,
         })
         const draft = latestFormData(initialPkg)
         const draftID = draft.id
@@ -798,51 +927,9 @@ describe('submitHealthPlanPackage with feature flags', () => {
             },
         })
 
-        expect(submitResult.errors).toBeUndefined()
-        const createdID = submitResult?.data?.submitHealthPlanPackage.pkg.id
-
-        // test result
-        const pkg = await fetchTestHealthPlanPackageById(server, createdID)
-
-        const resultDraft = latestFormData(pkg)
-
-        // The submission fields should still be set
-        expect(resultDraft.id).toEqual(createdID)
-        expect(resultDraft.submissionType).toBe('CONTRACT_AND_RATES')
-        expect(resultDraft.programIDs).toEqual([defaultFloridaProgram().id])
-        // check that the stateNumber is being returned the same
-        expect(resultDraft.stateNumber).toEqual(draft.stateNumber)
-        expect(resultDraft.submissionDescription).toBe('An updated submission')
-        expect(resultDraft.documents).toEqual(draft.documents)
-
-        // Contract details fields should still be set
-        expect(resultDraft.contractType).toEqual(draft.contractType)
-        expect(resultDraft.contractExecutionStatus).toEqual(
-            draft.contractExecutionStatus
+        expect(submitResult.errors).toBeDefined()
+        expect(submitResult.errors?.[0].extensions?.message).toBe(
+            'formData is missing required contract fields'
         )
-        expect(resultDraft.contractDateStart).toEqual(draft.contractDateStart)
-        expect(resultDraft.contractDateEnd).toEqual(draft.contractDateEnd)
-        expect(resultDraft.managedCareEntities).toEqual(
-            draft.managedCareEntities
-        )
-        expect(resultDraft.contractDocuments).toEqual(draft.contractDocuments)
-
-        expect(resultDraft.federalAuthorities).toEqual(draft.federalAuthorities)
-
-        if (resultDraft.status == 'DRAFT') {
-            throw new Error('Not a locked submission')
-        }
-
-        // submittedAt should be set to today's date
-        const today = new Date()
-        const expectedDate = today.toISOString().split('T')[0]
-        expect(pkg.initiallySubmittedAt).toEqual(expectedDate)
-
-        // UpdatedAt should be after the former updatedAt
-        const resultUpdated = new Date(resultDraft.updatedAt)
-        const createdUpdated = new Date(draft.updatedAt)
-        expect(
-            resultUpdated.getTime() - createdUpdated.getTime()
-        ).toBeGreaterThan(0)
     }, 20000)
 })

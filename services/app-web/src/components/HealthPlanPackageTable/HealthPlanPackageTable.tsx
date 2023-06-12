@@ -311,8 +311,12 @@ export const HealthPlanPackageTable = ({
     const filteredRows = reactTable.getRowModel().rows
     const hasFilteredRows = filteredRows.length > 0
 
-    const stateColumn = reactTable.getColumn('stateName')
-    const submissionTypeColumn = reactTable.getColumn('submissionType')
+    const stateColumn = reactTable.getColumn(
+        'stateName'
+    ) as Column<PackageInDashboardType>
+    const submissionTypeColumn = reactTable.getColumn(
+        'submissionType'
+    ) as Column<PackageInDashboardType>
 
     // Filter options based on table data instead of static list of options.
     const stateFilterOptions = Array.from(

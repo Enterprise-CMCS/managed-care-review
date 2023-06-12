@@ -1,10 +1,10 @@
-import { getParameterStore } from '../../awsParameterStore'
+import { ParameterStore } from '../../awsParameterStore'
 
-export const getStateAnalystsEmails = async (
+const getStateAnalystsEmails = async (
     stateCode: string
 ): Promise<string[] | Error> => {
     const name = `/configuration/${stateCode}/stateanalysts/email`
-    const stateAnalysts = await getParameterStore(name)
+    const stateAnalysts = await ParameterStore.getParameter(name)
 
     if (stateAnalysts instanceof Error) {
         return stateAnalysts
@@ -21,9 +21,11 @@ export const getStateAnalystsEmails = async (
     return value.split(',').map((email) => email.trim())
 }
 
-export const getStateAnalystsEmailsLocal = async (
+const getStateAnalystsEmailsLocal = async (
     stateCode: string
 ): Promise<string[] | Error> => [
     `"${stateCode} State Analyst 1" <${stateCode}StateAnalyst1@example.com>`,
     `"${stateCode} State Analyst 2" <${stateCode}StateAnalyst2@example.com>`,
 ]
+
+export { getStateAnalystsEmails, getStateAnalystsEmailsLocal }

@@ -1,12 +1,11 @@
 /**
- * Contains a list of all our feature flags in Launch Darkly each flag should contain a default value. This is used to
- * give us type safety around flag names when we're enabling/disabling features in our code.
+ * Source of truth for feature flags in application.
+ * Ensures some type safety around flag names when we're enabling/disabling features in our code.
  *
- * This list is also used to generate Types for our Unit and Cypress tests. Our Cypress LD integration heavily relies
- * on this list to help constrain tests to flag's in LD, autocompletion, generate Types and flag state management
+ * This file also used to generate types for our Jest unit tests, Cypress tests, and for Yup validation logic.
  */
 
-export const featureFlags = {
+const featureFlags = {
     /**
      Toggles the site maintenance alert on the landing page
     */
@@ -43,24 +42,31 @@ export const featureFlags = {
         defaultValue: 2,
     },
     /**
-     * Enables filter on CMS dashboard
-     */
-    CMS_DASHBOARD_FILTER: {
-        flag: 'cms-dashboard-filter',
-        defaultValue: false,
-    },
-    /**
-     * Enables rate cert assurance workflow
-     */
-    RATE_CERT_ASSURANCE: {
-        flag: 'rate-cert-assurance',
-        defaultValue: false,
-    },
-    /**
      * Enables state and CMS Q&A features
      */
     CMS_QUESTIONS: {
         flag: 'cms-questions',
+        defaultValue: false,
+    },
+    /**
+     * Enables packages with shared rates dropdown on rate details page. This was an early version of rates across subs functionality.
+     */
+    PACKAGES_WITH_SHARED_RATES: {
+        flag: 'packages-with-shared-rates',
+        defaultValue: false,
+    },
+    /**
+     * Enables Chip-only form changes
+     */
+    CHIP_ONLY_FORM: {
+        flag: 'chip-only-form',
+        defaultValue: false,
+    },
+    /**
+     * Enables supporting documents to be associated with a specific rate certification on the Rate Details page
+     */
+    SUPPORTING_DOCS_BY_RATE: {
+        flag: 'supporting-docs-by-rate',
         defaultValue: false,
     },
     /**
@@ -73,23 +79,24 @@ export const featureFlags = {
     },
 } as const
 
-export type FlagEnumType = keyof typeof featureFlags
-
 /**
- * featureFlags object top level property keys in an array. Used for LD integration into Cypress
+ * Feature flags constants used in application. Uppercased and snake_cased
  */
-export const featureFlagEnums: FlagEnumType[] = Object.keys(featureFlags).map(
-    (flag): keyof typeof featureFlags => flag as FlagEnumType
+const featureFlagKeys = Object.keys(featureFlags).map(
+    (flag): keyof typeof featureFlags => flag as FlagKey
 )
 
 /**
- * Get a union type of all `flag` values of `featureFlags`. This type will constrain code to only use feature flags defined
- * in the featureFlag object. Mainly used in testing to restrict testing to actual feature flags.
+ * Feature flag constants used in Launch Darkly. Lowercased and kebab-cased
  */
-export type FeatureFlagTypes =
-    typeof featureFlags[keyof typeof featureFlags]['flag']
+type FeatureFlagLDConstant =
+    (typeof featureFlags)[keyof typeof featureFlags]['flag']
 
-/**
- * Flag value types from Launch Darkly and used to restrict feature flag default types as well as values in testing.
- */
-export type FlagValueTypes = boolean | string | number | object | []
+type FlagKey = keyof typeof featureFlags
+type FlagValue = boolean | string | number | object | [] // this is  an approximate mapping to available LD flag value types
+
+type FeatureFlagSettings = Partial<Record<FeatureFlagLDConstant, FlagValue>>
+
+export type { FlagKey, FlagValue, FeatureFlagLDConstant, FeatureFlagSettings }
+
+export { featureFlagKeys, featureFlags }

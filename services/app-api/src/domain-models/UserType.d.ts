@@ -1,4 +1,5 @@
 import { StateType } from './StateType'
+import { DivisionType } from './DivisionType'
 
 type UserType = StateUserType | CMSUserType | AdminUserType
 
@@ -18,6 +19,7 @@ type CMSUserType = {
     givenName: string
     familyName: string
     stateAssignments: StateType[]
+    divisionAssignment?: DivisionType
 }
 
 type AdminUserType = {

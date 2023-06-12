@@ -8,6 +8,7 @@ import {
     FileInputRef,
 } from '@trussworks/react-uswds'
 import { PoliteErrorMessage } from '../'
+import { recordJSException } from '../../otelHelpers'
 
 import styles from './FileUpload.module.scss'
 
@@ -16,6 +17,7 @@ import { FileItemsList } from './FileItemList/FileItemsList'
 import { pluralize } from '../../common-code/formatters'
 
 import { recordUserInputException } from '../../otelHelpers'
+import { calculateSHA256 } from '../../common-code/sha/generateSha'
 
 export type S3FileData = {
     key: string
@@ -40,12 +42,11 @@ export type FileUploadProps = {
     innerInputRef?: (el: HTMLInputElement) => void
 } & JSX.IntrinsicElements['input']
 
-/*  FileUpload handles async file upload to S3 and displays inline errors per file.
-    Tracks files as they are uploaded. Once files are no longer processing passes to parent with onFileItemsUpdate.
+/*  
+    FileUpload handles async file upload to S3 and displays inline errors per file.
+    Tracks files as they are uploaded. Once files are no longer processing passes data back up to parent with onFileItemsUpdate.
 
-    Note: This component uses a ref to access files in the input. It also clears its own value after each change.
-    This is not standard behavior for an HTML input. However, rendering quickly allows us to take over handling of files
-    for upload and display in our custom FileItemList.
+    For more detail on this component and the related sub-components see docs/technical-design/file-upload.md
 */
 
 export const FileUpload = ({
@@ -214,7 +215,8 @@ export const FileUpload = ({
     // Upload to S3 and update file items in component state with the async loading status
     // This includes moving from pending/loading UI to display success or errors
     const asyncS3Upload = (files: File[] | File) => {
-        const upload = (file: File) => {
+        const upload = async (file: File) => {
+            const sha = (await calculateSHA256(file)) || ''
             uploadFile(file)
                 .then((data) => {
                     setFileItems((prevItems) => {
@@ -225,6 +227,7 @@ export const FileUpload = ({
                                     ...item,
                                     key: data.key,
                                     s3URL: data.s3URL,
+                                    sha256: sha,
                                     // In general, we update the UI status for file items as uploads and scans to S3 complete
                                     // Files with duplicate name errors are exceptional. This error takes priority. Duplicate files are still uploaded to s3 silently and scanned but will only display their duplicate name error.
                                     status:
@@ -247,6 +250,15 @@ export const FileUpload = ({
                                 const newItems = [...prevItems]
                                 return newItems.map((item) => {
                                     if (item.key === data.key) {
+                                        if (
+                                            item.status ===
+                                            'DUPLICATE_NAME_ERROR'
+                                        ) {
+                                            const error = new Error(
+                                                `DUPLICATE_NAME_ERROR: ${item.status}`
+                                            )
+                                            recordJSException(error)
+                                        }
                                         return {
                                             ...item,
                                             file: undefined,
@@ -267,6 +279,10 @@ export const FileUpload = ({
                                 const newItems = [...prevItems]
                                 return newItems.map((item) => {
                                     if (item.key === data.key) {
+                                        const error = new Error(
+                                            `SCANNING_ERROR: ${item}`
+                                        )
+                                        recordJSException(error)
                                         return {
                                             ...item,
                                             S3URL: null,
@@ -278,17 +294,23 @@ export const FileUpload = ({
                                 })
                             })
                             // immediately delete this bad file
-                            deleteFile(data.key).catch(() =>
-                                console.info('Error deleting from s3')
-                            )
+                            deleteFile(data.key).catch(() => {
+                                const error = new Error(
+                                    'Error deleting from s3'
+                                )
+                                recordJSException(error)
+                                console.info(error)
+                            })
                         }
                     }
                 })
-                .catch((e) => {
+                .catch((_e) => {
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
                         return newItems.map((item) => {
                             if (item.file === file) {
+                                const error = new Error(`UPLOAD_ERROR: ${item}`)
+                                recordJSException(error)
                                 return {
                                     ...item,
                                     status: 'UPLOAD_ERROR',
@@ -303,10 +325,10 @@ export const FileUpload = ({
 
         if (!(files instanceof File)) {
             files.forEach((file) => {
-                upload(file)
+                upload(file).catch((e) => console.error(e))
             })
         } else {
-            upload(files as File)
+            upload(files).catch((e) => console.error(e))
         }
     }
 
@@ -364,7 +386,7 @@ export const FileUpload = ({
         addFilesAndUpdateList(files)
     }
 
-    const handleOnChange = (e: React.ChangeEvent): void => {
+    const handleOnChange = (_e: React.ChangeEvent): void => {
         const files = Array.from(fileInputRef.current?.input?.files || []) // Web API File objects
         addFilesAndUpdateList(files)
     }

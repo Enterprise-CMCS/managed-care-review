@@ -11,8 +11,10 @@ import {
 import { todaysDate } from '../../testHelpers/dateHelpers'
 import { HealthPlanPackageEdge, HealthPlanPackage } from '../../gen/gqlServer'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
+import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 
 describe('indexHealthPlanPackages', () => {
+    const cmsUser = testCMSUser()
     describe('isStateUser', () => {
         it('returns a list of submissions that includes newly created entries', async () => {
             const server = await constructTestPostgresServer()
@@ -64,14 +66,7 @@ describe('indexHealthPlanPackages', () => {
 
             const cmsServer = await constructTestPostgresServer({
                 context: {
-                    user: {
-                        id: '841c22b2-fa13-4f42-a3d0-9fb8fb671ed7',
-                        role: 'CMS_USER',
-                        email: 'zuko@example.com',
-                        familyName: 'Zuko',
-                        givenName: 'Prince',
-                        stateAssignments: [],
-                    },
+                    user: cmsUser,
                 },
             })
 
@@ -160,14 +155,7 @@ describe('indexHealthPlanPackages', () => {
             // setup a server with a different user
             const otherUserServer = await constructTestPostgresServer({
                 context: {
-                    user: {
-                        id: 'b9c58d1c-806c-4862-a832-9779b8a511c2',
-                        stateCode: 'FL',
-                        role: 'STATE_USER',
-                        email: 'aang@mn.gov',
-                        givenName: 'Aang',
-                        familyName: 'Aang',
-                    },
+                    user: testStateUser(),
                 },
             })
 
@@ -197,14 +185,9 @@ describe('indexHealthPlanPackages', () => {
 
             const otherUserServer = await constructTestPostgresServer({
                 context: {
-                    user: {
-                        id: 'b9029ffe-f6f0-47cc-baab-b37774ef02b1',
+                    user: testStateUser({
                         stateCode: 'VA',
-                        role: 'STATE_USER',
-                        email: 'aang@mn.gov',
-                        familyName: 'Aang',
-                        givenName: 'Aang',
-                    },
+                    }),
                 },
             })
 
@@ -228,14 +211,7 @@ describe('indexHealthPlanPackages', () => {
             const stateServer = await constructTestPostgresServer()
             const cmsServer = await constructTestPostgresServer({
                 context: {
-                    user: {
-                        id: '4f3a5d98-0e6e-4c15-9738-d6ea0cfd10b7',
-                        role: 'CMS_USER',
-                        email: 'zuko@example.com',
-                        givenName: 'Zuko',
-                        familyName: 'Zuko',
-                        stateAssignments: [],
-                    },
+                    user: cmsUser,
                 },
             })
             // First, create new submissions
@@ -264,14 +240,7 @@ describe('indexHealthPlanPackages', () => {
 
             const cmsServer = await constructTestPostgresServer({
                 context: {
-                    user: {
-                        id: '1700cd2e-6860-4e6f-a061-b3ca8f5aeeb2',
-                        role: 'CMS_USER',
-                        email: 'zuko@example.com',
-                        givenName: 'Prince',
-                        familyName: 'Zuko',
-                        stateAssignments: [],
-                    },
+                    user: cmsUser,
                 },
             })
 
@@ -339,26 +308,15 @@ describe('indexHealthPlanPackages', () => {
             const stateServer = await constructTestPostgresServer()
             const cmsServer = await constructTestPostgresServer({
                 context: {
-                    user: {
-                        id: 'bfe2e6d3-15ff-4b5a-8782-a199d027967a',
-                        role: 'CMS_USER',
-                        email: 'zuko@example.com',
-                        familyName: 'Zuko',
-                        givenName: 'Prince',
-                        stateAssignments: [],
-                    },
+                    user: cmsUser,
                 },
             })
             const otherStateServer = await constructTestPostgresServer({
                 context: {
-                    user: {
-                        id: 'c5de2733-edea-462a-a9b1-41b97a636986',
+                    user: testStateUser({
                         stateCode: 'VA',
-                        role: 'STATE_USER',
                         email: 'aang@mn.gov',
-                        familyName: 'AANG',
-                        givenName: 'AANG',
-                    },
+                    }),
                 },
             })
             // submit packages from two different states
