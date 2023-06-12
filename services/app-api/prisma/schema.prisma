@@ -53,7 +53,6 @@ model ContractRevisionTable {
   contractID    String
   contract      ContractTable                           @relation(fields: [contractID], references: [id])
   rateRevisions RateRevisionsOnContractRevisionsTable[]
-  invalidatedRevisions RateRevisionsOnContractRevisionsTable[] @relation("invalidatedByContract")
 
   draftRates RateTable[]
 
@@ -73,7 +72,6 @@ model RateRevisionTable {
   rateID            String
   rate              RateTable                               @relation(fields: [rateID], references: [id])
   contractRevisions RateRevisionsOnContractRevisionsTable[]
-  invalidatedRevisions RateRevisionsOnContractRevisionsTable[] @relation("invalidatedByRate")
 
   draftContracts ContractTable[]
 
@@ -99,12 +97,6 @@ model RateRevisionsOnContractRevisionsTable {
   updatedAt  DateTime  @default(now()) @updatedAt
 
   isRemoval Boolean @default(false)
-
-  invalidatedByContractRevisionID String?
-  invalidatedByContractRevision ContractRevisionTable? @relation("invalidatedByContract", fields: [invalidatedByContractRevisionID], references: [id])
-
-  invalidatedByRateRevisionID String?
-  invalidatedByRateRevision RateRevisionTable? @relation("invalidatedByRate", fields: [invalidatedByRateRevisionID], references: [id])
 
   @@id([rateRevisionID, contractRevisionID, validAfter])
 }

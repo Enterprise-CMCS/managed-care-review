@@ -137,7 +137,6 @@ async function submitRateRevision(
                 },
                 data: {
                     validUntil: groupTime,
-                    invalidatedByRateRevisionID: updated.id,
                 },
             })
         }

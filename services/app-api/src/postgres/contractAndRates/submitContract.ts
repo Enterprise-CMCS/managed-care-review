@@ -135,6 +135,7 @@ async function submitContract(
                 })
             }
 
+            // invalidate all revisions associated with the previous rev
             await client.rateRevisionsOnContractRevisionsTable.updateMany({
                 where: {
                     contractRevisionID: oldRev.id,
@@ -142,7 +143,6 @@ async function submitContract(
                 },
                 data: {
                     validUntil: groupTime,
-                    invalidatedByContractRevisionID: updated.id,
                 },
             })
         }

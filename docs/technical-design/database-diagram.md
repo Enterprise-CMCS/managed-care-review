@@ -122,8 +122,6 @@ RateRevisionsOnContractRevisionsTable {
    DateTime validAfter
    DateTime validUntil
    
-   String invalidatedByContractRevisionID
-   String invalidatedByRateRevisionID
 }
 
 UpdateInfoTable {
