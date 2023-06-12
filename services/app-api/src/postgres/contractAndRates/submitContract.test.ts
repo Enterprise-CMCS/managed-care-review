@@ -87,6 +87,16 @@ describe('submitContract', () => {
                 'initial submit'
             )
         )
+
+        // submit the first draft rate
+        must(
+            await submitRateRevision(
+                client,
+                rateA.id,
+                stateUser.id,
+                'initial rate submit'
+            )
+        )
         // set up the relation between the submitted contract and the rate
         await client.rateRevisionsOnContractRevisionsTable.create({
             data: {
