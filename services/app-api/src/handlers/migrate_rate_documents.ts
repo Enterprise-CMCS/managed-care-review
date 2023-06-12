@@ -7,61 +7,6 @@ import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormD
 import { isStoreError, StoreError } from '../postgres/storeError'
 import { Store } from '../postgres'
 
-// export const streamToBuffer = async (stream: Readable): Promise<Buffer> => {
-//     return new Promise((resolve, reject) => {
-//         const chunks: Uint8Array[] = []
-//         stream.on('data', (chunk) => chunks.push(chunk))
-//         stream.on('error', reject)
-//         stream.on('end', () => resolve(Buffer.concat(chunks)))
-//     })
-// }
-
-// export const calculateSHA256 = async (s3URL: string): Promise<string> => {
-//     try {
-//         const getObjectCommand = new GetObjectCommand({
-//             Bucket: parseBucketName(s3URL) as string,
-//             Key: `allusers/${parseKey(s3URL)}`,
-//         })
-
-//         const s3Object = await s3.send(getObjectCommand)
-
-//         const buffer = await streamToBuffer(s3Object.Body as Readable)
-
-//         const hash = createHash('sha256')
-//         hash.update(buffer)
-//         return hash.digest('hex')
-//     } catch (err) {
-//         console.error(`Error calculating SHA256 for ${s3URL}: ${err}`)
-//         throw err
-//     }
-// }
-
-// export const updateDocumentsSHA256 = async (
-//     documents: SubmissionDocument[]
-// ): Promise<SubmissionDocument[]> => {
-//     try {
-//         await Promise.all(
-//             documents.map(async (document) => {
-//                 if (
-//                     !Object.prototype.hasOwnProperty.call(document, 'sha256') ||
-//                     !document.sha256
-//                 ) {
-//                     try {
-//                         const sha256 = await calculateSHA256(document.s3URL)
-//                         document.sha256 = `${sha256}`
-//                     } catch (error) {
-//                         console.error('Error calculating SHA256:', error)
-//                     }
-//                 }
-//             })
-//         )
-//         return documents
-//     } catch (error) {
-//         console.error('Error in updateDocumentsSHA256:', error)
-//         throw error
-//     }
-// }
-
 export const processRevisions = async (
     store: Store,
     revisions: HealthPlanRevisionTable[]
@@ -73,13 +18,33 @@ export const processRevisions = async (
             const formData = decodedFormDataProto as HealthPlanFormDataType
             // skip the submission with two rates
             if (formData.id !== 'ddd5dde1-0082-4398-90fe-89fc1bc148df') {
-                // we know the existing data has only a single rates document
+                // we know the other submissions have only a single rate document
                 const ratesRelatedDocument = formData.documents.filter((doc) =>
                     doc.documentCategories.includes('RATES_RELATED')
                 )
                 formData.rateInfos[0].supportingDocuments = ratesRelatedDocument
                 formData.documents = formData.documents.filter(
                     (doc) => !ratesRelatedDocument.includes(doc)
+                )
+            } else {
+                const firstRateRelatedDocument = formData.documents.filter(
+                    (doc) =>
+                        doc.name ===
+                        'Report12 - SFY 2022 Preliminary MississippiCAN Capitation Rates - Exhibits.xlsx'
+                )
+                const secondRateRelatedDocument = formData.documents.filter(
+                    (doc) =>
+                        doc.name ===
+                        'Report13 - SFY 2023 Preliminary MississippiCAN Capitation Rates - Exhibits.xlsx'
+                )
+                formData.rateInfos[0].supportingDocuments =
+                    firstRateRelatedDocument
+                formData.rateInfos[1].supportingDocuments =
+                    secondRateRelatedDocument
+                formData.documents = formData.documents.filter(
+                    (doc) =>
+                        !firstRateRelatedDocument.includes(doc) &&
+                        !secondRateRelatedDocument.includes(doc)
                 )
             }
             try {
