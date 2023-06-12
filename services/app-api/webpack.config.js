@@ -21,8 +21,11 @@ module.exports = {
     entry: slsw.lib.entries,
     mode: isLocal ? 'development' : 'production',
     externals: [
-        nodeExternals(),
         nodeExternals({
+            allowlist: [/^@managed-care-review/],
+        }),
+        nodeExternals({
+            allowlist: [/^@managed-care-review/],
             modulesDir: path.resolve(__dirname, '../../node_modules'),
         }),
         'prisma',
