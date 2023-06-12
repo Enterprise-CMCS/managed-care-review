@@ -47,6 +47,15 @@ async function submitContract(
             (c) => c.revisions[0]
         )
 
+        if (submittedRateRevisions.some((rev) => rev === undefined)) {
+            console.error(
+                'Attempted to submit a contract related to a rate that has not been submitted'
+            )
+            return new Error(
+                'Attempted to submit a contract related to a rate that has not been submitted'
+            )
+        }
+
         const updated = await client.contractRevisionTable.update({
             where: {
                 id: currentRev.id,
@@ -77,7 +86,9 @@ async function submitContract(
                 },
             },
         })
+
         // oldRev is the previously submitted revision of this contract (the one just superseded by the update)
+        // get the previous revision, to invalidate all relationships and add any removed entries to the join table.
         const oldRev = await client.contractRevisionTable.findFirst({
             where: {
                 contractID: updated.contractID,
@@ -85,15 +96,45 @@ async function submitContract(
                     id: updated.id,
                 },
             },
+            include: {
+                rateRevisions: {
+                    include: {
+                        rateRevision: true,
+                    },
+                },
+            },
             orderBy: {
                 createdAt: 'desc',
             },
         })
 
-        // invalidate all joins on the old revision // maybe should just invalidate ALL where?
         // on an initial submission, there won't be an oldRev
         // validUntil: null means it's current.  we invalidate the joins on the old revision by giving it a validUntil value
         if (oldRev) {
+            // if any of the old rev's Rates aren't in the new Rates, add an entry
+            // entry is for a previous rate to this new contractRev.
+            const oldRateRevs = oldRev.rateRevisions
+                .filter((rrevjoin) => !rrevjoin.validUntil)
+                .map((rrevjoin) => rrevjoin.rateRevision)
+            const removedRateRevs = oldRateRevs.filter(
+                (rrev) =>
+                    !currentRev.draftRates
+                        .map((r) => r.id)
+                        .includes(rrev.rateID)
+            )
+
+            if (removedRateRevs.length > 0) {
+                await client.rateRevisionsOnContractRevisionsTable.createMany({
+                    data: removedRateRevs.map((rrev) => ({
+                        contractRevisionID: updated.id,
+                        rateRevisionID: rrev.id,
+                        validAfter: groupTime,
+                        validUntil: groupTime,
+                        isRemoval: true,
+                    })),
+                })
+            }
+
             await client.rateRevisionsOnContractRevisionsTable.updateMany({
                 where: {
                     contractRevisionID: oldRev.id,

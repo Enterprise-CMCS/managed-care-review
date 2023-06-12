@@ -98,6 +98,8 @@ model RateRevisionsOnContractRevisionsTable {
   validUntil DateTime?
   updatedAt  DateTime  @default(now()) @updatedAt
 
+  isRemoval Boolean @default(false)
+
   invalidatedByContractRevisionID String?
   invalidatedByContractRevision ContractRevisionTable? @relation("invalidatedByContract", fields: [invalidatedByContractRevisionID], references: [id])
 
