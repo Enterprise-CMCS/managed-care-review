@@ -46,6 +46,15 @@ async function submitRateRevision(
             (c) => c.revisions[0]
         )
 
+        if (freshContractRevs.some((rev) => rev === undefined)) {
+            console.error(
+                'Attempted to submit a rate related to a contract that has not been submitted'
+            )
+            return new Error(
+                'Attempted to submit a rate related to a contract that has not been submitted'
+            )
+        }
+
         const updated = await client.rateRevisionTable.update({
             where: {
                 id: currentRev.id,
@@ -84,16 +93,43 @@ async function submitRateRevision(
                     id: updated.id,
                 },
             },
+            include: {
+                contractRevisions: {
+                    include: {
+                        contractRevision: true,
+                    },
+                },
+            },
             orderBy: {
                 createdAt: 'desc',
-            },
-            include: {
-                contractRevisions: true,
             },
         })
 
         // invalidate all joins on the old revision
         if (oldRev) {
+            // if any of the old rev's Rates aren't in the new Rates, add an entry
+            const oldContractRevs = oldRev.contractRevisions
+                .filter((crevjoin) => !crevjoin.validUntil)
+                .map((crevjoin) => crevjoin.contractRevision)
+            const removedContractRevs = oldContractRevs.filter(
+                (crev) =>
+                    !currentRev.draftContracts
+                        .map((c) => c.id)
+                        .includes(crev.contractID)
+            )
+
+            if (removedContractRevs.length > 0) {
+                await client.rateRevisionsOnContractRevisionsTable.createMany({
+                    data: removedContractRevs.map((crev) => ({
+                        rateRevisionID: updated.id,
+                        contractRevisionID: crev.id,
+                        validAfter: groupTime,
+                        validUntil: groupTime,
+                        isRemoval: true,
+                    })),
+                })
+            }
+
             await client.rateRevisionsOnContractRevisionsTable.updateMany({
                 where: {
                     rateRevisionID: oldRev.id,

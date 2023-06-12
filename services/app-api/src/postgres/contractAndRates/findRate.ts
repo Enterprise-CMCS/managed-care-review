@@ -1,4 +1,9 @@
-import { PrismaClient, UpdateInfoTable } from '@prisma/client'
+import {
+    ContractRevisionTable,
+    PrismaClient,
+    RateRevisionTable,
+    UpdateInfoTable,
+} from '@prisma/client'
 import { UpdateInfoType } from '../../domain-models'
 import { Rate, RateRevision } from './rateType'
 
@@ -16,7 +21,15 @@ function convertUpdateInfo(
     }
 }
 
-async function findRate(
+// this is for the internal building of individual revisions
+// we convert them into RateRevisons to return them
+interface RateRevisionSet {
+    rateRev: RateRevisionTable
+    submitInfo: UpdateInfoTable
+    contractRevs: ContractRevisionTable[]
+}
+
+async function findRateWithContracts(
     client: PrismaClient,
     rateID: string
 ): Promise<Rate | Error> {
@@ -40,141 +53,88 @@ async function findRate(
                             },
                         },
                     },
+                    orderBy: {
+                        validAfter: 'asc',
+                    },
                 },
             },
         })
 
-        // so you get all the contract revisions. each one has a bunch of rates
-        // each set of rates gets its own "revision" in the return list
-        // further contractRevs naturally are their own "revision"
+        // so you get all the rate revisions. each one has a bunch of contracts
+        // each set of contracts gets its own "revision" in the return list
+        // further rateRevs naturally are their own "revision"
 
-        const allRateRevisions: RateRevision[] = []
+        const allEntries: RateRevisionSet[] = []
         for (const rateRev of rateRevisions) {
-            const addTimeline: {
-                [date: string]: typeof rateRev.contractRevisions
-            } = {}
-            const removeTimeline: {
-                [date: string]: typeof rateRev.contractRevisions
-            } = {}
-
             // no drafts allowed
             if (!rateRev.submitInfo) {
                 continue
             }
 
-            // There will be an entry for this contract no matter what, so add an empty date there
-            addTimeline[rateRev.submitInfo.updatedAt.toISOString()] = []
-
-            for (const contractRev of rateRev.contractRevisions) {
-                const addEntry =
-                    addTimeline[contractRev.validAfter.toISOString()]
-                if (!addEntry) {
-                    addTimeline[contractRev.validAfter.toISOString()] = [
-                        contractRev,
-                    ]
-                } else {
-                    addEntry.push(contractRev)
-                }
-
-                if (contractRev.validUntil) {
-                    const removeEntry =
-                        removeTimeline[contractRev.validUntil.toISOString()]
-                    if (!removeEntry) {
-                        removeTimeline[contractRev.validUntil.toISOString()] = [
-                            contractRev,
-                        ]
-                    } else {
-                        removeEntry.push(contractRev)
-                    }
-                }
+            const initialEntry: RateRevisionSet = {
+                rateRev,
+                submitInfo: rateRev.submitInfo,
+                contractRevs: [],
             }
 
-            const allDates = new Set(
-                Object.keys(addTimeline).concat(Object.keys(removeTimeline))
-            )
-            const orderedDates = Array.from(allDates).sort()
+            allEntries.push(initialEntry)
 
-            const lastRevisions: Set<typeof rateRev.contractRevisions[0]> =
-                new Set()
-            for (const date of orderedDates) {
-                // each date here is a submission date.
-                const addedRevs = addTimeline[date]
-                const removedRevs = removeTimeline[date]
-
-                let changedUpdateInfo: UpdateInfoType | undefined = undefined
-
-                if (addedRevs) {
-                    // figure out where this rev came from to get the right by/your/leave
-                    if (rateRev.submitInfo.updatedAt.toISOString() === date) {
-                        // this is the initial addition, from this contract.
-                        changedUpdateInfo = convertUpdateInfo(
-                            rateRev.submitInfo
-                        )
-                    } else {
-                        // ok, we have to assume then that this was added by the contractRev.
-                        const newRev = addedRevs[0]
-                        changedUpdateInfo = convertUpdateInfo(
-                            newRev.contractRevision.submitInfo
-                        )
-                    }
-
-                    for (const added of addedRevs) {
-                        lastRevisions.add(added)
-                    }
+            let lastEntry = initialEntry
+            // go through every contract revision with this rate
+            for (const contractRev of rateRev.contractRevisions) {
+                if (!contractRev.contractRevision.submitInfo) {
+                    return new Error(
+                        'Programming Error: a rate is associated with an unsubmitted contract'
+                    )
                 }
 
-                if (removedRevs) {
-                    const removedRev = removedRevs[0]
-                    if (removedRev.invalidatedByRateRevisionID) {
-                        continue
-                    } else if (removedRev.invalidatedByContractRevisionID) {
-                        const removedCause =
-                            await client.contractRevisionTable.findUnique({
-                                where: {
-                                    id: removedRev.invalidatedByContractRevisionID,
-                                },
-                                include: { submitInfo: true },
-                            })
-                        if (!removedCause) {
-                            return new Error('this should always be found.')
-                        }
-                        changedUpdateInfo = convertUpdateInfo(
-                            removedCause.submitInfo
-                        )
-                    } else {
-                        console.error(
-                            'BIG ERROR, invalidated has to have a reason'
-                        )
-                        return new Error(
-                            'Unexpected Data Integrity error. No cause for removal.'
+                // if it's from before this rate was submitted, it's there at the beginning.
+                if (contractRev.validAfter <= rateRev.submitInfo.updatedAt) {
+                    if (!contractRev.isRemoval) {
+                        initialEntry.contractRevs.push(
+                            contractRev.contractRevision
                         )
                     }
+                } else {
+                    // if after, then it's always a new entry in the list
+                    let lastContracts = [...lastEntry.contractRevs]
 
-                    for (const removed of removedRevs) {
-                        lastRevisions.delete(removed)
+                    // take out the previous contract revision this revision supersedes
+                    lastContracts = lastContracts.filter(
+                        (c) =>
+                            c.contractID !==
+                            contractRev.contractRevision.contractID
+                    )
+                    if (!contractRev.isRemoval) {
+                        lastContracts.push(contractRev.contractRevision)
                     }
-                }
 
-                const rev: RateRevision = {
-                    id: rateRev.id,
-                    revisionFormData: rateRev.name,
-                    submitInfo: changedUpdateInfo,
-                    contractRevisions: [...lastRevisions].map((cr) => {
-                        return {
-                            id: cr.contractRevisionID,
-                            contractFormData: cr.contractRevision.name,
-                            rateRevisions: [],
-                        }
-                    }),
-                }
+                    const newRev: RateRevisionSet = {
+                        rateRev,
+                        submitInfo: contractRev.contractRevision.submitInfo,
+                        contractRevs: lastContracts,
+                    }
 
-                allRateRevisions.push(rev)
+                    lastEntry = newRev
+                    allEntries.push(newRev)
+                }
             }
         }
 
+        const allRevisions: RateRevision[] = allEntries.map((entry) => ({
+            id: entry.rateRev.id,
+            submitInfo: convertUpdateInfo(entry.submitInfo),
+            revisionFormData: entry.rateRev.name,
+            contractRevisions: entry.contractRevs.map((crev) => ({
+                id: crev.id,
+                contractFormData: crev.name,
+                rateRevisions: [],
+            })),
+        }))
+
         return {
             id: rateID,
-            revisions: allRateRevisions,
+            revisions: allRevisions,
         }
     } catch (err) {
         console.error('PRISMA ERROR', err)
@@ -182,4 +142,4 @@ async function findRate(
     }
 }
 
-export { findRate }
+export { findRateWithContracts as findRate }
