@@ -95,7 +95,7 @@ describe('submission type', () => {
 
             // Navigate to dashboard page by clicking cancel
             cy.findByRole('button', { name: /Cancel/ }).click()
-            cy.wait('@indexHealthPlanPackagesQuery', { timeout: 50000 })
+            cy.wait('@indexHealthPlanPackagesQuery', { timeout: 50_000 })
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Navigate to type page
