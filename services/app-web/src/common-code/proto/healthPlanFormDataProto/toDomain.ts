@@ -353,6 +353,7 @@ function parseRateInfos(
                     rateInfo?.rateCapitationType
                 ),
                 rateDocuments: parseProtoDocuments(rateInfo?.rateDocuments),
+                supportingDocuments: parseProtoDocuments(rateInfo?.supportingDocuments),
                 rateDateStart: protoDateToDomain(rateInfo?.rateDateStart),
                 rateDateEnd: protoDateToDomain(rateInfo?.rateDateEnd),
                 rateDateCertified: protoDateToDomain(

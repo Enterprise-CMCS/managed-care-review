@@ -168,9 +168,8 @@ const updateTestHealthPlanFormData = async (
             },
         },
     })
-
     if (updateResult.errors) {
-        console.info('errors', updateResult.errors)
+        console.info('errors', JSON.stringify(updateResult.errors))
         throw new Error(
             `updateTestHealthPlanFormData mutation failed with errors ${updateResult.errors}`
         )
@@ -179,7 +178,6 @@ const updateTestHealthPlanFormData = async (
     if (!updateResult.data) {
         throw new Error('updateTestHealthPlanFormData returned nothing')
     }
-
     return updateResult.data.updateHealthPlanFormData.pkg
 }
 
@@ -217,6 +215,7 @@ const createAndUpdateTestHealthPlanPackage = async (
                     documentCategories: ['RATES' as const],
                 },
             ],
+            supportingDocuments: [],
             //We only want one rate ID and use last program in list to differentiate from programID if possible.
             rateProgramIDs: [ratePrograms.reverse()[0].id],
             actuaryContacts: [

@@ -3,7 +3,7 @@ package mcreviewproto;
 import "google/protobuf/timestamp.proto";
 
 // HealthPlanFormData represents the form data for MC Review
-// It has all the fields for both Locked and Unlocked HealthPlanFormDataType, 
+// It has all the fields for both Locked and Unlocked HealthPlanFormDataType,
 // differentiated by the value of the `status` field.
 message HealthPlanFormData {
   optional string proto_name = 1;
@@ -32,8 +32,8 @@ message HealthPlanFormData {
 
 /// Submission related enums
 enum SubmissionType {
-  SUBMISSION_TYPE_UNSPECIFIED = 0; 
-  SUBMISSION_TYPE_CONTRACT_ONLY = 1; 
+  SUBMISSION_TYPE_UNSPECIFIED = 0;
+  SUBMISSION_TYPE_CONTRACT_ONLY = 1;
   SUBMISSION_TYPE_CONTRACT_AND_RATES = 3;
 }
 
@@ -53,8 +53,8 @@ message Date {
 }
 
 enum SubmissionStatus{
-  SUBMISSION_STATUS_UNSPECIFIED = 0; 
-  SUBMISSION_STATUS_DRAFT = 1; 
+  SUBMISSION_STATUS_UNSPECIFIED = 0;
+  SUBMISSION_STATUS_DRAFT = 1;
   SUBMISSION_STATUS_SUBMITTED = 2;
 }
 
@@ -86,13 +86,13 @@ message ContractInfo {
   optional ContractAmendmentInfo contract_amendment_info  = 50;
 
 
-  message ContractAmendmentInfo  { 
+  message ContractAmendmentInfo  {
     // Rates Refactor: CapitationRatesAmendedInfo is dead code. Please remove.
     message CapitationRatesAmendedInfo {
       optional CapitationRateAmendmentReason reason = 1;
       optional string other_reason = 2;
     }
-    
+
     message ModifiedProvisions {
       optional bool modified_benefits_provided = 1;
       optional bool modified_geo_area_served = 2;
@@ -112,7 +112,7 @@ message ContractInfo {
       optional bool modified_non_risk_payment_arrangements = 16;
       optional bool in_lieu_services_and_settings = 17;
     }
-    
+
     repeated AmendedItem amendable_items = 1;
     optional string other_amendable_item = 2;
     optional CapitationRatesAmendedInfo capitation_rates_amended_info = 3;
@@ -141,7 +141,7 @@ enum AmendedItem {
   AMENDED_ITEM_OTHER=14;
 }
 
-// Rates Refactor: CapitationRatesAmendmentReason is dead code. 
+// Rates Refactor: CapitationRatesAmendmentReason is dead code.
 enum CapitationRateAmendmentReason{
   CAPITATION_RATE_AMENDMENT_REASON_UNSPECIFIED = 0;
   CAPITATION_RATE_AMENDMENT_REASON_ANNUAL = 1;
@@ -175,7 +175,7 @@ enum ManagedCareEntity {
   MANAGED_CARE_ENTITY_UNSPECIFIED = 0;
   MANAGED_CARE_ENTITY_MCO = 1;
   MANAGED_CARE_ENTITY_PIHP = 2;
-  MANAGED_CARE_ENTITY_PAHP= 3; 
+  MANAGED_CARE_ENTITY_PAHP= 3;
   MANAGED_CARE_ENTITY_PCCM = 4;
 }
 
@@ -199,6 +199,7 @@ message RateInfo {
   repeated string rate_program_ids = 10;
   optional string rate_certification_name = 11;
   repeated SharedRateCertDisplay packages_with_shared_rate_certs = 12;
+  repeated Document supporting_documents = 13;
 
   optional RateAmendmentInfo rate_amendment_info = 50;
 
@@ -237,7 +238,7 @@ enum ActuarialFirmType {
   ACTUARIAL_FIRM_TYPE_OTHER = 7;
 }
 
-    
+
 /// Generic sub types
 enum DocumentCategory {
   DOCUMENT_CATEGORY_UNSPECIFIED = 0;
