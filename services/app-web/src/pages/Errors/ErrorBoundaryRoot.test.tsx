@@ -38,7 +38,7 @@ describe('Error boundary tests', () => {
             )
         ).toBeInTheDocument()
 
-        // Expect error to be record to otel with the correct error thrown.
+        // Expect error to be recorded to otel with the correct error thrown.
         // This verifies that the react-error-boundary component correctly passed in the thrown error it caught.
         expect(recordJSExceptionSpy).toHaveBeenCalledWith(
             'Crash in ErrorBoundaryRoot. Error message: Error: react-error-boundary caught the error'
