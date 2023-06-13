@@ -163,7 +163,7 @@ functions:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
 
-    migrate_rate_documents:
+  migrate_rate_documents:
     handler: src/handlers/migrate_rate_documents.main
     layers:
       - !Ref PrismaClientEngineLambdaLayer

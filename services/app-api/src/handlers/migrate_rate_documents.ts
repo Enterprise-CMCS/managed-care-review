@@ -7,6 +7,10 @@ import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormD
 import { isStoreError, StoreError } from '../postgres/storeError'
 import { Store } from '../postgres'
 
+/* We're changing where we store rate documents on the proto.  We're moving them from fromDataProto.documents
+to formDataProto.rateInfos[0].supportingDocuments.  This migration will move the documents from the old location
+to the new location, removing the documents from formDataProto.documents. */
+
 export const processRevisions = async (
     store: Store,
     revisions: HealthPlanRevisionTable[]
@@ -27,6 +31,7 @@ export const processRevisions = async (
                     (doc) => !ratesRelatedDocument.includes(doc)
                 )
             } else {
+                // now handle the submisson with two rates
                 const firstRateRelatedDocument = formData.documents.filter(
                     (doc) =>
                         doc.name ===
