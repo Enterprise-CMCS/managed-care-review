@@ -14019,9 +14019,9 @@
   integrity sha512-Abq9fBviLV93OiXMu+f6r0elxCzRwc0RC5f99cU892uBITL44pTvgvEqlRlPRi8EGcO1z7Cp8A4d0s/p3J/+Nw==
 
 "@types/node@^14.14.31":
-  version "14.18.48"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.18.48.tgz#ee5c7ac6e38fd2a9e6885f15c003464cf2da343c"
-  integrity sha512-iL0PIMwejpmuVHgfibHpfDwOdsbmB50wr21X71VnF5d7SsBF7WK+ZvP/SCcFm7Iwb9iiYSap9rlrdhToNAWdxg==
+  version "14.18.50"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.18.50.tgz#c23e357fc76bb61f0fcdaacd18ce1771b8fe6eb4"
+  integrity sha512-DdJP83r2Zp5x32la3jEzjIlB85+2gMPUHP1xFL2xFORzbJ94sNwh4b6ZBaF6EN/7BTII6mba3yakqfLEnt5eZg==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
@@ -28581,10 +28581,10 @@ react-element-to-jsx-string@^14.3.4:
     is-plain-object "5.0.0"
     react-is "17.0.2"
 
-react-error-boundary@^3.1.0:
-  version "3.1.4"
-  resolved "https://registry.yarnpkg.com/react-error-boundary/-/react-error-boundary-3.1.4.tgz#255db92b23197108757a888b01e5b729919abde0"
-  integrity sha512-uM9uPzZJTF6wRQORmSrvOIgt4lJ9MC1sNgEOj2XGsDTRE4kmpWxg7ENK9EWNKJRMAOY9z0MuF4yIfl6gp4sotA==
+react-error-boundary@^4.0.10:
+  version "4.0.10"
+  resolved "https://registry.yarnpkg.com/react-error-boundary/-/react-error-boundary-4.0.10.tgz#975cc298e93ab7760d1460b7ea5a7855621e355a"
+  integrity sha512-pvVKdi77j2OoPHo+p3rorgE43OjDWiqFkaqkJz8sJKK6uf/u8xtzuaVfj5qJ2JnDLIgF1De3zY5AJDijp+LVPA==
   dependencies:
     "@babel/runtime" "^7.12.5"
 
