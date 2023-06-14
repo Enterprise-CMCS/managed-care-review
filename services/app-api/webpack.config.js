@@ -19,24 +19,33 @@ const extensions = [
 
 module.exports = {
     entry: slsw.lib.entries,
-    externalsPresets: { node: true },
-    context: __dirname,
     mode: isLocal ? 'development' : 'production',
-    devtool: 'source-map',
-    performance: {
-        hints: false,
-    },
+    externalsPresets: { node: true },
+    /*
     externals: [
         nodeExternals({
-            allowlist: [/^@managed-care-review/],
+            modulesFromFile: {
+                fileName:
+                    './package.json' ,
+                includeInBundle: [
+                    'dependencies',
+                ],
+                excludeFromBundle: [
+                    /^aws-sdk/,
+                ],
+            },
         }),
-        nodeExternals({
-            modulesDir: path.resolve(__dirname, '../../node_modules'),
-        }),
+        { 'aws-sdk': 'commonjs aws-sdk' },
         'prisma',
         '@prisma/client',
-        'aws-sdk',
     ],
+    */
+    optimization: {
+        minimize: false,
+        moduleIds: 'named',
+    },
+    performance: { hints: false },
+    devtool: 'source-map',
     resolve: {
         symlinks: false,
         extensions: extensions,

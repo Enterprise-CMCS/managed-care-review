@@ -37,7 +37,8 @@ custom:
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
-    includeModules: false
+    includeModules:
+      nodeModulesRelativeDir: '../../'
     packagerOptions:
       lockFile: '../../yarn.lock'
       noInstall: true
