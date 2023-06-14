@@ -428,11 +428,7 @@ export const FileUpload = ({
                 {label}
             </Label>
 
-            {error && (
-                <PoliteErrorMessage id={`${id}-error`}>
-                    {error}
-                </PoliteErrorMessage>
-            )}
+            <PoliteErrorMessage id={`${id}-error`}>{error}</PoliteErrorMessage>
             {hint && (
                 <span
                     id={`${id}-hint`}

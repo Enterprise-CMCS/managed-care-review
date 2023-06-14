@@ -50,9 +50,7 @@ export const FieldTextarea = ({
             <Label htmlFor={id} error={showError}>
                 {label}
             </Label>
-            {showError && meta.error && (
-                <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>
-            )}
+            {showError && <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>}
             {hint && (
                 <div
                     role="note"

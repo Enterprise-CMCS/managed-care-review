@@ -55,11 +55,9 @@ export const FieldYesNo = ({
             id={id}
             legend={label}
             className={classes}
-            data-testid='yes-no-radio-fieldset'
+            data-testid="yes-no-radio-fieldset"
         >
-            {showError && meta.error && (
-                <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>
-            )}
+            {showError && <PoliteErrorMessage>{meta.error}</PoliteErrorMessage>}
             {hint && (
                 <div
                     role="note"
