@@ -16,10 +16,10 @@
         "test": "services/cypress"
     },
     "scripts": {
-        "clean": "lerna clean",
+        "clean": "npx lerna clean",
         "format": "yarn prettier --write",
         "prettier": "prettier --ignore-path .gitignore \"**/*.+(ts|tsx|json)\"",
-        "test:coverage": "lerna run test:coverage --scope=app-web --scope=app-api --scope=cypress",
+        "test:coverage": "npx lerna run test:coverage --scope=app-web --scope=app-api --scope=cypress",
         "pretest:coverage": "rm -rf .nyc_output",
         "posttest:coverage": "yarn run report:combined",
         "mkdir:reports": "mkdir -p reports",

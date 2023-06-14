@@ -59,8 +59,7 @@ jobs:
 
       - name: build scripts
         shell: bash
-        run: |
-          lerna run build:ci-scripts
+        run: npx lerna run build:ci-scripts
 
       - name: run get_changed_services
         id: changed-services-action
@@ -97,10 +96,10 @@ jobs:
         uses: ./.github/actions/setup_env
 
       - name: Generate GraphQL
-        run: lerna run gqlgen
+        run: npx lerna run gqlgen
 
       - name: Generate Protos
-        run: lerna run generate --scope=app-proto
+        run: npx lerna run generate --scope=@managed-care-review/app-proto
 
       - name: Web Unit Tests
         env:
@@ -163,10 +162,10 @@ jobs:
         uses: ./.github/actions/setup_env
 
       - name: Generate GraphQL
-        run: lerna run gqlgen
+        run: npx lerna run gqlgen
 
       - name: Generate Protos
-        run: lerna run generate --scope=app-proto
+        run: npx lerna run generate
 
       - name: Generate Prisma
         env:
@@ -175,7 +174,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-api
         run: |
-          lerna run generate --scope=app-api
+          npx lerna run generate --scope=app-api
           npx prisma migrate reset --force
 
       - name: API Unit Tests
@@ -225,12 +224,14 @@ jobs:
         run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn install --prefer-offline --frozen-lockfile --cache-folder ${{ steps.yarn-cache-dir-path.outputs.dir }}
 
       - name: Generate protos
-        run: lerna run generate --scope=app-proto && lerna run build --scope=app-proto
+        run: npx lerna run generate && npx lerna run build --scope=app-proto
 
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client
         working-directory: services/app-api
-        run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-1.0.x yarn prisma generate
+        env:
+          PRISMA_CLI_BINARY_TARGETS: rhel-openssl-1.0.x
+        run: yarn prisma generate
 
       - name: Prepare "@prisma/client" lambda layer
         working-directory: services/app-api
@@ -248,7 +249,7 @@ jobs:
 
   deploy-infra:
     needs: [begin-deployment]
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-infra-to-env.yml@mt-fix-lerna-7
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name}}
@@ -274,7 +275,7 @@ jobs:
       needs.api-unit-tests.result == 'success' &&
       needs.build-prisma-client-lambda-layer.result == 'success' &&
       needs.begin-deployment.result == 'success'
-    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@main
+    uses: Enterprise-CMCS/managed-care-review/.github/workflows/deploy-app-to-env.yml@mt-fix-lerna-7
     with:
       environment: dev
       stage_name: ${{ needs.begin-deployment.outputs.stage-name }}
