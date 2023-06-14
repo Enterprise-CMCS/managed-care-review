@@ -38,6 +38,8 @@ custom:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
     includeModules:
+      forceExclude:
+        - '@prisma/client'
       nodeModulesRelativeDir: '../../'
     packagerOptions:
       lockFile: '../../yarn.lock'
