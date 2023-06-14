@@ -1,9 +1,9 @@
-/* 
-    Mock different health plan form data that match frontend types. 
+/*
+    Mock different health plan form data that match frontend types.
     These helper functions allow us to compose together different proto form data to serialize and then attach in our health plan package GQL queries/ mutations
     See HealthPlanPackageGQLMock` file for usage
 
-    Future refactors - it seems like we are starting to also add these types of mocks in common-code/healthPlanFormDataMocks. 
+    Future refactors - it seems like we are starting to also add these types of mocks in common-code/healthPlanFormDataMocks.
     We may be able to move these mocks in that file as well.
 */
 
@@ -97,6 +97,7 @@ function mockBaseContract(
                 rateType: 'NEW',
                 rateCapitationType: 'RATE_CELL',
                 rateDocuments: [],
+                supportingDocuments: [],
                 rateDateStart: new Date(),
                 rateDateEnd: new Date(),
                 rateDateCertified: new Date(),
@@ -167,6 +168,7 @@ function mockContractAndRatesDraft(
                 rateType: 'AMENDMENT',
                 rateCapitationType: 'RATE_CELL',
                 rateDocuments: [],
+                supportingDocuments: [],
                 rateDateStart: new Date(),
                 rateDateEnd: new Date(),
                 rateDateCertified: new Date(),
@@ -269,6 +271,7 @@ function mockStateSubmission(): LockedHealthPlanFormDataType {
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                supportingDocuments: [],
                 rateDateStart: new Date(),
                 rateDateEnd: new Date(),
                 rateDateCertified: new Date(),
@@ -364,6 +367,7 @@ function mockStateSubmissionContractAmendment(): LockedHealthPlanFormDataType {
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                supportingDocuments: [],
                 rateDateStart: new Date(),
                 rateDateEnd: new Date(),
                 rateDateCertified: new Date(),

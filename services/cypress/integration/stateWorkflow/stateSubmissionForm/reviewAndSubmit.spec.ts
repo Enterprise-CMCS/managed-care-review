@@ -3,7 +3,7 @@ describe('review and submit', () => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
     })
-    it('can navigate to and from review and submit page', () => {
+    it(' navigate back and save as draft from review and submit page', () => {
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
@@ -25,7 +25,7 @@ describe('review and submit', () => {
             cy.findByText('Download all contract documents').should('not.exist')
 
             // Navigate to dashboard page by clicking save as draft
-            cy.navigateFormByButtonClick('SAVE_DRAFT')
+            cy.navigateFormByButtonClick('SAVE_DRAFT', false)
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
         })
     })
@@ -41,7 +41,7 @@ describe('review and submit', () => {
             const draftSubmissionId = pathnameArray[2]
             cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/review-and-submit`)
 
-            cy.submitStateSubmissionForm(false)
+            cy.submitStateSubmissionForm({success: false})
             cy.findByRole('heading', { level: 4, name: /Submission error/ })
         })
     })

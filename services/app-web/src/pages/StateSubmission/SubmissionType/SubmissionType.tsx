@@ -284,7 +284,7 @@ export const SubmissionType = ({
             isSelectingChipOnly &&
             values.submissionType === 'CONTRACT_AND_RATES'
         ) {
-            setFieldValue('submissionType', 'CONTRACT_ONLY', true)
+            void setFieldValue('submissionType', 'CONTRACT_ONLY', true)
         }
     }
 

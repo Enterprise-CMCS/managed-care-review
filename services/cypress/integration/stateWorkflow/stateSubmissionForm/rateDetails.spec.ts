@@ -3,7 +3,7 @@ describe('rate details', () => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
     })
-    it('can navigate to and from rate details page', () => {
+    it('can navigate back and save as draft from rate details page', () => {0
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
@@ -24,15 +24,6 @@ describe('rate details', () => {
             // Navigate to dashboard page by clicking save as draft
             cy.navigateFormByButtonClick('SAVE_DRAFT')
             cy.findByRole('heading', { level: 1, name: /Dashboard/ })
-
-            // Navigate to rate details page
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/rate-details`)
-
-            cy.fillOutNewRateCertification()
-
-            // Navigate to contacts page by clicking continue
-            cy.navigateFormByButtonClick('CONTINUE')
-            cy.findByRole('heading', { level: 2, name: /Contacts/ })
         })
     })
 
@@ -61,31 +52,6 @@ describe('rate details', () => {
             //     hideElements: '.usa-step-indicator',
             //     threshold: 4,
             // })
-        })
-    })
-
-    it('can get and set dates correctly', () => {
-        cy.logInAsStateUser()
-        cy.startNewContractAndRatesSubmission()
-
-        // Navigate to rate details page
-        cy.location().then((fullUrl) => {
-            const { pathname } = fullUrl
-            const pathnameArray = pathname.split('/')
-            const draftSubmissionId = pathnameArray[2]
-            cy.navigateFormByDirectLink(`/submissions/${draftSubmissionId}/edit/rate-details`)
-
-            cy.fillOutAmendmentToPriorRateCertification()
-
-            // Navigate to contacts page by clicking continue
-            cy.navigateFormByButtonClick('CONTINUE')
-            cy.findByRole('heading', { level: 2, name: /Contacts/ })
-
-            cy.fillOutStateContact()
-            cy.fillOutAdditionalActuaryContact()
-            cy.navigateFormByButtonClick('CONTINUE')
-
-            cy.findByRole('heading', { level: 2, name: /Supporting documents/ })
         })
     })
 

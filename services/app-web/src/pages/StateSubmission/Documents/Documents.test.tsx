@@ -9,6 +9,7 @@ import {
     TEST_VIDEO_FILE,
     TEST_PNG_FILE,
     dragAndDrop,
+    ldUseClientSpy,
 } from '../../../testHelpers/jestHelpers'
 import {
     fetchCurrentUserMock,
@@ -1106,6 +1107,173 @@ describe('Documents', () => {
                 within(validAndHasCategoriesRow).getAllByRole('checkbox')
             ).toHaveLength(2)
             expect(within(duplicateNameRow).queryByRole('checkbox')).toBeNull()
+        })
+    })
+
+    describe('SUPPORTING_DOCS_BY_RATE feature flag on', () => {
+        it('checkboxes not present on contract and rates submission when SUPPORTING_DOCS_BY_RATE is on', async () => {
+            ldUseClientSpy({ 'supporting-docs-by-rate': true })
+            const mockDraftSubmission = {
+                ...mockDraft(),
+                submissionType: 'CONTRACT_AND_RATES' as const,
+                documents: [
+                    {
+                        s3URL: 's3://bucketname/key/supporting-documents',
+                        name: 'supporting documents',
+                        sha256: undefined,
+                        documentCategories: ['RATES_RELATED' as const],
+                    },
+                ],
+            }
+            const mockUpdateDraftFn = jest.fn()
+            renderWithProviders(
+                <Documents
+                    draftSubmission={mockDraftSubmission}
+                    updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText('supporting documents')
+                ).toBeInTheDocument()
+            })
+
+            expect(await screen.queryByText('Contract-supporting')).toBeNull()
+            expect(await screen.queryByText('Rate-supporting')).toBeNull()
+
+            jest.clearAllMocks()
+        })
+
+        it('documents are always categorized as CONTRACT_RELATED when SUPPORTING_DOCS_BY_RATE is on', async () => {
+            ldUseClientSpy({ 'supporting-docs-by-rate': true })
+            const mockUpdateDraftFn = jest.fn()
+
+            renderWithProviders(
+                <Documents
+                    draftSubmission={{
+                        ...mockDraft(),
+                        submissionType: 'CONTRACT_AND_RATES' as const,
+                    }}
+                    updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            const input = screen.getByLabelText(
+                'Upload any additional supporting documents'
+            )
+
+            expect(input).toBeInTheDocument()
+
+            await userEvent.upload(input, [TEST_DOC_FILE])
+
+            await waitFor(() => {
+                expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
+                expect(continueButton).toBeInTheDocument()
+                continueButton.click()
+                expect(mockUpdateDraftFn).toHaveBeenCalled()
+            })
+
+            const updatedDraft = mockUpdateDraftFn.mock.calls[0][0]
+
+            expect(updatedDraft.documents).toHaveLength(1)
+            expect(updatedDraft.documents).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        name: 'testFile.doc',
+                        s3URL: expect.anything(),
+                        sha256: expect.anything(),
+                        documentCategories: ['CONTRACT_RELATED'],
+                    }),
+                ])
+            )
+
+            jest.clearAllMocks()
+        })
+
+        it('existing documents categories are not overwritten when SUPPORTING_DOCS_BY_RATE is on', async () => {
+            ldUseClientSpy({ 'supporting-docs-by-rate': true })
+            const mockUpdateDraftFn = jest.fn()
+
+            renderWithProviders(
+                <Documents
+                    draftSubmission={{
+                        ...mockDraft(),
+                        submissionType: 'CONTRACT_AND_RATES' as const,
+                        documents: [
+                            {
+                                s3URL: 's3://bucketname/key/supporting-documents',
+                                name: 'supporting documents',
+                                sha256: undefined,
+                                documentCategories: ['RATES_RELATED' as const],
+                            },
+                        ],
+                    }}
+                    updateDraft={mockUpdateDraftFn}
+                    previousDocuments={[]}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            const input = screen.getByLabelText(
+                'Upload any additional supporting documents'
+            )
+            expect(input).toBeInTheDocument()
+            await userEvent.upload(input, [TEST_DOC_FILE])
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText('supporting documents')
+                ).toBeInTheDocument()
+                expect(screen.getByText(TEST_DOC_FILE.name)).toBeInTheDocument()
+                expect(continueButton).toBeInTheDocument()
+                continueButton.click()
+                expect(mockUpdateDraftFn).toHaveBeenCalled()
+            })
+
+            const updatedDraft = mockUpdateDraftFn.mock.calls[0][0]
+
+            expect(updatedDraft.documents).toHaveLength(2)
+            expect(updatedDraft.documents).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        name: 'supporting documents',
+                        s3URL: expect.anything(),
+                        sha256: undefined,
+                        documentCategories: ['RATES_RELATED'],
+                    }),
+                    expect.objectContaining({
+                        name: 'testFile.doc',
+                        s3URL: expect.anything(),
+                        sha256: expect.anything(),
+                        documentCategories: ['CONTRACT_RELATED'],
+                    }),
+                ])
+            )
+
+            jest.clearAllMocks()
         })
     })
 })

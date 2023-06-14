@@ -62,6 +62,7 @@ describe('with rates', () => {
                             documentCategories: ['RATES' as const],
                         },
                     ],
+                    supportingDocuments: [],
                     rateDateCertified: new Date('01/02/2021'),
                     rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                     rateCertificationName:
@@ -161,6 +162,7 @@ describe('with rates', () => {
                             documentCategories: ['RATES' as const],
                         },
                     ],
+                    supportingDocuments: [],
                     rateDateCertified: new Date('01/02/2021'),
                     rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                     rateCertificationName:
@@ -188,6 +190,7 @@ describe('with rates', () => {
                             documentCategories: ['RATES' as const],
                         },
                     ],
+                    supportingDocuments: [],
                     rateDateCertified: new Date('02/02/2022'),
                     rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                     rateCertificationName:
@@ -215,6 +218,7 @@ describe('with rates', () => {
                             documentCategories: ['RATES' as const],
                         },
                     ],
+                    supportingDocuments: [],
                     rateDateCertified: new Date('01/02/2021'),
                     rateProgramIDs: [
                         'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
@@ -415,6 +419,7 @@ describe('with rates', () => {
                             documentCategories: ['RATES' as const],
                         },
                     ],
+                    supportingDocuments: [],
                     rateDateCertified: new Date('01/02/2021'),
                     rateProgramIDs: ['e0819153-5894-4153-937e-aad00ab01a8f'],
                     rateAmendmentInfo: undefined,
@@ -469,6 +474,7 @@ describe('with rates', () => {
                             documentCategories: ['RATES' as const],
                         },
                     ],
+                    supportingDocuments: [],
                     rateDateCertified: new Date('01/02/2021'),
                     rateProgramIDs: ['e0819153-5894-4153-937e-aad00ab01a8f'],
                     rateAmendmentInfo: undefined,
@@ -706,6 +712,7 @@ test('renders overall email as expected', async () => {
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                supportingDocuments: [],
                 rateDateCertified: new Date('01/02/2021'),
                 rateProgramIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
                 rateCertificationName:
@@ -733,6 +740,7 @@ test('renders overall email as expected', async () => {
                         documentCategories: ['RATES' as const],
                     },
                 ],
+                supportingDocuments: [],
                 rateDateCertified: new Date('02/02/2022'),
                 rateProgramIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
                 rateCertificationName:

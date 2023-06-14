@@ -72,6 +72,7 @@ describe('templateHelpers', () => {
                                 documentCategories: ['RATES' as const],
                             },
                         ],
+                        supportingDocuments: [],
                         rateDateStart: new Date(),
                         rateDateEnd: new Date(),
                         rateDateCertified: new Date(),

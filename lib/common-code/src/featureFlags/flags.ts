@@ -63,6 +63,13 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
+     * Enables supporting documents to be associated with a specific rate certification on the Rate Details page
+     */
+    SUPPORTING_DOCS_BY_RATE: {
+        flag: 'supporting-docs-by-rate',
+        defaultValue: false,
+    },
+    /**
      * Used in testing to simulate errors in fetching flag value.
      * This flag does not exist in LaunchDarkly dashboard so fetching this will return the defaultValue.
      */
@@ -83,7 +90,7 @@ const featureFlagKeys = Object.keys(featureFlags).map(
  * Feature flag constants used in Launch Darkly. Lowercased and kebab-cased
  */
 type FeatureFlagLDConstant =
-    typeof featureFlags[keyof typeof featureFlags]['flag']
+    (typeof featureFlags)[keyof typeof featureFlags]['flag']
 
 type FlagKey = keyof typeof featureFlags
 type FlagValue = boolean | string | number | object | [] // this is  an approximate mapping to available LD flag value types

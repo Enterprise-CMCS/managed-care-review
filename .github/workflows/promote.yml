@@ -85,7 +85,7 @@ jobs:
         uses: ./.github/actions/setup_env
 
       - name: Generate protos
-        run: lerna run generate && lerna run build --scope=@managed-care-review/app-proto
+        run: npx lerna run generate && lerna run build --scope=@managed-care-review/app-proto
 
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client

@@ -206,6 +206,7 @@ describe('submitHealthPlanPackage', () => {
                             documentCategories: ['RATES' as const],
                         },
                     ],
+                    supportingDocuments: [],
                     rateProgramIDs: ['3b8d8fa1-1fa6-4504-9c5b-ef522877fe1e'],
                     actuaryContacts: [
                         {
@@ -800,6 +801,7 @@ describe('submitHealthPlanPackage', () => {
                     rateDateEnd: new Date(Date.UTC(2026, 4, 30)),
                     rateDateCertified: undefined,
                     rateDocuments: [],
+                    supportingDocuments: [],
                     actuaryContacts: [],
                     packagesWithSharedRateCerts: [],
                 },

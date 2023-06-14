@@ -59,8 +59,7 @@ jobs:
 
       - name: build scripts
         shell: bash
-        run: |
-          lerna run build:ci-scripts
+        run: npx lerna run build:ci-scripts
 
       - name: run get_changed_services
         id: changed-services-action
@@ -97,10 +96,10 @@ jobs:
         uses: ./.github/actions/setup_env
 
       - name: Generate GraphQL
-        run: lerna run gqlgen
+        run: npx lerna run gqlgen
 
       - name: Generate Protos
-        run: lerna run generate --scope=@managed-care-review/app-proto
+        run: npx lerna run generate --scope=@managed-care-review/app-proto
 
       - name: Web Unit Tests
         env:
@@ -163,10 +162,10 @@ jobs:
         uses: ./.github/actions/setup_env
 
       - name: Generate GraphQL
-        run: lerna run gqlgen
+        run: npx lerna run gqlgen
 
       - name: Generate Protos
-        run: lerna run generate
+        run: npx lerna run generate
 
       - name: Generate Prisma
         env:
@@ -175,7 +174,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-api
         run: |
-          lerna run generate --scope=app-api
+          npx lerna run generate --scope=app-api
           npx prisma migrate reset --force
 
       - name: API Unit Tests
@@ -214,7 +213,7 @@ jobs:
         uses: ./.github/actions/setup_env
 
       - name: Generate protos
-        run: lerna run generate && lerna run build --scope=@managed-care-review/app-proto
+        run: npx lerna run generate && lerna run build --scope=@managed-care-review/app-proto
 
       # Generate Prisma Client and binary that can run in a lambda environment
       - name: Prepare prisma client

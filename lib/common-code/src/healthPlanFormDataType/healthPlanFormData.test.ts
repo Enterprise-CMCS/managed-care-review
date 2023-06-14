@@ -206,9 +206,11 @@ describe('submission type assertions', () => {
                 rateInfos: [
                     {
                         rateDocuments: [],
+                        supportingDocuments: [],
                     },
                 ],
                 rateDocuments: [],
+                supportingDocuments: [],
             },
             false,
         ],
@@ -484,6 +486,7 @@ describe('submission type assertions', () => {
                 rateInfos: [
                     {
                         rateDocuments: [],
+                        supportingDocuments: [],
                     },
                 ],
             },
@@ -564,6 +567,7 @@ describe('submission type assertions', () => {
                             effectiveDateEnd: new Date('2022/09/21'),
                         },
                         rateDocuments: [],
+                        supportingDocuments: [],
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
@@ -586,6 +590,7 @@ describe('submission type assertions', () => {
                         rateDateEnd: new Date('2022/03/29'),
                         rateDateCertified: new Date('2021/04/22'),
                         rateDocuments: [],
+                        supportingDocuments: [],
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
@@ -615,6 +620,7 @@ describe('submission type assertions', () => {
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
                         rateDocuments: [],
+                        supportingDocuments: [],
                         actuaryContacts: [],
                         packagesWithSharedRateCerts: [],
                     },
@@ -641,6 +647,7 @@ describe('submission type assertions', () => {
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
                         rateDocuments: [],
+                        supportingDocuments: [],
                         actuaryContacts: [],
                         packagesWithSharedRateCerts: [],
                     },
@@ -660,6 +667,7 @@ describe('submission type assertions', () => {
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
                         rateDocuments: [],
+                        supportingDocuments: [],
                         actuaryContacts: [],
                         packagesWithSharedRateCerts: [],
                     },
@@ -685,6 +693,7 @@ describe('submission type assertions', () => {
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
                         rateDocuments: [],
+                        supportingDocuments: [],
                         actuaryContacts: [],
                         packagesWithSharedRateCerts: [],
                     },
@@ -705,6 +714,7 @@ describe('submission type assertions', () => {
                             effectiveDateStart: new Date('2022/05/21'),
                         },
                         rateDocuments: [],
+                        supportingDocuments: [],
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
@@ -730,6 +740,7 @@ describe('submission type assertions', () => {
                             effectiveDateEnd: new Date('2022/09/21'),
                         },
                         rateDocuments: [],
+                        supportingDocuments: [],
                         rateProgramIDs: [
                             'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
                         ],
@@ -759,6 +770,7 @@ describe('submission type assertions', () => {
                             effectiveDateEnd: new Date('2022/09/21'),
                         },
                         rateDocuments: [],
+                        supportingDocuments: [],
                         rateProgramIDs: [],
                         actuaryContacts: [],
                         packagesWithSharedRateCerts: [],

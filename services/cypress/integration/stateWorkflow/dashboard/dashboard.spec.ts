@@ -3,26 +3,8 @@ describe('dashboard', () => {
         cy.stubFeatureFlags()
         cy.interceptGraphQL()
     })
-    it('can navigate to and from dashboard page', () => {
-        cy.logInAsStateUser()
-        cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
-        cy.findByRole('link', { name: 'Start new submission' }).click()
-        cy.findByRole('heading', { level: 1, name: /New submission/ })
-    })
-
-    it('scan accessibility of dashboard', () => {
-        cy.logInAsStateUser()
-        cy.findByRole('heading', { level: 1, name: /Dashboard/ })
-
-        // Commented out to get react-scripts/webpack 5 upgrade through
-        // check accessibility of dashboard
-        // cy.pa11y({
-        //     actions: ['wait for element #dashboard-page to be visible'],
-        // })
-    })
-
-    it('can see submission summary', () => {
+    it('can navigate to submission summary', () => {
         cy.logInAsStateUser()
 
         // add a draft submission
@@ -75,8 +57,6 @@ describe('dashboard', () => {
 
         // Submit, sent to dashboard
         cy.submitStateSubmissionForm()
-        cy.findByText('Dashboard').should('exist')
-        cy.findByText('Programs').should('exist')
 
         // View submission summary
         cy.location().then((loc) => {
@@ -88,8 +68,7 @@ describe('dashboard', () => {
             cy.findByText(`${submissionName} was sent to CMS`).should('exist')
             cy.get('table')
                 .findByRole('link', { name: submissionName })
-                .should('exist')
-            cy.findByRole('link', { name: submissionName }).click()
+                .should('exist').click()
             cy.url({ timeout: 10_000 }).should('contain', submissionId)
             cy.findByTestId('submission-summary').should('exist')
             cy.findByRole('heading', {

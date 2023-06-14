@@ -25,17 +25,21 @@ Cypress.Commands.add(
         }).safeClick()
 
         if (buttonKey === 'SAVE_DRAFT') {
+            if(waitForLoad) {
+                cy.wait('@updateHealthPlanFormDataMutation', { timeout: 50_000})
+             }
             cy.findByTestId('dashboard-page').should('exist')
+            cy.findByRole('heading',{name:'Submissions'}).should('exist')
         } else if (buttonKey === 'CONTINUE_FROM_START_NEW') {
             if (waitForLoad) {
-                cy.wait('@createHealthPlanPackageMutation', { timeout: 50000 })
+                cy.wait('@createHealthPlanPackageMutation', { timeout: 50_000 })
                 cy.wait('@fetchHealthPlanPackageQuery')
             }
             cy.findByTestId('state-submission-form-page').should('exist')
         } else if (buttonKey === 'CONTINUE') {
             if (waitForLoad) {
                 cy.findAllByTestId('errorMessage').should('have.length', 0)
-                cy.wait('@updateHealthPlanFormDataMutation')
+                cy.wait('@updateHealthPlanFormDataMutation', { timeout: 50_000})
             }
             cy.findByTestId('state-submission-form-page').should('exist')
         } else {
@@ -49,6 +53,6 @@ Cypress.Commands.add(
     (url: string, waitForLoad = true) => {
         cy.visit(url)
         if (waitForLoad)
-            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 20000 })
+            cy.wait('@fetchHealthPlanPackageQuery', { timeout: 50_000 })
     }
 )

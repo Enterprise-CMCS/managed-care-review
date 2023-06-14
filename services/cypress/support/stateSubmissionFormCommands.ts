@@ -14,7 +14,7 @@ Cypress.Commands.add('startNewContractOnlySubmissionWithBaseContract', () => {
 Cypress.Commands.add('startNewContractOnlySubmissionWithAmendment', () => {
     // Must be on '/submissions/new'
     cy.findByTestId('dashboard-page').should('exist')
-    cy.findByRole('link', { name: 'Start new submission' }).click()
+    cy.findByRole('link', { name: 'Start new submission' , timeout: 5000}).click()
     cy.findByRole('heading', { level: 1, name: /New submission/ })
 
     cy.fillOutContractActionOnlyWithAmendment()
@@ -26,7 +26,7 @@ Cypress.Commands.add('startNewContractOnlySubmissionWithAmendment', () => {
 Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
     // Must be on '/submissions/new'
     cy.findByTestId('dashboard-page').should('exist')
-    cy.findByRole('link', { name: 'Start new submission' }).click()
+    cy.findByRole('link', { name: 'Start new submission', timeout: 5000 }).click()
     cy.findByRole('heading', { level: 1, name: /New submission/ })
 
     cy.fillOutContractActionAndRateCertification()
@@ -41,15 +41,17 @@ Cypress.Commands.add('fillOutContractActionOnlyWithBaseContract', () => {
         if (store['chip-only-form']) {
             cy.get('label[for="medicaid"]').click()
         }
+    })
 
-        cy.findByRole('combobox', {
-            name: 'Programs this contract action covers (required)',
-        }).click({
-            force: true,
-        })
-        cy.findByText('PMAP').click()
-        cy.findByText('Contract action only').click()
-        cy.findByText('Base contract').click()
+    cy.findByRole('combobox', {
+        name: 'Programs this contract action covers (required)',
+        timeout: 2_000
+    }).click({
+        force: true,
+    })
+    cy.findByText('PMAP').click()
+    cy.findByText('Contract action only').click()
+    cy.findByText('Base contract').click()
 
         //rate-cert-assurance
         cy.get('label[for="riskBasedContractNo"]').click()
@@ -57,7 +59,6 @@ Cypress.Commands.add('fillOutContractActionOnlyWithBaseContract', () => {
         cy.findByRole('textbox', { name: 'Submission description' }).type(
             'description of contract only submission'
         )
-    })
 })
 
 Cypress.Commands.add('fillOutContractActionOnlyWithAmendment', () => {
@@ -66,13 +67,15 @@ Cypress.Commands.add('fillOutContractActionOnlyWithAmendment', () => {
         if (store['chip-only-form']) {
             cy.get('label[for="medicaid"]').click()
         }
+    })
+    cy.findByRole('combobox', {
+        name: 'Programs this contract action covers (required)', timeout: 2_000
+    }).click({
+        force: true,
+    })
+    cy.findByText('PMAP').click()
+    cy.findByText('Contract action only').click()
 
-        cy.findByRole('combobox', {
-            name: 'Programs this contract action covers (required)',
-        }).click({
-            force: true,
-        })
-        cy.findByText('PMAP').click()
         cy.findByText('Contract action only').click()
 
         //rate-cert-assurance
@@ -83,7 +86,6 @@ Cypress.Commands.add('fillOutContractActionOnlyWithAmendment', () => {
             'description of contract only submission'
         )
     })
-})
 
 Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
     // Must be on '/submissions/new'
@@ -91,14 +93,14 @@ Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
         if (store['chip-only-form']) {
             cy.get('label[for="medicaid"]').click()
         }
-
-        cy.findByRole('combobox', {
-            name: 'Programs this contract action covers (required)',
-        }).click({
-            force: true,
-        })
-        cy.findByText('PMAP').click()
-        cy.findByText('Contract action and rate certification').click()
+    })
+    cy.findByRole('combobox', {
+        name: 'Programs this contract action covers (required)', timeout: 2_000
+    }).click({
+        force: true,
+    })
+    cy.findByText('PMAP').click()
+    cy.findByText('Contract action and rate certification').click()
 
         //rate-cert-assurance
         cy.get('label[for="riskBasedContractNo"]').click()
@@ -108,13 +110,10 @@ Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
             'description of contract and rates submission'
         )
     })
-})
-
 Cypress.Commands.add('fillOutBaseContractDetails', () => {
     // Must be on '/submissions/:id/edit/contract-details'
     cy.findByText('Fully executed').click()
-    cy.wait(2000)
-    cy.findAllByLabelText('Start date')
+    cy.findAllByLabelText('Start date', {timeout: 2000})
         .parents()
         .findByTestId('date-picker-external-input')
         .type('04/01/2024')
@@ -189,8 +188,8 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
 Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     // Must be on '/submissions/:id/edit/contract-details'
     cy.findByText('Unexecuted by some or all parties').click()
-    cy.wait(2000)
-    cy.findAllByLabelText('Start date')
+
+    cy.findAllByLabelText('Start date', {timeout: 2000})
         .parents()
         .findByTestId('date-picker-external-input')
         .type('04/01/2024')
@@ -333,8 +332,8 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     cy.findByText(
         'Certification of capitation rates specific to each rate cell'
     ).click()
-    cy.wait(2000)
-    cy.findAllByLabelText('Start date')
+
+    cy.findAllByLabelText('Start date', {timeout: 2000})
         .parents()
         .findByTestId('date-picker-external-input')
         .type('02/29/2024')
@@ -381,15 +380,13 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
         'Certification of capitation rates specific to each rate cell'
     ).click()
 
-    cy.wait(2000)
-
-    /* 
+    /*
     There are currently multiple date range pickers on the page with the same label names (start date, end date) and different headings
     Preferred approach would be targeting by via findBy* or a custom data-cyid attribute
-    However, surfacing custom attributes on the nested inputs in third party component DateRangePicker not possible in current react-uswds version 
+    However, surfacing custom attributes on the nested inputs in third party component DateRangePicker not possible in current react-uswds version
     For now using targeting by html id (anti-pattern)
 */
-    cy.get(`[id="rateInfos.${id}.rateDateStart"]`).type('02/01/2023')
+    cy.get(`[id="rateInfos.${id}.rateDateStart"]`, {timeout: 2000}).type('02/01/2023')
     cy.get(`[id="rateInfos.${id}.rateDateEnd"]`).type('03/01/2025')
     cy.get(`[id="rateInfos.${id}.effectiveDateStart"]`).type('03/01/2024')
     cy.get(`[id="rateInfos.${id}.effectiveDateEnd"]`).type('03/01/2025')
@@ -472,22 +469,22 @@ Cypress.Commands.add('fillOutSupportingDocuments', () => {
     // twice because there could be validation errors with checkbox
     cy.verifyDocumentsHaveNoErrors()
 
-    cy.findAllByTestId('upload-finished-indicator', { timeout: 120000 }).should(
-        'have.have.length',
-        2
-    )
+    cy.waitForDocumentsToLoad({tableView: true})
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
-Cypress.Commands.add('waitForDocumentsToLoad', () => {
-    const authMode = Cypress.env('AUTH_MODE')
-    if (authMode !== 'LOCAL') {
-        // Must wait for scanning to complete in AWS environments
-        cy.wait(20000)
+// for fileupload with the table view and checkboxes- tableView can be assigned to a number that representes how many items in the list should be preses
+Cypress.Commands.add('waitForDocumentsToLoad', ({ tableView } = {tableView: false}) => {
+    if (tableView) {
+        cy.findAllByTestId('file-input-loading-image', {
+            timeout: 150_000,
+        }).should('not.exist')
+    } else {
+        // list view is the default behavior
+        cy.findAllByTestId('file-input-preview-image', {
+            timeout: 150_000,
+        }).should('not.have.class', 'is-loading')
     }
-    cy.findAllByTestId('file-input-preview-image', {
-        timeout: 40000,
-    }).should('not.have.class', 'is-loading')
 })
 
 Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
@@ -499,7 +496,7 @@ Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
 
 Cypress.Commands.add(
     'submitStateSubmissionForm',
-    (_success = true, resubmission = false) => {
+    ({success, resubmission}=  {success: true, resubmission: false}) => {
         cy.findByRole('heading', { level: 2, name: /Review and submit/ })
         cy.findByRole('button', {
             name: 'Submit',
@@ -518,6 +515,11 @@ Cypress.Commands.add(
                     cy.findByTestId('submit-modal-submit').click()
                 }
             })
-        cy.wait('@submitHealthPlanPackageMutation', { timeout: 50000 })
+        cy.wait('@submitHealthPlanPackageMutation', { timeout: 50_000 })
+        if (success) {
+            cy.findByTestId('dashboard-page').should('exist')
+            cy.findByRole('heading',{name:'Submissions'}).should('exist')
+        }
+
     }
 )
