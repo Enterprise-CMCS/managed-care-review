@@ -14019,9 +14019,9 @@
   integrity sha512-Abq9fBviLV93OiXMu+f6r0elxCzRwc0RC5f99cU892uBITL44pTvgvEqlRlPRi8EGcO1z7Cp8A4d0s/p3J/+Nw==
 
 "@types/node@^14.14.31":
-  version "14.18.48"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.18.48.tgz#ee5c7ac6e38fd2a9e6885f15c003464cf2da343c"
-  integrity sha512-iL0PIMwejpmuVHgfibHpfDwOdsbmB50wr21X71VnF5d7SsBF7WK+ZvP/SCcFm7Iwb9iiYSap9rlrdhToNAWdxg==
+  version "14.18.51"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.18.51.tgz#cb90935b89c641201c3d07a595c3e22d1cfaa417"
+  integrity sha512-P9bsdGFPpVtofEKlhWMVS2qqx1A/rt9QBfihWlklfHHpUpjtYse5AzFz6j4DWrARLYh6gRnw9+5+DJcrq3KvBA==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
@@ -20736,9 +20736,9 @@ formidable@^2.0.1:
     qs "6.9.3"
 
 formik@^2.2.9:
-  version "2.2.9"
-  resolved "https://registry.yarnpkg.com/formik/-/formik-2.2.9.tgz#8594ba9c5e2e5cf1f42c5704128e119fc46232d0"
-  integrity sha512-LQLcISMmf1r5at4/gyJigGn0gOwFbeEAlji+N9InZF6LIMXnFNkO42sCI8Jt84YZggpD4cPWObAZaxpEFtSzNA==
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/formik/-/formik-2.4.1.tgz#f2630b51a866c86144a5faf68d31200c9d8ceea9"
+  integrity sha512-ajOB9EmFhXb4PACTlaooVEn7PLtLtBJEZ8fPs+wFZjL5KSGwgAoU+n9DHN8JcqNKcXkloEYYtn1lxrLav18ecQ==
   dependencies:
     deepmerge "^2.1.1"
     hoist-non-react-statics "^3.3.0"
@@ -28375,9 +28375,9 @@ qs@6.9.3:
   integrity sha512-EbZYNarm6138UKKq46tdx08Yo/q9ZhFoAXAI1meAFd2GtbRDhbZY2WQSICskT0c5q99aFzLG1D4nvTk9tqfXIw==
 
 qs@^6.10.0, qs@^6.10.3, qs@^6.11.0:
-  version "6.11.0"
-  resolved "https://registry.yarnpkg.com/qs/-/qs-6.11.0.tgz#fd0d963446f7a65e1367e01abd85429453f0c37a"
-  integrity sha512-MvjoMCJwEarSbUYk5O+nmoSzSutSsTwF85zcHPQ9OrlFoZOYIjaqBAJIqIXjptyD5vThxGq52Xu/MaJzRkIk4Q==
+  version "6.11.2"
+  resolved "https://registry.yarnpkg.com/qs/-/qs-6.11.2.tgz#64bea51f12c1f5da1bc01496f48ffcff7c69d7d9"
+  integrity sha512-tDNIz22aBzCDxLtVH++VnTfzxlfeK5CbqohpSqpJgj1Wg/cQbStNAz3NuqCs5vV+pjBsK4x4pN9HlVh7rcYRiA==
   dependencies:
     side-channel "^1.0.4"
 
@@ -28581,10 +28581,10 @@ react-element-to-jsx-string@^14.3.4:
     is-plain-object "5.0.0"
     react-is "17.0.2"
 
-react-error-boundary@^3.1.0:
-  version "3.1.4"
-  resolved "https://registry.yarnpkg.com/react-error-boundary/-/react-error-boundary-3.1.4.tgz#255db92b23197108757a888b01e5b729919abde0"
-  integrity sha512-uM9uPzZJTF6wRQORmSrvOIgt4lJ9MC1sNgEOj2XGsDTRE4kmpWxg7ENK9EWNKJRMAOY9z0MuF4yIfl6gp4sotA==
+react-error-boundary@^4.0.10:
+  version "4.0.10"
+  resolved "https://registry.yarnpkg.com/react-error-boundary/-/react-error-boundary-4.0.10.tgz#975cc298e93ab7760d1460b7ea5a7855621e355a"
+  integrity sha512-pvVKdi77j2OoPHo+p3rorgE43OjDWiqFkaqkJz8sJKK6uf/u8xtzuaVfj5qJ2JnDLIgF1De3zY5AJDijp+LVPA==
   dependencies:
     "@babel/runtime" "^7.12.5"
 
