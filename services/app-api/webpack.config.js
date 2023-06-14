@@ -19,40 +19,25 @@ const extensions = [
 
 module.exports = {
     entry: slsw.lib.entries,
-    mode: isLocal ? 'development' : 'production',
     externalsPresets: { node: true },
-    /*
+    context: __dirname,
+    mode: isLocal ? 'development' : 'production',
+    performance: {
+        hints: false,
+    },
     externals: [
+        nodeExternals(),
         nodeExternals({
-            modulesFromFile: {
-                fileName:
-                    './package.json' ,
-                includeInBundle: [
-                    'dependencies',
-                ],
-                excludeFromBundle: [
-                    /^aws-sdk/,
-                ],
-            },
+            modulesDir: path.resolve(__dirname, '../../node_modules'),
         }),
-        { 'aws-sdk': 'commonjs aws-sdk' },
         'prisma',
         '@prisma/client',
     ],
-    */
-    optimization: {
-        minimize: false,
-        moduleIds: 'named',
-    },
-    performance: { hints: false },
     devtool: 'source-map',
     resolve: {
         symlinks: false,
         extensions: extensions,
-        modules: [
-            path.resolve(__dirname, '../../node_modules'),
-            'node_modules',
-        ],
+        modules: [path.resolve(__dirname, 'node_modules'), 'node_modules'],
         plugins: [
             new TsconfigPathsPlugin({
                 configFile: tsConfigPath,

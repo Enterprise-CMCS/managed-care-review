@@ -18,7 +18,7 @@ import classNames from 'classnames'
 import { ErrorSummary } from '../../../components/Form'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '../../../common-code/featureFlags'
+import { featureFlags } from '@managed-care-review/common-code/featureFlags'
 
 export const Documents = ({
     draftSubmission,
