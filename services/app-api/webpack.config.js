@@ -19,7 +19,13 @@ const extensions = [
 
 module.exports = {
     entry: slsw.lib.entries,
+    externalsPresets: { node: true },
+    context: __dirname,
     mode: isLocal ? 'development' : 'production',
+    devtool: 'source-map',
+    performance: {
+        hints: false,
+    },
     externals: [
         nodeExternals({
             allowlist: [/^@managed-care-review/],
@@ -32,6 +38,7 @@ module.exports = {
         'aws-sdk',
     ],
     resolve: {
+        symlinks: false,
         extensions: extensions,
         modules: [
             path.resolve(__dirname, '../../node_modules'),
