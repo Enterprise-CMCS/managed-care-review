@@ -130,7 +130,7 @@ resources:
           - postgresql
         ServerlessV2ScalingConfiguration:
           MinCapacity: ${self:custom.auroraMinCapacity.${opt:stage}, self:custom.auroraMinCapacity.other}
-          MaxCapacity: 32
+          MaxCapacity: 16
 
     PostgresAuroraV2Instance:
       Type: AWS::RDS::DBInstance
