@@ -7,7 +7,7 @@ export async function runS3Locally(runner: LabeledProcessRunner) {
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     runner.runCommandAndOutput(
         's3',
-        ['lerna', 'run', 'start', '--scope=uploads'],
+        ['npx', 'lerna', 'run', 'start', '--scope=uploads'],
         ''
     )
 }

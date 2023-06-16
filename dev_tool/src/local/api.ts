@@ -18,7 +18,7 @@ export async function runAPILocally(runner: LabeledProcessRunner) {
 
     runner.runCommandAndOutput(
         'api',
-        ['lerna', 'run', 'start', '--scope=app-api'],
+        ['npx', 'lerna', 'run', 'start', '--scope=app-api'],
         ''
     )
 }
