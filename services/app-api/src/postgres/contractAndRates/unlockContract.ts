@@ -37,52 +37,58 @@ async function unlockContract(
                 },
             })
             if (!currentRev) {
-                console.error('No Rev! Contracts should always have revisions.')
-                return new Error('cant find the current rev to submit')
+                console.error(
+                    'Programming Error: cannot find the current revision to submit'
+                )
+                return new Error(
+                    'Programming Error: cannot find the current revision to submit'
+                )
             }
 
             if (!currentRev.submitInfoID) {
                 console.error(
-                    'this contract already has an unsubmitted revision'
+                    'Programming Error: cannot unlock a already unlocked contract'
                 )
-                return new Error('cant unlock an alreday unlocked submission')
+                return new Error(
+                    'Programming Error: cannot unlock a already unlocked contract'
+                )
             }
 
             const previouslySubmittedRateIDs = currentRev.rateRevisions.map(
                 (c) => c.rateRevision.rateID
             )
 
-            await tx.contractRevisionTable.create({
-                data: {
-                    id: uuidv4(),
-                    contract: {
-                        connect: {
-                            id: contractID,
-                        },
-                    },
-                    name: currentRev.name,
-                    unlockInfo: {
-                        create: {
-                            id: uuidv4(),
-                            updatedAt: groupTime,
-                            updatedByID: unlockedByUserID,
-                            updatedReason: unlockReason,
-                        },
-                    },
-                    draftRates: {
-                        connect: previouslySubmittedRateIDs.map((cID) => ({
-                            id: cID,
-                        })),
+        await client.contractRevisionTable.create({
+            data: {
+                id: uuidv4(),
+                contract: {
+                    connect: {
+                        id: contractID,
                     },
                 },
-                include: {
-                    rateRevisions: {
-                        include: {
-                            rateRevision: true,
-                        },
+                name: currentRev.name,
+                unlockInfo: {
+                    create: {
+                        id: uuidv4(),
+                        updatedAt: groupTime,
+                        updatedByID: unlockedByUserID,
+                        updatedReason: unlockReason,
                     },
                 },
-            })
+                draftRates: {
+                    connect: previouslySubmittedRateIDs.map((cID) => ({
+                        id: cID,
+                    })),
+                },
+            },
+            include: {
+                rateRevisions: {
+                    include: {
+                        rateRevision: true,
+                    },
+                },
+            },
+        })
 
             return findContractWithHistory(tx, contractID)
         })
