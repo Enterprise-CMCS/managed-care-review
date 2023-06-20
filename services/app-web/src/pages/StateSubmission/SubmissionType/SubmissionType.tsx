@@ -5,7 +5,7 @@ import {
     Link,
     Label,
 } from '@trussworks/react-uswds'
-import { Field, Formik, FormikErrors, FormikHelpers } from 'formik'
+import { Formik, FormikErrors, FormikHelpers } from 'formik'
 import React, { useEffect } from 'react'
 import {
     Link as ReactRouterLink,
@@ -39,7 +39,6 @@ import { PageActions } from '../PageActions'
 import styles from '../StateSubmissionForm.module.scss'
 import { GenericApiErrorBanner, ProgramSelect } from '../../../components'
 import type { HealthPlanFormPageProps } from '../StateSubmissionForm'
-import { useStatePrograms } from '../../../hooks/useStatePrograms'
 import {
     booleanAsYesNoFormValue,
     yesNoFormValueAsBoolean,
@@ -85,8 +84,6 @@ export const SubmissionType = ({
         featureFlags.CHIP_ONLY_FORM.flag,
         featureFlags.CHIP_ONLY_FORM.defaultValue
     )
-
-    const statePrograms = useStatePrograms()
 
     const [createHealthPlanPackage, { error }] =
         useCreateHealthPlanPackageMutation({
@@ -413,29 +410,12 @@ export const SubmissionType = ({
                                         {errors.programIDs}
                                     </PoliteErrorMessage>
                                 )}
-                                <Field name="programIDs">
-                                    {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-                                    {/* @ts-ignore */}
-                                    {({ form }) => (
-                                        <ProgramSelect
-                                            name="programIDs"
-                                            inputId="programIDs"
-                                            statePrograms={statePrograms}
-                                            programIDs={values.programIDs}
-                                            aria-label="Programs this contract action covers (required)"
-                                            onChange={(selectedOption) =>
-                                                form.setFieldValue(
-                                                    'programIDs',
-                                                    selectedOption.map(
-                                                        (item: {
-                                                            value: string
-                                                        }) => item.value
-                                                    )
-                                                )
-                                            }
-                                        />
-                                    )}
-                                </Field>
+                                <ProgramSelect
+                                    name="programIDs"
+                                    inputId="programIDs"
+                                    programIDs={values.programIDs}
+                                    aria-label="Programs this contract action covers (required)"
+                                />
                             </FormGroup>
                             <FormGroup
                                 error={showFieldErrors(errors.submissionType)}

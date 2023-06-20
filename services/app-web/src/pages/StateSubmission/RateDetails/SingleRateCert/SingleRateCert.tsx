@@ -26,7 +26,6 @@ import { formatUserInputDate, isDateRangeEmpty } from '../../../../formHelpers'
 import { useFileUpload } from '../../../../hooks/useFileUpload'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../../components/FileUpload'
 import { useS3 } from '../../../../contexts/S3Context'
-import { useStatePrograms } from '../../../../hooks'
 
 import { FormikErrors, getIn, useFormikContext } from 'formik'
 import {
@@ -124,7 +123,6 @@ export const SingleRateCert = ({
         featureFlags.PACKAGES_WITH_SHARED_RATES.flag,
         featureFlags.PACKAGES_WITH_SHARED_RATES.defaultValue
     )
-    const statePrograms = useStatePrograms()
     const key = rateInfo.key
     const displayAsStandaloneRate = multiRatesConfig === undefined
     const fieldNamePrefix = `rateInfos.${index}`
@@ -220,7 +218,6 @@ export const SingleRateCert = ({
                 <ProgramSelect
                     name={`${fieldNamePrefix}.rateProgramIDs`}
                     inputId={`${fieldNamePrefix}.rateProgramIDs`}
-                    statePrograms={statePrograms}
                     programIDs={rateInfo.rateProgramIDs}
                     aria-label="programs (required)"
                 />

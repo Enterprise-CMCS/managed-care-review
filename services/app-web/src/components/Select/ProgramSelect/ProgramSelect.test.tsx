@@ -1,15 +1,11 @@
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { ProgramSelect } from './ProgramSelect'
-import {
-    fetchCurrentUserMock,
-    mockMNState,
-} from '../../../testHelpers/apolloMocks'
+import { fetchCurrentUserMock } from '../../../testHelpers/apolloMocks'
 import { screen, waitFor } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import userEvent from '@testing-library/user-event'
 
 describe('ProgramSelect', () => {
-    const mockStatePrograms = mockMNState().programs
     let mockOnChange = jest.fn()
     beforeEach(
         () =>
@@ -23,7 +19,6 @@ describe('ProgramSelect', () => {
         renderWithProviders(
             <ProgramSelect
                 name="programSelect"
-                statePrograms={mockStatePrograms}
                 programIDs={[]}
                 onChange={mockOnChange}
             />,
@@ -52,7 +47,6 @@ describe('ProgramSelect', () => {
         renderWithProviders(
             <ProgramSelect
                 name="programSelect"
-                statePrograms={mockStatePrograms}
                 programIDs={[]}
                 onChange={mockOnChange}
             />,
@@ -94,7 +88,6 @@ describe('ProgramSelect', () => {
         renderWithProviders(
             <ProgramSelect
                 name="programSelect"
-                statePrograms={mockStatePrograms}
                 programIDs={[
                     '3fd36500-bf2c-47bc-80e8-e7aa417184c5',
                     'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',

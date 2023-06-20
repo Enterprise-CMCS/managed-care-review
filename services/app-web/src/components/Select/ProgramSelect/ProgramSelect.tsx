@@ -1,12 +1,11 @@
 import React from 'react'
 import styles from '../Select.module.scss'
 import Select, { AriaOnFocus, Props } from 'react-select'
-import { Program } from '../../../gen/gqlClient'
 import { useField } from 'formik'
+import { useStatePrograms } from '../../../hooks'
 
 export type ProgramSelectPropType = {
     name: string
-    statePrograms: Program[]
     programIDs: string[]
 }
 
@@ -26,11 +25,12 @@ export interface ProgramOptionType {
 
 export const ProgramSelect = ({
     name,
-    statePrograms,
     programIDs,
     ...selectProps
 }: ProgramSelectPropType & Props<ProgramOptionType, true>) => {
     const [_field, _meta, helpers] = useField({ name })
+    const statePrograms = useStatePrograms()
+
     const programOptions: ProgramOptionType[] = statePrograms.map((program) => {
         return { value: program.id, label: program.name }
     })
