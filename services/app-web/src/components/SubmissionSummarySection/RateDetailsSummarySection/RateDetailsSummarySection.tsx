@@ -22,6 +22,8 @@ import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataTy
 import { DataDetailMissingField } from '../../DataDetail/DataDetailMissingField'
 import { DataDetailContactField } from '../../DataDetail/DataDetailContactField/DataDetailContactField'
 import { v4 as uuidv4 } from 'uuid'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '../../../common-code/featureFlags'
 
 // Used for refreshed packages names keyed by their package id
 // package name includes (Draft) for draft packages.
@@ -50,12 +52,25 @@ export const RateDetailsSummarySection = ({
     submissionName,
     statePrograms,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
+    // feature flags state management
+    const ldClient = useLDClient()
+    const supportingDocsByRate = ldClient?.variation(
+        featureFlags.SUPPORTING_DOCS_BY_RATE.flag,
+        featureFlags.SUPPORTING_DOCS_BY_RATE.defaultValue
+    )
+
     const [packageNamesLookup, setPackageNamesLookup] =
         React.useState<PackageNamesLookupType | null>(null)
 
     const isSubmitted = submission.status === 'SUBMITTED'
     const isEditing = !isSubmitted && navigateTo !== undefined
     const isPreviousSubmission = usePreviousSubmission()
+    const submissionLevelRateSupportingDocuments = submission.documents.filter(
+        (doc) => doc.documentCategories.includes('RATES_RELATED')
+    )
+
+    const { getKey, getBulkDlURL } = useS3()
+    const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
 
     // Return refreshed package names for state  - used rates across submissions feature
     // Use package name from api if available, otherwise use packageName coming down from proto as fallback
@@ -125,13 +140,6 @@ export const RateDetailsSummarySection = ({
         // No displayed error state, we fall back to proto stored names for potential shared rate packages
     }
 
-    // Get the zip file for the rate details
-    const { getKey, getBulkDlURL } = useS3()
-    const [zippedFilesURL, setZippedFilesURL] = useState<string>('')
-    const rateSupportingDocuments = submission.documents.filter((doc) =>
-        doc.documentCategories.includes('RATES_RELATED')
-    )
-
     const rateCapitationType = (rateInfo: RateInfoType) =>
         rateInfo.rateCapitationType
             ? rateInfo.rateCapitationType === 'RATE_CELL'
@@ -170,8 +178,18 @@ export const RateDetailsSummarySection = ({
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
             const keysFromDocs = submission.rateInfos
-                .flatMap((rateInfo) => rateInfo.rateDocuments)
-                .concat(rateSupportingDocuments)
+                .flatMap((rateInfo) =>
+                    supportingDocsByRate
+                        ? rateInfo.rateDocuments.concat(
+                              rateInfo.supportingDocuments
+                          )
+                        : rateInfo.rateDocuments
+                )
+                .concat(
+                    supportingDocsByRate
+                        ? []
+                        : submissionLevelRateSupportingDocuments
+                )
                 .map((doc) => {
                     const key = getKey(doc.s3URL)
                     if (!key) return ''
@@ -198,8 +216,9 @@ export const RateDetailsSummarySection = ({
         getKey,
         getBulkDlURL,
         submission,
-        rateSupportingDocuments,
+        submissionLevelRateSupportingDocuments,
         submissionName,
+        supportingDocsByRate,
     ])
 
     return (
@@ -329,6 +348,22 @@ export const RateDetailsSummarySection = ({
                                 ) : (
                                     <span className="srOnly">'LOADING...'</span>
                                 )}
+                                {supportingDocsByRate && !loading ? (
+                                    <UploadedDocumentsTable
+                                        documents={rateInfo.supportingDocuments}
+                                        packagesWithSharedRateCerts={refreshPackagesWithSharedRateCert(
+                                            rateInfo
+                                        )}
+                                        documentDateLookupTable={
+                                            documentDateLookupTable
+                                        }
+                                        isCMSUser={isCMSUser}
+                                        caption="Rate supporting documents"
+                                        documentCategory="Rate certification"
+                                    />
+                                ) : (
+                                    <span className="srOnly">'LOADING...'</span>
+                                )}
                             </React.Fragment>
                         )
                     })
@@ -336,15 +371,21 @@ export const RateDetailsSummarySection = ({
                     <DataDetailMissingField />
                 )}
             </dl>
-            <UploadedDocumentsTable
-                documents={rateSupportingDocuments}
-                documentDateLookupTable={documentDateLookupTable}
-                isCMSUser={isCMSUser}
-                caption="Rate supporting documents"
-                documentCategory="Rate-supporting"
-                isSupportingDocuments
-                isEditing={isEditing}
-            />
+            {
+                // START  - This whole block gets deleted when we remove the feature flag.
+                !supportingDocsByRate && (
+                    <UploadedDocumentsTable
+                        documents={submissionLevelRateSupportingDocuments}
+                        documentDateLookupTable={documentDateLookupTable}
+                        isCMSUser={isCMSUser}
+                        caption="Rate supporting documents"
+                        documentCategory="Rate-supporting"
+                        isSupportingDocuments
+                        isEditing={isEditing}
+                    />
+                )
+                // This whole block gets deleted when we remove the feature flag - END
+            }
         </section>
     )
 }

@@ -23,7 +23,6 @@ import {
 
 import styles from '../../StateSubmissionForm.module.scss'
 import { formatUserInputDate, isDateRangeEmpty } from '../../../../formHelpers'
-import { useFileUpload } from '../../../../hooks/useFileUpload'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../../components/FileUpload'
 import { useS3 } from '../../../../contexts/S3Context'
 
@@ -117,20 +116,24 @@ export const SingleRateCert = ({
     index = 0,
     sharedRatesConfig: { parentSubmissionID },
 }: SingleRateCertProps): React.ReactElement => {
-    console.info('rateInfo', rateInfo)
+    // feature flags
     const ldClient = useLDClient()
     const showPackagesWithSharedRatesDropdown: boolean = ldClient?.variation(
         featureFlags.PACKAGES_WITH_SHARED_RATES.flag,
         featureFlags.PACKAGES_WITH_SHARED_RATES.defaultValue
     )
+    const supportingDocsByRate = ldClient?.variation(
+        featureFlags.SUPPORTING_DOCS_BY_RATE.flag,
+        featureFlags.SUPPORTING_DOCS_BY_RATE.defaultValue
+    )
+
+    // page level setup
+    const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
     const key = rateInfo.key
     const displayAsStandaloneRate = multiRatesConfig === undefined
     const fieldNamePrefix = `rateInfos.${index}`
-
+    const rateCertNumber = index + 1
     const { errors, setFieldValue } = useFormikContext<RateInfoArrayType>()
-
-    const { onFileItemsUpdate } = useFileUpload()
-    const { handleDeleteFile, handleUploadFile, handleScanFile } = useS3()
 
     const showFieldErrors = (
         fieldName: keyof RateCertFormType
@@ -139,10 +142,11 @@ export const SingleRateCert = ({
         return getIn(errors, `${fieldNamePrefix}.${fieldName}`)
     }
 
+    // custom logic for individual form fields
     const handleRateInfoLegend = (index: number) => {
         return displayAsStandaloneRate
             ? `Rate certification`
-            : `Rate certification ${index + 1}`
+            : `Rate certification ${rateCertNumber}`
     }
 
     return (
@@ -156,7 +160,7 @@ export const SingleRateCert = ({
             <FormGroup error={Boolean(showFieldErrors('rateDocuments'))}>
                 <FileUpload
                     id={`${fieldNamePrefix}.rateDocuments`}
-                    name={`rateInfos.${index}.rateDocuments`}
+                    name={`${fieldNamePrefix}.rateDocuments`}
                     label="Upload rate certification"
                     renderMode="list"
                     aria-required
@@ -167,8 +171,9 @@ export const SingleRateCert = ({
                                 Upload one rate certification only.
                             </span>
                             <span className="text-ink">
-                                Additional rates and supporting documents can be
-                                added later.
+                                {supportingDocsByRate
+                                    ? 'Additional rates can be added later.'
+                                    : 'Additional rates and supporting documents can be added later.'}
                             </span>
                             <Link
                                 aria-label="Document definitions and requirements (opens in new window)"
@@ -193,10 +198,60 @@ export const SingleRateCert = ({
                     deleteFile={(key) =>
                         handleDeleteFile(key, 'HEALTH_PLAN_DOCS')
                     }
-                    onFileItemsUpdate={onFileItemsUpdate}
                     innerInputRef={multiRatesConfig?.reassignNewRateRef}
                 />
             </FormGroup>
+
+            {supportingDocsByRate && (
+                <FormGroup
+                    error={Boolean(showFieldErrors('supportingDocuments'))}
+                >
+                    <FileUpload
+                        id={`${fieldNamePrefix}.supportingDocuments`}
+                        name={`${fieldNamePrefix}.supportingDocuments`}
+                        label="Upload supporting documents (optional)"
+                        renderMode="list"
+                        aria-required
+                        error={showFieldErrors('supportingDocuments')}
+                        hint={
+                            <span className={styles.guidanceTextBlock}>
+                                <span className="text-ink">
+                                    {`Upload any supporting documents for Rate certification ${rateCertNumber}`}
+                                </span>
+                                <span className="text-ink">
+                                    {supportingDocsByRate
+                                        ? 'Additional rates can be added later.'
+                                        : 'Additional rates and supporting documents can be added later.'}
+                                </span>
+                                <Link
+                                    aria-label="Document definitions and requirements (opens in new window)"
+                                    href={'/help#key-documents'}
+                                    variant="external"
+                                    target="_blank"
+                                >
+                                    Document definitions and requirements
+                                </Link>
+                                <span className="padding-top-1">
+                                    This input only accepts PDF, CSV, DOC, DOCX,
+                                    XLS, XLSX, XLSM files.
+                                </span>
+                            </span>
+                        }
+                        accept={ACCEPTED_SUBMISSION_FILE_TYPES}
+                        initialItems={rateInfo.supportingDocuments}
+                        uploadFile={(file) =>
+                            handleUploadFile(file, 'HEALTH_PLAN_DOCS')
+                        }
+                        scanFile={(key) =>
+                            handleScanFile(key, 'HEALTH_PLAN_DOCS')
+                        }
+                        deleteFile={(key) =>
+                            handleDeleteFile(key, 'HEALTH_PLAN_DOCS')
+                        }
+                        innerInputRef={multiRatesConfig?.reassignNewRateRef}
+                    />
+                </FormGroup>
+            )}
 
             {showPackagesWithSharedRatesDropdown && (
                 <PackagesWithSharedRates
@@ -244,7 +299,7 @@ export const SingleRateCert = ({
                     </Link>
                     <FieldRadio
                         id={`newRate-${index}`}
-                        name={`rateInfos.${index}.rateType`}
+                        name={`${fieldNamePrefix}.rateType`}
                         label="New rate certification"
                         value={'NEW'}
                     />
@@ -466,7 +521,6 @@ export const SingleRateCert = ({
                     unstyled
                     className={styles.removeContactBtn}
                     onClick={async () => {
-                        await onFileItemsUpdate({ fileItems: [] })
                         multiRatesConfig.removeSelf()
                     }}
                 >

@@ -37,7 +37,7 @@ export type FileUploadProps = {
     uploadFile: (file: File) => Promise<S3FileData>
     scanFile?: (key: string) => Promise<void | Error> // optional function to be called after uploading (used for scanning)
     deleteFile: (key: string) => Promise<void>
-    onFileItemsUpdate: ({ fileItems }: { fileItems: FileItemT[] }) => void
+    onFileItemsUpdate?: ({ fileItems }: { fileItems: FileItemT[] }) => void // deprecated
     isContractOnly?: boolean
     shouldDisplayMissingCategoriesError?: boolean // by default, false. the parent component may read current files list and requirements of the form to determine otherwise.
     innerInputRef?: (el: HTMLInputElement) => void
@@ -103,7 +103,7 @@ export const FileUpload = ({
     // update fileItems in parent
     React.useEffect(() => {
         if (JSON.stringify(fileItems) !== JSON.stringify(previousFileItems)) {
-            onFileItemsUpdate({ fileItems })
+            onFileItemsUpdate && onFileItemsUpdate({ fileItems })
             helpers.setValue(fileItems, false)
         }
     }, [fileItems, previousFileItems, onFileItemsUpdate, helpers])

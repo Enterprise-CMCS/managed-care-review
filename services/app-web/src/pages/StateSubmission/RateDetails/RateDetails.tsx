@@ -103,35 +103,23 @@ export const RateDetails = ({
 }: HealthPlanFormPageProps): React.ReactElement => {
     const navigate = useNavigate()
     const { getKey } = useS3()
+
     // feature flags state management
     const ldClient = useLDClient()
     const showPackagesWithSharedRatesDropdown: boolean = ldClient?.variation(
         featureFlags.PACKAGES_WITH_SHARED_RATES.flag,
         featureFlags.PACKAGES_WITH_SHARED_RATES.defaultValue
     )
+    const supportingDocsByRate = ldClient?.variation(
+        featureFlags.SUPPORTING_DOCS_BY_RATE.flag,
+        featureFlags.SUPPORTING_DOCS_BY_RATE.defaultValue
+    )
 
-    // page level state management
+    // form validation state management
     const [focusErrorSummaryHeading, setFocusErrorSummaryHeading] =
         React.useState(false)
     const errorSummaryHeadingRef = React.useRef<HTMLHeadingElement>(null)
     const [shouldValidate, setShouldValidate] = React.useState(showValidations)
-
-    // multi rates state managements
-    const [focusNewRate, setFocusNewRate] = React.useState(false)
-    const newRateNameRef = React.useRef<HTMLElement | null>(null)
-    const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
-
-    const rateDetailsFormSchema = RateDetailsFormSchema({
-        'packages-with-shared-rates': showPackagesWithSharedRatesDropdown,
-    })
-
-    React.useEffect(() => {
-        if (focusNewRate) {
-            newRateNameRef.current && newRateNameRef.current.focus()
-            setFocusNewRate(false)
-            newRateNameRef.current = null
-        }
-    }, [focusNewRate])
 
     useEffect(() => {
         // Focus the error summary heading only if we are displaying
@@ -141,6 +129,24 @@ export const RateDetails = ({
         }
         setFocusErrorSummaryHeading(false)
     }, [focusErrorSummaryHeading])
+
+    // multi-rates state management
+    const [focusNewRate, setFocusNewRate] = React.useState(false)
+    const newRateNameRef = React.useRef<HTMLElement | null>(null)
+    const [newRateButtonRef, setNewRateButtonFocus] = useFocus() // This ref.current is always the same element
+
+    const rateDetailsFormSchema = RateDetailsFormSchema({
+        'packages-with-shared-rates': showPackagesWithSharedRatesDropdown,
+        'supporting-docs-by-rate': supportingDocsByRate,
+    })
+
+    React.useEffect(() => {
+        if (focusNewRate) {
+            newRateNameRef.current && newRateNameRef.current.focus()
+            setFocusNewRate(false)
+            newRateNameRef.current = null
+        }
+    }, [focusNewRate])
 
     const rateInfosInitialValues: RateInfoArrayType = {
         rateInfos:

@@ -25,7 +25,9 @@ const SingleRateCertSchema = (activeFeatureFlags: FeatureFlagSettings) =>
                   .required()
             : Yup.array(),
         rateDocuments: validateFileUpload({ required: true }),
-        supportingDocuments: validateFileUpload({ required: false }),
+        supportingDocuments: activeFeatureFlags['supporting-docs-by-rate']
+            ? validateFileUpload({ required: false })
+            : Yup.mixed(),
         rateProgramIDs: Yup.array().min(1, 'You must select a program'),
         rateType: Yup.string().defined(
             'You must choose a rate certification type'
