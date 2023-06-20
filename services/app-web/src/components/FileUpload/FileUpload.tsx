@@ -18,6 +18,7 @@ import { pluralize } from '../../common-code/formatters'
 
 import { recordUserInputException } from '../../otelHelpers'
 import { calculateSHA256 } from '../../common-code/sha/generateSha'
+import { useField } from 'formik'
 
 export type S3FileData = {
     key: string
@@ -42,7 +43,7 @@ export type FileUploadProps = {
     innerInputRef?: (el: HTMLInputElement) => void
 } & JSX.IntrinsicElements['input']
 
-/*  
+/*
     FileUpload handles async file upload to S3 and displays inline errors per file.
     Tracks files as they are uploaded. Once files are no longer processing passes data back up to parent with onFileItemsUpdate.
 
@@ -71,6 +72,8 @@ export const FileUpload = ({
     const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
     const summaryRef = useRef<HTMLHeadingElement>(null) // reference to the heading that we will focus
     const previousFileItems = usePrevious(fileItems)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [field, meta, helpers] = useField({ name })
 
     const handleCheckboxClick = (
         event: React.ChangeEvent<HTMLInputElement>
@@ -101,8 +104,9 @@ export const FileUpload = ({
     React.useEffect(() => {
         if (JSON.stringify(fileItems) !== JSON.stringify(previousFileItems)) {
             onFileItemsUpdate({ fileItems })
+            helpers.setValue(fileItems, false)
         }
-    }, [fileItems, previousFileItems, onFileItemsUpdate])
+    }, [fileItems, previousFileItems, onFileItemsUpdate, helpers])
 
     //Pass input ref to parent when innerInputRef prop exists.
     React.useEffect(() => {
