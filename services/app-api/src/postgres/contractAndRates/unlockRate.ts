@@ -35,13 +35,21 @@ async function unlockRate(
             },
         })
         if (!currentRev) {
-            console.error('No Rev! Contracts should always have revisions.')
-            return new Error('cant find the current rev to submit')
+            console.error(
+                'Programming Error: cannot find the current revision to submit'
+            )
+            return new Error(
+                'Programming Error: cannot find the current revision to submit'
+            )
         }
 
         if (!currentRev.submitInfoID) {
-            console.error('this contract already has an unsubmitted revision')
-            return new Error('cant unlock an alreday unlocked submission')
+            console.error(
+                'Programming Error: cannot unlock a already unlocked rate'
+            )
+            return new Error(
+                'Programming Error: cannot unlock a already unlocked rate'
+            )
         }
 
         const previouslySubmittedContractIDs = currentRev.contractRevisions.map(
