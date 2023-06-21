@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import { findRate } from './findRate'
 import { Rate } from './rateType'
 
 // Update the given draft
@@ -24,7 +25,7 @@ async function updateRateDraft(
             return new Error('cant find a draft rev to submit')
         }
 
-        const updated = await client.rateRevisionTable.update({
+        await client.rateRevisionTable.update({
             where: {
                 id: currentRev.id,
             },
@@ -45,20 +46,7 @@ async function updateRateDraft(
             },
         })
 
-        return {
-            id: rateID,
-            revisions: [
-                {
-                    id: updated.id,
-                    revisionFormData: updated.name,
-                    contractRevisions: updated.contractRevisions.map((cr) => ({
-                        id: cr.rateRevisionID,
-                        contractFormData: cr.contractRevision.name,
-                        rateRevisions: [],
-                    })),
-                },
-            ],
-        }
+        return findRate(client, rateID)
     } catch (err) {
         console.error('SUBMIT PRISMA CONTRACT ERR', err)
         return err
