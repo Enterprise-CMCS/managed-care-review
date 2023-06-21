@@ -1,10 +1,10 @@
 import {
     ContractRevisionTable,
-    PrismaClient,
     RateRevisionTable,
     UpdateInfoTable,
 } from '@prisma/client'
 import { UpdateInfoType } from '../../domain-models'
+import { PrismaTransactionType } from '../prismaTypes'
 import { Contract, ContractRevision } from './contractType'
 
 function convertUpdateInfo(
@@ -30,7 +30,7 @@ interface ContractRevisionSet {
 }
 
 async function findContractWithRates(
-    client: PrismaClient,
+    client: PrismaTransactionType,
     contractID: string
 ): Promise<Contract | Error> {
     try {
