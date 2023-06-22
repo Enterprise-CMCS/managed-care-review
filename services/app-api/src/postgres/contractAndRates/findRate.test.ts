@@ -12,7 +12,7 @@ import { findRate } from './findRate'
 import { must } from '../../testHelpers'
 
 describe('findContract', () => {
-    it('finds a full contract', async () => {
+    it('finds a full rate', async () => {
         const client = await sharedTestPrismaClient()
 
         const stateUser = await client.user.create({
@@ -197,6 +197,7 @@ describe('findContract', () => {
                 revisions[0].contractRevisions[0].contractFormData
         ).toBe('one contract')
         expect(revisions[0].submitInfo?.updatedReason).toBe('Rate Submit')
+        expect(revisions[0].unlockInfo).toBeUndefined()
 
         expect(revisions[1].contractRevisions).toHaveLength(1)
         expect(
@@ -204,6 +205,8 @@ describe('findContract', () => {
                 revisions[1].contractRevisions[0].contractFormData
         ).toBe('one contract')
         expect(revisions[1].submitInfo?.updatedReason).toBe('1.1 new name')
+        expect(revisions[1].unlockInfo?.updatedReason).toBe('unlock for 1.1')
+        expect(revisions[1].unlockInfo?.updatedBy).toBe('zuko@example.com')
 
         expect(revisions[2].contractRevisions).toHaveLength(1)
         expect(
@@ -211,6 +214,8 @@ describe('findContract', () => {
                 revisions[2].contractRevisions[0].contractFormData
         ).toBe('a.1 body')
         expect(revisions[2].submitInfo?.updatedReason).toBe('Submitting A.1')
+        expect(revisions[2].unlockInfo?.updatedReason).toBe('unlocking A.0')
+        expect(revisions[2].unlockInfo?.updatedBy).toBe('zuko@example.com')
 
         expect(revisions[3].contractRevisions).toHaveLength(0)
         expect(revisions[3].submitInfo?.updatedReason).toBe('Submitting A.2')

@@ -2,13 +2,14 @@ import {
     ContractRevisionTable,
     RateRevisionTable,
     UpdateInfoTable,
+    User,
 } from '@prisma/client'
 import { UpdateInfoType } from '../../domain-models'
 import { PrismaTransactionType } from '../prismaTypes'
 import { Rate, RateRevision } from './rateType'
 
 function convertUpdateInfo(
-    info: UpdateInfoTable | null
+    info: (UpdateInfoTable & { updatedBy: User }) | null
 ): UpdateInfoType | undefined {
     if (!info) {
         return undefined
@@ -16,7 +17,7 @@ function convertUpdateInfo(
 
     return {
         updatedAt: info.updatedAt,
-        updatedBy: info.updatedByID,
+        updatedBy: info.updatedBy.email,
         updatedReason: info.updatedReason,
     }
 }
@@ -25,7 +26,8 @@ function convertUpdateInfo(
 // we convert them into RateRevisons to return them
 interface RateRevisionSet {
     rateRev: RateRevisionTable
-    submitInfo: UpdateInfoTable
+    submitInfo: UpdateInfoTable & { updatedBy: User }
+    unlockInfo: (UpdateInfoTable & { updatedBy: User }) | undefined
     contractRevs: ContractRevisionTable[]
 }
 
@@ -42,14 +44,30 @@ async function findRateWithContracts(
                 createdAt: 'asc',
             },
             include: {
-                submitInfo: true,
-                unlockInfo: true,
+                submitInfo: {
+                    include: {
+                        updatedBy: true,
+                    },
+                },
+                unlockInfo: {
+                    include: {
+                        updatedBy: true,
+                    },
+                },
                 contractRevisions: {
                     include: {
                         contractRevision: {
                             include: {
-                                submitInfo: true,
-                                unlockInfo: true,
+                                submitInfo: {
+                                    include: {
+                                        updatedBy: true,
+                                    },
+                                },
+                                unlockInfo: {
+                                    include: {
+                                        updatedBy: true,
+                                    },
+                                },
                             },
                         },
                     },
@@ -74,6 +92,7 @@ async function findRateWithContracts(
             const initialEntry: RateRevisionSet = {
                 rateRev,
                 submitInfo: rateRev.submitInfo,
+                unlockInfo: rateRev.unlockInfo || undefined,
                 contractRevs: [],
             }
 
@@ -112,6 +131,9 @@ async function findRateWithContracts(
                     const newRev: RateRevisionSet = {
                         rateRev,
                         submitInfo: contractRev.contractRevision.submitInfo,
+                        unlockInfo:
+                            contractRev.contractRevision.unlockInfo ||
+                            undefined,
                         contractRevs: lastContracts,
                     }
 
@@ -124,6 +146,7 @@ async function findRateWithContracts(
         const allRevisions: RateRevision[] = allEntries.map((entry) => ({
             id: entry.rateRev.id,
             submitInfo: convertUpdateInfo(entry.submitInfo),
+            unlockInfo: entry.unlockInfo && convertUpdateInfo(entry.unlockInfo),
             revisionFormData: entry.rateRev.name,
             contractRevisions: entry.contractRevs.map((crev) => ({
                 id: crev.id,
