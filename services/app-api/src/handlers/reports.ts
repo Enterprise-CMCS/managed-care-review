@@ -60,12 +60,6 @@ const decodeRevisions = (
     revisions.forEach((revision) => {
         let decodedRevision = {} as RevisionWithDecodedProtobuf
         const decodedFormDataProto = toDomain(revision.formDataProto)
-        console.info(
-            'decodedFormDataProto',
-            JSON.stringify(decodedFormDataProto)
-        )
-        console.info('id', revision.id)
-        console.info('submittedAt', revision.submittedAt)
         decodedRevision.formDataProto = decodedFormDataProto
         const names = programList
             .filter(
