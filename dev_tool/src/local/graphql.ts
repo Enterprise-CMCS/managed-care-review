@@ -5,7 +5,11 @@ import { once } from '../deps.js'
 async function compileGraphQLTypesWatch(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput('gql deps', ['yarn', 'install'], '')
 
-    runner.runCommandAndOutput('gqlgen', ['lerna', 'run', 'gqlgen:watch'], '')
+    runner.runCommandAndOutput(
+        'gqlgen',
+        ['npx', 'lerna', 'run', 'gqlgen:watch'],
+        ''
+    )
 }
 
 export const compileGraphQLTypesWatchOnce = once(compileGraphQLTypesWatch)
@@ -17,7 +21,11 @@ async function compileGraphQLTypes(runner: LabeledProcessRunner) {
         ''
     )
 
-    return runner.runCommandAndOutput('gqlgen', ['lerna', 'run', 'gqlgen'], '')
+    return runner.runCommandAndOutput(
+        'gqlgen',
+        ['npx', 'lerna', 'run', 'gqlgen'],
+        ''
+    )
 }
 
 export const compileGraphQLTypesOnce = once(compileGraphQLTypes)

@@ -21,7 +21,7 @@ export async function runWebLocally(runner: LabeledProcessRunner) {
 
     runner.runCommandAndOutput(
         'web',
-        ['lerna', 'run', 'start', '--scope=app-web'],
+        ['npx', 'lerna', 'run', 'start', '--scope=app-web'],
         ''
     )
 }
