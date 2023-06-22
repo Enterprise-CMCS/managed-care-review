@@ -142,19 +142,16 @@ export const SingleRateCert = ({
         return getIn(errors, `${fieldNamePrefix}.${fieldName}`)
     }
 
-    // custom logic for individual form fields
-    const handleRateInfoLegend = (index: number) => {
-        return displayAsStandaloneRate
-            ? `Rate certification`
-            : `Rate certification ${rateCertNumber}`
-    }
-
     return (
         <Fieldset
             data-testid={`rate-certification-form`}
             key={key}
             id={`${fieldNamePrefix}.container.${rateInfo.id}`}
-            legend={handleRateInfoLegend(index)}
+            legend={
+                displayAsStandaloneRate
+                    ? `Rate certification`
+                    : `Rate certification ${rateCertNumber}`
+            }
             className={styles.rateCertContainer}
         >
             <FormGroup error={Boolean(showFieldErrors('rateDocuments'))}>
@@ -166,15 +163,7 @@ export const SingleRateCert = ({
                     aria-required
                     error={showFieldErrors('rateDocuments')}
                     hint={
-                        <span className={styles.guidanceTextBlock}>
-                            <span className="text-ink">
-                                Upload one rate certification only.
-                            </span>
-                            <span className="text-ink">
-                                {supportingDocsByRate
-                                    ? 'Additional rates can be added later.'
-                                    : 'Additional rates and supporting documents can be added later.'}
-                            </span>
+                        <span className={styles.guidanceTextBlockNoPadding}>
                             <Link
                                 aria-label="Document definitions and requirements (opens in new window)"
                                 href={'/help#key-documents'}
@@ -183,6 +172,15 @@ export const SingleRateCert = ({
                             >
                                 Document definitions and requirements
                             </Link>
+                            <span className="padding-top-1">
+                                Upload one rate certification only.
+                            </span>
+                            <span>
+                                {supportingDocsByRate
+                                    ? 'Additional rates can be added later.'
+                                    : 'Additional rates and supporting documents can be added later.'}
+                            </span>
+
                             <span className="padding-top-1">
                                 This input only accepts PDF, CSV, DOC, DOCX,
                                 XLS, XLSX, XLSM files.
@@ -199,6 +197,12 @@ export const SingleRateCert = ({
                         handleDeleteFile(key, 'HEALTH_PLAN_DOCS')
                     }
                     innerInputRef={multiRatesConfig?.reassignNewRateRef}
+                    onFileItemsUpdate={({ fileItems }) =>
+                        setFieldValue(
+                            `${fieldNamePrefix}.rateDocuments`,
+                            fileItems
+                        )
+                    }
                 />
             </FormGroup>
 
@@ -214,15 +218,7 @@ export const SingleRateCert = ({
                         aria-required
                         error={showFieldErrors('supportingDocuments')}
                         hint={
-                            <span className={styles.guidanceTextBlock}>
-                                <span className="text-ink">
-                                    {`Upload any supporting documents for Rate certification ${rateCertNumber}`}
-                                </span>
-                                <span className="text-ink">
-                                    {supportingDocsByRate
-                                        ? 'Additional rates can be added later.'
-                                        : 'Additional rates and supporting documents can be added later.'}
-                                </span>
+                            <span className={styles.guidanceTextBlockNoPadding}>
                                 <Link
                                     aria-label="Document definitions and requirements (opens in new window)"
                                     href={'/help#key-documents'}
@@ -231,6 +227,15 @@ export const SingleRateCert = ({
                                 >
                                     Document definitions and requirements
                                 </Link>
+                                <span className="padding-top-1">
+                                    {`Upload any supporting documents for Rate certification ${rateCertNumber}`}
+                                </span>
+                                <span>
+                                    {supportingDocsByRate
+                                        ? 'Additional rates can be added later.'
+                                        : 'Additional rates and supporting documents can be added later.'}
+                                </span>
+
                                 <span className="padding-top-1">
                                     This input only accepts PDF, CSV, DOC, DOCX,
                                     XLS, XLSX, XLSM files.
@@ -249,6 +254,12 @@ export const SingleRateCert = ({
                             handleDeleteFile(key, 'HEALTH_PLAN_DOCS')
                         }
                         innerInputRef={multiRatesConfig?.reassignNewRateRef}
+                        onFileItemsUpdate={({ fileItems }) =>
+                            setFieldValue(
+                                `${fieldNamePrefix}.supportingDocuments`,
+                                fileItems
+                            )
+                        }
                     />
                 </FormGroup>
             )}
@@ -520,9 +531,7 @@ export const SingleRateCert = ({
                     type="button"
                     unstyled
                     className={styles.removeContactBtn}
-                    onClick={async () => {
-                        multiRatesConfig.removeSelf()
-                    }}
+                    onClick={multiRatesConfig.removeSelf}
                 >
                     Remove rate certification
                 </Button>

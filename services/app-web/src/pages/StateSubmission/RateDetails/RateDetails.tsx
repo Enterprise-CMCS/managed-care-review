@@ -29,6 +29,7 @@ import {
 } from './SingleRateCert/SingleRateCert'
 import { useS3 } from '../../../contexts/S3Context'
 import { S3ClientT } from '../../../s3'
+import { isLoadingOrHasFileErrors } from '../../../components/FileUpload'
 
 // This function is used to get initial form values as well return empty form values when we add a new rate or delete a rate
 // We need to include the getKey function in params because there are no guarantees currently file is in s3 even if when we load data from API
@@ -97,7 +98,6 @@ export const rateErrorHandling = (
 
 export const RateDetails = ({
     draftSubmission,
-    previousDocuments,
     showValidations = false,
     updateDraft,
 }: HealthPlanFormPageProps): React.ReactElement => {
@@ -158,31 +158,40 @@ export const RateDetails = ({
     }
 
     const handleFormSubmit = async (
-        rateInfos: RateCertFormType[],
+        form: RateInfoArrayType,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
         options: {
             shouldValidateDocuments: boolean
             redirectPath: string
         }
     ) => {
-        // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
-        // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue
-        // if(options.shouldValidateDocuments) {
-        //     if (!allRatesHasValidFiles ) {
-        //         setShouldValidate(true) // set inline field errors
-        //         setFocusErrorSummaryHeading(true) // set errors in form-wide error summary
-        //         setSubmitting(false) // reset formik submit
-        //         return
-        //     }
-        // }
+        const { rateInfos } = form
+        if (options.shouldValidateDocuments) {
+            const fileErrorsNeedAttention = rateInfos.some((rateInfo) =>
+                isLoadingOrHasFileErrors(
+                    rateInfo.supportingDocuments.concat(rateInfo.rateDocuments)
+                )
+            )
+            if (fileErrorsNeedAttention) {
+                // make inline field errors visible so user can correct documents, direct user focus to errors, and manually exit formik submit
+                setShouldValidate(true)
+                setFocusErrorSummaryHeading(true)
+                setSubmitting(false)
+                return
+            }
+        }
 
-        draftSubmission.rateInfos = rateInfos.map((rateInfo, index) => {
+        const cleanedRateInfos = rateInfos.map((rateInfo) => {
             return {
                 rateType: rateInfo.rateType,
                 rateCapitationType: rateInfo.rateCapitationType,
-                rateDocuments: formatDocumentsForDomain(rateInfo.rateDocuments),
+                rateDocuments: formatDocumentsForDomain(
+                    rateInfo.rateDocuments,
+                    ['RATES']
+                ),
                 supportingDocuments: formatDocumentsForDomain(
-                    rateInfo.supportingDocuments
+                    rateInfo.supportingDocuments,
+                    ['RATES_RELATED']
                 ),
                 rateDateStart: formatFormDateForDomain(rateInfo.rateDateStart),
                 rateDateEnd: formatFormDateForDomain(rateInfo.rateDateEnd),
@@ -211,6 +220,8 @@ export const RateDetails = ({
             }
         })
 
+        draftSubmission.rateInfos = cleanedRateInfos
+
         try {
             const updatedSubmission = await updateDraft(draftSubmission)
             if (updatedSubmission instanceof Error) {
@@ -227,6 +238,9 @@ export const RateDetails = ({
         }
     }
 
+    // Due to multi-rates we have extra handling around how error summary apperas
+    // Error summary object keys will be used as DP< focus point from error-summary. Must be valid html selector
+    // Error summary object values will be used as messages displays in error summary
     const generateErrorSummaryErrors = (
         errors: FormikErrors<RateInfoArrayType>
     ) => {
@@ -236,6 +250,7 @@ export const RateDetails = ({
         if (rateErrors && Array.isArray(rateErrors)) {
             rateErrors.forEach((rateError, index) => {
                 if (!rateError) return
+
                 Object.entries(rateError).forEach(([field, value]) => {
                     if (typeof value === 'string') {
                         //rateProgramIDs error message needs a # proceeding the key name because this is the only way to be able to link to the Select component element see comments in ErrorSummaryMessage component.
@@ -263,6 +278,17 @@ export const RateDetails = ({
                             }
                         )
                     }
+
+                    // adjust focus key for documents slightly - if its an input error focus on input, otherwise focus on the list itself
+                    //     errors={
+                    //         documentsErrorMessage
+                    //             ? {
+                    //                   [documentsErrorKey]:
+                    //                       documentsErrorMessage,
+                    //                   ...errors,
+                    //               }
+                    //             : errors
+                    //     }
                 })
             })
         }
@@ -273,8 +299,8 @@ export const RateDetails = ({
     return (
         <Formik
             initialValues={rateInfosInitialValues}
-            onSubmit={(values, { setSubmitting }) => {
-                return handleFormSubmit(values.rateInfos, setSubmitting, {
+            onSubmit={({ rateInfos }, { setSubmitting }) => {
+                return handleFormSubmit({ rateInfos }, setSubmitting, {
                     shouldValidateDocuments: true,
                     redirectPath: `../contacts`,
                 })
@@ -284,6 +310,7 @@ export const RateDetails = ({
             {({
                 values: { rateInfos },
                 errors,
+                dirty,
                 handleSubmit,
                 isSubmitting,
                 setSubmitting,
@@ -366,19 +393,23 @@ export const RateDetails = ({
                             </fieldset>
                             <PageActions
                                 backOnClick={async () => {
-                                    await handleFormSubmit(
-                                        rateInfos,
-                                        setSubmitting,
-                                        {
-                                            shouldValidateDocuments: false,
-                                            redirectPath: `../contract-details`,
-                                        }
-                                    )
+                                    const redirectPath = `../contract-details`
+                                    if (dirty) {
+                                        await handleFormSubmit(
+                                            { rateInfos },
+                                            setSubmitting,
+                                            {
+                                                shouldValidateDocuments: false,
+                                                redirectPath,
+                                            }
+                                        )
+                                    } else {
+                                        navigate(redirectPath)
+                                    }
                                 }}
                                 saveAsDraftOnClick={async () => {
-                                    setFocusErrorSummaryHeading(true)
                                     await handleFormSubmit(
-                                        rateInfos,
+                                        { rateInfos },
                                         setSubmitting,
                                         {
                                             shouldValidateDocuments: true,

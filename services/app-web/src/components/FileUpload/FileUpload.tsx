@@ -18,7 +18,6 @@ import { pluralize } from '../../common-code/formatters'
 
 import { recordUserInputException } from '../../otelHelpers'
 import { calculateSHA256 } from '../../common-code/sha/generateSha'
-import { useField } from 'formik'
 
 export type S3FileData = {
     key: string
@@ -37,7 +36,7 @@ export type FileUploadProps = {
     uploadFile: (file: File) => Promise<S3FileData>
     scanFile?: (key: string) => Promise<void | Error> // optional function to be called after uploading (used for scanning)
     deleteFile: (key: string) => Promise<void>
-    onFileItemsUpdate?: ({ fileItems }: { fileItems: FileItemT[] }) => void // deprecated
+    onFileItemsUpdate: ({ fileItems }: { fileItems: FileItemT[] }) => void
     isContractOnly?: boolean
     shouldDisplayMissingCategoriesError?: boolean // by default, false. the parent component may read current files list and requirements of the form to determine otherwise.
     innerInputRef?: (el: HTMLInputElement) => void
@@ -73,7 +72,6 @@ export const FileUpload = ({
     const summaryRef = useRef<HTMLHeadingElement>(null) // reference to the heading that we will focus
     const previousFileItems = usePrevious(fileItems)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [field, meta, helpers] = useField({ name })
 
     const handleCheckboxClick = (
         event: React.ChangeEvent<HTMLInputElement>
@@ -100,13 +98,12 @@ export const FileUpload = ({
     }
 
     const inputRequired = inputProps['aria-required'] || inputProps.required
-    // update fileItems in parent
+
     React.useEffect(() => {
         if (JSON.stringify(fileItems) !== JSON.stringify(previousFileItems)) {
-            onFileItemsUpdate && onFileItemsUpdate({ fileItems })
-            helpers.setValue(fileItems, false)
+            onFileItemsUpdate({ fileItems })
         }
-    }, [fileItems, previousFileItems, onFileItemsUpdate, helpers])
+    }, [fileItems, previousFileItems, onFileItemsUpdate])
 
     //Pass input ref to parent when innerInputRef prop exists.
     React.useEffect(() => {

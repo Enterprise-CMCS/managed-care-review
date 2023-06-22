@@ -8,6 +8,29 @@ import { screen, waitFor } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import userEvent from '@testing-library/user-event'
 
+const mockOnChange = jest.fn()
+const mockSetValue = jest.fn()
+
+// mock out formik hook as we are not testing formik
+// needs to be before first describe
+jest.mock('formik', () => {
+    return {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore-next-line
+        ...jest.requireActual('formik'),
+        useField: () => [
+            {
+                onChange: mockOnChange,
+            },
+            {
+                touched: true,
+                error: 'You must provide a description of any major changes or updates',
+            },
+            { setValue: mockSetValue },
+        ],
+    }
+})
+
 describe('ProgramSelect', () => {
     const packageOptions = [
         { value: 'test-id-124', label: 'MCR-MN-0005-MSC+-PMAP-SNBC' },

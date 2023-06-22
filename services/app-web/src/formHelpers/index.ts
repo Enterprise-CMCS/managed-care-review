@@ -8,5 +8,5 @@ export {
     isDateRangeEmpty,
     validateDateFormat,
     validateDateRange12Months,
-    validateFileUpload,
+    validateFileItemsList,
 } from './validators'

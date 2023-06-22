@@ -2,7 +2,7 @@ import * as Yup from 'yup'
 import { dayjs } from '../../../common-code/dateHelpers'
 import { FeatureFlagSettings } from '../../../common-code/featureFlags'
 import { validateDateFormat } from '../../../formHelpers'
-import { validateFileUpload } from '../../../formHelpers/validators'
+import { validateFileItemsList } from '../../../formHelpers/validators'
 
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
@@ -24,9 +24,9 @@ const SingleRateCertSchema = (activeFeatureFlags: FeatureFlagSettings) =>
                   })
                   .required()
             : Yup.array(),
-        rateDocuments: validateFileUpload({ required: true }),
+        rateDocuments: validateFileItemsList({ required: true }),
         supportingDocuments: activeFeatureFlags['supporting-docs-by-rate']
-            ? validateFileUpload({ required: false })
+            ? validateFileItemsList({ required: false })
             : Yup.mixed(),
         rateProgramIDs: Yup.array().min(1, 'You must select a program'),
         rateType: Yup.string().defined(

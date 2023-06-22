@@ -2,7 +2,7 @@
 @import '../../styles/custom.scss';
 
 .formPage {
-    width: 100%; 
+    width: 100%;
 }
 
 .formContainer.tableContainer {
@@ -137,6 +137,11 @@
 
 .guidanceTextBlock{
     padding-top: .5em;
+    display: flex;
+    flex-direction: column;
+}
+
+.guidanceTextBlockNoPadding{
     display: flex;
     flex-direction: column;
 }

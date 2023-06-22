@@ -11,7 +11,10 @@ import { FieldYesNo, PoliteErrorMessage } from '../../../../components'
 import { FormGroup, Label, Link } from '@trussworks/react-uswds'
 import { PackageSelect } from '../../../../components/Select'
 import { getIn, useFormikContext } from 'formik'
-import { RateInfoArrayType } from '../SingleRateCert/SingleRateCert'
+import {
+    RateCertFormType,
+    RateInfoArrayType,
+} from '../SingleRateCert/SingleRateCert'
 
 import styles from '../../StateSubmissionForm.module.scss'
 
@@ -34,6 +37,13 @@ export const PackagesWithSharedRates = ({
     const [packageOptions, setPackageOptions] = React.useState<
         PackageOptionType[]
     >([])
+
+    const showFieldErrors = (
+        fieldName: keyof RateCertFormType
+    ): string | undefined => {
+        if (!shouldValidate) return undefined
+        return getIn(errors, `${fieldNamePrefix}.${fieldName}`)
+    }
 
     // Grab values and submitForm from context
     const { values, errors, setFieldValue } =
@@ -100,11 +110,8 @@ export const PackagesWithSharedRates = ({
     return (
         <FormGroup
             error={Boolean(
-                getIn(errors, `${fieldNamePrefix}.hasSharedRateCert`) ||
-                    getIn(
-                        errors,
-                        `${fieldNamePrefix}.packagesWithSharedRateCerts`
-                    )
+                showFieldErrors('hasSharedRateCert') &&
+                    showFieldErrors('packagesWithSharedRateCerts')
             )}
         >
             <FieldYesNo
@@ -112,10 +119,7 @@ export const PackagesWithSharedRates = ({
                 id={`hasSharedRateCert.${index}.hasSharedRateCert`}
                 name={`${fieldNamePrefix}.hasSharedRateCert`}
                 label="Was this rate certification uploaded to any other submissions?"
-                showError={Boolean(
-                    shouldValidate &&
-                        getIn(errors, `${fieldNamePrefix}.hasSharedRateCert`)
-                )}
+                showError={Boolean(showFieldErrors('hasSharedRateCert'))}
             />
 
             {getIn(values, `${fieldNamePrefix}.hasSharedRateCert`) ===

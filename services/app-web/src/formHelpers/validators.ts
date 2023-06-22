@@ -2,7 +2,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dayjs from 'dayjs'
 import * as Yup from 'yup'
-import { FileItemT } from '../components'
+import {
+    hasAtLeastOneFile,
+    hasNoFileErrors,
+    hasNoLoadingFiles,
+} from '../components/FileUpload'
 
 /*
     validateDateFormat is a custom Yup method
@@ -45,42 +49,28 @@ const validateDateRange12Months = (
 const isDateRangeEmpty = (startDate?: string, endDate?: string) =>
     !startDate && !endDate
 
-const validateFileUpload = ({ required }: { required: boolean }) => {
+const validateFileItemsList = ({ required }: { required: boolean }) => {
     return Yup.mixed()
         .test(
             'is-not-empty',
             'You must upload at least one document',
-            (value) => (required ? _hasAtLeastOneFile(value) : true)
+            (value) => (required ? hasAtLeastOneFile(value) : true)
         )
         .test(
             'is-not-loading',
             'You must wait for all documents to finish uploading before continuing',
-            (value) => _hasNoLoadingFiles(value)
+            (value) => hasNoLoadingFiles(value)
         )
         .test(
             'is-error-free',
             'You must remove all documents with error messages before continuing',
-            (value) => _hasNoFileErrors(value)
+            (value) => hasNoFileErrors(value)
         )
 }
-const _hasNoLoadingFiles = (fileItems: FileItemT[]) =>
-    fileItems.every(
-        (item) => item.status !== 'PENDING' && item.status !== 'SCANNING'
-    )
-
-const _hasNoFileErrors = (fileItems: FileItemT[]) =>
-    fileItems.every(
-        (item) =>
-            item.status !== 'DUPLICATE_NAME_ERROR' &&
-            item.status !== 'UPLOAD_ERROR' &&
-            item.status !== 'SCANNING_ERROR'
-    )
-
-const _hasAtLeastOneFile = (fileItems: FileItemT[]) => fileItems.length > 0
 
 export {
     isDateRangeEmpty,
     validateDateFormat,
     validateDateRange12Months,
-    validateFileUpload,
+    validateFileItemsList,
 }

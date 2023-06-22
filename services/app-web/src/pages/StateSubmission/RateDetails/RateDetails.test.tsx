@@ -26,6 +26,7 @@ import {
     dragAndDrop,
     updateDateRange,
     ldUseClientSpy,
+    TEST_TEXT_FILE,
 } from '../../../testHelpers'
 import { RateDetails } from './RateDetails'
 import { ACCEPTED_SUBMISSION_FILE_TYPES } from '../../../components/FileUpload'
@@ -1467,7 +1468,7 @@ describe('RateDetails', () => {
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                supportingDocuments:  [],
+                supportingDocuments: [],
                 rateType: undefined,
                 rateDateStart: undefined,
                 rateDateEnd: undefined,
@@ -1620,7 +1621,8 @@ describe('RateDetails', () => {
             expect(mockUpdateDraftFn).not.toHaveBeenCalled()
         })
 
-        it('when duplicate files present, does not trigger duplicate documents alert on click and silently updates submission without the duplicate', async () => {
+        it('when duplicate files present, does not trigger duplicate documents alert on click and silently updates rate and supporting documents lists without duplicates', async () => {
+            ldUseClientSpy({ 'supporting-docs-by-rate': true })
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
@@ -1630,47 +1632,47 @@ describe('RateDetails', () => {
                 />,
                 {
                     apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                        mocks: [
+                            indexHealthPlanPackagesMockSuccess([
+                                {
+                                    ...mockSubmittedHealthPlanPackage(),
+                                    id: 'test-abc-123',
+                                },
+                            ]),
+                        ],
                     },
                 }
             )
 
-            const input = screen.getByLabelText('Upload rate certification')
+            const rateCertInput = screen.getByLabelText(
+                'Upload rate certification'
+            )
+            const supportingDocsInput = screen.getByLabelText(
+                'Upload supporting documents (optional)'
+            )
             const backButton = screen.getByRole('button', {
                 name: 'Back',
             })
 
-            await userEvent.upload(input, [TEST_DOC_FILE])
-            await userEvent.upload(input, [TEST_PDF_FILE])
-            await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(rateCertInput, [TEST_DOC_FILE])
+            await userEvent.upload(rateCertInput, [TEST_PDF_FILE])
+            await userEvent.upload(rateCertInput, [TEST_DOC_FILE])
+
+            await userEvent.upload(supportingDocsInput, [TEST_XLS_FILE])
+            await userEvent.upload(supportingDocsInput, [TEST_TEXT_FILE])
+            await userEvent.upload(supportingDocsInput, [TEST_XLS_FILE])
             await waitFor(() => {
                 expect(backButton).not.toHaveAttribute('aria-disabled')
                 expect(
                     screen.queryAllByText('Duplicate file, please remove')
-                ).toHaveLength(1)
+                ).toHaveLength(2)
             })
             await userEvent.click(backButton)
             expect(screen.queryByText('Remove files with errors')).toBeNull()
             expect(mockUpdateDraftFn).toHaveBeenCalledWith(
                 expect.objectContaining({
                     rateInfos: [
-                        {
-                            rateType: undefined,
-                            rateCapitationType: undefined,
-                            rateDateStart: undefined,
-                            rateDateEnd: undefined,
-                            rateDateCertified: undefined,
-                            rateAmendmentInfo: undefined,
-                            rateProgramIDs: [],
-                            actuaryContacts: [
-                                {
-                                    actuarialFirm: undefined,
-                                    actuarialFirmOther: '',
-                                    email: '',
-                                    name: '',
-                                    titleRole: '',
-                                },
-                            ],
+                        expect.objectContaining({
                             rateDocuments: [
                                 {
                                     name: 'testFile.doc',
@@ -1685,9 +1687,21 @@ describe('RateDetails', () => {
                                     sha256: '6d50607f29187d5b185ffd9d46bc5ef75ce7abb53318690c73e55b6623e25ad5', // pragma: allowlist secret
                                 },
                             ],
-                            supportingDocuments: [],
-                            packagesWithSharedRateCerts: [],
-                        },
+                            supportingDocuments: [
+                                {
+                                    name: 'testFile.xls',
+                                    s3URL: expect.any(String),
+                                    documentCategories: ['RATES'],
+                                    sha256: 'da7d22ce886b5ab262cd7ab28901212a027630a5edf8e88c8488087b03ffd833', // pragma: allowlist secret
+                                },
+                                {
+                                    name: 'testFile.txt',
+                                    s3URL: expect.any(String),
+                                    documentCategories: ['RATES'],
+                                    sha256: '6d50607f29187d5b185ffd9d46bc5ef75ce7abb53318690c73e55b6623e25ad5', // pragma: allowlist secret
+                                },
+                            ],
+                        }),
                     ],
                 })
             )

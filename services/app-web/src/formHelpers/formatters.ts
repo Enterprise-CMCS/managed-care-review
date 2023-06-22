@@ -73,7 +73,7 @@ const formatFormDateForDomain = (attribute: string): Date | undefined => {
 
 const formatDocumentsForDomain = (
     fileItems: FileItemT[],
-    documentCategory?: DocumentCategoryType[]
+    documentCategory?: DocumentCategoryType[] // if present will override any existing categories on the file items
 ): SubmissionDocument[] => {
     return fileItems.reduce((cleanedFileItems, fileItem) => {
         if (fileItem.status === 'UPLOAD_ERROR') {
@@ -97,7 +97,8 @@ const formatDocumentsForDomain = (
                 name: fileItem.name,
                 s3URL: fileItem.s3URL,
                 sha256: fileItem.sha256,
-                documentCategories: fileItem.documentCategories,
+                documentCategories:
+                    documentCategory || fileItem.documentCategories,
             })
         }
         return cleanedFileItems
