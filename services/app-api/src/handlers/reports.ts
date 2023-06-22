@@ -17,6 +17,11 @@ import {
     userFromCognitoAuthProvider,
     userFromLocalAuthProvider,
 } from '../authn'
+import {
+    initTracer,
+    initMeter,
+    recordException,
+} from '../../../uploads/src/lib/otel'
 
 type RequiredRevisionWithDecodedProtobufProperties = {
     formDataProto: HealthPlanFormDataType | Error
@@ -128,12 +133,29 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
         result,
         programList
     )
-
+    const stageName = process.env.stage
+    if (!stageName || stageName === '') {
+        throw new Error('Configuration Error: stage env var must be set')
+    }
+    const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
+    if (!otelCollectorURL || otelCollectorURL === '') {
+        throw new Error(
+            'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
+        )
+    }
+    const serviceName = `reports_endpoint-${stageName}`
+    initTracer(serviceName, otelCollectorURL)
+    initMeter(serviceName)
     const bucket = [] as RevisionWithDecodedProtobuf[]
-    allDecodedRevisions.forEach((revision) => {
+    for (const revision of allDecodedRevisions) {
         if (revision.formDataProto instanceof Error) {
-            console.error('Error decoding revision')
-            throw new Error(`Error generating reports array`)
+            console.error('Error decoding revision', revision.id)
+            recordException(
+                revision.formDataProto,
+                serviceName,
+                'decode_revision'
+            )
+            continue
         } else {
             // add the package name to the revision
             revision.packageName = packageName(
@@ -154,7 +176,7 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
                 bucket.push(revision)
             }
         }
-    })
+    }
     const parser = new Parser({
         transforms: [
             transforms.flatten({

@@ -49,4 +49,4 @@ fi
 
 # build and run dev.ts
 # tsc is configured to build what we expect in tsconfig.json
-lerna run build --scope=dev_tool && node ./dev_tool/build/dev.js "$@"
+npx lerna run build --scope=dev_tool && node ./dev_tool/build/dev.js "$@"
