@@ -224,21 +224,33 @@ describe('findContract', () => {
 
         expect(revisions).toHaveLength(8)
         expect(revisions[0].rateRevisions).toHaveLength(0)
+        expect(revisions[0].unlockInfo).toBeUndefined()
         expect(revisions[0].submitInfo?.updatedReason).toBe('initial submit')
 
         expect(revisions[1].rateRevisions).toHaveLength(1)
+        expect(revisions[1].unlockInfo).toBeUndefined()
         expect(revisions[1].submitInfo?.updatedReason).toBe('Rate Submit')
 
         expect(revisions[2].rateRevisions).toHaveLength(2)
+        expect(revisions[2].unlockInfo).toBeUndefined()
         expect(revisions[2].submitInfo?.updatedReason).toBe('RateSubmit 2')
 
         expect(revisions[3].rateRevisions).toHaveLength(3)
+        expect(revisions[3].unlockInfo).toBeUndefined()
+        expect(revisions[3].submitInfo?.updatedReason).toBe('3.0 create')
+
         expect(revisions[4].rateRevisions).toHaveLength(2)
+        expect(revisions[4].unlockInfo?.updatedReason).toBe(
+            'unlock for 2.1 remove'
+        )
+        expect(revisions[4].unlockInfo?.updatedBy).toBe('zuko@example.com')
+        expect(revisions[4].submitInfo?.updatedReason).toBe('2.1 remove')
 
         expect(revisions[5].rateRevisions).toHaveLength(2)
         expect(revisions[5].rateRevisions[1].revisionFormData).toBe(
             'onepointone'
         )
+        expect(revisions[5].unlockInfo?.updatedReason).toBe('unlock for 1.1')
         expect(revisions[5].submitInfo?.updatedReason).toBe('1.1 new name')
 
         expect(revisions[6].rateRevisions).toHaveLength(2)
@@ -608,14 +620,11 @@ describe('findContract', () => {
         expect(revisions[2].rateRevisions).toHaveLength(2)
         expect(revisions[2].submitInfo?.updatedReason).toBe('third submit')
 
-        expect(
+        // these revisions can be in any order because they were saved at the same time
+        const revisionFormDatas = new Set(
             revisions[2].rateRevisions.map((rr) => rr.revisionFormData)
-        ).toStrictEqual(['onepoint0', 'twopointone'])
+        )
+        const expectedFormDatas = new Set(['onepoint0', 'twopointone'])
+        expect(revisionFormDatas).toStrictEqual(expectedFormDatas)
     })
-
-    // get the current thing only, maybe ignoring the current draft
-
-    // go from the other direction. find rate
-
-    // get draft?
 })
