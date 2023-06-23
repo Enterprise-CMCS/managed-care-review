@@ -175,7 +175,9 @@ export const getRevisions = async (
     const result: HealthPlanRevisionTable[] | StoreError =
         await store.findAllRevisions()
     if (isStoreError(result)) {
-        console.error(`Error getting revisions from db ${result}`)
+        console.error(
+            `Error getting revisions from db ${JSON.stringify(result)}`
+        )
         throw new Error('Error getting records; cannot generate report')
     }
 
@@ -185,16 +187,16 @@ export const getRevisions = async (
 export const main: Handler = async (event, context) => {
     // Check on the values for our required config
     const stageName = process.env.stage ?? 'stageNotSet'
-
+    const serviceName = `add_sha_lambda-${stageName}`
     const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
-    if (!otelCollectorURL || otelCollectorURL === '') {
-        throw new Error(
+    if (otelCollectorURL) {
+        initTracer(serviceName, otelCollectorURL)
+    } else {
+        console.error(
             'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
         )
     }
 
-    const serviceName = `add_sha_lambda-${stageName}`
-    initTracer(serviceName, otelCollectorURL)
     initMeter(serviceName)
     const store = await getDatabaseConnection()
 

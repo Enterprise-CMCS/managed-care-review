@@ -77,7 +77,7 @@ const decodeRevisions = (
 
 export const main: APIGatewayProxyHandler = async (event, context) => {
     const authProvider =
-        event.requestContext.identity.cognitoAuthenticationProvider || ''
+        event.requestContext.identity.cognitoAuthenticationProvider ?? ''
     const programList = [] as ProgramArgType[]
     statePrograms.states.forEach((state) => {
         programList.push(...state.programs)
@@ -134,14 +134,15 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
         programList
     )
     const stageName = process.env.stage ?? 'stageNotSet'
+    const serviceName = `reports_endpoint-${stageName}`
     const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
-    if (!otelCollectorURL || otelCollectorURL === '') {
-        throw new Error(
+    if (otelCollectorURL) {
+        initTracer(serviceName, otelCollectorURL)
+    } else {
+        console.error(
             'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
         )
     }
-    const serviceName = `reports_endpoint-${stageName}`
-    initTracer(serviceName, otelCollectorURL)
     initMeter(serviceName)
     const bucket = [] as RevisionWithDecodedProtobuf[]
     for (const revision of allDecodedRevisions) {
@@ -152,7 +153,6 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
                 serviceName,
                 'decode_revision'
             )
-            continue
         } else {
             // add the package name to the revision
             revision.packageName = packageName(
