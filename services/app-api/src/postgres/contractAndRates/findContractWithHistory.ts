@@ -21,8 +21,8 @@ function convertUpdateInfo(
     }
 }
 
-// this is for the internal building of individual revisions
-// we convert them into ContractRevions to return them
+// ContractRevisionSet is for the internal building of individual revisions
+// we convert them into ContractRevisions to return them
 interface ContractRevisionSet {
     contractRev: ContractRevisionTable
     submitInfo: UpdateInfoTableWithUpdater
@@ -30,6 +30,10 @@ interface ContractRevisionSet {
     rateRevs: RateRevisionTable[]
 }
 
+// findContractWithHistory returns a ContractType with a full set of
+// ContractRevisions in reverse chronological order. Each revision is a change to this
+// Contract with submit and unlock info. Changes to the data of this contract, or changes
+// to the data or relations of associate revisions will all surface as new ContractRevisions
 async function findContractWithHistory(
     client: PrismaTransactionType,
     contractID: string
@@ -61,13 +65,12 @@ async function findContractWithHistory(
             },
         })
 
-        // each contract revision has a bunch of initial rates
-        // each set of rates gets its own "revision" in the return list
-        // further contractRevs naturally are their own "revision"
-
-        const allEntries: ContractRevisionSet[] = []
+        // We iterate through each contract revision in order, adding it as a revision in the history
+        // then iterate through each of its rates, constructing a history of any rates that changed
+        // between contract revision updates
+        const allRevisionSets: ContractRevisionSet[] = []
         for (const contractRev of contractRevisions) {
-            // no drafts allowed
+            // We exclude the draft from this list, use findDraftContract to get the current draft
             if (!contractRev.submitInfo) {
                 continue
             }
@@ -79,10 +82,11 @@ async function findContractWithHistory(
                 rateRevs: [],
             }
 
-            allEntries.push(initialEntry)
+            allRevisionSets.push(initialEntry)
 
             let lastEntry = initialEntry
-            // go through every rate revision in the join table in order
+            // go through every rate revision in the join table in time order and construct a revisionSet
+            // with (or without) the new rate revision in it.
             for (const rateRev of contractRev.rateRevisions) {
                 if (!rateRev.rateRevision.submitInfo) {
                     return new Error(
@@ -103,6 +107,7 @@ async function findContractWithHistory(
                     lastRates = lastRates.filter(
                         (r) => r.rateID !== rateRev.rateRevision.rateID
                     )
+                    // an isRemoval entry indicates that this rate was removed from this contract.
                     if (!rateRev.isRemoval) {
                         lastRates.push(rateRev.rateRevision)
                     }
@@ -116,27 +121,29 @@ async function findContractWithHistory(
                     }
 
                     lastEntry = newRev
-                    allEntries.push(newRev)
+                    allRevisionSets.push(newRev)
                 }
             }
         }
 
-        const allRevisions: ContractRevision[] = allEntries.map((entry) => ({
-            id: entry.contractRev.id,
-            submitInfo: convertUpdateInfo(entry.submitInfo),
-            unlockInfo: entry.unlockInfo
-                ? convertUpdateInfo(entry.unlockInfo)
-                : undefined,
-            contractFormData: entry.contractRev.name,
-            rateRevisions: entry.rateRevs.map((rrev) => ({
-                id: rrev.id,
-                revisionFormData: rrev.name,
-            })),
-        }))
+        const allRevisions: ContractRevision[] = allRevisionSets.map(
+            (entry) => ({
+                id: entry.contractRev.id,
+                submitInfo: convertUpdateInfo(entry.submitInfo),
+                unlockInfo: entry.unlockInfo
+                    ? convertUpdateInfo(entry.unlockInfo)
+                    : undefined,
+                contractFormData: entry.contractRev.name,
+                rateRevisions: entry.rateRevs.map((rrev) => ({
+                    id: rrev.id,
+                    revisionFormData: rrev.name,
+                })),
+            })
+        )
 
         return {
             id: contractID,
-            revisions: allRevisions,
+            revisions: allRevisions.reverse(),
         }
     } catch (err) {
         console.error('PRISMA ERROR', err)

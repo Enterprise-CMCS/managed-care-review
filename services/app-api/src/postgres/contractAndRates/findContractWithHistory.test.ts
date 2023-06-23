@@ -13,7 +13,7 @@ import { findRateWithHistory } from './findRateWithHistory'
 import { must } from '../../testHelpers'
 
 describe('findContract', () => {
-    it('finds a stripped down contract', async () => {
+    it('finds a stripped down contract with history', async () => {
         const client = await sharedTestPrismaClient()
 
         const stateUser = await client.user.create({
@@ -101,7 +101,7 @@ describe('findContract', () => {
             throw twoContract
         }
         expect(twoContract.revisions).toHaveLength(5)
-        expect(twoContract.revisions[4].rateRevisions).toHaveLength(2)
+        expect(twoContract.revisions[0].rateRevisions).toHaveLength(2)
 
         // update rate 1 to have a new version, should make one new rev.
         must(await unlockRate(client, rate1.id, cmsUser.id, 'unlock for 1.1'))
@@ -189,52 +189,72 @@ describe('findContract', () => {
             throw resultingContract
         }
 
-        const revisions = resultingContract.revisions
+        const revisionsInTimeOrder = resultingContract.revisions.reverse()
 
         console.info(
             'ALL First REvisions: ',
-            JSON.stringify(revisions, null, '  ')
+            JSON.stringify(revisionsInTimeOrder, null, '  ')
         )
 
         // Each Revision needs a Reason, one of the contracts or revisions associated with it should have changed and why.
 
-        expect(revisions).toHaveLength(8)
-        expect(revisions[0].rateRevisions).toHaveLength(0)
-        expect(revisions[0].unlockInfo).toBeUndefined()
-        expect(revisions[0].submitInfo?.updatedReason).toBe('initial submit')
+        expect(revisionsInTimeOrder).toHaveLength(8)
+        expect(revisionsInTimeOrder[0].rateRevisions).toHaveLength(0)
+        expect(revisionsInTimeOrder[0].unlockInfo).toBeUndefined()
+        expect(revisionsInTimeOrder[0].submitInfo?.updatedReason).toBe(
+            'initial submit'
+        )
 
-        expect(revisions[1].rateRevisions).toHaveLength(1)
-        expect(revisions[1].unlockInfo).toBeUndefined()
-        expect(revisions[1].submitInfo?.updatedReason).toBe('Rate Submit')
+        expect(revisionsInTimeOrder[1].rateRevisions).toHaveLength(1)
+        expect(revisionsInTimeOrder[1].unlockInfo).toBeUndefined()
+        expect(revisionsInTimeOrder[1].submitInfo?.updatedReason).toBe(
+            'Rate Submit'
+        )
 
-        expect(revisions[2].rateRevisions).toHaveLength(2)
-        expect(revisions[2].unlockInfo).toBeUndefined()
-        expect(revisions[2].submitInfo?.updatedReason).toBe('RateSubmit 2')
+        expect(revisionsInTimeOrder[2].rateRevisions).toHaveLength(2)
+        expect(revisionsInTimeOrder[2].unlockInfo).toBeUndefined()
+        expect(revisionsInTimeOrder[2].submitInfo?.updatedReason).toBe(
+            'RateSubmit 2'
+        )
 
-        expect(revisions[3].rateRevisions).toHaveLength(3)
-        expect(revisions[3].unlockInfo).toBeUndefined()
-        expect(revisions[3].submitInfo?.updatedReason).toBe('3.0 create')
+        expect(revisionsInTimeOrder[3].rateRevisions).toHaveLength(3)
+        expect(revisionsInTimeOrder[3].unlockInfo).toBeUndefined()
+        expect(revisionsInTimeOrder[3].submitInfo?.updatedReason).toBe(
+            '3.0 create'
+        )
 
-        expect(revisions[4].rateRevisions).toHaveLength(2)
-        expect(revisions[4].unlockInfo?.updatedReason).toBe(
+        expect(revisionsInTimeOrder[4].rateRevisions).toHaveLength(2)
+        expect(revisionsInTimeOrder[4].unlockInfo?.updatedReason).toBe(
             'unlock for 2.1 remove'
         )
-        expect(revisions[4].unlockInfo?.updatedBy).toBe('zuko@example.com')
-        expect(revisions[4].submitInfo?.updatedReason).toBe('2.1 remove')
+        expect(revisionsInTimeOrder[4].unlockInfo?.updatedBy).toBe(
+            'zuko@example.com'
+        )
+        expect(revisionsInTimeOrder[4].submitInfo?.updatedReason).toBe(
+            '2.1 remove'
+        )
 
-        expect(revisions[5].rateRevisions).toHaveLength(2)
-        expect(revisions[5].rateRevisions[1].revisionFormData).toBe(
+        expect(revisionsInTimeOrder[5].rateRevisions).toHaveLength(2)
+        expect(revisionsInTimeOrder[5].rateRevisions[1].revisionFormData).toBe(
             'onepointone'
         )
-        expect(revisions[5].unlockInfo?.updatedReason).toBe('unlock for 1.1')
-        expect(revisions[5].submitInfo?.updatedReason).toBe('1.1 new name')
+        expect(revisionsInTimeOrder[5].unlockInfo?.updatedReason).toBe(
+            'unlock for 1.1'
+        )
+        expect(revisionsInTimeOrder[5].submitInfo?.updatedReason).toBe(
+            '1.1 new name'
+        )
 
-        expect(revisions[6].rateRevisions).toHaveLength(2)
-        expect(revisions[6].submitInfo?.updatedReason).toBe('Submitting A.1')
+        expect(revisionsInTimeOrder[6].rateRevisions).toHaveLength(2)
+        expect(revisionsInTimeOrder[6].submitInfo?.updatedReason).toBe(
+            'Submitting A.1'
+        )
 
-        expect(revisions[7].rateRevisions).toHaveLength(1)
-        expect(revisions[7].contractFormData).toBe('a.2 body')
-        expect(revisions[7].submitInfo?.updatedReason).toBe('Submitting A.2')
+        expect(revisionsInTimeOrder[7].rateRevisions).toHaveLength(1)
+        expect(revisionsInTimeOrder[7].contractFormData).toBe('a.2 body')
+        expect(revisionsInTimeOrder[7].submitInfo?.updatedReason).toBe(
+            'Submitting A.2'
+        )
 
         // check for rate and see if it handles the removed bit right
 
@@ -244,7 +264,7 @@ describe('findContract', () => {
         }
 
         expect(rate1fetched.revisions).toHaveLength(4)
-        expect(rate1fetched.revisions[3].submitInfo?.updatedReason).toBe(
+        expect(rate1fetched.revisions[0].submitInfo?.updatedReason).toBe(
             'Submitting A.2'
         )
     })
@@ -380,7 +400,7 @@ describe('findContract', () => {
             throw resultingContract
         }
 
-        const revisions = resultingContract.revisions
+        const revisions = resultingContract.revisions.reverse()
 
         console.info(
             'ALL First REvisions: ',
@@ -423,7 +443,7 @@ describe('findContract', () => {
         }
 
         expect(rate1fetched.revisions).toHaveLength(4)
-        expect(rate1fetched.revisions[3].submitInfo?.updatedReason).toBe(
+        expect(rate1fetched.revisions[0].submitInfo?.updatedReason).toBe(
             'Submitting A.2'
         )
     })
@@ -526,7 +546,7 @@ describe('findContract', () => {
             throw res
         }
 
-        const revisions = res.revisions
+        const revisions = res.revisions.reverse()
 
         console.info(
             'ALL First REvisions: ',

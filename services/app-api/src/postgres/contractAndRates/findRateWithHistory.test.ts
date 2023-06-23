@@ -146,7 +146,7 @@ describe('findContract', () => {
             throw resultingRate
         }
 
-        const revisions = resultingRate.revisions
+        const revisions = resultingRate.revisions.reverse()
 
         console.info(
             'ALL First REvisions: ',

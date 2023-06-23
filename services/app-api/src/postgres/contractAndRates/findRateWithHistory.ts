@@ -157,7 +157,7 @@ async function findRateWithHistory(
 
         return {
             id: rateID,
-            revisions: allRevisions,
+            revisions: allRevisions.reverse(),
         }
     } catch (err) {
         console.error('PRISMA ERROR', err)
