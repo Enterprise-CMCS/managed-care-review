@@ -6,6 +6,11 @@ import { HealthPlanFormDataType } from '../../../app-web/src/common-code/healthP
 import { toDomain } from '../../../app-web/src/common-code/proto/healthPlanFormDataProto'
 import { isStoreError, StoreError } from '../postgres/storeError'
 import { Store } from '../postgres'
+import {
+    initTracer,
+    initMeter,
+    recordException,
+} from '../../../uploads/src/lib/otel'
 
 /* We're changing where we store rate documents on the proto.  We're moving them from fromDataProto.documents
 to formDataProto.rateInfos[0].supportingDocuments.  This migration will move the documents from the old location
@@ -15,6 +20,19 @@ export const processRevisions = async (
     store: Store,
     revisions: HealthPlanRevisionTable[]
 ): Promise<void> => {
+    const stageName = process.env.stage
+    if (!stageName || stageName === '') {
+        throw new Error('Configuration Error: stage env var must be set')
+    }
+    const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
+    if (!otelCollectorURL || otelCollectorURL === '') {
+        throw new Error(
+            'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
+        )
+    }
+    const serviceName = `migrate_rate_documents_lambda-${stageName}`
+    initTracer(serviceName, otelCollectorURL)
+    initMeter(serviceName)
     for (const revision of revisions) {
         const pkgID = revision.pkgID
         const decodedFormDataProto = toDomain(revision.formDataProto)
@@ -71,10 +89,9 @@ export const processRevisions = async (
                 throw err
             }
         } else {
-            console.error(
-                `Error decoding formDataProto for revision ${revision.id} in sha migration: ${decodedFormDataProto}`
-            )
-            throw new Error('Error decoding formDataProto in sha migration')
+            const error = `Error decoding formDataProto for revision ${revision.id} in rate migration: ${decodedFormDataProto}`
+            console.error(error)
+            recordException(error, serviceName, 'migrate_rate_documents')
         }
     }
 }
@@ -114,7 +131,6 @@ export const getRevisions = async (
         console.error(`Error getting revisions from db ${result}`)
         throw new Error('Error getting records; cannot generate report')
     }
-
     return result
 }
 
