@@ -184,10 +184,7 @@ export const getRevisions = async (
 
 export const main: Handler = async (event, context) => {
     // Check on the values for our required config
-    const stageName = process.env.stage
-    if (!stageName || stageName === '') {
-        throw new Error('Configuration Error: stage env var must be set')
-    }
+    const stageName = process.env.stage ?? 'stageNotSet'
 
     const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
     if (!otelCollectorURL || otelCollectorURL === '') {

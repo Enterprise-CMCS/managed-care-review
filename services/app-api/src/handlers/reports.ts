@@ -133,10 +133,7 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
         result,
         programList
     )
-    const stageName = process.env.stage
-    if (!stageName || stageName === '') {
-        throw new Error('Configuration Error: stage env var must be set')
-    }
+    const stageName = process.env.stage ?? 'stageNotSet'
     const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
     if (!otelCollectorURL || otelCollectorURL === '') {
         throw new Error(
