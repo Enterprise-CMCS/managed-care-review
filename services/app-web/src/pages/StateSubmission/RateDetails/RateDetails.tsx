@@ -239,7 +239,7 @@ export const RateDetails = ({
     }
 
     // Due to multi-rates we have extra handling around how error summary apperas
-    // Error summary object keys will be used as DP< focus point from error-summary. Must be valid html selector
+    // Error summary object keys will be used as DOM focus point from error-summary. Must be valid html selector
     // Error summary object values will be used as messages displays in error summary
     const generateErrorSummaryErrors = (
         errors: FormikErrors<RateInfoArrayType>
@@ -261,7 +261,7 @@ export const RateDetails = ({
                                 : `rateInfos.${index}.${field}`
                         errorObject[errorKey] = value
                     }
-                    //If the field is actuaryContacts then the value should be an array with at least one object of errors
+                    // If the field is actuaryContacts then the value should be an array with at least one object of errors
                     if (
                         field === 'actuaryContacts' &&
                         Array.isArray(value) &&
@@ -278,17 +278,6 @@ export const RateDetails = ({
                             }
                         )
                     }
-
-                    // adjust focus key for documents slightly - if its an input error focus on input, otherwise focus on the list itself
-                    //     errors={
-                    //         documentsErrorMessage
-                    //             ? {
-                    //                   [documentsErrorKey]:
-                    //                       documentsErrorMessage,
-                    //                   ...errors,
-                    //               }
-                    //             : errors
-                    //     }
                 })
             })
         }
