@@ -9,7 +9,14 @@ import {
     Label,
     Button,
 } from '@trussworks/react-uswds'
-import { Field, FieldArray, Formik, FormikErrors, getIn } from 'formik'
+import {
+    Field,
+    FieldArray,
+    FieldArrayRenderProps,
+    Formik,
+    FormikErrors,
+    getIn,
+} from 'formik'
 import { useNavigate } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -599,7 +606,10 @@ export const RateDetails = ({
                                     />
                                 )}
                                 <FieldArray name="rateInfos">
-                                    {({ remove, push }) => (
+                                    {({
+                                        remove,
+                                        push,
+                                    }: FieldArrayRenderProps) => (
                                         <>
                                             {rateInfos.map(
                                                 (rateInfo, index) => (

@@ -13,6 +13,7 @@ import {
     FieldArray,
     ErrorMessage,
     getIn,
+    FieldArrayRenderProps,
 } from 'formik'
 import { useNavigate } from 'react-router-dom'
 
@@ -321,7 +322,7 @@ export const Contacts = ({
                             )}
 
                             <FieldArray name="stateContacts">
-                                {({ remove, push }) => (
+                                {({ remove, push }: FieldArrayRenderProps) => (
                                     <div
                                         className={styles.stateContacts}
                                         data-testid="state-contacts"
@@ -455,7 +456,10 @@ export const Contacts = ({
                                     </legend>
 
                                     <FieldArray name="addtlActuaryContacts">
-                                        {({ remove, push }) => (
+                                        {({
+                                            remove,
+                                            push,
+                                        }: FieldArrayRenderProps) => (
                                             <div
                                                 className={
                                                     styles.actuaryContacts
