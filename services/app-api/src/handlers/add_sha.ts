@@ -16,11 +16,6 @@ import {
     parseKey,
     parseBucketName,
 } from '../../../app-web/src/common-code/s3URLEncoding'
-import {
-    initTracer,
-    initMeter,
-    recordException,
-} from '../../../uploads/src/lib/otel'
 
 const s3 = new S3Client({ region: 'us-east-1' })
 
@@ -39,24 +34,25 @@ export const calculateSHA256 = async (s3URL: string): Promise<string> => {
             Bucket: parseBucketName(s3URL) as string,
             Key: `allusers/${parseKey(s3URL)}`,
         })
+
         const s3Object = await s3.send(getObjectCommand)
+
         const buffer = await streamToBuffer(s3Object.Body as Readable)
 
         const hash = createHash('sha256')
         hash.update(buffer)
         return hash.digest('hex')
     } catch (err) {
-        console.error(`Error in calculateSHA256 for ${s3URL}: ${err}`)
-        return ''
+        console.error(`Error calculating SHA256 for ${s3URL}: ${err}`)
+        throw err
     }
 }
 
 export const updateDocumentsSHA256 = async (
-    documents: SubmissionDocument[],
-    serviceName: string
+    documents: SubmissionDocument[]
 ): Promise<SubmissionDocument[]> => {
     try {
-        const updatedDocuments = await Promise.all(
+        await Promise.all(
             documents.map(async (document) => {
                 if (
                     !Object.prototype.hasOwnProperty.call(document, 'sha256') ||
@@ -64,52 +60,36 @@ export const updateDocumentsSHA256 = async (
                 ) {
                     try {
                         const sha256 = await calculateSHA256(document.s3URL)
-                        const updatedDocument = {
-                            ...document,
-                            sha256: `${sha256}`,
-                        }
-                        return updatedDocument
+                        document.sha256 = `${sha256}`
                     } catch (error) {
-                        console.error('Error in updateDocumentsSHA256:', error)
-                        recordException(error, serviceName, 'calculateSHA256')
-                        // Return the original document if an error occurs
-                        return document
+                        console.error('Error calculating SHA256:', error)
                     }
-                } else {
-                    return document
                 }
             })
         )
-        return updatedDocuments
+        return documents
     } catch (error) {
         console.error('Error in updateDocumentsSHA256:', error)
-        recordException(error, serviceName, 'updateDocumentsSHA256')
         throw error
     }
 }
 
 export const processRevisions = async (
     store: Store,
-    revisions: HealthPlanRevisionTable[],
-    serviceName: string
+    revisions: HealthPlanRevisionTable[]
 ): Promise<void> => {
     for (const revision of revisions) {
         const pkgID = revision.pkgID
         const decodedFormDataProto = toDomain(revision.formDataProto)
         if (!(decodedFormDataProto instanceof Error)) {
             const formData = decodedFormDataProto as HealthPlanFormDataType
-            formData.documents = await updateDocumentsSHA256(
-                formData.documents,
-                serviceName
-            )
+            formData.documents = await updateDocumentsSHA256(formData.documents)
             formData.contractDocuments = await updateDocumentsSHA256(
-                formData.contractDocuments,
-                serviceName
+                formData.contractDocuments
             )
             for (const rateInfo of formData.rateInfos) {
                 rateInfo.rateDocuments = await updateDocumentsSHA256(
-                    rateInfo.rateDocuments,
-                    serviceName
+                    rateInfo.rateDocuments
                 )
             }
             try {
@@ -134,11 +114,7 @@ export const processRevisions = async (
             console.error(
                 `Error decoding formDataProto for revision ${revision.id} in sha migration: ${decodedFormDataProto}`
             )
-            recordException(
-                `Error decoding formDataProto for revision ${revision.id} in sha migration: ${decodedFormDataProto}`,
-                serviceName,
-                'processRevisions'
-            )
+            throw new Error('Error decoding formDataProto in sha migration')
         }
     }
 }
@@ -175,9 +151,7 @@ export const getRevisions = async (
     const result: HealthPlanRevisionTable[] | StoreError =
         await store.findAllRevisions()
     if (isStoreError(result)) {
-        console.error(
-            `Error getting revisions from db ${JSON.stringify(result)}`
-        )
+        console.error(`Error getting revisions from db ${result}`)
         throw new Error('Error getting records; cannot generate report')
     }
 
@@ -185,22 +159,10 @@ export const getRevisions = async (
 }
 
 export const main: Handler = async (event, context) => {
-    // Check on the values for our required config
-    const stageName = process.env.stage ?? 'stageNotSet'
-    const serviceName = `add_sha_lambda-${stageName}`
-    const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
-    if (otelCollectorURL) {
-        initTracer(serviceName, otelCollectorURL)
-    } else {
-        console.error(
-            'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
-        )
-    }
-
-    initMeter(serviceName)
     const store = await getDatabaseConnection()
 
     const revisions = await getRevisions(store)
+
     // Get the pkgID from the first revision in the list
     const pkgID = revisions[0].pkgID
     if (!pkgID) {
@@ -208,7 +170,7 @@ export const main: Handler = async (event, context) => {
         throw new Error('Package ID is required')
     }
 
-    await processRevisions(store, revisions, serviceName)
+    await processRevisions(store, revisions)
 
     console.info('SHA256 update complete')
 }

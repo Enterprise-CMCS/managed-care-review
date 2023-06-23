@@ -17,11 +17,6 @@ import {
     userFromCognitoAuthProvider,
     userFromLocalAuthProvider,
 } from '../authn'
-import {
-    initTracer,
-    initMeter,
-    recordException,
-} from '../../../uploads/src/lib/otel'
 
 type RequiredRevisionWithDecodedProtobufProperties = {
     formDataProto: HealthPlanFormDataType | Error
@@ -77,7 +72,7 @@ const decodeRevisions = (
 
 export const main: APIGatewayProxyHandler = async (event, context) => {
     const authProvider =
-        event.requestContext.identity.cognitoAuthenticationProvider ?? ''
+        event.requestContext.identity.cognitoAuthenticationProvider || ''
     const programList = [] as ProgramArgType[]
     statePrograms.states.forEach((state) => {
         programList.push(...state.programs)
@@ -133,26 +128,12 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
         result,
         programList
     )
-    const stageName = process.env.stage ?? 'stageNotSet'
-    const serviceName = `reports_endpoint-${stageName}`
-    const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
-    if (otelCollectorURL) {
-        initTracer(serviceName, otelCollectorURL)
-    } else {
-        console.error(
-            'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
-        )
-    }
-    initMeter(serviceName)
+
     const bucket = [] as RevisionWithDecodedProtobuf[]
-    for (const revision of allDecodedRevisions) {
+    allDecodedRevisions.forEach((revision) => {
         if (revision.formDataProto instanceof Error) {
-            console.error('Error decoding revision', revision.id)
-            recordException(
-                revision.formDataProto,
-                serviceName,
-                'decode_revision'
-            )
+            console.error('Error decoding revision')
+            throw new Error(`Error generating reports array`)
         } else {
             // add the package name to the revision
             revision.packageName = packageName(
@@ -173,7 +154,7 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
                 bucket.push(revision)
             }
         }
-    }
+    })
     const parser = new Parser({
         transforms: [
             transforms.flatten({
