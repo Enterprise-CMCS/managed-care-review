@@ -99,6 +99,7 @@ export const rateErrorHandling = (
 export const RateDetails = ({
     draftSubmission,
     showValidations = false,
+    previousDocuments,
     updateDraft,
 }: HealthPlanFormPageProps): React.ReactElement => {
     const navigate = useNavigate()
@@ -346,10 +347,12 @@ export const RateDetails = ({
                                                         shouldValidate={
                                                             shouldValidate
                                                         }
-                                                        sharedRatesConfig={{
-                                                            parentSubmissionID:
-                                                                draftSubmission.id,
-                                                        }}
+                                                        parentSubmissionID={
+                                                            draftSubmission.id
+                                                        }
+                                                        previousDocuments={
+                                                            previousDocuments
+                                                        }
                                                         multiRatesConfig={{
                                                             removeSelf: () => {
                                                                 remove(index)

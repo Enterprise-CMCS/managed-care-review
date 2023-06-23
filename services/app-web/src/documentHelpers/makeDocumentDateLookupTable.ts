@@ -24,6 +24,10 @@ export function makeDateTableFromFormData(
                         const documentKey = getDocumentKey(doc)
                         lookupTable[documentKey] = revisionData.updatedAt
                     })
+                    rateInfo.supportingDocuments.forEach((doc) => {
+                        const documentKey = getDocumentKey(doc)
+                        lookupTable[documentKey] = revisionData.updatedAt
+                    })
                 })
             } else {
                 revisionData[bucket].forEach((doc) => {

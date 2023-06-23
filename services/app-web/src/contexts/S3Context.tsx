@@ -14,7 +14,11 @@ type S3ContextT = {
         key: string,
         bucket: BucketShortName
     ) => Promise<void | Error>
-    handleDeleteFile: (key: string, bucket: BucketShortName) => Promise<void>
+    handleDeleteFile: (
+        key: string,
+        bucket: BucketShortName,
+        permanentFileKeys?: string[]
+    ) => Promise<void>
 } & S3ClientT
 
 const S3Context = React.createContext<S3ClientT | undefined>(undefined)

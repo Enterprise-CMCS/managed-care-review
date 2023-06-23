@@ -32,10 +32,7 @@ import {
     SharedRateCertDisplay,
 } from '../../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { ActuaryContactFields } from '../../Contacts'
-import {
-    PackagesWithSharedRates,
-    PackagesWithSharedRatesProps,
-} from '../PackagesWithSharedRates/PackagesWithSharedRates'
+import { PackagesWithSharedRates } from '../PackagesWithSharedRates/PackagesWithSharedRates'
 import { featureFlags } from '../../../../common-code/featureFlags'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 
@@ -76,11 +73,12 @@ type MultiRatesConfig = {
 }
 
 type SingleRateCertProps = {
-    index: number // index of this rate in overall rates list, defaults to 0 if editing standalone rate
     rateInfo: RateCertFormType
     shouldValidate: boolean
-    sharedRatesConfig: Pick<PackagesWithSharedRatesProps, 'parentSubmissionID'>
-    multiRatesConfig?: MultiRatesConfig // config is present when we are displaying a rate within the multi-rates UI
+    index: number // defaults to 0
+    previousDocuments: string[] // this only passed in to ensure S3 deleteFile doesn't remove valid files for previous revisions
+    parentSubmissionID: string // this is only passed in for PackagesWithShared rates feature.
+    multiRatesConfig?: MultiRatesConfig // this is only passed in to enable displaying this rate within the multi-rates UI
 }
 
 const RateDatesErrorMessage = ({
@@ -113,8 +111,9 @@ export const SingleRateCert = ({
     rateInfo,
     shouldValidate,
     multiRatesConfig,
+    parentSubmissionID,
+    previousDocuments,
     index = 0,
-    sharedRatesConfig: { parentSubmissionID },
 }: SingleRateCertProps): React.ReactElement => {
     // feature flags
     const ldClient = useLDClient()
@@ -194,7 +193,11 @@ export const SingleRateCert = ({
                     }
                     scanFile={(key) => handleScanFile(key, 'HEALTH_PLAN_DOCS')}
                     deleteFile={(key) =>
-                        handleDeleteFile(key, 'HEALTH_PLAN_DOCS')
+                        handleDeleteFile(
+                            key,
+                            'HEALTH_PLAN_DOCS',
+                            previousDocuments
+                        )
                     }
                     innerInputRef={multiRatesConfig?.reassignNewRateRef}
                     onFileItemsUpdate={({ fileItems }) =>
@@ -251,7 +254,11 @@ export const SingleRateCert = ({
                             handleScanFile(key, 'HEALTH_PLAN_DOCS')
                         }
                         deleteFile={(key) =>
-                            handleDeleteFile(key, 'HEALTH_PLAN_DOCS')
+                            handleDeleteFile(
+                                key,
+                                'HEALTH_PLAN_DOCS',
+                                previousDocuments
+                            )
                         }
                         innerInputRef={multiRatesConfig?.reassignNewRateRef}
                         onFileItemsUpdate={({ fileItems }) =>
