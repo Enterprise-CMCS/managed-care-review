@@ -171,7 +171,7 @@ const updateTestHealthPlanFormData = async (
     if (updateResult.errors) {
         console.info('errors', JSON.stringify(updateResult.errors))
         throw new Error(
-            `updateTestHealthPlanFormData mutation failed with errors ${updateResult.errors}`
+            `updateTestHealthPlanFormData mutation failed with errors: ${updateResult.errors}`
         )
     }
 
