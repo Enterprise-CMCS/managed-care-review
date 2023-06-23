@@ -10,13 +10,13 @@
         "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""
     },
     "devDependencies": {
-        "@graphql-codegen/cli": "^4.0.1",
-        "@graphql-codegen/introspection": "^4.0.0",
-        "@graphql-codegen/typescript": "^4.0.1",
-        "@graphql-codegen/typescript-operations": "^4.0.1",
-        "@graphql-codegen/typescript-react-apollo": "^3.3.7",
-        "@graphql-codegen/typescript-resolvers": "^4.0.1",
-        "graphql": "^16.7.0"
+        "@graphql-codegen/cli": "^2.2.2",
+        "@graphql-codegen/introspection": "^3.0.1",
+        "@graphql-codegen/typescript": "^3.0.2",
+        "@graphql-codegen/typescript-operations": "^4.0.0",
+        "@graphql-codegen/typescript-react-apollo": "^3.2.0",
+        "@graphql-codegen/typescript-resolvers": "^3.0.0",
+        "graphql": "^16.2.0"
     },
     "dependencies": {
         "graphql-tag": "^2.12.6"
