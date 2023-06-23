@@ -2143,12 +2143,12 @@ __metadata:
   linkType: hard
 
 "@aws-sdk/client-ssm@npm:^3.350.0":
-  version: 3.358.0
-  resolution: "@aws-sdk/client-ssm@npm:3.358.0"
+  version: 3.359.0
+  resolution: "@aws-sdk/client-ssm@npm:3.359.0"
   dependencies:
     "@aws-crypto/sha256-browser": 3.0.0
     "@aws-crypto/sha256-js": 3.0.0
-    "@aws-sdk/client-sts": 3.358.0
+    "@aws-sdk/client-sts": 3.359.0
     "@aws-sdk/config-resolver": 3.357.0
     "@aws-sdk/credential-provider-node": 3.358.0
     "@aws-sdk/fetch-http-handler": 3.357.0
@@ -2184,7 +2184,7 @@ __metadata:
     "@smithy/types": ^1.0.0
     tslib: ^2.5.0
     uuid: ^8.3.2
-  checksum: 203895772da13f20f8dc5bd6c4d0d0e6f88f740b565fa37746f7f8c291c6883da918a0ab405f3bacb9eebaf60f7b7270d1a63d86d6f96cf4ce27d0b84fca7dde
+  checksum: fa9a76d2f03456de39c0b0ea58ec76549d8ac4fd610423238354daf8bd0d6ad701f089287458a8cba8b1ca314752e1f7c27e5754722bde9cf86f4777acd4d2c4
   languageName: node
   linkType: hard
 
@@ -3357,9 +3357,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-sdk/client-sts@npm:3.358.0":
-  version: 3.358.0
-  resolution: "@aws-sdk/client-sts@npm:3.358.0"
+"@aws-sdk/client-sts@npm:3.359.0":
+  version: 3.359.0
+  resolution: "@aws-sdk/client-sts@npm:3.359.0"
   dependencies:
     "@aws-crypto/sha256-browser": 3.0.0
     "@aws-crypto/sha256-js": 3.0.0
@@ -3396,9 +3396,9 @@ __metadata:
     "@aws-sdk/util-utf8": 3.310.0
     "@smithy/protocol-http": ^1.0.1
     "@smithy/types": ^1.0.0
-    fast-xml-parser: 4.2.4
+    fast-xml-parser: 4.2.5
     tslib: ^2.5.0
-  checksum: 71da447c9c4f6832fd22350fde9c2aec0cedc74e4e2b1248367960c7c366244e1413a24938f3d418db543b627618278ea5119f58d54e1f10763cb6282dd35715
+  checksum: 12b6ac49dca0eb782802c0eb32e9af31bf0235daf9303458fc6f5f3a55cc0bda0d4f2f965389775e83cbd9ef4ba0e5573c484535faea2ff101ef4e06e1956c9e
   languageName: node
   linkType: hard
 
@@ -14361,7 +14361,7 @@ __metadata:
     ts-jest: ^27.1.4
     ts-loader: ^9.4.2
     tsconfig-paths-webpack-plugin: ^4.0.1
-    typescript: ^5.0.4
+    typescript: ^4.4.4
     url-parse: ^1.5.2
     use-deep-compare-effect: ^1.8.1
     uswds: 2.13.3
@@ -14411,7 +14411,7 @@ __metadata:
     lint-staged: ^13.0.1
     path-browserify: ^1.0.1
     prettier: ^2.4.1
-    typescript: ^5.0.4
+    typescript: ^4.9.5
   languageName: unknown
   linkType: soft
 
@@ -16380,7 +16380,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@prisma/client@npm:4.7.1":
+"@prisma/client@npm:^4.6.1":
   version: 4.7.1
   resolution: "@prisma/client@npm:4.7.1"
   dependencies:
@@ -16401,10 +16401,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@prisma/engines@npm:4.7.1":
-  version: 4.7.1
-  resolution: "@prisma/engines@npm:4.7.1"
-  checksum: 1660f1d5a6188a9cb9aa5186111910f37b1bc02f09be10336a41e0ec61a18a4193e0ff424077dafb1bf1392a435fc89cec47526a58784a7bdc6c8278adf147a4
+"@prisma/engines@npm:4.10.1":
+  version: 4.10.1
+  resolution: "@prisma/engines@npm:4.10.1"
+  checksum: 359e32db3155640315661055d8e6430d60c10ff057b5d4c070164587d872ab6d4c292cee5ac35d364c1a2f6da0265fa847023c5cc1a4bf3c067fbecbbb638273
   languageName: node
   linkType: hard
 
@@ -21716,7 +21716,7 @@ __metadata:
     "@opentelemetry/sdk-trace-base": ^1.9.1
     "@opentelemetry/sdk-trace-node": ^1.9.1
     "@opentelemetry/semantic-conventions": ^1.9.1
-    "@prisma/client": 4.7.1
+    "@prisma/client": ^4.6.1
     "@types/archiver": ^5.1.1
     "@types/aws-lambda": ^8.10.83
     "@types/glob": ^8.0.0
@@ -21748,7 +21748,7 @@ __metadata:
     neverthrow: ^6.0.0
     path-to-regexp: ^6.2.1
     prettier: ^2.4.1
-    prisma: 4.7.1
+    prisma: ^4.6.1
     protobufjs: ^6.11.2
     request: ^2.88.2
     serverless: ^3.31.0
@@ -21762,9 +21762,9 @@ __metadata:
     serverless-webpack: ^5.11.0
     slugify: ^1.6.5
     ts-jest: ^27.1.4
-    ts-loader: ^9.4.2
+    ts-loader: ^9.2.8
     tsconfig-paths-webpack-plugin: ^4.0.1
-    typescript: 5.0.4
+    typescript: 4.8.4
     url-parse: ^1.5.2
     uuid: ^9.0.0
     webpack: ^5.83.1
@@ -26351,7 +26351,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "dev_tool@workspace:dev_tool"
   dependencies:
-    typescript: ^5.0.4
+    typescript: ^4.4.4
     yargs: ^17.2.1
   languageName: unknown
   linkType: soft
@@ -28419,6 +28419,17 @@ __metadata:
   bin:
     fxparser: src/cli/cli.js
   checksum: d3b4d0c0152c09f98def792769fca6bb3fa1d597f9745d9564451c239089bd86bdf573c9263b4944860028cb7edb81752d64399c1aff8b87c9225ecef96905f7
+  languageName: node
+  linkType: hard
+
+"fast-xml-parser@npm:4.2.5":
+  version: 4.2.5
+  resolution: "fast-xml-parser@npm:4.2.5"
+  dependencies:
+    strnum: ^1.0.5
+  bin:
+    fxparser: src/cli/cli.js
+  checksum: d32b22005504eeb207249bf40dc82d0994b5bb9ca9dcc731d335a1f425e47fe085b3cace3cf9d32172dd1a5544193c49e8615ca95b4bf95a4a4920a226b06d80
   languageName: node
   linkType: hard
 
@@ -38633,15 +38644,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prisma@npm:4.7.1":
-  version: 4.7.1
-  resolution: "prisma@npm:4.7.1"
+"prisma@npm:^4.6.1":
+  version: 4.10.1
+  resolution: "prisma@npm:4.10.1"
   dependencies:
-    "@prisma/engines": 4.7.1
+    "@prisma/engines": 4.10.1
   bin:
     prisma: build/index.js
     prisma2: build/index.js
-  checksum: eb7046a5928f33e484bb2a100f49b613a37bdd83d72aa7e87a4edb38a235b7c44bb9c89bc9116af60950554da06d6ef7c581dd0c637ba2798810485d04da29d4
+  checksum: e4078909ad07bcfbe19e10aa0822dca47622b099b4ad6f48da743d47a658e25662de757b5b0e3bbfcd04c0b346dfcfe4d1fa6f0486312dfd8b193b32795ed5ce
   languageName: node
   linkType: hard
 
@@ -40766,7 +40777,7 @@ __metadata:
     "@octokit/action": ^5.0.2
     csv-parser: ^3.0.0
     octokit: ^2.0.4
-    typescript: ^5.0.4
+    typescript: ^4.5.4
     uuid: ^9.0.0
   languageName: unknown
   linkType: soft
@@ -43385,6 +43396,21 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
+"ts-loader@npm:^9.2.8":
+  version: 9.3.1
+  resolution: "ts-loader@npm:9.3.1"
+  dependencies:
+    chalk: ^4.1.0
+    enhanced-resolve: ^5.0.0
+    micromatch: ^4.0.0
+    semver: ^7.3.4
+  peerDependencies:
+    typescript: "*"
+    webpack: ^5.0.0
+  checksum: 462a8ac315017cf4961dafd2be29d5abe7c3af63c4515e325269f79b9d0212b35c59184d7fd01fc378749c88454752e1599301d2190eb6844ea5fe332de5f695
+  languageName: node
+  linkType: hard
+
 "ts-loader@npm:^9.4.2":
   version: 9.4.3
   resolution: "ts-loader@npm:9.4.3"
@@ -43696,7 +43722,17 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"typescript@npm:4.9.5":
+"typescript@npm:4.8.4":
+  version: 4.8.4
+  resolution: "typescript@npm:4.8.4"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 3e4f061658e0c8f36c820802fa809e0fd812b85687a9a2f5430bc3d0368e37d1c9605c3ce9b39df9a05af2ece67b1d844f9f6ea8ff42819f13bcb80f85629af0
+  languageName: node
+  linkType: hard
+
+"typescript@npm:4.9.5, typescript@npm:^4.9.5":
   version: 4.9.5
   resolution: "typescript@npm:4.9.5"
   bin:
@@ -43706,17 +43742,7 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"typescript@npm:5.0.4":
-  version: 5.0.4
-  resolution: "typescript@npm:5.0.4"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 82b94da3f4604a8946da585f7d6c3025fff8410779e5bde2855ab130d05e4fd08938b9e593b6ebed165bda6ad9292b230984f10952cf82f0a0ca07bbeaa08172
-  languageName: node
-  linkType: hard
-
-"typescript@npm:>=3 < 6, typescript@npm:^5.0.4":
+"typescript@npm:>=3 < 6":
   version: 5.1.3
   resolution: "typescript@npm:5.1.3"
   bin:
@@ -43726,7 +43752,27 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@4.9.5#~builtin<compat/typescript>":
+"typescript@npm:^4.4.4, typescript@npm:^4.5.4":
+  version: 4.9.4
+  resolution: "typescript@npm:4.9.4"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: e782fb9e0031cb258a80000f6c13530288c6d63f1177ed43f770533fdc15740d271554cdae86701c1dd2c83b082cea808b07e97fd68b38a172a83dbf9e0d0ef9
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@4.8.4#~builtin<compat/typescript>":
+  version: 4.8.4
+  resolution: "typescript@patch:typescript@npm%3A4.8.4#~builtin<compat/typescript>::version=4.8.4&hash=1a91c8"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: c981e82b77a5acdcc4e69af9c56cdecf5b934a87a08e7b52120596701e389a878b8e3f860e73ffb287bf649cc47a8c741262ce058148f71de4cdd88bb9c75153
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@4.9.5#~builtin<compat/typescript>, typescript@patch:typescript@^4.9.5#~builtin<compat/typescript>":
   version: 4.9.5
   resolution: "typescript@patch:typescript@npm%3A4.9.5#~builtin<compat/typescript>::version=4.9.5&hash=289587"
   bin:
@@ -43736,23 +43782,23 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@5.0.4#~builtin<compat/typescript>":
-  version: 5.0.4
-  resolution: "typescript@patch:typescript@npm%3A5.0.4#~builtin<compat/typescript>::version=5.0.4&hash=b5f058"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: d26b6ba97b6d163c55dbdffd9bbb4c211667ebebc743accfeb2c8c0154aace7afd097b51165a72a5bad2cf65a4612259344ff60f8e642362aa1695c760d303ac
-  languageName: node
-  linkType: hard
-
-"typescript@patch:typescript@>=3 < 6#~builtin<compat/typescript>, typescript@patch:typescript@^5.0.4#~builtin<compat/typescript>":
+"typescript@patch:typescript@>=3 < 6#~builtin<compat/typescript>":
   version: 5.1.3
   resolution: "typescript@patch:typescript@npm%3A5.1.3#~builtin<compat/typescript>::version=5.1.3&hash=77c9e2"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 32a25b2e128a4616f999d4ee502aabb1525d5647bc8955e6edf05d7fbc53af8aa98252e2f6ba80bcedfc0260c982b885f3c09cfac8bb65d2924f3133ad1e1e62
+  languageName: node
+  linkType: hard
+
+"typescript@patch:typescript@^4.4.4#~builtin<compat/typescript>, typescript@patch:typescript@^4.5.4#~builtin<compat/typescript>":
+  version: 4.9.4
+  resolution: "typescript@patch:typescript@npm%3A4.9.4#~builtin<compat/typescript>::version=4.9.4&hash=289587"
+  bin:
+    tsc: bin/tsc
+    tsserver: bin/tsserver
+  checksum: 2160f7ad975c59b2f5816817d3916be1d156c5688a7517602b3b640c5015e740f4ba933996ac85371d68f7bbdd41602150fb8b68334122ac637fdb5418085e7a
   languageName: node
   linkType: hard
 
@@ -44215,9 +44261,9 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
     serverless-stack-termination-protection: ^2.0.2
     serverless-webpack: ^5.11.0
     ts-jest: ^27.1.4
-    ts-loader: ^9.4.2
+    ts-loader: ^9.2.8
     tsconfig-paths-webpack-plugin: ^4.0.1
-    typescript: 5.0.4
+    typescript: 4.9.5
     webpack: ^5.83.1
   languageName: unknown
   linkType: soft
