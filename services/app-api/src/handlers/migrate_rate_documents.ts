@@ -20,7 +20,10 @@ export const processRevisions = async (
     store: Store,
     revisions: HealthPlanRevisionTable[]
 ): Promise<void> => {
-    const stageName = process.env.stage ?? 'stageNotSet'
+    const stageName = process.env.stage
+    if (!stageName || stageName === '') {
+        throw new Error('Configuration Error: stage must be set')
+    }
     const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
     if (!otelCollectorURL || otelCollectorURL === '') {
         throw new Error(
