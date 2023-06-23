@@ -359,7 +359,8 @@ export const RateDetailsSummarySection = ({
                                         }
                                         isCMSUser={isCMSUser}
                                         caption="Rate supporting documents"
-                                        documentCategory="Rate certification"
+                                        isSupportingDocuments
+                                        documentCategory="Rate-supporting"
                                     />
                                 ) : (
                                     <span className="srOnly">'LOADING...'</span>
