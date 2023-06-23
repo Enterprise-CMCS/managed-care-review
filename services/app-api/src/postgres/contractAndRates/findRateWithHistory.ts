@@ -31,7 +31,7 @@ interface RateRevisionSet {
     contractRevs: ContractRevisionTable[]
 }
 
-async function findRateWithContracts(
+async function findRateWithHistory(
     client: PrismaTransactionType,
     rateID: string
 ): Promise<Rate | Error> {
@@ -165,4 +165,4 @@ async function findRateWithContracts(
     }
 }
 
-export { findRateWithContracts as findRate }
+export { findRateWithHistory }

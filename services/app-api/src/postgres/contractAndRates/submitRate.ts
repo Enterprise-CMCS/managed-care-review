@@ -1,12 +1,12 @@
 import { PrismaClient } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
-import { findRate } from './findRate'
+import { findRateWithHistory } from './findRateWithHistory'
 import { Rate } from './rateType'
 
 // Update the given revision
 // * invalidate relationships of previous revision
 // * set the ActionInfo
-async function submitRateRevision(
+async function submitRate(
     client: PrismaClient,
     rateID: string,
     submittedByUserID: string,
@@ -143,7 +143,7 @@ async function submitRateRevision(
                 })
             }
 
-            return findRate(tx, rateID)
+            return findRateWithHistory(tx, rateID)
         })
     } catch (err) {
         console.error('SUBMIT PRISMA CONTRACT ERR', err)
@@ -151,4 +151,4 @@ async function submitRateRevision(
     }
 }
 
-export { submitRateRevision }
+export { submitRate }

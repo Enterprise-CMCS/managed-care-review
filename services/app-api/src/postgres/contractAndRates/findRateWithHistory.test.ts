@@ -1,14 +1,14 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import { submitContract } from './submitContract'
-import { submitRateRevision } from './submitRateRevision'
+import { submitRate } from './submitRate'
 import { insertDraftContract } from './insertContract'
 import { unlockContract } from './unlockContract'
-import { updateContractDraft } from './updateContractDraft'
+import { updateDraftContract } from './updateDraftContract'
 import { insertDraftRate } from './insertRate'
-import { updateRateDraft } from './updateRateDraft'
+import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
-import { findRate } from './findRate'
+import { findRateWithHistory } from './findRateWithHistory'
 import { must } from '../../testHelpers'
 
 describe('findContract', () => {
@@ -52,46 +52,25 @@ describe('findContract', () => {
         // Add 3 rates 1, 2, 3 pointing to contract A
         const rate1 = must(await insertDraftRate(client, 'someurle.en'))
         must(
-            await updateRateDraft(client, rate1.id, 'someurle.en', [
+            await updateDraftRate(client, rate1.id, 'someurle.en', [
                 contractA.id,
             ])
         )
-        must(
-            await submitRateRevision(
-                client,
-                rate1.id,
-                stateUser.id,
-                'Rate Submit'
-            )
-        )
+        must(await submitRate(client, rate1.id, stateUser.id, 'Rate Submit'))
 
         const rate2 = must(await insertDraftRate(client, 'twopointo'))
         must(
-            await updateRateDraft(client, rate2.id, 'twopointo', [contractA.id])
+            await updateDraftRate(client, rate2.id, 'twopointo', [contractA.id])
         )
-        must(
-            await submitRateRevision(
-                client,
-                rate2.id,
-                stateUser.id,
-                'RateSubmit 2'
-            )
-        )
+        must(await submitRate(client, rate2.id, stateUser.id, 'RateSubmit 2'))
 
         const rate3 = must(await insertDraftRate(client, 'threepointo'))
         must(
-            await updateRateDraft(client, rate3.id, 'threepointo', [
+            await updateDraftRate(client, rate3.id, 'threepointo', [
                 contractA.id,
             ])
         )
-        must(
-            await submitRateRevision(
-                client,
-                rate3.id,
-                stateUser.id,
-                '3.0 create'
-            )
-        )
+        must(await submitRate(client, rate3.id, stateUser.id, '3.0 create'))
 
         // remove the connection from rate 2
         must(
@@ -102,31 +81,17 @@ describe('findContract', () => {
                 'unlock for 2.1 remove'
             )
         )
-        must(await updateRateDraft(client, rate2.id, 'twopointone', []))
-        must(
-            await submitRateRevision(
-                client,
-                rate2.id,
-                stateUser.id,
-                '2.1 remove'
-            )
-        )
+        must(await updateDraftRate(client, rate2.id, 'twopointone', []))
+        must(await submitRate(client, rate2.id, stateUser.id, '2.1 remove'))
 
         // update rate 1 to have a new version, should make one new rev.
         must(await unlockRate(client, rate1.id, cmsUser.id, 'unlock for 1.1'))
         must(
-            await updateRateDraft(client, rate1.id, 'onepointone', [
+            await updateDraftRate(client, rate1.id, 'onepointone', [
                 contractA.id,
             ])
         )
-        must(
-            await submitRateRevision(
-                client,
-                rate1.id,
-                stateUser.id,
-                '1.1 new name'
-            )
-        )
+        must(await submitRate(client, rate1.id, stateUser.id, '1.1 new name'))
 
         // Make a new Contract Revision, should show up as a single new rev with all the old info
         must(
@@ -138,7 +103,7 @@ describe('findContract', () => {
             )
         )
         must(
-            await updateContractDraft(client, contractA.id, 'a.1 body', [
+            await updateDraftContract(client, contractA.id, 'a.1 body', [
                 rate1.id,
                 rate3.id,
             ])
@@ -162,7 +127,7 @@ describe('findContract', () => {
             )
         )
         must(
-            await updateContractDraft(client, contractA.id, 'a.2 body', [
+            await updateDraftContract(client, contractA.id, 'a.2 body', [
                 rate3.id,
             ])
         )
@@ -176,7 +141,7 @@ describe('findContract', () => {
         )
 
         // Now, find that contract and assert the history is what we expected
-        const resultingRate = await findRate(client, rate1.id)
+        const resultingRate = await findRateWithHistory(client, rate1.id)
         if (resultingRate instanceof Error) {
             throw resultingRate
         }

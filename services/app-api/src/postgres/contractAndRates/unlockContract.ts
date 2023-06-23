@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
 import { Contract } from './contractType'
-import { findContract } from './findContract'
+import { findContractWithHistory } from './findContractWithHistory'
 
 // Unlock the given contract
 // * copy form data
@@ -84,7 +84,7 @@ async function unlockContract(
                 },
             })
 
-            return findContract(tx, contractID)
+            return findContractWithHistory(tx, contractID)
         })
     } catch (err) {
         console.error('SUBMIT PRISMA CONTRACT ERR', err)

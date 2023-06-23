@@ -1,11 +1,11 @@
 import { PrismaClient } from '@prisma/client'
-import { findRate } from './findRate'
+import { findRateWithHistory } from './findRateWithHistory'
 import { Rate } from './rateType'
 
 // Update the given draft
 // * can change the set of draftRates
 // * set the formData
-async function updateRateDraft(
+async function updateDraftRate(
     client: PrismaClient,
     rateID: string,
     formData: string,
@@ -46,11 +46,11 @@ async function updateRateDraft(
             },
         })
 
-        return findRate(client, rateID)
+        return findRateWithHistory(client, rateID)
     } catch (err) {
         console.error('SUBMIT PRISMA CONTRACT ERR', err)
         return err
     }
 }
 
-export { updateRateDraft }
+export { updateDraftRate }

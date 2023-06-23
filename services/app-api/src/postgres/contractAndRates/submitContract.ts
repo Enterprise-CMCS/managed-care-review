@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
 import { Contract } from './contractType'
-import { findContract } from './findContract'
+import { findContractWithHistory } from './findContractWithHistory'
 
 // Update the given revision
 // * invalidate relationships of previous revision
@@ -148,7 +148,7 @@ async function submitContract(
                 })
             }
 
-            return await findContract(tx, contractID)
+            return await findContractWithHistory(tx, contractID)
         })
     } catch (err) {
         console.error('SUBMITeeee PRISMA CONTRACT ERR', err)

@@ -1,19 +1,18 @@
-import { PrismaClient } from "@prisma/client";
-import { Contract } from "./contractType";
-import { findContract } from "./findContract";
+import { PrismaClient } from '@prisma/client'
+import { Contract } from './contractType'
+import { findContractWithHistory } from './findContractWithHistory'
 
 // Update the given draft
 // * can change the set of draftRates
 // * set the formData
-async function updateContractDraft(
-                                                client: PrismaClient, 
-                                                contractID: string,
-                                                formData: string,
-                                                rateIDs: string[],
-                                            ): Promise<Contract | Error> {
-
+async function updateDraftContract(
+    client: PrismaClient,
+    contractID: string,
+    formData: string,
+    rateIDs: string[]
+): Promise<Contract | Error> {
     try {
-        // Given all the Rates associated with this draft, find the most recent submitted 
+        // Given all the Rates associated with this draft, find the most recent submitted
         // rateRevision to update.
         const currentRev = await client.contractRevisionTable.findFirst({
             where: {
@@ -33,30 +32,25 @@ async function updateContractDraft(
             data: {
                 name: formData,
                 draftRates: {
-                    set: rateIDs.map( (rID) => ({
+                    set: rateIDs.map((rID) => ({
                         id: rID,
-                    }))
-                }
+                    })),
+                },
             },
             include: {
                 rateRevisions: {
                     include: {
                         rateRevision: true,
-                    }
+                    },
                 },
-            }
+            },
         })
 
-        return findContract(client, contractID)
-
-    }
-    catch (err) {
-        console.error("SUBMIT PRISMA CONTRACT ERR", err)
+        return findContractWithHistory(client, contractID)
+    } catch (err) {
+        console.error('SUBMIT PRISMA CONTRACT ERR', err)
         return err
     }
-
 }
 
-export {
-    updateContractDraft,
-}
+export { updateDraftContract }

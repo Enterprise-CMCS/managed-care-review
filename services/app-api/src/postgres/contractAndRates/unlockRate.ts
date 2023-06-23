@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { v4 as uuidv4 } from 'uuid'
-import { findRate } from './findRate'
+import { findRateWithHistory } from './findRateWithHistory'
 import { Rate } from './rateType'
 
 // Unlock the given rate
@@ -85,7 +85,7 @@ async function unlockRate(
                 },
             })
 
-            return findRate(tx, rateID)
+            return findRateWithHistory(tx, rateID)
         })
     } catch (err) {
         console.error('SUBMIT PRISMA CONTRACT ERR', err)

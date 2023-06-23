@@ -3,8 +3,8 @@ import { v4 as uuidv4 } from 'uuid'
 import { submitContract } from './submitContract'
 import { insertDraftContract } from './insertContract'
 import { insertDraftRate } from './insertRate'
-import { submitRateRevision } from './submitRateRevision'
-import { updateRateDraft } from './updateRateDraft'
+import { submitRate } from './submitRate'
+import { updateDraftRate } from './updateDraftRate'
 import { must } from '../../testHelpers'
 
 describe('submitContract', () => {
@@ -90,7 +90,7 @@ describe('submitContract', () => {
 
         // submit the first draft rate
         must(
-            await submitRateRevision(
+            await submitRate(
                 client,
                 rateA.id,
                 stateUser.id,
@@ -171,9 +171,9 @@ describe('submitContract', () => {
         // Attempt to submit a rate related to this draft contract
         const rate1 = must(await insertDraftRate(client, 'onepoint0'))
         must(
-            await updateRateDraft(client, rate1.id, 'onepoint0', [contractA.id])
+            await updateDraftRate(client, rate1.id, 'onepoint0', [contractA.id])
         )
-        const result = await submitRateRevision(
+        const result = await submitRate(
             client,
             rate1.id,
             stateUser.id,

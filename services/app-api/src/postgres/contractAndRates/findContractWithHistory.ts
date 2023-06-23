@@ -1,15 +1,14 @@
-import {
-    ContractRevisionTable,
-    RateRevisionTable,
-    UpdateInfoTable,
-    User,
-} from '@prisma/client'
+import { ContractRevisionTable, RateRevisionTable } from '@prisma/client'
 import { UpdateInfoType } from '../../domain-models'
-import { PrismaTransactionType } from '../prismaTypes'
+import {
+    PrismaTransactionType,
+    updateInfoIncludeUpdater,
+    UpdateInfoTableWithUpdater,
+} from '../prismaTypes'
 import { Contract, ContractRevision } from './contractType'
 
 function convertUpdateInfo(
-    info: (UpdateInfoTable & { updatedBy: User }) | null
+    info: UpdateInfoTableWithUpdater | null
 ): UpdateInfoType | undefined {
     if (!info) {
         return undefined
@@ -26,12 +25,12 @@ function convertUpdateInfo(
 // we convert them into ContractRevions to return them
 interface ContractRevisionSet {
     contractRev: ContractRevisionTable
-    submitInfo: UpdateInfoTable & { updatedBy: User }
-    unlockInfo: (UpdateInfoTable & { updatedBy: User }) | undefined
+    submitInfo: UpdateInfoTableWithUpdater
+    unlockInfo: UpdateInfoTableWithUpdater | undefined
     rateRevs: RateRevisionTable[]
 }
 
-async function findContractWithRates(
+async function findContractWithHistory(
     client: PrismaTransactionType,
     contractID: string
 ): Promise<Contract | Error> {
@@ -44,30 +43,14 @@ async function findContractWithRates(
                 createdAt: 'asc',
             },
             include: {
-                submitInfo: {
-                    include: {
-                        updatedBy: true,
-                    },
-                },
-                unlockInfo: {
-                    include: {
-                        updatedBy: true,
-                    },
-                },
+                submitInfo: updateInfoIncludeUpdater,
+                unlockInfo: updateInfoIncludeUpdater,
                 rateRevisions: {
                     include: {
                         rateRevision: {
                             include: {
-                                submitInfo: {
-                                    include: {
-                                        updatedBy: true,
-                                    },
-                                },
-                                unlockInfo: {
-                                    include: {
-                                        updatedBy: true,
-                                    },
-                                },
+                                submitInfo: updateInfoIncludeUpdater,
+                                unlockInfo: updateInfoIncludeUpdater,
                             },
                         },
                     },
@@ -161,4 +144,4 @@ async function findContractWithRates(
     }
 }
 
-export { findContractWithRates as findContract }
+export { findContractWithHistory }
