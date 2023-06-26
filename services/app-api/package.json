@@ -103,7 +103,7 @@
         "serverless-webpack": "^5.11.0",
         "slugify": "^1.6.5",
         "ts-jest": "^27.1.4",
-        "ts-loader": "^9.4.2",
+        "ts-loader": "^9.4.3",
         "tsconfig-paths-webpack-plugin": "^4.0.1",
         "typescript": "^5.0.4",
         "webpack": "^5.83.1",

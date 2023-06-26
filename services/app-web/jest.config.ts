@@ -1,6 +1,5 @@
-import type { JestConfigWithTsJest } from 'ts-jest'
-
-const jestConfig: JestConfigWithTsJest = {
+const jestConfig = {
+    preset: 'ts-jest',
     setupFiles: ['jest-launchdarkly-mock'],
     moduleNameMapper: {
         '^@managed-care-review/common-code/(.*)$':

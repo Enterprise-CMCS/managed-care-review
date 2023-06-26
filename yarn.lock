@@ -9819,7 +9819,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/code-frame@npm:^7.0.0, @babel/code-frame@npm:^7.10.4, @babel/code-frame@npm:^7.12.13, @babel/code-frame@npm:^7.16.0, @babel/code-frame@npm:^7.18.6, @babel/code-frame@npm:^7.5.5, @babel/code-frame@npm:^7.8.3":
+"@babel/code-frame@npm:^7.0.0, @babel/code-frame@npm:^7.10.4, @babel/code-frame@npm:^7.12.13, @babel/code-frame@npm:^7.16.0, @babel/code-frame@npm:^7.18.6, @babel/code-frame@npm:^7.8.3":
   version: 7.18.6
   resolution: "@babel/code-frame@npm:7.18.6"
   dependencies:
@@ -12014,8 +12014,8 @@ __metadata:
   linkType: hard
 
 "@cypress/code-coverage@npm:^3.10.0":
-  version: 3.10.0
-  resolution: "@cypress/code-coverage@npm:3.10.0"
+  version: 3.10.7
+  resolution: "@cypress/code-coverage@npm:3.10.7"
   dependencies:
     "@cypress/webpack-preprocessor": ^5.11.0
     chalk: 4.1.2
@@ -12024,11 +12024,11 @@ __metadata:
     execa: 4.1.0
     globby: 11.0.4
     istanbul-lib-coverage: 3.0.0
-    js-yaml: 3.14.1
+    js-yaml: 4.1.0
     nyc: 15.1.0
   peerDependencies:
     cypress: "*"
-  checksum: e82d0ea1bb4d8eaf802fd0d916f5c72b5590ff0b96f31b2606881628d11d84c49e8299639cb54a2aa9b3ff12f3903d8558a428b250988a9b7e07a1fc42747675
+  checksum: a40bcbccdb9c89fd86ef5361c454d2c1545a39128b640d6df8f65a44dade20d83bf22506bf12579fef2a28496916f1be16f979564223a08f894f0e364f0b4c08
   languageName: node
   linkType: hard
 
@@ -14192,20 +14192,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/types@npm:^29.5.0":
-  version: 29.5.0
-  resolution: "@jest/types@npm:29.5.0"
-  dependencies:
-    "@jest/schemas": ^29.4.3
-    "@types/istanbul-lib-coverage": ^2.0.0
-    "@types/istanbul-reports": ^3.0.0
-    "@types/node": "*"
-    "@types/yargs": ^17.0.8
-    chalk: ^4.0.0
-  checksum: 1811f94b19cf8a9460a289c4f056796cfc373480e0492692a6125a553cd1a63824bd846d7bb78820b7b6f758f6dd3c2d4558293bb676d541b2fa59c70fdf9d39
-  languageName: node
-  linkType: hard
-
 "@josephg/resolvable@npm:^1.0.0, @josephg/resolvable@npm:^1.0.1":
   version: 1.0.1
   resolution: "@josephg/resolvable@npm:1.0.1"
@@ -14425,7 +14411,7 @@ __metadata:
     "@testing-library/user-event": ^14.4.3
     "@trussworks/react-uswds": ^3.2.0
     "@types/classnames": ^2.2.11
-    "@types/jest": ^27.0.1
+    "@types/jest": ^27.4.1
     "@types/path-browserify": ^1.0.0
     "@types/react": ^18.0.14
     "@types/react-dom": ^18.0.5
@@ -14451,7 +14437,7 @@ __metadata:
     graphql: ^16.2.0
     graphql.macro: ^1.4.2
     jest-launchdarkly-mock: ^1.0.6
-    jest-mock: ^29.5.0
+    jest-mock: ^27.5.1
     jotai: ^1.13.0
     jotai-location: ^0.4.0
     launchdarkly-react-client-sdk: ^3.0.1
@@ -14463,7 +14449,7 @@ __metadata:
     react-dom: ^18.2.0
     react-error-boundary: ^4.0.10
     react-router-dom: ^6.5.0
-    react-scripts: 5.0.1
+    react-scripts: ^5.0.1
     react-select: ^5.7.0
     react-select-event: ^5.5.0
     react-test-renderer: ^18.2.0
@@ -14473,13 +14459,13 @@ __metadata:
     serverless-cloudfront-invalidate: ^1.12.2
     serverless-s3-sync: ^3.1.0
     serverless-stack-termination-protection: ^2.0.2
-    ts-jest: ^27.1.4
-    ts-loader: ^9.4.2
+    ts-jest: ^27.1.5
+    ts-loader: ^9.4.3
     tsconfig-paths-webpack-plugin: ^4.0.1
-    typescript: ^5.0.4
+    typescript: ^5.0.0
     url-parse: ^1.5.2
     use-deep-compare-effect: ^1.8.1
-    uswds: ^2.13.3
+    uswds: ^2.13.1
     uuid: ^9.0.0
     web-vitals: ^3.0.1
     webpack: ^5.83.1
@@ -16724,8 +16710,8 @@ __metadata:
   linkType: hard
 
 "@serverless/utils@npm:^6.11.1":
-  version: 6.11.1
-  resolution: "@serverless/utils@npm:6.11.1"
+  version: 6.11.2
+  resolution: "@serverless/utils@npm:6.11.2"
   dependencies:
     archive-type: ^4.0.0
     chalk: ^4.1.2
@@ -16751,7 +16737,7 @@ __metadata:
     memoizee: ^0.4.15
     ms: ^2.1.3
     ncjsm: ^4.3.2
-    node-fetch: ^2.6.9
+    node-fetch: ^2.6.11
     open: ^8.4.2
     p-event: ^4.2.0
     supports-color: ^8.1.1
@@ -16760,7 +16746,7 @@ __metadata:
     uni-global: ^1.0.0
     uuid: ^8.3.2
     write-file-atomic: ^4.0.2
-  checksum: c1eefeab96ef6a9e37f5978c5e3fa2e71d524ae29ee745d3556be00df4ce7af5d2878b9a5ee286951bd150e93581c1875f9a587bf3e1b719d314a5deb0410bfd
+  checksum: d11ccb8cd31efbe33c5b569369d1fe5c9b58ac8ed93cab00d6d189d26b4fcd195df896f8995d4368453c9476bcf26bab4fcfc854a7d27c9232b913e2893837a9
   languageName: node
   linkType: hard
 
@@ -19643,7 +19629,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jest@npm:^27.0.1":
+"@types/jest@npm:^27.0.1, @types/jest@npm:^27.4.1":
   version: 27.5.2
   resolution: "@types/jest@npm:27.5.2"
   dependencies:
@@ -21843,7 +21829,7 @@ __metadata:
     serverless-webpack: ^5.11.0
     slugify: ^1.6.5
     ts-jest: ^27.1.4
-    ts-loader: ^9.4.2
+    ts-loader: ^9.4.3
     tsconfig-paths-webpack-plugin: ^4.0.1
     typescript: ^5.0.4
     url-parse: ^1.5.2
@@ -22461,8 +22447,8 @@ __metadata:
   linkType: hard
 
 "aws-sdk@npm:^2.1389.0":
-  version: 2.1404.0
-  resolution: "aws-sdk@npm:2.1404.0"
+  version: 2.1405.0
+  resolution: "aws-sdk@npm:2.1405.0"
   dependencies:
     buffer: 4.9.2
     events: 1.1.1
@@ -22474,7 +22460,7 @@ __metadata:
     util: ^0.12.4
     uuid: 8.0.0
     xml2js: 0.5.0
-  checksum: 016aaccb31bfdcadf464f29376ce653d8bc1b5d54b12e5a8aa3079b966fd7d357b3c4d96084307971670686a1c9d185d7da1fefd7c0d9fc2077e0b7be4c75143
+  checksum: d50585ce11ec1d60005687b4116d6810f550d75c503ced06edf01385786e789bc1626ef9716d62097f3850090d192c090b44b0983a2a81707bb2215277660f25
   languageName: node
   linkType: hard
 
@@ -23878,9 +23864,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001464, caniuse-lite@npm:^1.0.30001503":
-  version: 1.0.30001507
-  resolution: "caniuse-lite@npm:1.0.30001507"
-  checksum: 7044172bdf65140c927cdaaff50368a97676f06a9fd8b515c046613bdf52cb769e9efb832ee491b8f8cc21f82c15f154a896efbab690f431bb064c95f3a2b7a8
+  version: 1.0.30001508
+  resolution: "caniuse-lite@npm:1.0.30001508"
+  checksum: 0a083ed92194d87e608fc35cac65830a27900249729eb8a68e270f866f2c4f83396c2e54eb47b0ef71360682174dd74e2e68eac0b8d407d125611c7bc12488eb
   languageName: node
   linkType: hard
 
@@ -24222,10 +24208,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"classlist-polyfill@npm:1.2.0":
-  version: 1.2.0
-  resolution: "classlist-polyfill@npm:1.2.0"
-  checksum: 43ff10af5e75d0347f820d77536a12f981adbf5be9c0ff5c3c4823693c8daacf8aa487eac1a9704b73f4dd74d811e5145b4465fe606926351cdfca5bb9b0914e
+"classlist-polyfill@npm:1.0.3":
+  version: 1.0.3
+  resolution: "classlist-polyfill@npm:1.0.3"
+  checksum: 287125901a08f3d2d0d397f38f7446f0804b1fb0eeabeea978e69268332e6f308da2fd15bfe073fb8d11e34f23d891e17298c52b348ade0308cf2a3eb118d394
   languageName: node
   linkType: hard
 
@@ -29032,24 +29018,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fork-ts-checker-webpack-plugin@npm:^4.1.6":
-  version: 4.1.6
-  resolution: "fork-ts-checker-webpack-plugin@npm:4.1.6"
-  dependencies:
-    "@babel/code-frame": ^7.5.5
-    chalk: ^2.4.1
-    micromatch: ^3.1.10
-    minimatch: ^3.0.4
-    semver: ^5.6.0
-    tapable: ^1.0.0
-    worker-rpc: ^0.1.0
-  checksum: 4cc4fa7919dd9a0d765514d064c86e3a6f9cea8e700996b3e775cfcc0280f606a2dd16203d9b7e294b64e900795b0d80eb41fc8c192857d3350e407f14ef3eed
-  languageName: node
-  linkType: hard
-
-"fork-ts-checker-webpack-plugin@npm:^6.0.4, fork-ts-checker-webpack-plugin@npm:^6.5.0":
-  version: 6.5.2
-  resolution: "fork-ts-checker-webpack-plugin@npm:6.5.2"
+"fork-ts-checker-webpack-plugin@npm:6.5.3":
+  version: 6.5.3
+  resolution: "fork-ts-checker-webpack-plugin@npm:6.5.3"
   dependencies:
     "@babel/code-frame": ^7.8.3
     "@types/json-schema": ^7.0.5
@@ -29074,7 +29045,7 @@ __metadata:
       optional: true
     vue-template-compiler:
       optional: true
-  checksum: c823de02ee258a26ea5c0c488b2f1825b941f72292417478689862468a9140b209ad7df52f67bd134228fe9f40e9115b604fc8f88a69338929fe52be869469b6
+  checksum: 9732a49bfeed8fc23e6e8a59795fa7c238edeba91040a9b520db54b4d316dda27f9f1893d360e296fd0ad8930627d364417d28a8c7007fba60cc730ebfce4956
   languageName: node
   linkType: hard
 
@@ -32713,17 +32684,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-mock@npm:^29.5.0":
-  version: 29.5.0
-  resolution: "jest-mock@npm:29.5.0"
-  dependencies:
-    "@jest/types": ^29.5.0
-    "@types/node": "*"
-    jest-util: ^29.5.0
-  checksum: 2a9cf07509948fa8608898c445f04fe4dd6e2049ff431e5531eee028c808d3ba3c67f226ac87b0cf383feaa1055776900d197c895e89783016886ac17a4ff10c
-  languageName: node
-  linkType: hard
-
 "jest-pnp-resolver@npm:^1.2.2":
   version: 1.2.2
   resolution: "jest-pnp-resolver@npm:1.2.2"
@@ -32934,20 +32894,6 @@ __metadata:
     graceful-fs: ^4.2.9
     picomatch: ^2.2.3
   checksum: fd6459742c941f070223f25e38a2ac0719aad92561591e9fb2a50d602a5d19d754750b79b4074327a42b00055662b95da3b006542ceb8b54309da44d4a62e721
-  languageName: node
-  linkType: hard
-
-"jest-util@npm:^29.5.0":
-  version: 29.5.0
-  resolution: "jest-util@npm:29.5.0"
-  dependencies:
-    "@jest/types": ^29.5.0
-    "@types/node": "*"
-    chalk: ^4.0.0
-    ci-info: ^3.2.0
-    graceful-fs: ^4.2.9
-    picomatch: ^2.2.3
-  checksum: fd9212950d34d2ecad8c990dda0d8ea59a8a554b0c188b53ea5d6c4a0829a64f2e1d49e6e85e812014933d17426d7136da4785f9cf76fff1799de51b88bc85d3
   languageName: node
   linkType: hard
 
@@ -33178,18 +33124,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-yaml@npm:3.14.1, js-yaml@npm:^3.10.0, js-yaml@npm:^3.13.1, js-yaml@npm:^3.14.1":
-  version: 3.14.1
-  resolution: "js-yaml@npm:3.14.1"
-  dependencies:
-    argparse: ^1.0.7
-    esprima: ^4.0.0
-  bin:
-    js-yaml: bin/js-yaml.js
-  checksum: bef146085f472d44dee30ec34e5cf36bf89164f5d585435a3d3da89e52622dff0b188a580e4ad091c3341889e14cb88cac6e4deb16dc5b1e9623bb0601fc255c
-  languageName: node
-  linkType: hard
-
 "js-yaml@npm:4.1.0, js-yaml@npm:^4.0.0, js-yaml@npm:^4.1.0":
   version: 4.1.0
   resolution: "js-yaml@npm:4.1.0"
@@ -33198,6 +33132,18 @@ __metadata:
   bin:
     js-yaml: bin/js-yaml.js
   checksum: c7830dfd456c3ef2c6e355cc5a92e6700ceafa1d14bba54497b34a99f0376cecbb3e9ac14d3e5849b426d5a5140709a66237a8c991c675431271c4ce5504151a
+  languageName: node
+  linkType: hard
+
+"js-yaml@npm:^3.10.0, js-yaml@npm:^3.13.1, js-yaml@npm:^3.14.1":
+  version: 3.14.1
+  resolution: "js-yaml@npm:3.14.1"
+  dependencies:
+    argparse: ^1.0.7
+    esprima: ^4.0.0
+  bin:
+    js-yaml: bin/js-yaml.js
+  checksum: bef146085f472d44dee30ec34e5cf36bf89164f5d585435a3d3da89e52622dff0b188a580e4ad091c3341889e14cb88cac6e4deb16dc5b1e9623bb0601fc255c
   languageName: node
   linkType: hard
 
@@ -35033,13 +34979,6 @@ __metadata:
   version: 1.1.2
   resolution: "methods@npm:1.1.2"
   checksum: 0917ff4041fa8e2f2fda5425a955fe16ca411591fbd123c0d722fcf02b73971ed6f764d85f0a6f547ce49ee0221ce2c19a5fa692157931cecb422984f1dcd13a
-  languageName: node
-  linkType: hard
-
-"microevent.ts@npm:~0.1.1":
-  version: 0.1.1
-  resolution: "microevent.ts@npm:0.1.1"
-  checksum: 7874fcdb3f0dfa4e996d3ea63b3b9882874ae7d22be28d51ae20da24c712e9e28e5011d988095c27dd2b32e37c0ad7425342a71b89adb8e808ec7194fadf4a7a
   languageName: node
   linkType: hard
 
@@ -39510,7 +39449,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-scripts@npm:5.0.1":
+"react-scripts@npm:^5.0.1":
   version: 5.0.1
   resolution: "react-scripts@npm:5.0.1"
   dependencies:
@@ -43445,7 +43384,7 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"ts-jest@npm:^27.1.4":
+"ts-jest@npm:^27.1.4, ts-jest@npm:^27.1.5":
   version: 27.1.5
   resolution: "ts-jest@npm:27.1.5"
   dependencies:
@@ -43478,7 +43417,7 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"ts-loader@npm:^9.4.2":
+"ts-loader@npm:^9.4.2, ts-loader@npm:^9.4.3":
   version: 9.4.3
   resolution: "ts-loader@npm:9.4.3"
   dependencies:
@@ -43789,7 +43728,7 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"typescript@npm:>=3 < 6, typescript@npm:^5.0.4":
+"typescript@npm:>=3 < 6, typescript@npm:^5.0.0, typescript@npm:^5.0.4":
   version: 5.1.3
   resolution: "typescript@npm:5.1.3"
   bin:
@@ -43799,7 +43738,7 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@>=3 < 6#~builtin<compat/typescript>, typescript@patch:typescript@^5.0.4#~builtin<compat/typescript>":
+"typescript@patch:typescript@>=3 < 6#~builtin<compat/typescript>, typescript@patch:typescript@^5.0.0#~builtin<compat/typescript>, typescript@patch:typescript@^5.0.4#~builtin<compat/typescript>":
   version: 5.1.3
   resolution: "typescript@patch:typescript@npm%3A5.1.3#~builtin<compat/typescript>::version=5.1.3&hash=77c9e2"
   bin:
@@ -44396,16 +44335,16 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   languageName: node
   linkType: hard
 
-"uswds@npm:^2.13.3":
-  version: 2.14.0
-  resolution: "uswds@npm:2.14.0"
+"uswds@npm:^2.13.1":
+  version: 2.13.3
+  resolution: "uswds@npm:2.13.3"
   dependencies:
-    classlist-polyfill: 1.2.0
+    classlist-polyfill: 1.0.3
     domready: 1.0.8
     object-assign: 4.1.1
     receptor: 1.0.0
     resolve-id-refs: 0.1.0
-  checksum: c88decea6f755bf679cf74004564155375e48136c3547092aa6d8c1e87a2d722b9cee1f556764f9b153498be9e400db79a48ed9bfe4258c8f53314986c3197a0
+  checksum: 858e8ca0cb09e26099b3c57c12440566153792a65d99733176c1ce7b42d4d303759502768f37f9dcd4da2ab4fb0945a5132810263ea6f6e48c47d0cb6746fb3c
   languageName: node
   linkType: hard
 
@@ -45585,15 +45524,6 @@ serverless-s3-bucket-helper@CMSgov/serverless-s3-bucket-helper:
   dependencies:
     errno: ~0.1.7
   checksum: eab917530e1feddf157ec749e9c91b73a886142daa7fdf3490bccbf7b548b2576c43ab8d0a98e72ac755cbc101ca8647a7b1ff2485fddb9e8f53c40c77f5a719
-  languageName: node
-  linkType: hard
-
-"worker-rpc@npm:^0.1.0":
-  version: 0.1.1
-  resolution: "worker-rpc@npm:0.1.1"
-  dependencies:
-    microevent.ts: ~0.1.1
-  checksum: 8f8607506172f44c05490f3ccf13e5c1f430eeb9b6116a405919c186b8b17add13bbb22467a0dbcd18ec7fcb080709a15738182e0003c5fbe2144721ea00f357
   languageName: node
   linkType: hard
 

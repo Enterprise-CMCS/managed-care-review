@@ -96,6 +96,7 @@
     "packageManager": "yarn@3.5.1",
     "resolutions": {
         "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.cd77847.0",
+        "fork-ts-checker-webpack-plugin": "6.5.3",
         "eslint-plugin-jsx-a11y": "6.5.1"
     }
 }
