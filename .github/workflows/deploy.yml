@@ -99,7 +99,7 @@ jobs:
         run: npx lerna run gqlgen
 
       - name: Generate Protos
-        working-directory: services/app-web
+        working-directory: services/app-proto
         run: yarn generate
 
       - name: Web Unit Tests
