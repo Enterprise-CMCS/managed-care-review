@@ -50,10 +50,10 @@ model ContractFormData {
   status FormDataStatus
   stateCode StateCode
   stateNumber Int
-  submissionType SubmissionType
-  submissionDescription String
+  submissionType SubmissionType?
+  submissionDescription String?
   programIDs  String[]
-  populationCovered PopulationCoverageType
+  populationCovered PopulationCoverageType?
   riskBasedContract Boolean?
   stateContacts StateContact[]
   addtlActuaryContacts ActuaryContact[]
@@ -76,7 +76,20 @@ model RateFormData {
   updatedAt DateTime @default(now()) @updatedAt
   submittedAt DateTime?
 
+  rateType RateType?
+  rateCapitationType RateCapitationType?
+
   contractFormData ContractFormData[]
+}
+
+enum RateType {
+  NEW
+  AMENDMENT
+}
+
+enum RateCapitationType {
+  RATE_CELL
+  RATE_RANGE
 }
 
 enum ManagedCareEntity {
@@ -102,7 +115,7 @@ model ModifiedProvisions {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  modifiedBenefitsProvided Boolean
+  modifiedBenefitsProvided Boolean @default(false)
   modifiedGeoAreaServed Boolean @default(false)
   modifiedMedicaidBeneficiaries Boolean @default(false)
   modifiedRiskSharingStrategy Boolean @default(false)
