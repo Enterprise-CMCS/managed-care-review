@@ -10,7 +10,7 @@ datasource db {
 
 model HealthPlanPackageTable {
   id        String                    @id
-  stateCode String
+  stateCode StateCode
   state     State                     @relation(fields: [stateCode], references: [stateCode])
   revisions HealthPlanRevisionTable[]
   questions Question[]
@@ -39,6 +39,187 @@ model ContractTable {
   revisions ContractRevisionTable[]
 
   draftRateRevisions RateRevisionTable[]
+}
+
+model ContractFormData {
+  id  String  @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  submittedAt DateTime?
+
+  status FormDataStatus
+  stateCode StateCode
+  stateNumber Int
+  submissionType SubmissionType
+  submissionDescription String
+  programIDs  String[]
+  populationCovered PopulationCoverageType
+  riskBasedContract Boolean?
+  stateContacts StateContact[]
+  addtlActuaryContacts ActuaryContact[]
+  addtlActuaryCommunicationPreference ActuaryCommunication?
+  supportingDocuments Document[] @relation("ContractSupportingDocuments")
+  contractType ContractType?
+  contractExecutionStatus ContractExecutionStatus?
+  contractDocuments Document[] @relation("ContractDocuments")
+  contractDateStart DateTime?
+  contractDateEnd DateTime?
+  managedCareEntities ManagedCareEntity[]
+  federalAuthorities FederalAuthority[]
+  contractAmendmentInfo ContractAmendmentInfo?
+  rateInfos RateFormData[]
+}
+
+model RateFormData {
+  id  String  @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  submittedAt DateTime?
+
+  contractFormData ContractFormData[]
+}
+
+enum ManagedCareEntity {
+  MCO
+  PIHP
+  PAHP
+  PCCM
+}
+
+model ContractAmendmentInfo {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  modifiedProvisions ModifiedProvisions?
+
+  contractFormDataID String @unique
+  contractFormData ContractFormData @relation(fields: [contractFormDataID], references: [id])
+}
+
+model ModifiedProvisions {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  modifiedBenefitsProvided Boolean
+  modifiedGeoAreaServed Boolean @default(false)
+  modifiedMedicaidBeneficiaries Boolean @default(false)
+  modifiedRiskSharingStrategy Boolean @default(false)
+  modifiedIncentiveArrangements Boolean @default(false)
+  modifiedWitholdAgreements Boolean @default(false)
+  modifiedStateDirectedPayments Boolean @default(false)
+  modifiedPassThroughPayments Boolean @default(false)
+  modifiedPaymentsForMentalDiseaseInstitutions Boolean @default(false)
+  modifiedMedicalLossRatioStandards Boolean @default(false)
+  modifiedOtherFinancialPaymentIncentive Boolean @default(false)
+  modifiedEnrollmentProcess Boolean @default(false)
+  modifiedGrevienceAndAppeal Boolean @default(false)
+  modifiedNetworkAdequacyStandards Boolean @default(false)
+  modifiedLengthOfContract Boolean @default(false)
+  modifiedNonRiskPaymentArrangements Boolean @default(false)
+  inLieuServicesAndSettings Boolean @default(false)
+
+  contractAmendmentInfoID String @unique
+  contractAmendmentInfo ContractAmendmentInfo @relation(fields: [contractAmendmentInfoID], references: [id])
+}
+
+enum FederalAuthority {
+  STATE_PLAN
+  WAIVER_1915B
+  WAIVER_1115
+  VOLUNTARY
+  BENCHMARK
+  TITLE_XXI
+}
+
+enum ContractExecutionStatus {
+  EXECUTED
+  UNEXECUTED
+}
+
+enum ContractType {
+  BASE
+  AMENDMENT
+}
+
+model Document {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  name String
+  s3URL String
+  documentCategories DocumentCategory[]
+  sha256 String?
+
+  contractSupportingDocument ContractFormData[] @relation("ContractSupportingDocuments")
+  contractFormDataContractDocument ContractFormData[] @relation("ContractDocuments")
+}
+
+enum DocumentCategory {
+  CONTRACT
+  RATES
+  CONTRACT_RELATED
+  RATES_RELATED
+}
+
+model ActuaryContact {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  titleRole String
+  email String
+  actuarialFirm ActuarialFirm
+  actuarialFirmOther String?
+
+  contractFormDataID String?
+  contractFormData ContractFormData? @relation(fields: [contractFormDataID], references: [id])
+}
+
+enum ActuaryCommunication {
+  OACT_TO_ACTUARY
+  OACT_TO_STATE
+}
+
+enum ActuarialFirm {
+  MERCER
+  MILLIMAN
+  OPTUMAS
+  GUIDEHOUSE
+  DELOITTE
+  STATE_IN_HOUSE
+  OTHER
+}
+
+model StateContact {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  name  String
+  titleRole String
+  email String
+
+  contractFormDataID String
+  contractFormData ContractFormData @relation(fields: [contractFormDataID], references: [id])
+}
+
+enum PopulationCoverageType {
+  MEDICAID
+  CHIP
+  MEDICAID_AND_CHIP
+}
+
+enum SubmissionType {
+  CONTRACT_ONLY
+  CONTRACT_AND_RATES
+}
+
+enum FormDataStatus {
+  DRAFT
+  SUBMITTED
 }
 
 model RateTable {
@@ -120,7 +301,7 @@ model UpdateInfoTable {
 }
 
 model State {
-  stateCode                   String                   @id
+  stateCode                   StateCode                   @id
   name                        String
   latestStateSubmissionNumber Int                      @default(0)
   statePackages               HealthPlanPackageTable[]
@@ -136,7 +317,7 @@ model User {
   email                 String
   role                  Role
   divisionAssignment    Division?
-  stateCode             String?
+  stateCode             StateCode?
 
   stateAssignments      State[]
   questions             Question[]
@@ -218,4 +399,60 @@ enum Role {
 enum AuditAction {
   CHANGED_STATE_ASSIGNMENT
   CHANGED_DIVISION_ASSIGNMENT
+}
+
+enum StateCode {
+  UNSPECIFIED
+  AS
+  AK
+  AL
+  AR
+  AZ
+  CA
+  CO
+  CT
+  DC
+  DE
+  FL
+  GA
+  HI
+  IA
+  ID
+  IL
+  IN
+  KS
+  LA
+  MA
+  MD
+  ME
+  MI
+  MN
+  MO
+  MS
+  MT
+  NC
+  ND
+  NE
+  NH
+  NJ
+  NM
+  NV
+  NY
+  OH
+  OK
+  OR
+  PA
+  PR
+  RI
+  SC
+  SD
+  TN
+  TX
+  UT
+  VA
+  VT
+  WA
+  WI
+  WV
+  WY
 }
