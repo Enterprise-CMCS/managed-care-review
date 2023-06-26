@@ -1327,7 +1327,7 @@ describe('RateDetails', () => {
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')
         })
         // eslint-disable-next-line jest/no-disabled-tests
-        it.skip('disabled with alert when trying to continue while a file is still uploading', async () => {
+        it('disabled with alert when trying to continue while a file is still uploading', async () => {
             renderWithProviders(
                 <RateDetails
                     draftSubmission={emptyRateDetailsDraft()}
@@ -1340,31 +1340,33 @@ describe('RateDetails', () => {
                     },
                 }
             )
+
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
-            const targetEl = await screen.getAllByTestId(
+            const targetEl = await screen.findAllByTestId(
                 'file-input-droptarget'
-            )[0]
+            )
 
             // upload one file
-            dragAndDrop(targetEl, [TEST_PDF_FILE])
-            const imageElFile1 = screen.getByTestId('file-input-preview-image')
-            expect(imageElFile1).toHaveClass('is-loading')
+            dragAndDrop(targetEl[0], [TEST_PDF_FILE])
+            const imageElFile = await screen.findByTestId(
+                'file-input-preview-image'
+            )
             await waitFor(() =>
-                expect(imageElFile1).not.toHaveClass('is-loading')
+                expect(imageElFile).not.toHaveClass('is-loading')
             )
 
             // upload second file
-            dragAndDrop(targetEl, [TEST_DOC_FILE])
-
-            const imageElFile2 = screen.getAllByTestId(
+            dragAndDrop(targetEl[0], [TEST_DOC_FILE])
+            const imageElFiles = await screen.findAllByTestId(
                 'file-input-preview-image'
-            )[1]
-            expect(imageElFile2).toHaveClass('is-loading')
+            )
+            expect(imageElFiles[1]).toHaveClass('is-loading')
 
             // click continue while file 2 still loading
             fireEvent.click(continueButton)
+
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')
 
             expect(
