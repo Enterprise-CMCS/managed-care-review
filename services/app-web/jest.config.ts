@@ -1,5 +1,4 @@
 const jestConfig = {
-    preset: 'ts-jest',
     setupFiles: ['jest-launchdarkly-mock'],
     moduleNameMapper: {
         '^@managed-care-review/common-code/(.*)$':
