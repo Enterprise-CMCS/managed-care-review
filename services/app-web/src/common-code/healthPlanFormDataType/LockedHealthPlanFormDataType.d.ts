@@ -11,6 +11,7 @@ import type {
     ContractExecutionStatus,
     RateInfoType,
     PopulationCoveredType,
+    ManagedCareEntity,
 } from './UnlockedHealthPlanFormDataType'
 
 export type LockedHealthPlanFormDataType = {
@@ -32,7 +33,7 @@ export type LockedHealthPlanFormDataType = {
     contractDocuments: SubmissionDocument[]
     contractDateStart: Date
     contractDateEnd: Date
-    managedCareEntities: string[]
+    managedCareEntities: ManagedCareEntity[]
     federalAuthorities: FederalAuthority[]
     contractAmendmentInfo?: ContractAmendmentInfo
     rateInfos: RateInfoType[]

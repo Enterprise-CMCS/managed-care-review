@@ -1,4 +1,4 @@
-import {FederalAuthority} from 'FederalAuthority'
+import { FederalAuthority } from 'FederalAuthority'
 
 // Draft state submission is a health plan that a state user is still working on
 
@@ -107,7 +107,7 @@ type UnlockedHealthPlanFormDataType = {
     contractDocuments: SubmissionDocument[]
     contractDateStart?: Date
     contractDateEnd?: Date
-    managedCareEntities: string[]
+    managedCareEntities: ManagedCareEntity[]
     federalAuthorities: FederalAuthority[]
     contractAmendmentInfo?: ContractAmendmentInfo
     rateInfos: RateInfoType[]
