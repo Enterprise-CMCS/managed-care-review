@@ -99,7 +99,8 @@ jobs:
         run: npx lerna run gqlgen
 
       - name: Generate Protos
-        run: npx lerna run generate --scope=@managed-care-review/app-proto
+        working-directory: services/app-web
+        run: yarn generate
 
       - name: Web Unit Tests
         env:
