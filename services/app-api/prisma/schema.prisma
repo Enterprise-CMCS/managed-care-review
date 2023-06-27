@@ -115,23 +115,23 @@ model ModifiedProvisions {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  modifiedBenefitsProvided Boolean @default(false)
-  modifiedGeoAreaServed Boolean @default(false)
-  modifiedMedicaidBeneficiaries Boolean @default(false)
-  modifiedRiskSharingStrategy Boolean @default(false)
-  modifiedIncentiveArrangements Boolean @default(false)
-  modifiedWitholdAgreements Boolean @default(false)
-  modifiedStateDirectedPayments Boolean @default(false)
-  modifiedPassThroughPayments Boolean @default(false)
-  modifiedPaymentsForMentalDiseaseInstitutions Boolean @default(false)
-  modifiedMedicalLossRatioStandards Boolean @default(false)
-  modifiedOtherFinancialPaymentIncentive Boolean @default(false)
-  modifiedEnrollmentProcess Boolean @default(false)
-  modifiedGrevienceAndAppeal Boolean @default(false)
-  modifiedNetworkAdequacyStandards Boolean @default(false)
-  modifiedLengthOfContract Boolean @default(false)
-  modifiedNonRiskPaymentArrangements Boolean @default(false)
-  inLieuServicesAndSettings Boolean @default(false)
+  modifiedBenefitsProvided Boolean
+  modifiedGeoAreaServed Boolean
+  modifiedMedicaidBeneficiaries Boolean
+  modifiedRiskSharingStrategy Boolean
+  modifiedIncentiveArrangements Boolean
+  modifiedWitholdAgreements Boolean
+  modifiedStateDirectedPayments Boolean
+  modifiedPassThroughPayments Boolean
+  modifiedPaymentsForMentalDiseaseInstitutions Boolean
+  modifiedMedicalLossRatioStandards Boolean
+  modifiedOtherFinancialPaymentIncentive Boolean
+  modifiedEnrollmentProcess Boolean
+  modifiedGrevienceAndAppeal Boolean
+  modifiedNetworkAdequacyStandards Boolean
+  modifiedLengthOfContract Boolean
+  modifiedNonRiskPaymentArrangements Boolean
+  inLieuServicesAndSettings Boolean
 
   contractAmendmentInfoID String @unique
   contractAmendmentInfo ContractAmendmentInfo @relation(fields: [contractAmendmentInfoID], references: [id])
