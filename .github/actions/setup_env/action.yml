@@ -70,3 +70,13 @@ runs:
         # Other environment variables
         HUSKY: '0' # By default do not run HUSKY install
         PRISMA_CLI_BINARY_TARGETS: 'rhel-openssl-1.0.x'
+
+    - name: Generate GraphQL
+      shell: bash
+      working-directory: services/app-graphql
+      run: yarn generate
+
+    - name: Generate Protos
+      shell: bash
+      working-directory: services/app-proto
+      run: yarn generate
