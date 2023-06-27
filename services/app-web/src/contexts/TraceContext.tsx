@@ -41,6 +41,7 @@ registerInstrumentations({
                 ignoreUrls: [
                     /(.*).launchdarkly\.(com|us)/g,
                     /adobe-ep\.cms\.gov/g,
+                    /adobedc\.demdex\.net/g,
                 ],
                 propagateTraceHeaderCorsUrls: [/.+/g],
             },
@@ -49,6 +50,7 @@ registerInstrumentations({
                 ignoreUrls: [
                     /(.*).launchdarkly\.(com|us)/g,
                     /adobe-ep\.cms\.gov/g,
+                    /adobedc\.demdex\.net/g,
                 ],
                 propagateTraceHeaderCorsUrls: [/.+/g],
             },
