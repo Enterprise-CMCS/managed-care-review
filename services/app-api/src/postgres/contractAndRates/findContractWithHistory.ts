@@ -95,7 +95,10 @@ async function findContractWithHistory(
                 }
 
                 // if it's from before this contract was submitted, it's there at the beginning.
-                if (rateRev.validAfter <= contractRev.submitInfo.updatedAt) {
+                if (
+                    rateRev.rateRevision.submitInfo.updatedAt <=
+                    contractRev.submitInfo.updatedAt
+                ) {
                     if (!rateRev.isRemoval) {
                         initialEntry.rateRevs.push(rateRev.rateRevision)
                     }

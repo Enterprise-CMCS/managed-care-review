@@ -121,6 +121,7 @@ RateRevisionsOnContractRevisionsTable {
 
    DateTime validAfter
    DateTime validUntil
+   Boolean isRemoval
    
 }
 
