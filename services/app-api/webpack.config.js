@@ -25,19 +25,15 @@ module.exports = {
     performance: {
         hints: false,
     },
-    externals: [
-        nodeExternals(),
-        nodeExternals({
-            modulesDir: path.resolve(__dirname, '../../node_modules'),
-        }),
-        'prisma',
-        '@prisma/client',
-    ],
     devtool: 'source-map',
     resolve: {
         symlinks: false,
         extensions: extensions,
-        modules: [path.resolve(__dirname, 'node_modules'), 'node_modules'],
+        modules: [
+            path.resolve(__dirname, 'node_modules'),
+            path.resolve(__dirname, '../../lib/common-code'),
+            'node_modules',
+        ],
         plugins: [
             new TsconfigPathsPlugin({
                 configFile: tsConfigPath,
