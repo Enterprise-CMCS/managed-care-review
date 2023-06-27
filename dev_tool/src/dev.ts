@@ -28,19 +28,35 @@ async function runAllClean() {
     const runner = new LabeledProcessRunner()
     runner.runCommandAndOutput(
         'clean',
-        ['lerna', 'run', 'clean', '--scope=app-api', '--scope=app-web'],
+        [
+            'npx',
+            'lerna',
+            'run',
+            'clean',
+            '--scope=app-api',
+            '--scope=app-web',
+            '--scope=cypress',
+        ],
         ''
     )
 }
 
 async function runAllLint() {
     const runner = new LabeledProcessRunner()
-    await runner.runCommandAndOutput('lint', ['lerna', 'run', 'lint'], '')
+    await runner.runCommandAndOutput(
+        'lint',
+        ['npx', 'lerna', 'run', 'lint'],
+        ''
+    )
 }
 
 async function runAllFormat() {
     const runner = new LabeledProcessRunner()
-    await runner.runCommandAndOutput('format', ['lerna', 'run', 'prettier'], '')
+    await runner.runCommandAndOutput(
+        'format',
+        ['npx', 'lerna', 'run', 'prettier'],
+        ''
+    )
 }
 
 async function runAllGenerate() {

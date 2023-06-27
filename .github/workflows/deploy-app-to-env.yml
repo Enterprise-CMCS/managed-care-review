@@ -50,7 +50,7 @@ jobs:
           changed-services: ${{ inputs.changed_services }}
 
       - name: Generate Code
-        run: lerna run generate
+        run: npx lerna run generate
 
       - name: deploy app-web
         id: deploy-app-web
@@ -80,10 +80,10 @@ jobs:
           changed-services: ${{ inputs.changed_services }}
 
       - name: Generate Code
-        run: lerna run generate
+        run: npx lerna run generate
 
       - name: Compile proto migration files
-        run: lerna run build --scope=app-proto
+        run: npx lerna run build --scope=app-proto
 
       - name: upload app web gen directory
         uses: actions/upload-artifact@v3
