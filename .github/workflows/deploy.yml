@@ -95,13 +95,6 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Generate GraphQL
-        run: npx lerna run gqlgen
-
-      - name: Generate Protos
-        working-directory: services/app-proto
-        run: yarn generate
-
       - name: Web Unit Tests
         env:
           REACT_APP_AUTH_MODE: AWS_COGNITO
@@ -162,21 +155,13 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
-      - name: Generate GraphQL
-        run: npx lerna run gqlgen
-
-      - name: Generate Protos
-        run: npx lerna run generate
-
-      - name: Generate Prisma
+      - name: Migrate Prisma
         env:
           NODE_OPTIONS: --max_old_space_size=6000
           REACT_APP_AUTH_MODE: AWS_COGNITO
           DATABASE_URL: postgresql://postgres:shhhsecret@localhost:5432/postgres?schema=public&connection_limit=5 #pragma: allowlist secret
         working-directory: services/app-api
-        run: |
-          npx lerna run generate --scope=app-api
-          npx prisma migrate reset --force
+        run: npx prisma migrate reset --force
 
       - name: API Unit Tests
         env:
@@ -212,16 +197,6 @@ jobs:
 
       - name: Setup env
         uses: ./.github/actions/setup_env
-
-      - name: Generate protos
-        run: npx lerna run generate && lerna run build --scope=@managed-care-review/app-proto
-
-      # Generate Prisma Client and binary that can run in a lambda environment
-      - name: Prepare prisma client
-        working-directory: services/app-api
-        env:
-          PRISMA_CLI_BINARY_TARGETS: rhel-openssl-1.0.x
-        run: yarn prisma generate
 
       - name: Prepare "@prisma/client" lambda layer
         working-directory: services/app-api

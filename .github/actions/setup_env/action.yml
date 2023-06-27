@@ -80,3 +80,10 @@ runs:
       shell: bash
       working-directory: services/app-proto
       run: yarn generate
+
+    - name: Generate Prisma
+      shell: bash
+      working-directory: services/app-api
+      env:
+        PRISMA_CLI_BINARY_TARGETS: rhel-openssl-1.0.x
+      run: yarn prisma generate
