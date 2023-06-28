@@ -28,7 +28,7 @@ export type PackagesWithSharedRatesProps = {
 
 export const PackagesWithSharedRates = ({
     index,
-    key,
+    keyProp,
     shouldValidate,
     parentSubmissionID,
     fieldNamePrefix,
