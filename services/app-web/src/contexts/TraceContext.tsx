@@ -38,12 +38,20 @@ registerInstrumentations({
         getWebAutoInstrumentations({
             // load custom configuration for xml-http-request instrumentation
             '@opentelemetry/instrumentation-xml-http-request': {
-                ignoreUrls: [/(.*).launchdarkly\.(com|us)/g],
+                ignoreUrls: [
+                    /(.*).launchdarkly\.(com|us)/g,
+                    /adobe-ep\.cms\.gov/g,
+                    /adobedc\.demdex\.net/g,
+                ],
                 propagateTraceHeaderCorsUrls: [/.+/g],
             },
             // load custom configuration for fetch instrumentation
             '@opentelemetry/instrumentation-fetch': {
-                ignoreUrls: [/(.*).launchdarkly\.(com|us)/g],
+                ignoreUrls: [
+                    /(.*).launchdarkly\.(com|us)/g,
+                    /adobe-ep\.cms\.gov/g,
+                    /adobedc\.demdex\.net/g,
+                ],
                 propagateTraceHeaderCorsUrls: [/.+/g],
             },
         }),
