@@ -62,9 +62,7 @@ describe('unlockContract', () => {
         const draftContract = must(await findDraftContract(client, contract.id))
 
         if (draftContract === undefined) {
-            if (draftContract === undefined) {
-                throw Error('Contract data was undefined')
-            }
+            throw Error('Contract data was undefined')
         }
 
         // Rate revision should be connected to contract
@@ -87,9 +85,7 @@ describe('unlockContract', () => {
         )
 
         if (draftContractTwo === undefined) {
-            if (draftContractTwo === undefined) {
-                throw Error('Contract data was undefined')
-            }
+            throw Error('Contract data was undefined')
         }
 
         // Contract should now have the latest rate revision
