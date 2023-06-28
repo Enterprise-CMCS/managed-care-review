@@ -18,7 +18,7 @@
             "internalConsoleOptions": "neverOpen"
         },
         {
-            "name": "Debug current file web test",
+            "name": "Debug current file web tests",
             "type": "node",
             "request": "launch",
             "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/react-scripts",

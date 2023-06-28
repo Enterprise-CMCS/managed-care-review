@@ -13,10 +13,10 @@ import { getDocumentKey } from '../../../documentHelpers/getDocumentKey'
 export type UploadedDocumentsTableProps = {
     documents: SubmissionDocument[]
     caption: string | null
-    documentCategory: string
     documentDateLookupTable?: DocumentDateLookupTable
     packagesWithSharedRateCerts?: SharedRateCertDisplay[]
     isSupportingDocuments?: boolean
+    documentCategory?: string // if this prop is not included, do not show category column
     isEditing?: boolean
     isCMSUser?: boolean
 }
@@ -164,7 +164,9 @@ export const UploadedDocumentsTable = ({
                     <tr>
                         <th scope="col">Document name</th>
                         <th scope="col">Date added</th>
-                        <th scope="col">Document category</th>
+                        {documentCategory && (
+                            <th scope="col">Document category</th>
+                        )}
                         {showSharedInfo && (
                             <th scope="col">Linked submissions</th>
                         )}
@@ -208,7 +210,7 @@ export const UploadedDocumentsTable = ({
                                       ).format('M/D/YY')
                                     : ''}
                             </td>
-                            <td>{documentCategory}</td>
+                            {documentCategory && <td>{documentCategory}</td>}
                             {showSharedInfo
                                 ? packagesWithSharedRateCerts && (
                                       <td>

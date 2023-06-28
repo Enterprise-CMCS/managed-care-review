@@ -8,4 +8,5 @@ export {
     isDateRangeEmpty,
     validateDateFormat,
     validateDateRange12Months,
+    validateFileItemsList,
 } from './validators'

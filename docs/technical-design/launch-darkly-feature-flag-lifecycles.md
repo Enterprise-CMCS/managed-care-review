@@ -1,5 +1,7 @@
 # Feature Flag Lifecycles
 
+- Setup steps for testing with Launch Darkly locally can be found in [testing approach documentation](./launch-darkly-feature-flag-lifecycles.md)
+
 ## Criteria for when a feature should be behind a flag
 
 A feature typically can be added behind a flag if:
