@@ -93,7 +93,7 @@
         "cypress-file-upload": "^5.0.8",
         "path-browserify": "^1.0.1"
     },
-    "packageManager": "yarn@3.5.1",
+    "packageManager": "yarn@3.6.0",
     "resolutions": {
         "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.cd77847.0",
         "fork-ts-checker-webpack-plugin": "6.5.3",

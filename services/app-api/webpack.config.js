@@ -25,19 +25,13 @@ module.exports = {
     performance: {
         hints: false,
     },
-    externals: [
-        nodeExternals(),
-        nodeExternals({
-            modulesDir: path.resolve(__dirname, '../../node_modules'),
-        }),
-        'prisma',
-        '@prisma/client',
-    ],
-    devtool: 'source-map',
+    externals: ['prisma', '@prisma/client', 'aws-sdk'],
     resolve: {
-        symlinks: false,
         extensions: extensions,
-        modules: [path.resolve(__dirname, 'node_modules'), 'node_modules'],
+        modules: [
+            path.resolve(__dirname, '../../node_modules'),
+            path.resolve(__dirname, 'node_modules'),
+        ],
         plugins: [
             new TsconfigPathsPlugin({
                 configFile: tsConfigPath,
@@ -58,7 +52,6 @@ module.exports = {
                         },
                     },
                 ],
-                exclude: /node_modules/,
             },
             {
                 test: /\.(graphql|gql)$/,

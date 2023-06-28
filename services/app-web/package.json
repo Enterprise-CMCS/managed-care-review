@@ -115,7 +115,7 @@
         "use-deep-compare-effect": "^1.8.1",
         "uswds": "^2.13.1",
         "uuid": "^9.0.0",
-        "web-vitals": "^3.0.1",
+        "web-vitals": "^3.3.2",
         "yup": "^0.32.9",
         "zod": "^3.10.1"
     },
@@ -164,14 +164,14 @@
         "react-scripts": "^5.0.1",
         "react-select-event": "^5.5.0",
         "react-test-renderer": "^18.2.0",
-        "serverless": "^3.31.0",
+        "serverless": "^3.33.0",
         "serverless-cloudfront-invalidate": "^1.12.2",
         "serverless-s3-sync": "^3.1.0",
         "serverless-stack-termination-protection": "^2.0.2",
         "ts-jest": "^27.1.5",
-        "ts-loader": "^9.4.3",
+        "ts-loader": "^9.4.4",
         "tsconfig-paths-webpack-plugin": "^4.0.1",
         "typescript": "^5.0.0",
-        "webpack": "^5.83.1"
+        "webpack": "^5.88.1"
     }
 }

@@ -6,7 +6,7 @@
     "author": "",
     "license": "CC0-1.0",
     "devDependencies": {
-        "serverless": "^3.31.0",
+        "serverless": "^3.33.0",
         "serverless-s3-bucket-helper": "CMSgov/serverless-s3-bucket-helper",
         "serverless-stack-termination-protection": "^2.0.2"
     }

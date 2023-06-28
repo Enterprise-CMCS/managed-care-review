@@ -4,10 +4,6 @@ frameworkVersion: '^3.19.0'
 
 package:
   individually: true
-  patterns:
-    - '!node_modules/prisma'
-    - '!node_modules/.prisma'
-    - '!node_modules/@prisma'
 
 plugins:
   - serverless-offline-ssm
@@ -37,10 +33,6 @@ custom:
   webpack:
     webpackConfig: 'webpack.config.js'
     packager: 'yarn'
-    includeModules:
-      forceExclude:
-        - '@prisma/client'
-      nodeModulesRelativeDir: '../../'
     packagerOptions:
       lockFile: '../../yarn.lock'
     excludeRegex: 'darwin|debian'
