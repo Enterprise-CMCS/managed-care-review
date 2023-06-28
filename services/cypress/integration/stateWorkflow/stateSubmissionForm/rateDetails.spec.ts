@@ -4,7 +4,6 @@ describe('rate details', () => {
         cy.interceptGraphQL()
     })
     it('can navigate back and save as draft from rate details page', () => {
-        0
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
@@ -32,7 +31,7 @@ describe('rate details', () => {
         })
     })
 
-    it.only('can add amendment to prior rate certification', () => {
+    it('can add amendment to prior rate certification', () => {
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 
