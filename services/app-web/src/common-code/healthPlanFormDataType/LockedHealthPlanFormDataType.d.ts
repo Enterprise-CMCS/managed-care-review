@@ -11,7 +11,6 @@ import type {
     ContractExecutionStatus,
     RateInfoType,
     PopulationCoveredType,
-    ManagedCareEntity,
 } from './UnlockedHealthPlanFormDataType'
 
 export type LockedHealthPlanFormDataType = {
