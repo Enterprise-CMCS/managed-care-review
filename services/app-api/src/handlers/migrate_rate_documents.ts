@@ -87,7 +87,7 @@ export const processRevisions = async (
                 throw err
             }
         } else {
-            const error = `Error decoding formDataProto for revision ${revision.id} in rate migration: ${decodedFormDataProto}`
+            const error = `Error decoding formDataProto for revision ${revision.id} in package ${revision.pkgID} in rate migration: ${decodedFormDataProto}`
             console.error(error)
             recordException(error, serviceName, 'migrate_rate_documents')
         }
