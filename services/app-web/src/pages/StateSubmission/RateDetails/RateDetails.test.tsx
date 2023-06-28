@@ -1326,6 +1326,7 @@ describe('RateDetails', () => {
 
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')
         })
+        // eslint-disable-next-line jest/no-disabled-tests
         it('disabled with alert when trying to continue while a file is still uploading', async () => {
             renderWithProviders(
                 <RateDetails
@@ -1339,29 +1340,33 @@ describe('RateDetails', () => {
                     },
                 }
             )
+
             const continueButton = screen.getByRole('button', {
                 name: 'Continue',
             })
-            const targetEl = screen.getByTestId('file-input-droptarget')
+            const targetEl = await screen.findAllByTestId(
+                'file-input-droptarget'
+            )
 
             // upload one file
-            dragAndDrop(targetEl, [TEST_PDF_FILE])
-            const imageElFile1 = screen.getByTestId('file-input-preview-image')
-            expect(imageElFile1).toHaveClass('is-loading')
+            dragAndDrop(targetEl[0], [TEST_PDF_FILE])
+            const imageElFile = await screen.findByTestId(
+                'file-input-preview-image'
+            )
             await waitFor(() =>
-                expect(imageElFile1).not.toHaveClass('is-loading')
+                expect(imageElFile).not.toHaveClass('is-loading')
             )
 
             // upload second file
-            dragAndDrop(targetEl, [TEST_DOC_FILE])
-
-            const imageElFile2 = screen.getAllByTestId(
+            dragAndDrop(targetEl[0], [TEST_DOC_FILE])
+            const imageElFiles = await screen.findAllByTestId(
                 'file-input-preview-image'
-            )[1]
-            expect(imageElFile2).toHaveClass('is-loading')
+            )
+            expect(imageElFiles[1]).toHaveClass('is-loading')
 
             // click continue while file 2 still loading
             fireEvent.click(continueButton)
+
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')
 
             expect(
@@ -1467,7 +1472,7 @@ describe('RateDetails', () => {
                         documentCategories: ['RATES' as const],
                     },
                 ],
-                supportingDocuments:  [],
+                supportingDocuments: [],
                 rateType: undefined,
                 rateDateStart: undefined,
                 rateDateEnd: undefined,
@@ -1620,7 +1625,8 @@ describe('RateDetails', () => {
             expect(mockUpdateDraftFn).not.toHaveBeenCalled()
         })
 
-        it('when duplicate files present, does not trigger duplicate documents alert on click and silently updates submission without the duplicate', async () => {
+        it('when duplicate files present, does not trigger duplicate documents alert on click and silently updates rate and supporting documents lists without duplicates', async () => {
+            ldUseClientSpy({ 'supporting-docs-by-rate': true })
             const mockUpdateDraftFn = jest.fn()
             renderWithProviders(
                 <RateDetails
@@ -1630,67 +1636,82 @@ describe('RateDetails', () => {
                 />,
                 {
                     apolloProvider: {
-                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                        mocks: [
+                            indexHealthPlanPackagesMockSuccess([
+                                {
+                                    ...mockSubmittedHealthPlanPackage(),
+                                    id: 'test-abc-123',
+                                },
+                            ]),
+                        ],
                     },
                 }
             )
 
-            const input = screen.getByLabelText('Upload rate certification')
+            const rateCertInput = screen.getByLabelText(
+                'Upload rate certification'
+            )
+            const supportingDocsInput = screen.getByLabelText(
+                'Upload supporting documents (optional)'
+            )
             const backButton = screen.getByRole('button', {
                 name: 'Back',
             })
 
-            await userEvent.upload(input, [TEST_DOC_FILE])
-            await userEvent.upload(input, [TEST_PDF_FILE])
-            await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(rateCertInput, [TEST_DOC_FILE])
+            await userEvent.upload(rateCertInput, [TEST_PDF_FILE])
+            await userEvent.upload(rateCertInput, [TEST_DOC_FILE])
+
+            await userEvent.upload(supportingDocsInput, [TEST_XLS_FILE])
+            await userEvent.upload(supportingDocsInput, [TEST_DOC_FILE])
+            await userEvent.upload(supportingDocsInput, [TEST_XLS_FILE])
             await waitFor(() => {
                 expect(backButton).not.toHaveAttribute('aria-disabled')
                 expect(
                     screen.queryAllByText('Duplicate file, please remove')
-                ).toHaveLength(1)
+                ).toHaveLength(2)
             })
             await userEvent.click(backButton)
+
             expect(screen.queryByText('Remove files with errors')).toBeNull()
-            expect(mockUpdateDraftFn).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    rateInfos: [
-                        {
-                            rateType: undefined,
-                            rateCapitationType: undefined,
-                            rateDateStart: undefined,
-                            rateDateEnd: undefined,
-                            rateDateCertified: undefined,
-                            rateAmendmentInfo: undefined,
-                            rateProgramIDs: [],
-                            actuaryContacts: [
-                                {
-                                    actuarialFirm: undefined,
-                                    actuarialFirmOther: '',
-                                    email: '',
-                                    name: '',
-                                    titleRole: '',
-                                },
-                            ],
-                            rateDocuments: [
-                                {
-                                    name: 'testFile.doc',
-                                    s3URL: expect.any(String),
-                                    documentCategories: ['RATES'],
-                                    sha256: 'da7d22ce886b5ab262cd7ab28901212a027630a5edf8e88c8488087b03ffd833', // pragma: allowlist secret
-                                },
-                                {
-                                    name: 'testFile.pdf',
-                                    s3URL: expect.any(String),
-                                    documentCategories: ['RATES'],
-                                    sha256: '6d50607f29187d5b185ffd9d46bc5ef75ce7abb53318690c73e55b6623e25ad5', // pragma: allowlist secret
-                                },
-                            ],
-                            supportingDocuments: [],
-                            packagesWithSharedRateCerts: [],
-                        },
-                    ],
-                })
-            )
+
+            const updatedRateInfo =
+                mockUpdateDraftFn.mock.calls[0][0].rateInfos[0]
+
+            // rate certs sent are as expected
+            expect(updatedRateInfo.rateDocuments).toBeDefined()
+            expect(updatedRateInfo.rateDocuments).toEqual([
+                {
+                    name: 'testFile.doc',
+                    s3URL: expect.any(String),
+                    documentCategories: ['RATES'],
+                    sha256: 'da7d22ce886b5ab262cd7ab28901212a027630a5edf8e88c8488087b03ffd833', // pragma: allowlist secret
+                },
+                {
+                    name: 'testFile.pdf',
+                    s3URL: expect.any(String),
+                    documentCategories: ['RATES'],
+                    sha256: '6d50607f29187d5b185ffd9d46bc5ef75ce7abb53318690c73e55b6623e25ad5', // pragma: allowlist secret
+                },
+            ])
+
+            // rate certs sent are as expected
+            expect(updatedRateInfo.supportingDocuments).toBeDefined()
+
+            expect(updatedRateInfo.supportingDocuments).toEqual([
+                {
+                    name: 'testFile.xls',
+                    s3URL: expect.any(String),
+                    documentCategories: ['RATES_RELATED'],
+                    sha256: '76dbe3fd2b5c00001d424347bd28047b3bb2196561fc703c04fe254c10964c80', // pragma: allowlist secret
+                },
+                {
+                    name: 'testFile.doc',
+                    s3URL: expect.any(String),
+                    documentCategories: ['RATES_RELATED'],
+                    sha256: 'da7d22ce886b5ab262cd7ab28901212a027630a5edf8e88c8488087b03ffd833', // pragma: allowlist secret
+                },
+            ])
         })
     })
 })

@@ -3,11 +3,11 @@ import { ActuaryContact } from '../../../common-code/healthPlanFormDataType'
 import { Field, FormikErrors, FormikValues, getIn } from 'formik'
 import { Fieldset, FormGroup } from '@trussworks/react-uswds'
 import { FieldRadio, FieldTextInput } from '../../../components/Form'
-import { RateInfoFormType } from '../RateDetails/RateDetails'
 import { PoliteErrorMessage } from '../../../components/PoliteErrorMessage'
+import { RateCertFormType } from '../RateDetails/SingleRateCert/SingleRateCert'
 
 type FormError =
-    FormikErrors<RateInfoFormType>[keyof FormikErrors<RateInfoFormType>]
+    FormikErrors<RateCertFormType>[keyof FormikErrors<RateCertFormType>]
 
 type ActuaryFormPropType = {
     actuaryContact: ActuaryContact
@@ -153,19 +153,12 @@ export const ActuaryContactFields = ({
                         >
                             Other actuarial firm
                         </label>
-                        {showFieldErrors(
-                            getIn(
+                        <PoliteErrorMessage>
+                            {getIn(
                                 errors,
                                 `${fieldNamePrefix}.actuarialFirmOther`
-                            )
-                        ) && (
-                            <PoliteErrorMessage>
-                                {getIn(
-                                    errors,
-                                    `${fieldNamePrefix}.actuarialFirmOther`
-                                )}
-                            </PoliteErrorMessage>
-                        )}
+                            )}
+                        </PoliteErrorMessage>
                         <Field
                             name={`${fieldNamePrefix}.actuarialFirmOther`}
                             id={`${fieldNamePrefix}.actuarialFirmOther`}

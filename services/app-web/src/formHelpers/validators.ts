@@ -2,10 +2,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import dayjs from 'dayjs'
 import * as Yup from 'yup'
+import {
+    hasAtLeastOneFile,
+    hasNoFileErrors,
+    hasNoLoadingFiles,
+} from '../components/FileUpload'
 
-/*  
+/*
     validateDateFormat is a custom Yup method
-    This is needed to transform manual user input format MM/DD/YYYY to YYYY-MM-DD 
+    This is needed to transform manual user input format MM/DD/YYYY to YYYY-MM-DD
     and display specific errors when date is invalid
     More on this approach: https://github.com/jquense/yup#yupaddmethodschematype-schema-name-string-method--schema-void
 
@@ -41,7 +46,31 @@ const validateDateRange12Months = (
     return dayjs(endDateField).isSame(oneYearLater, 'day')
 }
 
-const isDateRangeEmpty = (startDate: string, endDate: string) =>
+const isDateRangeEmpty = (startDate?: string, endDate?: string) =>
     !startDate && !endDate
 
-export { isDateRangeEmpty, validateDateFormat, validateDateRange12Months }
+const validateFileItemsList = ({ required }: { required: boolean }) => {
+    return Yup.mixed()
+        .test(
+            'is-not-empty',
+            'You must upload at least one document',
+            (value) => (required ? hasAtLeastOneFile(value) : true)
+        )
+        .test(
+            'is-not-loading',
+            'You must wait for all documents to finish uploading before continuing',
+            (value) => hasNoLoadingFiles(value)
+        )
+        .test(
+            'is-error-free',
+            'You must remove all documents with error messages before continuing',
+            (value) => hasNoFileErrors(value)
+        )
+}
+
+export {
+    isDateRangeEmpty,
+    validateDateFormat,
+    validateDateRange12Months,
+    validateFileItemsList,
+}
