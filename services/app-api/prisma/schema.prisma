@@ -10,7 +10,7 @@ datasource db {
 
 model HealthPlanPackageTable {
   id        String                    @id
-  stateCode StateCode
+  stateCode String
   state     State                     @relation(fields: [stateCode], references: [stateCode])
   revisions HealthPlanRevisionTable[]
   questions Question[]
@@ -37,6 +37,11 @@ model HealthPlanRevisionTable {
 model ContractTable {
   id        String                  @id
   revisions ContractRevisionTable[]
+  stateCode String
+  state     State                     @relation(fields: [stateCode], references: [stateCode])
+  stateNumber Int
+  //NOTE: Do we want status to be a "computed field" or calculate somewhere in the DB function
+  status FormDataStatus
 
   draftRateRevisions RateRevisionTable[]
 }
@@ -45,11 +50,7 @@ model ContractFormData {
   id  String  @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
-  submittedAt DateTime?
 
-  status FormDataStatus
-  stateCode StateCode
-  stateNumber Int
   submissionType SubmissionType?
   submissionDescription String?
   programIDs  String[]
@@ -58,62 +59,14 @@ model ContractFormData {
   stateContacts StateContact[]
   addtlActuaryContacts ActuaryContact[]
   addtlActuaryCommunicationPreference ActuaryCommunication?
-  supportingDocuments Document[] @relation("ContractSupportingDocuments")
+  supportingDocuments ContractSupportingDocument[]
   contractType ContractType?
   contractExecutionStatus ContractExecutionStatus?
-  contractDocuments Document[] @relation("ContractDocuments")
+  contractDocuments ContractDocument[]
   contractDateStart DateTime?
   contractDateEnd DateTime?
   managedCareEntities ManagedCareEntity[]
   federalAuthorities FederalAuthority[]
-  contractAmendmentInfo ContractAmendmentInfo?
-  rateInfos RateFormData[]
-}
-
-model RateFormData {
-  id  String  @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  submittedAt DateTime?
-
-  rateType RateType?
-  rateCapitationType RateCapitationType?
-
-  contractFormData ContractFormData[]
-}
-
-enum RateType {
-  NEW
-  AMENDMENT
-}
-
-enum RateCapitationType {
-  RATE_CELL
-  RATE_RANGE
-}
-
-enum ManagedCareEntity {
-  MCO
-  PIHP
-  PAHP
-  PCCM
-}
-
-model ContractAmendmentInfo {
-  id String @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  modifiedProvisions ModifiedProvisions?
-
-  contractFormDataID String @unique
-  contractFormData ContractFormData @relation(fields: [contractFormDataID], references: [id])
-}
-
-model ModifiedProvisions {
-  id String @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
 
   modifiedBenefitsProvided Boolean
   modifiedGeoAreaServed Boolean
@@ -133,8 +86,122 @@ model ModifiedProvisions {
   modifiedNonRiskPaymentArrangements Boolean
   inLieuServicesAndSettings Boolean
 
-  contractAmendmentInfoID String @unique
-  contractAmendmentInfo ContractAmendmentInfo @relation(fields: [contractAmendmentInfoID], references: [id])
+  rateInfos RateFormData[]
+}
+
+model RateFormData {
+  id  String  @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  submittedAt DateTime?
+
+  rateType RateType?
+  rateCapitationType RateCapitationType?
+  rateDocuments RateDocument[]
+  supportingDocuments RateSupportingDocument[]
+  rateDateStart DateTime?
+  rateDateEnd DateTime?
+  rateDateCertified DateTime?
+  amendmentEffectiveDateStart DateTime?
+  amendmentEffectiveDateEnd DateTime?
+
+  rateProgramIDs  String[]
+  rateCertificationName String?
+  actuaryContacts ActuaryContact[]
+  actuaryCommunicationPreference ActuaryCommunication?
+
+  contractFormData ContractFormData[]
+}
+
+model ActuaryContact {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  titleRole String
+  email String
+  actuarialFirm ActuarialFirm
+  actuarialFirmOther String?
+
+  contractFormDataID String?
+  contractFormData ContractFormData? @relation(fields: [contractFormDataID], references: [id])
+
+  rateFormDataID String?
+  rateFormData RateFormData? @relation(fields: [rateFormDataID], references: [id])
+}
+
+//Split to 4 tables
+model RateSupportingDocument {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  name String
+  s3URL String
+  documentCategories DocumentCategory[]
+  sha256 String?
+
+  rateFormDataID String
+  rateFormData RateFormData @relation(fields: [rateFormDataID], references: [id])
+}
+
+model RateDocument {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  name String
+  s3URL String
+  documentCategories DocumentCategory[]
+  sha256 String?
+
+  rateFormDataID String
+  rateFormData RateFormData @relation(fields: [rateFormDataID], references: [id])
+}
+
+model ContractSupportingDocument {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  name String
+  s3URL String
+  documentCategories DocumentCategory[]
+  sha256 String?
+
+  contractFormDataID String
+  contractFormData ContractFormData @relation(fields: [contractFormDataID], references: [id])
+}
+
+model ContractDocument {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  name String
+  s3URL String
+  documentCategories DocumentCategory[]
+  sha256 String?
+
+  contractFormDataID String
+  contractFormData ContractFormData @relation(fields: [contractFormDataID], references: [id])
+}
+
+enum RateType {
+  NEW
+  AMENDMENT
+}
+
+enum RateCapitationType {
+  RATE_CELL
+  RATE_RANGE
+}
+
+enum ManagedCareEntity {
+  MCO
+  PIHP
+  PAHP
+  PCCM
 }
 
 enum FederalAuthority {
@@ -156,39 +223,11 @@ enum ContractType {
   AMENDMENT
 }
 
-model Document {
-  id String @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  name String
-  s3URL String
-  documentCategories DocumentCategory[]
-  sha256 String?
-
-  contractSupportingDocument ContractFormData[] @relation("ContractSupportingDocuments")
-  contractFormDataContractDocument ContractFormData[] @relation("ContractDocuments")
-}
-
 enum DocumentCategory {
   CONTRACT
   RATES
   CONTRACT_RELATED
   RATES_RELATED
-}
-
-model ActuaryContact {
-  id String @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  titleRole String
-  email String
-  actuarialFirm ActuarialFirm
-  actuarialFirmOther String?
-
-  contractFormDataID String?
-  contractFormData ContractFormData? @relation(fields: [contractFormDataID], references: [id])
 }
 
 enum ActuaryCommunication {
@@ -314,11 +353,13 @@ model UpdateInfoTable {
 }
 
 model State {
-  stateCode                   StateCode                   @id
+  stateCode                   String                   @id
   name                        String
   latestStateSubmissionNumber Int                      @default(0)
+
   statePackages               HealthPlanPackageTable[]
   users                       User[]
+  contract                    ContractTable[]
 }
 
 model User {
@@ -330,14 +371,14 @@ model User {
   email                 String
   role                  Role
   divisionAssignment    Division?
-  stateCode             StateCode?
+  stateCode             String?
 
   stateAssignments      State[]
   questions             Question[]
   responses             QuestionResponse[]
   audits                UserAudit[]
   updatedByAuditEntries UserAudit[]        @relation("UpdatedBy")
-  updateInfos UpdateInfoTable[]
+  updateInfos           UpdateInfoTable[]
 }
 
 model UserAudit {
@@ -412,60 +453,4 @@ enum Role {
 enum AuditAction {
   CHANGED_STATE_ASSIGNMENT
   CHANGED_DIVISION_ASSIGNMENT
-}
-
-enum StateCode {
-  UNSPECIFIED
-  AS
-  AK
-  AL
-  AR
-  AZ
-  CA
-  CO
-  CT
-  DC
-  DE
-  FL
-  GA
-  HI
-  IA
-  ID
-  IL
-  IN
-  KS
-  LA
-  MA
-  MD
-  ME
-  MI
-  MN
-  MO
-  MS
-  MT
-  NC
-  ND
-  NE
-  NH
-  NJ
-  NM
-  NV
-  NY
-  OH
-  OK
-  OR
-  PA
-  PR
-  RI
-  SC
-  SD
-  TN
-  TX
-  UT
-  VA
-  VT
-  WA
-  WI
-  WV
-  WY
 }
