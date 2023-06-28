@@ -101,7 +101,7 @@ const RateDatesErrorMessage = ({
     const validationErrorMessage = hasError
         ? isDateRangeEmpty(startDate, endDate)
             ? 'You must provide a start and an end date'
-            : startDateError || endDateError
+            : startDateError ?? endDateError
         : null
 
     return <PoliteErrorMessage>{validationErrorMessage}</PoliteErrorMessage>
@@ -274,7 +274,7 @@ export const SingleRateCert = ({
             {showPackagesWithSharedRatesDropdown && (
                 <PackagesWithSharedRates
                     index={index}
-                    key={key}
+                    keyProp={key}
                     fieldNamePrefix={fieldNamePrefix}
                     shouldValidate={shouldValidate}
                     parentSubmissionID={parentSubmissionID}
@@ -369,7 +369,7 @@ export const SingleRateCert = ({
                 <>
                     <FormGroup
                         error={Boolean(
-                            showFieldErrors('rateDateStart') ||
+                            showFieldErrors('rateDateStart') ??
                                 showFieldErrors('rateDateEnd')
                         )}
                     >
@@ -429,7 +429,7 @@ export const SingleRateCert = ({
                         <>
                             <FormGroup
                                 error={Boolean(
-                                    showFieldErrors('effectiveDateStart') ||
+                                    showFieldErrors('effectiveDateStart') ??
                                         showFieldErrors('effectiveDateEnd')
                                 )}
                             >

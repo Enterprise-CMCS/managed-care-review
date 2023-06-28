@@ -16,7 +16,7 @@ const ErrorSummaryMessage = ({
 
     // Treat keys that begin with # as ids
     if (errorKey.startsWith('#')) {
-        fieldSelector = errorKey
+        fieldSelector = `[id="${errorKey}"]`
         href = errorKey
 
         // Otherwise, assume that keys correspond to name attributes and ids

@@ -40,7 +40,7 @@ const generateRateCertFormValues = (params?: {
     const rateInfo = params?.rateInfo
 
     return {
-        id: rateInfo?.id || uuidv4(),
+        id: rateInfo?.id ?? uuidv4(),
         key: uuidv4(),
         rateType: rateInfo?.rateType,
         rateCapitationType: rateInfo?.rateCapitationType,
@@ -143,7 +143,7 @@ export const RateDetails = ({
 
     React.useEffect(() => {
         if (focusNewRate) {
-            newRateNameRef.current && newRateNameRef.current.focus()
+            newRateNameRef?.current?.focus()
             setFocusNewRate(false)
             newRateNameRef.current = null
         }

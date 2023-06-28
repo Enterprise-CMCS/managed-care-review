@@ -76,12 +76,11 @@ export const PackageSelect = ({
         if (!packageOptions.length) {
             return 'No submissions found'
         }
-        return
     }
 
     return (
         <Select
-            defaultValue={defaultValues}
+            value={defaultValues}
             placeholder={isLoading ? 'Loading submissions...' : 'Select...'}
             noOptionsMessage={() => noOptionsMessage()}
             loadingMessage={() => 'Loading submissions...'}

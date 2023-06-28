@@ -20,7 +20,7 @@ import styles from '../../StateSubmissionForm.module.scss'
 
 export type PackagesWithSharedRatesProps = {
     index: number
-    key: string
+    keyProp: string
     shouldValidate: boolean
     fieldNamePrefix: string
     parentSubmissionID: string
@@ -150,7 +150,7 @@ export const PackagesWithSharedRates = ({
                     <PackageSelect
                         //This key is required here because the combination of react-select, defaultValue, formik and apollo useQuery
                         // causes issues with the default value when reloading the page
-                        key={`packageOptions-${key}`}
+                        key={`packageOptions-${keyProp}`}
                         inputId={`${fieldNamePrefix}.packagesWithSharedRateCerts`}
                         name={`${fieldNamePrefix}.packagesWithSharedRateCerts`}
                         statePrograms={statePrograms}

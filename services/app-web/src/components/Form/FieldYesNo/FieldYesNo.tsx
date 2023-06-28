@@ -24,7 +24,7 @@ export type FieldYesNoProps = {
     showError?: boolean
     id: string
     variant?: 'TOPLEVEL' | 'SUBHEAD' // subhead variant used for nested fields yes/no fields under an overarching heading
-} & JSX.IntrinsicElements['input']
+} & React.JSX.IntrinsicElements['input']
 
 export const FieldYesNo = ({
     name,
