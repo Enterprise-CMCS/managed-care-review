@@ -44,43 +44,7 @@ async function unlockContract(
                     'Programming Error: cannot find the current revision to submit'
                 )
             }
-            // Given all the Rates associated with this draft, find the most recent submitted
-            // rateRevision to attach to this contract on submit.
-            const currentRev = await client.contractRevisionTable.findFirst({
-                where: {
-                    contractID: contractID,
-                },
-                orderBy: {
-                    createdAt: 'desc',
-                },
-                include: {
-                    rateRevisions: {
-                        where: {
-                            validUntil: null,
-                        },
-                        include: {
-                            rateRevision: true,
-                        },
-                    },
-                },
-            })
-            if (!currentRev) {
-                console.error(
-                    'Programming Error: cannot find the current revision to submit'
-                )
-                return new Error(
-                    'Programming Error: cannot find the current revision to submit'
-                )
-            }
 
-            if (!currentRev.submitInfoID) {
-                console.error(
-                    'Programming Error: cannot unlock a already unlocked contract'
-                )
-                return new Error(
-                    'Programming Error: cannot unlock a already unlocked contract'
-                )
-            }
             if (!currentRev.submitInfoID) {
                 console.error(
                     'Programming Error: cannot unlock a already unlocked contract'
@@ -94,7 +58,7 @@ async function unlockContract(
                 (c) => c.rateRevision.rateID
             )
 
-            await client.contractRevisionTable.create({
+            await tx.contractRevisionTable.create({
                 data: {
                     id: uuidv4(),
                     contract: {

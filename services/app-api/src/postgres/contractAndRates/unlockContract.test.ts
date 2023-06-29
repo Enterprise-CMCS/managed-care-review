@@ -6,11 +6,11 @@ import { unlockContract } from './unlockContract'
 import { insertDraftRate } from './insertRate'
 import { unlockRate } from './unlockRate'
 import { findDraftContract } from './findDraftContract'
-import { submitRateRevision } from './submitRateRevision'
-import { updateContractDraft } from './updateContractDraft'
-import { updateRateDraft } from './updateRateDraft'
+import { submitRate } from './submitRate'
+import { updateDraftContract } from './updateDraftContract'
+import { updateDraftRate } from './updateDraftRate'
 import { submitContract } from './submitContract'
-import { findContract } from './findContract'
+import { findContractWithHistory } from './findContractWithHistory'
 import { must } from '../../testHelpers'
 
 describe('unlockContract', () => {
@@ -43,18 +43,13 @@ describe('unlockContract', () => {
         const rate = must(await insertDraftRate(client, 'Rate 1.0'))
 
         // Submit Rate A
-        const submittedRateRev = must(
-            await submitRateRevision(
-                client,
-                rate.id,
-                stateUser.id,
-                'Rate A 1.0 submit'
-            )
+        const submittedRate = must(
+            await submitRate(client, rate.id, stateUser.id, 'Rate A 1.0 submit')
         )
 
         // Connect draft contract to submitted rate
         must(
-            await updateContractDraft(client, contract.id, 'Connecting rate', [
+            await updateDraftContract(client, contract.id, 'Connecting rate', [
                 rate.id,
             ])
         )
@@ -66,18 +61,16 @@ describe('unlockContract', () => {
         }
 
         // Rate revision should be connected to contract
-        expect(draftContract.rateRevisions[0].id).toEqual(submittedRateRev.id)
+        expect(draftContract.rateRevisions[0].id).toEqual(
+            submittedRate.revisions[0].id
+        )
 
         // Unlock the rate
         must(await unlockRate(client, rate.id, cmsUser.id, 'Unlocking rate'))
-        must(await updateRateDraft(client, rate.id, 'Rate 2.0', []))
-        const resubmittedRateRev = must(
-            await submitRateRevision(
-                client,
-                rate.id,
-                stateUser.id,
-                'Updated things'
-            )
+        must(await updateDraftRate(client, rate.id, 'Rate 2.0', []))
+
+        const resubmittedRate = must(
+            await submitRate(client, rate.id, stateUser.id, 'Updated things')
         )
 
         const draftContractTwo = must(
@@ -90,7 +83,7 @@ describe('unlockContract', () => {
 
         // Contract should now have the latest rate revision
         expect(draftContractTwo.rateRevisions[0].id).toEqual(
-            resubmittedRateRev.id
+            resubmittedRate.revisions[0].id
         )
     })
 
@@ -123,18 +116,13 @@ describe('unlockContract', () => {
         const rate = must(await insertDraftRate(client, 'Rate 1.0'))
 
         // Submit Rate A
-        const submittedRateRev = must(
-            await submitRateRevision(
-                client,
-                rate.id,
-                stateUser.id,
-                'Rate 1.0 submit'
-            )
+        const submittedRate = must(
+            await submitRate(client, rate.id, stateUser.id, 'Rate 1.0 submit')
         )
 
         // Connect draft contract to submitted rate
         must(
-            await updateContractDraft(client, contract.id, 'Connecting rate', [
+            await updateDraftContract(client, contract.id, 'Connecting rate', [
                 rate.id,
             ])
         )
@@ -149,33 +137,30 @@ describe('unlockContract', () => {
             )
         )
         // Latest revision is the last index
-        const latestContractRev = submittedContract.revisions.reverse()[0]
+        const latestContractRev = submittedContract.revisions[0]
 
         // Expect rate to be connected to submitted contract
         expect(latestContractRev.rateRevisions[0].id).toEqual(
-            submittedRateRev.id
+            submittedRate.revisions[0].id
         )
 
         // Unlock the rate and resubmit rate
         must(await unlockRate(client, rate.id, cmsUser.id, 'Unlocking rate'))
-        must(await updateRateDraft(client, rate.id, 'Rate 2.0', [contract.id]))
-        const resubmittedRateRev = must(
-            await submitRateRevision(
-                client,
-                rate.id,
-                stateUser.id,
-                'Rate resubmit'
-            )
+        must(await updateDraftRate(client, rate.id, 'Rate 2.0', [contract.id]))
+        const resubmittedRate = must(
+            await submitRate(client, rate.id, stateUser.id, 'Rate resubmit')
         )
 
         // Expect rate to still be connected to submitted contract
-        const submittedContract2 = must(await findContract(client, contract.id))
+        const submittedContract2 = must(
+            await findContractWithHistory(client, contract.id)
+        )
         // Latest revision is the last index
-        const latestResubmittedRev = submittedContract2.revisions.reverse()[0]
+        const latestResubmittedRev = submittedContract2.revisions[0]
 
         // Expect latest contract revision to now be connected to latest rate revision
         expect(latestResubmittedRev.rateRevisions[0].id).toEqual(
-            resubmittedRateRev.id
+            resubmittedRate.revisions[0].id
         )
     })
 
@@ -209,19 +194,14 @@ describe('unlockContract', () => {
 
         // Connect draft contract to submitted rate
         must(
-            await updateContractDraft(client, contract.id, 'contract 1.0', [
+            await updateDraftContract(client, contract.id, 'contract 1.0', [
                 rate.id,
             ])
         )
 
         // Submit rate
-        const submittedRateRev = must(
-            await submitRateRevision(
-                client,
-                rate.id,
-                stateUser.id,
-                'Submit rate 1.0'
-            )
+        const submittedRate = must(
+            await submitRate(client, rate.id, stateUser.id, 'Submit rate 1.0')
         )
 
         // Submit contract
@@ -233,10 +213,10 @@ describe('unlockContract', () => {
                 'Submit contract 1.0'
             )
         )
-        const latestContractRev = submittedContract.revisions.reverse()[0]
+        const latestContractRev = submittedContract.revisions[0]
 
         expect(latestContractRev.rateRevisions[0].id).toEqual(
-            submittedRateRev.id
+            submittedRate.revisions[0].id
         )
 
         // Unlock and resubmit contract
@@ -249,7 +229,7 @@ describe('unlockContract', () => {
             )
         )
         must(
-            await updateContractDraft(client, contract.id, 'contract 2.0', [
+            await updateDraftContract(client, contract.id, 'contract 2.0', [
                 rate.id,
             ])
         )
@@ -261,11 +241,11 @@ describe('unlockContract', () => {
                 'Submit contract 2.0'
             )
         )
-        const latestResubmittedRev = resubmittedContract.revisions.reverse()[0]
+        const latestResubmittedRev = resubmittedContract.revisions[0]
 
         // Expect rate revision to still be connected
         expect(latestResubmittedRev.rateRevisions[0].id).toEqual(
-            submittedRateRev.id
+            submittedRate.revisions[0].id
         )
     })
     it('errors when submitting a contract that has a draft rate', async () => {
@@ -288,7 +268,7 @@ describe('unlockContract', () => {
 
         // Connect draft contract to submitted rate
         must(
-            await updateContractDraft(client, contract.id, 'contract 1.0', [
+            await updateDraftContract(client, contract.id, 'contract 1.0', [
                 rate.id,
             ])
         )
