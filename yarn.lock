@@ -24312,10 +24312,10 @@ jotai-location@^0.4.0:
   resolved "https://registry.yarnpkg.com/jotai-location/-/jotai-location-0.4.0.tgz#5797c14833c7cdbf42540869908f117231e83c74"
   integrity sha512-UqvK/ysq2a38CXWN5qjYq5+VBTKhL7xjF4sTo9GSKFMumtFfprrO34rSOER1RHgsugZWFlB2OuRzrRKyHVBwrg==
 
-jotai@^1.13.0:
-  version "1.13.0"
-  resolved "https://registry.yarnpkg.com/jotai/-/jotai-1.13.0.tgz#c24f9fe4f18f58a348f042411509ef402b26c045"
-  integrity sha512-SPTO46Jw1aJTp2i18tiKgk++nKNKJTMNw4qYFy9QRTydceWvD2Eys+YgB7cb1S6pzbM9i0Ik/y7Yl7IH8k9Lig==
+jotai@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/jotai/-/jotai-2.2.1.tgz#0a95b88c5f3ea4fd656b5f79af6f84e895f84f5a"
+  integrity sha512-Gz4tpbRQy9OiFgBwF9F7TieDn0UTE3C0IFSDuxHjOIvgn2tACH30UKz6p/wIlfoZROXSTCIxEvYEa7Y25WM+8g==
 
 js-cookie@^2.2.1:
   version "2.2.1"
