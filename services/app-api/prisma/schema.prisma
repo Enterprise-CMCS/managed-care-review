@@ -45,8 +45,6 @@ model ContractTable {
   stateNumber Int
   status      FormDataStatus
 
-  sharedRateCerts SharedRateCertitications[]
-
   revisions   ContractRevisionTable[]
   draftRateRevisions RateRevisionTable[]
 }
@@ -56,8 +54,6 @@ model RateTable {
   createdAt   DateTime                @default(now())
   updatedAt   DateTime                @default(now()) @updatedAt
   submittedAt DateTime?
-
-  packagesWithSharedRateCerts SharedRateCertitications[]
 
   revisions RateRevisionTable[]
   draftContractRevisions ContractRevisionTable[]
@@ -130,17 +126,6 @@ model UpdateInfoTable {
   submitedContracts ContractRevisionTable[] @relation("submitContractInfo")
   unlockedRates     RateRevisionTable[]     @relation("unlockRateInfo")
   submitedRates     RateRevisionTable[]     @relation("submitRateInfo")
-}
-
-model SharedRateCertitications {
-  id  String  @id @default(uuid())
-  createdAt   DateTime                @default(now())
-  updatedAt   DateTime                @default(now()) @updatedAt
-
-  packageName String
-
-  contract  ContractTable[]
-  rate  RateTable[]
 }
 
 model ContractFormData {
