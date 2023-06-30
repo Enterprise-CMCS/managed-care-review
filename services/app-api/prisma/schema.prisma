@@ -132,7 +132,6 @@ model ContractFormData {
   id                                           String                       @id @unique @default(uuid())
   createdAt                                    DateTime                     @default(now())
   updatedAt                                    DateTime                     @default(now()) @updatedAt
-
   submissionType                               SubmissionType?
   submissionDescription                        String?
   programIDs                                   String[]
@@ -166,16 +165,14 @@ model ContractFormData {
   modifiedLengthOfContract                     Boolean
   modifiedNonRiskPaymentArrangements           Boolean
   inLieuServicesAndSettings                    Boolean
-
   contractRevisionID                           String                       @unique
   contractRevision                             ContractRevisionTable        @relation(fields: [contractRevisionID], references: [id])
 }
 
 model RateFormData {
-  id                             String                   @id @default(uuid())
-  createdAt                      DateTime                 @default(now())
-  updatedAt                      DateTime                 @default(now()) @updatedAt
-
+  id                             String                     @id @default(uuid())
+  createdAt                      DateTime                   @default(now())
+  updatedAt                      DateTime                   @default(now()) @updatedAt
   rateType                       RateType?
   rateCapitationType             RateCapitationType?
   rateDocuments                  RateDocument[]
@@ -189,21 +186,29 @@ model RateFormData {
   rateCertificationName          String?
   actuaryContacts                ActuaryContact[]
   actuaryCommunicationPreference ActuaryCommunication?
+  packagesWithSharedRateCerts    SharedRateCertifications[]
+  rateRevisionID                 String                     @unique
+  rateRevision                   RateRevisionTable          @relation(fields: [rateRevisionID], references: [id])
+}
 
-  rateRevisionID                 String                   @unique
-  rateRevision                   RateRevisionTable        @relation(fields: [rateRevisionID], references: [id])
+model SharedRateCertifications {
+  id             String       @id @default(uuid())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now()) @updatedAt
+  packageID      String
+  packageName    String
+  rateFormDataID String
+  rateFormData   RateFormData @relation(fields: [rateFormDataID], references: [id])
 }
 
 model ActuaryContact {
   id                 String            @id @default(uuid())
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @default(now()) @updatedAt
-
   titleRole          String
   email              String
   actuarialFirm      ActuarialFirm
   actuarialFirmOther String?
-
   contractFormDataID String?
   contractFormData   ContractFormData? @relation(fields: [contractFormDataID], references: [id])
   rateFormDataID     String?
@@ -214,12 +219,10 @@ model ContractDocument {
   id                 String             @id @default(uuid())
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @default(now()) @updatedAt
-
   name               String
   s3URL              String
   documentCategories DocumentCategory[]
   sha256             String?
-
   contractFormDataID String
   contractFormData   ContractFormData   @relation(fields: [contractFormDataID], references: [id])
 }
@@ -228,12 +231,10 @@ model ContractSupportingDocument {
   id                 String             @id @default(uuid())
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @default(now()) @updatedAt
-
   name               String
   s3URL              String
   documentCategories DocumentCategory[]
   sha256             String?
-
   contractFormDataID String
   contractFormData   ContractFormData   @relation(fields: [contractFormDataID], references: [id])
 }
@@ -242,12 +243,10 @@ model RateDocument {
   id                 String             @id @default(uuid())
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @default(now()) @updatedAt
-
   name               String
   s3URL              String
   documentCategories DocumentCategory[]
   sha256             String?
-
   rateFormDataID     String
   rateFormData       RateFormData       @relation(fields: [rateFormDataID], references: [id])
 }
@@ -256,12 +255,10 @@ model RateSupportingDocument {
   id                 String             @id @default(uuid())
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @default(now()) @updatedAt
-
   name               String
   s3URL              String
   documentCategories DocumentCategory[]
   sha256             String?
-
   rateFormDataID     String
   rateFormData       RateFormData       @relation(fields: [rateFormDataID], references: [id])
 }
@@ -270,11 +267,9 @@ model StateContact {
   id                 String           @id @default(uuid())
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @default(now()) @updatedAt
-
   name               String
   titleRole          String
   email              String
-
   contractFormDataID String
   contractFormData   ContractFormData @relation(fields: [contractFormDataID], references: [id])
 }
