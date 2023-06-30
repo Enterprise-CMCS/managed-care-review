@@ -43,7 +43,7 @@ model ContractTable {
   stateCode   String
   state       State          @relation(fields: [stateCode], references: [stateCode])
   stateNumber Int
-  status      FormDataStatus
+  status      PackageStatus
 
   revisions          ContractRevisionTable[]
   draftRateRevisions RateRevisionTable[]
@@ -55,12 +55,14 @@ model RateTable {
   updatedAt   DateTime  @default(now()) @updatedAt
   submittedAt DateTime?
 
+  status  PackageStatus
+
   revisions              RateRevisionTable[]
   draftContractRevisions ContractRevisionTable[]
 }
 
 model ContractRevisionTable {
-  id            String                                  @id
+  id            String                                  @id @default(uuid())
   contractID    String
   contract      ContractTable                           @relation(fields: [contractID], references: [id])
   rateRevisions RateRevisionsOnContractRevisionsTable[]
@@ -75,8 +77,39 @@ model ContractRevisionTable {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  name             String
-  contractFormData ContractFormData?
+  submissionType                               SubmissionType?
+  submissionDescription                        String?
+  programIDs                                   String[]
+  populationCovered                            PopulationCoverageType?
+  riskBasedContract                            Boolean?
+  stateContacts                                StateContact[]
+  addtlActuaryContacts                         ActuaryContact[]
+  addtlActuaryCommunicationPreference          ActuaryCommunication?
+  supportingDocuments                          ContractSupportingDocument[]
+  contractType                                 ContractType?
+  contractExecutionStatus                      ContractExecutionStatus?
+  contractDocuments                            ContractDocument[]
+  contractDateStart                            DateTime?
+  contractDateEnd                              DateTime?
+  managedCareEntities                          ManagedCareEntity[]
+  federalAuthorities                           FederalAuthority[]
+  modifiedBenefitsProvided                     Boolean?
+  modifiedGeoAreaServed                        Boolean?
+  modifiedMedicaidBeneficiaries                Boolean?
+  modifiedRiskSharingStrategy                  Boolean?
+  modifiedIncentiveArrangements                Boolean?
+  modifiedWitholdAgreements                    Boolean?
+  modifiedStateDirectedPayments                Boolean?
+  modifiedPassThroughPayments                  Boolean?
+  modifiedPaymentsForMentalDiseaseInstitutions Boolean?
+  modifiedMedicalLossRatioStandards            Boolean?
+  modifiedOtherFinancialPaymentIncentive       Boolean?
+  modifiedEnrollmentProcess                    Boolean?
+  modifiedGrevienceAndAppeal                   Boolean?
+  modifiedNetworkAdequacyStandards             Boolean?
+  modifiedLengthOfContract                     Boolean?
+  modifiedNonRiskPaymentArrangements           Boolean?
+  inLieuServicesAndSettings                    Boolean?
 }
 
 model RateRevisionTable {
@@ -96,7 +129,21 @@ model RateRevisionTable {
   submitInfo   UpdateInfoTable? @relation("submitRateInfo", fields: [submitInfoID], references: [id])
 
   name         String
-  rateFormData RateFormData?
+
+  rateType                       RateType?
+  rateCapitationType             RateCapitationType?
+  rateDocuments                  RateDocument[]
+  supportingDocuments            RateSupportingDocument[]
+  rateDateStart                  DateTime?
+  rateDateEnd                    DateTime?
+  rateDateCertified              DateTime?
+  amendmentEffectiveDateStart    DateTime?
+  amendmentEffectiveDateEnd      DateTime?
+  rateProgramIDs                 String[]
+  rateCertificationName          String?
+  actuaryContacts                ActuaryContact[]
+  actuaryCommunicationPreference ActuaryCommunication?
+  packagesWithSharedRateCerts    SharedRateCertifications[]
 }
 
 model RateRevisionsOnContractRevisionsTable {
@@ -128,91 +175,31 @@ model UpdateInfoTable {
   submitedRates     RateRevisionTable[]     @relation("submitRateInfo")
 }
 
-model ContractFormData {
-  id                                           String                       @id @unique @default(uuid())
-  createdAt                                    DateTime                     @default(now())
-  updatedAt                                    DateTime                     @default(now()) @updatedAt
-  submissionType                               SubmissionType?
-  submissionDescription                        String?
-  programIDs                                   String[]
-  populationCovered                            PopulationCoverageType?
-  riskBasedContract                            Boolean?
-  stateContacts                                StateContact[]
-  addtlActuaryContacts                         ActuaryContact[]
-  addtlActuaryCommunicationPreference          ActuaryCommunication?
-  supportingDocuments                          ContractSupportingDocument[]
-  contractType                                 ContractType?
-  contractExecutionStatus                      ContractExecutionStatus?
-  contractDocuments                            ContractDocument[]
-  contractDateStart                            DateTime?
-  contractDateEnd                              DateTime?
-  managedCareEntities                          ManagedCareEntity[]
-  federalAuthorities                           FederalAuthority[]
-  modifiedBenefitsProvided                     Boolean
-  modifiedGeoAreaServed                        Boolean
-  modifiedMedicaidBeneficiaries                Boolean
-  modifiedRiskSharingStrategy                  Boolean
-  modifiedIncentiveArrangements                Boolean
-  modifiedWitholdAgreements                    Boolean
-  modifiedStateDirectedPayments                Boolean
-  modifiedPassThroughPayments                  Boolean
-  modifiedPaymentsForMentalDiseaseInstitutions Boolean
-  modifiedMedicalLossRatioStandards            Boolean
-  modifiedOtherFinancialPaymentIncentive       Boolean
-  modifiedEnrollmentProcess                    Boolean
-  modifiedGrevienceAndAppeal                   Boolean
-  modifiedNetworkAdequacyStandards             Boolean
-  modifiedLengthOfContract                     Boolean
-  modifiedNonRiskPaymentArrangements           Boolean
-  inLieuServicesAndSettings                    Boolean
-  contractRevisionID                           String                       @unique
-  contractRevision                             ContractRevisionTable        @relation(fields: [contractRevisionID], references: [id])
-}
-
-model RateFormData {
-  id                             String                     @id @default(uuid())
-  createdAt                      DateTime                   @default(now())
-  updatedAt                      DateTime                   @default(now()) @updatedAt
-  rateType                       RateType?
-  rateCapitationType             RateCapitationType?
-  rateDocuments                  RateDocument[]
-  supportingDocuments            RateSupportingDocument[]
-  rateDateStart                  DateTime?
-  rateDateEnd                    DateTime?
-  rateDateCertified              DateTime?
-  amendmentEffectiveDateStart    DateTime?
-  amendmentEffectiveDateEnd      DateTime?
-  rateProgramIDs                 String[]
-  rateCertificationName          String?
-  actuaryContacts                ActuaryContact[]
-  actuaryCommunicationPreference ActuaryCommunication?
-  packagesWithSharedRateCerts    SharedRateCertifications[]
-  rateRevisionID                 String                     @unique
-  rateRevision                   RateRevisionTable          @relation(fields: [rateRevisionID], references: [id])
-}
-
 model SharedRateCertifications {
   id             String       @id @default(uuid())
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @default(now()) @updatedAt
   packageID      String
   packageName    String
-  rateFormDataID String
-  rateFormData   RateFormData @relation(fields: [rateFormDataID], references: [id])
+  rateRevisionID String
+  rateRevision   RateRevisionTable @relation(fields: [rateRevisionID], references: [id])
 }
 
 model ActuaryContact {
   id                 String            @id @default(uuid())
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @default(now()) @updatedAt
+  name               String
   titleRole          String
   email              String
   actuarialFirm      ActuarialFirm
   actuarialFirmOther String?
-  contractFormDataID String?
-  contractFormData   ContractFormData? @relation(fields: [contractFormDataID], references: [id])
-  rateFormDataID     String?
-  rateFormData       RateFormData?     @relation(fields: [rateFormDataID], references: [id])
+
+  contractRevisionID String?
+  contractRevision   ContractRevisionTable? @relation(fields: [contractRevisionID], references: [id])
+
+  rateRevisionID     String?
+  rateRevision       RateRevisionTable?     @relation(fields: [rateRevisionID], references: [id])
 }
 
 model ContractDocument {
@@ -223,8 +210,8 @@ model ContractDocument {
   s3URL              String
   documentCategories DocumentCategory[]
   sha256             String?
-  contractFormDataID String
-  contractFormData   ContractFormData   @relation(fields: [contractFormDataID], references: [id])
+  contractRevisionID String
+  contractRevision   ContractRevisionTable   @relation(fields: [contractRevisionID], references: [id])
 }
 
 model ContractSupportingDocument {
@@ -235,8 +222,8 @@ model ContractSupportingDocument {
   s3URL              String
   documentCategories DocumentCategory[]
   sha256             String?
-  contractFormDataID String
-  contractFormData   ContractFormData   @relation(fields: [contractFormDataID], references: [id])
+  contractRevisionID String
+  contractRevision   ContractRevisionTable   @relation(fields: [contractRevisionID], references: [id])
 }
 
 model RateDocument {
@@ -247,8 +234,8 @@ model RateDocument {
   s3URL              String
   documentCategories DocumentCategory[]
   sha256             String?
-  rateFormDataID     String
-  rateFormData       RateFormData       @relation(fields: [rateFormDataID], references: [id])
+  rateRevisionID     String
+  rateRevision       RateRevisionTable       @relation(fields: [rateRevisionID], references: [id])
 }
 
 model RateSupportingDocument {
@@ -259,8 +246,8 @@ model RateSupportingDocument {
   s3URL              String
   documentCategories DocumentCategory[]
   sha256             String?
-  rateFormDataID     String
-  rateFormData       RateFormData       @relation(fields: [rateFormDataID], references: [id])
+  rateRevisionID     String
+  rateRevision       RateRevisionTable       @relation(fields: [rateRevisionID], references: [id])
 }
 
 model StateContact {
@@ -270,8 +257,8 @@ model StateContact {
   name               String
   titleRole          String
   email              String
-  contractFormDataID String
-  contractFormData   ContractFormData @relation(fields: [contractFormDataID], references: [id])
+  contractRevisionID String
+  contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
 }
 
 model State {
@@ -446,7 +433,7 @@ enum SubmissionType {
   CONTRACT_AND_RATES
 }
 
-enum FormDataStatus {
+enum PackageStatus {
   DRAFT
   SUBMITTED
 }
