@@ -7,6 +7,7 @@ module.exports = () => {
     return {
         packager: 'npm',
         packagePath: './package.json',
+        platform: 'node',
         bundle: true,
         minify: true,
         sourcemap: false,
