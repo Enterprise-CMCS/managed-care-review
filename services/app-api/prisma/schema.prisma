@@ -35,27 +35,27 @@ model HealthPlanRevisionTable {
 }
 
 model ContractTable {
-  id          String                  @id
-  createdAt   DateTime                @default(now())
-  updatedAt   DateTime                @default(now()) @updatedAt
+  id          String    @id
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
   submittedAt DateTime?
 
   stateCode   String
-  state       State                   @relation(fields: [stateCode], references: [stateCode])
+  state       State          @relation(fields: [stateCode], references: [stateCode])
   stateNumber Int
   status      FormDataStatus
 
-  revisions   ContractRevisionTable[]
+  revisions          ContractRevisionTable[]
   draftRateRevisions RateRevisionTable[]
 }
 
 model RateTable {
-  id          String                  @id
-  createdAt   DateTime                @default(now())
-  updatedAt   DateTime                @default(now()) @updatedAt
+  id          String    @id
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
   submittedAt DateTime?
 
-  revisions RateRevisionTable[]
+  revisions              RateRevisionTable[]
   draftContractRevisions ContractRevisionTable[]
 }
 
@@ -75,7 +75,7 @@ model ContractRevisionTable {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  name String
+  name             String
   contractFormData ContractFormData?
 }
 
@@ -95,7 +95,7 @@ model RateRevisionTable {
   submitInfoID String?
   submitInfo   UpdateInfoTable? @relation("submitRateInfo", fields: [submitInfoID], references: [id])
 
-  name String
+  name         String
   rateFormData RateFormData?
 }
 
@@ -129,7 +129,7 @@ model UpdateInfoTable {
 }
 
 model ContractFormData {
-  id                                           String                       @id @default(uuid()) @unique
+  id                                           String                       @id @unique @default(uuid())
   createdAt                                    DateTime                     @default(now())
   updatedAt                                    DateTime                     @default(now()) @updatedAt
 
@@ -167,8 +167,8 @@ model ContractFormData {
   modifiedNonRiskPaymentArrangements           Boolean
   inLieuServicesAndSettings                    Boolean
 
-  contractRevisionID  String  @unique
-  contractRevision ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
+  contractRevisionID                           String                       @unique
+  contractRevision                             ContractRevisionTable        @relation(fields: [contractRevisionID], references: [id])
 }
 
 model RateFormData {
@@ -190,8 +190,8 @@ model RateFormData {
   actuaryContacts                ActuaryContact[]
   actuaryCommunicationPreference ActuaryCommunication?
 
-  rateRevisionID  String  @unique
-  rateRevision RateRevisionTable @relation(fields: [rateRevisionID], references: [id])
+  rateRevisionID                 String                   @unique
+  rateRevision                   RateRevisionTable        @relation(fields: [rateRevisionID], references: [id])
 }
 
 model ActuaryContact {
