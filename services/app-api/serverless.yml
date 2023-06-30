@@ -10,6 +10,7 @@ package:
     - '!node_modules/@prisma/engines/**'
     - 'node_modules/.prisma/client/schema.prisma'
     - 'node_modules/.prisma/client/libquery_engine-debian-*'
+    - 'src/emailer/etaTemplates/*'
 
 plugins:
   - serverless-esbuild
