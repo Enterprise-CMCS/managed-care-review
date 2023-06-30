@@ -4,7 +4,7 @@ import {
     UserAccountWarningBanner,
     AccountWarningBannerProps,
 } from './UserAccountWarningBanner'
-import { useString } from '../../../hooks/useString'
+import { useStringConstants } from '../../../hooks/useStringConstants'
 
 export default {
     title: 'Components/Banner/UserAccountWarningBanner',
@@ -12,7 +12,7 @@ export default {
 }
 
 const Template: Story<AccountWarningBannerProps> = ({ header, ...args }) => {
-    const stringConstants = useString()
+    const stringConstants = useStringConstants()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
 
     return (

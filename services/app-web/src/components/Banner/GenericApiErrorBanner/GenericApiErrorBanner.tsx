@@ -2,7 +2,7 @@ import React from 'react'
 import styles from '../Banner.module.scss'
 import { Alert, Link } from '@trussworks/react-uswds'
 import { ERROR_MESSAGES } from '../../../constants/errors'
-import { useString } from '../../../hooks/useString'
+import { useStringConstants } from '../../../hooks/useStringConstants'
 
 export type GenericApiErrorProps = {
     heading?: string
@@ -15,7 +15,7 @@ export const GenericApiErrorBanner = ({
     message,
     suggestion,
 }: GenericApiErrorProps): React.ReactElement => {
-    const stringConstants = useString()
+    const stringConstants = useStringConstants()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     return (
         <Alert

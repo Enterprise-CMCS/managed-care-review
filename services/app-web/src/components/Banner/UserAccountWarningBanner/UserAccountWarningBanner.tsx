@@ -4,7 +4,7 @@ import React from 'react'
 
 export type AccountWarningBannerProps = {
     header: string
-    message: string
+    message: React.ReactNode
 }
 
 const UserAccountWarningBanner = ({

@@ -5,13 +5,13 @@ import { ReactComponent as HHSIcon } from '../../assets/icons/depthealthhumanser
 import styles from './Footer.module.scss'
 import { Logo } from '../Logo'
 import { GridContainer, Grid } from '@trussworks/react-uswds'
-import { useString } from '../../hooks/useString'
+import { useStringConstants } from '../../hooks/useStringConstants'
 
 /**
  * CMS Footer
  */
 export const Footer = (): React.ReactElement => {
-    const stringConstants = useString()
+    const stringConstants = useStringConstants()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     return (
         <footer>

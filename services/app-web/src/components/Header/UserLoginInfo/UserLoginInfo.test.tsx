@@ -4,7 +4,7 @@ import {
     ldUseClientSpy,
 } from '../../../testHelpers/jestHelpers'
 import { UserLoginInfo } from './UserLoginInfo'
-import { useString } from '../../../hooks/useString'
+import { useStringConstants } from '../../../hooks/useStringConstants'
 
 describe('UserLoginInfo', () => {
     afterEach(() => jest.clearAllMocks())
@@ -57,7 +57,7 @@ describe('UserLoginInfo', () => {
 
     it('renders link to support email', () => {
         ldUseClientSpy({ 'helpdesk-email': true })
-        const stringConstants = useString()
+        const stringConstants = useStringConstants()
         const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
         const jestFn = jest.fn()
 

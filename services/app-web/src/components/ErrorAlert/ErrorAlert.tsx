@@ -2,7 +2,7 @@ import classnames from 'classnames'
 import React from 'react'
 import styles from './ErrorAlert.module.scss'
 import { Alert, Link } from '@trussworks/react-uswds'
-import { useString } from '../../hooks/useString'
+import { useStringConstants } from '../../hooks/useStringConstants'
 export type ErrorAlertProps = {
     message?: React.ReactNode
     heading?: string
@@ -17,7 +17,7 @@ export const ErrorAlert = ({
     className,
     ...divProps
 }: ErrorAlertProps): React.ReactElement => {
-    const stringConstants = useString()
+    const stringConstants = useStringConstants()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     const classes = classnames(styles.messageBodyText, className)
     const showLink = appendLetUsKnow || !message // our default message includes the link

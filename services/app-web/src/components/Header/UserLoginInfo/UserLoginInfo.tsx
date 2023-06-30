@@ -8,7 +8,7 @@ import { idmRedirectURL } from '../../../pages/Auth/cognitoAuth'
 import { AuthModeType } from '../../../common-code/config'
 
 import styles from '../Header.module.scss'
-import { useString } from '../../../hooks/useString'
+import { useStringConstants } from '../../../hooks/useStringConstants'
 
 type LogoutHandlerT = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -18,7 +18,7 @@ const LoggedInUserInfo = (
     user: User,
     logout: LogoutHandlerT
 ): React.ReactElement => {
-    const stringConstants = useString()
+    const stringConstants = useStringConstants()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     return (
         <div className={styles.userInfo}>

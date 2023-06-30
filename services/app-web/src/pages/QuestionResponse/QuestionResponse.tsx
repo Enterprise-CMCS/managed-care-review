@@ -13,7 +13,7 @@ import {
 import { QATable, QuestionData, Division } from './QATable/QATable'
 import { CmsUser, QuestionEdge, StateUser } from '../../gen/gqlClient'
 import { CMSUserType } from 'app-api/src/domain-models'
-import { useString } from '../../hooks/useString'
+import { useStringConstants } from '../../hooks/useStringConstants'
 
 type divisionQuestionDataType = {
     division: Division
@@ -49,7 +49,7 @@ const getDivisionOrder = (division?: Division): Division[] =>
     }) as Division[]
 
 export const QuestionResponse = () => {
-    const stringConstants = useString()
+    const stringConstants = useStringConstants()
     const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     // router context
     const location = useLocation()
@@ -119,7 +119,16 @@ export const QuestionResponse = () => {
                 {isCMSUser && !division && (
                     <UserAccountWarningBanner
                         header={'Missing division'}
-                        message={`You must be assigned to a division in order to ask questions about a submission. Contact ${MAIL_TO_SUPPORT} to add your division.`}
+                        message={
+                            <span>
+                                You must be assigned to a division in order to
+                                ask questions about a submission. Contact{' '}
+                                <a href={`mailto:${MAIL_TO_SUPPORT}`}>
+                                    {MAIL_TO_SUPPORT}
+                                </a>{' '}
+                                to add your division.
+                            </span>
+                        }
                     />
                 )}
                 {submitType && (
