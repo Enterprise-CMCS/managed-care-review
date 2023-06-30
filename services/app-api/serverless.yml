@@ -4,14 +4,19 @@ frameworkVersion: '^3.19.0'
 
 package:
   individually: true
+  patterns:
+    - '!node_modules/.prisma/client/libquery_engine-*'
+    - 'node_modules/.prisma/client/schema.prisma'
+    - 'node_modules/.prisma/client/libquery_engine-debian-*'
+    - '!node_modules/prisma/libquery_engine-*'
+    - '!node_modules/@prisma/engines/**'
 
 plugins:
+  - serverless-esbuild
   - serverless-offline-ssm
   - serverless-offline
-  - serverless-webpack
   - serverless-stack-termination-protection
   - serverless-s3-bucket-helper
-  - serverless-idempotency-helper
   - serverless-iam-helper
 
 custom:
@@ -30,12 +35,8 @@ custom:
   reactAppOtelCollectorUrl: ${env:REACT_APP_OTEL_COLLECTOR_URL, ssm:/configuration/react_app_otel_collector_url}
   dbURL: ${env:DATABASE_URL}
   ldSDKKey: ${env:LD_SDK_KEY, ssm:/configuration/ld_sdk_key_feds}
-  webpack:
-    webpackConfig: 'webpack.config.js'
-    packager: 'yarn'
-    packagerOptions:
-      lockFile: '../../yarn.lock'
-    excludeRegex: 'darwin|debian'
+  esbuild:
+    config: './esbuild.config.js'
   serverlessTerminationProtection:
     stages:
       - dev
