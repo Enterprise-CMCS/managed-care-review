@@ -71,7 +71,7 @@ describe('UserLoginInfo', () => {
             />
         )
         const feedbackLink = screen.getByRole('link', {
-            name: `Contact ${MAIL_TO_SUPPORT}`,
+            name: `${MAIL_TO_SUPPORT}`,
         })
         expect(feedbackLink).toHaveAttribute(
             'href',
