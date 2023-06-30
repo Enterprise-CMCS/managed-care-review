@@ -77,6 +77,13 @@ const featureFlags = {
         flag: 'test-error-fetching-flag',
         defaultValue: undefined,
     },
+    /* 
+    Temporary flag for the cutover to a new support email address 
+    */
+    HELPDESK_EMAIL: {
+        flag: 'helpdesk-email',
+        defaultValue: false,
+    },
 } as const
 
 /**
