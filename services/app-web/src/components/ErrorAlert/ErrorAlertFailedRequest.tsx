@@ -1,7 +1,7 @@
 import React from 'react'
 import styles from './ErrorAlert.module.scss'
 import { Alert, Link } from '@trussworks/react-uswds'
-import { MAIL_TO_SUPPORT } from '../../constants/errors'
+import { useStringConstants } from '../../hooks/useStringConstants'
 
 export type ErrorAlertFailedRequestProps = {
     message?: string
@@ -11,6 +11,8 @@ export type ErrorAlertFailedRequestProps = {
 export const ErrorAlertFailedRequest = ({
     message,
 }: ErrorAlertFailedRequestProps): React.ReactElement => {
+    const stringConstants = useStringConstants()
+    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     return (
         <Alert
             role="alert"

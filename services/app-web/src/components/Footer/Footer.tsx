@@ -5,11 +5,14 @@ import { ReactComponent as HHSIcon } from '../../assets/icons/depthealthhumanser
 import styles from './Footer.module.scss'
 import { Logo } from '../Logo'
 import { GridContainer, Grid } from '@trussworks/react-uswds'
+import { useStringConstants } from '../../hooks/useStringConstants'
 
 /**
  * CMS Footer
  */
 export const Footer = (): React.ReactElement => {
+    const stringConstants = useStringConstants()
+    const MAIL_TO_SUPPORT = stringConstants.MAIL_TO_SUPPORT
     return (
         <footer>
             <div className={styles.logosRow}>
@@ -38,12 +41,12 @@ export const Footer = (): React.ReactElement => {
                         <span>
                             Email&nbsp;
                             <a
-                                href="mailto: mc-review@cms.hhs.gov, mc-review-team@truss.works"
+                                href={`mailto: ${MAIL_TO_SUPPORT}, mc-review-team@truss.works`}
                                 className="usa-link"
                                 target="_blank"
                                 rel="noreferrer"
                             >
-                                mc-review@cms.hhs.gov
+                                {MAIL_TO_SUPPORT}
                             </a>
                             &nbsp;to get help or send feedback
                         </span>
