@@ -260,7 +260,7 @@ export const SingleRateCert = ({
                                 previousDocuments
                             )
                         }
-                        innerInputRef={multiRatesConfig?.reassignNewRateRef}
+                        // innerInputRef={multiRatesConfig?.reassignNewRateRef}
                         onFileItemsUpdate={({ fileItems }) =>
                             setFieldValue(
                                 `${fieldNamePrefix}.supportingDocuments`,
