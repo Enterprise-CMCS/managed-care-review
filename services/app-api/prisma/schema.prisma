@@ -34,6 +34,87 @@ model HealthPlanRevisionTable {
   pkg             HealthPlanPackageTable @relation(fields: [pkgID], references: [id])
 }
 
+model ContractTable {
+  id        String                  @id
+  revisions ContractRevisionTable[]
+
+  draftRateRevisions RateRevisionTable[]
+}
+
+model RateTable {
+  id        String              @id
+  revisions RateRevisionTable[]
+
+  draftContractRevisions ContractRevisionTable[]
+}
+
+model ContractRevisionTable {
+  id            String                                  @id
+  contractID    String
+  contract      ContractTable                           @relation(fields: [contractID], references: [id])
+  rateRevisions RateRevisionsOnContractRevisionsTable[]
+
+  draftRates RateTable[]
+
+  unlockInfoID String?
+  unlockInfo   UpdateInfoTable? @relation("unlockContractInfo", fields: [unlockInfoID], references: [id])
+  submitInfoID String?
+  submitInfo   UpdateInfoTable? @relation("submitContractInfo", fields: [submitInfoID], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  name String
+}
+
+model RateRevisionTable {
+  id                String                                  @id
+  rateID            String
+  rate              RateTable                               @relation(fields: [rateID], references: [id])
+  contractRevisions RateRevisionsOnContractRevisionsTable[]
+
+  draftContracts ContractTable[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  unlockInfoID String?
+  unlockInfo   UpdateInfoTable? @relation("unlockRateInfo", fields: [unlockInfoID], references: [id])
+  submitInfoID String?
+  submitInfo   UpdateInfoTable? @relation("submitRateInfo", fields: [submitInfoID], references: [id])
+
+  name        String
+}
+
+model RateRevisionsOnContractRevisionsTable {
+  rateRevisionID     String
+  rateRevision       RateRevisionTable     @relation(fields: [rateRevisionID], references: [id])
+  contractRevisionID String
+  contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
+
+  validAfter DateTime
+  validUntil DateTime?
+  updatedAt  DateTime  @default(now()) @updatedAt
+
+  isRemoval Boolean @default(false)
+
+  @@id([rateRevisionID, contractRevisionID, validAfter])
+}
+
+model UpdateInfoTable {
+  id String @id
+
+  updatedAt     DateTime
+  updatedByID String 
+  updatedBy     User @relation(fields: [updatedByID], references: [id])
+  updatedReason String
+
+  unlockedContracts ContractRevisionTable[] @relation("unlockContractInfo")
+  submitedContracts ContractRevisionTable[] @relation("submitContractInfo")
+  unlockedRates RateRevisionTable[] @relation("unlockRateInfo")
+  submitedRates RateRevisionTable[] @relation("submitRateInfo")
+}
+
 model State {
   stateCode                   String                   @id
   name                        String
@@ -51,12 +132,14 @@ model User {
   email                 String
   role                  Role
   divisionAssignment    Division?
-  stateAssignments      State[]
   stateCode             String?
+
+  stateAssignments      State[]
   questions             Question[]
   responses             QuestionResponse[]
   audits                UserAudit[]
   updatedByAuditEntries UserAudit[]        @relation("UpdatedBy")
+  updateInfos UpdateInfoTable[]
 }
 
 model UserAudit {

@@ -1,7 +1,7 @@
 import {
     PrismaClientInitializationError,
     PrismaClientKnownRequestError,
-} from '@prisma/client/runtime'
+} from '@prisma/client/runtime/library'
 
 const StoreErrorCodes = [
     'CONFIGURATION_ERROR',
@@ -12,7 +12,7 @@ const StoreErrorCodes = [
     'UNEXPECTED_EXCEPTION',
     'WRONG_STATUS',
 ] as const
-type StoreErrorCode = typeof StoreErrorCodes[number] // iterable union type
+type StoreErrorCode = (typeof StoreErrorCodes)[number] // iterable union type
 
 type StoreError = {
     code: StoreErrorCode
