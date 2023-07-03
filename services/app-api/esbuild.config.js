@@ -5,6 +5,12 @@ const {
 const fs = require('fs');
 const path = require('path');
 
+// this adds the dependencies to external. npm chokes on workspace declaration
+const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
+const dependencies = Object.keys(packageJson.dependencies).filter(
+    (dep) => !dep.startsWith('@managed-care-review/common-code')
+);
+
 module.exports = () => {
     return {
         packager: 'npm',
@@ -14,7 +20,7 @@ module.exports = () => {
         minify: true,
         sourcemap: false,
         keepNames: true,
-        external: ['aws-sdk', 'prisma', '@prisma/client'],
+        external: dependencies,
         plugins: [
             {
                 name: 'graphql-loader',
@@ -42,7 +48,7 @@ module.exports = () => {
                         );
                     });
 
-                    // replace the secret string
+                    // replace the license key
                     build.onEnd(() => {
                         const filePath = path.join(
                             __dirname,
