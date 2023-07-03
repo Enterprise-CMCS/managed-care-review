@@ -22,7 +22,7 @@ const ErrorSummaryMessage = ({
         // Otherwise, assume that keys correspond to name attributes and ids
     } else {
         href = '#' + errorKey
-        fieldSelector = `[id="${errorKey}"]`
+        fieldSelector = `[name="${errorKey}"]`
     }
 
     return (
