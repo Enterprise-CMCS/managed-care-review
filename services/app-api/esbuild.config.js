@@ -7,8 +7,13 @@ const path = require('path');
 
 // this adds the dependencies to external. npm chokes on workspace declaration
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
+const filters = [
+    '@managed-care-review/common-code',
+    '@prisma/client',
+    'prisma',
+];
 const dependencies = Object.keys(packageJson.dependencies).filter(
-    (dep) => !dep.startsWith('@managed-care-review/common-code')
+    (dep) => !filters.some((filter) => dep.startsWith(filter))
 );
 
 module.exports = () => {
