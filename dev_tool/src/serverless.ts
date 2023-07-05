@@ -10,7 +10,7 @@ type StageConnection =
 export function checkStageAccess(stage: string): StageConnection {
     // Test to see if we can read info from serverless. This is likely to trip folks up who haven't
     // configured their AWS keys correctly or if they have an invalid stage name.
-    const test = spawnSync('serverless', ['info', '--stage', stage], {
+    const test = spawnSync('npx', ['serverless', 'info', '--stage', stage], {
         cwd: 'services/ui-auth',
     })
     if (test.status != 0) {

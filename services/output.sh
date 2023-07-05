@@ -19,4 +19,4 @@ if [ "$output" == "url" ]; then
   output="CloudFrontEndpointUrl"
 fi
 
-cd "$service" && serverless info --verbose --stage "$stage" | sed -n -e "s/^.*$output: //p" && cd ..
+cd "$service" && npx serverless info --verbose --stage "$stage" | sed -n -e "s/^.*$output: //p" && cd ..
