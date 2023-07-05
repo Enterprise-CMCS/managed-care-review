@@ -5,27 +5,12 @@ const {
 const fs = require('fs');
 const path = require('path');
 
-// this adds the dependencies to external. npm chokes on workspace declaration
-const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
-const filters = [
-    '@managed-care-review/common-code',
-    '@prisma/client',
-    'prisma',
-];
-const dependencies = Object.keys(packageJson.dependencies).filter(
-    (dep) => !filters.some((filter) => dep.startsWith(filter))
-);
-
 module.exports = () => {
     return {
-        packager: 'npm',
+        packager: 'yarn',
         packagePath: './package.json',
         platform: 'node',
         bundle: true,
-        minify: true,
-        sourcemap: false,
-        keepNames: true,
-        external: dependencies,
         plugins: [
             {
                 name: 'graphql-loader',
