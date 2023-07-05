@@ -40,5 +40,12 @@ query fetchCurrentUser {
             familyName
             givenName
         }
+        ... on HelpdeskUser {
+            id
+            email
+            role
+            familyName
+            givenName
+        }
     }
 }

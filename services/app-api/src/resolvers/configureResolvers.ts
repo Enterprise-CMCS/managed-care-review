@@ -75,6 +75,8 @@ export function configureResolvers(
                     return 'CMSUser'
                 } else if (obj.role === 'ADMIN_USER') {
                     return 'AdminUser'
+                } else if (obj.role === 'HELPDESK_USER') {
+                    return 'HelpdeskUser'
                 } else {
                     return 'StateUser'
                 }

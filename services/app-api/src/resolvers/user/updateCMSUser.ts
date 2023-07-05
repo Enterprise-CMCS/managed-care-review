@@ -12,6 +12,7 @@ import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
 } from '../attributeHelper'
+import { isHelpdeskUser } from '../../domain-models/user'
 
 export function updateCMSUserResolver(
     store: Store
@@ -21,7 +22,7 @@ export function updateCMSUserResolver(
         setResolverDetailsOnActiveSpan('updateCmsUser', currentUser, span)
 
         // This resolver is only callable by admin users
-        if (!isAdminUser(currentUser)) {
+        if (!(isAdminUser(currentUser) || isHelpdeskUser(currentUser))) {
             logError(
                 'updateHealthPlanFormData',
                 'user not authorized to modify assignments'

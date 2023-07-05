@@ -5,13 +5,19 @@ import styles from '../Header.module.scss'
 
 import { PageHeading } from '../../../components/PageHeading'
 import { StateIcon, StateIconProps } from '../StateIcon/StateIcon'
-import { User, StateUser, CmsUser, AdminUser } from '../../../gen/gqlClient'
+import {
+    User,
+    StateUser,
+    CmsUser,
+    AdminUser,
+    HelpdeskUser,
+} from '../../../gen/gqlClient'
 
 const CMSUserRow = ({
     user,
     heading,
 }: {
-    user: CmsUser | AdminUser
+    user: CmsUser | AdminUser | HelpdeskUser
     heading?: string
 }) => {
     return (
@@ -107,7 +113,8 @@ export const PageHeadingRow = ({
 
     if (
         loggedInUser.__typename === 'CMSUser' ||
-        loggedInUser.__typename === 'AdminUser'
+        loggedInUser.__typename === 'AdminUser' ||
+        loggedInUser.__typename === 'HelpdeskUser'
     ) {
         return <CMSUserRow user={loggedInUser} heading={heading} />
     } else if (loggedInUser.__typename === 'StateUser') {

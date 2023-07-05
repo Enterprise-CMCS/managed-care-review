@@ -6,6 +6,7 @@ import {
     isCMSUser,
     isAdminUser,
 } from '../../domain-models'
+import { isHelpdeskUser } from '../../domain-models/user'
 import { QueryResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import { isStoreError, Store, StoreError } from '../../postgres'
@@ -53,7 +54,11 @@ export function indexHealthPlanPackagesResolver(
                 user.stateCode
             )
             return validateAndReturnHealthPlanPackages(results, span)
-        } else if (isCMSUser(user) || isAdminUser(user)) {
+        } else if (
+            isCMSUser(user) ||
+            isAdminUser(user) ||
+            isHelpdeskUser(user)
+        ) {
             const results = await store.findAllHealthPlanPackagesBySubmittedAt()
 
             return validateAndReturnHealthPlanPackages(results, span)

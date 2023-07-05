@@ -6,6 +6,7 @@ import {
     HealthPlanPackageType,
     packageStatus,
 } from '../../domain-models'
+import { isHelpdeskUser } from '../../domain-models/user'
 import { QueryResolvers, State } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import { isStoreError, Store } from '../../postgres'
@@ -58,7 +59,11 @@ export function fetchHealthPlanPackageResolver(
                     'user not authorized to fetch data from a different state'
                 )
             }
-        } else if (isCMSUser(context.user) || isAdminUser(context.user)) {
+        } else if (
+            isCMSUser(context.user) ||
+            isAdminUser(context.user) ||
+            isHelpdeskUser(context.user)
+        ) {
             if (packageStatus(pkg) === 'DRAFT') {
                 logError(
                     'fetchHealthPlanPackage',
