@@ -46,7 +46,7 @@ export const processRevisions = async (
             if (formData.id !== 'ddd5dde1-0082-4398-90fe-89fc1bc148df') {
                 if (formData.rateInfos.length > 1 && formData.documents) {
                     console.info(
-                        `There is an additional submission on this environment with rate supporting docs to be migrated. ID: ${formData.id}`
+                        `UNEXPECTED: There is an additional submission on this environment with rate supporting docs to be migrated. ID: ${formData.id}`
                     )
                 }
 
@@ -66,11 +66,33 @@ export const processRevisions = async (
                         doc.name ===
                         'Report12 - SFY 2022 Preliminary MississippiCAN Capitation Rates - Exhibits.xlsx'
                 )
+
                 const secondRateRelatedDocument = formData.documents.filter(
                     (doc) =>
                         doc.name ===
                         'Report13 - SFY 2023 Preliminary MississippiCAN Capitation Rates - Exhibits.xlsx'
                 )
+
+                if (
+                    firstRateRelatedDocument.length === 0 ||
+                    secondRateRelatedDocument.length === 0
+                ) {
+                    console.info(
+                        'UNEXPECTED: Rate related documents for odd duck submission are incorrect',
+                        firstRateRelatedDocument,
+                        secondRateRelatedDocument
+                    )
+                }
+                if (
+                    !formData.rateInfos[0] ||
+                    !formData.rateInfos[1].supportingDocuments
+                ) {
+                    console.info(
+                        'UNEXPECTED: Rate infos for odd duck submission are incorrect',
+                        formData.rateInfos
+                    )
+                }
+
                 formData.rateInfos[0].supportingDocuments =
                     firstRateRelatedDocument
                 formData.rateInfos[1].supportingDocuments =

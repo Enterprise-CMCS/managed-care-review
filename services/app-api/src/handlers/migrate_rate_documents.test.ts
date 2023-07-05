@@ -300,6 +300,46 @@ describe('migrate_rate_documents', () => {
             })
         )
     })
+    it('should skip submissions with no rate infos', async () => {
+        // Create a revision with a rate related document
+        const revisions: HealthPlanRevisionTable[] = [
+            {
+                id: 'mockId',
+                createdAt: new Date(),
+                pkgID: 'mockPkgID',
+                formDataProto: Buffer.from(
+                    toProtoBuffer({
+                        ...unlockedWithALittleBitOfEverything(),
+                        rateInfos: [],
+                    })
+                ),
+                submittedAt: new Date(),
+                unlockedAt: new Date(),
+                unlockedBy: 'mockUnlockedBy',
+                unlockedReason: 'mockUnlockedReason',
+                submittedBy: 'mockSubmittedBy',
+                submittedReason: 'mockSubmittedReason',
+            },
+        ]
+
+        const storeFindAllRevisionsSpy = jest.spyOn(
+            mockStore,
+            'findAllRevisions'
+        )
+        storeFindAllRevisionsSpy.mockResolvedValue(revisions)
+
+        const updateHealthPlanRevisionSpy = jest.spyOn(
+            mockStore,
+            'updateHealthPlanRevision'
+        )
+
+        await main({} as Event, {} as Context, () => {
+            /*empty callback*/
+        })
+
+        // the document should be moved to rateInfos
+        expect(updateHealthPlanRevisionSpy).not.toHaveBeenCalled()
+    })
 
     it('should move specific documents to specific places in rateInfos', async () => {
         // Create a revision with two specific documents
