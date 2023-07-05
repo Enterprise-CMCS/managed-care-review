@@ -36,18 +36,31 @@ export const processRevisions = async (
         const decodedFormDataProto = toDomain(revision.formDataProto)
         if (!(decodedFormDataProto instanceof Error)) {
             const formData = decodedFormDataProto as HealthPlanFormDataType
+            if (
+                formData.submissionType === 'CONTRACT_ONLY' ||
+                !formData.rateInfos[0]
+            )
+                return // no need to migrate these
+
             // skip the submission with two rates
             if (formData.id !== 'ddd5dde1-0082-4398-90fe-89fc1bc148df') {
-                // we know the other submissions have only a single rate document
+                if (formData.rateInfos.length > 1 && formData.documents) {
+                    console.info(
+                        `There is an additional submission on this environment with rate supporting docs to be migrated. ID: ${formData.id}`
+                    )
+                }
+
+                // we know the other submissions have only a single rate to handle
                 const ratesRelatedDocument = formData.documents.filter((doc) =>
                     doc.documentCategories.includes('RATES_RELATED')
                 )
+
                 formData.rateInfos[0].supportingDocuments = ratesRelatedDocument
                 formData.documents = formData.documents.filter(
                     (doc) => !ratesRelatedDocument.includes(doc)
                 )
             } else {
-                // now handle the submisson with two rates
+                // now handle the submission with two rates
                 const firstRateRelatedDocument = formData.documents.filter(
                     (doc) =>
                         doc.name ===
