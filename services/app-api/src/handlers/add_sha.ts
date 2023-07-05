@@ -158,7 +158,7 @@ export const getRevisions = async (
     return result
 }
 
-export const main: Handler = async (event, context) => {
+const main: Handler = async (event, context) => {
     const store = await getDatabaseConnection()
 
     const revisions = await getRevisions(store)
@@ -174,3 +174,5 @@ export const main: Handler = async (event, context) => {
 
     console.info('SHA256 update complete')
 }
+
+module.exports = { main }

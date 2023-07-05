@@ -70,7 +70,7 @@ const decodeRevisions = (
     return allRevisions
 }
 
-export const main: APIGatewayProxyHandler = async (event, context) => {
+const main: APIGatewayProxyHandler = async (event, context) => {
     const authProvider =
         event.requestContext.identity.cognitoAuthenticationProvider || ''
     const programList = [] as ProgramArgType[]
@@ -177,3 +177,5 @@ export const main: APIGatewayProxyHandler = async (event, context) => {
         },
     }
 }
+
+module.exports = { main }

@@ -5,7 +5,7 @@ if (ldClientKey === '') {
     throw new Error('LD_SDK_KEY environment variable is not set')
 }
 
-export const main: APIGatewayProxyHandler = async () => {
+const main: APIGatewayProxyHandler = async () => {
     // returns stage and version
     const health = {
         stage: process.env.stage,
@@ -23,3 +23,5 @@ export const main: APIGatewayProxyHandler = async () => {
         },
     }
 }
+
+module.exports = { main }

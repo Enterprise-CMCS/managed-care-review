@@ -6,7 +6,7 @@ import {
     DeleteDBClusterSnapshotCommand,
 } from '@aws-sdk/client-rds'
 
-export const main = async () => {
+const main = async () => {
     const client = new RDSClient({ region: 'us-east-1' })
 
     // find all snapshots in our account
@@ -34,3 +34,5 @@ export const main = async () => {
         console.info('Deleted old snapshot: ' + response)
     })
 }
+
+module.exports = { main }

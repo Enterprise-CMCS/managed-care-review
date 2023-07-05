@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import axios from 'axios'
 
-export const main: APIGatewayProxyHandler = async (event) => {
+const main: APIGatewayProxyHandler = async (event) => {
     const options = {
         headers: { 'content-type': 'application/json' },
     }
@@ -29,3 +29,5 @@ export const main: APIGatewayProxyHandler = async (event) => {
         },
     }
 }
+
+module.exports = { main }

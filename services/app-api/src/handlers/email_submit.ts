@@ -2,7 +2,7 @@ import { Handler } from 'aws-lambda'
 import { SESServiceException } from '@aws-sdk/client-ses'
 import { sendSESEmail } from '../emailer'
 
-export const main: Handler = async (event) => {
+const main: Handler = async (event) => {
     if (!event.body) {
         return {
             statusCode: 400,
@@ -44,3 +44,5 @@ export const main: Handler = async (event) => {
     })
     return sesResult
 }
+
+module.exports = { main }
