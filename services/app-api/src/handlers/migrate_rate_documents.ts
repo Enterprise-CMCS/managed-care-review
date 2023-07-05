@@ -31,6 +31,8 @@ export const processRevisions = async (
         )
     }
     initMeter(serviceName)
+    let revisionsEdited = 0
+    let revisionsMigrated = 0
     for (const revision of revisions) {
         const pkgID = revision.pkgID
         const decodedFormDataProto = toDomain(revision.formDataProto)
@@ -59,6 +61,7 @@ export const processRevisions = async (
                 formData.documents = formData.documents.filter(
                     (doc) => !ratesRelatedDocument.includes(doc)
                 )
+                revisionsEdited++
             } else {
                 // now handle the submission with two rates
                 const firstRateRelatedDocument = formData.documents.filter(
@@ -102,7 +105,9 @@ export const processRevisions = async (
                         !firstRateRelatedDocument.includes(doc) &&
                         !secondRateRelatedDocument.includes(doc)
                 )
+                revisionsEdited++
             }
+
             try {
                 const update = await store.updateHealthPlanRevision(
                     pkgID,
@@ -116,6 +121,8 @@ export const processRevisions = async (
                         }: ${JSON.stringify(update)}`
                     )
                     throw new Error('Error updating revision')
+                } else {
+                    revisionsMigrated++
                 }
             } catch (err) {
                 console.error(`Error updating revision ${revision.id}: ${err}`)
@@ -126,6 +133,12 @@ export const processRevisions = async (
             console.error(error)
             recordException(error, serviceName, 'migrate_rate_documents')
         }
+        console.info(
+            `There were ${revisionsEdited}/${revisions} were flagged for changes`
+        )
+        console.info(
+            `And ${revisionsMigrated}/ ${revisions} successfully migrated`
+        )
     }
 }
 
