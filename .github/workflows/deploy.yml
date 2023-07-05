@@ -198,6 +198,11 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Build proto script
+        shell: bash
+        working-directory: services/app-proto
+        run: yarn build
+
       - name: Prepare "@prisma/client" lambda layer
         working-directory: services/app-api
         run: ./scripts/prepare-prisma-layer.sh
