@@ -301,7 +301,6 @@ describe('migrate_rate_documents', () => {
         )
     })
     it('should skip submissions with no rate infos', async () => {
-        // Create a revision with a rate related document
         const revisions: HealthPlanRevisionTable[] = [
             {
                 id: 'mockId',
@@ -337,7 +336,6 @@ describe('migrate_rate_documents', () => {
             /*empty callback*/
         })
 
-        // the document should be moved to rateInfos
         expect(updateHealthPlanRevisionSpy).not.toHaveBeenCalled()
     })
 
