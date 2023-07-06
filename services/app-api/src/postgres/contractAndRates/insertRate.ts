@@ -19,7 +19,7 @@ async function incrementAndGetStateRateNumber(
             },
         })
 
-        return stateNumberResult.latestStateSubmissionNumber
+        return stateNumberResult.latestStateRateCertNumber
     } catch (e) {
         return e
     }
