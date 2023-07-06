@@ -43,7 +43,6 @@ model ContractTable {
   stateCode   String
   state       State          @relation(fields: [stateCode], references: [stateCode])
   stateNumber Int
-  status      PackageStatus
 
   revisions          ContractRevisionTable[]
   draftRateRevisions RateRevisionTable[]
@@ -55,7 +54,9 @@ model RateTable {
   updatedAt   DateTime  @default(now()) @updatedAt
   submittedAt DateTime?
 
-  status  PackageStatus
+  stateCode   String
+  state       State          @relation(fields: [stateCode], references: [stateCode])
+  stateNumber Int
 
   revisions              RateRevisionTable[]
   draftContractRevisions ContractRevisionTable[]
@@ -66,6 +67,7 @@ model ContractRevisionTable {
   contractID    String
   contract      ContractTable                           @relation(fields: [contractID], references: [id])
   rateRevisions RateRevisionsOnContractRevisionsTable[]
+  sharedRateRevisions SharedRateCertifications[]
 
   draftRates RateTable[]
 
@@ -77,7 +79,7 @@ model ContractRevisionTable {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
-  submissionType                               SubmissionType?
+  submissionType                               SubmissionType
   submissionDescription                        String?
   programIDs                                   String[]
   populationCovered                            PopulationCoverageType?
@@ -179,10 +181,8 @@ model SharedRateCertifications {
   id             String       @id @default(uuid())
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @default(now()) @updatedAt
-  packageID      String
-  packageName    String
-  rateRevisionID String
-  rateRevision   RateRevisionTable @relation(fields: [rateRevisionID], references: [id])
+  contract       ContractRevisionTable[]
+  rateRevision   RateRevisionTable[]
 }
 
 model ActuaryContact {
@@ -265,10 +265,12 @@ model State {
   stateCode                   String @id
   name                        String
   latestStateSubmissionNumber Int    @default(0)
+  latestStateRateCertNumber   Int    @default(0)
 
   statePackages HealthPlanPackageTable[]
   users         User[]
   contract      ContractTable[]
+  rate          RateTable[]
 }
 
 model User {
