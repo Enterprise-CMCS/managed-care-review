@@ -463,7 +463,7 @@ jobs:
         id: cypress
         uses: cypress-io/github-action@v5
         with:
-          install-command: yarn install
+          install: false
           config: baseUrl=${{ needs.finishing-prep.outputs.application-endpoint }}
           record: true
           parallel: true
