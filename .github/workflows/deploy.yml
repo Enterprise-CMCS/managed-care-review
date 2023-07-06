@@ -446,7 +446,7 @@ jobs:
 
       - uses: actions/download-artifact@v3
         with:
-          name: common-code-gen
+          name: app-web-gen
           path: ./lib/common-code/src/gen
 
       - name: check ip
