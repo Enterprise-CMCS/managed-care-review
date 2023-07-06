@@ -42,17 +42,19 @@ export const processRevisions = async (
     initMeter(serviceName)
     let revisionsEdited = 0
     let revisionsMigrated = 0
+    console.info('starting to loop through revisions')
     for (const revision of revisions) {
         const pkgID = revision.pkgID
         const decodedFormDataProto = toDomain(revision.formDataProto)
+
         if (!(decodedFormDataProto instanceof Error)) {
             const formData = decodedFormDataProto as HealthPlanFormDataType
             if (
                 formData.submissionType === 'CONTRACT_ONLY' ||
                 !formData.rateInfos[0]
-            )
-                return // no need to migrate these
-
+            ) {
+                continue // no need to migrate these
+            }
             // skip the submission with two rates
             if (formData.id !== 'ddd5dde1-0082-4398-90fe-89fc1bc148df') {
                 if (formData.rateInfos.length > 1 && formData.documents) {
@@ -140,17 +142,17 @@ export const processRevisions = async (
                 throw err
             }
         } else {
-            const error = `Error decoding formDataProto for revision ${revision.id} in package ${revision.pkgID} in rate migration: ${decodedFormDataProto}`
+            const error = `UNEXPECTED: Error decoding formDataProto for revision ${revision.id} in package ${revision.pkgID} in rate migration: ${decodedFormDataProto}`
             console.error(error)
             recordException(error, serviceName, 'migrate_rate_documents')
         }
-        console.info(
-            `There were ${revisionsEdited}/${revisions} were flagged for changes`
-        )
-        console.info(
-            `And ${revisionsMigrated}/ ${revisions} successfully migrated`
-        )
     }
+    console.info(
+        `There were ${revisionsEdited}/${revisions.length} were flagged for changes`
+    )
+    console.info(
+        `And ${revisionsMigrated}/ ${revisions.length} successfully migrated`
+    )
 }
 
 export const getDatabaseConnection = async (): Promise<Store> => {
