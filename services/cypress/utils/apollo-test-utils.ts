@@ -7,7 +7,7 @@ import {
     NormalizedCacheObject,
 } from '@apollo/client'
 import { Amplify, Auth as AmplifyAuth, API } from 'aws-amplify'
-import { UnlockedHealthPlanFormDataType } from '../../app-web/src/common-code/healthPlanFormDataType'
+import { UnlockedHealthPlanFormDataType } from '@managed-care-review/common-code/healthPlanFormDataType'
 
 type StateUserType = {
     id: string
@@ -39,7 +39,7 @@ type DivisionType = 'DMCO' | 'DMCP' | 'OACT'
 
 type UserType = StateUserType | AdminUserType | CMSUserType
 
-const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType>=> ({
+const contractOnlyData = (): Partial<UnlockedHealthPlanFormDataType> => ({
     stateContacts: [
         {
             name: 'Name',
@@ -86,7 +86,7 @@ const newSubmissionInput = (): Partial<UnlockedHealthPlanFormDataType> => ({
     contractType: 'BASE',
 })
 
-const stateUser = ():StateUserType => ({
+const stateUser = (): StateUserType => ({
     id: 'user1',
     email: 'aang@example.com',
     givenName: 'Aang',
@@ -254,13 +254,11 @@ const apolloClientWrapper = async <T>(
 
     const httpLinkConfig = {
         uri: '/graphql',
-        headers:
-            isLocalAuth
-                ? {
-                      'cognito-authentication-provider':
-                          JSON.stringify(authUser),
-                  }
-                : undefined,
+        headers: isLocalAuth
+            ? {
+                  'cognito-authentication-provider': JSON.stringify(authUser),
+              }
+            : undefined,
         fetch: fakeAmplifyFetch,
         fetchOptions: {
             mode: 'no-cors',

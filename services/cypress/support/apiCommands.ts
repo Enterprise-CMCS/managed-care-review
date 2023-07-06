@@ -12,7 +12,7 @@ import {
 import {
     domainToBase64,
     base64ToDomain,
-} from '../../app-web/src/common-code/proto/healthPlanFormDataProto'
+} from '@managed-care-review/common-code/proto/healthPlanFormDataProto'
 import {
     apolloClientWrapper,
     DivisionType,
@@ -21,7 +21,11 @@ import {
     newSubmissionInput,
     CMSUserType,
 } from '../utils/apollo-test-utils'
-import { ApolloClient, DocumentNode, NormalizedCacheObject } from '@apollo/client'
+import {
+    ApolloClient,
+    DocumentNode,
+    NormalizedCacheObject,
+} from '@apollo/client'
 
 const createAndSubmitContractOnlyPackage = async (
     apolloClient: ApolloClient<NormalizedCacheObject>
@@ -118,24 +122,38 @@ const seedUserIntoDB = async (
 Cypress.Commands.add(
     'apiCreateAndSubmitContractOnlySubmission',
     (stateUser): Cypress.Chainable<HealthPlanPackage> =>
-        cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
-            apolloClientWrapper(
-                schema,
-                stateUser,
-                createAndSubmitContractOnlyPackage
+        cy
+            .task<DocumentNode>('readGraphQLSchema')
+            .then((schema) =>
+                apolloClientWrapper(
+                    schema,
+                    stateUser,
+                    createAndSubmitContractOnlyPackage
+                )
             )
-        )
 )
 
 Cypress.Commands.add(
     'apiAssignDivisionToCMSUser',
     (cmsUser, division): Cypress.Chainable<void> =>
-        cy.task<DocumentNode>('readGraphQLSchema').then((schema) =>
-            cy.wrap(apolloClientWrapper(schema, cmsUser, seedUserIntoDB)).then(() =>
-                cy.wrap(apolloClientWrapper(schema, adminUser(), (apolloClient) =>
-                        assignCmsDivision(apolloClient, cmsUser, division)
+        cy
+            .task<DocumentNode>('readGraphQLSchema')
+            .then((schema) =>
+                cy
+                    .wrap(apolloClientWrapper(schema, cmsUser, seedUserIntoDB))
+                    .then(() =>
+                        cy.wrap(
+                            apolloClientWrapper(
+                                schema,
+                                adminUser(),
+                                (apolloClient) =>
+                                    assignCmsDivision(
+                                        apolloClient,
+                                        cmsUser,
+                                        division
+                                    )
+                            )
+                        )
                     )
-                )
             )
-        )
 )

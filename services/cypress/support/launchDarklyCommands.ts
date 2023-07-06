@@ -6,7 +6,7 @@ import {
     featureFlags,
     FlagValue,
     featureFlagKeys,
-} from '../../app-web/src/common-code/featureFlags/flags'
+} from '@managed-care-review/common-code/featureFlags/flags'
 
 /**
  * interceptFeatureFlags sets the flag to what is passed into it and sets other flags to default values.

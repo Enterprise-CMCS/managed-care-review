@@ -23,11 +23,11 @@ import './e2e'
 import {
     FeatureFlagLDConstant,
     FeatureFlagSettings,
-} from '../../app-web/src/common-code/featureFlags'
+} from '@managed-care-review/common-code/featureFlags'
 import './apiCommands'
-import { HealthPlanPackage } from '../gen/gqlClient';
-import { CMSUserType, DivisionType } from '../utils/apollo-test-utils';
-import { StateUserType } from 'app-api/src/domain-models';
+import { HealthPlanPackage } from '../gen/gqlClient'
+import { CMSUserType, DivisionType } from '../utils/apollo-test-utils'
+import { StateUserType } from 'app-api/src/domain-models'
 
 type FormButtonKey =
     | 'CONTINUE_FROM_START_NEW'
@@ -62,9 +62,12 @@ declare global {
             fillOutStateContact(): void
             fillOutAdditionalActuaryContact(): void
             fillOutSupportingDocuments(): void
-            waitForDocumentsToLoad( args?: {tableView?: boolean}): void
+            waitForDocumentsToLoad(args?: { tableView?: boolean }): void
             verifyDocumentsHaveNoErrors(): void
-            submitStateSubmissionForm( args?: {success?: boolean, resubmission?: boolean}): void
+            submitStateSubmissionForm(args?: {
+                success?: boolean
+                resubmission?: boolean
+            }): void
 
             // navigate commands
             navigateFormByButtonClick(
@@ -96,8 +99,13 @@ declare global {
                 division: DivisionType
             }): void
 
-            apiCreateAndSubmitContractOnlySubmission(stateUser: StateUserType): Cypress.Chainable<HealthPlanPackage>
-            apiAssignDivisionToCMSUser(cmsUser: CMSUserType, division: DivisionType): Cypress.Chainable<void>
+            apiCreateAndSubmitContractOnlySubmission(
+                stateUser: StateUserType
+            ): Cypress.Chainable<HealthPlanPackage>
+            apiAssignDivisionToCMSUser(
+                cmsUser: CMSUserType,
+                division: DivisionType
+            ): Cypress.Chainable<void>
 
             interceptGraphQL(): void
         }
