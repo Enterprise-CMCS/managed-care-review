@@ -74,7 +74,7 @@ const localUsers: LocalUserType[] = [
         role: 'ADMIN_USER',
     },
     {
-        id: 'user5',
+        id: 'user7',
         email: 'appa@example.com',
         givenName: 'Appa',
         familyName: 'Sky Bison',

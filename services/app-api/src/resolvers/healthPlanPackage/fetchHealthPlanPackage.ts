@@ -67,15 +67,13 @@ export function fetchHealthPlanPackageResolver(
             if (packageStatus(pkg) === 'DRAFT') {
                 logError(
                     'fetchHealthPlanPackage',
-                    'CMS user not authorized to fetch a draft'
+                    'user not authorized to fetch a draft'
                 )
                 setErrorAttributesOnActiveSpan(
-                    'CMS user not authorized to fetch a draft',
+                    'user not authorized to fetch a draft',
                     span
                 )
-                throw new ForbiddenError(
-                    'CMS user not authorized to fetch a draft'
-                )
+                throw new ForbiddenError('user not authorized to fetch a draft')
             }
         } else {
             logError('fetchHealthPlanPackage', 'unknown user type')
