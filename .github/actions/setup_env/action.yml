@@ -1,6 +1,10 @@
 name: 'Setup MC-Review environment'
 description: 'Runs common tasks for setting up the build environment in GHA'
 inputs:
+  skip-generate:
+    description: 'Skips generating files. Only runs yarn install commands.'
+    required: false
+    default: 'false'
   cache-node-modules:
     description: 'Cache node_modules, might speed up link step (invalidated lock/os/node-version/branch)'
     required: false
@@ -72,16 +76,19 @@ runs:
         PRISMA_CLI_BINARY_TARGETS: 'rhel-openssl-1.0.x'
 
     - name: Generate GraphQL
+      if: inputs.skip-generate == 'false'
       shell: bash
       working-directory: services/app-graphql
       run: yarn generate
 
     - name: Generate Protos
+      if: inputs.skip-generate == 'false'
       shell: bash
       working-directory: services/app-proto
       run: yarn generate
 
     - name: Generate Prisma
+      if: inputs.skip-generate == 'false'
       shell: bash
       working-directory: services/app-api
       env:
