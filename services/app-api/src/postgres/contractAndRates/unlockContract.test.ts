@@ -39,8 +39,16 @@ describe('unlockContract', () => {
         })
 
         //Creat a draft contract and draft rate
-        const contract = must(await insertDraftContract(client, 'Contract 1.0'))
-        const rate = must(await insertDraftRate(client, 'Rate 1.0'))
+        const contract = must(
+            await insertDraftContract(client, {
+                stateCode: 'MN',
+                submissionType: 'CONTRACT_AND_RATES',
+                submissionDescription: 'Contract 1.0',
+            })
+        )
+        const rate = must(
+            await insertDraftRate(client, { stateCode: 'MN', name: 'Rate 1.0' })
+        )
 
         // Submit Rate A
         const submittedRate = must(
@@ -49,9 +57,16 @@ describe('unlockContract', () => {
 
         // Connect draft contract to submitted rate
         must(
-            await updateDraftContract(client, contract.id, 'Connecting rate', [
-                rate.id,
-            ])
+            await updateDraftContract(
+                client,
+                contract.id,
+                {
+                    stateCode: 'MN',
+                    submissionType: 'CONTRACT_AND_RATES',
+                    submissionDescription: 'Connecting rate',
+                },
+                [rate.id]
+            )
         )
 
         const draftContract = must(await findDraftContract(client, contract.id))
@@ -112,8 +127,16 @@ describe('unlockContract', () => {
         })
 
         //Creat a draft contract and draft rate
-        const contract = must(await insertDraftContract(client, 'Contract 1.0'))
-        const rate = must(await insertDraftRate(client, 'Rate 1.0'))
+        const contract = must(
+            await insertDraftContract(client, {
+                stateCode: 'MN',
+                submissionType: 'CONTRACT_AND_RATES',
+                submissionDescription: 'Contract 1.0',
+            })
+        )
+        const rate = must(
+            await insertDraftRate(client, { stateCode: 'MN', name: 'Rate 1.0' })
+        )
 
         // Submit Rate A
         const submittedRate = must(
@@ -122,9 +145,16 @@ describe('unlockContract', () => {
 
         // Connect draft contract to submitted rate
         must(
-            await updateDraftContract(client, contract.id, 'Connecting rate', [
-                rate.id,
-            ])
+            await updateDraftContract(
+                client,
+                contract.id,
+                {
+                    stateCode: 'MN',
+                    submissionType: 'CONTRACT_AND_RATES',
+                    submissionDescription: 'Connecting rate',
+                },
+                [rate.id]
+            )
         )
 
         // Submit contract
@@ -189,14 +219,29 @@ describe('unlockContract', () => {
         })
 
         //Creat a draft contract and draft rate
-        const contract = must(await insertDraftContract(client, 'contract 1.0'))
-        const rate = must(await insertDraftRate(client, 'rate 1.0'))
+        const contract = must(
+            await insertDraftContract(client, {
+                stateCode: 'MN',
+                submissionType: 'CONTRACT_AND_RATES',
+                submissionDescription: 'contract 1.0',
+            })
+        )
+        const rate = must(
+            await insertDraftRate(client, { stateCode: 'MN', name: 'rate 1.0' })
+        )
 
         // Connect draft contract to submitted rate
         must(
-            await updateDraftContract(client, contract.id, 'contract 1.0', [
-                rate.id,
-            ])
+            await updateDraftContract(
+                client,
+                contract.id,
+                {
+                    stateCode: 'MN',
+                    submissionType: 'CONTRACT_AND_RATES',
+                    submissionDescription: 'contract 1.0',
+                },
+                [rate.id]
+            )
         )
 
         // Submit rate
@@ -229,9 +274,16 @@ describe('unlockContract', () => {
             )
         )
         must(
-            await updateDraftContract(client, contract.id, 'contract 2.0', [
-                rate.id,
-            ])
+            await updateDraftContract(
+                client,
+                contract.id,
+                {
+                    stateCode: 'MN',
+                    submissionType: 'CONTRACT_AND_RATES',
+                    submissionDescription: 'contract 2.0',
+                },
+                [rate.id]
+            )
         )
         const resubmittedContract = must(
             await submitContract(
@@ -263,14 +315,29 @@ describe('unlockContract', () => {
         })
 
         //Creat a draft contract and draft rate
-        const contract = must(await insertDraftContract(client, 'contract 1.0'))
-        const rate = must(await insertDraftRate(client, 'rate 1.0'))
+        const contract = must(
+            await insertDraftContract(client, {
+                stateCode: 'MN',
+                submissionType: 'CONTRACT_AND_RATES',
+                submissionDescription: 'contract 1.0',
+            })
+        )
+        const rate = must(
+            await insertDraftRate(client, { stateCode: 'MN', name: 'rate 1.0' })
+        )
 
         // Connect draft contract to submitted rate
         must(
-            await updateDraftContract(client, contract.id, 'contract 1.0', [
-                rate.id,
-            ])
+            await updateDraftContract(
+                client,
+                contract.id,
+                {
+                    stateCode: 'MN',
+                    submissionType: 'CONTRACT_AND_RATES',
+                    submissionDescription: 'contract 1.0',
+                },
+                [rate.id]
+            )
         )
 
         // Submit contract
@@ -297,9 +364,18 @@ describe('unlockContract', () => {
 
         //Creat a draft contract
         const contractA = must(
-            await insertDraftContract(client, 'contract A 1.1')
+            await insertDraftContract(client, {
+                stateCode: 'MN',
+                submissionType: 'CONTRACT_AND_RATES',
+                submissionDescription: 'contract A 1.1',
+            })
         )
-        const rateA = must(await insertDraftRate(client, 'rate A 1.1'))
+        const rateA = must(
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+                name: 'rate A 1.1',
+            })
+        )
 
         //Unlocking it results in error
         expect(

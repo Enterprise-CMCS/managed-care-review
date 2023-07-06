@@ -66,7 +66,8 @@ async function unlockContract(
                             id: contractID,
                         },
                     },
-                    name: currentRev.name,
+                    submissionType: currentRev.submissionType,
+                    submissionDescription: currentRev.submissionDescription,
                     unlockInfo: {
                         create: {
                             id: uuidv4(),

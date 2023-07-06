@@ -45,7 +45,7 @@ async function findDraftRate(
 
             contractRevisions: draftRate.draftContracts.map((dc) => ({
                 id: dc.revisions[0].id,
-                contractFormData: dc.revisions[0].name,
+                contractFormData: dc.revisions[0].submissionDescription ?? '',
                 rateRevisions: [],
             })),
         }

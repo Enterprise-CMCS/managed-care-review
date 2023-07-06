@@ -41,8 +41,7 @@ async function findDraftContract(
 
         const draft: ContractRevision = {
             id: draftContract.id,
-            contractFormData: draftContract.name,
-
+            contractFormData: draftContract.submissionDescription ?? '',
             rateRevisions: draftContract.draftRates.map((dr) => ({
                 id: dr.revisions[0].id,
                 revisionFormData: dr.revisions[0].name,
