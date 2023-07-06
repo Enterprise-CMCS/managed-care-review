@@ -20,6 +20,7 @@ export const processRevisions = async (
     store: Store,
     revisions: HealthPlanRevisionTable[]
 ): Promise<void> => {
+    console.info('STARTING process revisions')
     const stageName = process.env.stage ?? 'stageNotSet'
     const serviceName = `migrate_rate_documents_lambda-${stageName}`
     const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
@@ -30,18 +31,30 @@ export const processRevisions = async (
             'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
         )
     }
+
+    // Get the pkgID from the first revision in the list - not sure why we need?
+    const pkgID = revisions[0].pkgID
+    if (!pkgID) {
+        console.error('Package ID is missing in the revisions')
+        throw new Error('Package ID is required')
+    }
+
     initMeter(serviceName)
+    let revisionsEdited = 0
+    let revisionsMigrated = 0
+    console.info('starting to loop through revisions')
     for (const revision of revisions) {
         const pkgID = revision.pkgID
         const decodedFormDataProto = toDomain(revision.formDataProto)
+
         if (!(decodedFormDataProto instanceof Error)) {
             const formData = decodedFormDataProto as HealthPlanFormDataType
             if (
                 formData.submissionType === 'CONTRACT_ONLY' ||
                 !formData.rateInfos[0]
-            )
-                return // no need to migrate these
-
+            ) {
+                continue // no need to migrate these
+            }
             // skip the submission with two rates
             if (formData.id !== 'ddd5dde1-0082-4398-90fe-89fc1bc148df') {
                 if (formData.rateInfos.length > 1 && formData.documents) {
@@ -59,6 +72,7 @@ export const processRevisions = async (
                 formData.documents = formData.documents.filter(
                     (doc) => !ratesRelatedDocument.includes(doc)
                 )
+                revisionsEdited++
             } else {
                 // now handle the submission with two rates
                 const firstRateRelatedDocument = formData.documents.filter(
@@ -102,8 +116,12 @@ export const processRevisions = async (
                         !firstRateRelatedDocument.includes(doc) &&
                         !secondRateRelatedDocument.includes(doc)
                 )
+                revisionsEdited++
+                console.info('in the loop of editing revisions')
             }
+
             try {
+                console.info(`updating submission ${pkgID}`)
                 const update = await store.updateHealthPlanRevision(
                     pkgID,
                     revision.id,
@@ -116,17 +134,25 @@ export const processRevisions = async (
                         }: ${JSON.stringify(update)}`
                     )
                     throw new Error('Error updating revision')
+                } else {
+                    revisionsMigrated++
                 }
             } catch (err) {
                 console.error(`Error updating revision ${revision.id}: ${err}`)
                 throw err
             }
         } else {
-            const error = `Error decoding formDataProto for revision ${revision.id} in package ${revision.pkgID} in rate migration: ${decodedFormDataProto}`
+            const error = `UNEXPECTED: Error decoding formDataProto for revision ${revision.id} in package ${revision.pkgID} in rate migration: ${decodedFormDataProto}`
             console.error(error)
             recordException(error, serviceName, 'migrate_rate_documents')
         }
     }
+    console.info(
+        `There were ${revisionsEdited}/${revisions.length} were flagged for changes`
+    )
+    console.info(
+        `And ${revisionsMigrated}/ ${revisions.length} successfully migrated`
+    )
 }
 
 export const getDatabaseConnection = async (): Promise<Store> => {
@@ -170,18 +196,19 @@ export const getRevisions = async (
 }
 
 export const main: Handler = async (event, context) => {
-    const store = await getDatabaseConnection()
+    console.info('STARTING')
+    try {
+        const store = await getDatabaseConnection()
+        const revisions = await getRevisions(store)
 
-    const revisions = await getRevisions(store)
+        try {
+            await processRevisions(store, revisions)
+        } catch (processRevisionsError) {
+            console.error(`ERROR process revisions: ${processRevisionsError}`)
+        }
 
-    // Get the pkgID from the first revision in the list
-    const pkgID = revisions[0].pkgID
-    if (!pkgID) {
-        console.error('Package ID is missing in the revisions')
-        throw new Error('Package ID is required')
+        console.info('rate document migration complete')
+    } catch (error) {
+        console.error(`ERROR: ${error}`)
     }
-
-    await processRevisions(store, revisions)
-
-    console.info('rate document migration complete')
 }
