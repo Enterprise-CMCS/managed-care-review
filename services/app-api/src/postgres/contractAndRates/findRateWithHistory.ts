@@ -150,7 +150,7 @@ async function findRateWithHistory(
             revisionFormData: entry.rateRev.name,
             contractRevisions: entry.contractRevs.map((crev) => ({
                 id: crev.id,
-                contractFormData: crev.name,
+                contractFormData: crev.submissionDescription ?? '',
                 rateRevisions: [],
             })),
         }))
