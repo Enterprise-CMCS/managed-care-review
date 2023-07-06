@@ -36,7 +36,7 @@ async function insertDraftRate(
     )
 
     if (stateRateNumberResult instanceof Error) {
-        console.error('CONTRACT PRISMA ERR', stateRateNumberResult)
+        console.error('RATE PRISMA ERR', stateRateNumberResult)
         return stateRateNumberResult
     }
 
@@ -79,7 +79,7 @@ async function insertDraftRate(
             })),
         }
     } catch (err) {
-        console.error('CONTRACT PRISMA ERR', err)
+        console.error('RATE PRISMA ERR', err)
         return err
     }
 }
