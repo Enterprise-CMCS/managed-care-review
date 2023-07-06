@@ -444,6 +444,11 @@ jobs:
           name: cypress-gen
           path: ./services/cypress/gen
 
+      - uses: actions/download-artifact@v3
+        with:
+          name: common-code-gen
+          path: ./lib/common-code/src/gen
+
       - name: check ip
         id: check-ip
         shell: bash
