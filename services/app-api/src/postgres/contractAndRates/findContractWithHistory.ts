@@ -136,7 +136,7 @@ async function findContractWithHistory(
                 unlockInfo: entry.unlockInfo
                     ? convertUpdateInfo(entry.unlockInfo)
                     : undefined,
-                contractFormData: entry.contractRev.name,
+                contractFormData: entry.contractRev.submissionDescription ?? '',
                 rateRevisions: entry.rateRevs.map((rrev) => ({
                     id: rrev.id,
                     revisionFormData: rrev.name,
