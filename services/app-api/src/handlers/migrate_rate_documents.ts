@@ -20,6 +20,7 @@ export const processRevisions = async (
     store: Store,
     revisions: HealthPlanRevisionTable[]
 ): Promise<void> => {
+    console.info('STARTING')
     const stageName = process.env.stage ?? 'stageNotSet'
     const serviceName = `migrate_rate_documents_lambda-${stageName}`
     const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
@@ -106,9 +107,11 @@ export const processRevisions = async (
                         !secondRateRelatedDocument.includes(doc)
                 )
                 revisionsEdited++
+                console.info('in the loop of editing revisions')
             }
 
             try {
+                console.info(`updating submission ${pkgID}`)
                 const update = await store.updateHealthPlanRevision(
                     pkgID,
                     revision.id,
