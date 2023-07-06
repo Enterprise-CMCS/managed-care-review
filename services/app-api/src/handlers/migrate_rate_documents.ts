@@ -20,7 +20,7 @@ export const processRevisions = async (
     store: Store,
     revisions: HealthPlanRevisionTable[]
 ): Promise<void> => {
-    console.info('STARTING')
+    console.info('STARTING process revisions')
     const stageName = process.env.stage ?? 'stageNotSet'
     const serviceName = `migrate_rate_documents_lambda-${stageName}`
     const otelCollectorURL = process.env.REACT_APP_OTEL_COLLECTOR_URL
@@ -31,6 +31,14 @@ export const processRevisions = async (
             'Configuration Error: REACT_APP_OTEL_COLLECTOR_URL must be set'
         )
     }
+
+    // Get the pkgID from the first revision in the list - not sure why we need?
+    const pkgID = revisions[0].pkgID
+    if (!pkgID) {
+        console.error('Package ID is missing in the revisions')
+        throw new Error('Package ID is required')
+    }
+
     initMeter(serviceName)
     let revisionsEdited = 0
     let revisionsMigrated = 0
@@ -186,18 +194,19 @@ export const getRevisions = async (
 }
 
 export const main: Handler = async (event, context) => {
-    const store = await getDatabaseConnection()
+    console.info('STARTING')
+    try {
+        const store = await getDatabaseConnection()
+        const revisions = await getRevisions(store)
 
-    const revisions = await getRevisions(store)
+        try {
+            await processRevisions(store, revisions)
+        } catch (processRevisionsError) {
+            console.error(`ERROR process revisions: ${processRevisionsError}`)
+        }
 
-    // Get the pkgID from the first revision in the list
-    const pkgID = revisions[0].pkgID
-    if (!pkgID) {
-        console.error('Package ID is missing in the revisions')
-        throw new Error('Package ID is required')
+        console.info('rate document migration complete')
+    } catch (error) {
+        console.error(`ERROR: ${error}`)
     }
-
-    await processRevisions(store, revisions)
-
-    console.info('rate document migration complete')
 }
