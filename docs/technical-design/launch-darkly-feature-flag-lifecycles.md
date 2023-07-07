@@ -25,7 +25,7 @@ A feature typically can be added behind a flag if:
 -   A/B testing of a feature
 
 ## Steps
-### How flag to the codebase
+### Add a flag to the codebase
 
 Flags are first added to Launch Darkly via their UI. As an authenticated Launch Darkly user, navigate to our feature flags and click “create flag”. Choose a human readable flag name and a ‘-’ delimited flag key. The flag key is what we use inside our code. Make sure to mark the flag as client side if it is meant to be user visible (rather than API only). If the flag is permanent, mark this as well.
 
