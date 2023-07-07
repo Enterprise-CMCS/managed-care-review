@@ -44,6 +44,8 @@ describe('unlockContract', () => {
                 stateCode: 'MN',
                 submissionType: 'CONTRACT_AND_RATES',
                 submissionDescription: 'Contract 1.0',
+                contractType: 'BASE',
+                programIDs: [],
             })
         )
         const rate = must(
@@ -61,7 +63,6 @@ describe('unlockContract', () => {
                 client,
                 contract.id,
                 {
-                    stateCode: 'MN',
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'Connecting rate',
                 },
@@ -132,6 +133,8 @@ describe('unlockContract', () => {
                 stateCode: 'MN',
                 submissionType: 'CONTRACT_AND_RATES',
                 submissionDescription: 'Contract 1.0',
+                contractType: 'BASE',
+                programIDs: [],
             })
         )
         const rate = must(
@@ -149,7 +152,6 @@ describe('unlockContract', () => {
                 client,
                 contract.id,
                 {
-                    stateCode: 'MN',
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'Connecting rate',
                 },
@@ -224,6 +226,8 @@ describe('unlockContract', () => {
                 stateCode: 'MN',
                 submissionType: 'CONTRACT_AND_RATES',
                 submissionDescription: 'contract 1.0',
+                contractType: 'BASE',
+                programIDs: [],
             })
         )
         const rate = must(
@@ -236,7 +240,6 @@ describe('unlockContract', () => {
                 client,
                 contract.id,
                 {
-                    stateCode: 'MN',
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'contract 1.0',
                 },
@@ -278,7 +281,6 @@ describe('unlockContract', () => {
                 client,
                 contract.id,
                 {
-                    stateCode: 'MN',
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'contract 2.0',
                 },
@@ -320,6 +322,8 @@ describe('unlockContract', () => {
                 stateCode: 'MN',
                 submissionType: 'CONTRACT_AND_RATES',
                 submissionDescription: 'contract 1.0',
+                contractType: 'BASE',
+                programIDs: [],
             })
         )
         const rate = must(
@@ -332,7 +336,6 @@ describe('unlockContract', () => {
                 client,
                 contract.id,
                 {
-                    stateCode: 'MN',
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'contract 1.0',
                 },
@@ -368,6 +371,8 @@ describe('unlockContract', () => {
                 stateCode: 'MN',
                 submissionType: 'CONTRACT_AND_RATES',
                 submissionDescription: 'contract A 1.1',
+                contractType: 'BASE',
+                programIDs: [],
             })
         )
         const rateA = must(

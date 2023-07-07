@@ -33,6 +33,8 @@ describe('submitContract', () => {
                 stateCode: 'MN',
                 submissionType: 'CONTRACT_AND_RATES',
                 submissionDescription: 'one contract',
+                contractType: 'BASE',
+                programIDs: [],
             })
         )
         // submit the draft contract
@@ -80,6 +82,8 @@ describe('submitContract', () => {
                 stateCode: 'MN',
                 submissionType: 'CONTRACT_AND_RATES',
                 submissionDescription: 'first contract',
+                contractType: 'BASE',
+                programIDs: [],
             })
         )
 
@@ -131,6 +135,7 @@ describe('submitContract', () => {
                             id: uuidv4(),
                             submissionType: 'CONTRACT_AND_RATES',
                             submissionDescription: 'second contract revision',
+                            contractType: 'BASE',
                         },
                     },
                 },
@@ -183,6 +188,8 @@ describe('submitContract', () => {
                 stateCode: 'MN',
                 submissionType: 'CONTRACT_AND_RATES',
                 submissionDescription: 'one contract',
+                contractType: 'BASE',
+                programIDs: [],
             })
         )
 

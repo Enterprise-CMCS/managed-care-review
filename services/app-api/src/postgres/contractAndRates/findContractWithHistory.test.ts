@@ -43,6 +43,8 @@ describe('findContract', () => {
                 stateCode: 'MN',
                 submissionType: 'CONTRACT_AND_RATES',
                 submissionDescription: 'one contract',
+                contractType: 'BASE',
+                programIDs: [],
             })
         )
         must(
@@ -183,7 +185,6 @@ describe('findContract', () => {
                 client,
                 contractA.id,
                 {
-                    stateCode: 'MN',
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'a.2 body',
                 },
@@ -325,6 +326,8 @@ describe('findContract', () => {
                 stateCode: 'MN',
                 submissionType: 'CONTRACT_AND_RATES',
                 submissionDescription: 'one contract',
+                contractType: 'BASE',
+                programIDs: [],
             })
         )
         must(
@@ -427,7 +430,6 @@ describe('findContract', () => {
                 client,
                 contractA.id,
                 {
-                    stateCode: 'MN',
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'a.2 body',
                 },
@@ -549,6 +551,8 @@ describe('findContract', () => {
                 stateCode: 'MN',
                 submissionType: 'CONTRACT_AND_RATES',
                 submissionDescription: 'one contract',
+                contractType: 'BASE',
+                programIDs: [],
             })
         )
         must(
@@ -556,7 +560,6 @@ describe('findContract', () => {
                 client,
                 contractA.id,
                 {
-                    stateCode: 'MN',
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'one contract',
                 },

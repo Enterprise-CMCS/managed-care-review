@@ -51,6 +51,8 @@ describe('findDraftContract', () => {
                 stateCode: 'MN',
                 submissionType: 'CONTRACT_AND_RATES',
                 submissionDescription: 'one contract',
+                contractType: 'BASE',
+                programIDs: [],
             })
         )
         must(
@@ -58,7 +60,6 @@ describe('findDraftContract', () => {
                 client,
                 contractA.id,
                 {
-                    stateCode: 'MN',
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'one contract',
                 },
@@ -137,6 +138,8 @@ describe('findDraftContract', () => {
                 stateCode: 'MN',
                 submissionType: 'CONTRACT_AND_RATES',
                 submissionDescription: 'one contract',
+                contractType: 'BASE',
+                programIDs: [],
             })
         )
         must(
@@ -144,7 +147,6 @@ describe('findDraftContract', () => {
                 client,
                 contractA.id,
                 {
-                    stateCode: 'MN',
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'one contract',
                 },
@@ -193,6 +195,8 @@ describe('findDraftContract', () => {
                 stateCode: 'MN',
                 submissionType: 'CONTRACT_AND_RATES',
                 submissionDescription: 'one contract',
+                contractType: 'BASE',
+                programIDs: [],
             })
         )
         must(
@@ -200,7 +204,6 @@ describe('findDraftContract', () => {
                 client,
                 contractA.id,
                 {
-                    stateCode: 'MN',
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'first draft',
                 },
@@ -229,7 +232,6 @@ describe('findDraftContract', () => {
                 client,
                 contractA.id,
                 {
-                    stateCode: 'MN',
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'draft Edit',
                 },
