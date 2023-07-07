@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client'
-import { v4 as uuidv4 } from 'uuid'
 import { Contract } from './contractType'
 import { findContractWithHistory } from './findContractWithHistory'
 
@@ -60,7 +59,6 @@ async function unlockContract(
 
             await tx.contractRevisionTable.create({
                 data: {
-                    id: uuidv4(),
                     contract: {
                         connect: {
                             id: contractID,
@@ -68,9 +66,9 @@ async function unlockContract(
                     },
                     submissionType: currentRev.submissionType,
                     submissionDescription: currentRev.submissionDescription,
+                    contractType: currentRev.contractType,
                     unlockInfo: {
                         create: {
-                            id: uuidv4(),
                             updatedAt: groupTime,
                             updatedByID: unlockedByUserID,
                             updatedReason: unlockReason,
