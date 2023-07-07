@@ -342,6 +342,7 @@ enum Role {
   CMS_USER
   STATE_USER
   ADMIN_USER
+  HELPDESK_USER
 }
 
 enum AuditAction {

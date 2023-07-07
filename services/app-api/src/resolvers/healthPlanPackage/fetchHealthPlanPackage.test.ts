@@ -304,9 +304,7 @@ describe('fetchHealthPlanPackage', () => {
         expect(result.errors).toHaveLength(1)
         const resultErr = result.errors[0]
 
-        expect(resultErr?.message).toBe(
-            'CMS user not authorized to fetch a draft'
-        )
+        expect(resultErr?.message).toBe('user not authorized to fetch a draft')
         expect(resultErr?.extensions?.code).toBe('FORBIDDEN')
     })
 

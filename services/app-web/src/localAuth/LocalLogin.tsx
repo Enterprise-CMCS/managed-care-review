@@ -15,6 +15,7 @@ import { RoutesRecord } from '../constants/routes'
 import { loginLocalUser } from '.'
 
 import aangAvatar from '../assets/images/aang.png'
+import appaAvatar from '../assets/images/appa.png'
 import tophAvatar from '../assets/images/toph.png'
 import zukoAvatar from '../assets/images/zuko.png'
 import irohAvatar from '../assets/images/iroh.png'
@@ -72,6 +73,13 @@ const localUsers: LocalUserType[] = [
         familyName: 'Coldstart',
         role: 'ADMIN_USER',
     },
+    {
+        id: 'user7',
+        email: 'appa@example.com',
+        givenName: 'Appa',
+        familyName: 'Sky Bison',
+        role: 'HELPDESK_USER',
+    },
 ]
 
 const userAvatars: { [key: string]: string } = {
@@ -81,6 +89,7 @@ const userAvatars: { [key: string]: string } = {
     'iroh@example.com': irohAvatar,
     'roku@example.com': rokuAvatar,
     'izumi@example.com': izumiAvatar,
+    'appa@example.com': appaAvatar,
 }
 
 export function LocalLogin(): React.ReactElement {
@@ -115,6 +124,8 @@ export function LocalLogin(): React.ReactElement {
                     const fromString =
                         user.role === 'ADMIN_USER'
                             ? 'CMS (Admin)'
+                            : user.role === 'HELPDESK_USER'
+                            ? 'CMS (Helpdesk)'
                             : user.role === 'CMS_USER'
                             ? 'CMS'
                             : user.stateCode
