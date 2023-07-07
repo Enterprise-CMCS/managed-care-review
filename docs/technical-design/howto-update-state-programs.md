@@ -1,10 +1,13 @@
 # How to update state programs
 
-State programs are an important set of data in MC-Review. Currently, all submissions must have a program. Programs are also used in submission and rate names in communication.
+## Background
+State programs are an important set of data in MC-Review. Currently, all submissions must have a program. Programs are also used in submission and rate names in communication. Right now developers are manually managing updates to the state programs list.
 
 For pilot rollout of MC-Review, state programs are stored in a JSON file `stateProgram.json`. The state programs json is referenced both client-side, to display the program dropdowns, and server-side in API requests that include program data.
 
-The source of truth for that file comes from a CSV maintained by product and design. It is titled "State programs, population, and nicknames" in Google Drive. When that team adds or updates programs and would like the changes reflected in MC-Review, the dev team needs update our stored JSON using `scripts/import-programs.ts`. Steps to update are:
+The source of truth for that file comes from a CSV maintained by product and design. It is titled "State programs, population, and nicknames" in Google Drive. When that team adds or updates programs and would like the changes reflected in MC-Review, the dev team needs update our stored JSON using `scripts/import-programs.ts`. Steps to update this list follows below.
+
+## Steps
 
 1. Download the latest version of csv from google docs when prompted by product/design.
 2. Run the script following the command listed in the  `import-programs.ts`.
