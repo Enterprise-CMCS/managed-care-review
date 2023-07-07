@@ -39,7 +39,13 @@ describe('findContract', () => {
 
         // setup a single test contract
         const contractA = must(
-            await insertDraftContract(client, 'one contract')
+            await insertDraftContract(client, {
+                stateCode: 'MN',
+                submissionType: 'CONTRACT_AND_RATES',
+                submissionDescription: 'one contract',
+                contractType: 'BASE',
+                programIDs: [],
+            })
         )
         must(
             await submitContract(
@@ -51,7 +57,12 @@ describe('findContract', () => {
         )
 
         // Add 3 rates 1, 2, 3 pointing to contract A
-        const rate1 = must(await insertDraftRate(client, 'someurle.en'))
+        const rate1 = must(
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+                name: 'someurle.en',
+            })
+        )
         must(
             await updateDraftRate(client, rate1.id, 'someurle.en', [
                 contractA.id,
@@ -59,13 +70,23 @@ describe('findContract', () => {
         )
         must(await submitRate(client, rate1.id, stateUser.id, 'Rate Submit'))
 
-        const rate2 = must(await insertDraftRate(client, 'twopointo'))
+        const rate2 = must(
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+                name: 'twopointo',
+            })
+        )
         must(
             await updateDraftRate(client, rate2.id, 'twopointo', [contractA.id])
         )
         must(await submitRate(client, rate2.id, stateUser.id, 'RateSubmit 2'))
 
-        const rate3 = must(await insertDraftRate(client, 'threepointo'))
+        const rate3 = must(
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+                name: 'threepointo',
+            })
+        )
         must(
             await updateDraftRate(client, rate3.id, 'threepointo', [
                 contractA.id,
@@ -160,9 +181,15 @@ describe('findContract', () => {
             )
         )
         must(
-            await updateDraftContract(client, contractA.id, 'a.2 body', [
-                rate3.id,
-            ])
+            await updateDraftContract(
+                client,
+                contractA.id,
+                {
+                    submissionType: 'CONTRACT_AND_RATES',
+                    submissionDescription: 'a.2 body',
+                },
+                [rate3.id]
+            )
         )
         must(
             await submitContract(
@@ -295,7 +322,13 @@ describe('findContract', () => {
 
         // setup a single test contract
         const contractA = must(
-            await insertDraftContract(client, 'one contract')
+            await insertDraftContract(client, {
+                stateCode: 'MN',
+                submissionType: 'CONTRACT_AND_RATES',
+                submissionDescription: 'one contract',
+                contractType: 'BASE',
+                programIDs: [],
+            })
         )
         must(
             await submitContract(
@@ -307,7 +340,12 @@ describe('findContract', () => {
         )
 
         // Add 3 rates 1, 2, 3 pointing to contract A
-        const rate1 = must(await insertDraftRate(client, 'someurle.en'))
+        const rate1 = must(
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+                name: 'someurle.en',
+            })
+        )
         must(
             await updateDraftRate(client, rate1.id, 'someurle.en', [
                 contractA.id,
@@ -315,13 +353,23 @@ describe('findContract', () => {
         )
         must(await submitRate(client, rate1.id, stateUser.id, 'Rate Submit'))
 
-        const rate2 = must(await insertDraftRate(client, 'twopointo'))
+        const rate2 = must(
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+                name: 'twopointo',
+            })
+        )
         must(
             await updateDraftRate(client, rate2.id, 'twopointo', [contractA.id])
         )
         must(await submitRate(client, rate2.id, stateUser.id, 'RateSubmit 2'))
 
-        const rate3 = must(await insertDraftRate(client, 'threepointo'))
+        const rate3 = must(
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+                name: 'threepointo',
+            })
+        )
         must(
             await updateDraftRate(client, rate3.id, 'threepointo', [
                 contractA.id,
@@ -378,9 +426,15 @@ describe('findContract', () => {
             )
         )
         must(
-            await updateDraftContract(client, contractA.id, 'a.2 body', [
-                rate3.id,
-            ])
+            await updateDraftContract(
+                client,
+                contractA.id,
+                {
+                    submissionType: 'CONTRACT_AND_RATES',
+                    submissionDescription: 'a.2 body',
+                },
+                [rate3.id]
+            )
         )
         must(
             await submitContract(
@@ -473,23 +527,44 @@ describe('findContract', () => {
         })
 
         // Add 2 rates 1, 2
-        const rate1 = must(await insertDraftRate(client, 'onepoint0'))
+        const rate1 = must(
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+                name: 'onepoint0',
+            })
+        )
         must(await updateDraftRate(client, rate1.id, 'onepoint0', []))
         must(await submitRate(client, rate1.id, stateUser.id, 'Rate Submit'))
 
-        const rate2 = must(await insertDraftRate(client, 'twopointo'))
+        const rate2 = must(
+            await insertDraftRate(client, {
+                stateCode: 'MN',
+                name: 'twopointo',
+            })
+        )
         must(await updateDraftRate(client, rate2.id, 'twopointo', []))
         must(await submitRate(client, rate2.id, stateUser.id, 'Rate Submit 2'))
 
         // add a contract that has both of them.
         const contractA = must(
-            await insertDraftContract(client, 'one contract')
+            await insertDraftContract(client, {
+                stateCode: 'MN',
+                submissionType: 'CONTRACT_AND_RATES',
+                submissionDescription: 'one contract',
+                contractType: 'BASE',
+                programIDs: [],
+            })
         )
         must(
-            await updateDraftContract(client, contractA.id, 'one contract', [
-                rate1.id,
-                rate2.id,
-            ])
+            await updateDraftContract(
+                client,
+                contractA.id,
+                {
+                    submissionType: 'CONTRACT_AND_RATES',
+                    submissionDescription: 'one contract',
+                },
+                [rate1.id, rate2.id]
+            )
         )
         must(
             await submitContract(

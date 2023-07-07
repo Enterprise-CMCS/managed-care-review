@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client'
-import { v4 as uuidv4 } from 'uuid'
 import { findRateWithHistory } from './findRateWithHistory'
 import { Rate } from './rateType'
 
@@ -61,7 +60,6 @@ async function unlockRate(
 
             await tx.rateRevisionTable.create({
                 data: {
-                    id: uuidv4(),
                     rate: {
                         connect: {
                             id: rateID,
@@ -70,7 +68,6 @@ async function unlockRate(
                     name: currentRev.name,
                     unlockInfo: {
                         create: {
-                            id: uuidv4(),
                             updatedAt: groupTime,
                             updatedByID: unlockedByUserID,
                             updatedReason: unlockReason,

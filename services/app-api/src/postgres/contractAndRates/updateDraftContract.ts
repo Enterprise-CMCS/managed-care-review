@@ -1,6 +1,20 @@
-import { PrismaClient } from '@prisma/client'
+import {
+    ContractType,
+    PopulationCoverageType,
+    PrismaClient,
+    SubmissionType,
+} from '@prisma/client'
 import { Contract } from './contractType'
 import { findContractWithHistory } from './findContractWithHistory'
+
+type UpdateContractArgsType = {
+    populationCovered?: PopulationCoverageType
+    programIDs?: string[]
+    riskBasedContract?: boolean
+    submissionType?: SubmissionType
+    submissionDescription?: string
+    contractType?: ContractType
+}
 
 // Update the given draft
 // * can change the set of draftRates
@@ -8,7 +22,7 @@ import { findContractWithHistory } from './findContractWithHistory'
 async function updateDraftContract(
     client: PrismaClient,
     contractID: string,
-    formData: string,
+    formData: UpdateContractArgsType,
     rateIDs: string[]
 ): Promise<Contract | Error> {
     try {
@@ -30,7 +44,7 @@ async function updateDraftContract(
                 id: currentRev.id,
             },
             data: {
-                name: formData,
+                ...formData,
                 draftRates: {
                     set: rateIDs.map((rID) => ({
                         id: rID,

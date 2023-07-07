@@ -1,50 +1,67 @@
 import { PrismaClient } from '@prisma/client'
-import { v4 as uuidv4 } from 'uuid'
 import { Rate } from './rateType'
+
+type InsertRateArgsType = {
+    stateCode: string
+    name: string
+}
 
 // creates a new contract, with a new revision
 async function insertDraftRate(
     client: PrismaClient,
-    formData: string
+    formData: InsertRateArgsType
 ): Promise<Rate | Error> {
     try {
-        const rate = await client.rateTable.create({
-            data: {
-                id: uuidv4(),
-                revisions: {
-                    create: {
-                        id: uuidv4(),
-                        name: formData,
+        return await client.$transaction(async (tx) => {
+            const { latestStateRateCertNumber } = await tx.state.update({
+                data: {
+                    latestStateRateCertNumber: {
+                        increment: 1,
                     },
                 },
-            },
-            include: {
-                revisions: {
-                    include: {
-                        contractRevisions: {
-                            include: {
-                                contractRevision: true,
+                where: {
+                    stateCode: formData.stateCode,
+                },
+            })
+
+            const rate = await tx.rateTable.create({
+                data: {
+                    stateCode: formData.stateCode,
+                    stateNumber: latestStateRateCertNumber,
+                    revisions: {
+                        create: {
+                            name: formData.name,
+                        },
+                    },
+                },
+                include: {
+                    revisions: {
+                        include: {
+                            contractRevisions: {
+                                include: {
+                                    contractRevision: true,
+                                },
                             },
                         },
                     },
                 },
-            },
-        })
+            })
 
-        return {
-            id: rate.id,
-            revisions: rate.revisions.map((rr) => ({
-                id: rr.id,
-                revisionFormData: rr.name,
-                contractRevisions: rr.contractRevisions.map((cr) => ({
-                    id: cr.rateRevisionID,
-                    contractFormData: cr.contractRevision.name,
-                    rateRevisions: [],
+            return {
+                id: rate.id,
+                revisions: rate.revisions.map((rr) => ({
+                    id: rr.id,
+                    revisionFormData: rr.name,
+                    contractRevisions: rr.contractRevisions.map((cr) => ({
+                        id: cr.rateRevisionID,
+                        contractFormData: cr.contractRevision.submissionType,
+                        rateRevisions: [],
+                    })),
                 })),
-            })),
-        }
+            }
+        })
     } catch (err) {
-        console.error('CONTRACT PRISMA ERR', err)
+        console.error('RATE PRISMA ERR', err)
         return err
     }
 }

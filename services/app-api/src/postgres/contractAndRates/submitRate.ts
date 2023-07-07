@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client'
-import { v4 as uuidv4 } from 'uuid'
 import { findRateWithHistory } from './findRateWithHistory'
 import { Rate } from './rateType'
 
@@ -64,7 +63,6 @@ async function submitRate(
                 data: {
                     submitInfo: {
                         create: {
-                            id: uuidv4(),
                             updatedAt: groupTime,
                             updatedByID: submittedByUserID,
                             updatedReason: submitReason,
