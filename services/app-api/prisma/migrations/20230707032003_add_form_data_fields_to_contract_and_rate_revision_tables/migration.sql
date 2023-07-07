@@ -3,6 +3,8 @@ BEGIN;
   Warnings:
 
   - You are about to drop the column `name` on the `ContractRevisionTable` table. All the data in the column will be lost.
+  - Added the required column `contractType` to the `ContractRevisionTable` table without a default value. This is not possible if the table is not empty.
+  - Added the required column `submissionDescription` to the `ContractRevisionTable` table without a default value. This is not possible if the table is not empty.
   - Added the required column `submissionType` to the `ContractRevisionTable` table without a default value. This is not possible if the table is not empty.
   - Added the required column `stateCode` to the `ContractTable` table without a default value. This is not possible if the table is not empty.
   - Added the required column `stateNumber` to the `ContractTable` table without a default value. This is not possible if the table is not empty.
@@ -46,10 +48,10 @@ CREATE TYPE "SubmissionType" AS ENUM ('CONTRACT_ONLY', 'CONTRACT_AND_RATES');
 -- AlterTable
 ALTER TABLE "ContractRevisionTable" DROP COLUMN "name",
 ADD COLUMN     "addtlActuaryCommunicationPreference" "ActuaryCommunication",
-ADD COLUMN     "contractDateEnd" TIMESTAMP(3),
-ADD COLUMN     "contractDateStart" TIMESTAMP(3),
+ADD COLUMN     "contractDateEnd" DATE,
+ADD COLUMN     "contractDateStart" DATE,
 ADD COLUMN     "contractExecutionStatus" "ContractExecutionStatus",
-ADD COLUMN     "contractType" "ContractType",
+ADD COLUMN     "contractType" "ContractType" NOT NULL,
 ADD COLUMN     "federalAuthorities" "FederalAuthority"[],
 ADD COLUMN     "inLieuServicesAndSettings" BOOLEAN,
 ADD COLUMN     "managedCareEntities" "ManagedCareEntity"[],
@@ -72,25 +74,24 @@ ADD COLUMN     "modifiedWitholdAgreements" BOOLEAN,
 ADD COLUMN     "populationCovered" "PopulationCoverageType",
 ADD COLUMN     "programIDs" TEXT[],
 ADD COLUMN     "riskBasedContract" BOOLEAN,
-ADD COLUMN     "submissionDescription" TEXT,
+ADD COLUMN     "submissionDescription" TEXT NOT NULL,
 ADD COLUMN     "submissionType" "SubmissionType" NOT NULL;
 
 -- AlterTable
 ALTER TABLE "ContractTable" ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 ADD COLUMN     "stateCode" TEXT NOT NULL,
 ADD COLUMN     "stateNumber" INTEGER NOT NULL,
-ADD COLUMN     "submittedAt" TIMESTAMP(3),
 ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 -- AlterTable
 ALTER TABLE "RateRevisionTable" ADD COLUMN     "actuaryCommunicationPreference" "ActuaryCommunication",
-ADD COLUMN     "amendmentEffectiveDateEnd" TIMESTAMP(3),
-ADD COLUMN     "amendmentEffectiveDateStart" TIMESTAMP(3),
+ADD COLUMN     "amendmentEffectiveDateEnd" DATE,
+ADD COLUMN     "amendmentEffectiveDateStart" DATE,
 ADD COLUMN     "rateCapitationType" "RateCapitationType",
 ADD COLUMN     "rateCertificationName" TEXT,
-ADD COLUMN     "rateDateCertified" TIMESTAMP(3),
-ADD COLUMN     "rateDateEnd" TIMESTAMP(3),
-ADD COLUMN     "rateDateStart" TIMESTAMP(3),
+ADD COLUMN     "rateDateCertified" DATE,
+ADD COLUMN     "rateDateEnd" DATE,
+ADD COLUMN     "rateDateStart" DATE,
 ADD COLUMN     "rateProgramIDs" TEXT[],
 ADD COLUMN     "rateType" "RateType";
 
@@ -98,7 +99,6 @@ ADD COLUMN     "rateType" "RateType";
 ALTER TABLE "RateTable" ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 ADD COLUMN     "stateCode" TEXT NOT NULL,
 ADD COLUMN     "stateNumber" INTEGER NOT NULL,
-ADD COLUMN     "submittedAt" TIMESTAMP(3),
 ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 -- AlterTable
@@ -139,7 +139,6 @@ CREATE TABLE "ContractDocument" (
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
     "s3URL" TEXT NOT NULL,
-    "documentCategories" "DocumentCategory"[],
     "sha256" TEXT,
     "contractRevisionID" TEXT NOT NULL,
 
@@ -153,7 +152,6 @@ CREATE TABLE "ContractSupportingDocument" (
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
     "s3URL" TEXT NOT NULL,
-    "documentCategories" "DocumentCategory"[],
     "sha256" TEXT,
     "contractRevisionID" TEXT NOT NULL,
 
@@ -167,7 +165,6 @@ CREATE TABLE "RateDocument" (
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
     "s3URL" TEXT NOT NULL,
-    "documentCategories" "DocumentCategory"[],
     "sha256" TEXT,
     "rateRevisionID" TEXT NOT NULL,
 
@@ -181,7 +178,6 @@ CREATE TABLE "RateSupportingDocument" (
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "name" TEXT NOT NULL,
     "s3URL" TEXT NOT NULL,
-    "documentCategories" "DocumentCategory"[],
     "sha256" TEXT,
     "rateRevisionID" TEXT NOT NULL,
 
