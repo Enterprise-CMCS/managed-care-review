@@ -1,9 +1,4 @@
-import {
-    PrismaClient,
-    SubmissionType,
-    UpdateInfoTable,
-    User,
-} from '@prisma/client'
+import { PrismaClient, UpdateInfoTable, User } from '@prisma/client'
 
 // This is the type returned by client.$transaction
 type PrismaTransactionType = Omit<
@@ -20,22 +15,6 @@ const updateInfoIncludeUpdater = {
 
 type UpdateInfoTableWithUpdater = UpdateInfoTable & { updatedBy: User }
 
-type ContractFormData = {
-    stateCode: string
-    submissionType: SubmissionType
-    submissionDescription?: string
-}
-
-type RateFormData = {
-    stateCode: string
-    name: string
-}
-
-export type {
-    PrismaTransactionType,
-    UpdateInfoTableWithUpdater,
-    ContractFormData,
-    RateFormData,
-}
+export type { PrismaTransactionType, UpdateInfoTableWithUpdater }
 
 export { updateInfoIncludeUpdater }
