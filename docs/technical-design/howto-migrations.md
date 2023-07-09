@@ -15,12 +15,14 @@ Currently data migrations change existing records in the database. They are run 
 ### Steps
 1. Prepare for manual testing in lower environments.
     - Build a PR review app off `main` to start out. Try to populate with submissions similar to what is in production (For example, populate submissions via Cypress and there are specific submissions types you know you will need to test, make sure add them).
-1. Write the migration. Include verbose console statements for debugging.
+1. Write the migration with verbose logs.
     - The migration will be written as a [Node lambda](https://docs.aws.amazon.com/lambda/latest/dg/nodejs-handler.html) and live in `app-api/src/handlers`.  Make sure you use ES6 async await.
-    - Console are very helpful here specifically because there are no clear line numbers in Cloudwatch if the migration fails or does not apply correctly. There will be little additional context about the run (unlike api request or schema migrations using an ORM which have built in output). The console statements inline are the main way to = know where in the script execution paused or failed. Here is an example of debug console statements:
+    - Console statements are essential because there are line numbers in Cloudwatch when the migration fails or does not apply correctly. There is little additional context about why a run execution paused or failed.
+    - Here is an example of verbose debug console statements wrapping a loop:
+    ![debug consoles in data migration script](../../.images/verbose-logs-example.png)
 1. Write unit tests.
     - Consider including a test for `migration can be run repeatedly without data loss or unexpected results". Using repeatable migrations (when possible) makes it easier on developers and easier to unwind work.
-1. Manually test the migration in your review app
+1. Manually test the migration in your review app.
     - Log into [AWS Lambda Console](https://console.aws.amazon.com/lambda/home) and find the lambda. This means choosing `app-api-` lambda with your branch name and migration name included.
     - Click the Test tab and the `Test` button. Use the generic hello world event.
         - All output will appear inline on the same page as the lambda run. All consoles appear there as well. You can also click into a link from there into Cloudwatch to be able to see entire output of logs around the lambda execution.
@@ -32,8 +34,9 @@ Currently data migrations change existing records in the database. They are run 
     - How do you know migration applied? What will be checked either in the app, via api request, or in the reports CSV?
     - Developers will have to verify that the change worked multiple times, basically each time the migration is run on a new environment since the data could be quite different.
     - If verification involves looking into reports and comparing fields, consider using a CSV tool like [CSVKit](https://csvkit.readthedocs.io/en/latest/index.html) if the comparisons seem involved.
-1. After the PR merges and promotes, prepare to run the data migration in DEV environment. Follow similar steps Step #4 but now using the `main` lambda for your migration.
-1. Run the migration  DEV > VAL > PROD in order, verifying in the application (or via reporting output) after each run.
+1. After the PR merges and promotes,run in higher environments.
+    - Start with DEV. Follow similar steps Step #4 but now using the `main` lambda for your migration.
+    - Run the migration  DEV > VAL > PROD in order, verifying in the application (or via reporting output) after each run.
 
 
 ## Schema Migrations
