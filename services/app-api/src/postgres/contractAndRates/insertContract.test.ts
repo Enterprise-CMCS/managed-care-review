@@ -5,7 +5,7 @@ import { must } from '../../testHelpers'
 import { insertDraftContract } from './insertContract'
 
 describe('insertContract', () => {
-    it('creates a new draft submission', async () => {
+    it('creates a new draft contract', async () => {
         const client = await sharedTestPrismaClient()
 
         // submitting before there's a draft should be an error
