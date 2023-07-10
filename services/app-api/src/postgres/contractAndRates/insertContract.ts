@@ -10,9 +10,9 @@ import { draftContractRevisionsWithDraftRates } from '../prismaTypes'
 
 type InsertContractArgsType = {
     stateCode: string
-    populationCovered?: PopulationCoverageType
+    populationCovered: PopulationCoverageType
     programIDs: string[]
-    riskBasedContract?: boolean
+    riskBasedContract: boolean
     submissionType: SubmissionType
     submissionDescription: string
     contractType: ContractType
