@@ -5,6 +5,8 @@ import {
     ContractType,
 } from '@prisma/client'
 import { Contract } from './contractType'
+import { contractFormDataToDomainModel } from '../../domain-models/contractRevision'
+import { draftContractRevisionsWithDraftRates } from '../prismaTypes'
 
 type InsertContractArgsType = {
     stateCode: string
@@ -19,7 +21,7 @@ type InsertContractArgsType = {
 // creates a new contract, with a new revision
 async function insertDraftContract(
     client: PrismaClient,
-    formData: InsertContractArgsType
+    args: InsertContractArgsType
 ): Promise<Contract | Error> {
     try {
         return await client.$transaction(async (tx) => {
@@ -30,47 +32,45 @@ async function insertDraftContract(
                     },
                 },
                 where: {
-                    stateCode: formData.stateCode,
+                    stateCode: args.stateCode,
                 },
             })
 
             const contract = await tx.contractTable.create({
                 data: {
-                    stateCode: formData.stateCode,
+                    stateCode: args.stateCode,
                     stateNumber: latestStateSubmissionNumber,
                     revisions: {
                         create: {
-                            populationCovered: formData.populationCovered,
-                            programIDs: formData.programIDs,
-                            riskBasedContract: formData.riskBasedContract,
-                            submissionType: formData.submissionType,
-                            submissionDescription:
-                                formData.submissionDescription,
-                            contractType: formData.contractType,
+                            populationCovered: args.populationCovered,
+                            programIDs: args.programIDs,
+                            riskBasedContract: args.riskBasedContract,
+                            submissionType: args.submissionType,
+                            submissionDescription: args.submissionDescription,
+                            contractType: args.contractType,
                         },
                     },
                 },
                 include: {
                     revisions: {
-                        include: {
-                            rateRevisions: {
-                                include: {
-                                    rateRevision: true,
-                                },
-                            },
-                        },
+                        include: draftContractRevisionsWithDraftRates,
                     },
                 },
             })
 
             return {
                 id: contract.id,
+                status: 'DRAFT',
+                stateCode: contract.stateCode,
+                stateNumber: contract.stateNumber,
                 revisions: contract.revisions.map((cr) => ({
                     id: cr.id,
-                    contractFormData: cr.submissionDescription,
-                    rateRevisions: cr.rateRevisions.map((rr) => ({
-                        id: rr.rateRevisionID,
-                        revisionFormData: rr.rateRevision.name,
+                    createdAt: cr.createdAt,
+                    updatedAt: cr.updatedAt,
+                    formData: contractFormDataToDomainModel(cr),
+                    rateRevisions: cr.draftRates.map((dr) => ({
+                        id: dr.revisions[0].id,
+                        revisionFormData: dr.revisions[0].name,
                     })),
                 })),
             }
@@ -82,3 +82,4 @@ async function insertDraftContract(
 }
 
 export { insertDraftContract }
+export type { InsertContractArgsType }
