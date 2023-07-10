@@ -11,6 +11,7 @@ import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
 import { must } from '../../testHelpers'
+import { createDraftContractData } from '../../testHelpers/contractHelpers'
 
 describe('findContract', () => {
     it('finds a stripped down contract with history', async () => {
@@ -38,14 +39,11 @@ describe('findContract', () => {
         })
 
         // setup a single test contract
+        const draftContractData = createDraftContractData({
+            submissionDescription: 'one contract',
+        })
         const contractA = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionType: 'CONTRACT_AND_RATES',
-                submissionDescription: 'one contract',
-                contractType: 'BASE',
-                programIDs: [],
-            })
+            await insertDraftContract(client, draftContractData)
         )
         must(
             await submitContract(
@@ -187,6 +185,10 @@ describe('findContract', () => {
                 {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'a.2 body',
+                    contractType: 'BASE',
+                    programIDs: ['PMAP'],
+                    populationCovered: 'MEDICAID',
+                    riskBasedContract: false,
                 },
                 [rate3.id]
             )
@@ -278,7 +280,12 @@ describe('findContract', () => {
         )
 
         expect(revisionsInTimeOrder[7].rateRevisions).toHaveLength(1)
-        expect(revisionsInTimeOrder[7].contractFormData).toBe('a.2 body')
+        expect(revisionsInTimeOrder[7].formData).toEqual(
+            expect.objectContaining({
+                submissionType: 'CONTRACT_AND_RATES',
+                submissionDescription: 'a.2 body',
+            })
+        )
         expect(revisionsInTimeOrder[7].submitInfo?.updatedReason).toBe(
             'Submitting A.2'
         )
@@ -321,14 +328,11 @@ describe('findContract', () => {
         })
 
         // setup a single test contract
+        const draftContractData = createDraftContractData({
+            submissionDescription: 'one contract',
+        })
         const contractA = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionType: 'CONTRACT_AND_RATES',
-                submissionDescription: 'one contract',
-                contractType: 'BASE',
-                programIDs: [],
-            })
+            await insertDraftContract(client, draftContractData)
         )
         must(
             await submitContract(
@@ -432,6 +436,10 @@ describe('findContract', () => {
                 {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'a.2 body',
+                    contractType: 'BASE',
+                    programIDs: ['PMAP'],
+                    populationCovered: 'MEDICAID',
+                    riskBasedContract: false,
                 },
                 [rate3.id]
             )
@@ -486,7 +494,12 @@ describe('findContract', () => {
         expect(revisions[6].submitInfo?.updatedReason).toBe('Submitting A.1')
 
         expect(revisions[7].rateRevisions).toHaveLength(1)
-        expect(revisions[7].contractFormData).toBe('a.2 body')
+        expect(revisions[7].formData).toEqual(
+            expect.objectContaining({
+                submissionType: 'CONTRACT_AND_RATES',
+                submissionDescription: 'a.2 body',
+            })
+        )
         expect(revisions[7].submitInfo?.updatedReason).toBe('Submitting A.2')
 
         // check for rate and see if it handles the removed bit right
@@ -546,14 +559,11 @@ describe('findContract', () => {
         must(await submitRate(client, rate2.id, stateUser.id, 'Rate Submit 2'))
 
         // add a contract that has both of them.
+        const draftContractData = createDraftContractData({
+            submissionDescription: 'one contract',
+        })
         const contractA = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionType: 'CONTRACT_AND_RATES',
-                submissionDescription: 'one contract',
-                contractType: 'BASE',
-                programIDs: [],
-            })
+            await insertDraftContract(client, draftContractData)
         )
         must(
             await updateDraftContract(
@@ -562,6 +572,10 @@ describe('findContract', () => {
                 {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'one contract',
+                    contractType: 'BASE',
+                    programIDs: ['PMAP'],
+                    populationCovered: 'MEDICAID',
+                    riskBasedContract: false,
                 },
                 [rate1.id, rate2.id]
             )

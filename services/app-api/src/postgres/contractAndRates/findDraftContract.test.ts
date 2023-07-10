@@ -10,6 +10,7 @@ import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findDraftContract } from './findDraftContract'
 import { must } from '../../testHelpers'
+import { createDraftContractData } from '../../testHelpers/contractHelpers'
 
 describe('findDraftContract', () => {
     it('handles drafts correctly', async () => {
@@ -46,14 +47,11 @@ describe('findDraftContract', () => {
         must(await submitRate(client, rate2.id, stateUser.id, 'Rate Submit 2'))
 
         // add a draft contract that has both of them.
+        const draftContractData = createDraftContractData({
+            submissionDescription: 'one contract',
+        })
         const contractA = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionType: 'CONTRACT_AND_RATES',
-                submissionDescription: 'one contract',
-                contractType: 'BASE',
-                programIDs: [],
-            })
+            await insertDraftContract(client, draftContractData)
         )
         must(
             await updateDraftContract(
@@ -62,6 +60,10 @@ describe('findDraftContract', () => {
                 {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'one contract',
+                    contractType: 'BASE',
+                    programIDs: ['PMAP'],
+                    populationCovered: 'MEDICAID',
+                    riskBasedContract: false,
                 },
                 [rate1.id, rate2.id]
             )
@@ -133,14 +135,12 @@ describe('findDraftContract', () => {
         must(await updateDraftRate(client, rate2.id, 'draft three', []))
 
         // add a draft contract that has both of them.
+        const draftContractData = createDraftContractData({
+            submissionDescription: 'one contract',
+        })
+
         const contractA = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionType: 'CONTRACT_AND_RATES',
-                submissionDescription: 'one contract',
-                contractType: 'BASE',
-                programIDs: [],
-            })
+            await insertDraftContract(client, draftContractData)
         )
         must(
             await updateDraftContract(
@@ -149,6 +149,10 @@ describe('findDraftContract', () => {
                 {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'one contract',
+                    contractType: 'BASE',
+                    programIDs: ['PMAP'],
+                    populationCovered: 'MEDICAID',
+                    riskBasedContract: false,
                 },
                 [rate1.id, rate2.id]
             )
@@ -190,14 +194,11 @@ describe('findDraftContract', () => {
         })
 
         // add a draft contract that has both of them.
+        const draftContractData = createDraftContractData({
+            submissionDescription: 'one contract',
+        })
         const contractA = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionType: 'CONTRACT_AND_RATES',
-                submissionDescription: 'one contract',
-                contractType: 'BASE',
-                programIDs: [],
-            })
+            await insertDraftContract(client, draftContractData)
         )
         must(
             await updateDraftContract(
@@ -206,6 +207,10 @@ describe('findDraftContract', () => {
                 {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'first draft',
+                    contractType: 'BASE',
+                    programIDs: ['PMAP'],
+                    populationCovered: 'MEDICAID',
+                    riskBasedContract: false,
                 },
                 []
             )
@@ -234,6 +239,10 @@ describe('findDraftContract', () => {
                 {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'draft Edit',
+                    contractType: 'BASE',
+                    programIDs: ['PMAP'],
+                    populationCovered: 'MEDICAID',
+                    riskBasedContract: false,
                 },
                 []
             )
@@ -247,6 +256,15 @@ describe('findDraftContract', () => {
 
         expect(draft).toBeDefined()
         expect(draft.rateRevisions).toHaveLength(0)
-        expect(draft.contractFormData).toBe('draft Edit')
+        expect(draft.formData).toEqual(
+            expect.objectContaining({
+                submissionType: 'CONTRACT_AND_RATES',
+                submissionDescription: 'draft Edit',
+                contractType: 'BASE',
+                programIDs: ['PMAP'],
+                populationCovered: 'MEDICAID',
+                riskBasedContract: false,
+            })
+        )
     })
 })

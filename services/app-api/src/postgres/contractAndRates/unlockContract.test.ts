@@ -12,6 +12,7 @@ import { updateDraftRate } from './updateDraftRate'
 import { submitContract } from './submitContract'
 import { findContractWithHistory } from './findContractWithHistory'
 import { must } from '../../testHelpers'
+import { createDraftContractData } from '../../testHelpers/contractHelpers'
 
 describe('unlockContract', () => {
     it('Unlocks a rate without breaking connected draft contract', async () => {
@@ -38,15 +39,13 @@ describe('unlockContract', () => {
             },
         })
 
+        const draftContractData = createDraftContractData({
+            submissionDescription: 'Contract 1.0',
+        })
+
         //Creat a draft contract and draft rate
         const contract = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionType: 'CONTRACT_AND_RATES',
-                submissionDescription: 'Contract 1.0',
-                contractType: 'BASE',
-                programIDs: [],
-            })
+            await insertDraftContract(client, draftContractData)
         )
         const rate = must(
             await insertDraftRate(client, { stateCode: 'MN', name: 'Rate 1.0' })
@@ -65,6 +64,10 @@ describe('unlockContract', () => {
                 {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'Connecting rate',
+                    contractType: 'BASE',
+                    programIDs: ['PMAP'],
+                    populationCovered: 'MEDICAID',
+                    riskBasedContract: false,
                 },
                 [rate.id]
             )
@@ -127,15 +130,13 @@ describe('unlockContract', () => {
             },
         })
 
+        const draftContractData = createDraftContractData({
+            submissionDescription: 'Contract 1.0',
+        })
+
         //Creat a draft contract and draft rate
         const contract = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionType: 'CONTRACT_AND_RATES',
-                submissionDescription: 'Contract 1.0',
-                contractType: 'BASE',
-                programIDs: [],
-            })
+            await insertDraftContract(client, draftContractData)
         )
         const rate = must(
             await insertDraftRate(client, { stateCode: 'MN', name: 'Rate 1.0' })
@@ -154,6 +155,10 @@ describe('unlockContract', () => {
                 {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'Connecting rate',
+                    contractType: 'BASE',
+                    programIDs: ['PMAP'],
+                    populationCovered: 'MEDICAID',
+                    riskBasedContract: false,
                 },
                 [rate.id]
             )
@@ -220,15 +225,13 @@ describe('unlockContract', () => {
             },
         })
 
+        const draftContractData = createDraftContractData({
+            submissionDescription: 'Contract 1.0',
+        })
+
         //Creat a draft contract and draft rate
         const contract = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionType: 'CONTRACT_AND_RATES',
-                submissionDescription: 'contract 1.0',
-                contractType: 'BASE',
-                programIDs: [],
-            })
+            await insertDraftContract(client, draftContractData)
         )
         const rate = must(
             await insertDraftRate(client, { stateCode: 'MN', name: 'rate 1.0' })
@@ -242,6 +245,10 @@ describe('unlockContract', () => {
                 {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'contract 1.0',
+                    contractType: 'BASE',
+                    programIDs: ['PMAP'],
+                    populationCovered: 'MEDICAID',
+                    riskBasedContract: false,
                 },
                 [rate.id]
             )
@@ -283,6 +290,10 @@ describe('unlockContract', () => {
                 {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'contract 2.0',
+                    contractType: 'BASE',
+                    programIDs: ['PMAP'],
+                    populationCovered: 'MEDICAID',
+                    riskBasedContract: false,
                 },
                 [rate.id]
             )
@@ -316,15 +327,13 @@ describe('unlockContract', () => {
             },
         })
 
+        const draftContractData = createDraftContractData({
+            submissionDescription: 'Contract 1.0',
+        })
+
         //Creat a draft contract and draft rate
         const contract = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionType: 'CONTRACT_AND_RATES',
-                submissionDescription: 'contract 1.0',
-                contractType: 'BASE',
-                programIDs: [],
-            })
+            await insertDraftContract(client, draftContractData)
         )
         const rate = must(
             await insertDraftRate(client, { stateCode: 'MN', name: 'rate 1.0' })
@@ -338,6 +347,10 @@ describe('unlockContract', () => {
                 {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'contract 1.0',
+                    contractType: 'BASE',
+                    programIDs: ['PMAP'],
+                    populationCovered: 'MEDICAID',
+                    riskBasedContract: false,
                 },
                 [rate.id]
             )
@@ -365,15 +378,13 @@ describe('unlockContract', () => {
             },
         })
 
+        const draftContractData = createDraftContractData({
+            submissionDescription: 'Contract 1.0',
+        })
+
         //Creat a draft contract
         const contractA = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionType: 'CONTRACT_AND_RATES',
-                submissionDescription: 'contract A 1.1',
-                contractType: 'BASE',
-                programIDs: [],
-            })
+            await insertDraftContract(client, draftContractData)
         )
         const rateA = must(
             await insertDraftRate(client, {
