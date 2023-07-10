@@ -5,9 +5,9 @@ Migrations are a controlled way to change existing records in the database or el
 
 ## General Guidance
 - Prioritize testing in environments that have data similar to production. If you are testing on a review app, you should pre-populate data through using the deployed app as a user or via Cypress runs to have a diversity of test data available.
-- Run in all environments, in as close to a way as they run in CI.
-- Write migrations that can be tested repeatedly.  Include logic to skip or handle data that has already been changed or doesn't need to be migrated, so that repeated runs of the lambda don't result in bad data.
-- Avoid making migrations directly dependent on a specific feature in progress being available in production.
+- Run in all deployed environments and validate for each environment.
+- Write migrations that can be tested repeatedly.  Include logic to skip or handle data that has already been changed or doesn't need to be migrated, so repeated runs of the lambda don't result in bad data.
+- Avoid making migrations directly dependent on a specific feature being available in production.
 
 ## Data Migrations
 Currently data migrations change existing records in the database. They are run as standalone lambdas that developers must manually trigger by environment.
@@ -28,8 +28,9 @@ Currently data migrations change existing records in the database. They are run 
         - All output will appear inline on the same page as the lambda run. All consoles appear there as well. You can also click into a link from there into Cloudwatch to be able to see the entire output of logs around the lambda execution.
      - If you need to debug quickly, without waiting for redeploy in review app use the severless CLI script.
         -  `serverless deploy function --function name_of_migration --stage my_branch && echo "DEPLOYED" && serverless logs --function name_of_migration  --stage my_branch --tail` can be run in your `app-api` directory. This script deploys your local handler code directly to AWS, without going through our normal CI build process.  `my_branch`is the name of your deployed Github branch and `name_of_migration` is the name of the migration file mind the file path.
-        - If this is to be run in DEV (`main`) you will have to reshape your `envrc.local` to imitate configuration on that stage.
-        - Command line serverless scripts should not be used on higher environments than dev - it's important to run the migration via AWS lambda directly since that configuration is more similar to how our promote CI works.
+        - If this is to be run in DEV (`main`) you will have to reshape your `envrc.local` to imitate configuration on that stage. See AWS console for Lambda to reference the shape of config.
+        ![lambda configuration panel in aws](../../.images/aws-console-lambda-config.png)
+        - Command line serverless scripts should not be used on PROD. Ideally do not use in VAL either. Running a migration via the AWS lambda console web interface is preferred because it is guaranteed to build off merged code and use similar configuration to how our application is deployed in CI.
 1. Define clear acceptance criteria, this will be re-used.
     - How do you know migration applied? What will be checked either in the app, via api request, or in the reports CSV?
     - Developers will have to verify that the change worked multiple times, basically each time the migration is run on a new environment since the data could be quite different.
