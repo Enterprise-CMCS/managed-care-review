@@ -6,7 +6,7 @@ import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
 import { updateDraftRate } from './updateDraftRate'
 import { must } from '../../testHelpers'
-import { createDraftContractData } from '../../testHelpers/contractHelpers'
+import { createDraftContractData } from '../../testHelpers/contractAndRates/contractHelpers'
 
 describe('submitContract', () => {
     it('creates a submission from a draft', async () => {

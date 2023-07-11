@@ -10,7 +10,7 @@ import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
 import { must } from '../../testHelpers'
-import { createDraftContractData } from '../../testHelpers/contractHelpers'
+import { createDraftContractData } from '../../testHelpers/contractAndRates/contractHelpers'
 
 describe('findContract', () => {
     it('finds a full rate', async () => {

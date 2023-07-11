@@ -4,9 +4,9 @@ import {
     SubmissionType,
     ContractType,
 } from '@prisma/client'
-import { Contract } from './contractType'
-import { contractFormDataToDomainModel } from '../../domain-models/contractRevision'
-import { draftContractRevisionsWithDraftRates } from '../prismaTypes'
+import { Contract } from '../../domain-models/contractAndRates/contractType'
+import { contractFormDataToDomainModel } from '../../domain-models/contractAndRates/contractRevision'
+import { draftContractRevisionsWithDraftRates } from '../prismaHelpers'
 
 type InsertContractArgsType = {
     stateCode: string

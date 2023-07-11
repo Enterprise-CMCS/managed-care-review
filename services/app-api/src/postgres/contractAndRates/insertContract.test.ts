@@ -1,6 +1,6 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { submitContract } from './submitContract'
-import { createDraftContractData } from '../../testHelpers/contractHelpers'
+import { createDraftContractData } from '../../testHelpers/contractAndRates/contractHelpers'
 import { must } from '../../testHelpers'
 import { insertDraftContract } from './insertContract'
 

@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
-import { ContractRevision } from './contractType'
-import { contractFormDataToDomainModel } from '../../domain-models/contractRevision'
-import { draftContractRevisionsWithDraftRates } from '../prismaTypes'
+import { ContractRevision } from '../../domain-models/contractAndRates/contractType'
+import { contractFormDataToDomainModel } from '../../domain-models/contractAndRates/contractRevision'
+import { draftContractRevisionsWithDraftRates } from '../prismaHelpers'
 
 // findDraftContract returns a draft (if any) for the given contract.
 async function findDraftContract(

@@ -1,15 +1,18 @@
 import { RateRevisionTable } from '@prisma/client'
 import {
     PrismaTransactionType,
-    updateInfoIncludeUpdater,
     UpdateInfoTableWithUpdater,
     ContractRevisionTableWithRelations,
 } from '../prismaTypes'
-import { Contract, ContractRevision } from './contractType'
+import {
+    Contract,
+    ContractRevision,
+} from '../../domain-models/contractAndRates/contractType'
 import {
     contractFormDataToDomainModel,
-    convertUpdateInfo,
-} from '../../domain-models/contractRevision'
+    convertUpdateInfoToDomainModel,
+} from '../../domain-models/contractAndRates/contractRevision'
+import { updateInfoIncludeUpdater } from '../prismaHelpers'
 
 // ContractRevisionSet is for the internal building of individual revisions
 // we convert them into ContractRevisions to return them
@@ -127,9 +130,9 @@ async function findContractWithHistory(
         const allRevisions: ContractRevision[] = allRevisionSets.map(
             (entry) => ({
                 id: entry.contractRev.id,
-                submitInfo: convertUpdateInfo(entry.submitInfo),
+                submitInfo: convertUpdateInfoToDomainModel(entry.submitInfo),
                 unlockInfo: entry.unlockInfo
-                    ? convertUpdateInfo(entry.unlockInfo)
+                    ? convertUpdateInfoToDomainModel(entry.unlockInfo)
                     : undefined,
                 createdAt: entry.contractRev.createdAt,
                 updatedAt: entry.contractRev.updatedAt,

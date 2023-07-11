@@ -1,4 +1,4 @@
-import { InsertContractArgsType } from '../postgres/contractAndRates/insertContract'
+import { InsertContractArgsType } from '../../postgres/contractAndRates/insertContract'
 
 const createDraftContractData = (
     contractArgs?: Partial<InsertContractArgsType>

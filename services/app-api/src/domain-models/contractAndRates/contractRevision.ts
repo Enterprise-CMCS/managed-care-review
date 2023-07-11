@@ -1,6 +1,6 @@
-import { ContractFormData } from '../postgres/contractAndRates/contractType'
-import { UpdateInfoTableWithUpdater } from '../postgres/prismaTypes'
-import { UpdateInfoType } from './HealthPlanPackageType'
+import { ContractFormData } from './contractType'
+import { UpdateInfoTableWithUpdater } from '../../postgres/prismaTypes'
+import { UpdateInfoType } from '../HealthPlanPackageType'
 import {
     ActuaryContact,
     ContractDocument,
@@ -105,7 +105,7 @@ function contractFormDataToDomainModel(
     }
 }
 
-function convertUpdateInfo(
+function convertUpdateInfoToDomainModel(
     info: UpdateInfoTableWithUpdater | null
 ): UpdateInfoType | undefined {
     if (!info) {
@@ -119,4 +119,4 @@ function convertUpdateInfo(
     }
 }
 
-export { contractFormDataToDomainModel, convertUpdateInfo }
+export { contractFormDataToDomainModel, convertUpdateInfoToDomainModel }

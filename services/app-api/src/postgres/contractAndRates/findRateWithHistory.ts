@@ -1,14 +1,15 @@
 import { RateRevisionTable, UpdateInfoTable, User } from '@prisma/client'
 import { PrismaTransactionType } from '../prismaTypes'
-import { Rate, RateRevision } from './rateType'
+import {
+    Rate,
+    RateRevision,
+} from '../../domain-models/contractAndRates/rateType'
 import {
     contractFormDataToDomainModel,
-    convertUpdateInfo,
-} from '../../domain-models/contractRevision'
-import {
-    updateInfoIncludeUpdater,
-    ContractRevisionTableWithRelations,
-} from '../prismaTypes'
+    convertUpdateInfoToDomainModel,
+} from '../../domain-models/contractAndRates/contractRevision'
+import { ContractRevisionTableWithRelations } from '../prismaTypes'
+import { updateInfoIncludeUpdater } from '../prismaHelpers'
 
 // this is for the internal building of individual revisions
 // we convert them into RateRevisons to return them
@@ -126,8 +127,10 @@ async function findRateWithHistory(
 
         const allRevisions: RateRevision[] = allEntries.map((entry) => ({
             id: entry.rateRev.id,
-            submitInfo: convertUpdateInfo(entry.submitInfo),
-            unlockInfo: entry.unlockInfo && convertUpdateInfo(entry.unlockInfo),
+            submitInfo: convertUpdateInfoToDomainModel(entry.submitInfo),
+            unlockInfo:
+                entry.unlockInfo &&
+                convertUpdateInfoToDomainModel(entry.unlockInfo),
             revisionFormData: entry.rateRev.name,
             contractRevisions: entry.contractRevs.map((crev) => ({
                 id: crev.id,

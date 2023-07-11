@@ -4,7 +4,7 @@ import {
     PrismaClient,
     SubmissionType,
 } from '@prisma/client'
-import { Contract } from './contractType'
+import { Contract } from '../../domain-models/contractAndRates/contractType'
 import { findContractWithHistory } from './findContractWithHistory'
 
 type UpdateContractArgsType = {

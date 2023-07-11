@@ -1,4 +1,4 @@
-import { UpdateInfoType } from '../../domain-models'
+import { UpdateInfoType } from '../index'
 import { RateRevision } from './rateType'
 import {
     ActuaryCommunicationType,
