@@ -1,17 +1,15 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { submitContract } from './submitContract'
-import { createDraftContractData } from '../../testHelpers/contractAndRates/contractHelpers'
+import {
+    createDraftContractData,
+    getStateRecord,
+} from '../../testHelpers/contractAndRates/contractHelpers'
 import { must } from '../../testHelpers'
 import { insertDraftContract } from './insertContract'
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 
 describe('insertContract', () => {
     it('creates a new draft contract', async () => {
         const client = await sharedTestPrismaClient()
-
-        // submitting before there's a draft should be an error
-        expect(
-            await submitContract(client, '1111', '1111', 'failed submit')
-        ).toBeInstanceOf(Error)
 
         // create a draft contract
         const draftContractData = createDraftContractData()
@@ -42,6 +40,52 @@ describe('insertContract', () => {
                     }),
                 ]),
             })
+        )
+    })
+    it('returns an error when invalid state code is provided', async () => {
+        const client = await sharedTestPrismaClient()
+
+        const draftContractData = createDraftContractData({
+            stateCode: 'CANADA',
+        })
+        const draftContract = await insertDraftContract(
+            client,
+            draftContractData
+        )
+
+        // Expect a prisma error
+        expect(draftContract).toBeInstanceOf(PrismaClientKnownRequestError)
+    })
+    it('increments state number count', async () => {
+        const client = await sharedTestPrismaClient()
+        const contractA = createDraftContractData({
+            stateCode: 'MN',
+        })
+        const contractB = createDraftContractData({
+            stateCode: 'MN',
+        })
+        const initialState = await getStateRecord(client, contractA.stateCode)
+
+        must(await insertDraftContract(client, contractA))
+        const stateAfterInsertContractA = await getStateRecord(
+            client,
+            contractA.stateCode
+        )
+
+        // Expect state record count to be incremented by 1
+        expect(stateAfterInsertContractA.latestStateSubmissionNumber).toEqual(
+            initialState.latestStateSubmissionNumber + 1
+        )
+
+        must(await insertDraftContract(client, contractB))
+        const stateAfterInsertContractB = await getStateRecord(
+            client,
+            contractA.stateCode
+        )
+
+        // Expect state record count to be incremented by 2
+        expect(stateAfterInsertContractB.latestStateSubmissionNumber).toEqual(
+            initialState.latestStateSubmissionNumber + 2
         )
     })
 })
