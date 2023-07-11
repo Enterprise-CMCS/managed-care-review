@@ -1,6 +1,6 @@
-import { ContractFormData } from './contractType'
-import { UpdateInfoTableWithUpdater } from '../../postgres/prismaTypes'
-import { UpdateInfoType } from '../HealthPlanPackageType'
+import { ContractFormData } from '../../domain-models/contractAndRates/contractType'
+import { UpdateInfoTableWithUpdater } from '../prismaTypes'
+import { UpdateInfoType } from '../../domain-models/HealthPlanPackageType'
 import {
     ActuaryContact,
     ContractDocument,
@@ -120,3 +120,4 @@ function convertUpdateInfoToDomainModel(
 }
 
 export { contractFormDataToDomainModel, convertUpdateInfoToDomainModel }
+export type { ContractFormDataType }

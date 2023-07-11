@@ -5,7 +5,7 @@ import {
     ContractType,
 } from '@prisma/client'
 import { Contract } from '../../domain-models/contractAndRates/contractType'
-import { contractFormDataToDomainModel } from '../../domain-models/contractAndRates/contractRevision'
+import { contractFormDataToDomainModel } from './prismaToDomainModel'
 import { draftContractRevisionsWithDraftRates } from '../prismaHelpers'
 
 type InsertContractArgsType = {

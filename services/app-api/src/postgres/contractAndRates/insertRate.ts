@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { Rate } from '../../domain-models/contractAndRates/rateType'
-import { contractFormDataToDomainModel } from '../../domain-models/contractAndRates/contractRevision'
+import { contractFormDataToDomainModel } from './prismaToDomainModel'
 
 type InsertRateArgsType = {
     stateCode: string

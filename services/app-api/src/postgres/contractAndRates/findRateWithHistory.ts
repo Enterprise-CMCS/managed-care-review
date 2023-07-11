@@ -7,7 +7,7 @@ import {
 import {
     contractFormDataToDomainModel,
     convertUpdateInfoToDomainModel,
-} from '../../domain-models/contractAndRates/contractRevision'
+} from './prismaToDomainModel'
 import { ContractRevisionTableWithRelations } from '../prismaTypes'
 import { updateInfoIncludeUpdater } from '../prismaHelpers'
 
