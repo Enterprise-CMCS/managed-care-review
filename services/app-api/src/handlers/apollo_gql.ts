@@ -11,7 +11,7 @@ import {
     APIGatewayProxyHandler,
     Handler,
 } from 'aws-lambda'
-import typeDefs from '../../../app-graphql/src/schema.graphql'
+import typeDefs from '@managed-care-review/app-graphql/src/schema.graphql'
 import { assertIsAuthMode } from '@managed-care-review/common-code/config'
 import { UserType } from '../domain-models'
 import {

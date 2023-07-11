@@ -3,7 +3,7 @@ import {
     isStoreError,
     NewPostgresStore,
 } from '../../postgres'
-import INDEX_USERS from '../../../../app-graphql/src/queries/indexUsers.graphql'
+import INDEX_USERS from '@managed-care-review/app-graphql/src/queries/indexUsers.graphql'
 import { v4 as uuidv4 } from 'uuid'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'

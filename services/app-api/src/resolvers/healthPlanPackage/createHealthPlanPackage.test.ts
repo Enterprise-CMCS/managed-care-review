@@ -1,5 +1,5 @@
 import { CreateHealthPlanPackageInput } from '../../gen/gqlServer'
-import CREATE_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/createHealthPlanPackage.graphql'
+import CREATE_HEALTH_PLAN_PACKAGE from '@managed-care-review/app-graphql/src/mutations/createHealthPlanPackage.graphql'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import { latestFormData } from '../../testHelpers/healthPlanPackageHelpers'
 import { testCMSUser } from '../../testHelpers/userHelpers'

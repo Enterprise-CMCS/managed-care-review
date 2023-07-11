@@ -1,5 +1,5 @@
 import { GraphQLError } from 'graphql'
-import UNLOCK_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
+import UNLOCK_HEALTH_PLAN_PACKAGE from '@managed-care-review/app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
 import { HealthPlanPackage } from '../../gen/gqlServer'
 import { todaysDate } from '../../testHelpers/dateHelpers'
 import {

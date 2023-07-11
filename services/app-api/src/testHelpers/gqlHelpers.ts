@@ -1,13 +1,13 @@
 import { ApolloServer } from 'apollo-server-lambda'
-import CREATE_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/createHealthPlanPackage.graphql'
-import SUBMIT_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/submitHealthPlanPackage.graphql'
-import UNLOCK_HEALTH_PLAN_PACKAGE from 'app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
-import FETCH_HEALTH_PLAN_PACKAGE from 'app-graphql/src/queries/fetchHealthPlanPackage.graphql'
-import UPDATE_HEALTH_PLAN_FORM_DATA from 'app-graphql/src/mutations/updateHealthPlanFormData.graphql'
-import CREATE_QUESTION from 'app-graphql/src/mutations/createQuestion.graphql'
-import INDEX_QUESTIONS from 'app-graphql/src/queries/indexQuestions.graphql'
-import CREATE_QUESTION_RESPONSE from 'app-graphql/src/mutations/createQuestionResponse.graphql'
-import typeDefs from 'app-graphql/src/schema.graphql'
+import CREATE_HEALTH_PLAN_PACKAGE from '@managed-care-review/app-graphql/src/mutations/createHealthPlanPackage.graphql'
+import SUBMIT_HEALTH_PLAN_PACKAGE from '@managed-care-review/app-graphql/src/mutations/submitHealthPlanPackage.graphql'
+import UNLOCK_HEALTH_PLAN_PACKAGE from '@managed-care-review/app-graphql/src/mutations/unlockHealthPlanPackage.graphql'
+import FETCH_HEALTH_PLAN_PACKAGE from '@managed-care-review/app-graphql/src/queries/fetchHealthPlanPackage.graphql'
+import UPDATE_HEALTH_PLAN_FORM_DATA from '@managed-care-review/app-graphql/src/mutations/updateHealthPlanFormData.graphql'
+import CREATE_QUESTION from '@managed-care-review/app-graphql/src/mutations/createQuestion.graphql'
+import INDEX_QUESTIONS from '@managed-care-review/app-graphql/src/queries/indexQuestions.graphql'
+import CREATE_QUESTION_RESPONSE from '@managed-care-review/app-graphql/src/mutations/createQuestionResponse.graphql'
+import typeDefs from '@managed-care-review/app-graphql/src/schema.graphql'
 import {
     HealthPlanFormDataType,
     UnlockedHealthPlanFormDataType,

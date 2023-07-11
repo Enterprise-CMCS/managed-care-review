@@ -1,10 +1,11 @@
 {
-    "name": "app-graphql",
+    "name": "@managed-care-review/app-graphql",
     "version": "1.0.0",
     "description": "app graphql definitions",
     "license": "MIT",
     "scripts": {
-        "generate": "yarn gqlgen",
+        "generate": "yarn build && yarn gqlgen",
+        "build": "tsc",
         "gqlgen": "graphql-codegen",
         "gqlgen:watch": "graphql-codegen --watch",
         "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""
@@ -16,7 +17,8 @@
         "@graphql-codegen/typescript-operations": "^4.0.0",
         "@graphql-codegen/typescript-react-apollo": "^3.2.0",
         "@graphql-codegen/typescript-resolvers": "^3.0.0",
-        "graphql": "^16.2.0"
+        "graphql": "^16.2.0",
+        "typescript": "4.9.5"
     },
     "dependencies": {
         "graphql-tag": "^2.12.6"

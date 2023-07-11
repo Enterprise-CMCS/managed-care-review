@@ -1,4 +1,4 @@
-import INDEX_HEALTH_PLAN_PACKAGES from '../../../../app-graphql/src/queries/indexHealthPlanPackages.graphql'
+import INDEX_HEALTH_PLAN_PACKAGES from '@managed-care-review/app-graphql/src/queries/indexHealthPlanPackages.graphql'
 import {
     constructTestPostgresServer,
     createTestHealthPlanPackage,

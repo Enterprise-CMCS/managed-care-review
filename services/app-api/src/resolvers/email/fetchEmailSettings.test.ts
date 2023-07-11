@@ -1,5 +1,5 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import FETCH_EMAIL_SETTINGS from '../../../../app-graphql/src/queries/fetchEmailSettings.graphql'
+import FETCH_EMAIL_SETTINGS from '@managed-care-review/app-graphql/src/queries/fetchEmailSettings.graphql'
 import {
     testAdminUser,
     testCMSUser,

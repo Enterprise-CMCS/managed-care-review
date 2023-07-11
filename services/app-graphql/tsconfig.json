@@ -1,0 +1,21 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "rootDir": "src",
+
+        "module": "Node16",
+        "lib": ["es2021", "DOM"],
+        "target": "es2021",
+        "moduleResolution": "node",
+
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "preserveConstEnums": true,
+        "sourceMap": false,
+        "skipLibCheck": true,
+        "jsx": "react",
+        "esModuleInterop": true,
+        "resolveJsonModule": true
+    },
+    "exclude": ["src/gen/*"]
+}

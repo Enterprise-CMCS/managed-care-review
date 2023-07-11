@@ -1,4 +1,4 @@
-import FETCH_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/queries/fetchHealthPlanPackage.graphql'
+import FETCH_HEALTH_PLAN_PACKAGE from '@managed-care-review/app-graphql/src/queries/fetchHealthPlanPackage.graphql'
 import { base64ToDomain } from '@managed-care-review/common-code/proto'
 import { todaysDate } from '../../testHelpers/dateHelpers'
 import {

@@ -1,4 +1,4 @@
-import INDEX_QUESTIONS from 'app-graphql/src/queries/indexQuestions.graphql'
+import INDEX_QUESTIONS from '@managed-care-review/app-graphql/src/queries/indexQuestions.graphql'
 import {
     constructTestPostgresServer,
     createAndSubmitTestHealthPlanPackage,

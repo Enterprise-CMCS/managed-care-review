@@ -1,4 +1,4 @@
-import CREATE_QUESTION from 'app-graphql/src/mutations/createQuestion.graphql'
+import CREATE_QUESTION from '@managed-care-review/app-graphql/src/mutations/createQuestion.graphql'
 import {
     constructTestPostgresServer,
     createAndSubmitTestHealthPlanPackage,

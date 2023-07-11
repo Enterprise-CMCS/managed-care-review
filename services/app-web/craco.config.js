@@ -5,6 +5,7 @@ const { compilerOptions } = require('../../tsconfig.json');
 
 const packages = [];
 packages.push(path.join(__dirname, '../../lib/common-code'));
+packages.push(path.join(__dirname, '../app-graphql'));
 
 module.exports = {
     jest: {

@@ -1,4 +1,4 @@
-import SUBMIT_HEALTH_PLAN_PACKAGE from '../../../../app-graphql/src/mutations/submitHealthPlanPackage.graphql'
+import SUBMIT_HEALTH_PLAN_PACKAGE from '@managed-care-review/app-graphql/src/mutations/submitHealthPlanPackage.graphql'
 import {
     constructTestPostgresServer,
     createAndUpdateTestHealthPlanPackage,

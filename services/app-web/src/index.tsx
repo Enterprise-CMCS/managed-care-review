@@ -2,7 +2,7 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
 import { Amplify } from 'aws-amplify'
-import { loader } from 'graphql.macro'
+import { typeDefs } from '@managed-care-review/app-graphql/src/gen/graphql.gen'
 
 import './index.scss'
 
@@ -13,8 +13,6 @@ import { assertIsAuthMode } from '@managed-care-review/common-code/config'
 import { S3ClientT, newAmplifyS3Client, newLocalS3Client } from './s3'
 import { asyncWithLDProvider } from 'launchdarkly-react-client-sdk'
 import type { S3BucketConfigType } from './s3/s3Amplify'
-
-const gqlSchema = loader('../../app-web/src/gen/schema.graphql')
 
 // We are using Amplify for communicating with Cognito, for now.
 Amplify.configure({
@@ -63,7 +61,7 @@ const apolloClient = new ApolloClient({
             Submission: ['DraftSubmission', 'StateSubmission'],
         },
     }),
-    typeDefs: gqlSchema,
+    typeDefs: typeDefs,
 })
 
 // S3 Region and LocalUrl are mutually exclusive.

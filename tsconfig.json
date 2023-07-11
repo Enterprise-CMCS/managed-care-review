@@ -2,7 +2,8 @@
     "compilerOptions": {
         "baseUrl": ".",
         "paths": {
-            "@managed-care-review/common-code/*": ["lib/common-code/src"]
+            "@managed-care-review/common-code/*": ["lib/common-code/src"],
+            "@managed-care-review/app-graphql/*": ["services/app-graphql"]
         },
         "module": "esnext",
         "forceConsistentCasingInFileNames": true,

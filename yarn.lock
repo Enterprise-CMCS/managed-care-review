@@ -10472,7 +10472,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/parser@npm:^7.1.0, @babel/parser@npm:^7.1.6, @babel/parser@npm:^7.12.11, @babel/parser@npm:^7.12.7, @babel/parser@npm:^7.14.0, @babel/parser@npm:^7.14.7, @babel/parser@npm:^7.16.8, @babel/parser@npm:^7.18.10, @babel/parser@npm:^7.18.11":
+"@babel/parser@npm:^7.1.0, @babel/parser@npm:^7.12.11, @babel/parser@npm:^7.12.7, @babel/parser@npm:^7.14.0, @babel/parser@npm:^7.14.7, @babel/parser@npm:^7.16.8, @babel/parser@npm:^7.18.10, @babel/parser@npm:^7.18.11":
   version: 7.18.11
   resolution: "@babel/parser@npm:7.18.11"
   bin:
@@ -11669,7 +11669,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.10.2, @babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.12.0, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.14.6, @babel/runtime@npm:^7.15.4, @babel/runtime@npm:^7.16.3, @babel/runtime@npm:^7.17.8, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.5.0, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.7.2, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
+"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.10.2, @babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.12.0, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.14.6, @babel/runtime@npm:^7.15.4, @babel/runtime@npm:^7.16.3, @babel/runtime@npm:^7.17.8, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.5.0, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.8.7, @babel/runtime@npm:^7.9.2":
   version: 7.19.0
   resolution: "@babel/runtime@npm:7.19.0"
   dependencies:
@@ -11678,7 +11678,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/template@npm:^7.12.7, @babel/template@npm:^7.18.10, @babel/template@npm:^7.18.6, @babel/template@npm:^7.3.3, @babel/template@npm:^7.4.4":
+"@babel/template@npm:^7.12.7, @babel/template@npm:^7.18.10, @babel/template@npm:^7.18.6, @babel/template@npm:^7.3.3":
   version: 7.18.10
   resolution: "@babel/template@npm:7.18.10"
   dependencies:
@@ -11736,7 +11736,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/types@npm:^7.0.0, @babel/types@npm:^7.1.6, @babel/types@npm:^7.12.11, @babel/types@npm:^7.12.6, @babel/types@npm:^7.12.7, @babel/types@npm:^7.16.8, @babel/types@npm:^7.18.10, @babel/types@npm:^7.18.13, @babel/types@npm:^7.18.6, @babel/types@npm:^7.18.9, @babel/types@npm:^7.2.0, @babel/types@npm:^7.20.7, @babel/types@npm:^7.3.0, @babel/types@npm:^7.3.3, @babel/types@npm:^7.4.4":
+"@babel/types@npm:^7.0.0, @babel/types@npm:^7.12.11, @babel/types@npm:^7.12.6, @babel/types@npm:^7.12.7, @babel/types@npm:^7.16.8, @babel/types@npm:^7.18.10, @babel/types@npm:^7.18.13, @babel/types@npm:^7.18.6, @babel/types@npm:^7.18.9, @babel/types@npm:^7.2.0, @babel/types@npm:^7.20.7, @babel/types@npm:^7.3.0, @babel/types@npm:^7.3.3, @babel/types@npm:^7.4.4":
   version: 7.20.7
   resolution: "@babel/types@npm:7.20.7"
   dependencies:
@@ -14370,6 +14370,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@managed-care-review/app-graphql@workspace:^, @managed-care-review/app-graphql@workspace:services/app-graphql":
+  version: 0.0.0-use.local
+  resolution: "@managed-care-review/app-graphql@workspace:services/app-graphql"
+  dependencies:
+    "@graphql-codegen/cli": ^2.2.2
+    "@graphql-codegen/introspection": ^3.0.1
+    "@graphql-codegen/typescript": ^3.0.2
+    "@graphql-codegen/typescript-operations": ^4.0.0
+    "@graphql-codegen/typescript-react-apollo": ^3.2.0
+    "@graphql-codegen/typescript-resolvers": ^3.0.0
+    graphql: ^16.2.0
+    graphql-tag: ^2.12.6
+    typescript: 4.9.5
+  languageName: unknown
+  linkType: soft
+
 "@managed-care-review/app-proto@workspace:^, @managed-care-review/app-proto@workspace:services/app-proto":
   version: 0.0.0-use.local
   resolution: "@managed-care-review/app-proto@workspace:services/app-proto"
@@ -14394,6 +14410,7 @@ __metadata:
     "@craco/craco": ^7.1.0
     "@cypress/code-coverage": ^3.10.0
     "@cypress/instrument-cra": ^1.4.0
+    "@managed-care-review/app-graphql": "workspace:^"
     "@managed-care-review/common-code": "workspace:^"
     "@opentelemetry/api": ^1.3.0
     "@opentelemetry/auto-instrumentations-web": ^0.31.1
@@ -14446,7 +14463,6 @@ __metadata:
     eslint-plugin-react-hooks: ^4.3.0
     formik: ^2.2.9
     graphql: ^16.2.0
-    graphql.macro: ^1.4.2
     jest-launchdarkly-mock: ^1.0.6
     jest-mock: ^27.5.1
     jotai: ^1.13.0
@@ -21774,6 +21790,7 @@ __metadata:
     "@aws-sdk/lib-storage": ^3.226.0
     "@glen/jest-raw-loader": ^2.0.0
     "@luckycatfactory/esbuild-graphql-loader": ^3.8.1
+    "@managed-care-review/app-graphql": "workspace:^"
     "@managed-care-review/common-code": "workspace:^"
     "@opentelemetry/api": ^1.3.0
     "@opentelemetry/auto-instrumentations-node": ^0.36.3
@@ -21844,21 +21861,6 @@ __metadata:
     webpack: ^5.88.1
     webpack-node-externals: ^3.0.0
     zod: ^3.11.6
-  languageName: unknown
-  linkType: soft
-
-"app-graphql@workspace:services/app-graphql":
-  version: 0.0.0-use.local
-  resolution: "app-graphql@workspace:services/app-graphql"
-  dependencies:
-    "@graphql-codegen/cli": ^2.2.2
-    "@graphql-codegen/introspection": ^3.0.1
-    "@graphql-codegen/typescript": ^3.0.2
-    "@graphql-codegen/typescript-operations": ^4.0.0
-    "@graphql-codegen/typescript-react-apollo": ^3.2.0
-    "@graphql-codegen/typescript-resolvers": ^3.0.0
-    graphql: ^16.2.0
-    graphql-tag: ^2.12.6
   languageName: unknown
   linkType: soft
 
@@ -22590,19 +22592,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-literal-to-ast@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "babel-literal-to-ast@npm:2.1.0"
-  dependencies:
-    "@babel/parser": ^7.1.6
-    "@babel/traverse": ^7.1.6
-    "@babel/types": ^7.1.6
-  peerDependencies:
-    "@babel/core": ^7.1.2
-  checksum: 19eccc9744dccf06e3a34314413cbf1ab4b2e79fbfbd25a13ff3f105dc66a350db5f91c966e88efa6728cb9570e76503c9c2940334a9e426df634da0635b13cd
-  languageName: node
-  linkType: hard
-
 "babel-loader@npm:^8.0.0, babel-loader@npm:^8.2.3":
   version: 8.2.5
   resolution: "babel-loader@npm:8.2.5"
@@ -22690,17 +22679,6 @@ __metadata:
     "@types/babel__core": ^7.0.0
     "@types/babel__traverse": ^7.0.6
   checksum: 709c17727aa8fd3be755d256fb514bf945a5c2ea6017f037d80280fc44ae5fe7dfeebf63d8412df53796455c2c216119d628d8cc90b099434fd819005943d058
-  languageName: node
-  linkType: hard
-
-"babel-plugin-macros@npm:^2.5.0":
-  version: 2.8.0
-  resolution: "babel-plugin-macros@npm:2.8.0"
-  dependencies:
-    "@babel/runtime": ^7.7.2
-    cosmiconfig: ^6.0.0
-    resolve: ^1.12.0
-  checksum: 59b09a21cf3ae1e14186c1b021917d004b49b953824b24953a54c6502da79e8051d4ac31cfd4a0ae7f6ea5ddf1f7edd93df4895dd3c3982a5b2431859c2889ac
   languageName: node
   linkType: hard
 
@@ -30064,7 +30042,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graphql-tag@npm:^2.10.1, graphql-tag@npm:^2.11.0, graphql-tag@npm:^2.12.6":
+"graphql-tag@npm:^2.11.0, graphql-tag@npm:^2.12.6":
   version: 2.12.6
   resolution: "graphql-tag@npm:2.12.6"
   dependencies:
@@ -30090,18 +30068,6 @@ __metadata:
   peerDependencies:
     graphql: ">=0.11 <=16"
   checksum: 75ea80702fa027b8d4ff1faba9824b11184fef0946560c535040b79f0f7f56ac7ce42873ea3b34083373ddf3a439cda1e7b7bfae20939ab739330456f4e7776b
-  languageName: node
-  linkType: hard
-
-"graphql.macro@npm:^1.4.2":
-  version: 1.4.2
-  resolution: "graphql.macro@npm:1.4.2"
-  dependencies:
-    "@babel/template": ^7.4.4
-    babel-literal-to-ast: ^2.1.0
-    babel-plugin-macros: ^2.5.0
-    graphql-tag: ^2.10.1
-  checksum: a9cf5e3c1af0bda23c2f2d4b053752f94008f3e3c3c84b854bcb66226febe29416ab7199344e71c5fe2a8dad3df35b20adbb95439b81e429daadd27947327657
   languageName: node
   linkType: hard
 
@@ -40292,7 +40258,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"resolve@npm:^1.1.6, resolve@npm:^1.1.7, resolve@npm:^1.10.0, resolve@npm:^1.12.0, resolve@npm:^1.14.2, resolve@npm:^1.19.0, resolve@npm:^1.20.0, resolve@npm:^1.22.0, resolve@npm:^1.22.1, resolve@npm:^1.3.2":
+"resolve@npm:^1.1.6, resolve@npm:^1.1.7, resolve@npm:^1.10.0, resolve@npm:^1.14.2, resolve@npm:^1.19.0, resolve@npm:^1.20.0, resolve@npm:^1.22.0, resolve@npm:^1.22.1, resolve@npm:^1.3.2":
   version: 1.22.1
   resolution: "resolve@npm:1.22.1"
   dependencies:
@@ -40318,7 +40284,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"resolve@patch:resolve@^1.1.6#~builtin<compat/resolve>, resolve@patch:resolve@^1.1.7#~builtin<compat/resolve>, resolve@patch:resolve@^1.10.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.12.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.14.2#~builtin<compat/resolve>, resolve@patch:resolve@^1.19.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.20.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.22.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.22.1#~builtin<compat/resolve>, resolve@patch:resolve@^1.3.2#~builtin<compat/resolve>":
+"resolve@patch:resolve@^1.1.6#~builtin<compat/resolve>, resolve@patch:resolve@^1.1.7#~builtin<compat/resolve>, resolve@patch:resolve@^1.10.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.14.2#~builtin<compat/resolve>, resolve@patch:resolve@^1.19.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.20.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.22.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.22.1#~builtin<compat/resolve>, resolve@patch:resolve@^1.3.2#~builtin<compat/resolve>":
   version: 1.22.1
   resolution: "resolve@patch:resolve@npm%3A1.22.1#~builtin<compat/resolve>::version=1.22.1&hash=c3c19d"
   dependencies:

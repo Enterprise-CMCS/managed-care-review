@@ -1,5 +1,5 @@
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import UPDATE_CMS_USER from '../../../../app-graphql/src/mutations/updateCMSUser.graphql'
+import UPDATE_CMS_USER from '@managed-care-review/app-graphql/src/mutations/updateCMSUser.graphql'
 import {
     InsertUserArgsType,
     isStoreError,

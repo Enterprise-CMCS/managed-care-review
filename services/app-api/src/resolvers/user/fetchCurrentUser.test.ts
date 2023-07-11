@@ -1,8 +1,8 @@
 import { Context } from '../../handlers/apollo_gql'
 
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
-import FETCH_CURRENT_USER from '../../../../app-graphql/src/queries/fetchCurrentUser.graphql'
 import { testStateUser } from '../../testHelpers/userHelpers'
+import FETCH_CURRENT_USER from '@managed-care-review/app-graphql/src/queries/fetchCurrentUser.graphql'
 
 describe('currentUser', () => {
     it('returns the currentUser', async () => {

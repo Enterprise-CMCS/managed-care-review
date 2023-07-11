@@ -4,7 +4,7 @@ import {
     createAndUpdateTestHealthPlanPackage,
     createTestHealthPlanPackage,
 } from '../../testHelpers/gqlHelpers'
-import UPDATE_HEALTH_PLAN_FORM_DATA from '../../../../app-graphql/src/mutations/updateHealthPlanFormData.graphql'
+import UPDATE_HEALTH_PLAN_FORM_DATA from '@managed-care-review/app-graphql/src/mutations/updateHealthPlanFormData.graphql'
 import {
     base64ToDomain,
     domainToBase64,
