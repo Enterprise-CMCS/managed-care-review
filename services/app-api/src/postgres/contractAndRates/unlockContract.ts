@@ -67,6 +67,9 @@ async function unlockContract(
                     submissionType: currentRev.submissionType,
                     submissionDescription: currentRev.submissionDescription,
                     contractType: currentRev.contractType,
+                    populationCovered: currentRev.populationCovered,
+                    programIDs: currentRev.programIDs,
+                    riskBasedContract: currentRev.riskBasedContract,
                     unlockInfo: {
                         create: {
                             updatedAt: groupTime,
