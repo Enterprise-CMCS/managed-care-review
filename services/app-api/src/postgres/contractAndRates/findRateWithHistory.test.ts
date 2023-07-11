@@ -10,6 +10,7 @@ import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
 import { must } from '../../testHelpers'
+import { createDraftContractData } from '../../testHelpers/contractAndRates/contractHelpers'
 
 describe('findContract', () => {
     it('finds a full rate', async () => {
@@ -37,14 +38,11 @@ describe('findContract', () => {
         })
 
         // setup a couple test contracts
+        const draftContractData = createDraftContractData({
+            submissionDescription: 'one contract',
+        })
         const contractA = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionType: 'CONTRACT_AND_RATES',
-                submissionDescription: 'one contract',
-                contractType: 'BASE',
-                programIDs: [],
-            })
+            await insertDraftContract(client, draftContractData)
         )
         must(
             await submitContract(
@@ -130,6 +128,10 @@ describe('findContract', () => {
                 {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'a.1 body',
+                    contractType: 'BASE',
+                    programIDs: ['PMAP'],
+                    populationCovered: 'MEDICAID',
+                    riskBasedContract: false,
                 },
                 [rate1.id, rate3.id]
             )
@@ -159,6 +161,10 @@ describe('findContract', () => {
                 {
                     submissionType: 'CONTRACT_AND_RATES',
                     submissionDescription: 'a.2 body',
+                    contractType: 'BASE',
+                    programIDs: ['PMAP'],
+                    populationCovered: 'MEDICAID',
+                    riskBasedContract: false,
                 },
                 [rate3.id]
             )
@@ -191,16 +197,34 @@ describe('findContract', () => {
         expect(revisions[0].contractRevisions).toHaveLength(1)
         expect(
             revisions[0].contractRevisions &&
-                revisions[0].contractRevisions[0].contractFormData
-        ).toBe('one contract')
+                revisions[0].contractRevisions[0].formData
+        ).toEqual(
+            expect.objectContaining({
+                submissionType: 'CONTRACT_AND_RATES',
+                submissionDescription: 'one contract',
+                contractType: 'BASE',
+                programIDs: ['PMAP'],
+                populationCovered: 'MEDICAID',
+                riskBasedContract: false,
+            })
+        )
         expect(revisions[0].submitInfo?.updatedReason).toBe('Rate Submit')
         expect(revisions[0].unlockInfo).toBeUndefined()
 
         expect(revisions[1].contractRevisions).toHaveLength(1)
         expect(
             revisions[1].contractRevisions &&
-                revisions[1].contractRevisions[0].contractFormData
-        ).toBe('one contract')
+                revisions[1].contractRevisions[0].formData
+        ).toEqual(
+            expect.objectContaining({
+                submissionType: 'CONTRACT_AND_RATES',
+                submissionDescription: 'one contract',
+                contractType: 'BASE',
+                programIDs: ['PMAP'],
+                populationCovered: 'MEDICAID',
+                riskBasedContract: false,
+            })
+        )
         expect(revisions[1].submitInfo?.updatedReason).toBe('1.1 new name')
         expect(revisions[1].unlockInfo?.updatedReason).toBe('unlock for 1.1')
         expect(revisions[1].unlockInfo?.updatedBy).toBe('zuko@example.com')
@@ -208,8 +232,17 @@ describe('findContract', () => {
         expect(revisions[2].contractRevisions).toHaveLength(1)
         expect(
             revisions[2].contractRevisions &&
-                revisions[2].contractRevisions[0].contractFormData
-        ).toBe('a.1 body')
+                revisions[2].contractRevisions[0].formData
+        ).toEqual(
+            expect.objectContaining({
+                submissionType: 'CONTRACT_AND_RATES',
+                submissionDescription: 'a.1 body',
+                contractType: 'BASE',
+                programIDs: ['PMAP'],
+                populationCovered: 'MEDICAID',
+                riskBasedContract: false,
+            })
+        )
         expect(revisions[2].submitInfo?.updatedReason).toBe('Submitting A.1')
         expect(revisions[2].unlockInfo?.updatedReason).toBe('unlocking A.0')
         expect(revisions[2].unlockInfo?.updatedBy).toBe('zuko@example.com')

@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client'
-import { RateRevision } from './rateType'
+import { RateRevision } from '../../domain-models/contractAndRates/rateType'
+import { contractFormDataToDomainModel } from './prismaToDomainModel'
+import { updateInfoIncludeUpdater } from '../prismaHelpers'
 
 // findDraftRate returns a draft (if any) for the given contract.
 async function findDraftRate(
@@ -13,14 +15,23 @@ async function findDraftRate(
                 submitInfo: null,
             },
             include: {
-                submitInfo: true,
-                unlockInfo: true,
+                submitInfo: updateInfoIncludeUpdater,
+                unlockInfo: updateInfoIncludeUpdater,
                 draftContracts: {
                     include: {
                         revisions: {
                             include: {
-                                submitInfo: true,
-                                unlockInfo: true,
+                                submitInfo: updateInfoIncludeUpdater,
+                                unlockInfo: updateInfoIncludeUpdater,
+                                stateContacts: true,
+                                addtlActuaryContacts: true,
+                                contractDocuments: true,
+                                supportingDocuments: true,
+                                rateRevisions: {
+                                    include: {
+                                        rateRevision: true,
+                                    },
+                                },
                             },
                             where: {
                                 submitInfoID: { not: null },
@@ -45,8 +56,13 @@ async function findDraftRate(
 
             contractRevisions: draftRate.draftContracts.map((dc) => ({
                 id: dc.revisions[0].id,
-                contractFormData: dc.revisions[0].submissionDescription ?? '',
-                rateRevisions: [],
+                createdAt: dc.revisions[0].createdAt,
+                updatedAt: dc.revisions[0].updatedAt,
+                formData: contractFormDataToDomainModel(dc.revisions[0]),
+                rateRevisions: dc.revisions[0].rateRevisions.map((rr) => ({
+                    id: rr.rateRevisionID,
+                    revisionFormData: rr.rateRevision.name,
+                })),
             })),
         }
 

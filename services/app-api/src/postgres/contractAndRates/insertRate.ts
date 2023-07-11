@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client'
-import { Rate } from './rateType'
+import { Rate } from '../../domain-models/contractAndRates/rateType'
+import { contractFormDataToDomainModel } from './prismaToDomainModel'
 
 type InsertRateArgsType = {
     stateCode: string
@@ -9,7 +10,7 @@ type InsertRateArgsType = {
 // creates a new contract, with a new revision
 async function insertDraftRate(
     client: PrismaClient,
-    formData: InsertRateArgsType
+    args: InsertRateArgsType
 ): Promise<Rate | Error> {
     try {
         return await client.$transaction(async (tx) => {
@@ -20,17 +21,17 @@ async function insertDraftRate(
                     },
                 },
                 where: {
-                    stateCode: formData.stateCode,
+                    stateCode: args.stateCode,
                 },
             })
 
             const rate = await tx.rateTable.create({
                 data: {
-                    stateCode: formData.stateCode,
+                    stateCode: args.stateCode,
                     stateNumber: latestStateRateCertNumber,
                     revisions: {
                         create: {
-                            name: formData.name,
+                            name: args.name,
                         },
                     },
                 },
@@ -39,7 +40,19 @@ async function insertDraftRate(
                         include: {
                             contractRevisions: {
                                 include: {
-                                    contractRevision: true,
+                                    contractRevision: {
+                                        include: {
+                                            rateRevisions: {
+                                                include: {
+                                                    rateRevision: true,
+                                                },
+                                            },
+                                            stateContacts: true,
+                                            addtlActuaryContacts: true,
+                                            contractDocuments: true,
+                                            supportingDocuments: true,
+                                        },
+                                    },
                                 },
                             },
                         },
@@ -52,11 +65,21 @@ async function insertDraftRate(
                 revisions: rate.revisions.map((rr) => ({
                     id: rr.id,
                     revisionFormData: rr.name,
-                    contractRevisions: rr.contractRevisions.map((cr) => ({
-                        id: cr.rateRevisionID,
-                        contractFormData: cr.contractRevision.submissionType,
-                        rateRevisions: [],
-                    })),
+                    contractRevisions: rr.contractRevisions.map(
+                        ({ contractRevision }) => ({
+                            id: contractRevision.id,
+                            createdAt: contractRevision.createdAt,
+                            updatedAt: contractRevision.updatedAt,
+                            formData:
+                                contractFormDataToDomainModel(contractRevision),
+                            rateRevisions: contractRevision.rateRevisions.map(
+                                (rr) => ({
+                                    id: rr.rateRevisionID,
+                                    revisionFormData: rr.rateRevision.name,
+                                })
+                            ),
+                        })
+                    ),
                 })),
             }
         })

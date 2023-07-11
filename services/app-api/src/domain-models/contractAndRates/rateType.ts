@@ -1,4 +1,4 @@
-import { UpdateInfoType } from '../../domain-models'
+import { UpdateInfoType } from '../index'
 import { ContractRevision } from './contractType'
 
 // Rate represents the rate specific information in a submission package

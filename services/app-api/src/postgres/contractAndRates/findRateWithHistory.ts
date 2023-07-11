@@ -1,26 +1,15 @@
-import {
-    ContractRevisionTable,
-    RateRevisionTable,
-    UpdateInfoTable,
-    User,
-} from '@prisma/client'
-import { UpdateInfoType } from '../../domain-models'
+import { RateRevisionTable, UpdateInfoTable, User } from '@prisma/client'
 import { PrismaTransactionType } from '../prismaTypes'
-import { Rate, RateRevision } from './rateType'
-
-function convertUpdateInfo(
-    info: (UpdateInfoTable & { updatedBy: User }) | null
-): UpdateInfoType | undefined {
-    if (!info) {
-        return undefined
-    }
-
-    return {
-        updatedAt: info.updatedAt,
-        updatedBy: info.updatedBy.email,
-        updatedReason: info.updatedReason,
-    }
-}
+import {
+    Rate,
+    RateRevision,
+} from '../../domain-models/contractAndRates/rateType'
+import {
+    contractFormDataToDomainModel,
+    convertUpdateInfoToDomainModel,
+} from './prismaToDomainModel'
+import { ContractRevisionTableWithRelations } from '../prismaTypes'
+import { updateInfoIncludeUpdater } from '../prismaHelpers'
 
 // this is for the internal building of individual revisions
 // we convert them into RateRevisons to return them
@@ -28,7 +17,7 @@ interface RateRevisionSet {
     rateRev: RateRevisionTable
     submitInfo: UpdateInfoTable & { updatedBy: User }
     unlockInfo: (UpdateInfoTable & { updatedBy: User }) | undefined
-    contractRevs: ContractRevisionTable[]
+    contractRevs: ContractRevisionTableWithRelations[]
 }
 
 async function findRateWithHistory(
@@ -44,28 +33,21 @@ async function findRateWithHistory(
                 createdAt: 'asc',
             },
             include: {
-                submitInfo: {
-                    include: {
-                        updatedBy: true,
-                    },
-                },
-                unlockInfo: {
-                    include: {
-                        updatedBy: true,
-                    },
-                },
+                submitInfo: updateInfoIncludeUpdater,
+                unlockInfo: updateInfoIncludeUpdater,
                 contractRevisions: {
                     include: {
                         contractRevision: {
                             include: {
-                                submitInfo: {
+                                submitInfo: updateInfoIncludeUpdater,
+                                unlockInfo: updateInfoIncludeUpdater,
+                                stateContacts: true,
+                                addtlActuaryContacts: true,
+                                contractDocuments: true,
+                                supportingDocuments: true,
+                                rateRevisions: {
                                     include: {
-                                        updatedBy: true,
-                                    },
-                                },
-                                unlockInfo: {
-                                    include: {
-                                        updatedBy: true,
+                                        rateRevision: true,
                                     },
                                 },
                             },
@@ -145,13 +127,20 @@ async function findRateWithHistory(
 
         const allRevisions: RateRevision[] = allEntries.map((entry) => ({
             id: entry.rateRev.id,
-            submitInfo: convertUpdateInfo(entry.submitInfo),
-            unlockInfo: entry.unlockInfo && convertUpdateInfo(entry.unlockInfo),
+            submitInfo: convertUpdateInfoToDomainModel(entry.submitInfo),
+            unlockInfo:
+                entry.unlockInfo &&
+                convertUpdateInfoToDomainModel(entry.unlockInfo),
             revisionFormData: entry.rateRev.name,
             contractRevisions: entry.contractRevs.map((crev) => ({
                 id: crev.id,
-                contractFormData: crev.submissionDescription ?? '',
-                rateRevisions: [],
+                createdAt: crev.createdAt,
+                updatedAt: crev.updatedAt,
+                formData: contractFormDataToDomainModel(crev),
+                rateRevisions: crev.rateRevisions.map((rr) => ({
+                    id: rr.rateRevisionID,
+                    revisionFormData: rr.rateRevision.name,
+                })),
             })),
         }))
 

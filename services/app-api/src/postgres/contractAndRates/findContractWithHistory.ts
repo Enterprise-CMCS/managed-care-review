@@ -1,30 +1,23 @@
-import { ContractRevisionTable, RateRevisionTable } from '@prisma/client'
-import { UpdateInfoType } from '../../domain-models'
+import { RateRevisionTable } from '@prisma/client'
 import {
     PrismaTransactionType,
-    updateInfoIncludeUpdater,
     UpdateInfoTableWithUpdater,
+    ContractRevisionTableWithRelations,
 } from '../prismaTypes'
-import { Contract, ContractRevision } from './contractType'
-
-function convertUpdateInfo(
-    info: UpdateInfoTableWithUpdater | null
-): UpdateInfoType | undefined {
-    if (!info) {
-        return undefined
-    }
-
-    return {
-        updatedAt: info.updatedAt,
-        updatedBy: info.updatedBy.email,
-        updatedReason: info.updatedReason,
-    }
-}
+import {
+    Contract,
+    ContractRevision,
+} from '../../domain-models/contractAndRates/contractType'
+import {
+    contractFormDataToDomainModel,
+    convertUpdateInfoToDomainModel,
+} from './prismaToDomainModel'
+import { updateInfoIncludeUpdater } from '../prismaHelpers'
 
 // ContractRevisionSet is for the internal building of individual revisions
 // we convert them into ContractRevisions to return them
 interface ContractRevisionSet {
-    contractRev: ContractRevisionTable
+    contractRev: ContractRevisionTableWithRelations
     submitInfo: UpdateInfoTableWithUpdater
     unlockInfo: UpdateInfoTableWithUpdater | undefined
     rateRevs: RateRevisionTable[]
@@ -62,6 +55,11 @@ async function findContractWithHistory(
                         validAfter: 'asc',
                     },
                 },
+                stateContacts: true,
+                addtlActuaryContacts: true,
+                contractDocuments: true,
+                supportingDocuments: true,
+                contract: true,
             },
         })
 
@@ -132,11 +130,13 @@ async function findContractWithHistory(
         const allRevisions: ContractRevision[] = allRevisionSets.map(
             (entry) => ({
                 id: entry.contractRev.id,
-                submitInfo: convertUpdateInfo(entry.submitInfo),
+                submitInfo: convertUpdateInfoToDomainModel(entry.submitInfo),
                 unlockInfo: entry.unlockInfo
-                    ? convertUpdateInfo(entry.unlockInfo)
+                    ? convertUpdateInfoToDomainModel(entry.unlockInfo)
                     : undefined,
-                contractFormData: entry.contractRev.submissionDescription ?? '',
+                createdAt: entry.contractRev.createdAt,
+                updatedAt: entry.contractRev.updatedAt,
+                formData: contractFormDataToDomainModel(entry.contractRev),
                 rateRevisions: entry.rateRevs.map((rrev) => ({
                     id: rrev.id,
                     revisionFormData: rrev.name,
@@ -146,6 +146,9 @@ async function findContractWithHistory(
 
         return {
             id: contractID,
+            status: 'SUBMITTED',
+            stateCode: contractRevisions[0].contract.stateCode,
+            stateNumber: contractRevisions[0].contract.stateNumber,
             revisions: allRevisions.reverse(),
         }
     } catch (err) {

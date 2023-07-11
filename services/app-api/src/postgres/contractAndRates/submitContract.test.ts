@@ -6,6 +6,7 @@ import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
 import { updateDraftRate } from './updateDraftRate'
 import { must } from '../../testHelpers'
+import { createDraftContractData } from '../../testHelpers/contractAndRates/contractHelpers'
 
 describe('submitContract', () => {
     it('creates a submission from a draft', async () => {
@@ -28,14 +29,11 @@ describe('submitContract', () => {
         ).toBeInstanceOf(Error)
 
         // create a draft contract
+        const draftContractData = createDraftContractData({
+            submissionDescription: 'one contract',
+        })
         const contractA = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionType: 'CONTRACT_AND_RATES',
-                submissionDescription: 'one contract',
-                contractType: 'BASE',
-                programIDs: [],
-            })
+            await insertDraftContract(client, draftContractData)
         )
         // submit the draft contract
         const result = must(
@@ -49,6 +47,21 @@ describe('submitContract', () => {
         expect(result.revisions[0].submitInfo?.updatedReason).toBe(
             'initial submit'
         )
+
+        //Expect contract form data to be what was inserted
+        expect(result.revisions[0]).toEqual(
+            expect.objectContaining({
+                formData: expect.objectContaining({
+                    submissionType: 'CONTRACT_AND_RATES',
+                    submissionDescription: 'one contract',
+                    contractType: 'BASE',
+                    programIDs: ['PMAP'],
+                    populationCovered: 'MEDICAID',
+                    riskBasedContract: false,
+                }),
+            })
+        )
+
         // resubmitting should be an error
         expect(
             await submitContract(
@@ -77,14 +90,11 @@ describe('submitContract', () => {
         )
 
         // create a draft contract
+        const draftContractData = createDraftContractData({
+            submissionDescription: 'first contract',
+        })
         const contractA = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionType: 'CONTRACT_AND_RATES',
-                submissionDescription: 'first contract',
-                contractType: 'BASE',
-                programIDs: [],
-            })
+            await insertDraftContract(client, draftContractData)
         )
 
         // create a draft rate
@@ -132,7 +142,6 @@ describe('submitContract', () => {
                 data: {
                     revisions: {
                         create: {
-                            id: uuidv4(),
                             submissionType: 'CONTRACT_AND_RATES',
                             submissionDescription: 'second contract revision',
                             contractType: 'BASE',
@@ -183,14 +192,11 @@ describe('submitContract', () => {
             },
         })
 
+        const draftContractData = createDraftContractData({
+            submissionDescription: 'one contract',
+        })
         const contractA = must(
-            await insertDraftContract(client, {
-                stateCode: 'MN',
-                submissionType: 'CONTRACT_AND_RATES',
-                submissionDescription: 'one contract',
-                contractType: 'BASE',
-                programIDs: [],
-            })
+            await insertDraftContract(client, draftContractData)
         )
 
         // Attempt to submit a rate related to this draft contract

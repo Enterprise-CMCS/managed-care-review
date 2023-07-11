@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { Contract } from './contractType'
+import { Contract } from '../../domain-models/contractAndRates/contractType'
 import { findContractWithHistory } from './findContractWithHistory'
 
 // Unlock the given contract
@@ -67,6 +67,9 @@ async function unlockContract(
                     submissionType: currentRev.submissionType,
                     submissionDescription: currentRev.submissionDescription,
                     contractType: currentRev.contractType,
+                    populationCovered: currentRev.populationCovered,
+                    programIDs: currentRev.programIDs,
+                    riskBasedContract: currentRev.riskBasedContract,
                     unlockInfo: {
                         create: {
                             updatedAt: groupTime,

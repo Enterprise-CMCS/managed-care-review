@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { findRateWithHistory } from './findRateWithHistory'
-import { Rate } from './rateType'
+import { Rate } from '../../domain-models/contractAndRates/rateType'
 
 // Update the given revision
 // * invalidate relationships of previous revision
