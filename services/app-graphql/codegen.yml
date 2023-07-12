@@ -6,7 +6,7 @@ hooks:
     - cp src/schema.graphql ../app-web/src/gen/ && echo "HI"
     - cp src/schema.graphql ../cypress/gen/ && echo "HI"
 generates:
-  src/gen/graphql.gen.ts:
+  ../app-web/src/gen/graphql.gen.ts:
     plugins:
       - 'src/plugins/codegen-typedefs.js'
 

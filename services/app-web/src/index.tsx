@@ -2,7 +2,7 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
 import { Amplify } from 'aws-amplify'
-import { typeDefs } from '@managed-care-review/app-graphql/src/gen/graphql.gen'
+import { typeDefs } from './gen/graphql.gen'
 
 import './index.scss'
 

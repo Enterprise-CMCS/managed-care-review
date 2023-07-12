@@ -2,7 +2,7 @@ import { ApolloExplorer } from '@apollo/explorer/react'
 import styles from './GraphQLExplorer.module.scss'
 import { useAuth } from '../../contexts/AuthContext'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
-import { typeDefs } from '@managed-care-review/app-graphql/src/gen/graphql.gen'
+import { typeDefs } from '../../gen/graphql.gen'
 import { FetchCurrentUserDocument } from '../../gen/gqlClient'
 import { fakeAmplifyFetch } from '../../api'
 
