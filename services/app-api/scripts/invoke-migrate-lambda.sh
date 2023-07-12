@@ -3,6 +3,7 @@ set -u
 
 function_name="$1"
 lambda_version="${2:-\$LATEST}"
+error_message="$3"
 
 cli_read_timeout=240
 
@@ -10,7 +11,7 @@ if (set -x ; aws lambda invoke --qualifier "$lambda_version" --cli-read-timeout 
   exitCode="$(jq '.statusCode' < lambda_response.json)"
   if [[ "$exitCode" != 200 ]] ; then
     cat lambda_response.json
-    echo "Migration of the database failed." 1>&2
+    echo "$error_message" 1>&2
     exit 1
   fi
 else
