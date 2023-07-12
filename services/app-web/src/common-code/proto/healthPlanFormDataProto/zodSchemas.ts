@@ -7,12 +7,12 @@
 
 import { z } from 'zod'
 
-const submissionTypeSchema = z.union([
+export const submissionTypeSchema = z.union([
     z.literal('CONTRACT_ONLY'),
     z.literal('CONTRACT_AND_RATES'),
 ])
 
-const populationCoveredSchema = z.union([
+export const populationCoveredSchema = z.union([
     z.literal('MEDICAID'),
     z.literal('CHIP'),
     z.literal('MEDICAID_AND_CHIP'),
@@ -24,7 +24,7 @@ export const capitationRatesAmendedReasonSchema = z.union([
     z.literal('OTHER'),
 ])
 
-const submissionDocumentSchema = z.object({
+export const submissionDocumentSchema = z.object({
     name: z.string(),
     s3URL: z.string(),
     documentCategories: z.array(
@@ -62,19 +62,22 @@ const contractAmendmentInfoSchema = z.object({
     }),
 })
 
-const rateAmendmentInfoSchema = z.object({
+export const rateAmendmentInfoSchema = z.object({
     effectiveDateStart: z.date().optional(),
     effectiveDateEnd: z.date().optional(),
 })
 
-const contractTypeSchema = z.union([z.literal('BASE'), z.literal('AMENDMENT')])
+export const contractTypeSchema = z.union([
+    z.literal('BASE'),
+    z.literal('AMENDMENT'),
+])
 
-const contractExecutionStatusSchema = z.union([
+export const contractExecutionStatusSchema = z.union([
     z.literal('EXECUTED'),
     z.literal('UNEXECUTED'),
 ])
 
-const actuarialFirmTypeSchema = z.union([
+export const actuarialFirmTypeSchema = z.union([
     z.literal('MERCER'),
     z.literal('MILLIMAN'),
     z.literal('OPTUMAS'),
@@ -84,12 +87,12 @@ const actuarialFirmTypeSchema = z.union([
     z.literal('OTHER'),
 ])
 
-const actuaryCommunicationTypeSchema = z.union([
+export const actuaryCommunicationTypeSchema = z.union([
     z.literal('OACT_TO_ACTUARY'),
     z.literal('OACT_TO_STATE'),
 ])
 
-const federalAuthoritySchema = z.union([
+export const federalAuthoritySchema = z.union([
     z.literal('STATE_PLAN'),
     z.literal('WAIVER_1915B'),
     z.literal('WAIVER_1115'),
@@ -98,13 +101,13 @@ const federalAuthoritySchema = z.union([
     z.literal('TITLE_XXI'),
 ])
 
-const stateContactSchema = z.object({
+export const stateContactSchema = z.object({
     name: z.string(),
     titleRole: z.string(),
     email: z.string(),
 })
 
-const actuaryContactSchema = z.object({
+export const actuaryContactSchema = z.object({
     name: z.string(),
     titleRole: z.string(),
     email: z.string(),
@@ -112,14 +115,17 @@ const actuaryContactSchema = z.object({
     actuarialFirmOther: z.string().optional(),
 })
 
-const sharedRateCertDisplay = z.object({
+export const sharedRateCertDisplay = z.object({
     packageName: z.string(),
     packageId: z.string(),
 })
 
-const rateTypeSchema = z.union([z.literal('NEW'), z.literal('AMENDMENT')])
+export const rateTypeSchema = z.union([
+    z.literal('NEW'),
+    z.literal('AMENDMENT'),
+])
 
-const rateCapitationTypeSchema = z.union([
+export const rateCapitationTypeSchema = z.union([
     z.literal('RATE_CELL'),
     z.literal('RATE_RANGE'),
 ])
