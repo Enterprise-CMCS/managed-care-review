@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
-import { ContractRevision } from '../../domain-models/contractAndRates/contractType'
-import { contractFormDataToDomainModel } from './prismaToDomainModel'
+import { ContractRevision } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
+import { parseDraftContractRevision } from '../../domain-models/contractAndRates/parseDomainData'
 import { draftContractRevisionsWithDraftRates } from '../prismaHelpers'
 
 // findDraftContract returns a draft (if any) for the given contract.
@@ -9,30 +9,20 @@ async function findDraftContract(
     contractID: string
 ): Promise<ContractRevision | undefined | Error> {
     try {
-        const draftContract = await client.contractRevisionTable.findFirst({
-            where: {
-                contractID: contractID,
-                submitInfo: null,
-            },
-            include: draftContractRevisionsWithDraftRates,
-        })
+        const draftContractRevision =
+            await client.contractRevisionTable.findFirst({
+                where: {
+                    contractID: contractID,
+                    submitInfo: null,
+                },
+                include: draftContractRevisionsWithDraftRates,
+            })
 
-        if (!draftContract) {
+        if (!draftContractRevision) {
             return undefined
         }
 
-        const draft: ContractRevision = {
-            id: draftContract.id,
-            createdAt: draftContract.createdAt,
-            updatedAt: draftContract.updatedAt,
-            formData: contractFormDataToDomainModel(draftContract),
-            rateRevisions: draftContract.draftRates.map((dr) => ({
-                id: dr.revisions[0].id,
-                revisionFormData: dr.revisions[0].name,
-            })),
-        }
-
-        return draft
+        return parseDraftContractRevision(draftContractRevision)
     } catch (err) {
         console.error('PRISMA ERROR', err)
         return err
