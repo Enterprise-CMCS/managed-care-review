@@ -163,7 +163,7 @@ functions:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
 
-    proto_to_db:
+  proto_to_db:
     handler: src/handlers/proto_to_db.main
     layers:
       - !Ref PrismaClientEngineLambdaLayer
