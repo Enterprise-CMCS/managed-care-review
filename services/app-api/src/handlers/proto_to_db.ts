@@ -73,4 +73,11 @@ export const main: Handler = async (event, context) => {
     console.info(`Package ID: ${pkgID}`)
 
     console.info('JJJ lambda proto_to_db called in CI')
+    return {
+        statusCode: 200,
+        body: JSON.stringify({
+            message: 'Lambda function executed successfully',
+            packageId: pkgID,
+        }),
+    }
 }
