@@ -4,16 +4,16 @@ import {
     PrismaClient,
     SubmissionType,
 } from '@prisma/client'
-import { Contract } from '../../domain-models/contractAndRates/contractType'
+import { Contract } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import { findContractWithHistory } from './findContractWithHistory'
 
 type UpdateContractArgsType = {
-    populationCovered?: PopulationCoverageType
-    programIDs?: string[]
-    riskBasedContract?: boolean
-    submissionType?: SubmissionType
-    submissionDescription?: string
-    contractType?: ContractType
+    populationCovered: PopulationCoverageType
+    programIDs: string[]
+    riskBasedContract: boolean
+    submissionType: SubmissionType
+    submissionDescription: string
+    contractType: ContractType
 }
 
 // Update the given draft
@@ -44,7 +44,12 @@ async function updateDraftContract(
                 id: currentRev.id,
             },
             data: {
-                ...formData,
+                populationCovered: formData.populationCovered,
+                programIDs: formData.programIDs,
+                riskBasedContract: formData.riskBasedContract,
+                submissionType: formData.submissionType,
+                submissionDescription: formData.submissionDescription,
+                contractType: formData.contractType,
                 draftRates: {
                     set: rateIDs.map((rID) => ({
                         id: rID,

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { Contract } from '../../domain-models/contractAndRates/contractType'
+import { Contract } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import { findContractWithHistory } from './findContractWithHistory'
 
 // Update the given revision

@@ -1,9 +1,9 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import {
+    must,
     createDraftContractData,
     getStateRecord,
-} from '../../testHelpers/contractAndRates/contractHelpers'
-import { must } from '../../testHelpers'
+} from '../../testHelpers'
 import { insertDraftContract } from './insertContract'
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
 
@@ -58,33 +58,29 @@ describe('insertContract', () => {
     })
     it('increments state number count', async () => {
         const client = await sharedTestPrismaClient()
+        const initialState = await getStateRecord(client, 'MN')
         const contractA = createDraftContractData({
             stateCode: 'MN',
         })
         const contractB = createDraftContractData({
             stateCode: 'MN',
         })
-        const initialState = await getStateRecord(client, contractA.stateCode)
 
-        must(await insertDraftContract(client, contractA))
-        const stateAfterInsertContractA = await getStateRecord(
-            client,
-            contractA.stateCode
+        const submittedContractA = must(
+            await insertDraftContract(client, contractA)
         )
 
         // Expect state record count to be incremented by 1
-        expect(stateAfterInsertContractA.latestStateSubmissionNumber).toEqual(
+        expect(submittedContractA.stateNumber).toEqual(
             initialState.latestStateSubmissionNumber + 1
         )
 
-        must(await insertDraftContract(client, contractB))
-        const stateAfterInsertContractB = await getStateRecord(
-            client,
-            contractA.stateCode
+        const submittedContractB = must(
+            await insertDraftContract(client, contractB)
         )
 
         // Expect state record count to be incremented by 2
-        expect(stateAfterInsertContractB.latestStateSubmissionNumber).toEqual(
+        expect(submittedContractB.stateNumber).toEqual(
             initialState.latestStateSubmissionNumber + 2
         )
     })

@@ -1,11 +1,9 @@
-import {
-    contractFormDataToDomainModel,
-    ContractFormDataType,
-} from './prismaToDomainModel'
+import { contractFormDataToDomainModel } from './prismaToDomainModel'
+import { ContractRevisionFormDataType } from '../prismaTypes'
 
 describe('prismaToDomainModel', () => {
     it('contractFormDataToDomainModel correctly adds document categories to each document', () => {
-        const formData: ContractFormDataType = {
+        const formData: ContractRevisionFormDataType = {
             id: 'formDataID',
             contractID: 'contractRevisionID',
             submitInfoID: 'submitInfoID',

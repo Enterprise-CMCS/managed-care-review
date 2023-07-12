@@ -11,8 +11,7 @@ import { updateDraftContract } from './updateDraftContract'
 import { updateDraftRate } from './updateDraftRate'
 import { submitContract } from './submitContract'
 import { findContractWithHistory } from './findContractWithHistory'
-import { must } from '../../testHelpers'
-import { createDraftContractData } from '../../testHelpers/contractAndRates/contractHelpers'
+import { must, createDraftContractData } from '../../testHelpers'
 
 describe('unlockContract', () => {
     it('Unlocks a rate without breaking connected draft contract', async () => {

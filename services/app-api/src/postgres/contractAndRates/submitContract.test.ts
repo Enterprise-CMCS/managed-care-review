@@ -5,8 +5,7 @@ import { insertDraftContract } from './insertContract'
 import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
 import { updateDraftRate } from './updateDraftRate'
-import { must } from '../../testHelpers'
-import { createDraftContractData } from '../../testHelpers/contractAndRates/contractHelpers'
+import { must, createDraftContractData } from '../../testHelpers'
 
 describe('submitContract', () => {
     it('creates a submission from a draft', async () => {
@@ -145,6 +144,9 @@ describe('submitContract', () => {
                             submissionType: 'CONTRACT_AND_RATES',
                             submissionDescription: 'second contract revision',
                             contractType: 'BASE',
+                            programIDs: ['PMAP'],
+                            populationCovered: 'MEDICAID',
+                            riskBasedContract: false,
                         },
                     },
                 },

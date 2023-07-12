@@ -9,8 +9,7 @@ import { insertDraftRate } from './insertRate'
 import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findDraftContract } from './findDraftContract'
-import { must } from '../../testHelpers'
-import { createDraftContractData } from '../../testHelpers/contractAndRates/contractHelpers'
+import { must, createDraftContractData } from '../../testHelpers'
 
 describe('findDraftContract', () => {
     it('handles drafts correctly', async () => {

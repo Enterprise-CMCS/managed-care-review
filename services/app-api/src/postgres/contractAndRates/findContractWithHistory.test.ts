@@ -10,8 +10,7 @@ import { insertDraftRate } from './insertRate'
 import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
-import { must } from '../../testHelpers'
-import { createDraftContractData } from '../../testHelpers/contractAndRates/contractHelpers'
+import { must, createDraftContractData } from '../../testHelpers'
 
 describe('findContract', () => {
     it('finds a stripped down contract with history', async () => {
