@@ -53,6 +53,7 @@ module.exports = () => {
                     });
                 },
             },
+            /*
             {
                 name: 'copy-prisma-schema',
                 setup(build) {
@@ -64,6 +65,7 @@ module.exports = () => {
                     });
                 },
             },
+            */
         ],
     };
 };
