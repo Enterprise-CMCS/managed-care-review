@@ -58,12 +58,13 @@ describe('insertContract', () => {
     })
     it('increments state number count', async () => {
         const client = await sharedTestPrismaClient()
-        const initialState = await getStateRecord(client, 'MN')
+        const stateCode = 'OH'
+        const initialState = await getStateRecord(client, stateCode)
         const contractA = createDraftContractData({
-            stateCode: 'MN',
+            stateCode,
         })
         const contractB = createDraftContractData({
-            stateCode: 'MN',
+            stateCode,
         })
 
         const submittedContractA = must(
