@@ -3,7 +3,7 @@ set -u
 
 function_name="$1"
 lambda_version="${2:-\$LATEST}"
-error_message="$3"
+error_message="${3:-}"
 
 cli_read_timeout=240
 
