@@ -28,7 +28,7 @@ module.exports = () => {
                 },
             },
             {
-                name: 'copy-and-replace',
+                name: 'copy-and-replace-collector',
                 setup(build) {
                     // copy collector.yml to the build directory
                     build.onStart(() => {
@@ -50,6 +50,17 @@ module.exports = () => {
                             process.env.NR_LICENSE_KEY
                         );
                         fs.writeFileSync(filePath, contents);
+                    });
+                },
+            },
+            {
+                name: 'copy-prisma-schema',
+                setup(build) {
+                    build.onStart(() => {
+                        fs.copyFileSync(
+                            'prisma/schema.prisma',
+                            '.esbuild/.build/src/handlers/schema.prisma'
+                        );
                     });
                 },
             },

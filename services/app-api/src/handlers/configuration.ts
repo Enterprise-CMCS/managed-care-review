@@ -61,7 +61,7 @@ async function configurePostgres(
             'Error: attempting to create prisma client: ',
             prismaResult
         )
-        return new Error('Failed to create Prisma Client')
+        return new Error(`Failed to create Prisma Client: ${prismaResult}`)
     }
 
     const client: PrismaClient = prismaResult

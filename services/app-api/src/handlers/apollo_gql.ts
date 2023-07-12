@@ -11,7 +11,7 @@ import {
     APIGatewayProxyHandler,
     Handler,
 } from 'aws-lambda'
-import typeDefs from '@managed-care-review/app-graphql/src/schema.graphql'
+import typeDefs from '../../../app-graphql/src/schema.graphql'
 import { assertIsAuthMode } from '@managed-care-review/common-code/config'
 import { UserType } from '../domain-models'
 import {
@@ -223,7 +223,9 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     const pgResult = await configurePostgres(dbURL, secretsManagerSecret)
     if (pgResult instanceof Error) {
-        console.error("Init Error: Postgres couldn't be configured")
+        console.error(
+            `Init Error: Postgres couldn't be configured: ${pgResult}`
+        )
         throw pgResult
     }
 
