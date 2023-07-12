@@ -136,3 +136,15 @@ jobs:
           STAGE_NAME: ${{ inputs.stage_name }}
         run: |
           ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_NAME-migrate
+      - name: Invoke proto_to_db Lambda
+        env:
+          STAGE_NAME: ${{ inputs.stage_name }}
+        run: |
+          FUNCTION_NAME="proto_to_db-$STAGE_NAME"
+          aws lambda invoke \
+            --function-name $FUNCTION_NAME \
+            --region ${{ inputs.aws_default_region }} \
+            response.json
+
+      - name: Display response from Lambda
+        run: cat response.json
