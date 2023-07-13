@@ -5,7 +5,7 @@ import { insertDraftContract } from './insertContract'
 import { insertDraftRate } from './insertRate'
 import { submitRate } from './submitRate'
 import { updateDraftRate } from './updateDraftRate'
-import { must, createDraftContractData } from '../../testHelpers'
+import { must, createInsertContractData } from '../../testHelpers'
 
 describe('submitContract', () => {
     it('creates a submission from a draft', async () => {
@@ -28,7 +28,7 @@ describe('submitContract', () => {
         ).toBeInstanceOf(Error)
 
         // create a draft contract
-        const draftContractData = createDraftContractData({
+        const draftContractData = createInsertContractData({
             submissionDescription: 'one contract',
         })
         const contractA = must(
@@ -89,7 +89,7 @@ describe('submitContract', () => {
         )
 
         // create a draft contract
-        const draftContractData = createDraftContractData({
+        const draftContractData = createInsertContractData({
             submissionDescription: 'first contract',
         })
         const contractA = must(
@@ -194,7 +194,7 @@ describe('submitContract', () => {
             },
         })
 
-        const draftContractData = createDraftContractData({
+        const draftContractData = createInsertContractData({
             submissionDescription: 'one contract',
         })
         const contractA = must(

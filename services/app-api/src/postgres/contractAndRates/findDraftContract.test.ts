@@ -9,7 +9,7 @@ import { insertDraftRate } from './insertRate'
 import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findDraftContract } from './findDraftContract'
-import { must, createDraftContractData } from '../../testHelpers'
+import { must, createInsertContractData } from '../../testHelpers'
 
 describe('findDraftContract', () => {
     it('handles drafts correctly', async () => {
@@ -46,7 +46,7 @@ describe('findDraftContract', () => {
         must(await submitRate(client, rate2.id, stateUser.id, 'Rate Submit 2'))
 
         // add a draft contract that has both of them.
-        const draftContractData = createDraftContractData({
+        const draftContractData = createInsertContractData({
             submissionDescription: 'one contract',
         })
         const contractA = must(
@@ -134,7 +134,7 @@ describe('findDraftContract', () => {
         must(await updateDraftRate(client, rate2.id, 'draft three', []))
 
         // add a draft contract that has both of them.
-        const draftContractData = createDraftContractData({
+        const draftContractData = createInsertContractData({
             submissionDescription: 'one contract',
         })
 
@@ -193,7 +193,7 @@ describe('findDraftContract', () => {
         })
 
         // add a draft contract that has both of them.
-        const draftContractData = createDraftContractData({
+        const draftContractData = createInsertContractData({
             submissionDescription: 'one contract',
         })
         const contractA = must(

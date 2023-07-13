@@ -1,7 +1,7 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import {
     must,
-    createDraftContractData,
+    createInsertContractData,
     getStateRecord,
 } from '../../testHelpers'
 import { insertDraftContract } from './insertContract'
@@ -12,7 +12,7 @@ describe('insertContract', () => {
         const client = await sharedTestPrismaClient()
 
         // create a draft contract
-        const draftContractData = createDraftContractData()
+        const draftContractData = createInsertContractData()
         const draftContract = must(
             await insertDraftContract(client, draftContractData)
         )
@@ -42,28 +42,14 @@ describe('insertContract', () => {
             })
         )
     })
-    it('returns an error when invalid state code is provided', async () => {
-        const client = await sharedTestPrismaClient()
-
-        const draftContractData = createDraftContractData({
-            stateCode: 'CANADA',
-        })
-        const draftContract = await insertDraftContract(
-            client,
-            draftContractData
-        )
-
-        // Expect a prisma error
-        expect(draftContract).toBeInstanceOf(PrismaClientKnownRequestError)
-    })
     it('increments state number count', async () => {
         const client = await sharedTestPrismaClient()
         const stateCode = 'OH'
         const initialState = await getStateRecord(client, stateCode)
-        const contractA = createDraftContractData({
+        const contractA = createInsertContractData({
             stateCode,
         })
-        const contractB = createDraftContractData({
+        const contractB = createInsertContractData({
             stateCode,
         })
 
@@ -84,5 +70,19 @@ describe('insertContract', () => {
         expect(submittedContractB.stateNumber).toEqual(
             initialState.latestStateSubmissionNumber + 2
         )
+    })
+    it('returns an error when invalid state code is provided', async () => {
+        const client = await sharedTestPrismaClient()
+
+        const draftContractData = createInsertContractData({
+            stateCode: 'CANADA',
+        })
+        const draftContract = await insertDraftContract(
+            client,
+            draftContractData
+        )
+
+        // Expect a prisma error
+        expect(draftContract).toBeInstanceOf(PrismaClientKnownRequestError)
     })
 })
