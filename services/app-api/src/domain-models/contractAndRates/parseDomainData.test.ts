@@ -88,15 +88,34 @@ describe('parseDomainData', () => {
         )
     })
     describe('parseDraftContractRevision', () => {
+        it('cant parse valid contract revision with no errors', () => {
+            const contractRevision =
+                createContractRevision() as DraftContractRevisionTableWithRelations
+            expect(
+                parseDraftContractRevision(contractRevision)
+            ).not.toBeInstanceOf(Error)
+        })
         const draftContractRevisionsWithInvalidData: {
             revision: DraftContractRevisionTableWithRelations
             testDescription: string
         }[] = [
             {
                 revision: createContractRevision({
-                    programIDs: undefined,
+                    submissionType: undefined,
                 }) as DraftContractRevisionTableWithRelations,
-                testDescription: 'invalid programIDs',
+                testDescription: 'invalid submissionType',
+            },
+            {
+                revision: createContractRevision({
+                    submissionDescription: undefined,
+                }) as DraftContractRevisionTableWithRelations,
+                testDescription: 'invalid submissionDescription',
+            },
+            {
+                revision: createContractRevision({
+                    contractType: undefined,
+                }) as DraftContractRevisionTableWithRelations,
+                testDescription: 'invalid contractType',
             },
             {
                 revision: createContractRevision({

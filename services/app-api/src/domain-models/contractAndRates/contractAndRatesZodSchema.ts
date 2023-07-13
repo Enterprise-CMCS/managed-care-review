@@ -22,7 +22,7 @@ const contractFormDataSchema = z.object({
     addtlActuaryCommunicationPreference:
         actuaryCommunicationTypeSchema.optional(),
     supportingDocuments: z.array(submissionDocumentSchema),
-    contractType: contractTypeSchema.optional(),
+    contractType: contractTypeSchema,
     contractExecutionStatus: contractExecutionStatusSchema.optional(),
     contractDocuments: z.array(submissionDocumentSchema),
     contractDateStart: z.date().optional(),
