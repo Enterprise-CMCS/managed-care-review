@@ -59,12 +59,12 @@ function contractFormDataToDomainModel(
     contractRevision: ContractRevisionFormDataType
 ): ContractFormData {
     return {
-        programIDs: contractRevision.programIDs ?? undefined,
+        submissionType: contractRevision.submissionType,
+        submissionDescription: contractRevision.submissionDescription,
+        contractType: contractRevision.contractType,
+        programIDs: contractRevision.programIDs ?? [],
         populationCovered: contractRevision.populationCovered ?? undefined,
-        submissionType: contractRevision.submissionType ?? undefined,
         riskBasedContract: contractRevision.riskBasedContract ?? undefined,
-        submissionDescription:
-            contractRevision.submissionDescription ?? undefined,
         stateContacts: contractRevision.stateContacts
             ? contractRevision.stateContacts.map((contact) => ({
                   name: contact.name,
@@ -93,7 +93,6 @@ function contractFormDataToDomainModel(
                   ] as DocumentCategoryType[],
               }))
             : [],
-        contractType: contractRevision.contractType ?? undefined,
         contractExecutionStatus:
             contractRevision.contractExecutionStatus ?? undefined,
         contractDocuments: contractRevision.contractDocuments
