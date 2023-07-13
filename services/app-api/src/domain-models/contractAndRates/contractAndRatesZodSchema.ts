@@ -11,11 +11,6 @@ import {
     submissionTypeSchema,
 } from 'app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
 
-const contractStatusSchema = z.union([
-    z.literal('SUBMITTED'),
-    z.literal('DRAFT'),
-])
-
 const contractFormDataSchema = z.object({
     programIDs: z.array(z.string()),
     populationCovered: populationCoveredSchema.optional(),
@@ -88,30 +83,29 @@ const contractRevisionZodSchema = contractRevisionSchema.extend({
 // submissions are kept intact here across time
 const contractZodSchema = z.object({
     id: z.string().uuid(),
-    status: contractStatusSchema,
+    status: z.union([z.literal('SUBMITTED'), z.literal('DRAFT')]),
     stateCode: z.string(),
-    stateNumber: z.number(),
+    stateNumber: z.number().min(1),
     revisions: z.array(contractRevisionZodSchema),
 })
 
 const draftContractZodSchema = contractZodSchema.extend({
     status: z.literal('DRAFT'),
-})
-
-const submittedContractZodSchema = contractZodSchema.extend({
-    status: z.literal('SUBMITTED'),
+    revisions: z.array(contractRevisionZodSchema).min(1),
 })
 
 type ContractFormData = z.infer<typeof contractFormDataSchema>
 type Contract = z.infer<typeof contractZodSchema>
 type ContractRevision = z.infer<typeof contractRevisionZodSchema>
 type UpdateInfo = z.infer<typeof updateInfoSchema>
+type ContractStatus = z.infer<typeof contractZodSchema.shape.status>
 
-export {
-    contractRevisionZodSchema,
-    draftContractZodSchema,
-    submittedContractZodSchema,
-    contractZodSchema,
+export { contractRevisionZodSchema, draftContractZodSchema, contractZodSchema }
+
+export type {
+    ContractFormData,
+    Contract,
+    ContractRevision,
+    UpdateInfo,
+    ContractStatus,
 }
-
-export type { ContractFormData, Contract, ContractRevision, UpdateInfo }

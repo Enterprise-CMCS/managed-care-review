@@ -1,5 +1,5 @@
 import {
-    ContractRevisionTableWithRelations,
+    ContractTableWithRelations,
     DraftContractRevisionTableWithRelations,
     DraftContractTableWithRelations,
 } from '../../postgres/prismaTypes'
@@ -8,9 +8,8 @@ import {
     ContractRevision,
     contractRevisionZodSchema,
     draftContractZodSchema,
-    submittedContractZodSchema,
+    contractZodSchema,
 } from './contractAndRatesZodSchema'
-import { ContractTable } from '@prisma/client'
 import {
     draftContractToDomainModel,
     draftContractRevToDomainModel,
@@ -27,34 +26,29 @@ function parseDraftContractRevision(
 
     if (!parseDraft.success) {
         console.warn(
-            `ERROR: attempting to parse prisma draft contract revision failed, ${parseDraft.error}`
+            `ERROR: attempting to parse prisma draft contract revision failed: ${parseDraft.error}`
         )
-        return Error(
-            `ERROR: attempting to parse prisma draft contract revision failed, ${parseDraft.error}`
-        )
+        return parseDraft.error
     }
 
-    return draftContractRevision
+    return parseDraft.data
 }
 
 function parseDraftContract(
     contract: DraftContractTableWithRelations
 ): Contract | Error {
     const draftContract = draftContractToDomainModel(contract)
+
     const parseDraft = draftContractZodSchema.safeParse(draftContract)
 
     if (!parseDraft.success) {
         console.warn(
-            `ERROR: attempting to parse prisma draft contract failed, ${parseDraft.error}`
+            `ERROR: attempting to parse prisma draft contract failed: ${parseDraft.error}`
         )
-        const newError = new Error(
-            `ERROR: attempting to parse prisma draft contract failed, ${parseDraft.error}`
-        )
-
-        newError.stack
+        return parseDraft.error
     }
 
-    return draftContract
+    return parseDraft.data
 }
 
 // parseContractWithHistory returns a ContractType with a full set of
@@ -62,26 +56,27 @@ function parseDraftContract(
 // Contract with submit and unlock info. Changes to the data of this contract, or changes
 // to the data or relations of associate revisions will all surface as new ContractRevisions
 function parseContractWithHistory(
-    contract: ContractTable,
-    contractRevisions: ContractRevisionTableWithRelations[]
+    contract: ContractTableWithRelations
+    //contractRevisions: ContractRevisionTableWithRelations[]
 ): Contract | Error {
-    const contractWithHistory = contractWithHistoryToDomainModel(
-        contract,
-        contractRevisions
-    )
-    const parseContract =
-        submittedContractZodSchema.safeParse(contractWithHistory)
+    const contractWithHistory = contractWithHistoryToDomainModel(contract)
 
-    if (!parseContract.success) {
+    if (contractWithHistory instanceof Error) {
         console.warn(
-            `ERROR: attempting to parse prisma contract with history failed, ${parseContract.error}`
+            `ERROR: attempting to parse prisma contract with history failed: ${contractWithHistory.message}`
         )
-        return new Error(
-            `ERROR: attempting to parse prisma contract with history failed, ${parseContract.error}`
-        )
+        return contractWithHistory
     }
 
-    return contractWithHistory
+    const parseContract = contractZodSchema.safeParse(contractWithHistory)
+
+    if (!parseContract.success) {
+        const error = `ERROR: attempting to parse prisma contract with history failed: ${parseContract.error}`
+        console.warn(error)
+        return parseContract.error
+    }
+
+    return parseContract.data
 }
 
 export {
