@@ -7,6 +7,9 @@ export {
 export { must } from './errorHelpers'
 
 export {
-    createDraftContractData,
+    createInsertContractData,
     getStateRecord,
+    createContractData,
+    createContractRevision,
+    createDraftContractData,
 } from './contractAndRates/contractHelpers'
