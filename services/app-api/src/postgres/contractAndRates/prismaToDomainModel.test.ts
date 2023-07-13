@@ -7,80 +7,13 @@ import {
     ContractRevisionTableWithRelations,
 } from '../prismaTypes'
 import { v4 as uuidv4 } from 'uuid'
+import { createContractRevision } from '../../testHelpers'
 
 describe('prismaToDomainModel', () => {
     describe('contractFormDataToDomainModel', () => {
         it('correctly adds document categories to each document', () => {
-            const contractRevision: ContractRevisionFormDataType = {
-                id: 'revisionID',
-                contractID: 'contractID',
-                submitInfoID: 'submitInfoID',
-                unlockInfoID: 'unlockInfoID',
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                programIDs: ['Program'],
-                populationCovered: 'MEDICAID' as const,
-                submissionType: 'CONTRACT_ONLY' as const,
-                riskBasedContract: false,
-                submissionDescription: 'Test',
-                stateContacts: [],
-                addtlActuaryContacts: [],
-                addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
-                supportingDocuments: [
-                    {
-                        id: 'contractSupportingDocID',
-                        contractRevisionID: 'contractRevisionID',
-                        createdAt: new Date(),
-                        updatedAt: new Date(),
-                        name: 'contract supporting doc',
-                        s3URL: 'fakeS3URL',
-                        sha256: '2342fwlkdmwvw',
-                    },
-                    {
-                        id: 'contractSupportingDocID2',
-                        contractRevisionID: 'contractRevisionID',
-                        createdAt: new Date(),
-                        updatedAt: new Date(),
-                        name: 'contract supporting doc 2',
-                        s3URL: 'fakeS3URL',
-                        sha256: '45662342fwlkdmwvw',
-                    },
-                ],
-                contractType: 'BASE',
-                contractExecutionStatus: 'EXECUTED',
-                contractDocuments: [
-                    {
-                        id: 'contractDocID',
-                        contractRevisionID: 'contractRevisionID',
-                        createdAt: new Date(),
-                        updatedAt: new Date(),
-                        name: 'contract doc',
-                        s3URL: 'fakeS3URL',
-                        sha256: '8984234fwlkdmwvw',
-                    },
-                ],
-                contractDateStart: new Date(Date.UTC(2025, 5, 1)),
-                contractDateEnd: new Date(Date.UTC(2026, 4, 30)),
-                managedCareEntities: ['MCO'],
-                federalAuthorities: ['STATE_PLAN' as const],
-                modifiedBenefitsProvided: false,
-                modifiedGeoAreaServed: false,
-                modifiedMedicaidBeneficiaries: false,
-                modifiedRiskSharingStrategy: false,
-                modifiedIncentiveArrangements: false,
-                modifiedWitholdAgreements: false,
-                modifiedStateDirectedPayments: false,
-                modifiedPassThroughPayments: false,
-                modifiedPaymentsForMentalDiseaseInstitutions: false,
-                modifiedMedicalLossRatioStandards: false,
-                modifiedOtherFinancialPaymentIncentive: false,
-                modifiedEnrollmentProcess: false,
-                modifiedGrevienceAndAppeal: false,
-                modifiedNetworkAdequacyStandards: true,
-                modifiedLengthOfContract: true,
-                modifiedNonRiskPaymentArrangements: null,
-                inLieuServicesAndSettings: null,
-            }
+            const contractRevision: ContractRevisionFormDataType =
+                createContractRevision()
 
             const domainFormData =
                 contractFormDataToDomainModel(contractRevision)
@@ -215,7 +148,7 @@ describe('prismaToDomainModel', () => {
             },
         ]
         test.each(contractWithUnorderedRevs)(
-            'getContractStatus correctly gets status when $testDescription',
+            'correctly gets contract status from unordered revisions: $testDescription',
             ({ revision, expectedResult }) => {
                 expect(getContractStatus(revision)).toEqual(expectedResult)
             }
