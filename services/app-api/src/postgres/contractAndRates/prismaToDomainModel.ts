@@ -2,6 +2,7 @@ import {
     Contract,
     ContractRevision,
     ContractFormData,
+    ContractStatus,
 } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import { RateRevision } from '../../domain-models/contractAndRates/rateType'
 import {
@@ -11,10 +12,11 @@ import {
     DraftRateWithRelations,
     ContractRevisionTableWithRelations,
     ContractRevisionFormDataType,
+    ContractTableWithRelations,
 } from '../prismaTypes'
 import { UpdateInfoType } from '../../domain-models'
 import { DocumentCategoryType } from 'app-web/src/common-code/healthPlanFormDataType'
-import { ContractTable, RateRevisionTable } from '@prisma/client'
+import { RateRevisionTable } from '@prisma/client'
 
 // ContractRevisionSet is for the internal building of individual revisions
 // we convert them into ContractRevisions to return them
@@ -39,55 +41,73 @@ function convertUpdateInfoToDomainModel(
     }
 }
 
+function getContractStatus(
+    revision: Pick<
+        ContractRevisionTableWithRelations,
+        'createdAt' | 'submitInfo'
+    >[]
+): ContractStatus {
+    // need to order revisions from latest to earlies
+    const latestToEarliestRev = revision.sort(
+        (revA, revB) => revB.createdAt.getTime() - revA.createdAt.getTime()
+    )
+    const latestRevision = latestToEarliestRev[0]
+    return latestRevision?.submitInfo ? 'SUBMITTED' : 'DRAFT'
+}
+
 function contractFormDataToDomainModel(
     contractRevision: ContractRevisionFormDataType
 ): ContractFormData {
     return {
-        programIDs: contractRevision.programIDs,
+        programIDs: contractRevision.programIDs ?? undefined,
         populationCovered: contractRevision.populationCovered ?? undefined,
-        submissionType: contractRevision.submissionType,
+        submissionType: contractRevision.submissionType ?? undefined,
         riskBasedContract: contractRevision.riskBasedContract ?? undefined,
         submissionDescription:
             contractRevision.submissionDescription ?? undefined,
-        stateContacts: contractRevision.stateContacts.map((contact) => ({
-            name: contact.name,
-            titleRole: contact.titleRole,
-            email: contact.email,
-        })),
-        addtlActuaryContacts: contractRevision.addtlActuaryContacts.map(
-            (contact) => ({
-                name: contact.name,
-                titleRole: contact.titleRole,
-                email: contact.email,
-                actuarialFirm: contact.actuarialFirm,
-                actuarialFirmOther: contact.actuarialFirmOther ?? undefined,
-            })
-        ),
+        stateContacts: contractRevision.stateContacts
+            ? contractRevision.stateContacts.map((contact) => ({
+                  name: contact.name,
+                  titleRole: contact.titleRole,
+                  email: contact.email,
+              }))
+            : [],
+        addtlActuaryContacts: contractRevision.addtlActuaryContacts
+            ? contractRevision.addtlActuaryContacts.map((contact) => ({
+                  name: contact.name,
+                  titleRole: contact.titleRole,
+                  email: contact.email,
+                  actuarialFirm: contact.actuarialFirm,
+                  actuarialFirmOther: contact.actuarialFirmOther ?? undefined,
+              }))
+            : [],
         addtlActuaryCommunicationPreference:
             contractRevision.addtlActuaryCommunicationPreference ?? undefined,
-        supportingDocuments: contractRevision.supportingDocuments.map(
-            (doc) => ({
-                name: doc.name,
-                s3URL: doc.s3URL,
-                sha256: doc.sha256 ?? undefined,
-                documentCategories: [
-                    'CONTRACT_RELATED',
-                ] as DocumentCategoryType[],
-            })
-        ),
+        supportingDocuments: contractRevision.supportingDocuments
+            ? contractRevision.supportingDocuments.map((doc) => ({
+                  name: doc.name,
+                  s3URL: doc.s3URL,
+                  sha256: doc.sha256 ?? undefined,
+                  documentCategories: [
+                      'CONTRACT_RELATED',
+                  ] as DocumentCategoryType[],
+              }))
+            : [],
         contractType: contractRevision.contractType ?? undefined,
         contractExecutionStatus:
             contractRevision.contractExecutionStatus ?? undefined,
-        contractDocuments: contractRevision.contractDocuments.map((doc) => ({
-            name: doc.name,
-            s3URL: doc.s3URL,
-            sha256: doc.sha256 ?? undefined,
-            documentCategories: ['CONTRACT'] as DocumentCategoryType[],
-        })),
+        contractDocuments: contractRevision.contractDocuments
+            ? contractRevision.contractDocuments.map((doc) => ({
+                  name: doc.name,
+                  s3URL: doc.s3URL,
+                  sha256: doc.sha256 ?? undefined,
+                  documentCategories: ['CONTRACT'] as DocumentCategoryType[],
+              }))
+            : [],
         contractDateStart: contractRevision.contractDateStart ?? undefined,
         contractDateEnd: contractRevision.contractDateEnd ?? undefined,
-        managedCareEntities: contractRevision.managedCareEntities,
-        federalAuthorities: contractRevision.federalAuthorities,
+        managedCareEntities: contractRevision.managedCareEntities ?? undefined,
+        federalAuthorities: contractRevision.federalAuthorities ?? undefined,
         modifiedBenefitsProvided:
             contractRevision.modifiedBenefitsProvided ?? undefined,
         modifiedGeoAreaServed:
@@ -178,25 +198,27 @@ function contractRevToDomainModel(
 function draftContractToDomainModel(
     contract: DraftContractTableWithRelations
 ): Contract {
+    const revisions = contract.revisions.map((cr) =>
+        draftContractRevToDomainModel(cr)
+    )
+
     return {
         id: contract.id,
-        status: 'DRAFT' as const,
+        status: getContractStatus(contract.revisions),
         stateCode: contract.stateCode,
         stateNumber: contract.stateNumber,
-        revisions: contract.revisions.map((cr) =>
-            draftContractRevToDomainModel(cr)
-        ),
+        revisions,
     }
 }
 
 function contractWithHistoryToDomainModel(
-    contract: ContractTable,
-    contractRevisions: ContractRevisionTableWithRelations[]
+    contract: ContractTableWithRelations
 ): Contract | Error {
     // We iterate through each contract revision in order, adding it as a revision in the history
     // then iterate through each of its rates, constructing a history of any rates that changed
     // between contract revision updates
     const allRevisionSets: ContractRevisionSet[] = []
+    const contractRevisions = contract.revisions
     for (const contractRev of contractRevisions) {
         // We exclude the draft from this list, use findDraftContract to get the current draft
         if (!contractRev.submitInfo) {
@@ -258,9 +280,11 @@ function contractWithHistoryToDomainModel(
 
     const revisions = contractRevToDomainModel(allRevisionSets).reverse()
 
+    const contractStatus = getContractStatus(contract.revisions)
+
     return {
         id: contract.id,
-        status: 'SUBMITTED',
+        status: contractStatus,
         stateCode: contract.stateCode,
         stateNumber: contract.stateNumber,
         revisions: revisions,
@@ -276,4 +300,5 @@ export {
     draftRatesToDomainModel,
     ratesRevisionsToDomainModel,
     contractWithHistoryToDomainModel,
+    getContractStatus,
 }

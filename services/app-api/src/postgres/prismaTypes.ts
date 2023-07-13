@@ -28,8 +28,12 @@ type RateRevisionWithRelations = RateRevisionsOnContractRevisionsTable & {
     }
 }
 
+type DraftRateWithRelations = RateTable & {
+    revisions: RateRevisionTable[]
+}
+
 type ContractRevisionTableWithRelations = ContractRevisionTable & {
-    submitInfo: UpdateInfoTableWithUpdater | null
+    submitInfo?: UpdateInfoTableWithUpdater | null
     unlockInfo?: UpdateInfoTableWithUpdater | null
     stateContacts: StateContact[]
     addtlActuaryContacts: ActuaryContact[]
@@ -38,10 +42,6 @@ type ContractRevisionTableWithRelations = ContractRevisionTable & {
     managedCareEntities: ManagedCareEntity[]
     federalAuthorities: FederalAuthority[]
     rateRevisions: RateRevisionWithRelations[]
-}
-
-type DraftRateWithRelations = RateTable & {
-    revisions: RateRevisionTable[]
 }
 
 type DraftContractRevisionTableWithRelations = ContractRevisionTable & {
@@ -58,6 +58,10 @@ type DraftContractRevisionTableWithRelations = ContractRevisionTable & {
 
 type DraftContractTableWithRelations = ContractTable & {
     revisions: DraftContractRevisionTableWithRelations[]
+}
+
+type ContractTableWithRelations = ContractTable & {
+    revisions: ContractRevisionTableWithRelations[]
 }
 
 type ContractRevisionFormDataType = Omit<
@@ -77,4 +81,5 @@ export type {
     RateRevisionWithRelations,
     DraftRateWithRelations,
     ContractRevisionFormDataType,
+    ContractTableWithRelations,
 }
