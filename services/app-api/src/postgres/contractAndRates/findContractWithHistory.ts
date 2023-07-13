@@ -16,6 +16,34 @@ async function findContractWithHistory(
             where: {
                 id: contractID,
             },
+            include: {
+                revisions: {
+                    orderBy: {
+                        createdAt: 'asc',
+                    },
+                    include: {
+                        submitInfo: updateInfoIncludeUpdater,
+                        unlockInfo: updateInfoIncludeUpdater,
+                        rateRevisions: {
+                            include: {
+                                rateRevision: {
+                                    include: {
+                                        submitInfo: updateInfoIncludeUpdater,
+                                        unlockInfo: updateInfoIncludeUpdater,
+                                    },
+                                },
+                            },
+                            orderBy: {
+                                validAfter: 'asc',
+                            },
+                        },
+                        stateContacts: true,
+                        addtlActuaryContacts: true,
+                        contractDocuments: true,
+                        supportingDocuments: true,
+                    },
+                },
+            },
         })
 
         if (!contract) {
@@ -24,37 +52,7 @@ async function findContractWithHistory(
             return new Error(err)
         }
 
-        const contractRevisions = await client.contractRevisionTable.findMany({
-            where: {
-                contractID: contractID,
-            },
-            orderBy: {
-                createdAt: 'asc',
-            },
-            include: {
-                submitInfo: updateInfoIncludeUpdater,
-                unlockInfo: updateInfoIncludeUpdater,
-                rateRevisions: {
-                    include: {
-                        rateRevision: {
-                            include: {
-                                submitInfo: updateInfoIncludeUpdater,
-                                unlockInfo: updateInfoIncludeUpdater,
-                            },
-                        },
-                    },
-                    orderBy: {
-                        validAfter: 'asc',
-                    },
-                },
-                stateContacts: true,
-                addtlActuaryContacts: true,
-                contractDocuments: true,
-                supportingDocuments: true,
-            },
-        })
-
-        return parseContractWithHistory(contract, contractRevisions)
+        return parseContractWithHistory(contract)
     } catch (err) {
         console.error('PRISMA ERROR', err)
         return err
