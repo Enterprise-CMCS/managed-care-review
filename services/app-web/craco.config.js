@@ -16,7 +16,7 @@ module.exports = {
         },
     },
     webpack: {
-        configure: (webpackConfig, arg) => {
+        configure: (webpackConfig, { paths }) => {
             const { isFound, match } = getLoader(
                 webpackConfig,
                 loaderByName('babel-loader')
@@ -46,6 +46,12 @@ module.exports = {
                         });
                 }
             }
+            webpackConfig.resolve.alias = {
+                ...webpackConfig.resolve.alias,
+                ...pathsToModuleNameMapper(compilerOptions.paths, {
+                    prefix: path.join(paths.appSrc, '../../../'),
+                }),
+            };
             return webpackConfig;
         },
     },
