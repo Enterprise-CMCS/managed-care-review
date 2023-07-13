@@ -404,4 +404,4 @@ const gqlHandler: Handler = async (event, context, completion) => {
     return await initializedHandler(event, context, completion)
 }
 
-exports.graphqlHandler = gqlHandler
+export { gqlHandler }

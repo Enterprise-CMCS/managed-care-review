@@ -4,10 +4,10 @@
     "description": "app graphql definitions",
     "license": "MIT",
     "scripts": {
-        "generate": "yarn build && yarn gqlgen",
+        "generate": "yarn gqlgen",
         "build": "tsc",
-        "gqlgen": "graphql-codegen",
-        "gqlgen:watch": "graphql-codegen --watch",
+        "gqlgen": "yarn build && graphql-codegen",
+        "gqlgen:watch": "yarn build && graphql-codegen --watch",
         "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""
     },
     "devDependencies": {

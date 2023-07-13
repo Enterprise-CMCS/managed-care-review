@@ -6,7 +6,6 @@ package:
   individually: true
   patterns:
     - 'src/emailer/etaTemplates/*'
-    - 'prisma/schema.prisma'
 
 plugins:
   - serverless-esbuild
@@ -187,7 +186,7 @@ functions:
           cors: true
 
   graphql:
-    handler: src/handlers/apollo_gql.graphqlHandler
+    handler: src/handlers/apollo_gql.gqlHandler
     events:
       - http:
           path: graphql

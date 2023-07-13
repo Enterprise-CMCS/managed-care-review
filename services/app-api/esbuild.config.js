@@ -53,19 +53,22 @@ module.exports = () => {
                     });
                 },
             },
-            /*
             {
-                name: 'copy-prisma-schema',
+                name: 'copy-prisma-engine-for-local-dev',
                 setup(build) {
                     build.onStart(() => {
-                        fs.copyFileSync(
-                            'prisma/schema.prisma',
-                            '.esbuild/.build/src/handlers/schema.prisma'
+                        const prismaPath = path.join(
+                            __dirname,
+                            '../../node_modules/prisma/libquery_engine-darwin-arm64.dylib.node'
                         );
+                        const outDir = path.join(
+                            __dirname,
+                            '../../node_modules/@prisma/client/libquery_engine-darwin-arm64.dylib.node'
+                        );
+                        fs.copyFileSync(prismaPath, outDir);
                     });
                 },
             },
-            */
         ],
     };
 };
