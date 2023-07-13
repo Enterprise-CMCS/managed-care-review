@@ -1,7 +1,4 @@
-import {
-    PrismaClientInitializationError,
-    PrismaClientKnownRequestError,
-} from '@prisma/client/runtime'
+import { Prisma } from '@prisma/client'
 
 const StoreErrorCodes = [
     'CONFIGURATION_ERROR',
@@ -12,7 +9,7 @@ const StoreErrorCodes = [
     'UNEXPECTED_EXCEPTION',
     'WRONG_STATUS',
 ] as const
-type StoreErrorCode = typeof StoreErrorCodes[number] // iterable union type
+type StoreErrorCode = (typeof StoreErrorCodes)[number] // iterable union type
 
 type StoreError = {
     code: StoreErrorCode
@@ -42,7 +39,7 @@ function isStoreError(err: unknown): err is StoreError {
 const convertPrismaErrorToStoreError = (prismaErr: unknown): StoreError => {
     // PrismaClientKnownRequestError is for errors that are expected to occur based on
     // making invalid requests of some kind.
-    if (prismaErr instanceof PrismaClientKnownRequestError) {
+    if (prismaErr instanceof Prisma.PrismaClientKnownRequestError) {
         // P2002 is for violating a uniqueness constraint
         if (prismaErr.code === 'P2002') {
             return {
@@ -73,7 +70,7 @@ const convertPrismaErrorToStoreError = (prismaErr: unknown): StoreError => {
     }
 
     // PrismaClientInitializationError is for errors trying to setup a prisma connection
-    if (prismaErr instanceof PrismaClientInitializationError) {
+    if (prismaErr instanceof Prisma.PrismaClientInitializationError) {
         return {
             code: 'CONNECTION_ERROR',
             message: prismaErr.message,
