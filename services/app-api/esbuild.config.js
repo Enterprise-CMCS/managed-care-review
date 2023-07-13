@@ -57,15 +57,17 @@ module.exports = () => {
                 name: 'copy-prisma-engine-for-local-dev',
                 setup(build) {
                     build.onStart(() => {
-                        const prismaPath = path.join(
-                            __dirname,
-                            '../../node_modules/prisma/libquery_engine-darwin-arm64.dylib.node'
-                        );
-                        const outDir = path.join(
-                            __dirname,
-                            '../../node_modules/@prisma/client/libquery_engine-darwin-arm64.dylib.node'
-                        );
-                        fs.copyFileSync(prismaPath, outDir);
+                        if (process.env.REACT_APP_STAGE_NAME === 'local') {
+                            const prismaPath = path.join(
+                                __dirname,
+                                '../../node_modules/prisma/libquery_engine-darwin-arm64.dylib.node'
+                            );
+                            const outDir = path.join(
+                                __dirname,
+                                '../../node_modules/@prisma/client/libquery_engine-darwin-arm64.dylib.node'
+                            );
+                            fs.copyFileSync(prismaPath, outDir);
+                        }
                     });
                 },
             },

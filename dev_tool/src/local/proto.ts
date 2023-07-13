@@ -17,14 +17,8 @@ export async function compileProtoWatch(runner: LabeledProcessRunner) {
 
     runner.runCommandAndOutput(
         'protogen',
-        [
-            'npx',
-            'lerna',
-            'run',
-            'generate:watch',
-            '--scope=@managed-care-review/app-proto',
-        ],
-        ''
+        ['yarn', 'generate:watch'],
+        'services/app-proto'
     )
 }
 
@@ -33,13 +27,7 @@ export async function compileProto(runner: LabeledProcessRunner) {
 
     return runner.runCommandAndOutput(
         'protogen',
-        [
-            'npx',
-            'lerna',
-            'run',
-            'generate',
-            '--scope=@managed-care-review/app-proto',
-        ],
-        ''
+        ['yarn', 'generate'],
+        'services/app-proto'
     )
 }

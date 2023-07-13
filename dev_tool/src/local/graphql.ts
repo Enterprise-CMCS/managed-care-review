@@ -7,8 +7,8 @@ async function compileGraphQLTypesWatch(runner: LabeledProcessRunner) {
 
     runner.runCommandAndOutput(
         'gqlgen',
-        ['npx', 'lerna', 'run', 'gqlgen:watch'],
-        ''
+        ['yarn', 'gqlgen:watch'],
+        'services/app-graphql'
     )
 }
 
@@ -19,8 +19,8 @@ async function compileGraphQLTypes(runner: LabeledProcessRunner) {
 
     return runner.runCommandAndOutput(
         'gqlgen',
-        ['npx', 'lerna', 'run', 'gqlgen'],
-        ''
+        ['yarn', 'gqlgen'],
+        'services/app-graphql'
     )
 }
 

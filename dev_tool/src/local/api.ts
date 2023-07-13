@@ -16,9 +16,5 @@ export async function runAPILocally(runner: LabeledProcessRunner) {
 
     await installAPIDeps(runner)
 
-    runner.runCommandAndOutput(
-        'api',
-        ['npx', 'lerna', 'run', 'start', '--scope=app-api'],
-        ''
-    )
+    runner.runCommandAndOutput('api', ['yarn', 'start'], 'services/app-api')
 }
