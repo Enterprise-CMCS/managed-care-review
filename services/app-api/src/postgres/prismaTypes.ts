@@ -1,5 +1,4 @@
 import {
-    ActuaryContact,
     ContractDocument,
     ContractRevisionTable,
     ContractSupportingDocument,
@@ -23,7 +22,6 @@ type ContractRevisionTableWithRelations = ContractRevisionTable & {
     submitInfo?: UpdateInfoTableWithUpdater | null
     unlockInfo?: UpdateInfoTableWithUpdater | null
     stateContacts: StateContact[]
-    addtlActuaryContacts: ActuaryContact[]
     contractDocuments: ContractDocument[]
     supportingDocuments: ContractSupportingDocument[]
     managedCareEntities: ManagedCareEntity[]

@@ -1,7 +1,6 @@
 import { UpdateInfoType } from '../index'
 import { RateRevision } from './rateType'
 import {
-    ActuaryCommunicationType,
     ContractExecutionStatus,
     ContractType,
     PopulationCoveredType,
@@ -9,7 +8,6 @@ import {
     SubmissionDocument,
     SubmissionType,
     FederalAuthority,
-    ActuaryContact,
 } from 'app-web/src/common-code/healthPlanFormDataType'
 
 // Contract represents the contract specific information in a submission package
@@ -44,8 +42,6 @@ type ContractFormData = {
     riskBasedContract?: boolean
     submissionDescription?: string
     stateContacts: StateContact[]
-    addtlActuaryContacts: ActuaryContact[]
-    addtlActuaryCommunicationPreference?: ActuaryCommunicationType
     supportingDocuments: SubmissionDocument[]
     contractType?: ContractType
     contractExecutionStatus?: ContractExecutionStatus

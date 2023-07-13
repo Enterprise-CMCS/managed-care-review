@@ -42,7 +42,6 @@ async function findRateWithHistory(
                                 submitInfo: updateInfoIncludeUpdater,
                                 unlockInfo: updateInfoIncludeUpdater,
                                 stateContacts: true,
-                                addtlActuaryContacts: true,
                                 contractDocuments: true,
                                 supportingDocuments: true,
                                 rateRevisions: {

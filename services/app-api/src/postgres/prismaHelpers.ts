@@ -6,7 +6,6 @@ const updateInfoIncludeUpdater = {
 
 const draftContractRevisionsWithDraftRates = {
     stateContacts: true,
-    addtlActuaryContacts: true,
     contractDocuments: true,
     supportingDocuments: true,
     draftRates: {

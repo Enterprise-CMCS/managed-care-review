@@ -18,8 +18,6 @@ describe('prismaToDomainModel', () => {
             riskBasedContract: false,
             submissionDescription: 'Test',
             stateContacts: [],
-            addtlActuaryContacts: [],
-            addtlActuaryCommunicationPreference: 'OACT_TO_ACTUARY',
             supportingDocuments: [
                 {
                     id: 'contractSupportingDocID',

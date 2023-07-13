@@ -2,7 +2,6 @@ import { ContractFormData } from '../../domain-models/contractAndRates/contractT
 import { UpdateInfoTableWithUpdater } from '../prismaTypes'
 import { UpdateInfoType } from '../../domain-models/HealthPlanPackageType'
 import {
-    ActuaryContact,
     ContractDocument,
     ContractRevisionTable,
     ContractSupportingDocument,
@@ -13,7 +12,6 @@ import {
 
 type ContractFormDataType = ContractRevisionTable & {
     stateContacts: StateContact[]
-    addtlActuaryContacts: ActuaryContact[]
     contractDocuments: ContractDocument[]
     supportingDocuments: ContractSupportingDocument[]
     managedCareEntities: ManagedCareEntity[]
@@ -34,17 +32,6 @@ function contractFormDataToDomainModel(
             titleRole: contact.titleRole,
             email: contact.email,
         })),
-        addtlActuaryContacts: contractRevision.addtlActuaryContacts.map(
-            (contact) => ({
-                name: contact.name,
-                titleRole: contact.titleRole,
-                email: contact.email,
-                actuarialFirm: contact.actuarialFirm,
-                actuarialFirmOther: contact.actuarialFirmOther ?? undefined,
-            })
-        ),
-        addtlActuaryCommunicationPreference:
-            contractRevision.addtlActuaryCommunicationPreference ?? undefined,
         supportingDocuments: contractRevision.supportingDocuments.map(
             (doc) => ({
                 name: doc.name,
