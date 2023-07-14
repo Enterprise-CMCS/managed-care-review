@@ -9,8 +9,7 @@ import { insertDraftRate } from './insertRate'
 import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
-import { must } from '../../testHelpers'
-import { createDraftContractData } from '../../testHelpers/contractAndRates/contractHelpers'
+import { must, createInsertContractData } from '../../testHelpers'
 
 describe('findContract', () => {
     it('finds a full rate', async () => {
@@ -38,7 +37,7 @@ describe('findContract', () => {
         })
 
         // setup a couple test contracts
-        const draftContractData = createDraftContractData({
+        const draftContractData = createInsertContractData({
             submissionDescription: 'one contract',
         })
         const contractA = must(

@@ -10,8 +10,7 @@ import { insertDraftRate } from './insertRate'
 import { updateDraftRate } from './updateDraftRate'
 import { unlockRate } from './unlockRate'
 import { findRateWithHistory } from './findRateWithHistory'
-import { must } from '../../testHelpers'
-import { createDraftContractData } from '../../testHelpers/contractAndRates/contractHelpers'
+import { must, createInsertContractData } from '../../testHelpers'
 
 describe('findContract', () => {
     it('finds a stripped down contract with history', async () => {
@@ -39,7 +38,7 @@ describe('findContract', () => {
         })
 
         // setup a single test contract
-        const draftContractData = createDraftContractData({
+        const draftContractData = createInsertContractData({
             submissionDescription: 'one contract',
         })
         const contractA = must(
@@ -328,7 +327,7 @@ describe('findContract', () => {
         })
 
         // setup a single test contract
-        const draftContractData = createDraftContractData({
+        const draftContractData = createInsertContractData({
             submissionDescription: 'one contract',
         })
         const contractA = must(
@@ -559,7 +558,7 @@ describe('findContract', () => {
         must(await submitRate(client, rate2.id, stateUser.id, 'Rate Submit 2'))
 
         // add a contract that has both of them.
-        const draftContractData = createDraftContractData({
+        const draftContractData = createInsertContractData({
             submissionDescription: 'one contract',
         })
         const contractA = must(

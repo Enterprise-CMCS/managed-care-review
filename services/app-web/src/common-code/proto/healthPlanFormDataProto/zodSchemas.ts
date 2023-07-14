@@ -18,7 +18,7 @@ const populationCoveredSchema = z.union([
     z.literal('MEDICAID_AND_CHIP'),
 ])
 
-export const capitationRatesAmendedReasonSchema = z.union([
+const capitationRatesAmendedReasonSchema = z.union([
     z.literal('ANNUAL'),
     z.literal('MIDYEAR'),
     z.literal('OTHER'),
@@ -191,4 +191,19 @@ const lockedHealthPlanFormDataZodSchema = z.object({
 export {
     unlockedHealthPlanFormDataZodSchema,
     lockedHealthPlanFormDataZodSchema,
+    rateCapitationTypeSchema,
+    rateTypeSchema,
+    sharedRateCertDisplay,
+    actuaryContactSchema,
+    stateContactSchema,
+    federalAuthoritySchema,
+    actuaryCommunicationTypeSchema,
+    actuarialFirmTypeSchema,
+    contractExecutionStatusSchema,
+    contractTypeSchema,
+    rateAmendmentInfoSchema,
+    submissionDocumentSchema,
+    capitationRatesAmendedReasonSchema,
+    populationCoveredSchema,
+    submissionTypeSchema,
 }

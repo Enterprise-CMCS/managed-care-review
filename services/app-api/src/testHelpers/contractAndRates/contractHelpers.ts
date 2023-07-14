@@ -2,8 +2,15 @@ import { InsertContractArgsType } from '../../postgres/contractAndRates/insertCo
 import { State } from '@prisma/client'
 import { must } from '../errorHelpers'
 import { PrismaClient } from '@prisma/client'
+import {
+    ContractRevisionTableWithRelations,
+    ContractTableWithRelations,
+    DraftContractRevisionTableWithRelations,
+    DraftContractTableWithRelations,
+} from '../../postgres/prismaTypes'
+import { v4 as uuidv4 } from 'uuid'
 
-const createDraftContractData = (
+const createInsertContractData = (
     contractArgs?: Partial<InsertContractArgsType>
 ): InsertContractArgsType => {
     return {
@@ -37,4 +44,140 @@ const getStateRecord = async (
     return state
 }
 
-export { createDraftContractData, getStateRecord }
+const createDraftContractData = (
+    contract?: Partial<DraftContractTableWithRelations>
+): DraftContractTableWithRelations => ({
+    id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    stateCode: 'FL',
+    stateNumber: 111,
+    revisions: contract?.revisions ?? [
+        createContractRevision({
+            rateRevisions: undefined,
+            submitInfo: null,
+        }) as DraftContractRevisionTableWithRelations,
+    ],
+    ...contract,
+})
+
+const createContractData = (
+    contract?: Partial<ContractTableWithRelations>
+): ContractTableWithRelations => ({
+    id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    stateCode: 'FL',
+    stateNumber: 111,
+    revisions: contract?.revisions ?? [
+        createContractRevision({
+            draftRates: undefined,
+        }) as ContractRevisionTableWithRelations,
+    ],
+    ...contract,
+})
+
+const createContractRevision = (
+    revision?: Partial<
+        | ContractRevisionTableWithRelations
+        | DraftContractRevisionTableWithRelations
+    >
+):
+    | ContractRevisionTableWithRelations
+    | DraftContractRevisionTableWithRelations => ({
+    id: uuidv4(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    submitInfo: {
+        id: uuidv4(),
+        updatedAt: new Date(),
+        updatedByID: 'someone',
+        updatedReason: 'submit',
+        updatedBy: {
+            id: 'someone',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            givenName: 'Bob',
+            familyName: 'Law',
+            email: 'boblaw@example.com',
+            role: 'STATE_USER',
+            divisionAssignment: null,
+            stateCode: 'OH',
+        },
+    },
+    unlockInfo: null,
+    contractID: 'contractID',
+    submitInfoID: null,
+    unlockInfoID: null,
+    programIDs: ['Program'],
+    populationCovered: 'MEDICAID' as const,
+    submissionType: 'CONTRACT_ONLY' as const,
+    riskBasedContract: false,
+    submissionDescription: 'Test',
+    stateContacts: [],
+    supportingDocuments: [
+        {
+            id: uuidv4(),
+            contractRevisionID: 'contractRevisionID',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            name: 'contract supporting doc',
+            s3URL: 'fakeS3URL',
+            sha256: '2342fwlkdmwvw',
+        },
+        {
+            id: uuidv4(),
+            contractRevisionID: 'contractRevisionID',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            name: 'contract supporting doc 2',
+            s3URL: 'fakeS3URL',
+            sha256: '45662342fwlkdmwvw',
+        },
+    ],
+    contractType: 'BASE',
+    contractExecutionStatus: 'EXECUTED',
+    contractDocuments: [
+        {
+            id: uuidv4(),
+            contractRevisionID: 'contractRevisionID',
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            name: 'contract doc',
+            s3URL: 'fakeS3URL',
+            sha256: '8984234fwlkdmwvw',
+        },
+    ],
+    contractDateStart: new Date(Date.UTC(2025, 5, 1)),
+    contractDateEnd: new Date(Date.UTC(2026, 4, 30)),
+    managedCareEntities: ['MCO'],
+    federalAuthorities: ['STATE_PLAN' as const],
+    modifiedBenefitsProvided: false,
+    modifiedGeoAreaServed: false,
+    modifiedMedicaidBeneficiaries: false,
+    modifiedRiskSharingStrategy: false,
+    modifiedIncentiveArrangements: false,
+    modifiedWitholdAgreements: false,
+    modifiedStateDirectedPayments: false,
+    modifiedPassThroughPayments: false,
+    modifiedPaymentsForMentalDiseaseInstitutions: false,
+    modifiedMedicalLossRatioStandards: false,
+    modifiedOtherFinancialPaymentIncentive: false,
+    modifiedEnrollmentProcess: false,
+    modifiedGrevienceAndAppeal: false,
+    modifiedNetworkAdequacyStandards: true,
+    modifiedLengthOfContract: true,
+    modifiedNonRiskPaymentArrangements: null,
+    inLieuServicesAndSettings: null,
+    rateRevisions: [],
+    draftRates: [],
+    ...revision,
+})
+
+export {
+    createInsertContractData,
+    getStateRecord,
+    createContractRevision,
+    createContractData,
+    createDraftContractData,
+}

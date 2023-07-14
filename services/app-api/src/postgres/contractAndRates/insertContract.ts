@@ -2,10 +2,10 @@ import {
     PrismaClient,
     PopulationCoverageType,
     SubmissionType,
-    ContractType,
+    ContractType as PrismaContractType,
 } from '@prisma/client'
-import { Contract } from '../../domain-models/contractAndRates/contractType'
-import { contractFormDataToDomainModel } from './prismaToDomainModel'
+import { ContractType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
+import { parseDraftContract } from '../../domain-models/contractAndRates/parseDomainData'
 import { draftContractRevisionsWithDraftRates } from '../prismaHelpers'
 
 type InsertContractArgsType = {
@@ -15,14 +15,14 @@ type InsertContractArgsType = {
     riskBasedContract: boolean
     submissionType: SubmissionType
     submissionDescription: string
-    contractType: ContractType
+    contractType: PrismaContractType
 }
 
 // creates a new contract, with a new revision
 async function insertDraftContract(
     client: PrismaClient,
     args: InsertContractArgsType
-): Promise<Contract | Error> {
+): Promise<ContractType | Error> {
     try {
         return await client.$transaction(async (tx) => {
             const { latestStateSubmissionNumber } = await tx.state.update({
@@ -58,22 +58,7 @@ async function insertDraftContract(
                 },
             })
 
-            return {
-                id: contract.id,
-                status: 'DRAFT',
-                stateCode: contract.stateCode,
-                stateNumber: contract.stateNumber,
-                revisions: contract.revisions.map((cr) => ({
-                    id: cr.id,
-                    createdAt: cr.createdAt,
-                    updatedAt: cr.updatedAt,
-                    formData: contractFormDataToDomainModel(cr),
-                    rateRevisions: cr.draftRates.map((dr) => ({
-                        id: dr.revisions[0].id,
-                        revisionFormData: dr.revisions[0].name,
-                    })),
-                })),
-            }
+            return parseDraftContract(contract)
         })
     } catch (err) {
         console.error('CONTRACT PRISMA ERR', err)
