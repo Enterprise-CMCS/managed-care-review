@@ -99,7 +99,7 @@ export function createHealthPlanPackageResolver(
                 convertContractToUnlockedHealthPlanPackage(contractResult)
 
             if (pkg instanceof Error) {
-                const errMessage = `Error creating a draft contract. Message: ${pkg.message}`
+                const errMessage = `Error converting draft contract. Message: ${pkg.message}`
                 logError('createHealthPlanPackage', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new GraphQLError(errMessage, {
