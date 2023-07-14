@@ -14,13 +14,20 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql/index'
+import {LDService} from '../../launchDarkly/launchDarkly';
 
 export function createHealthPlanPackageResolver(
-    store: Store
+    store: Store,
+    launchDarkly: LDService
 ): MutationResolvers['createHealthPlanPackage'] {
     return async (_parent, { input }, context) => {
         const { user, span } = context
         setResolverDetailsOnActiveSpan('createHealthPlanPackage', user, span)
+
+        const ratesDatabaseRefactor = await launchDarkly.getFeatureFlag(
+            context,
+            'rates-db-refactor'
+        )
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
