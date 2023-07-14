@@ -43,7 +43,7 @@ import {
     insertQuestionResponse,
 } from './questionResponse'
 import { findAllSupportedStates } from './state'
-import { Contract } from '../domain-models/contractAndRates/contractAndRatesZodSchema'
+import { ContractType } from '../domain-models/contractAndRates/contractAndRatesZodSchema'
 import {
     InsertContractArgsType,
     insertDraftContract,
@@ -124,7 +124,7 @@ type Store = {
 
     insertDraftContract: (
         args: InsertContractArgsType
-    ) => Promise<Contract | Error>
+    ) => Promise<ContractType | Error>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {

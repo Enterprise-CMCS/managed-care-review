@@ -4,7 +4,7 @@ import {
     HealthPlanPackageType,
 } from './HealthPlanPackageType'
 import { pruneDuplicateEmails } from '../emailer/formatters'
-import { Contract } from './contractAndRates/contractAndRatesZodSchema'
+import { ContractType } from './contractAndRates/contractAndRatesZodSchema'
 import {
     SubmissionDocument,
     UnlockedHealthPlanFormDataType,
@@ -70,7 +70,7 @@ function packageSubmitters(pkg: HealthPlanPackageType): string[] {
 }
 
 function convertContractToUnlockedHealthPlanPackage(
-    contract: Contract
+    contract: ContractType
 ): HealthPlanPackageType | Error {
     console.info('Attempting to convert contract to health plan package')
 
@@ -91,7 +91,7 @@ function convertContractToUnlockedHealthPlanPackage(
 }
 
 function convertContractRevisionToHealthPlanRevision(
-    contract: Contract
+    contract: ContractType
 ): HealthPlanRevisionType[] {
     if (contract.status !== 'DRAFT') {
         throw new Error(
