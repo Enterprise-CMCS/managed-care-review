@@ -2,9 +2,11 @@
 import LabeledProcessRunner from '../runner.js'
 import { compileGraphQLTypesWatchOnce } from './graphql.js'
 import { installPrismaDeps } from './postgres.js'
+import { compileCommonCodeOnce } from './common.js'
 
 export async function installAPIDeps(runner: LabeledProcessRunner) {
     await runner.runCommandAndOutput('api deps', ['yarn', 'install'], '')
+    await compileCommonCodeOnce(runner)
 
     // prisma requires that prisma generate is run after any yarn install
     return installPrismaDeps(runner)

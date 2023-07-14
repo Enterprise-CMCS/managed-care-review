@@ -4,7 +4,7 @@ const { compilerOptions } = require('../../tsconfig.json');
 const CracoEsbuildPlugin = require('craco-esbuild');
 
 const packages = [];
-packages.push(path.join(__dirname, '../../lib/common-code/dist'));
+packages.push(path.join(__dirname, '../../lib/common-code'));
 packages.push(path.join(__dirname, '../app-graphql'));
 
 module.exports = {

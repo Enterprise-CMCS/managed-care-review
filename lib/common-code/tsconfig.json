@@ -16,5 +16,5 @@
         "jsx": "react",
         "types": ["cypress", "node"]
     },
-    "exclude": ["src/gen/*", "dist/*", "jest.config.ts"]
+    "exclude": ["dist/*", "jest.config.ts"]
 }

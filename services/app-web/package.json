@@ -9,7 +9,7 @@
         "build:prod": "craco build",
         "build:instrumented": "CYPRESS_INSTRUMENT_PRODUCTION=true craco -r @cypress/instrument-cra build",
         "eject": "craco eject",
-        "clean": "rm -rf node_modules && yarn cache clean",
+        "clean": "rm -rf node_modules && yarn cache clean && rm -rf build && rm -rf .serverless",
         "format": "prettier --write src/**/*.ts{,x}",
         "lint": "tsc --noEmit && eslint src/ --max-warnings=0",
         "test": "TZ=UTC craco test",

@@ -35,6 +35,7 @@ async function runAllClean() {
             'clean',
             '--scope=@managed-care-review/app-api',
             '--scope=@managed-care-review/app-web',
+            '--scope=@managed-care-review/common-code',
             '--scope=cypress',
         ],
         ''
