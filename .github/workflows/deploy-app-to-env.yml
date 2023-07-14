@@ -55,7 +55,7 @@ jobs:
         env:
           NODE_OPTIONS: --max_old_space_size=6000
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
-        run: npx serverless deploy --stage ${{ inputs.stage_name }}
+        run: yarn install && npx serverless deploy --stage ${{ inputs.stage_name }}
 
   app-api:
     if: ${{ contains(inputs.changed_services, 'app-api') || contains(inputs.changed_services, 'app-proto') }}
