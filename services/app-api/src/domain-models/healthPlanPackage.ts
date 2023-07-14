@@ -74,32 +74,30 @@ function convertContractToUnlockedHealthPlanPackage(
 ): HealthPlanPackageType | Error {
     console.info('Attempting to convert contract to health plan package')
 
-    try {
-        const healthPlanRevisions =
-            convertContractRevisionToHealthPlanRevision(contract)
-        return {
-            id: contract.id,
-            stateCode: contract.stateCode,
-            revisions: healthPlanRevisions,
-        }
-    } catch (err) {
-        console.warn(
-            `Error: convertContractToUnlockedHealthPlanPackage encountered an error: ${err.message}`
-        )
-        return err
+    const healthPlanRevisions =
+        convertContractRevisionToHealthPlanRevision(contract)
+
+    if (healthPlanRevisions instanceof Error) {
+        return healthPlanRevisions
+    }
+
+    return {
+        id: contract.id,
+        stateCode: contract.stateCode,
+        revisions: healthPlanRevisions,
     }
 }
 
 function convertContractRevisionToHealthPlanRevision(
     contract: ContractType
-): HealthPlanRevisionType[] {
+): HealthPlanRevisionType[] | Error {
     if (contract.status !== 'DRAFT') {
-        throw new Error(
-            'Contract status is not "DRAFT". Cannot convert to unlocked health plan package'
+        return new Error(
+            `Contract with ID: ${contract.id} status is not "DRAFT". Cannot convert to unlocked health plan package`
         )
     }
 
-    const healthPlanRevisions: HealthPlanRevisionType[] = []
+    let healthPlanRevisions: HealthPlanRevisionType[] | Error = []
     for (const contractRev of contract.revisions) {
         const unlockedHealthPlanFormData: UnlockedHealthPlanFormDataType = {
             id: contractRev.id,
@@ -185,8 +183,12 @@ function convertContractRevisionToHealthPlanRevision(
         // check that we can encode then decode with no issues
         const domainData = toDomain(formDataProto)
 
+        // If any revision has en error in decoding we break the loop and return an error
         if (domainData instanceof Error) {
-            throw domainData
+            healthPlanRevisions = new Error(
+                `Could not convert contract revision with ID: ${contractRev.id} to health plan package revision: ${domainData}`
+            )
+            break
         }
 
         const healthPlanRevision: HealthPlanRevisionType = {
