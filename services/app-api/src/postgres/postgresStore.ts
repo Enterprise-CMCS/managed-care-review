@@ -43,6 +43,11 @@ import {
     insertQuestionResponse,
 } from './questionResponse'
 import { findAllSupportedStates } from './state'
+import { Contract } from '../domain-models/contractAndRates/contractAndRatesZodSchema'
+import {
+    InsertContractArgsType,
+    insertDraftContract,
+} from './contractAndRates/insertContract'
 
 type Store = {
     findPrograms: (
@@ -116,6 +121,10 @@ type Store = {
         questionInput: InsertQuestionResponseArgs,
         user: StateUserType
     ) => Promise<QuestionResponseType | StoreError>
+
+    insertDraftContract: (
+        args: InsertContractArgsType
+    ) => Promise<Contract | Error>
 }
 
 function NewPostgresStore(client: PrismaClient): Store {
@@ -170,6 +179,10 @@ function NewPostgresStore(client: PrismaClient): Store {
             findAllQuestionsByHealthPlanPackage(client, pkgID),
         insertQuestionResponse: (questionInput, user) =>
             insertQuestionResponse(client, questionInput, user),
+        /**
+         * Rates database refactor prisma functions
+         */
+        insertDraftContract: (args) => insertDraftContract(client, args),
     }
 }
 
