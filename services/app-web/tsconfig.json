@@ -8,7 +8,7 @@
         "skipLibCheck": true,
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
-        //"module": "ESNext",
+        "module": "ESNext",
         "resolveJsonModule": true,
         "isolatedModules": true,
         "noEmit": true,
