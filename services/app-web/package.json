@@ -7,7 +7,7 @@
         "start": "craco -r @cypress/instrument-cra start",
         "build": "sh ../../run_build.sh",
         "build:prod": "craco build",
-        "build:instrumented": "CYPRESS_INSTRUMENT_PRODUCTION=true craco -r @cypress/instrument-cra build",
+        "build:instrumented": "craco build",
         "eject": "craco eject",
         "clean": "rm -rf node_modules && yarn cache clean && rm -rf build && rm -rf .serverless",
         "format": "prettier --write src/**/*.ts{,x}",

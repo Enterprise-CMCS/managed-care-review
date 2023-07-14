@@ -16,7 +16,7 @@ module.exports = {
                 skipEsbuildJest: true,
                 esbuildLoaderOptions: {
                     loader: 'tsx',
-                    target: 'es2015',
+                    target: 'es2017',
                 },
             },
         },
