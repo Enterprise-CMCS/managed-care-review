@@ -2,9 +2,9 @@ import {
     PrismaClient,
     PopulationCoverageType,
     SubmissionType,
-    ContractType,
+    ContractType as PrismaContractType,
 } from '@prisma/client'
-import { Contract } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
+import { ContractType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import { parseDraftContract } from '../../domain-models/contractAndRates/parseDomainData'
 import { draftContractRevisionsWithDraftRates } from '../prismaHelpers'
 
@@ -15,14 +15,14 @@ type InsertContractArgsType = {
     riskBasedContract: boolean
     submissionType: SubmissionType
     submissionDescription: string
-    contractType: ContractType
+    contractType: PrismaContractType
 }
 
 // creates a new contract, with a new revision
 async function insertDraftContract(
     client: PrismaClient,
     args: InsertContractArgsType
-): Promise<Contract | Error> {
+): Promise<ContractType | Error> {
     try {
         return await client.$transaction(async (tx) => {
             const { latestStateSubmissionNumber } = await tx.state.update({

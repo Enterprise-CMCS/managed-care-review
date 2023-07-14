@@ -89,18 +89,18 @@ const draftContractZodSchema = contractZodSchema.extend({
     revisions: z.array(contractRevisionZodSchema).min(1),
 })
 
-type ContractFormData = z.infer<typeof contractFormDataSchema>
-type Contract = z.infer<typeof contractZodSchema>
-type ContractRevision = z.infer<typeof contractRevisionZodSchema>
-type UpdateInfo = z.infer<typeof updateInfoSchema>
-type ContractStatus = z.infer<typeof contractZodSchema.shape.status>
+type ContractFormDataType = z.infer<typeof contractFormDataSchema>
+type ContractType = z.infer<typeof contractZodSchema>
+type ContractRevisionType = z.infer<typeof contractRevisionZodSchema>
+type UpdateInfoType = z.infer<typeof updateInfoSchema>
+type ContractStatusType = z.infer<typeof contractZodSchema.shape.status>
 
 export { contractRevisionZodSchema, draftContractZodSchema, contractZodSchema }
 
 export type {
-    ContractFormData,
-    Contract,
-    ContractRevision,
-    UpdateInfo,
-    ContractStatus,
+    ContractFormDataType,
+    ContractType,
+    ContractRevisionType,
+    UpdateInfoType,
+    ContractStatusType,
 }

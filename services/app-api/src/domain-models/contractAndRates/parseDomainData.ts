@@ -4,8 +4,8 @@ import {
     DraftContractTableWithRelations,
 } from '../../postgres/prismaTypes'
 import {
-    Contract,
-    ContractRevision,
+    ContractType,
+    ContractRevisionType,
     contractRevisionZodSchema,
     draftContractZodSchema,
     contractZodSchema,
@@ -18,7 +18,7 @@ import {
 
 function parseDraftContractRevision(
     revision: DraftContractRevisionTableWithRelations
-): ContractRevision | Error {
+): ContractRevisionType | Error {
     const draftContractRevision = draftContractRevToDomainModel(revision)
     const parseDraft = contractRevisionZodSchema.safeParse(
         draftContractRevision
@@ -36,7 +36,7 @@ function parseDraftContractRevision(
 
 function parseDraftContract(
     contract: DraftContractTableWithRelations
-): Contract | Error {
+): ContractType | Error {
     const draftContract = draftContractToDomainModel(contract)
 
     const parseDraft = draftContractZodSchema.safeParse(draftContract)
@@ -58,7 +58,7 @@ function parseDraftContract(
 function parseContractWithHistory(
     contract: ContractTableWithRelations
     //contractRevisions: ContractRevisionTableWithRelations[]
-): Contract | Error {
+): ContractType | Error {
     const contractWithHistory = contractWithHistoryToDomainModel(contract)
 
     if (contractWithHistory instanceof Error) {

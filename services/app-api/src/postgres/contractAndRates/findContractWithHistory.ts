@@ -1,5 +1,5 @@
 import { PrismaTransactionType } from '../prismaTypes'
-import { Contract } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
+import { ContractType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import { parseContractWithHistory } from '../../domain-models/contractAndRates/parseDomainData'
 import { updateInfoIncludeUpdater } from '../prismaHelpers'
 
@@ -10,7 +10,7 @@ import { updateInfoIncludeUpdater } from '../prismaHelpers'
 async function findContractWithHistory(
     client: PrismaTransactionType,
     contractID: string
-): Promise<Contract | Error> {
+): Promise<ContractType | Error> {
     try {
         const contract = await client.contractTable.findFirst({
             where: {
