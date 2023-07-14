@@ -49,16 +49,13 @@ jobs:
           stage-name: ${{ inputs.stage_name }}
           changed-services: ${{ inputs.changed_services }}
 
-      - name: Generate Code
-        run: npx lerna run generate
-
       - name: deploy app-web
         id: deploy-app-web
+        working-directory: services/app-web
         env:
           NODE_OPTIONS: --max_old_space_size=6000
           REACT_APP_AUTH_MODE: ${{ secrets.react_app_auth_mode }}
-        run: |
-          pushd services/app-web && npx serverless deploy --stage ${{ inputs.stage_name }}
+        run: npx serverless deploy --stage ${{ inputs.stage_name }}
 
   app-api:
     if: ${{ contains(inputs.changed_services, 'app-api') || contains(inputs.changed_services, 'app-proto') }}
