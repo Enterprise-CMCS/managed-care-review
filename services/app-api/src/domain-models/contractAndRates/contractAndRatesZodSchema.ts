@@ -7,7 +7,7 @@ import {
     stateContactSchema,
     submissionDocumentSchema,
     submissionTypeSchema,
-} from 'app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
+} from '../../../../app-web/src/common-code/proto/healthPlanFormDataProto/zodSchemas'
 
 const contractFormDataSchema = z.object({
     programIDs: z.array(z.string()),
