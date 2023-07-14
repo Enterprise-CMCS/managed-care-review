@@ -83,8 +83,6 @@ model ContractRevisionTable {
   populationCovered                            PopulationCoverageType?
   riskBasedContract                            Boolean?
   stateContacts                                StateContact[]
-  addtlActuaryContacts                         ActuaryContact[]
-  addtlActuaryCommunicationPreference          ActuaryCommunication?
   supportingDocuments                          ContractSupportingDocument[]
   contractType                                 ContractType
   contractExecutionStatus                      ContractExecutionStatus?
@@ -138,7 +136,8 @@ model RateRevisionTable {
   amendmentEffectiveDateEnd      DateTime?                               @db.Date
   rateProgramIDs                 String[]
   rateCertificationName          String?
-  actuaryContacts                ActuaryContact[]
+  certifyingActuaryContacts      ActuaryContact[] @relation(name: "CertifyingActuaryOnRateRevision")
+  addtlActuaryContacts           ActuaryContact[] @relation(name: "AddtlActuaryOnRateRevision")
   actuaryCommunicationPreference ActuaryCommunication?
   packagesWithSharedRateCerts    SharedRateCertifications[]
 }
@@ -163,9 +162,9 @@ model UpdateInfoTable {
   updatedBy         User                    @relation(fields: [updatedByID], references: [id])
   updatedReason     String
   unlockedContracts ContractRevisionTable[] @relation("unlockContractInfo")
-  submitedContracts ContractRevisionTable[] @relation("submitContractInfo")
+  submittedContracts ContractRevisionTable[] @relation("submitContractInfo")
   unlockedRates     RateRevisionTable[]     @relation("unlockRateInfo")
-  submitedRates     RateRevisionTable[]     @relation("submitRateInfo")
+  submittedRates    RateRevisionTable[]     @relation("submitRateInfo")
 }
 
 model SharedRateCertifications {
@@ -185,10 +184,10 @@ model ActuaryContact {
   email              String
   actuarialFirm      ActuarialFirm
   actuarialFirmOther String?
-  contractRevisionID String?
-  contractRevision   ContractRevisionTable? @relation(fields: [contractRevisionID], references: [id])
-  rateRevisionID     String?
-  rateRevision       RateRevisionTable?     @relation(fields: [rateRevisionID], references: [id])
+  rateWithCertifyingActuaryID    String?
+  rateWithAddtlActuaryID    String?
+  rateActuaryCertifying  RateRevisionTable?  @relation(name: "CertifyingActuaryOnRateRevision", fields: [  rateWithCertifyingActuaryID ], references: [id])
+  rateActuaryAddtl   RateRevisionTable?   @relation(name: "AddtlActuaryOnRateRevision", fields: [   rateWithAddtlActuaryID ], references: [id])
 }
 
 model ContractDocument {

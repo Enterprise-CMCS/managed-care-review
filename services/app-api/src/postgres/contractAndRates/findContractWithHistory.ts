@@ -38,7 +38,6 @@ async function findContractWithHistory(
                             },
                         },
                         stateContacts: true,
-                        addtlActuaryContacts: true,
                         contractDocuments: true,
                         supportingDocuments: true,
                     },

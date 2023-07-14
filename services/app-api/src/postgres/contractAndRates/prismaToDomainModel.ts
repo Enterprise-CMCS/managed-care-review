@@ -72,17 +72,6 @@ function contractFormDataToDomainModel(
                   email: contact.email,
               }))
             : [],
-        addtlActuaryContacts: contractRevision.addtlActuaryContacts
-            ? contractRevision.addtlActuaryContacts.map((contact) => ({
-                  name: contact.name,
-                  titleRole: contact.titleRole,
-                  email: contact.email,
-                  actuarialFirm: contact.actuarialFirm,
-                  actuarialFirmOther: contact.actuarialFirmOther ?? undefined,
-              }))
-            : [],
-        addtlActuaryCommunicationPreference:
-            contractRevision.addtlActuaryCommunicationPreference ?? undefined,
         supportingDocuments: contractRevision.supportingDocuments
             ? contractRevision.supportingDocuments.map((doc) => ({
                   name: doc.name,
