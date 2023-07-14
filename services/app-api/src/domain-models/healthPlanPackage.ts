@@ -180,8 +180,10 @@ function convertContractRevisionToHealthPlanRevision(
             rateInfos: [],
         }
 
+        const formDataProto = toProtoBuffer(unlockedHealthPlanFormData)
+
         // check that we can encode then decode with no issues
-        const domainData = toDomain(toProtoBuffer(unlockedHealthPlanFormData))
+        const domainData = toDomain(formDataProto)
 
         if (domainData instanceof Error) {
             throw domainData
@@ -192,7 +194,7 @@ function convertContractRevisionToHealthPlanRevision(
             unlockInfo: contractRev.unlockInfo,
             submitInfo: contractRev.submitInfo,
             createdAt: contractRev.createdAt,
-            formDataProto: toProtoBuffer(unlockedHealthPlanFormData),
+            formDataProto,
         }
 
         healthPlanRevisions.push(healthPlanRevision)
