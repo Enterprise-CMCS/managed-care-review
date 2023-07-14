@@ -1,7 +1,5 @@
 import { z } from 'zod'
 import {
-    actuaryCommunicationTypeSchema,
-    actuaryContactSchema,
     contractExecutionStatusSchema,
     contractTypeSchema,
     federalAuthoritySchema,
@@ -18,9 +16,6 @@ const contractFormDataSchema = z.object({
     riskBasedContract: z.boolean().optional(),
     submissionDescription: z.string(),
     stateContacts: z.array(stateContactSchema),
-    addtlActuaryContacts: z.array(actuaryContactSchema),
-    addtlActuaryCommunicationPreference:
-        actuaryCommunicationTypeSchema.optional(),
     supportingDocuments: z.array(submissionDocumentSchema),
     contractType: contractTypeSchema,
     contractExecutionStatus: contractExecutionStatusSchema.optional(),
