@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { Contract } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
+import { ContractType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import { findContractWithHistory } from './findContractWithHistory'
 
 // Unlock the given contract
@@ -10,7 +10,7 @@ async function unlockContract(
     contractID: string,
     unlockedByUserID: string,
     unlockReason: string
-): Promise<Contract | Error> {
+): Promise<ContractType | Error> {
     const groupTime = new Date()
 
     try {

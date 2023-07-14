@@ -1,10 +1,10 @@
 import {
-    ContractType,
+    ContractType as PrismaContractType,
     PopulationCoverageType,
     PrismaClient,
     SubmissionType,
 } from '@prisma/client'
-import { Contract } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
+import { ContractType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import { findContractWithHistory } from './findContractWithHistory'
 
 type UpdateContractArgsType = {
@@ -13,7 +13,7 @@ type UpdateContractArgsType = {
     riskBasedContract: boolean
     submissionType: SubmissionType
     submissionDescription: string
-    contractType: ContractType
+    contractType: PrismaContractType
 }
 
 // Update the given draft
@@ -24,7 +24,7 @@ async function updateDraftContract(
     contractID: string,
     formData: UpdateContractArgsType,
     rateIDs: string[]
-): Promise<Contract | Error> {
+): Promise<ContractType | Error> {
     try {
         // Given all the Rates associated with this draft, find the most recent submitted
         // rateRevision to update.

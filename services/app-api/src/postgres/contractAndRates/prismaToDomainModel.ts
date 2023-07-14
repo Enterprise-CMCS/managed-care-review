@@ -1,8 +1,8 @@
 import {
-    Contract,
-    ContractRevision,
-    ContractFormData,
-    ContractStatus,
+    ContractType,
+    ContractRevisionType,
+    ContractFormDataType,
+    ContractStatusType,
 } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import { RateRevision } from '../../domain-models/contractAndRates/rateType'
 import {
@@ -46,7 +46,7 @@ function getContractStatus(
         ContractRevisionTableWithRelations,
         'createdAt' | 'submitInfo'
     >[]
-): ContractStatus {
+): ContractStatusType {
     // need to order revisions from latest to earlies
     const latestToEarliestRev = revision.sort(
         (revA, revB) => revB.createdAt.getTime() - revA.createdAt.getTime()
@@ -57,7 +57,7 @@ function getContractStatus(
 
 function contractFormDataToDomainModel(
     contractRevision: ContractRevisionFormDataType
-): ContractFormData {
+): ContractFormDataType {
     return {
         submissionType: contractRevision.submissionType,
         submissionDescription: contractRevision.submissionDescription,
@@ -155,7 +155,7 @@ function ratesRevisionsToDomainModel(
 
 function draftContractRevToDomainModel(
     revision: DraftContractRevisionTableWithRelations
-): ContractRevision {
+): ContractRevisionType {
     return {
         id: revision.id,
         createdAt: revision.createdAt,
@@ -167,7 +167,7 @@ function draftContractRevToDomainModel(
 
 function contractRevToDomainModel(
     revisions: ContractRevisionSet[]
-): ContractRevision[] {
+): ContractRevisionType[] {
     const contractRevisions = revisions.map((entry) => ({
         id: entry.contractRev.id,
         submitInfo: convertUpdateInfoToDomainModel(entry.submitInfo),
@@ -185,7 +185,7 @@ function contractRevToDomainModel(
 
 function draftContractToDomainModel(
     contract: DraftContractTableWithRelations
-): Contract {
+): ContractType {
     const revisions = contract.revisions.map((cr) =>
         draftContractRevToDomainModel(cr)
     )
@@ -199,9 +199,11 @@ function draftContractToDomainModel(
     }
 }
 
+// contractWithHistoryToDomainModel constructs a history for this particular contract including changes to all of its
+// revisions and all related rate revisions, including added and removed rates
 function contractWithHistoryToDomainModel(
     contract: ContractTableWithRelations
-): Contract | Error {
+): ContractType | Error {
     // We iterate through each contract revision in order, adding it as a revision in the history
     // then iterate through each of its rates, constructing a history of any rates that changed
     // between contract revision updates

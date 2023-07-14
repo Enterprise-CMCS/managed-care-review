@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { ContractRevision } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
+import { ContractRevisionType } from '../../domain-models/contractAndRates/contractAndRatesZodSchema'
 import { parseDraftContractRevision } from '../../domain-models/contractAndRates/parseDomainData'
 import { draftContractRevisionsWithDraftRates } from '../prismaHelpers'
 
@@ -7,7 +7,7 @@ import { draftContractRevisionsWithDraftRates } from '../prismaHelpers'
 async function findDraftContract(
     client: PrismaClient,
     contractID: string
-): Promise<ContractRevision | undefined | Error> {
+): Promise<ContractRevisionType | undefined | Error> {
     try {
         const draftContractRevision =
             await client.contractRevisionTable.findFirst({
