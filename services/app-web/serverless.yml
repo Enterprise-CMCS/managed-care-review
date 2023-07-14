@@ -76,5 +76,5 @@ custom:
         export REACT_APP_OTEL_COLLECTOR_URL=${self:custom.api_url}/otel
         export REACT_APP_LD_CLIENT_ID=${self:custom.react_app_ld_client_id}
 
-        yarn run build
+        yarn run build:prod
         yarn build-storybook
