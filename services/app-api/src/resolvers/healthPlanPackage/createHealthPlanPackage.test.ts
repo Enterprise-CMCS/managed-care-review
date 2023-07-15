@@ -16,7 +16,7 @@ const flagValueTestParameters: {
 }[] = [
     {
         flagName: 'rates-db-refactor',
-        flagValue: true,
+        flagValue: false,
         testName: 'createHealthPlanPackage with all feature flags off',
     },
     {
