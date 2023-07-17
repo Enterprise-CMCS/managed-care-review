@@ -169,7 +169,7 @@ resources:
         ImageId: ami-05bfc1ab11bfbf484
         SecurityGroupIds:
           - !Ref PostgresVmSg
-        SubnetId: !Sub ${self:custom.publicSubnetA}'
+        SubnetId: !Sub ${self:custom.publicSubnetA}
 
     PostgresVmSg:
       Type: 'AWS::EC2::SecurityGroup'
