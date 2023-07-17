@@ -47,6 +47,7 @@ custom:
     - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/a/id, ssm:/configuration/default/vpc/subnets/private/a/id}
     - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/b/id, ssm:/configuration/default/vpc/subnets/private/b/id}
     - ${ssm:/configuration/${sls:stage}/vpc/subnets/private/c/id, ssm:/configuration/default/vpc/subnets/private/c/id}
+  publicSubnetA: ${ssm:/configuration/${sls:stage}/vpc/subnets/public/a/id, ssm:/configuration/default/vpc/subnets/public/a/id}
   rotatorArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-rotator'
   serverless-offline-ssm:
     stages:
@@ -168,7 +169,7 @@ resources:
         ImageId: ami-05bfc1ab11bfbf484
         SecurityGroupIds:
           - !Ref PostgresVmSg
-        SubnetId: !Sub ${self:custom.privateSubnets}'
+        SubnetId: !Sub ${self:custom.publicSubnetA}'
 
     PostgresVmSg:
       Type: 'AWS::EC2::SecurityGroup'
