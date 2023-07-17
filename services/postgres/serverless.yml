@@ -91,6 +91,16 @@ functions:
       artifact: s3://secrets-manager-rotation-apps-c0de1e0412b469545054417cc38af3c3/SecretsManagerRDSPostgreSQLRotationSingleUser/SecretsManagerRDSPostgreSQLRotationSingleUser.zip
 
 resources:
+  Conditions:
+    IsDevValProd: !Or
+      - !Equals ['${sls:stage}', 'main']
+      - !Equals ['${sls:stage}', 'val']
+      - !Equals ['${sls.stage}', 'prod']
+      - !Equals ['${sls:stage}', 'mtdbvm']
+  Mappings:
+    Logins:
+      mojo:
+        sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDaR+UVq61k14jcuSFfoCfTxvB1IyhU3IQFp4OjpiN4fYMBjE9USeNoHon2ux8VTvL0nRc7Zn4g9HemxiDjdawUxh2oJ8GOTsiFTEWic2nf90SnbjBMn1OZELvMiZzoYDjQFvEp+AgETBA5nhrbHyxWQWIBa7A+XqiqnX0lcZ1p+x8sLIl4F0e583lJeuPQPVkpCicf2GDdtG1TnPxltqJgGaeVSONivpxeVofJwG4DCXy1b1xSo1NG0gzy9BWFJwOWKmZAk6nYq+rcxZg+TgU1x5WJ6z8/CS0PMSoTMRRIejm734PSmkGCU+WkR139Dl8o3DvQh/VQD71fxw30aONG98PSBJEUd5IouuiPPNYGP+fuDWgCBkaoA6JKlSVtbneNt1Qkm10FFHqExqzGWaSDeUCh6da3WG1BW4KZcC3MQ8CTEG47LFqUG5TvhklhiAAJH7cGF9W9SU1Beq2A6Wx1R/yGvgH/7U6X0/QfJi1ljY32pPzP2S+gzzOVGJgrMz3qRRgNvcY5k8EMbIuTK2yanFFHuVaWQq/zZW1T376oyHMfWdBB9WAtIKwpCgA5kYUu0XCo3XM0fWibZFIa/cEBNSKH1gEFKCBXolsc2+c4iZtdbG4YCHLgzOOqklERMEeK5dXq9Rz7UjoE91UVIyO2/d+mXmiVDRgtUsiQ34Sxyw== mojo.talantikite@gmail.com'
   Resources:
     # VPC endpoint for rotation lambda
     SecretsManagerVPCEndpoint:
@@ -140,6 +150,43 @@ resources:
         DBInstanceClass: db.serverless
         DBClusterIdentifier: !Ref PostgresAuroraV2
         AutoMinorVersionUpgrade: true
+
+    PostgresVM:
+      Type: 'AWS::EC2::Instance'
+      Condition: IsDevValProd
+      Metadata:
+        AWS::CloudFormation::Init:
+          config:
+            files:
+              '/home/ec2-user/.ssh/authorized_keys':
+                content: !FindInMap [Logins, 'mojo', 'sshPublicKey']
+                mode: '000600'
+                owner: 'ubuntu'
+                group: 'ubuntu'
+      Properties:
+        InstanceType: t2.micro
+        ImageId: ami-05bfc1ab11bfbf484
+        SecurityGroupIds:
+          - !Ref PostgresVmSg
+        SubnetId: !Ref PostgresVmSubnet
+
+    PostgresVmSubnet:
+      Type: 'AWS::EC2::Subnet'
+      Properties:
+        VpcId: !Sub ${self:custom.vpcId}
+        CidrBlock: 10.0.1.0/24
+        AvailabilityZone: 'us-east-1'
+
+    PostgresVmSg:
+      Type: 'AWS::EC2::SecurityGroup'
+      Properties:
+        GroupDescription: Enable SSH access via port 22
+        VpcId: !Sub ${self:custom.vpcId}
+        SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 22
+            ToPort: 22
+            CidrIp: 0.0.0.0/0
 
     PostgresSubnetGroup:
       Type: AWS::RDS::DBSubnetGroup
