@@ -1,7 +1,7 @@
 # Contract and Rates Refactor: Historical Relationships in Tables
 
 ## Overview
-This is a big one. From the beginning of this project our application data model has been built around the health plan package. We are shifting now towards a data model built on health plan contracts and health plan rates as distinct entities. See ADR #023. This document outlines our approach to storing contract and rates as separate entities with historical relationships.
+This is a big one. From the beginning of this project our application data model has been built around the health plan package. We are shifting now towards a data model built on health plan contracts and health plan rates as distinct entities. See [ADR 023](../architectural-decision-records/023-seperate-contract-rates-tables-postgres.md). This document outlines our approach to storing contract and rates as separate entities with historical relationships.
 
 ## Constraints
 - Need rates to be able to be associated to many contracts (rates across submissions)
@@ -147,7 +147,7 @@ B.0, 3.0, 2020-01-02, 2020-01-04, false
 ```
 
 This will give us a new entry in our rate 1 history, and we can attribute it to the correct submission because we have the isRemoved bit:
-````
+```
 2020-01-01: – initial submit of rate 1
     1.0 -> A.0
     1.0 -> B.0
@@ -160,4 +160,4 @@ This will give us a new entry in our rate 1 history, and we can attribute it to 
 
 ## Migration plan summary
 
-Existing HealthPlanPackage submissions will be converted into Contract and Rates in the db. Since we will be working on the migration work behind a feature flag, we can write a migrator that runs repeatedly, taking the old protobuf encoded FormData and moving that data into our new Contract[Revision] and Rate[Revision] tables. This way we can test and refine our migration before we actually switch over to using the new data. 
+Existing `HealthPlanPackage` submissions will be converted into Contract and Rates in the db. Since we will be working on the migration work behind a feature flag, we can write a migrator that runs repeatedly, taking the old protobuf encoded FormData and moving that data into our new `Contract[Revision]` and `Rate[Revision]` tables. This way we can test and refine our migration before we actually switch over to using the new data. 
