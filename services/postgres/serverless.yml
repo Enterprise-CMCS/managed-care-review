@@ -175,7 +175,7 @@ resources:
       Properties:
         VpcId: !Sub ${self:custom.vpcId}
         CidrBlock: 10.0.1.0/24
-        AvailabilityZone: 'us-east-1'
+        AvailabilityZone: 'us-east-1a'
 
     PostgresVmSg:
       Type: 'AWS::EC2::SecurityGroup'
