@@ -174,7 +174,7 @@ resources:
       Type: 'AWS::EC2::Subnet'
       Properties:
         VpcId: !Sub ${self:custom.vpcId}
-        CidrBlock: 10.0.1.0/24
+        CidrBlock: 10.147.218.0/26
         AvailabilityZone: 'us-east-1a'
 
     PostgresVmSg:
