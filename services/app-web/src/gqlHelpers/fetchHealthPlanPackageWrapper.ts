@@ -2,6 +2,8 @@ import {
     useFetchHealthPlanPackageQuery,
     FetchHealthPlanPackageQuery,
     useFetchHealthPlanPackageWithQuestionsQuery,
+    HealthPlanRevision,
+    HealthPlanPackage,
 } from '../gen/gqlClient'
 import { HealthPlanFormDataType } from '../common-code/healthPlanFormDataType'
 import { base64ToDomain } from '../common-code/proto/healthPlanFormDataProto'
@@ -11,20 +13,19 @@ import {
     QuerySuccessType,
     WrappedApolloResultType,
 } from './apolloQueryWrapper'
-import { DocumentDateLookupTable } from '../pages/SubmissionSummary/SubmissionSummary'
-import { makeDateTableFromFormData } from '../documentHelpers/makeDocumentDateLookupTable'
-import {
-    LookupListType,
-    makeDocumentListFromFormDatas,
-} from '../documentHelpers/makeDocumentKeyLookupList'
 import { QueryFunctionOptions } from '@apollo/client'
+import { recordJSException } from '../otelHelpers'
 
-// We return a slightly modified version of the wrapped result adding formDatas
+// ExpandedRevisionsType - HPP revision plus an additional formData field containing values of formDataProto decoded into typescript
+type ExpandedRevisionsType = HealthPlanRevision & {
+    formData: HealthPlanFormDataType
+}
+
+type RevisionsLookupType = { [revisionID: string]: ExpandedRevisionsType }
+// We return a slightly modified version of the wrapped result adding RevisionsLookup, documentDateLookup, etc
 // all of these fields will be added to the SUCCESS type
 type AdditionalParsedDataType = {
-    formDatas: { [revisionID: string]: HealthPlanFormDataType }
-    documentDates: DocumentDateLookupTable
-    documentLists: LookupListType
+    revisionsLookup: RevisionsLookupType
 }
 
 type ParsedFetchResultType = ApolloResultType<
@@ -42,6 +43,33 @@ type WrappedFetchResultWithQuestionsType = WrappedApolloResultType<
     AdditionalParsedDataType
 >
 
+// Take health plan package directly from API, decodes all fields and return expanded revisions list.
+const buildRevisionsLookup = (
+    pkg: HealthPlanPackage
+): RevisionsLookupType | Error => {
+    const expandedRevisions: RevisionsLookupType = {}
+    for (const revision of pkg.revisions) {
+        const revisionDecodedFormData = base64ToDomain(
+            revision.node.formDataProto
+        )
+
+        if (revisionDecodedFormData instanceof Error) {
+            const err =
+                new Error(`buildRevisionsLookup: proto decoding error. pkg ID: ${pkg.id} revision ID:
+            ${revision.node.id}. Error message: ${revisionDecodedFormData}`)
+            recordJSException(err)
+            return err
+        } else {
+            expandedRevisions[revision.node.id] = {
+                ...revision.node,
+                formData: revisionDecodedFormData,
+            }
+        }
+    }
+
+    return expandedRevisions
+}
+
 function parseProtos(
     result: QuerySuccessType<FetchHealthPlanPackageQuery>
 ): ParsedFetchResultType {
@@ -50,12 +78,7 @@ function parseProtos(
     if (!pkg) {
         return {
             ...result,
-            formDatas: {},
-            documentDates: {},
-            documentLists: {
-                currentDocuments: [],
-                previousDocuments: [],
-            },
+            revisionsLookup: {},
         }
     }
 
@@ -69,37 +92,17 @@ function parseProtos(
             error: err,
         }
     }
-
-    const formDatas: { [revisionID: string]: HealthPlanFormDataType } = {}
-    for (const revisionEdge of pkg.revisions) {
-        const revision = revisionEdge.node
-        const formDataResult = base64ToDomain(revision.formDataProto)
-
-        if (formDataResult instanceof Error) {
-            const err =
-                new Error(`useFetchHealthPlanPackageWrapper: proto decoding error. ID:
-                ${pkg.id}. Error message: ${formDataResult}`)
-            console.error('Error decoding revision', revision, err)
-            return {
-                status: 'ERROR',
-                error: formDataResult,
-            }
+    const revisionsLookup = buildRevisionsLookup(pkg)
+    if (revisionsLookup instanceof Error) {
+        return {
+            status: 'ERROR',
+            error: revisionsLookup,
         }
-
-        formDatas[revision.id] = formDataResult
-    }
-
-    const formDatasInOrder = pkg.revisions.map((rEdge) => {
-        return formDatas[rEdge.node.id]
-    })
-    const documentDates = makeDateTableFromFormData(formDatasInOrder)
-    const documentLists = makeDocumentListFromFormDatas(formDatasInOrder)
-
-    return {
-        ...result,
-        formDatas,
-        documentDates,
-        documentLists,
+    } else {
+        return {
+            ...result,
+            revisionsLookup,
+        }
     }
 }
 
@@ -167,4 +170,7 @@ function useFetchHealthPlanPackageWithQuestionsWrapper(
 export {
     useFetchHealthPlanPackageWrapper,
     useFetchHealthPlanPackageWithQuestionsWrapper,
+    buildRevisionsLookup,
 }
+
+export type { ExpandedRevisionsType, RevisionsLookupType }

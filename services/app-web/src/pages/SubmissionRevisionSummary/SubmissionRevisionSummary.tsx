@@ -20,6 +20,7 @@ import { recordJSException } from '../../otelHelpers/tracingHelper'
 import { useFetchHealthPlanPackageWrapper } from '../../gqlHelpers'
 import { ApolloError } from '@apollo/client'
 import { handleApolloError } from '../../gqlHelpers/apolloErrors'
+import { makeDocumentDateTable } from '../../documentHelpers/makeDocumentDateLookupTable'
 
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
@@ -60,7 +61,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         return <GenericErrorPage /> // api failure or protobuf decode failure
     }
 
-    const { data, formDatas, documentDates } = fetchResult
+    const { data, revisionsLookup } = fetchResult
     const pkg = data.fetchHealthPlanPackage.pkg
 
     // fetchHPP returns null if no package is found with the given ID
@@ -77,7 +78,8 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         console.info('no revision found at index', revisionIndex)
         return <Error404 />
     }
-    const packageData = formDatas[revision.id]
+    const packageData = revisionsLookup[revision.id].formData
+    const documentDates = makeDocumentDateTable(revisionsLookup)
 
     const statePrograms = pkg.state.programs
     const name = packageName(packageData, statePrograms)

@@ -44,6 +44,10 @@ import { recordJSException } from '../../otelHelpers/tracingHelper'
 import { useStatePrograms } from '../../hooks/useStatePrograms'
 import { ApolloError } from '@apollo/client'
 import { handleApolloError } from '../../gqlHelpers/apolloErrors'
+import {
+    makeDocumentS3KeyLookup,
+    makeDocumentDateTable,
+} from '../../documentHelpers'
 
 const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
     getRelativePath({
@@ -98,9 +102,9 @@ const activeFormPages = (
     )
 }
 
-/* 
+/*
     Prep work for refactor of form pages.  This should be pulled out into a HealthPlanFormPageContext or HOC.
-    We have several instances of shared state across pages. 
+    We have several instances of shared state across pages.
 */
 
 export type HealthPlanFormPageProps = {
@@ -196,7 +200,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return <GenericErrorPage /> // api failure or protobuf decode failure
     }
 
-    const { data, formDatas, documentDates, documentLists } = fetchResult
+    const { data, revisionsLookup } = fetchResult
     const pkg = data.fetchHealthPlanPackage.pkg
 
     // fetchHPP returns null if no package is found with the given ID
@@ -204,9 +208,12 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return <Error404 />
     }
 
-    // pull out the latest revision for editing
+    // pull out the latest revision and document lookups
     const latestRevision = pkg.revisions[0].node
-    const formDataFromLatestRevision = formDatas[latestRevision.id]
+    const formDataFromLatestRevision =
+        revisionsLookup[latestRevision.id].formData
+    const documentDates = makeDocumentDateTable(revisionsLookup)
+    const documentLists = makeDocumentS3KeyLookup(revisionsLookup)
 
     // if we've gotten back a submitted revision, it can't be edited
     if (formDataFromLatestRevision.status !== 'DRAFT') {

@@ -28,10 +28,6 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
 import { SideNavOutletContextType } from '../SubmissionSideNav/SubmissionSideNav'
 
-export type DocumentDateLookupTable = {
-    [key: string]: string
-}
-
 function UnlockModalButton({
     disabled,
     modalRef,
