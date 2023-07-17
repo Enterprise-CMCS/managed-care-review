@@ -168,14 +168,7 @@ resources:
         ImageId: ami-05bfc1ab11bfbf484
         SecurityGroupIds:
           - !Ref PostgresVmSg
-        SubnetId: !Ref PostgresVmSubnet
-
-    PostgresVmSubnet:
-      Type: 'AWS::EC2::Subnet'
-      Properties:
-        VpcId: !Sub ${self:custom.vpcId}
-        CidrBlock: 10.147.218.0/26
-        AvailabilityZone: 'us-east-1a'
+        SubnetId: !Sub ${self:custom.privateSubnets}'
 
     PostgresVmSg:
       Type: 'AWS::EC2::SecurityGroup'
