@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { DataDetail } from '../../../components/DataDetail'
 import { SectionHeader } from '../../../components/SectionHeader'
 import { UploadedDocumentsTable } from '../../../components/SubmissionSummarySection'
-import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import {
     ContractExecutionStatusRecord,
     FederalAuthorityRecord,
@@ -30,11 +29,12 @@ import {
     HealthPlanFormDataType,
     federalAuthorityKeysForCHIP,
 } from '../../../common-code/healthPlanFormDataType'
+import { useOutletContext } from 'react-router-dom'
+import { SideNavOutletContextType } from '../../../pages/SubmissionSideNav/SubmissionSideNav'
 
 export type ContractDetailsSummarySectionProps = {
     submission: HealthPlanFormDataType
     navigateTo?: string
-    documentDateLookupTable?: DocumentDateLookupTable
     isCMSUser?: boolean
     submissionName: string
 }
@@ -42,7 +42,6 @@ export type ContractDetailsSummarySectionProps = {
 export const ContractDetailsSummarySection = ({
     submission,
     navigateTo, // this is the edit link for the section. When this prop exists, summary section is loaded in edit mode
-    documentDateLookupTable,
     isCMSUser,
     submissionName,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
@@ -63,7 +62,8 @@ export const ContractDetailsSummarySection = ({
     const [modifiedProvisions, unmodifiedProvisions] =
         sortModifiedProvisions(submission)
     const provisionsAreInvalid = isMissingProvisions(submission) && isEditing
-
+    const { documentDates } =
+    useOutletContext<SideNavOutletContextType>()
     useEffect(() => {
         // get all the keys for the documents we want to zip
         async function fetchZipUrl() {
@@ -202,14 +202,14 @@ export const ContractDetailsSummarySection = ({
             </dl>
             <UploadedDocumentsTable
                 documents={submission.contractDocuments}
-                documentDateLookupTable={documentDateLookupTable}
+                documentDateLookupTable={documentDates}
                 isCMSUser={isCMSUser}
                 caption="Contract"
                 documentCategory="Contract"
             />
             <UploadedDocumentsTable
                 documents={contractSupportingDocuments}
-                documentDateLookupTable={documentDateLookupTable}
+                documentDateLookupTable={documentDates}
                 isCMSUser={isCMSUser}
                 caption="Contract supporting documents"
                 documentCategory="Contract-supporting"

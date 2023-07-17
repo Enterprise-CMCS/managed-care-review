@@ -7,6 +7,7 @@ import {
 } from '../../../testHelpers/apolloMocks'
 
 describe('UploadedDocumentsTable', () => {
+    const emptyDocumentsTable = () => {return {}}
     it('renders documents without errors', async () => {
         const testDocuments = [
             {
@@ -17,6 +18,7 @@ describe('UploadedDocumentsTable', () => {
         ]
         renderWithProviders(
             <UploadedDocumentsTable
+                documentDateLookupTable={emptyDocumentsTable()}
                 documents={testDocuments}
                 caption="Contract"
                 documentCategory="Contract"
@@ -59,6 +61,7 @@ describe('UploadedDocumentsTable', () => {
 
         renderWithProviders(
             <UploadedDocumentsTable
+            documentDateLookupTable={emptyDocumentsTable()}
                 documents={testDocuments}
                 caption="Contract supporting"
                 documentCategory="Contract-supporting"
@@ -121,6 +124,7 @@ describe('UploadedDocumentsTable', () => {
         )
         renderWithProviders(
             <UploadedDocumentsTable
+            documentDateLookupTable={emptyDocumentsTable()}
                 documents={testDocuments}
                 caption="Contract supporting"
                 documentCategory="Contract-supporting"

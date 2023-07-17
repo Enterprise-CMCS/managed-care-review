@@ -320,7 +320,6 @@ export const StateSubmissionForm = (): React.ReactElement => {
                                 draftSubmission={formDataFromLatestRevision}
                                 unlocked={!!unlockedInfo}
                                 submissionName={computedSubmissionName}
-                                documentDateLookupTable={documentDates}
                             />
                         }
                     />

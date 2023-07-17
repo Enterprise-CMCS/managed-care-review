@@ -3,17 +3,17 @@ import { Link } from '@trussworks/react-uswds'
 import { NavLink } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { SubmissionDocument } from '../../../common-code/healthPlanFormDataType'
-import { DocumentDateLookupTable } from '../../../pages/SubmissionSummary/SubmissionSummary'
 import styles from './UploadedDocumentsTable.module.scss'
 import { usePreviousSubmission } from '../../../hooks'
 import { SharedRateCertDisplay } from '../../../common-code/healthPlanFormDataType/UnlockedHealthPlanFormDataType'
 import { DocumentTag } from './DocumentTag'
 import { useDocument } from '../../../hooks/useDocument'
 import { getDocumentKey } from '../../../documentHelpers/getDocumentKey'
+import { DocumentDateLookupTableType } from '../../../documentHelpers/makeDocumentDateLookupTable'
 export type UploadedDocumentsTableProps = {
     documents: SubmissionDocument[]
     caption: string | null
-    documentDateLookupTable?: DocumentDateLookupTable
+    documentDateLookupTable: DocumentDateLookupTableType,
     packagesWithSharedRateCerts?: SharedRateCertDisplay[]
     isSupportingDocuments?: boolean
     documentCategory?: string // if this prop is not included, do not show category column
@@ -87,11 +87,13 @@ export const UploadedDocumentsTable = ({
     )
     const shouldHaveNewTag = (doc: SubmissionDocument) => {
         const documentKey = getDocumentKey(doc)
+        if ( documentDateLookupTable[documentKey] === undefined  ||   documentDateLookupTable.previousSubmissionDate === undefined){
+            return false // this is a document on a draft submission
+        }
         return (
-            isCMSUser &&
-            documentDateLookupTable &&
-            documentDateLookupTable[documentKey] >
-                documentDateLookupTable.previousSubmissionDate
+        isCMSUser &&
+         documentDateLookupTable['documentKey'] >
+        documentDateLookupTable.previousSubmissionDate
         )
     }
 

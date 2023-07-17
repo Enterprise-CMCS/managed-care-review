@@ -7,7 +7,7 @@ import { getDocumentKey } from './getDocumentKey'
 
 // DocumentDateLookupTableType -  { S3 key string : date string for "date added" }
 type DocumentDateLookupTableType = {
-    [key: string]: string | undefined
+    [key: string]: string
 }
 
 // getDateAdded - picks out the submit info updatedAt date for a revision
@@ -19,6 +19,7 @@ const getDateAdded = (
 }
 // makeDateTable - generates document S3 keys and their "date added"
 // used for date added column on UploadedDocumentsTable displayed in SubmissionSummary and ReviewSubmit
+// documents without a date added all together are excluded
 function makeDocumentDateTable(
     revisionsLookup: RevisionsLookupType
 ): DocumentDateLookupTableType {
@@ -28,13 +29,15 @@ function makeDocumentDateTable(
             const revision = revisionsLookup[revisionId]
             if (index === 1) {
                 // second most recent revision
-                lookupTable['previousSubmissionDate'] = getDateAdded(revision) // used in UploadedDocumentsTable to determine if we should show NEW tag
+                const previousSubmission = getDateAdded(revision) // used in UploadedDocumentsTable to determine if we should show NEW tag
+                if (previousSubmission) lookupTable['previousSubmissionDate'] = previousSubmission
             }
 
             const allDocuments = getAllDocuments(revision.formData)
             allDocuments.forEach((doc) => {
                 const documentKey = getDocumentKey(doc)
-                lookupTable[documentKey] = getDateAdded(revision)
+                const dateAdded = getDateAdded(revision)
+                if (dateAdded) lookupTable[documentKey] = dateAdded
             })
         }
     )

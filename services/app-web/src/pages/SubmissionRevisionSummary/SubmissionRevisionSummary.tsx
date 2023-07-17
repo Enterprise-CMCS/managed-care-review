@@ -121,14 +121,13 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
 
                 <ContractDetailsSummarySection
                     submission={packageData}
-                    documentDateLookupTable={documentDates}
                     submissionName={packageName(packageData, statePrograms)}
                 />
 
                 {isContractActionAndRateCertification && (
                     <RateDetailsSummarySection
                         submission={packageData}
-                        documentDateLookupTable={documentDates}
+
                         submissionName={packageName(packageData, statePrograms)}
                         statePrograms={statePrograms}
                     />

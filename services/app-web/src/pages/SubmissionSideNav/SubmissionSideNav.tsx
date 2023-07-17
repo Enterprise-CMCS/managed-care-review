@@ -28,7 +28,7 @@ import {
 } from '../../common-code/healthPlanFormDataType'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '../../common-code/featureFlags'
-import { DocumentDateLookupTableType } from '../../documentHelpers/makeDocumentDateLookupTable'
+import { DocumentDateLookupTableType, makeDocumentDateTable } from '../../documentHelpers/makeDocumentDateLookupTable'
 
 export type SideNavOutletContextType = {
     pkg: HealthPlanPackage
@@ -131,7 +131,7 @@ export const SubmissionSideNav = () => {
     const currentRevision = edge.node
     const packageData = revisionsLookup[currentRevision.id].formData
     const pkgName = packageName(packageData, pkg.state.programs)
-
+    const documentDates = makeDocumentDateTable(revisionsLookup)
     const outletContext: SideNavOutletContextType = {
         pkg,
         packageName: pkgName,
