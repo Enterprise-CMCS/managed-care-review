@@ -12,10 +12,10 @@ This is a big one. From the beginning of this project our application data model
 - Need to be able to validate form has all required fields for the current form on submit
 
 ## Key Terminology
-Package - this refers to a health plan submission made by a state, including all form fields, all the documents,  and any additional high level metadata. A package always has a contract. It may have rates. This term may become outdated as we move to referring to the health plan data as either contracts or rates more frequently. 
-Contract - this refers to the contract documents, supporting documents, and the form fields related to the health plan contract, including the set of yes no questions CMS asks to ensure contracts are the expected shape. 
-Rate - this refers to the rate documents, supporting documents, and the form fields related to the health plan rates including the actuarial information.
-Revision - this is a point in time snapshot of either contract or rate. There may be only one revision (if a submission is submitted once) or multiple as a contract or rate is edited and updated.
+- **Package** - this refers to a health plan submission made by a state, including all form fields, all the documents,  and any additional high level metadata. A package always has a contract. It may have rates. This term may become outdated as we move to referring to the health plan data as either contracts or rates more frequently. 
+- **Contract** - this refers to the contract documents, supporting documents, and the form fields related to the health plan contract, including the set of yes no questions CMS asks to ensure contracts are the expected shape. 
+- **Rate** - this refers to the rate documents, supporting documents, and the form fields related to the health plan rates including the actuarial information.
+- **Revision** - this is a point in time snapshot of either contract or rate. There may be only one revision (if a submission is submitted once) or multiple as a contract or rate is edited and updated.
 
 
 ## Background
@@ -43,49 +43,60 @@ Before submission, state users will fill out a draft revision. Draft revisions a
 
 The contract and rate lifecycles are implemented in our postgres package. There are four functions each for Contracts and Rates for manipulating them:
 
+```
 insertDraftContract
 updateDraftContract
 submitContract
 unlockContract
+```
 
 Plus a couple functions for inspecting them:
 
+```
 findContractWithHistory
 findDraftContract
+```
 
-A new contract or rate submission is created with insertDraftContract. The draft is updated with updateDraftContract, allowing you to associate your draft contract with other rates as well as filling in the form data. 
-
-submitContract will find all the most recent submitted rates it is associated with and record them in the join table with the newly submitted contract. 
-
-unlockContract will create a new draft revision for that contract, with all the data and associations from the most recent submission on it. This can then be updated again and re-submitted. 
+The lifecycle functions are used as follows
+1. A new contract or rate submission is created with `insertDraftContract`
+2. The draft contract is updated with `updateDraftContract`, allowing you to associate your draft contract with other rates as well as filling in the form data.
+3. `submitContract` will find all the most recent submitted rates it is associated with and record them in the join table with the newly submitted contract.
+4. `unlockContract` will create a new draft revision for that contract, with all the data and associations from the most recent submission on it. This can then be updated again and re-submitted. 
 
 One gotcha here is that it is an error to submit a contract revision that is associated with a rate revision that has not been submitted yet. We don’t want any links to unsubmitted revisions in our join table so there wouldn’t be anyhting to do that made sense in that case. If you’re submitting a new contract + rate together, one needs to be submitted alone first then the second submitted with the association. 
 
 
 ## Example
 
+### Insert, submit, unlock, re-submit
+
 Given Contracts A, B, and C, and Rates 1, 2, and 3, and revisions A.0, A.1, B.0, B.1, 1.0, 2.3, etc. 
 
-
+```
 contract rev, rate rev, valid after, valid before, isRemoval
 A.0, 1.0, 2020-01-01, null, false       
 A.0, 2.0, 2020-01-01, null, false        // this block is the initial state we enter. 
 B.0, 1.0, 2020-01-01, null, false       
-C.0, 2.0, 2020-01-01, null, false       
+C.0, 2.0, 2020-01-01, null, false 
+```      
 
 then, we insert and submit a new rate, associated with A and B
 
+```
 A.0, 3.0, 2020-01-02, null, false
 B.0, 3.0, 2020-01-02, null, false
+```
 
 now if we unlock, update A, and resumit, creating a new revision, we add a new set of A relationships
 
+```
 A.1, 1.0, 2020-01-03, null, false
 A.1, 2.0, 2020-01-03, null, false
 A.1, 3.0, 2020-01-03, null, false
-
+```
 ...and invalidate the old ones (these update previous rows) leading us to this table:
 
+```
 A.0, 1.0, 2020-01-01, 2020-01-03, false
 A.0, 2.0, 2020-01-01, 2020-01-03, false
 B.0, 1.0, 2020-01-01, null, false       
@@ -95,24 +106,28 @@ B.0, 3.0, 2020-01-02, null, false
 A.1, 1.0, 2020-01-03, null, false
 A.1, 2.0, 2020-01-03, null, false
 A.1, 3.0, 2020-01-03, null, false
+```
 
+### Version history
 Now, it's not super straightforward, but this is enough information to construct a sensible history. 
 
 For instance, we can try and determine the history for rate 1.0, by selecting all rows that have 1.0 as the rate revision, grouping by the valid_after timestamp. 
 
+```
 A.0, 1.0, 2020-01-01, 2020-01-03
 B.0, 1.0, 2020-01-01, null       
 A.1, 1.0, 2020-01-03, null
-
+```
 This is a toy example but you can see how you could construct a history like this:
 
+```
 2020-01-01: 
     1.0 -> A.0
     1.0 -> B.0
 2020-01-03:
     1.0 -> A.1
     1.0 -> B.0
-
+```
 
 This join table strategy allows us to maintain a fully versioned history of revisions to contracts, rate, and the associations between them. 
 
@@ -120,16 +135,19 @@ Continuing the above example, let’s say we resubmit contract B and remove the 
 
 We’ll have new entries for the rates, including the one removed:
 
+```
 B.1, 1.0, 2020-01-04, 2020-01-04, true
 B.1, 3.0, 2020-01-04, null, false
-
+```
 And we’ll update the old relations to be invalid
 
+```
 B.0, 1.0, 2020-01-01, 2020-01-04, false
 B.0, 3.0, 2020-01-02, 2020-01-04, false
+```
 
 This will give us a new entry in our rate 1 history, and we can attribute it to the correct submission because we have the isRemoved bit:
-
+````
 2020-01-01: – initial submit of rate 1
     1.0 -> A.0
     1.0 -> B.0
@@ -138,7 +156,8 @@ This will give us a new entry in our rate 1 history, and we can attribute it to 
     1.0 -> B.0
 2020-01-04: – contract B resubmitted
     1.0 -> A.1
+```
 
-## Migration
+## Migration plan summary
 
 Existing HealthPlanPackage submissions will be converted into Contract and Rates in the db. Since we will be working on the migration work behind a feature flag, we can write a migrator that runs repeatedly, taking the old protobuf encoded FormData and moving that data into our new Contract[Revision] and Rate[Revision] tables. This way we can test and refine our migration before we actually switch over to using the new data. 
