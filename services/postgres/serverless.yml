@@ -173,8 +173,6 @@ resources:
             GroupSet:
               - !Ref PostgresVmSg
             SubnetId: !Sub ${self:custom.publicSubnetA}
-        SecurityGroupIds:
-          - !Ref PostgresVmSg
 
     PostgresVmSg:
       Type: 'AWS::EC2::SecurityGroup'
