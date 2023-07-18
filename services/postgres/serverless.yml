@@ -167,9 +167,14 @@ resources:
       Properties:
         InstanceType: t2.micro
         ImageId: ami-05bfc1ab11bfbf484
+        NetworkInterfaces:
+          - AssociatePublicIpAddress: true
+            DeviceIndex: '0'
+            GroupSet:
+              - !Ref PostgresVmSg
+            SubnetId: !Sub ${self:custom.publicSubnetA}
         SecurityGroupIds:
           - !Ref PostgresVmSg
-        SubnetId: !Sub ${self:custom.publicSubnetA}
 
     PostgresVmSg:
       Type: 'AWS::EC2::SecurityGroup'
