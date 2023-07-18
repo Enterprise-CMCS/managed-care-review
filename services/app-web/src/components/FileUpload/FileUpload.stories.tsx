@@ -26,7 +26,7 @@ export const DemoListUploadSuccess = (): React.ReactElement => {
                 await fakeRequest<S3FileData>(true, resolveData)
                 return
             }}
-            onFileItemsUpdate={() => console.log('Async load complete')}
+            onFileItemsUpdate={() => console.info('Async load complete')}
             isContractOnly={false}
         />
     )
@@ -50,7 +50,7 @@ export const DemoTableUploadSuccess = (): React.ReactElement => {
                 await fakeRequest<S3FileData>(true, resolveData)
                 return
             }}
-            onFileItemsUpdate={() => console.log('Async load complete')}
+            onFileItemsUpdate={() => console.info('Async load complete')}
             isContractOnly={false}
         />
     )
@@ -74,7 +74,7 @@ export const DemoListUploadFailure = (): React.ReactElement => {
                 await fakeRequest<S3FileData>(true, resolveData)
                 return
             }}
-            onFileItemsUpdate={() => console.log('Async load complete')}
+            onFileItemsUpdate={() => console.info('Async load complete')}
             isContractOnly={false}
         />
     )
@@ -98,7 +98,7 @@ export const DemoTableUploadFailure = (): React.ReactElement => {
                 await fakeRequest<S3FileData>(true, resolveData)
                 return
             }}
-            onFileItemsUpdate={() => console.log('Async load complete')}
+            onFileItemsUpdate={() => console.info('Async load complete')}
             isContractOnly={false}
         />
     )
@@ -122,7 +122,7 @@ export const DemoListScanFailure = (): React.ReactElement => {
                 await fakeRequest<S3FileData>(true, resolveData)
                 return
             }}
-            onFileItemsUpdate={() => console.log('Async load complete')}
+            onFileItemsUpdate={() => console.info('Async load complete')}
             isContractOnly={false}
         />
     )
@@ -146,7 +146,7 @@ export const DemoTableScanFailure = (): React.ReactElement => {
                 await fakeRequest<S3FileData>(true, resolveData)
                 return
             }}
-            onFileItemsUpdate={() => console.log('Async load complete')}
+            onFileItemsUpdate={() => console.info('Async load complete')}
             isContractOnly={false}
         />
     )
