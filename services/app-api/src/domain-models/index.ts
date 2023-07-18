@@ -23,6 +23,7 @@ export {
     packageStatus,
     packageSubmittedAt,
     packageSubmitters,
+    convertContractToUnlockedHealthPlanPackage,
 } from './healthPlanPackage'
 
 export type {

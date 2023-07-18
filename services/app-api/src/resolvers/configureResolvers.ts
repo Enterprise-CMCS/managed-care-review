@@ -49,7 +49,10 @@ export function configureResolvers(
             ),
         },
         Mutation: {
-            createHealthPlanPackage: createHealthPlanPackageResolver(store),
+            createHealthPlanPackage: createHealthPlanPackageResolver(
+                store,
+                launchDarkly
+            ),
             updateHealthPlanFormData: updateHealthPlanFormDataResolver(store),
             submitHealthPlanPackage: submitHealthPlanPackageResolver(
                 store,
