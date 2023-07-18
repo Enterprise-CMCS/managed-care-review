@@ -159,7 +159,7 @@ resources:
         AWS::CloudFormation::Init:
           config:
             files:
-              '/home/ec2-user/.ssh/authorized_keys':
+              '/home/ubuntu/.ssh/authorized_keys':
                 content: !FindInMap [Logins, 'mojo', 'sshPublicKey']
                 mode: '000600'
                 owner: 'ubuntu'
