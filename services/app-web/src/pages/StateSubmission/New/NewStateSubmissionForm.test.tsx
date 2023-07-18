@@ -40,6 +40,9 @@ describe('NewStateSubmissionForm', () => {
             screen.getByRole('form', { name: 'New Submission Form' })
         ).toBeInTheDocument()
 
+        const medicaid = await screen.findByText('Medicaid')
+        await userEvent.click(medicaid)
+
         const comboBox = await screen.findByRole('combobox', {
             name: 'Programs this contract action covers (required)',
         })

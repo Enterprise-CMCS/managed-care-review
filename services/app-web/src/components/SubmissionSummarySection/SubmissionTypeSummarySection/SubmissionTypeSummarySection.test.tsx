@@ -1,8 +1,5 @@
 import { screen } from '@testing-library/react'
-import {
-    ldUseClientSpy,
-    renderWithProviders,
-} from '../../../testHelpers/jestHelpers'
+import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { SubmissionTypeSummarySection } from './SubmissionTypeSummarySection'
 import {
     mockContractAndRatesDraft,
@@ -69,7 +66,6 @@ describe('SubmissionTypeSummarySection', () => {
     })
 
     it('renders expected fields for draft package on review and submit', () => {
-        ldUseClientSpy({ 'chip-only-form': true })
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={draftSubmission}
@@ -104,7 +100,6 @@ describe('SubmissionTypeSummarySection', () => {
     })
 
     it('renders missing field message for population coverage question when expected', () => {
-        ldUseClientSpy({ 'chip-only-form': true })
         renderWithProviders(
             <SubmissionTypeSummarySection
                 submission={

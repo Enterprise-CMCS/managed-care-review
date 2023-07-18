@@ -24,14 +24,12 @@ import {
     indexUsersResolver,
 } from './user'
 import { EmailParameterStore } from '../parameterStore'
-import { LDService } from '../launchDarkly/launchDarkly'
 import { fetchEmailSettingsResolver } from './email/fetchEmailSettings'
 
 export function configureResolvers(
     store: Store,
     emailer: Emailer,
-    emailParameterStore: EmailParameterStore,
-    launchDarkly: LDService
+    emailParameterStore: EmailParameterStore
 ): Resolvers {
     const resolvers: Resolvers = {
         Date: GraphQLDate,
@@ -54,8 +52,7 @@ export function configureResolvers(
             submitHealthPlanPackage: submitHealthPlanPackageResolver(
                 store,
                 emailer,
-                emailParameterStore,
-                launchDarkly
+                emailParameterStore
             ),
             unlockHealthPlanPackage: unlockHealthPlanPackageResolver(
                 store,

@@ -56,13 +56,6 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
-     * Enables Chip-only form changes
-     */
-    CHIP_ONLY_FORM: {
-        flag: 'chip-only-form',
-        defaultValue: false,
-    },
-    /**
      * Enables supporting documents to be associated with a specific rate certification on the Rate Details page
      */
     SUPPORTING_DOCS_BY_RATE: {

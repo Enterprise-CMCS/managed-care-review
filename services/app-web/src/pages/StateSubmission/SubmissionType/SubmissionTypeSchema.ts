@@ -6,13 +6,11 @@ Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 // Formik setup
 // Should be listed in order of appearance on field to allow errors to focus as expected
-const SubmissionTypeFormSchema = (flags: FeatureFlagSettings = {}) =>
+const SubmissionTypeFormSchema = (_flags: FeatureFlagSettings = {}) =>
     Yup.object().shape({
-        populationCovered: flags['chip-only-form']
-            ? Yup.string().required(
-                  'You must select the population this contract covers'
-              )
-            : Yup.string().optional(),
+        populationCovered: Yup.string().required(
+            'You must select the population this contract covers'
+        ),
         programIDs: Yup.array().min(1, 'You must select at least one program'),
         submissionType: Yup.string().required(
             'You must choose a submission type'

@@ -29,11 +29,6 @@ import {
     newAWSEmailParameterStore,
     newLocalEmailParameterStore,
 } from '../parameterStore'
-import {
-    LDService,
-    ldService,
-    offlineLDService,
-} from '../launchDarkly/launchDarkly'
 import { LDClient } from 'launchdarkly-node-server-sdk'
 import * as ld from 'launchdarkly-node-server-sdk'
 import {
@@ -291,18 +286,15 @@ async function initializeGQLHandler(): Promise<Handler> {
         eventsUri: 'https://events.launchdarkly.us',
     }
     ldClient = ld.init(ldSDKKey, ldOptions)
-    let launchDarkly: LDService
 
     // Wait for initialization. On initialization failure default to offlineLDService and close ldClient.
     try {
         await ldClient.waitForInitialization()
-        launchDarkly = ldService(ldClient)
     } catch (err) {
         console.error(
             `LaunchDarkly Error: ${err.message} Falling back to LaunchDarkly offline service.`
         )
         ldClient.close()
-        launchDarkly = offlineLDService()
     }
 
     // Configure Apollo sandbox plugin
@@ -353,12 +345,7 @@ async function initializeGQLHandler(): Promise<Handler> {
               })
 
     // Resolvers are defined and tested in the resolvers package
-    const resolvers = configureResolvers(
-        store,
-        emailer,
-        emailParameterStore,
-        launchDarkly
-    )
+    const resolvers = configureResolvers(store, emailer, emailParameterStore)
 
     const userFetcher =
         authMode === 'LOCAL'
