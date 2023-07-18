@@ -37,11 +37,7 @@ Cypress.Commands.add('startNewContractAndRatesSubmission', () => {
 
 Cypress.Commands.add('fillOutContractActionOnlyWithBaseContract', () => {
     // Must be on '/submissions/new'
-    cy.getFeatureFlagStore(['chip-only-form']).then((store) => {
-        if (store['chip-only-form']) {
-            cy.get('label[for="medicaid"]').click()
-        }
-    })
+    cy.get('label[for="medicaid"]').click()
 
     cy.findByRole('combobox', {
         name: 'Programs this contract action covers (required)',
@@ -63,11 +59,7 @@ Cypress.Commands.add('fillOutContractActionOnlyWithBaseContract', () => {
 
 Cypress.Commands.add('fillOutContractActionOnlyWithAmendment', () => {
     // Must be on '/submissions/new'
-    cy.getFeatureFlagStore(['chip-only-form']).then((store) => {
-        if (store['chip-only-form']) {
-            cy.get('label[for="medicaid"]').click()
-        }
-    })
+    cy.get('label[for="medicaid"]').click()
     cy.findByRole('combobox', {
         name: 'Programs this contract action covers (required)', timeout: 2_000
     }).click({
@@ -89,11 +81,7 @@ Cypress.Commands.add('fillOutContractActionOnlyWithAmendment', () => {
 
 Cypress.Commands.add('fillOutContractActionAndRateCertification', () => {
     // Must be on '/submissions/new'
-    cy.getFeatureFlagStore(['chip-only-form']).then((store) => {
-        if (store['chip-only-form']) {
-            cy.get('label[for="medicaid"]').click()
-        }
-    })
+    cy.get('label[for="medicaid"]').click()
     cy.findByRole('combobox', {
         name: 'Programs this contract action covers (required)', timeout: 2_000
     }).click({
