@@ -135,4 +135,12 @@ jobs:
         env:
           STAGE_NAME: ${{ inputs.stage_name }}
         run: |
-          ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_NAME-migrate
+          ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_NAME-migrate \$LATEST "Migration of the database failed."
+
+      - name: invoke proto_to_db lambda
+        id: invoke-proto_to_db
+        working-directory: services/app-api
+        env:
+          STAGE_NAME: ${{ inputs.stage_name }}
+        run: |
+          ./scripts/invoke-migrate-lambda.sh app-api-$STAGE_NAME-proto_to_db \$LATEST "Migration of the protos to the database failed."
