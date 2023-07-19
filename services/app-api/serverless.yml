@@ -163,6 +163,17 @@ functions:
         - ${self:custom.sgId}
       subnetIds: ${self:custom.privateSubnets}
 
+  proto_to_db:
+    handler: src/handlers/proto_to_db.main
+    layers:
+      - !Ref PrismaClientEngineLambdaLayer
+      - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-nodejs-amd64-ver-1-9-1:1
+    timeout: 300
+    vpc:
+      securityGroupIds:
+        - ${self:custom.sgId}
+      subnetIds: ${self:custom.privateSubnets}
+
   migrate_rate_documents:
     handler: src/handlers/migrate_rate_documents.main
     layers:
